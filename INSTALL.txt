@@ -1,0 +1,210 @@
+
+
+For the impatient:
+
+    $ cd montysolr
+    $ cp build.properties.default build.properties
+    $ vim build.properties # review the config and set the correct paths
+    $ ant automatic-install
+
+
+HOWEVER: this will work only if you already have pre-requisities installed OR if we
+built them for you. In any case, give it a try!
+
+The automatic installation will:
+
+    * check correct version of Python
+    * check for JCC module (if available in our repository, we will offer to download and install it for you)
+    * check pylucene package (again, we'll download and install it if available)
+    * build the wrapper for Solr (as a Python module)
+    * build MontySolr (as a Python module)
+    * run some basic tests
+
+== STANDARD INSTALLATION ==
+
+To build MontySolr you need:
+
+  * Java JDK >= 1.6 (tested and worked with both OpenJDK and Sun Java JDK)
+  * ant >= 1.6
+  * Python >= 2.4 (if you want to take advantage of multiprocessing, then at least Python 2.5)
+  * JCC module for Python
+  * PyLucene
+  * setuptools for Python (needed for installation of pylucene)
+
+
+The recommended installation is this:
+
+    * Install JCC
+        - http://lucene.apache.org/pylucene/documentation/install.html
+        - NOTE: you must build JCC in a shared mode (default now)
+
+        {{{
+        export JCC_LFLAGS='-framework:JavaVM:-framework:Python'
+        python setup.py build
+        python setup.py install
+        }}}
+
+
+    $ cp build.properties.default build.properties
+    $ vim build.properties  # edit and review the configuration
+    $ ant assemble-example  # assemble demo example
+    $ ant montysolr-build   # compile montysolr
+    $ ant run-montysolr     # run the demo
+
+
+
+
+
+
+
+
+
+
+
+    * Follow the installation instructions for JCC at http://pypi.python.org/pypi/JCC/
+
+1. create a copy of the build.properties
+
+
+
+=== JCC NOTES ===
+
+http://lucene.apache.org/pylucene/jcc/index.html
+
+JCC is a code generator by Andi Vajda. It is used to wrap Java into a tiny layer of C++. Thanks to the work
+of JCC we can build Python modules from the Java code. Thanks to JCC we can use Java inside Python, and also
+Python inside Java!
+
+JCC must be built in a shared mode (default now). To check it, you can do:
+
+    $ python -c "from jcc import config; print 'version=', config.VERSION, ', shared=', config.SHARED"
+
+If shared is not 'True', then you have to rebuilt JCC
+
+    $ cd /some/dir/with/jcc
+    $ export USE_DISTUTILS
+    $ python setup.py build
+    $ python setup.py install
+
+    -- if you are on Mac OS X, the sequence is: --
+
+    $ cd /some/dir/with/jcc
+    $ export JCC_LFLAGS='-framework:JavaVM:-framework:Python'
+    $ export USE_DISTUTILS
+    $ python setup.py build
+    $ python setup.py install
+
+If your system does not have the correct setup, JCC will warn you and will also provide the instructions on
+how to fix it.
+
+-- Note for Mac OS X users --
+
+
+=== PYLUCENE ===
+
+http://lucene.apache.org/pylucene
+
+JCC builds PyLucene project which is simply a normal Lucene wrapped into a Python package.
+
+Because we don't want to duplicate code, MontySolr takes advantage of pylucene built as a separate module.
+For this to work Pylucene, solr and also montysolr packages must be built in a shared mode.
+Shared mode is default on many recent systems now, but it is good to check that.
+
+    TODO: build a small program that checks shared mode
+
+In MontySolr we use generics support for Java (this makes your life as Java programmers much easier
+in Python). Unfortunately, generics is not yet a default option. So if you already built a pylucene,
+you will have to rebuild it again (in my experience, inclusion of generics does not have a negative
+impact -- besides you having to work with newer versions of Java, but you do that already, right?)
+
+So the build of Lucene is:
+
+    $ set JCCFLAGS=
+    $ export JCCFLAGS
+    $ make
+    $ make install
+
+
+
+== FAQ ==
+
+Q: What version of Solr shall I user?
+
+You can use both Solr 1.4 and 3.x but make sure that also your PyLucene is the same version, *including minor versions*!
+Ie. if your solr is using 2.9.3, then also your pylucene must have 2.9.3.
+
+
+
+Q: Do I need a separate distrubution of the lucene sources or is what's in the solr distribution enough?
+
+It is enough. But PyLucene has the lucene jars inside, so inevitably you will end up with two sets
+of lucene jars. This is not a problem though. Just make sure that your PyLucene is using the same
+version as your Solr instance!
+
+
+
+
+Q: When I start montysolr, I see errors "ImportError: No module named solr_java" ... or "lucene", "foo", "bar" etc.
+
+The message comes from the Python interpreter that cannot find some module. If you installed lucene or
+any other into non-standard location, then you have to make that location known to Python.
+
+    * use PYTHONPATH
+        - e.g. "export PYTHONPATH=/some/path:/some/other/path"
+    * if you start montysolr with ant ("ant run-montysolr")
+        - edit build.properties
+        - python_path=/some/path:/some/other/path
+
+If the missing module is "solr_java" then you did not finish installation properly, you can fix it by:
+
+    $ ant solr-build
+
+You shall find the solr_java module inside "./montysolr/build/dist" -- from there it can be easily installed.
+
+    $ cd ./montysolr/build/dist
+    $ easy_install solr_java-0.1-py2.6-macosx-10.6-universal.egg
+
+
+
+
+Q: When building the montysolr, I get these errors:
+
+    build/_solr_java/__wrap__.cpp: In function ‘PyObject* org::apache::solr::search::function::t_DualFloatFunction_createWeight(org::apache::solr::search::function::t_DualFloatFunction*, PyObject*)’:
+    build/_solr_java/__wrap__.cpp:2325: error: ‘parameters_’ is not a member of ‘java::util::t_Map’
+
+Your PyLucene is not built with the generics support. Please see above how to fix it.
+
+
+
+Q: I am using python virtualenv, will it cause problems?
+
+Absolutely no.
+
+Q: Are there any limitations of what I can run inside the Python?
+
+No, if it works in the normal Python session, it will work also inside Solr (provided that you set up correct paths,
+have enough memory to host both systems etc.)
+
+
+Q: I have several versions of Python installed, how to run MontySolr with the non-standard one?
+
+In the past, I was doing something like this:
+
+I was doing this:
+
+# first set up environment vars that make system use different Python
+
+$ export LD_LIBRARY_PATH=/opt/rchyla/python26/lib/:/opt/rchyla/python26/lib/python2.6/lib-dynload/
+$ export PYTHONHOME=/opt/rchyla/python26/
+$ export PYTHONPATH=/opt/rchyla/workspace/:/opt/rchyla/workspace/solrpie/python/
+$ export PATH=/opt/rchyla/python26/bin:/opt/rchyla/python26:/afs/cern.ch/user/r/rchyla/public/jdk1.6.0_18/bin/:$PATH
+
+# then use the ant to run MontySolr as a daemon
+
+$ export SOLRPIE_ARGS='--port 8443 --daemon'
+$ export SOLRPIE_JVMARGS='-d64 -Xmx2048m -Dsolrpie.max_workers=5 -Dsolrpie.max_threads=200'
+$ export SOLRPIE_MAX_WORKERS=5
+$ export SOLRPIE_NEWENVIRONMENT=false
+$ ant run-solrpie-daemon
+
+

@@ -1,0 +1,157 @@
+= Technical Details of the Solr-Python-Invenio integration =
+
+== Embedding Solr ==
+
+There are three ways that I found/considered to embed Solr:
+
+    * org.apache.solr.client.solrj.embedded.EmbeddedSolrServer
+        - this is the default way, Solr is running as an embedded process, not inside a servlet container
+        - the parent process is responsible for querying Solr using the Solr API
+        - this is implemented in the rca.solr.GetRecIds
+    * org.apache.solr.servlet.DirectSolrConnect
+        - this is like the above, but easier -- all the queries are sent as strings, everything is just a string. 
+          This solution is very flexible and probably suitable for quick integration
+    * embed servlet container (in this case Jetty) 
+        - this is the craziest, but potentially the most powerful solution (so I went for it)
+        - we encapsulate the servlet container and let it run Solr as normally, everything is just as it was in the normal server appliance
+        - test implemented in the rca.solr.JettyRunner
+    * embed Python VM in Java VM
+        - well, this is the best (not sure if crazy) solution which Andi showed me after I asked
+        - it embeds PythonVM inside Java and therefore it is more straightforward, possible cleaner than communication from python with jetty
+          Because there i would have to devise ways how to initiate calls to python from Java
+        
+        
+
+        
+== Servlet Jetty Embedding ==
+
+
+OK, so I had to discover those things (and who knows what else will have to be discovered):
+
+ - classloaders and servlets
+    - normally there are 3 class loaders in java (system, application and one another which i forgot)
+    - class loaders ask their parents before loading the new classes
+    - HOWEVER, for servlets this is not true; servlet classloader can ignore (and actually should) ignore
+      the already loaded class (of its parent class loaders) -- well, jetty creates a new classloader
+      that does not have a parent classloader 
+    - THEREFORE - my singletons were not absolute singletons
+    - There are two ways to solve this:
+        - tell Jetty to behave (like normal java) (i use this)
+        - register parent classloader
+        
+ - extra classes
+    - it is important, that the montysolr singleton classes ARE NOT present in the webapp/WEB-INF
+        - anything there might be loaded by the classloader separately, even if we specified classpath
+          or configured jetty's classloader
+        - JUST KEEP montysolr classes OUT OF webapp!
+        
+
+=== Good Practice ===
+    - keep them separated, what belongs to Solr should live inside solr
+    - what belongs to Jetty, lives inside webapp
+    - our code is starting Jetty, Jetty reads Solr, Solr will load our classes, BUT we don't 
+      include things neither in solr nor in webapps folders!
+    
+    - HOWEVER, certain special features must be activated in the solr configuration - so WE EDIT
+      solrconfig.xml
+      
+  
+
+=== TODO ===
+    - ~~run JettyRunner in Python~~ 
+    - organize imports (look at solr distro -- jars from solr/dist should be included)
+        - fix build.xml
+    - can we wrap jetty start.jar? -- to do the hard job of setting classpath, but also make sure we can load our singleton?
+
+
+== Embed PythonVM ==
+
+    - JCC must be built in a shared mode (default)
+    - however, on Mac, LCFLAGS must also contain 'framework Python', otherwise you get error when trying to start PythonVM
+    {{{
+          System.loadLibrary("jcc");
+          Exception in thread "main" java.lang.UnsatisfiedLinkError:
+            /Library/Python/2.6/site-packages/JCC-2.6-py2.6-macosx-10.6-universal.egg/libjcc.dylib:
+            Symbol not found: _PyExc_RuntimeError
+            
+Andi's explanation:          
+That's because Python's shared library wasn't found. The reason is that, by default, Python's shared lib not on JCC's link line because normally JCC is loaded into a Python process and the dynamic linker thus finds the symbols needed inside the process.
+
+Here, since you're not starting inside a Python process, you need to add '-framework Python' to JCC's LFLAGS in setup.py so that the dynamic linker can find the Python VM shared lib and load it.
+          
+    }}}
+    - so change the JCC setup.py, or add LFLAGS and rebuild
+        {{{
+        export JCC_LFLAGS='-framework:JavaVM:-framework:Python'
+        python setup.py build
+        python setup.py install
+        }}}
+
+    - the extension that i build with JCC is also runnable from inside Python, therefore I can built one extension, and run
+      java from python, or python from java
+        - to do that, I have to be careful to compile wrapper only for chosen classes
+            - do not use --jar montysolr.jar for compilation
+            - or make sure, that some classes (namely org.apache.jcc.PythonVM) are not called from my public classes
+                - because during build, jcc compiler will try to load the extension which we are just compiling
+        - JCC does not like singletons (neither on Python side, nor on Java side - it was hanging at vm.acquireThreadState())
+        - it is possible to use Interfaces, however the wrapped java class must have the basic methods in itself (not inherited; i tried that,
+          even with protected fields, it was throwing error unsatisfied link error)
+    - be careful to exclude *from solr* classes that you build for your own extension (jcc will ignore them if they were already built, then
+      i was getting misterious unsatisfied link error because they were included from solr but i didn't know that)
+      
+    - by default, lucene is build with --no-generics (and also i was building other modules without generics, however that makes
+      it difficult for writing things in Python and pass to Java. Therefore it is necessary to have modules built with generics.
+      MontySolr builds with generics by default, but if lucene was not build like that, we cannot probably shared them.
+      
+      So to rectify that, build lucene with generics (empty JCCFLAGS switches that off) - worked fine on Mac 10.6 w/ Python 2.6
+      and WindowsXP w/ Python2.5
+      {{{
+      export JCCFLAGS=
+      make
+      make install
+      }}}
+    
+    
+== Programming for Java ==
+    
+    1. Watch out for invisible differences between Python and Java wrapped objects
+        dictname = String('dictname')
+        dictname.__hash__()
+        1926449949
+        s = 'dictname'
+        s.__hash__()
+        1024421145
+        
+        Because Python entries in the dictionary are recognized by __hash__, this will 
+        not find anything
+        d = {'dictname': 1}
+        d[dictname]
+        
+        However, this will work
+        d[str(dictname)]
+        
+    2. Printing big objects will crash the VM (if there is not enough memory)
+    
+    3. If running invenio, and using MySQLdb extension, or basically any other
+       extensions - the java must be in the compatible mode - which is usually 32bit
+        java -d32 ....
+        
+    4. Invalid access memory error....
+       
+       This error is caused by two things: either you try to access java native method that
+       does not exist. JCC then helps you to find out by dying immediately.
+       
+       The other problem is actually more tricky: it is the intbitset module of Invenio.
+       This module is written in C and in case of error, it prints no diagnostic messages.
+       And the error inside the C extension brings down the whole JavaVM. To find out this
+       error, run unittests for python.
+        
+                
+
+== TO PUT SOMEWHERE ==
+
+    start JettyRunner with -Dsolr.data.dir=/some/path/to/solr/data
+        - otherwise solr creates an empty index in ./solr/data
+        - this is configurable in solr/conf/solrconfig.xml
+    
+    

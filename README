@@ -1,0 +1,59 @@
+CONTENTS OF THIS FILE
+---------------------
+
+* About MontySolr
+* Configuration and features
+* Developing for MontySolr
+
+ABOUT MONTYSOLR
+------------
+
+MontySolr is an open source extension that makes it possible to include Python 
+code inside Solr (http://lucene.apache.org/solr). You can call Python routines
+from the Java side, as well as control (most of the) Solr operations from the
+Python side.
+
+
+CONFIGURATION AND FEATURES
+--------------------------
+
+MontySolr (what you get when you download and extract montysolr-x.y.tgz) is only
+an extension for Solr. You will need a separate Solr instance as well as a few
+dependencies to use MontySolr.
+
+
+More about configuration:
+ * Install, upgrade, and maintaince:
+   See INSTALL.txt in the same directory as this document.
+ * Learn about how to extend MontySolr:
+   See docs/technical-details.txt
+ * See also: https://svnweb.cern.ch/trac/rcarepo/wiki/MontySolr
+
+
+DEVELOPING FOR MONTYSOLR
+------------------------
+
+MontySolr contains very simple API and the layer between Solr and Python is 
+intentionally kept minimal. In most cases you simply want to use MontySolr just
+as a communication layer between Solr and your own Python-written system. In this
+case you don't need to make any changes inside MontySolr, but you will write simple
+Python code that controls the business logic between Solr and Python.
+
+More about writing wrappers to call your Python system(s):
+  * Hello world example
+    See docs/hello-world.txt
+  * To understand details of the wrappers
+    See docs/how-to-wrap.txt
+
+
+
+If you need new functionality that is not present in MontySolr, search for
+existing solutions or discussion on the mailing list:
+
+  * Invenio Development Team
+    <info@invenio-software.org>
+    <http://invenio-software.org/>
+    
+  * For more information about developing
+    See docs/development.txt
+

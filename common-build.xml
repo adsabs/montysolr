@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+
+
+<project name="common" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  <description>
+    This file is designed for importing into a main build file, and not intended
+    for standalone use.
+  </description>
+
+  <macrodef name="get-and-check">
+    <attribute name="url"/>
+    <attribute name="dest"/>
+    <attribute name="destfile"/>
+    <sequential>
+      <dirname property="destdir@{url}" file="@{dest}"/>
+      <echo> @{dest}</echo>
+      <get dest="@{destfile}" src="@{url}"  />
+      <get dest="@{destfile}.asc" src="@{url}.asc" />
+      <!--
+        <url url="@{url}"/>
+        <url url="@{url}.sha1"/>
+        <firstmatchmapper>
+          <globmapper from="@{url}.asc" to="@{dest}.asc"/>
+          <globmapper from="@{url}" to="@{dest}"/>
+        </firstmatchmapper>
+      </get>
+
+      <property name="checksum.@{url}.matches"/>
+      <property name="checksum.@{url}.matches.fail"/>
+      <checksum file="@{dest}" algorithm="sha" fileext=".asc"
+                verifyproperty="checksum.matches"/>
+      <condition property="checksum.@{url}.matches.fail">
+        <equals arg1="${checksum.@{url}.matches}" arg2="false"/>
+      </condition>
+      <fail if="checksum.@{url}.matches.fail">Checksum error</fail>
+      -->
+    </sequential>
+  </macrodef>
+
+
+
+</project>
