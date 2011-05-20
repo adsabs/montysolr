@@ -9,11 +9,11 @@
      Configuration section
   ==================================================================
   -->
-	<property file="build.properties" />
+
 
 	<property name="montysolr.home" location="." />
-	<property name="src.dir.java" location="java" />
-	<property name="src.dir.python" location="python" />
+	<property name="src.dir.java" location="src/java" />
+	<property name="src.dir.python" location="src/python" />
 	<property name="build.dir" value="build" />
 	<property name="dist.dir" value="build/dist" />
 	<property name="classes.dir" value="bin" />
@@ -25,6 +25,7 @@
 	<property name="solr.url" value="http://www.apache.org/dist/lucene/solr/${solr.version}/apache-solr-${solr.version}.zip" />
 	<property name="lucene.url" value="http://archive.apache.org/dist/lucene/java/lucene-${lucene.version}.zip" />
 
+	<property file="build.properties" />
 
 	<!-- these are now defined in the properties file
     <property name="jcc"           value="jcc.__main__" />
@@ -677,30 +678,50 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 	<target name="examples"
           description="Assembels MontySolr example demos (from Solr and our sources)"
-          depends="get-solr">
+          depends="examples-check-download,get-solr">
 
-		<copy  todir="${montysolr.home}/examples/invenio" overwrite="false" >
+		<!-- TODO: make this smarter, tried using 'apply' but somehow it applies
+		     only to files, i didn't manage to select directories only -->
+
+		<copy todir="${montysolr.home}/examples/invenio" overwrite="false" >
             <fileset dir="${solr.home}/example">
                 <include name="**/**" />
             </fileset>
         </copy>
 
+		<copy todir="${montysolr.home}/examples/twitter" overwrite="false" >
+            <fileset dir="${solr.home}/example">
+                <include name="**/**" />
+            </fileset>
+        </copy>
 
 		<echo>
-	    The MontySolr example was assembled from the original Solr example
+	    The MontySolr examples were assembled from the original Solr example distribution
 		(${solr.home}/example)
 		See ${montysolr.home}/examples/README.txt for instructions on how to
 		run the demos.
 		</echo>
 	</target>
 
-	<target name="get-solr" depends="init">
+
+
+	<target name="examples-check-download" >
+		<condition property="examples.donot.download" value="true" else="">
+			<and>
+			  <available file="${build.dir}/solr-download/apache-solr-${solr.version}/example/start.jar"/>
+			</and>
+		</condition>
+	</target>
+
+
+    <!-- Download the solr binary distribution, unless it was already downloaded -->
+	<target name="get-solr" depends="init"
+		unless="${examples.donot.download}" >
+
 		<echo>Downloading solr ${solr.version} from ${solr.url}</echo>
 
-		<!--
 		<get src="${solr.url}" dest="${build.dir}/solr-download/${solr.version}" />
         <unzip dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}"  />
-        -->
 
 
 		<echo>Building the Solr example</echo>
@@ -712,6 +733,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 			inheritall="false"
 		/>
 		-->
+
 		<exec command="ant" dir="${build.dir}/solr-download/apache-solr-${solr.version}/" >
 			<env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
 			   <arg value="example" />

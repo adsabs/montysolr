@@ -2,6 +2,10 @@
 
 For the impatient:
 
+    * Download MontySolr and extract it somewhere
+        OR checkout the source:
+    $ git clone git@github.com:romanchyla/montysolr.git montysolr
+
     $ cd montysolr
     $ cp build.properties.default build.properties
     $ vim build.properties # review the config and set the correct paths
@@ -21,6 +25,16 @@ The automatic installation will:
     * run some basic tests
 
 == STANDARD INSTALLATION ==
+
+    $ cp build.properties.default build.properties
+    $ vim build.properties  # edit and review the configuration
+
+    $ ant get-solr          # download solr distro (if you don't have one)
+    $ ant assemble-example  # assemble demo example
+    $ ant montysolr-build   # compile montysolr
+    $ ant run-montysolr     # run the demo
+
+
 
 To build MontySolr you need:
 
@@ -45,11 +59,7 @@ The recommended installation is this:
         }}}
 
 
-    $ cp build.properties.default build.properties
-    $ vim build.properties  # edit and review the configuration
-    $ ant assemble-example  # assemble demo example
-    $ ant montysolr-build   # compile montysolr
-    $ ant run-montysolr     # run the demo
+
 
 
 
