@@ -19,13 +19,11 @@
 	<property name="classes.dir" value="bin" />
 	<property name="jar.dir" value="${build.dir}/jar" />
 
-	<property name="solr.version" value="1.4.1" />
-	<property name="lucene.version" value="2.9.3" />
-
+	<property file="build.properties" />
 	<property name="solr.url" value="http://www.apache.org/dist/lucene/solr/${solr.version}/apache-solr-${solr.version}.zip" />
 	<property name="lucene.url" value="http://archive.apache.org/dist/lucene/java/lucene-${lucene.version}.zip" />
 
-	<property file="build.properties" />
+
 
 	<!-- these are now defined in the properties file
     <property name="jcc"           value="jcc.__main__" />
@@ -43,6 +41,10 @@
 	<property name="app.solr.name" value="solr_java" />
     <property name="app.solr.version" value="0.1" />
 	<property name="ddash" value="--" />
+
+	<!-- standard arguments for running the Solr -->
+	<property name="run.solr.jvmargs" value="-d32 -Xmx2048m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200" />
+	<property name="run.solr.args" value="" />
 
 	<!-- these will be used when running tests and command line montysolr
 	     you can set them as:
@@ -103,14 +105,17 @@
 	          description="Prints out instructions">
 		<echo message="Welcome to the MontySolr project!" />
 		<echo message="Use 'ant examples' to create a runnable example configurations." />
-		<echo message="Use 'ant run-example' to create and run the example." />
+		<echo message="Use 'ant build-all' to compile MontySolr extension." />
+		<echo message="Use 'ant run' to run the example." />
+		<echo message="Use 'ant run-daemon' to run the example with logging." />
+
 		<echo message="And for developers:"/>
 		<echo message="Use 'ant clean' to clean compiled files." />
-		<echo message="Use 'ant compile' to compile the source code." />
-		<echo message="Use 'ant dist' to build the project WAR and JAR files." />
-		<echo message="Use 'ant generate-maven-artifacts' to generate maven artifacts." />
+		<echo message="Use 'ant compile' to compile the Java source code." />
+		<echo message="Use 'ant build' to compile only MontySolr as a Python module." />
+		<echo message="Use 'ant build-solr' to compile only Solr as a Python module." />
+		<echo message="TODOs:" />
 		<echo message="Use 'ant package' to generate zip, tgz, and maven artifacts for distribution." />
-		<echo message="Use 'ant luke' to start luke.  see: http://www.getopt.org/luke/" />
 		<echo message="Use 'ant test' to run unit tests." />
 	</target>
 
@@ -208,9 +213,7 @@
 	</target>
 
 	<target name="clean" >
-		<delete dir="${build.dir}/build" />
-		<delete dir="${build.dir}/jar" />
-		<!--<delete dir="${build.dir}" failonerror="no"/>-->
+		<delete dir="${build.dir}" />
 	</target>
 
 	<!--
@@ -223,7 +226,7 @@
 
 
 	<!-- Compiles all java classes -->
-	<target name="java-compile" depends="init">
+	<target name="compile" depends="init">
 		<javac srcdir="${src.dir.java}" destdir="${classes.dir}"
 			classpathref="montysolr.classpath"
 		    classpath="${jcc_egg}/jcc/classes"
@@ -232,7 +235,7 @@
 
 
 	<!-- create a montysolr.jar that we can include and that contains our extra code -->
-	<target name="montysolr-jar" depends="config,java-compile">
+	<target name="build-jar" depends="config,compile">
 		<mkdir dir="${jar.dir}" />
 		<jar destfile="${my.montysolr.jar}" filesetmanifest="mergewithoutmain">
 			<manifest>
@@ -261,11 +264,11 @@
 
     <!-- Builds jar and also compile Java-Pyhon wrapper - this is all you need to run Solr inside Python -->
 	<target name="montysolr-jetty-build"
-		depends="config,montysolr-jar,montysolr-jetty-egg-compilation,unzip-egg">
+		depends="config,build-jar,montysolr-jetty-egg-compilation,unzip-egg">
 	</target>
 
 
-	<target name="montysolr-jetty-egg-compilation" depends="montysolr-jar">
+	<target name="montysolr-jetty-egg-compilation" depends="build-jar">
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 
@@ -330,15 +333,15 @@
     -->
 
 
-	<target name="montysolr-build-clean" depends="clean,solr-build,montysolr-build"
+	<target name="build-all" depends="build-solr,build"
 		description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
 
-	<target name="montysolr-build" depends="config,montysolr-egg-compile,unzip-egg"
-		   description="Build Python egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
-	<target name="montysolr-build-test" depends="montysolr-build,run-montysolr" />
+	<target name="build" depends="config,compile-montysolr-egg,unzip-egg"
+		   description="Build MontySolr separately"/>
+	<target name="build-test" depends="build,run" />
 
 	<!-- Compile egg for embedding into Java VM -->
-	<target name="montysolr-egg-compile" depends="montysolr-jar">
+	<target name="compile-montysolr-egg" depends="build-jar">
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 
@@ -387,12 +390,14 @@
 
 
 
-	<target name="solr-build" depends="config,solr-egg-compile,unzip-solr"
-	           description="Build separately the Python egg of solr"/>
+	<target name="build-solr" depends="config,compile-solr-egg,unzip-solr"
+	           description="Build separately the Python egg of Solr"/>
 
-	<target name="solr-egg-compile" depends="config">
+	<target name="compile-solr-egg" depends="config">
         <mkdir dir="${build.dir}" />
         <delete dir="${build.dir}/build" failonerror="no" />
+
+		<echo message="You can watch Monty Python, this takes a while..." />
 
         <exec executable="${python}" dir="${build.dir}" failonerror="true">
             <env key="PYTHONPATH" value="${src.dir.python}" />
@@ -441,8 +446,7 @@
 	</target>
 
 
-	<target name="run-montysolr" depends="config,java-compile"
-		description="Starts solr with PythonVM included (make sure you built montysolr)">
+	<target name="run-bare" depends="config,compile">
 		<echo>
 Running montysolr as:
 ========
@@ -474,20 +478,23 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 	</target>
 
-	<target name="run-montysolr-silent" >
+	<target name="run-daemon" >
 		<exec executable="ant" failonerror="true" dir="${montysolr.home}">
 			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
-			<env key="MONTYSOLR_JVMARGS" value="-Djava.util.logging.config.file=${webdist.home}/etc/logging.properties -d32 -Xmx1024m -Dmontysolr.max_workers=4" />
-			<arg value="run-montysolr"/>
+			<env key="MONTYSOLR_JVMARGS" value="${run.solr.jvmargs} ${env.MONTYSOLR_JVMARGS} -Djava.util.logging.config.file=${webdist.home}/etc/logging.properties" />
+			<env key="MONTYSOLR_ARGS" value="${run.solr.args} ${env.MONTYSOLR_ARGS} --daemon" />
+			<arg value="run-bare"/>
 		</exec>
 	</target>
 
-	<target name="run-montysolr-daemon" >
+	<target name="run"
+        description="Starts MontySolr">
+
         <exec executable="ant" failonerror="true" dir="${montysolr.home}">
         	<env key="MONTYSOLR_MAX_WORKERS" value="4" />
-            <env key="MONTYSOLR_JVMARGS" value="-Djava.util.logging.config.file=${webdist.home}/etc/logging.properties -d32 -Xmx2048m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200" />
-        	<env key="MONTYSOLR_ARGS" value="--daemon" />
-            <arg value="run-montysolr"/>
+            <env key="MONTYSOLR_JVMARGS" value="${run.solr.jvmargs} ${env.MONTYSOLR_JVMARGS} " />
+        	<env key="MONTYSOLR_ARGS" value="${run.solr.args} ${env.MONTYSOLR_ARGS} --daemon"/>
+            <arg value="run-bare"/>
         </exec>
     </target>
 
@@ -560,7 +567,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 	  </target>
 
 	  <target name="javacc-InvenioQueryParser-rebuild" depends="javacc-clean, javacc-InvenioQueryParser" if="javacc.present">
-	  	<antcall target="java-compile"></antcall>
+	  	<antcall target="compile"></antcall>
 	  	</target>
 
 	  <target name="javacc-InvenioQueryParser" depends="javacc-init,javacc-check" if="javacc.present">
@@ -621,7 +628,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 	  <!-- Compile unit tests. -->
 	  <target name="compile-tests"
-	          depends="java-compile">
+	          depends="compile">
 
 	    <mkdir dir="${build.dir}/tests" />
 	  	<javac srcdir="${montysolr.home}/test/java" destdir="${build.dir}/tests"
@@ -678,7 +685,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 	<target name="examples"
           description="Assembels MontySolr example demos (from Solr and our sources)"
-          depends="examples-check-download,get-solr">
+          depends="examples-check-download,download-solr">
 
 		<!-- TODO: make this smarter, tried using 'apply' but somehow it applies
 		     only to files, i didn't manage to select directories only -->
@@ -706,22 +713,27 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 
 	<target name="examples-check-download" >
-		<condition property="examples.donot.download" value="true" else="">
+		<condition property="examples.donot.download" value="true" else="false">
 			<and>
 			  <available file="${build.dir}/solr-download/apache-solr-${solr.version}/example/start.jar"/>
 			</and>
 		</condition>
+		<echo message="Shall we skip download of Solr? ${examples.donot.download}" level="verbose" />
 	</target>
 
 
     <!-- Download the solr binary distribution, unless it was already downloaded -->
-	<target name="get-solr" depends="init"
+	<target name="download-solr"
 		unless="${examples.donot.download}" >
 
-		<echo>Downloading solr ${solr.version} from ${solr.url}</echo>
 
-		<get src="${solr.url}" dest="${build.dir}/solr-download/${solr.version}" />
-        <unzip dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}"  />
+		<!-- can't rely on the init target -->
+		<mkdir dir="${build.dir}/solr-download/"/>
+
+		<echo>Downloading Solr, please wait...</echo>
+
+		<get src="${solr.url}" dest="${build.dir}/solr-download/${solr.version}.zip" />
+        <unzip dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}.zip"  />
 
 
 		<echo>Building the Solr example</echo>
@@ -743,7 +755,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 	<target name="run-example"
 	   description="Assembles and runs the example"
-	   depends="run-montysolr-daemon">
+	   depends="run-daemon">
 
 	</target>
 
