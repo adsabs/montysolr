@@ -42,6 +42,7 @@
     <property name="app.solr.version" value="0.1" />
 	<property name="ddash" value="--" />
 
+
 	<!-- standard arguments for running the Solr -->
 	<property name="run.solr.jvmargs" value="-d32 -Xmx2048m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200" />
 	<property name="run.solr.args" value="" />
@@ -92,6 +93,12 @@
 		java.lang.String
 		org.apache.solr.request.SolrQueryRequest
 		org.apache.solr.request.SolrQueryResponse" />
+
+
+	<!--Needed only if you want to regenerate InvenioQueryParser syntax,
+        which is probably not what you need to do -->
+
+    <property name="javacc.home" value="/some/path/javacc-5.0" />
 
 
 	<!--
@@ -172,7 +179,7 @@
 	  -->
 		<path id="solr.core.path">
 		  <fileset dir="${solr.home}/dist" id="solr.core.jar" >
-		    <filename name="*solr-core-1*.jar"/>
+		    <filename name="*solr-core-*.jar"/>
 		  </fileset>
 		</path>
 		<pathconvert property="solr.core.jar.string" pathsep=" --jar ">
@@ -181,7 +188,7 @@
 
     <path id="solr.sorlj.path">
   		<fileset dir="${solr.home}/dist" id="solr.solrj.jar" >
-        <filename name="*solr-solrj-1*.jar"/>
+        <filename name="*solr-solrj-*.jar"/>
       </fileset>
   	</path>
 		<pathconvert property="solr.solrj.jar.string" pathsep=" --jar ">

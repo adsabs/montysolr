@@ -3,6 +3,20 @@
 # of montysolr modules. The more detailed settings can be changed in the configuration
 # section of the build.xml file. Be careful to remove trailing whitespaces.
 
+
+# What version we use, be careful - the version of pylucene must match with
+# the lucene version and that one must match with the version of lucene used
+# inside solr.
+
+solr.version=1.4.1
+lucene.version=2.9.3
+
+
+# Python executable
+
+python=python
+
+
 # based on the installed version of JCC, you have to select the
 # correct invocation
 <!--
@@ -17,25 +31,26 @@
 
 jcc=jcc.__main__
 
-# folder where the solr lives
-solr_home=/x/dev/workspace/apache-solr-1.4.1
 
-# your custom solr configuration
-webdist=./example
+# The path where your Solr installation lives - note that
+# MontySolr can automatically download the Solr binary distribution
+# and use it for compilation. If you want this behaviour use:
+# solr_home=./build/solr-download/apache-solr-${solr.version}
 
-# python executable
-python=python
+solr_home=./build/solr-download/apache-solr-${solr.version}
 
-# PYTHONPATH : the tasks with the name of run-* (eg. run-solr)
-# are starting JVM and the JVM has a Python inside. This python
+
+# The path to the Solr configuration
+
+webdist=./examples/twitter
+
+
+# PYTHONPATH : the tasks with the name of run-* (eg. run-daemon)
+# are starting JVM with Python interpreter inside. This Python
 # interpreter needs to know where to look for python packages
 # By default, run-* tasks add ./python and ./build/dist folders
-# to the classpath, but here you can add or change the, this
+# to the classpath, but here you can add or change it, this
 # PYTHONPATH will be prepended
 
 python_path=/opt/invenio/lib/python
 
-# Needed only if you want to regenerate InvenioQueryParser syntax,
-# which is probably not what you need to do
-
-javacc.home=/some/path/javacc-5.0
