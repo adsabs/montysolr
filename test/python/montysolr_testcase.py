@@ -46,8 +46,9 @@ class MontySolrTestCase(unittest.TestCase):
 
     def tearDown(self):
         #self.core_container.shutdown()
-        sj.System.setProperty('solr.solr.home', self.old_home)
-        sj.System.setProperty('solr.data.dir', self.old_data_dir)
+        if hasattr(self, 'old_data_dir'):
+            sj.System.setProperty('solr.solr.home', self.old_home)
+            sj.System.setProperty('solr.data.dir', self.old_data_dir)
 
 
     def getBaseDir(self):

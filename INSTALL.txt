@@ -99,7 +99,7 @@ The general installation instructions for pylucene can be found at:
 http://lucene.apache.org/pylucene/documentation/install.html
 
 
-For reasons listed below, you will need to change them slightly.
+If you use pylucene 3.0.1, you must change the build slightly:
 
 
     $ set JCCFLAGS=        # this is different from the normal setup

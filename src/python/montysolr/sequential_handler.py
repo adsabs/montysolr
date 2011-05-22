@@ -4,6 +4,7 @@ Created on Feb 4, 2011
 @author: rca
 '''
 
+from montysolr.config import MSTARGETUS
 from montysolr import handler
 
 
@@ -12,7 +13,7 @@ class Handler(handler.Handler):
     '''
 
     def init(self):
-        self.discover_targets(['montysolr.inveniopie.targets', 'montysolr.examples.twitter_test'])
+        self.discover_targets(MSTARGETUS)
 
 
 

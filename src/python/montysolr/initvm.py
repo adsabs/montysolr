@@ -5,7 +5,6 @@ Created on Jan 13, 2011
 '''
 import os
 import sys
-
 import lucene
 
 try:
@@ -21,9 +20,11 @@ except:
     import montysolr_java
 
 
-if os.getenv('MONTYSOLR_DEBUG'):
-    from invenio import remote_debugger
-    remote_debugger.start('3') #or override '3|ip:192.168.31.1|port:9999'
+MSBUGDEBUG = False
+
+#if os.getenv('MONTYSOLR_DEBUG'):
+#    from invenio import remote_debugger
+#    remote_debugger.start('3') #or override '3|ip:192.168.31.1|port:9999'
 
 
 _jvmargs = ''
@@ -36,6 +37,9 @@ _cp = os.path.join(os.path.dirname(montysolr_java.__file__), 'classpath')
 _classpath=''
 if os.path.exists(_cp):
     _classpath = open(_cp, 'r').read()
+
+# order of calls important - first we initialize MontySolr
+# then the rest
 
 if _jvmargs:
     montysolr_java.initVM(lucene.CLASSPATH+os.pathsep+montysolr_java.CLASSPATH+os.pathsep+_classpath, vmargs=_jvmargs)
