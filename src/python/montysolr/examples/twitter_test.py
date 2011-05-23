@@ -34,20 +34,21 @@ def twitter_api(message):
             return
         api = twitter.Api()
         docs = api.GetSearch(term)
+        i = 0
         for d in docs:
             d = d.AsDict()
             doc = sj.SolrInputDocument();
             doc.addField(schema.getUniqueKeyField().getName(), d['id'])
             doc.addField("title", d['text'])
-            doc.addField("source", d['source'])
-            doc.addField("user", d['user']['screen_name'])
-
+            doc.addField("description", d['source'])
+            doc.addField("author", d['user']['screen_name'])
+            i += 1
             addCmd.doc = sj.DocumentBuilder.toDocument(doc, schema)
             updateHandler.addDoc(addCmd)
 
         updateCmd = sj.CommitUpdateCommand(True) # coz for demo we want to see it
         updateHandler.commit(updateCmd)
-
+        message.setResults(i)
         rsp.add('python-message', 'Found and indexed %s docs for term %s from Twitter' % (len(docs), term))
 
     else:

@@ -20,7 +20,7 @@ import sys
 class Test(MontySolrTestCase):
 
     def setUp(self):
-        self.size = 5000000
+        self.size = 500000
         self.setSolrHome(os.path.join(self.getBaseDir(), 'examples/twitter/solr'))
         self.setDataDir(os.path.join(self.getBaseDir(), 'examples/twitter/solr/data'))
         self.setHandler(self.loadHandler('montysolr.examples.bigtest'))
