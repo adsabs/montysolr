@@ -15,7 +15,7 @@ class SimpleBridge(sj.MontySolrBridge):
 
     def __init__(self, handler=None):
         if not handler:
-            handler_module = __import__(MSIAMHANDLER, globals(), locals())
+            handler_module = __import__(MSIAMHANDLER, globals(), locals(), fromlist=['Handler'])
             handler = handler_module.Handler
         super(SimpleBridge, self).__init__()
         self._handler = handler
