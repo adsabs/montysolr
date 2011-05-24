@@ -26,22 +26,26 @@ import org.apache.solr.common.params.UpdateParams;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.ContentStream;
+import org.apache.solr.common.util.StrUtils;
+import org.apache.solr.common.util.SystemIdResolver;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.handler.RequestHandlerUtils;
-import org.apache.solr.request.RawResponseWriter;
+import org.apache.solr.response.RawResponseWriter;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.request.SolrQueryResponse;
+import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.apache.solr.update.processor.UpdateRequestProcessorChain;
 import org.apache.solr.util.plugin.SolrCoreAware;
 
+import java.io.StringReader;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 
 /**
  * <p>
@@ -61,10 +65,10 @@ import org.slf4j.LoggerFactory;
  *
  * @version $Id: DataImportHandler.java 788580 2009-06-26 05:20:23Z noble $
  * @since solr 1.3
- * 
- * NOTE: this is a slightly modified DataImportHandler that waits until the importer stops to be 
+ *
+ * NOTE: this is a slightly modified DataImportHandler that waits until the importer stops to be
  * busy.
- * 
+ *
  */
 public class WaitingDataImportHandler extends RequestHandlerBase implements
         SolrCoreAware {
@@ -105,18 +109,14 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
           myName = myName.replaceAll("/","_") ;
         }
       }
-      String debug = (String) initArgs.get(ENABLE_DEBUG);
-      if (debug != null && "no".equals(debug))
-        debugEnabled = false;
+      debugEnabled = StrUtils.parseBool((String)initArgs.get(ENABLE_DEBUG), true);
       NamedList defaults = (NamedList) initArgs.get("defaults");
       if (defaults != null) {
         String configLoc = (String) defaults.get("config");
         if (configLoc != null && configLoc.length() != 0) {
           processConfiguration(defaults);
-
-          importer = new NoRollbackDataImporter(SolrWriter.getResourceAsString(core
-                  .getResourceLoader().openResource(configLoc)), core,
-                  dataSources, coreScopeSession);
+          final InputSource is = new InputSource(core.getResourceLoader().openConfig(configLoc));
+          importer = new NoRollbackDataImporter(is, core, dataSources, coreScopeSession);
         }
       }
     } catch (Throwable e) {
@@ -167,7 +167,7 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
       if (requestParams.dataConfig != null) {
         try {
           processConfiguration((NamedList) initArgs.get("defaults"));
-          importer = new DataImporter(requestParams.dataConfig, req.getCore()
+          importer = new DataImporter(new InputSource(new StringReader(requestParams.dataConfig)), req.getCore()
                   , dataSources, coreScopeSession);
         } catch (RuntimeException e) {
           rsp.add("exception", DebugLogger.getStacktraceString(e));
@@ -198,18 +198,18 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
   	    	  }
   	      }
     	}
-    	
+
     	if (command != null) {
 	      if (DataImporter.FULL_IMPORT_CMD.equals(command)
 	              || DataImporter.DELTA_IMPORT_CMD.equals(command) ||
 	              IMPORT_CMD.equals(command)) {
-	
+
 	        UpdateRequestProcessorChain processorChain =
 	                req.getCore().getUpdateProcessingChain(params.get(UpdateParams.UPDATE_PROCESSOR));
 	        UpdateRequestProcessor processor = processorChain.createProcessor(req, rsp);
 	        SolrResourceLoader loader = req.getCore().getResourceLoader();
 	        SolrWriter sw = getSolrWriter(processor, loader, requestParams);
-	
+
 	        if (requestParams.debug) {
 	          if (debugEnabled) {
 	            // Synchronous request for the debug mode
@@ -357,7 +357,7 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
 
   @Override
   public String getSourceId() {
-    return "$Id: DataImportHandler.java 788580 2009-06-26 05:20:23Z noble $";
+    return "$Id: DataImportHandler.java 1075044 2011-02-27 12:52:05Z uschindler $";
   }
 
   @Override
@@ -367,7 +367,7 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
 
   @Override
   public String getSource() {
-    return "$URL: http://svn.apache.org/repos/asf/lucene/solr/tags/release-1.4.1/contrib/dataimporthandler/src/main/java/org/apache/solr/handler/dataimport/DataImportHandler.java $";
+    return "$URL: http://svn.apache.org/repos/asf/lucene/dev/tags/lucene_solr_3_1/solr/contrib/dataimporthandler/src/main/java/org/apache/solr/handler/dataimport/DataImportHandler.java $";
   }
 
   public static final String ENABLE_DEBUG = "enableDebug";

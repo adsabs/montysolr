@@ -116,8 +116,10 @@ class InvenioQParser extends QParser {
 		if (m != null ) {
 			if (m.contains("maxinv") && !schema.hasExplicitField("*")) {
 				throw new SolrException(
-						null,
-						"Query parser is configured to pass as many fields to Invenio as possible, for this to work, schema must contain a dynamic field declared as '*'");
+						SolrException.ErrorCode.SERVER_ERROR,
+						"Query parser is configured to pass as many fields to Invenio as possible," +
+						" for this to work, schema must contain a dynamic field declared as '*'" +
+						"<dynamicField name=\"*\" type=\"text\" multiValued=\"true\" />");
 			}
 			operationMode = m;
 		}
