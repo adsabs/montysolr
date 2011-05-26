@@ -6,26 +6,19 @@ Created on Feb 4, 2011
 #@PydevCodeAnalysisIgnore
 
 import unittest
-from montysolr import initvm, java_bridge, handler
+from montysolr_testcase import MontySolrTestCase, sj
+
 import os
 
-sj = initvm.montysolr_java
 
-class TestHandler(handler.Handler):
-    def init(self):
-        #_b = os.path.join(os.path.dirname(__file__), 'testing_targets.py')
-        #self.discover_targets([_b])
-        self.discover_targets(['montysolr.inveniopie.targets'])
-test_handler = TestHandler()
 
-class Test(unittest.TestCase):
-
+class Test(MontySolrTestCase):
 
     def setUp(self):
-        self.bridge = java_bridge.SimpleBridge(test_handler)
-
-    def tearDown(self):
-        pass
+        self.setSolrHome(os.path.join(self.getBaseDir(), 'examples/invenio/solr'))
+        self.setDataDir(os.path.join(self.getBaseDir(), 'examples/invenio/solr/data'))
+        self.setHandler(self.loadHandler('montysolr.inveniopie.targets'))
+        MontySolrTestCase.setUp(self)
 
 
     def test_dict_cache(self):

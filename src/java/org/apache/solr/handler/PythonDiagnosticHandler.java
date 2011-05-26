@@ -13,9 +13,8 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.request.SolrQueryResponse;
+import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.search.DocSlice;
 import org.apache.solr.util.DictionaryCache;
@@ -25,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 
 
-public class PythonDiagnosticHandler extends SearchHandler {
+public class PythonDiagnosticHandler extends RequestHandlerBase {
 
 	public static final Logger log = LoggerFactory
 			.getLogger(PythonDiagnosticHandler.class);
@@ -150,6 +149,36 @@ public class PythonDiagnosticHandler extends SearchHandler {
 		log.info(rinfo);
 		log.info("======== end diagnostics ========");
 
+	}
+
+
+
+
+	@Override
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public String getSourceId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public String getSource() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public String getVersion() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

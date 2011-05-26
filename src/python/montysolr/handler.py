@@ -29,7 +29,6 @@ class Handler(object):
     def handle_message(self, message):
         '''Receives the messages, finds the target of the message
         and calls it, passing it the message instance'''
-        message.threadInfo("handle_message")
         target = self.get_target(message)
         if target:
             target(message)

@@ -12,26 +12,27 @@ import org.apache.solr.handler.dataimport.DataImporter.Status;
 import org.apache.solr.schema.IndexSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 
 public class NoRollbackDataImporter extends DataImporter {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(NoRollbackDataImporter.class);
 	private ReentrantLock importLock = new ReentrantLock();
-	
-	
+
+
 	NoRollbackDataImporter() {
 		super();
 	  }
 
-	NoRollbackDataImporter(String dataConfig, SolrCore core, Map<String, Properties> ds, Map<String, Object> session) {
+	NoRollbackDataImporter(InputSource dataConfig, SolrCore core, Map<String, Properties> ds, Map<String, Object> session) {
 		super(dataConfig, core, ds, session);
 	}
 
-	
+
 	public boolean isBusy() {
 	    return importLock.isLocked();
 	  }
-	
+
 	public void doFullImport(SolrWriter writer, RequestParams requestParams) {
 	    LOG.info("Starting Full Import");
 	    setStatus(Status.RUNNING_FULL_DUMP);
@@ -84,7 +85,7 @@ public class NoRollbackDataImporter extends DataImporter {
 	      return;
 	    }
 	    if (!importLock.tryLock()){
-	      LOG.warn("Import command failed . another import is running");      
+	      LOG.warn("Import command failed . another import is running");
 	      return;
 	    }
 	    try {

@@ -5,12 +5,12 @@ import invenio.montysolr.jni.MontySolrVM;
 
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.request.SolrQueryResponse;
+import org.apache.solr.response.SolrQueryResponse;
 
 
 public class TwitterAPIHandler extends RequestHandlerBase{
-	@Override
 
+	  @Override
 	  public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws Exception
 	  {
 
@@ -51,4 +51,6 @@ public class TwitterAPIHandler extends RequestHandlerBase{
 	  public String getSource() {
 	    return "";
   }
+
+
 }

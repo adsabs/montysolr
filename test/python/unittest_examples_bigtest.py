@@ -9,35 +9,22 @@ You can do this:
 export MONTYSOLR_JVMARGS_PYTHON='-Xmx800m -d32'
 python unittest_example_bigtest.py Test.test_bigtest01
 '''
-#@PydevCodeAnalysisIgnore
 
 import unittest
-from montysolr import initvm, java_bridge, handler
+from montysolr_testcase import MontySolrTestCase, sj
 import os
 import time
 import sys
 
-sj = initvm.montysolr_java
 
-class TestHandler(handler.Handler):
-    def init(self):
-        #_b = os.path.join(os.path.dirname(__file__), 'testing_targets.py')
-        #self.discover_targets([_b])
-        self.discover_targets(['montysolr.examples.bigtest'])
-test_handler = TestHandler()
-
-class Test(unittest.TestCase):
-
+class Test(MontySolrTestCase):
 
     def setUp(self):
-        self.size = 5000000
-        sj.System.setProperty('solr.solr.home', os.path.join(os.path.abspath(os.path.dirname(initvm.__file__) + '../../..'), 'examples/twitter/solr'))
-        self.bridge = java_bridge.SimpleBridge(test_handler)
-        self.core = sj.SolrCore.getSolrCore()
-
-    def tearDown(self):
-        #self.core.close()
-        pass
+        self.size = 500000
+        self.setSolrHome(os.path.join(self.getBaseDir(), 'examples/twitter/solr'))
+        self.setDataDir(os.path.join(self.getBaseDir(), 'examples/twitter/solr/data'))
+        self.setHandler(self.loadHandler('montysolr.examples.bigtest'))
+        MontySolrTestCase.setUp(self)
 
 
 

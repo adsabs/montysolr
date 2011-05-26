@@ -21,7 +21,7 @@ class Test(MontySolrTestCase):
 
         hm = sj.HashMap().of_(sj.String, sj.String)
         hm.put('action', 'search')
-        hm.put('term', 'Feb17')
+        hm.put('term', 'libya')
         params = sj.MapSolrParams(hm)
 
         req = sj.LocalSolrQueryRequest(self.core, params)
@@ -34,11 +34,8 @@ class Test(MontySolrTestCase):
 
         self.bridge.receive_message(message)
 
-        res = sj.JArray_int.cast_(message.getResults())
-        res = list(res)
-        assert len(res) == size
-        assert res[0] == 0
-        assert res[5] == 5
+        total = sj.Integer.cast_(message.getResults())
+        assert total
 
 
 

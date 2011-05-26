@@ -1,0 +1,8 @@
+
+
+Developing for MontySolr needs the project setup (which we could perhaps simplify):
+
+- add references to the lucene_solr_3_1 project libraries
+- add source to the java build path
+- include path to the JCC classes as an external class folder (/Library/Python/2.6/site-packages/JCC-2.7-py2.6-macosx-10.6-universal.egg/classes)
+

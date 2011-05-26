@@ -122,6 +122,7 @@
 		<echo message="Use 'ant build' to compile only MontySolr as a Python module." />
 		<echo message="Use 'ant build-solr' to compile only Solr as a Python module." />
 		<echo message="TODOs:" />
+		<echo message="Use 'ant automatic-install' to install everything incl dependencies." />
 		<echo message="Use 'ant package' to generate zip, tgz, and maven artifacts for distribution." />
 		<echo message="Use 'ant test' to run unit tests." />
 	</target>
