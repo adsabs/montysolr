@@ -86,7 +86,7 @@ class InvenioRefersToQParser extends QParser {
 
 		Query mainq = lparser.parse(qstr);
 		//Filter qfilter = new CitationRefersToFilter();
-		
+
 		//return new CitationRefersToQuery(mainq, qfilter);
 		return new CitationQuery(mainq, req, localParams);
 	}
@@ -97,7 +97,7 @@ class InvenioRefersToQParser extends QParser {
 
 }
 
-class CitationRefersToQuery 
+class CitationRefersToQuery
 extends Query {
 
 	  Query query;
@@ -123,13 +123,13 @@ extends Query {
 	    final Similarity similarity = query.getSimilarity(searcher);
 	    return new Weight() {
 	      private float value;
-	        
+
 	      // pass these methods through to enclosed query's weight
 	      public float getValue() { return value; }
-	      public float sumOfSquaredWeights() throws IOException { 
-	        return weight.sumOfSquaredWeights() * getBoost() * getBoost(); 
+	      public float sumOfSquaredWeights() throws IOException {
+	        return weight.sumOfSquaredWeights() * getBoost() * getBoost();
 	      }
-	      public void normalize (float v) { 
+	      public void normalize (float v) {
 	        weight.normalize(v);
 	        value = weight.getValue() * getBoost();
 	      }
@@ -179,7 +179,7 @@ extends Query {
 	        return new Scorer(similarity) {
 
 	          private int doc = -1;
-	          
+
 	          private int advanceToCommon(int scorerDoc, int disiDoc) throws IOException {
 	            while (scorerDoc != disiDoc) {
 	              if (scorerDoc < disiDoc) {
@@ -190,7 +190,7 @@ extends Query {
 	            }
 	            return scorerDoc;
 	          }
-	          
+
 	          public void score(Collector collector) throws IOException {
 	        	    collector.setScorer(this);
 	        	    int doc;
@@ -210,20 +210,18 @@ extends Query {
 	                && (scorerDoc = scorer.nextDoc()) != NO_MORE_DOCS
 	                && advanceToCommon(scorerDoc, disiDoc) != NO_MORE_DOCS ? scorer.docID() : NO_MORE_DOCS;
 	          }
-	          
-	          /** @deprecated use {@link #docID()} instead. */
-	          public int doc() { return scorer.doc(); }
+
 	          public int docID() { return doc; }
-	          
+
 	          /** @deprecated use {@link #advance(int)} instead. */
 	          public boolean skipTo(int i) throws IOException {
 	            return advance(i) != NO_MORE_DOCS;
 	          }
-	          
+
 	          public int advance(int target) throws IOException {
 	            int disiDoc, scorerDoc;
 	            return doc = (disiDoc = docIdSetIterator.advance(target)) != NO_MORE_DOCS
-	                && (scorerDoc = scorer.advance(disiDoc)) != NO_MORE_DOCS 
+	                && (scorerDoc = scorer.advance(disiDoc)) != NO_MORE_DOCS
 	                && advanceToCommon(scorerDoc, disiDoc) != NO_MORE_DOCS ? scorer.docID() : NO_MORE_DOCS;
 	          }
 
@@ -231,8 +229,11 @@ extends Query {
 
 	          // add an explanation about whether the document was filtered
 	          public Explanation explain (int i) throws IOException {
-	            Explanation exp = scorer.explain(i);
-	            
+	        	  Explanation exp = new Explanation();
+	        	  // FIX: use the IndexReader.explain()
+	        		  //Weight.explain(indexReader, i);
+	            //Explanation exp = scorer.explain(i);
+
 	            if (docIdSetIterator.advance(i) == i) {
 	              exp.setDescription ("allowed by filter: "+exp.getDescription());
 	              exp.setValue(getBoost() * exp.getValue());
@@ -299,7 +300,7 @@ extends Query {
 	}
 
 class CitationRefersToFilter extends Filter {
-		
+
 	/**
 	 * This method returns a set of documents that are referring (citing)
 	 * the set of documents we retrieved in the underlying query
