@@ -287,8 +287,6 @@ public class CitationQuery extends Query {
 	        	  return scorer.nextDoc();
 	          }
 
-	          /** @deprecated use {@link #docID()} instead. */
-	          public int doc() { return scorer.doc(); }
 	          public int docID() { return doc; }
 
 	          /** @deprecated use {@link #advance(int)} instead. */
