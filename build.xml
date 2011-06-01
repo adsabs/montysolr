@@ -20,8 +20,8 @@
 	<property name="jar.dir" value="${build.dir}/jar" />
 
 	<property file="build.properties" />
-	<property name="solr.url" value="http://www.apache.org/dist/lucene/solr/${solr.version}/apache-solr-${solr.version}.zip" />
-	<property name="lucene.url" value="http://archive.apache.org/dist/lucene/java/lucene-${lucene.version}.zip" />
+	<property name="solr.url" value="http://www.apache.org/dist/lucene/solr/${solr.version}/apache-solr-${solr.version}-src.tgz" />
+	<property name="lucene.url" value="http://archive.apache.org/dist/lucene/java/lucene-${lucene.version}-src.tar.gz" />
 
 
 
