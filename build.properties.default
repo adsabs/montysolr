@@ -8,8 +8,12 @@
 # the lucene version and that one must match with the version of lucene used
 # inside solr.
 
-solr.version=1.4.1
-lucene.version=2.9.3
+# For the old solr 1.4, the following works
+# lucene.version=2.9.3
+# solr.version=1.4
+
+solr.version=3.1.0
+lucene.version=3.1.0
 
 
 # Python executable
