@@ -159,7 +159,7 @@
 
 		<path id="montysolr.classpath">
 			<fileset dir="${jar.dir}" includes="**/*.jar" />
-			<fileset dir="${solr.home}/lib" includes="**/*.jar" />
+			<fileset dir="${solr.home}/example/lib" includes="**/*.jar" />
 			<fileset dir="${solr.home}/dist" includes="**/*.jar" />
 			<fileset dir="${webdist.home}/lib" includes="**/*.jar" />
 			<fileset dir="${lib.dir}" includes="**/*.jar" />
@@ -722,9 +722,10 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 	<target name="examples-check-download" >
 		<condition property="examples.donot.download" value="true" else="false">
-			<and>
+			<or>
+			  <available file="${solr.home}/example/start.jar"/>
 			  <available file="${build.dir}/solr-download/apache-solr-${solr.version}/example/start.jar"/>
-			</and>
+			</or>
 		</condition>
 		<echo message="Shall we skip download of Solr? ${examples.donot.download}" level="verbose" />
 	</target>
@@ -740,9 +741,12 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 		<echo>Downloading Solr, please wait...</echo>
 
-		<get src="${solr.url}" dest="${build.dir}/solr-download/${solr.version}.zip" />
-        <unzip dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}.zip"  />
+		<get src="${solr.url}" dest="${build.dir}/solr-download/${solr.version}-src.tgz" />
+		<untar dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}-src.tgz" />
 
+		<!--
+        <unzip dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}.zip"  />
+        -->
 
 		<echo>Building the Solr example</echo>
 
