@@ -24,7 +24,8 @@ public class PythonTextField extends TextField {
 
 	    try {
 			MontySolrVM.INSTANCE.sendMessage(message);
-			if (message.containsKey("result")) {
+			Object res = message.getResults();
+			if (res != null) {
 				  String val = (String) message.getResults();
 				  if (val != null)
 					  return super.createField(field, val, boost);
