@@ -20,8 +20,6 @@ except:
     import montysolr_java
 
 
-MSBUGDEBUG = False
-
 #if os.getenv('MONTYSOLR_DEBUG'):
 #    from invenio import remote_debugger
 #    remote_debugger.start('3') #or override '3|ip:192.168.31.1|port:9999'
