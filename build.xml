@@ -337,7 +337,7 @@
     -->
 
 
-	<target name="build-all" depends="check-solr-location,download-solr,build-solr-example,build-solr,build,examples"
+	<target name="build-all" depends="examples,build-solr,build"
 		description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
 
 	<target name="build" depends="config,compile-montysolr-egg,unzip-egg"
