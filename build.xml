@@ -784,7 +784,6 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 	<target name="try-lucene-jars" depends="check-solr-location" >
 		<path id="montysolr.classpath.testing">
             <fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
-            <fileset dir="${webdist.home}/lib" includes="**/*.jar" />
         </path>
 
         <condition property="lucene.jars.exist" value="true">
