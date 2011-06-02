@@ -20,9 +20,6 @@
 	<property name="jar.dir" value="${build.dir}/jar" />
 
 	<property file="build.properties" />
-	<property name="solr.url" value="http://www.apache.org/dist/lucene/solr/${solr.version}/apache-solr-${solr.version}-src.tgz" />
-	<property name="lucene.url" value="http://archive.apache.org/dist/lucene/java/lucene-${lucene.version}-src.tar.gz" />
-
 
 
 	<!-- these are now defined in the properties file
@@ -111,8 +108,7 @@
 	<target name="usage"
 	          description="Prints out instructions">
 		<echo message="Welcome to the MontySolr project!" />
-		<echo message="Use 'ant examples' to create a runnable example configurations." />
-		<echo message="Use 'ant build-all' to compile MontySolr extension." />
+		<echo message="Use 'ant build-all' to compile MontySolr and prepare demos." />
 		<echo message="Use 'ant run' to run the example." />
 		<echo message="Use 'ant run-daemon' to run the example with logging." />
 
@@ -129,7 +125,7 @@
 
 
 
-	<target name="init" depends="check_properties,die_unless_propertiesOK">
+	<target name="init" depends="check_properties,die_unless_propertiesOK,check-solr-location,check-lucene-jars">
 		<mkdir dir="${build.dir}" />
 		<mkdir dir="${dist.dir}" />
 		<mkdir dir="${classes.dir}" />
@@ -157,10 +153,10 @@
 			<arg value="import os;d='${webdist.home}';print os.path.exists(d+'/webapps/solr.war') and d+'/webapps/solr.war' or d+'/webapps'" />
 		</exec>
 
+
 		<path id="montysolr.classpath">
 			<fileset dir="${jar.dir}" includes="**/*.jar" />
-			<fileset dir="${solr.home}/example/lib" includes="**/*.jar" />
-			<fileset dir="${solr.home}/dist" includes="**/*.jar" />
+			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
 			<fileset dir="${webdist.home}/lib" includes="**/*.jar" />
 			<fileset dir="${lib.dir}" includes="**/*.jar" />
 		</path>
@@ -179,7 +175,7 @@
 	  We include them all. TODO: pick the newest file only
 	  -->
 		<path id="solr.core.path">
-		  <fileset dir="${solr.home}/dist" id="solr.core.jar" >
+		  <fileset dir="${solr.real.location}/dist" id="solr.core.jar" >
 		    <filename name="*solr-core-*.jar"/>
 		  </fileset>
 		</path>
@@ -188,7 +184,7 @@
 	  </pathconvert>
 
     <path id="solr.sorlj.path">
-  		<fileset dir="${solr.home}/dist" id="solr.solrj.jar" >
+  		<fileset dir="${solr.real.location}/dist" id="solr.solrj.jar" >
         <filename name="*solr-solrj-*.jar"/>
       </fileset>
   	</path>
@@ -341,7 +337,7 @@
     -->
 
 
-	<target name="build-all" depends="build-solr,build"
+	<target name="build-all" depends="examples,build-solr,build"
 		description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
 
 	<target name="build" depends="config,compile-montysolr-egg,unzip-egg"
@@ -693,22 +689,21 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 	<target name="examples"
           description="Assembels MontySolr example demos (from Solr and our sources)"
-          depends="examples-check-download,download-solr">
+          depends="check-solr-location,download-solr,build-solr-example">
 
-		<!-- TODO: make this smarter, tried using 'apply' but somehow it applies
-		     only to files, i didn't manage to select directories only -->
+		<apply executable="ant" type="dir" dir="${montysolr.home}">
 
-		<copy todir="${montysolr.home}/examples/invenio" overwrite="false" >
-            <fileset dir="${solr.home}/example">
-                <include name="**/**" />
-            </fileset>
-        </copy>
+            <arg line="assemble-example" />
+            <arg line="-Dassemble.source"/>
+            <arg value="${solr.real.location}/example" />
+            <arg line="-Dassemble.target"/>
+            <srcfile />
 
-		<copy todir="${montysolr.home}/examples/twitter" overwrite="false" >
-            <fileset dir="${solr.home}/example">
-                <include name="**/**" />
-            </fileset>
-        </copy>
+            <dirset dir="${montysolr.home}">
+              <include name="examples/*"/>
+            </dirset>
+        </apply>
+
 
 		<echo>
 	    The MontySolr examples were assembled from the original Solr example distribution
@@ -718,22 +713,43 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 		</echo>
 	</target>
 
+    <target name="assemble-example" >
+    	<!-- called only from the examples target, automatically -->
+    	<copy todir="${assemble.target}" overwrite="false">
+            <fileset dir="${assemble.source}">
+                <include name="**/**" />
+            </fileset>
+        </copy>
+	   <echo>
+	      Copied from ${assemble.source} to ${assemble.target}
+	   </echo>
+	</target>
 
 
-	<target name="examples-check-download" >
-		<condition property="examples.donot.download" value="true" else="false">
-			<or>
-			  <available file="${solr.home}/example/start.jar"/>
-			  <available file="${build.dir}/solr-download/apache-solr-${solr.version}/example/start.jar"/>
-			</or>
+
+
+	<target name="check-solr-location" >
+		<condition property="solr.real.location" value="${solr.home}">
+			<and>
+		        <available file="${solr.home}/example/start.jar"/>
+				<available file="${solr.home}/lib/commons-io-1.4.jar"/>
+		    </and>
 		</condition>
-		<echo message="Shall we skip download of Solr? ${examples.donot.download}" level="verbose" />
+
+		<condition property="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr">
+			<and>
+        	    <available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/example/start.jar"/>
+			    <available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/lib/commons-io-1.4.jar"/>
+			</and>
+        </condition>
+
+		<echo message="Did we find real solr? Path=${solr.real.location}" level="verbose" />
 	</target>
 
 
     <!-- Download the solr binary distribution, unless it was already downloaded -->
 	<target name="download-solr"
-		unless="${examples.donot.download}" >
+		unless="solr.real.location" depends="get-solr-mirror">
 
 
 		<!-- can't rely on the init target -->
@@ -741,34 +757,79 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 		<echo>Downloading Solr, please wait...</echo>
 
-		<get src="${solr.url}" dest="${build.dir}/solr-download/${solr.version}-src.tgz" />
-		<untar dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}-src.tgz" />
+		<get src="${solr.mirror}/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" />
+		<untar dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}-src.tgz" compression="gzip"/>
+
+	    <property name="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr"/>
+	</target>
+
+
+	<target name="build-solr-example" if="solr.real.location">
+        <echo>Building the Solr example</echo>
 
 		<!--
-        <unzip dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}.zip"  />
+        Unfortunately, the ant task is having some problems with the basedir (ant 1.7)
+        <ant target="example"
+            dir="${build.dir}/solr-download/apache-solr-${solr.version}/"
+            inheritall="false"
+        />
         -->
 
-		<echo>Building the Solr example</echo>
-
-		<!--
-		Unfortunately, the ant task is having some problems with the basedir (ant 1.7)
-		<ant target="example"
-			dir="${build.dir}/solr-download/apache-solr-${solr.version}/"
-			inheritall="false"
-		/>
-		-->
-
-		<exec command="ant" dir="${build.dir}/solr-download/apache-solr-${solr.version}/" >
-			<env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
-			   <arg value="example" />
-		</exec>
-
+        <exec command="ant" dir="${solr.real.location}" >
+            <env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
+            <arg value="example" />
+        </exec>
 	</target>
+
+	<target name="try-lucene-jars" depends="check-solr-location" >
+		<path id="montysolr.classpath.testing">
+            <fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
+            <fileset dir="${webdist.home}/lib" includes="**/*.jar" />
+        </path>
+
+        <condition property="lucene.jars.exist" value="true">
+            <and>
+                <available classname="org.apache.lucene.spatial.tier.InvalidGeoException" classpath="${toString:montysolr.classpath.testing}" />
+            </and>
+        </condition>
+
+        <echo message="Are lucene jars available? ${lucene.jars.exist}" level="verbose" />
+    </target>
+
+	<target name="check-lucene-jars" depends="try-lucene-jars" unless="lucene.jars.exist">
+		<delete dir="${solr.real.location}/dist/montysolr-extracted" />
+		<mkdir dir="${solr.real.location}/dist/montysolr-extracted" />
+		<unzip dest="${solr.real.location}/dist/montysolr-extracted" overwrite="yes">
+            <fileset dir="${solr.real.location}/dist">
+               <include name="apache-solr*.war" />
+            </fileset>
+        </unzip>
+		<move todir="${solr.real.location}/dist/montysolr-extracted">
+			<fileset dir="${solr.real.location}/dist/montysolr-extracted/WEB-INF/lib">
+			   <include name="**/**.jar"/>
+			</fileset>
+		</move>
+		<delete dir="${solr.real.location}/dist/montysolr-extracted" includeemptydirs="true">
+			<exclude name="**/**.jar"/>
+		</delete>
+	</target>
+
 
 	<target name="run-example"
 	   description="Assembles and runs the example"
 	   depends="run-daemon">
 
+	</target>
+
+	<target name="get-solr-mirror" >
+	   <exec command="${python}" outputproperty="solr.mirror" failonerror="true">
+	   	   <arg value="-c" />
+	       <arg  value="import urllib;
+t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();
+l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));
+print l[0]
+"/>
+	   </exec>
 	</target>
 
 </project>
