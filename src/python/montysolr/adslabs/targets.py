@@ -9,6 +9,7 @@ import os
 
 import time
 import ptree
+import pymongo
 
 def workout_field_value(message):
     sender = str(message.getSender())
@@ -28,18 +29,27 @@ def workout_field_value(message):
                     v = v[1:-1]
                 vals[k] = v
             if 'bibcode' in vals and 'src_dir' in vals:
-                dirs = vals['src_dir'].split(',')
-                bib = vals['bibcode'].split(',')[0].strip()
-                ptree_path = ptree.id2ptree(bib)
-
-                for d in dirs:
-                    full_path = d + ptree_path + 'body.txt'
-                    message.threadInfo('looking for ' + full_path)
-                    if os.path.exists(full_path):
-                        fo = open(full_path, 'r')
-                        ret = fo.read()
-                        message.setResults(ret.decode('utf-8'))
+                if vals['src_dir'] == "mongo":
+                    mongo = pymongo.Connection('adszee')
+                    docs = mongo['solr4ads']['docs']
+                    bib = vals['bibcode']
+                    doc = docs.find_one({'bibcode': bib}, {'body': 1})
+                    if doc:
+                        message.setResults(doc['body'])
                         return
+                else:
+                    dirs = vals['src_dir'].split(',')
+                    bib = vals['bibcode'].split(',')[0].strip()
+                    ptree_path = ptree.id2ptree(bib)
+    
+                    for d in dirs:
+                        full_path = d + ptree_path + 'body.txt'
+                        message.threadInfo('looking for ' + full_path)
+                        if os.path.exists(full_path):
+                            fo = open(full_path, 'r')
+                            ret = fo.read()
+                            message.setResults(ret.decode('utf-8'))
+                            return
 
 def montysolr_targets():
     targets = [

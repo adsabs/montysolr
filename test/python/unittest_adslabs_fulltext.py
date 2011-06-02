@@ -11,7 +11,7 @@ from montysolr_testcase import MontySolrTestCase, sj
 import os
 import time
 import sys
-
+import re
 
 class Test(MontySolrTestCase):
     
@@ -22,7 +22,17 @@ class Test(MontySolrTestCase):
         MontySolrTestCase.setUp(self)
         
     def test_mongodb(self):
-        pass
+        
+        message = sj.PythonMessage('workout_field_value')
+        message.setSender('PythonTextField')
+        message.setParam('field','fulltext')
+        message.setParam('externalVal', 'id:2|bibcode:1989ApJ...345..245C|src_dir:mongo')
+        
+        self.bridge.receive_message(message)
+        
+        res = str(message.getResults())
+        wanted = "THE RELATIONSHIP BETWEEN INFRARED, OPTICAL, AND ULTRAVIOLET EXTINCTION"
+        assert re.search(wanted, res) != None
     
     def test_fulltext_file(self):
         ''''''
