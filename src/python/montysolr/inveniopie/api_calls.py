@@ -44,7 +44,7 @@ def get_recids_changes(last_recid, max_recs=10000):
     modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM bibrec "
                     "WHERE modification_date " + search_op + "%s LIMIT %s", (mod_date, max_recs )))
 
-    out = {'DELETED': [], 'CHANGED': [], 'ADDED': []}
+    out = {'DELETED': [], 'UPDATED': [], 'ADDED': []}
     for recid, mod_date, create_date in modified_records:
         if mod_date == create_date:
             out['ADDED'].append(recid)
@@ -54,7 +54,7 @@ def get_recids_changes(last_recid, max_recs=10000):
             if status == 'DELETED':
                 out['DELETED'].append(recid)
             else:
-                out['CHANGED'].append(recid)
+                out['UPDATED'].append(recid)
     return out
 
 def citation_summary(recids, of, ln, p, f):

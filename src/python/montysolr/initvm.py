@@ -11,7 +11,7 @@ try:
     import solr_java
     import montysolr_java
 except:
-    _d = os.path.abspath(os.path.dirname(__file__) + '/../../build/dist')
+    _d = os.path.abspath(os.path.dirname(__file__) + '/../../../build/dist')
     if _d not in sys.path and os.path.exists(_d):
         sys.stderr.write('Warning: we add the default folder to sys.path:\n')
         sys.stderr.write(_d + '\n')

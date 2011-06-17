@@ -9,7 +9,7 @@ from montysolr import handler
 
 
 class Handler(handler.Handler):
-    '''Simple handler that just calls the methods
+    '''Simple handler that just calls the methods sequentially
     '''
 
     def init(self):
