@@ -831,4 +831,86 @@ print l[0]
 	   </exec>
 	</target>
 
+	<target name="install-eclipse-project-files" depends="init" >
+
+		<property name="_home" location="." />
+
+		<exec executable="${python}" failonerror="true" outputproperty="_top_folder">
+            <arg value="-c"/>
+            <arg value="import os;print os.path.basename(os.path.abspath('.'))" />
+        </exec>
+
+		<exec executable="${python}" failonerror="true" outputproperty="_python_ver">
+            <arg value="-c"/>
+            <arg value="import sys;print '%s.%s' % sys.version_info[:2]" />
+        </exec>
+
+		<echo file=".project"><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+    <name>]]></echo>
+		<echo file=".project" append="true">${_top_folder}</echo>
+		<echo file=".project" append="true"><![CDATA[</name>
+    <comment></comment>
+    <projects>
+        <project>lucene_solr_3_1</project>
+    </projects>
+    <buildSpec>
+        <buildCommand>
+            <name>org.python.pydev.PyDevBuilder</name>
+            <arguments>
+            </arguments>
+        </buildCommand>
+        <buildCommand>
+            <name>org.eclipse.jdt.core.javabuilder</name>
+            <arguments>
+            </arguments>
+        </buildCommand>
+    </buildSpec>
+    <natures>
+        <nature>org.eclipse.jdt.core.javanature</nature>
+        <nature>org.python.pydev.pythonNature</nature>
+    </natures>
+</projectDescription>
+		   ]]> </echo>
+
+		<echo file=".pydevproject">
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
+&lt;?eclipse-pydev version="1.0"?&gt;
+
+&lt;pydev_project&gt;
+    &lt;pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER"&gt;Default&lt;/pydev_property&gt;
+    &lt;pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION"&gt;python ${_python_ver}&lt;/pydev_property&gt;
+    &lt;pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH"&gt;
+    &lt;path&gt;/${_top_folder}/src/python&lt;/path&gt;
+    &lt;/pydev_pathproperty&gt;
+    &lt;pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH"&gt;
+    &lt;path&gt;${_home}/build/dist&lt;/path&gt;
+    &lt;/pydev_pathproperty&gt;
+&lt;/pydev_project&gt;
+	   </echo>
+
+		<echo file=".classpath"><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+    <classpathentry kind="src" path="src/java"/>
+    <classpathentry kind="src" path="test/java"/>
+    <classpathentry kind="lib" path="lib/junit-3.8.2.jar"/>
+    <classpathentry kind="lib" path="lib/jzlib-1.0.7.jar"/>
+    <classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
+    <classpathentry kind="lib" path="lib/slf4j-api-1.5.5.jar"/>
+    <classpathentry kind="lib" path="lib/slf4j-jdk14-1.5.5.jar"/>
+	<classpathentry kind="lib" path="]]></echo>
+	    <echo file=".classpath" append="true">${jcc_egg}/jcc/classes</echo>
+		<echo file=".classpath" append="true"><![CDATA["/>
+    <classpathentry combineaccessrules="false" kind="src" path="/lucene_solr_3_1"/>
+    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry combineaccessrules="false" kind="src" path="/jetty-6.1.4"/>
+    <classpathentry kind="output" path="bin"/>
+</classpath>
+            ]]> </echo>
+
+
+	</target>
+
 </project>
