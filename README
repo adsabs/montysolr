@@ -6,7 +6,7 @@ CONTENTS OF THIS FILE
 * Developing for MontySolr
 
 ABOUT MONTYSOLR
-------------
+---------------
 
 MontySolr is an open source extension that makes it possible to include Python 
 code inside Solr (http://lucene.apache.org/solr). You can call Python routines
