@@ -59,6 +59,7 @@
     <property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
 	<property name="env.MONTYSOLR_ARGS" value="${subant.args}"/>
 	<property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
+	<property name="env.PYTHONPATH" value=""/>
 
 	<!--
     these classes must be made available/known to JCC when we compile the wrapper
@@ -277,8 +278,7 @@
 		<delete dir="${build.dir}/build" failonerror="no" />
 
 		<exec executable="${python}" dir="${build.dir}" failonerror="true">
-			<arg value="-m" />
-			<arg value="${jcc}" />
+			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
 			<!--<arg value="${ddash}no-generics" />-->
 			<arg line="${jcc.build_also}" />
@@ -350,13 +350,12 @@
 		<delete dir="${build.dir}/build" failonerror="no" />
 
 		<exec executable="${python}" dir="${build.dir}" failonerror="true">
-			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}../${dist.dir}" />
+			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}../${dist.dir}${path.separator}${env.PYTHONPATH}" />
 
 			<!-- this is mac specific, i will yet have to find out how to make it os-specific -->
             <env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
 
-			<arg value="-m" />
-			<arg value="${jcc}" />
+			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
 			<!--<arg value="${ddash}no-generics" />-->
 			<arg value="${ddash}version" />
@@ -404,13 +403,13 @@
 		<echo message="You can watch Monty Python, this takes a while..." />
 
         <exec executable="${python}" dir="${build.dir}" failonerror="true">
-            <env key="PYTHONPATH" value="${src.dir.python}" />
+            <env key="PYTHONPATH" value="${src.dir.python}${path.separator}${env.PYTHONPATH}" />
 
             <!-- this is mac specific, i will yet have to find out how to make it os-specific -->
             <env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
 
-            <arg value="-m" />
-            <arg value="${jcc}" />
+            
+            <arg line="${jcc}" />
             <arg value="${ddash}shared" />
             <!--<arg value="${ddash}no-generics" />-->
             <arg value="${ddash}version" />
@@ -469,7 +468,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 			classname="invenio.montysolr.JettyRunnerPythonVM"
 			>
 
-			<env key="PYTHONPATH" path="${python_path}${path.separator}${dist.dir}${path.separator}${src.dir.python}" />
+			<env key="PYTHONPATH" path="${python_path}${path.separator}${dist.dir}${path.separator}${src.dir.python}${path.separator}${env.PYTHONPATH}" />
 			<jvmarg line="-Dsolr.solr.home=${webdist.home}/solr -Dsolr.data.dir=${webdist.home}/solr/data"/>
 			<jvmarg line="-Djava.library.path=${jcc_egg}"/>
 			<jvmarg line="${env.MONTYSOLR_JVMARGS}"/>
@@ -775,13 +774,16 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
         />
         -->
 
-        <exec command="ant" dir="${solr.real.location}" >
+        <exec executable="ant" dir="${solr.real.location}" >
             <env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
             <arg value="example" />
         </exec>
 	</target>
 
 	<target name="try-lucene-jars" depends="check-solr-location" >
+	    <!-- since on old ant we cannot ignore it -->
+	    <mkdir dir="${solr.real.location}/dist" />
+	    
 		<path id="montysolr.classpath.testing">
             <fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
         </path>
@@ -821,14 +823,11 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 	</target>
 
 	<target name="get-solr-mirror" >
-	   <exec command="${python}" outputproperty="solr.mirror" failonerror="true">
+	   <exec executable="${python}" outputproperty="solr.mirror" failonerror="true">
 	   	   <arg value="-c" />
-	       <arg  value="import urllib;
-t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();
-l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));
-print l[0]
-"/>
+	       <arg  value="import urllib;t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));print l[0]"/>
 	   </exec>
+	   <echo>We will use the mirror: ${solr.mirror}</echo>
 	</target>
 
 	<target name="install-eclipse-project-files" depends="init" >
