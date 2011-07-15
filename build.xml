@@ -59,6 +59,7 @@
     <property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
 	<property name="env.MONTYSOLR_ARGS" value="${subant.args}"/>
 	<property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
+	<property name="env.PYTHONPATH" value=""/>
 
 	<!--
     these classes must be made available/known to JCC when we compile the wrapper
@@ -277,8 +278,7 @@
 		<delete dir="${build.dir}/build" failonerror="no" />
 
 		<exec executable="${python}" dir="${build.dir}" failonerror="true">
-			<arg value="-m" />
-			<arg value="${jcc}" />
+			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
 			<!--<arg value="${ddash}no-generics" />-->
 			<arg line="${jcc.build_also}" />
@@ -350,13 +350,12 @@
 		<delete dir="${build.dir}/build" failonerror="no" />
 
 		<exec executable="${python}" dir="${build.dir}" failonerror="true">
-			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}../${dist.dir}" />
+			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}../${dist.dir}${path.separator}${env.PYTHONPATH}" />
 
 			<!-- this is mac specific, i will yet have to find out how to make it os-specific -->
             <env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
 
-			<arg value="-m" />
-			<arg value="${jcc}" />
+			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
 			<!--<arg value="${ddash}no-generics" />-->
 			<arg value="${ddash}version" />
@@ -404,13 +403,13 @@
 		<echo message="You can watch Monty Python, this takes a while..." />
 
         <exec executable="${python}" dir="${build.dir}" failonerror="true">
-            <env key="PYTHONPATH" value="${src.dir.python}" />
+            <env key="PYTHONPATH" value="${src.dir.python}${path.separator}${env.PYTHONPATH}" />
 
             <!-- this is mac specific, i will yet have to find out how to make it os-specific -->
             <env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
 
-            <arg value="-m" />
-            <arg value="${jcc}" />
+            
+            <arg line="${jcc}" />
             <arg value="${ddash}shared" />
             <!--<arg value="${ddash}no-generics" />-->
             <arg value="${ddash}version" />
@@ -469,7 +468,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 			classname="invenio.montysolr.JettyRunnerPythonVM"
 			>
 
-			<env key="PYTHONPATH" path="${python_path}${path.separator}${dist.dir}${path.separator}${src.dir.python}" />
+			<env key="PYTHONPATH" path="${python_path}${path.separator}${dist.dir}${path.separator}${src.dir.python}${path.separator}${env.PYTHONPATH}" />
 			<jvmarg line="-Dsolr.solr.home=${webdist.home}/solr -Dsolr.data.dir=${webdist.home}/solr/data"/>
 			<jvmarg line="-Djava.library.path=${jcc_egg}"/>
 			<jvmarg line="${env.MONTYSOLR_JVMARGS}"/>
@@ -775,13 +774,16 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
         />
         -->
 
-        <exec command="ant" dir="${solr.real.location}" >
+        <exec executable="ant" dir="${solr.real.location}" >
             <env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
             <arg value="example" />
         </exec>
 	</target>
 
 	<target name="try-lucene-jars" depends="check-solr-location" >
+	    <!-- since on old ant we cannot ignore it -->
+	    <mkdir dir="${solr.real.location}/dist" />
+	    
 		<path id="montysolr.classpath.testing">
             <fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
         </path>
@@ -821,14 +823,93 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 	</target>
 
 	<target name="get-solr-mirror" >
-	   <exec command="${python}" outputproperty="solr.mirror" failonerror="true">
+	   <exec executable="${python}" outputproperty="solr.mirror" failonerror="true">
 	   	   <arg value="-c" />
-	       <arg  value="import urllib;
-t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();
-l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));
-print l[0]
-"/>
+	       <arg  value="import urllib;t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));print l[0]"/>
 	   </exec>
+	   <echo>We will use the mirror: ${solr.mirror}</echo>
+	</target>
+
+	<target name="install-eclipse-project-files" depends="init" >
+
+		<property name="_home" location="." />
+
+		<exec executable="${python}" failonerror="true" outputproperty="_top_folder">
+            <arg value="-c"/>
+            <arg value="import os;print os.path.basename(os.path.abspath('.'))" />
+        </exec>
+
+		<exec executable="${python}" failonerror="true" outputproperty="_python_ver">
+            <arg value="-c"/>
+            <arg value="import sys;print '%s.%s' % sys.version_info[:2]" />
+        </exec>
+
+		<echo file=".project"><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+    <name>]]></echo>
+		<echo file=".project" append="true">${_top_folder}</echo>
+		<echo file=".project" append="true"><![CDATA[</name>
+    <comment></comment>
+    <projects>
+        <project>lucene_solr_3_1</project>
+    </projects>
+    <buildSpec>
+        <buildCommand>
+            <name>org.python.pydev.PyDevBuilder</name>
+            <arguments>
+            </arguments>
+        </buildCommand>
+        <buildCommand>
+            <name>org.eclipse.jdt.core.javabuilder</name>
+            <arguments>
+            </arguments>
+        </buildCommand>
+    </buildSpec>
+    <natures>
+        <nature>org.eclipse.jdt.core.javanature</nature>
+        <nature>org.python.pydev.pythonNature</nature>
+    </natures>
+</projectDescription>
+		   ]]> </echo>
+
+		<echo file=".pydevproject">
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
+&lt;?eclipse-pydev version="1.0"?&gt;
+
+&lt;pydev_project&gt;
+    &lt;pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER"&gt;Default&lt;/pydev_property&gt;
+    &lt;pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION"&gt;python ${_python_ver}&lt;/pydev_property&gt;
+    &lt;pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH"&gt;
+    &lt;path&gt;/${_top_folder}/src/python&lt;/path&gt;
+    &lt;/pydev_pathproperty&gt;
+    &lt;pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH"&gt;
+    &lt;path&gt;${_home}/build/dist&lt;/path&gt;
+    &lt;/pydev_pathproperty&gt;
+&lt;/pydev_project&gt;
+	   </echo>
+
+		<echo file=".classpath"><![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+    <classpathentry kind="src" path="src/java"/>
+    <classpathentry kind="src" path="test/java"/>
+    <classpathentry kind="lib" path="lib/junit-3.8.2.jar"/>
+    <classpathentry kind="lib" path="lib/jzlib-1.0.7.jar"/>
+    <classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
+    <classpathentry kind="lib" path="lib/slf4j-api-1.5.5.jar"/>
+    <classpathentry kind="lib" path="lib/slf4j-jdk14-1.5.5.jar"/>
+	<classpathentry kind="lib" path="]]></echo>
+	    <echo file=".classpath" append="true">${jcc_egg}/jcc/classes</echo>
+		<echo file=".classpath" append="true"><![CDATA["/>
+    <classpathentry combineaccessrules="false" kind="src" path="/lucene_solr_3_1"/>
+    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry combineaccessrules="false" kind="src" path="/jetty-6.1.4"/>
+    <classpathentry kind="output" path="bin"/>
+</classpath>
+            ]]> </echo>
+
+
 	</target>
 
 </project>
