@@ -139,7 +139,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		Integer maximport = params.getInt("maximport", 200);
 
 		if (index && datasource != null && importurl != null) {
-			rsp.add("message", "Fetching recids from: " + importurl
+			rsp.add("message", "Fetching max of " + maximport + " recids from: " + importurl
 					+ " Using url: " + datasource);
 			List<String> queryParts;
 
@@ -231,7 +231,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		return importurl
 				+ "&url="
 				+ java.net.URLEncoder.encode(
-					datasource + "?p=" + queryPart + "&rm=" + maximport + "&of=xm",
+					datasource + "?p=" + queryPart + "&rg=" + maximport + "&of=xm",
 					"UTF-8");
 
 	}
