@@ -8,6 +8,7 @@ Created on June 2, 2011
 
 import unittest
 from montysolr_testcase import MontySolrTestCase, sj
+from montysolr import config
 import os
 import time
 import sys
@@ -19,29 +20,21 @@ class Test(MontySolrTestCase):
         self.setSolrHome(os.path.join(self.getBaseDir(), 'examples/adslabs/solr'))
         self.setDataDir(os.path.join(self.getBaseDir(), 'examples/adslabs/solr/data'))
         self.setHandler(self.loadHandler('montysolr.adslabs.targets'))
+        self.old_MSFTBASEPATH = config.MSFTBASEPATH
+        config.MSFTBASEPATH = self.base_dir + '/test/test-files/adslabs'
         MontySolrTestCase.setUp(self)
-        
-    def test_mongodb(self):
-        
-        message = sj.PythonMessage('workout_field_value')
-        message.setSender('PythonTextField')
-        message.setParam('field','fulltext')
-        message.setParam('externalVal', 'id:2|bibcode:1989ApJ...345..245C|src_dir:mongo')
-        
-        self.bridge.receive_message(message)
-        
-        res = str(message.getResults())
-        wanted = "THE RELATIONSHIP BETWEEN INFRARED, OPTICAL, AND ULTRAVIOLET EXTINCTION"
-        assert re.search(wanted, res) != None
     
+    def tearDown(self):
+        config.MSFTBASEPATH = self.old_MSFTBASEPATH
+        MontySolrTestCase.tearDown(self)
+        
     def test_fulltext_file(self):
         ''''''
 
         message = sj.PythonMessage('workout_field_value') 
         message.setSender('PythonTextField')
         message.setParam('field', 'fulltext')
-        message.setParam('externalVal','id:1|bibcode:foobar|src_dir:%s' % \
-                         self.base_dir + '/test/test-files/adslabs')
+        message.setParam('externalVal', 'foobar')
 
         self.bridge.receive_message(message)
 

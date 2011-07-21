@@ -85,7 +85,7 @@
         
         
         <field column="fulltext"        
-            template="id:${adslabs.id}|bibcode:${adslabs.bibcode}|src_dir:${dataimporter.request.dirs}" />
+            xpath="/collection/record/datafield[@tag='037']/subfield[@code='a']" />
                         
         </entity>
         
