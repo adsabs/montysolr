@@ -479,14 +479,12 @@
    <!-- rca: because elevation has 'id' hardcoded, we cannot use recid and elevantion
         at the same time, so i will use 'id' name -->
    <field name="id" type="string" indexed="true" stored="true" required="true" />
+   <field name="recid" type="int" indexed="true" stored="true"/>
    <field name="bibcode" type="string" indexed="true" stored="true" required="true" />
-   <field name="recid" type="int" indexed="true" stored="true" required="false" />
+   <!-- field name="bibstem" type="bibstem" indexed="true" stored="true" /-->
    <field name="abstract" type="text" indexed="true" stored="true"/>
    <field name="publication" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
-   <field name="topic" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="reportnumber" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="other_id" type="text" indexed="true" stored="true" multiValued="true"/>
-
 
 
    <!-- Common metadata fields, named specifically to match up with
@@ -494,24 +492,20 @@
      Some fields are multiValued only because Tika currently may return
      multiple values for them.
    -->
-   <field name="all" type="text" indexed="true" stored="false" multiValued="true"/>
    <field name="title" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="subject" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="description" type="text" indexed="true" stored="true"/>
-   <field name="collection" type="text" indexed="true" stored="true"/>
-   <field name="collaboration" type="text" indexed="true" stored="true"/>
-   <field name="doi" type="text" indexed="true" stored="true"/>
-   <field name="experiment" type="text" indexed="true" stored="true"/>
-   <field name="reference" type="text" indexed="true" stored="false"/>
-   <field name="comment" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="collection" type="string" indexed="true" stored="true"/>
+   <field name="collection_type" type="string" indexed="true" stored="true"/>
+   <field name="first_author" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="first_author_norm" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="first_author_affiliation" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="author" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="exactauthor" type="string" indexed="true" stored="false" multiValued="true"/>
+   <field name="author_norm" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="author_affiliation" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="keyword" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="category" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="content_type" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="last_modified" type="date" indexed="true" stored="true"/>
-   <field name="links" type="text" indexed="true" stored="true" multiValued="true"/>
-   <field name="caption" type="text" indexed="true" stored="false" multiValued="true" />
+   
+   <field name="publication_year" type="string" stored="true" indexed="true"/>
+   <field name="publication_date" type="string" stored="true" indexed="true"/>
+   <field name="publication_date_sort" type="int" stored="true" indexed="true"/>
    
    <!-- MontySolr: needed when InvneioParser is used in maxinv mode -->
    <dynamicField name="*" type="text" multiValued="true" />
@@ -522,64 +516,16 @@
    <!-- MontySolr: Pythonic text -->
    <field name="fulltext" type="textgen_py" indexed="true" stored="true" multiValued="true"/>
 
-   <field name="text" type="text" indexed="true" stored="false" multiValued="true"/>
-   <field name="text_rev" type="text_rev" indexed="true" stored="false" multiValued="true"/>
-
-
    <field name="payloads" type="payloads" indexed="true" stored="true"/>
 
    <!-- Uncommenting the following will create a "timestamp" field using
         a default value of "NOW" to indicate when each document was indexed.
      -->
    <field name="indexstamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
-   
 
-   <!-- Dynamic field definitions.  If a field name is not found, dynamicFields
-        will be used if the name matches any of the patterns.
-        RESTRICTION: the glob-like pattern in the name attribute must have
-        a "*" only at the start or the end.
-        EXAMPLE:  name="*_i" will match any field ending in _i (like myid_i, z_i)
-        Longer patterns will be matched first.  if equal size patterns
-        both match, the first appearing in the schema will be used.  -->
-   <dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
-   <dynamicField name="*_s"  type="string"  indexed="true"  stored="true"/>
-   <dynamicField name="*_l"  type="long"   indexed="true"  stored="true"/>
-   <dynamicField name="*_t"  type="text"    indexed="true"  stored="true"/>
-   <dynamicField name="*_txt" type="text"    indexed="true"  stored="true" multiValued="true"/>
-   <dynamicField name="*_b"  type="boolean" indexed="true"  stored="true"/>
-   <dynamicField name="*_f"  type="float"  indexed="true"  stored="true"/>
-   <dynamicField name="*_d"  type="double" indexed="true"  stored="true"/>
-
-   <!-- Type used to index the lat and lon components for the "location" FieldType -->
-   <dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false"/>
-
-   <dynamicField name="*_dt" type="date"    indexed="true"  stored="true"/>
-   <dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
-
-   <!-- some trie-coded dynamic fields for faster range queries -->
-   <dynamicField name="*_ti" type="tint"    indexed="true"  stored="true"/>
-   <dynamicField name="*_tl" type="tlong"   indexed="true"  stored="true"/>
-   <dynamicField name="*_tf" type="tfloat"  indexed="true"  stored="true"/>
-   <dynamicField name="*_td" type="tdouble" indexed="true"  stored="true"/>
-   <dynamicField name="*_tdt" type="tdate"  indexed="true"  stored="true"/>
-
-   <dynamicField name="*_pi"  type="pint"    indexed="true"  stored="true"/>
-
-   <dynamicField name="ignored_*" type="ignored" multiValued="true"/>
-   <dynamicField name="tmp_*" type="ignored" multiValued="true"/>
-   <dynamicField name="attr_*" type="textgen" indexed="true" stored="true" multiValued="true"/>
-
-   <dynamicField name="random_*" type="random" />
-   
    <!--  MontySolr: have some dynamic Pythonic fields -->
    <dynamicField name="*_py" type="textgen_py" indexed="true" stored="false"/>
 
-   <!-- uncomment the following to ignore any fields that don't already match an existing 
-        field name or dynamic field, rather than reporting them as an error. 
-        alternately, change the type="ignored" to some other type e.g. "text" if you want 
-        unknown fields indexed and/or stored by default --> 
-   <!--dynamicField name="*" type="ignored" multiValued="true" /-->
-   
  </fields>
 
  <!-- Field to use to determine and enforce document uniqueness. 
@@ -588,7 +534,7 @@
  <uniqueKey>id</uniqueKey>
 
  <!-- field for the QueryParser to use when an explicit fieldname is absent -->
- <defaultSearchField>text</defaultSearchField>
+ <defaultSearchField>fulltext</defaultSearchField>
 
  <!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
  <solrQueryParser defaultOperator="OR"/>
@@ -598,21 +544,9 @@
         or to add multiple fields to the same field for easier/faster searching.  -->
 
    <copyField source="id" dest="recid"/>
-   <copyField source="reportnumber" dest="all"/>
-   <copyField source="other_id" dest="all"/>
-   <copyField source="author" dest="all"/>
-   <copyField source="title" dest="all"/>
-   <copyField source="keyword" dest="all"/>
-   <copyField source="subject" dest="all"/>
-   <copyField source="abstract" dest="all"/>
-   <copyField source="fulltext" dest="all"/>
-   <copyField source="publication" dest="all"/>
-   <copyField source="caption" dest="all"/>
-   <copyField source="collection" dest="all"/>
-   <copyField source="collaboration" dest="all"/>
-   <copyField source="doi" dest="all"/>
-   <copyField source="author" dest="exactauthor"/>
-
+   <copyField source="first_author" dest="author"/>
+   <copyField source="first_author_norm" dest="author_norm"/>
+   <copyField source="first_author_affiliation" dest="author_affiliation"/>
 
    <!-- Above, multiple source fields are copied to the [text] field.
 	  Another way to map multiple source fields to the same
