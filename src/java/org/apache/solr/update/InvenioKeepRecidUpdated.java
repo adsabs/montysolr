@@ -255,7 +255,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			query = new StringBuilder();
 			query.append("recid:" + recids[i]);
 			for (i++; i < recids.length; i++) {
-				if (delta > maxspan) {
+				if (delta >= maxspan) {
 					break;
 				}
 				if (recids[i] - 1 == recids[i - 1]) {
