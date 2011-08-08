@@ -17,3 +17,6 @@ MSTARGETUS = ['montysolr.adslabs.targets'] #'montysolr.inveniopie.targets', 'mon
 
 # base path where fulltext files are looked for
 MSFTBASEPATH = '/proj/ads/fulltext/extracted'
+
+# use the multiprocessing version of api_calls
+MSMULTIPROC = True

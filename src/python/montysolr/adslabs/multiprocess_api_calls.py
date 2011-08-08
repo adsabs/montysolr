@@ -4,7 +4,7 @@ Created on Feb 13, 2011
 @author: rca
 '''
 
-from montysolr.inveniopie import api_calls
+from montysolr.adslabs import api_calls
 from invenio.intbitset import intbitset
 import os
 import multiprocessing

@@ -5,12 +5,15 @@ from montysolr.initvm import montysolr_java as sj
 from montysolr.utils import MontySolrTarget
 import logging
 import os
-import montysolr.adslabs.api_calls as api_calls
-#import montysolr.adslabs.multiprocess_api_calls as api_calls
+
 from montysolr import config
 
+if config.MSMULTIPROC:
+    import montysolr.adslabs.multiprocess_api_calls as api_calls
+else:
+    import montysolr.adslabs.api_calls as api_calls
+
 import time
-import ptree
 
 def workout_field_value(message):
     sender = str(message.getSender())
@@ -22,18 +25,15 @@ def workout_field_value(message):
         message.threadInfo('got bibcode ' + bibcode)
         ret = None
         if bibcode:
-            ptree_path = ptree.id2ptree(bibcode)
-            full_path = config.MSFTBASEPATH + ptree_path + 'body.txt'
-            message.threadInfo('looking for ' + full_path)
-            if os.path.exists(full_path):
-                fo = open(full_path, 'r')
-                ret = fo.read()
-                message.setResults(ret.decode('utf-8'))
-                return
-            else:
-                message.threadInfo(full_path + " not found")
-                message.setResults("")
-                return
+            start = time.time()
+            (wid, results) = api_calls.dispatch('load_fulltext', bibcode)
+            t = time.time() - start
+            message.threadInfo("Fulltext load took: %s s. len=%s and was executed by: %s" % (t, len(results), wid))
+            message.setResults(results)
+        else:
+            message.threadInfo("hey, i didn't get a bibcode!")
+            message.setResults("")
+        return
                         
 def get_recids_changes(message):
     """Retrieves the recids of the last changed documents"""
@@ -64,4 +64,11 @@ def montysolr_targets():
 #           MontySolrTarget('Invenio:diagnostic_test', diagnostic_test),
            ]
 
+    # start multiprocessing with that many processes in the pool
+    if config.MSMULTIPROC and hasattr(api_calls, "start_multiprocessing"):
+        if os.getenv('MONTYSOLR_MAX_WORKERS'):
+            api_calls.start_multiprocessing(int(os.getenv('MONTYSOLR_MAX_WORKERS')))
+        else:
+            api_calls.start_multiprocessing()
+            
     return targets

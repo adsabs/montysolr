@@ -1,7 +1,9 @@
 
 
+import sys
 import os
 import thread
+import ptree
 
 from invenio import search_engine
 from invenio import search_engine_summarizer
@@ -10,6 +12,8 @@ from invenio import bibrecord
 from invenio.intbitset import intbitset
 
 from invenio.bibrank_citation_searcher import get_citation_dict
+
+from montysolr import config
 
 
 
@@ -107,7 +111,17 @@ def sort_and_format(hits, kwargs):
 
     return recids
 
-
+def load_fulltext(bibcode):
+    ptree_path = ptree.id2ptree(bibcode)
+    full_path = config.MSFTBASEPATH + ptree_path + 'body.txt'
+    if os.path.exists(full_path):
+        fo = open(full_path, 'r')
+        text = fo.read()
+        fo.close()
+        return text.decode('utf-8')
+    else:
+        return u""
+                        
 
 
 if __name__ == '__main__':
