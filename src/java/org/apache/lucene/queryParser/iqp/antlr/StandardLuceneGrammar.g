@@ -32,15 +32,19 @@ primaryClause
     
 
 query   : 
-  term
+  field? term
   //| LPAREN query RPAREN
   ;
-  
-
+   
+field	:	
+	term COLON
+	;
 
 term  : 
-  NORMAL_TERM
-  | QUOTED_TERM
+  TERM_NORMAL
+  | TERM_QUOTED
+  | TERM_QUOTED_TRUNCATED
+  | TERM_TRUNCATED
   ;
 
 operator: (AND | OR | NOT | NEAR);
@@ -65,24 +69,50 @@ fragment INT: '0' .. '9';
 
 NUMBER  : INT+ ('.' INT+)?;
 
+
 fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
       | '\\' | '\'' | '\"' 
       | '(' | ')' | '[' | ']' | '{' | '}'
       | '+' | '-' | '!' | ':' | '~' | '^' 
-      | '*' | '|' | '&'  //this line is not present in lucene StandardParser.jj
+      | '*' | '|' | '&' | '?'  //this line is not present in lucene StandardParser.jj
       );  
   
 fragment ESC_CHAR:  '\\' .; 
 
 
-QUOTED_TERM
-  : '\"' (~('\"'))* '\"'
+TERM_QUOTED
+  : '\"' (~('\"' | '?' | '*' ))* '\"'
   ; 
 
-NORMAL_TERM
+TERM_NORMAL
   : NORMAL_CHAR ( NORMAL_CHAR | ESC_CHAR )*
   ;
-    
+
+TERM_QUOTED_TRUNCATED: '\"' (~('\"' | '?' | '*') | STAR | QMARK )+ '\"';
+
+TERM_TRUNCATED: (NORMAL_CHAR | STAR | QMARK)+;
+
+
+// ------------ problematic --------------
+
+fragment RANGE_QUOTED
+	:	'\"' (~('\"'))* '\"'
+	;
+
+fragment RANGE_GOOP
+	: (~(' ' | ']' | '}'))+
+	; 
+		
+RANGEIN	:	
+	'[' (RANGE_GOOP | RANGE_QUOTED)? ('TO' RANGE_GOOP | RANGE_QUOTED)? ']'
+	;
+
+RANGEEX	:	
+	'{' (RANGE_GOOP | RANGE_QUOTED)? ('TO' RANGE_GOOP | RANGE_QUOTED)? '}'
+	;		    
+
+// ------------ problematic --------------
+
 
 //TERMCHAR  :
 //  (~('\u0000'..'\u001f' | ' ' | '\\' | '\"' | '(' | ')' | '[' | ']' | ':' | ',' | ';' | '+' | '-' | '*' | '|' | '&' | '{' | '}' | '~' | '^') )*
@@ -118,7 +148,9 @@ PLUS  : '+' ;
 
 MINUS : '-' ;
 
-STAR  : '*' ;
+fragment STAR  : '*' ;
+
+fragment QMARK  : '?' ;
 
 VBAR  : '|' ;
 
