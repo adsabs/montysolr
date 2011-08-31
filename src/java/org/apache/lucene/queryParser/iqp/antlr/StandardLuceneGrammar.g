@@ -32,7 +32,7 @@ primaryClause
     
 
 query   : 
-  field? term
+  field? (range | term)
   //| LPAREN query RPAREN
   ;
    
@@ -41,11 +41,17 @@ field	:
 	;
 
 term  : 
-  TERM_NORMAL
+   TERM_NORMAL
   | TERM_QUOTED
   | TERM_QUOTED_TRUNCATED
   | TERM_TRUNCATED
   ;
+
+range	:	
+	//RANGEIN
+	rangein
+	| RANGEEX
+	;
 
 operator: (AND | OR | NOT | NEAR);
 
@@ -100,15 +106,29 @@ fragment RANGE_QUOTED
 	;
 
 fragment RANGE_GOOP
-	: (~(' ' | ']' | '}'))+
+	: 
+	//(~(' ' | ']' | '}'))+
+	NUMBER
 	; 
-		
+
+
+rangein	:	
+	LBRACK ( range_fill WS* ('TO' ( ~(']') )+ )? ) RBRACK
+	;
+	
+range_fill
+	: 
+	//(TERM_NORMAL | TERM_QUOTED)
+	(~('['|']'))+
+	;		
+
+			
 RANGEIN	:	
-	'[' (RANGE_GOOP | RANGE_QUOTED)? ('TO' RANGE_GOOP | RANGE_QUOTED)? ']'
+	LBRACK  ( (TERM_NORMAL | TERM_QUOTED) WS* ('TO' ( ~(']') )+ )? ) RBRACK
 	;
 
 RANGEEX	:	
-	'{' (RANGE_GOOP | RANGE_QUOTED)? ('TO' RANGE_GOOP | RANGE_QUOTED)? '}'
+	LCURLY  ( (TERM_NORMAL | TERM_QUOTED) WS* ('TO' ( ~('}') )+ )? ) RCURLY
 	;		    
 
 // ------------ problematic --------------
