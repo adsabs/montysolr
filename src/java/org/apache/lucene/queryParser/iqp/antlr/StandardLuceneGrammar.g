@@ -32,7 +32,7 @@ primaryClause
     
 
 query   : 
-  field? (range | term)
+  field? (term)
   //| LPAREN query RPAREN
   ;
    
@@ -41,18 +41,17 @@ field	:
 	;
 
 term  : 
-   TERM_NORMAL
+  rangein 
+  | TERM_NORMAL
   | TERM_QUOTED
   | TERM_QUOTED_TRUNCATED
   | TERM_TRUNCATED
   ;
 
-range	:	
-	//RANGEIN
-	rangein
-	| RANGEEX
+rangein	:	
+	TERM_RANGEIN
 	;
-
+	
 operator: (AND | OR | NOT | NEAR);
 
 modifier: (PLUS|MINUS);
@@ -98,38 +97,17 @@ TERM_QUOTED_TRUNCATED: '\"' (~('\"' | '?' | '*') | STAR | QMARK )+ '\"';
 
 TERM_TRUNCATED: (NORMAL_CHAR | STAR | QMARK)+;
 
-
+TERM_RANGEIN
+	:	
+	RANGEIN_START {System.out.println("start");}
+	(RANGEIN_GOOP | TERM_QUOTED)
+	(' '+ RANGEIN_TO ' '+)?
+	(RANGEIN_GOOP | TERM_QUOTED)?
+	RANGEIN_END
+	;
 // ------------ problematic --------------
 
-fragment RANGE_QUOTED
-	:	'\"' (~('\"'))* '\"'
-	;
-
-fragment RANGE_GOOP
-	: 
-	//(~(' ' | ']' | '}'))+
-	NUMBER
-	; 
-
-
-rangein	:	
-	LBRACK ( range_fill WS* ('TO' ( ~(']') )+ )? ) RBRACK
-	;
-	
-range_fill
-	: 
-	//(TERM_NORMAL | TERM_QUOTED)
-	(~('['|']'))+
-	;		
-
-			
-RANGEIN	:	
-	LBRACK  ( (TERM_NORMAL | TERM_QUOTED) WS* ('TO' ( ~(']') )+ )? ) RBRACK
-	;
-
-RANGEEX	:	
-	LCURLY  ( (TERM_NORMAL | TERM_QUOTED) WS* ('TO' ( ~('}') )+ )? ) RCURLY
-	;		    
+	    
 
 // ------------ problematic --------------
 
@@ -158,9 +136,9 @@ LPAREN  : '(';
 
 RPAREN  : ')';
 
-LBRACK  : '[';
+fragment LBRACK  : '[';
 
-RBRACK  : ']';
+fragment RBRACK  : ']';
 
 COLON   : ':' ;
 
@@ -176,13 +154,37 @@ VBAR  : '|' ;
 
 AMPER : '&' ;
 
-LCURLY  : '{' ;
+fragment LCURLY  : '{' ;
 
-RCURLY  : '}' ;
+fragment RCURLY  : '}' ;
 
 CARAT : '^' ;
 
 TILDE : '~' ;
 
 
+
+RANGEIN_START
+	: 
+	'['
+	;
+	
+fragment RANGEIN_TO
+	:	
+	'TO'
+	;
+
+RANGEIN_END
+	:	
+	']'
+	;
+
+RANGEIN_QUOTED
+	: '\"' (~('\"') | '\\\"')+ '\"'
+	;	
+
+RANGEIN_GOOP
+	: (~(' ' | ']'))+
+	; 
+	
 
