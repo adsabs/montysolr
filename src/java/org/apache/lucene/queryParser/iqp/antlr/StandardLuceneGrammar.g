@@ -6,33 +6,46 @@ options {
 }
 
 tokens {
-  ROOT;
+  DEFAULT;
+  ONOT;
+  OP_OR;
+  QUERY;
+  FIRST;
+  OTHER;
+  ATOM;
+  CLAUSE;
+  MOD;
+  BOO;
+  VAL;
 }
 
 mainQ : 
-  clauseDefault+;
+  clauseDefault* -> ^(DEFAULT clauseDefault+)
+  ;
 
   
 clauseDefault
-  : clauseStrongest (NOT clauseStrongest)* 
+  : first=clauseStrongest 
+  (NOT^ other=clauseStrongest)*
   ;
 
 clauseStrongest
-  : clauseStrong (AND clauseStrong)* 
+  : clauseStrong 
+  (AND^ clauseStrong)*
   ;
   
 clauseStrong
-  : clauseWeak (OR clauseWeak)* 
+  : first=clauseWeak (OR^ others=clauseWeak)*
   ;
   
 clauseWeak
-  : primaryClause (NEAR primaryClause)* 
+  : primaryClause (NEAR^ primaryClause)* 
   ;
   
 primaryClause
   : 
-  modifier? atom
-  | LPAREN clauseDefault RPAREN BOOST?
+  modifier? atom -> ^(ATOM ^(MOD modifier?) ^(BOO ) ^(VAL atom))
+  | modifier? LPAREN clauseDefault+ RPAREN BOOST? -> ^(CLAUSE ^(MOD modifier?) ^(BOO BOOST?) clauseDefault+ )
   ;
     
 
@@ -43,7 +56,7 @@ atom   :
   ;
    
 field	:	
-	(TERM_NORMAL COLON)
+	(TERM_NORMAL COLON) -> TERM_NORMAL
 	;
 
 value  : 
@@ -105,10 +118,10 @@ FUZZY_SLOP
 TO	:	'TO';
 
 /* We want to be case insensitive */
-AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | '&&') ;
-OR  : (('o' | 'O') ('r' | 'R') | '||');
+AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
+OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
 NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
-NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ;
+NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n');
 
 fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
       | '\\' | '\'' | '\"' 
@@ -183,15 +196,15 @@ COLON   : ':' ;  //this must NOT be fragment
 
 PLUS  : '+' ;
 
-MINUS : '-' ;
+MINUS : '-';
 
 fragment STAR  : '*' ;
 
 fragment QMARK  : '?' ;
 
-VBAR  : '|' ;
+fragment VBAR  : '|' ;
 
-AMPER : '&' ;
+fragment AMPER : '&' ;
 
 fragment LCURLY  : '{' ;
 
