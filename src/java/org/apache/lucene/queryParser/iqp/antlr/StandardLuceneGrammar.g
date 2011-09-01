@@ -88,7 +88,7 @@ operator: (AND | OR | NOT | NEAR);
 
 modifier: (PLUS|MINUS);
 
-fragment ESC_CHAR:  '\\' ~('\\'); 
+ESC_CHAR:  '\\' .; 
 
 BOOST	:	
 	(CARAT boost=NUMBER)
@@ -127,7 +127,7 @@ NUMBER  : INT+ ('.' INT+)?;
 
 
 TERM_NORMAL
-  : NORMAL_CHAR ( NORMAL_CHAR | ESC_CHAR )*
+  : ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )*
   ;
 
 TERM_QUOTED_TRUNCATED: '\"' (~('\"' | '?' | '*') | STAR | QMARK )+ '\"';
