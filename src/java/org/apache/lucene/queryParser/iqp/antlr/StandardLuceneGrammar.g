@@ -5,29 +5,34 @@ options {
   output = AST;
 }
 
+tokens {
+  ROOT;
+}
 
 mainQ : 
-  clause;
+  clauseDefault+;
 
-clause  : 
-  clauseWeakest+;
   
-clauseWeakest
-  : clauseWeaker (NOT clauseWeaker)*;
+clauseDefault
+  : clauseStrongest (NOT clauseStrongest)* 
+  ;
 
-clauseWeaker
-  : clauseWeak (AND clauseWeak)*;
-  
-clauseWeak
-  : clauseStrong (OR clauseStrong)*;
+clauseStrongest
+  : clauseStrong (AND clauseStrong)* 
+  ;
   
 clauseStrong
-  : primaryClause (NEAR primaryClause)*;
+  : clauseWeak (OR clauseWeak)* 
+  ;
+  
+clauseWeak
+  : primaryClause (NEAR primaryClause)* 
+  ;
   
 primaryClause
   : 
   modifier? atom
-  | LPAREN clause RPAREN BOOST?
+  | LPAREN clauseDefault RPAREN BOOST?
   ;
     
 
