@@ -6,52 +6,53 @@ options {
 }
 
 tokens {
-  DEFAULT;
-  ONOT;
-  OP_OR;
-  QUERY;
-  FIRST;
-  OTHER;
+  DEFOP;
   ATOM;
+  MODIFIER;
+  BOOST;
+  VALUE;
   CLAUSE;
-  MOD;
-  BOO;
-  VAL;
+  RELATION;
 }
 
 mainQ : 
-  clauseDefault* -> ^(DEFAULT clauseDefault+)
+  clauseDefault* -> ^(DEFOP clauseDefault+)
   ;
 
   
 clauseDefault
-  : first=clauseStrongest 
-  (NOT^ other=clauseStrongest)*
+  : (first=clauseStrongest -> clauseStrongest) (NOT others=clauseStrongest -> ^(CLAUSE ^(MODIFIER ) ^(BOOST ) ^(NOT clauseStrongest+)))*
   ;
 
 clauseStrongest
-  : clauseStrong 
-  (AND^ clauseStrong)*
+  : (first=clauseStrong  -> clauseStrong) (AND clauseStrong -> ^(CLAUSE ^(MODIFIER ) ^(BOOST ) ^(AND clauseStrong+)))*
   ;
   
 clauseStrong
-  : first=clauseWeak (OR^ others=clauseWeak)*
+  : (first=clauseWeak -> clauseWeak) (OR clauseWeak -> ^(CLAUSE ^(MODIFIER ) ^(BOOST ) ^(OR clauseWeak+)))*
   ;
   
 clauseWeak
-  : primaryClause (NEAR^ primaryClause)* 
+  : (first=primaryClause -> primaryClause) (NEAR primaryClause -> ^(CLAUSE ^(MODIFIER ) ^(BOOST ) ^(NEAR primaryClause+)))* 
   ;
   
 primaryClause
   : 
-  modifier? atom -> ^(ATOM ^(MOD modifier?) ^(BOO ) ^(VAL atom))
-  | modifier? LPAREN clauseDefault+ RPAREN BOOST? -> ^(CLAUSE ^(MOD modifier?) ^(BOO BOOST?) clauseDefault+ )
+  
+  atom -> ^(ATOM ^(MODIFIER ) ^(BOOST ) ^(VALUE atom))
+  | (modifier? LPAREN clauseDefault+ RPAREN boost?) -> clauseDefault+
+
+  //atom -> ^(ATOM ^(MODIFIER ) ^(BOOST ) ^(VALUE atom))
+  //| (LPAREN clauseDefault+ RPAREN BOOST? -> clauseDefault+ )//^(CLAUSE ^(MODIFIER modifier?) ^(BOOST BOOST) clauseDefault+))
   ;
     
 
 atom   : 
+  modifier?
+  (
   field multi_term
   | field? (value)
+  )
   //| LPAREN query RPAREN
   ;
    
@@ -86,7 +87,7 @@ term
 	;
 
 range	:	
-	(RANGE_TERM_IN | RANGE_TERM_EX) BOOST?
+	(RANGE_TERM_IN|RANGE_TERM_EX) boost? 
 	;	
 	
 truncated
@@ -107,6 +108,8 @@ operator: (AND | OR | NOT | NEAR);
 modifier: (PLUS|MINUS);
 
 ESC_CHAR:  '\\' .; 
+
+boost	:	BOOST;
 
 BOOST	:	
 	(CARAT boost=NUMBER)
