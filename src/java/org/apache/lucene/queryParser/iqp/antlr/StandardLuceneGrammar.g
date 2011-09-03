@@ -21,26 +21,26 @@ mainQ :
 
   
 clauseDefault
-  : (first=clauseStrongest -> clauseStrongest) (NOT others=clauseStrongest -> ^(CLAUSE ^(MODIFIER ) ^(BOOST ) ^(NOT clauseStrongest+)))*
+  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(NOT clauseStrongest+))*
   ;
 
 clauseStrongest
-  : (first=clauseStrong  -> clauseStrong) (AND clauseStrong -> ^(CLAUSE ^(MODIFIER ) ^(BOOST ) ^(AND clauseStrong+)))*
+  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(AND clauseStrong+))*
   ;
   
 clauseStrong
-  : (first=clauseWeak -> clauseWeak) (OR clauseWeak -> ^(CLAUSE ^(MODIFIER ) ^(BOOST ) ^(OR clauseWeak+)))*
+  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OR clauseWeak+))*
   ;
   
 clauseWeak
-  : (first=primaryClause -> primaryClause) (NEAR primaryClause -> ^(CLAUSE ^(MODIFIER ) ^(BOOST ) ^(NEAR primaryClause+)))* 
+  : (first=primaryClause -> $first) (NEAR others=primaryClause -> ^(NEAR primaryClause+))* 
   ;
   
 primaryClause
   : 
   
-  atom -> ^(ATOM ^(MODIFIER ) ^(BOOST ) ^(VALUE atom))
-  | (modifier? LPAREN clauseDefault+ RPAREN boost?) -> clauseDefault+
+  atom
+  | (modifier? LPAREN clauseDefault+ RPAREN boost?)
 
   //atom -> ^(ATOM ^(MODIFIER ) ^(BOOST ) ^(VALUE atom))
   //| (LPAREN clauseDefault+ RPAREN BOOST? -> clauseDefault+ )//^(CLAUSE ^(MODIFIER modifier?) ^(BOOST BOOST) clauseDefault+))
@@ -57,7 +57,7 @@ atom   :
   ;
    
 field	:	
-	(TERM_NORMAL COLON) -> TERM_NORMAL
+	TERM_NORMAL COLON -> TERM_NORMAL
 	;
 
 value  : 
