@@ -13,6 +13,7 @@ tokens {
   VALUE;
   CLAUSE;
   RELATION;
+  RANGE;
 }
 
 mainQ : 
@@ -39,8 +40,9 @@ clauseWeak
 primaryClause
   : 
   
-  atom
-  | (modifier? LPAREN clauseDefault+ RPAREN boost?)
+  atom -> ^(ATOM atom)
+  | (modifier? LPAREN first=clauseDefault -> $first) (clauseDefault* RPAREN boost? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST boost?) ^(DEFOP clauseDefault+)))
+  //^(CLAUSE ^(MODIFIER modifier?) ^(BOOST boost?) clauseDefault+)
 
   //atom -> ^(ATOM ^(MODIFIER ) ^(BOOST ) ^(VALUE atom))
   //| (LPAREN clauseDefault+ RPAREN BOOST? -> clauseDefault+ )//^(CLAUSE ^(MODIFIER modifier?) ^(BOOST BOOST) clauseDefault+))
@@ -56,6 +58,7 @@ atom   :
   //| LPAREN query RPAREN
   ;
    
+	   
 field	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
 	;
@@ -87,11 +90,12 @@ term
 	;
 
 range	:	
-	(RANGE_TERM_IN|RANGE_TERM_EX) boost? 
+	(RANGE_TERM_IN|RANGE_TERM_EX) boost?
 	;	
 	
 truncated
-	:	TERM_TRUNCATED;
+	:	TERM_TRUNCATED
+	; 
 
 quoted	:	TERM_QUOTED
 	;
@@ -157,25 +161,25 @@ TERM_TRUNCATED: (NORMAL_CHAR | STAR | QMARK)+;
 
 RANGE_TERM_IN
 	:	
-	LBRACK
-	WS*
-	(TERM_NORMAL | TERM_QUOTED)
-	((WS* TO WS*)
-	(TERM_NORMAL | TERM_QUOTED))?
-	WS*
-	RBRACK
+       LBRACK
+       WS*
+       (TERM_NORMAL | TERM_QUOTED)
+       ((WS* TO WS*)
+       (TERM_NORMAL | TERM_QUOTED))?
+       WS*
+       RBRACK
 	;
 
 
 RANGE_TERM_EX
 	:	
-	LCURLY
-	WS*
-	(TERM_NORMAL | TERM_QUOTED)
-	((WS* TO WS*)
-	(TERM_NORMAL | TERM_QUOTED))?
-	WS*
-	RCURLY
+       LCURLY
+       WS*
+       (TERM_NORMAL | TERM_QUOTED)
+       ((WS* TO WS*)
+       (TERM_NORMAL | TERM_QUOTED))?
+       WS*
+       RCURLY
 	;	
 	
 
