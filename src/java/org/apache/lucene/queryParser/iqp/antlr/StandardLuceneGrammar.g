@@ -14,48 +14,42 @@ tokens {
   CLAUSE;
   RELATION;
   RANGE;
+  FIELD;
+  FUZZY;
 }
 
 mainQ : 
-  clauseDefault* -> ^(DEFOP clauseDefault+)
-  ;
-
+	clauseDefault+ -> ^(DEFOP clauseDefault+)
+	;
+   
   
 clauseDefault
-  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(NOT clauseStrongest+))*
+  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(NOT clauseStrongest+ ))*
   ;
 
 clauseStrongest
-  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(AND clauseStrong+))*
+  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(AND clauseStrong+ ))*
   ;
   
 clauseStrong
-  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OR clauseWeak+))*
+  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OR clauseWeak+ ))*
   ;
   
 clauseWeak
-  : (first=primaryClause -> $first) (NEAR others=primaryClause -> ^(NEAR primaryClause+))* 
+  : (first=primaryClause -> $first) (NEAR others=primaryClause -> ^(NEAR primaryClause+ ))* 
   ;
   
 primaryClause
   : 
-  
-  atom -> ^(ATOM atom)
-  | (modifier? LPAREN first=clauseDefault -> $first) (clauseDefault* RPAREN boost? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST boost?) ^(DEFOP clauseDefault+)))
-  //^(CLAUSE ^(MODIFIER modifier?) ^(BOOST boost?) clauseDefault+)
-
-  //atom -> ^(ATOM ^(MODIFIER ) ^(BOOST ) ^(VALUE atom))
-  //| (LPAREN clauseDefault+ RPAREN BOOST? -> clauseDefault+ )//^(CLAUSE ^(MODIFIER modifier?) ^(BOOST BOOST) clauseDefault+))
+  atom 
+  | modifier? LPAREN clauseDefault+ RPAREN boost? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST boost?) ^(DEFOP clauseDefault+) )
   ;
     
 
-atom   : 
-  modifier?
-  (
-  field multi_term
-  | field? (value)
-  )
-  //| LPAREN query RPAREN
+atom   
+  : 
+  modifier? field multi_term -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_term))
+  | modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value*))
   ;
    
 	   
@@ -74,19 +68,24 @@ value  :
   ;
 
 multi_term
-	: LPAREN mterm+ RPAREN
+	: LPAREN mterm+ RPAREN -> mterm+
 	;
 	
 	
-mterm	:	(modifier? term)
+mterm	:	(modifier? term -> ^(ATOM ^(MODIFIER modifier?) ^(VALUE term)))
 	;
 		
 term
-	:	(normal | quoted | quoted_truncated | truncated)
-		(
-		(BOOST FUZZY_SLOP?)
-		| FUZZY_SLOP
-		)?
+	:	
+	( normal -> normal
+	| quoted -> quoted
+	| quoted_truncated -> quoted_truncated
+	| truncated -> truncated
+	)
+	(
+	b=BOOST f=FUZZY_SLOP? -> ^(BOOST $term $b $f?)
+	| f=FUZZY_SLOP -> $term $f
+	)?
 	;
 
 range	:	
@@ -113,10 +112,12 @@ modifier: (PLUS|MINUS);
 
 ESC_CHAR:  '\\' .; 
 
-boost	:	BOOST;
+boost	:
+	BOOST
+	;
 
 BOOST	:	
-	(CARAT boost=NUMBER)
+	CARAT NUMBER
 	;
 	
 FUZZY_SLOP
