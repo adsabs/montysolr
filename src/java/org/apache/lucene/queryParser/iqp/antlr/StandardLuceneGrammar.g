@@ -9,13 +9,14 @@ tokens {
   DEFOP;
   ATOM;
   MODIFIER;
-  BOOST;
   VALUE;
   CLAUSE;
   RELATION;
   RANGE;
   FIELD;
   FUZZY;
+  ADDED;
+  BOOST;
 }
 
 mainQ : 
@@ -82,10 +83,7 @@ term
 	| quoted_truncated -> quoted_truncated
 	| truncated -> truncated
 	)
-	(
-	b=BOOST f=FUZZY_SLOP? -> ^(BOOST $term $b $f?)
-	| f=FUZZY_SLOP -> $term $f
-	)?
+	boost? -> $term boost?
 	;
 
 range	:	
@@ -113,15 +111,16 @@ modifier: (PLUS|MINUS);
 ESC_CHAR:  '\\' .; 
 
 boost	:
-	BOOST
+	CARAT+ b=NUMBER TILDE+ f=NUMBER? -> ^(ADDED ^(BOOST $b) ^(FUZZY $f?))
+	| TILDE g=NUMBER? -> ^(ADDED ^(FUZZY $g?))
 	;
 
-BOOST	:	
-	CARAT NUMBER
-	;
+//BOOST	:	
+//	CARAT NUMBER
+//	;
 	
-FUZZY_SLOP
-	:	TILDE NUMBER?;
+//FUZZY_SLOP
+//	:	TILDE NUMBER?;
 
 TO	:	'TO';
 
@@ -218,9 +217,9 @@ fragment LCURLY  : '{' ;
 
 fragment RCURLY  : '}' ;
 
-fragment CARAT : '^' ;
+CARAT : '^';
 
-fragment TILDE : '~' ;
+TILDE : '~' ;
 
 fragment DQUOTE	
 	:	'\"';
