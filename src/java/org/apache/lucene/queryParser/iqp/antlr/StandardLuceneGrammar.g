@@ -17,6 +17,12 @@ tokens {
   FUZZY;
   ADDED;
   BOOST;
+  QNORMAL;
+  QPHRASE;
+  QTRUNCQUOTED;
+  QTRUNCATED;
+  QRANGEIN;
+  QRANGEEX;
 }
 
 mainQ : 
@@ -43,7 +49,7 @@ clauseWeak
 primaryClause
   : 
   atom 
-  | modifier? LPAREN clauseDefault+ RPAREN boost? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST boost?) ^(DEFOP clauseDefault+) )
+  | modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
   ;
     
 
@@ -78,27 +84,37 @@ mterm	:	(modifier? term -> ^(ATOM ^(MODIFIER modifier?) ^(VALUE term)))
 		
 term
 	:	
-	( normal -> normal
-	| quoted -> quoted
-	| quoted_truncated -> quoted_truncated
-	| truncated -> truncated
+	( normal -> ^(QNORMAL normal)
+	| quoted -> ^(QPHRASE quoted)
+	| quoted_truncated -> ^(QTRUNCQUOTED quoted_truncated)
+	| truncated -> ^(QTRUNCATED truncated)
 	)
-	boost? -> $term boost?
+	term_modifier? -> term_modifier? $term
 	;
 
 range	:	
-	(RANGE_TERM_IN|RANGE_TERM_EX) boost?
+	(
+	range_term_in -> ^(QRANGEIN range_term_in)
+	| range_term_ex -> ^(QRANGEEX range_term_ex) 
+	)
+	term_modifier? -> $range term_modifier?
 	;	
 	
 truncated
 	:	TERM_TRUNCATED
 	; 
 
-quoted	:	TERM_QUOTED
+quoted	:	
+	//DQUOTE t=~('\"' | '?' | '*' | '\\\"' )* DQUOTE -> $t
+	TERM_QUOTED
 	;
 
 quoted_truncated
-	:	TERM_QUOTED_TRUNCATED;
+	:	
+	//DQUOTE TERM_QUOTED_TRUNCATED DQUOTE
+	TERM_QUOTED_TRUNCATED
+	;
+	
 
 normal	:	TERM_NORMAL
 		| NUMBER
@@ -108,19 +124,57 @@ operator: (AND | OR | NOT | NEAR);
 
 modifier: (PLUS|MINUS);
 
-ESC_CHAR:  '\\' .; 
 
-boost	:
-	CARAT+ b=NUMBER TILDE+ f=NUMBER? -> ^(ADDED ^(BOOST $b) ^(FUZZY $f?))
-	| TILDE g=NUMBER? -> ^(ADDED ^(FUZZY $g?))
+/*
+Lucene allows default fuzzy value (if not specified). This, however,
+generates warnings
+	...
+	TILDE f=NUMBER* -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
+	
+
+Decision can match input such as "NUMBER" using multiple alternatives: 1, 2
+As a result, alternative(s) 2 were disabled for that input
+
+	
+TODO: add  semantic predicates; switch on memoization
+*/
+term_modifier	:	
+	(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) (TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)))?
+	|	TILDE f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
+	
+	
 	;
 
-//BOOST	:	
-//	CARAT NUMBER
-//	;
-	
-//FUZZY_SLOP
-//	:	TILDE NUMBER?;
+range_term_in
+	:	
+       LBRACK
+       WS*
+       (normal -> normal | quoted -> quoted)
+       ((WS* TO WS*)
+       (t=normal | q=quoted)
+       -> $range_term_in $t? $q?
+       )?
+       WS*
+       RBRACK
+	;
+
+
+range_term_ex
+	:	
+       LCURLY
+       WS*
+       (normal -> normal | quoted -> quoted)
+       (
+       (WS* TO WS*)
+       (t=normal | q=quoted)
+       -> $range_term_ex $t? $q?
+       )?
+       WS*
+       RCURLY
+	;	
+
+
+ESC_CHAR:  '\\' .; 
 
 TO	:	'TO';
 
@@ -140,53 +194,23 @@ fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
 
 
 
+fragment INT: '0' .. '9';
+
+NUMBER  : INT+ ('.' INT+)?;
+
 TERM_QUOTED
   : '\"' (~('\"' | '?' | '*' | '\\\"' ))* '\"'
   ; 
 
-fragment INT: '0' .. '9';
-
-
-
-NUMBER  : INT+ ('.' INT+)?;
 
 
 TERM_NORMAL
-  : ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )*
+  : ( NORMAL_CHAR | ESC_CHAR) ( NORMAL_CHAR | ESC_CHAR)*
   ;
 
-TERM_QUOTED_TRUNCATED: '\"' (~('\"' | '?' | '*') | STAR | QMARK )+ '\"';
+TERM_QUOTED_TRUNCATED: '\"' (~('\"' | '?' | '*') | STAR | QMARK )+ '\"' ;
 
 TERM_TRUNCATED: (NORMAL_CHAR | STAR | QMARK)+;
-
-RANGE_TERM_IN
-	:	
-       LBRACK
-       WS*
-       (TERM_NORMAL | TERM_QUOTED)
-       ((WS* TO WS*)
-       (TERM_NORMAL | TERM_QUOTED))?
-       WS*
-       RBRACK
-	;
-
-
-RANGE_TERM_EX
-	:	
-       LCURLY
-       WS*
-       (TERM_NORMAL | TERM_QUOTED)
-       ((WS* TO WS*)
-       (TERM_NORMAL | TERM_QUOTED))?
-       WS*
-       RCURLY
-	;	
-	
-
-range_data
-	:	(TERM_NORMAL | TERM_QUOTED) {System.out.println("gotcha");}
-	;	
-
 
 
 
@@ -195,9 +219,9 @@ LPAREN  : '(';
 
 RPAREN  : ')';
 
-fragment LBRACK  : '[';
+LBRACK  : '[';
 
-fragment RBRACK  : ']';
+RBRACK  : ']';
 
 COLON   : ':' ;  //this must NOT be fragment
 
@@ -213,15 +237,15 @@ fragment VBAR  : '|' ;
 
 fragment AMPER : '&' ;
 
-fragment LCURLY  : '{' ;
+LCURLY  : '{' ;
 
-fragment RCURLY  : '}' ;
+RCURLY  : '}' ;
 
 CARAT : '^';
 
 TILDE : '~' ;
 
-fragment DQUOTE	
+DQUOTE	
 	:	'\"';
 
 fragment SQUOTE
