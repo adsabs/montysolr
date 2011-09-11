@@ -147,17 +147,10 @@ truncated
 
 quoted_truncated
 	:	
-	//DQUOTE TERM_QUOTED_TRUNCATED DQUOTE
-	//TERM_QUOTED_TRUNCATED
-	//b=(~('\"' | '\\\"')+) (STAR|QMARK) (~('\"' | '\\\"') (STAR|QMARK))*
-	//DQUOTE b=STAR QMARK STAR DQUOTE -> $b 
-	//DQUOTE ~('\"')+ DQUOTE
 	PHRASE_ANYTHING
 	;
 
 quoted	:	
-	//DQUOTE t=~('\"' | '?' | '*' | '\\\"' )* DQUOTE -> $t
-	//DQUOTE ~('\"'|'?'|'*')+ DQUOTE
 	PHRASE
 	;
 
@@ -187,8 +180,9 @@ TODO: add  semantic predicates; switch on memoization
 	
 */
 term_modifier	:	
-	(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) (TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)))?
-	|	TILDE f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
+	((CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) (TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)))?)
+	| (TILDE -> ^(MODIFIER ^(BOOST) ^(FUZZY )) ) (f=NUMBER? -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)))
+	
 	
 	/*
 	(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) 
@@ -289,12 +283,7 @@ fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
       | '+' | '-' | '!' | ':' | '~' | '^' 
       | '*' | '|' | '&' | '?' | '\\\"'  //this line is not present in lucene StandardParser.jj
       );  	
-/*	
-fragment ANY_CHAR
-	:	
-	(NORMAL_CHAR | WS | LPAREN | RPAREN | LBRACK | RBRACK)
-	;
-*/
+
 
 NUMBER  
 	: 
@@ -307,31 +296,6 @@ TERM_NORMAL
 	( NORMAL_CHAR | ESC_CHAR) ( NORMAL_CHAR | ESC_CHAR)*
 	;
 
-/*
-TERM_QUOTED
-	:	
-	ANY_CHAR+
-	;
-	
-TERM_QUOTED_TRUNCATED
-	:
-	(QMARK|STAR)? TERM_QUOTED (QMARK|STAR) (TERM_QUOTED|QMARK|STAR)*
-	;	
-*/	
-/*	
-TERM_QUOTED
-	: 
-	DQUOTE ANY_CHAR+ DQUOTE
-	; 
-
-
-
-TERM_QUOTED_TRUNCATED
-	: 
-	DQUOTE (ANY_CHAR | STAR | QMARK )+ DQUOTE 
-	;
-
-*/
 
 TERM_TRUNCATED: 
 	(NORMAL_CHAR | STAR | QMARK)+
