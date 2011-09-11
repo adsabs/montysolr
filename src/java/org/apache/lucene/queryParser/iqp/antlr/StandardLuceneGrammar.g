@@ -47,50 +47,30 @@ clauseWeak
   ;
   
 primaryClause
-  : 
-  atom 
-  | modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
-  ;
+	: 
+	atom 
+	| modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
+	;
     
 
 atom   
-  : 
-  modifier? field multi_term -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_term))
-  | modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value*))
-  ;
+	: 
+	modifier? field multi_value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_value))
+	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value*))
+	;
    
 	   
-field	:	
+field	
+	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
 	;
 
-value  : 
-  range 
-  | term
-  
-//  | normal
-//  | quoted
-//  | quoted_truncated
-//  | truncated
-  ;
+value  
+	: 
+  	range 
+  	| term
+  	;
 
-multi_term
-	: LPAREN mterm+ RPAREN -> mterm+
-	;
-	
-	
-mterm	:	(modifier? term -> ^(ATOM ^(MODIFIER modifier?) ^(VALUE term)))
-	;
-		
-term
-	:	
-	( normal -> ^(QNORMAL normal)
-	| quoted -> ^(QPHRASE quoted)
-	| quoted_truncated -> ^(QTRUNCQUOTED quoted_truncated)
-	| truncated -> ^(QTRUNCATED truncated)
-	)
-	term_modifier? -> term_modifier? $term
-	;
 
 range	:	
 	(
@@ -99,51 +79,6 @@ range	:
 	)
 	term_modifier? -> $range term_modifier?
 	;	
-	
-truncated
-	:	TERM_TRUNCATED
-	; 
-
-quoted	:	
-	//DQUOTE t=~('\"' | '?' | '*' | '\\\"' )* DQUOTE -> $t
-	TERM_QUOTED
-	;
-
-quoted_truncated
-	:	
-	//DQUOTE TERM_QUOTED_TRUNCATED DQUOTE
-	TERM_QUOTED_TRUNCATED
-	;
-	
-
-normal	:	TERM_NORMAL
-		| NUMBER
-	;	
-	
-operator: (AND | OR | NOT | NEAR);
-
-modifier: (PLUS|MINUS);
-
-
-/*
-Lucene allows default fuzzy value (if not specified). This, however,
-generates warnings
-	...
-	TILDE f=NUMBER* -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
-	
-
-Decision can match input such as "NUMBER" using multiple alternatives: 1, 2
-As a result, alternative(s) 2 were disabled for that input
-
-	
-TODO: add  semantic predicates; switch on memoization
-*/
-term_modifier	:	
-	(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) (TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)))?
-	|	TILDE f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
-	
-	
-	;
 
 range_term_in
 	:	
@@ -174,44 +109,119 @@ range_term_ex
 	;	
 
 
-ESC_CHAR:  '\\' .; 
+multi_value
+	: 
+	LPAREN mterm+ RPAREN -> mterm+
+	;
+	
+	
+mterm	
+	:	
+	(modifier? term -> ^(ATOM ^(MODIFIER modifier?) ^(VALUE term)))
+	;
+		
+term
+	:	
+	( normal -> ^(QNORMAL normal)
+	| truncated -> ^(QTRUNCATED truncated)
+	| quoted -> ^(QPHRASE quoted)
+	| quoted_truncated -> ^(QTRUNCQUOTED quoted_truncated)
+	)
+	term_modifier? -> term_modifier? $term
+	;
 
-TO	:	'TO';
+normal	
+	:	
+	TERM_NORMAL
+	| NUMBER
+	;	
 
-/* We want to be case insensitive */
-AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
-OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
-NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
-NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n');
+	
 
-fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
-      | '\\' | '\'' | '\"' 
-      | '(' | ')' | '[' | ']' | '{' | '}'
-      | '+' | '-' | '!' | ':' | '~' | '^' 
-      | '*' | '|' | '&' | '?'  //this line is not present in lucene StandardParser.jj
-      );  
-  
+			
+truncated
+	:	
+	TERM_TRUNCATED
+	; 
 
 
+quoted_truncated
+	:	
+	//DQUOTE TERM_QUOTED_TRUNCATED DQUOTE
+	//TERM_QUOTED_TRUNCATED
+	//b=(~('\"' | '\\\"')+) (STAR|QMARK) (~('\"' | '\\\"') (STAR|QMARK))*
+	//DQUOTE b=STAR QMARK STAR DQUOTE -> $b 
+	//DQUOTE ~('\"')+ DQUOTE
+	PHRASE_ANYTHING
+	;
 
-fragment INT: '0' .. '9';
-
-NUMBER  : INT+ ('.' INT+)?;
-
-TERM_QUOTED
-  : '\"' (~('\"' | '?' | '*' | '\\\"' ))* '\"'
-  ; 
+quoted	:	
+	//DQUOTE t=~('\"' | '?' | '*' | '\\\"' )* DQUOTE -> $t
+	//DQUOTE ~('\"'|'?'|'*')+ DQUOTE
+	PHRASE
+	;
 
 
 
-TERM_NORMAL
-  : ( NORMAL_CHAR | ESC_CHAR) ( NORMAL_CHAR | ESC_CHAR)*
-  ;
+	
+operator: (AND | OR | NOT | NEAR);
 
-TERM_QUOTED_TRUNCATED: '\"' (~('\"' | '?' | '*') | STAR | QMARK )+ '\"' ;
+modifier: (PLUS|MINUS);
 
-TERM_TRUNCATED: (NORMAL_CHAR | STAR | QMARK)+;
 
+/*
+Lucene allows default fuzzy value (if not specified). This, however,
+generates warnings
+	...
+	TILDE f=NUMBER* -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
+	
+
+Decision can match input such as "NUMBER" using multiple alternatives: 1, 2
+As a result, alternative(s) 2 were disabled for that input
+
+	
+TODO: add  semantic predicates; switch on memoization
+
+(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) (TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)))?
+	|	TILDE f=NUMBER? -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
+	
+*/
+term_modifier	:	
+	(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) (TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)))?
+	|	TILDE f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
+	
+	/*
+	(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) 
+		(
+		 TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f))
+		 | TILDE -> ^(MODIFIER ^(BOOST $b) ^(FUZZY '0.5'))
+		)?
+	|(TILDE NUMBER)=> TILDE f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
+	|(TILDE)=> TILDE -> ^(MODIFIER ^(BOOST ) ^(FUZZY '0.5'))
+	*/
+	/*
+	(boost fuzzy)=> CARAT NUMBER TILDE NUMBER
+	|(CARAT NUMBER TILDE) => CARAT NUMBER TILDE
+	| (TILDE NUMBER) => TILDE NUMBER
+	| (TILDE)=> TILDE
+	|CARAT NUMBER (TILDE NUMBER)?
+	*/
+	;
+
+boost	:	
+	CARAT NUMBER
+	;
+
+fuzzy	:	
+	TILDE NUMBER
+	;
+
+
+
+/* ================================================================
+ * =                     LEXER                                    =
+ * ================================================================
+ */
 
 
 
@@ -229,9 +239,9 @@ PLUS  : '+' ;
 
 MINUS : '-';
 
-fragment STAR  : '*' ;
+STAR  : '*' ;
 
-fragment QMARK  : '?' ;
+QMARK  : '?' ;
 
 fragment VBAR  : '|' ;
 
@@ -248,9 +258,19 @@ TILDE : '~' ;
 DQUOTE	
 	:	'\"';
 
-fragment SQUOTE
+SQUOTE
 	:	'\'';
 
+
+ESC_CHAR:  '\\' .; 
+
+TO	:	'TO';
+
+/* We want to be case insensitive */
+AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
+OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
+NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
+NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n');
 
 
 WS  :   ( ' '
@@ -260,6 +280,69 @@ WS  :   ( ' '
         ) {$channel=HIDDEN;}
     ;
 
+
+fragment INT: '0' .. '9';
+
+fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
+      | '\\' | '\'' | '\"' 
+      | '(' | ')' | '[' | ']' | '{' | '}'
+      | '+' | '-' | '!' | ':' | '~' | '^' 
+      | '*' | '|' | '&' | '?' | '\\\"'  //this line is not present in lucene StandardParser.jj
+      );  	
+/*	
+fragment ANY_CHAR
+	:	
+	(NORMAL_CHAR | WS | LPAREN | RPAREN | LBRACK | RBRACK)
+	;
+*/
+
+NUMBER  
+	: 
+	INT+ ('.' INT+)?
+	;
+
+
+TERM_NORMAL
+	: 
+	( NORMAL_CHAR | ESC_CHAR) ( NORMAL_CHAR | ESC_CHAR)*
+	;
+
+/*
+TERM_QUOTED
+	:	
+	ANY_CHAR+
+	;
 	
+TERM_QUOTED_TRUNCATED
+	:
+	(QMARK|STAR)? TERM_QUOTED (QMARK|STAR) (TERM_QUOTED|QMARK|STAR)*
+	;	
+*/	
+/*	
+TERM_QUOTED
+	: 
+	DQUOTE ANY_CHAR+ DQUOTE
+	; 
 
 
+
+TERM_QUOTED_TRUNCATED
+	: 
+	DQUOTE (ANY_CHAR | STAR | QMARK )+ DQUOTE 
+	;
+
+*/
+
+TERM_TRUNCATED: 
+	(NORMAL_CHAR | STAR | QMARK)+
+	;
+
+
+PHRASE	
+	:	
+	DQUOTE ~('\"'|'?'|'*')+ DQUOTE
+	;
+
+PHRASE_ANYTHING	:	
+	DQUOTE ~('\"')+ DQUOTE
+	;
