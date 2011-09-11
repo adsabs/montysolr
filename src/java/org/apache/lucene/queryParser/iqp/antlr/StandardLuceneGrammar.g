@@ -19,7 +19,7 @@ tokens {
   BOOST;
   QNORMAL;
   QPHRASE;
-  QTRUNCQUOTED;
+  QPHRASETRUNC;
   QTRUNCATED;
   QRANGEIN;
   QRANGEEX;
@@ -56,7 +56,7 @@ primaryClause
 atom   
 	: 
 	modifier? field multi_value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_value))
-	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value*))
+	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value))
 	;
    
 	   
@@ -67,18 +67,18 @@ field
 
 value  
 	: 
-  	range 
-  	| term
+	( 
+	range_term_in -> ^(QRANGEIN range_term_in)
+	| range_term_ex -> ^(QRANGEEX range_term_ex) 
+	| normal -> ^(QNORMAL normal)
+	| truncated -> ^(QTRUNCATED truncated)
+	| quoted -> ^(QPHRASE quoted)
+	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	)
+	term_modifier? -> term_modifier? $value
   	;
 
 
-range	:	
-	(
-	range_term_in -> ^(QRANGEIN range_term_in)
-	| range_term_ex -> ^(QRANGEEX range_term_ex) 
-	)
-	term_modifier? -> $range term_modifier?
-	;	
 
 range_term_in
 	:	
@@ -117,18 +117,9 @@ multi_value
 	
 mterm	
 	:	
-	(modifier? term -> ^(ATOM ^(MODIFIER modifier?) ^(VALUE term)))
+	(modifier? value -> ^(ATOM ^(MODIFIER modifier?) ^(VALUE value)))
 	;
-		
-term
-	:	
-	( normal -> ^(QNORMAL normal)
-	| truncated -> ^(QTRUNCATED truncated)
-	| quoted -> ^(QPHRASE quoted)
-	| quoted_truncated -> ^(QTRUNCQUOTED quoted_truncated)
-	)
-	term_modifier? -> term_modifier? $term
-	;
+	
 
 normal	
 	:	
@@ -163,43 +154,30 @@ modifier: (PLUS|MINUS);
 
 
 /*
-Lucene allows default fuzzy value (if not specified). This, however,
-generates warnings
-	...
-	TILDE f=NUMBER* -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
-	
+This terribly convoluted grammar is here because of weird AST rewrite rules
+and because we need to allow for default value when TILDE is not followed by
+anything
 
-Decision can match input such as "NUMBER" using multiple alternatives: 1, 2
-As a result, alternative(s) 2 were disabled for that input
-
-	
-TODO: add  semantic predicates; switch on memoization
-
-(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) (TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)))?
-	|	TILDE f=NUMBER? -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
-	
+This grammar has problem with following
+	:	term^4~ 9999
+	where 999 is another term, not a fuzzy value
 */
 term_modifier	:	
-	((CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) (TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)))?)
-	| (TILDE -> ^(MODIFIER ^(BOOST) ^(FUZZY )) ) (f=NUMBER? -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)))
+	// first alternative
+	(
+	  (CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))
+	 ) 
+	( //syntactic predicate
+	 (TILDE NUMBER )=>TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)) //
+	 | TILDE -> ^(MODIFIER ^(BOOST $b) ^(FUZZY NUMBER["0.5"]))
+	 )* // set the default value
 	
+	)
+	// second alternative [only ~ | ~NUMBER]
+	| 
+	  (TILDE -> ^(MODIFIER ^(BOOST) ^(FUZZY NUMBER["0.5"])) ) // set the default value
+	  ((~(WS))=>f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
 	
-	/*
-	(CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))) 
-		(
-		 TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f))
-		 | TILDE -> ^(MODIFIER ^(BOOST $b) ^(FUZZY '0.5'))
-		)?
-	|(TILDE NUMBER)=> TILDE f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?))
-	|(TILDE)=> TILDE -> ^(MODIFIER ^(BOOST ) ^(FUZZY '0.5'))
-	*/
-	/*
-	(boost fuzzy)=> CARAT NUMBER TILDE NUMBER
-	|(CARAT NUMBER TILDE) => CARAT NUMBER TILDE
-	| (TILDE NUMBER) => TILDE NUMBER
-	| (TILDE)=> TILDE
-	|CARAT NUMBER (TILDE NUMBER)?
-	*/
 	;
 
 boost	:	
@@ -271,7 +249,8 @@ WS  :   ( ' '
         | '\t'
         | '\r'
         | '\n'
-        ) {$channel=HIDDEN;}
+        ) 
+        {$channel=HIDDEN;}
     ;
 
 
