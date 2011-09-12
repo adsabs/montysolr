@@ -1,0 +1,72 @@
+gunit StandardLuceneGrammar;
+
+
+//------------------- mainQ
+mainQ:
+
+"title:\"The Right Way\" AND text:go title:\"Do it right\" AND right" OK
+
+"title:Do it right" OK
+
+"te?t" OK
+
+"test*"  -> (DEFOP (ATOM MODIFIER FIELD (VALUE (QTRUNCATED test*))))
+
+"te*t"  -> (DEFOP (ATOM MODIFIER FIELD (VALUE (QTRUNCATED te*t))))
+
+"\"te*t\"" OK
+
+"\"text\"" OK
+
+"roam~0.8" OK
+
+"roam~" OK
+
+"9999" OK
+
+"\"jakarta apache\"~10" OK
+
+"mod_date:[20020101 TO 20030101]" OK
+
+"title:{Aida TO Carmen}" OK
+
+"jakarta^4 apache" OK
+
+"\"jakarta apache\"^4 \"Apache Lucene\"" OK
+
+"\"jakarta apache\" OR jakarta" OK
+
+"\"jakarta apache\" AND \"Apache Lucene\"" OK
+
+"+jakarta lucene" OK
+
+"\"jakarta apache\" NOT \"Apache Lucene\"" OK
+
+"\"jakarta apache\" -\"Apache Lucene\"" OK
+
+"(jakarta OR apache) AND website" OK
+
+"title:(+return +\"pink panther\")" OK
+
+"\(1\+1\)\:2" OK
+
+"escape:(\+\-\&\&\|\|\!\(\)\{\}\[\]\^\"\~\*\?\:\\)" FAIL
+
+
+//---------------- value
+value:
+
+"this" -> "(QNORMAL this)"
+
+"this999" -> "(QNORMAL this999)"
+
+"this0.9" -> "(QNORMAL this0.9)"
+
+"\"this\"" -> "(QPHRASE \"this\")"
+
+"\"this  \"" -> "(QPHRASE \"this  \")"
+
+"\"this  \"   " -> "(QPHRASE \"this  \")"
+
+"\"  this  \"" -> "(QPHRASE \"  this  \")"
+
