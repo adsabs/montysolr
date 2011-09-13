@@ -10,7 +10,7 @@ javac -cp $CP *.java
 java -cp $CP Demo "$1" > ast-tree.dot
 
 XDOT=`which xdot`
-if [ -f $XDOT ];
+if [ $XDOT ];
 then
   $XDOT ast-tree.dot 
 else

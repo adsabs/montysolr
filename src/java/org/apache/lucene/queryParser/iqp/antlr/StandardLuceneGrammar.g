@@ -6,6 +6,7 @@ options {
 }
 
 tokens {
+  TOKEN;
   DEFOP;
   ATOM;
   MODIFIER;
@@ -23,6 +24,7 @@ tokens {
   QTRUNCATED;
   QRANGEIN;
   QRANGEEX;
+  QANYTHING;
 }
 
 mainQ : 
@@ -48,8 +50,11 @@ clauseWeak
   
 primaryClause
 	: 
-	atom 
-	| modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
+	
+	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
+	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
+	| (LPAREN)=> LPAREN clauseDefault+ RPAREN -> clauseDefault+
+	| atom 
 	;
     
 
@@ -78,18 +83,13 @@ value
 	term_modifier? -> term_modifier? $value
   	;
 
-
+	
 
 range_term_in
 	:	
        LBRACK
-       WS*
-       (normal -> normal | quoted -> quoted)
-       ((WS* TO WS*)
-       (t=normal | q=quoted)
-       -> $range_term_in $t? $q?
-       )?
-       WS*
+       (a=range_value -> range_value ^(QANYTHING ))
+       ( TO? b=range_value -> $a $b? )?
        RBRACK
 	;
 
@@ -97,17 +97,19 @@ range_term_in
 range_term_ex
 	:	
        LCURLY
-       WS*
-       (normal -> normal | quoted -> quoted)
-       (
-       (WS* TO WS*)
-       (t=normal | q=quoted)
-       -> $range_term_ex $t? $q?
-       )?
-       WS*
+       ( a=range_value -> range_value ^(QANYTHING ))
+       ( TO? b=range_value -> $a $b? )?
        RCURLY
 	;	
 
+range_value
+	:	
+	normal -> ^(QNORMAL normal)
+	| truncated -> ^(QTRUNCATED truncated)
+	| quoted -> ^(QPHRASE quoted)
+	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	| STAR -> ^(QANYTHING )
+	;
 
 multi_value
 	: 
@@ -176,7 +178,7 @@ term_modifier	:
 	// second alternative [only ~ | ~NUMBER]
 	| 
 	  (TILDE -> ^(MODIFIER ^(BOOST) ^(FUZZY NUMBER["0.5"])) ) // set the default value
-	  ((~(WS))=>f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
+	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
 	
 	;
 
@@ -277,7 +279,8 @@ TERM_NORMAL
 
 
 TERM_TRUNCATED: 
-	(NORMAL_CHAR | STAR | QMARK)+
+	(NORMAL_CHAR | (STAR | QMARK))+
+	//(STAR | QMARK)? NORMAL_CHAR+ ((STAR | QMARK) (NORMAL_CHAR+ (STAR | QMARK))?)?
 	;
 
 

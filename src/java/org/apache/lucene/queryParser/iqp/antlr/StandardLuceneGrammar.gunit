@@ -50,13 +50,81 @@ mainQ:
 
 "\(1\+1\)\:2" OK
 
+// TODO: fix
 "escape:(\+\-\&\&\|\|\!\(\)\{\}\[\]\^\"\~\*\?\:\\)" FAIL
 
 
+//---------------- primaryClause
+
+"this (that)" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+
+"this ((that))" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+
+"(this) ((((((that))))))" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+
+"(this) (that)" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+
+"this +(that)" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this ((((+(that)))))" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this (+(((+(that)))))" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (DEFOP (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+
+"this +((((+(that)))))" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (DEFOP (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+
+"this +(+((((that)))))" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (DEFOP (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+
+"this (+(((+(that))))" FAIL
+
+"this (++(((+(that)))))" FAIL
+
+"this (+(that)^7)" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this ((((+(that)^7))))" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this (-(that)^7))" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER -) (BOOST 7) (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this -((that))^7" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER -) (BOOST 7) (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this +(that thus)^7" -> "(DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (DEFOP (ATOM MODIFIER FIELD (VALUE (QNORMAL that))) (ATOM MODIFIER FIELD (VALUE (QNORMAL thus))))))"
+
+
+//---------------- atom
+atom:
+
+"field:value" -> "(ATOM MODIFIER (FIELD field) (VALUE (QNORMAL value)))"
+
+"field:\"value\"" -> "(ATOM MODIFIER (FIELD field) (VALUE (QPHRASE \"value\")))"
+
+"field:(one two three)" -> "(ATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM MODIFIER (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+
+"field:(one +two -three)" -> "(ATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM (MODIFIER -) (VALUE (QNORMAL three)))))"
+
+"+field:(-one +two three)" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+
+"-field:(-one +two three)" -> "(ATOM (MODIFIER -) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+
+"+value" -> "(ATOM (MODIFIER +) FIELD (VALUE (QNORMAL value)))"
+
+"-value" -> "(ATOM (MODIFIER -) FIELD (VALUE (QNORMAL value)))"
+
+"+field:" FAIL
+
+"+field:[this TO that]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+
+"+field:[   this TO that   ]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+
+"+field:{this TO that}" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEEX (QNORMAL this) (QNORMAL that))))"
+
+"+field: [this TO that]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+
 //---------------- value
+
 value:
 
 "this" -> "(QNORMAL this)"
+
+"th\*is" -> "(QNORMAL th\\*is)"
 
 "this999" -> "(QNORMAL this999)"
 
@@ -70,3 +138,145 @@ value:
 
 "\"  this  \"" -> "(QPHRASE \"  this  \")"
 
+"\"this*\"" -> "(QPHRASETRUNC \"this*\")"
+
+"\"this*a\"" -> "(QPHRASETRUNC \"this*a\")"
+
+"\"this?\"" -> "(QPHRASETRUNC \"this?\")"
+
+"\"this?a\"" -> "(QPHRASETRUNC \"this?a\")"
+
+"\"this val*\"" -> "(QPHRASETRUNC \"this val*\")"
+
+"\"this val?\"" -> "(QPHRASETRUNC \"this val?\")"
+
+"\"this*val?\"" -> "(QPHRASETRUNC \"this*val?\")"
+
+"\"?this\"" -> "(QPHRASETRUNC \"?this\")"
+
+"\"*this\"" -> "(QPHRASETRUNC \"*this\")"
+
+"\"+() AND that\"" -> "(QPHRASE \"+() AND that\")"
+
+"\"func(*) AND that\"" -> "(QPHRASETRUNC \"func(*) AND that\")"
+
+
+
+
+
+"[this TO that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO *]" -> "(QRANGEIN (QNORMAL this) QANYTHING)"
+
+"[this]" -> "(QRANGEIN (QNORMAL this) QANYTHING)"
+
+"[* this]" -> "(QRANGEIN QANYTHING (QNORMAL this))"
+
+"[* TO this]" -> "(QRANGEIN QANYTHING (QNORMAL this))"
+
+"[\"this\" TO \"that*\"]" -> "(QRANGEIN (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
+
+"[\"#$%^&\" TO \"&*()\"]" -> "(QRANGEIN (QPHRASE \"#$%^&\") (QPHRASETRUNC \"&*()\"))"
+
+"{this TO that}" -> "(QRANGEEX (QNORMAL this) (QNORMAL that))"
+
+"{this that}" -> "(QRANGEEX (QNORMAL this) (QNORMAL that))"
+
+"{this TO *}" -> "(QRANGEEX (QNORMAL this) QANYTHING)"
+
+"{* this}" -> "(QRANGEEX QANYTHING (QNORMAL this))"
+
+"{* TO this}" -> "(QRANGEEX QANYTHING (QNORMAL this))"
+
+"{\"this\" TO \"that*\"}" -> "(QRANGEEX (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
+
+"{\"#$%^&\" TO \"&*()\"}" -> "(QRANGEEX (QPHRASE \"#$%^&\") (QPHRASETRUNC \"&*()\"))"
+
+"{}" FAIL
+
+"[]" FAIL
+
+
+
+
+"this*" -> "(QTRUNCATED this*)"
+
+"*this*" -> "(QTRUNCATED *this*)"
+
+"*this" -> "(QTRUNCATED *this)"
+
+"th*is" -> "(QTRUNCATED th*is)"
+
+"this?" -> "(QTRUNCATED this?)"
+
+"?this?" -> "(QTRUNCATED ?this?)"
+
+"?this" -> "(QTRUNCATED ?this)"
+
+"th?is" -> "(QTRUNCATED th?is)"
+
+"th?is*" -> "(QTRUNCATED th?is*)"
+
+"*th?is" -> "(QTRUNCATED *th?is)"
+
+//TODO
+//"th*?is" FAIL
+//"th****?is" FAIL
+
+"*" FAIL
+
+
+
+
+// testing term modifiers
+
+"this^0.5" -> "(MODIFIER (BOOST 0.5) FUZZY) (QNORMAL this)"
+
+"this^5" -> "(MODIFIER (BOOST 5) FUZZY) (QNORMAL this)"
+
+"this^9999999999999" -> "(MODIFIER (BOOST 9999999999999) FUZZY) (QNORMAL this)"
+
+"this^6666.o" FAIL
+
+"this^ 5" -> "(MODIFIER (BOOST 5) FUZZY) (QNORMAL this)"
+
+
+//TODO: this should make '9' as a new term
+"this^5~ 9" -> "(MODIFIER (BOOST 5) (FUZZY 9)) (QNORMAL this)"  
+
+"this^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QNORMAL this)"
+
+"this^5~7" -> "(MODIFIER (BOOST 5) (FUZZY 7)) (QNORMAL this)"
+
+"this^5~8.9999" -> "(MODIFIER (BOOST 5) (FUZZY 8.9999)) (QNORMAL this)"
+
+"this~" -> "(MODIFIER BOOST (FUZZY 0.5)) (QNORMAL this)"
+
+"this~0.6" -> "(MODIFIER BOOST (FUZZY 0.6)) (QNORMAL this)"
+
+
+//TODO: either make the term_modifier accept any order or ~ and ^ or throw error
+// now it parses it wrongly (MODIFIER BOOST (FUZZY 5)) (QNORMAL this)
+"this~5^7" FAIL
+
+"this^~" FAIL
+
+"\"this that\"^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QPHRASE \"this that\")"
+
+"\"this that\"^5~6" -> "(MODIFIER (BOOST 5) (FUZZY 6)) (QPHRASE \"this that\")"
+
+"\"this that*\"^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QPHRASETRUNC \"this that*\")"
+
+"\"this that*\"^5~6" -> "(MODIFIER (BOOST 5) (FUZZY 6)) (QPHRASETRUNC \"this that*\")"
+
+"[this TO that]^5" -> "(MODIFIER (BOOST 5) FUZZY) (QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO that]^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO that]^5~0.6" -> "(MODIFIER (BOOST 5) (FUZZY 0.6)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO that]~" -> "(MODIFIER BOOST (FUZZY 0.5)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO that]~9" -> "(MODIFIER BOOST (FUZZY 9)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
