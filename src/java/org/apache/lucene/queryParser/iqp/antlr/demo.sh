@@ -12,7 +12,9 @@ java -cp $CP Demo "$1" > ast-tree.dot
 XDOT=`which xdot`
 if [ $XDOT ];
 then
+  echo "executing: $XDOT ast-tree.dot"
   $XDOT ast-tree.dot 
 else
+  echo "executing: open -a graphviz ast-tree.dot"
   open -a graphviz ast-tree.dot
 fi

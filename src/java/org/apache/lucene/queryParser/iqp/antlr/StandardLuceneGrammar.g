@@ -6,14 +6,11 @@ options {
 }
 
 tokens {
-  TOKEN;
-  DEFOP;
+  OPERATOR;
   ATOM;
   MODIFIER;
   VALUE;
   CLAUSE;
-  RELATION;
-  RANGE;
   FIELD;
   FUZZY;
   ADDED;
@@ -28,31 +25,31 @@ tokens {
 }
 
 mainQ : 
-	clauseDefault+ -> ^(DEFOP clauseDefault+)
+	clauseDefault+ -> ^(OPERATOR["AND"] clauseDefault+) // Default operator
 	;
    
   
 clauseDefault
-  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(NOT clauseStrongest+ ))*
+  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(OPERATOR["NOT"] clauseStrongest+ ))*
   ;
 
 clauseStrongest
-  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(AND clauseStrong+ ))*
+  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(OPERATOR["AND"] clauseStrong+ ))*
   ;
   
 clauseStrong
-  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OR clauseWeak+ ))*
+  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OPERATOR["OR"] clauseWeak+ ))*
   ;
   
 clauseWeak
-  : (first=primaryClause -> $first) (NEAR others=primaryClause -> ^(NEAR primaryClause+ ))* 
+  : (first=primaryClause -> $first) (near others=primaryClause -> ^(near primaryClause+) )* 
   ;
   
 primaryClause
 	: 
 	
-	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
-	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
+	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
+	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
 	| (LPAREN)=> LPAREN clauseDefault+ RPAREN -> clauseDefault+
 	| atom 
 	;
@@ -191,6 +188,10 @@ fuzzy	:
 	;
 
 
+near	:	
+	(NEAR -> ^(OPERATOR["NEAR 5"]) )
+	('/' b=NUMBER -> ^(OPERATOR["NEAR " + $b.getText()]) )?
+	;
 
 /* ================================================================
  * =                     LEXER                                    =
@@ -244,7 +245,7 @@ TO	:	'TO';
 AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
 OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
 NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
-NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n');
+NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 
 WS  :   ( ' '
@@ -262,7 +263,7 @@ fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
       | '\\' | '\'' | '\"' 
       | '(' | ')' | '[' | ']' | '{' | '}'
       | '+' | '-' | '!' | ':' | '~' | '^' 
-      | '*' | '|' | '&' | '?' | '\\\"'  //this line is not present in lucene StandardParser.jj
+      | '*' | '|' | '&' | '?' | '\\\"' | '/'  //this line is not present in lucene StandardParser.jj
       );  	
 
 
