@@ -2,6 +2,9 @@ import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;
 import org.antlr.stringtemplate.*;
 
+import org.apache.lucene.queryParser.iqp.antlr.StandardLuceneGrammarLexer;
+import org.apache.lucene.queryParser.iqp.antlr.StandardLuceneGrammarParser;
+
 public class Demo {
     public static void main(String[] args) throws Exception {
         System.err.println("Java received:" + (args.length > 0 ? args[0] : ""));
