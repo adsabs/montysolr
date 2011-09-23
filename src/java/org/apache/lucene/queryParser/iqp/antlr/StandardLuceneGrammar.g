@@ -1,21 +1,16 @@
 grammar StandardLuceneGrammar;
 
-
-
 options {
   language = Java;
   output = AST;
 }
 
-
 tokens {
-  DEFOP;
+  OPERATOR;
   ATOM;
   MODIFIER;
   VALUE;
   CLAUSE;
-  RELATION;
-  RANGE;
   FIELD;
   FUZZY;
   ADDED;
@@ -26,43 +21,44 @@ tokens {
   QTRUNCATED;
   QRANGEIN;
   QRANGEEX;
-  FUNC;
+  QANYTHING;
 }
-
 
 @header{
-package org.apache.lucene.queryParser.iqp.antlr;
+   package org.apache.lucene.queryParser.iqp.antlr;
 }
 @lexer::header {
-package org.apache.lucene.queryParser.iqp.antlr;
+   package org.apache.lucene.queryParser.iqp.antlr;
 }
 
-
 mainQ : 
-	clauseDefault+ -> ^(DEFOP clauseDefault+)
+	clauseDefault+ -> ^(OPERATOR["AND"] clauseDefault+) // Default operator
 	;
    
   
 clauseDefault
-  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(NOT clauseStrongest+ ))*
+  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(OPERATOR["NOT"] clauseStrongest+ ))*
   ;
 
 clauseStrongest
-  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(AND clauseStrong+ ))*
+  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(OPERATOR["AND"] clauseStrong+ ))*
   ;
   
 clauseStrong
-  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OR clauseWeak+ ))*
+  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OPERATOR["OR"] clauseWeak+ ))*
   ;
   
 clauseWeak
-  : (first=primaryClause -> $first) (NEAR others=primaryClause -> ^(NEAR primaryClause+ ))* 
+  : (first=primaryClause -> $first) (near others=primaryClause -> ^(near primaryClause+) )* 
   ;
   
 primaryClause
 	: 
-	atom 
-	| modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(DEFOP clauseDefault+) )
+	
+	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
+	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
+	| (LPAREN)=> LPAREN clauseDefault+ RPAREN -> clauseDefault+
+	| atom 
 	;
     
 
@@ -70,20 +66,8 @@ atom
 	: 
 	modifier? field multi_value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_value))
 	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value))
-	| modifier? func LPAREN func_value+ RPAREN -> ^(ATOM ^(MODIFIER modifier?) ^(FUNC func) ^(VALUE func_value+))
-	
 	;
    
-	
-func	:
-	'func'
-	| 'whatever_name'
-	;
-
-func_value
-	:	
-	value COMMA? -> value
-	;
 	   
 field	
 	:	
@@ -103,18 +87,13 @@ value
 	term_modifier? -> term_modifier? $value
   	;
 
-
+	
 
 range_term_in
 	:	
        LBRACK
-       WS*
-       (normal -> normal | quoted -> quoted)
-       ((WS* TO WS*)
-       (t=normal | q=quoted)
-       -> $range_term_in $t? $q?
-       )?
-       WS*
+       (a=range_value -> range_value ^(QANYTHING ))
+       ( TO? b=range_value -> $a $b? )?
        RBRACK
 	;
 
@@ -122,17 +101,19 @@ range_term_in
 range_term_ex
 	:	
        LCURLY
-       WS*
-       (normal -> normal | quoted -> quoted)
-       (
-       (WS* TO WS*)
-       (t=normal | q=quoted)
-       -> $range_term_ex $t? $q?
-       )?
-       WS*
+       ( a=range_value -> range_value ^(QANYTHING ))
+       ( TO? b=range_value -> $a $b? )?
        RCURLY
 	;	
 
+range_value
+	:	
+	normal -> ^(QNORMAL normal)
+	| truncated -> ^(QTRUNCATED truncated)
+	| quoted -> ^(QPHRASE quoted)
+	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	| STAR -> ^(QANYTHING )
+	;
 
 multi_value
 	: 
@@ -201,7 +182,7 @@ term_modifier	:
 	// second alternative [only ~ | ~NUMBER]
 	| 
 	  (TILDE -> ^(MODIFIER ^(BOOST) ^(FUZZY NUMBER["0.5"])) ) // set the default value
-	  ((~(WS))=>f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
+	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
 	
 	;
 
@@ -214,6 +195,10 @@ fuzzy	:
 	;
 
 
+near	:	
+	(NEAR -> ^(OPERATOR["NEAR 5"]) )
+	('/' b=NUMBER -> ^(OPERATOR["NEAR " + $b.getText()]) )?
+	;
 
 /* ================================================================
  * =                     LEXER                                    =
@@ -259,10 +244,6 @@ SQUOTE
 	:	'\'';
 
 
-COMMA	:	
-	','
-	;
-
 ESC_CHAR:  '\\' .; 
 
 TO	:	'TO';
@@ -271,7 +252,7 @@ TO	:	'TO';
 AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
 OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
 NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
-NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ('/' INT+)?;
+NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 
 WS  :   ( ' '
@@ -289,7 +270,7 @@ fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
       | '\\' | '\'' | '\"' 
       | '(' | ')' | '[' | ']' | '{' | '}'
       | '+' | '-' | '!' | ':' | '~' | '^' 
-      | '*' | '|' | '&' | '?' | '\\\"' | ',' //this line is not present in lucene StandardParser.jj
+      | '*' | '|' | '&' | '?' | '\\\"' | '/'  //this line is not present in lucene StandardParser.jj
       );  	
 
 
@@ -306,7 +287,8 @@ TERM_NORMAL
 
 
 TERM_TRUNCATED: 
-	(NORMAL_CHAR | STAR | QMARK)+
+	(NORMAL_CHAR | (STAR | QMARK))+
+	//(STAR | QMARK)? NORMAL_CHAR+ ((STAR | QMARK) (NORMAL_CHAR+ (STAR | QMARK))?)?
 	;
 
 
@@ -318,5 +300,3 @@ PHRASE
 PHRASE_ANYTHING	:	
 	DQUOTE ~('\"')+ DQUOTE
 	;
-	
-	
