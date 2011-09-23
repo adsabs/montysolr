@@ -1,5 +1,9 @@
 gunit StandardLuceneGrammar;
 
+@header {
+package org.apache.lucene.queryParser.iqp.antlr;
+}
+
 // We assume that the default operator is AND
 
 
