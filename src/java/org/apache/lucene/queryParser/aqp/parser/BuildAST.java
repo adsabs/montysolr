@@ -2,10 +2,10 @@ import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;
 import org.antlr.stringtemplate.*;
 
-import org.apache.lucene.queryParser.iqp.antlr.StandardLuceneGrammarLexer;
-import org.apache.lucene.queryParser.iqp.antlr.StandardLuceneGrammarParser;
+import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarLexer;
+import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarParser;
 
-public class Demo {
+public class BuildAST {
     public static void main(String[] args) throws Exception {
         System.err.println("Java received:" + (args.length > 0 ? args[0] : ""));
         ANTLRStringStream in = new ANTLRStringStream(args.length > 0 ? args[0] : "No input given");

@@ -1,7 +1,7 @@
 gunit StandardLuceneGrammar;
 
 @header {
-package org.apache.lucene.queryParser.iqp.antlr;
+package org.apache.lucene.queryParser.aqp.parser;
 }
 
 // We assume that the default operator is AND

@@ -25,10 +25,10 @@ tokens {
 }
 
 @header{
-   package org.apache.lucene.queryParser.iqp.antlr;
+   package org.apache.lucene.queryParser.aqp.parser;
 }
 @lexer::header {
-   package org.apache.lucene.queryParser.iqp.antlr;
+   package org.apache.lucene.queryParser.aqp.parser;
 }
 
 mainQ : 
