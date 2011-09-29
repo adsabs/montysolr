@@ -6,16 +6,24 @@ import os
 def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.jar:/x/dev/antlr-34/lib/antlr-3.4-complete.jar'):
     
     if not basedir:
-        basedir = os.path.dirname(os.path.abspath(__file__))
-    grammar_file = os.path.join(basedir, grammar_name + '.g')
+        basedir = os.path.abspath('../../../../../../../../bin/')
+        
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    
+    cp += os.pathsep + basedir
+    
+    grammar_file = os.path.join(thisdir, grammar_name + '.g')
     
     if not os.path.exists(grammar_file):
         raise Exception('Grammar %s does not exist' % grammar_file)
     
-    tmp_file = os.path.join(basedir, 'tmp-file.dot')
+    tmp_file = os.path.join(basedir, 'ast-tree.dot')
     index_file = os.path.join(basedir, 'index.html')
-    gunit_file = os.path.join(basedir, grammar_name + '.gunit')
-    generate_ast_command = 'java -cp %s Demo "%%s"' % (cp,)
+    gunit_file = os.path.join(thisdir, grammar_name + '.gunit')
+    generate_ast_command = 'java -cp %s BuildAST "%%s"' % (cp,)
+    
+    generate_grammar_command = '%s/demo.sh "build-only"' % (thisdir,)
+    
     generate_svg_command = 'dot -Tsvg %s' % tmp_file
     
     test_cases = load_gunit_file(gunit_file)
@@ -35,6 +43,8 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     
     toc.append('<a name="toc" />')
     
+    os.system(generate_grammar_command)
+    
     for section,values in test_cases.items():
         
         # generate AST tree
@@ -42,10 +52,17 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
             i += 1
             cmds[-1] = query
             
-            tmp_dot = os.path.join(basedir, 'tmp-%s.dot' % i)
+            #tmp_dot = os.path.join(basedir, 'tmp-%s.dot' % i)
+            
+            tmp_dot = tmp_file
+            
+            if os.path.exists(tmp_dot):
+                os.remove(tmp_dot)
+            
             toc.append('%s. <a href="#anchor%s"><pre>%s</pre></a><br/>' % (i, i, query))
             
             print '%s/%s :: %s' % (i, total, query)
+            print cmds
             p = sub.Popen(cmds,stdout=sub.PIPE,stderr=sub.PIPE)
             output, errors = p.communicate()
             if output:
@@ -54,6 +71,7 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
                 fo.close()
             else:
                 print 'Error generating AST for: ' + query
+                print errors
                 continue
             
             cmds_svg[-1] = tmp_dot
