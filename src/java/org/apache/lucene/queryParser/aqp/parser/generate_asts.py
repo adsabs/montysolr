@@ -20,9 +20,9 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     tmp_file = os.path.join(basedir, 'ast-tree.dot')
     index_file = os.path.join(basedir, 'index.html')
     gunit_file = os.path.join(thisdir, grammar_name + '.gunit')
-    generate_ast_command = 'java -cp %s BuildAST "%%s"' % (cp,)
+    generate_ast_command = 'java -cp %s org.apache.lucene.queryParser.aqp.parser.BuildAST %s "%%s"' % (cp, grammar_name)
     
-    generate_grammar_command = '%s/demo.sh "build-only"' % (thisdir,)
+    generate_grammar_command = '%s/demo.sh "build-only" "%s"' % (thisdir, grammar_name)
     
     generate_svg_command = 'dot -Tsvg %s' % tmp_file
     
@@ -62,7 +62,7 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
             toc.append('%s. <a href="#anchor%s"><pre>%s</pre></a><br/>' % (i, i, query))
             
             print '%s/%s :: %s' % (i, total, query)
-            print cmds
+            #print cmds
             p = sub.Popen(cmds,stdout=sub.PIPE,stderr=sub.PIPE)
             output, errors = p.communicate()
             if output:

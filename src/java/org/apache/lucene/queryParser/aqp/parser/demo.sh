@@ -1,10 +1,9 @@
 #!/bin/bash
 set +e
 
-echo 'Input is:' $1
 
 
-GRAMMAR=StandardLuceneGrammar
+GRAMMAR=${2:=StandardLuceneGrammar}
 
 BINDIR=../../../../../../../../bin
 
@@ -16,16 +15,21 @@ TGTFILE=$BINDIR/ast-tree.dot
 
 
 
+echo 'Input:' $1
+
+
 rm -fR $TGTDIR
 mkdir -p $TGTDIR
 rm $TGTFILE
 
-echo "regenerating grammar..."
+echo "Regenerating grammar $GRAMMAR..."
 
 java -cp $CP org.antlr.Tool -o $TGTDIR $GRAMMAR.g
 java -cp $CP org.antlr.Tool $GRAMMAR.g
 cp BuildAST.java $TGTDIR
 javac -cp $CP $TGTDIR/*.java
+
+
 
 java -cp $CP org.apache.lucene.queryParser.aqp.parser.BuildAST $GRAMMAR "$1" > $TGTFILE
 
@@ -36,6 +40,12 @@ then
 fi
 
     
+if ! grep -q "digraph" $TGTFILE ;
+then
+    echo "No DOT file generated!"
+    exit 1
+fi
+
 
 
 XDOT=`which xdot`

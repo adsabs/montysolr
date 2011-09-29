@@ -11,7 +11,7 @@ import org.apache.lucene.queryParser.aqp.parser.*;
 //import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarParser;
 
 public class BuildAST {
-    //@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
     	String grammar = args[0];
     	
@@ -37,9 +37,8 @@ public class BuildAST {
         Class clsParser = Class.forName("org.apache.lucene.queryParser.aqp.parser." + grammar + "Parser");
         
         
-        System.err.println("xxx" + clsParser);
         
-        // insantiate lexer 
+        // insantiate lexer with one parameter
         Class partypes[] = new Class[1];
         partypes[0] = CharStream.class;
         Constructor ctLexer 
@@ -49,20 +48,13 @@ public class BuildAST {
         arglist[0] = in;
         Object iLexer = ctLexer.newInstance(arglist);
         
-        //Object iLexer = clsLexer.newInstance();
         
-        System.err.println(clsLexer.cast(iLexer));
-        ((Lexer) clsLexer.cast(iLexer)).setText(input);
         
-        //Method iLexerMethod = clsLexer.getDeclaredMethod("setText");
-        //iLexerMethod.invoke(iLexer, input);
-        
+        // get tokens
         CommonTokenStream tokens = new CommonTokenStream((TokenSource) clsLexer.cast(iLexer));
         
-        //System.err.println(tokens.toString());
         
-        // parse and get the AST tree
-        
+        // instantiate parser using parameters
         Class partypes2[] = new Class[1];
          partypes2[0] = TokenStream.class;
          Constructor ct 
@@ -73,21 +65,14 @@ public class BuildAST {
          Object iParser = ct.newInstance(arglist2);
          
          
-        //Object iParser = clsParser.newInstance();
-        //Method iParserSetTokens= clsLexer.getDeclaredMethod("setTokenStream");
-        ((Parser)iParser).setTokenStream(tokens);
-         
+        // call the mainQ parser rule 
         Method iParserMainQ= clsParser.getDeclaredMethod("mainQ");
-        System.err.println(iParserMainQ);
-        
         Object retVal = iParserMainQ.invoke(iParser);
-        System.err.println(iParserMainQ.getReturnType().cast(retVal));
-        
         Method getMethod = iParserMainQ.getReturnType().getMethod("getTree");
-        
         CommonTree tree = (CommonTree) (getMethod.invoke(retVal));
         
         
+        // print the AST tree
         DOTTreeGenerator gen = new DOTTreeGenerator();
         StringTemplate st = gen.toDOT(tree);
         System.out.println(st);
