@@ -1,0 +1,385 @@
+gunit Invenio;
+
+@header {
+package org.apache.lucene.queryParser.aqp.parser;
+}
+
+// We assume that the default operator is AND
+
+
+//------------------- mainQ
+mainQ:
+
+"+(author:\"richter, burton*\" | exactauthor:\"richter, b *\" | exactauthor:\"richter, b\" | exactauthor:\"richter, bu\" | exactauthor:\"richter, bur\" | exactauthor:\"richter, burt\" | exactauthor:\"richter, burto\" | author:\"richter, burton, *\" +title:quark" -> ""
+"title:Do it right" OK
+
+"expr1" OK
+
+"(expr1)" -> ""  //+ expr
+
+"expr1 - (expr2)" -> "" //['+', 'expr1', '-', 'expr2']
+
+"+ expr1 - (expr2)" -> "" // ['+', 'expr1', '-', 'expr2']
+
+"+ expr1 - (expr2)" -> "" // ['+', 'expr1', '-', 'expr2']
+
+"expr1 (expr2)" -> "" // ['+', 'expr1', '+', 'expr2']
+
+"(expr1) - expr2" -> "" // ['+', 'expr1', '-', 'expr2']
+
+"(expr1)-(expr2)" -> "" // ['+', 'expr1', '-', 'expr2']
+
+"-(expr1)-(expr2)" -> "" // ['-', 'expr1', '-', 'expr2']
+
+"(expr1) - expr2 + (expr3)" -> "" // ['+', 'expr1', '-', 'expr2', '+', 'expr3']
+
+"(expr1) - expr2 + (expr3) | expr4" -> "" // ['+', 'expr1', '-', 'expr2', '+', 'expr3', '|', 'expr4']
+
+"(expr1) - expr2 + (expr3 | expr4) | \"expr5 + expr6\"" -> "" // ['+', 'expr1', '-', 'expr2', '+', 'expr3 | expr4', '|', '"expr5 + expr6"']
+
+"\"expr1\" (expr2) expr3" -> "" // ['+', '"expr1"', '+', 'expr2', '+', 'expr3']
+
+"\"expr1\"->\"expr2\"" -> "" // '+', '"expr1"->"expr2"
+
+"(expr1) expr2 (expr3) | expr4" -> "" // ['+', 'expr1', '+', 'expr2', '+', 'expr3', '|', 'expr4']
+
+"((expr1)) + (expr2 - expr3)" -> "" // ['+', 'expr1', '+', 'expr2', '-', 'expr3'
+
+"expr1 - (expr2 - (expr3 | expr4))" -> "" // ['+', 'expr1', '+', '- expr2 | expr3 | expr4']
+
+"(expr" FAIL
+
+"expr)" FAIL
+
+"(expr1) not expr2 and (expr3) or expr4" -> "" // ['+', 'expr1', '-', 'expr2', '+', 'expr3', '|', 'expr4']
+
+"(expr1) not expr2 | \"expressions not in and quotes | (are) not - parsed \" - (expr3) or expr4" -> "" // ['+', 'expr1', '-', 'expr2', '|', '"expressions not in and quotes | (are) not - parsed "', '-', 'expr3', '|', 'expr4']
+
+"expr1 \\\" expr2 foo(expr3) not expr4 \\\" and (expr5)" -> "" // ['+', 'expr1', '+', '\\"', '+', 'expr2', '+', 'foo(expr3)', '-', 'expr4', '+', '\\"', '+', 'expr5']
+
+// XXX: example of the confusion of '+' and AND
+"(expr1 and expr2) or expr3" -> "" // ['+', 'expr1 + expr2', '|', 'expr3'] 
+
+"(expr1 and expr2) or expr3" -> ""
+
+"(expr1 + expr2) | expr3" -> "" 
+
+"(expr1 and expr2) or expr3" -> ""
+
+"(expr1 + expr2) or expr3" -> ""
+
+"(expr1) - expr2 | "expressions - in + quotes | (are) not - parsed " - (expr3) | expr4" -> "" // ['+', 'expr1', '-', 'expr2', '|', '"expressions - in + quotes | (are) not - parsed "', '-', 'expr3', '|', 'expr4']
+
+"(expr1) - expr2 | 'expressions - in + quotes | (are) not - parsed ' - (expr3) | expr4" -> "" // ['+', 'expr1', '-', 'expr2', '|', "'expressions - in + quotes | (are) not - parsed '", '-', 'expr3', '|', 'expr4']
+
+"expr1 \\' expr2 +(expr3) -expr4 \\' + (expr5)" -> "" // ['+', 'expr1', '+', "\\'", '+', 'expr2', '+', 'expr3', '-', 'expr4', '+', "\\'", '+', 'expr5']
+
+"expr1 \\" expr2 +(expr3) -expr4 \\" + (expr5)" -> "" // ['+', 'expr1', '+', '\\"', '+', 'expr2', '+', 'expr3', '-', 'expr4', '+', '\\"', '+', 'expr5']
+
+"\"expr1\" - (expr2)" -> "" // ['+', '"expr1"', '-', 'expr2']
+
+"-\"expr1\" - (expr2)" -> "" // ['-', '"expr1"', '-', 'expr2']
+
+"p0 or p1 or p2 or p3 or p4" -> "" // ['+', 'p0', '|', 'p1', '|', 'p2', '|', 'p3', '|', 'p4']
+
+"(p0 or p1) not p2" -> "" //  ['+', 'p0 | p1', '-', 'p2']
+
+
+"foo oR bar" -> "" // ['+', 'foo', '|', 'bar']
+
+"(ellis )" -> "" // ['+', 'ellis']
+
+"(U(1) or SL(2,Z))" -> "" // ['+', 'u(1) | sl(2,z)']
+
+"refersto:(author:\"s parke\" or author:ellis)" -> "" // ['+', 'refersto:\'author:"s parke" | author:ellis\'']
+
+"refersto:(author:\'s parke\' or author:ellis)" -> "" // ['+', 'refersto:"author:\'s parke\' | author:ellis"']
+
+"refersto:(author:\"s parke\")" -> "" // ['+', 'refersto:author:"s parke"']
+
+"e(+)e(-)" -> "" // ['+', 'e(+)e(-)']
+
+"Fe(2+)" -> "" // ['+', 'fe(2+)']
+
+/*
+'+', 'measurements', '+', 'of', '+', 'cp-conserving', '+', 'trilinear', '+', 'gauge', \
+'+', 'boson', '+', 'couplings', '+', 'wwv', '+', 'v + gamma, + z', \
+'+', 'in', '+', 'e(+)e(-)', '+', 'collisions', '+', 'at', '+', 'lep2'
+*/
+"Measurements of CP-conserving trilinear gauge boson couplings WWV (V gamma, Z) in e(+)e(-) collisions at LEP2" -> "" 
+
+"refersto:(author:ellis or author:hawking)" -> "" // ['+', 'refersto:"author:ellis | author:hawking"']
+
+
+"te?t" OK
+
+"test*"  -> (AND (ATOM MODIFIER FIELD (VALUE (QTRUNCATED test*))))
+
+"te*t"  -> (AND (ATOM MODIFIER FIELD (VALUE (QTRUNCATED te*t))))
+
+"\"te*t\"" OK
+
+"\"text\"" OK
+
+"roam~0.8" OK
+
+"roam~" OK
+
+"9999" OK
+
+"\"jakarta apache\"~10" OK
+
+"mod_date:[20020101 TO 20030101]" OK
+
+"title:{Aida TO Carmen}" OK
+
+"jakarta^4 apache" OK
+
+"\"jakarta apache\"^4 \"Apache Lucene\"" OK
+
+"\"jakarta apache\" OR jakarta" OK
+
+"\"jakarta apache\" AND \"Apache Lucene\"" OK
+
+"+jakarta lucene" OK
+
+"\"jakarta apache\" NOT \"Apache Lucene\"" OK
+
+"\"jakarta apache\" -\"Apache Lucene\"" OK
+
+"(jakarta OR apache) AND website" OK
+
+"title:(+return +\"pink panther\")" OK
+
+"\(1\+1\)\:2" OK
+
+// TODO: fix
+"escape:(\+\-\&\&\|\|\!\(\)\{\}\[\]\^\"\~\*\?\:\\)" FAIL
+
+
+//---------------- primaryClause
+
+"this (that)" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+
+"this ((that))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+
+"(this) ((((((that))))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+
+"(this) (that)" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+
+"this +(that)" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this ((((+(that)))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this (+(((+(that)))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+
+"this +((((+(that)))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+
+"this +(+((((that)))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+
+"this (+(((+(that))))" FAIL
+
+"this (++(((+(that)))))" FAIL
+
+"this (+(that)^7)" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this ((((+(that)^7))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this (-(that)^7))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER -) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this -((that))^7" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER -) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+
+"this +(that thus)^7" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))) (ATOM MODIFIER FIELD (VALUE (QNORMAL thus))))))"
+
+
+//---------------- atom
+atom:
+
+"field:value" -> "(ATOM MODIFIER (FIELD field) (VALUE (QNORMAL value)))"
+
+"field:\"value\"" -> "(ATOM MODIFIER (FIELD field) (VALUE (QPHRASE \"value\")))"
+
+"field:(one two three)" -> "(ATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM MODIFIER (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+
+"field:(one +two -three)" -> "(ATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM (MODIFIER -) (VALUE (QNORMAL three)))))"
+
+"+field:(-one +two three)" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+
+"-field:(-one +two three)" -> "(ATOM (MODIFIER -) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+
+"+value" -> "(ATOM (MODIFIER +) FIELD (VALUE (QNORMAL value)))"
+
+"-value" -> "(ATOM (MODIFIER -) FIELD (VALUE (QNORMAL value)))"
+
+"+field:" FAIL
+
+"+field:[this TO that]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+
+"+field:[   this TO that   ]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+
+"+field:{this TO that}" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEEX (QNORMAL this) (QNORMAL that))))"
+
+"+field: [this TO that]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+
+//---------------- value
+
+value:
+
+"this" -> "(QNORMAL this)"
+
+"th\*is" -> "(QNORMAL th\\*is)"
+
+"this999" -> "(QNORMAL this999)"
+
+"this0.9" -> "(QNORMAL this0.9)"
+
+"\"this\"" -> "(QPHRASE \"this\")"
+
+"\"this  \"" -> "(QPHRASE \"this  \")"
+
+"\"this  \"   " -> "(QPHRASE \"this  \")"
+
+"\"  this  \"" -> "(QPHRASE \"  this  \")"
+
+"\"this*\"" -> "(QPHRASETRUNC \"this*\")"
+
+"\"this*a\"" -> "(QPHRASETRUNC \"this*a\")"
+
+"\"this?\"" -> "(QPHRASETRUNC \"this?\")"
+
+"\"this?a\"" -> "(QPHRASETRUNC \"this?a\")"
+
+"\"this val*\"" -> "(QPHRASETRUNC \"this val*\")"
+
+"\"this val?\"" -> "(QPHRASETRUNC \"this val?\")"
+
+"\"this*val?\"" -> "(QPHRASETRUNC \"this*val?\")"
+
+"\"?this\"" -> "(QPHRASETRUNC \"?this\")"
+
+"\"*this\"" -> "(QPHRASETRUNC \"*this\")"
+
+"\"+() AND that\"" -> "(QPHRASE \"+() AND that\")"
+
+"\"func(*) AND that\"" -> "(QPHRASETRUNC \"func(*) AND that\")"
+
+
+
+
+
+"[this TO that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO *]" -> "(QRANGEIN (QNORMAL this) QANYTHING)"
+
+"[this]" -> "(QRANGEIN (QNORMAL this) QANYTHING)"
+
+"[* this]" -> "(QRANGEIN QANYTHING (QNORMAL this))"
+
+"[* TO this]" -> "(QRANGEIN QANYTHING (QNORMAL this))"
+
+"[\"this\" TO \"that*\"]" -> "(QRANGEIN (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
+
+"[\"#$%^&\" TO \"&*()\"]" -> "(QRANGEIN (QPHRASE \"#$%^&\") (QPHRASETRUNC \"&*()\"))"
+
+"{this TO that}" -> "(QRANGEEX (QNORMAL this) (QNORMAL that))"
+
+"{this that}" -> "(QRANGEEX (QNORMAL this) (QNORMAL that))"
+
+"{this TO *}" -> "(QRANGEEX (QNORMAL this) QANYTHING)"
+
+"{* this}" -> "(QRANGEEX QANYTHING (QNORMAL this))"
+
+"{* TO this}" -> "(QRANGEEX QANYTHING (QNORMAL this))"
+
+"{\"this\" TO \"that*\"}" -> "(QRANGEEX (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
+
+"{\"#$%^&\" TO \"&*()\"}" -> "(QRANGEEX (QPHRASE \"#$%^&\") (QPHRASETRUNC \"&*()\"))"
+
+"{}" FAIL
+
+"[]" FAIL
+
+
+
+
+"this*" -> "(QTRUNCATED this*)"
+
+"*this*" -> "(QTRUNCATED *this*)"
+
+"*this" -> "(QTRUNCATED *this)"
+
+"th*is" -> "(QTRUNCATED th*is)"
+
+"this?" -> "(QTRUNCATED this?)"
+
+"?this?" -> "(QTRUNCATED ?this?)"
+
+"?this" -> "(QTRUNCATED ?this)"
+
+"th?is" -> "(QTRUNCATED th?is)"
+
+"th?is*" -> "(QTRUNCATED th?is*)"
+
+"*th?is" -> "(QTRUNCATED *th?is)"
+
+//TODO
+//"th*?is" FAIL
+//"th****?is" FAIL
+
+"*" FAIL
+
+
+
+
+// testing term modifiers
+
+"this^0.5" -> "(MODIFIER (BOOST 0.5) FUZZY) (QNORMAL this)"
+
+"this^5" -> "(MODIFIER (BOOST 5) FUZZY) (QNORMAL this)"
+
+"this^9999999999999" -> "(MODIFIER (BOOST 9999999999999) FUZZY) (QNORMAL this)"
+
+"this^6666.o" FAIL
+
+"this^ 5" -> "(MODIFIER (BOOST 5) FUZZY) (QNORMAL this)"
+
+
+//TODO: this should make '9' as a new term
+"this^5~ 9" -> "(MODIFIER (BOOST 5) (FUZZY 9)) (QNORMAL this)"  
+
+"this^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QNORMAL this)"
+
+"this^5~7" -> "(MODIFIER (BOOST 5) (FUZZY 7)) (QNORMAL this)"
+
+"this^5~8.9999" -> "(MODIFIER (BOOST 5) (FUZZY 8.9999)) (QNORMAL this)"
+
+"this~" -> "(MODIFIER BOOST (FUZZY 0.5)) (QNORMAL this)"
+
+"this~0.6" -> "(MODIFIER BOOST (FUZZY 0.6)) (QNORMAL this)"
+
+
+//TODO: either make the term_modifier accept any order or ~ and ^ or throw error
+// now it parses it wrongly (MODIFIER BOOST (FUZZY 5)) (QNORMAL this)
+"this~5^7" FAIL
+
+"this^~" FAIL
+
+"\"this that\"^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QPHRASE \"this that\")"
+
+"\"this that\"^5~6" -> "(MODIFIER (BOOST 5) (FUZZY 6)) (QPHRASE \"this that\")"
+
+"\"this that*\"^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QPHRASETRUNC \"this that*\")"
+
+"\"this that*\"^5~6" -> "(MODIFIER (BOOST 5) (FUZZY 6)) (QPHRASETRUNC \"this that*\")"
+
+"[this TO that]^5" -> "(MODIFIER (BOOST 5) FUZZY) (QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO that]^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO that]^5~0.6" -> "(MODIFIER (BOOST 5) (FUZZY 0.6)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO that]~" -> "(MODIFIER BOOST (FUZZY 0.5)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
+
+"[this TO that]~9" -> "(MODIFIER BOOST (FUZZY 9)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
