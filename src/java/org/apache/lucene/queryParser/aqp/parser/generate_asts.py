@@ -6,23 +6,25 @@ import os
 def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.jar:/x/dev/antlr-34/lib/antlr-3.4-complete.jar'):
     
     if not basedir:
-        basedir = os.path.abspath('../../../../../../../../bin/')
-        
+        basedir = os.path.abspath('../../../../../../../../bin')
+
+    old_dir = os.getcwd()        
     thisdir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(thisdir)
     
     cp += os.pathsep + basedir
     
     grammar_file = os.path.join(thisdir, grammar_name + '.g')
     
     if not os.path.exists(grammar_file):
-        raise Exception('Grammar %s does not exist' % grammar_file)
+        raise Exception('Grammar %s does not exist in classpath: %s' % (grammar_file, cp))
     
     tmp_file = os.path.join(basedir, 'ast-tree.dot')
     index_file = os.path.join(basedir, 'index.html')
     gunit_file = os.path.join(thisdir, grammar_name + '.gunit')
     generate_ast_command = 'java -cp %s org.apache.lucene.queryParser.aqp.parser.BuildAST %s "%%s"' % (cp, grammar_name)
     
-    generate_grammar_command = '%s/demo.sh "build-only" "%s"' % (thisdir, grammar_name)
+    generate_grammar_command = '%s/demo.sh build-only %s' % (thisdir, grammar_name)
     
     generate_svg_command = 'dot -Tsvg %s' % tmp_file
     
@@ -43,7 +45,11 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     
     toc.append('<a name="toc" />')
     
-    os.system(generate_grammar_command)
+    p = sub.Popen(generate_grammar_command.split(),stdout=sub.PIPE,stderr=sub.PIPE, cwd=thisdir)
+    output, errors = p.communicate()
+    if errors and 'Exception' in errors:
+        raise Exception(errors)
+    #os.system(generate_grammar_command)
     
     for section,values in test_cases.items():
         
@@ -103,7 +109,7 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     index_fo.close()
         
         
-        
+    os.chdir(old_dir)
         
 
 def load_gunit_file(gunit_file):
