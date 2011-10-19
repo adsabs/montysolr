@@ -20,7 +20,7 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
         raise Exception('Grammar %s does not exist in classpath: %s' % (grammar_file, cp))
     
     tmp_file = os.path.join(basedir, 'ast-tree.dot')
-    index_file = os.path.join(basedir, 'index.html')
+    index_file = os.path.join(basedir, '%s.html' % grammar_name)
     gunit_file = os.path.join(thisdir, grammar_name + '.gunit')
     generate_ast_command = 'java -cp %s org.apache.lucene.queryParser.aqp.parser.BuildAST %s "%%s"' % (cp, grammar_name)
     
@@ -108,7 +108,7 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     ''')    
     index_fo.close()
         
-        
+    print 'HTML charts generated into:', index_fo.name        
     os.chdir(old_dir)
         
 

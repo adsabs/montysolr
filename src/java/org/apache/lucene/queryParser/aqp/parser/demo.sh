@@ -3,7 +3,7 @@ set +e
 
 
 
-GRAMMAR=${2:=StandardLuceneGrammar}
+GRAMMAR=${2:-StandardLuceneGrammar}
 
 BINDIR=../../../../../../../../bin
 
