@@ -6,6 +6,7 @@ import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.Tree;
 import org.apache.lucene.messages.Message;
 import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.core.QueryNodeException;
@@ -14,6 +15,7 @@ import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.parser.SyntaxParser;
 
+import org.apache.lucene.queryParser.aqp.nodes.ASTNode;
 import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarLexer;
 import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarParser;
 import org.apache.lucene.queryParser.aqp.processors.ASTConvertProcessor;
@@ -46,11 +48,13 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 
 		// GET the AST tree
 		CommonTree astTree = (CommonTree) returnValue.getTree();
+		
+		return convertAST(astTree);
 
 
 		// convert it to QueryNodes
-		ASTConvertProcessor convertor = new ASTConvertProcessor();
-		return convertor.processAST(astTree);
+		//ASTConvertProcessor convertor = new ASTConvertProcessor();
+		//return convertor.processAST(astTree);
 		/*
 		try {
 			return convertor.processAST(astTree);
@@ -59,6 +63,15 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 			throw new QueryNodeParseException(new MessageImpl("Error converting AST query tree", e.getMessage()));
 		}
 		*/
+	}
+	
+	public QueryNode convertAST(Tree astTree) {
+		ASTNode root = new ASTNode(astTree);
+		for (int i=0; i < astTree.getChildCount(); i++) {
+			Tree child = astTree.getChild(i);
+			root.add(convertAST(child));
+		}
+		return root;
 	}
 
 }

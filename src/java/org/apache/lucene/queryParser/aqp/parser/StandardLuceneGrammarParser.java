@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-18 14:15:22
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-20 00:13:03
 
    package org.apache.lucene.queryParser.aqp.parser;
 
@@ -815,7 +815,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    if ( state.backtracking==0 ) stream_primaryClause.add(others.getTree());
 
             	    // AST REWRITE
-            	    // elements: primaryClause, near
+            	    // elements: near, primaryClause
             	    // token labels: 
             	    // rule labels: retval
             	    // token list labels: 
@@ -1296,7 +1296,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: NUMBER, modifier, clauseDefault
+                    // elements: clauseDefault, NUMBER, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1688,7 +1688,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_multi_value.add(multi_value24.getTree());
 
                     // AST REWRITE
-                    // elements: modifier, multi_value, field
+                    // elements: multi_value, field, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1824,7 +1824,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_value.add(value27.getTree());
 
                     // AST REWRITE
-                    // elements: modifier, value, field
+                    // elements: field, modifier, value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2577,7 +2577,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 
                     // AST REWRITE
-                    // elements: b, a
+                    // elements: a, b
                     // token labels: 
                     // rule labels: retval, b, a
                     // token list labels: 
@@ -4052,7 +4052,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     	    // AST REWRITE
-                    	    // elements: NUMBER, b
+                    	    // elements: b, NUMBER
                     	    // token labels: b
                     	    // rule labels: retval
                     	    // token list labels: 
