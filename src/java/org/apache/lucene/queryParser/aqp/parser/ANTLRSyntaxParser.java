@@ -15,7 +15,9 @@ import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.parser.SyntaxParser;
 
-import org.apache.lucene.queryParser.aqp.nodes.ASTNode;
+import org.apache.lucene.queryParser.aqp.AqpCommonTree;
+import org.apache.lucene.queryParser.aqp.AqpCommonTreeAdaptor;
+import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarLexer;
 import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarParser;
 import org.apache.lucene.queryParser.aqp.processors.ASTConvertProcessor;
@@ -32,6 +34,10 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 		StandardLuceneGrammarParser parser = new StandardLuceneGrammarParser(
 				tokens);
 		StandardLuceneGrammarParser.mainQ_return returnValue;
+		
+		AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor();
+		parser.setTreeAdaptor(adaptor);
+		
 		try {
 			returnValue = parser.mainQ();
 		} catch (RecognitionException e) {
@@ -47,9 +53,14 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 		}
 
 		// GET the AST tree
-		CommonTree astTree = (CommonTree) returnValue.getTree();
+		AqpCommonTree astTree = (AqpCommonTree) returnValue.getTree();
 		
-		return convertAST(astTree);
+		QueryNode t = astTree.toQueryNodeTree();
+		
+		System.out.println(((AqpANTLRNode)t).toStringRecursive());
+		return t;
+		
+		//return convertAST(astTree);
 
 
 		// convert it to QueryNodes
@@ -64,7 +75,7 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 		}
 		*/
 	}
-	
+	/*
 	public QueryNode convertAST(Tree astTree) {
 		ASTNode root = new ASTNode(astTree);
 		for (int i=0; i < astTree.getChildCount(); i++) {
@@ -73,5 +84,7 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 		}
 		return root;
 	}
+	*/
+	
 
 }
