@@ -35,7 +35,7 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 				tokens);
 		StandardLuceneGrammarParser.mainQ_return returnValue;
 		
-		AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor();
+		AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor(parser.getTokenNames());
 		parser.setTreeAdaptor(adaptor);
 		
 		try {
@@ -57,7 +57,8 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 		
 		QueryNode t = astTree.toQueryNodeTree();
 		
-		System.out.println(((AqpANTLRNode)t).toStringRecursive());
+		System.out.println(query);
+		System.out.println(((AqpANTLRNode)t));
 		return t;
 		
 		//return convertAST(astTree);

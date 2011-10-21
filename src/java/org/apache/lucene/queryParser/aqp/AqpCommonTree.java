@@ -1,5 +1,7 @@
 package org.apache.lucene.queryParser.aqp;
 
+import java.util.Map;
+
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
@@ -9,6 +11,8 @@ import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 
 public class AqpCommonTree extends CommonTree {
+	
+	protected Map<Integer, String> typeToNameMap;
 	
 	public AqpCommonTree() { }
 	
@@ -42,7 +46,7 @@ public class AqpCommonTree extends CommonTree {
     	return (QueryNode) new AqpANTLRNode(this);
     }
     
-    public String getTokenType() {
+    public String getTokenLabel() {
     	if ( isNil() ) {
 			return "nil";
 		}
@@ -69,12 +73,25 @@ public class AqpCommonTree extends CommonTree {
 		}
     }
     
+    public int getTokenType() {
+    	return token.getType();
+    }
+    
+    public String getTypeLabel() {
+    	int t = getTokenType();
+    	return typeToNameMap.get(t);
+    }
+    
     public int getStartIndex() {
     	return ((CommonToken)token).getStartIndex();
     }
     
     public int getStopIndex() {
     	return ((CommonToken)token).getStopIndex();
+    }
+    
+    public void setTypeToNameMap(Map<Integer, String> typeMap) {
+    	typeToNameMap = typeMap; 
     }
     
 }

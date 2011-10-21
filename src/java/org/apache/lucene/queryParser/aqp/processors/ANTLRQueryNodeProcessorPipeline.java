@@ -64,7 +64,8 @@ public class ANTLRQueryNodeProcessorPipeline extends
 
   public ANTLRQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
     super(queryConfig);
-
+    
+    add(new AqpTreeRewriteProcessor());
     add(new WildcardQueryNodeProcessor());
     add(new MultiFieldQueryNodeProcessor());
     add(new FuzzyQueryNodeProcessor());
