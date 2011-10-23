@@ -9,6 +9,7 @@ tokens {
   OPERATOR;
   ATOM;
   MODIFIER;
+  TMODIFIER;
   VALUE;
   CLAUSE;
   FIELD;
@@ -171,18 +172,18 @@ This grammar has problem with following
 term_modifier	:	
 	// first alternative
 	(
-	  (CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))
+	  (CARAT b=NUMBER -> ^(TMODIFIER ^(BOOST $b) ^(FUZZY ))
 	 ) 
 	( //syntactic predicate
-	 (TILDE NUMBER )=>TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)) //
-	 | TILDE -> ^(MODIFIER ^(BOOST $b) ^(FUZZY NUMBER["0.5"]))
+	 (TILDE NUMBER )=>TILDE f=NUMBER -> ^(TMODIFIER ^(BOOST $b) ^(FUZZY $f)) //
+	 | TILDE -> ^(TMODIFIER ^(BOOST $b) ^(FUZZY NUMBER["0.5"]))
 	 )* // set the default value
 	
 	)
 	// second alternative [only ~ | ~NUMBER]
 	| 
-	  (TILDE -> ^(MODIFIER ^(BOOST) ^(FUZZY NUMBER["0.5"])) ) // set the default value
-	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
+	  (TILDE -> ^(TMODIFIER ^(BOOST) ^(FUZZY NUMBER["0.5"])) ) // set the default value
+	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(TMODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
 	
 	;
 

@@ -201,6 +201,8 @@ public class TestQPHelperAqpSimple extends LuceneTestCase {
 		
 		Query query;
 		
+		query = qp.parse("something", "field");
+		
 		query = qp.parse("A AND B C AND D", "field");
 		
 		query = qp.parse("this OR that AND thus", "field");

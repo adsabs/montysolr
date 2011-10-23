@@ -66,6 +66,7 @@ public class ANTLRQueryNodeProcessorPipeline extends
     super(queryConfig);
     
     add(new AqpTreeRewriteProcessor());
+    add(new AqpQNORMALProcessor());
     add(new WildcardQueryNodeProcessor());
     add(new MultiFieldQueryNodeProcessor());
     add(new FuzzyQueryNodeProcessor());

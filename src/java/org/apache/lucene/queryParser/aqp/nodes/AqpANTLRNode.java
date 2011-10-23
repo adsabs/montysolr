@@ -34,7 +34,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 		String input = node.getTokenInput();
 
 		if (input != null) {
-			setTokenInput(tokenInput);
+			setTokenInput(input);
 		}
 
 		setTokenLabel(node.getTokenLabel());
@@ -61,7 +61,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 	public String toStringNodeOnly() {
 		if (getTokenInput() != null) {
 			return "<ast value=\"" + getTokenInput() + "\" start=\""
-					+ tree.getStartIndex() + "\" end=\"" + tree.getStopIndex()
+					+ getTokenStart() + "\" end=\"" + getTokenEnd()
 					+ "\" />";
 		} else {
 			return "<ast type=\"" + getTokenLabel() + "\" />";
@@ -81,9 +81,9 @@ public class AqpANTLRNode extends QueryNodeImpl {
 
 		buf.append("<ast ");
 
-		if (this.tokenInput != null) {
+		if (getTokenInput() != null) {
 			buf.append("value=\"" + getTokenInput() + "\" start=\""
-					+ tree.getStartIndex() + "\" end=\"" + tree.getStopIndex()
+					+ getTokenStart() + "\" end=\"" + getTokenEnd()
 					+ "\"");
 		} else {
 			buf.append("label=\"" + getTokenLabel() + "\"");
@@ -143,6 +143,14 @@ public class AqpANTLRNode extends QueryNodeImpl {
 
 	public void setTokenInput(String tokenInput) {
 		this.tokenInput = tokenInput;
+	}
+	
+	public int getTokenStart() {
+		return tree.getStartIndex();
+	}
+	
+	public int getTokenEnd() {
+		return tree.getStopIndex();
 	}
 
 }

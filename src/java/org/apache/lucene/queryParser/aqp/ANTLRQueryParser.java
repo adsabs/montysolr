@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryParser.aqp.parser.ANTLRSyntaxParser;
 import org.apache.lucene.queryParser.aqp.processors.ANTLRQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
@@ -111,7 +112,8 @@ public class ANTLRQueryParser extends QueryParserHelper {
    * Constructs a {@link StandardQueryParser} object.
    */
   public ANTLRQueryParser() {
-    super(new StandardQueryConfigHandler(), new ANTLRSyntaxParser(),
+    super(new AqpStandardQueryConfigHandler(), 
+    	new ANTLRSyntaxParser(),
         new ANTLRQueryNodeProcessorPipeline(null),
         new StandardQueryTreeBuilder());
   }
