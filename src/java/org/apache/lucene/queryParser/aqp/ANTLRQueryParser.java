@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.parser.ANTLRSyntaxParser;
 import org.apache.lucene.queryParser.aqp.processors.ANTLRQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
@@ -202,8 +203,12 @@ public class ANTLRQueryParser extends QueryParserHelper {
   @Override
   public Query parse(String query, String defaultField)
       throws QueryNodeException {
-
-    return (Query) super.parse(query, defaultField);
+	  
+	  QueryConfigHandler cfg = getQueryConfigHandler();
+	  DefaultFieldAttribute attr = cfg.getAttribute(DefaultFieldAttribute.class);
+	  attr.setDefaultField(defaultField);
+	  
+      return (Query) super.parse(query, defaultField);
 
   }
 
