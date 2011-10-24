@@ -14,6 +14,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.standard.nodes.BooleanModifierNode;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode.Modifier;
 
 public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
@@ -27,7 +28,7 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 	}
 
 	@Override
-	protected QueryNode postProcessNode(QueryNode node)
+	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
 		return node;
 	}
@@ -40,7 +41,9 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 	 *   OR
 	 *   	- applies {@see ModifierQueryNode.Modifier.MOD_NONE} to all children
 	 *   NOT
-	 *   	- applies {@see ModifierQueryNode.Modifier.MOD_NOT} to all children
+	 *   	- applies {@see ModifierQueryNode.Modifier.MOD_REQ} to the first child
+	 *        and {@see ModifierQueryNode.Modifier.MOD_NOT} to the rest. This query
+	 *        means "x AND NOT y"
 	 *   WITH
 	 *   	- not implemented yet
 	 *   PARAGRAPH
@@ -53,7 +56,7 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 	 * @see org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl#preProcessNode(org.apache.lucene.queryParser.core.nodes.QueryNode)
 	 */
 	@Override
-	protected QueryNode preProcessNode(QueryNode node)
+	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 		
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenName().equals("OPERATOR")) {
@@ -88,25 +91,35 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 	 * (unless it is already of the type ModifierQueryNode)
 	 */
 	private List<QueryNode> getChildren(QueryNode node, AqpOPERATORProcessor.OPERATOR operator) {
-		ModifierQueryNode.Modifier mod = null;
+		Modifier mod = null;
+		Modifier firstMod = null;
+		List<QueryNode> children = node.getChildren();
+		
 		switch (operator) {
 		case AND:
-			mod = ModifierQueryNode.Modifier.MOD_REQ;
+			mod = Modifier.MOD_REQ;
 			break;
 		case NOT:
-			mod = ModifierQueryNode.Modifier.MOD_NOT;
+			mod = Modifier.MOD_NOT;
+			firstMod = Modifier.MOD_REQ;
 			break;
 		case OR:
-			mod = ModifierQueryNode.Modifier.MOD_NONE;
+			mod = Modifier.MOD_NONE;
 			break;
 		default:
 			throw new IllegalArgumentException("This call accepts only standard Boolean operators");
 		}
 		
-		List<QueryNode> children = node.getChildren();
+		
 		for (int i=0;i<children.size();i++) {
-			if (!(children.get(i) instanceof ModifierQueryNode)) {
-				children.set(i, new ModifierQueryNode(children.get(i), mod));
+			QueryNode child = children.get(i);
+			if (child instanceof ModifierQueryNode) {
+				children.set(i, new ModifierQueryNode(child.getChildren().get(0), 
+						i==0&&firstMod!=null ? firstMod : mod));
+			} 
+			else {
+				children.set(i, new ModifierQueryNode(children.get(i), 
+						i==0&&firstMod!=null ? firstMod : mod));
 			}
 		}
 		return children;

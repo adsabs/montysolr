@@ -39,7 +39,7 @@ mainQ :
    
   
 clauseDefault
-  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(OPERATOR["NOT"] clauseStrongest+ ))*
+  : (first=clauseStrongest -> $first) (OR others=clauseStrongest -> ^(OPERATOR["OR"] clauseStrongest+ ))*
   ;
 
 clauseStrongest
@@ -47,7 +47,7 @@ clauseStrongest
   ;
   
 clauseStrong
-  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OPERATOR["OR"] clauseWeak+ ))*
+  : (first=clauseWeak -> $first) (NOT others=clauseWeak -> ^(OPERATOR["NOT"] clauseWeak+ ))*
   ;
   
 clauseWeak

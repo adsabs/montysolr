@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.GroupQueryNode;
+import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
+import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.parser.EscapeQuerySyntax;
 
@@ -37,9 +39,13 @@ public class NotQueryNode extends BooleanQueryNode {
    */
   public NotQueryNode(List<QueryNode> clauses) {
     super(clauses);
-    if ((clauses == null) || (clauses.size() == 0)) {
+    if ((clauses == null) || (clauses.size() < 2)) {
       throw new IllegalArgumentException(
-          "OR query must have at least one clause");
+          "NOT query must have at least two clauses");
+    }
+    if (((ModifierQueryNode)clauses.get(0)).getModifier()!=Modifier.MOD_REQ) {
+    	throw new IllegalArgumentException(
+        	"The first node of the NOT query must be required");
     }
   }
 

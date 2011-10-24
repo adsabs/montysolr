@@ -202,10 +202,25 @@ public class TestQPHelperAqpSimple extends LuceneTestCase {
 		Query query;
 		
 		query = qp.parse("something", "field");
+		System.out.println(query);
 		
 		query = qp.parse("A AND B C AND D", "field");
+		System.out.println(query);
 		
 		query = qp.parse("this OR that AND thus", "field");
+		System.out.println(query);
+		
+		query = qp.parse("this OR +that", "field");
+		System.out.println(query);
+		
+		query = qp.parse("this OR that NOT thus", "field");
+		System.out.println(query);
+		
+		query = qp.parse("this OR (that AND thus) NOT then", "field");
+		System.out.println(query);
+		
+		query = qp.parse("-notthis -notthat", "field");
+		System.out.println(query);
 		
 		assertQueryEquals(query.toString(), analyzer, "BooleanQuery()");
 		

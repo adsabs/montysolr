@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-24 15:49:00
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-24 18:53:10
 
    package org.apache.lucene.queryParser.aqp.parser;
 
@@ -231,7 +231,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseDefault"
-    // StandardLuceneGrammar.g:41:1: clauseDefault : (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )* ;
+    // StandardLuceneGrammar.g:41:1: clauseDefault : (first= clauseStrongest -> $first) ( OR others= clauseStrongest -> ^( OPERATOR[\"OR\"] ( clauseStrongest )+ ) )* ;
     public final StandardLuceneGrammarParser.clauseDefault_return clauseDefault() throws RecognitionException {
         StandardLuceneGrammarParser.clauseDefault_return retval = new StandardLuceneGrammarParser.clauseDefault_return();
         retval.start = input.LT(1);
@@ -239,18 +239,18 @@ public TreeAdaptor getTreeAdaptor() {
 
         Object root_0 = null;
 
-        Token NOT2=null;
+        Token OR2=null;
         StandardLuceneGrammarParser.clauseStrongest_return first =null;
 
         StandardLuceneGrammarParser.clauseStrongest_return others =null;
 
 
-        Object NOT2_tree=null;
-        RewriteRuleTokenStream stream_NOT=new RewriteRuleTokenStream(adaptor,"token NOT");
+        Object OR2_tree=null;
+        RewriteRuleTokenStream stream_OR=new RewriteRuleTokenStream(adaptor,"token OR");
         RewriteRuleSubtreeStream stream_clauseStrongest=new RewriteRuleSubtreeStream(adaptor,"rule clauseStrongest");
         try {
-            // StandardLuceneGrammar.g:42:3: ( (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )* )
-            // StandardLuceneGrammar.g:42:5: (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )*
+            // StandardLuceneGrammar.g:42:3: ( (first= clauseStrongest -> $first) ( OR others= clauseStrongest -> ^( OPERATOR[\"OR\"] ( clauseStrongest )+ ) )* )
+            // StandardLuceneGrammar.g:42:5: (first= clauseStrongest -> $first) ( OR others= clauseStrongest -> ^( OPERATOR[\"OR\"] ( clauseStrongest )+ ) )*
             {
             // StandardLuceneGrammar.g:42:5: (first= clauseStrongest -> $first)
             // StandardLuceneGrammar.g:42:6: first= clauseStrongest
@@ -289,23 +289,23 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:42:39: ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )*
+            // StandardLuceneGrammar.g:42:39: ( OR others= clauseStrongest -> ^( OPERATOR[\"OR\"] ( clauseStrongest )+ ) )*
             loop2:
             do {
                 int alt2=2;
                 int LA2_0 = input.LA(1);
 
-                if ( (LA2_0==NOT) ) {
+                if ( (LA2_0==OR) ) {
                     alt2=1;
                 }
 
 
                 switch (alt2) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:42:40: NOT others= clauseStrongest
+            	    // StandardLuceneGrammar.g:42:40: OR others= clauseStrongest
             	    {
-            	    NOT2=(Token)match(input,NOT,FOLLOW_NOT_in_clauseDefault185); if (state.failed) return retval; 
-            	    if ( state.backtracking==0 ) stream_NOT.add(NOT2);
+            	    OR2=(Token)match(input,OR,FOLLOW_OR_in_clauseDefault185); if (state.failed) return retval; 
+            	    if ( state.backtracking==0 ) stream_OR.add(OR2);
 
 
             	    pushFollow(FOLLOW_clauseStrongest_in_clauseDefault189);
@@ -328,13 +328,13 @@ public TreeAdaptor getTreeAdaptor() {
             	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             	    root_0 = (Object)adaptor.nil();
-            	    // 42:67: -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ )
+            	    // 42:66: -> ^( OPERATOR[\"OR\"] ( clauseStrongest )+ )
             	    {
-            	        // StandardLuceneGrammar.g:42:70: ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ )
+            	        // StandardLuceneGrammar.g:42:69: ^( OPERATOR[\"OR\"] ( clauseStrongest )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
-            	        (Object)adaptor.create(OPERATOR, "NOT")
+            	        (Object)adaptor.create(OPERATOR, "OR")
             	        , root_1);
 
             	        if ( !(stream_clauseStrongest.hasNext()) ) {
@@ -563,7 +563,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseStrong"
-    // StandardLuceneGrammar.g:49:1: clauseStrong : (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )* ;
+    // StandardLuceneGrammar.g:49:1: clauseStrong : (first= clauseWeak -> $first) ( NOT others= clauseWeak -> ^( OPERATOR[\"NOT\"] ( clauseWeak )+ ) )* ;
     public final StandardLuceneGrammarParser.clauseStrong_return clauseStrong() throws RecognitionException {
         StandardLuceneGrammarParser.clauseStrong_return retval = new StandardLuceneGrammarParser.clauseStrong_return();
         retval.start = input.LT(1);
@@ -571,18 +571,18 @@ public TreeAdaptor getTreeAdaptor() {
 
         Object root_0 = null;
 
-        Token OR4=null;
+        Token NOT4=null;
         StandardLuceneGrammarParser.clauseWeak_return first =null;
 
         StandardLuceneGrammarParser.clauseWeak_return others =null;
 
 
-        Object OR4_tree=null;
-        RewriteRuleTokenStream stream_OR=new RewriteRuleTokenStream(adaptor,"token OR");
+        Object NOT4_tree=null;
+        RewriteRuleTokenStream stream_NOT=new RewriteRuleTokenStream(adaptor,"token NOT");
         RewriteRuleSubtreeStream stream_clauseWeak=new RewriteRuleSubtreeStream(adaptor,"rule clauseWeak");
         try {
-            // StandardLuceneGrammar.g:50:3: ( (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )* )
-            // StandardLuceneGrammar.g:50:5: (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )*
+            // StandardLuceneGrammar.g:50:3: ( (first= clauseWeak -> $first) ( NOT others= clauseWeak -> ^( OPERATOR[\"NOT\"] ( clauseWeak )+ ) )* )
+            // StandardLuceneGrammar.g:50:5: (first= clauseWeak -> $first) ( NOT others= clauseWeak -> ^( OPERATOR[\"NOT\"] ( clauseWeak )+ ) )*
             {
             // StandardLuceneGrammar.g:50:5: (first= clauseWeak -> $first)
             // StandardLuceneGrammar.g:50:6: first= clauseWeak
@@ -621,23 +621,23 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:50:34: ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )*
+            // StandardLuceneGrammar.g:50:34: ( NOT others= clauseWeak -> ^( OPERATOR[\"NOT\"] ( clauseWeak )+ ) )*
             loop4:
             do {
                 int alt4=2;
                 int LA4_0 = input.LA(1);
 
-                if ( (LA4_0==OR) ) {
+                if ( (LA4_0==NOT) ) {
                     alt4=1;
                 }
 
 
                 switch (alt4) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:50:35: OR others= clauseWeak
+            	    // StandardLuceneGrammar.g:50:35: NOT others= clauseWeak
             	    {
-            	    OR4=(Token)match(input,OR,FOLLOW_OR_in_clauseStrong272); if (state.failed) return retval; 
-            	    if ( state.backtracking==0 ) stream_OR.add(OR4);
+            	    NOT4=(Token)match(input,NOT,FOLLOW_NOT_in_clauseStrong272); if (state.failed) return retval; 
+            	    if ( state.backtracking==0 ) stream_NOT.add(NOT4);
 
 
             	    pushFollow(FOLLOW_clauseWeak_in_clauseStrong276);
@@ -660,13 +660,13 @@ public TreeAdaptor getTreeAdaptor() {
             	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             	    root_0 = (Object)adaptor.nil();
-            	    // 50:56: -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ )
+            	    // 50:57: -> ^( OPERATOR[\"NOT\"] ( clauseWeak )+ )
             	    {
-            	        // StandardLuceneGrammar.g:50:59: ^( OPERATOR[\"OR\"] ( clauseWeak )+ )
+            	        // StandardLuceneGrammar.g:50:60: ^( OPERATOR[\"NOT\"] ( clauseWeak )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
-            	        (Object)adaptor.create(OPERATOR, "OR")
+            	        (Object)adaptor.create(OPERATOR, "NOT")
             	        , root_1);
 
             	        if ( !(stream_clauseWeak.hasNext()) ) {
@@ -1113,7 +1113,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: modifier, clauseDefault, NUMBER
+                    // elements: clauseDefault, NUMBER, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1690,7 +1690,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_multi_value.add(multi_value24.getTree());
 
                     // AST REWRITE
-                    // elements: modifier, field, multi_value
+                    // elements: multi_value, field, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1826,7 +1826,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_value.add(value27.getTree());
 
                     // AST REWRITE
-                    // elements: field, value, modifier
+                    // elements: field, modifier, value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2400,7 +2400,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: value, term_modifier
+            // elements: term_modifier, value
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -2583,7 +2583,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 
                     // AST REWRITE
-                    // elements: b, a
+                    // elements: a, b
                     // token labels: 
                     // rule labels: retval, b, a
                     // token list labels: 
@@ -4000,7 +4000,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     	    // AST REWRITE
-                    	    // elements: f, b
+                    	    // elements: b, f
                     	    // token labels: f, b
                     	    // rule labels: retval
                     	    // token list labels: 
@@ -4853,15 +4853,15 @@ public TreeAdaptor getTreeAdaptor() {
  
 
     public static final BitSet FOLLOW_clauseDefault_in_mainQ143 = new BitSet(new long[]{0x00006000E41E0002L});
-    public static final BitSet FOLLOW_clauseStrongest_in_clauseDefault176 = new BitSet(new long[]{0x0000000002000002L});
-    public static final BitSet FOLLOW_NOT_in_clauseDefault185 = new BitSet(new long[]{0x00006000E41E0000L});
-    public static final BitSet FOLLOW_clauseStrongest_in_clauseDefault189 = new BitSet(new long[]{0x0000000002000002L});
+    public static final BitSet FOLLOW_clauseStrongest_in_clauseDefault176 = new BitSet(new long[]{0x0000000010000002L});
+    public static final BitSet FOLLOW_OR_in_clauseDefault185 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseStrongest_in_clauseDefault189 = new BitSet(new long[]{0x0000000010000002L});
     public static final BitSet FOLLOW_clauseStrong_in_clauseStrongest218 = new BitSet(new long[]{0x0000000000000042L});
     public static final BitSet FOLLOW_AND_in_clauseStrongest228 = new BitSet(new long[]{0x00006000E41E0000L});
     public static final BitSet FOLLOW_clauseStrong_in_clauseStrongest232 = new BitSet(new long[]{0x0000000000000042L});
-    public static final BitSet FOLLOW_clauseWeak_in_clauseStrong263 = new BitSet(new long[]{0x0000000010000002L});
-    public static final BitSet FOLLOW_OR_in_clauseStrong272 = new BitSet(new long[]{0x00006000E41E0000L});
-    public static final BitSet FOLLOW_clauseWeak_in_clauseStrong276 = new BitSet(new long[]{0x0000000010000002L});
+    public static final BitSet FOLLOW_clauseWeak_in_clauseStrong263 = new BitSet(new long[]{0x0000000002000002L});
+    public static final BitSet FOLLOW_NOT_in_clauseStrong272 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseWeak_in_clauseStrong276 = new BitSet(new long[]{0x0000000002000002L});
     public static final BitSet FOLLOW_primaryClause_in_clauseWeak307 = new BitSet(new long[]{0x0000000000800002L});
     public static final BitSet FOLLOW_near_in_clauseWeak316 = new BitSet(new long[]{0x00006000E41E0000L});
     public static final BitSet FOLLOW_primaryClause_in_clauseWeak320 = new BitSet(new long[]{0x0000000000800002L});

@@ -11,6 +11,8 @@ import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
+import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
+import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryParser.core.nodes.ParametricQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ParametricQueryNode.CompareOperator;
 import org.apache.lucene.queryParser.core.nodes.ParametricRangeQueryNode;
@@ -60,6 +62,19 @@ public class AqpATOMProcessor extends QueryNodeProcessorImpl implements
 			
 			if (boost!=null) {
 				userInput = new BoostQueryNode(userInput, boost);
+			}
+			
+			if (modifierNode!=null && modifierNode.getChildren()!=null) {
+				String mod = ((AqpANTLRNode) modifierNode.getChildren().get(0)).getTokenInput();
+				if (mod.equals("+")) {
+					userInput = new ModifierQueryNode(userInput, Modifier.MOD_REQ);
+				}
+				else if (mod.equals("-")) {
+					userInput = new ModifierQueryNode(userInput, Modifier.MOD_NOT);
+				}
+				else {
+					throw new IllegalArgumentException("This processor understands only +/- as modifiers");
+				}
 			}
 			
 			return userInput;
