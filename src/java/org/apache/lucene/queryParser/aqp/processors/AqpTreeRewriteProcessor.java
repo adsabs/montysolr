@@ -29,21 +29,20 @@ public class AqpTreeRewriteProcessor extends QueryNodeProcessorImpl {
 			}
 			
 			if (node.getParent()==null && children.size() > 1) { // it is a root mode
-				Integer last = ((AqpANTLRNode)children.get(0)).getTokenType();
-				Integer tt = null;
+				String last = ((AqpANTLRNode)children.get(0)).getTokenLabel();
 				boolean rewriteSafe = true;
+				// check all children nodes are of the same type
 				for (int i=1;i<children.size();i++) {
 					AqpANTLRNode t = (AqpANTLRNode) children.get(i);
-					tt = t.getTokenType();
-					if (tt != last) {
+					String tt = t.getTokenLabel();
+					if (!(tt.equals(last) && t.getTokenName().equals("OPERATOR"))) {
 						rewriteSafe = false;
 						break;
 					}
 				}
-				if (rewriteSafe==true && ((AqpANTLRNode)children.get(0)).getTokenName().equals("OPERATOR")) {
+				if (rewriteSafe==true) {
 					
 					QueryNode firstChild = children.get(0);
-					
 					List<QueryNode> childrenList = firstChild.getChildren();
 					
 					for (int i=1;i<children.size();i++) {
@@ -54,7 +53,6 @@ public class AqpTreeRewriteProcessor extends QueryNodeProcessorImpl {
 					}
 					
 					children.clear();
-					children.add(firstChild);
 					parent.set(childrenList);
 				}
 			}

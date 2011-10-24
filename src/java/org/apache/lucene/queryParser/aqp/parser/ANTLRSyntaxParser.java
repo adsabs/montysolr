@@ -55,37 +55,8 @@ public class ANTLRSyntaxParser implements SyntaxParser {
 		// GET the AST tree
 		AqpCommonTree astTree = (AqpCommonTree) returnValue.getTree();
 		
-		QueryNode t = astTree.toQueryNodeTree();
+		return astTree.toQueryNodeTree();
 		
-		System.out.println(query);
-		System.out.println(((AqpANTLRNode)t));
-		return t;
-		
-		//return convertAST(astTree);
-
-
-		// convert it to QueryNodes
-		//ASTConvertProcessor convertor = new ASTConvertProcessor();
-		//return convertor.processAST(astTree);
-		/*
-		try {
-			return convertor.processAST(astTree);
-		} catch (QueryNodeException e) {
-			// TODO Auto-generated catch block
-			throw new QueryNodeParseException(new MessageImpl("Error converting AST query tree", e.getMessage()));
-		}
-		*/
 	}
-	/*
-	public QueryNode convertAST(Tree astTree) {
-		ASTNode root = new ASTNode(astTree);
-		for (int i=0; i < astTree.getChildCount(); i++) {
-			Tree child = astTree.getChild(i);
-			root.add(convertAST(child));
-		}
-		return root;
-	}
-	*/
-	
 
 }

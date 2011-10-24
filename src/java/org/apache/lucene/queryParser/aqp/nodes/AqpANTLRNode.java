@@ -23,6 +23,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 	private String tokenName;
 
 	private String tokenInput = null;
+	
 
 	/**
 	 * @param node
@@ -70,10 +71,10 @@ public class AqpANTLRNode extends QueryNodeImpl {
 
 	@Override
 	public String toString() {
-		return toStringRecursive(0);
+		return toString(0);
 	}
 
-	public String toStringRecursive(int level) {
+	public String toString(int level) {
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < level; i++) {
 			buf.append(" ");
@@ -96,7 +97,12 @@ public class AqpANTLRNode extends QueryNodeImpl {
 		if (children != null) {
 			buf.append(">\n");
 			for (QueryNode child : children) {
-				buf.append(((AqpANTLRNode) child).toStringRecursive(level + 4));
+				if (child instanceof AqpANTLRNode) {
+					buf.append(((AqpANTLRNode) child).toString(level+4));
+				}
+				else {
+					buf.append(child.toString());
+				}
 			}
 		}
 

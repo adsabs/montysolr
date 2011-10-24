@@ -18,6 +18,8 @@ import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryParser.core.parser.SyntaxParser;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.standard.QueryParserUtil;
@@ -32,7 +34,9 @@ import org.apache.lucene.util.LuceneTestCase;
  * 
  * Tests QueryParser.
  */
-public class TestQPHelperAqpSimple extends LuceneTestCase {
+public class TestAqpSimple extends LuceneTestCase {
+	
+	private boolean verbose = true;
 
 	public static Analyzer qpAnalyzer = new QPTestAnalyzer();
 
@@ -189,9 +193,47 @@ public class TestQPHelperAqpSimple extends LuceneTestCase {
 					+ "/, expecting /" + result + "/");
 		}
 	}
+	
 
-
-
+	private void assertQueryMatch(ANTLRQueryParser qp, String queryString,
+			String defaultField, String expectedResult) throws QueryNodeException {
+		
+		Query query = qp.parse(queryString, defaultField);
+		String queryParsed = query.toString();
+		
+		
+		
+		if (!queryParsed.equals(expectedResult)) {
+			
+			if (this.verbose) {
+				
+				SyntaxParser parser = qp.getSyntaxParser();
+				QueryNode queryTree = parser.parse(queryString, defaultField);
+				
+				System.out.println(" ----- AST QNTRee ----");
+				System.out.print(queryTree);
+				QueryNodeProcessor processor = qp.getQueryNodeProcessor();
+			    if (processor != null) {
+			      queryTree = processor.process(queryTree);
+			    }
+			    System.out.println(" ----- ProcessedQN ----");
+			    System.out.println(queryTree);
+			    System.out.println("query:\t\t" + queryString);
+				System.out.println("result:\t\t" + queryParsed);
+			}
+			
+			String msg = "Query /" + queryString + "/ with field: " + defaultField
+			+ "/ yielded /" + queryParsed
+			+ "/, expecting /" + expectedResult + "/";
+			
+			if (this.verbose) {
+				System.err.println(msg);
+			}
+			else {
+				fail(msg);
+			}
+		}
+	}
 
 	public void testBooleanQuery() throws Exception {
 		
@@ -199,30 +241,29 @@ public class TestQPHelperAqpSimple extends LuceneTestCase {
 		
 		ANTLRQueryParser qp = getParser(analyzer);
 		
-		Query query;
 		
-		query = qp.parse("something", "field");
-		System.out.println(query);
+		assertQueryMatch(qp, "something", "field", 
+				             "field:something");
 		
-		query = qp.parse("A AND B C AND D", "field");
-		System.out.println(query);
+		assertQueryMatch(qp, "A AND B C AND D", "field", 
+				             "+field:A +field:B +field:C +field:D");
 		
-		query = qp.parse("this OR that AND thus", "field");
-		System.out.println(query);
+		assertQueryMatch(qp, "A AND B C AND D OR E", "field", 
+        					 "(+field:A +field:B) ((+field:C +field:D) field:E)");
 		
-		query = qp.parse("this OR +that", "field");
-		System.out.println(query);
+		assertQueryMatch(qp, "one OR +two", "f", 
+				             "f:one +f:two");
 		
-		query = qp.parse("this OR that NOT thus", "field");
-		System.out.println(query);
+		assertQueryMatch(qp, "one OR two NOT three", "field", 
+							 "field:one (+field:two -field:three)");
 		
-		query = qp.parse("this OR (that AND thus) NOT then", "field");
-		System.out.println(query);
+		assertQueryMatch(qp, "one OR (two AND three) NOT four", "field", 
+							 "field:one ((+field:two +field:three) -field:four)");
 		
-		query = qp.parse("-notthis -notthat", "field");
-		System.out.println(query);
+		assertQueryMatch(qp, "-one -two", "field", 
+				             "-field:one -field:two");
 		
-		assertQueryEquals(query.toString(), analyzer, "BooleanQuery()");
+		
 		
 		BooleanQuery.setMaxClauseCount(2);
 		try {
@@ -234,6 +275,8 @@ public class TestQPHelperAqpSimple extends LuceneTestCase {
 			// too many boolean clauses, so ParseException is expected
 		}
 	}
+
+
 
 
 	private class CannedTokenStream extends TokenStream {

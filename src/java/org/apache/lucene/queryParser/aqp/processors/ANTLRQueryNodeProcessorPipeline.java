@@ -72,8 +72,9 @@ public class ANTLRQueryNodeProcessorPipeline extends
     add(new AqpBOOSTProcessor());
     
     //add(new AqpCLAUSEProcessor());
-    add(new AqpOPERATORProcessor());
     add(new AqpATOMProcessor());
+    add(new AqpOPERATORProcessor());
+    
     //add(new AqpMODIFIERProcessor());
     
     add(new WildcardQueryNodeProcessor());
@@ -85,7 +86,7 @@ public class ANTLRQueryNodeProcessorPipeline extends
     add(new AllowLeadingWildcardProcessor());
     add(new AnalyzerQueryNodeProcessor());
     add(new PhraseSlopQueryNodeProcessor());
-    add(new GroupQueryNodeProcessor());
+    //add(new GroupQueryNodeProcessor());
     add(new NoChildOptimizationQueryNodeProcessor());
     add(new RemoveDeletedQueryNodesProcessor());
     add(new RemoveEmptyNonLeafQueryNodeProcessor());

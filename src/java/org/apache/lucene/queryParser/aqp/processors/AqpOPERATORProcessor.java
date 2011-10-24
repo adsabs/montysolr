@@ -6,6 +6,7 @@ import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.nodes.NotQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.AndQueryNode;
+import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryParser.core.nodes.OrQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ProximityQueryNode;
@@ -92,8 +93,8 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 	 */
 	private List<QueryNode> getChildren(QueryNode node, AqpOPERATORProcessor.OPERATOR operator) {
 		Modifier mod = null;
-		Modifier firstMod = null;
 		List<QueryNode> children = node.getChildren();
+		int index = 0;
 		
 		switch (operator) {
 		case AND:
@@ -101,7 +102,11 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 			break;
 		case NOT:
 			mod = Modifier.MOD_NOT;
-			firstMod = Modifier.MOD_REQ;
+			index = 1; //skip the first
+			if (!(children.get(0) instanceof ModifierQueryNode
+					|| children.get(0) instanceof BooleanQueryNode)) {
+				children.set(0, new ModifierQueryNode(children.get(0), Modifier.MOD_REQ));
+			}
 			break;
 		case OR:
 			mod = Modifier.MOD_NONE;
@@ -111,15 +116,15 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 		}
 		
 		
-		for (int i=0;i<children.size();i++) {
+		for (int i=index;i<children.size();i++) {
 			QueryNode child = children.get(i);
-			if (child instanceof ModifierQueryNode) {
-				children.set(i, new ModifierQueryNode(child.getChildren().get(0), 
-						i==0&&firstMod!=null ? firstMod : mod));
+			if (child instanceof ModifierQueryNode || child instanceof BooleanQueryNode) {
+				// do nothing, modifiers have precedence
+				//children.set(i, new ModifierQueryNode(child.getChildren().get(0), 
+				//		i==0&&firstMod!=null ? firstMod : mod));
 			} 
 			else {
-				children.set(i, new ModifierQueryNode(children.get(i), 
-						i==0&&firstMod!=null ? firstMod : mod));
+				children.set(i, new ModifierQueryNode(children.get(i), mod));
 			}
 		}
 		return children;
