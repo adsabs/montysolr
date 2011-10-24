@@ -152,5 +152,26 @@ public class AqpANTLRNode extends QueryNodeImpl {
 	public int getTokenEnd() {
 		return tree.getStopIndex();
 	}
+	
+	public AqpANTLRNode getChild(String tokenLabel) {
+		List<QueryNode> children = getChildren();
+		if (children!=null) {
+			for (QueryNode child: children) {
+				AqpANTLRNode n = (AqpANTLRNode) child;
+				if (n.getTokenLabel().equals(tokenLabel)) {
+					return n;
+				}
+			}
+			
+		}
+		return null;
+	}
+	
+	public Float getTokenInputFloat() {
+		if (this.tokenInput!=null) {
+			return Float.valueOf(this.tokenInput);
+		}
+		return null;
+	}
 
 }

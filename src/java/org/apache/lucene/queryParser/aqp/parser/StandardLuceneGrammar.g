@@ -8,6 +8,7 @@ options {
 tokens {
   OPERATOR;
   ATOM;
+  MULTIATOM;
   MODIFIER;
   TMODIFIER;
   VALUE;
@@ -65,7 +66,7 @@ primaryClause
 
 atom   
 	: 
-	modifier? field multi_value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_value))
+	modifier? field multi_value -> ^(MULTIATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_value))
 	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value))
 	;
    
@@ -93,7 +94,7 @@ value
 range_term_in
 	:	
        LBRACK
-       (a=range_value -> range_value ^(QANYTHING ))
+       (a=range_value -> range_value ^(QANYTHING QANYTHING["*"]))
        ( TO? b=range_value -> $a $b? )?
        RBRACK
 	;
@@ -102,7 +103,7 @@ range_term_in
 range_term_ex
 	:	
        LCURLY
-       ( a=range_value -> range_value ^(QANYTHING ))
+       ( a=range_value -> range_value ^(QANYTHING QANYTHING["*"]))
        ( TO? b=range_value -> $a $b? )?
        RCURLY
 	;	
@@ -113,7 +114,7 @@ range_value
 	| truncated -> ^(QTRUNCATED truncated)
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| STAR -> ^(QANYTHING )
+	| STAR -> ^(QANYTHING STAR)
 	;
 
 multi_value

@@ -102,13 +102,19 @@ atom:
 
 "field:\"value\"" -> "(ATOM MODIFIER (FIELD field) (VALUE (QPHRASE \"value\")))"
 
-"field:(one two three)" -> "(ATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM MODIFIER (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+"field:(one two three)" -> "(MULTIATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM MODIFIER (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
 
-"field:(one +two -three)" -> "(ATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM (MODIFIER -) (VALUE (QNORMAL three)))))"
+"field:(one +two -three)" -> "(MULTIATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM (MODIFIER -) (VALUE (QNORMAL three)))))"
 
-"+field:(-one +two three)" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+"+field:(-one +two three)" -> "(MULTIATOM (MODIFIER +) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
 
-"-field:(-one +two three)" -> "(ATOM (MODIFIER -) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+"-field:(-one +two three)" -> "(MULTIATOM (MODIFIER -) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+
+"field:(one)" -> "(MULTIATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one)))))"
+
+"field: (one)" -> "(MULTIATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one)))))"
+
+"field:( one )" -> "(MULTIATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one)))))"
 
 "+value" -> "(ATOM (MODIFIER +) FIELD (VALUE (QNORMAL value)))"
 
@@ -174,13 +180,13 @@ value:
 
 "[this that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
 
-"[this TO *]" -> "(QRANGEIN (QNORMAL this) QANYTHING)"
+"[this TO *]" -> "(QRANGEIN (QNORMAL this) (QANYTHING *))"
 
-"[this]" -> "(QRANGEIN (QNORMAL this) QANYTHING)"
+"[this]" -> "(QRANGEIN (QNORMAL this) (QANYTHING *))"
 
-"[* this]" -> "(QRANGEIN QANYTHING (QNORMAL this))"
+"[* this]" -> "(QRANGEIN (QANYTHING *) (QNORMAL this))"
 
-"[* TO this]" -> "(QRANGEIN QANYTHING (QNORMAL this))"
+"[* TO this]" -> "(QRANGEIN (QANYTHING *) (QNORMAL this))"
 
 "[\"this\" TO \"that*\"]" -> "(QRANGEIN (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
 
@@ -190,11 +196,11 @@ value:
 
 "{this that}" -> "(QRANGEEX (QNORMAL this) (QNORMAL that))"
 
-"{this TO *}" -> "(QRANGEEX (QNORMAL this) QANYTHING)"
+"{this TO *}" -> "(QRANGEEX (QNORMAL this) (QANYTHING *))"
 
-"{* this}" -> "(QRANGEEX QANYTHING (QNORMAL this))"
+"{* this}" -> "(QRANGEEX (QANYTHING *) (QNORMAL this))"
 
-"{* TO this}" -> "(QRANGEEX QANYTHING (QNORMAL this))"
+"{* TO this}" -> "(QRANGEEX (QANYTHING *) (QNORMAL this))"
 
 "{\"this\" TO \"that*\"}" -> "(QRANGEEX (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
 

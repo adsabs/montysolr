@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-23 12:59:42
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-24 14:10:16
 
    package org.apache.lucene.queryParser.aqp.parser;
 
@@ -16,11 +16,11 @@ import org.antlr.runtime.tree.*;
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class StandardLuceneGrammarParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ADDED", "AMPER", "AND", "ATOM", "BOOST", "CARAT", "CLAUSE", "COLON", "DQUOTE", "ESC_CHAR", "FIELD", "FUZZY", "INT", "LBRACK", "LCURLY", "LPAREN", "MINUS", "MODIFIER", "NEAR", "NORMAL_CHAR", "NOT", "NUMBER", "OPERATOR", "OR", "PHRASE", "PHRASE_ANYTHING", "PLUS", "QANYTHING", "QMARK", "QNORMAL", "QPHRASE", "QPHRASETRUNC", "QRANGEEX", "QRANGEIN", "QTRUNCATED", "RBRACK", "RCURLY", "RPAREN", "SQUOTE", "STAR", "TERM_NORMAL", "TERM_TRUNCATED", "TILDE", "TMODIFIER", "TO", "VALUE", "VBAR", "WS", "'/'"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "ADDED", "AMPER", "AND", "ATOM", "BOOST", "CARAT", "CLAUSE", "COLON", "DQUOTE", "ESC_CHAR", "FIELD", "FUZZY", "INT", "LBRACK", "LCURLY", "LPAREN", "MINUS", "MODIFIER", "MULTIATOM", "NEAR", "NORMAL_CHAR", "NOT", "NUMBER", "OPERATOR", "OR", "PHRASE", "PHRASE_ANYTHING", "PLUS", "QANYTHING", "QMARK", "QNORMAL", "QPHRASE", "QPHRASETRUNC", "QRANGEEX", "QRANGEIN", "QTRUNCATED", "RBRACK", "RCURLY", "RPAREN", "SQUOTE", "STAR", "TERM_NORMAL", "TERM_TRUNCATED", "TILDE", "TMODIFIER", "TO", "VALUE", "VBAR", "WS", "'/'"
     };
 
     public static final int EOF=-1;
-    public static final int T__52=52;
+    public static final int T__53=53;
     public static final int ADDED=4;
     public static final int AMPER=5;
     public static final int AND=6;
@@ -39,36 +39,37 @@ public class StandardLuceneGrammarParser extends Parser {
     public static final int LPAREN=19;
     public static final int MINUS=20;
     public static final int MODIFIER=21;
-    public static final int NEAR=22;
-    public static final int NORMAL_CHAR=23;
-    public static final int NOT=24;
-    public static final int NUMBER=25;
-    public static final int OPERATOR=26;
-    public static final int OR=27;
-    public static final int PHRASE=28;
-    public static final int PHRASE_ANYTHING=29;
-    public static final int PLUS=30;
-    public static final int QANYTHING=31;
-    public static final int QMARK=32;
-    public static final int QNORMAL=33;
-    public static final int QPHRASE=34;
-    public static final int QPHRASETRUNC=35;
-    public static final int QRANGEEX=36;
-    public static final int QRANGEIN=37;
-    public static final int QTRUNCATED=38;
-    public static final int RBRACK=39;
-    public static final int RCURLY=40;
-    public static final int RPAREN=41;
-    public static final int SQUOTE=42;
-    public static final int STAR=43;
-    public static final int TERM_NORMAL=44;
-    public static final int TERM_TRUNCATED=45;
-    public static final int TILDE=46;
-    public static final int TMODIFIER=47;
-    public static final int TO=48;
-    public static final int VALUE=49;
-    public static final int VBAR=50;
-    public static final int WS=51;
+    public static final int MULTIATOM=22;
+    public static final int NEAR=23;
+    public static final int NORMAL_CHAR=24;
+    public static final int NOT=25;
+    public static final int NUMBER=26;
+    public static final int OPERATOR=27;
+    public static final int OR=28;
+    public static final int PHRASE=29;
+    public static final int PHRASE_ANYTHING=30;
+    public static final int PLUS=31;
+    public static final int QANYTHING=32;
+    public static final int QMARK=33;
+    public static final int QNORMAL=34;
+    public static final int QPHRASE=35;
+    public static final int QPHRASETRUNC=36;
+    public static final int QRANGEEX=37;
+    public static final int QRANGEIN=38;
+    public static final int QTRUNCATED=39;
+    public static final int RBRACK=40;
+    public static final int RCURLY=41;
+    public static final int RPAREN=42;
+    public static final int SQUOTE=43;
+    public static final int STAR=44;
+    public static final int TERM_NORMAL=45;
+    public static final int TERM_TRUNCATED=46;
+    public static final int TILDE=47;
+    public static final int TMODIFIER=48;
+    public static final int TO=49;
+    public static final int VALUE=50;
+    public static final int VBAR=51;
+    public static final int WS=52;
 
     // delegates
     public Parser[] getDelegates() {
@@ -104,7 +105,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "mainQ"
-    // StandardLuceneGrammar.g:35:1: mainQ : ( clauseDefault )+ -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ;
+    // StandardLuceneGrammar.g:36:1: mainQ : ( clauseDefault )+ -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ;
     public final StandardLuceneGrammarParser.mainQ_return mainQ() throws RecognitionException {
         StandardLuceneGrammarParser.mainQ_return retval = new StandardLuceneGrammarParser.mainQ_return();
         retval.start = input.LT(1);
@@ -117,10 +118,10 @@ public TreeAdaptor getTreeAdaptor() {
 
         RewriteRuleSubtreeStream stream_clauseDefault=new RewriteRuleSubtreeStream(adaptor,"rule clauseDefault");
         try {
-            // StandardLuceneGrammar.g:35:7: ( ( clauseDefault )+ -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
-            // StandardLuceneGrammar.g:36:2: ( clauseDefault )+
+            // StandardLuceneGrammar.g:36:7: ( ( clauseDefault )+ -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+            // StandardLuceneGrammar.g:37:2: ( clauseDefault )+
             {
-            // StandardLuceneGrammar.g:36:2: ( clauseDefault )+
+            // StandardLuceneGrammar.g:37:2: ( clauseDefault )+
             int cnt1=0;
             loop1:
             do {
@@ -134,9 +135,9 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt1) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:36:2: clauseDefault
+            	    // StandardLuceneGrammar.g:37:2: clauseDefault
             	    {
-            	    pushFollow(FOLLOW_clauseDefault_in_mainQ138);
+            	    pushFollow(FOLLOW_clauseDefault_in_mainQ143);
             	    clauseDefault1=clauseDefault();
 
             	    state._fsp--;
@@ -170,9 +171,9 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 36:17: -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
+            // 37:17: -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
             {
-                // StandardLuceneGrammar.g:36:20: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
+                // StandardLuceneGrammar.g:37:20: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
@@ -230,7 +231,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseDefault"
-    // StandardLuceneGrammar.g:40:1: clauseDefault : (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )* ;
+    // StandardLuceneGrammar.g:41:1: clauseDefault : (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )* ;
     public final StandardLuceneGrammarParser.clauseDefault_return clauseDefault() throws RecognitionException {
         StandardLuceneGrammarParser.clauseDefault_return retval = new StandardLuceneGrammarParser.clauseDefault_return();
         retval.start = input.LT(1);
@@ -248,13 +249,13 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_NOT=new RewriteRuleTokenStream(adaptor,"token NOT");
         RewriteRuleSubtreeStream stream_clauseStrongest=new RewriteRuleSubtreeStream(adaptor,"rule clauseStrongest");
         try {
-            // StandardLuceneGrammar.g:41:3: ( (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )* )
-            // StandardLuceneGrammar.g:41:5: (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )*
+            // StandardLuceneGrammar.g:42:3: ( (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )* )
+            // StandardLuceneGrammar.g:42:5: (first= clauseStrongest -> $first) ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )*
             {
-            // StandardLuceneGrammar.g:41:5: (first= clauseStrongest -> $first)
-            // StandardLuceneGrammar.g:41:6: first= clauseStrongest
+            // StandardLuceneGrammar.g:42:5: (first= clauseStrongest -> $first)
+            // StandardLuceneGrammar.g:42:6: first= clauseStrongest
             {
-            pushFollow(FOLLOW_clauseStrongest_in_clauseDefault171);
+            pushFollow(FOLLOW_clauseStrongest_in_clauseDefault176);
             first=clauseStrongest();
 
             state._fsp--;
@@ -275,7 +276,7 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_first=new RewriteRuleSubtreeStream(adaptor,"rule first",first!=null?first.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 41:28: -> $first
+            // 42:28: -> $first
             {
                 adaptor.addChild(root_0, stream_first.nextTree());
 
@@ -288,7 +289,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:41:39: ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )*
+            // StandardLuceneGrammar.g:42:39: ( NOT others= clauseStrongest -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ ) )*
             loop2:
             do {
                 int alt2=2;
@@ -301,13 +302,13 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt2) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:41:40: NOT others= clauseStrongest
+            	    // StandardLuceneGrammar.g:42:40: NOT others= clauseStrongest
             	    {
-            	    NOT2=(Token)match(input,NOT,FOLLOW_NOT_in_clauseDefault180); if (state.failed) return retval; 
+            	    NOT2=(Token)match(input,NOT,FOLLOW_NOT_in_clauseDefault185); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_NOT.add(NOT2);
 
 
-            	    pushFollow(FOLLOW_clauseStrongest_in_clauseDefault184);
+            	    pushFollow(FOLLOW_clauseStrongest_in_clauseDefault189);
             	    others=clauseStrongest();
 
             	    state._fsp--;
@@ -327,9 +328,9 @@ public TreeAdaptor getTreeAdaptor() {
             	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             	    root_0 = (Object)adaptor.nil();
-            	    // 41:67: -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ )
+            	    // 42:67: -> ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ )
             	    {
-            	        // StandardLuceneGrammar.g:41:70: ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ )
+            	        // StandardLuceneGrammar.g:42:70: ^( OPERATOR[\"NOT\"] ( clauseStrongest )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
@@ -396,7 +397,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseStrongest"
-    // StandardLuceneGrammar.g:44:1: clauseStrongest : (first= clauseStrong -> $first) ( AND others= clauseStrong -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ ) )* ;
+    // StandardLuceneGrammar.g:45:1: clauseStrongest : (first= clauseStrong -> $first) ( AND others= clauseStrong -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ ) )* ;
     public final StandardLuceneGrammarParser.clauseStrongest_return clauseStrongest() throws RecognitionException {
         StandardLuceneGrammarParser.clauseStrongest_return retval = new StandardLuceneGrammarParser.clauseStrongest_return();
         retval.start = input.LT(1);
@@ -414,13 +415,13 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_AND=new RewriteRuleTokenStream(adaptor,"token AND");
         RewriteRuleSubtreeStream stream_clauseStrong=new RewriteRuleSubtreeStream(adaptor,"rule clauseStrong");
         try {
-            // StandardLuceneGrammar.g:45:3: ( (first= clauseStrong -> $first) ( AND others= clauseStrong -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ ) )* )
-            // StandardLuceneGrammar.g:45:5: (first= clauseStrong -> $first) ( AND others= clauseStrong -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ ) )*
+            // StandardLuceneGrammar.g:46:3: ( (first= clauseStrong -> $first) ( AND others= clauseStrong -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ ) )* )
+            // StandardLuceneGrammar.g:46:5: (first= clauseStrong -> $first) ( AND others= clauseStrong -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ ) )*
             {
-            // StandardLuceneGrammar.g:45:5: (first= clauseStrong -> $first)
-            // StandardLuceneGrammar.g:45:6: first= clauseStrong
+            // StandardLuceneGrammar.g:46:5: (first= clauseStrong -> $first)
+            // StandardLuceneGrammar.g:46:6: first= clauseStrong
             {
-            pushFollow(FOLLOW_clauseStrong_in_clauseStrongest213);
+            pushFollow(FOLLOW_clauseStrong_in_clauseStrongest218);
             first=clauseStrong();
 
             state._fsp--;
@@ -441,7 +442,7 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_first=new RewriteRuleSubtreeStream(adaptor,"rule first",first!=null?first.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 45:26: -> $first
+            // 46:26: -> $first
             {
                 adaptor.addChild(root_0, stream_first.nextTree());
 
@@ -454,7 +455,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:45:37: ( AND others= clauseStrong -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ ) )*
+            // StandardLuceneGrammar.g:46:37: ( AND others= clauseStrong -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ ) )*
             loop3:
             do {
                 int alt3=2;
@@ -467,13 +468,13 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt3) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:45:38: AND others= clauseStrong
+            	    // StandardLuceneGrammar.g:46:38: AND others= clauseStrong
             	    {
-            	    AND3=(Token)match(input,AND,FOLLOW_AND_in_clauseStrongest223); if (state.failed) return retval; 
+            	    AND3=(Token)match(input,AND,FOLLOW_AND_in_clauseStrongest228); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_AND.add(AND3);
 
 
-            	    pushFollow(FOLLOW_clauseStrong_in_clauseStrongest227);
+            	    pushFollow(FOLLOW_clauseStrong_in_clauseStrongest232);
             	    others=clauseStrong();
 
             	    state._fsp--;
@@ -493,9 +494,9 @@ public TreeAdaptor getTreeAdaptor() {
             	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             	    root_0 = (Object)adaptor.nil();
-            	    // 45:62: -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ )
+            	    // 46:62: -> ^( OPERATOR[\"AND\"] ( clauseStrong )+ )
             	    {
-            	        // StandardLuceneGrammar.g:45:65: ^( OPERATOR[\"AND\"] ( clauseStrong )+ )
+            	        // StandardLuceneGrammar.g:46:65: ^( OPERATOR[\"AND\"] ( clauseStrong )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
@@ -562,7 +563,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseStrong"
-    // StandardLuceneGrammar.g:48:1: clauseStrong : (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )* ;
+    // StandardLuceneGrammar.g:49:1: clauseStrong : (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )* ;
     public final StandardLuceneGrammarParser.clauseStrong_return clauseStrong() throws RecognitionException {
         StandardLuceneGrammarParser.clauseStrong_return retval = new StandardLuceneGrammarParser.clauseStrong_return();
         retval.start = input.LT(1);
@@ -580,13 +581,13 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_OR=new RewriteRuleTokenStream(adaptor,"token OR");
         RewriteRuleSubtreeStream stream_clauseWeak=new RewriteRuleSubtreeStream(adaptor,"rule clauseWeak");
         try {
-            // StandardLuceneGrammar.g:49:3: ( (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )* )
-            // StandardLuceneGrammar.g:49:5: (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )*
+            // StandardLuceneGrammar.g:50:3: ( (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )* )
+            // StandardLuceneGrammar.g:50:5: (first= clauseWeak -> $first) ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )*
             {
-            // StandardLuceneGrammar.g:49:5: (first= clauseWeak -> $first)
-            // StandardLuceneGrammar.g:49:6: first= clauseWeak
+            // StandardLuceneGrammar.g:50:5: (first= clauseWeak -> $first)
+            // StandardLuceneGrammar.g:50:6: first= clauseWeak
             {
-            pushFollow(FOLLOW_clauseWeak_in_clauseStrong258);
+            pushFollow(FOLLOW_clauseWeak_in_clauseStrong263);
             first=clauseWeak();
 
             state._fsp--;
@@ -607,7 +608,7 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_first=new RewriteRuleSubtreeStream(adaptor,"rule first",first!=null?first.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 49:23: -> $first
+            // 50:23: -> $first
             {
                 adaptor.addChild(root_0, stream_first.nextTree());
 
@@ -620,7 +621,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:49:34: ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )*
+            // StandardLuceneGrammar.g:50:34: ( OR others= clauseWeak -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ ) )*
             loop4:
             do {
                 int alt4=2;
@@ -633,13 +634,13 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt4) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:49:35: OR others= clauseWeak
+            	    // StandardLuceneGrammar.g:50:35: OR others= clauseWeak
             	    {
-            	    OR4=(Token)match(input,OR,FOLLOW_OR_in_clauseStrong267); if (state.failed) return retval; 
+            	    OR4=(Token)match(input,OR,FOLLOW_OR_in_clauseStrong272); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_OR.add(OR4);
 
 
-            	    pushFollow(FOLLOW_clauseWeak_in_clauseStrong271);
+            	    pushFollow(FOLLOW_clauseWeak_in_clauseStrong276);
             	    others=clauseWeak();
 
             	    state._fsp--;
@@ -659,9 +660,9 @@ public TreeAdaptor getTreeAdaptor() {
             	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             	    root_0 = (Object)adaptor.nil();
-            	    // 49:56: -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ )
+            	    // 50:56: -> ^( OPERATOR[\"OR\"] ( clauseWeak )+ )
             	    {
-            	        // StandardLuceneGrammar.g:49:59: ^( OPERATOR[\"OR\"] ( clauseWeak )+ )
+            	        // StandardLuceneGrammar.g:50:59: ^( OPERATOR[\"OR\"] ( clauseWeak )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
@@ -728,7 +729,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseWeak"
-    // StandardLuceneGrammar.g:52:1: clauseWeak : (first= primaryClause -> $first) ( near others= primaryClause -> ^( near ( primaryClause )+ ) )* ;
+    // StandardLuceneGrammar.g:53:1: clauseWeak : (first= primaryClause -> $first) ( near others= primaryClause -> ^( near ( primaryClause )+ ) )* ;
     public final StandardLuceneGrammarParser.clauseWeak_return clauseWeak() throws RecognitionException {
         StandardLuceneGrammarParser.clauseWeak_return retval = new StandardLuceneGrammarParser.clauseWeak_return();
         retval.start = input.LT(1);
@@ -746,13 +747,13 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_near=new RewriteRuleSubtreeStream(adaptor,"rule near");
         RewriteRuleSubtreeStream stream_primaryClause=new RewriteRuleSubtreeStream(adaptor,"rule primaryClause");
         try {
-            // StandardLuceneGrammar.g:53:3: ( (first= primaryClause -> $first) ( near others= primaryClause -> ^( near ( primaryClause )+ ) )* )
-            // StandardLuceneGrammar.g:53:5: (first= primaryClause -> $first) ( near others= primaryClause -> ^( near ( primaryClause )+ ) )*
+            // StandardLuceneGrammar.g:54:3: ( (first= primaryClause -> $first) ( near others= primaryClause -> ^( near ( primaryClause )+ ) )* )
+            // StandardLuceneGrammar.g:54:5: (first= primaryClause -> $first) ( near others= primaryClause -> ^( near ( primaryClause )+ ) )*
             {
-            // StandardLuceneGrammar.g:53:5: (first= primaryClause -> $first)
-            // StandardLuceneGrammar.g:53:6: first= primaryClause
+            // StandardLuceneGrammar.g:54:5: (first= primaryClause -> $first)
+            // StandardLuceneGrammar.g:54:6: first= primaryClause
             {
-            pushFollow(FOLLOW_primaryClause_in_clauseWeak302);
+            pushFollow(FOLLOW_primaryClause_in_clauseWeak307);
             first=primaryClause();
 
             state._fsp--;
@@ -773,7 +774,7 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_first=new RewriteRuleSubtreeStream(adaptor,"rule first",first!=null?first.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 53:26: -> $first
+            // 54:26: -> $first
             {
                 adaptor.addChild(root_0, stream_first.nextTree());
 
@@ -786,7 +787,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:53:37: ( near others= primaryClause -> ^( near ( primaryClause )+ ) )*
+            // StandardLuceneGrammar.g:54:37: ( near others= primaryClause -> ^( near ( primaryClause )+ ) )*
             loop5:
             do {
                 int alt5=2;
@@ -799,16 +800,16 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt5) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:53:38: near others= primaryClause
+            	    // StandardLuceneGrammar.g:54:38: near others= primaryClause
             	    {
-            	    pushFollow(FOLLOW_near_in_clauseWeak311);
+            	    pushFollow(FOLLOW_near_in_clauseWeak316);
             	    near5=near();
 
             	    state._fsp--;
             	    if (state.failed) return retval;
             	    if ( state.backtracking==0 ) stream_near.add(near5.getTree());
 
-            	    pushFollow(FOLLOW_primaryClause_in_clauseWeak315);
+            	    pushFollow(FOLLOW_primaryClause_in_clauseWeak320);
             	    others=primaryClause();
 
             	    state._fsp--;
@@ -816,7 +817,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    if ( state.backtracking==0 ) stream_primaryClause.add(others.getTree());
 
             	    // AST REWRITE
-            	    // elements: primaryClause, near
+            	    // elements: near, primaryClause
             	    // token labels: 
             	    // rule labels: retval
             	    // token list labels: 
@@ -828,9 +829,9 @@ public TreeAdaptor getTreeAdaptor() {
             	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             	    root_0 = (Object)adaptor.nil();
-            	    // 53:64: -> ^( near ( primaryClause )+ )
+            	    // 54:64: -> ^( near ( primaryClause )+ )
             	    {
-            	        // StandardLuceneGrammar.g:53:67: ^( near ( primaryClause )+ )
+            	        // StandardLuceneGrammar.g:54:67: ^( near ( primaryClause )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(stream_near.nextNode(), root_1);
@@ -895,7 +896,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "primaryClause"
-    // StandardLuceneGrammar.g:56:1: primaryClause : ( ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN -> ( clauseDefault )+ | atom );
+    // StandardLuceneGrammar.g:57:1: primaryClause : ( ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN -> ( clauseDefault )+ | atom );
     public final StandardLuceneGrammarParser.primaryClause_return primaryClause() throws RecognitionException {
         StandardLuceneGrammarParser.primaryClause_return retval = new StandardLuceneGrammarParser.primaryClause_return();
         retval.start = input.LT(1);
@@ -943,7 +944,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_modifier=new RewriteRuleSubtreeStream(adaptor,"rule modifier");
         RewriteRuleSubtreeStream stream_clauseDefault=new RewriteRuleSubtreeStream(adaptor,"rule clauseDefault");
         try {
-            // StandardLuceneGrammar.g:57:2: ( ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN -> ( clauseDefault )+ | atom )
+            // StandardLuceneGrammar.g:58:2: ( ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN -> ( clauseDefault )+ | atom )
             int alt13=4;
             switch ( input.LA(1) ) {
             case MINUS:
@@ -1015,9 +1016,9 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt13) {
                 case 1 :
-                    // StandardLuceneGrammar.g:59:2: ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )?
+                    // StandardLuceneGrammar.g:60:2: ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )?
                     {
-                    // StandardLuceneGrammar.g:59:45: ( modifier )?
+                    // StandardLuceneGrammar.g:60:45: ( modifier )?
                     int alt6=2;
                     int LA6_0 = input.LA(1);
 
@@ -1026,9 +1027,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt6) {
                         case 1 :
-                            // StandardLuceneGrammar.g:59:45: modifier
+                            // StandardLuceneGrammar.g:60:45: modifier
                             {
-                            pushFollow(FOLLOW_modifier_in_primaryClause359);
+                            pushFollow(FOLLOW_modifier_in_primaryClause364);
                             modifier6=modifier();
 
                             state._fsp--;
@@ -1041,11 +1042,11 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    LPAREN7=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_primaryClause362); if (state.failed) return retval; 
+                    LPAREN7=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_primaryClause367); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN7);
 
 
-                    // StandardLuceneGrammar.g:59:62: ( clauseDefault )+
+                    // StandardLuceneGrammar.g:60:62: ( clauseDefault )+
                     int cnt7=0;
                     loop7:
                     do {
@@ -1059,9 +1060,9 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt7) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:59:62: clauseDefault
+                    	    // StandardLuceneGrammar.g:60:62: clauseDefault
                     	    {
-                    	    pushFollow(FOLLOW_clauseDefault_in_primaryClause364);
+                    	    pushFollow(FOLLOW_clauseDefault_in_primaryClause369);
                     	    clauseDefault8=clauseDefault();
 
                     	    state._fsp--;
@@ -1082,11 +1083,11 @@ public TreeAdaptor getTreeAdaptor() {
                     } while (true);
 
 
-                    RPAREN9=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_primaryClause367); if (state.failed) return retval; 
+                    RPAREN9=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_primaryClause372); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN9);
 
 
-                    // StandardLuceneGrammar.g:59:84: ( CARAT NUMBER )?
+                    // StandardLuceneGrammar.g:60:84: ( CARAT NUMBER )?
                     int alt8=2;
                     int LA8_0 = input.LA(1);
 
@@ -1095,13 +1096,13 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt8) {
                         case 1 :
-                            // StandardLuceneGrammar.g:59:85: CARAT NUMBER
+                            // StandardLuceneGrammar.g:60:85: CARAT NUMBER
                             {
-                            CARAT10=(Token)match(input,CARAT,FOLLOW_CARAT_in_primaryClause370); if (state.failed) return retval; 
+                            CARAT10=(Token)match(input,CARAT,FOLLOW_CARAT_in_primaryClause375); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_CARAT.add(CARAT10);
 
 
-                            NUMBER11=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_primaryClause372); if (state.failed) return retval; 
+                            NUMBER11=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_primaryClause377); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_NUMBER.add(NUMBER11);
 
 
@@ -1112,7 +1113,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: NUMBER, modifier, clauseDefault
+                    // elements: clauseDefault, NUMBER, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1124,23 +1125,23 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 59:100: -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+                    // 60:100: -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
                     {
-                        // StandardLuceneGrammar.g:59:103: ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+                        // StandardLuceneGrammar.g:60:103: ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(CLAUSE, "CLAUSE")
                         , root_1);
 
-                        // StandardLuceneGrammar.g:59:112: ^( MODIFIER ( modifier )? )
+                        // StandardLuceneGrammar.g:60:112: ^( MODIFIER ( modifier )? )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_2);
 
-                        // StandardLuceneGrammar.g:59:123: ( modifier )?
+                        // StandardLuceneGrammar.g:60:123: ( modifier )?
                         if ( stream_modifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_modifier.nextTree());
 
@@ -1150,14 +1151,14 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:59:134: ^( BOOST ( NUMBER )? )
+                        // StandardLuceneGrammar.g:60:134: ^( BOOST ( NUMBER )? )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(BOOST, "BOOST")
                         , root_2);
 
-                        // StandardLuceneGrammar.g:59:142: ( NUMBER )?
+                        // StandardLuceneGrammar.g:60:142: ( NUMBER )?
                         if ( stream_NUMBER.hasNext() ) {
                             adaptor.addChild(root_2, 
                             stream_NUMBER.nextNode()
@@ -1169,7 +1170,7 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:59:151: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
+                        // StandardLuceneGrammar.g:60:151: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -1200,9 +1201,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:60:4: ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )?
+                    // StandardLuceneGrammar.g:61:4: ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )?
                     {
-                    // StandardLuceneGrammar.g:60:50: ( modifier )?
+                    // StandardLuceneGrammar.g:61:50: ( modifier )?
                     int alt9=2;
                     int LA9_0 = input.LA(1);
 
@@ -1211,9 +1212,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt9) {
                         case 1 :
-                            // StandardLuceneGrammar.g:60:50: modifier
+                            // StandardLuceneGrammar.g:61:50: modifier
                             {
-                            pushFollow(FOLLOW_modifier_in_primaryClause423);
+                            pushFollow(FOLLOW_modifier_in_primaryClause428);
                             modifier12=modifier();
 
                             state._fsp--;
@@ -1226,11 +1227,11 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    LPAREN13=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_primaryClause426); if (state.failed) return retval; 
+                    LPAREN13=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_primaryClause431); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN13);
 
 
-                    // StandardLuceneGrammar.g:60:67: ( clauseDefault )+
+                    // StandardLuceneGrammar.g:61:67: ( clauseDefault )+
                     int cnt10=0;
                     loop10:
                     do {
@@ -1244,9 +1245,9 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt10) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:60:67: clauseDefault
+                    	    // StandardLuceneGrammar.g:61:67: clauseDefault
                     	    {
-                    	    pushFollow(FOLLOW_clauseDefault_in_primaryClause428);
+                    	    pushFollow(FOLLOW_clauseDefault_in_primaryClause433);
                     	    clauseDefault14=clauseDefault();
 
                     	    state._fsp--;
@@ -1267,11 +1268,11 @@ public TreeAdaptor getTreeAdaptor() {
                     } while (true);
 
 
-                    RPAREN15=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_primaryClause431); if (state.failed) return retval; 
+                    RPAREN15=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_primaryClause436); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN15);
 
 
-                    // StandardLuceneGrammar.g:60:89: ( CARAT NUMBER )?
+                    // StandardLuceneGrammar.g:61:89: ( CARAT NUMBER )?
                     int alt11=2;
                     int LA11_0 = input.LA(1);
 
@@ -1280,13 +1281,13 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt11) {
                         case 1 :
-                            // StandardLuceneGrammar.g:60:90: CARAT NUMBER
+                            // StandardLuceneGrammar.g:61:90: CARAT NUMBER
                             {
-                            CARAT16=(Token)match(input,CARAT,FOLLOW_CARAT_in_primaryClause434); if (state.failed) return retval; 
+                            CARAT16=(Token)match(input,CARAT,FOLLOW_CARAT_in_primaryClause439); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_CARAT.add(CARAT16);
 
 
-                            NUMBER17=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_primaryClause436); if (state.failed) return retval; 
+                            NUMBER17=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_primaryClause441); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_NUMBER.add(NUMBER17);
 
 
@@ -1309,23 +1310,23 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 60:105: -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+                    // 61:105: -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
                     {
-                        // StandardLuceneGrammar.g:60:108: ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+                        // StandardLuceneGrammar.g:61:108: ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(CLAUSE, "CLAUSE")
                         , root_1);
 
-                        // StandardLuceneGrammar.g:60:117: ^( MODIFIER ( modifier )? )
+                        // StandardLuceneGrammar.g:61:117: ^( MODIFIER ( modifier )? )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_2);
 
-                        // StandardLuceneGrammar.g:60:128: ( modifier )?
+                        // StandardLuceneGrammar.g:61:128: ( modifier )?
                         if ( stream_modifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_modifier.nextTree());
 
@@ -1335,14 +1336,14 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:60:139: ^( BOOST ( NUMBER )? )
+                        // StandardLuceneGrammar.g:61:139: ^( BOOST ( NUMBER )? )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(BOOST, "BOOST")
                         , root_2);
 
-                        // StandardLuceneGrammar.g:60:147: ( NUMBER )?
+                        // StandardLuceneGrammar.g:61:147: ( NUMBER )?
                         if ( stream_NUMBER.hasNext() ) {
                             adaptor.addChild(root_2, 
                             stream_NUMBER.nextNode()
@@ -1354,7 +1355,7 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:60:156: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
+                        // StandardLuceneGrammar.g:61:156: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -1385,13 +1386,13 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // StandardLuceneGrammar.g:61:4: ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN
+                    // StandardLuceneGrammar.g:62:4: ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN
                     {
-                    LPAREN18=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_primaryClause478); if (state.failed) return retval; 
+                    LPAREN18=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_primaryClause483); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN18);
 
 
-                    // StandardLuceneGrammar.g:61:22: ( clauseDefault )+
+                    // StandardLuceneGrammar.g:62:22: ( clauseDefault )+
                     int cnt12=0;
                     loop12:
                     do {
@@ -1405,9 +1406,9 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt12) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:61:22: clauseDefault
+                    	    // StandardLuceneGrammar.g:62:22: clauseDefault
                     	    {
-                    	    pushFollow(FOLLOW_clauseDefault_in_primaryClause480);
+                    	    pushFollow(FOLLOW_clauseDefault_in_primaryClause485);
                     	    clauseDefault19=clauseDefault();
 
                     	    state._fsp--;
@@ -1428,7 +1429,7 @@ public TreeAdaptor getTreeAdaptor() {
                     } while (true);
 
 
-                    RPAREN20=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_primaryClause483); if (state.failed) return retval; 
+                    RPAREN20=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_primaryClause488); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN20);
 
 
@@ -1445,7 +1446,7 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 61:44: -> ( clauseDefault )+
+                    // 62:44: -> ( clauseDefault )+
                     {
                         if ( !(stream_clauseDefault.hasNext()) ) {
                             throw new RewriteEarlyExitException();
@@ -1465,12 +1466,12 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // StandardLuceneGrammar.g:62:4: atom
+                    // StandardLuceneGrammar.g:63:4: atom
                     {
                     root_0 = (Object)adaptor.nil();
 
 
-                    pushFollow(FOLLOW_atom_in_primaryClause493);
+                    pushFollow(FOLLOW_atom_in_primaryClause498);
                     atom21=atom();
 
                     state._fsp--;
@@ -1512,7 +1513,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "atom"
-    // StandardLuceneGrammar.g:66:1: atom : ( ( modifier )? field multi_value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD field ) ^( VALUE multi_value ) ) | ( modifier )? ( field )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD ( field )? ) ^( VALUE value ) ) );
+    // StandardLuceneGrammar.g:67:1: atom : ( ( modifier )? field multi_value -> ^( MULTIATOM ^( MODIFIER ( modifier )? ) ^( FIELD field ) ^( VALUE multi_value ) ) | ( modifier )? ( field )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD ( field )? ) ^( VALUE value ) ) );
     public final StandardLuceneGrammarParser.atom_return atom() throws RecognitionException {
         StandardLuceneGrammarParser.atom_return retval = new StandardLuceneGrammarParser.atom_return();
         retval.start = input.LT(1);
@@ -1538,7 +1539,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_value=new RewriteRuleSubtreeStream(adaptor,"rule value");
         RewriteRuleSubtreeStream stream_multi_value=new RewriteRuleSubtreeStream(adaptor,"rule multi_value");
         try {
-            // StandardLuceneGrammar.g:67:2: ( ( modifier )? field multi_value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD field ) ^( VALUE multi_value ) ) | ( modifier )? ( field )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD ( field )? ) ^( VALUE value ) ) )
+            // StandardLuceneGrammar.g:68:2: ( ( modifier )? field multi_value -> ^( MULTIATOM ^( MODIFIER ( modifier )? ) ^( FIELD field ) ^( VALUE multi_value ) ) | ( modifier )? ( field )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD ( field )? ) ^( VALUE value ) ) )
             int alt17=2;
             switch ( input.LA(1) ) {
             case MINUS:
@@ -1648,9 +1649,9 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt17) {
                 case 1 :
-                    // StandardLuceneGrammar.g:68:2: ( modifier )? field multi_value
+                    // StandardLuceneGrammar.g:69:2: ( modifier )? field multi_value
                     {
-                    // StandardLuceneGrammar.g:68:2: ( modifier )?
+                    // StandardLuceneGrammar.g:69:2: ( modifier )?
                     int alt14=2;
                     int LA14_0 = input.LA(1);
 
@@ -1659,9 +1660,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt14) {
                         case 1 :
-                            // StandardLuceneGrammar.g:68:2: modifier
+                            // StandardLuceneGrammar.g:69:2: modifier
                             {
-                            pushFollow(FOLLOW_modifier_in_atom515);
+                            pushFollow(FOLLOW_modifier_in_atom520);
                             modifier22=modifier();
 
                             state._fsp--;
@@ -1674,14 +1675,14 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    pushFollow(FOLLOW_field_in_atom518);
+                    pushFollow(FOLLOW_field_in_atom523);
                     field23=field();
 
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_field.add(field23.getTree());
 
-                    pushFollow(FOLLOW_multi_value_in_atom520);
+                    pushFollow(FOLLOW_multi_value_in_atom525);
                     multi_value24=multi_value();
 
                     state._fsp--;
@@ -1689,7 +1690,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_multi_value.add(multi_value24.getTree());
 
                     // AST REWRITE
-                    // elements: field, multi_value, modifier
+                    // elements: multi_value, field, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1701,23 +1702,23 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 68:30: -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD field ) ^( VALUE multi_value ) )
+                    // 69:30: -> ^( MULTIATOM ^( MODIFIER ( modifier )? ) ^( FIELD field ) ^( VALUE multi_value ) )
                     {
-                        // StandardLuceneGrammar.g:68:33: ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD field ) ^( VALUE multi_value ) )
+                        // StandardLuceneGrammar.g:69:33: ^( MULTIATOM ^( MODIFIER ( modifier )? ) ^( FIELD field ) ^( VALUE multi_value ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
-                        (Object)adaptor.create(ATOM, "ATOM")
+                        (Object)adaptor.create(MULTIATOM, "MULTIATOM")
                         , root_1);
 
-                        // StandardLuceneGrammar.g:68:40: ^( MODIFIER ( modifier )? )
+                        // StandardLuceneGrammar.g:69:45: ^( MODIFIER ( modifier )? )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_2);
 
-                        // StandardLuceneGrammar.g:68:51: ( modifier )?
+                        // StandardLuceneGrammar.g:69:56: ( modifier )?
                         if ( stream_modifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_modifier.nextTree());
 
@@ -1727,7 +1728,7 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:68:62: ^( FIELD field )
+                        // StandardLuceneGrammar.g:69:67: ^( FIELD field )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -1739,7 +1740,7 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:68:77: ^( VALUE multi_value )
+                        // StandardLuceneGrammar.g:69:82: ^( VALUE multi_value )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -1763,9 +1764,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:69:4: ( modifier )? ( field )? value
+                    // StandardLuceneGrammar.g:70:4: ( modifier )? ( field )? value
                     {
-                    // StandardLuceneGrammar.g:69:4: ( modifier )?
+                    // StandardLuceneGrammar.g:70:4: ( modifier )?
                     int alt15=2;
                     int LA15_0 = input.LA(1);
 
@@ -1774,9 +1775,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt15) {
                         case 1 :
-                            // StandardLuceneGrammar.g:69:4: modifier
+                            // StandardLuceneGrammar.g:70:4: modifier
                             {
-                            pushFollow(FOLLOW_modifier_in_atom550);
+                            pushFollow(FOLLOW_modifier_in_atom555);
                             modifier25=modifier();
 
                             state._fsp--;
@@ -1789,7 +1790,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    // StandardLuceneGrammar.g:69:14: ( field )?
+                    // StandardLuceneGrammar.g:70:14: ( field )?
                     int alt16=2;
                     int LA16_0 = input.LA(1);
 
@@ -1802,9 +1803,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt16) {
                         case 1 :
-                            // StandardLuceneGrammar.g:69:14: field
+                            // StandardLuceneGrammar.g:70:14: field
                             {
-                            pushFollow(FOLLOW_field_in_atom553);
+                            pushFollow(FOLLOW_field_in_atom558);
                             field26=field();
 
                             state._fsp--;
@@ -1817,7 +1818,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    pushFollow(FOLLOW_value_in_atom556);
+                    pushFollow(FOLLOW_value_in_atom561);
                     value27=value();
 
                     state._fsp--;
@@ -1825,7 +1826,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_value.add(value27.getTree());
 
                     // AST REWRITE
-                    // elements: modifier, value, field
+                    // elements: field, modifier, value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1837,23 +1838,23 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 69:27: -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD ( field )? ) ^( VALUE value ) )
+                    // 70:27: -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD ( field )? ) ^( VALUE value ) )
                     {
-                        // StandardLuceneGrammar.g:69:30: ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD ( field )? ) ^( VALUE value ) )
+                        // StandardLuceneGrammar.g:70:30: ^( ATOM ^( MODIFIER ( modifier )? ) ^( FIELD ( field )? ) ^( VALUE value ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(ATOM, "ATOM")
                         , root_1);
 
-                        // StandardLuceneGrammar.g:69:37: ^( MODIFIER ( modifier )? )
+                        // StandardLuceneGrammar.g:70:37: ^( MODIFIER ( modifier )? )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_2);
 
-                        // StandardLuceneGrammar.g:69:48: ( modifier )?
+                        // StandardLuceneGrammar.g:70:48: ( modifier )?
                         if ( stream_modifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_modifier.nextTree());
 
@@ -1863,14 +1864,14 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:69:59: ^( FIELD ( field )? )
+                        // StandardLuceneGrammar.g:70:59: ^( FIELD ( field )? )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(FIELD, "FIELD")
                         , root_2);
 
-                        // StandardLuceneGrammar.g:69:67: ( field )?
+                        // StandardLuceneGrammar.g:70:67: ( field )?
                         if ( stream_field.hasNext() ) {
                             adaptor.addChild(root_2, stream_field.nextTree());
 
@@ -1880,7 +1881,7 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:69:75: ^( VALUE value )
+                        // StandardLuceneGrammar.g:70:75: ^( VALUE value )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -1936,7 +1937,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "field"
-    // StandardLuceneGrammar.g:73:1: field : TERM_NORMAL COLON -> TERM_NORMAL ;
+    // StandardLuceneGrammar.g:74:1: field : TERM_NORMAL COLON -> TERM_NORMAL ;
     public final StandardLuceneGrammarParser.field_return field() throws RecognitionException {
         StandardLuceneGrammarParser.field_return retval = new StandardLuceneGrammarParser.field_return();
         retval.start = input.LT(1);
@@ -1953,14 +1954,14 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_TERM_NORMAL=new RewriteRuleTokenStream(adaptor,"token TERM_NORMAL");
 
         try {
-            // StandardLuceneGrammar.g:74:2: ( TERM_NORMAL COLON -> TERM_NORMAL )
-            // StandardLuceneGrammar.g:75:2: TERM_NORMAL COLON
+            // StandardLuceneGrammar.g:75:2: ( TERM_NORMAL COLON -> TERM_NORMAL )
+            // StandardLuceneGrammar.g:76:2: TERM_NORMAL COLON
             {
-            TERM_NORMAL28=(Token)match(input,TERM_NORMAL,FOLLOW_TERM_NORMAL_in_field604); if (state.failed) return retval; 
+            TERM_NORMAL28=(Token)match(input,TERM_NORMAL,FOLLOW_TERM_NORMAL_in_field609); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_TERM_NORMAL.add(TERM_NORMAL28);
 
 
-            COLON29=(Token)match(input,COLON,FOLLOW_COLON_in_field606); if (state.failed) return retval; 
+            COLON29=(Token)match(input,COLON,FOLLOW_COLON_in_field611); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_COLON.add(COLON29);
 
 
@@ -1977,7 +1978,7 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 75:20: -> TERM_NORMAL
+            // 76:20: -> TERM_NORMAL
             {
                 adaptor.addChild(root_0, 
                 stream_TERM_NORMAL.nextNode()
@@ -2022,7 +2023,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "value"
-    // StandardLuceneGrammar.g:78:1: value : ( range_term_in -> ^( QRANGEIN range_term_in ) | range_term_ex -> ^( QRANGEEX range_term_ex ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) ) ( term_modifier )? -> ( term_modifier )? $value;
+    // StandardLuceneGrammar.g:79:1: value : ( range_term_in -> ^( QRANGEIN range_term_in ) | range_term_ex -> ^( QRANGEEX range_term_ex ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) ) ( term_modifier )? -> ( term_modifier )? $value;
     public final StandardLuceneGrammarParser.value_return value() throws RecognitionException {
         StandardLuceneGrammarParser.value_return retval = new StandardLuceneGrammarParser.value_return();
         retval.start = input.LT(1);
@@ -2053,10 +2054,10 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_truncated=new RewriteRuleSubtreeStream(adaptor,"rule truncated");
         RewriteRuleSubtreeStream stream_quoted_truncated=new RewriteRuleSubtreeStream(adaptor,"rule quoted_truncated");
         try {
-            // StandardLuceneGrammar.g:79:2: ( ( range_term_in -> ^( QRANGEIN range_term_in ) | range_term_ex -> ^( QRANGEEX range_term_ex ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) ) ( term_modifier )? -> ( term_modifier )? $value)
-            // StandardLuceneGrammar.g:80:2: ( range_term_in -> ^( QRANGEIN range_term_in ) | range_term_ex -> ^( QRANGEEX range_term_ex ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) ) ( term_modifier )?
+            // StandardLuceneGrammar.g:80:2: ( ( range_term_in -> ^( QRANGEIN range_term_in ) | range_term_ex -> ^( QRANGEEX range_term_ex ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) ) ( term_modifier )? -> ( term_modifier )? $value)
+            // StandardLuceneGrammar.g:81:2: ( range_term_in -> ^( QRANGEIN range_term_in ) | range_term_ex -> ^( QRANGEEX range_term_ex ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) ) ( term_modifier )?
             {
-            // StandardLuceneGrammar.g:80:2: ( range_term_in -> ^( QRANGEIN range_term_in ) | range_term_ex -> ^( QRANGEEX range_term_ex ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) )
+            // StandardLuceneGrammar.g:81:2: ( range_term_in -> ^( QRANGEIN range_term_in ) | range_term_ex -> ^( QRANGEEX range_term_ex ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) )
             int alt18=6;
             switch ( input.LA(1) ) {
             case LBRACK:
@@ -2101,9 +2102,9 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt18) {
                 case 1 :
-                    // StandardLuceneGrammar.g:81:2: range_term_in
+                    // StandardLuceneGrammar.g:82:2: range_term_in
                     {
-                    pushFollow(FOLLOW_range_term_in_in_value629);
+                    pushFollow(FOLLOW_range_term_in_in_value634);
                     range_term_in30=range_term_in();
 
                     state._fsp--;
@@ -2123,9 +2124,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 81:16: -> ^( QRANGEIN range_term_in )
+                    // 82:16: -> ^( QRANGEIN range_term_in )
                     {
-                        // StandardLuceneGrammar.g:81:19: ^( QRANGEIN range_term_in )
+                        // StandardLuceneGrammar.g:82:19: ^( QRANGEIN range_term_in )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -2146,9 +2147,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:82:4: range_term_ex
+                    // StandardLuceneGrammar.g:83:4: range_term_ex
                     {
-                    pushFollow(FOLLOW_range_term_ex_in_value642);
+                    pushFollow(FOLLOW_range_term_ex_in_value647);
                     range_term_ex31=range_term_ex();
 
                     state._fsp--;
@@ -2168,9 +2169,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 82:18: -> ^( QRANGEEX range_term_ex )
+                    // 83:18: -> ^( QRANGEEX range_term_ex )
                     {
-                        // StandardLuceneGrammar.g:82:21: ^( QRANGEEX range_term_ex )
+                        // StandardLuceneGrammar.g:83:21: ^( QRANGEEX range_term_ex )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -2191,9 +2192,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // StandardLuceneGrammar.g:83:4: normal
+                    // StandardLuceneGrammar.g:84:4: normal
                     {
-                    pushFollow(FOLLOW_normal_in_value656);
+                    pushFollow(FOLLOW_normal_in_value661);
                     normal32=normal();
 
                     state._fsp--;
@@ -2213,9 +2214,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 83:11: -> ^( QNORMAL normal )
+                    // 84:11: -> ^( QNORMAL normal )
                     {
-                        // StandardLuceneGrammar.g:83:14: ^( QNORMAL normal )
+                        // StandardLuceneGrammar.g:84:14: ^( QNORMAL normal )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -2236,9 +2237,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // StandardLuceneGrammar.g:84:4: truncated
+                    // StandardLuceneGrammar.g:85:4: truncated
                     {
-                    pushFollow(FOLLOW_truncated_in_value669);
+                    pushFollow(FOLLOW_truncated_in_value674);
                     truncated33=truncated();
 
                     state._fsp--;
@@ -2258,9 +2259,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 84:14: -> ^( QTRUNCATED truncated )
+                    // 85:14: -> ^( QTRUNCATED truncated )
                     {
-                        // StandardLuceneGrammar.g:84:17: ^( QTRUNCATED truncated )
+                        // StandardLuceneGrammar.g:85:17: ^( QTRUNCATED truncated )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -2281,9 +2282,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 5 :
-                    // StandardLuceneGrammar.g:85:4: quoted
+                    // StandardLuceneGrammar.g:86:4: quoted
                     {
-                    pushFollow(FOLLOW_quoted_in_value682);
+                    pushFollow(FOLLOW_quoted_in_value687);
                     quoted34=quoted();
 
                     state._fsp--;
@@ -2303,9 +2304,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 85:11: -> ^( QPHRASE quoted )
+                    // 86:11: -> ^( QPHRASE quoted )
                     {
-                        // StandardLuceneGrammar.g:85:14: ^( QPHRASE quoted )
+                        // StandardLuceneGrammar.g:86:14: ^( QPHRASE quoted )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -2326,9 +2327,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 6 :
-                    // StandardLuceneGrammar.g:86:4: quoted_truncated
+                    // StandardLuceneGrammar.g:87:4: quoted_truncated
                     {
-                    pushFollow(FOLLOW_quoted_truncated_in_value695);
+                    pushFollow(FOLLOW_quoted_truncated_in_value700);
                     quoted_truncated35=quoted_truncated();
 
                     state._fsp--;
@@ -2348,9 +2349,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 86:21: -> ^( QPHRASETRUNC quoted_truncated )
+                    // 87:21: -> ^( QPHRASETRUNC quoted_truncated )
                     {
-                        // StandardLuceneGrammar.g:86:24: ^( QPHRASETRUNC quoted_truncated )
+                        // StandardLuceneGrammar.g:87:24: ^( QPHRASETRUNC quoted_truncated )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -2374,7 +2375,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:88:2: ( term_modifier )?
+            // StandardLuceneGrammar.g:89:2: ( term_modifier )?
             int alt19=2;
             int LA19_0 = input.LA(1);
 
@@ -2383,9 +2384,9 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt19) {
                 case 1 :
-                    // StandardLuceneGrammar.g:88:2: term_modifier
+                    // StandardLuceneGrammar.g:89:2: term_modifier
                     {
-                    pushFollow(FOLLOW_term_modifier_in_value709);
+                    pushFollow(FOLLOW_term_modifier_in_value714);
                     term_modifier36=term_modifier();
 
                     state._fsp--;
@@ -2399,7 +2400,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: value, term_modifier
+            // elements: term_modifier, value
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -2411,9 +2412,9 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 88:17: -> ( term_modifier )? $value
+            // 89:17: -> ( term_modifier )? $value
             {
-                // StandardLuceneGrammar.g:88:20: ( term_modifier )?
+                // StandardLuceneGrammar.g:89:20: ( term_modifier )?
                 if ( stream_term_modifier.hasNext() ) {
                     adaptor.addChild(root_0, stream_term_modifier.nextTree());
 
@@ -2461,7 +2462,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "range_term_in"
-    // StandardLuceneGrammar.g:93:1: range_term_in : LBRACK (a= range_value -> range_value ^( QANYTHING ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK ;
+    // StandardLuceneGrammar.g:94:1: range_term_in : LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK ;
     public final StandardLuceneGrammarParser.range_term_in_return range_term_in() throws RecognitionException {
         StandardLuceneGrammarParser.range_term_in_return retval = new StandardLuceneGrammarParser.range_term_in_return();
         retval.start = input.LT(1);
@@ -2485,17 +2486,17 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_TO=new RewriteRuleTokenStream(adaptor,"token TO");
         RewriteRuleSubtreeStream stream_range_value=new RewriteRuleSubtreeStream(adaptor,"rule range_value");
         try {
-            // StandardLuceneGrammar.g:94:2: ( LBRACK (a= range_value -> range_value ^( QANYTHING ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK )
-            // StandardLuceneGrammar.g:95:8: LBRACK (a= range_value -> range_value ^( QANYTHING ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK
+            // StandardLuceneGrammar.g:95:2: ( LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK )
+            // StandardLuceneGrammar.g:96:8: LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK
             {
-            LBRACK37=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_range_term_in742); if (state.failed) return retval; 
+            LBRACK37=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_range_term_in747); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LBRACK.add(LBRACK37);
 
 
-            // StandardLuceneGrammar.g:96:8: (a= range_value -> range_value ^( QANYTHING ) )
-            // StandardLuceneGrammar.g:96:9: a= range_value
+            // StandardLuceneGrammar.g:97:8: (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) )
+            // StandardLuceneGrammar.g:97:9: a= range_value
             {
-            pushFollow(FOLLOW_range_value_in_range_term_in754);
+            pushFollow(FOLLOW_range_value_in_range_term_in759);
             a=range_value();
 
             state._fsp--;
@@ -2515,16 +2516,20 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 96:23: -> range_value ^( QANYTHING )
+            // 97:23: -> range_value ^( QANYTHING QANYTHING[\"*\"] )
             {
                 adaptor.addChild(root_0, stream_range_value.nextTree());
 
-                // StandardLuceneGrammar.g:96:38: ^( QANYTHING )
+                // StandardLuceneGrammar.g:97:38: ^( QANYTHING QANYTHING[\"*\"] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
                 (Object)adaptor.create(QANYTHING, "QANYTHING")
                 , root_1);
+
+                adaptor.addChild(root_1, 
+                (Object)adaptor.create(QANYTHING, "*")
+                );
 
                 adaptor.addChild(root_0, root_1);
                 }
@@ -2538,7 +2543,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:97:8: ( ( TO )? b= range_value -> $a ( $b)? )?
+            // StandardLuceneGrammar.g:98:8: ( ( TO )? b= range_value -> $a ( $b)? )?
             int alt21=2;
             int LA21_0 = input.LA(1);
 
@@ -2547,9 +2552,9 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt21) {
                 case 1 :
-                    // StandardLuceneGrammar.g:97:10: ( TO )? b= range_value
+                    // StandardLuceneGrammar.g:98:10: ( TO )? b= range_value
                     {
-                    // StandardLuceneGrammar.g:97:10: ( TO )?
+                    // StandardLuceneGrammar.g:98:10: ( TO )?
                     int alt20=2;
                     int LA20_0 = input.LA(1);
 
@@ -2558,9 +2563,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt20) {
                         case 1 :
-                            // StandardLuceneGrammar.g:97:10: TO
+                            // StandardLuceneGrammar.g:98:10: TO
                             {
-                            TO38=(Token)match(input,TO,FOLLOW_TO_in_range_term_in775); if (state.failed) return retval; 
+                            TO38=(Token)match(input,TO,FOLLOW_TO_in_range_term_in782); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_TO.add(TO38);
 
 
@@ -2570,7 +2575,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    pushFollow(FOLLOW_range_value_in_range_term_in780);
+                    pushFollow(FOLLOW_range_value_in_range_term_in787);
                     b=range_value();
 
                     state._fsp--;
@@ -2578,7 +2583,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 
                     // AST REWRITE
-                    // elements: b, a
+                    // elements: a, b
                     // token labels: 
                     // rule labels: retval, b, a
                     // token list labels: 
@@ -2592,11 +2597,11 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_a=new RewriteRuleSubtreeStream(adaptor,"rule a",a!=null?a.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 97:28: -> $a ( $b)?
+                    // 98:28: -> $a ( $b)?
                     {
                         adaptor.addChild(root_0, stream_a.nextTree());
 
-                        // StandardLuceneGrammar.g:97:35: ( $b)?
+                        // StandardLuceneGrammar.g:98:35: ( $b)?
                         if ( stream_b.hasNext() ) {
                             adaptor.addChild(root_0, stream_b.nextTree());
 
@@ -2615,7 +2620,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            RBRACK39=(Token)match(input,RBRACK,FOLLOW_RBRACK_in_range_term_in801); if (state.failed) return retval; 
+            RBRACK39=(Token)match(input,RBRACK,FOLLOW_RBRACK_in_range_term_in808); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_RBRACK.add(RBRACK39);
 
 
@@ -2652,7 +2657,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "range_term_ex"
-    // StandardLuceneGrammar.g:102:1: range_term_ex : LCURLY (a= range_value -> range_value ^( QANYTHING ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RCURLY ;
+    // StandardLuceneGrammar.g:103:1: range_term_ex : LCURLY (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RCURLY ;
     public final StandardLuceneGrammarParser.range_term_ex_return range_term_ex() throws RecognitionException {
         StandardLuceneGrammarParser.range_term_ex_return retval = new StandardLuceneGrammarParser.range_term_ex_return();
         retval.start = input.LT(1);
@@ -2676,17 +2681,17 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_RCURLY=new RewriteRuleTokenStream(adaptor,"token RCURLY");
         RewriteRuleSubtreeStream stream_range_value=new RewriteRuleSubtreeStream(adaptor,"rule range_value");
         try {
-            // StandardLuceneGrammar.g:103:2: ( LCURLY (a= range_value -> range_value ^( QANYTHING ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RCURLY )
-            // StandardLuceneGrammar.g:104:8: LCURLY (a= range_value -> range_value ^( QANYTHING ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RCURLY
+            // StandardLuceneGrammar.g:104:2: ( LCURLY (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RCURLY )
+            // StandardLuceneGrammar.g:105:8: LCURLY (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RCURLY
             {
-            LCURLY40=(Token)match(input,LCURLY,FOLLOW_LCURLY_in_range_term_ex821); if (state.failed) return retval; 
+            LCURLY40=(Token)match(input,LCURLY,FOLLOW_LCURLY_in_range_term_ex828); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LCURLY.add(LCURLY40);
 
 
-            // StandardLuceneGrammar.g:105:8: (a= range_value -> range_value ^( QANYTHING ) )
-            // StandardLuceneGrammar.g:105:10: a= range_value
+            // StandardLuceneGrammar.g:106:8: (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) )
+            // StandardLuceneGrammar.g:106:10: a= range_value
             {
-            pushFollow(FOLLOW_range_value_in_range_term_ex834);
+            pushFollow(FOLLOW_range_value_in_range_term_ex841);
             a=range_value();
 
             state._fsp--;
@@ -2706,16 +2711,20 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 105:24: -> range_value ^( QANYTHING )
+            // 106:24: -> range_value ^( QANYTHING QANYTHING[\"*\"] )
             {
                 adaptor.addChild(root_0, stream_range_value.nextTree());
 
-                // StandardLuceneGrammar.g:105:39: ^( QANYTHING )
+                // StandardLuceneGrammar.g:106:39: ^( QANYTHING QANYTHING[\"*\"] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
                 (Object)adaptor.create(QANYTHING, "QANYTHING")
                 , root_1);
+
+                adaptor.addChild(root_1, 
+                (Object)adaptor.create(QANYTHING, "*")
+                );
 
                 adaptor.addChild(root_0, root_1);
                 }
@@ -2729,7 +2738,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:106:8: ( ( TO )? b= range_value -> $a ( $b)? )?
+            // StandardLuceneGrammar.g:107:8: ( ( TO )? b= range_value -> $a ( $b)? )?
             int alt23=2;
             int LA23_0 = input.LA(1);
 
@@ -2738,9 +2747,9 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt23) {
                 case 1 :
-                    // StandardLuceneGrammar.g:106:10: ( TO )? b= range_value
+                    // StandardLuceneGrammar.g:107:10: ( TO )? b= range_value
                     {
-                    // StandardLuceneGrammar.g:106:10: ( TO )?
+                    // StandardLuceneGrammar.g:107:10: ( TO )?
                     int alt22=2;
                     int LA22_0 = input.LA(1);
 
@@ -2749,9 +2758,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt22) {
                         case 1 :
-                            // StandardLuceneGrammar.g:106:10: TO
+                            // StandardLuceneGrammar.g:107:10: TO
                             {
-                            TO41=(Token)match(input,TO,FOLLOW_TO_in_range_term_ex855); if (state.failed) return retval; 
+                            TO41=(Token)match(input,TO,FOLLOW_TO_in_range_term_ex864); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_TO.add(TO41);
 
 
@@ -2761,7 +2770,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    pushFollow(FOLLOW_range_value_in_range_term_ex860);
+                    pushFollow(FOLLOW_range_value_in_range_term_ex869);
                     b=range_value();
 
                     state._fsp--;
@@ -2783,11 +2792,11 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_a=new RewriteRuleSubtreeStream(adaptor,"rule a",a!=null?a.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 106:28: -> $a ( $b)?
+                    // 107:28: -> $a ( $b)?
                     {
                         adaptor.addChild(root_0, stream_a.nextTree());
 
-                        // StandardLuceneGrammar.g:106:35: ( $b)?
+                        // StandardLuceneGrammar.g:107:35: ( $b)?
                         if ( stream_b.hasNext() ) {
                             adaptor.addChild(root_0, stream_b.nextTree());
 
@@ -2806,7 +2815,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            RCURLY42=(Token)match(input,RCURLY,FOLLOW_RCURLY_in_range_term_ex881); if (state.failed) return retval; 
+            RCURLY42=(Token)match(input,RCURLY,FOLLOW_RCURLY_in_range_term_ex890); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_RCURLY.add(RCURLY42);
 
 
@@ -2843,7 +2852,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "range_value"
-    // StandardLuceneGrammar.g:110:1: range_value : ( normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | STAR -> ^( QANYTHING ) );
+    // StandardLuceneGrammar.g:111:1: range_value : ( normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | STAR -> ^( QANYTHING STAR ) );
     public final StandardLuceneGrammarParser.range_value_return range_value() throws RecognitionException {
         StandardLuceneGrammarParser.range_value_return retval = new StandardLuceneGrammarParser.range_value_return();
         retval.start = input.LT(1);
@@ -2868,7 +2877,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_quoted_truncated=new RewriteRuleSubtreeStream(adaptor,"rule quoted_truncated");
         RewriteRuleSubtreeStream stream_truncated=new RewriteRuleSubtreeStream(adaptor,"rule truncated");
         try {
-            // StandardLuceneGrammar.g:111:2: ( normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | STAR -> ^( QANYTHING ) )
+            // StandardLuceneGrammar.g:112:2: ( normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | STAR -> ^( QANYTHING STAR ) )
             int alt24=5;
             switch ( input.LA(1) ) {
             case NUMBER:
@@ -2908,9 +2917,9 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt24) {
                 case 1 :
-                    // StandardLuceneGrammar.g:112:2: normal
+                    // StandardLuceneGrammar.g:113:2: normal
                     {
-                    pushFollow(FOLLOW_normal_in_range_value895);
+                    pushFollow(FOLLOW_normal_in_range_value904);
                     normal43=normal();
 
                     state._fsp--;
@@ -2930,9 +2939,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 112:9: -> ^( QNORMAL normal )
+                    // 113:9: -> ^( QNORMAL normal )
                     {
-                        // StandardLuceneGrammar.g:112:12: ^( QNORMAL normal )
+                        // StandardLuceneGrammar.g:113:12: ^( QNORMAL normal )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -2953,9 +2962,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:113:4: truncated
+                    // StandardLuceneGrammar.g:114:4: truncated
                     {
-                    pushFollow(FOLLOW_truncated_in_range_value908);
+                    pushFollow(FOLLOW_truncated_in_range_value917);
                     truncated44=truncated();
 
                     state._fsp--;
@@ -2975,9 +2984,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 113:14: -> ^( QTRUNCATED truncated )
+                    // 114:14: -> ^( QTRUNCATED truncated )
                     {
-                        // StandardLuceneGrammar.g:113:17: ^( QTRUNCATED truncated )
+                        // StandardLuceneGrammar.g:114:17: ^( QTRUNCATED truncated )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -2998,9 +3007,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // StandardLuceneGrammar.g:114:4: quoted
+                    // StandardLuceneGrammar.g:115:4: quoted
                     {
-                    pushFollow(FOLLOW_quoted_in_range_value921);
+                    pushFollow(FOLLOW_quoted_in_range_value930);
                     quoted45=quoted();
 
                     state._fsp--;
@@ -3020,9 +3029,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 114:11: -> ^( QPHRASE quoted )
+                    // 115:11: -> ^( QPHRASE quoted )
                     {
-                        // StandardLuceneGrammar.g:114:14: ^( QPHRASE quoted )
+                        // StandardLuceneGrammar.g:115:14: ^( QPHRASE quoted )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3043,9 +3052,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // StandardLuceneGrammar.g:115:4: quoted_truncated
+                    // StandardLuceneGrammar.g:116:4: quoted_truncated
                     {
-                    pushFollow(FOLLOW_quoted_truncated_in_range_value934);
+                    pushFollow(FOLLOW_quoted_truncated_in_range_value943);
                     quoted_truncated46=quoted_truncated();
 
                     state._fsp--;
@@ -3065,9 +3074,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 115:21: -> ^( QPHRASETRUNC quoted_truncated )
+                    // 116:21: -> ^( QPHRASETRUNC quoted_truncated )
                     {
-                        // StandardLuceneGrammar.g:115:24: ^( QPHRASETRUNC quoted_truncated )
+                        // StandardLuceneGrammar.g:116:24: ^( QPHRASETRUNC quoted_truncated )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3088,14 +3097,14 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 5 :
-                    // StandardLuceneGrammar.g:116:4: STAR
+                    // StandardLuceneGrammar.g:117:4: STAR
                     {
-                    STAR47=(Token)match(input,STAR,FOLLOW_STAR_in_range_value947); if (state.failed) return retval; 
+                    STAR47=(Token)match(input,STAR,FOLLOW_STAR_in_range_value956); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STAR.add(STAR47);
 
 
                     // AST REWRITE
-                    // elements: 
+                    // elements: STAR
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3107,14 +3116,18 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 116:9: -> ^( QANYTHING )
+                    // 117:9: -> ^( QANYTHING STAR )
                     {
-                        // StandardLuceneGrammar.g:116:12: ^( QANYTHING )
+                        // StandardLuceneGrammar.g:117:12: ^( QANYTHING STAR )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(QANYTHING, "QANYTHING")
                         , root_1);
+
+                        adaptor.addChild(root_1, 
+                        stream_STAR.nextNode()
+                        );
 
                         adaptor.addChild(root_0, root_1);
                         }
@@ -3160,7 +3173,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "multi_value"
-    // StandardLuceneGrammar.g:119:1: multi_value : LPAREN ( mterm )+ RPAREN -> ( mterm )+ ;
+    // StandardLuceneGrammar.g:120:1: multi_value : LPAREN ( mterm )+ RPAREN -> ( mterm )+ ;
     public final StandardLuceneGrammarParser.multi_value_return multi_value() throws RecognitionException {
         StandardLuceneGrammarParser.multi_value_return retval = new StandardLuceneGrammarParser.multi_value_return();
         retval.start = input.LT(1);
@@ -3179,14 +3192,14 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_LPAREN=new RewriteRuleTokenStream(adaptor,"token LPAREN");
         RewriteRuleSubtreeStream stream_mterm=new RewriteRuleSubtreeStream(adaptor,"rule mterm");
         try {
-            // StandardLuceneGrammar.g:120:2: ( LPAREN ( mterm )+ RPAREN -> ( mterm )+ )
-            // StandardLuceneGrammar.g:121:2: LPAREN ( mterm )+ RPAREN
+            // StandardLuceneGrammar.g:121:2: ( LPAREN ( mterm )+ RPAREN -> ( mterm )+ )
+            // StandardLuceneGrammar.g:122:2: LPAREN ( mterm )+ RPAREN
             {
-            LPAREN48=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_multi_value967); if (state.failed) return retval; 
+            LPAREN48=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_multi_value977); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN48);
 
 
-            // StandardLuceneGrammar.g:121:9: ( mterm )+
+            // StandardLuceneGrammar.g:122:9: ( mterm )+
             int cnt25=0;
             loop25:
             do {
@@ -3200,9 +3213,9 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt25) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:121:9: mterm
+            	    // StandardLuceneGrammar.g:122:9: mterm
             	    {
-            	    pushFollow(FOLLOW_mterm_in_multi_value969);
+            	    pushFollow(FOLLOW_mterm_in_multi_value979);
             	    mterm49=mterm();
 
             	    state._fsp--;
@@ -3223,7 +3236,7 @@ public TreeAdaptor getTreeAdaptor() {
             } while (true);
 
 
-            RPAREN50=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_multi_value972); if (state.failed) return retval; 
+            RPAREN50=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_multi_value982); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN50);
 
 
@@ -3240,7 +3253,7 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 121:23: -> ( mterm )+
+            // 122:23: -> ( mterm )+
             {
                 if ( !(stream_mterm.hasNext()) ) {
                     throw new RewriteEarlyExitException();
@@ -3290,7 +3303,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "mterm"
-    // StandardLuceneGrammar.g:125:1: mterm : ( ( modifier )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) ) ) ;
+    // StandardLuceneGrammar.g:126:1: mterm : ( ( modifier )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) ) ) ;
     public final StandardLuceneGrammarParser.mterm_return mterm() throws RecognitionException {
         StandardLuceneGrammarParser.mterm_return retval = new StandardLuceneGrammarParser.mterm_return();
         retval.start = input.LT(1);
@@ -3306,13 +3319,13 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_modifier=new RewriteRuleSubtreeStream(adaptor,"rule modifier");
         RewriteRuleSubtreeStream stream_value=new RewriteRuleSubtreeStream(adaptor,"rule value");
         try {
-            // StandardLuceneGrammar.g:126:2: ( ( ( modifier )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) ) ) )
-            // StandardLuceneGrammar.g:127:2: ( ( modifier )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) ) )
+            // StandardLuceneGrammar.g:127:2: ( ( ( modifier )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) ) ) )
+            // StandardLuceneGrammar.g:128:2: ( ( modifier )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) ) )
             {
-            // StandardLuceneGrammar.g:127:2: ( ( modifier )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) ) )
-            // StandardLuceneGrammar.g:127:3: ( modifier )? value
+            // StandardLuceneGrammar.g:128:2: ( ( modifier )? value -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) ) )
+            // StandardLuceneGrammar.g:128:3: ( modifier )? value
             {
-            // StandardLuceneGrammar.g:127:3: ( modifier )?
+            // StandardLuceneGrammar.g:128:3: ( modifier )?
             int alt26=2;
             int LA26_0 = input.LA(1);
 
@@ -3321,9 +3334,9 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt26) {
                 case 1 :
-                    // StandardLuceneGrammar.g:127:3: modifier
+                    // StandardLuceneGrammar.g:128:3: modifier
                     {
-                    pushFollow(FOLLOW_modifier_in_mterm995);
+                    pushFollow(FOLLOW_modifier_in_mterm1005);
                     modifier51=modifier();
 
                     state._fsp--;
@@ -3336,7 +3349,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            pushFollow(FOLLOW_value_in_mterm998);
+            pushFollow(FOLLOW_value_in_mterm1008);
             value52=value();
 
             state._fsp--;
@@ -3356,23 +3369,23 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 127:19: -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) )
+            // 128:19: -> ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) )
             {
-                // StandardLuceneGrammar.g:127:22: ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) )
+                // StandardLuceneGrammar.g:128:22: ^( ATOM ^( MODIFIER ( modifier )? ) ^( VALUE value ) )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
                 (Object)adaptor.create(ATOM, "ATOM")
                 , root_1);
 
-                // StandardLuceneGrammar.g:127:29: ^( MODIFIER ( modifier )? )
+                // StandardLuceneGrammar.g:128:29: ^( MODIFIER ( modifier )? )
                 {
                 Object root_2 = (Object)adaptor.nil();
                 root_2 = (Object)adaptor.becomeRoot(
                 (Object)adaptor.create(MODIFIER, "MODIFIER")
                 , root_2);
 
-                // StandardLuceneGrammar.g:127:40: ( modifier )?
+                // StandardLuceneGrammar.g:128:40: ( modifier )?
                 if ( stream_modifier.hasNext() ) {
                     adaptor.addChild(root_2, stream_modifier.nextTree());
 
@@ -3382,7 +3395,7 @@ public TreeAdaptor getTreeAdaptor() {
                 adaptor.addChild(root_1, root_2);
                 }
 
-                // StandardLuceneGrammar.g:127:51: ^( VALUE value )
+                // StandardLuceneGrammar.g:128:51: ^( VALUE value )
                 {
                 Object root_2 = (Object)adaptor.nil();
                 root_2 = (Object)adaptor.becomeRoot(
@@ -3439,7 +3452,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "normal"
-    // StandardLuceneGrammar.g:131:1: normal : ( TERM_NORMAL | NUMBER );
+    // StandardLuceneGrammar.g:132:1: normal : ( TERM_NORMAL | NUMBER );
     public final StandardLuceneGrammarParser.normal_return normal() throws RecognitionException {
         StandardLuceneGrammarParser.normal_return retval = new StandardLuceneGrammarParser.normal_return();
         retval.start = input.LT(1);
@@ -3452,7 +3465,7 @@ public TreeAdaptor getTreeAdaptor() {
         Object set53_tree=null;
 
         try {
-            // StandardLuceneGrammar.g:132:2: ( TERM_NORMAL | NUMBER )
+            // StandardLuceneGrammar.g:133:2: ( TERM_NORMAL | NUMBER )
             // StandardLuceneGrammar.g:
             {
             root_0 = (Object)adaptor.nil();
@@ -3508,7 +3521,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "truncated"
-    // StandardLuceneGrammar.g:140:1: truncated : TERM_TRUNCATED ;
+    // StandardLuceneGrammar.g:141:1: truncated : TERM_TRUNCATED ;
     public final StandardLuceneGrammarParser.truncated_return truncated() throws RecognitionException {
         StandardLuceneGrammarParser.truncated_return retval = new StandardLuceneGrammarParser.truncated_return();
         retval.start = input.LT(1);
@@ -3521,13 +3534,13 @@ public TreeAdaptor getTreeAdaptor() {
         Object TERM_TRUNCATED54_tree=null;
 
         try {
-            // StandardLuceneGrammar.g:141:2: ( TERM_TRUNCATED )
-            // StandardLuceneGrammar.g:142:2: TERM_TRUNCATED
+            // StandardLuceneGrammar.g:142:2: ( TERM_TRUNCATED )
+            // StandardLuceneGrammar.g:143:2: TERM_TRUNCATED
             {
             root_0 = (Object)adaptor.nil();
 
 
-            TERM_TRUNCATED54=(Token)match(input,TERM_TRUNCATED,FOLLOW_TERM_TRUNCATED_in_truncated1060); if (state.failed) return retval;
+            TERM_TRUNCATED54=(Token)match(input,TERM_TRUNCATED,FOLLOW_TERM_TRUNCATED_in_truncated1070); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             TERM_TRUNCATED54_tree = 
             (Object)adaptor.create(TERM_TRUNCATED54)
@@ -3568,7 +3581,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "quoted_truncated"
-    // StandardLuceneGrammar.g:146:1: quoted_truncated : PHRASE_ANYTHING ;
+    // StandardLuceneGrammar.g:147:1: quoted_truncated : PHRASE_ANYTHING ;
     public final StandardLuceneGrammarParser.quoted_truncated_return quoted_truncated() throws RecognitionException {
         StandardLuceneGrammarParser.quoted_truncated_return retval = new StandardLuceneGrammarParser.quoted_truncated_return();
         retval.start = input.LT(1);
@@ -3581,13 +3594,13 @@ public TreeAdaptor getTreeAdaptor() {
         Object PHRASE_ANYTHING55_tree=null;
 
         try {
-            // StandardLuceneGrammar.g:147:2: ( PHRASE_ANYTHING )
-            // StandardLuceneGrammar.g:148:2: PHRASE_ANYTHING
+            // StandardLuceneGrammar.g:148:2: ( PHRASE_ANYTHING )
+            // StandardLuceneGrammar.g:149:2: PHRASE_ANYTHING
             {
             root_0 = (Object)adaptor.nil();
 
 
-            PHRASE_ANYTHING55=(Token)match(input,PHRASE_ANYTHING,FOLLOW_PHRASE_ANYTHING_in_quoted_truncated1075); if (state.failed) return retval;
+            PHRASE_ANYTHING55=(Token)match(input,PHRASE_ANYTHING,FOLLOW_PHRASE_ANYTHING_in_quoted_truncated1085); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             PHRASE_ANYTHING55_tree = 
             (Object)adaptor.create(PHRASE_ANYTHING55)
@@ -3628,7 +3641,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "quoted"
-    // StandardLuceneGrammar.g:151:1: quoted : PHRASE ;
+    // StandardLuceneGrammar.g:152:1: quoted : PHRASE ;
     public final StandardLuceneGrammarParser.quoted_return quoted() throws RecognitionException {
         StandardLuceneGrammarParser.quoted_return retval = new StandardLuceneGrammarParser.quoted_return();
         retval.start = input.LT(1);
@@ -3641,13 +3654,13 @@ public TreeAdaptor getTreeAdaptor() {
         Object PHRASE56_tree=null;
 
         try {
-            // StandardLuceneGrammar.g:151:8: ( PHRASE )
-            // StandardLuceneGrammar.g:152:2: PHRASE
+            // StandardLuceneGrammar.g:152:8: ( PHRASE )
+            // StandardLuceneGrammar.g:153:2: PHRASE
             {
             root_0 = (Object)adaptor.nil();
 
 
-            PHRASE56=(Token)match(input,PHRASE,FOLLOW_PHRASE_in_quoted1087); if (state.failed) return retval;
+            PHRASE56=(Token)match(input,PHRASE,FOLLOW_PHRASE_in_quoted1097); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             PHRASE56_tree = 
             (Object)adaptor.create(PHRASE56)
@@ -3688,7 +3701,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "operator"
-    // StandardLuceneGrammar.g:158:1: operator : ( AND | OR | NOT | NEAR ) ;
+    // StandardLuceneGrammar.g:159:1: operator : ( AND | OR | NOT | NEAR ) ;
     public final StandardLuceneGrammarParser.operator_return operator() throws RecognitionException {
         StandardLuceneGrammarParser.operator_return retval = new StandardLuceneGrammarParser.operator_return();
         retval.start = input.LT(1);
@@ -3701,7 +3714,7 @@ public TreeAdaptor getTreeAdaptor() {
         Object set57_tree=null;
 
         try {
-            // StandardLuceneGrammar.g:158:9: ( ( AND | OR | NOT | NEAR ) )
+            // StandardLuceneGrammar.g:159:9: ( ( AND | OR | NOT | NEAR ) )
             // StandardLuceneGrammar.g:
             {
             root_0 = (Object)adaptor.nil();
@@ -3757,7 +3770,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "modifier"
-    // StandardLuceneGrammar.g:160:1: modifier : ( PLUS | MINUS ) ;
+    // StandardLuceneGrammar.g:161:1: modifier : ( PLUS | MINUS ) ;
     public final StandardLuceneGrammarParser.modifier_return modifier() throws RecognitionException {
         StandardLuceneGrammarParser.modifier_return retval = new StandardLuceneGrammarParser.modifier_return();
         retval.start = input.LT(1);
@@ -3770,7 +3783,7 @@ public TreeAdaptor getTreeAdaptor() {
         Object set58_tree=null;
 
         try {
-            // StandardLuceneGrammar.g:160:9: ( ( PLUS | MINUS ) )
+            // StandardLuceneGrammar.g:161:9: ( ( PLUS | MINUS ) )
             // StandardLuceneGrammar.g:
             {
             root_0 = (Object)adaptor.nil();
@@ -3826,7 +3839,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "term_modifier"
-    // StandardLuceneGrammar.g:172:1: term_modifier : ( ( ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )* ) | ( TILDE -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) ) ) ( (~ ( WS | TILDE | CARAT ) )=>f= NUMBER -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) ) )* );
+    // StandardLuceneGrammar.g:173:1: term_modifier : ( ( ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )* ) | ( TILDE -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) ) ) ( (~ ( WS | TILDE | CARAT ) )=>f= NUMBER -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) ) )* );
     public final StandardLuceneGrammarParser.term_modifier_return term_modifier() throws RecognitionException {
         StandardLuceneGrammarParser.term_modifier_return retval = new StandardLuceneGrammarParser.term_modifier_return();
         retval.start = input.LT(1);
@@ -3852,7 +3865,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_TILDE=new RewriteRuleTokenStream(adaptor,"token TILDE");
 
         try {
-            // StandardLuceneGrammar.g:172:15: ( ( ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )* ) | ( TILDE -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) ) ) ( (~ ( WS | TILDE | CARAT ) )=>f= NUMBER -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) ) )* )
+            // StandardLuceneGrammar.g:173:15: ( ( ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )* ) | ( TILDE -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) ) ) ( (~ ( WS | TILDE | CARAT ) )=>f= NUMBER -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) ) )* )
             int alt29=2;
             int LA29_0 = input.LA(1);
 
@@ -3872,19 +3885,19 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt29) {
                 case 1 :
-                    // StandardLuceneGrammar.g:174:2: ( ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )* )
+                    // StandardLuceneGrammar.g:175:2: ( ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )* )
                     {
-                    // StandardLuceneGrammar.g:174:2: ( ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )* )
-                    // StandardLuceneGrammar.g:175:4: ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )*
+                    // StandardLuceneGrammar.g:175:2: ( ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )* )
+                    // StandardLuceneGrammar.g:176:4: ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) ) ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )*
                     {
-                    // StandardLuceneGrammar.g:175:4: ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) )
-                    // StandardLuceneGrammar.g:175:5: CARAT b= NUMBER
+                    // StandardLuceneGrammar.g:176:4: ( CARAT b= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) ) )
+                    // StandardLuceneGrammar.g:176:5: CARAT b= NUMBER
                     {
-                    CARAT59=(Token)match(input,CARAT,FOLLOW_CARAT_in_term_modifier1146); if (state.failed) return retval; 
+                    CARAT59=(Token)match(input,CARAT,FOLLOW_CARAT_in_term_modifier1156); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_CARAT.add(CARAT59);
 
 
-                    b=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_term_modifier1150); if (state.failed) return retval; 
+                    b=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_term_modifier1160); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUMBER.add(b);
 
 
@@ -3902,16 +3915,16 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 175:20: -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) )
+                    // 176:20: -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) )
                     {
-                        // StandardLuceneGrammar.g:175:23: ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) )
+                        // StandardLuceneGrammar.g:176:23: ^( TMODIFIER ^( BOOST $b) ^( FUZZY ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                         , root_1);
 
-                        // StandardLuceneGrammar.g:175:35: ^( BOOST $b)
+                        // StandardLuceneGrammar.g:176:35: ^( BOOST $b)
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -3923,7 +3936,7 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:175:47: ^( FUZZY )
+                        // StandardLuceneGrammar.g:176:47: ^( FUZZY )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -3945,7 +3958,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    // StandardLuceneGrammar.g:177:2: ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )*
+                    // StandardLuceneGrammar.g:178:2: ( ( TILDE NUMBER )=> TILDE f= NUMBER -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) ) | TILDE -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) ) )*
                     loop27:
                     do {
                         int alt27=3;
@@ -3976,13 +3989,13 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt27) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:178:3: ( TILDE NUMBER )=> TILDE f= NUMBER
+                    	    // StandardLuceneGrammar.g:179:3: ( TILDE NUMBER )=> TILDE f= NUMBER
                     	    {
-                    	    TILDE60=(Token)match(input,TILDE,FOLLOW_TILDE_in_term_modifier1188); if (state.failed) return retval; 
+                    	    TILDE60=(Token)match(input,TILDE,FOLLOW_TILDE_in_term_modifier1198); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_TILDE.add(TILDE60);
 
 
-                    	    f=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_term_modifier1192); if (state.failed) return retval; 
+                    	    f=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_term_modifier1202); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_NUMBER.add(f);
 
 
@@ -4001,16 +4014,16 @@ public TreeAdaptor getTreeAdaptor() {
                     	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     	    root_0 = (Object)adaptor.nil();
-                    	    // 178:35: -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) )
+                    	    // 179:35: -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) )
                     	    {
-                    	        // StandardLuceneGrammar.g:178:38: ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) )
+                    	        // StandardLuceneGrammar.g:179:38: ^( TMODIFIER ^( BOOST $b) ^( FUZZY $f) )
                     	        {
                     	        Object root_1 = (Object)adaptor.nil();
                     	        root_1 = (Object)adaptor.becomeRoot(
                     	        (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                     	        , root_1);
 
-                    	        // StandardLuceneGrammar.g:178:50: ^( BOOST $b)
+                    	        // StandardLuceneGrammar.g:179:50: ^( BOOST $b)
                     	        {
                     	        Object root_2 = (Object)adaptor.nil();
                     	        root_2 = (Object)adaptor.becomeRoot(
@@ -4022,7 +4035,7 @@ public TreeAdaptor getTreeAdaptor() {
                     	        adaptor.addChild(root_1, root_2);
                     	        }
 
-                    	        // StandardLuceneGrammar.g:178:62: ^( FUZZY $f)
+                    	        // StandardLuceneGrammar.g:179:62: ^( FUZZY $f)
                     	        {
                     	        Object root_2 = (Object)adaptor.nil();
                     	        root_2 = (Object)adaptor.becomeRoot(
@@ -4046,9 +4059,9 @@ public TreeAdaptor getTreeAdaptor() {
                     	    }
                     	    break;
                     	case 2 :
-                    	    // StandardLuceneGrammar.g:179:5: TILDE
+                    	    // StandardLuceneGrammar.g:180:5: TILDE
                     	    {
-                    	    TILDE61=(Token)match(input,TILDE,FOLLOW_TILDE_in_term_modifier1219); if (state.failed) return retval; 
+                    	    TILDE61=(Token)match(input,TILDE,FOLLOW_TILDE_in_term_modifier1229); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_TILDE.add(TILDE61);
 
 
@@ -4066,16 +4079,16 @@ public TreeAdaptor getTreeAdaptor() {
                     	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     	    root_0 = (Object)adaptor.nil();
-                    	    // 179:11: -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) )
+                    	    // 180:11: -> ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) )
                     	    {
-                    	        // StandardLuceneGrammar.g:179:14: ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) )
+                    	        // StandardLuceneGrammar.g:180:14: ^( TMODIFIER ^( BOOST $b) ^( FUZZY NUMBER[\"0.5\"] ) )
                     	        {
                     	        Object root_1 = (Object)adaptor.nil();
                     	        root_1 = (Object)adaptor.becomeRoot(
                     	        (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                     	        , root_1);
 
-                    	        // StandardLuceneGrammar.g:179:26: ^( BOOST $b)
+                    	        // StandardLuceneGrammar.g:180:26: ^( BOOST $b)
                     	        {
                     	        Object root_2 = (Object)adaptor.nil();
                     	        root_2 = (Object)adaptor.becomeRoot(
@@ -4087,7 +4100,7 @@ public TreeAdaptor getTreeAdaptor() {
                     	        adaptor.addChild(root_1, root_2);
                     	        }
 
-                    	        // StandardLuceneGrammar.g:179:38: ^( FUZZY NUMBER[\"0.5\"] )
+                    	        // StandardLuceneGrammar.g:180:38: ^( FUZZY NUMBER[\"0.5\"] )
                     	        {
                     	        Object root_2 = (Object)adaptor.nil();
                     	        root_2 = (Object)adaptor.becomeRoot(
@@ -4125,12 +4138,12 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:185:4: ( TILDE -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) ) ) ( (~ ( WS | TILDE | CARAT ) )=>f= NUMBER -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) ) )*
+                    // StandardLuceneGrammar.g:186:4: ( TILDE -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) ) ) ( (~ ( WS | TILDE | CARAT ) )=>f= NUMBER -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) ) )*
                     {
-                    // StandardLuceneGrammar.g:185:4: ( TILDE -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) ) )
-                    // StandardLuceneGrammar.g:185:5: TILDE
+                    // StandardLuceneGrammar.g:186:4: ( TILDE -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) ) )
+                    // StandardLuceneGrammar.g:186:5: TILDE
                     {
-                    TILDE62=(Token)match(input,TILDE,FOLLOW_TILDE_in_term_modifier1262); if (state.failed) return retval; 
+                    TILDE62=(Token)match(input,TILDE,FOLLOW_TILDE_in_term_modifier1272); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TILDE.add(TILDE62);
 
 
@@ -4147,16 +4160,16 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 185:11: -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) )
+                    // 186:11: -> ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) )
                     {
-                        // StandardLuceneGrammar.g:185:14: ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) )
+                        // StandardLuceneGrammar.g:186:14: ^( TMODIFIER ^( BOOST ) ^( FUZZY NUMBER[\"0.5\"] ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                         , root_1);
 
-                        // StandardLuceneGrammar.g:185:26: ^( BOOST )
+                        // StandardLuceneGrammar.g:186:26: ^( BOOST )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -4166,7 +4179,7 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:185:35: ^( FUZZY NUMBER[\"0.5\"] )
+                        // StandardLuceneGrammar.g:186:35: ^( FUZZY NUMBER[\"0.5\"] )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
@@ -4192,7 +4205,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    // StandardLuceneGrammar.g:186:4: ( (~ ( WS | TILDE | CARAT ) )=>f= NUMBER -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) ) )*
+                    // StandardLuceneGrammar.g:187:4: ( (~ ( WS | TILDE | CARAT ) )=>f= NUMBER -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) ) )*
                     loop28:
                     do {
                         int alt28=2;
@@ -4211,9 +4224,9 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt28) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:186:5: (~ ( WS | TILDE | CARAT ) )=>f= NUMBER
+                    	    // StandardLuceneGrammar.g:187:5: (~ ( WS | TILDE | CARAT ) )=>f= NUMBER
                     	    {
-                    	    f=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_term_modifier1301); if (state.failed) return retval; 
+                    	    f=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_term_modifier1311); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_NUMBER.add(f);
 
 
@@ -4231,16 +4244,16 @@ public TreeAdaptor getTreeAdaptor() {
                     	    RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     	    root_0 = (Object)adaptor.nil();
-                    	    // 186:35: -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) )
+                    	    // 187:35: -> ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) )
                     	    {
-                    	        // StandardLuceneGrammar.g:186:38: ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) )
+                    	        // StandardLuceneGrammar.g:187:38: ^( TMODIFIER ^( BOOST ) ^( FUZZY ( $f)? ) )
                     	        {
                     	        Object root_1 = (Object)adaptor.nil();
                     	        root_1 = (Object)adaptor.becomeRoot(
                     	        (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                     	        , root_1);
 
-                    	        // StandardLuceneGrammar.g:186:50: ^( BOOST )
+                    	        // StandardLuceneGrammar.g:187:50: ^( BOOST )
                     	        {
                     	        Object root_2 = (Object)adaptor.nil();
                     	        root_2 = (Object)adaptor.becomeRoot(
@@ -4250,14 +4263,14 @@ public TreeAdaptor getTreeAdaptor() {
                     	        adaptor.addChild(root_1, root_2);
                     	        }
 
-                    	        // StandardLuceneGrammar.g:186:60: ^( FUZZY ( $f)? )
+                    	        // StandardLuceneGrammar.g:187:60: ^( FUZZY ( $f)? )
                     	        {
                     	        Object root_2 = (Object)adaptor.nil();
                     	        root_2 = (Object)adaptor.becomeRoot(
                     	        (Object)adaptor.create(FUZZY, "FUZZY")
                     	        , root_2);
 
-                    	        // StandardLuceneGrammar.g:186:69: ( $f)?
+                    	        // StandardLuceneGrammar.g:187:69: ( $f)?
                     	        if ( stream_f.hasNext() ) {
                     	            adaptor.addChild(root_2, stream_f.nextNode());
 
@@ -4320,7 +4333,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "boost"
-    // StandardLuceneGrammar.g:190:1: boost : CARAT NUMBER ;
+    // StandardLuceneGrammar.g:191:1: boost : CARAT NUMBER ;
     public final StandardLuceneGrammarParser.boost_return boost() throws RecognitionException {
         StandardLuceneGrammarParser.boost_return retval = new StandardLuceneGrammarParser.boost_return();
         retval.start = input.LT(1);
@@ -4335,13 +4348,13 @@ public TreeAdaptor getTreeAdaptor() {
         Object NUMBER64_tree=null;
 
         try {
-            // StandardLuceneGrammar.g:190:7: ( CARAT NUMBER )
-            // StandardLuceneGrammar.g:191:2: CARAT NUMBER
+            // StandardLuceneGrammar.g:191:7: ( CARAT NUMBER )
+            // StandardLuceneGrammar.g:192:2: CARAT NUMBER
             {
             root_0 = (Object)adaptor.nil();
 
 
-            CARAT63=(Token)match(input,CARAT,FOLLOW_CARAT_in_boost1338); if (state.failed) return retval;
+            CARAT63=(Token)match(input,CARAT,FOLLOW_CARAT_in_boost1348); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             CARAT63_tree = 
             (Object)adaptor.create(CARAT63)
@@ -4349,7 +4362,7 @@ public TreeAdaptor getTreeAdaptor() {
             adaptor.addChild(root_0, CARAT63_tree);
             }
 
-            NUMBER64=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_boost1340); if (state.failed) return retval;
+            NUMBER64=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_boost1350); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             NUMBER64_tree = 
             (Object)adaptor.create(NUMBER64)
@@ -4390,7 +4403,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "fuzzy"
-    // StandardLuceneGrammar.g:194:1: fuzzy : TILDE NUMBER ;
+    // StandardLuceneGrammar.g:195:1: fuzzy : TILDE NUMBER ;
     public final StandardLuceneGrammarParser.fuzzy_return fuzzy() throws RecognitionException {
         StandardLuceneGrammarParser.fuzzy_return retval = new StandardLuceneGrammarParser.fuzzy_return();
         retval.start = input.LT(1);
@@ -4405,13 +4418,13 @@ public TreeAdaptor getTreeAdaptor() {
         Object NUMBER66_tree=null;
 
         try {
-            // StandardLuceneGrammar.g:194:7: ( TILDE NUMBER )
-            // StandardLuceneGrammar.g:195:2: TILDE NUMBER
+            // StandardLuceneGrammar.g:195:7: ( TILDE NUMBER )
+            // StandardLuceneGrammar.g:196:2: TILDE NUMBER
             {
             root_0 = (Object)adaptor.nil();
 
 
-            TILDE65=(Token)match(input,TILDE,FOLLOW_TILDE_in_fuzzy1352); if (state.failed) return retval;
+            TILDE65=(Token)match(input,TILDE,FOLLOW_TILDE_in_fuzzy1362); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             TILDE65_tree = 
             (Object)adaptor.create(TILDE65)
@@ -4419,7 +4432,7 @@ public TreeAdaptor getTreeAdaptor() {
             adaptor.addChild(root_0, TILDE65_tree);
             }
 
-            NUMBER66=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_fuzzy1354); if (state.failed) return retval;
+            NUMBER66=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_fuzzy1364); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             NUMBER66_tree = 
             (Object)adaptor.create(NUMBER66)
@@ -4460,7 +4473,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "near"
-    // StandardLuceneGrammar.g:199:1: near : ( NEAR -> ^( OPERATOR[\"NEAR 5\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR \" + $b.getText()] ) )? ;
+    // StandardLuceneGrammar.g:200:1: near : ( NEAR -> ^( OPERATOR[\"NEAR 5\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR \" + $b.getText()] ) )? ;
     public final StandardLuceneGrammarParser.near_return near() throws RecognitionException {
         StandardLuceneGrammarParser.near_return retval = new StandardLuceneGrammarParser.near_return();
         retval.start = input.LT(1);
@@ -4476,17 +4489,17 @@ public TreeAdaptor getTreeAdaptor() {
         Object NEAR67_tree=null;
         Object char_literal68_tree=null;
         RewriteRuleTokenStream stream_NEAR=new RewriteRuleTokenStream(adaptor,"token NEAR");
-        RewriteRuleTokenStream stream_52=new RewriteRuleTokenStream(adaptor,"token 52");
+        RewriteRuleTokenStream stream_53=new RewriteRuleTokenStream(adaptor,"token 53");
         RewriteRuleTokenStream stream_NUMBER=new RewriteRuleTokenStream(adaptor,"token NUMBER");
 
         try {
-            // StandardLuceneGrammar.g:199:6: ( ( NEAR -> ^( OPERATOR[\"NEAR 5\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR \" + $b.getText()] ) )? )
-            // StandardLuceneGrammar.g:200:2: ( NEAR -> ^( OPERATOR[\"NEAR 5\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR \" + $b.getText()] ) )?
+            // StandardLuceneGrammar.g:200:6: ( ( NEAR -> ^( OPERATOR[\"NEAR 5\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR \" + $b.getText()] ) )? )
+            // StandardLuceneGrammar.g:201:2: ( NEAR -> ^( OPERATOR[\"NEAR 5\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR \" + $b.getText()] ) )?
             {
-            // StandardLuceneGrammar.g:200:2: ( NEAR -> ^( OPERATOR[\"NEAR 5\"] ) )
-            // StandardLuceneGrammar.g:200:3: NEAR
+            // StandardLuceneGrammar.g:201:2: ( NEAR -> ^( OPERATOR[\"NEAR 5\"] ) )
+            // StandardLuceneGrammar.g:201:3: NEAR
             {
-            NEAR67=(Token)match(input,NEAR,FOLLOW_NEAR_in_near1368); if (state.failed) return retval; 
+            NEAR67=(Token)match(input,NEAR,FOLLOW_NEAR_in_near1378); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_NEAR.add(NEAR67);
 
 
@@ -4503,9 +4516,9 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 200:8: -> ^( OPERATOR[\"NEAR 5\"] )
+            // 201:8: -> ^( OPERATOR[\"NEAR 5\"] )
             {
-                // StandardLuceneGrammar.g:200:11: ^( OPERATOR[\"NEAR 5\"] )
+                // StandardLuceneGrammar.g:201:11: ^( OPERATOR[\"NEAR 5\"] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
@@ -4524,22 +4537,22 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // StandardLuceneGrammar.g:201:2: ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR \" + $b.getText()] ) )?
+            // StandardLuceneGrammar.g:202:2: ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR \" + $b.getText()] ) )?
             int alt30=2;
             int LA30_0 = input.LA(1);
 
-            if ( (LA30_0==52) ) {
+            if ( (LA30_0==53) ) {
                 alt30=1;
             }
             switch (alt30) {
                 case 1 :
-                    // StandardLuceneGrammar.g:201:3: '/' b= NUMBER
+                    // StandardLuceneGrammar.g:202:3: '/' b= NUMBER
                     {
-                    char_literal68=(Token)match(input,52,FOLLOW_52_in_near1381); if (state.failed) return retval; 
-                    if ( state.backtracking==0 ) stream_52.add(char_literal68);
+                    char_literal68=(Token)match(input,53,FOLLOW_53_in_near1391); if (state.failed) return retval; 
+                    if ( state.backtracking==0 ) stream_53.add(char_literal68);
 
 
-                    b=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_near1385); if (state.failed) return retval; 
+                    b=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_near1395); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUMBER.add(b);
 
 
@@ -4556,9 +4569,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 201:16: -> ^( OPERATOR[\"NEAR \" + $b.getText()] )
+                    // 202:16: -> ^( OPERATOR[\"NEAR \" + $b.getText()] )
                     {
-                        // StandardLuceneGrammar.g:201:19: ^( OPERATOR[\"NEAR \" + $b.getText()] )
+                        // StandardLuceneGrammar.g:202:19: ^( OPERATOR[\"NEAR \" + $b.getText()] )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -4607,18 +4620,18 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred1_StandardLuceneGrammar
     public final void synpred1_StandardLuceneGrammar_fragment() throws RecognitionException {
-        // StandardLuceneGrammar.g:59:2: ( modifier LPAREN ( clauseDefault )+ RPAREN )
-        // StandardLuceneGrammar.g:59:3: modifier LPAREN ( clauseDefault )+ RPAREN
+        // StandardLuceneGrammar.g:60:2: ( modifier LPAREN ( clauseDefault )+ RPAREN )
+        // StandardLuceneGrammar.g:60:3: modifier LPAREN ( clauseDefault )+ RPAREN
         {
-        pushFollow(FOLLOW_modifier_in_synpred1_StandardLuceneGrammar347);
+        pushFollow(FOLLOW_modifier_in_synpred1_StandardLuceneGrammar352);
         modifier();
 
         state._fsp--;
         if (state.failed) return ;
 
-        match(input,LPAREN,FOLLOW_LPAREN_in_synpred1_StandardLuceneGrammar349); if (state.failed) return ;
+        match(input,LPAREN,FOLLOW_LPAREN_in_synpred1_StandardLuceneGrammar354); if (state.failed) return ;
 
-        // StandardLuceneGrammar.g:59:19: ( clauseDefault )+
+        // StandardLuceneGrammar.g:60:19: ( clauseDefault )+
         int cnt31=0;
         loop31:
         do {
@@ -4632,9 +4645,9 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt31) {
         	case 1 :
-        	    // StandardLuceneGrammar.g:59:19: clauseDefault
+        	    // StandardLuceneGrammar.g:60:19: clauseDefault
         	    {
-        	    pushFollow(FOLLOW_clauseDefault_in_synpred1_StandardLuceneGrammar351);
+        	    pushFollow(FOLLOW_clauseDefault_in_synpred1_StandardLuceneGrammar356);
         	    clauseDefault();
 
         	    state._fsp--;
@@ -4654,7 +4667,7 @@ public TreeAdaptor getTreeAdaptor() {
         } while (true);
 
 
-        match(input,RPAREN,FOLLOW_RPAREN_in_synpred1_StandardLuceneGrammar354); if (state.failed) return ;
+        match(input,RPAREN,FOLLOW_RPAREN_in_synpred1_StandardLuceneGrammar359); if (state.failed) return ;
 
         }
 
@@ -4663,12 +4676,12 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred2_StandardLuceneGrammar
     public final void synpred2_StandardLuceneGrammar_fragment() throws RecognitionException {
-        // StandardLuceneGrammar.g:60:4: ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )
-        // StandardLuceneGrammar.g:60:5: LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER
+        // StandardLuceneGrammar.g:61:4: ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )
+        // StandardLuceneGrammar.g:61:5: LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER
         {
-        match(input,LPAREN,FOLLOW_LPAREN_in_synpred2_StandardLuceneGrammar410); if (state.failed) return ;
+        match(input,LPAREN,FOLLOW_LPAREN_in_synpred2_StandardLuceneGrammar415); if (state.failed) return ;
 
-        // StandardLuceneGrammar.g:60:12: ( clauseDefault )+
+        // StandardLuceneGrammar.g:61:12: ( clauseDefault )+
         int cnt32=0;
         loop32:
         do {
@@ -4682,9 +4695,9 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt32) {
         	case 1 :
-        	    // StandardLuceneGrammar.g:60:12: clauseDefault
+        	    // StandardLuceneGrammar.g:61:12: clauseDefault
         	    {
-        	    pushFollow(FOLLOW_clauseDefault_in_synpred2_StandardLuceneGrammar412);
+        	    pushFollow(FOLLOW_clauseDefault_in_synpred2_StandardLuceneGrammar417);
         	    clauseDefault();
 
         	    state._fsp--;
@@ -4704,11 +4717,11 @@ public TreeAdaptor getTreeAdaptor() {
         } while (true);
 
 
-        match(input,RPAREN,FOLLOW_RPAREN_in_synpred2_StandardLuceneGrammar415); if (state.failed) return ;
+        match(input,RPAREN,FOLLOW_RPAREN_in_synpred2_StandardLuceneGrammar420); if (state.failed) return ;
 
-        match(input,CARAT,FOLLOW_CARAT_in_synpred2_StandardLuceneGrammar417); if (state.failed) return ;
+        match(input,CARAT,FOLLOW_CARAT_in_synpred2_StandardLuceneGrammar422); if (state.failed) return ;
 
-        match(input,NUMBER,FOLLOW_NUMBER_in_synpred2_StandardLuceneGrammar419); if (state.failed) return ;
+        match(input,NUMBER,FOLLOW_NUMBER_in_synpred2_StandardLuceneGrammar424); if (state.failed) return ;
 
         }
 
@@ -4717,10 +4730,10 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred3_StandardLuceneGrammar
     public final void synpred3_StandardLuceneGrammar_fragment() throws RecognitionException {
-        // StandardLuceneGrammar.g:61:4: ( LPAREN )
-        // StandardLuceneGrammar.g:61:5: LPAREN
+        // StandardLuceneGrammar.g:62:4: ( LPAREN )
+        // StandardLuceneGrammar.g:62:5: LPAREN
         {
-        match(input,LPAREN,FOLLOW_LPAREN_in_synpred3_StandardLuceneGrammar474); if (state.failed) return ;
+        match(input,LPAREN,FOLLOW_LPAREN_in_synpred3_StandardLuceneGrammar479); if (state.failed) return ;
 
         }
 
@@ -4729,12 +4742,12 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred4_StandardLuceneGrammar
     public final void synpred4_StandardLuceneGrammar_fragment() throws RecognitionException {
-        // StandardLuceneGrammar.g:178:3: ( TILDE NUMBER )
-        // StandardLuceneGrammar.g:178:4: TILDE NUMBER
+        // StandardLuceneGrammar.g:179:3: ( TILDE NUMBER )
+        // StandardLuceneGrammar.g:179:4: TILDE NUMBER
         {
-        match(input,TILDE,FOLLOW_TILDE_in_synpred4_StandardLuceneGrammar1182); if (state.failed) return ;
+        match(input,TILDE,FOLLOW_TILDE_in_synpred4_StandardLuceneGrammar1192); if (state.failed) return ;
 
-        match(input,NUMBER,FOLLOW_NUMBER_in_synpred4_StandardLuceneGrammar1184); if (state.failed) return ;
+        match(input,NUMBER,FOLLOW_NUMBER_in_synpred4_StandardLuceneGrammar1194); if (state.failed) return ;
 
         }
 
@@ -4743,10 +4756,10 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred5_StandardLuceneGrammar
     public final void synpred5_StandardLuceneGrammar_fragment() throws RecognitionException {
-        // StandardLuceneGrammar.g:186:5: (~ ( WS | TILDE | CARAT ) )
+        // StandardLuceneGrammar.g:187:5: (~ ( WS | TILDE | CARAT ) )
         // StandardLuceneGrammar.g:
         {
-        if ( (input.LA(1) >= ADDED && input.LA(1) <= BOOST)||(input.LA(1) >= CLAUSE && input.LA(1) <= TERM_TRUNCATED)||(input.LA(1) >= TMODIFIER && input.LA(1) <= VBAR)||input.LA(1)==52 ) {
+        if ( (input.LA(1) >= ADDED && input.LA(1) <= BOOST)||(input.LA(1) >= CLAUSE && input.LA(1) <= TERM_TRUNCATED)||(input.LA(1) >= TMODIFIER && input.LA(1) <= VBAR)||input.LA(1)==53 ) {
             input.consume();
             state.errorRecovery=false;
             state.failed=false;
@@ -4839,98 +4852,98 @@ public TreeAdaptor getTreeAdaptor() {
 
  
 
-    public static final BitSet FOLLOW_clauseDefault_in_mainQ138 = new BitSet(new long[]{0x00003000721E0002L});
-    public static final BitSet FOLLOW_clauseStrongest_in_clauseDefault171 = new BitSet(new long[]{0x0000000001000002L});
-    public static final BitSet FOLLOW_NOT_in_clauseDefault180 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_clauseStrongest_in_clauseDefault184 = new BitSet(new long[]{0x0000000001000002L});
-    public static final BitSet FOLLOW_clauseStrong_in_clauseStrongest213 = new BitSet(new long[]{0x0000000000000042L});
-    public static final BitSet FOLLOW_AND_in_clauseStrongest223 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_clauseStrong_in_clauseStrongest227 = new BitSet(new long[]{0x0000000000000042L});
-    public static final BitSet FOLLOW_clauseWeak_in_clauseStrong258 = new BitSet(new long[]{0x0000000008000002L});
-    public static final BitSet FOLLOW_OR_in_clauseStrong267 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_clauseWeak_in_clauseStrong271 = new BitSet(new long[]{0x0000000008000002L});
-    public static final BitSet FOLLOW_primaryClause_in_clauseWeak302 = new BitSet(new long[]{0x0000000000400002L});
-    public static final BitSet FOLLOW_near_in_clauseWeak311 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_primaryClause_in_clauseWeak315 = new BitSet(new long[]{0x0000000000400002L});
-    public static final BitSet FOLLOW_modifier_in_primaryClause359 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_LPAREN_in_primaryClause362 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_clauseDefault_in_primaryClause364 = new BitSet(new long[]{0x00003200721E0000L});
-    public static final BitSet FOLLOW_RPAREN_in_primaryClause367 = new BitSet(new long[]{0x0000000000000202L});
-    public static final BitSet FOLLOW_CARAT_in_primaryClause370 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_primaryClause372 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_modifier_in_primaryClause423 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_LPAREN_in_primaryClause426 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_clauseDefault_in_primaryClause428 = new BitSet(new long[]{0x00003200721E0000L});
-    public static final BitSet FOLLOW_RPAREN_in_primaryClause431 = new BitSet(new long[]{0x0000000000000202L});
-    public static final BitSet FOLLOW_CARAT_in_primaryClause434 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_primaryClause436 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LPAREN_in_primaryClause478 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_clauseDefault_in_primaryClause480 = new BitSet(new long[]{0x00003200721E0000L});
-    public static final BitSet FOLLOW_RPAREN_in_primaryClause483 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_atom_in_primaryClause493 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_modifier_in_atom515 = new BitSet(new long[]{0x0000100000000000L});
-    public static final BitSet FOLLOW_field_in_atom518 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_multi_value_in_atom520 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_modifier_in_atom550 = new BitSet(new long[]{0x0000300032060000L});
-    public static final BitSet FOLLOW_field_in_atom553 = new BitSet(new long[]{0x0000300032060000L});
-    public static final BitSet FOLLOW_value_in_atom556 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TERM_NORMAL_in_field604 = new BitSet(new long[]{0x0000000000000800L});
-    public static final BitSet FOLLOW_COLON_in_field606 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_range_term_in_in_value629 = new BitSet(new long[]{0x0000400000000202L});
-    public static final BitSet FOLLOW_range_term_ex_in_value642 = new BitSet(new long[]{0x0000400000000202L});
-    public static final BitSet FOLLOW_normal_in_value656 = new BitSet(new long[]{0x0000400000000202L});
-    public static final BitSet FOLLOW_truncated_in_value669 = new BitSet(new long[]{0x0000400000000202L});
-    public static final BitSet FOLLOW_quoted_in_value682 = new BitSet(new long[]{0x0000400000000202L});
-    public static final BitSet FOLLOW_quoted_truncated_in_value695 = new BitSet(new long[]{0x0000400000000202L});
-    public static final BitSet FOLLOW_term_modifier_in_value709 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LBRACK_in_range_term_in742 = new BitSet(new long[]{0x0000380032000000L});
-    public static final BitSet FOLLOW_range_value_in_range_term_in754 = new BitSet(new long[]{0x0001388032000000L});
-    public static final BitSet FOLLOW_TO_in_range_term_in775 = new BitSet(new long[]{0x0000380032000000L});
-    public static final BitSet FOLLOW_range_value_in_range_term_in780 = new BitSet(new long[]{0x0000008000000000L});
-    public static final BitSet FOLLOW_RBRACK_in_range_term_in801 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LCURLY_in_range_term_ex821 = new BitSet(new long[]{0x0000380032000000L});
-    public static final BitSet FOLLOW_range_value_in_range_term_ex834 = new BitSet(new long[]{0x0001390032000000L});
-    public static final BitSet FOLLOW_TO_in_range_term_ex855 = new BitSet(new long[]{0x0000380032000000L});
-    public static final BitSet FOLLOW_range_value_in_range_term_ex860 = new BitSet(new long[]{0x0000010000000000L});
-    public static final BitSet FOLLOW_RCURLY_in_range_term_ex881 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_normal_in_range_value895 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_truncated_in_range_value908 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_quoted_in_range_value921 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_quoted_truncated_in_range_value934 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_STAR_in_range_value947 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LPAREN_in_multi_value967 = new BitSet(new long[]{0x0000300072160000L});
-    public static final BitSet FOLLOW_mterm_in_multi_value969 = new BitSet(new long[]{0x0000320072160000L});
-    public static final BitSet FOLLOW_RPAREN_in_multi_value972 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_modifier_in_mterm995 = new BitSet(new long[]{0x0000300032060000L});
-    public static final BitSet FOLLOW_value_in_mterm998 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TERM_TRUNCATED_in_truncated1060 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_PHRASE_ANYTHING_in_quoted_truncated1075 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_PHRASE_in_quoted1087 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_CARAT_in_term_modifier1146 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_term_modifier1150 = new BitSet(new long[]{0x0000400000000002L});
-    public static final BitSet FOLLOW_TILDE_in_term_modifier1188 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_term_modifier1192 = new BitSet(new long[]{0x0000400000000002L});
-    public static final BitSet FOLLOW_TILDE_in_term_modifier1219 = new BitSet(new long[]{0x0000400000000002L});
-    public static final BitSet FOLLOW_TILDE_in_term_modifier1262 = new BitSet(new long[]{0x0000000002000002L});
-    public static final BitSet FOLLOW_NUMBER_in_term_modifier1301 = new BitSet(new long[]{0x0000000002000002L});
-    public static final BitSet FOLLOW_CARAT_in_boost1338 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_boost1340 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TILDE_in_fuzzy1352 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_fuzzy1354 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_NEAR_in_near1368 = new BitSet(new long[]{0x0010000000000002L});
-    public static final BitSet FOLLOW_52_in_near1381 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_near1385 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_modifier_in_synpred1_StandardLuceneGrammar347 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_LPAREN_in_synpred1_StandardLuceneGrammar349 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_clauseDefault_in_synpred1_StandardLuceneGrammar351 = new BitSet(new long[]{0x00003200721E0000L});
-    public static final BitSet FOLLOW_RPAREN_in_synpred1_StandardLuceneGrammar354 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LPAREN_in_synpred2_StandardLuceneGrammar410 = new BitSet(new long[]{0x00003000721E0000L});
-    public static final BitSet FOLLOW_clauseDefault_in_synpred2_StandardLuceneGrammar412 = new BitSet(new long[]{0x00003200721E0000L});
-    public static final BitSet FOLLOW_RPAREN_in_synpred2_StandardLuceneGrammar415 = new BitSet(new long[]{0x0000000000000200L});
-    public static final BitSet FOLLOW_CARAT_in_synpred2_StandardLuceneGrammar417 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_synpred2_StandardLuceneGrammar419 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_LPAREN_in_synpred3_StandardLuceneGrammar474 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_TILDE_in_synpred4_StandardLuceneGrammar1182 = new BitSet(new long[]{0x0000000002000000L});
-    public static final BitSet FOLLOW_NUMBER_in_synpred4_StandardLuceneGrammar1184 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_clauseDefault_in_mainQ143 = new BitSet(new long[]{0x00006000E41E0002L});
+    public static final BitSet FOLLOW_clauseStrongest_in_clauseDefault176 = new BitSet(new long[]{0x0000000002000002L});
+    public static final BitSet FOLLOW_NOT_in_clauseDefault185 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseStrongest_in_clauseDefault189 = new BitSet(new long[]{0x0000000002000002L});
+    public static final BitSet FOLLOW_clauseStrong_in_clauseStrongest218 = new BitSet(new long[]{0x0000000000000042L});
+    public static final BitSet FOLLOW_AND_in_clauseStrongest228 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseStrong_in_clauseStrongest232 = new BitSet(new long[]{0x0000000000000042L});
+    public static final BitSet FOLLOW_clauseWeak_in_clauseStrong263 = new BitSet(new long[]{0x0000000010000002L});
+    public static final BitSet FOLLOW_OR_in_clauseStrong272 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseWeak_in_clauseStrong276 = new BitSet(new long[]{0x0000000010000002L});
+    public static final BitSet FOLLOW_primaryClause_in_clauseWeak307 = new BitSet(new long[]{0x0000000000800002L});
+    public static final BitSet FOLLOW_near_in_clauseWeak316 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_primaryClause_in_clauseWeak320 = new BitSet(new long[]{0x0000000000800002L});
+    public static final BitSet FOLLOW_modifier_in_primaryClause364 = new BitSet(new long[]{0x0000000000080000L});
+    public static final BitSet FOLLOW_LPAREN_in_primaryClause367 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseDefault_in_primaryClause369 = new BitSet(new long[]{0x00006400E41E0000L});
+    public static final BitSet FOLLOW_RPAREN_in_primaryClause372 = new BitSet(new long[]{0x0000000000000202L});
+    public static final BitSet FOLLOW_CARAT_in_primaryClause375 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_primaryClause377 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_modifier_in_primaryClause428 = new BitSet(new long[]{0x0000000000080000L});
+    public static final BitSet FOLLOW_LPAREN_in_primaryClause431 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseDefault_in_primaryClause433 = new BitSet(new long[]{0x00006400E41E0000L});
+    public static final BitSet FOLLOW_RPAREN_in_primaryClause436 = new BitSet(new long[]{0x0000000000000202L});
+    public static final BitSet FOLLOW_CARAT_in_primaryClause439 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_primaryClause441 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LPAREN_in_primaryClause483 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseDefault_in_primaryClause485 = new BitSet(new long[]{0x00006400E41E0000L});
+    public static final BitSet FOLLOW_RPAREN_in_primaryClause488 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_atom_in_primaryClause498 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_modifier_in_atom520 = new BitSet(new long[]{0x0000200000000000L});
+    public static final BitSet FOLLOW_field_in_atom523 = new BitSet(new long[]{0x0000000000080000L});
+    public static final BitSet FOLLOW_multi_value_in_atom525 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_modifier_in_atom555 = new BitSet(new long[]{0x0000600064060000L});
+    public static final BitSet FOLLOW_field_in_atom558 = new BitSet(new long[]{0x0000600064060000L});
+    public static final BitSet FOLLOW_value_in_atom561 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TERM_NORMAL_in_field609 = new BitSet(new long[]{0x0000000000000800L});
+    public static final BitSet FOLLOW_COLON_in_field611 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_range_term_in_in_value634 = new BitSet(new long[]{0x0000800000000202L});
+    public static final BitSet FOLLOW_range_term_ex_in_value647 = new BitSet(new long[]{0x0000800000000202L});
+    public static final BitSet FOLLOW_normal_in_value661 = new BitSet(new long[]{0x0000800000000202L});
+    public static final BitSet FOLLOW_truncated_in_value674 = new BitSet(new long[]{0x0000800000000202L});
+    public static final BitSet FOLLOW_quoted_in_value687 = new BitSet(new long[]{0x0000800000000202L});
+    public static final BitSet FOLLOW_quoted_truncated_in_value700 = new BitSet(new long[]{0x0000800000000202L});
+    public static final BitSet FOLLOW_term_modifier_in_value714 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LBRACK_in_range_term_in747 = new BitSet(new long[]{0x0000700064000000L});
+    public static final BitSet FOLLOW_range_value_in_range_term_in759 = new BitSet(new long[]{0x0002710064000000L});
+    public static final BitSet FOLLOW_TO_in_range_term_in782 = new BitSet(new long[]{0x0000700064000000L});
+    public static final BitSet FOLLOW_range_value_in_range_term_in787 = new BitSet(new long[]{0x0000010000000000L});
+    public static final BitSet FOLLOW_RBRACK_in_range_term_in808 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LCURLY_in_range_term_ex828 = new BitSet(new long[]{0x0000700064000000L});
+    public static final BitSet FOLLOW_range_value_in_range_term_ex841 = new BitSet(new long[]{0x0002720064000000L});
+    public static final BitSet FOLLOW_TO_in_range_term_ex864 = new BitSet(new long[]{0x0000700064000000L});
+    public static final BitSet FOLLOW_range_value_in_range_term_ex869 = new BitSet(new long[]{0x0000020000000000L});
+    public static final BitSet FOLLOW_RCURLY_in_range_term_ex890 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_normal_in_range_value904 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_truncated_in_range_value917 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_quoted_in_range_value930 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_quoted_truncated_in_range_value943 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_STAR_in_range_value956 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LPAREN_in_multi_value977 = new BitSet(new long[]{0x00006000E4160000L});
+    public static final BitSet FOLLOW_mterm_in_multi_value979 = new BitSet(new long[]{0x00006400E4160000L});
+    public static final BitSet FOLLOW_RPAREN_in_multi_value982 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_modifier_in_mterm1005 = new BitSet(new long[]{0x0000600064060000L});
+    public static final BitSet FOLLOW_value_in_mterm1008 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TERM_TRUNCATED_in_truncated1070 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_PHRASE_ANYTHING_in_quoted_truncated1085 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_PHRASE_in_quoted1097 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_CARAT_in_term_modifier1156 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_term_modifier1160 = new BitSet(new long[]{0x0000800000000002L});
+    public static final BitSet FOLLOW_TILDE_in_term_modifier1198 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_term_modifier1202 = new BitSet(new long[]{0x0000800000000002L});
+    public static final BitSet FOLLOW_TILDE_in_term_modifier1229 = new BitSet(new long[]{0x0000800000000002L});
+    public static final BitSet FOLLOW_TILDE_in_term_modifier1272 = new BitSet(new long[]{0x0000000004000002L});
+    public static final BitSet FOLLOW_NUMBER_in_term_modifier1311 = new BitSet(new long[]{0x0000000004000002L});
+    public static final BitSet FOLLOW_CARAT_in_boost1348 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_boost1350 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TILDE_in_fuzzy1362 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_fuzzy1364 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_NEAR_in_near1378 = new BitSet(new long[]{0x0020000000000002L});
+    public static final BitSet FOLLOW_53_in_near1391 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_near1395 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_modifier_in_synpred1_StandardLuceneGrammar352 = new BitSet(new long[]{0x0000000000080000L});
+    public static final BitSet FOLLOW_LPAREN_in_synpred1_StandardLuceneGrammar354 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseDefault_in_synpred1_StandardLuceneGrammar356 = new BitSet(new long[]{0x00006400E41E0000L});
+    public static final BitSet FOLLOW_RPAREN_in_synpred1_StandardLuceneGrammar359 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LPAREN_in_synpred2_StandardLuceneGrammar415 = new BitSet(new long[]{0x00006000E41E0000L});
+    public static final BitSet FOLLOW_clauseDefault_in_synpred2_StandardLuceneGrammar417 = new BitSet(new long[]{0x00006400E41E0000L});
+    public static final BitSet FOLLOW_RPAREN_in_synpred2_StandardLuceneGrammar420 = new BitSet(new long[]{0x0000000000000200L});
+    public static final BitSet FOLLOW_CARAT_in_synpred2_StandardLuceneGrammar422 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_synpred2_StandardLuceneGrammar424 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_LPAREN_in_synpred3_StandardLuceneGrammar479 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_TILDE_in_synpred4_StandardLuceneGrammar1192 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_NUMBER_in_synpred4_StandardLuceneGrammar1194 = new BitSet(new long[]{0x0000000000000002L});
 
 }
