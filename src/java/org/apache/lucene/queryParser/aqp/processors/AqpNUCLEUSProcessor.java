@@ -42,8 +42,8 @@ public class AqpNUCLEUSProcessor extends QueryNodeProcessorImpl implements
 	
 	private String getFieldValue(AqpANTLRNode fieldNode) throws QueryNodeException {
 		
-		if (fieldNode!= null && fieldNode.getTokenInput()!=null) {
-			return fieldNode.getTokenInput();
+		if (fieldNode!= null && fieldNode.getChildren()!=null) {
+			return ((AqpANTLRNode) fieldNode.getChildren().get(0)).getTokenInput();
 		}
 		return null;
 		
@@ -51,15 +51,14 @@ public class AqpNUCLEUSProcessor extends QueryNodeProcessorImpl implements
 	
 	private void applyFieldToAllChildren(String field, QueryNode node) {
 		
-		for (QueryNode child : node.getChildren()) {
-			if (child instanceof FieldQueryNode) {
-				((FieldQueryNode) child).setField(field);
-				if (child.getChildren()!=null) {
+		if (node instanceof FieldQueryNode) {
+			((FieldQueryNode) node).setField(field);
+			if (node.getChildren()!=null) {
+				for (QueryNode child : node.getChildren()) {
 					applyFieldToAllChildren(field, child);
 				}
 			}
 		}
-		
 	}
 
 }
