@@ -52,10 +52,12 @@ public class AqpATOMProcessor extends QueryNodeProcessorImpl implements
 			AqpANTLRNode tModifierNode = valueNode.getChild("TMODIFIER");
 			if (tModifierNode!=null) {
 				AqpANTLRNode boostNode = tModifierNode.getChild("BOOST");
-				AqpANTLRNode fuzzyNode = valueNode.getChild("FUZZY");
+				AqpANTLRNode fuzzyNode = tModifierNode.getChild("FUZZY");
 				
-				boost = boostNode.getTokenInputFloat();
-				fuzzy = fuzzyNode.getTokenInputFloat();
+				if (boostNode!=null && boostNode.getChildren()!=null)
+					boost = ((AqpANTLRNode)boostNode.getChildren().get(0)).getTokenInputFloat();
+				if (fuzzyNode!=null && fuzzyNode.getChildren()!=null)
+					fuzzy = ((AqpANTLRNode)fuzzyNode.getChildren().get(0)).getTokenInputFloat();
 			}
 			
 			QueryNode userInput = createQueryNodeFromInput(field, valueNode, fuzzy);
@@ -95,10 +97,13 @@ public class AqpATOMProcessor extends QueryNodeProcessorImpl implements
 		
 		AqpANTLRNode subChild;
 		
-		// TODO: Make FuzzyProcessor which checks proper tree shape
+		// TODO: Make FuzzyProcessor which removes invalid nodes
 		if (fuzzy!=null) {
 			AqpANTLRNode c = (AqpANTLRNode) children.get(0);
-			return new FuzzyQueryNode(field, c.getTokenInput(), fuzzy, c.getTokenStart(), c.getTokenEnd());
+			AqpANTLRNode inputNode = (AqpANTLRNode) c.getChildren().get(0);
+			return new FuzzyQueryNode(field, 
+					inputNode.getTokenInput(), 
+					fuzzy, inputNode.getTokenStart(), inputNode.getTokenEnd());
 		}
 		
 		

@@ -263,6 +263,19 @@ public class TestAqpSimple extends LuceneTestCase {
 		assertQueryMatch(qp, "-one -two", "field", 
 				             "-field:one -field:two");
 		
+		assertQueryMatch(qp, "x:one NOT y:two -three^0.5", "field", 
+                             "");
+		
+		assertQueryMatch(qp, "one NOT two -three~0.2", "field", 
+        "");
+
+		assertQueryMatch(qp, "one two^0.5 three~0.2", "field", 
+        "");
+
+		assertQueryMatch(qp, "one (two three)^0.8", "field", 
+        "");
+
+		
 		
 		
 		BooleanQuery.setMaxClauseCount(2);
