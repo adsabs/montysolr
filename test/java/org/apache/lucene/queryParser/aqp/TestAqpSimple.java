@@ -196,43 +196,60 @@ public class TestAqpSimple extends LuceneTestCase {
 	
 
 	private void assertQueryMatch(ANTLRQueryParser qp, String queryString,
-			String defaultField, String expectedResult) throws QueryNodeException {
+			String defaultField, String expectedResult) throws Exception {
 		
-		Query query = qp.parse(queryString, defaultField);
-		String queryParsed = query.toString();
-		
-		
-		
-		if (!queryParsed.equals(expectedResult)) {
+		try {
+			Query query = qp.parse(queryString, defaultField);
+			String queryParsed = query.toString();
 			
-			if (this.verbose) {
+			if (!queryParsed.equals(expectedResult)) {
 				
-				SyntaxParser parser = qp.getSyntaxParser();
-				QueryNode queryTree = parser.parse(queryString, defaultField);
+				if (this.verbose) {
+					
+					SyntaxParser parser = qp.getSyntaxParser();
+					QueryNode queryTree = parser.parse(queryString, defaultField);
+					
+					System.out.println(" ----- AST QNTRee ----");
+					System.out.print(queryTree);
+					QueryNodeProcessor processor = qp.getQueryNodeProcessor();
+				    if (processor != null) {
+				      queryTree = processor.process(queryTree);
+				    }
+				    System.out.println(" ----- ProcessedQN ----");
+				    System.out.println(queryTree);
+				    System.out.println("query:\t\t" + queryString);
+					System.out.println("result:\t\t" + queryParsed);
+				}
 				
-				System.out.println(" ----- AST QNTRee ----");
-				System.out.print(queryTree);
-				QueryNodeProcessor processor = qp.getQueryNodeProcessor();
-			    if (processor != null) {
-			      queryTree = processor.process(queryTree);
-			    }
-			    System.out.println(" ----- ProcessedQN ----");
-			    System.out.println(queryTree);
-			    System.out.println("query:\t\t" + queryString);
-				System.out.println("result:\t\t" + queryParsed);
-			}
-			
-			String msg = "Query /" + queryString + "/ with field: " + defaultField
-			+ "/ yielded /" + queryParsed
-			+ "/, expecting /" + expectedResult + "/";
-			
-			if (this.verbose) {
-				System.err.println(msg);
+				String msg = "Query /" + queryString + "/ with field: " + defaultField
+				+ "/ yielded /" + queryParsed
+				+ "/, expecting /" + expectedResult + "/";
+				
+				if (this.verbose) {
+					System.err.println(msg);
+				}
+				else {
+					fail(msg);
+				}
 			}
 			else {
-				fail(msg);
+				if (this.verbose) {
+					System.out.println("OK \"" + queryString + "\" --->  " + queryParsed );
+				}
+			}
+		} catch (Exception e) {
+			if (this.verbose) {
+				System.err.println(queryString);
+				e.printStackTrace();
+			}
+			else {
+				throw e;
 			}
 		}
+		
+		
+		
+		
 	}
 
 	public void testBooleanQuery() throws Exception {
@@ -264,16 +281,19 @@ public class TestAqpSimple extends LuceneTestCase {
 				             "-field:one -field:two");
 		
 		assertQueryMatch(qp, "x:one NOT y:two -three^0.5", "field", 
-                             "");
+                             "(+field:one -field:two) -field:three^0.5");
 		
 		assertQueryMatch(qp, "one NOT two -three~0.2", "field", 
-        "");
+        "(+field:one -field:two) -field:three~0.2");
+		
+		assertQueryMatch(qp, "one NOT two NOT three~0.2", "field", 
+        "(+field:one -field:two) -field:three~0.2");
 
 		assertQueryMatch(qp, "one two^0.5 three~0.2", "field", 
-        "");
+        "+field:one +field:two^0.5 +field:three~0.2");
 
 		assertQueryMatch(qp, "one (two three)^0.8", "field", 
-        "");
+        "+field:one +((+field:two +field:three)^0.8)");
 
 		
 		

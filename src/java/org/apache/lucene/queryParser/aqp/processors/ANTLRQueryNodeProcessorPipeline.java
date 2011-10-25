@@ -66,6 +66,7 @@ public class ANTLRQueryNodeProcessorPipeline extends
     super(queryConfig);
     
     add(new AqpTreeRewriteProcessor());
+    add(new AqpCLAUSEProcessor());
     //add(new AqpQNORMALProcessor());
     add(new AqpQPHRASEProcessor());
     add(new AqpQPHRASETRUNCProcessor());
