@@ -53,8 +53,8 @@ public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 	
 	private ClauseData harvestData(AqpANTLRNode clauseNode, ClauseData data) {
 		List<QueryNode> children = clauseNode.getChildren();
-		AqpANTLRNode modifierNode = (AqpANTLRNode) children.remove(0);
-		AqpANTLRNode boostNode = (AqpANTLRNode) children.remove(0);
+		AqpANTLRNode modifierNode = (AqpANTLRNode) children.remove(0); //MODIFIER
+		AqpANTLRNode boostNode = (AqpANTLRNode) children.remove(0); //BOOST
 		String modifier = null;
 		Float boost = null;
 		
