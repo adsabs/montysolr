@@ -287,7 +287,7 @@ public class TestAqpSimple extends LuceneTestCase {
         "(+field:one -field:two) -field:three~0.2");
 		
 		assertQueryMatch(qp, "one NOT two NOT three~0.2", "field", 
-        "(+field:one -field:two) -field:three~0.2");
+        "+field:one -field:two -field:three~0.2");
 
 		assertQueryMatch(qp, "one two^0.5 three~0.2", "field", 
         "+field:one +field:two^0.5 +field:three~0.2");

@@ -14,7 +14,9 @@ public class AqpCommonTree extends CommonTree {
 	
 	protected Map<Integer, String> typeToNameMap;
 	
-	public AqpCommonTree() { }
+	public AqpCommonTree() {
+		super();
+	}
 	
 	public AqpCommonTree(CommonTree node) {
 		super(node);
@@ -26,6 +28,12 @@ public class AqpCommonTree extends CommonTree {
 	
 	public AqpCommonTree(Token t) {
 		this.token = t;
+	}
+	
+	public Tree dupNode() {
+		AqpCommonTree r = new AqpCommonTree(this);
+		r.setTypeToNameMap(this.typeToNameMap);
+		return r;
 	}
 	
 	/** Return the whole tree converted to QueryNode tree */
