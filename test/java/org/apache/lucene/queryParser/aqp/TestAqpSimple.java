@@ -262,6 +262,18 @@ public class TestAqpSimple extends LuceneTestCase {
 		assertQueryMatch(qp, "something", "field", 
 				             "field:something");
 		
+		assertQueryMatch(qp, "x:something", "field", 
+        "x:something");
+		
+		assertQueryMatch(qp, "x:\"something\"", "field", 
+        "x:\"something\"");
+		
+		assertQueryMatch(qp, "x:\"someth*\"", "field", 
+        "x:someth*");
+		
+		assertQueryMatch(qp, "x:\"someth?ng\"", "field", 
+        "x:something");
+		
 		assertQueryMatch(qp, "A AND B C AND D", "field", 
 				             "+field:A +field:B +field:C +field:D");
 		
@@ -298,6 +310,14 @@ public class TestAqpSimple extends LuceneTestCase {
 		assertQueryMatch(qp, "one (x:two three)^0.8", "field", 
         "+field:one +((+x:two +field:three)^0.8)");
 		
+		assertQueryMatch(qp, "one:(two three)^0.8", "field", 
+        "+field:one +((+x:two +field:three)^0.8)");
+		
+		assertQueryMatch(qp, "[one TO five]", "field", 
+        "");
+		
+		assertQueryMatch(qp, "z:[one TO five]", "field", 
+        "");
 		
 		
 		BooleanQuery.setMaxClauseCount(2);
