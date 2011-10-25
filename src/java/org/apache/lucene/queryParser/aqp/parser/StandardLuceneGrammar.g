@@ -8,7 +8,9 @@ options {
 tokens {
   OPERATOR;
   ATOM;
+  NUCLEUS;
   MULTIATOM;
+  MULTITERM;
   MODIFIER;
   TMODIFIER;
   VALUE;
@@ -66,8 +68,8 @@ primaryClause
 
 atom   
 	: 
-	modifier? field multi_value -> ^(MULTIATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_value))
-	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value))
+	modifier? field multi_value -> ^(MULTITERM ^(MODIFIER modifier?) ^(FIELD field) ^(MULTIATOM multi_value))
+	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(NUCLEUS ^(FIELD field?) ^(VALUE value)))
 	;
    
 	   
@@ -125,7 +127,7 @@ multi_value
 	
 mterm	
 	:	
-	(modifier? value -> ^(ATOM ^(MODIFIER modifier?) ^(VALUE value)))
+	(modifier? value -> ^(ATOM ^(MODIFIER modifier?) ^(NUCLEUS FIELD ^(VALUE value))))
 	;
 	
 

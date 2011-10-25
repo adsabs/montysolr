@@ -42,42 +42,12 @@ public class AqpATOMProcessor extends QueryNodeProcessorImpl implements
 			AqpANTLRNode n = (AqpANTLRNode) node;
 			AqpANTLRNode modifierNode = n.getChild("MODIFIER");
 			AqpANTLRNode fieldNode = n.getChild("FIELD");
-			AqpANTLRNode valueNode = n.getChild("VALUE");
+			
 			
 			String field = getFieldValue(fieldNode);
 			
-			Float boost = null;
-			Float fuzzy = null;
 			
-			AqpANTLRNode tModifierNode = valueNode.getChild("TMODIFIER");
-			if (tModifierNode!=null) {
-				AqpANTLRNode boostNode = tModifierNode.getChild("BOOST");
-				AqpANTLRNode fuzzyNode = tModifierNode.getChild("FUZZY");
-				
-				if (boostNode!=null && boostNode.getChildren()!=null)
-					boost = ((AqpANTLRNode)boostNode.getChildren().get(0)).getTokenInputFloat();
-				if (fuzzyNode!=null && fuzzyNode.getChildren()!=null)
-					fuzzy = ((AqpANTLRNode)fuzzyNode.getChildren().get(0)).getTokenInputFloat();
-			}
 			
-			QueryNode userInput = createQueryNodeFromInput(field, valueNode, fuzzy);
-			
-			if (boost!=null) {
-				userInput = new BoostQueryNode(userInput, boost);
-			}
-			
-			if (modifierNode!=null && modifierNode.getChildren()!=null) {
-				String mod = ((AqpANTLRNode) modifierNode.getChildren().get(0)).getTokenInput();
-				if (mod.equals("+")) {
-					userInput = new ModifierQueryNode(userInput, Modifier.MOD_REQ);
-				}
-				else if (mod.equals("-")) {
-					userInput = new ModifierQueryNode(userInput, Modifier.MOD_NOT);
-				}
-				else {
-					throw new IllegalArgumentException("This processor understands only +/- as modifiers");
-				}
-			}
 			
 			return userInput;
 			
@@ -86,87 +56,15 @@ public class AqpATOMProcessor extends QueryNodeProcessorImpl implements
 	}
 
 
-	private QueryNode createQueryNodeFromInput(String field, AqpANTLRNode valueNode, Float fuzzy) 
-		throws QueryNodeException {
-		
-		List<QueryNode> children = valueNode.getChildren();
-		AqpANTLRNode tmodifier = valueNode.getChild("TMODIFIER");
-		if (tmodifier!=null) {
-			children.remove(tmodifier);
-		}
-		
-		AqpANTLRNode subChild;
-		
-		// TODO: Make FuzzyProcessor which removes invalid nodes
-		if (fuzzy!=null) {
-			AqpANTLRNode c = (AqpANTLRNode) children.get(0);
-			AqpANTLRNode inputNode = (AqpANTLRNode) c.getChildren().get(0);
-			return new FuzzyQueryNode(field, 
-					inputNode.getTokenInput(), 
-					fuzzy, inputNode.getTokenStart(), inputNode.getTokenEnd());
-		}
-		
-		
-		
-		for (QueryNode child: children) {
-			String tl = ((AqpANTLRNode) child).getTokenLabel();
-			if (tl.equals("QNORMAL")) {
-				subChild = (AqpANTLRNode) child.getChildren().get(0);
-				return new FieldQueryNode(field,	
-						EscapeQuerySyntaxImpl.discardEscapeChar(subChild.getTokenInput()), 
-						subChild.getTokenStart(), subChild.getTokenEnd());
-			}
-			else if(tl.equals("QPHRASE")) {
-				//TODO: so phrase is recognized only as being made of n>1 elements?
-				//and these queries are identical? a) invenio b) "Invenio"
-				subChild = (AqpANTLRNode) child.getChildren().get(0);
-				return new FieldQueryNode(field,	
-						EscapeQuerySyntaxImpl.discardEscapeChar(subChild.getTokenInput()), 
-						subChild.getTokenStart(), subChild.getTokenEnd());
-			}
-			else if(tl.equals("QPHRASETRUNC") || tl.equals("QTRUNC")) {
-				subChild = (AqpANTLRNode) child.getChildren().get(0);
-				return new WildcardQueryNode(field,	
-						EscapeQuerySyntaxImpl.discardEscapeChar(subChild.getTokenInput()), 
-						subChild.getTokenStart(), subChild.getTokenEnd());
-			}
-			else if(tl.equals("QRANGEIN") || tl.equals("QRANGEEX")) {
-				AqpANTLRNode lowerNode = (AqpANTLRNode) child.getChildren().get(0).getChildren().get(0);
-				AqpANTLRNode upperNode = (AqpANTLRNode) child.getChildren().get(0).getChildren().get(1);
-				CompareOperator lowerComparator = tl.equals("QRANGEIN") ? CompareOperator.GE : CompareOperator.GT;
-				CompareOperator upperComparator = (lowerComparator==CompareOperator.GE) ? CompareOperator.LE : CompareOperator.LT;
-				
-				ParametricQueryNode lowerBound = new ParametricQueryNode(field, lowerComparator,
-						lowerNode.getTokenInput(), lowerNode.getTokenStart(), lowerNode.getTokenEnd());
-				ParametricQueryNode upperBound = new ParametricQueryNode(field, upperComparator,
-						upperNode.getTokenInput(), upperNode.getTokenStart(), upperNode.getTokenEnd());
-				return new ParametricRangeQueryNode(lowerBound, upperBound);
-			}
-		}
-		throw new QueryNodeException(new MessageImpl(
-                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, valueNode.toString(), 
-                "Don't know how to parse"));
-	}
+	
 
 	private String getFieldValue(AqpANTLRNode fieldNode) throws QueryNodeException {
 		
 		if (fieldNode!= null && fieldNode.getTokenInput()!=null) {
 			return fieldNode.getTokenInput();
 		}
+		return null;
 		
-		QueryConfigHandler queryConfig = getQueryConfigHandler();
-
-		if (queryConfig != null) {
-			
-			if (queryConfig.hasAttribute(DefaultFieldAttribute.class)) {
-				String defaultField = queryConfig.getAttribute(
-						DefaultFieldAttribute.class).getDefaultField();
-				return defaultField;
-			}
-		}
-		throw new QueryNodeException(new MessageImpl(
-                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-                "Configuration error: " + DefaultFieldAttribute.class.toString() + " is missing"));
 	}
 
 	@Override
