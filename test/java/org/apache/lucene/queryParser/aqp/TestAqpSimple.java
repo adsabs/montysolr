@@ -89,7 +89,7 @@ public class TestAqpSimple extends LuceneTestCase {
 		}
 	}
 
-	public static class QPTestParser extends ANTLRQueryParser {
+	public static class QPTestParser extends AqpQueryParser {
 		public QPTestParser(Analyzer a) {
 			((QueryNodeProcessorPipeline) getQueryNodeProcessor())
 					.add(new QPTestParserQueryNodeProcessor());
@@ -151,10 +151,10 @@ public class TestAqpSimple extends LuceneTestCase {
 	}
 
 	
-	public ANTLRQueryParser getParser(Analyzer a) throws Exception {
+	public AqpQueryParser getParser(Analyzer a) throws Exception {
 		if (a == null)
 			a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
-		ANTLRQueryParser qp = new ANTLRQueryParser();
+		AqpQueryParser qp = new AqpQueryParser();
 		qp.setAnalyzer(a);
 		return qp;
 	}
@@ -175,7 +175,7 @@ public class TestAqpSimple extends LuceneTestCase {
 	}
 
 
-	public void assertQueryEquals(ANTLRQueryParser qp, String field,
+	public void assertQueryEquals(AqpQueryParser qp, String field,
 			String query, String result) throws Exception {
 		Query q = qp.parse(query, field);
 		String s = q.toString(field);
@@ -195,7 +195,7 @@ public class TestAqpSimple extends LuceneTestCase {
 	}
 	
 
-	private void assertQueryMatch(ANTLRQueryParser qp, String queryString,
+	private void assertQueryMatch(AqpQueryParser qp, String queryString,
 			String defaultField, String expectedResult) throws Exception {
 		
 		try {
@@ -256,7 +256,7 @@ public class TestAqpSimple extends LuceneTestCase {
 		
 		WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		
-		ANTLRQueryParser qp = getParser(analyzer);
+		AqpQueryParser qp = getParser(analyzer);
 		
 		//DEFAULT OPERATOR IS AND
 		

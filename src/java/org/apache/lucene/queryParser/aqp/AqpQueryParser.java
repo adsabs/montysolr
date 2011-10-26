@@ -21,10 +21,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryParser.aqp.builders.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
-import org.apache.lucene.queryParser.aqp.parser.ANTLRSyntaxParser;
-import org.apache.lucene.queryParser.aqp.processors.ANTLRQueryNodeProcessorPipeline;
+import org.apache.lucene.queryParser.aqp.parser.AqpSyntaxParser;
+import org.apache.lucene.queryParser.aqp.parser.AqpSyntaxParser;
+import org.apache.lucene.queryParser.aqp.processors.AqpQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryParserHelper;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
@@ -107,16 +109,16 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryNodeProcessorPipeline
  * @see StandardQueryTreeBuilder
  */
-public class ANTLRQueryParser extends QueryParserHelper {
+public class AqpQueryParser extends QueryParserHelper {
 
   /**
    * Constructs a {@link StandardQueryParser} object.
    */
-  public ANTLRQueryParser() {
+  public AqpQueryParser() {
     super(new AqpStandardQueryConfigHandler(), 
-    	new ANTLRSyntaxParser(),
-        new ANTLRQueryNodeProcessorPipeline(null),
-        new StandardQueryTreeBuilder());
+    	new AqpSyntaxParser(),
+        new AqpQueryNodeProcessorPipeline(null),
+        new AqpStandardQueryTreeBuilder());
   }
 
   /**
@@ -131,7 +133,7 @@ public class ANTLRQueryParser extends QueryParserHelper {
    * @param analyzer
    *          the analyzer to be used by this query parser helper
    */
-  public ANTLRQueryParser(Analyzer analyzer) {
+  public AqpQueryParser(Analyzer analyzer) {
     this();
 
     this.setAnalyzer(analyzer);

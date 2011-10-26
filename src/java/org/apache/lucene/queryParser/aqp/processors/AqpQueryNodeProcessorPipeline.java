@@ -59,10 +59,10 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryConfigHandler
  * @see StandardSyntaxParser
  */
-public class ANTLRQueryNodeProcessorPipeline extends
+public class AqpQueryNodeProcessorPipeline extends
     QueryNodeProcessorPipeline {
 
-  public ANTLRQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
+  public AqpQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
     super(queryConfig);
     
     add(new AqpTreeRewriteProcessor());

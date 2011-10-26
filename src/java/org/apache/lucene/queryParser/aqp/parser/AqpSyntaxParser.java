@@ -20,9 +20,8 @@ import org.apache.lucene.queryParser.aqp.AqpCommonTreeAdaptor;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarLexer;
 import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarParser;
-import org.apache.lucene.queryParser.aqp.processors.ASTConvertProcessor;
 
-public class ANTLRSyntaxParser implements SyntaxParser {
+public class AqpSyntaxParser implements SyntaxParser {
 
 	@Override
 	public QueryNode parse(CharSequence query, CharSequence field)
