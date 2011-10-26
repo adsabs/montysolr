@@ -11,6 +11,7 @@ import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
+import org.apache.lucene.queryParser.core.nodes.MatchAllDocsQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ParametricQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ParametricRangeQueryNode;
@@ -21,6 +22,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
+import org.apache.lucene.search.MatchAllDocsQuery;
 
 public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
@@ -135,6 +137,13 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 						EscapeQuerySyntaxImpl.discardEscapeChar(subChild
 								.getTokenInput()), subChild.getTokenStart(),
 						subChild.getTokenEnd());
+			} else if (tl.equals("QANYTHING")) {
+				subChild = (AqpANTLRNode) child.getChildren().get(0);
+				//if (field.equals("*")) { // this will never happen now, but may change in the future
+				//	return new MatchAllDocsQueryNode();
+				//}
+				return new FieldQueryNode(field, "*", subChild.getTokenStart(), subChild.getTokenEnd());
+				
 			} else if (tl.equals("QRANGEIN") || tl.equals("QRANGEEX")) {
 				AqpANTLRNode lowerNode = (AqpANTLRNode) child.getChildren()
 						.get(0).getChildren().get(0);
