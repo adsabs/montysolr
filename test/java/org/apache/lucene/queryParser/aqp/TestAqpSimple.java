@@ -258,6 +258,7 @@ public class TestAqpSimple extends LuceneTestCase {
 		
 		ANTLRQueryParser qp = getParser(analyzer);
 		
+		//DEFAULT OPERATOR IS AND
 		
 		assertQueryMatch(qp, "something", "field", 
 				             "field:something");
@@ -311,14 +312,52 @@ public class TestAqpSimple extends LuceneTestCase {
         "+field:one +((+x:two +field:three)^0.8)");
 		
 		assertQueryMatch(qp, "one:(two three)^0.8", "field", 
-        "+field:one +((+x:two +field:three)^0.8)");
+        "+((one:two one:three)^0.8)");
+		
+		assertQueryMatch(qp, "-one:(two three)^0.8", "field", 
+        "-((one:two one:three)^0.8)");
+		
+		assertQueryMatch(qp, "+one:(two three)^0.8", "field", 
+        "+((one:two one:three)^0.8)");
 		
 		assertQueryMatch(qp, "[one TO five]", "field", 
-        "");
+        "field:[one TO five]");
 		
 		assertQueryMatch(qp, "z:[one TO five]", "field", 
-        "");
+        "z:[one TO five]");
 		
+		assertQueryMatch(qp, "{one TO five}", "field", 
+        "field:{one TO five}");
+		
+		assertQueryMatch(qp, "z:{one TO five}", "field", 
+        "z:{one TO five}");
+		
+		assertQueryMatch(qp, "z:{\"one\" TO \"five\"}", "field", 
+        "z:{one TO five}");
+		
+		assertQueryMatch(qp, "z:{one TO *}", "field", 
+        "z:{one TO five}");
+		
+		assertQueryMatch(qp, "this +(that)", "field", 
+        "+field:this +field:that");
+		
+		assertQueryMatch(qp, "(this) (that)", "field", 
+        "+field:this +field:that");
+		
+		assertQueryMatch(qp, "this ((((+(that))))) ", "field", 
+        "+field:this +field:that");
+		
+		assertQueryMatch(qp, "this (+(that)^0.7)", "field", 
+        "+field:this +field:that^0.7");
+		
+		assertQueryMatch(qp, "this (+(that thus)^0.7)", "field", 
+        "+field:this +((+field:that +field:thus)^0.7)");
+		
+		assertQueryMatch(qp, "this (+(-(that thus))^0.7)", "field", 
+        "+field:this -((+field:that +field:thus)^0.7)");
+		
+		assertQueryMatch(qp, "this (+(-(+(-(that thus))^0.1))^0.3)", "field", 
+        "+field:this -((+field:that +field:thus)^0.1)");
 		
 		BooleanQuery.setMaxClauseCount(2);
 		try {

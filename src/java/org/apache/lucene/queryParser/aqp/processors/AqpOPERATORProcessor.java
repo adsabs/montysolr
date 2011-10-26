@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.nodes.NotQueryNode;
+import org.apache.lucene.queryParser.aqp.util.AqpUtils.Operator;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.AndQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
@@ -20,13 +21,6 @@ import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode.Modifier;
 public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
 	
-	public enum OPERATOR {
-		AND,
-		OR,
-		NOT,
-		WITH,
-		PARAGRAPH;
-	}
 
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
@@ -65,13 +59,13 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 			QueryNode ret = null;
 			
 			if (n.getTokenLabel().equals("AND")) {
-				ret = new AndQueryNode(getChildren(node, OPERATOR.AND));
+				ret = new AndQueryNode(getChildren(node, Operator.AND));
 			}
 			else if(n.getTokenLabel().equals("OR")) {
-				ret = new OrQueryNode(getChildren(node, OPERATOR.OR));
+				ret = new OrQueryNode(getChildren(node, Operator.OR));
 			}
 			else if(n.getTokenLabel().equals("NOT")) {
-				ret = new NotQueryNode(getChildren(node, OPERATOR.NOT));
+				ret = new NotQueryNode(getChildren(node, Operator.NOT));
 			}
 			//else if(n.getTokenLabel().equals("WITH")) {
 			//	new ProximityQueryNode(clauses, field, type, inorder)
@@ -91,7 +85,7 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 	 * Apply the ModifierQueryNode to each of the children
 	 * (unless it is already of the type ModifierQueryNode)
 	 */
-	private List<QueryNode> getChildren(QueryNode node, AqpOPERATORProcessor.OPERATOR operator) {
+	private List<QueryNode> getChildren(QueryNode node, Operator operator) {
 		Modifier mod = null;
 		List<QueryNode> children = node.getChildren();
 		int index = 0;

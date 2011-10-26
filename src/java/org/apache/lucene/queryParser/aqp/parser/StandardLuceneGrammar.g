@@ -10,7 +10,7 @@ tokens {
   ATOM;
   NUCLEUS;
   MULTIATOM;
-  MULTITERM;
+  MULTIVALUE;
   MODIFIER;
   TMODIFIER;
   VALUE;
@@ -68,7 +68,7 @@ primaryClause
 
 atom   
 	: 
-	modifier? field multi_value -> ^(MULTITERM ^(MODIFIER modifier?) ^(FIELD field) ^(MULTIATOM multi_value))
+	modifier? field multi_value term_modifier? -> ^(MULTIATOM ^(MODIFIER modifier?) ^(FIELD field) ^(MULTIVALUE multi_value) term_modifier?)
 	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(NUCLEUS ^(FIELD field?) ^(VALUE value)))
 	;
    

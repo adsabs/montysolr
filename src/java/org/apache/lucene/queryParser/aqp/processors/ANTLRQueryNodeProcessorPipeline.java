@@ -72,6 +72,7 @@ public class ANTLRQueryNodeProcessorPipeline extends
     
     add(new AqpVALUEProcessor());
     add(new AqpNUCLEUSProcessor());
+    add(new AqpMULTIATOMProcessor());
     add(new AqpATOMProcessor());
     add(new AqpCLAUSEProcessor());
     add(new AqpOPERATORProcessor());

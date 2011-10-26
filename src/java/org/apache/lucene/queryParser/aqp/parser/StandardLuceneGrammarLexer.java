@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-26 01:25:25
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-26 03:46:49
 
    package org.apache.lucene.queryParser.aqp.parser;
 
@@ -31,7 +31,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
     public static final int MINUS=20;
     public static final int MODIFIER=21;
     public static final int MULTIATOM=22;
-    public static final int MULTITERM=23;
+    public static final int MULTIVALUE=23;
     public static final int NEAR=24;
     public static final int NORMAL_CHAR=25;
     public static final int NOT=26;

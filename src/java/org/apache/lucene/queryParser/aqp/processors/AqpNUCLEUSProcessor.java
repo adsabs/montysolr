@@ -53,10 +53,10 @@ public class AqpNUCLEUSProcessor extends QueryNodeProcessorImpl implements
 		
 		if (node instanceof FieldQueryNode) {
 			((FieldQueryNode) node).setField(field);
-			if (node.getChildren()!=null) {
-				for (QueryNode child : node.getChildren()) {
-					applyFieldToAllChildren(field, child);
-				}
+		}
+		if (node.getChildren()!=null) {
+			for (QueryNode child : node.getChildren()) {
+				applyFieldToAllChildren(field, child);
 			}
 		}
 	}

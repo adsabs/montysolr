@@ -11,12 +11,18 @@ import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.aqp.util.AqpUtils.Modifier;
 
 public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
-
+	
+	
+	/*
+	 * 
+	 * @see org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl#preProcessNode(org.apache.lucene.queryParser.core.nodes.QueryNode)
+	 */
 	@Override
-	protected QueryNode postProcessNode(QueryNode node)
+	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("CLAUSE")) {
 			ClauseData data = harvestData((AqpANTLRNode) node);
@@ -35,7 +41,7 @@ public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 	}
 
 	@Override
-	protected QueryNode preProcessNode(QueryNode node)
+	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 		return node;
 	}
@@ -71,7 +77,9 @@ public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 			}
 		}
 		
-		if (children.size()==1 && ((AqpANTLRNode)children.get(0)).getTokenLabel().equals("CLAUSE")) {
+		if (children.size()==1 &&
+				children.get(0) instanceof AqpANTLRNode &&
+				((AqpANTLRNode)children.get(0)).getTokenLabel().equals("CLAUSE")) {
 			return harvestData(((AqpANTLRNode)children.get(0)), data);
 		}
 		else {
@@ -81,10 +89,7 @@ public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 		
 	}
 	
-	enum Modifier {
-		PLUS,
-		MINUS;
-	}
+	
 	class ClauseData {
 		private Modifier modifier;
 		private Float boost;

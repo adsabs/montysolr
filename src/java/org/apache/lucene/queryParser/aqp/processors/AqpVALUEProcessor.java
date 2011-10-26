@@ -139,7 +139,7 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 				AqpANTLRNode lowerNode = (AqpANTLRNode) child.getChildren()
 						.get(0).getChildren().get(0);
 				AqpANTLRNode upperNode = (AqpANTLRNode) child.getChildren()
-						.get(0).getChildren().get(1);
+						.get(1).getChildren().get(0);
 				CompareOperator lowerComparator = tl.equals("QRANGEIN") ? CompareOperator.GE
 						: CompareOperator.GT;
 				CompareOperator upperComparator = (lowerComparator == CompareOperator.GE) ? CompareOperator.LE

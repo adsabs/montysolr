@@ -23,7 +23,9 @@ public class AqpTreeRewriteProcessor extends QueryNodeProcessorImpl {
 			// also (AND (ATOM ....)) into (ATOM...)
 			if (parent.getTokenName().equals("OPERATOR") && children.size() == 1) {
 				child = (AqpANTLRNode) children.get(0);
-				if (child.getTokenName().equals("OPERATOR") || child.getTokenName().equals("ATOM")) {
+				if (child.getTokenName().equals("OPERATOR") 
+						|| child.getTokenName().equals("ATOM")
+						|| child.getTokenName().equals("CLAUSE")) {
 					return child;
 				}
 			}
