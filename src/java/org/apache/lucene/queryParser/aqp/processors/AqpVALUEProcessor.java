@@ -18,6 +18,8 @@ import org.apache.lucene.queryParser.core.nodes.ParametricRangeQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryParser.core.nodes.ParametricQueryNode.CompareOperator;
+import org.apache.lucene.queryParser.core.nodes.QuotedFieldQueryNode;
+import org.apache.lucene.queryParser.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
@@ -104,13 +106,6 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 
 
 
-		// TODO: Make FuzzyProcessor which removes invalid nodes as fuzzy 
-		// can be applied to only some values
-		if (fuzzy != null) {
-			AqpANTLRNode inputNode = (AqpANTLRNode) valueChildren.get(0).getChildren().get(0);
-			return new FuzzyQueryNode(field, inputNode.getTokenInput(), fuzzy,
-					inputNode.getTokenStart(), inputNode.getTokenEnd());
-		}
 
 		AqpANTLRNode subChild;
 		
@@ -118,33 +113,58 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 			String tl = ((AqpANTLRNode) child).getTokenLabel();
 			if (tl.equals("QNORMAL")) {
 				subChild = (AqpANTLRNode) child.getChildren().get(0);
-				return new FieldQueryNode(field,
+				if (fuzzy != null) {
+					AqpANTLRNode inputNode = (AqpANTLRNode) valueChildren.get(0).getChildren().get(0);
+					return new FuzzyQueryNode(field, inputNode.getTokenInput(), fuzzy,
+							inputNode.getTokenStart(), inputNode.getTokenEnd());
+				}
+				else {
+				    return new FieldQueryNode(field,
 						EscapeQuerySyntaxImpl.discardEscapeChar(subChild
 								.getTokenInput()), subChild.getTokenStart(),
 						subChild.getTokenEnd());
+				}
+				
 			} else if (tl.equals("QPHRASE")) {
-				// TODO: so phrase is recognized only as being made of n>1
-				// elements?
-				// and these queries are identical? a) invenio b) "Invenio"
 				subChild = (AqpANTLRNode) child.getChildren().get(0);
-				return new FieldQueryNode(field,
+				QueryNode fq = new QuotedFieldQueryNode(field,
 						EscapeQuerySyntaxImpl.discardEscapeChar(subChild
 								.getTokenInput()), subChild.getTokenStart(),
 						subChild.getTokenEnd());
+				if (fuzzy!=null) {
+					return new SlopQueryNode(fq, fuzzy.intValue());
+				}
+				return fq;
 			} else if (tl.equals("QPHRASETRUNC") || tl.equals("QTRUNC")) {
 				subChild = (AqpANTLRNode) child.getChildren().get(0);
-				return new WildcardQueryNode(field,
+				QueryNode wq = new WildcardQueryNode(field,
 						EscapeQuerySyntaxImpl.discardEscapeChar(subChild
 								.getTokenInput()), subChild.getTokenStart(),
 						subChild.getTokenEnd());
+				if (fuzzy!=null) {
+					return new SlopQueryNode(wq, fuzzy.intValue());
+				}
+				return wq;
 			} else if (tl.equals("QANYTHING")) {
 				subChild = (AqpANTLRNode) child.getChildren().get(0);
 				//if (field.equals("*")) { // this will never happen now, but may change in the future
 				//	return new MatchAllDocsQueryNode();
 				//}
+				
+				if (fuzzy!=null) {
+					throw new QueryNodeException(new MessageImpl(
+							QueryParserMessages.INVALID_SYNTAX,
+							valueChildren.toString(), "It makes not sense to use *~" + fuzzy));
+				}
 				return new FieldQueryNode(field, "*", subChild.getTokenStart(), subChild.getTokenEnd());
 				
 			} else if (tl.equals("QRANGEIN") || tl.equals("QRANGEEX")) {
+				if (fuzzy!=null) {
+					throw new QueryNodeException(new MessageImpl(
+							QueryParserMessages.INVALID_SYNTAX,
+							valueChildren.toString(), "Use of ~ not allowed for parametric queries"));
+				}
+				
 				AqpANTLRNode lowerNode = (AqpANTLRNode) child.getChildren()
 						.get(0).getChildren().get(0);
 				AqpANTLRNode upperNode = (AqpANTLRNode) child.getChildren()

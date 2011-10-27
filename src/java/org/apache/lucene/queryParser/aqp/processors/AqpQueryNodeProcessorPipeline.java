@@ -65,10 +65,11 @@ public class AqpQueryNodeProcessorPipeline extends
   public AqpQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
     super(queryConfig);
     
+    add(new AqpDEFOPProcessor());
     add(new AqpTreeRewriteProcessor());
     add(new AqpQPHRASEProcessor());
     add(new AqpQPHRASETRUNCProcessor());
-    add(new AqpBOOSTProcessor());
+    //add(new AqpBOOSTProcessor());
     
     add(new AqpVALUEProcessor());
     add(new AqpNUCLEUSProcessor());

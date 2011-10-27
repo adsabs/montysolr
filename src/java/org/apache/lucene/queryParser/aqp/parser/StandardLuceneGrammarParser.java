@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-26 13:44:38
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-27 00:23:05
 
    package org.apache.lucene.queryParser.aqp.parser;
 
@@ -107,7 +107,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "mainQ"
-    // StandardLuceneGrammar.g:38:1: mainQ : ( clauseDefault )+ -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ;
+    // StandardLuceneGrammar.g:38:1: mainQ : ( clauseDefault )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) ;
     public final StandardLuceneGrammarParser.mainQ_return mainQ() throws RecognitionException {
         StandardLuceneGrammarParser.mainQ_return retval = new StandardLuceneGrammarParser.mainQ_return();
         retval.start = input.LT(1);
@@ -120,7 +120,7 @@ public TreeAdaptor getTreeAdaptor() {
 
         RewriteRuleSubtreeStream stream_clauseDefault=new RewriteRuleSubtreeStream(adaptor,"rule clauseDefault");
         try {
-            // StandardLuceneGrammar.g:38:7: ( ( clauseDefault )+ -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+            // StandardLuceneGrammar.g:38:7: ( ( clauseDefault )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) )
             // StandardLuceneGrammar.g:39:2: ( clauseDefault )+
             {
             // StandardLuceneGrammar.g:39:2: ( clauseDefault )+
@@ -173,13 +173,13 @@ public TreeAdaptor getTreeAdaptor() {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
             root_0 = (Object)adaptor.nil();
-            // 39:17: -> ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
+            // 39:17: -> ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ )
             {
-                // StandardLuceneGrammar.g:39:20: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
+                // StandardLuceneGrammar.g:39:20: ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
-                (Object)adaptor.create(OPERATOR, "AND")
+                (Object)adaptor.create(OPERATOR, "DEFOP")
                 , root_1);
 
                 if ( !(stream_clauseDefault.hasNext()) ) {
@@ -819,7 +819,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    if ( state.backtracking==0 ) stream_primaryClause.add(others.getTree());
 
             	    // AST REWRITE
-            	    // elements: primaryClause, near
+            	    // elements: near, primaryClause
             	    // token labels: 
             	    // rule labels: retval
             	    // token list labels: 
@@ -898,7 +898,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "primaryClause"
-    // StandardLuceneGrammar.g:59:1: primaryClause : ( ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN -> ( clauseDefault )+ | atom );
+    // StandardLuceneGrammar.g:59:1: primaryClause : ( ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) ) | ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) ) | ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN -> ( clauseDefault )+ | atom );
     public final StandardLuceneGrammarParser.primaryClause_return primaryClause() throws RecognitionException {
         StandardLuceneGrammarParser.primaryClause_return retval = new StandardLuceneGrammarParser.primaryClause_return();
         retval.start = input.LT(1);
@@ -946,7 +946,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_modifier=new RewriteRuleSubtreeStream(adaptor,"rule modifier");
         RewriteRuleSubtreeStream stream_clauseDefault=new RewriteRuleSubtreeStream(adaptor,"rule clauseDefault");
         try {
-            // StandardLuceneGrammar.g:60:2: ( ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) ) | ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN -> ( clauseDefault )+ | atom )
+            // StandardLuceneGrammar.g:60:2: ( ( modifier LPAREN ( clauseDefault )+ RPAREN )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) ) | ( LPAREN ( clauseDefault )+ RPAREN CARAT NUMBER )=> ( modifier )? LPAREN ( clauseDefault )+ RPAREN ( CARAT NUMBER )? -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) ) | ( LPAREN )=> LPAREN ( clauseDefault )+ RPAREN -> ( clauseDefault )+ | atom )
             int alt13=4;
             switch ( input.LA(1) ) {
             case MINUS:
@@ -1128,9 +1128,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 62:100: -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+                    // 62:100: -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) )
                     {
-                        // StandardLuceneGrammar.g:62:103: ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+                        // StandardLuceneGrammar.g:62:103: ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -1173,11 +1173,11 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:62:151: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
+                        // StandardLuceneGrammar.g:62:151: ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
-                        (Object)adaptor.create(OPERATOR, "AND")
+                        (Object)adaptor.create(OPERATOR, "DEFOP")
                         , root_2);
 
                         if ( !(stream_clauseDefault.hasNext()) ) {
@@ -1301,7 +1301,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: clauseDefault, modifier, NUMBER
+                    // elements: clauseDefault, NUMBER, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1313,9 +1313,9 @@ public TreeAdaptor getTreeAdaptor() {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
 
                     root_0 = (Object)adaptor.nil();
-                    // 63:105: -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+                    // 63:105: -> ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) )
                     {
-                        // StandardLuceneGrammar.g:63:108: ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"AND\"] ( clauseDefault )+ ) )
+                        // StandardLuceneGrammar.g:63:108: ^( CLAUSE ^( MODIFIER ( modifier )? ) ^( BOOST ( NUMBER )? ) ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -1358,11 +1358,11 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_1, root_2);
                         }
 
-                        // StandardLuceneGrammar.g:63:156: ^( OPERATOR[\"AND\"] ( clauseDefault )+ )
+                        // StandardLuceneGrammar.g:63:156: ^( OPERATOR[\"DEFOP\"] ( clauseDefault )+ )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
-                        (Object)adaptor.create(OPERATOR, "AND")
+                        (Object)adaptor.create(OPERATOR, "DEFOP")
                         , root_2);
 
                         if ( !(stream_clauseDefault.hasNext()) ) {
@@ -1799,7 +1799,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: multi_value, field, modifier, term_modifier
+                    // elements: field, multi_value, modifier, term_modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1949,7 +1949,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_value.add(value28.getTree());
 
                     // AST REWRITE
-                    // elements: modifier, value, field
+                    // elements: field, modifier, value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2649,7 +2649,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
             // AST REWRITE
-            // elements: value, term_modifier
+            // elements: term_modifier, value
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -3027,7 +3027,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 
                     // AST REWRITE
-                    // elements: a, b
+                    // elements: b, a
                     // token labels: 
                     // rule labels: retval, b, a
                     // token list labels: 
@@ -3606,7 +3606,7 @@ public TreeAdaptor getTreeAdaptor() {
             if ( state.backtracking==0 ) stream_value.add(value56.getTree());
 
             // AST REWRITE
-            // elements: modifier, value
+            // elements: value, modifier
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -4329,7 +4329,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     	    // AST REWRITE
-                    	    // elements: b, NUMBER
+                    	    // elements: NUMBER, b
                     	    // token labels: b
                     	    // rule labels: retval
                     	    // token list labels: 

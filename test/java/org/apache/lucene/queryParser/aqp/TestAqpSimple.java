@@ -23,6 +23,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.standard.QueryParserUtil;
+import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -259,6 +260,7 @@ public class TestAqpSimple extends LuceneTestCase {
 		AqpQueryParser qp = getParser(analyzer);
 		
 		//DEFAULT OPERATOR IS AND
+		qp.setDefaultOperator(Operator.AND);
 		
 		assertQueryMatch(qp, "something", "field", 
 				             "field:something");
@@ -266,8 +268,8 @@ public class TestAqpSimple extends LuceneTestCase {
 		assertQueryMatch(qp, "x:something", "field", 
         "x:something");
 		
-		assertQueryMatch(qp, "x:\"something\"", "field", 
-        "x:\"something\"");
+		assertQueryMatch(qp, "x:\"something else\"", "field", 
+        "x:\"something else\"");
 		
 		assertQueryMatch(qp, "x:\"someth*\"", "field", 
         "x:someth*");

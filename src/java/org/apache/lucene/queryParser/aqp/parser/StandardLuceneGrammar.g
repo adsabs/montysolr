@@ -36,7 +36,7 @@ tokens {
 }
 
 mainQ : 
-	clauseDefault+ -> ^(OPERATOR["AND"] clauseDefault+) // Default operator
+	clauseDefault+ -> ^(OPERATOR["DEFOP"] clauseDefault+) // Default operator
 	;
    
   
@@ -59,8 +59,8 @@ clauseWeak
 primaryClause
 	: 
 	
-	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
-	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
+	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["DEFOP"] clauseDefault+) ) // Default operator
+	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["DEFOP"] clauseDefault+) ) // Default operator
 	| (LPAREN)=> LPAREN clauseDefault+ RPAREN -> clauseDefault+
 	| atom 
 	;

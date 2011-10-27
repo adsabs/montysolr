@@ -6,8 +6,19 @@ import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.hamcrest.core.IsInstanceOf;
 
+/*
+ * Processor which massages the AST tree before other processors work
+ * with it.
+ * 	- replaces chain of OPERATORs with the lowest ie. (AND (AND (AND..)))
+ *    becomes (AND ...); this happens only if the OPERATOR has one 
+ *    single child of type: OPERATOR, ATOM, CLAUSE
+ *    
+ *    Useful mostly for the DEFOP operator as our ANTLR grammars
+ *    usually group same clauses under one operator
+ *    
+ *  - 
+ */
 public class AqpTreeRewriteProcessor extends QueryNodeProcessorImpl {
 
 	@Override
@@ -16,12 +27,12 @@ public class AqpTreeRewriteProcessor extends QueryNodeProcessorImpl {
 		
 		if (node instanceof AqpANTLRNode && node.getChildren()!= null) {
 			List<QueryNode> children = node.getChildren();
-			AqpANTLRNode parent = (AqpANTLRNode)node;
+			AqpANTLRNode n = (AqpANTLRNode)node;
 			AqpANTLRNode child;
 			
 			// turn (AND (AND (CLAUSE...))) into (AND (CLAUSE...))
 			// also (AND (ATOM ....)) into (ATOM...)
-			if (parent.getTokenName().equals("OPERATOR") && children.size() == 1) {
+			if (n.getTokenName().equals("OPERATOR") && children.size() == 1) {
 				child = (AqpANTLRNode) children.get(0);
 				if (child.getTokenName().equals("OPERATOR") 
 						|| child.getTokenName().equals("ATOM")
@@ -30,6 +41,7 @@ public class AqpTreeRewriteProcessor extends QueryNodeProcessorImpl {
 				}
 			}
 			
+			/*
 			if (node.getParent()==null && children.size() > 1) { // it is a root mode
 				String last = ((AqpANTLRNode)children.get(0)).getTokenLabel();
 				boolean rewriteSafe = true;
@@ -49,15 +61,16 @@ public class AqpTreeRewriteProcessor extends QueryNodeProcessorImpl {
 					
 					for (int i=1;i<children.size();i++) {
 						QueryNode otherChild = children.get(i);
-						for (QueryNode n: otherChild.getChildren()) {
-							childrenList.add(n);
+						for (QueryNode nod: otherChild.getChildren()) {
+							childrenList.add(nod);
 						}
 					}
 					
 					children.clear();
-					parent.set(childrenList);
+					n.set(childrenList);
 				}
 			}
+			*/
 		}
 		return node;
 	}
