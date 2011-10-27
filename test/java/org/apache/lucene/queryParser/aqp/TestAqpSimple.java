@@ -39,103 +39,6 @@ public class TestAqpSimple extends LuceneTestCase {
 	
 	private boolean verbose = true;
 
-	public static Analyzer qpAnalyzer = new QPTestAnalyzer();
-
-	public static final class QPTestFilter extends TokenFilter {
-		private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
-		private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
-
-		/**
-		 * Filter which discards the token 'stop' and which expands the token
-		 * 'phrase' into 'phrase1 phrase2'
-		 */
-		public QPTestFilter(TokenStream in) {
-			super(in);
-		}
-
-		boolean inPhrase = false;
-		int savedStart = 0, savedEnd = 0;
-
-		@Override
-		public boolean incrementToken() throws IOException {
-			if (inPhrase) {
-				inPhrase = false;
-				clearAttributes();
-				termAtt.setEmpty().append("phrase2");
-				offsetAtt.setOffset(savedStart, savedEnd);
-				return true;
-			} else
-				while (input.incrementToken()) {
-					if (termAtt.toString().equals("phrase")) {
-						inPhrase = true;
-						savedStart = offsetAtt.startOffset();
-						savedEnd = offsetAtt.endOffset();
-						termAtt.setEmpty().append("phrase1");
-						offsetAtt.setOffset(savedStart, savedEnd);
-						return true;
-					} else if (!termAtt.toString().equals("stop"))
-						return true;
-				}
-			return false;
-		}
-	}
-
-	public static final class QPTestAnalyzer extends Analyzer {
-
-		/** Filters LowerCaseTokenizer with StopFilter. */
-		@Override
-		public final TokenStream tokenStream(String fieldName, Reader reader) {
-			return new QPTestFilter(new LowerCaseTokenizer(
-					TEST_VERSION_CURRENT, reader));
-		}
-	}
-
-	public static class QPTestParser extends AqpQueryParser {
-		public QPTestParser(Analyzer a) {
-			((QueryNodeProcessorPipeline) getQueryNodeProcessor())
-					.add(new QPTestParserQueryNodeProcessor());
-			this.setAnalyzer(a);
-
-		}
-
-		private static class QPTestParserQueryNodeProcessor extends
-				QueryNodeProcessorImpl {
-
-			@Override
-			protected QueryNode postProcessNode(QueryNode node)
-					throws QueryNodeException {
-
-				return node;
-
-			}
-
-			@Override
-			protected QueryNode preProcessNode(QueryNode node)
-					throws QueryNodeException {
-
-				if (node instanceof WildcardQueryNode
-						|| node instanceof FuzzyQueryNode) {
-
-					throw new QueryNodeException(new MessageImpl(
-							QueryParserMessages.EMPTY_MESSAGE));
-
-				}
-
-				return node;
-
-			}
-
-			@Override
-			protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
-					throws QueryNodeException {
-
-				return children;
-
-			}
-
-		}
-
-	}
 
 	private int originalMaxClauses;
 
@@ -165,35 +68,6 @@ public class TestAqpSimple extends LuceneTestCase {
 	}
 
 
-	public void assertQueryEquals(String query, Analyzer a, String result)
-			throws Exception {
-		Query q = getQuery(query, a);
-		String s = q.toString("field");
-		if (!s.equals(result)) {
-			fail("Query /" + query + "/ yielded /" + s + "/, expecting /"
-					+ result + "/");
-		}
-	}
-
-
-	public void assertQueryEquals(AqpQueryParser qp, String field,
-			String query, String result) throws Exception {
-		Query q = qp.parse(query, field);
-		String s = q.toString(field);
-		if (!s.equals(result)) {
-			fail("Query /" + query + "/ yielded /" + s + "/, expecting /"
-					+ result + "/");
-		}
-	}
-
-	public void assertEscapedQueryEquals(String query, Analyzer a, String result)
-			throws Exception {
-		String escapedQuery = QueryParserUtil.escape(query);
-		if (!escapedQuery.equals(result)) {
-			fail("Query /" + query + "/ yielded /" + escapedQuery
-					+ "/, expecting /" + result + "/");
-		}
-	}
 	
 
 	private void assertQueryMatch(AqpQueryParser qp, String queryString,
@@ -375,43 +249,5 @@ public class TestAqpSimple extends LuceneTestCase {
 		}
 	}
 
-
-
-
-	private class CannedTokenStream extends TokenStream {
-		private int upto = 0;
-		final PositionIncrementAttribute posIncr = addAttribute(PositionIncrementAttribute.class);
-		final CharTermAttribute term = addAttribute(CharTermAttribute.class);
-
-		@Override
-		public boolean incrementToken() {
-			clearAttributes();
-			if (upto == 4) {
-				return false;
-			}
-			if (upto == 0) {
-				posIncr.setPositionIncrement(1);
-				term.setEmpty().append("a");
-			} else if (upto == 1) {
-				posIncr.setPositionIncrement(1);
-				term.setEmpty().append("b");
-			} else if (upto == 2) {
-				posIncr.setPositionIncrement(0);
-				term.setEmpty().append("c");
-			} else {
-				posIncr.setPositionIncrement(0);
-				term.setEmpty().append("d");
-			}
-			upto++;
-			return true;
-		}
-	}
-
-	private class CannedAnalyzer extends Analyzer {
-		@Override
-		public TokenStream tokenStream(String ignored, Reader alsoIgnored) {
-			return new CannedTokenStream();
-		}
-	}
 
 }
