@@ -76,6 +76,7 @@ atom
 field	
 	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
+	| STAR COLON -> ^(QANYTHING STAR)
 	;
 
 value  
@@ -87,6 +88,7 @@ value
 	| truncated -> ^(QTRUNCATED truncated)
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	| STAR -> ^(QANYTHING STAR)
 	)
 	term_modifier? -> term_modifier? $value
   	;

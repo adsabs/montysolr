@@ -218,7 +218,7 @@ public class TestAqpSimple extends LuceneTestCase {
         					"z:{one TO five}");
 		
 		assertQueryMatch(qp, "z:{one TO *}", "field", 
-        					"z:{one TO five}");
+        					"z:{one TO *}");
 		
 		assertQueryMatch(qp, "this +(that)", "field", 
         					"+field:this +field:that");

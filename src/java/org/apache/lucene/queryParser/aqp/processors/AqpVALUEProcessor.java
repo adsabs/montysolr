@@ -136,6 +136,14 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 				subChild = (AqpANTLRNode) child.getChildren().get(0);
 				if (fuzzy != null) {
 					AqpANTLRNode inputNode = (AqpANTLRNode) valueChildren.get(0).getChildren().get(0);
+					
+					// I think the checking should be in the FuzzyQueryNode
+					if (fuzzy<0.0f || fuzzy>=1.0f) {
+						throw new QueryNodeException(new MessageImpl(
+							QueryParserMessages.INVALID_SYNTAX,
+							valueChildren.toString(), "Similarity s must be 0.0 > s < 1.0"));
+					}
+					
 					return new FuzzyQueryNode(field, inputNode.getTokenInput(), fuzzy,
 							inputNode.getTokenStart(), inputNode.getTokenEnd());
 				}
@@ -177,7 +185,8 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 							QueryParserMessages.INVALID_SYNTAX,
 							valueChildren.toString(), "It makes not sense to use *~" + fuzzy));
 				}
-				return new FieldQueryNode(field, "*", subChild.getTokenStart(), subChild.getTokenEnd());
+				//return new FieldQueryNode(field, "*", subChild.getTokenStart(), subChild.getTokenEnd());
+				return new MatchAllDocsQueryNode();
 				
 			} else if (tl.equals("QRANGEIN") || tl.equals("QRANGEEX")) {
 				if (fuzzy!=null) {
