@@ -22,6 +22,7 @@ import org.apache.lucene.queryParser.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.standard.config.FuzzyAttribute;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -55,8 +56,7 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 					boost = ((AqpANTLRNode) boostNode.getChildren().get(0))
 							.getTokenInputFloat();
 				if (fuzzyNode != null && fuzzyNode.getChildren() != null)
-					fuzzy = ((AqpANTLRNode) fuzzyNode.getChildren().get(0))
-							.getTokenInputFloat();
+					fuzzy = getFuzzyValue(fuzzyNode);
 			}
 
 			List<QueryNode> children = valueNode.getChildren();
@@ -82,6 +82,27 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 	protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
 			throws QueryNodeException {
 		return children;
+	}
+	
+	/*
+	 * Finds the float value, it can be both input, but also as a label 
+	 * (if no input was given). But presence of the FUZZY node means
+	 * the user specified "~"
+	 */
+	private Float getFuzzyValue(AqpANTLRNode fuzzyNode) throws QueryNodeException {
+		Float fuzzy = ((AqpANTLRNode) fuzzyNode.getChildren().get(0))
+			.getTokenInputFloat();
+		if (fuzzy==null) {
+			QueryConfigHandler queryConfig = getQueryConfigHandler();
+			if (queryConfig == null || !queryConfig.hasAttribute(FuzzyAttribute.class)) {
+				throw new QueryNodeException(new MessageImpl(
+		                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+		                "Configuration error: " + DefaultFieldAttribute.class.toString() + " is missing"));
+			}
+			fuzzy = queryConfig.getAttribute(
+						FuzzyAttribute.class).getFuzzyMinSimilarity();
+		}
+		return fuzzy;
 	}
 	
 	private String getDefaultFieldName() throws QueryNodeException {

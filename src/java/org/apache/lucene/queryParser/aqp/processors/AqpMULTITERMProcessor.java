@@ -13,23 +13,23 @@ import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 
-public class AqpMULTIATOMProcessor extends QueryNodeProcessorImpl implements
+public class AqpMULTITERMProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
 
 	@Override
-	protected QueryNode preProcessNode(QueryNode node)
+	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 		return node;
 	}
 
 	@Override
-	protected QueryNode postProcessNode(QueryNode node)
+	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
-		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("MULTIATOM")) {
+		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("MULTITERM")) {
 			AqpANTLRNode mNode = (AqpANTLRNode) node;
 			AqpANTLRNode modifierNode = (AqpANTLRNode) mNode.getChild("MODIFIER");
 			AqpANTLRNode fieldNode = (AqpANTLRNode) mNode.getChild("FIELD");
-			AqpANTLRNode multiNode = (AqpANTLRNode) mNode.getChild("MULTIVALUE");
+			AqpANTLRNode multiNode = (AqpANTLRNode) mNode.getChild("MULTIATOM");
 			AqpANTLRNode tModifierNode = (AqpANTLRNode) mNode.getChild("TMODIFIER");
 			
 			String field = AqpUtils.getFirstChildInputString(fieldNode);

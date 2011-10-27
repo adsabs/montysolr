@@ -17,8 +17,13 @@ package org.apache.lucene.queryParser.aqp.processors;
  * limitations under the License.
  */
 
+import java.util.Iterator;
+
+import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
+import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.NoChildOptimizationQueryNodeProcessor;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.processors.RemoveDeletedQueryNodesProcessor;
 import org.apache.lucene.queryParser.standard.builders.StandardQueryTreeBuilder;
@@ -73,7 +78,8 @@ public class AqpQueryNodeProcessorPipeline extends
     
     add(new AqpVALUEProcessor());
     add(new AqpNUCLEUSProcessor());
-    add(new AqpMULTIATOMProcessor());
+    //add(new AqpMULTIATOMProcessor());
+    add(new AqpMULTITERMProcessor());
     add(new AqpATOMProcessor());
     add(new AqpCLAUSEProcessor());
     add(new AqpOPERATORProcessor());
@@ -98,5 +104,6 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new BoostQueryNodeProcessor());
     add(new MultiTermRewriteMethodProcessor());
   }
-
+  
+  
 }

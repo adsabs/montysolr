@@ -28,6 +28,7 @@ import org.apache.lucene.queryParser.aqp.builders.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.parser.AqpSyntaxParser;
+import org.apache.lucene.queryParser.aqp.processors.AqpDebuggingQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.aqp.processors.AqpQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryParserHelper;
@@ -127,7 +128,8 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryTreeBuilder
  */
 public class AqpQueryParser extends QueryParserHelper {
-
+	
+	
   /**
    * Constructs a {@link StandardQueryParser} object. The default grammar used
    * is "LuceneGrammar"
@@ -167,7 +169,18 @@ public class AqpQueryParser extends QueryParserHelper {
   public String toString(){
     return "<AqpQueryParser config=\"" + this.getQueryConfigHandler() + "\"/>";
   }
-
+  
+  /*
+   * De/activates the debugging print of the processed query tree
+   */
+  public void setDebug(boolean debug) {
+	  if (debug) {
+		  this.setQueryNodeProcessor(new AqpDebuggingQueryNodeProcessorPipeline(getQueryConfigHandler()));
+	  }
+	  else {
+		  this.setQueryNodeProcessor(new AqpQueryNodeProcessorPipeline(getQueryConfigHandler()));
+	  }
+  }
 
   /**
    * Overrides {@link QueryParserHelper#parse(String, String)} so it casts the

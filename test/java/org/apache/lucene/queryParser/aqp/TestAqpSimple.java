@@ -14,6 +14,8 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryParser.aqp.processors.AqpDebuggingQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
@@ -59,6 +61,7 @@ public class TestAqpSimple extends LuceneTestCase {
 		if (a == null)
 			a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
 		AqpQueryParser qp = new AqpQueryParser();
+		
 		qp.setAnalyzer(a);
 		return qp;
 	}
@@ -149,10 +152,10 @@ public class TestAqpSimple extends LuceneTestCase {
         "x:\"something else\"");
 		
 		assertQueryMatch(qp, "x:\"someth*\"", "field", 
-        "x:someth*");
+        					"x:someth*");
 		
 		assertQueryMatch(qp, "x:\"someth?ng\"", "field", 
-        "x:something");
+							"x:someth?ng");
 		
 		assertQueryMatch(qp, "A AND B C AND D", "field", 
 				             "+field:A +field:B +field:C +field:D");
@@ -176,67 +179,67 @@ public class TestAqpSimple extends LuceneTestCase {
                              "(+x:one -y:two) -field:three^0.5");
 		
 		assertQueryMatch(qp, "one NOT two -three~0.2", "field", 
-        "(+field:one -field:two) -field:three~0.2");
+        					"(+field:one -field:two) -field:three~0.2");
 		
 		assertQueryMatch(qp, "one NOT two NOT three~0.2", "field", 
-        "+field:one -field:two -field:three~0.2");
+        					"+field:one -field:two -field:three~0.2");
 
 		assertQueryMatch(qp, "one two^0.5 three~0.2", "field", 
-        "+field:one +field:two^0.5 +field:three~0.2");
+        					"+field:one +field:two^0.5 +field:three~0.2");
 
 		assertQueryMatch(qp, "one (two three)^0.8", "field", 
-        "+field:one +((+field:two +field:three)^0.8)");
+        					"+field:one +((+field:two +field:three)^0.8)");
 
 		assertQueryMatch(qp, "one (x:two three)^0.8", "field", 
-        "+field:one +((+x:two +field:three)^0.8)");
+        					"+field:one +((+x:two +field:three)^0.8)");
 		
 		assertQueryMatch(qp, "one:(two three)^0.8", "field", 
-        "+((one:two one:three)^0.8)");
+        					"+((one:two one:three)^0.8)");
 		
 		assertQueryMatch(qp, "-one:(two three)^0.8", "field", 
-        "-((one:two one:three)^0.8)");
+       						"-((one:two one:three)^0.8)");
 		
 		assertQueryMatch(qp, "+one:(two three)^0.8", "field", 
-        "+((one:two one:three)^0.8)");
+        					"+((one:two one:three)^0.8)");
 		
 		assertQueryMatch(qp, "[one TO five]", "field", 
-        "field:[one TO five]");
+        					"field:[one TO five]");
 		
 		assertQueryMatch(qp, "z:[one TO five]", "field", 
-        "z:[one TO five]");
+        					"z:[one TO five]");
 		
 		assertQueryMatch(qp, "{one TO five}", "field", 
-        "field:{one TO five}");
+        					"field:{one TO five}");
 		
 		assertQueryMatch(qp, "z:{one TO five}", "field", 
-        "z:{one TO five}");
+        					"z:{one TO five}");
 		
 		assertQueryMatch(qp, "z:{\"one\" TO \"five\"}", "field", 
-        "z:{one TO five}");
+        					"z:{one TO five}");
 		
 		assertQueryMatch(qp, "z:{one TO *}", "field", 
-        "z:{one TO five}");
+        					"z:{one TO five}");
 		
 		assertQueryMatch(qp, "this +(that)", "field", 
-        "+field:this +field:that");
+        					"+field:this +field:that");
 		
 		assertQueryMatch(qp, "(this) (that)", "field", 
-        "+field:this +field:that");
+							"+field:this +field:that");
 		
 		assertQueryMatch(qp, "this ((((+(that))))) ", "field", 
-        "+field:this +field:that");
+							"+field:this +field:that");
 		
 		assertQueryMatch(qp, "this (+(that)^0.7)", "field", 
-        "+field:this +field:that^0.7");
+							"+field:this +field:that^0.7");
 		
 		assertQueryMatch(qp, "this (+(that thus)^0.7)", "field", 
-        "+field:this +((+field:that +field:thus)^0.7)");
+							"+field:this +((+field:that +field:thus)^0.7)");
 		
 		assertQueryMatch(qp, "this (+(-(that thus))^0.7)", "field", 
-        "+field:this -((+field:that +field:thus)^0.7)");
+							"+field:this -((+field:that +field:thus)^0.7)");
 		
 		assertQueryMatch(qp, "this (+(-(+(-(that thus))^0.1))^0.3)", "field", 
-        "+field:this -((+field:that +field:thus)^0.1)");
+							"+field:this -((+field:that +field:thus)^0.1)");
 		
 		BooleanQuery.setMaxClauseCount(2);
 		try {

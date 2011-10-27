@@ -10,7 +10,7 @@ tokens {
   ATOM;
   NUCLEUS;
   MULTIATOM;
-  MULTIVALUE;
+  MULTITERM;
   MODIFIER;
   TMODIFIER;
   VALUE;
@@ -36,7 +36,7 @@ tokens {
 }
 
 mainQ : 
-	clauseDefault+ -> ^(OPERATOR["AND"] clauseDefault+) // Default operator
+	clauseDefault+ -> ^(OPERATOR["DEFOP"] clauseDefault+) // Default operator
 	;
    
   
@@ -59,8 +59,8 @@ clauseWeak
 primaryClause
 	: 
 	
-	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
-	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
+	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["DEFOP"] clauseDefault+) ) // Default operator
+	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["DEFOP"] clauseDefault+) ) // Default operator
 	| (LPAREN)=> LPAREN clauseDefault+ RPAREN -> clauseDefault+
 	| atom 
 	;
@@ -68,7 +68,7 @@ primaryClause
 
 atom   
 	: 
-	modifier? field multi_value term_modifier? -> ^(MULTIATOM ^(MODIFIER modifier?) ^(FIELD field) ^(MULTIVALUE multi_value) term_modifier?)
+	modifier? field multi_value term_modifier? -> ^(MULTITERM ^(MODIFIER modifier?) ^(FIELD field) ^(MULTIATOM multi_value) term_modifier?)
 	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(NUCLEUS ^(FIELD field?) ^(VALUE value)))
 	;
    
@@ -76,7 +76,6 @@ atom
 field	
 	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
-	| STAR COLON -> STAR
 	;
 
 value  
@@ -88,7 +87,6 @@ value
 	| truncated -> ^(QTRUNCATED truncated)
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| STAR -> ^(QANYTHING STAR)
 	)
 	term_modifier? -> term_modifier? $value
   	;
@@ -255,9 +253,9 @@ ESC_CHAR:  '\\' .;
 TO	:	'TO';
 
 /* We want to be case insensitive */
-NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
 AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
 OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
+NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
 NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 

@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-27 17:45:22
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-27 21:23:54
 
    package org.apache.lucene.queryParser.aqp.parser;
 
@@ -31,7 +31,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
     public static final int MINUS=20;
     public static final int MODIFIER=21;
     public static final int MULTIATOM=22;
-    public static final int MULTIVALUE=23;
+    public static final int MULTITERM=23;
     public static final int NEAR=24;
     public static final int NORMAL_CHAR=25;
     public static final int NOT=26;
@@ -105,8 +105,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:216:9: ( '(' )
-            // StandardLuceneGrammar.g:216:11: '('
+            // StandardLuceneGrammar.g:214:9: ( '(' )
+            // StandardLuceneGrammar.g:214:11: '('
             {
             match('('); 
 
@@ -126,8 +126,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:218:9: ( ')' )
-            // StandardLuceneGrammar.g:218:11: ')'
+            // StandardLuceneGrammar.g:216:9: ( ')' )
+            // StandardLuceneGrammar.g:216:11: ')'
             {
             match(')'); 
 
@@ -147,8 +147,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = LBRACK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:220:9: ( '[' )
-            // StandardLuceneGrammar.g:220:11: '['
+            // StandardLuceneGrammar.g:218:9: ( '[' )
+            // StandardLuceneGrammar.g:218:11: '['
             {
             match('['); 
 
@@ -168,8 +168,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = RBRACK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:222:9: ( ']' )
-            // StandardLuceneGrammar.g:222:11: ']'
+            // StandardLuceneGrammar.g:220:9: ( ']' )
+            // StandardLuceneGrammar.g:220:11: ']'
             {
             match(']'); 
 
@@ -189,8 +189,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:224:9: ( ':' )
-            // StandardLuceneGrammar.g:224:11: ':'
+            // StandardLuceneGrammar.g:222:9: ( ':' )
+            // StandardLuceneGrammar.g:222:11: ':'
             {
             match(':'); 
 
@@ -210,8 +210,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:226:7: ( '+' )
-            // StandardLuceneGrammar.g:226:9: '+'
+            // StandardLuceneGrammar.g:224:7: ( '+' )
+            // StandardLuceneGrammar.g:224:9: '+'
             {
             match('+'); 
 
@@ -231,8 +231,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = MINUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:228:7: ( '-' )
-            // StandardLuceneGrammar.g:228:9: '-'
+            // StandardLuceneGrammar.g:226:7: ( '-' )
+            // StandardLuceneGrammar.g:226:9: '-'
             {
             match('-'); 
 
@@ -252,8 +252,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = STAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:230:7: ( '*' )
-            // StandardLuceneGrammar.g:230:9: '*'
+            // StandardLuceneGrammar.g:228:7: ( '*' )
+            // StandardLuceneGrammar.g:228:9: '*'
             {
             match('*'); 
 
@@ -273,8 +273,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = QMARK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:232:8: ( '?' )
-            // StandardLuceneGrammar.g:232:10: '?'
+            // StandardLuceneGrammar.g:230:8: ( '?' )
+            // StandardLuceneGrammar.g:230:10: '?'
             {
             match('?'); 
 
@@ -292,8 +292,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "VBAR"
     public final void mVBAR() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:234:16: ( '|' )
-            // StandardLuceneGrammar.g:234:18: '|'
+            // StandardLuceneGrammar.g:232:16: ( '|' )
+            // StandardLuceneGrammar.g:232:18: '|'
             {
             match('|'); 
 
@@ -310,8 +310,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "AMPER"
     public final void mAMPER() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:236:16: ( '&' )
-            // StandardLuceneGrammar.g:236:18: '&'
+            // StandardLuceneGrammar.g:234:16: ( '&' )
+            // StandardLuceneGrammar.g:234:18: '&'
             {
             match('&'); 
 
@@ -330,8 +330,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = LCURLY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:238:9: ( '{' )
-            // StandardLuceneGrammar.g:238:11: '{'
+            // StandardLuceneGrammar.g:236:9: ( '{' )
+            // StandardLuceneGrammar.g:236:11: '{'
             {
             match('{'); 
 
@@ -351,8 +351,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = RCURLY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:240:9: ( '}' )
-            // StandardLuceneGrammar.g:240:11: '}'
+            // StandardLuceneGrammar.g:238:9: ( '}' )
+            // StandardLuceneGrammar.g:238:11: '}'
             {
             match('}'); 
 
@@ -372,8 +372,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = CARAT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:242:7: ( '^' )
-            // StandardLuceneGrammar.g:242:9: '^'
+            // StandardLuceneGrammar.g:240:7: ( '^' )
+            // StandardLuceneGrammar.g:240:9: '^'
             {
             match('^'); 
 
@@ -393,8 +393,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:244:7: ( '~' )
-            // StandardLuceneGrammar.g:244:9: '~'
+            // StandardLuceneGrammar.g:242:7: ( '~' )
+            // StandardLuceneGrammar.g:242:9: '~'
             {
             match('~'); 
 
@@ -414,8 +414,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = DQUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:247:2: ( '\\\"' )
-            // StandardLuceneGrammar.g:247:4: '\\\"'
+            // StandardLuceneGrammar.g:245:2: ( '\\\"' )
+            // StandardLuceneGrammar.g:245:4: '\\\"'
             {
             match('\"'); 
 
@@ -435,8 +435,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = SQUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:250:2: ( '\\'' )
-            // StandardLuceneGrammar.g:250:4: '\\''
+            // StandardLuceneGrammar.g:248:2: ( '\\'' )
+            // StandardLuceneGrammar.g:248:4: '\\''
             {
             match('\''); 
 
@@ -456,8 +456,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = ESC_CHAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:253:9: ( '\\\\' . )
-            // StandardLuceneGrammar.g:253:12: '\\\\' .
+            // StandardLuceneGrammar.g:251:9: ( '\\\\' . )
+            // StandardLuceneGrammar.g:251:12: '\\\\' .
             {
             match('\\'); 
 
@@ -479,8 +479,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = TO;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:255:4: ( 'TO' )
-            // StandardLuceneGrammar.g:255:6: 'TO'
+            // StandardLuceneGrammar.g:253:4: ( 'TO' )
+            // StandardLuceneGrammar.g:253:6: 'TO'
             {
             match("TO"); 
 
@@ -497,6 +497,230 @@ public class StandardLuceneGrammarLexer extends Lexer {
     }
     // $ANTLR end "TO"
 
+    // $ANTLR start "AND"
+    public final void mAND() throws RecognitionException {
+        try {
+            int _type = AND;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // StandardLuceneGrammar.g:256:7: ( ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) ) )
+            // StandardLuceneGrammar.g:256:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) )
+            {
+            // StandardLuceneGrammar.g:256:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) )
+            int alt2=2;
+            int LA2_0 = input.LA(1);
+
+            if ( (LA2_0=='A'||LA2_0=='a') ) {
+                alt2=1;
+            }
+            else if ( (LA2_0=='&') ) {
+                alt2=2;
+            }
+            else {
+                NoViableAltException nvae =
+                    new NoViableAltException("", 2, 0, input);
+
+                throw nvae;
+
+            }
+            switch (alt2) {
+                case 1 :
+                    // StandardLuceneGrammar.g:256:10: ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' )
+                    {
+                    if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
+                        input.consume();
+                    }
+                    else {
+                        MismatchedSetException mse = new MismatchedSetException(null,input);
+                        recover(mse);
+                        throw mse;
+                    }
+
+
+                    if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
+                        input.consume();
+                    }
+                    else {
+                        MismatchedSetException mse = new MismatchedSetException(null,input);
+                        recover(mse);
+                        throw mse;
+                    }
+
+
+                    if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
+                        input.consume();
+                    }
+                    else {
+                        MismatchedSetException mse = new MismatchedSetException(null,input);
+                        recover(mse);
+                        throw mse;
+                    }
+
+
+                    }
+                    break;
+                case 2 :
+                    // StandardLuceneGrammar.g:256:48: ( AMPER ( AMPER )? )
+                    {
+                    // StandardLuceneGrammar.g:256:48: ( AMPER ( AMPER )? )
+                    // StandardLuceneGrammar.g:256:49: AMPER ( AMPER )?
+                    {
+                    mAMPER(); 
+
+
+                    // StandardLuceneGrammar.g:256:55: ( AMPER )?
+                    int alt1=2;
+                    int LA1_0 = input.LA(1);
+
+                    if ( (LA1_0=='&') ) {
+                        alt1=1;
+                    }
+                    switch (alt1) {
+                        case 1 :
+                            // StandardLuceneGrammar.g:
+                            {
+                            if ( input.LA(1)=='&' ) {
+                                input.consume();
+                            }
+                            else {
+                                MismatchedSetException mse = new MismatchedSetException(null,input);
+                                recover(mse);
+                                throw mse;
+                            }
+
+
+                            }
+                            break;
+
+                    }
+
+
+                    }
+
+
+                    }
+                    break;
+
+            }
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "AND"
+
+    // $ANTLR start "OR"
+    public final void mOR() throws RecognitionException {
+        try {
+            int _type = OR;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // StandardLuceneGrammar.g:257:5: ( ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) ) )
+            // StandardLuceneGrammar.g:257:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) )
+            {
+            // StandardLuceneGrammar.g:257:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) )
+            int alt4=2;
+            int LA4_0 = input.LA(1);
+
+            if ( (LA4_0=='O'||LA4_0=='o') ) {
+                alt4=1;
+            }
+            else if ( (LA4_0=='|') ) {
+                alt4=2;
+            }
+            else {
+                NoViableAltException nvae =
+                    new NoViableAltException("", 4, 0, input);
+
+                throw nvae;
+
+            }
+            switch (alt4) {
+                case 1 :
+                    // StandardLuceneGrammar.g:257:8: ( 'o' | 'O' ) ( 'r' | 'R' )
+                    {
+                    if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
+                        input.consume();
+                    }
+                    else {
+                        MismatchedSetException mse = new MismatchedSetException(null,input);
+                        recover(mse);
+                        throw mse;
+                    }
+
+
+                    if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
+                        input.consume();
+                    }
+                    else {
+                        MismatchedSetException mse = new MismatchedSetException(null,input);
+                        recover(mse);
+                        throw mse;
+                    }
+
+
+                    }
+                    break;
+                case 2 :
+                    // StandardLuceneGrammar.g:257:34: ( VBAR ( VBAR )? )
+                    {
+                    // StandardLuceneGrammar.g:257:34: ( VBAR ( VBAR )? )
+                    // StandardLuceneGrammar.g:257:35: VBAR ( VBAR )?
+                    {
+                    mVBAR(); 
+
+
+                    // StandardLuceneGrammar.g:257:40: ( VBAR )?
+                    int alt3=2;
+                    int LA3_0 = input.LA(1);
+
+                    if ( (LA3_0=='|') ) {
+                        alt3=1;
+                    }
+                    switch (alt3) {
+                        case 1 :
+                            // StandardLuceneGrammar.g:
+                            {
+                            if ( input.LA(1)=='|' ) {
+                                input.consume();
+                            }
+                            else {
+                                MismatchedSetException mse = new MismatchedSetException(null,input);
+                                recover(mse);
+                                throw mse;
+                            }
+
+
+                            }
+                            break;
+
+                    }
+
+
+                    }
+
+
+                    }
+                    break;
+
+            }
+
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "OR"
+
     // $ANTLR start "NOT"
     public final void mNOT() throws RecognitionException {
         try {
@@ -506,23 +730,23 @@ public class StandardLuceneGrammarLexer extends Lexer {
             // StandardLuceneGrammar.g:258:9: ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) | '!' )
             {
             // StandardLuceneGrammar.g:258:9: ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) | '!' )
-            int alt1=2;
-            int LA1_0 = input.LA(1);
+            int alt5=2;
+            int LA5_0 = input.LA(1);
 
-            if ( (LA1_0=='N'||LA1_0=='n') ) {
-                alt1=1;
+            if ( (LA5_0=='N'||LA5_0=='n') ) {
+                alt5=1;
             }
-            else if ( (LA1_0=='!') ) {
-                alt1=2;
+            else if ( (LA5_0=='!') ) {
+                alt5=2;
             }
             else {
                 NoViableAltException nvae =
-                    new NoViableAltException("", 1, 0, input);
+                    new NoViableAltException("", 5, 0, input);
 
                 throw nvae;
 
             }
-            switch (alt1) {
+            switch (alt5) {
                 case 1 :
                     // StandardLuceneGrammar.g:258:10: ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' )
                     {
@@ -580,239 +804,15 @@ public class StandardLuceneGrammarLexer extends Lexer {
     }
     // $ANTLR end "NOT"
 
-    // $ANTLR start "AND"
-    public final void mAND() throws RecognitionException {
-        try {
-            int _type = AND;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:259:7: ( ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) ) )
-            // StandardLuceneGrammar.g:259:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) )
-            {
-            // StandardLuceneGrammar.g:259:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) )
-            int alt3=2;
-            int LA3_0 = input.LA(1);
-
-            if ( (LA3_0=='A'||LA3_0=='a') ) {
-                alt3=1;
-            }
-            else if ( (LA3_0=='&') ) {
-                alt3=2;
-            }
-            else {
-                NoViableAltException nvae =
-                    new NoViableAltException("", 3, 0, input);
-
-                throw nvae;
-
-            }
-            switch (alt3) {
-                case 1 :
-                    // StandardLuceneGrammar.g:259:10: ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' )
-                    {
-                    if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
-                        input.consume();
-                    }
-                    else {
-                        MismatchedSetException mse = new MismatchedSetException(null,input);
-                        recover(mse);
-                        throw mse;
-                    }
-
-
-                    if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
-                        input.consume();
-                    }
-                    else {
-                        MismatchedSetException mse = new MismatchedSetException(null,input);
-                        recover(mse);
-                        throw mse;
-                    }
-
-
-                    if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
-                        input.consume();
-                    }
-                    else {
-                        MismatchedSetException mse = new MismatchedSetException(null,input);
-                        recover(mse);
-                        throw mse;
-                    }
-
-
-                    }
-                    break;
-                case 2 :
-                    // StandardLuceneGrammar.g:259:48: ( AMPER ( AMPER )? )
-                    {
-                    // StandardLuceneGrammar.g:259:48: ( AMPER ( AMPER )? )
-                    // StandardLuceneGrammar.g:259:49: AMPER ( AMPER )?
-                    {
-                    mAMPER(); 
-
-
-                    // StandardLuceneGrammar.g:259:55: ( AMPER )?
-                    int alt2=2;
-                    int LA2_0 = input.LA(1);
-
-                    if ( (LA2_0=='&') ) {
-                        alt2=1;
-                    }
-                    switch (alt2) {
-                        case 1 :
-                            // StandardLuceneGrammar.g:
-                            {
-                            if ( input.LA(1)=='&' ) {
-                                input.consume();
-                            }
-                            else {
-                                MismatchedSetException mse = new MismatchedSetException(null,input);
-                                recover(mse);
-                                throw mse;
-                            }
-
-
-                            }
-                            break;
-
-                    }
-
-
-                    }
-
-
-                    }
-                    break;
-
-            }
-
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        	// do for sure before leaving
-        }
-    }
-    // $ANTLR end "AND"
-
-    // $ANTLR start "OR"
-    public final void mOR() throws RecognitionException {
-        try {
-            int _type = OR;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:260:5: ( ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) ) )
-            // StandardLuceneGrammar.g:260:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) )
-            {
-            // StandardLuceneGrammar.g:260:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) )
-            int alt5=2;
-            int LA5_0 = input.LA(1);
-
-            if ( (LA5_0=='O'||LA5_0=='o') ) {
-                alt5=1;
-            }
-            else if ( (LA5_0=='|') ) {
-                alt5=2;
-            }
-            else {
-                NoViableAltException nvae =
-                    new NoViableAltException("", 5, 0, input);
-
-                throw nvae;
-
-            }
-            switch (alt5) {
-                case 1 :
-                    // StandardLuceneGrammar.g:260:8: ( 'o' | 'O' ) ( 'r' | 'R' )
-                    {
-                    if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
-                        input.consume();
-                    }
-                    else {
-                        MismatchedSetException mse = new MismatchedSetException(null,input);
-                        recover(mse);
-                        throw mse;
-                    }
-
-
-                    if ( input.LA(1)=='R'||input.LA(1)=='r' ) {
-                        input.consume();
-                    }
-                    else {
-                        MismatchedSetException mse = new MismatchedSetException(null,input);
-                        recover(mse);
-                        throw mse;
-                    }
-
-
-                    }
-                    break;
-                case 2 :
-                    // StandardLuceneGrammar.g:260:34: ( VBAR ( VBAR )? )
-                    {
-                    // StandardLuceneGrammar.g:260:34: ( VBAR ( VBAR )? )
-                    // StandardLuceneGrammar.g:260:35: VBAR ( VBAR )?
-                    {
-                    mVBAR(); 
-
-
-                    // StandardLuceneGrammar.g:260:40: ( VBAR )?
-                    int alt4=2;
-                    int LA4_0 = input.LA(1);
-
-                    if ( (LA4_0=='|') ) {
-                        alt4=1;
-                    }
-                    switch (alt4) {
-                        case 1 :
-                            // StandardLuceneGrammar.g:
-                            {
-                            if ( input.LA(1)=='|' ) {
-                                input.consume();
-                            }
-                            else {
-                                MismatchedSetException mse = new MismatchedSetException(null,input);
-                                recover(mse);
-                                throw mse;
-                            }
-
-
-                            }
-                            break;
-
-                    }
-
-
-                    }
-
-
-                    }
-                    break;
-
-            }
-
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        	// do for sure before leaving
-        }
-    }
-    // $ANTLR end "OR"
-
     // $ANTLR start "NEAR"
     public final void mNEAR() throws RecognitionException {
         try {
             int _type = NEAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:261:7: ( ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' ) )
-            // StandardLuceneGrammar.g:261:9: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' )
+            // StandardLuceneGrammar.g:259:7: ( ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' ) )
+            // StandardLuceneGrammar.g:259:9: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' )
             {
-            // StandardLuceneGrammar.g:261:9: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' )
+            // StandardLuceneGrammar.g:259:9: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' )
             int alt6=2;
             int LA6_0 = input.LA(1);
 
@@ -838,7 +838,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt6) {
                 case 1 :
-                    // StandardLuceneGrammar.g:261:10: ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' )
+                    // StandardLuceneGrammar.g:259:10: ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' )
                     {
                     if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                         input.consume();
@@ -883,7 +883,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:261:60: 'n'
+                    // StandardLuceneGrammar.g:259:60: 'n'
                     {
                     match('n'); 
 
@@ -909,8 +909,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:264:5: ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
-            // StandardLuceneGrammar.g:264:9: ( ' ' | '\\t' | '\\r' | '\\n' )
+            // StandardLuceneGrammar.g:262:5: ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
+            // StandardLuceneGrammar.g:262:9: ( ' ' | '\\t' | '\\r' | '\\n' )
             {
             if ( (input.LA(1) >= '\t' && input.LA(1) <= '\n')||input.LA(1)=='\r'||input.LA(1)==' ' ) {
                 input.consume();
@@ -938,7 +938,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "INT"
     public final void mINT() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:273:13: ( '0' .. '9' )
+            // StandardLuceneGrammar.g:271:13: ( '0' .. '9' )
             // StandardLuceneGrammar.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
@@ -964,8 +964,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "NORMAL_CHAR"
     public final void mNORMAL_CHAR() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:275:23: (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\\\' | '\\'' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '*' | '|' | '&' | '?' | '\\\\\\\"' | '/' ) )
-            // StandardLuceneGrammar.g:275:25: ~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\\\' | '\\'' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '*' | '|' | '&' | '?' | '\\\\\\\"' | '/' )
+            // StandardLuceneGrammar.g:273:23: (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\\\' | '\\'' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '*' | '|' | '&' | '?' | '\\\\\\\"' | '/' ) )
+            // StandardLuceneGrammar.g:273:25: ~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\\\' | '\\'' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '*' | '|' | '&' | '?' | '\\\\\\\"' | '/' )
             {
             if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\b')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '\u001F')||(input.LA(1) >= '#' && input.LA(1) <= '%')||input.LA(1)==','||input.LA(1)=='.'||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= ';' && input.LA(1) <= '>')||(input.LA(1) >= '@' && input.LA(1) <= 'Z')||(input.LA(1) >= '_' && input.LA(1) <= 'z')||(input.LA(1) >= '\u007F' && input.LA(1) <= '\uFFFF') ) {
                 input.consume();
@@ -992,10 +992,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = NUMBER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:284:2: ( ( INT )+ ( '.' ( INT )+ )? )
-            // StandardLuceneGrammar.g:285:2: ( INT )+ ( '.' ( INT )+ )?
+            // StandardLuceneGrammar.g:282:2: ( ( INT )+ ( '.' ( INT )+ )? )
+            // StandardLuceneGrammar.g:283:2: ( INT )+ ( '.' ( INT )+ )?
             {
-            // StandardLuceneGrammar.g:285:2: ( INT )+
+            // StandardLuceneGrammar.g:283:2: ( INT )+
             int cnt7=0;
             loop7:
             do {
@@ -1034,7 +1034,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             } while (true);
 
 
-            // StandardLuceneGrammar.g:285:7: ( '.' ( INT )+ )?
+            // StandardLuceneGrammar.g:283:7: ( '.' ( INT )+ )?
             int alt9=2;
             int LA9_0 = input.LA(1);
 
@@ -1043,11 +1043,11 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt9) {
                 case 1 :
-                    // StandardLuceneGrammar.g:285:8: '.' ( INT )+
+                    // StandardLuceneGrammar.g:283:8: '.' ( INT )+
                     {
                     match('.'); 
 
-                    // StandardLuceneGrammar.g:285:12: ( INT )+
+                    // StandardLuceneGrammar.g:283:12: ( INT )+
                     int cnt8=0;
                     loop8:
                     do {
@@ -1108,10 +1108,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = TERM_NORMAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:290:2: ( ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )* )
-            // StandardLuceneGrammar.g:291:2: ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )*
+            // StandardLuceneGrammar.g:288:2: ( ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )* )
+            // StandardLuceneGrammar.g:289:2: ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )*
             {
-            // StandardLuceneGrammar.g:291:2: ( NORMAL_CHAR | ESC_CHAR )
+            // StandardLuceneGrammar.g:289:2: ( NORMAL_CHAR | ESC_CHAR )
             int alt10=2;
             int LA10_0 = input.LA(1);
 
@@ -1130,7 +1130,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt10) {
                 case 1 :
-                    // StandardLuceneGrammar.g:291:4: NORMAL_CHAR
+                    // StandardLuceneGrammar.g:289:4: NORMAL_CHAR
                     {
                     mNORMAL_CHAR(); 
 
@@ -1138,7 +1138,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:291:18: ESC_CHAR
+                    // StandardLuceneGrammar.g:289:18: ESC_CHAR
                     {
                     mESC_CHAR(); 
 
@@ -1149,7 +1149,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
 
 
-            // StandardLuceneGrammar.g:291:28: ( NORMAL_CHAR | ESC_CHAR )*
+            // StandardLuceneGrammar.g:289:28: ( NORMAL_CHAR | ESC_CHAR )*
             loop11:
             do {
                 int alt11=3;
@@ -1165,7 +1165,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                 switch (alt11) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:291:30: NORMAL_CHAR
+            	    // StandardLuceneGrammar.g:289:30: NORMAL_CHAR
             	    {
             	    mNORMAL_CHAR(); 
 
@@ -1173,7 +1173,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // StandardLuceneGrammar.g:291:44: ESC_CHAR
+            	    // StandardLuceneGrammar.g:289:44: ESC_CHAR
             	    {
             	    mESC_CHAR(); 
 
@@ -1203,10 +1203,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = TERM_TRUNCATED;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:295:15: ( ( NORMAL_CHAR | ( STAR | QMARK ) )+ )
-            // StandardLuceneGrammar.g:296:2: ( NORMAL_CHAR | ( STAR | QMARK ) )+
+            // StandardLuceneGrammar.g:293:15: ( ( NORMAL_CHAR | ( STAR | QMARK ) )+ )
+            // StandardLuceneGrammar.g:294:2: ( NORMAL_CHAR | ( STAR | QMARK ) )+
             {
-            // StandardLuceneGrammar.g:296:2: ( NORMAL_CHAR | ( STAR | QMARK ) )+
+            // StandardLuceneGrammar.g:294:2: ( NORMAL_CHAR | ( STAR | QMARK ) )+
             int cnt12=0;
             loop12:
             do {
@@ -1223,7 +1223,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                 switch (alt12) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:296:3: NORMAL_CHAR
+            	    // StandardLuceneGrammar.g:294:3: NORMAL_CHAR
             	    {
             	    mNORMAL_CHAR(); 
 
@@ -1231,7 +1231,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // StandardLuceneGrammar.g:296:17: ( STAR | QMARK )
+            	    // StandardLuceneGrammar.g:294:17: ( STAR | QMARK )
             	    {
             	    if ( input.LA(1)=='*'||input.LA(1)=='?' ) {
             	        input.consume();
@@ -1272,13 +1272,13 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = PHRASE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:302:2: ( DQUOTE (~ ( '\\\"' | '?' | '*' ) )+ DQUOTE )
-            // StandardLuceneGrammar.g:303:2: DQUOTE (~ ( '\\\"' | '?' | '*' ) )+ DQUOTE
+            // StandardLuceneGrammar.g:300:2: ( DQUOTE (~ ( '\\\"' | '?' | '*' ) )+ DQUOTE )
+            // StandardLuceneGrammar.g:301:2: DQUOTE (~ ( '\\\"' | '?' | '*' ) )+ DQUOTE
             {
             mDQUOTE(); 
 
 
-            // StandardLuceneGrammar.g:303:9: (~ ( '\\\"' | '?' | '*' ) )+
+            // StandardLuceneGrammar.g:301:9: (~ ( '\\\"' | '?' | '*' ) )+
             int cnt13=0;
             loop13:
             do {
@@ -1336,13 +1336,13 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = PHRASE_ANYTHING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:306:17: ( DQUOTE (~ ( '\\\"' ) )+ DQUOTE )
-            // StandardLuceneGrammar.g:307:2: DQUOTE (~ ( '\\\"' ) )+ DQUOTE
+            // StandardLuceneGrammar.g:304:17: ( DQUOTE (~ ( '\\\"' ) )+ DQUOTE )
+            // StandardLuceneGrammar.g:305:2: DQUOTE (~ ( '\\\"' ) )+ DQUOTE
             {
             mDQUOTE(); 
 
 
-            // StandardLuceneGrammar.g:307:9: (~ ( '\\\"' ) )+
+            // StandardLuceneGrammar.g:305:9: (~ ( '\\\"' ) )+
             int cnt14=0;
             loop14:
             do {
@@ -1396,7 +1396,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR end "PHRASE_ANYTHING"
 
     public void mTokens() throws RecognitionException {
-        // StandardLuceneGrammar.g:1:8: ( T__55 | LPAREN | RPAREN | LBRACK | RBRACK | COLON | PLUS | MINUS | STAR | QMARK | LCURLY | RCURLY | CARAT | TILDE | DQUOTE | SQUOTE | ESC_CHAR | TO | NOT | AND | OR | NEAR | WS | NUMBER | TERM_NORMAL | TERM_TRUNCATED | PHRASE | PHRASE_ANYTHING )
+        // StandardLuceneGrammar.g:1:8: ( T__55 | LPAREN | RPAREN | LBRACK | RBRACK | COLON | PLUS | MINUS | STAR | QMARK | LCURLY | RCURLY | CARAT | TILDE | DQUOTE | SQUOTE | ESC_CHAR | TO | AND | OR | NOT | NEAR | WS | NUMBER | TERM_NORMAL | TERM_TRUNCATED | PHRASE | PHRASE_ANYTHING )
         int alt15=28;
         alt15 = dfa15.predict(input);
         switch (alt15) {
@@ -1545,25 +1545,25 @@ public class StandardLuceneGrammarLexer extends Lexer {
                 }
                 break;
             case 19 :
-                // StandardLuceneGrammar.g:1:124: NOT
-                {
-                mNOT(); 
-
-
-                }
-                break;
-            case 20 :
-                // StandardLuceneGrammar.g:1:128: AND
+                // StandardLuceneGrammar.g:1:124: AND
                 {
                 mAND(); 
 
 
                 }
                 break;
-            case 21 :
-                // StandardLuceneGrammar.g:1:132: OR
+            case 20 :
+                // StandardLuceneGrammar.g:1:128: OR
                 {
                 mOR(); 
+
+
+                }
+                break;
+            case 21 :
+                // StandardLuceneGrammar.g:1:131: NOT
+                {
+                mNOT(); 
 
 
                 }
@@ -1632,36 +1632,36 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
     protected DFA15 dfa15 = new DFA15(this);
     static final String DFA15_eotS =
-        "\11\uffff\1\35\1\37\4\uffff\1\40\2\uffff\1\45\1\51\1\uffff\1\45"+
-        "\1\uffff\1\45\1\uffff\1\45\1\uffff\1\55\1\45\6\uffff\1\60\1\61\1"+
-        "\uffff\3\45\1\uffff\1\45\1\30\1\45\1\uffff\1\55\3\uffff\1\24\1\45"+
-        "\1\26\1\55\1\uffff\1\51";
+        "\11\uffff\1\35\1\37\4\uffff\1\40\2\uffff\2\45\1\uffff\1\45\1\uffff"+
+        "\1\53\1\uffff\1\45\1\uffff\1\55\1\45\6\uffff\1\60\1\61\1\uffff\2"+
+        "\45\1\26\2\45\1\uffff\1\45\1\uffff\1\55\3\uffff\1\24\1\30\1\45\1"+
+        "\55\1\uffff\1\53";
     static final String DFA15_eofS =
         "\70\uffff";
     static final String DFA15_minS =
         "\1\0\10\uffff\2\0\4\uffff\1\0\1\uffff\3\0\1\uffff\1\0\1\uffff\1"+
-        "\0\1\uffff\1\0\1\uffff\2\0\4\uffff\1\0\1\uffff\2\0\1\uffff\3\0\1"+
-        "\uffff\3\0\1\uffff\1\0\3\uffff\4\0\1\uffff\1\0";
+        "\0\1\uffff\1\0\1\uffff\2\0\4\uffff\1\0\1\uffff\2\0\1\uffff\5\0\1"+
+        "\uffff\1\0\1\uffff\1\0\3\uffff\4\0\1\uffff\1\0";
     static final String DFA15_maxS =
         "\1\uffff\10\uffff\2\uffff\4\uffff\1\uffff\1\uffff\3\uffff\1\uffff"+
         "\1\uffff\1\uffff\1\uffff\1\uffff\1\uffff\1\uffff\2\uffff\4\uffff"+
-        "\1\uffff\1\uffff\2\uffff\1\uffff\3\uffff\1\uffff\3\uffff\1\uffff"+
+        "\1\uffff\1\uffff\2\uffff\1\uffff\5\uffff\1\uffff\1\uffff\1\uffff"+
         "\1\uffff\3\uffff\4\uffff\1\uffff\1\uffff";
     static final String DFA15_acceptS =
         "\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\1\10\2\uffff\1\13\1\14\1\15"+
         "\1\16\1\uffff\1\20\3\uffff\1\23\1\uffff\1\24\1\uffff\1\25\1\uffff"+
-        "\1\27\2\uffff\1\11\1\32\1\12\1\17\1\uffff\1\34\2\uffff\1\31\3\uffff"+
-        "\1\26\3\uffff\1\30\1\uffff\1\33\1\21\1\22\4\uffff\1\33\1\uffff";
+        "\1\27\2\uffff\1\11\1\32\1\12\1\17\1\uffff\1\34\2\uffff\1\31\5\uffff"+
+        "\1\26\1\uffff\1\30\1\uffff\1\33\1\21\1\22\4\uffff\1\33\1\uffff";
     static final String DFA15_specialS =
-        "\1\31\10\uffff\1\7\1\12\4\uffff\1\26\1\uffff\1\2\1\11\1\0\1\uffff"+
-        "\1\15\1\uffff\1\24\1\uffff\1\32\1\uffff\1\16\1\1\4\uffff\1\14\1"+
-        "\uffff\1\22\1\23\1\uffff\1\3\1\4\1\20\1\uffff\1\30\1\17\1\27\1\uffff"+
-        "\1\13\3\uffff\1\6\1\21\1\10\1\25\1\uffff\1\5}>";
+        "\1\17\10\uffff\1\7\1\13\4\uffff\1\30\1\uffff\1\2\1\11\1\16\1\uffff"+
+        "\1\21\1\uffff\1\10\1\uffff\1\6\1\uffff\1\20\1\1\4\uffff\1\15\1\uffff"+
+        "\1\25\1\26\1\uffff\1\3\1\4\1\12\1\22\1\23\1\uffff\1\31\1\uffff\1"+
+        "\14\3\uffff\1\0\1\32\1\24\1\27\1\uffff\1\5}>";
     static final String[] DFA15_transitionS = {
-            "\11\34\2\32\2\34\1\32\22\34\1\32\1\24\1\17\3\34\1\26\1\20\1"+
+            "\11\34\2\32\2\34\1\32\22\34\1\32\1\30\1\17\3\34\1\24\1\20\1"+
             "\2\1\3\1\11\1\7\1\34\1\10\1\34\1\1\12\33\1\6\4\34\1\12\1\34"+
-            "\1\25\14\34\1\31\1\27\4\34\1\22\6\34\1\4\1\21\1\5\1\15\2\34"+
-            "\1\25\14\34\1\23\1\27\13\34\1\13\1\30\1\14\1\16\uff81\34",
+            "\1\23\14\34\1\31\1\25\4\34\1\22\6\34\1\4\1\21\1\5\1\15\2\34"+
+            "\1\23\14\34\1\27\1\25\13\34\1\13\1\26\1\14\1\16\uff81\34",
             "",
             "",
             "",
@@ -1687,21 +1687,21 @@ public class StandardLuceneGrammarLexer extends Lexer {
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\17"+
             "\46\1\44\13\46\4\uffff\34\46\4\uffff\uff81\46",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
-            "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\5"+
-            "\46\1\50\11\46\1\47\13\46\1\uffff\1\45\2\uffff\6\46\1\50\11"+
-            "\46\1\47\13\46\4\uffff\uff81\46",
-            "",
-            "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\16"+
-            "\46\1\52\14\46\4\uffff\17\46\1\52\14\46\4\uffff\uff81\46",
+            "\46\1\47\14\46\4\uffff\17\46\1\47\14\46\4\uffff\uff81\46",
             "",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\22"+
-            "\46\1\53\10\46\4\uffff\23\46\1\53\10\46\4\uffff\uff81\46",
+            "\46\1\50\10\46\4\uffff\23\46\1\50\10\46\4\uffff\uff81\46",
             "",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\5"+
-            "\46\1\50\11\46\1\47\13\46\4\uffff\6\46\1\50\11\46\1\47\13\46"+
+            "\46\1\52\11\46\1\51\13\46\1\uffff\1\45\2\uffff\6\46\1\52\11"+
+            "\46\1\51\13\46\4\uffff\uff81\46",
+            "",
+            "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
+            "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\5"+
+            "\46\1\52\11\46\1\51\13\46\4\uffff\6\46\1\52\11\46\1\51\13\46"+
             "\4\uffff\uff81\46",
             "",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
@@ -1727,18 +1727,18 @@ public class StandardLuceneGrammarLexer extends Lexer {
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\33"+
             "\46\4\uffff\34\46\4\uffff\uff81\46",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
-            "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\24"+
-            "\46\1\62\6\46\4\uffff\25\46\1\62\6\46\4\uffff\uff81\46",
-            "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
-            "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\1"+
-            "\46\1\63\31\46\4\uffff\2\46\1\63\31\46\4\uffff\uff81\46",
-            "",
-            "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\4"+
-            "\46\1\64\26\46\4\uffff\5\46\1\64\26\46\4\uffff\uff81\46",
+            "\46\1\62\26\46\4\uffff\5\46\1\62\26\46\4\uffff\uff81\46",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\33"+
             "\46\1\uffff\1\45\2\uffff\34\46\4\uffff\uff81\46",
+            "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
+            "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\24"+
+            "\46\1\63\6\46\4\uffff\25\46\1\63\6\46\4\uffff\uff81\46",
+            "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
+            "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\1"+
+            "\46\1\64\31\46\4\uffff\2\46\1\64\31\46\4\uffff\uff81\46",
+            "",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\65\1\uffff\4\46\1\36\33"+
             "\46\4\uffff\34\46\4\uffff\uff81\46",
@@ -1753,11 +1753,11 @@ public class StandardLuceneGrammarLexer extends Lexer {
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\33"+
             "\46\1\uffff\1\45\2\uffff\34\46\4\uffff\uff81\46",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
-            "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\22"+
-            "\46\1\67\10\46\4\uffff\23\46\1\67\10\46\4\uffff\uff81\46",
-            "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\33"+
             "\46\1\uffff\1\45\2\uffff\34\46\4\uffff\uff81\46",
+            "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
+            "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\46\1\uffff\4\46\1\36\22"+
+            "\46\1\67\10\46\4\uffff\23\46\1\67\10\46\4\uffff\uff81\46",
             "\11\46\2\uffff\2\46\1\uffff\22\46\3\uffff\3\46\4\uffff\1\36"+
             "\1\uffff\1\46\1\uffff\1\46\1\uffff\12\65\1\uffff\4\46\1\36\33"+
             "\46\1\uffff\1\45\2\uffff\34\46\4\uffff\uff81\46",
@@ -1797,27 +1797,23 @@ public class StandardLuceneGrammarLexer extends Lexer {
             this.transition = DFA15_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( T__55 | LPAREN | RPAREN | LBRACK | RBRACK | COLON | PLUS | MINUS | STAR | QMARK | LCURLY | RCURLY | CARAT | TILDE | DQUOTE | SQUOTE | ESC_CHAR | TO | NOT | AND | OR | NEAR | WS | NUMBER | TERM_NORMAL | TERM_TRUNCATED | PHRASE | PHRASE_ANYTHING );";
+            return "1:1: Tokens : ( T__55 | LPAREN | RPAREN | LBRACK | RBRACK | COLON | PLUS | MINUS | STAR | QMARK | LCURLY | RCURLY | CARAT | TILDE | DQUOTE | SQUOTE | ESC_CHAR | TO | AND | OR | NOT | NEAR | WS | NUMBER | TERM_NORMAL | TERM_TRUNCATED | PHRASE | PHRASE_ANYTHING );";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             IntStream input = _input;
         	int _s = s;
             switch ( s ) {
                     case 0 : 
-                        int LA15_19 = input.LA(1);
+                        int LA15_50 = input.LA(1);
 
                         s = -1;
-                        if ( (LA15_19=='O'||LA15_19=='o') ) {s = 39;}
+                        if ( ((LA15_50 >= '\u0000' && LA15_50 <= '\b')||(LA15_50 >= '\u000B' && LA15_50 <= '\f')||(LA15_50 >= '\u000E' && LA15_50 <= '\u001F')||(LA15_50 >= '#' && LA15_50 <= '%')||LA15_50==','||LA15_50=='.'||(LA15_50 >= '0' && LA15_50 <= '9')||(LA15_50 >= ';' && LA15_50 <= '>')||(LA15_50 >= '@' && LA15_50 <= 'Z')||(LA15_50 >= '_' && LA15_50 <= 'z')||(LA15_50 >= '\u007F' && LA15_50 <= '\uFFFF')) ) {s = 38;}
 
-                        else if ( (LA15_19=='E'||LA15_19=='e') ) {s = 40;}
+                        else if ( (LA15_50=='\\') ) {s = 37;}
 
-                        else if ( ((LA15_19 >= '\u0000' && LA15_19 <= '\b')||(LA15_19 >= '\u000B' && LA15_19 <= '\f')||(LA15_19 >= '\u000E' && LA15_19 <= '\u001F')||(LA15_19 >= '#' && LA15_19 <= '%')||LA15_19==','||LA15_19=='.'||(LA15_19 >= '0' && LA15_19 <= '9')||(LA15_19 >= ';' && LA15_19 <= '>')||(LA15_19 >= '@' && LA15_19 <= 'D')||(LA15_19 >= 'F' && LA15_19 <= 'N')||(LA15_19 >= 'P' && LA15_19 <= 'Z')||(LA15_19 >= '_' && LA15_19 <= 'd')||(LA15_19 >= 'f' && LA15_19 <= 'n')||(LA15_19 >= 'p' && LA15_19 <= 'z')||(LA15_19 >= '\u007F' && LA15_19 <= '\uFFFF')) ) {s = 38;}
+                        else if ( (LA15_50=='*'||LA15_50=='?') ) {s = 30;}
 
-                        else if ( (LA15_19=='\\') ) {s = 37;}
-
-                        else if ( (LA15_19=='*'||LA15_19=='?') ) {s = 30;}
-
-                        else s = 41;
+                        else s = 20;
 
                         if ( s>=0 ) return s;
                         break;
@@ -1861,9 +1857,9 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         int LA15_39 = input.LA(1);
 
                         s = -1;
-                        if ( (LA15_39=='T'||LA15_39=='t') ) {s = 50;}
+                        if ( (LA15_39=='D'||LA15_39=='d') ) {s = 50;}
 
-                        else if ( ((LA15_39 >= '\u0000' && LA15_39 <= '\b')||(LA15_39 >= '\u000B' && LA15_39 <= '\f')||(LA15_39 >= '\u000E' && LA15_39 <= '\u001F')||(LA15_39 >= '#' && LA15_39 <= '%')||LA15_39==','||LA15_39=='.'||(LA15_39 >= '0' && LA15_39 <= '9')||(LA15_39 >= ';' && LA15_39 <= '>')||(LA15_39 >= '@' && LA15_39 <= 'S')||(LA15_39 >= 'U' && LA15_39 <= 'Z')||(LA15_39 >= '_' && LA15_39 <= 's')||(LA15_39 >= 'u' && LA15_39 <= 'z')||(LA15_39 >= '\u007F' && LA15_39 <= '\uFFFF')) ) {s = 38;}
+                        else if ( ((LA15_39 >= '\u0000' && LA15_39 <= '\b')||(LA15_39 >= '\u000B' && LA15_39 <= '\f')||(LA15_39 >= '\u000E' && LA15_39 <= '\u001F')||(LA15_39 >= '#' && LA15_39 <= '%')||LA15_39==','||LA15_39=='.'||(LA15_39 >= '0' && LA15_39 <= '9')||(LA15_39 >= ';' && LA15_39 <= '>')||(LA15_39 >= '@' && LA15_39 <= 'C')||(LA15_39 >= 'E' && LA15_39 <= 'Z')||(LA15_39 >= '_' && LA15_39 <= 'c')||(LA15_39 >= 'e' && LA15_39 <= 'z')||(LA15_39 >= '\u007F' && LA15_39 <= '\uFFFF')) ) {s = 38;}
 
                         else if ( (LA15_39=='*'||LA15_39=='?') ) {s = 30;}
 
@@ -1882,22 +1878,24 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                         else if ( (LA15_55=='*'||LA15_55=='?') ) {s = 30;}
 
-                        else s = 41;
+                        else s = 43;
 
                         if ( s>=0 ) return s;
                         break;
 
                     case 6 : 
-                        int LA15_50 = input.LA(1);
+                        int LA15_25 = input.LA(1);
 
                         s = -1;
-                        if ( ((LA15_50 >= '\u0000' && LA15_50 <= '\b')||(LA15_50 >= '\u000B' && LA15_50 <= '\f')||(LA15_50 >= '\u000E' && LA15_50 <= '\u001F')||(LA15_50 >= '#' && LA15_50 <= '%')||LA15_50==','||LA15_50=='.'||(LA15_50 >= '0' && LA15_50 <= '9')||(LA15_50 >= ';' && LA15_50 <= '>')||(LA15_50 >= '@' && LA15_50 <= 'Z')||(LA15_50 >= '_' && LA15_50 <= 'z')||(LA15_50 >= '\u007F' && LA15_50 <= '\uFFFF')) ) {s = 38;}
+                        if ( (LA15_25=='O'||LA15_25=='o') ) {s = 41;}
 
-                        else if ( (LA15_50=='\\') ) {s = 37;}
+                        else if ( (LA15_25=='E'||LA15_25=='e') ) {s = 42;}
 
-                        else if ( (LA15_50=='*'||LA15_50=='?') ) {s = 30;}
+                        else if ( ((LA15_25 >= '\u0000' && LA15_25 <= '\b')||(LA15_25 >= '\u000B' && LA15_25 <= '\f')||(LA15_25 >= '\u000E' && LA15_25 <= '\u001F')||(LA15_25 >= '#' && LA15_25 <= '%')||LA15_25==','||LA15_25=='.'||(LA15_25 >= '0' && LA15_25 <= '9')||(LA15_25 >= ';' && LA15_25 <= '>')||(LA15_25 >= '@' && LA15_25 <= 'D')||(LA15_25 >= 'F' && LA15_25 <= 'N')||(LA15_25 >= 'P' && LA15_25 <= 'Z')||(LA15_25 >= '_' && LA15_25 <= 'd')||(LA15_25 >= 'f' && LA15_25 <= 'n')||(LA15_25 >= 'p' && LA15_25 <= 'z')||(LA15_25 >= '\u007F' && LA15_25 <= '\uFFFF')) ) {s = 38;}
 
-                        else s = 20;
+                        else if ( (LA15_25=='*'||LA15_25=='?') ) {s = 30;}
+
+                        else s = 37;
 
                         if ( s>=0 ) return s;
                         break;
@@ -1914,16 +1912,20 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         break;
 
                     case 8 : 
-                        int LA15_52 = input.LA(1);
+                        int LA15_23 = input.LA(1);
 
                         s = -1;
-                        if ( ((LA15_52 >= '\u0000' && LA15_52 <= '\b')||(LA15_52 >= '\u000B' && LA15_52 <= '\f')||(LA15_52 >= '\u000E' && LA15_52 <= '\u001F')||(LA15_52 >= '#' && LA15_52 <= '%')||LA15_52==','||LA15_52=='.'||(LA15_52 >= '0' && LA15_52 <= '9')||(LA15_52 >= ';' && LA15_52 <= '>')||(LA15_52 >= '@' && LA15_52 <= 'Z')||(LA15_52 >= '_' && LA15_52 <= 'z')||(LA15_52 >= '\u007F' && LA15_52 <= '\uFFFF')) ) {s = 38;}
+                        if ( (LA15_23=='O'||LA15_23=='o') ) {s = 41;}
 
-                        else if ( (LA15_52=='\\') ) {s = 37;}
+                        else if ( (LA15_23=='E'||LA15_23=='e') ) {s = 42;}
 
-                        else if ( (LA15_52=='*'||LA15_52=='?') ) {s = 30;}
+                        else if ( ((LA15_23 >= '\u0000' && LA15_23 <= '\b')||(LA15_23 >= '\u000B' && LA15_23 <= '\f')||(LA15_23 >= '\u000E' && LA15_23 <= '\u001F')||(LA15_23 >= '#' && LA15_23 <= '%')||LA15_23==','||LA15_23=='.'||(LA15_23 >= '0' && LA15_23 <= '9')||(LA15_23 >= ';' && LA15_23 <= '>')||(LA15_23 >= '@' && LA15_23 <= 'D')||(LA15_23 >= 'F' && LA15_23 <= 'N')||(LA15_23 >= 'P' && LA15_23 <= 'Z')||(LA15_23 >= '_' && LA15_23 <= 'd')||(LA15_23 >= 'f' && LA15_23 <= 'n')||(LA15_23 >= 'p' && LA15_23 <= 'z')||(LA15_23 >= '\u007F' && LA15_23 <= '\uFFFF')) ) {s = 38;}
 
-                        else s = 22;
+                        else if ( (LA15_23=='\\') ) {s = 37;}
+
+                        else if ( (LA15_23=='*'||LA15_23=='?') ) {s = 30;}
+
+                        else s = 43;
 
                         if ( s>=0 ) return s;
                         break;
@@ -1944,6 +1946,21 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         break;
 
                     case 10 : 
+                        int LA15_40 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA15_40 >= '\u0000' && LA15_40 <= '\b')||(LA15_40 >= '\u000B' && LA15_40 <= '\f')||(LA15_40 >= '\u000E' && LA15_40 <= '\u001F')||(LA15_40 >= '#' && LA15_40 <= '%')||LA15_40==','||LA15_40=='.'||(LA15_40 >= '0' && LA15_40 <= '9')||(LA15_40 >= ';' && LA15_40 <= '>')||(LA15_40 >= '@' && LA15_40 <= 'Z')||(LA15_40 >= '_' && LA15_40 <= 'z')||(LA15_40 >= '\u007F' && LA15_40 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_40=='\\') ) {s = 37;}
+
+                        else if ( (LA15_40=='*'||LA15_40=='?') ) {s = 30;}
+
+                        else s = 22;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 11 : 
                         int LA15_10 = input.LA(1);
 
                         s = -1;
@@ -1954,7 +1971,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 11 : 
+                    case 12 : 
                         int LA15_46 = input.LA(1);
 
                         s = -1;
@@ -1973,7 +1990,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 12 : 
+                    case 13 : 
                         int LA15_33 = input.LA(1);
 
                         s = -1;
@@ -1986,187 +2003,22 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 13 : 
-                        int LA15_21 = input.LA(1);
+                    case 14 : 
+                        int LA15_19 = input.LA(1);
 
                         s = -1;
-                        if ( (LA15_21=='N'||LA15_21=='n') ) {s = 42;}
+                        if ( (LA15_19=='N'||LA15_19=='n') ) {s = 39;}
 
-                        else if ( ((LA15_21 >= '\u0000' && LA15_21 <= '\b')||(LA15_21 >= '\u000B' && LA15_21 <= '\f')||(LA15_21 >= '\u000E' && LA15_21 <= '\u001F')||(LA15_21 >= '#' && LA15_21 <= '%')||LA15_21==','||LA15_21=='.'||(LA15_21 >= '0' && LA15_21 <= '9')||(LA15_21 >= ';' && LA15_21 <= '>')||(LA15_21 >= '@' && LA15_21 <= 'M')||(LA15_21 >= 'O' && LA15_21 <= 'Z')||(LA15_21 >= '_' && LA15_21 <= 'm')||(LA15_21 >= 'o' && LA15_21 <= 'z')||(LA15_21 >= '\u007F' && LA15_21 <= '\uFFFF')) ) {s = 38;}
+                        else if ( ((LA15_19 >= '\u0000' && LA15_19 <= '\b')||(LA15_19 >= '\u000B' && LA15_19 <= '\f')||(LA15_19 >= '\u000E' && LA15_19 <= '\u001F')||(LA15_19 >= '#' && LA15_19 <= '%')||LA15_19==','||LA15_19=='.'||(LA15_19 >= '0' && LA15_19 <= '9')||(LA15_19 >= ';' && LA15_19 <= '>')||(LA15_19 >= '@' && LA15_19 <= 'M')||(LA15_19 >= 'O' && LA15_19 <= 'Z')||(LA15_19 >= '_' && LA15_19 <= 'm')||(LA15_19 >= 'o' && LA15_19 <= 'z')||(LA15_19 >= '\u007F' && LA15_19 <= '\uFFFF')) ) {s = 38;}
 
-                        else if ( (LA15_21=='*'||LA15_21=='?') ) {s = 30;}
+                        else if ( (LA15_19=='*'||LA15_19=='?') ) {s = 30;}
 
                         else s = 37;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 14 : 
-                        int LA15_27 = input.LA(1);
-
-                        s = -1;
-                        if ( (LA15_27=='.') ) {s = 44;}
-
-                        else if ( ((LA15_27 >= '0' && LA15_27 <= '9')) ) {s = 46;}
-
-                        else if ( ((LA15_27 >= '\u0000' && LA15_27 <= '\b')||(LA15_27 >= '\u000B' && LA15_27 <= '\f')||(LA15_27 >= '\u000E' && LA15_27 <= '\u001F')||(LA15_27 >= '#' && LA15_27 <= '%')||LA15_27==','||(LA15_27 >= ';' && LA15_27 <= '>')||(LA15_27 >= '@' && LA15_27 <= 'Z')||(LA15_27 >= '_' && LA15_27 <= 'z')||(LA15_27 >= '\u007F' && LA15_27 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_27=='\\') ) {s = 37;}
-
-                        else if ( (LA15_27=='*'||LA15_27=='?') ) {s = 30;}
-
-                        else s = 45;
 
                         if ( s>=0 ) return s;
                         break;
 
                     case 15 : 
-                        int LA15_43 = input.LA(1);
-
-                        s = -1;
-                        if ( ((LA15_43 >= '\u0000' && LA15_43 <= '\b')||(LA15_43 >= '\u000B' && LA15_43 <= '\f')||(LA15_43 >= '\u000E' && LA15_43 <= '\u001F')||(LA15_43 >= '#' && LA15_43 <= '%')||LA15_43==','||LA15_43=='.'||(LA15_43 >= '0' && LA15_43 <= '9')||(LA15_43 >= ';' && LA15_43 <= '>')||(LA15_43 >= '@' && LA15_43 <= 'Z')||(LA15_43 >= '_' && LA15_43 <= 'z')||(LA15_43 >= '\u007F' && LA15_43 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_43=='\\') ) {s = 37;}
-
-                        else if ( (LA15_43=='*'||LA15_43=='?') ) {s = 30;}
-
-                        else s = 24;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 16 : 
-                        int LA15_40 = input.LA(1);
-
-                        s = -1;
-                        if ( (LA15_40=='A'||LA15_40=='a') ) {s = 51;}
-
-                        else if ( ((LA15_40 >= '\u0000' && LA15_40 <= '\b')||(LA15_40 >= '\u000B' && LA15_40 <= '\f')||(LA15_40 >= '\u000E' && LA15_40 <= '\u001F')||(LA15_40 >= '#' && LA15_40 <= '%')||LA15_40==','||LA15_40=='.'||(LA15_40 >= '0' && LA15_40 <= '9')||(LA15_40 >= ';' && LA15_40 <= '>')||LA15_40=='@'||(LA15_40 >= 'B' && LA15_40 <= 'Z')||(LA15_40 >= '_' && LA15_40 <= '`')||(LA15_40 >= 'b' && LA15_40 <= 'z')||(LA15_40 >= '\u007F' && LA15_40 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_40=='*'||LA15_40=='?') ) {s = 30;}
-
-                        else s = 37;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 17 : 
-                        int LA15_51 = input.LA(1);
-
-                        s = -1;
-                        if ( (LA15_51=='R'||LA15_51=='r') ) {s = 55;}
-
-                        else if ( ((LA15_51 >= '\u0000' && LA15_51 <= '\b')||(LA15_51 >= '\u000B' && LA15_51 <= '\f')||(LA15_51 >= '\u000E' && LA15_51 <= '\u001F')||(LA15_51 >= '#' && LA15_51 <= '%')||LA15_51==','||LA15_51=='.'||(LA15_51 >= '0' && LA15_51 <= '9')||(LA15_51 >= ';' && LA15_51 <= '>')||(LA15_51 >= '@' && LA15_51 <= 'Q')||(LA15_51 >= 'S' && LA15_51 <= 'Z')||(LA15_51 >= '_' && LA15_51 <= 'q')||(LA15_51 >= 's' && LA15_51 <= 'z')||(LA15_51 >= '\u007F' && LA15_51 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_51=='*'||LA15_51=='?') ) {s = 30;}
-
-                        else s = 37;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 18 : 
-                        int LA15_35 = input.LA(1);
-
-                        s = -1;
-                        if ( ((LA15_35 >= '\u0000' && LA15_35 <= '\b')||(LA15_35 >= '\u000B' && LA15_35 <= '\f')||(LA15_35 >= '\u000E' && LA15_35 <= '\u001F')||(LA15_35 >= '#' && LA15_35 <= '%')||LA15_35==','||LA15_35=='.'||(LA15_35 >= '0' && LA15_35 <= '9')||(LA15_35 >= ';' && LA15_35 <= '>')||(LA15_35 >= '@' && LA15_35 <= 'Z')||LA15_35=='\\'||(LA15_35 >= '_' && LA15_35 <= 'z')||(LA15_35 >= '\u007F' && LA15_35 <= '\uFFFF')) ) {s = 37;}
-
-                        else s = 48;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 19 : 
-                        int LA15_36 = input.LA(1);
-
-                        s = -1;
-                        if ( ((LA15_36 >= '\u0000' && LA15_36 <= '\b')||(LA15_36 >= '\u000B' && LA15_36 <= '\f')||(LA15_36 >= '\u000E' && LA15_36 <= '\u001F')||(LA15_36 >= '#' && LA15_36 <= '%')||LA15_36==','||LA15_36=='.'||(LA15_36 >= '0' && LA15_36 <= '9')||(LA15_36 >= ';' && LA15_36 <= '>')||(LA15_36 >= '@' && LA15_36 <= 'Z')||(LA15_36 >= '_' && LA15_36 <= 'z')||(LA15_36 >= '\u007F' && LA15_36 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_36=='\\') ) {s = 37;}
-
-                        else if ( (LA15_36=='*'||LA15_36=='?') ) {s = 30;}
-
-                        else s = 49;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 20 : 
-                        int LA15_23 = input.LA(1);
-
-                        s = -1;
-                        if ( (LA15_23=='R'||LA15_23=='r') ) {s = 43;}
-
-                        else if ( ((LA15_23 >= '\u0000' && LA15_23 <= '\b')||(LA15_23 >= '\u000B' && LA15_23 <= '\f')||(LA15_23 >= '\u000E' && LA15_23 <= '\u001F')||(LA15_23 >= '#' && LA15_23 <= '%')||LA15_23==','||LA15_23=='.'||(LA15_23 >= '0' && LA15_23 <= '9')||(LA15_23 >= ';' && LA15_23 <= '>')||(LA15_23 >= '@' && LA15_23 <= 'Q')||(LA15_23 >= 'S' && LA15_23 <= 'Z')||(LA15_23 >= '_' && LA15_23 <= 'q')||(LA15_23 >= 's' && LA15_23 <= 'z')||(LA15_23 >= '\u007F' && LA15_23 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_23=='*'||LA15_23=='?') ) {s = 30;}
-
-                        else s = 37;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 21 : 
-                        int LA15_53 = input.LA(1);
-
-                        s = -1;
-                        if ( ((LA15_53 >= '0' && LA15_53 <= '9')) ) {s = 53;}
-
-                        else if ( ((LA15_53 >= '\u0000' && LA15_53 <= '\b')||(LA15_53 >= '\u000B' && LA15_53 <= '\f')||(LA15_53 >= '\u000E' && LA15_53 <= '\u001F')||(LA15_53 >= '#' && LA15_53 <= '%')||LA15_53==','||LA15_53=='.'||(LA15_53 >= ';' && LA15_53 <= '>')||(LA15_53 >= '@' && LA15_53 <= 'Z')||(LA15_53 >= '_' && LA15_53 <= 'z')||(LA15_53 >= '\u007F' && LA15_53 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_53=='\\') ) {s = 37;}
-
-                        else if ( (LA15_53=='*'||LA15_53=='?') ) {s = 30;}
-
-                        else s = 45;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 22 : 
-                        int LA15_15 = input.LA(1);
-
-                        s = -1;
-                        if ( ((LA15_15 >= '\u0000' && LA15_15 <= '!')||(LA15_15 >= '#' && LA15_15 <= ')')||(LA15_15 >= '+' && LA15_15 <= '>')||(LA15_15 >= '@' && LA15_15 <= '\uFFFF')) ) {s = 33;}
-
-                        else if ( (LA15_15=='*'||LA15_15=='?') ) {s = 34;}
-
-                        else s = 32;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 23 : 
-                        int LA15_44 = input.LA(1);
-
-                        s = -1;
-                        if ( ((LA15_44 >= '0' && LA15_44 <= '9')) ) {s = 53;}
-
-                        else if ( ((LA15_44 >= '\u0000' && LA15_44 <= '\b')||(LA15_44 >= '\u000B' && LA15_44 <= '\f')||(LA15_44 >= '\u000E' && LA15_44 <= '\u001F')||(LA15_44 >= '#' && LA15_44 <= '%')||LA15_44==','||LA15_44=='.'||(LA15_44 >= ';' && LA15_44 <= '>')||(LA15_44 >= '@' && LA15_44 <= 'Z')||(LA15_44 >= '_' && LA15_44 <= 'z')||(LA15_44 >= '\u007F' && LA15_44 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_44=='*'||LA15_44=='?') ) {s = 30;}
-
-                        else s = 37;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 24 : 
-                        int LA15_42 = input.LA(1);
-
-                        s = -1;
-                        if ( (LA15_42=='D'||LA15_42=='d') ) {s = 52;}
-
-                        else if ( ((LA15_42 >= '\u0000' && LA15_42 <= '\b')||(LA15_42 >= '\u000B' && LA15_42 <= '\f')||(LA15_42 >= '\u000E' && LA15_42 <= '\u001F')||(LA15_42 >= '#' && LA15_42 <= '%')||LA15_42==','||LA15_42=='.'||(LA15_42 >= '0' && LA15_42 <= '9')||(LA15_42 >= ';' && LA15_42 <= '>')||(LA15_42 >= '@' && LA15_42 <= 'C')||(LA15_42 >= 'E' && LA15_42 <= 'Z')||(LA15_42 >= '_' && LA15_42 <= 'c')||(LA15_42 >= 'e' && LA15_42 <= 'z')||(LA15_42 >= '\u007F' && LA15_42 <= '\uFFFF')) ) {s = 38;}
-
-                        else if ( (LA15_42=='*'||LA15_42=='?') ) {s = 30;}
-
-                        else s = 37;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 25 : 
                         int LA15_0 = input.LA(1);
 
                         s = -1;
@@ -2206,17 +2058,17 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                         else if ( (LA15_0=='T') ) {s = 18;}
 
-                        else if ( (LA15_0=='n') ) {s = 19;}
+                        else if ( (LA15_0=='A'||LA15_0=='a') ) {s = 19;}
 
-                        else if ( (LA15_0=='!') ) {s = 20;}
+                        else if ( (LA15_0=='&') ) {s = 20;}
 
-                        else if ( (LA15_0=='A'||LA15_0=='a') ) {s = 21;}
+                        else if ( (LA15_0=='O'||LA15_0=='o') ) {s = 21;}
 
-                        else if ( (LA15_0=='&') ) {s = 22;}
+                        else if ( (LA15_0=='|') ) {s = 22;}
 
-                        else if ( (LA15_0=='O'||LA15_0=='o') ) {s = 23;}
+                        else if ( (LA15_0=='n') ) {s = 23;}
 
-                        else if ( (LA15_0=='|') ) {s = 24;}
+                        else if ( (LA15_0=='!') ) {s = 24;}
 
                         else if ( (LA15_0=='N') ) {s = 25;}
 
@@ -2229,19 +2081,167 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 26 : 
-                        int LA15_25 = input.LA(1);
+                    case 16 : 
+                        int LA15_27 = input.LA(1);
 
                         s = -1;
-                        if ( (LA15_25=='O'||LA15_25=='o') ) {s = 39;}
+                        if ( (LA15_27=='.') ) {s = 44;}
 
-                        else if ( (LA15_25=='E'||LA15_25=='e') ) {s = 40;}
+                        else if ( ((LA15_27 >= '0' && LA15_27 <= '9')) ) {s = 46;}
 
-                        else if ( ((LA15_25 >= '\u0000' && LA15_25 <= '\b')||(LA15_25 >= '\u000B' && LA15_25 <= '\f')||(LA15_25 >= '\u000E' && LA15_25 <= '\u001F')||(LA15_25 >= '#' && LA15_25 <= '%')||LA15_25==','||LA15_25=='.'||(LA15_25 >= '0' && LA15_25 <= '9')||(LA15_25 >= ';' && LA15_25 <= '>')||(LA15_25 >= '@' && LA15_25 <= 'D')||(LA15_25 >= 'F' && LA15_25 <= 'N')||(LA15_25 >= 'P' && LA15_25 <= 'Z')||(LA15_25 >= '_' && LA15_25 <= 'd')||(LA15_25 >= 'f' && LA15_25 <= 'n')||(LA15_25 >= 'p' && LA15_25 <= 'z')||(LA15_25 >= '\u007F' && LA15_25 <= '\uFFFF')) ) {s = 38;}
+                        else if ( ((LA15_27 >= '\u0000' && LA15_27 <= '\b')||(LA15_27 >= '\u000B' && LA15_27 <= '\f')||(LA15_27 >= '\u000E' && LA15_27 <= '\u001F')||(LA15_27 >= '#' && LA15_27 <= '%')||LA15_27==','||(LA15_27 >= ';' && LA15_27 <= '>')||(LA15_27 >= '@' && LA15_27 <= 'Z')||(LA15_27 >= '_' && LA15_27 <= 'z')||(LA15_27 >= '\u007F' && LA15_27 <= '\uFFFF')) ) {s = 38;}
 
-                        else if ( (LA15_25=='*'||LA15_25=='?') ) {s = 30;}
+                        else if ( (LA15_27=='\\') ) {s = 37;}
+
+                        else if ( (LA15_27=='*'||LA15_27=='?') ) {s = 30;}
+
+                        else s = 45;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 17 : 
+                        int LA15_21 = input.LA(1);
+
+                        s = -1;
+                        if ( (LA15_21=='R'||LA15_21=='r') ) {s = 40;}
+
+                        else if ( ((LA15_21 >= '\u0000' && LA15_21 <= '\b')||(LA15_21 >= '\u000B' && LA15_21 <= '\f')||(LA15_21 >= '\u000E' && LA15_21 <= '\u001F')||(LA15_21 >= '#' && LA15_21 <= '%')||LA15_21==','||LA15_21=='.'||(LA15_21 >= '0' && LA15_21 <= '9')||(LA15_21 >= ';' && LA15_21 <= '>')||(LA15_21 >= '@' && LA15_21 <= 'Q')||(LA15_21 >= 'S' && LA15_21 <= 'Z')||(LA15_21 >= '_' && LA15_21 <= 'q')||(LA15_21 >= 's' && LA15_21 <= 'z')||(LA15_21 >= '\u007F' && LA15_21 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_21=='*'||LA15_21=='?') ) {s = 30;}
 
                         else s = 37;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 18 : 
+                        int LA15_41 = input.LA(1);
+
+                        s = -1;
+                        if ( (LA15_41=='T'||LA15_41=='t') ) {s = 51;}
+
+                        else if ( ((LA15_41 >= '\u0000' && LA15_41 <= '\b')||(LA15_41 >= '\u000B' && LA15_41 <= '\f')||(LA15_41 >= '\u000E' && LA15_41 <= '\u001F')||(LA15_41 >= '#' && LA15_41 <= '%')||LA15_41==','||LA15_41=='.'||(LA15_41 >= '0' && LA15_41 <= '9')||(LA15_41 >= ';' && LA15_41 <= '>')||(LA15_41 >= '@' && LA15_41 <= 'S')||(LA15_41 >= 'U' && LA15_41 <= 'Z')||(LA15_41 >= '_' && LA15_41 <= 's')||(LA15_41 >= 'u' && LA15_41 <= 'z')||(LA15_41 >= '\u007F' && LA15_41 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_41=='*'||LA15_41=='?') ) {s = 30;}
+
+                        else s = 37;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 19 : 
+                        int LA15_42 = input.LA(1);
+
+                        s = -1;
+                        if ( (LA15_42=='A'||LA15_42=='a') ) {s = 52;}
+
+                        else if ( ((LA15_42 >= '\u0000' && LA15_42 <= '\b')||(LA15_42 >= '\u000B' && LA15_42 <= '\f')||(LA15_42 >= '\u000E' && LA15_42 <= '\u001F')||(LA15_42 >= '#' && LA15_42 <= '%')||LA15_42==','||LA15_42=='.'||(LA15_42 >= '0' && LA15_42 <= '9')||(LA15_42 >= ';' && LA15_42 <= '>')||LA15_42=='@'||(LA15_42 >= 'B' && LA15_42 <= 'Z')||(LA15_42 >= '_' && LA15_42 <= '`')||(LA15_42 >= 'b' && LA15_42 <= 'z')||(LA15_42 >= '\u007F' && LA15_42 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_42=='*'||LA15_42=='?') ) {s = 30;}
+
+                        else s = 37;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 20 : 
+                        int LA15_52 = input.LA(1);
+
+                        s = -1;
+                        if ( (LA15_52=='R'||LA15_52=='r') ) {s = 55;}
+
+                        else if ( ((LA15_52 >= '\u0000' && LA15_52 <= '\b')||(LA15_52 >= '\u000B' && LA15_52 <= '\f')||(LA15_52 >= '\u000E' && LA15_52 <= '\u001F')||(LA15_52 >= '#' && LA15_52 <= '%')||LA15_52==','||LA15_52=='.'||(LA15_52 >= '0' && LA15_52 <= '9')||(LA15_52 >= ';' && LA15_52 <= '>')||(LA15_52 >= '@' && LA15_52 <= 'Q')||(LA15_52 >= 'S' && LA15_52 <= 'Z')||(LA15_52 >= '_' && LA15_52 <= 'q')||(LA15_52 >= 's' && LA15_52 <= 'z')||(LA15_52 >= '\u007F' && LA15_52 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_52=='*'||LA15_52=='?') ) {s = 30;}
+
+                        else s = 37;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 21 : 
+                        int LA15_35 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA15_35 >= '\u0000' && LA15_35 <= '\b')||(LA15_35 >= '\u000B' && LA15_35 <= '\f')||(LA15_35 >= '\u000E' && LA15_35 <= '\u001F')||(LA15_35 >= '#' && LA15_35 <= '%')||LA15_35==','||LA15_35=='.'||(LA15_35 >= '0' && LA15_35 <= '9')||(LA15_35 >= ';' && LA15_35 <= '>')||(LA15_35 >= '@' && LA15_35 <= 'Z')||LA15_35=='\\'||(LA15_35 >= '_' && LA15_35 <= 'z')||(LA15_35 >= '\u007F' && LA15_35 <= '\uFFFF')) ) {s = 37;}
+
+                        else s = 48;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 22 : 
+                        int LA15_36 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA15_36 >= '\u0000' && LA15_36 <= '\b')||(LA15_36 >= '\u000B' && LA15_36 <= '\f')||(LA15_36 >= '\u000E' && LA15_36 <= '\u001F')||(LA15_36 >= '#' && LA15_36 <= '%')||LA15_36==','||LA15_36=='.'||(LA15_36 >= '0' && LA15_36 <= '9')||(LA15_36 >= ';' && LA15_36 <= '>')||(LA15_36 >= '@' && LA15_36 <= 'Z')||(LA15_36 >= '_' && LA15_36 <= 'z')||(LA15_36 >= '\u007F' && LA15_36 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_36=='\\') ) {s = 37;}
+
+                        else if ( (LA15_36=='*'||LA15_36=='?') ) {s = 30;}
+
+                        else s = 49;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 23 : 
+                        int LA15_53 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA15_53 >= '0' && LA15_53 <= '9')) ) {s = 53;}
+
+                        else if ( ((LA15_53 >= '\u0000' && LA15_53 <= '\b')||(LA15_53 >= '\u000B' && LA15_53 <= '\f')||(LA15_53 >= '\u000E' && LA15_53 <= '\u001F')||(LA15_53 >= '#' && LA15_53 <= '%')||LA15_53==','||LA15_53=='.'||(LA15_53 >= ';' && LA15_53 <= '>')||(LA15_53 >= '@' && LA15_53 <= 'Z')||(LA15_53 >= '_' && LA15_53 <= 'z')||(LA15_53 >= '\u007F' && LA15_53 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_53=='\\') ) {s = 37;}
+
+                        else if ( (LA15_53=='*'||LA15_53=='?') ) {s = 30;}
+
+                        else s = 45;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 24 : 
+                        int LA15_15 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA15_15 >= '\u0000' && LA15_15 <= '!')||(LA15_15 >= '#' && LA15_15 <= ')')||(LA15_15 >= '+' && LA15_15 <= '>')||(LA15_15 >= '@' && LA15_15 <= '\uFFFF')) ) {s = 33;}
+
+                        else if ( (LA15_15=='*'||LA15_15=='?') ) {s = 34;}
+
+                        else s = 32;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 25 : 
+                        int LA15_44 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA15_44 >= '0' && LA15_44 <= '9')) ) {s = 53;}
+
+                        else if ( ((LA15_44 >= '\u0000' && LA15_44 <= '\b')||(LA15_44 >= '\u000B' && LA15_44 <= '\f')||(LA15_44 >= '\u000E' && LA15_44 <= '\u001F')||(LA15_44 >= '#' && LA15_44 <= '%')||LA15_44==','||LA15_44=='.'||(LA15_44 >= ';' && LA15_44 <= '>')||(LA15_44 >= '@' && LA15_44 <= 'Z')||(LA15_44 >= '_' && LA15_44 <= 'z')||(LA15_44 >= '\u007F' && LA15_44 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_44=='*'||LA15_44=='?') ) {s = 30;}
+
+                        else s = 37;
+
+                        if ( s>=0 ) return s;
+                        break;
+
+                    case 26 : 
+                        int LA15_51 = input.LA(1);
+
+                        s = -1;
+                        if ( ((LA15_51 >= '\u0000' && LA15_51 <= '\b')||(LA15_51 >= '\u000B' && LA15_51 <= '\f')||(LA15_51 >= '\u000E' && LA15_51 <= '\u001F')||(LA15_51 >= '#' && LA15_51 <= '%')||LA15_51==','||LA15_51=='.'||(LA15_51 >= '0' && LA15_51 <= '9')||(LA15_51 >= ';' && LA15_51 <= '>')||(LA15_51 >= '@' && LA15_51 <= 'Z')||(LA15_51 >= '_' && LA15_51 <= 'z')||(LA15_51 >= '\u007F' && LA15_51 <= '\uFFFF')) ) {s = 38;}
+
+                        else if ( (LA15_51=='\\') ) {s = 37;}
+
+                        else if ( (LA15_51=='*'||LA15_51=='?') ) {s = 30;}
+
+                        else s = 24;
 
                         if ( s>=0 ) return s;
                         break;
