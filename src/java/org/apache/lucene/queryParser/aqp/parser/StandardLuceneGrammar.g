@@ -36,7 +36,7 @@ tokens {
 }
 
 mainQ : 
-	clauseDefault+ -> ^(OPERATOR["DEFOP"] clauseDefault+) // Default operator
+	clauseDefault+ -> ^(OPERATOR["AND"] clauseDefault+) // Default operator
 	;
    
   
@@ -59,8 +59,8 @@ clauseWeak
 primaryClause
 	: 
 	
-	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["DEFOP"] clauseDefault+) ) // Default operator
-	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["DEFOP"] clauseDefault+) ) // Default operator
+	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
+	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
 	| (LPAREN)=> LPAREN clauseDefault+ RPAREN -> clauseDefault+
 	| atom 
 	;
@@ -255,9 +255,9 @@ ESC_CHAR:  '\\' .;
 TO	:	'TO';
 
 /* We want to be case insensitive */
+NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
 AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
 OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
-NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
 NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 

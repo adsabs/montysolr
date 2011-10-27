@@ -135,7 +135,7 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 					return new SlopQueryNode(fq, fuzzy.intValue());
 				}
 				return fq;
-			} else if (tl.equals("QPHRASETRUNC") || tl.equals("QTRUNC")) {
+			} else if (tl.equals("QPHRASETRUNC") || tl.equals("QTRUNCATED")) {
 				subChild = (AqpANTLRNode) child.getChildren().get(0);
 				QueryNode wq = new WildcardQueryNode(field,
 						EscapeQuerySyntaxImpl.discardEscapeChar(subChild

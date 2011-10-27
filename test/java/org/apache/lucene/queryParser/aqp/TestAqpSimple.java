@@ -262,6 +262,9 @@ public class TestAqpSimple extends LuceneTestCase {
 		//DEFAULT OPERATOR IS AND
 		qp.setDefaultOperator(Operator.AND);
 		
+		assertQueryMatch(qp, "term~", "field", 
+        "field:term~0.5");
+		
 		assertQueryMatch(qp, "something", "field", 
 				             "field:something");
 		
