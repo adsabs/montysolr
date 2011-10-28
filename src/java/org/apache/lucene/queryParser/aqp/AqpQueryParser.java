@@ -24,6 +24,7 @@ import java.util.TooManyListenersException;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.DateTools;
+import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.builders.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
@@ -32,7 +33,10 @@ import org.apache.lucene.queryParser.aqp.processors.AqpDebuggingQueryNodeProcess
 import org.apache.lucene.queryParser.aqp.processors.AqpQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryParserHelper;
+import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
+import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
+import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.standard.builders.StandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.standard.config.AllowLeadingWildcardAttribute;
 import org.apache.lucene.queryParser.standard.config.AnalyzerAttribute;
@@ -51,6 +55,7 @@ import org.apache.lucene.queryParser.standard.config.RangeCollatorAttribute;
 import org.apache.lucene.queryParser.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.queryParser.standard.nodes.RangeQueryNode;
+import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.queryParser.standard.parser.StandardSyntaxParser;
 import org.apache.lucene.queryParser.standard.processors.StandardQueryNodeProcessorPipeline;
 import org.apache.lucene.search.FuzzyQuery;
@@ -89,21 +94,21 @@ import org.apache.lucene.search.Query;
  * <li>a term followed by a colon, indicating the field to be searched. This
  * enables one to construct queries which search multiple fields.
  * </ul>
- *
+ * 
  * A clause may be either:
  * <ul>
  * <li>a term, indicating all the documents that contain this term; or
  * <li>a nested query, enclosed in parentheses. Note that this may be used with
  * a <code>+</code>/<code>-</code> prefix to require any of a set of terms.
  * </ul>
- *
+ * 
  * Thus, in BNF, the query grammar is:
- *
+ * 
  * <pre>
  *   Query  ::= ( Clause )*
  *   Clause ::= [&quot;+&quot;, &quot;-&quot;] [&lt;TERM&gt; &quot;:&quot;] ( &lt;TERM&gt; | &quot;(&quot; Query &quot;)&quot; )
  * </pre>
- *
+ * 
  * <p>
  * Examples of appropriately formatted queries can be found in the <a
  * href="../../../../../../queryparsersyntax.html">query syntax
@@ -120,7 +125,7 @@ import org.apache.lucene.search.Query;
  * <p>
  * The builder used by this helper is a {@link StandardQueryTreeBuilder}.
  * <p/>
- *
+ * 
  * @see StandardQueryParser
  * @see StandardQueryConfigHandler
  * @see StandardSyntaxParser
@@ -128,335 +133,367 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryTreeBuilder
  */
 public class AqpQueryParser extends QueryParserHelper {
-	
-	
-  /**
-   * Constructs a {@link StandardQueryParser} object. The default grammar used
-   * is "LuceneGrammar"
-   * {@see AqpQueryParser#AqpQueryParser(String)}
-   * @throws Exception 
-   */
-  public AqpQueryParser() throws Exception {
-	  this("StandardLuceneGrammar");
-  }
 
-  public AqpQueryParser(String grammarName) throws Exception {
-	    super(new AqpStandardQueryConfigHandler(), 
-	    	new AqpSyntaxParser().initializeGrammar(grammarName),
-	        new AqpQueryNodeProcessorPipeline(null),
-	        new AqpStandardQueryTreeBuilder());
-	  }
-  
-  /**
-   * Constructs a {@link StandardQueryParser} object and sets an
-   * {@link Analyzer} to it. The same as:
-   *
-   * <ul>
-   * StandardQueryParser qp = new StandardQueryParser();
-   * qp.getQueryConfigHandler().setAnalyzer(analyzer);
-   * </ul>
-   *
-   * @param analyzer
-   *          the analyzer to be used by this query parser helper
- * @throws Exception 
-   */
-  public AqpQueryParser(Analyzer analyzer) throws Exception {
-    this();
-    this.setAnalyzer(analyzer);
-  }
+	/**
+	 * Constructs a {@link StandardQueryParser} object. The default grammar used
+	 * is "LuceneGrammar" {@see AqpQueryParser#AqpQueryParser(String)}
+	 * 
+	 * @throws Exception
+	 */
+	public AqpQueryParser() throws Exception {
+		this("StandardLuceneGrammar");
+	}
 
-  @Override
-  public String toString(){
-    return "<AqpQueryParser config=\"" + this.getQueryConfigHandler() + "\"/>";
-  }
-  
-  /*
-   * De/activates the debugging print of the processed query tree
-   */
-  public void setDebug(boolean debug) {
-	  if (debug) {
-		  this.setQueryNodeProcessor(new AqpDebuggingQueryNodeProcessorPipeline(getQueryConfigHandler()));
-	  }
-	  else {
-		  this.setQueryNodeProcessor(new AqpQueryNodeProcessorPipeline(getQueryConfigHandler()));
-	  }
-  }
+	public AqpQueryParser(String grammarName) throws Exception {
+		super(new AqpStandardQueryConfigHandler(), new AqpSyntaxParser()
+				.initializeGrammar(grammarName),
+				new AqpQueryNodeProcessorPipeline(null),
+				new AqpStandardQueryTreeBuilder());
+	}
 
-  /**
-   * Overrides {@link QueryParserHelper#parse(String, String)} so it casts the
-   * return object to {@link Query}. For more reference about this method, check
-   * {@link QueryParserHelper#parse(String, String)}.
-   *
-   * @param query
-   *          the query string
-   * @param defaultField
-   *          the default field used by the text parser
-   *
-   * @return the object built from the query
-   *
-   * @throws QueryNodeException
-   *           if something wrong happens along the three phases
-   */
-  @Override
-  public Query parse(String query, String defaultField)
-      throws QueryNodeException {
-	  
-	  QueryConfigHandler cfg = getQueryConfigHandler();
-	  DefaultFieldAttribute attr = cfg.getAttribute(DefaultFieldAttribute.class);
-	  attr.setDefaultField(defaultField);
-	  
-      return (Query) super.parse(query, defaultField);
+	/**
+	 * Constructs a {@link StandardQueryParser} object and sets an
+	 * {@link Analyzer} to it. The same as:
+	 * 
+	 * <ul>
+	 * StandardQueryParser qp = new StandardQueryParser();
+	 * qp.getQueryConfigHandler().setAnalyzer(analyzer);
+	 * </ul>
+	 * 
+	 * @param analyzer
+	 *            the analyzer to be used by this query parser helper
+	 * @throws Exception
+	 */
+	public AqpQueryParser(Analyzer analyzer) throws Exception {
+		this();
+		this.setAnalyzer(analyzer);
+	}
 
-  }
+	@Override
+	public String toString() {
+		return "<AqpQueryParser config=\"" + this.getQueryConfigHandler()
+				+ "\"/>";
+	}
 
-  /**
-   * Gets implicit operator setting, which will be either {@link Operator#AND}
-   * or {@link Operator#OR}.
-   */
-  public Operator getDefaultOperator() {
-    DefaultOperatorAttribute attr = getQueryConfigHandler().getAttribute(DefaultOperatorAttribute.class);
-    return attr.getOperator();
-  }
+	/*
+	 * De/activates the debugging print of the processed query tree
+	 */
+	public void setDebug(boolean debug) {
+		if (debug) {
+			this.setQueryNodeProcessor(new AqpDebuggingQueryNodeProcessorPipeline(
+					getQueryConfigHandler()));
+		} else {
+			this.setQueryNodeProcessor(new AqpQueryNodeProcessorPipeline(
+					getQueryConfigHandler()));
+		}
+	}
 
-  /**
-   * Sets the collator used to determine index term inclusion in ranges for
-   * RangeQuerys.
-   * <p/>
-   * <strong>WARNING:</strong> Setting the rangeCollator to a non-null collator
-   * using this method will cause every single index Term in the Field
-   * referenced by lowerTerm and/or upperTerm to be examined. Depending on the
-   * number of index Terms in this Field, the operation could be very slow.
-   * 
-   * @param collator
-   *          the collator to use when constructing {@link RangeQueryNode}s
-   */
-  public void setRangeCollator(Collator collator) {
-    RangeCollatorAttribute attr = getQueryConfigHandler().getAttribute(RangeCollatorAttribute.class);
-    attr.setDateResolution(collator);
-  }
+	/**
+	 * Overrides {@link QueryParserHelper#parse(String, String)} so it casts the
+	 * return object to {@link Query}. For more reference about this method,
+	 * check {@link QueryParserHelper#parse(String, String)}.
+	 * 
+	 * @param query
+	 *            the query string
+	 * @param defaultField
+	 *            the default field used by the text parser
+	 * 
+	 * @return the object built from the query
+	 * 
+	 * @throws QueryNodeException
+	 *             if something wrong happens along the three phases
+	 */
+	@Override
+	public Query parse(String query, String defaultField)
+			throws QueryNodeException {
 
-  /**
-   * @return the collator used to determine index term inclusion in ranges for
-   *         RangeQuerys.
-   */
-  public Collator getRangeCollator() {
-    RangeCollatorAttribute attr = getQueryConfigHandler().getAttribute(RangeCollatorAttribute.class);
-    return attr.getRangeCollator();
-  }
+		QueryConfigHandler cfg = getQueryConfigHandler();
+		DefaultFieldAttribute attr = cfg
+				.getAttribute(DefaultFieldAttribute.class);
+		attr.setDefaultField(defaultField);
 
-  /**
-   * Sets the boolean operator of the QueryParser. In default mode (
-   * {@link Operator#OR}) terms without any modifiers are considered optional:
-   * for example <code>capital of Hungary</code> is equal to
-   * <code>capital OR of OR Hungary</code>.<br/>
-   * In {@link Operator#AND} mode terms are considered to be in conjunction: the
-   * above mentioned query is parsed as <code>capital AND of AND Hungary</code>
-   */
-  public void setDefaultOperator(Operator operator) {
-    DefaultOperatorAttribute attr = getQueryConfigHandler().getAttribute(DefaultOperatorAttribute.class);
-    attr.setOperator(operator);
-  }
+		return (Query) super.parse(query, defaultField);
 
-  /**
-   * Set to <code>true</code> to allow leading wildcard characters.
-   * <p>
-   * When set, <code>*</code> or <code>?</code> are allowed as the first
-   * character of a PrefixQuery and WildcardQuery. Note that this can produce
-   * very slow queries on big indexes.
-   * <p>
-   * Default: false.
-   */
-  public void setLowercaseExpandedTerms(boolean lowercaseExpandedTerms) {
-    LowercaseExpandedTermsAttribute attr = getQueryConfigHandler().getAttribute(LowercaseExpandedTermsAttribute.class);
-    attr.setLowercaseExpandedTerms(lowercaseExpandedTerms);
-  }
+	}
 
-  /**
-   * @see #setLowercaseExpandedTerms(boolean)
-   */
-  public boolean getLowercaseExpandedTerms() {
-    LowercaseExpandedTermsAttribute attr = getQueryConfigHandler().getAttribute(LowercaseExpandedTermsAttribute.class);
-    return attr.isLowercaseExpandedTerms();
-  }
+	/**
+	 * Gets implicit operator setting, which will be either {@link Operator#AND}
+	 * or {@link Operator#OR}.
+	 */
+	public Operator getDefaultOperator() {
+		DefaultOperatorAttribute attr = getQueryConfigHandler().getAttribute(
+				DefaultOperatorAttribute.class);
+		return attr.getOperator();
+	}
 
-  /**
-   * Set to <code>true</code> to allow leading wildcard characters.
-   * <p>
-   * When set, <code>*</code> or <code>?</code> are allowed as the first
-   * character of a PrefixQuery and WildcardQuery. Note that this can produce
-   * very slow queries on big indexes.
-   * <p>
-   * Default: false.
-   */
-  public void setAllowLeadingWildcard(boolean allowLeadingWildcard) {
-    AllowLeadingWildcardAttribute attr = getQueryConfigHandler().getAttribute(AllowLeadingWildcardAttribute.class);
-    attr.setAllowLeadingWildcard(allowLeadingWildcard);
-  }
+	/**
+	 * Sets the collator used to determine index term inclusion in ranges for
+	 * RangeQuerys.
+	 * <p/>
+	 * <strong>WARNING:</strong> Setting the rangeCollator to a non-null
+	 * collator using this method will cause every single index Term in the
+	 * Field referenced by lowerTerm and/or upperTerm to be examined. Depending
+	 * on the number of index Terms in this Field, the operation could be very
+	 * slow.
+	 * 
+	 * @param collator
+	 *            the collator to use when constructing {@link RangeQueryNode}s
+	 */
+	public void setRangeCollator(Collator collator) {
+		RangeCollatorAttribute attr = getQueryConfigHandler().getAttribute(
+				RangeCollatorAttribute.class);
+		attr.setDateResolution(collator);
+	}
 
-  /**
-   * Set to <code>true</code> to enable position increments in result query.
-   * <p>
-   * When set, result phrase and multi-phrase queries will be aware of position
-   * increments. Useful when e.g. a StopFilter increases the position increment
-   * of the token that follows an omitted token.
-   * <p>
-   * Default: false.
-   */
-  public void setEnablePositionIncrements(boolean enabled) {
-    PositionIncrementsAttribute attr = getQueryConfigHandler().getAttribute(PositionIncrementsAttribute.class);
-    attr.setPositionIncrementsEnabled(enabled);
-  }
+	/**
+	 * @return the collator used to determine index term inclusion in ranges for
+	 *         RangeQuerys.
+	 */
+	public Collator getRangeCollator() {
+		RangeCollatorAttribute attr = getQueryConfigHandler().getAttribute(
+				RangeCollatorAttribute.class);
+		return attr.getRangeCollator();
+	}
 
-  /**
-   * @see #setEnablePositionIncrements(boolean)
-   */
-  public boolean getEnablePositionIncrements() {
-    PositionIncrementsAttribute attr = getQueryConfigHandler().getAttribute(PositionIncrementsAttribute.class);
-    return attr.isPositionIncrementsEnabled();
-  }
+	/**
+	 * Sets the boolean operator of the QueryParser. In default mode (
+	 * {@link Operator#OR}) terms without any modifiers are considered optional:
+	 * for example <code>capital of Hungary</code> is equal to
+	 * <code>capital OR of OR Hungary</code>.<br/>
+	 * In {@link Operator#AND} mode terms are considered to be in conjunction:
+	 * the above mentioned query is parsed as
+	 * <code>capital AND of AND Hungary</code>
+	 */
+	public void setDefaultOperator(Operator operator) {
+		DefaultOperatorAttribute attr = getQueryConfigHandler().getAttribute(
+				DefaultOperatorAttribute.class);
+		attr.setOperator(operator);
+	}
 
-  /**
-   * By default, it uses
-   * {@link MultiTermQuery#CONSTANT_SCORE_AUTO_REWRITE_DEFAULT} when creating a
-   * prefix, wildcard and range queries. This implementation is generally
-   * preferable because it a) Runs faster b) Does not have the scarcity of terms
-   * unduly influence score c) avoids any {@link TooManyListenersException}
-   * exception. However, if your application really needs to use the
-   * old-fashioned boolean queries expansion rewriting and the above points are
-   * not relevant then use this change the rewrite method.
-   */
-  public void setMultiTermRewriteMethod(MultiTermQuery.RewriteMethod method) {
-    MultiTermRewriteMethodAttribute attr = getQueryConfigHandler().getAttribute(MultiTermRewriteMethodAttribute.class);
-    attr.setMultiTermRewriteMethod(method);
-  }
+	/**
+	 * Set to <code>true</code> to allow leading wildcard characters.
+	 * <p>
+	 * When set, <code>*</code> or <code>?</code> are allowed as the first
+	 * character of a PrefixQuery and WildcardQuery. Note that this can produce
+	 * very slow queries on big indexes.
+	 * <p>
+	 * Default: false.
+	 */
+	public void setLowercaseExpandedTerms(boolean lowercaseExpandedTerms) {
+		LowercaseExpandedTermsAttribute attr = getQueryConfigHandler()
+				.getAttribute(LowercaseExpandedTermsAttribute.class);
+		attr.setLowercaseExpandedTerms(lowercaseExpandedTerms);
+	}
 
-  /**
-   * @see #setMultiTermRewriteMethod(org.apache.lucene.search.MultiTermQuery.RewriteMethod)
-   */
-  public MultiTermQuery.RewriteMethod getMultiTermRewriteMethod() {
-    MultiTermRewriteMethodAttribute attr = getQueryConfigHandler().getAttribute(MultiTermRewriteMethodAttribute.class);    
-    return attr.getMultiTermRewriteMethod();
-  }
+	/**
+	 * @see #setLowercaseExpandedTerms(boolean)
+	 */
+	public boolean getLowercaseExpandedTerms() {
+		LowercaseExpandedTermsAttribute attr = getQueryConfigHandler()
+				.getAttribute(LowercaseExpandedTermsAttribute.class);
+		return attr.isLowercaseExpandedTerms();
+	}
 
-  public void setMultiFields(CharSequence[] fields) {
+	/**
+	 * Set to <code>true</code> to allow leading wildcard characters.
+	 * <p>
+	 * When set, <code>*</code> or <code>?</code> are allowed as the first
+	 * character of a PrefixQuery and WildcardQuery. Note that this can produce
+	 * very slow queries on big indexes.
+	 * <p>
+	 * Default: false.
+	 */
+	public void setAllowLeadingWildcard(boolean allowLeadingWildcard) {
+		AllowLeadingWildcardAttribute attr = getQueryConfigHandler()
+				.getAttribute(AllowLeadingWildcardAttribute.class);
+		attr.setAllowLeadingWildcard(allowLeadingWildcard);
+	}
 
-    if (fields == null) {
-      fields = new CharSequence[0];
-    }
+	/**
+	 * Set to <code>true</code> to enable position increments in result query.
+	 * <p>
+	 * When set, result phrase and multi-phrase queries will be aware of
+	 * position increments. Useful when e.g. a StopFilter increases the position
+	 * increment of the token that follows an omitted token.
+	 * <p>
+	 * Default: false.
+	 */
+	public void setEnablePositionIncrements(boolean enabled) {
+		PositionIncrementsAttribute attr = getQueryConfigHandler()
+				.getAttribute(PositionIncrementsAttribute.class);
+		attr.setPositionIncrementsEnabled(enabled);
+	}
 
-    MultiFieldAttribute attr = getQueryConfigHandler().addAttribute(MultiFieldAttribute.class);
-    attr.setFields(fields);
+	/**
+	 * @see #setEnablePositionIncrements(boolean)
+	 */
+	public boolean getEnablePositionIncrements() {
+		PositionIncrementsAttribute attr = getQueryConfigHandler()
+				.getAttribute(PositionIncrementsAttribute.class);
+		return attr.isPositionIncrementsEnabled();
+	}
 
-  }
+	/**
+	 * By default, it uses
+	 * {@link MultiTermQuery#CONSTANT_SCORE_AUTO_REWRITE_DEFAULT} when creating
+	 * a prefix, wildcard and range queries. This implementation is generally
+	 * preferable because it a) Runs faster b) Does not have the scarcity of
+	 * terms unduly influence score c) avoids any
+	 * {@link TooManyListenersException} exception. However, if your application
+	 * really needs to use the old-fashioned boolean queries expansion rewriting
+	 * and the above points are not relevant then use this change the rewrite
+	 * method.
+	 */
+	public void setMultiTermRewriteMethod(MultiTermQuery.RewriteMethod method) {
+		MultiTermRewriteMethodAttribute attr = getQueryConfigHandler()
+				.getAttribute(MultiTermRewriteMethodAttribute.class);
+		attr.setMultiTermRewriteMethod(method);
+	}
 
-  /**
-   * Set the prefix length for fuzzy queries. Default is 0.
-   * 
-   * @param fuzzyPrefixLength
-   *          The fuzzyPrefixLength to set.
-   */
-  public void setFuzzyPrefixLength(int fuzzyPrefixLength) {
-    FuzzyAttribute attr = getQueryConfigHandler().addAttribute(FuzzyAttribute.class);
-    attr.setPrefixLength(fuzzyPrefixLength);
-  }
+	/**
+	 * @see #setMultiTermRewriteMethod(org.apache.lucene.search.MultiTermQuery.RewriteMethod)
+	 */
+	public MultiTermQuery.RewriteMethod getMultiTermRewriteMethod() {
+		MultiTermRewriteMethodAttribute attr = getQueryConfigHandler()
+				.getAttribute(MultiTermRewriteMethodAttribute.class);
+		return attr.getMultiTermRewriteMethod();
+	}
 
-  /**
-   * Set locale used by date range parsing.
-   */
-  public void setLocale(Locale locale) {
-    LocaleAttribute attr = getQueryConfigHandler().addAttribute(LocaleAttribute.class);
-    attr.setLocale(locale);
-  }
+	public void setMultiFields(CharSequence[] fields) {
 
-  /**
-   * Returns current locale, allowing access by subclasses.
-   */
-  public Locale getLocale() {
-    LocaleAttribute attr = getQueryConfigHandler().addAttribute(LocaleAttribute.class);
-    return attr.getLocale();
-  }
+		if (fields == null) {
+			fields = new CharSequence[0];
+		}
 
-  /**
-   * Sets the default slop for phrases. If zero, then exact phrase matches are
-   * required. Default value is zero.
-   */
-  public void setDefaultPhraseSlop(int defaultPhraseSlop) {
-    DefaultPhraseSlopAttribute attr = getQueryConfigHandler().addAttribute(DefaultPhraseSlopAttribute.class);
-    attr.setDefaultPhraseSlop(defaultPhraseSlop);
-  }
+		MultiFieldAttribute attr = getQueryConfigHandler().addAttribute(
+				MultiFieldAttribute.class);
+		attr.setFields(fields);
 
-  public void setAnalyzer(Analyzer analyzer) {
-    AnalyzerAttribute attr = getQueryConfigHandler().getAttribute(AnalyzerAttribute.class);
-    attr.setAnalyzer(analyzer);
-  }
-  
-  public Analyzer getAnalyzer() {    
-    QueryConfigHandler config = this.getQueryConfigHandler();
+	}
 
-    if ( config.hasAttribute(AnalyzerAttribute.class)) {
-      AnalyzerAttribute attr = config.getAttribute(AnalyzerAttribute.class);
-      return attr.getAnalyzer();
-    }
+	/**
+	 * Set the prefix length for fuzzy queries. Default is 0.
+	 * 
+	 * @param fuzzyPrefixLength
+	 *            The fuzzyPrefixLength to set.
+	 */
+	public void setFuzzyPrefixLength(int fuzzyPrefixLength) {
+		FuzzyAttribute attr = getQueryConfigHandler().addAttribute(
+				FuzzyAttribute.class);
+		attr.setPrefixLength(fuzzyPrefixLength);
+	}
 
-    return null;       
-  }
+	/**
+	 * Set locale used by date range parsing.
+	 */
+	public void setLocale(Locale locale) {
+		LocaleAttribute attr = getQueryConfigHandler().addAttribute(
+				LocaleAttribute.class);
+		attr.setLocale(locale);
+	}
 
-  /**
-   * @see #setAllowLeadingWildcard(boolean)
-   */
-  public boolean getAllowLeadingWildcard() {
-    AllowLeadingWildcardAttribute attr = getQueryConfigHandler().addAttribute(AllowLeadingWildcardAttribute.class);
-    return attr.isAllowLeadingWildcard();
-  }
+	/**
+	 * Returns current locale, allowing access by subclasses.
+	 */
+	public Locale getLocale() {
+		LocaleAttribute attr = getQueryConfigHandler().addAttribute(
+				LocaleAttribute.class);
+		return attr.getLocale();
+	}
 
-  /**
-   * Get the minimal similarity for fuzzy queries.
-   */
-  public float getFuzzyMinSim() {
-    FuzzyAttribute attr = getQueryConfigHandler().addAttribute(FuzzyAttribute.class);
-    return attr.getFuzzyMinSimilarity();
-  }
+	/**
+	 * Sets the default slop for phrases. If zero, then exact phrase matches are
+	 * required. Default value is zero.
+	 */
+	public void setDefaultPhraseSlop(int defaultPhraseSlop) {
+		DefaultPhraseSlopAttribute attr = getQueryConfigHandler().addAttribute(
+				DefaultPhraseSlopAttribute.class);
+		attr.setDefaultPhraseSlop(defaultPhraseSlop);
+	}
 
-  /**
-   * Get the prefix length for fuzzy queries.
-   * 
-   * @return Returns the fuzzyPrefixLength.
-   */
-  public int getFuzzyPrefixLength() {
-    FuzzyAttribute attr = getQueryConfigHandler().addAttribute(FuzzyAttribute.class);
-    return attr.getPrefixLength();
-  }
+	public void setAnalyzer(Analyzer analyzer) {
+		AnalyzerAttribute attr = getQueryConfigHandler().getAttribute(
+				AnalyzerAttribute.class);
+		attr.setAnalyzer(analyzer);
+	}
 
-  /**
-   * Gets the default slop for phrases.
-   */
-  public int getPhraseSlop() {
-    DefaultPhraseSlopAttribute attr = getQueryConfigHandler().addAttribute(DefaultPhraseSlopAttribute.class);
-    return attr.getDefaultPhraseSlop();
-  }
+	public Analyzer getAnalyzer() {
+		QueryConfigHandler config = this.getQueryConfigHandler();
 
-  /**
-   * Set the minimum similarity for fuzzy queries. Default is defined on
-   * {@link FuzzyQuery#defaultMinSimilarity}.
-   */
-  public void setFuzzyMinSim(float fuzzyMinSim) {
-    FuzzyAttribute attr = getQueryConfigHandler().addAttribute(FuzzyAttribute.class);
-    attr.setFuzzyMinSimilarity(fuzzyMinSim);
-  }
-  
-  public void setFieldsBoost(Map<String, Float> boosts) {
-    FieldBoostMapAttribute attr = getQueryConfigHandler().addAttribute(FieldBoostMapAttribute.class);
-    attr.setFieldBoostMap(boosts);
-  }
+		if (config.hasAttribute(AnalyzerAttribute.class)) {
+			AnalyzerAttribute attr = config
+					.getAttribute(AnalyzerAttribute.class);
+			return attr.getAnalyzer();
+		}
 
-  public void setDateResolution(DateTools.Resolution dateResolution) {
-    DateResolutionAttribute attr = getQueryConfigHandler().addAttribute(DateResolutionAttribute.class);
-    attr.setDateResolution(dateResolution);
-  }
+		return null;
+	}
 
-  public void setDateResolution(Map<CharSequence, DateTools.Resolution> dateRes) {
-    FieldDateResolutionMapAttribute attr = getQueryConfigHandler().addAttribute(FieldDateResolutionMapAttribute.class);
-    attr.setFieldDateResolutionMap(dateRes);
-  }
-  
+	/**
+	 * @see #setAllowLeadingWildcard(boolean)
+	 */
+	public boolean getAllowLeadingWildcard() {
+		AllowLeadingWildcardAttribute attr = getQueryConfigHandler()
+				.addAttribute(AllowLeadingWildcardAttribute.class);
+		return attr.isAllowLeadingWildcard();
+	}
+
+	/**
+	 * Get the minimal similarity for fuzzy queries.
+	 */
+	public float getFuzzyMinSim() {
+		FuzzyAttribute attr = getQueryConfigHandler().addAttribute(
+				FuzzyAttribute.class);
+		return attr.getFuzzyMinSimilarity();
+	}
+
+	/**
+	 * Get the prefix length for fuzzy queries.
+	 * 
+	 * @return Returns the fuzzyPrefixLength.
+	 */
+	public int getFuzzyPrefixLength() {
+		FuzzyAttribute attr = getQueryConfigHandler().addAttribute(
+				FuzzyAttribute.class);
+		return attr.getPrefixLength();
+	}
+
+	/**
+	 * Gets the default slop for phrases.
+	 */
+	public int getPhraseSlop() {
+		DefaultPhraseSlopAttribute attr = getQueryConfigHandler().addAttribute(
+				DefaultPhraseSlopAttribute.class);
+		return attr.getDefaultPhraseSlop();
+	}
+
+	/**
+	 * Set the minimum similarity for fuzzy queries. Default is defined on
+	 * {@link FuzzyQuery#defaultMinSimilarity}.
+	 */
+	public void setFuzzyMinSim(float fuzzyMinSim) {
+		FuzzyAttribute attr = getQueryConfigHandler().addAttribute(
+				FuzzyAttribute.class);
+		attr.setFuzzyMinSimilarity(fuzzyMinSim);
+	}
+
+	public void setFieldsBoost(Map<String, Float> boosts) {
+		FieldBoostMapAttribute attr = getQueryConfigHandler().addAttribute(
+				FieldBoostMapAttribute.class);
+		attr.setFieldBoostMap(boosts);
+	}
+
+	public void setDateResolution(DateTools.Resolution dateResolution) {
+		DateResolutionAttribute attr = getQueryConfigHandler().addAttribute(
+				DateResolutionAttribute.class);
+		attr.setDateResolution(dateResolution);
+	}
+
+	public void setDateResolution(
+			Map<CharSequence, DateTools.Resolution> dateRes) {
+		FieldDateResolutionMapAttribute attr = getQueryConfigHandler()
+				.addAttribute(FieldDateResolutionMapAttribute.class);
+		attr.setFieldDateResolutionMap(dateRes);
+	}
+
 }

@@ -103,6 +103,7 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new DefaultPhraseSlopQueryNodeProcessor());
     add(new BoostQueryNodeProcessor());
     add(new MultiTermRewriteMethodProcessor());
+    add(new AqpOptimizationProcessor());
   }
   
   
