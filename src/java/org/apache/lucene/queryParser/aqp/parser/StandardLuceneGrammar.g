@@ -76,7 +76,7 @@ atom
 field	
 	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
-	| STAR COLON -> ^(QANYTHING STAR)
+        | STAR COLON -> ^(QANYTHING STAR)
 	;
 
 value  
@@ -84,8 +84,8 @@ value
 	( 
 	range_term_in -> ^(QRANGEIN range_term_in)
 	| range_term_ex -> ^(QRANGEEX range_term_ex) 
+	| truncated -> ^(QTRUNCATED truncated)	
 	| normal -> ^(QNORMAL normal)
-	| truncated -> ^(QTRUNCATED truncated)
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
 	| STAR -> ^(QANYTHING STAR)
@@ -250,7 +250,7 @@ SQUOTE
 	:	'\'';
 
 
-ESC_CHAR:  '\\' .; 
+fragment ESC_CHAR:  '\\' .; 
 
 TO	:	'TO';
 
@@ -293,8 +293,8 @@ TERM_NORMAL
 
 
 TERM_TRUNCATED: 
-	(NORMAL_CHAR | (STAR | QMARK))+
-	//(STAR | QMARK)? NORMAL_CHAR+ ((STAR | QMARK) (NORMAL_CHAR+ (STAR | QMARK))?)?
+	(STAR|QMARK) ((NORMAL_CHAR|ESC_CHAR)+ (QMARK|STAR))* (NORMAL_CHAR|ESC_CHAR)*
+	| ((NORMAL_CHAR|ESC_CHAR)+ (QMARK|STAR))+ (NORMAL_CHAR|ESC_CHAR)*
 	;
 
 
