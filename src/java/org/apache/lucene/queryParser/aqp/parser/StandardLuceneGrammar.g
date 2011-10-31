@@ -26,6 +26,7 @@ tokens {
   QRANGEIN;
   QRANGEEX;
   QANYTHING;
+  QDATE;
 }
 
 @header{
@@ -87,7 +88,7 @@ value
 	| truncated -> ^(QTRUNCATED truncated)	
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| normal -> ^(QNORMAL normal)	
+	| normal -> ^(QNORMAL normal)
 	| STAR -> ^(QANYTHING STAR)
 	| QMARK -> ^(QANYTHING QMARK)
 	)
@@ -115,10 +116,11 @@ range_term_ex
 
 range_value
 	:	
-	normal -> ^(QNORMAL normal)
-	| truncated -> ^(QTRUNCATED truncated)
+	truncated -> ^(QTRUNCATED truncated)
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	| date -> ^(QNORMAL date)
+	| normal -> ^(QNORMAL normal)	
 	| STAR -> ^(QANYTHING STAR)
 	;
 
@@ -221,6 +223,11 @@ near	:
 	('/' b=NUMBER -> ^(OPERATOR["NEAR " + $b.getText()]) )?
 	;
 
+date	:	
+	//a=NUMBER '/' b=NUMBER '/' c=NUMBER -> ^(QDATE $a $b $c)
+	DATE_TOKEN
+	;
+
 /* ================================================================
  * =                     LEXER                                    =
  * ================================================================
@@ -287,7 +294,8 @@ WS  :   ( ' '
 
 fragment INT: '0' .. '9';
 
-fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
+fragment NORMAL_CHAR  : 
+     ~(' ' | '\t' | '\n' | '\r'
       | '\\' | '\'' | '\"' 
       | '(' | ')' | '[' | ']' | '{' | '}'
       | '+' | '-' | '!' | ':' | '~' | '^' 
@@ -300,6 +308,9 @@ NUMBER
 	INT+ ('.' INT+)?
 	;
 
+DATE_TOKEN
+	:	INT INT? ('/'|'-'|'.') INT INT? ('/'|'-'|'.') INT INT (INT INT)?
+	;
 
 TERM_NORMAL
 	: 
