@@ -89,6 +89,7 @@ value
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
 	| STAR -> ^(QANYTHING STAR)
+	| QMARK -> ^(QANYTHING QMARK)
 	)
 	term_modifier? -> term_modifier? $value
   	;

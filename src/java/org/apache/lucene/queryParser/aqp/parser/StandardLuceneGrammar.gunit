@@ -237,9 +237,43 @@ value:
 //"th*?is" FAIL
 //"th****?is" FAIL
 
-"*" FAIL
+"*" -> "(QANYTHING *)"
 
+"*t" -> "(QTRUNCATED *t)"
 
+"*t*" -> "(QTRUNCATED *t*)"
+
+"*t?" -> "(QTRUNCATED *t?)"
+
+"?t?" -> "(QTRUNCATED ?t?)"
+
+"?t*" -> "(QTRUNCATED ?t*)"
+
+"?t" -> "(QTRUNCATED ?t)"
+
+"*t*a" -> "(QTRUNCATED *t*a)"
+
+"*t?a" -> "(QTRUNCATED *t?a)"
+
+"*t*a*" -> "(QTRUNCATED *t*a*)"
+
+"t*a" -> "(QTRUNCATED t*a)"
+
+"t*a?" -> "(QTRUNCATED t*a?)"
+
+"t*a?a" -> "(QTRUNCATED t*a?a)"
+
+"?" -> "(QANYTHING ?)"
+
+"*t\\*a" -> "(QTRUNCATED *t\\*a)"
+
+"\\*t" -> "(QNORMAL \\*t)"
+
+"*t*a\\*" -> "(QTRUNCATED *t*a\\*)"
+
+"*t*a\\?" -> "(QTRUNCATED *t*a\\?)"
+
+"*t*\\a" -> "(QTRUNCATED *t*\\a)"
 
 
 // testing term modifiers

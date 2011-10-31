@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-30 23:37:30
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-31 01:29:16
 
    package org.apache.lucene.queryParser.aqp.parser;
 
@@ -105,8 +105,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:216:9: ( '(' )
-            // StandardLuceneGrammar.g:216:11: '('
+            // StandardLuceneGrammar.g:217:9: ( '(' )
+            // StandardLuceneGrammar.g:217:11: '('
             {
             match('('); 
 
@@ -126,8 +126,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:218:9: ( ')' )
-            // StandardLuceneGrammar.g:218:11: ')'
+            // StandardLuceneGrammar.g:219:9: ( ')' )
+            // StandardLuceneGrammar.g:219:11: ')'
             {
             match(')'); 
 
@@ -147,8 +147,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = LBRACK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:220:9: ( '[' )
-            // StandardLuceneGrammar.g:220:11: '['
+            // StandardLuceneGrammar.g:221:9: ( '[' )
+            // StandardLuceneGrammar.g:221:11: '['
             {
             match('['); 
 
@@ -168,8 +168,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = RBRACK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:222:9: ( ']' )
-            // StandardLuceneGrammar.g:222:11: ']'
+            // StandardLuceneGrammar.g:223:9: ( ']' )
+            // StandardLuceneGrammar.g:223:11: ']'
             {
             match(']'); 
 
@@ -189,8 +189,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:224:9: ( ':' )
-            // StandardLuceneGrammar.g:224:11: ':'
+            // StandardLuceneGrammar.g:225:9: ( ':' )
+            // StandardLuceneGrammar.g:225:11: ':'
             {
             match(':'); 
 
@@ -210,8 +210,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:226:7: ( '+' )
-            // StandardLuceneGrammar.g:226:9: '+'
+            // StandardLuceneGrammar.g:227:7: ( '+' )
+            // StandardLuceneGrammar.g:227:9: '+'
             {
             match('+'); 
 
@@ -231,8 +231,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = MINUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:228:7: ( '-' )
-            // StandardLuceneGrammar.g:228:9: '-'
+            // StandardLuceneGrammar.g:229:7: ( '-' )
+            // StandardLuceneGrammar.g:229:9: '-'
             {
             match('-'); 
 
@@ -252,8 +252,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = STAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:230:7: ( '*' )
-            // StandardLuceneGrammar.g:230:9: '*'
+            // StandardLuceneGrammar.g:231:7: ( '*' )
+            // StandardLuceneGrammar.g:231:9: '*'
             {
             match('*'); 
 
@@ -273,8 +273,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = QMARK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:232:8: ( '?' )
-            // StandardLuceneGrammar.g:232:10: '?'
+            // StandardLuceneGrammar.g:233:8: ( '?' )
+            // StandardLuceneGrammar.g:233:10: '?'
             {
             match('?'); 
 
@@ -292,8 +292,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "VBAR"
     public final void mVBAR() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:234:16: ( '|' )
-            // StandardLuceneGrammar.g:234:18: '|'
+            // StandardLuceneGrammar.g:235:16: ( '|' )
+            // StandardLuceneGrammar.g:235:18: '|'
             {
             match('|'); 
 
@@ -310,8 +310,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "AMPER"
     public final void mAMPER() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:236:16: ( '&' )
-            // StandardLuceneGrammar.g:236:18: '&'
+            // StandardLuceneGrammar.g:237:16: ( '&' )
+            // StandardLuceneGrammar.g:237:18: '&'
             {
             match('&'); 
 
@@ -330,8 +330,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = LCURLY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:238:9: ( '{' )
-            // StandardLuceneGrammar.g:238:11: '{'
+            // StandardLuceneGrammar.g:239:9: ( '{' )
+            // StandardLuceneGrammar.g:239:11: '{'
             {
             match('{'); 
 
@@ -351,8 +351,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = RCURLY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:240:9: ( '}' )
-            // StandardLuceneGrammar.g:240:11: '}'
+            // StandardLuceneGrammar.g:241:9: ( '}' )
+            // StandardLuceneGrammar.g:241:11: '}'
             {
             match('}'); 
 
@@ -372,8 +372,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = CARAT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:242:7: ( '^' )
-            // StandardLuceneGrammar.g:242:9: '^'
+            // StandardLuceneGrammar.g:243:7: ( '^' )
+            // StandardLuceneGrammar.g:243:9: '^'
             {
             match('^'); 
 
@@ -393,8 +393,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = TILDE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:244:7: ( '~' )
-            // StandardLuceneGrammar.g:244:9: '~'
+            // StandardLuceneGrammar.g:245:7: ( '~' )
+            // StandardLuceneGrammar.g:245:9: '~'
             {
             match('~'); 
 
@@ -414,8 +414,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = DQUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:247:2: ( '\\\"' )
-            // StandardLuceneGrammar.g:247:4: '\\\"'
+            // StandardLuceneGrammar.g:248:2: ( '\\\"' )
+            // StandardLuceneGrammar.g:248:4: '\\\"'
             {
             match('\"'); 
 
@@ -435,8 +435,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = SQUOTE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:250:2: ( '\\'' )
-            // StandardLuceneGrammar.g:250:4: '\\''
+            // StandardLuceneGrammar.g:251:2: ( '\\'' )
+            // StandardLuceneGrammar.g:251:4: '\\''
             {
             match('\''); 
 
@@ -454,8 +454,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "ESC_CHAR"
     public final void mESC_CHAR() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:253:18: ( '\\\\' . )
-            // StandardLuceneGrammar.g:253:21: '\\\\' .
+            // StandardLuceneGrammar.g:254:18: ( '\\\\' . )
+            // StandardLuceneGrammar.g:254:21: '\\\\' .
             {
             match('\\'); 
 
@@ -476,8 +476,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = TO;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:255:4: ( 'TO' )
-            // StandardLuceneGrammar.g:255:6: 'TO'
+            // StandardLuceneGrammar.g:256:4: ( 'TO' )
+            // StandardLuceneGrammar.g:256:6: 'TO'
             {
             match("TO"); 
 
@@ -499,10 +499,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = AND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:258:7: ( ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) ) )
-            // StandardLuceneGrammar.g:258:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) )
+            // StandardLuceneGrammar.g:259:7: ( ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) ) )
+            // StandardLuceneGrammar.g:259:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) )
             {
-            // StandardLuceneGrammar.g:258:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) )
+            // StandardLuceneGrammar.g:259:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) | ( AMPER ( AMPER )? ) )
             int alt2=2;
             int LA2_0 = input.LA(1);
 
@@ -521,7 +521,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt2) {
                 case 1 :
-                    // StandardLuceneGrammar.g:258:10: ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' )
+                    // StandardLuceneGrammar.g:259:10: ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' )
                     {
                     if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                         input.consume();
@@ -556,15 +556,15 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:258:48: ( AMPER ( AMPER )? )
+                    // StandardLuceneGrammar.g:259:48: ( AMPER ( AMPER )? )
                     {
-                    // StandardLuceneGrammar.g:258:48: ( AMPER ( AMPER )? )
-                    // StandardLuceneGrammar.g:258:49: AMPER ( AMPER )?
+                    // StandardLuceneGrammar.g:259:48: ( AMPER ( AMPER )? )
+                    // StandardLuceneGrammar.g:259:49: AMPER ( AMPER )?
                     {
                     mAMPER(); 
 
 
-                    // StandardLuceneGrammar.g:258:55: ( AMPER )?
+                    // StandardLuceneGrammar.g:259:55: ( AMPER )?
                     int alt1=2;
                     int LA1_0 = input.LA(1);
 
@@ -616,10 +616,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = OR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:259:5: ( ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) ) )
-            // StandardLuceneGrammar.g:259:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) )
+            // StandardLuceneGrammar.g:260:5: ( ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) ) )
+            // StandardLuceneGrammar.g:260:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) )
             {
-            // StandardLuceneGrammar.g:259:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) )
+            // StandardLuceneGrammar.g:260:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) | ( VBAR ( VBAR )? ) )
             int alt4=2;
             int LA4_0 = input.LA(1);
 
@@ -638,7 +638,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt4) {
                 case 1 :
-                    // StandardLuceneGrammar.g:259:8: ( 'o' | 'O' ) ( 'r' | 'R' )
+                    // StandardLuceneGrammar.g:260:8: ( 'o' | 'O' ) ( 'r' | 'R' )
                     {
                     if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                         input.consume();
@@ -663,15 +663,15 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:259:34: ( VBAR ( VBAR )? )
+                    // StandardLuceneGrammar.g:260:34: ( VBAR ( VBAR )? )
                     {
-                    // StandardLuceneGrammar.g:259:34: ( VBAR ( VBAR )? )
-                    // StandardLuceneGrammar.g:259:35: VBAR ( VBAR )?
+                    // StandardLuceneGrammar.g:260:34: ( VBAR ( VBAR )? )
+                    // StandardLuceneGrammar.g:260:35: VBAR ( VBAR )?
                     {
                     mVBAR(); 
 
 
-                    // StandardLuceneGrammar.g:259:40: ( VBAR )?
+                    // StandardLuceneGrammar.g:260:40: ( VBAR )?
                     int alt3=2;
                     int LA3_0 = input.LA(1);
 
@@ -723,10 +723,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = NOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:260:7: ( ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) | '!' ) )
-            // StandardLuceneGrammar.g:260:9: ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) | '!' )
+            // StandardLuceneGrammar.g:261:7: ( ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) | '!' ) )
+            // StandardLuceneGrammar.g:261:9: ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) | '!' )
             {
-            // StandardLuceneGrammar.g:260:9: ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) | '!' )
+            // StandardLuceneGrammar.g:261:9: ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) | '!' )
             int alt5=2;
             int LA5_0 = input.LA(1);
 
@@ -745,7 +745,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt5) {
                 case 1 :
-                    // StandardLuceneGrammar.g:260:10: ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' )
+                    // StandardLuceneGrammar.g:261:10: ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' )
                     {
                     if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                         input.consume();
@@ -780,7 +780,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:260:48: '!'
+                    // StandardLuceneGrammar.g:261:48: '!'
                     {
                     match('!'); 
 
@@ -806,10 +806,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = NEAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:261:7: ( ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' ) )
-            // StandardLuceneGrammar.g:261:9: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' )
+            // StandardLuceneGrammar.g:262:7: ( ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' ) )
+            // StandardLuceneGrammar.g:262:9: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' )
             {
-            // StandardLuceneGrammar.g:261:9: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' )
+            // StandardLuceneGrammar.g:262:9: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) | 'n' )
             int alt6=2;
             int LA6_0 = input.LA(1);
 
@@ -835,7 +835,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt6) {
                 case 1 :
-                    // StandardLuceneGrammar.g:261:10: ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' )
+                    // StandardLuceneGrammar.g:262:10: ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' )
                     {
                     if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                         input.consume();
@@ -880,7 +880,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:261:60: 'n'
+                    // StandardLuceneGrammar.g:262:60: 'n'
                     {
                     match('n'); 
 
@@ -906,8 +906,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:264:5: ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
-            // StandardLuceneGrammar.g:264:9: ( ' ' | '\\t' | '\\r' | '\\n' )
+            // StandardLuceneGrammar.g:265:5: ( ( ' ' | '\\t' | '\\r' | '\\n' ) )
+            // StandardLuceneGrammar.g:265:9: ( ' ' | '\\t' | '\\r' | '\\n' )
             {
             if ( (input.LA(1) >= '\t' && input.LA(1) <= '\n')||input.LA(1)=='\r'||input.LA(1)==' ' ) {
                 input.consume();
@@ -935,7 +935,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "INT"
     public final void mINT() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:273:13: ( '0' .. '9' )
+            // StandardLuceneGrammar.g:274:13: ( '0' .. '9' )
             // StandardLuceneGrammar.g:
             {
             if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
@@ -961,8 +961,8 @@ public class StandardLuceneGrammarLexer extends Lexer {
     // $ANTLR start "NORMAL_CHAR"
     public final void mNORMAL_CHAR() throws RecognitionException {
         try {
-            // StandardLuceneGrammar.g:275:23: (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\\\' | '\\'' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '*' | '|' | '&' | '?' | '\\\\\\\"' | '/' ) )
-            // StandardLuceneGrammar.g:275:25: ~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\\\' | '\\'' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '*' | '|' | '&' | '?' | '\\\\\\\"' | '/' )
+            // StandardLuceneGrammar.g:276:23: (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\\\' | '\\'' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '*' | '|' | '&' | '?' | '\\\\\\\"' | '/' ) )
+            // StandardLuceneGrammar.g:276:25: ~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\\\' | '\\'' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '*' | '|' | '&' | '?' | '\\\\\\\"' | '/' )
             {
             if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\b')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '\u001F')||(input.LA(1) >= '#' && input.LA(1) <= '%')||input.LA(1)==','||input.LA(1)=='.'||(input.LA(1) >= '0' && input.LA(1) <= '9')||(input.LA(1) >= ';' && input.LA(1) <= '>')||(input.LA(1) >= '@' && input.LA(1) <= 'Z')||(input.LA(1) >= '_' && input.LA(1) <= 'z')||(input.LA(1) >= '\u007F' && input.LA(1) <= '\uFFFF') ) {
                 input.consume();
@@ -989,10 +989,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = NUMBER;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:284:2: ( ( INT )+ ( '.' ( INT )+ )? )
-            // StandardLuceneGrammar.g:285:2: ( INT )+ ( '.' ( INT )+ )?
+            // StandardLuceneGrammar.g:285:2: ( ( INT )+ ( '.' ( INT )+ )? )
+            // StandardLuceneGrammar.g:286:2: ( INT )+ ( '.' ( INT )+ )?
             {
-            // StandardLuceneGrammar.g:285:2: ( INT )+
+            // StandardLuceneGrammar.g:286:2: ( INT )+
             int cnt7=0;
             loop7:
             do {
@@ -1031,7 +1031,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             } while (true);
 
 
-            // StandardLuceneGrammar.g:285:7: ( '.' ( INT )+ )?
+            // StandardLuceneGrammar.g:286:7: ( '.' ( INT )+ )?
             int alt9=2;
             int LA9_0 = input.LA(1);
 
@@ -1040,11 +1040,11 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt9) {
                 case 1 :
-                    // StandardLuceneGrammar.g:285:8: '.' ( INT )+
+                    // StandardLuceneGrammar.g:286:8: '.' ( INT )+
                     {
                     match('.'); 
 
-                    // StandardLuceneGrammar.g:285:12: ( INT )+
+                    // StandardLuceneGrammar.g:286:12: ( INT )+
                     int cnt8=0;
                     loop8:
                     do {
@@ -1105,10 +1105,10 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = TERM_NORMAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:290:2: ( ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )* )
-            // StandardLuceneGrammar.g:291:2: ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )*
+            // StandardLuceneGrammar.g:291:2: ( ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )* )
+            // StandardLuceneGrammar.g:292:2: ( NORMAL_CHAR | ESC_CHAR ) ( NORMAL_CHAR | ESC_CHAR )*
             {
-            // StandardLuceneGrammar.g:291:2: ( NORMAL_CHAR | ESC_CHAR )
+            // StandardLuceneGrammar.g:292:2: ( NORMAL_CHAR | ESC_CHAR )
             int alt10=2;
             int LA10_0 = input.LA(1);
 
@@ -1127,7 +1127,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt10) {
                 case 1 :
-                    // StandardLuceneGrammar.g:291:4: NORMAL_CHAR
+                    // StandardLuceneGrammar.g:292:4: NORMAL_CHAR
                     {
                     mNORMAL_CHAR(); 
 
@@ -1135,7 +1135,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:291:18: ESC_CHAR
+                    // StandardLuceneGrammar.g:292:18: ESC_CHAR
                     {
                     mESC_CHAR(); 
 
@@ -1146,7 +1146,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
 
 
-            // StandardLuceneGrammar.g:291:28: ( NORMAL_CHAR | ESC_CHAR )*
+            // StandardLuceneGrammar.g:292:28: ( NORMAL_CHAR | ESC_CHAR )*
             loop11:
             do {
                 int alt11=3;
@@ -1162,7 +1162,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                 switch (alt11) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:291:30: NORMAL_CHAR
+            	    // StandardLuceneGrammar.g:292:30: NORMAL_CHAR
             	    {
             	    mNORMAL_CHAR(); 
 
@@ -1170,7 +1170,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             	    }
             	    break;
             	case 2 :
-            	    // StandardLuceneGrammar.g:291:44: ESC_CHAR
+            	    // StandardLuceneGrammar.g:292:44: ESC_CHAR
             	    {
             	    mESC_CHAR(); 
 
@@ -1200,7 +1200,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = TERM_TRUNCATED;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:295:15: ( ( STAR | QMARK ) ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )* ( NORMAL_CHAR | ESC_CHAR )* | ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )+ ( NORMAL_CHAR | ESC_CHAR )* )
+            // StandardLuceneGrammar.g:296:15: ( ( STAR | QMARK ) ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )* ( NORMAL_CHAR | ESC_CHAR )* | ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )+ ( NORMAL_CHAR | ESC_CHAR )* )
             int alt18=2;
             int LA18_0 = input.LA(1);
 
@@ -1219,7 +1219,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             }
             switch (alt18) {
                 case 1 :
-                    // StandardLuceneGrammar.g:296:2: ( STAR | QMARK ) ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )* ( NORMAL_CHAR | ESC_CHAR )*
+                    // StandardLuceneGrammar.g:297:2: ( STAR | QMARK ) ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )* ( NORMAL_CHAR | ESC_CHAR )*
                     {
                     if ( input.LA(1)=='*'||input.LA(1)=='?' ) {
                         input.consume();
@@ -1231,16 +1231,16 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
 
 
-                    // StandardLuceneGrammar.g:296:15: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )*
+                    // StandardLuceneGrammar.g:297:15: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )*
                     loop13:
                     do {
                         int alt13=2;
                         alt13 = dfa13.predict(input);
                         switch (alt13) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:296:16: ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR )
+                    	    // StandardLuceneGrammar.g:297:16: ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR )
                     	    {
-                    	    // StandardLuceneGrammar.g:296:16: ( NORMAL_CHAR | ESC_CHAR )+
+                    	    // StandardLuceneGrammar.g:297:16: ( NORMAL_CHAR | ESC_CHAR )+
                     	    int cnt12=0;
                     	    loop12:
                     	    do {
@@ -1257,7 +1257,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                     	        switch (alt12) {
                     	    	case 1 :
-                    	    	    // StandardLuceneGrammar.g:296:17: NORMAL_CHAR
+                    	    	    // StandardLuceneGrammar.g:297:17: NORMAL_CHAR
                     	    	    {
                     	    	    mNORMAL_CHAR(); 
 
@@ -1265,7 +1265,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     	    	    }
                     	    	    break;
                     	    	case 2 :
-                    	    	    // StandardLuceneGrammar.g:296:29: ESC_CHAR
+                    	    	    // StandardLuceneGrammar.g:297:29: ESC_CHAR
                     	    	    {
                     	    	    mESC_CHAR(); 
 
@@ -1302,7 +1302,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     } while (true);
 
 
-                    // StandardLuceneGrammar.g:296:55: ( NORMAL_CHAR | ESC_CHAR )*
+                    // StandardLuceneGrammar.g:297:55: ( NORMAL_CHAR | ESC_CHAR )*
                     loop14:
                     do {
                         int alt14=3;
@@ -1318,7 +1318,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                         switch (alt14) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:296:56: NORMAL_CHAR
+                    	    // StandardLuceneGrammar.g:297:56: NORMAL_CHAR
                     	    {
                     	    mNORMAL_CHAR(); 
 
@@ -1326,7 +1326,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     	    }
                     	    break;
                     	case 2 :
-                    	    // StandardLuceneGrammar.g:296:68: ESC_CHAR
+                    	    // StandardLuceneGrammar.g:297:68: ESC_CHAR
                     	    {
                     	    mESC_CHAR(); 
 
@@ -1343,9 +1343,9 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // StandardLuceneGrammar.g:297:4: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )+ ( NORMAL_CHAR | ESC_CHAR )*
+                    // StandardLuceneGrammar.g:298:4: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )+ ( NORMAL_CHAR | ESC_CHAR )*
                     {
-                    // StandardLuceneGrammar.g:297:4: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )+
+                    // StandardLuceneGrammar.g:298:4: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )+
                     int cnt16=0;
                     loop16:
                     do {
@@ -1353,9 +1353,9 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         alt16 = dfa16.predict(input);
                         switch (alt16) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:297:5: ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR )
+                    	    // StandardLuceneGrammar.g:298:5: ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR )
                     	    {
-                    	    // StandardLuceneGrammar.g:297:5: ( NORMAL_CHAR | ESC_CHAR )+
+                    	    // StandardLuceneGrammar.g:298:5: ( NORMAL_CHAR | ESC_CHAR )+
                     	    int cnt15=0;
                     	    loop15:
                     	    do {
@@ -1372,7 +1372,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                     	        switch (alt15) {
                     	    	case 1 :
-                    	    	    // StandardLuceneGrammar.g:297:6: NORMAL_CHAR
+                    	    	    // StandardLuceneGrammar.g:298:6: NORMAL_CHAR
                     	    	    {
                     	    	    mNORMAL_CHAR(); 
 
@@ -1380,7 +1380,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     	    	    }
                     	    	    break;
                     	    	case 2 :
-                    	    	    // StandardLuceneGrammar.g:297:18: ESC_CHAR
+                    	    	    // StandardLuceneGrammar.g:298:18: ESC_CHAR
                     	    	    {
                     	    	    mESC_CHAR(); 
 
@@ -1421,7 +1421,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     } while (true);
 
 
-                    // StandardLuceneGrammar.g:297:44: ( NORMAL_CHAR | ESC_CHAR )*
+                    // StandardLuceneGrammar.g:298:44: ( NORMAL_CHAR | ESC_CHAR )*
                     loop17:
                     do {
                         int alt17=3;
@@ -1437,7 +1437,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
 
                         switch (alt17) {
                     	case 1 :
-                    	    // StandardLuceneGrammar.g:297:45: NORMAL_CHAR
+                    	    // StandardLuceneGrammar.g:298:45: NORMAL_CHAR
                     	    {
                     	    mNORMAL_CHAR(); 
 
@@ -1445,7 +1445,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                     	    }
                     	    break;
                     	case 2 :
-                    	    // StandardLuceneGrammar.g:297:57: ESC_CHAR
+                    	    // StandardLuceneGrammar.g:298:57: ESC_CHAR
                     	    {
                     	    mESC_CHAR(); 
 
@@ -1477,13 +1477,13 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = PHRASE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:304:2: ( DQUOTE (~ ( '\\\"' | '?' | '*' ) )+ DQUOTE )
-            // StandardLuceneGrammar.g:305:2: DQUOTE (~ ( '\\\"' | '?' | '*' ) )+ DQUOTE
+            // StandardLuceneGrammar.g:303:2: ( DQUOTE (~ ( '\\\"' | '?' | '*' ) )+ DQUOTE )
+            // StandardLuceneGrammar.g:304:2: DQUOTE (~ ( '\\\"' | '?' | '*' ) )+ DQUOTE
             {
             mDQUOTE(); 
 
 
-            // StandardLuceneGrammar.g:305:9: (~ ( '\\\"' | '?' | '*' ) )+
+            // StandardLuceneGrammar.g:304:9: (~ ( '\\\"' | '?' | '*' ) )+
             int cnt19=0;
             loop19:
             do {
@@ -1541,13 +1541,13 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = PHRASE_ANYTHING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:308:17: ( DQUOTE (~ ( '\\\"' ) )+ DQUOTE )
-            // StandardLuceneGrammar.g:309:2: DQUOTE (~ ( '\\\"' ) )+ DQUOTE
+            // StandardLuceneGrammar.g:307:17: ( DQUOTE (~ ( '\\\"' ) )+ DQUOTE )
+            // StandardLuceneGrammar.g:308:2: DQUOTE (~ ( '\\\"' ) )+ DQUOTE
             {
             mDQUOTE(); 
 
 
-            // StandardLuceneGrammar.g:309:9: (~ ( '\\\"' ) )+
+            // StandardLuceneGrammar.g:308:9: (~ ( '\\\"' ) )+
             int cnt20=0;
             loop20:
             do {
@@ -1887,7 +1887,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             this.transition = DFA13_transition;
         }
         public String getDescription() {
-            return "()* loopback of 296:15: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )*";
+            return "()* loopback of 297:15: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )*";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             IntStream input = _input;
@@ -2009,7 +2009,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             this.transition = DFA16_transition;
         }
         public String getDescription() {
-            return "()+ loopback of 297:4: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )+";
+            return "()+ loopback of 298:4: ( ( NORMAL_CHAR | ESC_CHAR )+ ( QMARK | STAR ) )+";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             IntStream input = _input;
