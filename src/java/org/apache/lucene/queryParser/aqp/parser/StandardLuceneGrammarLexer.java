@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-31 01:46:22
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-10-31 14:03:50
 
    package org.apache.lucene.queryParser.aqp.parser;
 
@@ -1477,38 +1477,29 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = PHRASE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:303:2: ( DQUOTE (~ ( '\\\\\"' | '?' | '*' ) )+ DQUOTE )
-            // StandardLuceneGrammar.g:304:2: DQUOTE (~ ( '\\\\\"' | '?' | '*' ) )+ DQUOTE
+            // StandardLuceneGrammar.g:303:2: ( DQUOTE (~ ( '\\\"' | '\\\\\"' | '?' | '*' ) )+ DQUOTE )
+            // StandardLuceneGrammar.g:304:2: DQUOTE (~ ( '\\\"' | '\\\\\"' | '?' | '*' ) )+ DQUOTE
             {
             mDQUOTE(); 
 
 
-            // StandardLuceneGrammar.g:304:9: (~ ( '\\\\\"' | '?' | '*' ) )+
+            // StandardLuceneGrammar.g:304:9: (~ ( '\\\"' | '\\\\\"' | '?' | '*' ) )+
             int cnt19=0;
             loop19:
             do {
                 int alt19=2;
                 int LA19_0 = input.LA(1);
 
-                if ( (LA19_0=='\"') ) {
-                    int LA19_1 = input.LA(2);
-
-                    if ( ((LA19_1 >= '\u0000' && LA19_1 <= ')')||(LA19_1 >= '+' && LA19_1 <= '>')||(LA19_1 >= '@' && LA19_1 <= '\uFFFF')) ) {
-                        alt19=1;
-                    }
-
-
-                }
-                else if ( ((LA19_0 >= '\u0000' && LA19_0 <= '!')||(LA19_0 >= '#' && LA19_0 <= ')')||(LA19_0 >= '+' && LA19_0 <= '>')||(LA19_0 >= '@' && LA19_0 <= '\uFFFF')) ) {
+                if ( ((LA19_0 >= '\u0000' && LA19_0 <= '!')||(LA19_0 >= '#' && LA19_0 <= ')')||(LA19_0 >= '+' && LA19_0 <= '>')||(LA19_0 >= '@' && LA19_0 <= '\uFFFF')) ) {
                     alt19=1;
                 }
 
 
                 switch (alt19) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:304:9: ~ ( '\\\\\"' | '?' | '*' )
+            	    // StandardLuceneGrammar.g:304:9: ~ ( '\\\"' | '\\\\\"' | '?' | '*' )
             	    {
-            	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= ')')||(input.LA(1) >= '+' && input.LA(1) <= '>')||(input.LA(1) >= '@' && input.LA(1) <= '\uFFFF') ) {
+            	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= ')')||(input.LA(1) >= '+' && input.LA(1) <= '>')||(input.LA(1) >= '@' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
             	    }
             	    else {
@@ -1550,38 +1541,29 @@ public class StandardLuceneGrammarLexer extends Lexer {
         try {
             int _type = PHRASE_ANYTHING;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // StandardLuceneGrammar.g:307:17: ( DQUOTE (~ ( '\\\\\"' ) )+ DQUOTE )
-            // StandardLuceneGrammar.g:308:2: DQUOTE (~ ( '\\\\\"' ) )+ DQUOTE
+            // StandardLuceneGrammar.g:307:17: ( DQUOTE (~ ( '\\\"' | '\\\\\"' ) )+ DQUOTE )
+            // StandardLuceneGrammar.g:308:2: DQUOTE (~ ( '\\\"' | '\\\\\"' ) )+ DQUOTE
             {
             mDQUOTE(); 
 
 
-            // StandardLuceneGrammar.g:308:9: (~ ( '\\\\\"' ) )+
+            // StandardLuceneGrammar.g:308:9: (~ ( '\\\"' | '\\\\\"' ) )+
             int cnt20=0;
             loop20:
             do {
                 int alt20=2;
                 int LA20_0 = input.LA(1);
 
-                if ( (LA20_0=='\"') ) {
-                    int LA20_1 = input.LA(2);
-
-                    if ( ((LA20_1 >= '\u0000' && LA20_1 <= '\uFFFF')) ) {
-                        alt20=1;
-                    }
-
-
-                }
-                else if ( ((LA20_0 >= '\u0000' && LA20_0 <= '!')||(LA20_0 >= '#' && LA20_0 <= '\uFFFF')) ) {
+                if ( ((LA20_0 >= '\u0000' && LA20_0 <= '!')||(LA20_0 >= '#' && LA20_0 <= '\uFFFF')) ) {
                     alt20=1;
                 }
 
 
                 switch (alt20) {
             	case 1 :
-            	    // StandardLuceneGrammar.g:308:9: ~ ( '\\\\\"' )
+            	    // StandardLuceneGrammar.g:308:9: ~ ( '\\\"' | '\\\\\"' )
             	    {
-            	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\uFFFF') ) {
+            	    if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '\uFFFF') ) {
             	        input.consume();
             	    }
             	    else {
@@ -2095,29 +2077,29 @@ public class StandardLuceneGrammarLexer extends Lexer {
     static final String DFA21_eotS =
         "\11\uffff\1\35\1\37\4\uffff\1\40\1\uffff\2\44\1\uffff\1\44\1\uffff"+
         "\1\53\1\uffff\1\44\1\uffff\1\55\1\44\7\uffff\1\61\1\uffff\1\44\1"+
-        "\uffff\1\44\1\25\2\44\1\uffff\1\44\1\uffff\1\55\1\44\1\67\1\uffff"+
-        "\1\44\1\23\1\27\1\44\1\55\1\uffff\1\53";
+        "\uffff\1\44\1\25\2\44\1\uffff\1\44\1\uffff\1\55\1\44\2\uffff\1\44"+
+        "\1\23\1\27\1\44\1\55\1\uffff\1\53";
     static final String DFA21_eofS =
         "\71\uffff";
     static final String DFA21_minS =
         "\1\0\10\uffff\2\0\4\uffff\1\0\1\uffff\2\0\1\uffff\1\0\1\uffff\1"+
         "\0\1\uffff\1\0\1\uffff\3\0\4\uffff\1\0\1\uffff\1\0\1\uffff\6\0\1"+
-        "\uffff\1\0\1\uffff\3\0\1\uffff\5\0\1\uffff\1\0";
+        "\uffff\1\0\1\uffff\2\0\2\uffff\5\0\1\uffff\1\0";
     static final String DFA21_maxS =
         "\1\uffff\10\uffff\2\uffff\4\uffff\1\uffff\1\uffff\2\uffff\1\uffff"+
         "\1\uffff\1\uffff\1\uffff\1\uffff\1\uffff\1\uffff\3\uffff\4\uffff"+
         "\1\uffff\1\uffff\1\uffff\1\uffff\6\uffff\1\uffff\1\uffff\1\uffff"+
-        "\3\uffff\1\uffff\5\uffff\1\uffff\1\uffff";
+        "\2\uffff\2\uffff\5\uffff\1\uffff\1\uffff";
     static final String DFA21_acceptS =
         "\1\uffff\1\1\1\2\1\3\1\4\1\5\1\6\1\7\1\10\2\uffff\1\13\1\14\1\15"+
         "\1\16\1\uffff\1\20\2\uffff\1\22\1\uffff\1\23\1\uffff\1\24\1\uffff"+
         "\1\26\3\uffff\1\11\1\31\1\12\1\17\1\uffff\1\33\1\uffff\1\30\6\uffff"+
-        "\1\25\1\uffff\1\27\3\uffff\1\21\5\uffff\1\32\1\uffff";
+        "\1\25\1\uffff\1\27\2\uffff\1\32\1\21\5\uffff\1\32\1\uffff";
     static final String DFA21_specialS =
-        "\1\21\10\uffff\1\31\1\12\4\uffff\1\23\1\uffff\1\2\1\0\1\uffff\1"+
-        "\14\1\uffff\1\35\1\uffff\1\1\1\uffff\1\32\1\13\1\15\4\uffff\1\17"+
-        "\1\uffff\1\7\1\uffff\1\24\1\16\1\5\1\33\1\34\1\27\1\uffff\1\25\1"+
-        "\uffff\1\3\1\26\1\10\1\uffff\1\11\1\20\1\4\1\30\1\6\1\uffff\1\22}>";
+        "\1\20\10\uffff\1\30\1\11\4\uffff\1\22\1\uffff\1\2\1\0\1\uffff\1"+
+        "\13\1\uffff\1\34\1\uffff\1\1\1\uffff\1\31\1\12\1\14\4\uffff\1\16"+
+        "\1\uffff\1\7\1\uffff\1\23\1\15\1\5\1\32\1\33\1\26\1\uffff\1\24\1"+
+        "\uffff\1\3\1\25\2\uffff\1\10\1\17\1\4\1\27\1\6\1\uffff\1\21}>";
     static final String[] DFA21_transitionS = {
             "\11\33\2\31\2\33\1\31\22\33\1\31\1\27\1\17\3\33\1\23\1\20\1"+
             "\2\1\3\1\11\1\7\1\33\1\10\1\33\1\1\12\32\1\6\4\33\1\12\1\33"+
@@ -2141,7 +2123,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             "",
             "",
             "",
-            "\52\41\1\42\24\41\1\42\uffc0\41",
+            "\42\41\1\uffff\7\41\1\42\24\41\1\42\uffc0\41",
             "",
             "\11\45\2\uffff\2\45\1\uffff\22\45\3\uffff\3\45\4\uffff\1\36"+
             "\1\uffff\1\45\1\uffff\1\45\1\uffff\12\45\1\uffff\4\45\1\36\17"+
@@ -2213,7 +2195,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
             "\11\45\2\uffff\2\45\1\uffff\22\45\3\uffff\3\45\4\uffff\1\36"+
             "\1\uffff\1\45\1\uffff\1\45\1\uffff\12\45\1\uffff\4\45\1\36\33"+
             "\45\1\uffff\1\46\2\uffff\34\45\4\uffff\uff81\45",
-            "\42\41\1\60\7\41\1\42\24\41\1\42\uffc0\41",
+            "",
             "",
             "\11\45\2\uffff\2\45\1\uffff\22\45\3\uffff\3\45\4\uffff\1\36"+
             "\1\uffff\1\45\1\uffff\1\45\1\uffff\12\45\1\uffff\4\45\1\36\33"+
@@ -2410,21 +2392,6 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         break;
 
                     case 8 : 
-                        int LA21_48 = input.LA(1);
-
-                        s = -1;
-                        if ( (LA21_48=='\"') ) {s = 48;}
-
-                        else if ( ((LA21_48 >= '\u0000' && LA21_48 <= '!')||(LA21_48 >= '#' && LA21_48 <= ')')||(LA21_48 >= '+' && LA21_48 <= '>')||(LA21_48 >= '@' && LA21_48 <= '\uFFFF')) ) {s = 33;}
-
-                        else if ( (LA21_48=='*'||LA21_48=='?') ) {s = 34;}
-
-                        else s = 55;
-
-                        if ( s>=0 ) return s;
-                        break;
-
-                    case 9 : 
                         int LA21_50 = input.LA(1);
 
                         s = -1;
@@ -2439,7 +2406,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 10 : 
+                    case 9 : 
                         int LA21_10 = input.LA(1);
 
                         s = -1;
@@ -2450,7 +2417,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 11 : 
+                    case 10 : 
                         int LA21_27 = input.LA(1);
 
                         s = -1;
@@ -2465,7 +2432,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 12 : 
+                    case 11 : 
                         int LA21_20 = input.LA(1);
 
                         s = -1;
@@ -2482,7 +2449,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 13 : 
+                    case 12 : 
                         int LA21_28 = input.LA(1);
 
                         s = -1;
@@ -2491,7 +2458,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 14 : 
+                    case 13 : 
                         int LA21_38 = input.LA(1);
 
                         s = -1;
@@ -2500,7 +2467,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 15 : 
+                    case 14 : 
                         int LA21_33 = input.LA(1);
 
                         s = -1;
@@ -2513,7 +2480,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 16 : 
+                    case 15 : 
                         int LA21_51 = input.LA(1);
 
                         s = -1;
@@ -2528,7 +2495,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 17 : 
+                    case 16 : 
                         int LA21_0 = input.LA(1);
 
                         s = -1;
@@ -2591,7 +2558,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 18 : 
+                    case 17 : 
                         int LA21_56 = input.LA(1);
 
                         s = -1;
@@ -2606,11 +2573,11 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 19 : 
+                    case 18 : 
                         int LA21_15 = input.LA(1);
 
                         s = -1;
-                        if ( ((LA21_15 >= '\u0000' && LA21_15 <= ')')||(LA21_15 >= '+' && LA21_15 <= '>')||(LA21_15 >= '@' && LA21_15 <= '\uFFFF')) ) {s = 33;}
+                        if ( ((LA21_15 >= '\u0000' && LA21_15 <= '!')||(LA21_15 >= '#' && LA21_15 <= ')')||(LA21_15 >= '+' && LA21_15 <= '>')||(LA21_15 >= '@' && LA21_15 <= '\uFFFF')) ) {s = 33;}
 
                         else if ( (LA21_15=='*'||LA21_15=='?') ) {s = 34;}
 
@@ -2619,7 +2586,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 20 : 
+                    case 19 : 
                         int LA21_37 = input.LA(1);
 
                         s = -1;
@@ -2634,7 +2601,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 21 : 
+                    case 20 : 
                         int LA21_44 = input.LA(1);
 
                         s = -1;
@@ -2651,7 +2618,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 22 : 
+                    case 21 : 
                         int LA21_47 = input.LA(1);
 
                         s = -1;
@@ -2666,7 +2633,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 23 : 
+                    case 22 : 
                         int LA21_42 = input.LA(1);
 
                         s = -1;
@@ -2683,7 +2650,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 24 : 
+                    case 23 : 
                         int LA21_53 = input.LA(1);
 
                         s = -1;
@@ -2700,7 +2667,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 25 : 
+                    case 24 : 
                         int LA21_9 = input.LA(1);
 
                         s = -1;
@@ -2711,7 +2678,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 26 : 
+                    case 25 : 
                         int LA21_26 = input.LA(1);
 
                         s = -1;
@@ -2730,7 +2697,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 27 : 
+                    case 26 : 
                         int LA21_40 = input.LA(1);
 
                         s = -1;
@@ -2745,7 +2712,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 28 : 
+                    case 27 : 
                         int LA21_41 = input.LA(1);
 
                         s = -1;
@@ -2762,7 +2729,7 @@ public class StandardLuceneGrammarLexer extends Lexer {
                         if ( s>=0 ) return s;
                         break;
 
-                    case 29 : 
+                    case 28 : 
                         int LA21_22 = input.LA(1);
 
                         s = -1;

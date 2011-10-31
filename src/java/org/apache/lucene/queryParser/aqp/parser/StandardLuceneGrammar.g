@@ -85,9 +85,9 @@ value
 	range_term_in -> ^(QRANGEIN range_term_in)
 	| range_term_ex -> ^(QRANGEEX range_term_ex) 
 	| truncated -> ^(QTRUNCATED truncated)	
-	| normal -> ^(QNORMAL normal)
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	| normal -> ^(QNORMAL normal)	
 	| STAR -> ^(QANYTHING STAR)
 	| QMARK -> ^(QANYTHING QMARK)
 	)
@@ -301,9 +301,9 @@ TERM_TRUNCATED:
 
 PHRASE	
 	:	
-	DQUOTE ~('\\"'|'?'|'*')+ DQUOTE
+	DQUOTE ~('\"'|'\\"'|'?'|'*')+ DQUOTE
 	;
 
 PHRASE_ANYTHING	:	
-	DQUOTE ~('\\"')+ DQUOTE
+	DQUOTE ~('\"'|'\\"')+ DQUOTE
 	;
