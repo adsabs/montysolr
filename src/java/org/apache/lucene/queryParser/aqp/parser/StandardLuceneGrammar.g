@@ -301,9 +301,9 @@ TERM_TRUNCATED:
 
 PHRASE	
 	:	
-	DQUOTE ~('\"'|'?'|'*')+ DQUOTE
+	DQUOTE ~('\\"'|'?'|'*')+ DQUOTE
 	;
 
 PHRASE_ANYTHING	:	
-	DQUOTE ~('\"')+ DQUOTE
+	DQUOTE ~('\\"')+ DQUOTE
 	;

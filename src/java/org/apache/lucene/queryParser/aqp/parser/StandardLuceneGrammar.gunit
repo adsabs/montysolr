@@ -150,6 +150,10 @@ value:
 
 "\"  this  \"" -> "(QPHRASE \"  this  \")"
 
+"\"a \\\"b c\\\" d\"" -> ""
+
+
+
 "\"this*\"" -> "(QPHRASETRUNC \"this*\")"
 
 "\"this*a\"" -> "(QPHRASETRUNC \"this*a\")"
