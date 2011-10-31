@@ -41,15 +41,15 @@ mainQ :
    
   
 clauseDefault
-  : (first=clauseStrongest -> $first) (OR others=clauseStrongest -> ^(OPERATOR["OR"] clauseStrongest+ ))*
+  : (first=clauseStrongest -> $first) (or others=clauseStrongest -> ^(OPERATOR["OR"] clauseStrongest+ ))*
   ;
 
 clauseStrongest
-  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(OPERATOR["AND"] clauseStrong+ ))*
+  : (first=clauseStrong  -> $first) (and others=clauseStrong -> ^(OPERATOR["AND"] clauseStrong+ ))*
   ;
   
 clauseStrong
-  : (first=clauseWeak -> $first) (NOT others=clauseWeak -> ^(OPERATOR["NOT"] clauseWeak+ ))*
+  : (first=clauseWeak -> $first) (not others=clauseWeak -> ^(OPERATOR["NOT"] clauseWeak+ ))*
   ;
   
 clauseWeak
@@ -163,7 +163,9 @@ quoted	:
 	
 operator: (AND | OR | NOT | NEAR);
 
-modifier: (PLUS|MINUS);
+modifier: 
+	PLUS -> PLUS["+"]
+	| MINUS -> MINUS["-"];
 
 
 /*
@@ -201,6 +203,18 @@ fuzzy	:
 	TILDE NUMBER
 	;
 
+not	:	
+	(AND NOT)=> AND NOT
+	| NOT
+	;
+	
+and 	:	
+	AND
+	;
+	
+or 	:	
+	OR
+	;		
 
 near	:	
 	(NEAR -> ^(OPERATOR["NEAR 5"]) )
@@ -226,7 +240,7 @@ COLON   : ':' ;  //this must NOT be fragment
 
 PLUS  : '+' ;
 
-MINUS : '-';
+MINUS : ('-'|'\!');
 
 STAR  : '*' ;
 
@@ -258,7 +272,7 @@ TO	:	'TO';
 /* We want to be case insensitive */
 AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
 OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
-NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!');
+NOT   : ('n' | 'N') ('o' | 'O') ('t' | 'T');
 NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 

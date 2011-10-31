@@ -465,7 +465,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("c OR (a AND b)", null, "c (+a +b)");
     
     // XXX: not allowed
-    //assertQueryEquals("a AND NOT b", null, "+a -b");
+    assertQueryEquals("a AND NOT b", null, "+a -b");
     assertQueryEquals("a NOT b", null, "+a -b");
 
     assertQueryEquals("a AND -b", null, "+a -b");
