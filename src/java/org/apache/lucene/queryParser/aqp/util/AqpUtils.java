@@ -3,6 +3,8 @@ package org.apache.lucene.queryParser.aqp.util;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryParser.core.util.UnescapedCharSequence;
+import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 
 public class AqpUtils {
 	

@@ -112,7 +112,7 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 		
 		for (int i=index;i<children.size();i++) {
 			QueryNode child = children.get(i);
-			if (child instanceof ModifierQueryNode || child instanceof BooleanQueryNode) {
+			if (child instanceof ModifierQueryNode) {
 				// do nothing, modifiers have precedence
 				//children.set(i, new ModifierQueryNode(child.getChildren().get(0), 
 				//		i==0&&firstMod!=null ? firstMod : mod));

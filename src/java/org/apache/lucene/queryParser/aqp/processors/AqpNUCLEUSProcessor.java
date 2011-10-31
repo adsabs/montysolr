@@ -8,6 +8,7 @@ import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 
 public class AqpNUCLEUSProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
@@ -21,7 +22,7 @@ public class AqpNUCLEUSProcessor extends QueryNodeProcessorImpl implements
 			String field = getFieldValue(fieldNode);
 			QueryNode valueNode = children.get(0);
 			if (field!=null) {
-				applyFieldToAllChildren(field, valueNode);
+				applyFieldToAllChildren(EscapeQuerySyntaxImpl.discardEscapeChar(field).toString(), valueNode);
 			}
 			return valueNode;
 		}

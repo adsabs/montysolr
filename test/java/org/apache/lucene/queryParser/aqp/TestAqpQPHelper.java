@@ -190,6 +190,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
   }
 
   private int originalMaxClauses;
+  private boolean debugParser = false;
 
   @Override
   public void setUp() throws Exception {
@@ -199,6 +200,11 @@ public class TestAqpQPHelper extends LuceneTestCase {
   
   public static void fail(String message) {
 	  System.err.println(message);
+	  //LuceneTestCase.fail(message);
+  }
+  
+  public void setDebug(boolean d) {
+	  debugParser = d;
   }
       
 
@@ -209,7 +215,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
     qp.setAnalyzer(a);
 
     qp.setDefaultOperator(Operator.OR);
-
+    qp.setDebug(this.debugParser);
     return qp;
 
   }
@@ -464,7 +470,6 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("(a AND b)", null, "+a +b");
     assertQueryEquals("c OR (a AND b)", null, "c (+a +b)");
     
-    // XXX: not allowed
     assertQueryEquals("a AND NOT b", null, "+a -b");
     assertQueryEquals("a NOT b", null, "+a -b");
 
@@ -502,12 +507,12 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("term^2", null, "term^2.0");
     assertQueryEquals("\"germ term\"^2.0", null, "\"germ term\"^2.0");
     assertQueryEquals("\"term germ\"^2", null, "\"term germ\"^2.0");
-
+    
+    setDebug(true);
     assertQueryEquals("(foo OR bar) AND (baz OR boo)", null,
         "+(foo bar) +(baz boo)");
     
-    //XXX: not allowed
-    //assertQueryEquals("((a OR b) AND NOT c) OR d", null, "(+(a b) -c) d");
+    assertQueryEquals("((a OR b) AND NOT c) OR d", null, "(+(a b) -c) d");
     assertQueryEquals("((a OR b) NOT c) OR d", null, "(+(a b) -c) d");
     assertQueryEquals("+(apple \"steve jobs\") -(foo bar baz)", null,
         "+(apple \"steve jobs\") -(foo bar baz)");
@@ -881,7 +886,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("\\*", a, "*");
     
     assertQueryEquals("\\a", a, "a");
-
+    
     assertQueryEquals("a\\-b:c", a, "a-b:c");
     assertQueryEquals("a\\+b:c", a, "a+b:c");
     assertQueryEquals("a\\:b:c", a, "a:b:c");

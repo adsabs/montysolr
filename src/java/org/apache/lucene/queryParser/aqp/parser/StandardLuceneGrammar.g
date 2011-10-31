@@ -74,7 +74,7 @@ atom
 	;
    
 	   
-field	
+	   field	
 	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
         | STAR COLON -> ^(QANYTHING STAR)
@@ -85,12 +85,12 @@ value
 	( 
 	range_term_in -> ^(QRANGEIN range_term_in)
 	| range_term_ex -> ^(QRANGEEX range_term_ex) 
+	| normal -> ^(QNORMAL normal)	
 	| truncated -> ^(QTRUNCATED truncated)	
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| normal -> ^(QNORMAL normal)
 	| STAR -> ^(QANYTHING STAR)
-	| QMARK -> ^(QANYTHING QMARK)
+	| QMARK -> ^(QNORMAL QMARK)
 	)
 	term_modifier? -> term_modifier? $value
   	;
@@ -251,7 +251,7 @@ MINUS : ('-'|'\!');
 
 STAR  : '*' ;
 
-QMARK  : '?' ;
+QMARK  : '?'+ ;
 
 fragment VBAR  : '|' ;
 
@@ -287,6 +287,7 @@ WS  :   ( ' '
         | '\t'
         | '\r'
         | '\n'
+        | '\u3000'
         ) 
         {$channel=HIDDEN;}
     ;
@@ -295,7 +296,7 @@ WS  :   ( ' '
 fragment INT: '0' .. '9';
 
 fragment NORMAL_CHAR  : 
-     ~(' ' | '\t' | '\n' | '\r'
+     ~(' ' | '\t' | '\n' | '\r' | '\u3000'
       | '\\' | '\'' | '\"' 
       | '(' | ')' | '[' | ']' | '{' | '}'
       | '+' | '-' | '!' | ':' | '~' | '^' 

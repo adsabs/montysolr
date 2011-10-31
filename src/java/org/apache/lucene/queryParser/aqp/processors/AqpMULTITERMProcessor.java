@@ -12,6 +12,8 @@ import org.apache.lucene.queryParser.core.nodes.OrQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.core.util.UnescapedCharSequence;
+import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 
 public class AqpMULTITERMProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
@@ -37,7 +39,7 @@ public class AqpMULTITERMProcessor extends QueryNodeProcessorImpl implements
 			
 			
 			if (field!=null) {
-				AqpUtils.applyFieldToAllChildren(field, multiNode);
+				AqpUtils.applyFieldToAllChildren(EscapeQuerySyntaxImpl.discardEscapeChar(field).toString(), multiNode);
 			}
 			
 			node = new OrQueryNode(multiNode.getChildren());

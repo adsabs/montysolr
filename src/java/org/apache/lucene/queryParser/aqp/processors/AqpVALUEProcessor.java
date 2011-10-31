@@ -137,14 +137,14 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 				if (fuzzy != null) {
 					AqpANTLRNode inputNode = (AqpANTLRNode) valueChildren.get(0).getChildren().get(0);
 					
-					// I think the checking should be in the FuzzyQueryNode
+					// this should really be in the FuzzyQueryNode
 					if (fuzzy<0.0f || fuzzy>=1.0f) {
 						throw new QueryNodeException(new MessageImpl(
 							QueryParserMessages.INVALID_SYNTAX,
 							valueChildren.toString(), "Similarity s must be 0.0 > s < 1.0"));
 					}
 					
-					return new FuzzyQueryNode(field, inputNode.getTokenInput(), fuzzy,
+					return new FuzzyQueryNode(field, EscapeQuerySyntaxImpl.discardEscapeChar(inputNode.getTokenInput()), fuzzy,
 							inputNode.getTokenStart(), inputNode.getTokenEnd());
 				}
 				else {
@@ -205,10 +205,10 @@ public class AqpVALUEProcessor extends QueryNodeProcessorImpl implements
 						: CompareOperator.LT;
 
 				ParametricQueryNode lowerBound = new ParametricQueryNode(field,
-						lowerComparator, lowerNode.getTokenInput(),
+						lowerComparator, EscapeQuerySyntaxImpl.discardEscapeChar(lowerNode.getTokenInput()),
 						lowerNode.getTokenStart(), lowerNode.getTokenEnd());
 				ParametricQueryNode upperBound = new ParametricQueryNode(field,
-						upperComparator, upperNode.getTokenInput(),
+						upperComparator, EscapeQuerySyntaxImpl.discardEscapeChar(upperNode.getTokenInput()),
 						upperNode.getTokenStart(), upperNode.getTokenEnd());
 				return new ParametricRangeQueryNode(lowerBound, upperBound);
 			}
