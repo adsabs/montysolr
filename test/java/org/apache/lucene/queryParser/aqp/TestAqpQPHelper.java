@@ -1105,7 +1105,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
     
-    // precedence is normally honoured, but not with this processor
+    // precedence is normally honoured, but not with standard config (so we change it here to be flat)
     QueryNodeProcessorPipeline processor = (QueryNodeProcessorPipeline) qp.getQueryNodeProcessor();
     processor.add(new GroupQueryNodeProcessor());
     
