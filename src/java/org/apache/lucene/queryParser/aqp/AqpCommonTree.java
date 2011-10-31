@@ -4,7 +4,9 @@ import java.util.Map;
 
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonToken;
+import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
+import org.antlr.runtime.tree.CommonErrorNode;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
@@ -37,14 +39,19 @@ public class AqpCommonTree extends CommonTree {
 	}
 	
 	/** Return the whole tree converted to QueryNode tree */
-    public QueryNode toQueryNodeTree() {
+    public QueryNode toQueryNodeTree()
+    	throws RecognitionException {
 		if ( children==null || children.size()==0 ) {
 			return this.toQueryNode();
 		}
 		
 		QueryNode buf = toQueryNode();
 		for (int i = 0; children!=null && i < children.size(); i++) {
-			AqpCommonTree t = (AqpCommonTree)children.get(i);
+			Object child = children.get(i);
+			if (child instanceof CommonErrorNode) {
+				throw ((CommonErrorNode) child).trappedException;
+			}
+			AqpCommonTree t = (AqpCommonTree)child;
 			buf.add(t.toQueryNodeTree());
 		}
 		return buf;

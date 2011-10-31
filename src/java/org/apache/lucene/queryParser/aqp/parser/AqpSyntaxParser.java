@@ -40,6 +40,8 @@ public class AqpSyntaxParser implements SyntaxParser {
     
     private Lexer lexer;
     private Parser parser;
+    
+    private String[] tokenNames;
 	
     public AqpSyntaxParser() {
     	// empty constructor
@@ -70,7 +72,6 @@ public class AqpSyntaxParser implements SyntaxParser {
         lexer = (Lexer) iLexer;
         
         // get tokenNames
-        String[] tokenNames;
         Method getTokenNames = clsParser.getDeclaredMethod("getTokenNames");
         tokenNames = (String[]) getTokenNames.invoke(iParser);
         
@@ -93,7 +94,7 @@ public class AqpSyntaxParser implements SyntaxParser {
 	}
 	
 	@Override
-	public QueryNode parsex(CharSequence query, CharSequence field)
+	public QueryNode parse(CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 		
 		ANTLRStringStream input = new ANTLRStringStream(query.toString());		
@@ -124,12 +125,17 @@ public class AqpSyntaxParser implements SyntaxParser {
 			throw ee;
 		}
 		
-		return astTree.toQueryNodeTree();
+		try {
+			return astTree.toQueryNodeTree();
+		}
+		catch (RecognitionException e) {
+			throw new QueryNodeParseException(new MessageImpl(query + " >> " + parser.getErrorMessage(e, parser.getTokenNames())));
+		}
 		
 	}
 
 	
-	public QueryNode parse(CharSequence query, CharSequence field)
+	public QueryNode parsex(CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 
 		ANTLRStringStream in = new ANTLRStringStream(query.toString());
@@ -145,7 +151,7 @@ public class AqpSyntaxParser implements SyntaxParser {
 		try {
 			returnValue = parser.mainQ();
 		} catch (RecognitionException e) {
-			throw new QueryNodeParseException(new MessageImpl(e.getMessage()));
+			throw new QueryNodeParseException(new MessageImpl(query + " " + parser.getErrorMessage(e, parser.getTokenNames())));
 		} catch (Error e) {
 			Message message = new MessageImpl(
 					QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
@@ -159,7 +165,12 @@ public class AqpSyntaxParser implements SyntaxParser {
 		// GET the AST tree
 		AqpCommonTree astTree = (AqpCommonTree) returnValue.getTree();
 		
-		return astTree.toQueryNodeTree();
+		try {
+			return astTree.toQueryNodeTree();
+		}
+		catch (RecognitionException e) {
+			throw new QueryNodeParseException(new MessageImpl(query + " " + parser.getErrorMessage(e, parser.getTokenNames())));
+		}
 		
 	}
 
