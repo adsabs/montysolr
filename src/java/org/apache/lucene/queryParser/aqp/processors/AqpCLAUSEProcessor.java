@@ -27,14 +27,20 @@ public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("CLAUSE")) {
 			ClauseData data = harvestData((AqpANTLRNode) node);
 			
-			node = new GroupQueryNode(data.getLastChild());
+			node = data.getLastChild();
+			
 			if (data.getBoost()!=null) {
 				node = new BoostQueryNode(node, data.getBoost());
 			}
+			
+			
 			if (data.getModifier()!=null) {
 				node = new ModifierQueryNode(node, data.getModifier()==Modifier.PLUS ? ModifierQueryNode.Modifier.MOD_REQ 
 																					 : ModifierQueryNode.Modifier.MOD_NOT);
 			}
+			
+			node = new GroupQueryNode(node);
+			
 			return node;
 		}
 		return node;

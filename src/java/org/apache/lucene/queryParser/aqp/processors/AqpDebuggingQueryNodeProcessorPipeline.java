@@ -16,10 +16,14 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
 	}
 
 	public QueryNode process(QueryNode queryTree) throws QueryNodeException {
+		String oldVal = null;
+		String newVal = null;
+		
+		oldVal = queryTree.toString();
 		int i = 1;
 		System.out.println("     0. starting");
 		System.out.println("--------------------------------------------");
-		System.out.println(queryTree.toString());
+		System.out.println(oldVal);
 		
 		Iterator<QueryNodeProcessor> it = this.iterator();
 
@@ -28,12 +32,18 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
 			processor = it.next();
 			
 			System.out.println("     " + i + ". step "	+ processor.getClass().toString());
-			System.out.println("--------------------------------------------");
 			queryTree = processor.process(queryTree);
-			System.out.println(queryTree.toString());
+			newVal = queryTree.toString();
+			System.out.println("     Tree changed: " + (newVal.equals(oldVal) ? "NO" : "YES"));
+			System.out.println("--------------------------------------------");
+			System.out.println(newVal);
+			oldVal = newVal;
 			i += 1;
 		}
+		
+		System.out.println("");
 		System.out.println("final result:");
+		System.out.println("--------------------------------------------");
 		System.out.println(queryTree.toString());
 		return queryTree;
 

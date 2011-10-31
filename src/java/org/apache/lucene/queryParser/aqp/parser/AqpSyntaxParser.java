@@ -93,7 +93,7 @@ public class AqpSyntaxParser implements SyntaxParser {
 	}
 	
 	@Override
-	public QueryNode parse(CharSequence query, CharSequence field)
+	public QueryNode parsex(CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 		
 		ANTLRStringStream input = new ANTLRStringStream(query.toString());		
@@ -129,7 +129,7 @@ public class AqpSyntaxParser implements SyntaxParser {
 	}
 
 	
-	public QueryNode parseNew(CharSequence query, CharSequence field)
+	public QueryNode parse(CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 
 		ANTLRStringStream in = new ANTLRStringStream(query.toString());

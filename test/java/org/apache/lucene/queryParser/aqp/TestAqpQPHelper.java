@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -51,15 +52,22 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.processors.AqpDebuggingQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.QueryParserHelper;
+import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.standard.QueryParserUtil;
+import org.apache.lucene.queryParser.standard.StandardQueryParser;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
+import org.apache.lucene.queryParser.standard.processors.GroupQueryNodeProcessor;
+import org.apache.lucene.queryParser.standard.processors.StandardQueryNodeProcessorPipeline;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
@@ -204,6 +212,56 @@ public class TestAqpQPHelper extends LuceneTestCase {
 
     return qp;
 
+  }
+  
+  public QueryParserHelper getParser(boolean standard) throws Exception {
+	  
+	  class DebuggingQueryNodeProcessorPipeline extends StandardQueryNodeProcessorPipeline {
+		  DebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
+			  super(queryConfig);
+		  }
+		  public QueryNode process(QueryNode queryTree) throws QueryNodeException {
+				String oldVal = null;
+				String newVal = null;
+				
+				oldVal = queryTree.toString();
+				int i = 1;
+				System.out.println("     0. starting");
+				System.out.println("--------------------------------------------");
+				System.out.println(oldVal);
+				
+				Iterator<QueryNodeProcessor> it = this.iterator();
+
+				QueryNodeProcessor processor;
+				while (it.hasNext()) {
+					processor = it.next();
+					
+					System.out.println("     " + i + ". step "	+ processor.getClass().toString());
+					queryTree = processor.process(queryTree);
+					newVal = queryTree.toString();
+					System.out.println("     Tree changed: " + (newVal.equals(oldVal) ? "NO" : "YES"));
+					System.out.println("--------------------------------------------");
+					System.out.println(newVal);
+					oldVal = newVal;
+					i += 1;
+				}
+				
+				System.out.println("");
+				System.out.println("final result:");
+				System.out.println("--------------------------------------------");
+				System.out.println(queryTree.toString());
+				return queryTree;
+
+			}
+	  }
+	  if (standard) {
+		  StandardQueryParser sp = new StandardQueryParser();
+		  sp.setQueryNodeProcessor(new DebuggingQueryNodeProcessorPipeline(sp.getQueryConfigHandler()));
+		  return sp;
+	  }
+	  else {
+	      return new AqpQueryParser("StandardLuceneGrammar");
+	  }
   }
   
   public AqpQueryParser getParser() throws Exception {
@@ -398,15 +456,17 @@ public class TestAqpQPHelper extends LuceneTestCase {
         "t�rm term term");
     assertQueryEquals("�mlaut", new WhitespaceAnalyzer(TEST_VERSION_CURRENT), "�mlaut");
 
-    // XXX: not allowed
+    // XXX: not allowed, TODO???
     //assertQueryEquals("\"\"", new KeywordAnalyzer(), "");
     //assertQueryEquals("foo:\"\"", new KeywordAnalyzer(), "foo:");
 
     assertQueryEquals("a AND b", null, "+a +b");
     assertQueryEquals("(a AND b)", null, "+a +b");
     assertQueryEquals("c OR (a AND b)", null, "c (+a +b)");
-
-    assertQueryEquals("a AND NOT b", null, "+a -b");
+    
+    // XXX: not allowed
+    //assertQueryEquals("a AND NOT b", null, "+a -b");
+    assertQueryEquals("a NOT b", null, "+a -b");
 
     assertQueryEquals("a AND -b", null, "+a -b");
 
@@ -445,7 +505,10 @@ public class TestAqpQPHelper extends LuceneTestCase {
 
     assertQueryEquals("(foo OR bar) AND (baz OR boo)", null,
         "+(foo bar) +(baz boo)");
-    assertQueryEquals("((a OR b) AND NOT c) OR d", null, "(+(a b) -c) d");
+    
+    //XXX: not allowed
+    //assertQueryEquals("((a OR b) AND NOT c) OR d", null, "(+(a b) -c) d");
+    assertQueryEquals("((a OR b) NOT c) OR d", null, "(+(a b) -c) d");
     assertQueryEquals("+(apple \"steve jobs\") -(foo bar baz)", null,
         "+(apple \"steve jobs\") -(foo bar baz)");
     assertQueryEquals("+title:(dog OR cat) -author:\"bob dole\"", null,
@@ -1041,7 +1104,11 @@ public class TestAqpQPHelper extends LuceneTestCase {
   public void testPrecedence() throws Exception {
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
-
+    
+    // precedence is normally honoured, but not with standard config (so we change it here to be flat)
+    QueryNodeProcessorPipeline processor = (QueryNodeProcessorPipeline) qp.getQueryNodeProcessor();
+    processor.add(new GroupQueryNodeProcessor());
+    
     Query query1 = qp.parse("A AND B OR C AND D", "field");
     Query query2 = qp.parse("+A +B +C +D", "field");
 
@@ -1141,9 +1208,11 @@ public class TestAqpQPHelper extends LuceneTestCase {
     result = qp.parse("a:woo OR a:the", "a");
     assertNotNull("result is null and it shouldn't be", result);
     assertTrue("result is not a TermQuery", result instanceof TermQuery);
+    
     result = qp.parse(
         "(fieldX:xxxxx OR fieldy:xxxxxxxx)^2 AND (fieldx:the OR fieldy:foo)",
         "a");
+    
     assertNotNull("result is null and it shouldn't be", result);
     assertTrue("result is not a BooleanQuery", result instanceof BooleanQuery);
     if (VERBOSE)
