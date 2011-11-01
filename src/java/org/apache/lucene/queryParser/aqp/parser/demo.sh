@@ -5,6 +5,8 @@ set +e
 
 GRAMMAR=${2:-StandardLuceneGrammar}
 
+RULE=${2:-mainQ}
+
 BINDIR=../../../../../../../../bin
 
 CP=.:/dvt/antlr-142/lib/antlr-3.4-complete.jar:/x/dev/antlr-34/lib/antlr-3.4-complete.jar:$BINDIR
@@ -31,14 +33,13 @@ javac -cp $CP $TGTDIR/*.java
 
 
 
-java -cp $CP org.apache.lucene.queryParser.aqp.parser.BuildAST $GRAMMAR "$1" > $TGTFILE
-
 if [ "$1" = "build-only" ];
 then
     echo "finished..."
     exit 0
 fi
 
+java -cp $CP org.apache.lucene.queryParser.aqp.parser.BuildAST $GRAMMAR "$1" $RULE > $TGTFILE
     
 if ! grep -q "digraph" $TGTFILE ;
 then

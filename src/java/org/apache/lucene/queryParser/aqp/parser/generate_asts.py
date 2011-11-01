@@ -52,6 +52,9 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     #os.system(generate_grammar_command)
     
     for section,values in test_cases.items():
+        output = tree = svg = ''
+        
+        toc.append('<a href="#anchor%s"><pre>%s</pre></a><br/>' % (section, section))
         
         # generate AST tree
         for query in values:
@@ -68,8 +71,11 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
             toc.append('%s. <a href="#anchor%s"><pre>%s</pre></a><br/>' % (i, i, query))
             
             print '%s/%s :: %s' % (i, total, query)
-            #print cmds
+            
+            
+            #generate graph
             p = sub.Popen(cmds,stdout=sub.PIPE,stderr=sub.PIPE)
+            
             output, errors = p.communicate()
             if output:
                 fo = open(tmp_dot, 'w')
@@ -79,7 +85,23 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
                 print 'Error generating AST for: ' + query
                 print errors
                 continue
+
+            #generate tree
+            cmds.append(section)
+            cmds.append("tree")
+            p = sub.Popen(cmds,stdout=sub.PIPE,stderr=sub.PIPE)
             
+            tree, errors = p.communicate()
+            if tree:
+                print "\"%s\" -> \"%s\"" % (query.replace('"', '\\\"'), tree.strip().replace('"', '\\\"'))
+            else:
+                print 'Error generating AST for: ' + query
+                print errors
+                tree = errors
+                
+            cmds.pop()
+            cmds.pop()
+                        
             cmds_svg[-1] = tmp_dot
              
             p = sub.Popen(cmds_svg,stdout=sub.PIPE,stderr=sub.PIPE)
@@ -88,6 +110,7 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
             
             data.append(' <a name="anchor%s"/><h3>%s. <pre">%s</pre>&nbsp;&nbsp; <a href="#toc">^</a> </h3>' % (i, i, query))
             data.append(output)
+            data.append('<br/><pre>' + tree + '</pre>')
             data.append('<br/>')
     
     index_fo.write('''
@@ -151,6 +174,7 @@ def split_line(line):
     if not parts:
         parts.append(line.strip())
     return parts
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:

@@ -4,131 +4,207 @@ gunit StandardLuceneGrammar;
 package org.apache.lucene.queryParser.aqp.parser;
 }
 
-// We assume that the default operator is AND
-
 
 //------------------- mainQ
+
 mainQ:
 
-"title:\"The Right Way\" AND text:go title:\"Do it right\" AND right" OK
+"title:\"The Right Way\" AND text:go title:\"Do it right\" AND right" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD title (VALUE (QPHRASE \"The Right Way\"))))) (MODIFIER (TMODIFIER (FIELD text (VALUE (QNORMAL go)))))) (AND (MODIFIER (TMODIFIER (FIELD title (VALUE (QPHRASE \"Do it right\"))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL right)))))))"
 
-"title:Do it right" OK
+"title:Do it right" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD title (VALUE (QNORMAL Do))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL it))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL right))))))"
 
-"te?t" OK
+"te?t" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QTRUNCATED te?t))))))"
 
-"test*"  -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QTRUNCATED test*)))))"
+"test*" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QTRUNCATED test*))))))"
 
-"te*t"  -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QTRUNCATED te*t)))))"
+"te*t" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QTRUNCATED te*t))))))"
 
-"\"te*t\"" OK
+"\"te*t\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASETRUNC \"te*t\"))))))"
 
-"\"text\"" OK
+"\"text\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASE \"text\"))))))"
 
-"roam~0.8" OK
+"roam~0.8" -> "(DEFOP (MODIFIER (TMODIFIER (FUZZY ~0.8) BOOST (FIELD (VALUE (QNORMAL roam))))))"
 
-"roam~" OK
+"roam~" -> "(DEFOP (MODIFIER (TMODIFIER (FUZZY ~) BOOST (FIELD (VALUE (QNORMAL roam))))))"
 
-"9999" OK
+"9999" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL 9999))))))"
 
-"\"jakarta apache\"~10" OK
+"\"jakarta apache\"~10" -> "(DEFOP (MODIFIER (TMODIFIER (FUZZY ~10) BOOST (FIELD (VALUE (QPHRASE \"jakarta apache\"))))))"
 
-"mod_date:[20020101 TO 20030101]" OK
+"mod_date:[20020101 TO 20030101]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD mod_date (VALUE (QRANGEIN (QNORMAL 20020101) (QNORMAL 20030101)))))))"
 
-"title:{Aida TO Carmen}" OK
+"title:{Aida TO Carmen}" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD title (VALUE (QRANGEEX (QNORMAL Aida) (QNORMAL Carmen)))))))"
 
-"jakarta^4 apache" OK
+"jakarta^4 apache" -> "(DEFOP (MODIFIER (TMODIFIER (BOOST ^4) FUZZY (FIELD (VALUE (QNORMAL jakarta))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL apache))))))"
 
-"\"jakarta apache\"^4 \"Apache Lucene\"" OK
+"\"jakarta apache\"^4 \"Apache Lucene\"" -> "(DEFOP (MODIFIER (TMODIFIER (BOOST ^4) FUZZY (FIELD (VALUE (QPHRASE \"jakarta apache\"))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASE \"Apache Lucene\"))))))"
 
-"\"jakarta apache\" OR jakarta" OK
+"\"jakarta apache\" OR jakarta" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASE \"jakarta apache\"))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL jakarta)))))))"
 
-"\"jakarta apache\" AND \"Apache Lucene\"" OK
+"\"jakarta apache\" AND \"Apache Lucene\"" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASE \"jakarta apache\"))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASE \"Apache Lucene\")))))))"
 
-"+jakarta lucene" OK
+"+jakarta lucene" -> "(DEFOP (MODIFIER + (TMODIFIER (FIELD (VALUE (QNORMAL jakarta))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL lucene))))))"
 
-"\"jakarta apache\" NOT \"Apache Lucene\"" OK
+"\"jakarta apache\" NOT \"Apache Lucene\"" -> "(DEFOP (NOT (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASE \"jakarta apache\"))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASE \"Apache Lucene\")))))))"
 
-"\"jakarta apache\" -\"Apache Lucene\"" OK
+"\"jakarta apache\" -\"Apache Lucene\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QPHRASE \"jakarta apache\"))))) (MODIFIER - (TMODIFIER (FIELD (VALUE (QPHRASE \"Apache Lucene\"))))))"
 
-"(jakarta OR apache) AND website" OK
+"(jakarta OR apache) AND website" -> "(DEFOP (AND (OR (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL jakarta))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL apache)))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL website)))))))"
 
-"title:(+return +\"pink panther\")" OK
+"title:(+return +\"pink panther\")" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD title (VALUE (DEFOP (MODIFIER + (TMODIFIER (FIELD (VALUE (QNORMAL return))))) (MODIFIER + (TMODIFIER (FIELD (VALUE (QPHRASE \"pink panther\")))))))))))"
 
-"\(1\+1\)\:2" OK
+"\(1\+1\)\:2" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL \(1\+1\)\:2))))))"
+
 
 // TODO: fix
 "escape:(\+\-\&\&\|\|\!\(\)\{\}\[\]\^\"\~\*\?\:\\)" FAIL
 
 
-//---------------- primaryClause
 
-"this (that)" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))"
+"this (that)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))"
 
-"this ((that))" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))"
+"this ((that))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))"
 
-"(this) ((((((that))))))" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))"
+"(this) ((((((that))))))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))"
 
-"(this) (that)" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))"
+"(this) (that)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))"
 
-"this +(that)" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))"
+"this +(that)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER + (TMODIFIER (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))"
 
-"this ((((+(that)))))" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))"
+"this ((((+(that)))))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER + (TMODIFIER (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))"
 
-"this (+(((+(that)))))" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER +) BOOST (DEFOP (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))))"
+"this (+(((+(that)))))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER + (TMODIFIER (CLAUSE (DEFOP (MODIFIER + (TMODIFIER (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))))))"
 
-"this +((((+(that)))))" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER +) BOOST (DEFOP (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))))"
+"this +((((+(that)))))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER + (TMODIFIER (CLAUSE (DEFOP (MODIFIER + (TMODIFIER (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))))))"
 
-"this +(+((((that)))))" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER +) BOOST (DEFOP (CLAUSE (MODIFIER +) BOOST (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))))"
+"this +(+((((that)))))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER + (TMODIFIER (CLAUSE (DEFOP (MODIFIER + (TMODIFIER (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))))))"
+
+"this (+(that)^7)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER + (TMODIFIER (BOOST ^7) FUZZY (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))"
+
+"this ((((+(that)^7))))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER + (TMODIFIER (BOOST ^7) FUZZY (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))"
+
+"this (-(that)^7))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER - (TMODIFIER (BOOST ^7) FUZZY (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))"
+
+"this -((that))^7" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER - (TMODIFIER (BOOST ^7) FUZZY (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))))))))"
+
+"this +(that thus)^7" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL this))))) (MODIFIER + (TMODIFIER (BOOST ^7) FUZZY (CLAUSE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL that))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL thus))))))))))"
 
 "this (+(((+(that))))" FAIL
 
 "this (++(((+(that)))))" FAIL
 
-"this (+(that)^7)" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER +) (BOOST 7) (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))"
-
-"this ((((+(that)^7))))" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER +) (BOOST 7) (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))"
-
-"this (-(that)^7))" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER -) (BOOST 7) (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))"
-
-"this -((that))^7" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER -) (BOOST 7) (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))))))"
-
-"this +(that thus)^7" -> "(DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL this)))) (CLAUSE (MODIFIER +) (BOOST 7) (DEFOP (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL that)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL thus)))))))"
-
-
 //---------------- atom
+
 atom:
 
-"field:value" -> "(ATOM MODIFIER (NUCLEUS (FIELD field) (VALUE (QNORMAL value))))"
+"field:value" -> "(MODIFIER (TMODIFIER (FIELD field (VALUE (QNORMAL value)))))"
 
-"field:\"value\"" -> "(ATOM MODIFIER (NUCLEUS (FIELD field) (VALUE (QPHRASE \"value\"))))"
+"field:\"value\"" -> "(MODIFIER (TMODIFIER (FIELD field (VALUE (QPHRASE \"value\")))))"
 
-"field:(one two three)" -> "(MULTITERM MODIFIER (FIELD field) (MULTIATOM (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL one)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL two)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL three))))))"
+"field:(one two three)" -> "(MODIFIER (TMODIFIER (FIELD field (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL one))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL two))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL three))))))))))"
 
-"field:(one +two -three)" -> "(MULTITERM MODIFIER (FIELD field) (MULTIATOM (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL one)))) (ATOM (MODIFIER +) (NUCLEUS FIELD (VALUE (QNORMAL two)))) (ATOM (MODIFIER -) (NUCLEUS FIELD (VALUE (QNORMAL three))))))"
+"field:(one +two -three)" -> "(MODIFIER (TMODIFIER (FIELD field (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL one))))) (MODIFIER + (TMODIFIER (FIELD (VALUE (QNORMAL two))))) (MODIFIER - (TMODIFIER (FIELD (VALUE (QNORMAL three))))))))))"
 
-"+field:(-one +two three)" -> "(MULTITERM (MODIFIER +) (FIELD field) (MULTIATOM (ATOM (MODIFIER -) (NUCLEUS FIELD (VALUE (QNORMAL one)))) (ATOM (MODIFIER +) (NUCLEUS FIELD (VALUE (QNORMAL two)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL three))))))"
+"+field:(-one +two three)" -> "(MODIFIER + (TMODIFIER (FIELD field (VALUE (DEFOP (MODIFIER - (TMODIFIER (FIELD (VALUE (QNORMAL one))))) (MODIFIER + (TMODIFIER (FIELD (VALUE (QNORMAL two))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL three))))))))))"
 
-"-field:(-one +two three)" -> "(MULTITERM (MODIFIER -) (FIELD field) (MULTIATOM (ATOM (MODIFIER -) (NUCLEUS FIELD (VALUE (QNORMAL one)))) (ATOM (MODIFIER +) (NUCLEUS FIELD (VALUE (QNORMAL two)))) (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL three))))))"
+"-field:(-one +two three)" -> "(MODIFIER - (TMODIFIER (FIELD field (VALUE (DEFOP (MODIFIER - (TMODIFIER (FIELD (VALUE (QNORMAL one))))) (MODIFIER + (TMODIFIER (FIELD (VALUE (QNORMAL two))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL three))))))))))"
 
-"field:(one)" -> "(MULTITERM MODIFIER (FIELD field) (MULTIATOM (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL one))))))"
+"field:(one)" -> "(MODIFIER (TMODIFIER (FIELD field (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL one))))))))))"
 
-"field: (one)" -> "(MULTITERM MODIFIER (FIELD field) (MULTIATOM (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL one))))))"
+"field: (one)" -> "(MODIFIER (TMODIFIER (FIELD field (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL one))))))))))"
 
-"field:( one )" -> "(MULTITERM MODIFIER (FIELD field) (MULTIATOM (ATOM MODIFIER (NUCLEUS FIELD (VALUE (QNORMAL one))))))"
+"field:( one )" -> "(MODIFIER (TMODIFIER (FIELD field (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL one))))))))))"
 
-"+value" -> "(ATOM (MODIFIER +) (NUCLEUS FIELD (VALUE (QNORMAL value))))"
+"+value" -> "(MODIFIER + (TMODIFIER (FIELD (VALUE (QNORMAL value)))))"
 
-"-value" -> "(ATOM (MODIFIER -) (NUCLEUS FIELD (VALUE (QNORMAL value))))"
+"-value" -> "(MODIFIER - (TMODIFIER (FIELD (VALUE (QNORMAL value)))))"
 
 "+field:" FAIL
 
-"+field:[this TO that]" -> "(ATOM (MODIFIER +) (NUCLEUS (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that)))))"
+"+field:[this TO that]" -> "(MODIFIER + (TMODIFIER (FIELD field (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))))"
 
-"+field:[   this TO that   ]" -> "(ATOM (MODIFIER +) (NUCLEUS (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that)))))"
+"+field:[   this TO that   ]" -> "(MODIFIER + (TMODIFIER (FIELD field (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))))"
 
-"+field:{this TO that}" -> "(ATOM (MODIFIER +) (NUCLEUS (FIELD field) (VALUE (QRANGEEX (QNORMAL this) (QNORMAL that)))))"
+"+field:{this TO that}" -> "(MODIFIER + (TMODIFIER (FIELD field (VALUE (QRANGEEX (QNORMAL this) (QNORMAL that))))))"
 
-"+field: {this TO that}" -> "(ATOM (MODIFIER +) (NUCLEUS (FIELD field) (VALUE (QRANGEEX (QNORMAL this) (QNORMAL that)))))"
+"+field: {this TO that}" -> "(MODIFIER + (TMODIFIER (FIELD field (VALUE (QRANGEEX (QNORMAL this) (QNORMAL that))))))"
+
+
+"m:(a b c)" -> "(MODIFIER (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c))))))))))"
+
+"+m:(a b c)" -> "(MODIFIER + (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c))))))))))"
+
+"m:(+a b c)" -> "(MODIFIER (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER + (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c))))))))))"
+
+"m:(-a +b c)^0.6" -> "(MODIFIER (TMODIFIER (BOOST ^0.6) FUZZY (FIELD m (VALUE (DEFOP (MODIFIER - (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (MODIFIER + (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c))))))))))"
+
+"m:(a b c or d)" -> "(MODIFIER (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (OR (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL d)))))))))))"
+
+"m:(a b c OR d)" -> "(MODIFIER (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (OR (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL d)))))))))))"
+
+"m:(a b c OR d NOT e)" -> "(MODIFIER (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (OR (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c))))) (NOT (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL d))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL e))))))))))))"
+
+"m:(a b NEAR c)" -> "(MODIFIER (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (NEAR 5 (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c)))))))))))"
+
+"m:(a b NEAR c d AND e)" -> "(MODIFIER (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (NEAR 5 (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c)))))) (AND (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL d))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL e)))))))))))"
+
+"-m:(a b NEAR c d AND e)" -> "(MODIFIER - (TMODIFIER (FIELD m (VALUE (DEFOP (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL a))))) (NEAR 5 (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL b))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL c)))))) (AND (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL d))))) (MODIFIER (TMODIFIER (FIELD (VALUE (QNORMAL e)))))))))))"
+
+
+
+
+// testing term modifiers
+
+
+"this^0.5" -> "(MODIFIER (TMODIFIER (BOOST ^0.5) FUZZY (FIELD (VALUE (QNORMAL this)))))"
+
+"this^5" -> "(MODIFIER (TMODIFIER (BOOST ^5) FUZZY (FIELD (VALUE (QNORMAL this)))))"
+
+"this^9999999999999" -> "(MODIFIER (TMODIFIER (BOOST ^9999999999999) FUZZY (FIELD (VALUE (QNORMAL this)))))"
+
+"this^ 5" -> "(MODIFIER (TMODIFIER (BOOST ^) FUZZY (FIELD (VALUE (QNORMAL this)))))"
+
+//TODO: this should make '9' as a new term
+"this^5~ 9" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~) (FIELD (VALUE (QNORMAL this)))))"  
+
+"this^5~" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~) (FIELD (VALUE (QNORMAL this)))))"
+
+"this^5~7" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~7) (FIELD (VALUE (QNORMAL this)))))"
+
+"this^5~8.9999" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~8.9999) (FIELD (VALUE (QNORMAL this)))))"
+
+"this~" -> "(MODIFIER (TMODIFIER (FUZZY ~) BOOST (FIELD (VALUE (QNORMAL this)))))"
+
+"this~0.6" -> "(MODIFIER (TMODIFIER (FUZZY ~0.6) BOOST (FIELD (VALUE (QNORMAL this)))))"
+
+
+"this~5^7" -> "(MODIFIER (TMODIFIER (FUZZY ~5) (BOOST ^7) (FIELD (VALUE (QNORMAL this)))))"
+
+"this^~" -> "(MODIFIER (TMODIFIER (BOOST ^) (FUZZY ~) (FIELD (VALUE (QNORMAL this)))))"
+
+"\"this that\"^5~" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~) (FIELD (VALUE (QPHRASE \"this that\")))))"
+
+"\"this that\"^5~6" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~6) (FIELD (VALUE (QPHRASE \"this that\")))))"
+
+"\"this that*\"^5~" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~) (FIELD (VALUE (QPHRASETRUNC \"this that*\")))))"
+
+"\"this that*\"^5~6" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~6) (FIELD (VALUE (QPHRASETRUNC \"this that*\")))))"
+
+"[this TO that]^5" -> "(MODIFIER (TMODIFIER (BOOST ^5) FUZZY (FIELD (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))))"
+
+"[this TO that]^5~" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~) (FIELD (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))))"
+
+"[this TO that]^5~0.6" -> "(MODIFIER (TMODIFIER (BOOST ^5) (FUZZY ~0.6) (FIELD (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))))"
+
+"[this TO that]~" -> "(MODIFIER (TMODIFIER (FUZZY ~) BOOST (FIELD (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))))"
+
+"[this TO that]~9" -> "(MODIFIER (TMODIFIER (FUZZY ~9) BOOST (FIELD (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))))"
+
+// special case
+"*" -> "(QANYTHING *)"
+
+"*:*" -> "(QANYTHING *)"
+
 
 //---------------- value
 
@@ -136,7 +212,7 @@ value:
 
 "this" -> "(QNORMAL this)"
 
-"th\*is" -> "(QNORMAL th\\*is)"
+"th\*is" -> "(QNORMAL th\*is)"
 
 "this999" -> "(QNORMAL this999)"
 
@@ -150,6 +226,8 @@ value:
 
 "\"  this  \"" -> "(QPHRASE \"  this  \")"
 
+
+
 "\"a \\\"b c\\\" d\"" -> ""
 
 "a\\\\\\+b" -> ""
@@ -160,9 +238,9 @@ value:
 
 "\"a \\+b c d\"" -> ""
 
-"a\\u0062c" -> ""
 
 
+"a\\u0062c" -> "(QNORMAL a\\u0062c)"
 
 "\"this*\"" -> "(QPHRASETRUNC \"this*\")"
 
@@ -190,6 +268,10 @@ value:
 
 
 
+"\"+() AND that\"" -> "(QPHRASE \"+() AND that\")"
+
+"\"func(*) AND that\"" -> "(QPHRASETRUNC \"func(*) AND that\")"
+
 "[this TO that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
 
 "[this that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
@@ -205,6 +287,7 @@ value:
 "[\"this\" TO \"that*\"]" -> "(QRANGEIN (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
 
 "[\"#$%^&\" TO \"&*()\"]" -> "(QRANGEIN (QPHRASE \"#$%^&\") (QPHRASETRUNC \"&*()\"))"
+
 
 "{this TO that}" -> "(QRANGEEX (QNORMAL this) (QNORMAL that))"
 
@@ -251,8 +334,6 @@ value:
 //"th*?is" FAIL
 //"th****?is" FAIL
 
-"*" -> "(QANYTHING *)"
-
 "*t" -> "(QTRUNCATED *t)"
 
 "*t*" -> "(QTRUNCATED *t*)"
@@ -277,7 +358,7 @@ value:
 
 "t*a?a" -> "(QTRUNCATED t*a?a)"
 
-"?" -> "(QANYTHING ?)"
+"?" -> "(QTRUNCATED ?)"
 
 "*t\\*a" -> "(QTRUNCATED *t\\*a)"
 
@@ -290,53 +371,5 @@ value:
 "*t*\\a" -> "(QTRUNCATED *t*\\a)"
 
 
-// testing term modifiers
-
-"this^0.5" -> "(TMODIFIER (BOOST 0.5) FUZZY) (QNORMAL this)"
-
-"this^5" -> "(TMODIFIER (BOOST 5) FUZZY) (QNORMAL this)"
-
-"this^9999999999999" -> "(TMODIFIER (BOOST 9999999999999) FUZZY) (QNORMAL this)"
-
-"this^6666.o" FAIL
-
-"this^ 5" -> "(TMODIFIER (BOOST 5) FUZZY) (QNORMAL this)"
 
 
-//TODO: this should make '9' as a new term
-"this^5~ 9" -> "(TMODIFIER (BOOST 5) (FUZZY 9)) (QNORMAL this)"  
-
-"this^5~" -> "(TMODIFIER (BOOST 5) (FUZZY 0.5)) (QNORMAL this)"
-
-"this^5~7" -> "(TMODIFIER (BOOST 5) (FUZZY 7)) (QNORMAL this)"
-
-"this^5~8.9999" -> "(TMODIFIER (BOOST 5) (FUZZY 8.9999)) (QNORMAL this)"
-
-"this~" -> "(TMODIFIER BOOST (FUZZY 0.5)) (QNORMAL this)"
-
-"this~0.6" -> "(TMODIFIER BOOST (FUZZY 0.6)) (QNORMAL this)"
-
-
-//TODO: either make the term_modifier accept any order or ~ and ^ or throw error
-// now it parses it wrongly (TMODIFIER BOOST (FUZZY 5)) (QNORMAL this)
-"this~5^7" FAIL
-
-"this^~" FAIL
-
-"\"this that\"^5~" -> "(TMODIFIER (BOOST 5) (FUZZY 0.5)) (QPHRASE \"this that\")"
-
-"\"this that\"^5~6" -> "(TMODIFIER (BOOST 5) (FUZZY 6)) (QPHRASE \"this that\")"
-
-"\"this that*\"^5~" -> "(TMODIFIER (BOOST 5) (FUZZY 0.5)) (QPHRASETRUNC \"this that*\")"
-
-"\"this that*\"^5~6" -> "(TMODIFIER (BOOST 5) (FUZZY 6)) (QPHRASETRUNC \"this that*\")"
-
-"[this TO that]^5" -> "(TMODIFIER (BOOST 5) FUZZY) (QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO that]^5~" -> "(TMODIFIER (BOOST 5) (FUZZY 0.5)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO that]^5~0.6" -> "(TMODIFIER (BOOST 5) (FUZZY 0.6)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO that]~" -> "(TMODIFIER BOOST (FUZZY 0.5)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO that]~9" -> "(TMODIFIER BOOST (FUZZY 9)) (QRANGEIN (QNORMAL this) (QNORMAL that))"

@@ -91,7 +91,7 @@ value
 	| truncated -> ^(QTRUNCATED truncated)	
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| QMARK -> ^(QNORMAL QMARK)
+	| QMARK -> ^(QTRUNCATED QMARK)
   	;
 
 	
