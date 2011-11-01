@@ -134,9 +134,12 @@ multiClause
 	:
 	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
 	
-	// 1st working	
+	// this is also working, but i want operator precedence
+	//multiClause:
 	//(mterm+ -> mterm+)
 	//(op=operator rhs=fclause -> ^(OPERATOR ^(OPERATOR["DEFOP"] $mclause) $rhs))?
+	//;
+	//flause:mclause;
 	;
 
 multiDefault
@@ -165,7 +168,6 @@ multiNear
 	;	
 
 
-// this is just to fool ANTLR as we cannot reference "$mclause"
 multiBasic
 	:	
 	mterm
