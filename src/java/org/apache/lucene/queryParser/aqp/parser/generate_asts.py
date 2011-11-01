@@ -86,7 +86,7 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
             
             output, errors = p.communicate()
             
-            data.append(' <a name="anchor%s"/><h3><pre">%s</pre>&nbsp;&nbsp; <a href="#toc">^</a> </h3>' % (i, query))
+            data.append(' <a name="anchor%s"/><h3>%s. <pre">%s</pre>&nbsp;&nbsp; <a href="#toc">^</a> </h3>' % (i, i, query))
             data.append(output)
             data.append('<br/>')
     

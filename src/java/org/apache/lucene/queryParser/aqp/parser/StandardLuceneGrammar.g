@@ -37,35 +37,34 @@ tokens {
 }
 
 mainQ : 
-	clauseDefault+ -> ^(OPERATOR["DEFOP"] clauseDefault+) // Default operator
+	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
 	;
    
   
-clauseDefault
-  : (first=clauseStrongest -> $first) (or others=clauseStrongest -> ^(OPERATOR["OR"] clauseStrongest+ ))*
+clauseOr
+  : (first=clauseAnd -> $first) (or others=clauseAnd -> ^(OPERATOR["OR"] clauseAnd+ ))*
   ;
 
-clauseStrongest
-  : (first=clauseStrong  -> $first) (and others=clauseStrong -> ^(OPERATOR["AND"] clauseStrong+ ))*
+clauseAnd
+  : (first=clauseNot  -> $first) (and others=clauseNot -> ^(OPERATOR["AND"] clauseNot+ ))*
   ;
   
-clauseStrong
-  : (first=clauseWeak -> $first) (not others=clauseWeak -> ^(OPERATOR["NOT"] clauseWeak+ ))*
+clauseNot
+  : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
   
-clauseWeak
-  : (first=primaryClause -> $first) (near others=primaryClause -> ^(near primaryClause+) )* 
+clauseNear
+  : (first=clauseBasic -> $first) (near others=clauseBasic -> ^(near clauseBasic+) )* 
   ;
   
-primaryClause
+clauseBasic
 	: 
-	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN term_modifier? 
-		-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(CLAUSE ^(OPERATOR["DEFOP"] clauseDefault+)))) // Default operator
-	| (LPAREN clauseDefault+ RPAREN term_modifier)=> modifier? LPAREN clauseDefault+ RPAREN term_modifier? 
-		-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(CLAUSE ^(OPERATOR["DEFOP"] clauseDefault+)))) // Default operator
-	| (LPAREN )=> LPAREN clauseDefault+ RPAREN
-		-> clauseDefault+
-	| mterm
+	(modifier LPAREN clauseOr+ RPAREN )=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
+		-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(CLAUSE ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	| (LPAREN clauseOr+ RPAREN term_modifier)=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
+		-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(CLAUSE ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	| (LPAREN )=> LPAREN clauseOr+ RPAREN
+		-> clauseOr+
 	| atom
 	;
     
@@ -126,23 +125,50 @@ range_value
 
 multi_value
 	: 
-	LPAREN mclause RPAREN -> mclause
+	LPAREN multiClause RPAREN -> multiClause
 	;
 
 
 
-mclause	
+multiClause	
 	:
-	clauseDefault+ -> ^(OPERATOR["DEFOP"] clauseDefault+)
+	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
 	
 	// 1st working	
 	//(mterm+ -> mterm+)
 	//(op=operator rhs=fclause -> ^(OPERATOR ^(OPERATOR["DEFOP"] $mclause) $rhs))?
 	;
 
+multiDefault
+	:	
+	multiOr+ -> ^(OPERATOR["DEFOP"] multiOr+)
+	;
+
+multiOr	
+	:	
+	(first=multiAnd  -> $first) (or others=multiAnd-> ^(OPERATOR["OR"] multiAnd+ ))*
+	;	
+		
+multiAnd
+	:	
+	(first=multiNot  -> $first) (and others=multiNot -> ^(OPERATOR["AND"] multiNot+ ))*
+	;	
+
+multiNot	
+	:	
+	(first=multiNear  -> $first) (not others=multiNear-> ^(OPERATOR["NOT"] multiNear+ ))*
+	;	
+
+multiNear	
+	:	
+	(first=multiBasic  -> $first) (near others=multiBasic-> ^(near multiBasic+ ))*
+	;	
+
+
 // this is just to fool ANTLR as we cannot reference "$mclause"
-fclause	:	
-	mclause
+multiBasic
+	:	
+	mterm
 	;
 		
 mterm	
