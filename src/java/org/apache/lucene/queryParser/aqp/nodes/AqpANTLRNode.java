@@ -76,6 +76,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 
 	public String toString(int level) {
 		StringBuffer buf = new StringBuffer();
+		buf.append("\n");
 		for (int i = 0; i < level; i++) {
 			buf.append(" ");
 		}
@@ -95,7 +96,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 		List<QueryNode> children = this.getChildren();
 
 		if (children != null) {
-			buf.append(">\n");
+			buf.append(">");
 			for (QueryNode child : children) {
 				if (child instanceof AqpANTLRNode) {
 					buf.append(((AqpANTLRNode) child).toString(level+4));
@@ -109,12 +110,12 @@ public class AqpANTLRNode extends QueryNodeImpl {
 		if (isLeaf()) {
 			buf.append("/>");
 		} else {
+			buf.append("\n");
 			for (int i = 0; i < level; i++) {
 				buf.append(" ");
 			}
 			buf.append("</ast>");
 		}
-		buf.append("\n");
 
 		return buf.toString();
 	}

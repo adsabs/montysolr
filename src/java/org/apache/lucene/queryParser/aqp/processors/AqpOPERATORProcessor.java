@@ -88,7 +88,6 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 	private List<QueryNode> getChildren(QueryNode node, Operator operator) {
 		Modifier mod = null;
 		List<QueryNode> children = node.getChildren();
-		int index = 0;
 		
 		switch (operator) {
 		case AND:
@@ -96,33 +95,49 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 			break;
 		case NOT:
 			mod = Modifier.MOD_NOT;
-			index = 1; //skip the first
-			if (!(children.get(0) instanceof ModifierQueryNode
-					|| children.get(0) instanceof BooleanQueryNode)) {
-				children.set(0, new ModifierQueryNode(children.get(0), Modifier.MOD_REQ));
-			}
 			break;
 		case OR:
 			mod = Modifier.MOD_NONE;
 			break;
 		default:
-			throw new IllegalArgumentException("This call accepts only standard Boolean operators");
+			throw new IllegalArgumentException("This call accepts only standard Boolean operators AND/OR/NOT");
 		}
 		
 		
-		for (int i=index;i<children.size();i++) {
+		
+		for (int i=0;i<children.size();i++) {
 			QueryNode child = children.get(i);
-			if (child instanceof ModifierQueryNode) {
-				// do nothing, modifiers have precedence
-				//children.set(i, new ModifierQueryNode(child.getChildren().get(0), 
-				//		i==0&&firstMod!=null ? firstMod : mod));
-			} 
+			Modifier nodeModifier = getModifierValue(child);
+			if (nodeModifier!=null || child instanceof ModifierQueryNode) {
+				if (!(child instanceof ModifierQueryNode)) {
+					children.set(i, new ModifierQueryNode(child, nodeModifier));
+				}
+			}
 			else {
-				children.set(i, new ModifierQueryNode(children.get(i), mod));
+				if (mod == Modifier.MOD_NOT && i==0) {
+					children.set(i, new ModifierQueryNode(child, Modifier.MOD_REQ));
+				} 
+				else {
+					children.set(i, new ModifierQueryNode(child, mod));
+				}
 			}
 		}
 		return children;
 		
+	}
+	
+	private Modifier getModifierValue(QueryNode booleanNode) {
+		List<QueryNode> children = booleanNode.getChildren();
+		if (children!=null) {
+			QueryNode modifierNode = children.get(0);
+			if (modifierNode instanceof AqpANTLRNode && ((AqpANTLRNode) modifierNode).getTokenLabel().equals("MODIFIER")) {
+				if (modifierNode.getChildren()!=null) {
+					String modifier = ((AqpANTLRNode) modifierNode.getChildren().get(0)).getTokenName();
+					return modifier.equals("PLUS") ?  ModifierQueryNode.Modifier.MOD_REQ : ModifierQueryNode.Modifier.MOD_NOT;
+				}
+			}
+		}
+		return null;
 	}
 
 }

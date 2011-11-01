@@ -139,7 +139,11 @@ public class TestAqpSimple extends LuceneTestCase {
 		//DEFAULT OPERATOR IS AND
 		qp.setDefaultOperator(Operator.AND);
 		
-		qp.setDebug(true);
+		assertQueryMatch(qp, "+title:(dog cat)", "field", 
+        "+(title:dog title:cat)");
+		
+		assertQueryMatch(qp, "title:(+dog -cat)", "field", 
+        "(+title:dog -title:cat)");
 		
 		assertQueryMatch(qp, "\\*", "field", 
         "field:*");
@@ -175,7 +179,7 @@ public class TestAqpSimple extends LuceneTestCase {
 							 "field:one (+field:two -field:three)");
 		
 		assertQueryMatch(qp, "one OR (two AND three) NOT four", "field", 
-							 "field:one ((+field:two +field:three) -field:four)");
+							 "field:one (+(+field:two +field:three) -field:four)");
 		
 		assertQueryMatch(qp, "-one -two", "field", 
 				             "-field:one -field:two");

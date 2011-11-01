@@ -200,7 +200,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
   
   public static void fail(String message) {
 	  System.err.println(message);
-	  //LuceneTestCase.fail(message);
+	  LuceneTestCase.fail(message);
   }
   
   public void setDebug(boolean d) {
@@ -508,7 +508,6 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("\"germ term\"^2.0", null, "\"germ term\"^2.0");
     assertQueryEquals("\"term germ\"^2", null, "\"term germ\"^2.0");
     
-    setDebug(true);
     assertQueryEquals("(foo OR bar) AND (baz OR boo)", null,
         "+(foo bar) +(baz boo)");
     
@@ -516,9 +515,10 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("((a OR b) NOT c) OR d", null, "(+(a b) -c) d");
     assertQueryEquals("+(apple \"steve jobs\") -(foo bar baz)", null,
         "+(apple \"steve jobs\") -(foo bar baz)");
+    setDebug(true);
     assertQueryEquals("+title:(dog OR cat) -author:\"bob dole\"", null,
         "+(title:dog title:cat) -author:\"bob dole\"");
-
+    setDebug(true);
   }
 
   public void testPunct() throws Exception {

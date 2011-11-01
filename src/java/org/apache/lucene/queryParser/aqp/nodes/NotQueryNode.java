@@ -43,11 +43,13 @@ public class NotQueryNode extends BooleanQueryNode {
       throw new IllegalArgumentException(
           "NOT query must have at least two clauses");
     }
+    /*
     QueryNode first = clauses.get(0);
     if (first instanceof ModifierQueryNode && ((ModifierQueryNode)clauses.get(0)).getModifier()==Modifier.MOD_NOT) {
     	throw new IllegalArgumentException(
         	"The first node of the NOT query must not be " + ((ModifierQueryNode)clauses.get(0)).getModifier());
     }
+    */
   }
 
   @Override

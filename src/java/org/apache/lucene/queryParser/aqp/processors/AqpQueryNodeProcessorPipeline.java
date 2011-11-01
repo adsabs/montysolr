@@ -76,13 +76,14 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new AqpQPHRASETRUNCProcessor());
     //add(new AqpBOOSTProcessor());
     
+    add(new AqpOPERATORProcessor());
     add(new AqpVALUEProcessor());
     add(new AqpNUCLEUSProcessor());
     //add(new AqpMULTIATOMProcessor());
     add(new AqpMULTITERMProcessor());
     add(new AqpATOMProcessor());
     add(new AqpCLAUSEProcessor());
-    add(new AqpOPERATORProcessor());
+    
     
     //add(new AqpMODIFIERProcessor());
     
