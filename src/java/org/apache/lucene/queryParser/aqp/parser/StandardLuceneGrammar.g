@@ -59,40 +59,40 @@ clauseWeak
   
 primaryClause
 	: 
-	
-	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["DEFOP"] clauseDefault+) ) // Default operator
-	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["DEFOP"] clauseDefault+) ) // Default operator
-	| (LPAREN)=> LPAREN clauseDefault+ RPAREN -> clauseDefault+
-	| atom 
+	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN term_modifier? 
+		-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(CLAUSE ^(OPERATOR["DEFOP"] clauseDefault+)))) // Default operator
+	| (LPAREN clauseDefault+ RPAREN term_modifier)=> modifier? LPAREN clauseDefault+ RPAREN term_modifier? 
+		-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(CLAUSE ^(OPERATOR["DEFOP"] clauseDefault+)))) // Default operator
+	| (LPAREN )=> LPAREN clauseDefault+ RPAREN
+		-> clauseDefault+
+	| mterm
+	| atom
 	;
     
 
 atom   
 	: 
-	modifier? field multi_value term_modifier? -> ^(MULTITERM ^(MODIFIER modifier?) ^(FIELD field) ^(MULTIATOM multi_value) term_modifier?)
-	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(NUCLEUS ^(FIELD field?) ^(VALUE value)))
+	modifier? field multi_value term_modifier? -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field ^(VALUE multi_value))))
+	| 
+	modifier? field? value term_modifier? -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? ^(VALUE value))))
+	| (STAR COLON)? STAR -> ^(QANYTHING STAR["*"])
 	;
    
-	   
-	   field	
+
+field	
 	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
-        | STAR COLON -> ^(QANYTHING STAR)
 	;
 
 value  
 	: 
-	( 
 	range_term_in -> ^(QRANGEIN range_term_in)
 	| range_term_ex -> ^(QRANGEEX range_term_ex) 
 	| normal -> ^(QNORMAL normal)	
 	| truncated -> ^(QTRUNCATED truncated)	
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| STAR -> ^(QANYTHING STAR)
 	| QMARK -> ^(QNORMAL QMARK)
-	)
-	term_modifier? -> term_modifier? $value
   	;
 
 	
@@ -126,13 +126,28 @@ range_value
 
 multi_value
 	: 
-	LPAREN mterm+ RPAREN -> mterm+
+	LPAREN mclause RPAREN -> mclause
 	;
+
+
+
+mclause	
+	:
+	clauseDefault+ -> ^(OPERATOR["DEFOP"] clauseDefault+)
 	
-	
+	// 1st working	
+	//(mterm+ -> mterm+)
+	//(op=operator rhs=fclause -> ^(OPERATOR ^(OPERATOR["DEFOP"] $mclause) $rhs))?
+	;
+
+// this is just to fool ANTLR as we cannot reference "$mclause"
+fclause	:	
+	mclause
+	;
+		
 mterm	
 	:	
-	(modifier? value -> ^(ATOM ^(MODIFIER modifier?) ^(NUCLEUS FIELD ^(VALUE value))))
+	modifier? value -> ^(MODIFIER modifier? ^(VALUE value))
 	;
 	
 
@@ -163,7 +178,12 @@ quoted	:
 
 
 	
-operator: (AND | OR | NOT | NEAR);
+operator: (
+	AND -> OPERATOR["AND"]
+	| OR -> OPERATOR["OR"]
+	| NOT -> OPERATOR["NOT"]
+	| NEAR -> OPERATOR["NEAR"]
+	);
 
 modifier: 
 	PLUS -> PLUS["+"]
@@ -180,29 +200,35 @@ This grammar has problem with following
 	where 999 is another term, not a fuzzy value
 */
 term_modifier	:	
+	TILDE CARAT? -> ^(FUZZY TILDE) ^(BOOST CARAT?)
+	| CARAT TILDE? -> ^(BOOST CARAT) ^(FUZZY TILDE?)
+/*
 	// first alternative
 	(
-	  (CARAT b=NUMBER -> ^(TMODIFIER ^(BOOST $b) ^(FUZZY ))
+	  (CARAT b=NUMBER -> ^(BOOST $b) ^(FUZZY )
 	 ) 
 	( //syntactic predicate
-	 (TILDE NUMBER )=>TILDE f=NUMBER -> ^(TMODIFIER ^(BOOST $b) ^(FUZZY $f)) //
-	 | TILDE -> ^(TMODIFIER ^(BOOST $b) ^(FUZZY NUMBER["0.5"]))
+	 (TILDE NUMBER )=>TILDE f=NUMBER -> ^(BOOST $b) ^(FUZZY $f)
+	 | TILDE -> ^(BOOST $b) ^(FUZZY NUMBER["0.5"])
 	 )* // set the default value
 	
 	)
 	// second alternative [only ~ | ~NUMBER]
 	| 
-	  (TILDE -> ^(TMODIFIER ^(BOOST) ^(FUZZY NUMBER["0.5"])) ) // set the default value
-	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(TMODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
-	
+	  (TILDE -> ^(BOOST) ^(FUZZY NUMBER["0.5"])) // set the default value
+	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(BOOST) ^(FUZZY $f?) )* //replace the default but '~' must not be followed by WS
+*/	
 	;
 
-boost	:	
-	CARAT NUMBER
+
+boost	:
+	(CARAT -> ^(BOOST NUMBER["DEF"])) // set the default value
+	(NUMBER -> ^(BOOST NUMBER))? //replace the default with user input
 	;
 
-fuzzy	:	
-	TILDE NUMBER
+fuzzy	:
+	(TILDE -> ^(FUZZY NUMBER["DEF"])) // set the default value
+	(NUMBER -> ^(FUZZY NUMBER))? //replace the default with user input
 	;
 
 not	:	
@@ -261,9 +287,9 @@ LCURLY  : '{' ;
 
 RCURLY  : '}' ;
 
-CARAT : '^';
+CARAT : '^' (INT+ ('.' INT+)?)?;
 
-TILDE : '~' ;
+TILDE : '~' (INT+ ('.' INT+)?)?;
 
 DQUOTE	
 	:	'\"';
