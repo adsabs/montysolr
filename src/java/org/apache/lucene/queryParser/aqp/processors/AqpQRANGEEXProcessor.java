@@ -1,6 +1,7 @@
 package org.apache.lucene.queryParser.aqp.processors;
 
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
+import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.nodes.ParametricQueryNode;
@@ -42,6 +43,13 @@ public class AqpQRANGEEXProcessor extends AqpQRANGEINProcessor {
 	AqpQRANGEEXProcessor() {
 		lowerComparator = CompareOperator.GT;
 		upperComparator = CompareOperator.LT;
+	}
+	
+	public boolean nodeIsWanted(AqpANTLRNode node) {
+		if (node.getTokenLabel().equals("QRANGEEX")) {
+			return true;
+		}
+		return false;
 	}
 
 }

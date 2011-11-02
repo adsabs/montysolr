@@ -1,5 +1,6 @@
 package org.apache.lucene.queryParser.aqp.processors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
@@ -55,18 +56,31 @@ public class AqpTMODIFIERProcessor extends QueryNodeProcessorImpl implements
 			
 			List<QueryNode> children = node.getChildren();
 			
-			if (children.size()==0) {
+			if (children.size()==1) {
 				return children.get(0);
 			}
 			
-			QueryNode masterChild = children.get(0);
-			for (int i=1;i<children.size();i++) {
-				List<QueryNode> masterChildren = masterChild.getChildren();
-				masterChildren.add(children.get(i));
+			QueryNode masterChild = null;
+			QueryNode currentChild;
+			List<QueryNode> currentChildren;
+			
+			for (int i=0;i<children.size();i++) {
+				currentChild = children.get(i);
+				if (currentChild.isLeaf()) {
+					continue;
+				}
+				if (masterChild==null) {
+					masterChild = currentChild;
+					node = masterChild;
+					continue;
+				}
+				currentChildren = masterChild.getChildren();
+				currentChildren.add(currentChild);
+				//masterChild.set(currentChildren);
 				masterChild = children.get(i);
 			}
 			
-			return masterChild;
+			return node;
 			
 		}
 		return node;

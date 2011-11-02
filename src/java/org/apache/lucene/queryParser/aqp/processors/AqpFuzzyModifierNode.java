@@ -50,11 +50,15 @@ public class AqpFuzzyModifierNode extends QueryNodeImpl implements QueryNode {
 	@Override
 	public String toString() {
 		return "<fuzzy value='" + this.fuzzy.toString() + "'>" + "\n"
-				+ getChild().toString() + "\n</modifier>";
+				+ getChild().toString() + "\n</fuzzy>";
 	}
 
 	public QueryNode getChild() {
 		return getChildren().get(0);
+	}
+	
+	public Float getFuzzyValue() {
+		return fuzzy;
 	}
 
 }

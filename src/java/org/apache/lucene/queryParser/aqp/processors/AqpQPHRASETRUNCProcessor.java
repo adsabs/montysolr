@@ -30,7 +30,7 @@ import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 public class AqpQPHRASETRUNCProcessor extends AqpQProcessor {
 
 	public boolean nodeIsWanted(AqpANTLRNode node) {
-		if (node.getTokenLabel().equals("QTRUNCATED")) {
+		if (node.getTokenLabel().equals("QPHRASETRUNC")) {
 			return true;
 		}
 		return false;
