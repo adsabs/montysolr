@@ -3,45 +3,28 @@ package org.apache.lucene.queryParser.aqp.processors;
 import java.util.List;
 
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryParser.aqp.processors.AqpCLAUSEProcessor.ClauseData;
 import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryParser.core.nodes.GroupQueryNode;
-import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.aqp.util.AqpUtils.Modifier;
 
+/**
+ * Converts CLAUSE node into @{link {@link GroupQueryNode}
+ * 
+ *
+ */
 public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
 	
 	
-	/*
-	 * 
-	 * @see org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl#preProcessNode(org.apache.lucene.queryParser.core.nodes.QueryNode)
-	 */
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
+		
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("CLAUSE")) {
-			ClauseData data = harvestData((AqpANTLRNode) node);
-			
-			node = data.getLastChild();
-			
-			if (data.getBoost()!=null) {
-				node = new BoostQueryNode(node, data.getBoost());
-			}
-			
-			
-			if (data.getModifier()!=null) {
-				node = new ModifierQueryNode(node, data.getModifier()==Modifier.PLUS ? ModifierQueryNode.Modifier.MOD_REQ 
-																					 : ModifierQueryNode.Modifier.MOD_NOT);
-			}
-			
-			node = new GroupQueryNode(node);
-			
-			return node;
+			return new GroupQueryNode(node.getChildren().get(0));			
 		}
 		return node;
 	}
@@ -58,6 +41,12 @@ public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 		return children;
 	}
 	
+	
+	/*
+	 * methods below not used now, but might be added - it tries to
+	 * compact consecutive CLAUSE nodes into one clause, taking only
+	 * the last modifier/tmodifier values
+	 */
 	private ClauseData harvestData(AqpANTLRNode clauseNode) {
 		ClauseData data = new ClauseData();
 		return harvestData(clauseNode, data);

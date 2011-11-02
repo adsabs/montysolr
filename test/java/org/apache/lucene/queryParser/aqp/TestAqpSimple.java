@@ -139,6 +139,8 @@ public class TestAqpSimple extends LuceneTestCase {
 		//DEFAULT OPERATOR IS AND
 		qp.setDefaultOperator(Operator.AND);
 		
+		qp.setDebug(true);
+		
 		assertQueryMatch(qp, "+title:(dog cat)", "field", 
         "+(title:dog title:cat)");
 		

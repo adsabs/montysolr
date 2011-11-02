@@ -8,18 +8,20 @@ import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 
-/*
+/**
  * TMODIFIER node contains FUZZY, BOOST, FIELD nodes.
  * This processor changes the tree from this shape:
  * 
+ * <pre>
  *               TMODIFIER
  *               /   |   \
  *           FUZZY BOOST FIELD
  *             /           \
  *            ~1           ...
+ * </pre>
  *           
  *  To this shape:
- *               
+ * <pre>              
  *               FUZZY
  *                / \
  *              ~1  BOOST
@@ -27,13 +29,15 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
  *                    FIELD
  *                      \
  *                     ...
- *                     
+ * </pre>                    
  *  
  *  After the processor ran, the TMODIFIER node is removed and we return
  *  the FUZZY node
+ *  <br/>
  *  
  *  If TMODIFIER contains only single child, we return that child
  *  (thus remove the TMODIFIER node from the tree).
+ *  <br/>
  *  
  *  @see AqpFUZZYProcessor
  *  @see AqpBOOSTProcessor
