@@ -57,9 +57,9 @@ public class AqpBOOSTProcessor extends QueryNodeProcessorImpl implements
 			
 			Float boost = getBoostValue(node);
 			if (boost==null) {
-				return node.getChildren().get(node.getChildren().size());
+				return node.getChildren().get(node.getChildren().size()-1);
 			}
-			return new BoostQueryNode(node.getChildren().get(node.getChildren().size()), boost);
+			return new BoostQueryNode(node.getChildren().get(node.getChildren().size()-1), boost);
 			
 		}
 		return node;

@@ -21,6 +21,32 @@ import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Op
  * sets their @{code tokenInput} to be the name of the default
  * operator.
  * 
+ * If there is only one child, the child is returned and we remove the 
+ * operator. This happens mainly for simple queries such as
+ * 
+ * <pre> field:value </pre>
+ * 
+ * But also for queries which are itself clauses, like:
+ * 
+ * <pre> +(this that) </pre>
+ * 
+ * which produces:
+ * 
+ * <pre>
+ *            DEFOP
+ *              |
+ *           MODIFIER
+ *            /   \
+ *               TMODIFIER
+ *                  |
+ *                CLAUSE
+ *                  | 
+ *                DEFOP
+ *                /   \
+ *          MODIFIER MODIFIER   
+ *             |        |
+ * </pre>
+ *              
  * @see DefaultOperatorAttribute
  * @see AqpQueryParser#setDefaultOperator(org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator)
  * 
@@ -33,6 +59,11 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 			throws QueryNodeException {
 		
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("DEFOP")) {
+			
+			if (node.getChildren().size()==1) {
+				return node.getChildren().get(0);
+			}
+			
 			AqpANTLRNode n = (AqpANTLRNode) node;
 			Operator op = getDefaultOperator();
 			// TODO: we can allow many more operators as default operators (but will have to use our

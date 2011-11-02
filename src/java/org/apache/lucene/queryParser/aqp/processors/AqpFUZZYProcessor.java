@@ -51,7 +51,7 @@ public class AqpFUZZYProcessor extends QueryNodeProcessorImpl implements
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
-		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("BOOST")) {
+		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("FUZZY")) {
 			
 			if (node.getChildren().size()==1) {
 				return node.getChildren().get(0);
@@ -60,10 +60,10 @@ public class AqpFUZZYProcessor extends QueryNodeProcessorImpl implements
 			Float fuzzy= getFuzzyValue(node);
 			
 			if (fuzzy==null) {
-				return node.getChildren().get(node.getChildren().size());
+				return node.getChildren().get(node.getChildren().size()-1);
 			}
 			
-			return new AqpFuzzyModifierNode(node.getChildren().get(node.getChildren().size()), fuzzy);
+			return new AqpFuzzyModifierNode(node.getChildren().get(node.getChildren().size()-1), fuzzy);
 			
 		}
 		return node;
@@ -99,7 +99,7 @@ public class AqpFUZZYProcessor extends QueryNodeProcessorImpl implements
 				fuzzy = queryConfig.getAttribute(FuzzyAttribute.class).getFuzzyMinSimilarity();
 			}
 			else {
-				fuzzy = Float.valueOf(input.replace("^", ""));
+				fuzzy = Float.valueOf(input.replace("~", ""));
 			}
 			
 			return fuzzy;

@@ -30,7 +30,7 @@ import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 public class AqpQPHRASETRUNCProcessor extends AqpQProcessor {
 
 	public boolean nodeIsWanted(AqpANTLRNode node) {
-		if (node.getTokenLabel().equals("QTRUNCATED")) {
+		if (node.getTokenLabel().equals("QPHRASETRUNC")) {
 			return true;
 		}
 		return false;
@@ -43,7 +43,8 @@ public class AqpQPHRASETRUNCProcessor extends AqpQProcessor {
 		
 		return new WildcardQueryNode(field,
 				EscapeQuerySyntaxImpl.discardEscapeChar(subChild
-						.getTokenInput().substring(1, -1)), subChild.getTokenStart()+1,
+						.getTokenInput().substring(1, subChild.getTokenInput().length()-1)), 
+						subChild.getTokenStart()+1,
 				subChild.getTokenEnd()-1);
 		
 	}

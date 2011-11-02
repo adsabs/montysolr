@@ -47,7 +47,9 @@ public class AqpMODIFIERProcessor extends QueryNodeProcessorImpl implements
 				return node.getChildren().get(0);
 			}
 			
+			
 			String modifier = ((AqpANTLRNode) node.getChildren().get(0)).getTokenName();
+			node = node.getChildren().get(node.getChildren().size()-1);
 			return new ModifierQueryNode(node, modifier.equals("PLUS") ?  ModifierQueryNode.Modifier.MOD_REQ : ModifierQueryNode.Modifier.MOD_NOT);
 			
 		}

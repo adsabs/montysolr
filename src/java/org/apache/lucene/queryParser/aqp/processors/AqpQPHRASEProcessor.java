@@ -44,7 +44,8 @@ public class AqpQPHRASEProcessor extends AqpQProcessor {
 		
 		return new QuotedFieldQueryNode(field,
 				EscapeQuerySyntaxImpl.discardEscapeChar(subChild
-						.getTokenInput().substring(1, -1)), subChild.getTokenStart()+1,
+						.getTokenInput().substring(1, subChild.getTokenInput().length()-1)), 
+						subChild.getTokenStart()+1,
 				subChild.getTokenEnd()-1);
 		
 	}
