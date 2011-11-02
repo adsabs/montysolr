@@ -71,9 +71,9 @@ clauseBasic
 
 atom   
 	: 
-	modifier? field multi_value term_modifier? -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field ^(VALUE multi_value))))
+	modifier? field multi_value term_modifier? -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field ^(CLAUSE multi_value))))
 	| 
-	modifier? field? value term_modifier? -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? ^(VALUE value))))
+	modifier? field? value term_modifier? -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
 	| (STAR COLON)? STAR -> ^(QANYTHING STAR["*"])
 	;
    

@@ -72,20 +72,23 @@ public class AqpQueryNodeProcessorPipeline extends
     
     add(new AqpDEFOPProcessor());
     add(new AqpTreeRewriteProcessor());
+    
+    add(new AqpCLAUSEProcessor());
+    add(new AqpOPERATORProcessor());
+    add(new AqpMODIFIERProcessor());
+    add(new AqpBOOSTProcessor());
+    add(new AqpFUZZYProcessor());
+    add(new AqpTMODIFIERProcessor());
+    add(new AqpQNORMALProcessor());
     add(new AqpQPHRASEProcessor());
     add(new AqpQPHRASETRUNCProcessor());
-    //add(new AqpBOOSTProcessor());
-    
-    add(new AqpOPERATORProcessor());
-    add(new AqpVALUEProcessor());
-    add(new AqpNUCLEUSProcessor());
-    //add(new AqpMULTIATOMProcessor());
-    add(new AqpMULTITERMProcessor());
-    add(new AqpATOMProcessor());
-    add(new AqpCLAUSEProcessor());
+    add(new AqpQTRUNCATEDProcessor());
+    add(new AqpQRANGEINProcessor());
+    add(new AqpQRANGEEXProcessor());
+    add(new AqpQANYTHINGProcessor());
+    add(new AqpFIELDProcessor());
     
     
-    //add(new AqpMODIFIERProcessor());
     
     add(new WildcardQueryNodeProcessor());
     add(new MultiFieldQueryNodeProcessor());

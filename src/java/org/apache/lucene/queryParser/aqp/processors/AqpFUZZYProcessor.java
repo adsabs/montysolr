@@ -15,35 +15,37 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.standard.config.BoostAttribute;
 import org.apache.lucene.queryParser.standard.config.FuzzyAttribute;
 
-
 /**
  * Sets the node into the BoostQueryNode, this processor requires that
  * {@link AqpTMODIFIERProcessor} ran before. Because we depend on the proper
  * tree shape.
+ * 
  * <br/>
  * 
  * If BOOST node contains only one child, we return that child and do 
  * nothing.
+ * 
  * <br/>
  * 
  * If BOOST node contains two children, we take the first and check its
  * input, eg.
  * <pre>
- * 					BOOST
+ *                  FUZZY
  *                  /  \
- *               ^0.1  rest
+ *               ~0.1  rest
  * </pre>
  * 
- * We create a new node  BoostQueryNode(rest, 0.1) and return that node.
+ * We create a new node  {@@link AqpFuzzyModifierNode} (rest, 0.1) and return that node.
+ * 
  * <br/>
  * 
  * Presence of the BOOST node child means user specified at least "^"
- * We'll use the default from the configuration {@see BoostAttribute}
+ * We'll use the default from the configuration {@link BoostAttribute}
  * 
  * @see AqpTMODIFIERProcessor
  * @see AqpFUZZYProcessor
  */
-public class AqpBOOSTProcessor extends QueryNodeProcessorImpl implements
+public class AqpFUZZYProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
 
 	@Override
@@ -55,11 +57,13 @@ public class AqpBOOSTProcessor extends QueryNodeProcessorImpl implements
 				return node.getChildren().get(0);
 			}
 			
-			Float boost = getBoostValue(node);
-			if (boost==null) {
+			Float fuzzy= getFuzzyValue(node);
+			
+			if (fuzzy==null) {
 				return node.getChildren().get(node.getChildren().size());
 			}
-			return new BoostQueryNode(node.getChildren().get(node.getChildren().size()), boost);
+			
+			return new AqpFuzzyModifierNode(node.getChildren().get(node.getChildren().size()), fuzzy);
 			
 		}
 		return node;
@@ -78,27 +82,27 @@ public class AqpBOOSTProcessor extends QueryNodeProcessorImpl implements
 		return children;
 	}
 	
-	private Float getBoostValue(QueryNode boostNode) throws QueryNodeException {
-		if (boostNode.getChildren()!=null) {
+	private Float getFuzzyValue(QueryNode fuzzyNode) throws QueryNodeException {
+		if (fuzzyNode.getChildren()!=null) {
 			
-			AqpANTLRNode child = ((AqpANTLRNode) boostNode.getChildren().get(0));
+			AqpANTLRNode child = ((AqpANTLRNode) fuzzyNode.getChildren().get(0));
 			String input = child.getTokenInput();
-			float boost;
+			float fuzzy;
 			
-			if (input.equals("^")) {
+			if (input.equals("~")) {
 				QueryConfigHandler queryConfig = getQueryConfigHandler();
-				if (queryConfig == null || !queryConfig.hasAttribute(BoostAttribute.class)) {
+				if (queryConfig == null || !queryConfig.hasAttribute(FuzzyAttribute.class)) {
 					throw new QueryNodeException(new MessageImpl(
 			                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-			                "Configuration error: " + DefaultFieldAttribute.class.toString() + " is missing"));
+			                "Configuration error: " + FuzzyAttribute.class.toString() + " is missing"));
 				}
-				boost = queryConfig.getAttribute(BoostAttribute.class).getBoost();
+				fuzzy = queryConfig.getAttribute(FuzzyAttribute.class).getFuzzyMinSimilarity();
 			}
 			else {
-				boost = Float.valueOf(input.replace("^", ""));
+				fuzzy = Float.valueOf(input.replace("^", ""));
 			}
 			
-			return boost;
+			return fuzzy;
 			
 		}
 		return null;
