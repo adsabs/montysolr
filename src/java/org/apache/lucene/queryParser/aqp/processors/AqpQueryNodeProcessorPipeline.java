@@ -73,25 +73,24 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new AqpDEFOPProcessor());
     add(new AqpTreeRewriteProcessor());
     
-    add(new AqpCLAUSEProcessor());
-    add(new AqpOPERATORProcessor());
     add(new AqpMODIFIERProcessor());
+    add(new AqpOPERATORProcessor());
+    add(new AqpCLAUSEProcessor());
     add(new AqpTMODIFIERProcessor());
     add(new AqpFUZZYProcessor());
     add(new AqpBOOSTProcessor());
     
-    
+    add(new AqpQRANGEINProcessor());
+    add(new AqpQRANGEEXProcessor());
     add(new AqpQNORMALProcessor());
     add(new AqpQPHRASEProcessor());
     add(new AqpQPHRASETRUNCProcessor());
     add(new AqpQTRUNCATEDProcessor());
-    add(new AqpQRANGEINProcessor());
-    add(new AqpQRANGEEXProcessor());
     add(new AqpQANYTHINGProcessor());
     add(new AqpFIELDProcessor());
     
     add(new AqpFuzzyModifierProcessor());
-    add(new AqpGroupQueryOptimizerProcessor());
+    
     
     add(new WildcardQueryNodeProcessor());
     add(new MultiFieldQueryNodeProcessor());
@@ -110,6 +109,8 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new DefaultPhraseSlopQueryNodeProcessor());
     add(new BoostQueryNodeProcessor());
     add(new MultiTermRewriteMethodProcessor());
+    
+    add(new AqpGroupQueryOptimizerProcessor());
     add(new AqpOptimizationProcessor());
   }
   

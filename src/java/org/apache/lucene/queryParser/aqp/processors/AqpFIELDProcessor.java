@@ -33,7 +33,7 @@ public class AqpFIELDProcessor extends QueryNodeProcessorImpl implements
 			}
 			
 			
-			String field = getFieldValue(node.getChildren().get(0));
+			String field = getFieldValue(node);
 			node = node.getChildren().get(node.getChildren().size()-1);
 			if (field!=null) {
 				applyFieldToAllChildren(field, node);

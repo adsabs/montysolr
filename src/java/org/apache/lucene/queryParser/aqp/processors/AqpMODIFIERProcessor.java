@@ -16,7 +16,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
  * Creates a {@link ModifierQueryNode} from the MODIFIER node 
  * last child
  *  
- * If BOOST node contains only one child, we return that child and do 
+ * If MODIFIER node contains only one child, we return that child and do 
  * nothing.
  * <br/>
  * 
@@ -31,9 +31,21 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
  * We create a new node  ModifierQueryNode(rest, Modifier) and return that node.
  * <br/>
  * 
+ * This processor should run before {@link AqpOPERATORProcessor} to ensure
+ * that local modifiers have precedence over the boolean operations. For example:
+ * 
+ * <pre>
+ * title:(+a -b c)
+ * </pre>
+ * 
+ * Should produce (when OR is a default operator):
+ * 
+ * <pre>
+ *  +title:a -title:b title:c
+ * </pre>
  * 
  * @see Modifier
- * @see BooleanQueryNode
+ * @see AqpBooleanQueryNode
  */
 public class AqpMODIFIERProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {

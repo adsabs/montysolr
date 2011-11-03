@@ -85,7 +85,7 @@ public class AqpQRANGEINProcessor extends AqpQProcessor {
 			return new NodeData("*", subNode.getTokenStart(), subNode.getTokenEnd());
 		}
 		else if (label.contains("PHRASE")) {
-			return new NodeData(subNode.getTokenInput().substring(1, -1), 
+			return new NodeData(subNode.getTokenInput().substring(1, subNode.getTokenInput().length()-1), 
 					subNode.getTokenStart()+1, subNode.getTokenEnd()-1);
 		}
 		else {

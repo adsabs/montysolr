@@ -61,11 +61,11 @@ public class AqpANTLRNode extends QueryNodeImpl {
 
 	public String toStringNodeOnly() {
 		if (getTokenInput() != null) {
-			return "<ast value=\"" + getTokenInput() + "\" start=\""
+			return "<ast" + getTokenName() + " value=\"" + getTokenInput() + "\" start=\""
 					+ getTokenStart() + "\" end=\"" + getTokenEnd()
 					+ "\" />";
 		} else {
-			return "<ast type=\"" + getTokenLabel() + "\" />";
+			return "<ast" + getTokenName() + " type=\"" + getTokenLabel() + "\" />";
 		}
 	}
 
@@ -81,7 +81,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 			buf.append(" ");
 		}
 
-		buf.append("<ast ");
+		buf.append("<ast" + getTokenName() + " ");
 
 		if (getTokenInput() != null) {
 			buf.append("value=\"" + getTokenInput() + "\" start=\""
@@ -114,7 +114,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 			for (int i = 0; i < level; i++) {
 				buf.append(" ");
 			}
-			buf.append("</ast>");
+			buf.append("</ast" + getTokenName() + ">");
 		}
 
 		return buf.toString();

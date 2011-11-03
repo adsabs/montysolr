@@ -2,10 +2,17 @@ package org.apache.lucene.queryParser.aqp.processors;
 
 import java.util.List;
 
+import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.config.DefaultProximityAttribute;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryParser.aqp.nodes.NotQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpAndQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpNearQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpNotQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryParser.aqp.util.AqpUtils.Operator;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
+import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.AndQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
@@ -14,10 +21,36 @@ import org.apache.lucene.queryParser.core.nodes.ProximityQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.standard.config.FuzzyAttribute;
 import org.apache.lucene.queryParser.standard.nodes.BooleanModifierNode;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode.Modifier;
 
+/**
+ * This processor operates on OPERATOR nodes, these are the nodes with labels
+ * AND, OR, NOT, DEFOP, NEAR and possibly others.
+ * <br/>
+ * I have decided to create special QueryNodes for each type of the operator,
+ * because the default implementation ({@link AndQueryNode}, {@link OrQueryNode})
+ * was confusing.
+ * <pre>
+ *   AND
+ *   	- creates {@link AqpAndQueryNode}
+ *   OR
+ *   	- creates {@link AqpOrQueryNode}
+ *   NOT
+ *   	- creates {@link AqpNotQueryNode}
+ *   WITH
+ *   	- not implemented yet
+ *   PARAGRAPH
+ *   	- not implemented yet
+ * </pre>
+ *   
+ * This processor should run after {@link AqpDEFOPProcessor}, but before 
+ * {@link AqpMODIFIERProcessor} because modifiers should
+ * have precedence over operators. Like in the query: "this OR +that" 
+ *
+ */
 public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
 	
@@ -29,48 +62,38 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 	}
 	
 	
-	/*
-	 * Returns the QueryNode with the children being converted to {@see ModifierQueryNode}
-	 *   AND
-	 *   	- applies {@see ModifierQueryNode.Modifier.MOD_REQ} to all children
-	 *   OR
-	 *   	- applies {@see ModifierQueryNode.Modifier.MOD_NONE} to all children
-	 *   NOT
-	 *   	- applies {@see ModifierQueryNode.Modifier.MOD_REQ} to the first child
-	 *        and {@see ModifierQueryNode.Modifier.MOD_NOT} to the rest. This query
-	 *        means "x AND NOT y"
-	 *   WITH
-	 *   	- not implemented yet
-	 *   PARAGRAPH
-	 *   	- not implemented yet
-	 *   
-	 * This processor should be before {@AqpMODIFIERProcessor} because modifiers should
-	 * have precedence over operators. Like in the query: "this OR +that" 
-	 * 
-	 * @see AqpMODIFIERProcessor
-	 * @see org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl#preProcessNode(org.apache.lucene.queryParser.core.nodes.QueryNode)
-	 */
 	@Override
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 		
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenName().equals("OPERATOR")) {
 			AqpANTLRNode n = (AqpANTLRNode) node;
-			QueryNode ret = null;
 			
 			if (n.getTokenLabel().equals("AND")) {
-				ret = new AndQueryNode(getChildren(node, Operator.AND));
+				return new AqpAndQueryNode(node.getChildren());
 			}
 			else if(n.getTokenLabel().equals("OR")) {
-				ret = new OrQueryNode(getChildren(node, Operator.OR));
+				return new AqpOrQueryNode(node.getChildren());
 			}
 			else if(n.getTokenLabel().equals("NOT")) {
-				ret = new NotQueryNode(getChildren(node, Operator.NOT));
+				return new AqpNotQueryNode(node.getChildren());
 			}
-			//else if(n.getTokenLabel().equals("WITH")) {
-			//	new ProximityQueryNode(clauses, field, type, inorder)
-			//}
-			return ret;
+			else if(n.getTokenLabel().contains("NEAR")) {
+				String[] parts = n.getTokenLabel().split(":");
+				if (parts.length > 1) {
+					return new AqpNearQueryNode(node.getChildren(), Integer.valueOf(parts[1]));
+				}
+				else {
+					return new AqpNearQueryNode(node.getChildren(), getDefaultProximityValue());
+				}
+				
+			}
+			else {
+				throw new QueryNodeException(new MessageImpl(
+		                QueryParserMessages.INVALID_SYNTAX,
+		                "Unknown operator " + n.getTokenLabel()));
+			}
+			
 		}
 		return node;
 	}
@@ -81,63 +104,16 @@ public class AqpOPERATORProcessor extends QueryNodeProcessorImpl implements
 		return children;
 	}
 	
-	/*
-	 * Apply the ModifierQueryNode to each of the children
-	 * (unless it is already of the type ModifierQueryNode)
-	 */
-	private List<QueryNode> getChildren(QueryNode node, Operator operator) {
-		Modifier mod = null;
-		List<QueryNode> children = node.getChildren();
-		
-		switch (operator) {
-		case AND:
-			mod = Modifier.MOD_REQ;
-			break;
-		case NOT:
-			mod = Modifier.MOD_NOT;
-			break;
-		case OR:
-			mod = Modifier.MOD_NONE;
-			break;
-		default:
-			throw new IllegalArgumentException("This call accepts only standard Boolean operators AND/OR/NOT");
-		}
-		
-		
-		
-		for (int i=0;i<children.size();i++) {
-			QueryNode child = children.get(i);
-			Modifier nodeModifier = getModifierValue(child);
-			if (nodeModifier!=null || child instanceof ModifierQueryNode) {
-				if (!(child instanceof ModifierQueryNode)) {
-					children.set(i, new ModifierQueryNode(child, nodeModifier));
-				}
-			}
-			else {
-				if (mod == Modifier.MOD_NOT && i==0) {
-					children.set(i, new ModifierQueryNode(child, Modifier.MOD_REQ));
-				} 
-				else {
-					children.set(i, new ModifierQueryNode(child, mod));
-				}
-			}
-		}
-		return children;
-		
-	}
 	
-	private Modifier getModifierValue(QueryNode booleanNode) {
-		List<QueryNode> children = booleanNode.getChildren();
-		if (children!=null) {
-			QueryNode modifierNode = children.get(0);
-			if (modifierNode instanceof AqpANTLRNode && ((AqpANTLRNode) modifierNode).getTokenLabel().equals("MODIFIER")) {
-				if (modifierNode.getChildren()!=null) {
-					String modifier = ((AqpANTLRNode) modifierNode.getChildren().get(0)).getTokenName();
-					return modifier.equals("PLUS") ?  ModifierQueryNode.Modifier.MOD_REQ : ModifierQueryNode.Modifier.MOD_NOT;
-				}
-			}
+	
+	private Integer getDefaultProximityValue() throws QueryNodeException {
+		QueryConfigHandler queryConfig = getQueryConfigHandler();
+		if (queryConfig == null || !queryConfig.hasAttribute(DefaultProximityAttribute.class)) {
+			throw new QueryNodeException(new MessageImpl(
+	                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+	                "Configuration error: " + DefaultProximityAttribute.class.toString() + " is missing"));
 		}
-		return null;
+		return queryConfig.getAttribute(DefaultProximityAttribute.class).getDefaultProximity();
 	}
 
 }

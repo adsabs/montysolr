@@ -273,8 +273,8 @@ or 	:
 	;		
 
 near	:	
-	(NEAR -> ^(OPERATOR["NEAR 5"]) )
-	('/' b=NUMBER -> ^(OPERATOR["NEAR " + $b.getText()]) )?
+	(NEAR -> ^(OPERATOR["NEAR"]) )
+	('/' b=NUMBER -> ^(OPERATOR["NEAR:" + $b.getText()]) )?
 	;
 
 date	:	

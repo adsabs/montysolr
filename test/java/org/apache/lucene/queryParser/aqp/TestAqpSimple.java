@@ -87,16 +87,18 @@ public class TestAqpSimple extends LuceneTestCase {
 					SyntaxParser parser = qp.getSyntaxParser();
 					QueryNode queryTree = parser.parse(queryString, defaultField);
 					
-					System.out.println(" ----- AST QNTRee ----");
+					System.out.println("\n ----- AST QNTRee ----");
 					System.out.print(queryTree);
 					QueryNodeProcessor processor = qp.getQueryNodeProcessor();
 				    if (processor != null) {
 				      queryTree = processor.process(queryTree);
 				    }
-				    System.out.println(" ----- ProcessedQN ----");
+				    System.out.println("\n ----- ProcessedQN ----");
 				    System.out.println(queryTree);
+				    System.out.println("");
 				    System.out.println("query:\t\t" + queryString);
 					System.out.println("result:\t\t" + queryParsed);
+					System.out.println("");
 				}
 				
 				String msg = "Query /" + queryString + "/ with field: " + defaultField
@@ -139,13 +141,14 @@ public class TestAqpSimple extends LuceneTestCase {
 		//DEFAULT OPERATOR IS AND
 		qp.setDefaultOperator(Operator.AND);
 		
-		//qp.setDebug(true);
+		
 		
 		assertQueryMatch(qp, "+title:(dog cat)", "field", 
-        "+(title:dog title:cat)");
+        "+title:dog +title:cat");
+		
 		
 		assertQueryMatch(qp, "title:(+dog -cat)", "field", 
-        "(+title:dog -title:cat)");
+        "+title:dog -title:cat");
 		
 		assertQueryMatch(qp, "\\*", "field", 
         "field:*");
@@ -172,7 +175,7 @@ public class TestAqpSimple extends LuceneTestCase {
 				             "+field:A +field:B +field:C +field:D");
 		
 		assertQueryMatch(qp, "A AND B C AND D OR E", "field", 
-        					 "(+field:A +field:B) ((+field:C +field:D) field:E)");
+        					 "+(+field:A +field:B) +((+field:C +field:D) field:E)");
 		
 		assertQueryMatch(qp, "one OR +two", "f", 
 				             "f:one +f:two");
@@ -187,10 +190,10 @@ public class TestAqpSimple extends LuceneTestCase {
 				             "-field:one -field:two");
 		
 		assertQueryMatch(qp, "x:one NOT y:two -three^0.5", "field", 
-                             "(+x:one -y:two) -field:three^0.5");
+                             "+(+x:one -y:two) -field:three^0.5");
 		
 		assertQueryMatch(qp, "one NOT two -three~0.2", "field", 
-        					"(+field:one -field:two) -field:three~0.2");
+        					"+(+field:one -field:two) -field:three~0.2");
 		
 		assertQueryMatch(qp, "one NOT two NOT three~0.2", "field", 
         					"+field:one -field:two -field:three~0.2");
@@ -205,13 +208,13 @@ public class TestAqpSimple extends LuceneTestCase {
         					"+field:one +((+x:two +field:three)^0.8)");
 		
 		assertQueryMatch(qp, "one:(two three)^0.8", "field", 
-        					"+((one:two one:three)^0.8)");
+        					"(+one:two +one:three)^0.8");
 		
 		assertQueryMatch(qp, "-one:(two three)^0.8", "field", 
        						"-((one:two one:three)^0.8)");
 		
 		assertQueryMatch(qp, "+one:(two three)^0.8", "field", 
-        					"+((one:two one:three)^0.8)");
+        					"(+one:two +one:three)^0.8");
 		
 		assertQueryMatch(qp, "[one TO five]", "field", 
         					"field:[one TO five]");

@@ -3,6 +3,7 @@ package org.apache.lucene.queryParser.aqp.processors;
 import java.util.List;
 
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.nodes.AqpFuzzyModifierNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;

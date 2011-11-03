@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpFuzzyModifierNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;

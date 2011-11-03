@@ -36,7 +36,7 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
 			newVal = queryTree.toString();
 			System.out.println("     Tree changed: " + (newVal.equals(oldVal) ? "NO" : "YES"));
 			System.out.println("--------------------------------------------");
-			System.out.println(newVal);
+			System.out.println(newVal.equals(oldVal) ? "" : newVal);
 			oldVal = newVal;
 			i += 1;
 		}
