@@ -86,11 +86,12 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new AqpQPHRASEProcessor());
     add(new AqpQPHRASETRUNCProcessor());
     add(new AqpQTRUNCATEDProcessor());
+    add(new AqpQRANGEINProcessor());
+    add(new AqpQRANGEEXProcessor());
     add(new AqpQANYTHINGProcessor());
     add(new AqpFIELDProcessor());
     
     add(new AqpFuzzyModifierProcessor());
-    
     
     add(new WildcardQueryNodeProcessor());
     add(new MultiFieldQueryNodeProcessor());
