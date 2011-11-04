@@ -133,6 +133,8 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryTreeBuilder
  */
 public class AqpQueryParser extends QueryParserHelper {
+	
+	private boolean debugMode = false;
 
 	/**
 	 * Constructs a {@link StandardQueryParser} object. The default grammar used
@@ -145,8 +147,8 @@ public class AqpQueryParser extends QueryParserHelper {
 	}
 
 	public AqpQueryParser(String grammarName) throws Exception {
-		super(new AqpStandardQueryConfigHandler(), new AqpSyntaxParser()
-				.initializeGrammar(grammarName),
+		super(new AqpStandardQueryConfigHandler(), 
+				new AqpSyntaxParser().initializeGrammar(grammarName),
 				new AqpQueryNodeProcessorPipeline(null),
 				new AqpStandardQueryTreeBuilder());
 	}
@@ -186,6 +188,11 @@ public class AqpQueryParser extends QueryParserHelper {
 			this.setQueryNodeProcessor(new AqpQueryNodeProcessorPipeline(
 					getQueryConfigHandler()));
 		}
+		debugMode = debug;
+	}
+	
+	public boolean getDebug() {
+		return debugMode;
 	}
 
 	/**

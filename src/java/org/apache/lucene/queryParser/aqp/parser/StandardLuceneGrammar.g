@@ -60,9 +60,9 @@ clauseNear
 clauseBasic
 	: 
 	(modifier LPAREN clauseOr+ RPAREN )=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
-		-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(CLAUSE ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN clauseOr+ RPAREN term_modifier)=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
-		-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(CLAUSE ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN )=> LPAREN clauseOr+ RPAREN
 		-> clauseOr+
 	| atom
@@ -71,9 +71,11 @@ clauseBasic
 
 atom   
 	: 
-	modifier? field multi_value term_modifier? -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field ^(CLAUSE multi_value))))
+	modifier? field multi_value term_modifier?
+	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field multi_value))))
 	| 
-	modifier? field? value term_modifier? -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
+	modifier? field? value term_modifier? 
+	-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
 	| (STAR COLON)? STAR -> ^(QANYTHING STAR["*"])
 	;
    

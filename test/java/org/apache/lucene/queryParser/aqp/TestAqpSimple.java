@@ -84,21 +84,17 @@ public class TestAqpSimple extends LuceneTestCase {
 				
 				if (this.verbose) {
 					
-					SyntaxParser parser = qp.getSyntaxParser();
-					QueryNode queryTree = parser.parse(queryString, defaultField);
+					System.out.println("query:\t\t" + queryString);
 					
-					System.out.println("\n ----- AST QNTRee ----");
-					System.out.print(queryTree);
-					QueryNodeProcessor processor = qp.getQueryNodeProcessor();
-				    if (processor != null) {
-				      queryTree = processor.process(queryTree);
-				    }
-				    System.out.println("\n ----- ProcessedQN ----");
-				    System.out.println(queryTree);
-				    System.out.println("");
+					if (qp.getDebug()!=true) { // it already printed debug
+						qp.setDebug(true);
+						qp.parse(queryString, defaultField);
+						qp.setDebug(false);
+					}
+					System.out.println("");
 				    System.out.println("query:\t\t" + queryString);
 					System.out.println("result:\t\t" + queryParsed);
-					System.out.println("");
+					
 				}
 				
 				String msg = "Query /" + queryString + "/ with field: " + defaultField
@@ -141,6 +137,17 @@ public class TestAqpSimple extends LuceneTestCase {
 		//DEFAULT OPERATOR IS AND
 		qp.setDefaultOperator(Operator.AND);
 		
+		//qp.setDebug(true);
+		assertQueryMatch(qp, "(+(-(a b)))^0.8 OR -(x y)^0.2", "field", 
+        "((-(+field:a +field:b))^0.8) ((-(+field:x +field:y))^0.2)");
+		
+		assertQueryMatch(qp, "(+(-(a b)))^0.8 -(x y)", "field", 
+        "+((-(+field:a +field:b))^0.8) +(-(+field:x +field:y))");
+		// or does -(x y) have different semantics? ... -field:x -field:y
+		// +((-(+field:a +field:b))^0.8) -field:x -field:y
+		
+		assertQueryMatch(qp, "+((+(-(a b)))^0.8)^0.7 OR -(x y)^0.2", "field", 
+        "((-((+field:a +field:b)^0.8))^0.7) ((-(+field:x +field:y))^0.2)");
 		
 		
 		assertQueryMatch(qp, "+title:(dog cat)", "field", 
@@ -211,7 +218,7 @@ public class TestAqpSimple extends LuceneTestCase {
         					"(+one:two +one:three)^0.8");
 		
 		assertQueryMatch(qp, "-one:(two three)^0.8", "field", 
-       						"-((one:two one:three)^0.8)");
+       						"-((+one:two +one:three)^0.8)");
 		
 		assertQueryMatch(qp, "+one:(two three)^0.8", "field", 
         					"(+one:two +one:three)^0.8");

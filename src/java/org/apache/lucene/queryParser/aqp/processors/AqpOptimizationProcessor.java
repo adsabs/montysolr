@@ -14,6 +14,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
  * Optimizes the query tree
  * 		- on root node
  * 			- turns +whathever into whatever if there is only one child
+ *            (but only if Modifier is positive, MOD_REQ or MOD_NONE)
  * @author rchyla
  *
  */
@@ -25,7 +26,11 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
 			throws QueryNodeException {
 		if (node.getParent()==null && node.getChildren()!=null && node.getChildren().size()==1) {
 			if (node instanceof BooleanQueryNode ) {
-				return node.getChildren().get(0);
+				QueryNode c = node.getChildren().get(0);
+				if (c instanceof ModifierQueryNode && 
+						((ModifierQueryNode)c).getModifier()!=Modifier.MOD_NOT) {
+					return ((ModifierQueryNode)c).getChild();
+				}
 			}
 		}
 		return node;

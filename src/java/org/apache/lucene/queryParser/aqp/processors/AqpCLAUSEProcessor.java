@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryParser.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
@@ -28,6 +29,7 @@ public class AqpCLAUSEProcessor extends QueryNodeProcessorImpl implements
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("CLAUSE")) {
 			
 			return new GroupQueryNode(node.getChildren().get(0));
+			//return new BooleanQueryNode(node.getChildren());
 		}
 		return node;
 	}

@@ -1,10 +1,12 @@
 package org.apache.lucene.queryParser.aqp.processors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.util.AqpUtils.Modifier;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryParser.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
@@ -40,13 +42,18 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 			ClauseData data = harvestData(node);
 			
 			if (data.getLastChild()!=null && !node.equals(data.getLastChild())) {
-				node = new GroupQueryNode(data.getLastChild());
+				node = data.getLastChild();
 				if (data.getBoost()!=null) {
 					node = new BoostQueryNode(node, data.getBoost());
 				}
 				if (data.getModifier()!=null) {
-					node = new ModifierQueryNode(node, data.getModifier());
+					List<QueryNode> children = new ArrayList<QueryNode>();
+					children.add(new ModifierQueryNode(node, data.getModifier()));
+					node = new BooleanQueryNode(children);
 				}
+				
+				
+				return node;
 			}
 		}
 		return node;
