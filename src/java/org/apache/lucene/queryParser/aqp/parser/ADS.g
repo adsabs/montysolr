@@ -1,4 +1,4 @@
-grammar StandardLuceneGrammar;
+grammar ADS;
 
 options {
   language = Java;
@@ -22,6 +22,7 @@ tokens {
   QRANGEEX;
   QANYTHING;
   QDATE;
+  QFIRST;
 }
 
 @header{
@@ -32,7 +33,7 @@ tokens {
 }
 
 mainQ : 
-	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
+	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
 	;
    
   
@@ -53,13 +54,13 @@ clauseNear
   ;
   
 clauseBasic
-	:
+	: 
 	(modifier LPAREN clauseOr+ RPAREN )=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN clauseOr+ RPAREN term_modifier)=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN )=> LPAREN clauseOr+ RPAREN
-	 -> clauseOr+
+		-> clauseOr+
 	| atom
 	;
     
@@ -68,10 +69,10 @@ atom
 	: 
 	modifier? field multi_value term_modifier?
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field multi_value))))
-	| modifier? field? value term_modifier? 
-	 -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
-	| modifier? (STAR COLON)? STAR 
-	 -> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
+	| 
+	modifier? field? value term_modifier? 
+	-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
+	| modifier? (STAR COLON)? STAR -> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
 	;
    
 
@@ -88,6 +89,8 @@ value
 	| truncated -> ^(QTRUNCATED truncated)	
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	| DATE_RANGE -> ^(QDATE DATE_RANGE)
+	| AUTHOR_SEARCH -> ^(QFIRST AUTHOR_SEARCH)
 	| QMARK -> ^(QTRUNCATED QMARK)
   	;
 
@@ -184,7 +187,9 @@ mterm
 	
 
 normal	
-	:	
+	:
+	IDENTIFIER
+	|
 	TERM_NORMAL
 	| NUMBER
 	;	
@@ -330,42 +335,53 @@ SQUOTE
 	:	'\'';
 
 
-
+fragment ESC_CHAR:  '\\' .; 
 
 TO	:	'TO';
 
 /* We want to be case insensitive */
-AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
+AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)|',') ;
 OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
 NOT   : ('n' | 'N') ('o' | 'O') ('t' | 'T');
 NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 
-WS  :   ( ' '
-        | '\t'
-        | '\r'
-        | '\n'
-        | '\u3000'
-        ) 
-        {$channel=HIDDEN;}
-    ;
 
-      
-/*	
-fragment TERM_CHAR  : 
-     ~(' ' | '\t' | '\n' | '\r' | '\u3000'
-      | '\\' | '\'' | '\"' 
-      | '(' | ')' | '[' | ']' | '{' | '}'
-      | '+' | '-' | '!' | ':' | '~' | '^' 
-      | '*' | '|' | '&' | '?' | '\\\"' | '/'  //this line is not present in lucene StandardParser.jj
-      );  	
-*/
+// just used for debugging
+id	:	
+	IDENTIFIER
+	;
+
+as	:	
+	AUTHOR_SEARCH
+	;
+// debugging end
+
+	
+AUTHOR_SEARCH
+	:
+	'^' AS_CHAR+ (',' (' ' | AS_CHAR)+)?
+	;
+fragment AS_CHAR
+	:
+	~('0' .. '9' | ' ' | ',' | '+' | '-')
+	;
+	
+DATE_RANGE
+	:	
+	'-'? INT INT INT INT
+	| INT INT INT INT '-' (INT INT INT INT)?
+	;
+	
+IDENTIFIER
+	:	('arXiv'|'arxiv') ':' TERM_CHAR+
+	| INT+ '.' INT+ '/' INT+ ('.' INT+)?
+	;
+
+
 
 
 fragment INT: '0' .. '9';
-
-
-fragment ESC_CHAR:  '\\' .; 
 
 
 fragment TERM_START_CHAR
@@ -374,7 +390,7 @@ fragment TERM_START_CHAR
 	      | '\'' | '\"' 
 	      | '(' | ')' | '[' | ']' | '{' | '}'
 	      | '+' | '-' | '!' | ':' | '~' | '^' 
-	      | '?' | '*' | '\\'
+	      | '?' | '*' | '\\'|','
 	      )
 	 | ESC_CHAR );  	
 
@@ -416,4 +432,3 @@ PHRASE
 PHRASE_ANYTHING	:	
 	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
 	;
-

@@ -5,7 +5,7 @@ set +e
 
 GRAMMAR=${2:-StandardLuceneGrammar}
 
-RULE=${2:-mainQ}
+RULE=${3:-mainQ}
 
 BINDIR=../../../../../../../../bin
 

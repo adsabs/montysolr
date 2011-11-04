@@ -25,6 +25,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.standard.QueryParserUtil;
+import org.apache.lucene.queryParser.standard.StandardQueryParser;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.search.BooleanQuery;
@@ -65,6 +66,16 @@ public class TestAqpSimple extends LuceneTestCase {
 		qp.setAnalyzer(a);
 		return qp;
 	}
+	
+	
+	public StandardQueryParser getStandardParser(Analyzer a) throws Exception {
+		if (a == null)
+			a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
+		StandardQueryParser qp = new StandardQueryParser();
+		qp.setAnalyzer(a);
+		return qp;
+	}
+	
 
 	public Query getQuery(String query, Analyzer a) throws Exception {
 		return getParser(a).parse(query, "field");
@@ -134,8 +145,20 @@ public class TestAqpSimple extends LuceneTestCase {
 		
 		AqpQueryParser qp = getParser(analyzer);
 		
+		StandardQueryParser sp = getStandardParser(analyzer);
+		
 		//DEFAULT OPERATOR IS AND
 		qp.setDefaultOperator(Operator.AND);
+		sp.setDefaultOperator(Operator.AND);
+		
+		Query qa = sp.parse("kahnn-strauss", "x");
+		Query qb = qp.parse("kahnn-strauss", "x");
+		
+		qa = sp.parse("a \\\"b \\\"c d", "x");
+		qb = qp.parse("a \\\"b \\\"c d", "x");
+		
+		qa = sp.parse("\"a \\\"b c\\\" d\"", "x");
+		qb = qp.parse("\"a \\\"b c\\\" d\"", "x");
 		
 		//qp.setDebug(true);
 		assertQueryMatch(qp, "(+(-(a b)))^0.8 OR -(x y)^0.2", "field", 

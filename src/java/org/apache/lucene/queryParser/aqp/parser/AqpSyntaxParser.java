@@ -94,7 +94,7 @@ public class AqpSyntaxParser implements SyntaxParser {
 	}
 	
 	@Override
-	public QueryNode parse(CharSequence query, CharSequence field)
+	public QueryNode parsex(CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 		
 		ANTLRStringStream input = new ANTLRStringStream(query.toString());		
@@ -135,7 +135,7 @@ public class AqpSyntaxParser implements SyntaxParser {
 	}
 
 	
-	public QueryNode parsex(CharSequence query, CharSequence field)
+	public QueryNode parse(CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 
 		ANTLRStringStream in = new ANTLRStringStream(query.toString());
@@ -148,10 +148,22 @@ public class AqpSyntaxParser implements SyntaxParser {
 		AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor(parser.getTokenNames());
 		parser.setTreeAdaptor(adaptor);
 		
+		AqpCommonTree astTree;
+		
 		try {
 			returnValue = parser.mainQ();
+			astTree = (AqpCommonTree) returnValue.getTree();
+			return astTree.toQueryNodeTree();
 		} catch (RecognitionException e) {
 			throw new QueryNodeParseException(new MessageImpl(query + " " + parser.getErrorMessage(e, parser.getTokenNames())));
+		} catch (Exception e) {
+			Message message = new MessageImpl(
+					QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
+					e.getMessage());
+			QueryNodeParseException ee = new QueryNodeParseException(e);
+			ee.setQuery(query);
+			ee.setNonLocalizedMessage(message);
+			throw ee;
 		} catch (Error e) {
 			Message message = new MessageImpl(
 					QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
@@ -161,16 +173,7 @@ public class AqpSyntaxParser implements SyntaxParser {
 			ee.setNonLocalizedMessage(message);
 			throw ee;
 		}
-
-		// GET the AST tree
-		AqpCommonTree astTree = (AqpCommonTree) returnValue.getTree();
 		
-		try {
-			return astTree.toQueryNodeTree();
-		}
-		catch (RecognitionException e) {
-			throw new QueryNodeParseException(new MessageImpl(query + " " + parser.getErrorMessage(e, parser.getTokenNames())));
-		}
 		
 	}
 

@@ -656,13 +656,15 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("term -(stop) term", qpAnalyzer, "term term");
 
     assertQueryEquals("drop AND stop AND roll", qpAnalyzer, "+drop +roll");
-    // TODO: plug the modifier GroupQueryNodeProcessor
+    // rca TODO: plug the modifier GroupQueryNodeProcessor
     // expected: term phrase1 phrase2 term
     assertQueryEquals("term phrase term", qpAnalyzer,
         "term (phrase1 phrase2) term");
-
+    
+    // TODO: plug the modifier GroupQueryNodeProcessor
+    // expected: term phrase1 phrase2 term
     assertQueryEquals("term AND NOT phrase term", qpAnalyzer,
-        "+term -(phrase1 phrase2) term");
+        "(+term -(phrase1 phrase2)) term");
 
     assertQueryEquals("stop^3", qpAnalyzer, "");
     assertQueryEquals("stop", qpAnalyzer, "");

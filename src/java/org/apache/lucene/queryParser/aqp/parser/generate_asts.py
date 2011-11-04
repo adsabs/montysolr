@@ -93,7 +93,9 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
             
             tree, errors = p.communicate()
             if tree:
-                print "\"%s\" -> \"%s\"" % (query.replace('"', '\\\"'), tree.strip().replace('"', '\\\"'))
+                q = query.replace('\\', '\\\\').replace('"', '\\"')
+                t = tree.strip().replace('"', '\\"').replace('\\', '\\\\')
+                print "\"%s\" -> \"%s\"" % (q, t)
             else:
                 print 'Error generating AST for: ' + query
                 print errors
@@ -116,6 +118,7 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     index_fo.write('''
     <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <style type="text/css">
     pre {display:inline;}
 </style>
@@ -149,7 +152,7 @@ def load_gunit_file(gunit_file):
             test_cases.setdefault(section, [])
         elif len(parts) > 1 and parts[1].lower() != 'fail':
             query = parts[0]
-            query = query.replace('\\\"', '"')
+            query = query.replace('\\\"', '"').replace('\\\\', '\\')
             test_cases[section].append(query)
     fi.close()
     return test_cases
