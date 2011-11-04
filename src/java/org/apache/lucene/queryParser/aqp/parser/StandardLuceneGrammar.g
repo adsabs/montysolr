@@ -8,16 +8,11 @@ options {
 tokens {
   OPERATOR;
   ATOM;
-  NUCLEUS;
-  MULTIATOM;
-  MULTITERM;
   MODIFIER;
   TMODIFIER;
-  VALUE;
   CLAUSE;
   FIELD;
   FUZZY;
-  ADDED;
   BOOST;
   QNORMAL;
   QPHRASE;
@@ -134,7 +129,14 @@ multi_value
 
 multiClause	
 	:
+	
+	//m:(a b NEAR c OR d OR e)
+	
+	// without duplicating the rules (but it allows recursion)
 	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
+	
+	// allows only limited set of operations
+	//multiDefault
 	
 	// this is also working, but i want operator precedence
 	//multiClause:
@@ -177,7 +179,7 @@ multiBasic
 		
 mterm	
 	:	
-	modifier? value -> ^(MODIFIER modifier? ^(VALUE value))
+	modifier? value -> ^(MODIFIER modifier? value)
 	;
 	
 
