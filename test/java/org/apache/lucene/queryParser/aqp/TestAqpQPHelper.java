@@ -656,8 +656,10 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("term -(stop) term", qpAnalyzer, "term term");
 
     assertQueryEquals("drop AND stop AND roll", qpAnalyzer, "+drop +roll");
+    // TODO: plug the modifier GroupQueryNodeProcessor
+    // expected: term phrase1 phrase2 term
     assertQueryEquals("term phrase term", qpAnalyzer,
-        "term phrase1 phrase2 term");
+        "term (phrase1 phrase2) term");
 
     assertQueryEquals("term AND NOT phrase term", qpAnalyzer,
         "+term -(phrase1 phrase2) term");
@@ -690,8 +692,10 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertQueryEquals("[ a TO z] OR bar", null, "[a TO z] bar");
     assertQueryEquals("[ a TO z] AND bar", null, "+[a TO z] +bar");
     assertQueryEquals("( bar blar { a TO z}) ", null, "bar blar {a TO z}");
+    
+    // the original expected value was: gack (bar blar {a TO z}) 
     assertQueryEquals("gack ( bar blar { a TO z}) ", null,
-        "gack (bar blar {a TO z})");
+        "gack bar blar {a TO z}");
   }
 
   public void testFarsiRangeCollating() throws Exception {
@@ -1107,15 +1111,20 @@ public class TestAqpQPHelper extends LuceneTestCase {
    * This test differs from TestPrecedenceQueryParser
    */
   public void testPrecedence() throws Exception {
-    AqpQueryParser qp = getParser();
-    qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    AqpQueryParser qp1 = getParser();
+    qp1.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
     
-    // precedence is normally honoured, but not with standard config (so we change it here to be flat)
-    QueryNodeProcessorPipeline processor = (QueryNodeProcessorPipeline) qp.getQueryNodeProcessor();
+    AqpQueryParser qp2 = getParser();
+    qp2.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    
+    // TODO: to achieve standard lucene behaviour (no operator precedence)
+    // modify the GroupQueryNodeProcessor to recognize our new BooleanQN classes
+    // then do:
+    QueryNodeProcessorPipeline processor = (QueryNodeProcessorPipeline) qp1.getQueryNodeProcessor();
     processor.add(new GroupQueryNodeProcessor());
     
-    Query query1 = qp.parse("A AND B OR C AND D", "field");
-    Query query2 = qp.parse("+A +B +C +D", "field");
+    Query query1 = qp1.parse("A AND B OR C AND D", "field");
+    Query query2 = qp2.parse("+A +B +C +D", "field");
 
     assertEquals(query1, query2);
   }

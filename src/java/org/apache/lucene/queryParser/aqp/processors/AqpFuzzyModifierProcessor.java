@@ -39,7 +39,13 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 			QueryNode child = ((AqpFuzzyModifierNode) node).getChild();
 			Float fuzzy = ((AqpFuzzyModifierNode) node).getFuzzyValue();
 			
-			if (child instanceof FieldQueryNode) {
+			if (child instanceof QuotedFieldQueryNode ||
+					child instanceof WildcardQueryNode) {
+				
+				return new SlopQueryNode(child, fuzzy.intValue());
+			}
+			else if (child instanceof FieldQueryNode) {
+				
 				if (fuzzy<0.0f || fuzzy>=1.0f) {
 					throw new QueryNodeException(new MessageImpl(
 						QueryParserMessages.INVALID_SYNTAX,
@@ -50,10 +56,6 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 				
 				return new FuzzyQueryNode(fn.getFieldAsString(), fn.getTextAsString(), fuzzy,
 						fn.getBegin(), fn.getEnd());
-			}
-			else if (child instanceof QuotedFieldQueryNode ||
-					child instanceof WildcardQueryNode) {
-				return new SlopQueryNode(child, fuzzy.intValue());
 			}
 			else  {
 				throw new QueryNodeException(new MessageImpl(

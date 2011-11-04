@@ -9,6 +9,7 @@ import org.apache.lucene.queryParser.core.nodes.FieldableNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 
 /**
  * This processor applies the user-submitted value to all
@@ -36,7 +37,9 @@ public class AqpFIELDProcessor extends QueryNodeProcessorImpl implements
 			String field = getFieldValue(node);
 			node = node.getChildren().get(node.getChildren().size()-1);
 			if (field!=null) {
-				applyFieldToAllChildren(field, node);
+				applyFieldToAllChildren(
+						EscapeQuerySyntaxImpl.discardEscapeChar(field).toString(), 
+						node);
 			}
 		}
 		return node;

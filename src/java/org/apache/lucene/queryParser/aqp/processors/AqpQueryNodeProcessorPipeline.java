@@ -77,8 +77,8 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new AqpOPERATORProcessor());
     add(new AqpCLAUSEProcessor());
     add(new AqpTMODIFIERProcessor());
-    add(new AqpFUZZYProcessor());
     add(new AqpBOOSTProcessor());
+    add(new AqpFUZZYProcessor());
     
     add(new AqpQRANGEINProcessor());
     add(new AqpQRANGEEXProcessor());

@@ -1,4 +1,4 @@
-// $ANTLR 3.4 StandardLuceneGrammar.g 2011-11-04 09:23:05
+// $ANTLR 3.4 StandardLuceneGrammar.g 2011-11-04 10:34:24
 
    package org.apache.lucene.queryParser.aqp.parser;
 

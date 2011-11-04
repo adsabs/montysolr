@@ -16,16 +16,16 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
  * <pre>
  *               TMODIFIER
  *               /   |   \
- *           FUZZY BOOST FIELD
+ *           BOOST FUZZY FIELD
  *             /           \
- *            ~1           ...
+ *            ^1           ...
  * </pre>
  *           
  *  To this shape:
  * <pre>              
- *               FUZZY
+ *               BOOST
  *                / \
- *              ~1  BOOST
+ *              ^1  FUZZY
  *                    |
  *                    FIELD
  *                      \

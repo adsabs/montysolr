@@ -76,7 +76,7 @@ atom
 	| 
 	modifier? field? value term_modifier? 
 	-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
-	| (STAR COLON)? STAR -> ^(QANYTHING STAR["*"])
+	| modifier? (STAR COLON)? STAR -> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
 	;
    
 
@@ -230,7 +230,7 @@ This grammar has problem with following
 	where 999 is another term, not a fuzzy value
 */
 term_modifier	:	
-	TILDE CARAT? -> ^(FUZZY TILDE) ^(BOOST CARAT?)
+	TILDE CARAT? -> ^(BOOST CARAT?) ^(FUZZY TILDE) 
 	| CARAT TILDE? -> ^(BOOST CARAT) ^(FUZZY TILDE?)
 /*
 	// first alternative
