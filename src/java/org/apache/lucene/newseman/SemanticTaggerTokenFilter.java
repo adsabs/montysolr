@@ -70,6 +70,9 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	private boolean translationDone;
 	private TokenStream translatedStream;
 	private int maxBuffer = 4096;
+	private int curTokenCounter = 0;
+	private int exhaustedTokenCounter = 0;
+	private List<TokenState> enhancedTokens = null;
 
 	/**
 	 * Creates an instance for the given underlying stream and synonym table.
@@ -104,21 +107,27 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		}
 
 		if (!translatedStream.incrementToken()) {
-			if (!translationDone) {
-				List<TokenState> tokens = advanceInputTokenStream(); // advance the input token stream
-				if (tokens!=null) {
-					fillTokenStream(tokens);
-				}
-				
-			}
 			return false; // EOS; iterator exhausted
 		}
 		
+		if (curTokenCounter >= exhaustedTokenCounter) {
+			enhancedTokens = advanceInputTokenStream(); // advance the input token stream
+			if (enhancedTokens==null) {
+				return false;
+			}
+		}
+		
+		curTokenCounter++;
+		
+		TokenState ct = enhancedTokens.get(curTokenCounter);
+		
+		restoreState(ct.getState());
+		
 		if (semAtt.hasSemanticTags()) {
-		stack = semAtt.getSemanticTags(); // push onto stack
-		index = 0;
-		current = captureState();
-		todo = stack.size();
+			stack = semAtt.getSemanticTags(); // push onto stack
+			index = 0;
+			current = captureState();
+			todo = stack.size();
 		}
 		else {
 			todo = 0;
@@ -126,10 +135,10 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		}
 		return true;
 	}
-
-	private void fillTokenStream(List<TokenState> tokens) {
-		
-		
+	
+	
+	public String[][] getTranslations(String[][] tokens) throws IOException {
+		return seman.translateTokenCollection(tokens);
 	}
 
 	private List<TokenState> advanceInputTokenStream() throws IOException {
@@ -140,7 +149,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		
 		// first collect the tokens
 		int i = 0;
-	    while (input.incrementToken() && i < maxBuffer) {
+	    do {
 	    	TokenState s = new TokenState(input.captureState());
 	    	mapping.put(s.hashCode(), i);
 	    	tokens.set(i, s);
@@ -150,13 +159,15 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	    	};
 	    	passedTokens[i] = token;
 	    	i++;
-	    }
+	    } while (input.incrementToken() && i < maxBuffer);
+	    
+	    exhaustedTokenCounter += i;
 	    
 	    if (i < maxBuffer) {
 	    	translationDone = true;
 	    }
 	    
-	    String[][] results = seman.translateTokenCollection(passedTokens);
+	    String[][] results = getTranslations(passedTokens);
 	    
 	    for (String[] r: results) {
 	    	Integer id = Integer.valueOf(r[1]);
@@ -224,15 +235,4 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		}
 	}
 	
-	class LocalTokenStream extends TokenStream {
-		LocalTokenStream() {
-			super();
-		}
-
-		@Override
-		public boolean incrementToken() throws IOException {
-			// TODO Auto-generated method stub
-			return false;
-		}
-	}
 }
