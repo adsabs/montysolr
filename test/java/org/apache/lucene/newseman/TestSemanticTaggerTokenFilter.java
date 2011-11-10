@@ -18,6 +18,7 @@ package org.apache.lucene.newseman;
  */
 
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.WhitespaceTokenizer;
@@ -31,12 +32,36 @@ import org.apache.lucene.util.Version;
 import java.io.StringReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
 public class TestSemanticTaggerTokenFilter extends BaseTokenStreamTestCase {
+	
+	public static final class TestFilterSemantic extends SemanticTaggerTokenFilter {
+		
+		public TestFilterSemantic(TokenStream input) {
+			super(input);
+		}
+		public String[][] getTranslations(String[][] tokens) throws IOException {
+			for (int i=0;i<tokens.length;i++) {
+				
+				if (tokens[i]!=null) {
+					if (tokens[i][3].equals("keyword")) {
+						String[] c = tokens[i];
+						tokens[i] = new String[] {c[0], c[1], c[2], c[3], "sem", "ai a2 a3"};
+					}
+				}
+				else {
+					break;
+				}
+			}
+			
+		return tokens;
+		}
+	}
 
 	public static final class TestFilter extends TokenFilter {
 		private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
@@ -138,8 +163,41 @@ public class TestSemanticTaggerTokenFilter extends BaseTokenStreamTestCase {
 	public void testStopListPositions() throws IOException {
 		StringReader reader = new StringReader(
 				"This is a test of the english stop keyword analyzer");
-		TestFilter stream = new TestFilter(new StandardTokenizer(
-				Version.LUCENE_31, reader));
+		;
+		TestFilter stream = new TestFilter(
+							new StopFilter(
+									Version.LUCENE_31,
+								new StandardTokenizer(Version.LUCENE_31, reader),
+								new HashSet(Arrays.asList(new String[] {"stop", "the"}))
+								));
+		assertTrue(stream != null);
+		CharTermAttribute termAtt = stream
+				.getAttribute(CharTermAttribute.class);
+		PositionIncrementAttribute posIncrAtt = stream
+		.getAttribute(PositionIncrementAttribute.class);
+
+		StringBuffer buf = new StringBuffer();
+		while (stream.incrementToken()) {
+			buf.append(termAtt.toString());
+			buf.append("/");
+			buf.append(posIncrAtt.getPositionIncrement());
+			buf.append(" ");
+		}
+		assertEquals(buf.toString().trim(),
+				"This/1 is/1 a/1 test/1 of/1 english/1 keyword/1 a1/0 a2/0 a3/0 analyzer/1");
+	}
+
+	public void testSemanticTokenFilter() throws IOException {
+		StringReader reader = new StringReader(
+				"This is a test of the english stop keyword analyzer");
+		TestFilterSemantic stream = 
+			new TestFilterSemantic(
+				new StopFilter( Version.LUCENE_31,
+					new StandardTokenizer(Version.LUCENE_31, reader),
+					new HashSet(Arrays.asList(new String[] {"stop", "the"}))
+				)
+			);
+		
 		assertTrue(stream != null);
 		CharTermAttribute termAtt = stream
 				.getAttribute(CharTermAttribute.class);
@@ -155,6 +213,5 @@ public class TestSemanticTaggerTokenFilter extends BaseTokenStreamTestCase {
 		}
 		assertEquals(buf.toString().trim(),
 				"This/1 is/1 a/1 test/1 of/1 the/1 english/1 keyword/1 a1/0 a2/0 a3/0 analyzer/1");
-	}
-
+	}	
 }
