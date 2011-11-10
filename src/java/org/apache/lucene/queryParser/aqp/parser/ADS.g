@@ -23,6 +23,7 @@ tokens {
   QANYTHING;
   QDATE;
   QFIRST;
+  QFUNC;
 }
 
 @header{
@@ -72,7 +73,10 @@ atom
 	| 
 	modifier? field? value term_modifier? 
 	-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
-	| modifier? (STAR COLON)? STAR -> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
+	| modifier? (STAR COLON)? STAR 
+	-> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
+	| modifier? func_name value (',' value)* RPAREN
+	-> ^(MODIFIER modifier? ^(QFUNC func_name value+ ))
 	;
    
 
@@ -122,6 +126,13 @@ range_value
 	| normal -> ^(QNORMAL normal)	
 	| STAR -> ^(QANYTHING STAR)
 	;
+
+func_name
+	:	
+	FUNC_NAME
+	;
+
+
 
 multi_value
 	: 
@@ -378,6 +389,11 @@ IDENTIFIER
 	| INT+ '.' INT+ '/' INT+ ('.' INT+)?
 	;
 
+
+FUNC_NAME
+	:	
+	TERM_NORMAL '('
+	;	
 
 
 
