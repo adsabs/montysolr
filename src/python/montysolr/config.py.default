@@ -13,7 +13,7 @@ MSIAMHANDLER = 'montysolr.sequential_handler'
 
 ## List of modules where we load MontySolr targets
 
-MSTARGETUS = ['montysolr.adslabs.targets'] #'montysolr.inveniopie.targets', 'montysolr.examples.twitter_test']
+MSTARGETUS = ['montysolr.examples.twitter_test'] #'montysolr.inveniopie.targets', 'montysolr.examples.twitter_test']
 
 # base path where fulltext files are looked for
 MSFTBASEPATH = '/proj/ads/fulltext/extracted'
