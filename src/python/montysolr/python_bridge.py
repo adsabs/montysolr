@@ -4,8 +4,11 @@ Created on Feb 7, 2011
 
 @author: rca
 
-This class serves the same purpose as its java counterpart
-MontySolrVM - but it is a singleton that contains a reference 
+This class is useful for testing and when we want to call Java
+*from inside* Python. Ie when Python is the main process and 
+javaVM resides inside Python interpreter (usually it is reversed).
+
+It is a singleton that contains a reference 
 to the handlers - we don't need to instantiate it everytime
 as is the case when calling from Java. Therefore we can 
 put the VM and the bridge parts together.

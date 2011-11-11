@@ -1,0 +1,40 @@
+
+= Writing your code in Python =
+
+In order to plug Python functionality into Lucene/Solr, you need to know some basic facts (and ignore the rest).
+
+== The big picture ==
+
+Your Python module is (usually) called from the Java side, it will always receive one parameter: *message* instance
+
+The message object is effectively a Java instance of a PythonMessage(). But it was wrapped by JCC and your Python
+interpreter believes it is a Python object. You can retrieve and place values inside it.
+
+But be aware that even if it behaves like a Python object, it is not Python. You can store in it only Java
+objects (sometimes, JCC will automatically convert the values). This means, that often you have to write a Java
+code inside your Python modules. But hey, that is the only price you pay for the flexibility! After all, you want
+to connect Python and Java and this should not be a great problem...
+
+
+OK, Java calls Python, but how does it know what to call? Well, the short answer is: it doesn't know.
+
+This happens when Java message is created and passed to Python:
+
+{{{
+PythonMessage message = MontySolrVM.INSTANCE
+    .createMessage("some_function_x")
+    .setSender(this.getClass().toString())
+    .setParam("tokens", tokens);
+MontySolrVM.INSTANCE.sendMessage(message);
+}}}
+
+First, we create a message object. It knows its recipient ("some_function_x") and it also says who sends the message
+(this.getClass().toString()). The message object also contains data that we are passing on ("tokens")
+
+But we are jumping into the darkness. When you call "sendMessage()" MontySolr takes the envelope and simply passes
+it to the Python "handler". This Python handler (already on Python side) is responsible for exploring the attributes
+of the message and routing it to the final recipient. We, on the Java side, know nothing about it -- and for the same
+reason, we cannot check whether what we are sending is correct.
+
+
+

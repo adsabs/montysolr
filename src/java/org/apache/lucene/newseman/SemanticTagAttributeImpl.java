@@ -55,7 +55,7 @@ public class SemanticTagAttributeImpl extends AttributeImpl
 	  @Override
 	  public void copyTo(AttributeImpl target) {
 		  SemanticTagAttributeImpl t = (SemanticTagAttributeImpl) target;
-	    t.setSemanticTag(this.getSemanticTags());
+	    t.setSemanticTags(this.getSemanticTags());
 	  }  
 
 }

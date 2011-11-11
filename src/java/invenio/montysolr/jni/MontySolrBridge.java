@@ -7,7 +7,10 @@ import org.apache.jcc.PythonVM;
 
 
 /**
- * This class is used for calling Invenio from inside JavaVM
+ * This class is used for calling Invenio from inside JavaVM.
+ * It is the crucial piece of native link between Python and
+ * Java. But the implementation details are taken care of by
+ * @{link PythonVM}
  * 
  * @author rca
  * 

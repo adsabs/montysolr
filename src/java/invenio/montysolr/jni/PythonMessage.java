@@ -2,17 +2,42 @@ package invenio.montysolr.jni;
 
 import java.util.AbstractCollection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrResponse;
-import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+/**
+ * PythonMessage represents the core communication mechanism between
+ * Java side and (remote) Python side. PythonMessage extends 
+ * {@link HashMap} and on the remote Python side, all public methods
+ * of the message are visible.
+ * 
+ * <br/>
+ * 
+ * You can put any type of object inside the message, but there are
+ * also some public methods that help you to retrieve (properly casted
+ * Solr object) on the Python side.
+ * 
+ * <br/>
+ * 
+ * Even if you can put any key/value object inside the PythonMessage,
+ * you should not be doing it. Always use the getters/setters when
+ * possible.
+ *
+ * <br/>
+ * 
+ * And be aware, that from inside Python, you can insert into the 
+ * message instance <b>only Java instances</b>. Sometimes, JCC will
+ * automatically convert the Python object into the Java instance,
+ * however if something doesn't work, try to directly create a Java
+ * object and place it into the PythonMessage.
+ * 
+ *
+ */
 
 public class PythonMessage extends HashMap<String, Object>{
 

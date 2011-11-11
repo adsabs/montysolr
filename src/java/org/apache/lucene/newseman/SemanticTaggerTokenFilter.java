@@ -20,6 +20,7 @@ package org.apache.lucene.newseman;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	public static final String SEM_TOKEN_TYPE = "SEM";
 	public static final String POS_TOKEN_TYPE = "POS";
 
-	private List<String> stack = null;
+	private String[] stack = null;
 	private int index = 0;
 	private AttributeSource.State current = null;
 	private int todo = 0;
@@ -66,13 +67,10 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
 	private final SemanticTagAttribute semAtt = addAttribute(SemanticTagAttribute.class);
 
-	private SemanticTagger seman;
-	private boolean translationDone;
-	private TokenStream translatedStream;
-	private int maxBuffer = 4096;
-	private int curTokenCounter = 0;
-	private int exhaustedTokenCounter = 0;
+	protected SemanticTagger seman = null;
+	protected int maxBuffer = 4096;
 	private List<TokenState> enhancedTokens = null;
+	private Iterator<TokenState> etIterator = null;
 
 	/**
 	 * Creates an instance for the given underlying stream and synonym table.
@@ -86,53 +84,60 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	public SemanticTaggerTokenFilter(TokenStream input, SemanticTagger seman) {
 
 		super(input);
-
 		if (input == null)
 			throw new IllegalArgumentException("input must not be null");
 		if (seman == null)
 			throw new IllegalArgumentException("seman must not be null");
-
 		this.seman = seman;
+	}
+	
+	public SemanticTaggerTokenFilter(TokenStream input) {
+		super(input);
+		if (input == null)
+			throw new IllegalArgumentException("input must not be null");
 	}
 
 	/** Returns the next token in the stream, or null at EOS. */
 	@Override
 	public final boolean incrementToken() throws IOException {
 		
-		while (todo > 0 && index<todo) { // pop from stack
-			if (createToken(stack.get(index++), current)) {
+		while (todo > 0) { // pop semes from stack
+			if (createToken(stack[index++], current)) {
 				todo--;
 				return true;
 			}
 		}
-
-		if (!translatedStream.incrementToken()) {
-			return false; // EOS; iterator exhausted
-		}
 		
-		if (curTokenCounter >= exhaustedTokenCounter) {
+
+		if (etIterator==null || !etIterator.hasNext()) {
+			if (!input.incrementToken()) {
+				return false; // EOS; iterator exhausted
+			}
 			enhancedTokens = advanceInputTokenStream(); // advance the input token stream
 			if (enhancedTokens==null) {
 				return false;
 			}
+			etIterator = enhancedTokens.iterator();
 		}
 		
-		curTokenCounter++;
 		
-		TokenState ct = enhancedTokens.get(curTokenCounter);
-		
-		restoreState(ct.getState());
-		
-		if (semAtt.hasSemanticTags()) {
-			stack = semAtt.getSemanticTags(); // push onto stack
-			index = 0;
-			current = captureState();
-			todo = stack.size();
+		if (etIterator.hasNext()) {
+			TokenState ct = etIterator.next();
+			restoreState(ct.getState());
+			String[] semes = ct.getSemes();
+			if (semes!=null) {
+				stack = semes;
+				index = 0;
+				current = captureState();
+				todo = stack.length;
+			}
+			else {
+				todo = 0;
+				index = 0;
+			}
 		}
-		else {
-			todo = 0;
-			index = 0;
-		}
+		
+		
 		return true;
 	}
 	
@@ -142,35 +147,35 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	}
 
 	private List<TokenState> advanceInputTokenStream() throws IOException {
-		Map<Integer, Integer> mapping= new HashMap<Integer, Integer>(maxBuffer);
+		Map<String, Integer> mapping= new HashMap<String, Integer>(maxBuffer);
 		List<TokenState> tokens = new ArrayList<TokenState>(maxBuffer);
 		String[][] passedTokens = new String[maxBuffer][];
+		//ArrayList<String[]>passedTokens = new ArrayList<String[]>(maxBuffer);
 		
 		
 		// first collect the tokens
 		int i = 0;
 	    do {
 	    	TokenState s = new TokenState(input.captureState());
-	    	mapping.put(s.hashCode(), i);
-	    	tokens.set(i, s);
+	    	String id = Integer.toString(input.hashCode());
+	    	mapping.put(id, i);
+	    	tokens.add(s);
 	    	String[] token = {
-	    			"id", String.valueOf(input.hashCode()),
+	    			"id", id,
 	    			"token", termAtt.toString(),
 	    	};
 	    	passedTokens[i] = token;
+	    	//passedTokens.add(token);
 	    	i++;
 	    } while (input.incrementToken() && i < maxBuffer);
-	    
-	    exhaustedTokenCounter += i;
-	    
-	    if (i < maxBuffer) {
-	    	translationDone = true;
-	    }
 	    
 	    String[][] results = getTranslations(passedTokens);
 	    
 	    for (String[] r: results) {
-	    	Integer id = Integer.valueOf(r[1]);
+	    	if (r==null) break;
+	    	
+	    	//Integer id = Integer.valueOf(r[1]);
+	    	String id = r[1];
 	    	if (r.length > 4) {
 	    		String[] semes = r[5].split(" ");
 	    		if (mapping.containsKey(id)) {
@@ -197,9 +202,9 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	 * @return a new token, or null to indicate that the given synonym should be
 	 *         ignored
 	 */
-	protected boolean createToken(String synonym, AttributeSource.State current) {
+	protected boolean createToken(String sem, AttributeSource.State current) {
 		restoreState(current);
-		termAtt.setEmpty().append(synonym);
+		termAtt.setEmpty().append(sem);
 		typeAtt.setType(SEM_TOKEN_TYPE);
 		posIncrAtt.setPositionIncrement(0);
 		return true;
@@ -213,6 +218,8 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		index = 0;
 		current = null;
 		todo = 0;
+		enhancedTokens = null;
+		etIterator = null;
 	}
 	
 	class TokenState {
