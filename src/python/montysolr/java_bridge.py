@@ -5,6 +5,18 @@ from montysolr.initvm import montysolr_java as sj
 import time
 
 '''
+This class is always instantiated by the Java VM when a message 
+needs to be passed from Java to Python.
+
+At a startup, MontySolr inspects the system property called 
+"python.bridge" and loads the Python module.
+
+Example:
+  java -Dpython.bridge=montysolr.java_bridge.SimpleBridge -jar...
+  
+Will load module montysolr.java_bridge and instantiate class
+SimpleBridge upon MontySolr start.
+  
 Created on Jan 13, 2011
 
 @author: rca
