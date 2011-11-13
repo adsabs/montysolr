@@ -1,0 +1,7 @@
+*.class
+*.pyc
+*.log
+src/java/org/apache/lucene/queryParser/aqp/*
+bin
+examples/*
+build
