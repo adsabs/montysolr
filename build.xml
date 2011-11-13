@@ -41,7 +41,7 @@
 
 
 	<!-- standard arguments for running the Solr -->
-	<property name="run.solr.jvmargs" value="-d32 -Xmx2048m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200" />
+	<property name="run.solr.jvmargs" value="-d64 -Xmx2048m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200" />
 	<property name="run.solr.args" value="" />
 
 	<!-- these will be used when running tests and command line montysolr
@@ -50,10 +50,10 @@
 
 	     If you are using python c-extensions, make sure they are compatible with the
 	     java - if your java starts in 64bit mode, also the extensions must be available in 64bit
-	     By default, we run in 32bit mode: -d32
+	     By default, we run in 64bit mode: -d64
      //-->
 	<property environment="env"/>
-	<property name="subant.jvmargs" value="-d32" />
+	<property name="subant.jvmargs" value="" />
 	<property name="subant.args" value="" />
 	<property name="subant.newenvironment" value="true" />
 	<property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
