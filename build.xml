@@ -41,7 +41,7 @@
 
 
 	<!-- standard arguments for running the Solr -->
-	<property name="run.solr.jvmargs" value="-d64 -Xmx2048m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200" />
+	<property name="run.solr.jvmargs" value="-d64 -Xmx1024m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200" />
 	<property name="run.solr.args" value="" />
 
 	<!-- these will be used when running tests and command line montysolr

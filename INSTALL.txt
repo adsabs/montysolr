@@ -99,7 +99,7 @@ The general installation instructions for pylucene can be found at:
 http://lucene.apache.org/pylucene/documentation/install.html
 
 
-If you use pylucene 3.0.1, you must change the build slightly:
+If you use pylucene <3.0.1, you must change the build slightly:
 
 
     $ set JCCFLAGS=        # this is different from the normal setup
@@ -182,8 +182,8 @@ You shall find the solr_java module inside "./montysolr/build/dist" -- from ther
 
 Q: When building the montysolr, I get these errors:
 
-    build/_solr_java/__wrap__.cpp: In function â<PyObject* org::apache::solr::search::function::t_DualFloatFunction_createWeight(org::apache::solr::search::function::t_DualFloatFunction*, PyObject*)â>:
-    build/_solr_java/__wrap__.cpp:2325: error: â<parameters_â> is not a member of â<java::util::t_Mapâ>
+    build/_solr_java/__wrap__.cpp: In function ï¿½<PyObject* org::apache::solr::search::function::t_DualFloatFunction_createWeight(org::apache::solr::search::function::t_DualFloatFunction*, PyObject*)ï¿½>:
+    build/_solr_java/__wrap__.cpp:2325: error: ï¿½<parameters_ï¿½> is not a member of ï¿½<java::util::t_Mapï¿½>
 
 Your PyLucene is not built with the generics support. Please see above how to fix it.
 

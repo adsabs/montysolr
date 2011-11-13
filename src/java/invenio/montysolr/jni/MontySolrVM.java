@@ -111,11 +111,19 @@ public enum MontySolrVM {
 				? new Integer(System.getProperty("montysolr.max_workers")) 
 				: 1), true);
 	
+	/**
+	 * This method must be called from the main thread before the Solr init.
+	 * @param programName 
+	 * 			name of the program (it is just a symbolic name, at this
+	 * 			stage nothing is yet run/initialized and even if the config
+	 * 			is wrong, no error will happen)
+	 */
 	public PythonVM start(String programName) {
 		if (vm == null)
 			vm = PythonVM.start(programName);
 		return vm;
 	}
+	
 	
 	/**
 	 * Creates a new instance of the bridge over the Python waters.

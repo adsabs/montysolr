@@ -2,7 +2,7 @@
 
 == Embedding Solr ==
 
-There are three ways that I found/considered to embed Solr:
+There are three ways that I found/considered for embedding Solr:
 
     * org.apache.solr.client.solrj.embedded.EmbeddedSolrServer
         - this is the default way, Solr is running as an embedded process, not inside a servlet container
