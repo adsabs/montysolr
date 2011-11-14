@@ -3,6 +3,8 @@ package invenio.montysolr.jni;
 
 
 import org.apache.jcc.PythonVM;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -16,11 +18,20 @@ import org.apache.jcc.PythonVM;
  * 
  */
 
-public class MontySolrBridge extends BasicBridge implements PythonBridge {
+public class MontySolrBridge implements PythonBridge {
+	
+	public static final Logger log = LoggerFactory.getLogger(MontySolrBridge.class);
 	
 	private long pythonObject;
-	protected String bridgeName;
 	
+	protected String bridgeName = null;
+	
+	public String getName() {
+		return this.bridgeName;
+	}
+	public void setName(String name) {
+		this.bridgeName = name;
+	}
 
 	public void pythonExtension(long pythonObject) {
 		this.pythonObject = pythonObject;
@@ -54,11 +65,18 @@ public class MontySolrBridge extends BasicBridge implements PythonBridge {
 	
 	
 	/**
-	 * Just some testing methods, should be removed after
-	 * the code stabilizes
+	 * The main method for chaning Python environment
+	 * @param pythonString
 	 */
-	public native void test_print();
-	public native String test_return_string();
+	@Override
+	public void evalCommand(String pythonString) {
+		PythonVM vm = PythonVM.get();
+		vm.acquireThreadState();
+		eval_command(pythonString);
+		vm.releaseThreadState();
+	}
+	public native void eval_command(String pythonString);
+	
 
 }
 

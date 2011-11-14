@@ -34,7 +34,6 @@ class Handler(object):
             target(message)
 
 
-
     def get_target(self, message):
         """Must return only a callables that receive
         a PythonMessage object"""
@@ -146,7 +145,9 @@ class Handler(object):
     def _diagnostic_target(self):
         def diagnostic_target(message):
             out = []
-            out.append("PYTHONPATH: %s" % "\n  ".join(sys.path))
+            out.append("id(sys) %s" % id(sys))
+            out.append("sys.path: %s" % "\n  ".join(sys.path))
+            out.append("PYTHONPATH: %s" % os.getenv("PATH"))
             out.append("PYTHONHOME: %s" % os.getenv("PYTHONHOME"))
             out.append("PATH: %s" % os.getenv("PATH"))
             out.append("LD_LIBRARY_PATH: %s" % os.getenv("LD_LIBRARY_PATH"))
@@ -159,7 +160,7 @@ class Handler(object):
             out.append('current targets: %s' % "                 \n".join(map(lambda x: '%s --> %s' % x, self._db.items())))
 
             out.append('---')
-            out.append('running diagnostic tests')
+            out.append('running diagnostic tests from the targets (if available):')
             for k,v in self._db.items():
                 if 'diagnostic_test' in k and k != ':diagnostic_test':
                     out.append('===================')

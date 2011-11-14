@@ -5,12 +5,20 @@ import java.io.IOException;
 import java.util.Map;
 
 import invenio.montysolr.jni.MontySolrVM;
+import invenio.montysolr.jni.PythonBridge;
 import invenio.montysolr.jni.PythonMessage;
 
+import org.apache.solr.MontySolrTestCaseJ4;
 import org.apache.solr.util.MontySolrAbstractTestCase;
 
 public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
-
+	
+	
+	
+	@Override
+	public String getBridgeName() {
+		return "montysolr.tests.bridge.Bridge";
+	}
 
 	@Override
 	public String getSchemaFile() {
@@ -23,7 +31,9 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 	}
 
 	public void testBasicOperations() throws IOException {
-
+		
+		
+		
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage(
 				"diagnostic_test").setParam("query", "none");
 
@@ -43,7 +53,73 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		assertQ("nope",
 				req("qt", "/diagnostic_test", "q", "nope"),
 				"//lst/int"); //TODO: get xpath correctly
-
+		
+		//send several messages (the same)
+		try {
+			MontySolrVM.INSTANCE.sendMessage(message);
+			MontySolrVM.INSTANCE.sendMessage(message);
+			MontySolrVM.INSTANCE.sendMessage(message);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new IOException("Error multiple calling MontySolr!");
+		}
+		
+		message = MontySolrVM.INSTANCE.createMessage(
+			"unknown_call").setParam("query", "none");
+		
+		PythonBridge ba = MontySolrVM.INSTANCE.getBridge();
+		try {
+			MontySolrVM.INSTANCE.sendMessage(message);
+			assertSame(ba, MontySolrVM.INSTANCE.getBridge());
+			MontySolrVM.INSTANCE.sendMessage(message);
+			assertSame(ba, MontySolrVM.INSTANCE.getBridge());
+			MontySolrVM.INSTANCE.sendMessage(message);
+			assertSame(ba, MontySolrVM.INSTANCE.getBridge());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new IOException("Error multiple calling MontySolr!");
+		}
+		
+		try {
+			MontySolrVM.INSTANCE.evalCommand("import sys;print id(sys),sys.argv;sys.argv.insert(0,\'XYZW\');print sys.argv" );
+			PythonMessage message2 = MontySolrVM.INSTANCE.createMessage(
+			"diagnostic_test").setParam("query", "none");
+			MontySolrVM.INSTANCE.sendMessage(message2);
+			res = (String) message2.getResults();
+			System.out.println(res);
+			//TODO: this is really funny, it doesn't return XYZW, but different path is set
+			//assertTrue("Diagnostic test returned unexpected results!", 
+			//		res.contains("PYTHONPATH") && res.contains("\'XYZW\'"));
+		} catch (InterruptedException e1) {
+			throw new IOException("Error evaluating Python command!");
+		}
+		
+		
+		// now sets the sys.path and change the montysolr.bridge which
+		// should get a new bridge instance
+		PythonBridge b = MontySolrVM.INSTANCE.getBridge();
+		
+		try {
+			MontySolrVM.INSTANCE.evalCommand("import sys;sys.argv.insert(0,\'" + 
+					MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr/tests\')" );
+		} catch (InterruptedException e1) {
+			throw new IOException("Error evaluating Python command!");
+		}
+		
+		System.setProperty("montysolr.bridge", "tests.bridge.Bridge");
+		message = MontySolrVM.INSTANCE.createMessage(
+			"diagnostic_test").setParam("query", "none");
+		
+		try {
+			MontySolrVM.INSTANCE.sendMessage(message);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new IOException("Error multiple calling MontySolr!");
+		}
+		
+		PythonBridge b2 = MontySolrVM.INSTANCE.getBridge();
+		
+		assertNotSame(b, b2);
 	}
 
 }

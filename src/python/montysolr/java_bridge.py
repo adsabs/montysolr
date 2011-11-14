@@ -9,10 +9,10 @@ This class is always instantiated by the Java VM when a message
 needs to be passed from Java to Python.
 
 At a startup, MontySolr inspects the system property called 
-"python.bridge" and loads the Python module.
+"montysolr.bridge" and loads the Python module.
 
 Example:
-  java -Dpython.bridge=montysolr.java_bridge.SimpleBridge -jar...
+  java -Dmontysolr.bridge=montysolr.java_bridge.SimpleBridge -jar...
   
 Will load module montysolr.java_bridge and instantiate class
 SimpleBridge upon MontySolr start.
@@ -48,7 +48,10 @@ class SimpleBridge(sj.MontySolrBridge):
             message.threadInfo('Total time: %s' (time.time() - start))
         else:
             self._handler.handle_message(message)
-
+    
+    
+    def eval_command(self, message):
+        exec(message, globals(), locals())
 
 
     def set_handler(self, handler):

@@ -33,4 +33,11 @@ public interface PythonBridge {
 	 */
 	public void sendMessage(PythonMessage message);
 	
+	
+	/**
+	 * Generic method for setting up Python interpereter environmen
+	 * @param pythonString
+	 */
+	public void evalCommand(String pythonString);
+	
 }

@@ -132,7 +132,7 @@ public enum MontySolrVM {
 	 * @return {@link PythonBridge}
 	 */
 	public PythonBridge getBridge() {
-		return PythonVMBridge.start();
+		return PythonVMBridge.start(System.getProperty("montysolr.bridge"));
 	}
 	
 	/**
@@ -162,6 +162,21 @@ public enum MontySolrVM {
     	
     }
     
+    /**
+     * Passed the python command directly to the handler
+     * @param pythonString
+     * @throws InterruptedException
+     */
+    public void evalCommand(String pythonString) throws InterruptedException {
+    	PythonBridge b = getBridge();
+    	try {
+			semaphore.acquire();
+			b.evalCommand(pythonString);
+    	} finally {
+    		semaphore.release();
+    	}
+    }
+    
 	
 
 }
@@ -179,48 +194,50 @@ public enum MontySolrVM {
  */
 
 class PythonVMBridge {
-    static protected PythonBridge bridge;
+    static protected PythonBridge bridge = null;
+    private static String bridgeId = null;
     
     protected PythonVMBridge() {
-    	
-    }
-    
-    //TODO: implement absolute path, loading of the module/class
-    //TODO: remove the remnants of the code that was there to test
-    //      singleton nature of the bridge
-    
-    static public PythonBridge start() throws PythonException {
-    	if (System.getProperty("python.bridge") == null) {
-    		return start("SimpleBridge");
-    	}
-    	else {
-    		return start(System.getProperty("python.bridge"));
-    	}
+    	// empty constructor
     }
     
     static public PythonBridge start(String bridgeName) throws PythonException {
-    	if (bridgeName == "montysolr.java_bridge.SimpleBridge" ||
-    			bridgeName == "SimpleBridge") {
-    		return start("montysolr.java_bridge", "SimpleBridge");
+    	if (bridgeName==null) {
+    		System.err.println("please set montysolr.bridge system property (using default: montysolr.java_bridge.SimpleBridge)");
+    		bridgeName = "montysolr.java_bridge.SimpleBridge";
     	}
-		return bridge;
+    	String[] parts = bridgeName.split("\\.");
+    	
+    	if (bridge!=null && bridgeName.equals(bridgeId))
+    		return bridge;
+    	
+    	bridgeId = bridgeName;
+    	
+    	if (parts.length > 1) {
+    		StringBuffer module = new StringBuffer();
+    		module.append(parts[0]);
+    		for (int i=1;i<parts.length-1;i++) {
+    			module.append(".");
+    			module.append(parts[i]);
+    		}
+    		bridge = start(module.toString(), parts[parts.length-1]);
+    	}
+    	else {
+    		bridge = start(bridgeName);
+    	}
+    	return bridge;
     }
 
-    static public PythonBridge start(String moduleName, String className) throws PythonException 
-    {
-        if (bridge == null)
-        {
-        	PythonVM vm = PythonVM.get();
-        	bridge = (PythonBridge)vm.instantiate(moduleName, className);
-        	bridge.setName(moduleName+'.'+className);
-        }
-
+    static public PythonBridge start(String moduleName, String className) throws PythonException {
+    	PythonVM vm = PythonVM.get();
+    	bridge = (PythonBridge)vm.instantiate(moduleName, className);
+    	bridge.setName(moduleName+'.'+className);
         return bridge;
     }
     
-    static public PythonBridge get() throws PythonException {
-    	return start("SimpleBridge");
-    	//return bridge;
+    static public PythonBridge getBridge() throws PythonException {
+    	//return start("SimpleBridge");
+    	return bridge;
     }
     
 

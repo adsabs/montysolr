@@ -67,7 +67,6 @@
      -->
 	<property name="montysolr.classes" value="
 		invenio.montysolr.jni.MontySolrBridge
-		invenio.montysolr.jni.BasicBridge
 		invenio.montysolr.jni.PythonBridge
 		invenio.montysolr.jni.PythonMessage
 		invenio.montysolr.util.InvenioBitSet

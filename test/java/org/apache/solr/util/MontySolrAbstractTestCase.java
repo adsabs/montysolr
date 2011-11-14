@@ -7,33 +7,29 @@ import java.io.IOException;
 
 import org.apache.solr.MontySolrTestCaseJ4;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	
 	public void setUp() throws Exception {
 		super.setUp();
 		
+		// fix PYTHONPATH
+		String pythonpath = MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python";
+		ProcessUtils.addEnv("PYTHONPATH", pythonpath);
+		
+		
+		// set -Djava.library.path
+		String jccpath = ProcessUtils.getJCCPath();
+		ProcessUtils.setLibraryPath(jccpath);
+		
 		// this is necessary to run in the main thread
 		MontySolrVM.INSTANCE.start("python");
 		
-		//MontySolrVM.INSTANCE
-		//		.start("montysolr_java", "-c",
-		//				"import sys; sys.path.insert(0, \'/dvt/workspace/montysolr/src/python\')");
+		System.setProperty("montysolr.bridge", getBridgeName());
+
 		
-		
-		// has no effect
-		// System.setProperty("java.library.path",
-		// "/usr/local/lib/python2.7/dist-packages/JCC-2.11-py2.7-linux-x86_64.egg");
-		/**
-		 * Map<String, String> env = System.getenv();
-		 * 
-		 * if (env.containsKey("PYTHONPATH")) { env.put("PYTHONPATH", new
-		 * File(MontySolrTestCaseJ4.MONTYSOLR_HOME +
-		 * "/src/python").getAbsolutePath() + ":" + env.get("PYTHONPATH")); }
-		 * else { env.put("PYTHONPATH", new
-		 * File(MontySolrTestCaseJ4.MONTYSOLR_HOME +
-		 * "/src/python").getAbsolutePath()); }
-		 */
 	}
 	public String getSolrHome() {
 		return MontySolrTestCaseJ4.TEST_HOME;
@@ -42,5 +38,9 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	/** @see MontySolrTestCaseJ4#getFile */
 	public static File getFile(String name) throws IOException {
 		return MontySolrTestCaseJ4.getFile(name);
+	}
+	
+	public String getBridgeName() {
+		throw new NotImplementedException();
 	}
 }
