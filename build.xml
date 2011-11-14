@@ -191,6 +191,8 @@
 
 	<target name="clean" >
 		<delete dir="${build.dir}" />
+		<delete dir="${classes.dir}" />
+		<mkdir dir="${classes.dir}"/>
 	</target>
 
 	<!--

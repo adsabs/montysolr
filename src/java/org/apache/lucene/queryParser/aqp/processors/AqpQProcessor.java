@@ -11,7 +11,7 @@ import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 /**
  * A generic class that is used by other query processors, eg.
@@ -52,11 +52,11 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
 	
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	
 	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 	
 	public String getDefaultFieldName() throws QueryNodeException {

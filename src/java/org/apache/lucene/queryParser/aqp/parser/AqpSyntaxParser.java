@@ -93,8 +93,12 @@ public class AqpSyntaxParser implements SyntaxParser {
         
 	}
 	
+	/**
+	 * This parse method uses reflection so that it can load any grammar
+	 * without knowing in advance its name
+	 */
 	@Override
-	public QueryNode parsex(CharSequence query, CharSequence field)
+	public QueryNode parse(CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 		
 		ANTLRStringStream input = new ANTLRStringStream(query.toString());		
@@ -134,8 +138,16 @@ public class AqpSyntaxParser implements SyntaxParser {
 		
 	}
 
-	
-	public QueryNode parse(CharSequence query, CharSequence field)
+	/**
+	 * Parses a query and returns QueryNode tree. It does not use reflection, it is here for a
+	 * testing purposes only. It will be moved to a standard class.
+	 * 
+	 * @param query
+	 * @param field
+	 * @return
+	 * @throws QueryNodeParseException
+	 */
+	public QueryNode parse_normal(CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 
 		ANTLRStringStream in = new ANTLRStringStream(query.toString());
