@@ -15,10 +15,12 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		// fix PYTHONPATH
-		String pythonpath = MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python";
-		ProcessUtils.addEnv("PYTHONPATH", pythonpath);
+		// fix PYTHONPATH (has no effect on the interpereter)
+		//String pythonpath = MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python";
+		//ProcessUtils.addEnv("PYTHONPATH", pythonpath);
 		
+		// the path added to sys.path is the parent
+		System.setProperty("montysolr.modulepath", MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr");
 		
 		// set -Djava.library.path
 		String jccpath = ProcessUtils.getJCCPath();

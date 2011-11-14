@@ -119,8 +119,9 @@ public enum MontySolrVM {
 	 * 			is wrong, no error will happen)
 	 */
 	public PythonVM start(String programName) {
-		if (vm == null)
-			vm = PythonVM.start(programName);
+		if (vm == null) {
+			vm = PythonVM.start(System.getProperty("montysolr.modulepath", ""));
+		}
 		return vm;
 	}
 	
@@ -172,6 +173,10 @@ public enum MontySolrVM {
     	try {
 			semaphore.acquire();
 			b.evalCommand(pythonString);
+			// This works for the new JCC with support for eval, but it is not
+			// in the trunk yet
+			//int val = vm.eval(pythonString);
+			//System.out.println("exec(" + pythonString + ") = " + val);
     	} finally {
     		semaphore.release();
     	}

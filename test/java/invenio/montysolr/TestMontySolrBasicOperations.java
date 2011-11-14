@@ -8,6 +8,7 @@ import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonBridge;
 import invenio.montysolr.jni.PythonMessage;
 
+import org.apache.jcc.PythonException;
 import org.apache.solr.MontySolrTestCaseJ4;
 import org.apache.solr.util.MontySolrAbstractTestCase;
 
@@ -30,7 +31,7 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		return "solrconfig-diagnostic-test.xml";
 	}
 
-	public void testBasicOperations() throws IOException {
+	public void testBasicOperations() throws IOException, InterruptedException {
 		
 		
 		
@@ -38,6 +39,7 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 				"diagnostic_test").setParam("query", "none");
 
 		try {
+			MontySolrVM.INSTANCE.evalCommand("import sys;print sys.path;print sys.argv");
 			MontySolrVM.INSTANCE.sendMessage(message);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -98,13 +100,13 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		PythonBridge b = MontySolrVM.INSTANCE.getBridge();
 		
 		try {
-			MontySolrVM.INSTANCE.evalCommand("import sys;sys.argv.insert(0,\'" + 
+			MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.insert(0,\'" + 
 					MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr/tests\')" );
 		} catch (InterruptedException e1) {
 			throw new IOException("Error evaluating Python command!");
 		}
 		
-		System.setProperty("montysolr.bridge", "tests.bridge.Bridge");
+		System.setProperty("montysolr.bridge", "bridge.Bridge");
 		message = MontySolrVM.INSTANCE.createMessage(
 			"diagnostic_test").setParam("query", "none");
 		
@@ -118,6 +120,13 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		PythonBridge b2 = MontySolrVM.INSTANCE.getBridge();
 		
 		assertNotSame(b, b2);
+		
+		try {
+			MontySolrVM.INSTANCE.evalCommand("print (sys.path"); //wrong syntax
+		} catch (PythonException e) {
+			// this is OK
+		}
+		
 	}
 
 }
