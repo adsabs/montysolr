@@ -147,6 +147,7 @@ class Handler(object):
             out = []
             out.append("id(sys) %s" % id(sys))
             out.append("sys.path: %s" % "\n  ".join(sys.path))
+            out.append("sys.argv: %s" % "\n  ".join(sys.argv))
             out.append("PYTHONPATH: %s" % os.getenv("PATH"))
             out.append("PYTHONHOME: %s" % os.getenv("PYTHONHOME"))
             out.append("PATH: %s" % os.getenv("PATH"))

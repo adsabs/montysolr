@@ -81,15 +81,13 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		}
 		
 		try {
-			MontySolrVM.INSTANCE.evalCommand("import sys;print id(sys),sys.argv;sys.argv.insert(0,\'XYZW\');print sys.argv" );
-			PythonMessage message2 = MontySolrVM.INSTANCE.createMessage(
-			"diagnostic_test").setParam("query", "none");
-			MontySolrVM.INSTANCE.sendMessage(message2);
-			res = (String) message2.getResults();
-			System.out.println(res);
-			//TODO: this is really funny, it doesn't return XYZW, but different path is set
-			//assertTrue("Diagnostic test returned unexpected results!", 
-			//		res.contains("PYTHONPATH") && res.contains("\'XYZW\'"));
+			MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.insert(0,\'XYZW\')" );
+			message = MontySolrVM.INSTANCE.createMessage(
+				"diagnostic_test").setParam("query", "none");
+			MontySolrVM.INSTANCE.sendMessage(message);
+			res = (String) message.getResults();
+			assertTrue("Diagnostic test returned unexpected results!", 
+					res.contains("PYTHONPATH") && res.contains("XYZW"));
 		} catch (InterruptedException e1) {
 			throw new IOException("Error evaluating Python command!");
 		}
