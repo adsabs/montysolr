@@ -161,13 +161,6 @@
 		</exec>
 
 
-		<path id="montysolr.classpath">
-			<fileset dir="${jar.dir}" includes="**/*.jar" />
-			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
-			<fileset dir="${webdist.home}/lib" includes="**/*.jar" />
-			<fileset dir="${lib.dir}" includes="**/*.jar" />
-		</path>
-
 	</target>
 
 	
@@ -235,6 +228,14 @@
         <pathconvert property="solr.solrj.jar.string" pathsep=" --jar ">
             <path refid="solr.sorlj.path" />
         </pathconvert>
+		
+		
+		<path id="montysolr.classpath">
+            <fileset dir="${jar.dir}" includes="**/*.jar" />
+            <fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
+            <fileset dir="${webdist.home}/lib" includes="**/*.jar" />
+            <fileset dir="${lib.dir}" includes="**/*.jar" />
+        </path>
 	</target>
 
 
@@ -317,7 +318,7 @@
 	</target>
 
 	<!-- Unzip the egg into python-test to be loadable -->
-	<target name="unzip-egg" depends="before-unzip">
+	<target name="unzip-egg" depends="config-build,before-unzip">
 		<delete dir="${dist.dir}/${app.name}" failonerror="yes" />
 		<unzip dest="${dist.dir}" overwrite="yes">
 			<fileset dir="${dist.dir}">
@@ -325,14 +326,15 @@
 			</fileset>
 		</unzip>
 		<move file="${dist.dir}/EGG-INFO" tofile="${dist.dir}/${app.name}.egg-info" />
-
+	    
+		<!-- write the current classpath into a text file -->
 		<echo file="${dist.dir}/${app.name}/classpath">${toString:montysolr.classpath}</echo>
 	</target>
 
 
 
 	<!-- Just a basic test to verify that our montysolr package is correctly compiled and contains the necessary classes -->
-	<target name="test-egg" depends="config">
+	<target name="test-egg" depends="config-build">
 		<exec executable="${python}" dir="${dist.dir}" failonerror="true">
 			<arg value="-c" />
 			<arg value="import ${app.name} as X;X.initVM(X.CLASSPATH+'${path.separator}${toString:montysolr.classpath}',vmargs='-Dsolr.solr.home=/x/dev/workspace/test-solr/solr,-Dsolr.data.dir=/x/dev/workspace/test-solr/solr/data');assert (X.__file__ == 'montysolr/__init__.pyc');print X.JettyRunner,X.JettyRunner.main(('solr.home', '/x/dev/workspace/test-solr/solr'))" />
@@ -419,7 +421,8 @@
 		<exec executable="${python}" dir="${build.dir}" failonerror="true">
 			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}${env.PYTHONPATH}" />
 
-			<!-- this is mac specific, i will yet have to find out how to make it os-specific -->
+			<!-- this is mac specific, i will yet have to find out how to make it os-specific,
+			     but it makes no problems to Ubuntu/SLC linux os'es so far -->
 			<env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
 
 
@@ -464,7 +467,7 @@
 	</target>
 
 
-	<target name="run-bare" depends="config,compile">
+	<target name="run-bare" depends="config-build,compile">
 		<echo>
 Running montysolr as:
 ========
