@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+ 
+        http://www.apache.org/licenses/LICENSE-2.0
+ 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<project name="contrib-build" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  <echo>Building ${ant.project.name}...</echo>
+
+  <!-- TODO: adjust build.dir/dist.dir appropriately when a contrib project is run individually -->
+  <property name="build.dir" location="../../build/contrib/${ant.project.name}"/>
+  <property name="dist.dir" location="../../dist/contrib/${ant.project.name}"/>
+  <property name="maven.dist.dir" location="../../dist/maven"/>
+  	
+  <import file="../common-build.xml"/>
+
+  <available property="contrib.has.tests" type="dir" file="src/test" />
+  
+	
+  <!-- if you extend the classpath refid in one contrib's build.xml (add JARs), use this as basis: -->
+  <path id="base.classpath">
+    <!-- montysolr jars -->
+    <fileset dir="${common.dir}/build/jar">
+      <include name = "**/*.jar" />
+    </fileset>
+    
+    <!-- lucene/solr jars -->
+    <fileset dir="${common.dir}/build/solr-download">
+      <include name = "**/dist/**/*.jar" />
+    </fileset>
+    
+    <!-- montysolr lib -->
+    <fileset dir="${common.dir}/lib">
+      <include name = "**/*.jar" />
+    </fileset>
+    
+
+   <pathelement location="${common.dir}/build/classes/java"/>
+   <pathelement path="${project.classpath}"/>
+  </path>
+  
+	
+  <!-- default classpath refid, can be overridden by contrib's build.xml (use the above base.classpath as basis): -->
+  <path id="classpath" refid="base.classpath"/>
+  
+  <path id="test.base.classpath">
+    <path refid="classpath"/>
+    <pathelement location="${common.dir}/build/classes/test-framework"/>
+    <pathelement location="${common.dir}/build/classes/test"/>
+    <path refid="junit-path"/>
+    <pathelement location="${build.dir}/classes/java"/>
+  </path>
+
+  <path id="test.classpath" refid="test.base.classpath"/>
+
+  <path id="junit.classpath">
+    <path refid="test.classpath"/>
+    <pathelement location="${build.dir}/classes/test"/>
+    <pathelement path="${java.class.path}"/>
+  </path>
+
+  <target name="build-lucene" unless="core.compiled">
+    <ant dir="${common.dir}" target="compile-test" inheritAll="false"/>
+    <!-- set the property for this ant execution to speed up later tasks depending on this -->
+    <property name="core.compiled" value="true"/>
+  </target>
+  
+  <target name="init" depends="common.init,build-lucene"/>
+  <target name="compile-test" depends="init" if="contrib.has.tests">
+    <antcall target="common.compile-test" inheritRefs="true" />
+  </target>
+  <target name="test" depends="init" if="contrib.has.tests">
+    <antcall target="common.test" inheritRefs="true" />
+  </target>
+  <target name="build-artifacts-and-tests" depends="jar, compile-test" />
+	
+  <available 
+    type="file" 
+    file="pom.xml" 
+    property="pom.xml.present">
+  </available>
+			
+  <target name="dist-maven" if="pom.xml.present" depends="compile-core, jar-src">
+    <sequential>
+      <m2-deploy>
+        <artifact-attachments>
+          <attach file="${build.dir}/${final.name}-src.jar"
+                  classifier="sources"/>
+          <attach file="${build.dir}/${final.name}-javadoc.jar"
+                  classifier="javadoc"/>
+        </artifact-attachments>
+      </m2-deploy>
+    </sequential>
+  </target>
+
+  <target name="javadocs" depends="compile-core">
+   	<sequential>
+       <mkdir dir="${javadoc.dir}/contrib-${name}"/>
+       <invoke-javadoc
+         destdir="${javadoc.dir}/contrib-${name}"
+       	title="${Name} ${version} contrib-${name} API">
+         <sources>
+           <link href=""/>
+           <packageset dir="${src.dir}"/>
+        </sources>
+      </invoke-javadoc>
+      <jarify basedir="${javadoc.dir}/contrib-${name}" destfile="${build.dir}/${final.name}-javadoc.jar"/>
+    </sequential>
+  </target>	
+
+  <target name="javadocs-index.html" description="Generate line for index.html of JavaDocs">
+    <echo file="${javadoc.dir}/index.html" append="true">
+<![CDATA[
+  <li><a href="contrib-${name}/index.html">${name}</a></li>
+]]></echo>
+  </target>
+  
+  <macrodef name="contrib-uptodate">
+    <attribute name="name"/>
+    <attribute name="property" default="@{name}.uptodate"/>
+    <attribute name="classpath.property" default="@{name}.jar"/>
+    <!-- set jarfile only, if the target jar file has no generic name, applies to analyzers with its common and smartcn subdir -->
+    <attribute name="jarfile" default="${common.dir}/build/contrib/@{name}/lucene-@{name}-${version}.jar"/>
+    <sequential>
+      <!--<echo message="Checking '@{jarfile}' against source folder '${common.dir}/contrib/@{name}/src/java'"/>-->
+      <property name="@{classpath.property}" location="@{jarfile}"/>
+      <uptodate property="@{property}" targetfile="@{jarfile}">
+        <srcfiles dir="${common.dir}/contrib/@{name}/src/java" includes="**/*.java"/>
+      </uptodate>
+    </sequential>
+  </macrodef>
+</project>

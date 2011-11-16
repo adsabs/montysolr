@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+ 
+        http://www.apache.org/licenses/LICENSE-2.0
+ 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<project name="antlrqueryparser" default="default">
+
+	<description>
+    ANTLR Flexible Query Parser
+  </description>
+
+	<import file="../contrib-build.xml"/>
+
+	<property name="aqp.parser.dir" location="src/java/org/apache/lucene/queryParser/aqp/parser" />
+	<property name="aqp.classes.dir" location="${build.dir}/classes/java" />
+	<property name="aqp.classes.parser.dir" location="${aqp.classes.dir}/org/apache/lucene/queryParser/aqp/parser" />
+	<property name="aqp.dotfile" location="${build.dir}/graph.dot" />
+	
+	
+	
+	<condition property="aqp.grammar" value="StandardLuceneGrammar">
+       <not>  
+          <isset property="grammar"/>
+       </not>
+    </condition>
+    <property name="aqp.grammar" value="${grammar}"/>
+    
+    <condition property="aqp.rule" value="mainQ">
+       <not>  
+          <isset property="rule"/>
+       </not>
+    </condition>
+    <property name="aqp.rule" value="${rule}"/>
+	
+	
+	<condition property="aqp.query" value="standard query">
+       <not>  
+          <isset property="query"/>
+       </not>
+    </condition>
+	<property name="aqp.query" value="${query}" />
+
+	
+	<path id="classpath">
+		<path refid="base.classpath"/>
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	<path id="run.classpath">
+		<path refid="classpath"/>
+		<pathelement location="${build.dir}/classes/java"/>
+	</path>
+
+	<target name="clean">
+        <delete dir="${build.dir}" />
+    </target>
+
+	<target name="compile-core" depends="antlr,compile,common.compile-core"/>
+
+	<!--
+    NOTE: see the README.antlr for details on how to fully regenerate the parser
+  -->
+	<target name="antlr" depends="antlr-generate,antlr-compile"/>
+
+	<target name="antlr-generate" description="Generates the parser/lexer based on grammar">
+		<echo>
+		Regenerating: ${aqp.grammar}
+		Output: ${build.dir}/classes/java
+        </echo>
+		<java classpathref="classpath"
+            classname="org.antlr.Tool"
+            >
+			<arg value="-o"/>
+			<arg value="${aqp.classes.parser.dir}"/>
+			<arg value="${aqp.parser.dir}/${aqp.grammar}.g"/>
+		</java>
+	</target>
+
+	<target name="antlr-compile" description="Compiles only the parser/lexer based on grammar" depends="antlr-generate">
+		<javac classpathref="classpath" 
+			srcdir="${aqp.classes.parser.dir}"
+			destdir="${aqp.classes.dir}"
+			/>
+	</target>
+	
+	<target name="compile" description="Compiles all the java classes" depends="antlr">
+        <javac classpathref="classpath" 
+            srcdir="src/java"
+            destdir="${build.dir}/classes/java"
+            >
+        	<include name="**/*.java"/>
+		</javac>
+    </target>
+	
+
+	<target name="dot" >
+		<delete file="${aqp.dotfile}" />
+		<echo>
+        Generating DOT: ${aqp.grammar}  
+		Query: ${aqp.query} 
+		Rule: ${aqp.rule}   
+        </echo>
+		<java classpathref="classpath"
+            classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
+        	output="${aqp.dotfile}"
+        	errorproperty="aqp.antlr-dot.error"
+            >
+			<arg value="${aqp.grammar}"/>
+			<arg value="${aqp.query}"/>
+			<arg value="${aqp.rule}"/>
+		</java>
+	</target>
+
+	<target name="tree" >
+		<echo>
+			Generating TREE: ${aqp.grammar}  
+			Query: ${aqp.query} 
+			Rule: ${aqp.rule}       
+        </echo>
+		<java classpathref="classpath"
+            classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
+            >
+			<arg value="${aqp.grammar}"/>
+			<arg value="${aqp.query}"/>
+			<arg value="${aqp.rule}"/>
+			<arg value="tree"/>
+		</java>
+	</target>
+
+	<target name="view" depends="dot" >
+		<exec executable="${dot_viewer}" failifexecutionfails="true">
+			<arg line="${aqp.dotfile}"/>
+		</exec>
+	</target>
+
+	<target name="test" description="Test the string, usage: ant -Dquery=string">
+		<antcall target="antlr-tree" />
+		<antcall target="antlr-dot" />
+		<antcall target="view-dot" />
+	</target>
+	
+	
+	<target name="gunit" description="Run the gunit test suite, usage: ant -Dgrammar=name">
+		<echo>
+        Running GUNIT: ${aqp.grammar}        
+        </echo>
+        <java classpathref="classpath"
+            classname="org.antlr.gunit.Interp"
+            >
+            <arg value="${aqp.parser.dir}/${aqp.grammar}.gunit"/>
+        </java>
+    </target>
+</project>
