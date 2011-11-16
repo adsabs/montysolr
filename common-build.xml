@@ -80,12 +80,6 @@
   <property name="tests.loggingfile" value="/dev/null"/>
   <property name="tests.nightly" value="false" />
     
-  <property name="javac.deprecation" value="off"/>
-  <property name="javac.debug" value="on"/>
-  <property name="javac.source" value="1.5"/>
-  <property name="javac.target" value="1.5"/>
-  <property name="javac.source.backwards" value="1.5"/>
-  <property name="javac.target.backwards" value="1.5"/>
   <!-- clover wants to run with -lib, otherwise we prefer a repeatable
        classpath -->
   <property name="javac.includeAntRuntime" value="${run.clover}"/>
