@@ -48,7 +48,7 @@
   <property name="version" value="${dev.version}"/>
   <property name="spec.version" value="${version}"/>	
   <property name="year" value="2000-${current.year}"/>
-  <property name="final.name" value="montysolr{name}-${version}"/>
+  <property name="final.name" value="montysolr-${name}-${version}"/>
 
   <property name="junit.jar" value="junit-4.7.jar"/>
   <property name="junit-location.jar" value="${common.dir}/lib/${junit.jar}"/>

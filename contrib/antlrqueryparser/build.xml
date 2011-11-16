@@ -57,27 +57,25 @@
 	
 	<path id="classpath">
 		<path refid="base.classpath"/>
+		<pathelement location="${build.dir}/classes/java"/>
 		<fileset dir="lib">
 			<include name="**/*.jar"/>
 		</fileset>
-	</path>
-	<path id="run.classpath">
-		<path refid="classpath"/>
-		<pathelement location="${build.dir}/classes/java"/>
 	</path>
 
 	<target name="clean">
         <delete dir="${build.dir}" />
     </target>
 
-	<target name="compile-core" depends="antlr,compile,common.compile-core"/>
+	<target name="compile-core" depends="antlr,compile"/>
 
 	<!--
     NOTE: see the README.antlr for details on how to fully regenerate the parser
   -->
-	<target name="antlr" depends="antlr-generate,antlr-compile"/>
+	<target name="antlr" depends="antlr-generate,antlr-compile" 
+		description="Regenerates grammar; usage -Dgrammar=&lt;name&gt;"/>
 
-	<target name="antlr-generate" description="Generates the parser/lexer based on grammar">
+	<target name="antlr-generate" >
 		<echo>
 		Regenerating: ${aqp.grammar}
 		Output: ${build.dir}/classes/java
@@ -91,7 +89,7 @@
 		</java>
 	</target>
 
-	<target name="antlr-compile" description="Compiles only the parser/lexer based on grammar" depends="antlr-generate">
+	<target name="antlr-compile" depends="antlr-generate">
 		<javac classpathref="classpath" 
 			srcdir="${aqp.classes.parser.dir}"
 			destdir="${aqp.classes.dir}"
@@ -142,16 +140,16 @@
 		</java>
 	</target>
 
-	<target name="view" depends="dot" >
+	<target name="display" depends="dot" >
 		<exec executable="${dot_viewer}" failifexecutionfails="true">
 			<arg line="${aqp.dotfile}"/>
 		</exec>
 	</target>
 
-	<target name="test" description="Test the string, usage: ant -Dquery=string">
-		<antcall target="antlr-tree" />
-		<antcall target="antlr-dot" />
-		<antcall target="view-dot" />
+	<target name="view" description="Test the string, usage: ant -Dquery=string">
+		<antcall target="dot" />
+		<antcall target="tree" />
+		<antcall target="display" />
 	</target>
 	
 	
