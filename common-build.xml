@@ -111,7 +111,7 @@
   <property name="build.encoding" value="utf-8"/>
 
   <property name="src.dir" location="src/java"/>
-  <property name="tests.src.dir" location="test/java"/>
+  <property name="tests.src.dir" location="src/test"/>
   <property name="build.dir" location="build"/>
   <property name="dist.dir" location="dist"/>
   <property name="maven.dist.dir" location="dist/maven"/>
