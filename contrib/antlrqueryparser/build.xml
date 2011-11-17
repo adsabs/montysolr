@@ -29,32 +29,31 @@
 	<property name="aqp.classes.dir" location="${build.dir}/classes/java" />
 	<property name="aqp.classes.parser.dir" location="${aqp.classes.dir}/org/apache/lucene/queryParser/aqp/parser" />
 	<property name="aqp.dotfile" location="${build.dir}/graph.dot" />
-	
-	
-	
+
+
+
 	<condition property="aqp.grammar" value="StandardLuceneGrammar">
-       <not>  
-          <isset property="grammar"/>
-       </not>
-    </condition>
-    <property name="aqp.grammar" value="${grammar}"/>
-    
-    <condition property="aqp.rule" value="mainQ">
-       <not>  
-          <isset property="rule"/>
-       </not>
-    </condition>
-    <property name="aqp.rule" value="${rule}"/>
-	
-	
+		<not>
+			<isset property="grammar"/>
+		</not>
+	</condition>
+	<property name="aqp.grammar" value="${grammar}"/>
+
+	<condition property="aqp.rule" value="mainQ">
+		<not>
+			<isset property="rule"/>
+		</not>
+	</condition>
+	<property name="aqp.rule" value="${rule}"/>
+
+
 	<condition property="aqp.query" value="standard query">
-       <not>  
-          <isset property="query"/>
-       </not>
-    </condition>
+		<not>
+			<isset property="query"/>
+		</not>
+	</condition>
 	<property name="aqp.query" value="${query}" />
 
-	
 	<path id="classpath">
 		<path refid="base.classpath"/>
 		<pathelement location="${build.dir}/classes/java"/>
@@ -63,9 +62,17 @@
 		</fileset>
 	</path>
 
+	<path id="test.classpath">
+		<path refid="classpath"/>
+		<path refid="test.base.classpath"/>
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
 	<target name="clean">
-        <delete dir="${build.dir}" />
-    </target>
+		<delete dir="${build.dir}" />
+	</target>
 
 	<target name="compile-core" depends="antlr,compile"/>
 
@@ -78,15 +85,34 @@
 	<target name="antlr-generate" >
 		<echo>
 		Regenerating: ${aqp.grammar}
-		Output: ${build.dir}/classes/java
+		Output: ${aqp.classes.parser.dir}
         </echo>
+		<mkdir dir="${aqp.classes.parser.dir}"/>
+		<delete dir="${aqp.classes.parser.dir}" failonerror="false}">
+			<fileset dir="${aqp.classes.parser.dir}">
+                <include name="${aqp.grammar}*.java" />
+                <include name="${aqp.grammar}*.tokens" />
+            </fileset>
+		</delete>
+		
 		<java classpathref="classpath"
             classname="org.antlr.Tool"
+			failonerror="true"
             >
 			<arg value="-o"/>
 			<arg value="${aqp.classes.parser.dir}"/>
 			<arg value="${aqp.parser.dir}/${aqp.grammar}.g"/>
 		</java>
+		
+		<!-- also copy the grammar lexer/token into the src dir -->
+		
+		<copy todir="${aqp.parser.dir}">
+			<fileset dir="${aqp.classes.parser.dir}">
+			    <include name="${aqp.grammar}*.java" />
+				<include name="${aqp.grammar}*.tokens" />
+			</fileset>
+		</copy>
+		
 	</target>
 
 	<target name="antlr-compile" depends="antlr-generate">
@@ -95,16 +121,16 @@
 			destdir="${aqp.classes.dir}"
 			/>
 	</target>
-	
+
 	<target name="compile" description="Compiles all the java classes" depends="antlr">
-        <javac classpathref="classpath" 
+		<javac classpathref="classpath" 
             srcdir="src/java"
             destdir="${build.dir}/classes/java"
             >
-        	<include name="**/*.java"/>
+			<include name="**/*.java"/>
 		</javac>
-    </target>
-	
+	</target>
+
 
 	<target name="dot" >
 		<delete file="${aqp.dotfile}" />
@@ -117,6 +143,7 @@
             classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
         	output="${aqp.dotfile}"
         	errorproperty="aqp.antlr-dot.error"
+			failonerror="true"
             >
 			<arg value="${aqp.grammar}"/>
 			<arg value="${aqp.query}"/>
@@ -151,16 +178,16 @@
 		<antcall target="tree" />
 		<antcall target="display" />
 	</target>
-	
-	
+
+
 	<target name="gunit" description="Run the gunit test suite, usage: ant -Dgrammar=name">
 		<echo>
         Running GUNIT: ${aqp.grammar}        
         </echo>
-        <java classpathref="classpath"
+		<java classpathref="classpath"
             classname="org.antlr.gunit.Interp"
             >
-            <arg value="${aqp.parser.dir}/${aqp.grammar}.gunit"/>
-        </java>
-    </target>
+			<arg value="${aqp.parser.dir}/${aqp.grammar}.gunit"/>
+		</java>
+	</target>
 </project>

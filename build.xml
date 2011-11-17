@@ -2,7 +2,6 @@
 
 	<description>Java extensions for Invenio - Java search engine made python-friendly</description>
 
-	<!-- <import file="common-build.xml"/> -->
 
 	<!--
   ==================================================================
@@ -103,70 +102,10 @@
         <arg value="import os, jcc; print os.path.dirname(os.path.dirname(jcc.__file__))" />
     </exec>
 	
-	   <!-- from lucene/build.xml -->
-    
-	  <property name="junit.includes" value="**/Test*.java"/>
-
+	   
 	  <import file="common-build.xml"/>	  
-
-	  <!-- Build classpath -->
-	  <path id="classpath">
-	    <pathelement location="${build.dir}/classes/java"/>
-	  	<!-- montysolr jars -->
-  	    <fileset dir="${common.dir}/build/jar">
-  	      <include name = "**/*.jar" />
-  	    </fileset>
-  	    
-  	    <!-- lucene/solr jars -->
-  	    <fileset dir="${common.dir}/build/solr-download">
-  	      <include name = "**/dist/**/*.jar" />
-  	    </fileset>
-  	    
-  	    <!-- montysolr lib -->
-  	    <fileset dir="${common.dir}/lib">
-  	      <include name = "**/*.jar" />
-  	    </fileset>
-	  	
-	  	<dirset dir="${common.dir}/build/solr-download">
-	  	   <include name = "**/lucene/build/classes/test-framework"/>
-	  	</dirset>
-	  	
-	  	<dirset dir="${common.dir}/build/solr-download">
-           <include name = "**/solr/build/tests"/>
-        </dirset>
-	  	
-	  	<pathelement location="${jcc_egg}/jcc/classes" />
-
-	  </path>
-
-	  <path id="demo.classpath">
-	    <path refid="classpath"/>
-	    <pathelement location="${build.dir}/classes/demo"/>
-	  </path>
-	  
-	  <path id="test.classpath">
-	    <path refid="classpath"/>
-	    <path refid="junit-path"/>
-	    <path refid="ant-path"/>
-	    <pathelement location="${build.dir}/classes/test"/>
-	  </path>
-
-	  <path id="junit.classpath">
-	    <path refid="junit-path"/>
-	    <pathelement location="${build.dir}/classes/test"/>
-	    <pathelement location="${build.dir}/classes/java"/>
-	    <pathelement path="${java.class.path}"/>
-	  </path>
-
-	  <patternset id="binary.build.dist.patterns"
-	              includes="${final.name}*.jar,docs/,contrib/*/*.jar,contrib/*/*.war, contrib/*/*/*.jar"
-	              excludes="*-src.jar"
-	  />
-	  <patternset id="binary.root.dist.patterns"
-	              includes="docs/,*.txt,contrib/**/README*,**/CHANGES.txt,contrib/**/*.sh contrib/**/docs/ contrib/xml-query-parser/*.dtd"
-	              excludes="BUILD.txt"
-	  />
-	
+    
+		
 	
 	
 	<!--
@@ -701,74 +640,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 	</macrodef>
 
 
-	<!--
-	====================================================================
-	               Testing MontySolr/Python - mostly copied from
-	               solr build.xml
-    ====================================================================
-    -->
-
-	<!-- JUnit properties -->
-	<property name="junit.includes" value="**/Test*.java,**/*Test.java"/>
-	<property name="junit.output.dir" location="${build.dir}/tests/test-results"/>
-	<property name="junit.reports" location="${build.dir}/tests/test-results/reports"/>
-	<property name="junit.formatter" value="plain"/>
-
-	<!-- Run contrib unit tests. -->
-	<target name="test"
-	        description="Runs the unit tests."
-	        depends="compile-tests, junit" />
-
-	<!-- Compile unit tests. -->
-	<target name="compile-tests"
-	          depends="compile">
-
-		<mkdir dir="${build.dir}/tests" />
-		<javac srcdir="${montysolr.home}/test/java" destdir="${build.dir}/tests"
-	  	            classpathref="montysolr.classpath"
-	  	            classpath="${jcc_egg}/jcc/classes"
-	  	        />
-
-	</target>
-
-	<target name="junit" depends="compile-tests">
-
-		<!-- no description so it doesn't show up in -projecthelp -->
-		<mkdir dir="${junit.output.dir}"/>
-		<condition property="runall">
-			<not>
-				<or>
-					<isset property="testcase"/>
-					<isset property="testpackage"/>
-					<isset property="testpackageroot"/>
-				</or>
-			</not>
-		</condition>
-		<junit printsummary="on"
-	           haltonfailure="no"
-	           errorProperty="tests.failed"
-	           failureProperty="tests.failed"
-	    	   showoutput="yes"
-	           dir="${montysolr.home}/test/test-files/"
-	           >
-			<jvmarg line=""/>
-			<formatter type="brief" usefile="false" if="junit.details"/>
-			<classpath refid="montysolr.classpath"/>
-			<formatter type="${junit.formatter}"/>
-			<batchtest fork="yes" todir="${junit.output.dir}" if="runall">
-				<fileset dir="test/java" includes="${junit.includes}"/>
-			</batchtest>
-			<batchtest fork="yes" todir="${junit.output.dir}" if="testpackage">
-				<fileset dir="test/java" includes="**/${testpackage}/**/Test*.java,**/${testpackage}/**/*Test.java"/>
-			</batchtest>
-			<batchtest fork="yes" todir="${junit.output.dir}" if="testpackageroot">
-				<fileset dir="test/java" includes="**/${testpackageroot}/Test*.java,**/${testpackageroot}/*Test.java"/>
-			</batchtest>
-			<batchtest fork="yes" todir="${junit.output.dir}" if="testcase">
-				<fileset dir="test/java" includes="**/${testcase}.java"/>
-			</batchtest>
-		</junit>
-	</target>
+	
 
 	<!--
     ====================================================================
