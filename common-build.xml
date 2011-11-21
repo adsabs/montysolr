@@ -87,7 +87,7 @@
 	</path>
 
 	<path id="common.junit.classpath">
-		<path refid="common.classpath"/>
+		<path refid="common.test.classpath"/>
 		<path refid="junit-path"/>
 		<pathelement location="${common.dir}/build/classes/test"/>
 		<pathelement location="${common.dir}/build/classes/java"/>
