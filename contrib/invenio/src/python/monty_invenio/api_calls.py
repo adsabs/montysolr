@@ -108,6 +108,17 @@ def sort_and_format(hits, kwargs):
     return recids
 
 
+def get_citation_dict(message):
+    dictname = sj.String.cast_(message.getParam('dictname'))
+    cd = bcs.get_citation_dict(dictname)
+    if cd:
+        hm = sj.HashMap().of_(sj.String, sj.JArray_int)
+
+        for k,v in cd.items():
+            j_array = sj.JArray_int(v)
+            hm.put(k, j_array)
+
+        message.put('result', hm)
 
 
 if __name__ == '__main__':

@@ -126,6 +126,8 @@ def get_citation_dict(message):
             hm.put(int(k), j_array)
         message.threadInfo('finished')
 
+
+        
 def workout_field_value(message):
     sender = str(message.getSender())
     if sender in 'PythonTextField':

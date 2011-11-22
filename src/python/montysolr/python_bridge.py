@@ -31,9 +31,8 @@ class JVMBridge(object):
             return instance
         
     def __del__(self):
-        #if 'solr.container' in self._store:
-        #    self._store['solr.container'].shutdown()
-        sys.stderr.write('!!!!!!! - Bridge deleted')
+        if 'solr.container' in self._store:
+            self._store['solr.container'].shutdown()
     
     def __init__(self, handler=None):
         

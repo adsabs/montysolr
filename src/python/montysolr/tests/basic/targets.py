@@ -26,10 +26,23 @@ def receive_text_array(message):
     message.setResults(new_a)
     
     
+def handle_request_body(message):
+    rsp = message.getSolrQueryResponse()
+    rsp.add("python", 'says hello!')
+
+
+def receive_field_value(message):
+    val = message.getParam('value')
+    val = sj.JArray_string.cast_(val)
+    val.append('z')
+    
+        
 def montysolr_targets():
     targets = [
            MontySolrTarget(':diagnostic_test', diagnostic_test),
            MontySolrTarget(':receive_text', receive_text),
            MontySolrTarget(':receive_text_array', receive_text_array),
+           MontySolrTarget('receive_field_value', receive_field_value),
+           MontySolrTarget('handleRequestBody', handle_request_body),
            ]
     return targets     

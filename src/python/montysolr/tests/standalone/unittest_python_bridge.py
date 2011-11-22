@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
         JVMBridge.setHandler(self._handler)
     
     def test_basic(self):
-        
+        """Testing basic functions (outside solr)"""
         sj = JVMBridge.getObjMontySolr()
         message = JVMBridge.createMessage("test_a") \
             .setParam('data', sj.JArray_int([0,1,2]))

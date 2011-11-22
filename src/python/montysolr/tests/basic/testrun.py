@@ -38,5 +38,5 @@ class Test(MontySolrTestCase):
         res = sj.JArray_string.cast_(message.getResults())
         expected = sj.JArray_string(data + ['z'])
         
-        self.assertTrue(expected == res, "Big array don")
-        #self.assertTrue(expected.equals(res), "Java obj.equals() doesn't work for array")
+        self.assertTrue(expected == res, "Big array is missing")
+        

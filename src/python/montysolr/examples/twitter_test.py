@@ -32,6 +32,7 @@ def twitter_api(message):
         if not term:
             rsp.add("python-message", 'Missing search term!')
             return
+
         api = twitter.Api()
         docs = api.GetSearch(term)
         i = 0
