@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+ 
+        http://www.apache.org/licenses/LICENSE-2.0
+ 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<project name="invenio" default="default">
+
+	<description>
+    Invenio embedded in Solr
+  </description>
+
+	<import file="../contrib-build.xml"/>
+
+	<!--Needed only if you want to regenerate InvenioQueryParser syntax,
+	        which is probably not what you need to do -->
+	    
+	    <property name="javacc.home" value="/some/path/javacc-5.0" />
+	
+	<path id="classpath">
+		<path refid="base.classpath"/>
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	<path id="run.classpath">
+		<path refid="classpath"/>
+		<pathelement location="${build.dir}/classes/java"/>
+	</path>
+
+	<target name="clean">
+        <delete dir="${build.dir}" />
+    </target>
+
+	<target name="compile-core" depends="compile,common.compile-core"/>
+
+	
+	<target name="compile" description="Compiles all the java classes" >
+        <javac classpathref="classpath" 
+            srcdir="src/java"
+            destdir="${build.dir}/classes/java"
+            >
+        	<include name="**/*.java"/>
+		</javac>
+    </target>
+	
+	
+	   <!--
+	    ====================================================================
+	                   Query Parser for Invenio syntax
+	    ====================================================================
+	    -->
+
+	    <target name="javacc-clean">
+	        <delete>
+	            <fileset dir="${src.dir.java}/org/apache/lucene/queryParser" includes="*.java">
+	                <containsregexp expression="Generated.*By.*JavaCC"/>
+	                <exclude name="ParseException.java"/>
+	            </fileset>
+	        </delete>
+	    </target>
+
+	    <target name="javacc-init" depends="javacc-uptodate-check, javacc-notice">
+	    </target>
+
+	    <target name="javacc-uptodate-check">
+	        <available
+	            property="javacc.present"
+	            classname="org.javacc.parser.Main"
+	            classpath="${javacc.home}/bin/lib/javacc.jar"
+	            />
+	        <uptodate property="javacc.files.uptodate">
+	            <srcfiles dir="${src.dir.java}" includes="**/*.jj" />
+	            <mapper type="glob" from="*.jj" to="*.java"/>
+	        </uptodate>
+	    </target>
+
+	    <target name="javacc-notice" unless="javacc.files.uptodate">
+	        <echo>
+	          One or more of the JavaCC .jj files is newer than its corresponding
+	          .java file.  Run the "javacc" target to regenerate the artifacts.
+	        </echo>
+	    </target>
+
+	    <target name="javacc-check">
+	        <fail unless="javacc.present">
+	          ##################################################################
+	          JavaCC not found.
+	          JavaCC Home: ${javacc.home}
+	          JavaCC JAR: ${javacc.jar}
+
+	          Please download and install JavaCC from:
+
+	          &lt;http://javacc.dev.java.net&gt;
+
+	          Then, create a build.properties file either in your home
+	          directory, or within the Lucene directory and set the javacc.home
+	          property to the path where JavaCC is installed. For example,
+	          if you installed JavaCC in /usr/local/java/javacc-3.2, then set the
+	          javacc.home property to:
+
+	          javacc.home=/usr/local/java/javacc-3.2
+
+	          If you get an error like the one below, then you have not installed
+	          things correctly. Please check all your paths and try again.
+
+	          java.lang.NoClassDefFoundError: org.javacc.parser.Main
+	          ##################################################################
+	        </fail>
+
+	    </target>
+
+	    <target name="javacc-InvenioQueryParser-rebuild" depends="javacc-clean, javacc-InvenioQueryParser" if="javacc.present">
+	        <antcall target="compile">
+	        </antcall>
+	    </target>
+
+	    <target name="javacc-InvenioQueryParser" depends="javacc-init,javacc-check" if="javacc.present">
+	        <sequential>
+	            <invoke-javacc target="${src.dir.java}/org/apache/lucene/queryParser/InvenioQueryParser.jj"
+	                         outputDir="${src.dir.java}/org/apache/lucene/queryParser"/>
+
+	            <!-- Change the inccorrect public ctors for QueryParser to be protected instead -->
+	            <replaceregexp file="${src.dir.java}/org/apache/lucene/queryParser/InvenioQueryParser.java"
+	                 byline="true"
+	                 match="public InvenioQueryParser\(CharStream "
+	                 replace="protected InvenioQueryParser(CharStream "/>
+	            <replaceregexp file="${src.dir.java}/org/apache/lucene/queryParser/InvenioQueryParser.java"
+	                 byline="true"
+	                 match="public InvenioQueryParser\(InvenioQueryParserTokenManager "
+	                 replace="protected InvenioQueryParser(InvenioQueryParserTokenManager "/>
+
+	        </sequential>
+	    </target>
+
+	    <macrodef name="invoke-javacc">
+	        <attribute name="target"/>
+	        <attribute name="outputDir"/>
+	        <sequential>
+	            <mkdir dir="@{outputDir}"/>
+	            <javacc
+	              target="@{target}"
+	              outputDirectory="@{outputDir}"
+	              debugTokenManager="${javacc.debug.tokenmgr}"
+	              debugParser="${javacc.debug.parser}"
+	              debuglookahead="${javacc.debug.lookahead}"
+	              javacchome="${javacc.home}"
+	          />
+	            <fixcrlf srcdir="@{outputDir}" includes="*.java">
+	                <containsregexp expression="Generated.*By.*JavaCC"/>
+	            </fixcrlf>
+	        </sequential>
+	    </macrodef>
+
+
+</project>

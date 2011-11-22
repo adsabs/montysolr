@@ -1,6 +1,6 @@
 
 from montysolr.initvm import montysolr_java as sj
-from montysolr.tests import handler
+import handler
 
 import time
 
@@ -9,10 +9,9 @@ This class is used for unittests
 '''
 
 
-class Bridge(sj.MontySolrBridge):
+class Bridge(object):
 
     def __init__(self):
-        super(Bridge, self).__init__()
         self._handler = handler.Handler()
 
     def receive_message(self, message):

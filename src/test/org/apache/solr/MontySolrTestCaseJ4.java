@@ -5,7 +5,7 @@ import java.io.File;
 public abstract class MontySolrTestCaseJ4 extends SolrTestCaseJ4 {
 	
 	private static final String SOURCE_SOLR_HOME = determineSourceHome();
-	private static final String SOURCE_HOME = determineMontySourceHome();
+	private static final String SOURCE_HOME = getMontySolrHome() + "/src/test-files";
 	public static String MONTYSOLR_HOME = getMontySolrHome();
 	public static String TEST_HOME = SOURCE_HOME + "/solr"; //getFile("solr/conf").getParent();
 	public static String WEBAPP_HOME = new File(SOURCE_SOLR_HOME, "src/webapp/web")
@@ -24,8 +24,16 @@ public abstract class MontySolrTestCaseJ4 extends SolrTestCaseJ4 {
 	    return new File(base.getParentFile().getParentFile(), "test-files/").getAbsolutePath();
 	  }
 	
+	/**
+	 * Returns the root folder with montysolr code/files
+	 * @return
+	 */
 	public static String getMontySolrHome() {
-		File base = getFile("examples/README.txt").getAbsoluteFile();
-	    return base.getParentFile().getParentFile().getAbsolutePath().toString();
+		File base = getFile("src/python/").getAbsoluteFile();
+	    while (!new File(base, "README").exists()) {
+	      base = base.getParentFile();
+	    }
+	    return base.getAbsolutePath();
+	    
 	}
 }

@@ -7,7 +7,7 @@ class Handler(handler.Handler):
     '''
 
     def init(self):
-        self.discover_targets(["montysolr.tests.targets"])
+        self.discover_targets(["montysolr.tests.basic.targets"])
 
 
 

@@ -15,10 +15,17 @@ import org.apache.solr.util.MontySolrAbstractTestCase;
 public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 	
 	
-	
+
+	/**
+	   * Must return a fully qualified name of the python module to load, eg:
+	   * 
+	   * montysolr.tests.basic
+	   * 
+	   * @return
+	   */
 	@Override
-	public String getBridgeName() {
-		return "montysolr.tests.bridge.Bridge";
+	public String getModuleName() {
+		return "montysolr.tests.basic.bridge.Bridge";
 	}
 
 	@Override

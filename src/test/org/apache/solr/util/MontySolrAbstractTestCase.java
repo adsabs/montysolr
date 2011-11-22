@@ -7,29 +7,29 @@ import java.io.IOException;
 
 import org.apache.solr.MontySolrTestCaseJ4;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 
 public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		// fix PYTHONPATH (has no effect on the interpereter)
+		// chaning PYTHONPATH (has no effect on the embedded interpereter)
 		//String pythonpath = MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python";
 		//ProcessUtils.addEnv("PYTHONPATH", pythonpath);
 		
 		// the path added to sys.path is the parent
-		System.setProperty("montysolr.modulepath", MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr");
+		System.setProperty("montysolr.modulepath", getModulePath());
 		
-		// set -Djava.library.path
+		// discover and set -Djava.library.path
 		String jccpath = ProcessUtils.getJCCPath();
 		ProcessUtils.setLibraryPath(jccpath);
 		
-		// this is necessary to run in the main thread
-		MontySolrVM.INSTANCE.start("python");
+		// this is necessary to run in the main thread and because of the 
+		// python loads the parent folder and inserts it into the pythonpath
+		// we trick it
+		MontySolrVM.INSTANCE.start(getChildModulePath());
 		
-		System.setProperty("montysolr.bridge", getBridgeName());
+		System.setProperty("montysolr.bridge", getModuleName());
 
 		
 	}
@@ -42,7 +42,31 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		return MontySolrTestCaseJ4.getFile(name);
 	}
 	
-	public String getBridgeName() {
-		throw new NotImplementedException();
+	public String getModuleName() throws Exception {
+		throw new Exception("You must implement this in your class!");
+	}
+	
+	public String getModulePath() {
+		return MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr";
+	}
+	
+	/**
+	 * Trick to find any existing folder/file inside the main module path
+	 * and return it to be set by python into the PYTHONPATH
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public String getChildModulePath() throws Exception {
+		File f = new File(getModulePath());
+		if (f.isFile()) {
+			return f.getAbsolutePath().toString();
+		}
+		else if(f.exists()) {
+			for (String child: f.list()) {
+				return new File(f.getAbsolutePath() + "/" + child).getAbsolutePath();
+			}
+		}
+		throw new Exception("The module.path must exist: " + getModulePath());
 	}
 }
