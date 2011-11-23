@@ -39,7 +39,7 @@ def receive_field_value(message):
         
 def montysolr_targets():
     targets = [
-           MontySolrTarget(':diagnostic_test', diagnostic_test),
+           #MontySolrTarget(':diagnostic_test', diagnostic_test),
            MontySolrTarget(':receive_text', receive_text),
            MontySolrTarget(':receive_text_array', receive_text_array),
            MontySolrTarget('receive_field_value', receive_field_value),

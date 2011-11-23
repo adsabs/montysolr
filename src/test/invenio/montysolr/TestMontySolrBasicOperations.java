@@ -1,16 +1,14 @@
 package invenio.montysolr;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonBridge;
 import invenio.montysolr.jni.PythonMessage;
 
 import org.apache.jcc.PythonException;
-import org.apache.solr.MontySolrTestCaseJ4;
-import org.apache.solr.util.MontySolrAbstractTestCase;
+import invenio.montysolr.util.MontySolrTestCaseJ4;
+import invenio.montysolr.util.MontySolrAbstractTestCase;
 
 public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 	
@@ -19,9 +17,8 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 	/**
 	   * Must return a fully qualified name of the python module to load, eg:
 	   * 
-	   * montysolr.tests.basic
+	   * "montysolr.tests.basic"
 	   * 
-	   * @return
 	   */
 	@Override
 	public String getModuleName() {
@@ -56,8 +53,9 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		Object result = message.getResults();
 		assertNotNull(result);
 		String res = (String) result;
-		assertTrue("Diagnostic test returned unexpected results!", 
-				res.contains("PYTHONPATH") && res.contains(":diagnostic_test -->"));
+		assertTrue("Diagnostic test returned unexpected results, or diagnostic_test was overwritten!", 
+				res.contains("PYTHONPATH") && res.contains("sys.path")
+				&& res.contains("PYTHONPATH"));
 		
 		assertQ("nope",
 				req("qt", "/diagnostic_test", "q", "nope"),
@@ -113,7 +111,7 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 			throw new IOException("Error evaluating Python command!");
 		}
 		
-		System.setProperty("montysolr.bridge", "bridge.Bridge");
+		System.setProperty("montysolr.bridge", "basic.bridge.Bridge");
 		message = MontySolrVM.INSTANCE.createMessage(
 			"diagnostic_test").setParam("query", "none");
 		
@@ -128,11 +126,21 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		
 		assertNotSame(b, b2);
 		
+		
 		try {
-			MontySolrVM.INSTANCE.evalCommand("print (sys.path"); //wrong syntax
+			MontySolrVM.INSTANCE.evalCommand("print sys.path + 1 "); //wrong operation
+			fail("Wrong python exec did not raise error");
 		} catch (PythonException e) {
 			// this is OK
 		}
+
+		try {
+			MontySolrVM.INSTANCE.evalCommand("print sys.path + 1 "); //wrong syntax
+			fail("Wrong python exec did not raise error");
+		} catch (PythonException e) {
+			// this is OK
+		}
+		
 		
 	}
 

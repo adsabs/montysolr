@@ -9,9 +9,10 @@ This class is used for unittests
 '''
 
 
-class Bridge(object):
+class Bridge(sj.MontySolrBridge):
 
     def __init__(self):
+        super(Bridge, self).__init__()
         self._handler = handler.Handler()
 
     def receive_message(self, message):

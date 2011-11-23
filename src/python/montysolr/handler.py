@@ -158,7 +158,7 @@ class Handler(object):
 
 
             out.append('---')
-            out.append('current targets: %s' % "                 \n".join(map(lambda x: '%s --> %s' % x, self._db.items())))
+            out.append('current targets: \n%s' % "                 \n".join(map(lambda x: '%s --> %s' % x, self._db.items())))
 
             out.append('---')
             out.append('running diagnostic tests from the targets (if available):')

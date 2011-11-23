@@ -1,11 +1,13 @@
-package org.apache.solr.util;
+package invenio.montysolr.util;
 
 import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.solr.MontySolrTestCaseJ4;
+import invenio.montysolr.util.MontySolrTestCaseJ4;
+import invenio.montysolr.util.ProcessUtils;
+import org.apache.solr.util.AbstractSolrTestCase;
 
 
 public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
@@ -18,7 +20,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		//ProcessUtils.addEnv("PYTHONPATH", pythonpath);
 		
 		// the path added to sys.path is the parent
-		System.setProperty("montysolr.modulepath", getModulePath());
+		System.setProperty("montysolr.modulepath", getChildModulePath());
 		
 		// discover and set -Djava.library.path
 		String jccpath = ProcessUtils.getJCCPath();
@@ -27,7 +29,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		// this is necessary to run in the main thread and because of the 
 		// python loads the parent folder and inserts it into the pythonpath
 		// we trick it
-		MontySolrVM.INSTANCE.start(getChildModulePath());
+		MontySolrVM.INSTANCE.start(getModulePath());
 		
 		System.setProperty("montysolr.bridge", getModuleName());
 

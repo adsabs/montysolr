@@ -1,4 +1,4 @@
-package org.apache.solr.util;
+package invenio.montysolr.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -114,7 +114,7 @@ public class ProcessUtils {
 	}
 	
 
-	private static String execCommand(String[] cmd) throws Exception {
+	public static String execCommand(String[] cmd) throws Exception {
 		Runtime run = Runtime.getRuntime();
 		Process pr = null;
 		try {

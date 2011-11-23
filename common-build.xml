@@ -67,6 +67,10 @@
 	</path>
 
 	<path id="common.test.classpath">
+		<dirset dir="${common.dir}/build/solr-download">
+            <include name = "**/solr/src/test-files"/>
+        </dirset>
+
 		<path refid="common.classpath"/>
 		<path refid="junit-path"/>
 		<path refid="ant-path"/>
@@ -84,6 +88,8 @@
 		<dirset dir="${common.dir}/build/solr-download">
 			<include name = "**/solr/build/tests"/>
 		</dirset>
+		
+		
 	</path>
 
 	<path id="common.junit.classpath">
