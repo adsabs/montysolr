@@ -1,6 +1,6 @@
 
 from montysolr.initvm import montysolr_java as sj
-from montysolr.utils import MontySolrTarget
+from montysolr.utils import make_targets
 
 def diagnostic_test(message):
     out = []
@@ -38,11 +38,7 @@ def receive_field_value(message):
     
         
 def montysolr_targets():
-    targets = [
-           #MontySolrTarget(':diagnostic_test', diagnostic_test),
-           MontySolrTarget(':receive_text', receive_text),
-           MontySolrTarget(':receive_text_array', receive_text_array),
-           MontySolrTarget('receive_field_value', receive_field_value),
-           MontySolrTarget('handleRequestBody', handle_request_body),
-           ]
-    return targets     
+    return make_targets(receive_text=receive_text,
+                        receive_text_array=receive_text_array,
+                        receive_field_value=receive_field_value,
+                        handleRequestBody=handle_request_body)

@@ -1,4 +1,4 @@
-package org.apache.lucene.newseman;
+package newseman;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -30,7 +30,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
-import org.apache.lucene.newseman.SemanticTaggerTokenFilter.TokenState;
+import newseman.SemanticTaggerTokenFilter.TokenState;
 import org.apache.lucene.util.Attribute;
 import org.apache.lucene.util.AttributeReflector;
 import org.apache.lucene.util.AttributeSource;
@@ -161,8 +161,8 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	    	mapping.put(id, i);
 	    	tokens.add(s);
 	    	String[] token = {
-	    			"id", id,
 	    			"token", termAtt.toString(),
+	    			"id", id,
 	    	};
 	    	passedTokens[i] = token;
 	    	//passedTokens.add(token);

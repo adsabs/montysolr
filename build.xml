@@ -82,8 +82,10 @@
     _build variables are there to add extra classes to the wrapper - some packages (either in lucene or for montysolr)
     are not usable/visible, unless also these classes are present. So this is here to add these extra components to the build.
     I tried registerining packages only, but it didn't work for v2.9, so i am listing classes directly
+    java.util.ArrayList
     -->
-	<property name="jcc.build_also" value="java.util.ArrayList
+	<property name="jcc.build_also" value="
+		
 		java.lang.Float
 		java.lang.System
 		java.lang.String
@@ -408,7 +410,6 @@ lucene.version=${lucene.version}
 
 			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
-			<!--<arg value="${ddash}no-generics" />-->
 			<arg value="${ddash}version" />
 			<arg value="${app.version}" />
 			<arg line="${jcc.build}" />
@@ -424,7 +425,8 @@ lucene.version=${lucene.version}
 			-->
 			<arg line="${jcc.packages}" />
 			<arg value="${ddash}package" />
-			<arg line="org.apache.solr.request ${ddash}package java.lang" />
+			<!--<arg line="org.apache.solr.request ${ddash}package java.lang" />-->
+			<arg line="org.apache.solr.request" />
 			<arg value="${ddash}classpath" />
 			<arg value="${toString:montysolr.classpath}${path.separator}../${my.montysolr.jar}:${path.separator}${jcc_egg}/jcc/classes/" />
 			<arg value="${ddash}include" />
@@ -464,7 +466,6 @@ lucene.version=${lucene.version}
 
 			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
-			<!--<arg value="${ddash}no-generics" />-->
 			<arg value="${ddash}version" />
 			<arg value="${app.solr.version}" />
 			<arg value="${ddash}import"/>

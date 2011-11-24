@@ -1,4 +1,4 @@
-package org.apache.lucene.newseman;
+package newseman;
 
 import java.io.Serializable;
 import java.util.ArrayList;

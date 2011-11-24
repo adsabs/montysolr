@@ -40,30 +40,30 @@ class JVMBridge(object):
             import montysolr.sequential_handler as handler
             handler = handler.Handler
         self._handler = handler
-        self._lucene = initvm.lucene
-        self._solr = initvm.solr_java
-        self._sj = initvm.montysolr_java
         
         
     def sendMessage(self, message):
-        self._sj.getVMEnv().attachCurrentThread()
+        self.getObjMontySolr().getVMEnv().attachCurrentThread()
         self._handler.handle_message(message)
         
     def setHandler(self, handler):
         self._handler = handler
+        
+    def getHandler(self):
+        return self._handler
     
     def createMessage(self, receiver):
-        self._sj.getVMEnv().attachCurrentThread()
-        return self._sj.PythonMessage(receiver)
+        self.getObjMontySolr().getVMEnv().attachCurrentThread()
+        return self.getObjMontySolr().PythonMessage(receiver)
     
     def getObjMontySolr(self):
-        return self._sj
+        return initvm.montysolr_java
     
     def getObjLucene(self):
-        return self._lucene
+        return initvm.lucene
     
     def getObjSolr(self):
-        return self._solr
+        return initvm.solr_java
     
     def setObj(self, name, value):
         self._store[name] = value

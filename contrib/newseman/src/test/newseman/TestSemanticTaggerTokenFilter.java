@@ -1,4 +1,4 @@
-package org.apache.lucene.newseman;
+package newseman;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -26,8 +26,10 @@ import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.newseman.TestSemanticTaggerTokenFilter.TestFilter;
 import org.apache.lucene.util.Version;
+
+import newseman.SemanticTaggerTokenFilter;
+import newseman.TestSemanticTaggerTokenFilter.TestFilter;
 
 import java.io.StringReader;
 import java.io.IOException;
