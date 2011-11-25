@@ -10,6 +10,7 @@ from montysolr import handler
 
 class Handler(handler.Handler):
     '''Simple handler that just calls the methods sequentially
+    and discovers the targets from the config file definitions
     '''
 
     def init(self):

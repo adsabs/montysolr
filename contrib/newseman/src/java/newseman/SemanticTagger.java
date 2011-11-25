@@ -1,4 +1,4 @@
-package org.apache.lucene.newseman;
+package newseman;
 
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;

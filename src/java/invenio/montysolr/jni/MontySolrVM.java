@@ -116,15 +116,29 @@ public enum MontySolrVM {
 	 * @param programName 
 	 * 			name of the program (it is just a symbolic name, at this
 	 * 			stage nothing is yet run/initialized and even if the config
-	 * 			is wrong, no error will happen)
+	 * 			is wrong, no error will happen). But if the program is a 
+	 * 			real file, its parent folder will be added (by Python itself)
+	 *          to the PYTHONPATH
 	 */
 	public PythonVM start(String programName) {
 		if (vm == null) {
-			vm = PythonVM.start(System.getProperty("montysolr.modulepath", ""));
+			vm = PythonVM.start(programName);
 		}
 		return vm;
 	}
 	
+	/**
+	 * This method must be called from the main thread before the Solr init.
+	 * It will use a property <code>montysolr.modulepath</code> to initialize
+	 * the Python interpreter. If the property is empty, it will use "python"
+	 * @return
+	 */
+	public PythonVM start() {
+		if (vm == null) {
+			vm = PythonVM.start(System.getProperty("montysolr.modulepath", "python"));
+		}
+		return vm;
+	}
 	
 	/**
 	 * Creates a new instance of the bridge over the Python waters.

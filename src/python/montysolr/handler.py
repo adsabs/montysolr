@@ -40,12 +40,12 @@ class Handler(object):
         recipient = message.getReceiver()
         sender = message.getSender()
 
-        message_id = (sender or '') + ':' + recipient
+        message_id = (sender or '*') + ':' + recipient
         if message_id in self._db:
             return self._db[message_id]
         else:
-            self.log.error("Unknown target; sender=%s, recipient=%s, message_id=%s" %
-                           (sender, recipient, message_id))
+            self.log.error("Unknown target; message_id=%s" %
+                           (message_id,))
 
     def discover_targets(self, places):
         '''Queries the different objects for existence of the callable
@@ -138,8 +138,8 @@ class Handler(object):
         else:
             self.log.error("The %s has no method 'montysolr_targets'" % obj)
 
-        if ':diagnostic_test' not in db:
-            db[':diagnostic_test'] = self._diagnostic_target()
+        if '*:diagnostic_test' not in db:
+            db['*:diagnostic_test'] = self._diagnostic_target()
 
 
     def _diagnostic_target(self):
@@ -158,12 +158,12 @@ class Handler(object):
 
 
             out.append('---')
-            out.append('current targets: %s' % "                 \n".join(map(lambda x: '%s --> %s' % x, self._db.items())))
+            out.append('current targets: \n%s' % "                 \n".join(map(lambda x: '%s --> %s' % x, self._db.items())))
 
             out.append('---')
             out.append('running diagnostic tests from the targets (if available):')
             for k,v in self._db.items():
-                if 'diagnostic_test' in k and k != ':diagnostic_test':
+                if 'diagnostic_test' in k and k != '*:diagnostic_test':
                     out.append('===================')
                     out.append(k)
                     try:

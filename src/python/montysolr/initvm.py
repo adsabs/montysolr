@@ -38,10 +38,16 @@ if os.path.exists(_cp):
 
 # order of calls important - first we initialize MontySolr
 # then the rest
-
 if _jvmargs:
-    montysolr_java.initVM(lucene.CLASSPATH+os.pathsep+montysolr_java.CLASSPATH+os.pathsep+_classpath, vmargs=_jvmargs)
+    montysolr_java.initVM(os.pathsep.join([lucene.CLASSPATH, solr_java.CLASSPATH, montysolr_java.CLASSPATH, _classpath]), vmargs=_jvmargs)
 else:
-    montysolr_java.initVM(lucene.CLASSPATH+os.pathsep+montysolr_java.CLASSPATH+os.pathsep+_classpath)
+    montysolr_java.initVM(os.pathsep.join([lucene.CLASSPATH, solr_java.CLASSPATH, montysolr_java.CLASSPATH, _classpath]))
 lucene.initVM()
 solr_java.initVM()
+
+# move the objects from lucene to montysolr, temporary workaround for different identity objects
+for name in dir(montysolr_java._montysolr_java):
+    if 'JArray' in name or 'JObject' in name:
+        setattr(montysolr_java, name, getattr(lucene._lucene, name))
+
+JAVA = montysolr_java

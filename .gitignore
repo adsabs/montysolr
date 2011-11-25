@@ -1,8 +1,8 @@
 *.class
 *.pyc
 *.log
-src/java/org/apache/lucene/queryParser/aqp/parser
 bin
 examples/*
 build
 *~
+contrib/antlrqueryparser/src/java/org/apache/lucene/queryParser/aqp/parser/*
