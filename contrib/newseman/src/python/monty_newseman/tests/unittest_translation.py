@@ -7,7 +7,6 @@ from montysolr.python_bridge import JVMBridge
 from montysolr.utils import make_targets
 
 from monty_newseman import targets
-
 import sys
 import os
 
@@ -62,7 +61,10 @@ class Test(unittest.TestCase):
         fill_dictionary(d)
             
         
-        words = "velká světová revoluce byla Velká říjnová revoluce protože s Velkou říjnovou revolucí a bez velké říjnové revoluce a ještě velká říjnová revoluce socialistická komunistická".split()
+        words = "velká světová revoluce byla Velká říjnová revoluce protože s Velkou říjnovou revolucí \
+        a bez velké říjnové revoluce a ještě velká říjnová revoluce socialistická komunistická \
+        s velkou a říjnovou revolucí".split()
+        
         t_array = J.JArray_object(len(words))
         i = 0
         while i < len(words):
@@ -88,6 +90,7 @@ class Test(unittest.TestCase):
         results = J.JArray_object.cast_(results)
         for token in results:
             token = J.JArray_string.cast_(token)
+            print token
             if len(token) > 4:
                 assert token[4] == 'sem'
                 if token[5] == 'X X X':
