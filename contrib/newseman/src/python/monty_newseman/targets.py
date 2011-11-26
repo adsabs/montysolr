@@ -2,9 +2,11 @@
 from montysolr.initvm import JAVA as j
 from montysolr.utils import make_targets
 
-from newseman.sea.man import seaman_maker, Surface, callbacks
+from newseman.sea.man import seaman_maker, Surface
+from newseman.sea import callbacks
 from newseman.content.Document import Token, TokenCollection, Document
 from newseman.ci8.semes import filter_semantic_tokens
+from newseman.sea.callbacks import tokenfeature_orig
 
 JArray_object = j.JArray_object
 JArray_string = j.JArray_string
@@ -15,8 +17,8 @@ tokenfeature_prefix = Surface.tokenfeature_prefix
 tokenfeature_suffix = Surface.tokenfeature_suffix
 tokenfeature_radix = Surface.tokenfeature_radix
 tokenfeature_success = Surface.tokenfeature_success
-tokenfeature_extrasem = Surface.tokenfeature_extrasem
-tokenfeature_extrasurface = Surface.tokenfeature_extrasurface
+tokenfeature_extrasem = callbacks.tokenfeature_extrasem
+tokenfeature_extrasurface = callbacks.tokenfeature_extrasurface
 
 class Cacher(object):
     def __init__(self):
@@ -74,7 +76,11 @@ def configure_seman(message):
         @group fuzzy matching:
             Activates the discovery of multi-token groups
             even if they were separated by several other
-            tokens
+            tokens.
+            
+            NOTE: the dictionary must already contain the multi-token
+            groups that we want to find! They will be loaded at function
+            init.
             
             @param max_distance: (int) max number of tokens to allow
                 as separators
@@ -90,12 +96,13 @@ def configure_seman(message):
         action = str(message.getParam('grp_action'))
         cleaning = None
         if message.getParam('grp_cleaning'):
-            cleaning = message.getParam('grp_cleaning')
+            cleaning = str(message.getParam('grp_cleaning'))
         max_distance = 0
-        if message.hasParam('max_distance'):
-            max_distance = int(message.getParam('max_distance'))
+        if message.getParam('max_distance'):
+            max_distance = int(str(message.getParam('max_distance')))
         seman.registerCallback('after_translation', 
-                callbacks.cb_after_translation_getter(max_distance=max_distance,
+                callbacks.cb_after_translation_proximity_getter(seman,
+                                                      max_dist=max_distance,
                                                       grp_action=action,
                                                       grp_cleaning=cleaning))
         
@@ -115,23 +122,27 @@ def translate_tokens(message):
     if (tokens):
         # create tokencolleation from the array
         tc = TokenCollection()
+        
+        # the data
         tokens = JArray_object.cast_(tokens)
-        first_row = list(JArray_string.cast_(tokens[0]))
-        row_len = len(first_row)
-        row_keys = first_row # get the name of columns
-        ret_keys = row_keys[:]
-        ret_keys[0] = tokenfeature_cleared # instead of token, return other key
+        
+        # description of incoming data
+        header = list(JArray_string.cast_(tokens[0]))
+        header_len = len(header)
+        
+        # descr of outgoing data
+        ret_keys = header[:]
+        ret_keys.append("sem")
+        ret_keys.append("multi-token") #when a group is identified, its canonical form
+        ret_keys.append("multi-sem") # the sem of the group
             
         j = 1 # skip header
         l = len(tokens)
         while j < l:
             row = JArray_string.cast_(tokens[j])
-            token = Token(row[0])
-            row_len = len(row)
-            i = 2
-            while i < row_len:
-                token.setFeature(row_keys[i], row[i])
-                i += 1
+            token = Token(row[0]) # token is first
+            for i in range(1, len(row)): # set the rest
+                token.setFeature(header[i], row[i])
             tc.append(token)
             j += 1
     
@@ -154,15 +165,25 @@ def translate_tokens(message):
         
         # convert back to java array
         tc = doc.tokens()
-        final_len = len(tc) + len(filter_semantic_tokens(tc, attr=tokenfeature_extrasem))
-        final_results = JArray_object(final_len)
+        final_len = len(tc)
+        final_results = JArray_object(final_len + 1) # + header
+        
+        # insert header
+        final_results[0] = JArray_string(ret_keys)
+        
+        # insert rows
         i = 0
+        r = 1
+        idx_sem = ret_keys.index("sem")
+        idx_grp = ret_keys.index("multi-token")
+        idx_grp_sem = ret_keys.index("multi-sem")
         while i < final_len:
             token = tc[i]
             t = []
-            for ii in range(len(row_keys)): # take out the old values
-                #t.append(row_keys[ii])
-                val = token.getFeature(ret_keys[ii])
+            t.append(token.getFeature(tokenfeature_orig))
+            
+            for ii in range(1, len(header)): # take out the old values
+                val = token.getFeature(header[ii])
                 if isinstance(val, list):
                     t.append(val[0])  # merged values, eg id=[14,15]
                 else:
@@ -170,14 +191,17 @@ def translate_tokens(message):
                 
             sem = token.getFeature(tokenfeature_sem)
             if sem:
-                #t.append(tokenfeature_sem)
-                t.append(' '.join(sem))
+                t.insert(idx_sem, isinstance(sem, list) and ' '.join(sem) or sem)
             
-            esem = token.getFeature(tokenfeature_sem)
+            esem = token.getFeature(tokenfeature_extrasem)
             if esem:
-                t.append(esem)
-            final_results[i] = JArray_string(t)
+                etoken = token.getFeature(tokenfeature_extrasurface)
+                t.insert(idx_grp, etoken)
+                t.insert(idx_grp_sem, isinstance(esem, list) and ' '.join(esem) or esem)
+            
+            final_results[r] = JArray_string(t)
             i += 1
+            r += 1
         
         # clean up
         message.setParam("tokens", None)
@@ -188,4 +212,5 @@ def translate_tokens(message):
 
 def montysolr_targets():
     return make_targets(initialize_seman=initialize_seman,
-                        translate_token_collection=translate_token_collection)
+                        translate_tokens=translate_tokens,
+                        configure_seman=configure_seman)

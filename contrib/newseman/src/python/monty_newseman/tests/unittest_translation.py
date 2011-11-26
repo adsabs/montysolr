@@ -44,9 +44,48 @@ class Test(unittest.TestCase):
             .setParam('url', self.seman_url) \
             .setParam('language', 'czech')
             
+    
+    def _fill_dictionary(self):
+        # cheating, get the python object
+        seman = targets.Cacher.get_last()
+        d = seman.surface().getSurfaceDictionary()
+        fill_dictionary(d)
+    
+    def _create_array(self, words):
+        
+        header = ['token', 'id']
+        t_array = J.JArray_object(len(words)+1)
+        
+        header = J.JArray_string(['token', 'id'])
+        t_array[0] = header 
+        
+        w = 0
+        while w < len(words):
+            t = J.JArray_string(len(header))
+            t[0] = words[w]
+            t[1] = str(w)
+            t_array[w+1] = t
+            w += 1
+        return t_array
+    
+    def _get_results(self, results):
+        
+        results = J.JArray_object.cast_(results)
+        
+        header = list(J.JArray_string.cast_(results[0]))
+        idx_sem = header.index("sem")
+        idx_grp = header.index("multi-token")
+        idx_grp_sem = header.index("multi-sem")
+        
+        results = [J.JArray_string.cast_(x) for x in results]
+        
+        sms = [str(len(x) > idx_sem and x[idx_sem] or '') for x in results]
+        grp = [str(len(x) > idx_grp and x[idx_grp] or '') for x in results]
+        grs = [str(len(x) > idx_grp_sem and x[idx_grp_sem] or '') for x in results]
+        
+        return (sms, grp, grs)
             
-            
-    def test_translate_token_collection(self):
+    def test_translate_basic(self):
         
         
         message = self.bridge.createMessage("initialize_seman") \
@@ -55,50 +94,82 @@ class Test(unittest.TestCase):
         self.bridge.sendMessage(message)
         
         
-        # cheating, get the python object
-        seman = targets.Cacher.get_last()
-        d = seman.surface().getSurfaceDictionary()
-        fill_dictionary(d)
+        self._fill_dictionary()
             
+        words = "velká světová revoluce byla velká říjnová revoluce protože s velkou říjnovou revolucí \
+        a bez velké říjnové revoluce a ještě velká říjnová revoluce socialistická komunistická \
+        s velkou říjnovou revolucí".split()
         
-        words = "velká světová revoluce byla Velká říjnová revoluce protože s Velkou říjnovou revolucí \
+        
+        message = self.bridge.createMessage("translate_tokens")
+        message.setParam("tokens", self._create_array(words))
+        self.bridge.sendMessage(message)
+        
+        
+        # this would be done on java side
+        results = message.getResults()
+        assert results != None
+        (sms, grp, grs) = self._get_results(results)
+        assert sms.count('XXX') == 5
+        assert grs.count('XXX') == 0
+        assert sms.count('r2') == 1 #revolution
+    
+    def test_translate_add_purge(self):
+        
+        message = self.bridge.createMessage("initialize_seman") \
+            .setParam('url', self.seman_url) \
+            .setParam('language', 'czech')
+            
+            
+        self.bridge.sendMessage(message)
+        
+        self._fill_dictionary()
+        
+        message = self.bridge.createMessage("configure_seman") \
+            .setParam('url', self.seman_url) \
+            .setParam('language', 'czech') \
+            .setParam('max_distance', 1) \
+            .setParam('grp_action', 'add') \
+            .setParam('grp_cleaning', 'purge')
+            
+        self.bridge.sendMessage(message)
+        
+        words = "velká světová revoluce byla velká říjnová revoluce protože s velkou říjnovou revolucí \
         a bez velké říjnové revoluce a ještě velká říjnová revoluce socialistická komunistická \
         s velkou a říjnovou revolucí".split()
         
-        t_array = J.JArray_object(len(words))
-        i = 0
-        while i < len(words):
-            t = J.JArray_string(4)
-            t[0] = "token"
-            t[1] = words[i]
-            t[2] = 'id'
-            t[3] = str(i)
-            t_array[i] = t
-            i += 1
         
-        message = self.bridge.createMessage("translate_token_collection")
-        message.setParam("tokens", t_array)
-        
+        message = self.bridge.createMessage("translate_tokens")
+        message.setParam("tokens", self._create_array(words))
         self.bridge.sendMessage(message)
         
         # this would be done on java side
         results = message.getResults()
-        
         assert results != None
+        (sms, grp, grs) = self._get_results(results)
+        assert sms.count('XXX') == 4
+        assert grs.count('XXX') == 1
+        assert grp.count('velk říjn revol') == 1
+        assert sms.count('r2') == 1 #revolution
         
-        group_found = False
-        results = J.JArray_object.cast_(results)
-        for token in results:
-            token = J.JArray_string.cast_(token)
-            print token
-            if len(token) > 4:
-                assert token[4] == 'sem'
-                if token[5] == 'X X X':
-                    group_found = True
         
-        assert group_found == True
+        # add extra word which makes the distance too big
+        words = "velká světová revoluce byla velká říjnová revoluce protože s velkou říjnovou revolucí \
+        a bez velké říjnové revoluce a ještě velká říjnová revoluce socialistická komunistická \
+        s velkou a extra říjnovou revolucí".split()
         
-
+        
+        message = self.bridge.createMessage("translate_tokens")
+        message.setParam("tokens", self._create_array(words))
+        self.bridge.sendMessage(message)
+        
+        
+        results = message.getResults()
+        (sms, grp, grs) = self._get_results(results)
+        assert sms.count('XXX') == 4
+        assert grs.count('XXX') == 0
+        assert grp.count('velk říjn revol') == 0
+        assert sms.count('r2') == 2 #revolution
 
 def fill_dictionary(d):
     #radixes

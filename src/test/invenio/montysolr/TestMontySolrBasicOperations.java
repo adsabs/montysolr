@@ -43,7 +43,6 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 				"diagnostic_test").setParam("query", "none");
 
 		try {
-			MontySolrVM.INSTANCE.evalCommand("import sys;print sys.path;print sys.argv");
 			MontySolrVM.INSTANCE.sendMessage(message);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
