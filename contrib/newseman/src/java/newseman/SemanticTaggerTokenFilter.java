@@ -31,6 +31,8 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import newseman.SemanticTaggerTokenFilter.TokenState;
+
+import org.apache.lucene.util.ArrayUtil;
 import org.apache.lucene.util.Attribute;
 import org.apache.lucene.util.AttributeReflector;
 import org.apache.lucene.util.AttributeSource;
@@ -43,10 +45,8 @@ import org.apache.solr.common.util.SimpleOrderedMap;
  * enriches tokens with semantic categories (so called semes). This enrichment
  * is controlled/governed by the dictionary/taxonomy/ontology.
  * 
- * Since we call an external application SEMAN written in Python, this
- * {@link TokenFilter} cannot be considered fast. It also depends on the options
- * that you activate for SEMAN. For example, you can run part-of-speech tagging
- * (inside SEMAN) to improve the results of the translation.
+ * The translation is done by a Pythonic library called SEMAN. Please see 
+ * documentation of SEMAN for further details.
  * 
  * 
  * 
@@ -67,8 +67,8 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
 	private final SemanticTagAttribute semAtt = addAttribute(SemanticTagAttribute.class);
 
-	protected SemanticTagger seman = null;
-	protected int maxBuffer = 4096;
+	protected SemanticTagger seman = null; // Seman wrapper
+	protected int maxBuffer = 4096; // # of tokens we send to Seman in one go
 	private List<TokenState> enhancedTokens = null;
 	private Iterator<TokenState> etIterator = null;
 
@@ -151,19 +151,17 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		List<TokenState> tokens = new ArrayList<TokenState>(maxBuffer);
 		String[][] passedTokens = new String[maxBuffer][];
 		//ArrayList<String[]>passedTokens = new ArrayList<String[]>(maxBuffer);
-		
+
 		
 		// first collect the tokens
+		passedTokens[0] = new String[]{"token", "id"}; // header
 		int i = 0;
 	    do {
 	    	TokenState s = new TokenState(input.captureState());
 	    	String id = Integer.toString(input.hashCode());
 	    	mapping.put(id, i);
 	    	tokens.add(s);
-	    	String[] token = {
-	    			"token", termAtt.toString(),
-	    			"id", id,
-	    	};
+	    	String[] token = {termAtt.toString(), id};
 	    	passedTokens[i] = token;
 	    	//passedTokens.add(token);
 	    	i++;
@@ -171,16 +169,40 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	    
 	    String[][] results = getTranslations(passedTokens);
 	    
+	    String[] header = results[0];
+		Integer sem_idx = null;
+		Integer extra_sem_idx = null;
+		Integer extra_surface_idx =  null;
+	    for (int j=2;j<header.length;j++) {
+	    	String h = header[j];
+	    	if (h.equals("sem")) {
+	    		sem_idx = j;
+	    	}
+	    	else if(h.equals("extrasem")) {
+	    		extra_sem_idx = j;
+	    	}
+	    	else if(h.equals("extrasurface")) {
+	    		extra_surface_idx = j;
+	    	}
+	    }
+	    
 	    for (String[] r: results) {
 	    	if (r==null) break;
 	    	
-	    	//Integer id = Integer.valueOf(r[1]);
 	    	String id = r[1];
-	    	if (r.length > 4) {
-	    		String[] semes = r[5].split(" ");
+	    	if (r.length > extra_sem_idx) { // multi-token seme
+	    		String[] semes = r[extra_sem_idx].split(" ");
+	    		// TODO: create a new state
+	    		TokenState token = tokens.get(mapping.get(id));
+	    		token.setOtherName(r[extra_surface_idx]);
+	    		tokens.add(token);
+	    	}
+	    	else if (r.length > sem_idx) {
+	    		String[] semes = r[sem_idx].split(" ");
 	    		if (mapping.containsKey(id)) {
 	    			TokenState token = tokens.get(mapping.get(id));
 	    			token.setSemes(semes);
+	    			tokens.add(token);
 	    		}
 	    		else {
 	    			throw new IOException("SEMAN created a new token which is not in TokenStream");
@@ -225,6 +247,8 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	class TokenState {
 		State state = null;
 		String[] semes = null;
+		String otherName = null;
+		
 		TokenState(State state) {
 			this.state = state;
 		}
@@ -239,6 +263,12 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		}
 		public void setSemes(String[] semes) {
 			this.semes = semes;
+		}
+		public String getOtherName() {
+			return this.otherName;
+		}
+		public void setOtherName(String name) {
+			this.otherName = name;
 		}
 	}
 	

@@ -215,5 +215,35 @@ public class TestSemanticTaggerTokenFilter extends BaseTokenStreamTestCase {
 		}
 		assertEquals(buf.toString().trim(),
 				"This/1 is/1 a/1 test/1 of/1 the/1 english/1 keyword/1 a1/0 a2/0 a3/0 analyzer/1");
-	}	
+	}
+	
+	public void testSemanticTokenFilterTranslation() throws IOException {
+		StringReader reader = new StringReader(
+				"This is the stop word plus multi tokenized group\'s phrase");
+		TestFilterSemantic stream = 
+			new TestFilterSemantic(
+				new StopFilter( Version.LUCENE_31,
+					new StandardTokenizer(Version.LUCENE_31, reader),
+					new HashSet(Arrays.asList(new String[] {"stop", "the"}))
+				)
+			);
+		
+		assertTrue(stream != null);
+		CharTermAttribute termAtt = stream
+				.getAttribute(CharTermAttribute.class);
+		PositionIncrementAttribute posIncrAtt = stream
+				.getAttribute(PositionIncrementAttribute.class);
+		SemanticTagAttribute semAtt = stream
+				.getAttribute(SemanticTagAttribute.class);
+
+		StringBuffer buf = new StringBuffer();
+		while (stream.incrementToken()) {
+			buf.append(termAtt.toString());
+			buf.append("/");
+			buf.append(posIncrAtt.getPositionIncrement());
+			buf.append(" ");
+		}
+		assertEquals(buf.toString().trim(),
+				"This/1 is/1 word/1 plus/1 s1/0 s2/0 multi/1 s3/0 s4/0 multi token group phras/0 tokenized/1 grouph/1 phrase/1");
+	}
 }

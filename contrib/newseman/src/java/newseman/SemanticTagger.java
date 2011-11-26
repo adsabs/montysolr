@@ -6,6 +6,23 @@ import invenio.montysolr.jni.PythonMessage;
 import java.io.IOException;
 
 public class SemanticTagger {
+	
+	private String url = null;
+	 
+	SemanticTagger(String url) {
+		this.url = url;
+		
+	}
+	
+	public void createTagger(String url) throws InterruptedException {
+		
+		PythonMessage message = MontySolrVM.INSTANCE
+			.createMessage("initialize_seman")
+			.setSender(this.getClass().toString())
+			.setParam("url", url);
+		MontySolrVM.INSTANCE.sendMessage(message);
+	}
+	
 
 	public String[][] translateTokenCollection(String[][] tokens) throws IOException {
 

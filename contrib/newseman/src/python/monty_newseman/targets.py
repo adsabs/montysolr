@@ -2,8 +2,9 @@
 from montysolr.initvm import JAVA as j
 from montysolr.utils import make_targets
 
-from newseman.sea.man import seaman_maker, Surface
-from newseman.content.Document import Token, TokenCollection
+from newseman.sea.man import seaman_maker, Surface, callbacks
+from newseman.content.Document import Token, TokenCollection, Document
+from newseman.ci8.semes import filter_semantic_tokens
 
 JArray_object = j.JArray_object
 JArray_string = j.JArray_string
@@ -14,6 +15,8 @@ tokenfeature_prefix = Surface.tokenfeature_prefix
 tokenfeature_suffix = Surface.tokenfeature_suffix
 tokenfeature_radix = Surface.tokenfeature_radix
 tokenfeature_success = Surface.tokenfeature_success
+tokenfeature_extrasem = Surface.tokenfeature_extrasem
+tokenfeature_extrasurface = Surface.tokenfeature_extrasurface
 
 class Cacher(object):
     def __init__(self):
@@ -63,7 +66,42 @@ def initialize_seman(message):
     Cacher.set_seman(name, seman)
 
 
-def translate_token_collection(message):
+def configure_seman(message):
+    """Configures the existing instance of seman using the 
+        callbacks
+        @param url: url or name of the existing instance
+        
+        @group fuzzy matching:
+            Activates the discovery of multi-token groups
+            even if they were separated by several other
+            tokens
+            
+            @param max_distance: (int) max number of tokens to allow
+                as separators
+            @param grp_action: rewrite|add|insert_before|insert_after
+            @param grp_cleaning: purge|remove
+    """
+    seman = Cacher.get_seman(str(message.getParam('url')))
+    
+    if seman is None:
+        raise Exception('Seman is not initialized!')
+    
+    if message.getParam('grp_action'):
+        action = str(message.getParam('grp_action'))
+        cleaning = None
+        if message.getParam('grp_cleaning'):
+            cleaning = message.getParam('grp_cleaning')
+        max_distance = 0
+        if message.hasParam('max_distance'):
+            max_distance = int(message.getParam('max_distance'))
+        seman.registerCallback('after_translation', 
+                callbacks.cb_after_translation_getter(max_distance=max_distance,
+                                                      grp_action=action,
+                                                      grp_cleaning=cleaning))
+        
+        
+
+def translate_tokens(message):
     """Translates the array of tokens into semantic codes
         @param tokens: two dimensional array of tokens to 
             translate
@@ -80,19 +118,22 @@ def translate_token_collection(message):
         tokens = JArray_object.cast_(tokens)
         first_row = list(JArray_string.cast_(tokens[0]))
         row_len = len(first_row)
-        row_keys = first_row[0::2] # get the name of columns
+        row_keys = first_row # get the name of columns
         ret_keys = row_keys[:]
         ret_keys[0] = tokenfeature_cleared # instead of token, return other key
             
-        
-        for row in tokens:
-            row = JArray_string.cast_(row)
-            token = Token(row[1])
+        j = 1 # skip header
+        l = len(tokens)
+        while j < l:
+            row = JArray_string.cast_(tokens[j])
+            token = Token(row[0])
+            row_len = len(row)
             i = 2
             while i < row_len:
-                token.setFeature(row[i], row[i+1])
-                i += 2
+                token.setFeature(row_keys[i], row[i])
+                i += 1
             tc.append(token)
+            j += 1
     
         # get seman
         url = message.getParam("url")
@@ -103,22 +144,24 @@ def translate_token_collection(message):
             
         
         # translate
+        doc = Document(tokens=tc)
         language = str(message.getParam("language") or '')
         if language:
-            seman.translateTokenCollection(tc, language=language)
+            seman.translateTokenizedDocument(doc, language=language)
         else:
-            seman.translateTokenCollection(tc)
+            seman.translateTokenizedDocument(doc)
         
         
         # convert back to java array
-        final_len = len(tc)
+        tc = doc.tokens()
+        final_len = len(tc) + len(filter_semantic_tokens(tc, attr=tokenfeature_extrasem))
         final_results = JArray_object(final_len)
         i = 0
         while i < final_len:
             token = tc[i]
             t = []
             for ii in range(len(row_keys)): # take out the old values
-                t.append(row_keys[ii])
+                #t.append(row_keys[ii])
                 val = token.getFeature(ret_keys[ii])
                 if isinstance(val, list):
                     t.append(val[0])  # merged values, eg id=[14,15]
@@ -127,8 +170,12 @@ def translate_token_collection(message):
                 
             sem = token.getFeature(tokenfeature_sem)
             if sem:
-                t.append(tokenfeature_sem)
+                #t.append(tokenfeature_sem)
                 t.append(' '.join(sem))
+            
+            esem = token.getFeature(tokenfeature_sem)
+            if esem:
+                t.append(esem)
             final_results[i] = JArray_string(t)
             i += 1
         
