@@ -133,8 +133,10 @@ def translate_tokens(message):
         # descr of outgoing data
         ret_keys = header[:]
         ret_keys.append("sem")
-        ret_keys.append("multi-token") #when a group is identified, its canonical form
+        ret_keys.append("synonyms") # not implemented yet
         ret_keys.append("multi-sem") # the sem of the group
+        ret_keys.append("multi-synonyms") #when a group is identified, its canonical form
+        
             
         j = 1 # skip header
         l = len(tokens)
@@ -175,7 +177,7 @@ def translate_tokens(message):
         i = 0
         r = 1
         idx_sem = ret_keys.index("sem")
-        idx_grp = ret_keys.index("multi-token")
+        idx_grp = ret_keys.index("multi-synonyms")
         idx_grp_sem = ret_keys.index("multi-sem")
         while i < final_len:
             token = tc[i]

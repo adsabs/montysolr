@@ -35,19 +35,15 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		return "solrconfig-diagnostic-test.xml";
 	}
 
-	public void testBasicOperations() throws IOException, InterruptedException {
+	public void testBasicOperations() throws IOException {
 		
 		
+		boolean caught = false;
 		
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage(
 				"diagnostic_test").setParam("query", "none");
 
-		try {
-			MontySolrVM.INSTANCE.sendMessage(message);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			throw new IOException("Error calling MontySolr!");
-		}
+		MontySolrVM.INSTANCE.sendMessage(message);
 
 		Object result = message.getResults();
 		assertNotNull(result);
@@ -61,86 +57,86 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 				"//lst/int"); //TODO: get xpath correctly
 		
 		//send several messages (the same)
-		try {
-			MontySolrVM.INSTANCE.sendMessage(message);
-			MontySolrVM.INSTANCE.sendMessage(message);
-			MontySolrVM.INSTANCE.sendMessage(message);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			throw new IOException("Error multiple calling MontySolr!");
-		}
+		MontySolrVM.INSTANCE.sendMessage(message);
+		MontySolrVM.INSTANCE.sendMessage(message);
+		MontySolrVM.INSTANCE.sendMessage(message);
 		
-		message = MontySolrVM.INSTANCE.createMessage(
-			"unknown_call").setParam("query", "none");
+		caught = false;
+		try {
+			message = MontySolrVM.INSTANCE.createMessage(
+				"unknown_call").setParam("query", "none");
+			
+			MontySolrVM.INSTANCE.sendMessage(message);
+		}
+		catch (RuntimeException e) {
+			// this is OK
+			caught = true;
+		}
+		assertTrue(caught);
 		
 		PythonBridge ba = MontySolrVM.INSTANCE.getBridge();
-		try {
-			MontySolrVM.INSTANCE.sendMessage(message);
-			assertSame(ba, MontySolrVM.INSTANCE.getBridge());
-			MontySolrVM.INSTANCE.sendMessage(message);
-			assertSame(ba, MontySolrVM.INSTANCE.getBridge());
-			MontySolrVM.INSTANCE.sendMessage(message);
-			assertSame(ba, MontySolrVM.INSTANCE.getBridge());
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			throw new IOException("Error multiple calling MontySolr!");
-		}
+		assertSame(ba, MontySolrVM.INSTANCE.getBridge());
 		
+		caught = false;
 		try {
-			MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.insert(0,\'XYZW\')" );
-			message = MontySolrVM.INSTANCE.createMessage(
-				"diagnostic_test").setParam("query", "none");
 			MontySolrVM.INSTANCE.sendMessage(message);
-			res = (String) message.getResults();
-			assertTrue("Diagnostic test returned unexpected results!", 
-					res.contains("PYTHONPATH") && res.contains("XYZW"));
-		} catch (InterruptedException e1) {
-			throw new IOException("Error evaluating Python command!");
+		} 
+		catch (PythonException e) {
+			caught = true;
 		}
+		assertTrue(caught);
+		
+		PythonBridge bb = MontySolrVM.INSTANCE.getBridge();
+		assertSame(bb, MontySolrVM.INSTANCE.getBridge());
+		
+		
+		// evaluate python string
+		MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.insert(0,\'XYZW\')" );
+		message = MontySolrVM.INSTANCE.createMessage(
+			"diagnostic_test").setParam("query", "none");
+		MontySolrVM.INSTANCE.sendMessage(message);
+		res = (String) message.getResults();
+		assertTrue("Diagnostic test returned unexpected results!", 
+				res.contains("PYTHONPATH") && res.contains("XYZW"));
 		
 		
 		// now sets the sys.path and change the montysolr.bridge which
 		// should get a new bridge instance
 		PythonBridge b = MontySolrVM.INSTANCE.getBridge();
 		
-		try {
-			MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.insert(0,\'" + 
-					MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr/tests\')" );
-		} catch (InterruptedException e1) {
-			throw new IOException("Error evaluating Python command!");
-		}
+		MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.insert(0,\'" + 
+				MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr/tests\')" );
 		
 		System.setProperty("montysolr.bridge", "basic.bridge.Bridge");
 		message = MontySolrVM.INSTANCE.createMessage(
 			"diagnostic_test").setParam("query", "none");
 		
-		try {
-			MontySolrVM.INSTANCE.sendMessage(message);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			throw new IOException("Error multiple calling MontySolr!");
-		}
+		// just for fun do it again
+		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		PythonBridge b2 = MontySolrVM.INSTANCE.getBridge();
 		
 		assertNotSame(b, b2);
 		
 		
+		caught = false;
 		try {
 			MontySolrVM.INSTANCE.evalCommand("print sys.path + 1 "); //wrong operation
 			fail("Wrong python exec did not raise error");
 		} catch (PythonException e) {
-			// this is OK
+			caught = true;	// this is OK
 		}
+		assertTrue(caught);
 
+		caught = false;
 		try {
 			MontySolrVM.INSTANCE.evalCommand("print sys.path + 1 "); //wrong syntax
 			fail("Wrong python exec did not raise error");
 		} catch (PythonException e) {
-			// this is OK
+			caught = true;	// this is OK
 		}
 		
-		
+		assertTrue(caught);
 	}
 
 }

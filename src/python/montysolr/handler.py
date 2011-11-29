@@ -32,6 +32,8 @@ class Handler(object):
         target = self.get_target(message)
         if target:
             target(message)
+        else:
+            raise Exception("unknown target")
 
 
     def get_target(self, message):

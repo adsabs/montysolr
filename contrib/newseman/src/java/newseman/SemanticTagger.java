@@ -5,6 +5,8 @@ import invenio.montysolr.jni.PythonMessage;
 
 import java.io.IOException;
 
+import org.apache.jcc.PythonException;
+
 public class SemanticTagger {
 	
 	private String url = null;
@@ -33,7 +35,7 @@ public class SemanticTagger {
 	 * 		the name should be always unique)
 	 * @throws InterruptedException
 	 */
-	public void createTagger(String url, String name) throws InterruptedException {
+	public void createTagger(String url, String name) {
 		
 		PythonMessage message = MontySolrVM.INSTANCE
 			.createMessage("initialize_seman")
@@ -66,7 +68,7 @@ public class SemanticTagger {
 	 * @return
 	 * @throws IOException
 	 */
-	public String[][] translateTokens(String[][] tokens) throws IOException {
+	public String[][] translateTokens(String[][] tokens) throws NullPointerException {
 
 		PythonMessage message = MontySolrVM.INSTANCE
 				.createMessage("translate_tokens")
@@ -74,12 +76,7 @@ public class SemanticTagger {
 				.setParam("url", this.name)
 				.setParam("tokens", tokens);
 		
-		try {
-			MontySolrVM.INSTANCE.sendMessage(message);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			throw new IOException("Error calling MontySolr!");
-		}
+		MontySolrVM.INSTANCE.sendMessage(message);
 
 		Object results = message.getResults();
 		if (results != null) {
@@ -87,7 +84,7 @@ public class SemanticTagger {
 			return translatedTokens;
 		}
 		else {
-			throw new IOException("Wrong return type null");
+			throw new NullPointerException("Wrong return type null");
 		}
 	}
 

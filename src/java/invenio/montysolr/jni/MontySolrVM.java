@@ -2,6 +2,8 @@ package invenio.montysolr.jni;
 
 import org.apache.jcc.PythonException;
 import org.apache.jcc.PythonVM;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -58,6 +60,14 @@ import java.util.concurrent.Semaphore;
  *  
  *  <p>
  *  
+ *  <b>Exception handling</b>
+ *  
+ *  <p>
+ *  
+ *  The Python can raise Exceptions - unless they are of the type SystemException (and not 
+ *  recoverable) they will be wrapped into {@link PythonException}. However, this is an
+ *  unchecked exception! So you must decide yourself whether you catch it
+ *  
  *  <b>{@code montysolr.max_workers}</b>
  *  
  *  <p>
@@ -104,12 +114,13 @@ import java.util.concurrent.Semaphore;
 public enum MontySolrVM {
 	INSTANCE;
 	
+	public static final Logger log = LoggerFactory.getLogger(MontySolrVM.class);
 	private PythonVM vm = null;
+	private int interrupted = 0;
+	private int workers = (System.getProperty("montysolr.max_workers") != null 
+			? new Integer(System.getProperty("montysolr.max_workers")): 1);
 	
-	private Semaphore semaphore = 
-		new Semaphore((System.getProperty("montysolr.max_workers") != null 
-				? new Integer(System.getProperty("montysolr.max_workers")) 
-				: 1), true);
+	private Semaphore semaphore = new Semaphore(workers, true);
 	
 	/**
 	 * This method must be called from the main thread before the Solr init.
@@ -163,14 +174,26 @@ public enum MontySolrVM {
     /**
      * Passes the message over to the remote site, this method is just a factory
      * the passing is done by the Bridge itself
-     * @throws InterruptedException 
+     * 
+     * The underlying Python process is throwing unchecked {@link PythonException}
      */
     
-    public void sendMessage(PythonMessage message) throws InterruptedException {
+    public void sendMessage(PythonMessage message) {
     	PythonBridge b = getBridge();
     	try {
 			semaphore.acquire();
 			b.sendMessage(message);
+    	}
+    	catch (InterruptedException e) {
+    		interrupted++;
+    		if (interrupted > workers) {
+    			log.error(e.getMessage());
+    			log.error("Warning, the thread calling the Python process was interrupted." +
+  					  "If you use multiprocessing on the Python side, this may result in " +
+  					  "memory leaks (the process is not instantly terminated by Java;" +
+  					  " is garbage collected by Python after it finished though)");
+    			log.error("Total number of interrupts so far: " + interrupted);
+    		}
     	} finally {
     		semaphore.release();
     	}
@@ -180,9 +203,8 @@ public enum MontySolrVM {
     /**
      * Passed the python command directly to the handler
      * @param pythonString
-     * @throws InterruptedException
      */
-    public void evalCommand(String pythonString) throws InterruptedException {
+    public void evalCommand(String pythonString) {
     	PythonBridge b = getBridge();
     	try {
 			semaphore.acquire();
@@ -191,12 +213,21 @@ public enum MontySolrVM {
 			// in the trunk yet
 			//int val = vm.eval(pythonString);
 			//System.out.println("exec(" + pythonString + ") = " + val);
+    	}
+		catch (InterruptedException e) {
+	    		interrupted++;
+	    		if (interrupted > workers) {
+	    			log.error(e.getMessage());
+	    			log.error("Warning, the thread calling the Python process was interrupted." +
+	    					  "If you use multiprocessing on the Python side, this may result in " +
+	    					  "memory leaks (the process is not instantly terminated by Java;" +
+	    					  " is garbage collected by Python after it finished though)");
+	    			log.error("Total number of interrupts so far: " + interrupted);
+	    		}
     	} finally {
     		semaphore.release();
     	}
     }
-    
-	
 
 }
 

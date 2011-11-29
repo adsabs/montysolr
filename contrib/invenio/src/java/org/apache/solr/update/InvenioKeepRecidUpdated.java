@@ -54,7 +54,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 
 	@Override
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
-			throws Exception {
+			 {
 
 		if (isBusy()) {
 			rsp.add("message",

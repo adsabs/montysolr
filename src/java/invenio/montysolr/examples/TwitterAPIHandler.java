@@ -11,7 +11,7 @@ import org.apache.solr.response.SolrQueryResponse;
 public class TwitterAPIHandler extends RequestHandlerBase{
 
 	  @Override
-	  public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws Exception
+	  public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
 	  {
 
 	    long start = System.currentTimeMillis();

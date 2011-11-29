@@ -97,7 +97,7 @@ public class CitationQuery extends Query {
 		}
 	}
 
-	public Map<Integer, int[]> getDictCache(String dictname) throws IOException, InterruptedException {
+	public Map<Integer, int[]> getDictCache(String dictname) {
 
 
 		Map<Integer, int[]> cache = DictionaryCache.INSTANCE.getCache(dictname);

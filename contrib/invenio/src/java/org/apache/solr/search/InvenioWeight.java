@@ -73,19 +73,15 @@ public class InvenioWeight extends Weight {
 				}
 			}
 
-			private void searchInvenio() throws IOException {
+			private void searchInvenio() {
 				// ask Invenio to give us recids
 				String qval = query.getInvenioQuery();
 
 				PythonMessage message = MontySolrVM.INSTANCE
 						.createMessage("perform_request_search_ints")
 						.setSender("InvenioQuery").setParam("query", qval);
-				try {
-					MontySolrVM.INSTANCE.sendMessage(message);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					throw new IOException("Error searching Invenio!");
-				}
+				
+				MontySolrVM.INSTANCE.sendMessage(message);
 
 				Object result = message.getResults();
 				if (result != null) {

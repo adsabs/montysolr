@@ -25,9 +25,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.FlagsAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PayloadAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import newseman.SemanticTaggerTokenFilter.TokenState;
@@ -57,21 +61,29 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	public static final String SEM_TOKEN_TYPE = "SEM";
 	public static final String POS_TOKEN_TYPE = "POS";
 
+	protected SemanticTagger semanTagger = null; // Seman wrapper
+	protected int maxBuffer = 4096; // # of tokens we send to Seman in one go
+	protected String valueSeparator = "|";
+	private List<TokenState> enhancedTokens = null;
+	private Iterator<TokenState> etIterator = null;
+
+	
+	private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
+	private final FlagsAttribute flagsAtt = addAttribute(FlagsAttribute.class);
+	private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
+	private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+	private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
+	private final PayloadAttribute payloadAtt = addAttribute(PayloadAttribute.class);
+	private final SemanticTagAttribute semAtt = addAttribute(SemanticTagAttribute.class);
+
+	
 	private String[] stack = null;
 	private int index = 0;
 	private AttributeSource.State current = null;
 	private int todo = 0;
-
-	private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
-	private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
-	private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
-	private final SemanticTagAttribute semAtt = addAttribute(SemanticTagAttribute.class);
-
-	protected SemanticTagger seman = null; // Seman wrapper
-	protected int maxBuffer = 4096; // # of tokens we send to Seman in one go
-	private List<TokenState> enhancedTokens = null;
-	private Iterator<TokenState> etIterator = null;
-
+	
+	private AttributeSource wrapper = null;
+	
 	/**
 	 * Creates an instance for the given underlying stream and synonym table.
 	 * 
@@ -88,14 +100,21 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 			throw new IllegalArgumentException("input must not be null");
 		if (seman == null)
 			throw new IllegalArgumentException("seman must not be null");
-		this.seman = seman;
+		this.semanTagger = seman;
+		
+		if (wrapper == null) {
+			wrapper = new AttributeSource();
+			//wrapper = input.cloneAttributes();
+			wrapper.addAttribute(CharTermAttribute.class);
+			wrapper.addAttribute(FlagsAttribute.class);
+			wrapper.addAttribute(OffsetAttribute.class);
+			wrapper.addAttribute(TypeAttribute.class);
+			wrapper.addAttribute(PositionIncrementAttribute.class);
+			wrapper.addAttribute(SemanticTagAttribute.class);
+			wrapper.addAttribute(PayloadAttribute.class);
+		}
 	}
 	
-	public SemanticTaggerTokenFilter(TokenStream input) {
-		super(input);
-		if (input == null)
-			throw new IllegalArgumentException("input must not be null");
-	}
 
 	/** Returns the next token in the stream, or null at EOS. */
 	@Override
@@ -143,76 +162,174 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	
 	
 	public String[][] getTranslations(String[][] tokens) throws IOException {
-		return seman.translateTokenCollection(tokens);
+		return semanTagger.translateTokens(tokens);
 	}
 
+	
+	/**
+	 * Gets the buffer of tokens (enhanced/translated) from SEMAN
+	 * 
+	 * @return List<TokenState> collection of token ids, and token
+	 * 		states
+	 * @throws IOException
+	 */
 	private List<TokenState> advanceInputTokenStream() throws IOException {
-		Map<String, Integer> mapping= new HashMap<String, Integer>(maxBuffer);
+		
+		Map<String, Integer> id2state= new HashMap<String, Integer>(maxBuffer);
 		List<TokenState> tokens = new ArrayList<TokenState>(maxBuffer);
-		String[][] passedTokens = new String[maxBuffer][];
-		//ArrayList<String[]>passedTokens = new ArrayList<String[]>(maxBuffer);
+		String[][] passedTokens = new String[maxBuffer+1][];
 
 		
-		// first collect the tokens
+		// first collect the tokens (we are passing in an array)
 		passedTokens[0] = new String[]{"token", "id"}; // header
 		int i = 0;
 	    do {
 	    	TokenState s = new TokenState(input.captureState());
-	    	String id = Integer.toString(input.hashCode());
-	    	mapping.put(id, i);
+	    	String tid = Integer.toString(input.hashCode());
+	    	id2state.put(tid, i);
 	    	tokens.add(s);
-	    	String[] token = {termAtt.toString(), id};
+	    	String[] token = {termAtt.toString(), tid};
 	    	passedTokens[i] = token;
-	    	//passedTokens.add(token);
 	    	i++;
 	    } while (input.incrementToken() && i < maxBuffer);
 	    
-	    String[][] results = getTranslations(passedTokens);
 	    
-	    String[] header = results[0];
-		Integer sem_idx = null;
-		Integer extra_sem_idx = null;
-		Integer extra_surface_idx =  null;
+	    // correct the size, remove the null tokens
+	    if (i < maxBuffer) {
+	    	String[][] t = new String[i+1][];
+	    	int j = 0;
+	    	for (String[] s: passedTokens) {
+	    		t[j] = s;
+	    		j++;
+	    	}
+	    	passedTokens = t;
+	    }
+	    
+	    
+	    String[][] translated;
+		// translate tokens
+	    if (passedTokens.length > 0) {
+	    	translated = getTranslations(passedTokens);
+	    }
+	    else {
+	    	return null;
+	    }
+	    
+	    
+	    // get the col ids of the data we seek
+	    String[] header = translated[0];
+		int sem_idx = 0;
+		int multi_sem_idx = 0;
+		int synonyms_idx = 0;
+		int multi_synonyms_idx = 0;
+		int pos_idx = 0;
 	    for (int j=2;j<header.length;j++) {
 	    	String h = header[j];
-	    	if (h.equals("sem")) {
+	    	if (h.equals("sem")) { // semantic code of this token (or multi-token if we used rewrite)
 	    		sem_idx = j;
 	    	}
-	    	else if(h.equals("extrasem")) {
-	    		extra_sem_idx = j;
+	    	else if(h.equals("multi-sem")) { // semantic code of multigroup (if we used "add" operation)
+	    		multi_sem_idx = j;
 	    	}
-	    	else if(h.equals("extrasurface")) {
-	    		extra_surface_idx = j;
+	    	else if(h.equals("synonyms")) { // synonyms of the token (or multi-token if we used rewrite)
+	    		synonyms_idx = j;
+	    	}
+	    	else if(h.equals("multi-synonyms")) { // synonyms for the multi-sem group
+	    		multi_synonyms_idx = j;
+	    	}
+	    	else if(h.equals("POS")) { // part-of-speech tag
+	    		pos_idx = j;
 	    	}
 	    }
 	    
-	    for (String[] r: results) {
-	    	if (r==null) break;
+	    
+	    // enhance tokens, build return structure, results may also be reordered or 
+	    // contain completely new tokens (and some tokens might be missing)
+	    List<TokenState> results = new ArrayList<TokenState>(translated.length - 1);
+	    String[] r = null;
+	    TokenState token = null;
+	    String id = null;
+	    String[] semes;
+	    for (int k=1;k<translated.length;k++) {
+	    	r = translated[k];
+	    	id = r[1];
+	    	if (id2state.containsKey(id)) {
+    			token = tokens.get(id2state.get(id));
+    		}
+    		else {
+    			token = createNewTokenState(r, token);
+    			//throw new IOException("SEMAN created a new token which is not in TokenStream");
+    		}
 	    	
-	    	String id = r[1];
-	    	if (r.length > extra_sem_idx) { // multi-token seme
-	    		String[] semes = r[extra_sem_idx].split(" ");
-	    		// TODO: create a new state
-	    		TokenState token = tokens.get(mapping.get(id));
-	    		token.setOtherName(r[extra_surface_idx]);
-	    		tokens.add(token);
-	    	}
-	    	else if (r.length > sem_idx) {
-	    		String[] semes = r[sem_idx].split(" ");
-	    		if (mapping.containsKey(id)) {
-	    			TokenState token = tokens.get(mapping.get(id));
-	    			token.setSemes(semes);
-	    			tokens.add(token);
+	    	for (int c=2;c<r.length;c++) {
+	    		if (c == sem_idx && r[sem_idx] != null) {
+	    			semes = r[sem_idx].split(valueSeparator);
+		    		token.setSemes(semes);
 	    		}
-	    		else {
-	    			throw new IOException("SEMAN created a new token which is not in TokenStream");
-	    		}
+	    		else if (c == synonyms_idx && r[synonyms_idx] != null) {
+		    		token.setSynonyms(r[synonyms_idx].split(valueSeparator));
+		    	}
+	    		else if (c == multi_sem_idx && r[multi_sem_idx] != null) {
+		    		token.setOtherSemes(r[multi_sem_idx].split(valueSeparator));
+		    	}
+	    		else if (c == multi_synonyms_idx && r[multi_synonyms_idx] != null) {
+		    		token.setOtherSemes(r[multi_synonyms_idx].split(valueSeparator));
+		    	}
+	    		// TODO: add POS attribute?
+		    	/*
+		    	if (r.length > pos_idx && r[pos_idx] != null) {
+		    		token.setSynonyms(r[pos_idx].split(valueSeparator));
+		    	}
+		    	*/
+	    		// HERE can be generic key/value implementation, but do we want?
 	    	}
+	    	
+	    	results.add(token);
 	    }
 	    
-	    return tokens;
+	    return results;
 	}
-
+	
+	
+	/**
+	 * TODO: should we change the underlying offset parameters? Probably not, as the input
+	 * source is a different thing. But should we set differetn offset for multigroup
+	 * tokens?
+	 * 
+	 * @param data
+	 * @param previousToken
+	 * @return
+	 */
+	private TokenState createNewTokenState(String[] data, 
+			TokenState previousToken) {
+		
+		String token = data[0];
+		
+		wrapper.clearAttributes();
+		
+		int incr;
+		int startOffset;
+		int endOffset;
+		
+		if (previousToken == null) {
+			incr = 1;
+			startOffset = 0;
+			endOffset = 0;
+		}
+		else {
+			wrapper.restoreState(previousToken.getState());
+			incr = wrapper.getAttribute(PositionIncrementAttribute.class).getPositionIncrement();
+			startOffset = wrapper.getAttribute(OffsetAttribute.class).startOffset();
+			endOffset = wrapper.getAttribute(OffsetAttribute.class).endOffset();
+		}
+		
+		wrapper.getAttribute(CharTermAttribute.class).setEmpty().append(token);
+		wrapper.getAttribute(OffsetAttribute.class).setOffset(startOffset, endOffset);
+		wrapper.getAttribute(PositionIncrementAttribute.class).setPositionIncrement(0);
+		
+		return new TokenState(wrapper.captureState());
+	}
+	
 	/**
 	 * Creates and returns a token for the given synonym of the current input
 	 * token; Override for custom (stateless or stateful) behavior, if desired.
@@ -225,6 +342,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	 *         ignored
 	 */
 	protected boolean createToken(String sem, AttributeSource.State current) {
+		clearAttributes();
 		restoreState(current);
 		termAtt.setEmpty().append(sem);
 		typeAtt.setType(SEM_TOKEN_TYPE);
@@ -247,7 +365,9 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	class TokenState {
 		State state = null;
 		String[] semes = null;
-		String otherName = null;
+		String[] otherNames = null;
+		String[] otherSemes = null;
+		String[] synonyms = null;
 		
 		TokenState(State state) {
 			this.state = state;
@@ -258,17 +378,41 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		public void setState(State state) {
 			this.state = state;
 		}
+		public boolean hasSemes() {
+			return semes != null;
+		}
 		public String[] getSemes() {
 			return this.semes;
 		}
 		public void setSemes(String[] semes) {
 			this.semes = semes;
 		}
-		public String getOtherName() {
-			return this.otherName;
+		public boolean hasOtherNames() {
+			return otherNames != null;
 		}
-		public void setOtherName(String name) {
-			this.otherName = name;
+		public String[] getOtherNames() {
+			return this.otherNames;
+		}
+		public void setOtherNames(String[] name) {
+			this.otherNames = name;
+		}
+		public boolean hasOtherSemes() {
+			return otherSemes != null;
+		}
+		public String[] getOtherSemes() {
+			return this.otherSemes;
+		}
+		public void setOtherSemes(String[] semes) {
+			this.otherSemes = semes;
+		}
+		public boolean hasSynonyms() {
+			return synonyms != null;
+		}
+		public String[] getSynonyms() {
+			return this.synonyms;
+		}
+		public void setSynonyms(String[] synonyms) {
+			this.synonyms = synonyms;
 		}
 	}
 	

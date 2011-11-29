@@ -7,12 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonBridge;
 import invenio.montysolr.jni.PythonMessage;
-
-import org.apache.jcc.PythonException;
-
-import invenio.montysolr.util.MontySolrTestCaseJ4;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 
 public class TestSemanticTagger extends MontySolrAbstractTestCase {

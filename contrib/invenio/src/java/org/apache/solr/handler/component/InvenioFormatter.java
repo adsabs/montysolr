@@ -65,7 +65,7 @@ public class InvenioFormatter extends SearchComponent
 	}
 
 	@Override
-	public void process(ResponseBuilder rb) throws IOException {
+	public void process(ResponseBuilder rb) {
 
 		if ( activated ) {
 			SolrParams params = rb.req.getParams();
@@ -99,12 +99,7 @@ public class InvenioFormatter extends SearchComponent
 				.setParam("recids", recids)
 				.setParam("kwargs", invParams);
 
-			try {
-				MontySolrVM.INSTANCE.sendMessage(message);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			MontySolrVM.INSTANCE.sendMessage(message);
 
 			Object result = message.getResults();
 			String t = (String) message.getParam("rtype");

@@ -30,23 +30,18 @@ public class PythonDiagnosticHandler extends RequestHandlerBase {
 			.getLogger(PythonDiagnosticHandler.class);
 
 
-	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
-			throws Exception {
+	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws IOException
+			 {
 		SolrParams params = req.getParams();
 		String q = params.get(CommonParams.Q);
 
 		log.info("======= start diagnostics =======");
-
+		
 		PythonMessage message = MontySolrVM.INSTANCE
 			.createMessage("diagnostic_test")
 			.setParam("query", q);
 
-		try {
-			MontySolrVM.INSTANCE.sendMessage(message);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			throw new IOException("Error searching Invenio!");
-		}
+		MontySolrVM.INSTANCE.sendMessage(message);
 
 		Object result = message.getResults();
 		if (result != null) {
@@ -82,8 +77,7 @@ public class PythonDiagnosticHandler extends RequestHandlerBase {
 			for (int i=0; i<queries.length; i++) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				PrintStream ps = new PrintStream(baos);
-	
-	
+				
 				try {
 					qu = queries[i];
 					ModifiableSolrParams new_params = new ModifiableSolrParams(req.getParams());
@@ -105,7 +99,7 @@ public class PythonDiagnosticHandler extends RequestHandlerBase {
 	
 					try {
 						MontySolrVM.INSTANCE.sendMessage(message);
-					} catch (InterruptedException e) {
+					} catch (RuntimeException e) {
 						e.printStackTrace(ps);
 						r1 += baos.toString();
 						log.error(baos.toString());
