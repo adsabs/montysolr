@@ -65,8 +65,7 @@ public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestC
 
 
 	public void testSemanticTokenFilter() throws IOException {
-		String text = "velká světová revoluce byla velká říjnová revoluce protože s velkou říjnovou revolucí " +
-        "a bez velké říjnové revoluce a ještě velká říjnová revoluce socialistická komunistická " +
+		String text = "velká světová revoluce byla velká říjnová revoluce " +
         "s velkou extra říjnovou revolucí";
     
 	
