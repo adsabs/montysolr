@@ -182,15 +182,15 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		
 		// first collect the tokens (we are passing in an array)
 		passedTokens[0] = new String[]{"token", "id"}; // header
-		int i = 1;
+		int i = 0;
 	    do {
 	    	TokenState s = new TokenState(input.captureState());
 	    	String tid = Integer.toString(input.hashCode());
 	    	id2state.put(tid, i);
+	    	i++;
 	    	tokens.add(s);
 	    	String[] token = {termAtt.toString(), tid};
 	    	passedTokens[i] = token;
-	    	i++;
 	    } while (input.incrementToken() && i < maxBuffer);
 	    
 	    
