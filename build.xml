@@ -124,7 +124,7 @@
       ==================================================================
       -->
 
-	<target name="compile-test" depends="common.compile-test" />
+	<target name="compile-test" depends="compile,common.compile-test" />
 
 	<target name="config" depends="init">
 		<property name="my.montysolr.jar" value="${jar.dir}/${jar.suffix}" />

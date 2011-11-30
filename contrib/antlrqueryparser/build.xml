@@ -190,4 +190,8 @@
 			<arg value="${aqp.parser.dir}/${aqp.grammar}.gunit"/>
 		</java>
 	</target>
+	
+	<target name="test" depends="default" >
+		<antcall target="common.test" />
+	</target>
 </project>

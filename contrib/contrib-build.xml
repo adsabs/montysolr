@@ -54,13 +54,13 @@
 	</path>
 
 
-	<target name="build-lucene" unless="core.compiled">
+	<target name="build-montysolr" unless="core.compiled">
 		<ant dir="${common.dir}" target="compile-test" inheritAll="false"/>
 		<!-- set the property for this ant execution to speed up later tasks depending on this -->
 		<property name="core.compiled" value="true"/>
 	</target>
 
-	<target name="init" depends="common.init,build-lucene"/>
+	<target name="init" depends="common.init,build-montysolr"/>
 	<target name="compile-test" depends="init" if="contrib.has.tests">
 		<antcall target="common.compile-test" inheritRefs="true" />
 	</target>
