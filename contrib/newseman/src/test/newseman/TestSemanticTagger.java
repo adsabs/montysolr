@@ -58,16 +58,19 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 		List<String> header = Arrays.asList(results[0]);
 		int idx_sem = header.indexOf("sem");
 		int idx_grp_sem = header.indexOf("multi-sem");
-		int idx_grp = header.indexOf("multi-token");
+		int idx_grp = header.indexOf("multi-synonyms");
 		
 		ArrayList<String> sem = new ArrayList<String>();
 		ArrayList<String> grp = new ArrayList<String>();
 		ArrayList<String> grs = new ArrayList<String>();
 		
 		for (String[] row: results) {
-			sem.add(row[idx_sem]);
-			grp.add(row[idx_grp]);
-			grs.add(row[idx_grp_sem]);
+			if (idx_sem > 0 && row.length > idx_sem)
+				sem.add(row[idx_sem]);
+			if (idx_grp > 0 && row.length > idx_grp)
+				grp.add(row[idx_grp]);
+			if (idx_grp_sem > 0 && row.length > idx_grp_sem)
+				grs.add(row[idx_grp_sem]);
 		}
 		
 		out.add(0, sem);
@@ -84,6 +87,8 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 		MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.append(\'" 
 				+ this.getMontySolrHome() + "/contrib/newseman/src/python\')");
 		
+		MontySolrVM.INSTANCE.evalCommand("self._handler.discover_targets([" 
+				+ "\'monty_newseman.targets\', \'monty_newseman.tests.targets\'])");
 		
 		SemanticTagger tagger = new SemanticTagger(this.url);
 		
@@ -91,14 +96,16 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage(
 				"fill_newseman_dictionary")
 				.setParam("url", tagger.getName());
+		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		// configure for fuzzy parsing
 		message = MontySolrVM.INSTANCE.createMessage("configure_seman")
 	        .setParam("url", tagger.getName())
 	        .setParam("language", "czech")
-	        .setParam("max_distance", 1)
+	        .setParam("max_distance", 2)
 	        .setParam("grp_action", "add")
 	        .setParam("grp_cleaning", "purge");
+		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		String text = "velká světová revoluce byla velká říjnová revoluce protože s velkou říjnovou revolucí " +
 	        "a bez velké říjnové revoluce a ještě velká říjnová revoluce socialistická komunistická " +

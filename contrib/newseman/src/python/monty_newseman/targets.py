@@ -73,6 +73,8 @@ def configure_seman(message):
         callbacks
         @param url: url or name of the existing instance
         
+        @param language: language to set 
+        
         @group fuzzy matching:
             Activates the discovery of multi-token groups
             even if they were separated by several other
@@ -91,6 +93,9 @@ def configure_seman(message):
     
     if seman is None:
         raise Exception('Seman is not initialized!')
+    
+    if message.getParam("language"):
+        seman.setPersistentParameter("language", str(message.getParam("language")))
     
     if message.getParam('grp_action'):
         action = str(message.getParam('grp_action'))
@@ -133,10 +138,9 @@ def translate_tokens(message):
         # descr of outgoing data
         ret_keys = header[:]
         ret_keys.append("sem")
-        ret_keys.append("synonyms") # not implemented yet
         ret_keys.append("multi-sem") # the sem of the group
         ret_keys.append("multi-synonyms") #when a group is identified, its canonical form
-        
+        ret_keys.append("synonyms") # not implemented yet        
             
         j = 1 # skip header
         l = len(tokens)
@@ -149,7 +153,7 @@ def translate_tokens(message):
             j += 1
     
         # get seman
-        url = message.getParam("url")
+        url = str(message.getParam("url") or '')
         if url:
             seman = Cacher.get_seman(url)
         else:
@@ -179,29 +183,35 @@ def translate_tokens(message):
         idx_sem = ret_keys.index("sem")
         idx_grp = ret_keys.index("multi-synonyms")
         idx_grp_sem = ret_keys.index("multi-sem")
+        ret_arr = [None] * len(ret_keys) # care must be taken to place vals into correct place
         while i < final_len:
+            max_col = 1
             token = tc[i]
-            t = []
-            t.append(token.getFeature(tokenfeature_orig))
+            t = ret_arr[:]
+            t[0] = token.getFeature(tokenfeature_orig)
             
             for ii in range(1, len(header)): # take out the old values
                 val = token.getFeature(header[ii])
                 if isinstance(val, list):
-                    t.append(val[0])  # merged values, eg id=[14,15]
+                    t[ii] = val[0]  # merged values, eg id=[14,15]
                 else:
-                    t.append(val)
-                
+                    t[ii] = val
+                max_col = ii
+            
             sem = token.getFeature(tokenfeature_sem)
             if sem:
-                t.insert(idx_sem, isinstance(sem, list) and ' '.join(sem) or sem)
+                t[idx_sem] = isinstance(sem, list) and ' '.join(sem) or sem
+                max_col = max(idx_sem,max_col)
+                
             
             esem = token.getFeature(tokenfeature_extrasem)
             if esem:
                 etoken = token.getFeature(tokenfeature_extrasurface)
-                t.insert(idx_grp, etoken)
-                t.insert(idx_grp_sem, isinstance(esem, list) and ' '.join(esem) or esem)
-            
-            final_results[r] = JArray_string(t)
+                t[idx_grp] = etoken
+                t[idx_grp_sem] = isinstance(esem, list) and ' '.join(esem) or esem
+                max_col = max(idx_grp, idx_grp_sem)
+                
+            final_results[r] = JArray_string(t[:max_col+1]) # we want to limit amount of data sent
             i += 1
             r += 1
         
@@ -213,6 +223,8 @@ def translate_tokens(message):
 
 
 def montysolr_targets():
-    return make_targets(initialize_seman=initialize_seman,
+    return make_targets("newseman.SemanticTagger:translate_tokens", translate_tokens,
+                        "newseman.SemanticTagger:initialize_seman", initialize_seman,
+                        initialize_seman=initialize_seman,
                         translate_tokens=translate_tokens,
                         configure_seman=configure_seman)

@@ -29,7 +29,11 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
 
 import newseman.SemanticTaggerTokenFilter;
-import newseman.TestSemanticTaggerTokenFilter.TestFilter;
+import newseman.SemanticTagger;
+import newseman.MontySolrBaseTokenStreamTestCase;
+
+import invenio.montysolr.jni.MontySolrVM;
+import invenio.montysolr.jni.PythonMessage;
 
 import java.io.StringReader;
 import java.io.IOException;
@@ -40,20 +44,35 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
-public class TestSemanticTaggerTokenFilter extends BaseTokenStreamTestCase {
+public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestCase {
 	
+	private String url;
+	private SemanticTagger tagger;
 
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+		url = "sqlite:///:memory:";
+		tagger = new SemanticTagger(url);
+		
+		MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.append(\'" 
+				+ this.getMontySolrHome() + "/contrib/newseman/src/python\')");
+		
+		
+		SemanticTagger tagger = new SemanticTagger(this.url);
+		
+		// fill the db with test data
+		PythonMessage message = MontySolrVM.INSTANCE.createMessage(
+				"fill_newseman_dictionary")
+				.setParam("url", tagger.getName());
 	}
 
 
 	public void testSemanticTokenFilter() throws IOException {
 		StringReader reader = new StringReader(
 				"This is a test of the english stop keyword analyzer");
-		TestFilterSemantic stream = 
-			new TestFilterSemantic(
+		SemanticTaggerTokenFilter stream = 
+			new SemanticTaggerTokenFilter(
 				new StopFilter( Version.LUCENE_31,
 					new StandardTokenizer(Version.LUCENE_31, reader),
 					new HashSet(Arrays.asList(new String[] {"stop", "the"}))
@@ -77,33 +96,4 @@ public class TestSemanticTaggerTokenFilter extends BaseTokenStreamTestCase {
 				"This/1 is/1 a/1 test/1 of/1 the/1 english/1 keyword/1 a1/0 a2/0 a3/0 analyzer/1");
 	}
 	
-	public void testSemanticTokenFilterTranslation() throws IOException {
-		StringReader reader = new StringReader(
-				"This is the stop word plus multi tokenized group\'s phrase");
-		TestFilterSemantic stream = 
-			new TestFilterSemantic(
-				new StopFilter( Version.LUCENE_31,
-					new StandardTokenizer(Version.LUCENE_31, reader),
-					new HashSet(Arrays.asList(new String[] {"stop", "the"}))
-				)
-			);
-		
-		assertTrue(stream != null);
-		CharTermAttribute termAtt = stream
-				.getAttribute(CharTermAttribute.class);
-		PositionIncrementAttribute posIncrAtt = stream
-				.getAttribute(PositionIncrementAttribute.class);
-		SemanticTagAttribute semAtt = stream
-				.getAttribute(SemanticTagAttribute.class);
-
-		StringBuffer buf = new StringBuffer();
-		while (stream.incrementToken()) {
-			buf.append(termAtt.toString());
-			buf.append("/");
-			buf.append(posIncrAtt.getPositionIncrement());
-			buf.append(" ");
-		}
-		assertEquals(buf.toString().trim(),
-				"This/1 is/1 word/1 plus/1 s1/0 s2/0 multi/1 s3/0 s4/0 multi token group phras/0 tokenized/1 grouph/1 phrase/1");
-	}
 }

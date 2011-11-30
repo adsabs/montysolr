@@ -25,11 +25,24 @@ class MontySolrTarget(object):
         return '%s:%s' % (self._sender, self._recipient)
     
 
-def make_targets(**kwargs):
+def make_targets(*args, **kwargs):
     """Creates a list of targets, the keys are the 
     recipient names and the value the callable that
     implements them"""
     targets = []
+    assert len(args) % 2 == 0
+    i = 0
+    while i < len(args):
+        name = args[i]
+        sender = None
+        if ':' in name:
+            sender, name = name.split(':')
+        if sender:
+            targets.append(MontySolrTarget(name, args[i+1], sender=sender))
+        else:
+            targets.append(MontySolrTarget(name, args[i+1]))
+        i += 2
+        
     for k,v in kwargs.items():
         targets.append(MontySolrTarget(k, v))
     return targets

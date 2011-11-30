@@ -74,8 +74,8 @@ class Test(unittest.TestCase):
         
         header = list(J.JArray_string.cast_(results[0]))
         idx_sem = header.index("sem")
-        idx_grp = header.index("multi-token")
-        idx_grp_sem = header.index("multi-sem")
+        idx_grp = "multi-synonyms" in header and header.index("multi-synonyms") or 0
+        idx_grp_sem = "multi-sem" in header and header.index("multi-sem") or 0
         
         results = [J.JArray_string.cast_(x) for x in results]
         
@@ -128,7 +128,7 @@ class Test(unittest.TestCase):
         message = self.bridge.createMessage("configure_seman") \
             .setParam('url', self.seman_url) \
             .setParam('language', 'czech') \
-            .setParam('max_distance', 1) \
+            .setParam('max_distance', 2) \
             .setParam('grp_action', 'add') \
             .setParam('grp_cleaning', 'purge')
             
@@ -195,10 +195,10 @@ def fill_dictionary(d):
     d.addEntry(key= u"istická", language='czech', type='sem', group= u'suffix', value= u's7')
     
     #immutables
-    d.addEntry(key= u"bez", language='czech', type='sem', group= u'immutable', value= u'r0')
-    d.addEntry(key= u"protože", language='czech', type='sem', group= u'immutable', value= u'r0')
-    d.addEntry(key= u"a", language='czech', type='sem', group= u'immutable', value= u'r0')
-    d.addEntry(key= u"ještě", language='czech', type='sem', group= u'immutable', value= u'r0')
+    d.addEntry(key= u"bez", language='czech', type='sem', group= u'immutable', value= u'i0')
+    d.addEntry(key= u"protože", language='czech', type='sem', group= u'immutable', value= u'i0')
+    d.addEntry(key= u"a", language='czech', type='sem', group= u'immutable', value= u'i0')
+    d.addEntry(key= u"ještě", language='czech', type='sem', group= u'immutable', value= u'i0')
     
     #skupina slov
     d.addEntry(key= u"velk říjn revol", language='czech', type='sem', group= u'radix', value= u'XXX')

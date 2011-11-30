@@ -30,10 +30,8 @@ class Handler(object):
         '''Receives the messages, finds the target of the message
         and calls it, passing it the message instance'''
         target = self.get_target(message)
-        if target:
-            target(message)
-        else:
-            raise Exception("unknown target")
+        target(message)
+            
 
 
     def get_target(self, message):
@@ -46,7 +44,9 @@ class Handler(object):
         if message_id in self._db:
             return self._db[message_id]
         else:
-            self.log.error("Unknown target; message_id=%s" %
+            self.log.error("Unknown target; message_id=%s\nKnown targets: %s" %
+                           (message_id, self._db.keys()))
+            raise Exception("Unknown target; message_id=%s" %
                            (message_id,))
 
     def discover_targets(self, places):

@@ -15,8 +15,8 @@ public class SemanticTagger {
 	 
 	SemanticTagger(String url) {
 		this.url = url;
-		this.name = getClass().toString() + Thread.currentThread().getId();
-		
+		this.name = getClass().getCanonicalName() + Thread.currentThread().getId();
+		createTagger(this.url, this.name);
 	}
 	
 	public String getUrl() {
@@ -39,7 +39,7 @@ public class SemanticTagger {
 		
 		PythonMessage message = MontySolrVM.INSTANCE
 			.createMessage("initialize_seman")
-			.setSender(this.getClass().toString())
+			.setSender(this.getClass().getCanonicalName())
 			.setParam("url", this.url)
 			.setParam("name", this.name);
 		MontySolrVM.INSTANCE.sendMessage(message);
@@ -72,7 +72,7 @@ public class SemanticTagger {
 
 		PythonMessage message = MontySolrVM.INSTANCE
 				.createMessage("translate_tokens")
-				.setSender(this.getClass().toString())
+				.setSender(this.getClass().getCanonicalName())
 				.setParam("url", this.name)
 				.setParam("tokens", tokens);
 		
@@ -80,7 +80,11 @@ public class SemanticTagger {
 
 		Object results = message.getResults();
 		if (results != null) {
-			String[][] translatedTokens = (String[][]) results;
+			Object[] res = (Object[]) results;
+			String[][] translatedTokens = new String[res.length][];
+			for (int i=0;i<res.length;i++) {
+				translatedTokens[i] = (String[]) res[i];
+			}
 			return translatedTokens;
 		}
 		else {
