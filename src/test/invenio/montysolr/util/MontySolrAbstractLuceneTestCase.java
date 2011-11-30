@@ -41,11 +41,23 @@ public abstract class MontySolrAbstractLuceneTestCase extends LuceneTestCase {
 		return MontySolrTestCaseJ4.MONTYSOLR_HOME;
 	}
 	
-
-	public String getModuleName() throws Exception {
+	
+	/**
+	 * A fully qualified name of the python module that will be loaded
+	 * eg: package.module.ClassName
+	 * 
+	 * @return
+	 * @throws IllegalStateException
+	 */
+	public String getModuleName() throws IllegalStateException {
 		throw new IllegalStateException("You must implement this in your class!");
 	}
 	
+	/**
+	 * Folder that should be added to sys.path upon startup. It must 
+	 * exist and be a valid path (of one folder)
+	 * @return
+	 */
 	public String getModulePath() {
 		return MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr";
 	}
@@ -68,5 +80,19 @@ public abstract class MontySolrAbstractLuceneTestCase extends LuceneTestCase {
 			}
 		}
 		throw new Exception("The module.path must exist: " + getModulePath());
+	}
+	
+	
+	public void addToSysPath(String... paths) {
+		for (String path: paths) {
+			MontySolrVM.INSTANCE.evalCommand("import sys;\'" + path + "\' in sys.path or sys.path.insert(0, \'" + path + "\')");
+		}
+	}
+	
+	public void addTargetsToHandler(String... modules) {
+		for (String path: modules) {
+			// this is a quick hack, i should make the handler to have a defined place (or find some better way of adding)
+			MontySolrVM.INSTANCE.evalCommand("self._handler.discover_targets([\'" + path + "\'])");
+		}
 	}
 }

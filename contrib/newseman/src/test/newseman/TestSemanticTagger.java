@@ -16,14 +16,16 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 	
 	public void setUp() throws Exception {
 		super.setUp();
-		this.url = "sqlite:///:memory:";  
+		
+		addToSysPath(getMontySolrHome() + "/contrib/newseman/src/python");
+		addTargetsToHandler("monty_newseman.targets", "monty_newseman.tests.targets");
+		
+		this.url = "sqlite:///:memory:"; 
 	}
 
 	/**
 	   * Must return a fully qualified name of the python module to load, eg:
-	   * 
 	   * "montysolr.tests.basic"
-	   * 
 	   */
 	@Override
 	public String getModuleName() {
@@ -83,12 +85,6 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 
 	public void testFuzzyTranslation() throws IOException, InterruptedException {
 		
-		
-		MontySolrVM.INSTANCE.evalCommand("import sys;sys.path.append(\'" 
-				+ this.getMontySolrHome() + "/contrib/newseman/src/python\')");
-		
-		MontySolrVM.INSTANCE.evalCommand("self._handler.discover_targets([" 
-				+ "\'monty_newseman.targets\', \'monty_newseman.tests.targets\'])");
 		
 		SemanticTagger tagger = new SemanticTagger(this.url);
 		

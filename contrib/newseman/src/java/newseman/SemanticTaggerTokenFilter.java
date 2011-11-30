@@ -63,7 +63,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 
 	protected SemanticTagger semanTagger = null; // Seman wrapper
 	protected int maxBuffer = 4096; // # of tokens we send to Seman in one go
-	protected String valueSeparator = "|";
+	protected String valueSeparator = " ";
 	private List<TokenState> enhancedTokens = null;
 	private Iterator<TokenState> etIterator = null;
 
@@ -177,12 +177,12 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		
 		Map<String, Integer> id2state= new HashMap<String, Integer>(maxBuffer);
 		List<TokenState> tokens = new ArrayList<TokenState>(maxBuffer);
-		String[][] passedTokens = new String[maxBuffer+1][];
+		String[][] passedTokens = new String[maxBuffer][];
 
 		
 		// first collect the tokens (we are passing in an array)
 		passedTokens[0] = new String[]{"token", "id"}; // header
-		int i = 0;
+		int i = 1;
 	    do {
 	    	TokenState s = new TokenState(input.captureState());
 	    	String tid = Integer.toString(input.hashCode());
@@ -196,11 +196,9 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	    
 	    // correct the size, remove the null tokens
 	    if (i < maxBuffer) {
-	    	String[][] t = new String[i+1][];
-	    	int j = 0;
-	    	for (String[] s: passedTokens) {
-	    		t[j] = s;
-	    		j++;
+	    	String[][] t = new String[i][];
+	    	for (int j=0;j<i;j++) {
+	    		t[j] = passedTokens[j];
 	    	}
 	    	passedTokens = t;
 	    }

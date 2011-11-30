@@ -5,8 +5,22 @@ import invenio.montysolr.jni.PythonMessage;
 
 import java.io.IOException;
 
-import org.apache.jcc.PythonException;
 
+/**
+ * Wrapper for Pythonic application SEMAN. It enhances tokens with additional
+ * features such as: semantic codes, part-of-speech tags, synonyms, multi-token
+ * synonyms. It can also return the quasi-root of the word, modify the collection
+ * of tokens (add new, remove unwanted tokens etc).
+ * 
+ * The translation is called using {@link MontySolrVM}, therefore Python must
+ * be correctly initialized. Also you must make sure, that the python module
+ * <code> monty_newseman.targets </code> is on <code>sys.path</code>
+ * 
+ * @see SemanticTaggerTokenFilter
+ *  
+ * @author rchyla
+ *
+ */
 public class SemanticTagger {
 	
 	private String url = null;
@@ -33,18 +47,35 @@ public class SemanticTagger {
 	 * @param name - the identifier of the new database, it will be used to access the instance
 	 * 		of SEMAN (remember, you can create many instances with the same url; url is ambiguous, but
 	 * 		the name should be always unique)
-	 * @throws InterruptedException
 	 */
 	public void createTagger(String url, String name) {
 		
 		PythonMessage message = MontySolrVM.INSTANCE
 			.createMessage("initialize_seman")
 			.setSender(this.getClass().getCanonicalName())
-			.setParam("url", this.url)
-			.setParam("name", this.name);
+			.setParam("url", url)
+			.setParam("name", name);
 		MontySolrVM.INSTANCE.sendMessage(message);
 	}
 	
+	
+	public void configureTagger(String language, Integer maxDistance,
+			String groupAction, String groupCleaning ) {
+
+		PythonMessage message = MontySolrVM.INSTANCE.createMessage("configure_seman")
+	        .setParam("url", this.getName());
+		
+		if (language != null)
+	        message.setParam("language", language);
+	    if (maxDistance != null)
+	        message.setParam("max_distance", maxDistance);
+	    if (groupAction != null)
+	        message.setParam("grp_action", groupAction);
+	    if (groupCleaning != null)
+	        message.setParam("grp_cleaning", groupCleaning);
+	        
+		MontySolrVM.INSTANCE.sendMessage(message);
+	}
 	
 	/**
 	 * Receives the two-dimensional array in the form of:
