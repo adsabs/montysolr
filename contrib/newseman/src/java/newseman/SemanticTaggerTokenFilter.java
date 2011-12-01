@@ -191,13 +191,13 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	    	tokens.add(s);
 	    	String[] token = {termAtt.toString(), tid};
 	    	passedTokens[i] = token;
-	    } while (input.incrementToken() && i < maxBuffer);
+	    } while (i < maxBuffer && input.incrementToken());
 	    
 	    
 	    // correct the size, remove the null tokens
 	    if (i < maxBuffer) {
-	    	String[][] t = new String[i][];
-	    	for (int j=0;j<i;j++) {
+	    	String[][] t = new String[i+1][];
+	    	for (int j=0;j<i+1;j++) {
 	    		t[j] = passedTokens[j];
 	    	}
 	    	passedTokens = t;
@@ -255,7 +255,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
     			token = tokens.get(id2state.get(id));
     		}
     		else {
-    			token = createNewTokenState(r, token);
+    			token = createNewTokenState(r, token); //TODO: split id|id|id values
     			//throw new IOException("SEMAN created a new token which is not in TokenStream");
     		}
 	    	
