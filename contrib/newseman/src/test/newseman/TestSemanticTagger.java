@@ -4,13 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
+import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 
-public class TestSemanticTagger extends MontySolrAbstractTestCase {
+public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 	
 	private String url;
 	private SemanticTagger tagger;
@@ -41,15 +44,6 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 		return "montysolr.java_bridge.SimpleBridge";
 	}
 
-	@Override
-	public String getSchemaFile() {
-		return "schema-minimal.xml";
-	}
-
-	@Override
-	public String getSolrConfigFile() {
-		return "solrconfig-diagnostic-test.xml";
-	}
 	
 	private String[][] createTokens(String[] words) {
 		
@@ -63,41 +57,31 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 		return tokens;
 	}
 	
-	private List<List<String>> getResults(String[][] results) {
-		ArrayList<List<String>> out = new ArrayList<List<String>>();
+	private Map<String, List<String>> getResults(String[][] results) {
+		HashMap<String, List<String>> out = new HashMap<String, List<String>>();
 		
 		List<String> header = Arrays.asList(results[0]);
 		
-		int idx_token = header.indexOf("token");
-		int idx_sem = header.indexOf("sem");
-		int idx_grp_sem = header.indexOf("multi-sem");
-		int idx_grp = header.indexOf("multi-synonyms");
-		int idx_syn = header.indexOf("synonyms");
-		
-		ArrayList<String> tok = new ArrayList<String>();
-		ArrayList<String> sem = new ArrayList<String>();
-		ArrayList<String> grp = new ArrayList<String>();
-		ArrayList<String> grs = new ArrayList<String>();
-		ArrayList<String> syn = new ArrayList<String>();
-		
-		for (String[] row: results) {
-			if (idx_token > 0 && row.length > idx_token)
-				tok.add(row[idx_token]);
-			if (idx_sem > 0 && row.length > idx_sem)
-				sem.add(row[idx_sem]);
-			if (idx_grp > 0 && row.length > idx_grp)
-				grp.add(row[idx_grp]);
-			if (idx_grp_sem > 0 && row.length > idx_grp_sem)
-				grs.add(row[idx_grp_sem]);
-			if (idx_syn > 0 && row.length > idx_syn)
-				syn.add(row[idx_syn]);
+		for (String x: new String[]{"token", "id", "sem", "multi-sem", "synonyms", "multi-synonyms", "pos"}) {
+			out.put(x, new ArrayList<String>());
+		}
+		for (String x: header) {
+			if (!out.containsKey(x)) {
+				out.put(x, new ArrayList<String>());
+			}
 		}
 		
-		out.add(tok);
-		out.add(sem);
-		out.add(grp);
-		out.add(grs);
-		out.add(syn);
+		for (int r=1;r<results.length;r++) {
+			String[] row = results[r];
+			for (int i=0;i<header.size();i++) {
+				if (i < row.length) {
+					out.get(header.get(i)).add(row[i]);
+				}
+				else {
+					out.get(header.get(i)).add(null);
+				}
+			}
+		}
 		
 		return out;
 		
@@ -108,7 +92,7 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 		// configure for fuzzy parsing
 		tagger.configureTagger("czech", 2, "add", "purge");
 		
-		String text = "velká světová revoluce byla velká říjnová revoluce bez velké extra říjnové revoluce";
+		String text = "velká světová revoluce byla velká říjnová revoluce bez velké extra říjnové revoluce"; //12 tokens
 	    
 		String[] words = text.split(" ");
 		
@@ -116,21 +100,60 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 		
 		String[][] results = tagger.translateTokens(tokens);
 
-		List<List<String>> data = getResults(results);
-		
-		List<String> tok = data.get(0);
-		List<String> sms = data.get(1);
-		List<String> grp = data.get(2);
-		List<String> grs = data.get(3);
-		List<String> syn = data.get(4);
+		Map<String, List<String>> data = getResults(results);
 
-		assertTrue(Collections.frequency(sms, "XXX") == 1);
-		assertTrue(Collections.frequency(grs, "XXX") == 1);
-		assertTrue(Collections.frequency(sms, "r2") == 1);
-		assertTrue(Collections.frequency(grp, "velk říjn revol") == 1);
-		assertTrue(Collections.frequency(syn, "velká říjnová revoluce") == 1);
+		List<String> ids = data.get("id");
+		List<String> sem = data.get("sem");
+		List<String> tok = data.get("token");
+		List<String> syn = data.get("synonyms");
+		List<String> mulsyn = data.get("multi-synonyms");
+		List<String> mulsem = data.get("multi-sem");
+		
+		
+		assertTrue(tok.size() == 10);
+		assertTrue(Collections.frequency(tok, null) == 0);
+		assertTrue(Collections.frequency(sem, "XXX") == 1);
+		assertTrue(Collections.frequency(mulsem, "XXX") == 1);
+		assertTrue(Collections.frequency(sem, "r2") == 1);
+		assertTrue(Collections.frequency(mulsyn, "velk říjn revol") == 1);
+		assertTrue(tok.get(mulsyn.indexOf("velk říjn revol")).equals("velké"));
+		assertTrue(Collections.frequency(tok, "velká říjnová revoluce") == 1);
 	}
 
+
+	public void testTranslation_add_nopurge()  {
+		
+		// configure for fuzzy parsing
+		tagger.configureTagger("czech", 2, "add", null);
+		
+		String text = "velká světová revoluce byla velká říjnová revoluce bez velké extra říjnové revoluce"; //12 tokens
+	    
+		String[] words = text.split(" ");
+		
+		String[][] tokens = createTokens(words);
+		
+		String[][] results = tagger.translateTokens(tokens);
+
+		Map<String, List<String>> data = getResults(results);
+
+		List<String> ids = data.get("id");
+		List<String> sem = data.get("sem");
+		List<String> tok = data.get("token");
+		List<String> syn = data.get("synonyms");
+		List<String> mulsyn = data.get("multi-synonyms");
+		List<String> mulsem = data.get("multi-sem");
+		
+		
+		assertTrue(tok.size() == 10);
+		assertTrue(Collections.frequency(tok, null) == 0);
+		assertTrue(Collections.frequency(sem, "XXX") == 1);
+		assertTrue(Collections.frequency(mulsem, "XXX") == 1);
+		assertTrue(Collections.frequency(sem, "r2") == 2);
+		assertTrue(Collections.frequency(mulsyn, "velk říjn revol") == 1);
+		assertTrue(Collections.frequency(tok, "velká říjnová revoluce") == 1);
+	}	
+	
+	
 	public void testTranslation_rewrite_purge()  {
 		
 		// configure for fuzzy parsing
@@ -144,20 +167,23 @@ public class TestSemanticTagger extends MontySolrAbstractTestCase {
 		
 		String[][] results = tagger.translateTokens(tokens);
 
-		List<List<String>> data = getResults(results);
+		Map<String, List<String>> data = getResults(results);
 		
-		List<String> tok = data.get(0);
-		List<String> sms = data.get(1);
-		List<String> grp = data.get(2);
-		List<String> grs = data.get(3);
-		List<String> syn = data.get(4);
-
-		assertTrue(Collections.frequency(sms, "XXX") == 1);
-		assertTrue(Collections.frequency(grs, "XXX") == 1);
-		assertTrue(Collections.frequency(sms, "r2") == 1);
-		assertTrue(Collections.frequency(grp, "velk říjn revol") == 0);
-		assertTrue(Collections.frequency(syn, "velká říjnová revoluce") == 0);
-		assertTrue(Collections.frequency(tok, "velká říjnová revoluce") == 1);
+		List<String> ids = data.get("id");
+		List<String> sem = data.get("sem");
+		List<String> tok = data.get("token");
+		List<String> syn = data.get("synonyms");
+		List<String> mulsyn = data.get("multi-synonyms");
+		List<String> mulsem = data.get("multi-sem");
+		
+		
+		assertTrue(tok.size() == 10);
+		assertTrue(Collections.frequency(tok, null) == 0);
+		assertTrue(Collections.frequency(sem, "XXX") == 2);
+		assertTrue(Collections.frequency(mulsem, "XXX") == 0);
+		assertTrue(Collections.frequency(sem, "r2") == 1);
+		assertTrue(Collections.frequency(mulsyn, "velk říjn revol") == 0);
+		assertTrue(Collections.frequency(tok, "velké říjnové revoluce") == 1);
 	}
 	
 }

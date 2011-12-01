@@ -19,6 +19,7 @@ tokenfeature_radix = Surface.tokenfeature_radix
 tokenfeature_success = Surface.tokenfeature_success
 tokenfeature_extrasem = callbacks.tokenfeature_extrasem
 tokenfeature_extrasurface = callbacks.tokenfeature_extrasurface
+tokenfeature_extracanonical = callbacks.tokenfeature_extracanonical
 
 class Cacher(object):
     def __init__(self):
@@ -138,10 +139,21 @@ def translate_tokens(message):
         # descr of outgoing data
         ret_keys = header[:]
         ret_keys.append("sem")
-        ret_keys.append("multi-sem") # the sem of the group
-        ret_keys.append("multi-synonyms") #when a group is identified, its canonical form
-        ret_keys.append("synonyms") # not implemented yet        
-            
+        ret_keys.append("extra-sem") # the sem of the group
+        ret_keys.append("extra-canonical") #when a group is identified, its canonical form
+        ret_keys.append("extra-synonyms") #when a group is identified, its canonical form
+        #ret_keys.append("synonyms")
+        
+        
+        # descr of incoming features (related to outgoing data)
+        ret_features = header[:]
+        ret_features.append(tokenfeature_sem)
+        ret_features.append(tokenfeature_extrasem)
+        ret_features.append(tokenfeature_extracanonical)
+        ret_features.append(tokenfeature_extrasurface)
+        #ret_features.append(tokenfeature_synonyms)
+        
+        
         j = 1 # skip header
         l = len(tokens)
         while j < l:
@@ -181,8 +193,10 @@ def translate_tokens(message):
         i = 0
         r = 1
         idx_sem = ret_keys.index("sem")
-        idx_grp = ret_keys.index("multi-synonyms")
-        idx_grp_sem = ret_keys.index("multi-sem")
+        idx_grp_syn = ret_keys.index("extra-synonyms")
+        idx_grp_sem = ret_keys.index("extra-sem")
+        idx_grp_can = ret_keys.index("extra-canonical")
+        
         ret_arr = [None] * len(ret_keys) # care must be taken to place vals into correct place
         while i < final_len:
             max_col = 1
@@ -207,9 +221,9 @@ def translate_tokens(message):
             esem = token.getFeature(tokenfeature_extrasem)
             if esem:
                 etoken = token.getFeature(tokenfeature_extrasurface)
-                t[idx_grp] = etoken
+                t[idx_grp_syn] = etoken
                 t[idx_grp_sem] = isinstance(esem, list) and ' '.join(esem) or esem
-                max_col = max(idx_grp, idx_grp_sem)
+                max_col = max(idx_grp_syn, idx_grp_sem, idx_grp_can)
                 
             final_results[r] = JArray_string(t[:max_col+1]) # we want to limit amount of data sent
             i += 1

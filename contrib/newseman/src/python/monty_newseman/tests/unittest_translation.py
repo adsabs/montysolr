@@ -71,8 +71,25 @@ class Test(unittest.TestCase):
     def _get_results(self, results):
         
         results = J.JArray_object.cast_(results)
-        
         header = list(J.JArray_string.cast_(results[0]))
+        h = ["token", "id", "sem", "multi-sem", "synonyms", "multi-synonyms", "pos"]
+        out = {}
+        
+        for x in h:
+            out.setdefault(x, [])
+        for x in header:
+            out.setdefault(x, [])
+            
+        for i in range(1, len((results))):
+            row = list(J.JArray_string.cast_(results[i]))
+            for ii in range(len(header)):
+                key = header[ii]
+                if len(row) > ii:
+                    out[key].append(row[ii])
+                else:
+                    out[key].append(None)
+        return out
+        
         idx_sem = header.index("sem")
         idx_grp = "multi-synonyms" in header and header.index("multi-synonyms") or 0
         idx_grp_sem = "multi-sem" in header and header.index("multi-sem") or 0
@@ -109,10 +126,17 @@ class Test(unittest.TestCase):
         # this would be done on java side
         results = message.getResults()
         assert results != None
-        (sms, grp, grs) = self._get_results(results)
-        assert sms.count('XXX') == 5
-        assert grs.count('XXX') == 0
-        assert sms.count('r2') == 1 #revolution
+        
+        data = self._get_results(results)
+        sem = data['sem']
+        mulsem = data['multi-sem']
+        mulsyn = data['multi-synonyms']
+        
+        assert sem.count('XXX') == 5
+        assert mulsem.count('XXX') == 0
+        assert sem.count('r2') == 1 #revolution
+    
+    
     
     def test_translate_add_purge(self):
         
@@ -146,11 +170,17 @@ class Test(unittest.TestCase):
         # this would be done on java side
         results = message.getResults()
         assert results != None
-        (sms, grp, grs) = self._get_results(results)
-        assert sms.count('XXX') == 4
-        assert grs.count('XXX') == 1
-        assert grp.count('velk říjn revol') == 1
-        assert sms.count('r2') == 1 #revolution
+        
+        data = self._get_results(results)
+        sem = data['sem']
+        mulsem = data['multi-sem']
+        mulsyn = data['multi-synonyms']
+        
+        
+        assert sem.count('XXX') == 4
+        assert mulsem.count('XXX') == 1
+        assert mulsyn.count('velk říjn revol') == 1
+        assert sem.count('r2') == 1 #revolution
         
         
         # add extra word which makes the distance too big
@@ -165,11 +195,43 @@ class Test(unittest.TestCase):
         
         
         results = message.getResults()
-        (sms, grp, grs) = self._get_results(results)
-        assert sms.count('XXX') == 4
-        assert grs.count('XXX') == 0
-        assert grp.count('velk říjn revol') == 0
-        assert sms.count('r2') == 2 #revolution
+        data = self._get_results(results)
+        sem = data['sem']
+        mulsem = data['multi-sem']
+        mulsyn = data['multi-synonyms']
+        
+        assert sem.count('XXX') == 4
+        assert mulsyn.count('XXX') == 0
+        assert mulsyn.count('velk říjn revol') == 0
+        assert sem.count('r2') == 2 #revolution
+        
+        
+        
+        
+        words = 'velká světová revoluce byla velká říjnová revoluce bez velké extra říjnové revoluce'.split()
+        
+        message = self.bridge.createMessage("translate_tokens")
+        message.setParam("tokens", self._create_array(words))
+        self.bridge.sendMessage(message)
+        
+        
+        results = message.getResults()
+        data = self._get_results(results)
+        sem = data['sem']
+        token = data['token']
+        ids = data['id']
+        mulsem = data['multi-sem']
+        mulsyn = data['multi-synonyms']
+        
+        assert len(ids) == len(set(ids))
+        assert token.count('extra') == 1
+        assert sem.count('XXX') == 1
+        assert mulsem.count('XXX') == 1
+        assert sem.count('r2') == 1
+        assert ' '.join(token) == ' '.join(words)
+        assert '.'.join(token) != '.'.join(words)
+
+
 
 def fill_dictionary(d):
     #radixes
