@@ -62,7 +62,7 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 		
 		List<String> header = Arrays.asList(results[0]);
 		
-		for (String x: new String[]{"token", "id", "sem", "multi-sem", "synonyms", "multi-synonyms", "pos"}) {
+		for (String x: new String[]{"token", "id", "sem", "extra-sem", "synonyms", "extra-synonyms", "pos"}) {
 			out.put(x, new ArrayList<String>());
 		}
 		for (String x: header) {
@@ -106,8 +106,9 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 		List<String> sem = data.get("sem");
 		List<String> tok = data.get("token");
 		List<String> syn = data.get("synonyms");
-		List<String> mulsyn = data.get("multi-synonyms");
-		List<String> mulsem = data.get("multi-sem");
+		List<String> mulsyn = data.get("extra-synonyms");
+		List<String> mulcan = data.get("extra-canonical");
+		List<String> mulsem = data.get("extra-sem");
 		
 		
 		assertTrue(tok.size() == 10);
@@ -115,8 +116,9 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 		assertTrue(Collections.frequency(sem, "XXX") == 1);
 		assertTrue(Collections.frequency(mulsem, "XXX") == 1);
 		assertTrue(Collections.frequency(sem, "r2") == 1);
-		assertTrue(Collections.frequency(mulsyn, "velk říjn revol") == 1);
-		assertTrue(tok.get(mulsyn.indexOf("velk říjn revol")).equals("velké"));
+		assertTrue(Collections.frequency(mulcan, "velk říjn revol") == 1);
+		assertTrue(Collections.frequency(mulsyn, "velké říjnové revoluce") == 1);
+		assertTrue(tok.get(mulcan.indexOf("velk říjn revol")).equals("velké"));
 		assertTrue(Collections.frequency(tok, "velká říjnová revoluce") == 1);
 	}
 
@@ -140,8 +142,9 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 		List<String> sem = data.get("sem");
 		List<String> tok = data.get("token");
 		List<String> syn = data.get("synonyms");
-		List<String> mulsyn = data.get("multi-synonyms");
-		List<String> mulsem = data.get("multi-sem");
+		List<String> mulsyn = data.get("extra-synonyms");
+		List<String> mulsem = data.get("extra-sem");
+		List<String> mulcan = data.get("extra-canonical");
 		
 		
 		assertTrue(tok.size() == 10);
@@ -149,7 +152,8 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 		assertTrue(Collections.frequency(sem, "XXX") == 1);
 		assertTrue(Collections.frequency(mulsem, "XXX") == 1);
 		assertTrue(Collections.frequency(sem, "r2") == 2);
-		assertTrue(Collections.frequency(mulsyn, "velk říjn revol") == 1);
+		assertTrue(Collections.frequency(mulcan, "velk říjn revol") == 1);
+		assertTrue(Collections.frequency(mulsyn, "velké říjnové revoluce") == 1);
 		assertTrue(Collections.frequency(tok, "velká říjnová revoluce") == 1);
 	}	
 	
@@ -173,8 +177,8 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 		List<String> sem = data.get("sem");
 		List<String> tok = data.get("token");
 		List<String> syn = data.get("synonyms");
-		List<String> mulsyn = data.get("multi-synonyms");
-		List<String> mulsem = data.get("multi-sem");
+		List<String> mulsyn = data.get("extra-synonyms");
+		List<String> mulsem = data.get("extra-sem");
 		
 		
 		assertTrue(tok.size() == 10);

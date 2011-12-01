@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
         
         results = J.JArray_object.cast_(results)
         header = list(J.JArray_string.cast_(results[0]))
-        h = ["token", "id", "sem", "multi-sem", "synonyms", "multi-synonyms", "pos"]
+        h = ["token", "id", "sem", "extra-sem", "synonyms", "extra-synonyms", "pos", "extra-canonical"]
         out = {}
         
         for x in h:
@@ -90,17 +90,6 @@ class Test(unittest.TestCase):
                     out[key].append(None)
         return out
         
-        idx_sem = header.index("sem")
-        idx_grp = "multi-synonyms" in header and header.index("multi-synonyms") or 0
-        idx_grp_sem = "multi-sem" in header and header.index("multi-sem") or 0
-        
-        results = [J.JArray_string.cast_(x) for x in results]
-        
-        sms = [str(len(x) > idx_sem and x[idx_sem] or '') for x in results]
-        grp = [str(len(x) > idx_grp and x[idx_grp] or '') for x in results]
-        grs = [str(len(x) > idx_grp_sem and x[idx_grp_sem] or '') for x in results]
-        
-        return (sms, grp, grs)
             
     def test_translate_basic(self):
         
@@ -129,8 +118,8 @@ class Test(unittest.TestCase):
         
         data = self._get_results(results)
         sem = data['sem']
-        mulsem = data['multi-sem']
-        mulsyn = data['multi-synonyms']
+        mulsem = data['extra-sem']
+        mulsyn = data['extra-synonyms']
         
         assert sem.count('XXX') == 5
         assert mulsem.count('XXX') == 0
@@ -173,13 +162,14 @@ class Test(unittest.TestCase):
         
         data = self._get_results(results)
         sem = data['sem']
-        mulsem = data['multi-sem']
-        mulsyn = data['multi-synonyms']
+        mulsem = data['extra-sem']
+        mulcan = data['extra-canonical']
+        mulsyn = data['extra-synonyms']
         
         
         assert sem.count('XXX') == 4
         assert mulsem.count('XXX') == 1
-        assert mulsyn.count('velk říjn revol') == 1
+        assert mulcan.count('velk říjn revol') == 1
         assert sem.count('r2') == 1 #revolution
         
         
@@ -197,8 +187,8 @@ class Test(unittest.TestCase):
         results = message.getResults()
         data = self._get_results(results)
         sem = data['sem']
-        mulsem = data['multi-sem']
-        mulsyn = data['multi-synonyms']
+        mulsem = data['extra-sem']
+        mulsyn = data['extra-synonyms']
         
         assert sem.count('XXX') == 4
         assert mulsyn.count('XXX') == 0
@@ -220,8 +210,8 @@ class Test(unittest.TestCase):
         sem = data['sem']
         token = data['token']
         ids = data['id']
-        mulsem = data['multi-sem']
-        mulsyn = data['multi-synonyms']
+        mulsem = data['extra-sem']
+        mulsyn = data['extra-synonyms']
         
         assert len(ids) == len(set(ids))
         assert token.count('extra') == 1

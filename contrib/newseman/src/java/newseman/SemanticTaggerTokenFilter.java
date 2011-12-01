@@ -226,13 +226,13 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	    	if (h.equals("sem")) { // semantic code of this token (or multi-token if we used rewrite)
 	    		sem_idx = j;
 	    	}
-	    	else if(h.equals("multi-sem")) { // semantic code of multigroup (if we used "add" operation)
+	    	else if(h.equals("extra-sem")) { // semantic code of multigroup (if we used "add" operation)
 	    		multi_sem_idx = j;
 	    	}
-	    	else if(h.equals("synonyms")) { // synonyms of the token (or multi-token if we used rewrite)
+	    	else if(h.equals("extra-canonical")) { // canonical form of the multi-token
 	    		synonyms_idx = j;
 	    	}
-	    	else if(h.equals("multi-synonyms")) { // synonyms for the multi-sem group
+	    	else if(h.equals("extra-synonyms")) { // synonyms for the multi-sem group
 	    		multi_synonyms_idx = j;
 	    	}
 	    	else if(h.equals("POS")) { // part-of-speech tag

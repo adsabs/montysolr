@@ -123,6 +123,7 @@ def translate_tokens(message):
     """
     
     tokens = message.getParam("tokens")
+    join_char = str(message.getParam("joinChar") or '|')
     
     
     if (tokens):
@@ -147,6 +148,7 @@ def translate_tokens(message):
         
         # descr of incoming features (related to outgoing data)
         ret_features = header[:]
+        ret_features[0] = tokenfeature_orig
         ret_features.append(tokenfeature_sem)
         ret_features.append(tokenfeature_extrasem)
         ret_features.append(tokenfeature_extracanonical)
@@ -199,32 +201,22 @@ def translate_tokens(message):
         
         ret_arr = [None] * len(ret_keys) # care must be taken to place vals into correct place
         while i < final_len:
-            max_col = 1
+            
             token = tc[i]
             t = ret_arr[:]
-            t[0] = token.getFeature(tokenfeature_orig)
             
-            for ii in range(1, len(header)): # take out the old values
-                val = token.getFeature(header[ii])
-                if isinstance(val, list):
-                    t[ii] = val[0]  # merged values, eg id=[14,15]
-                else:
-                    t[ii] = val
-                max_col = ii
+            max_col = 0
+            ii = 0
+            for feature in ret_features:
+                val = token.getFeature(feature)
+                if val:
+                    max_col = ii
+                    if isinstance(val, list):
+                        t[ii] = join_char.join(val)
+                    else:
+                        t[ii] = val
+                ii += 1
             
-            sem = token.getFeature(tokenfeature_sem)
-            if sem:
-                t[idx_sem] = isinstance(sem, list) and ' '.join(sem) or sem
-                max_col = max(idx_sem,max_col)
-                
-            
-            esem = token.getFeature(tokenfeature_extrasem)
-            if esem:
-                etoken = token.getFeature(tokenfeature_extrasurface)
-                t[idx_grp_syn] = etoken
-                t[idx_grp_sem] = isinstance(esem, list) and ' '.join(esem) or esem
-                max_col = max(idx_grp_syn, idx_grp_sem, idx_grp_can)
-                
             final_results[r] = JArray_string(t[:max_col+1]) # we want to limit amount of data sent
             i += 1
             r += 1
