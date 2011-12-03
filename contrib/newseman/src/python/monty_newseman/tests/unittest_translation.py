@@ -231,7 +231,7 @@ def fill_dictionary(d):
     d.addEntry(key= u"říjn", language='czech', type='sem', group= u'radix', value= u'r3')
     d.addEntry(key= u"byl", language='czech', type='sem', group= u'radix', value= u'r4')
     d.addEntry(key= u"social", language='czech', type='sem', group= u'radix', value= u'r5')
-    d.addEntry(key= u"komun", language='czech', type='sem', group= u'radix', value= u'r6')
+    d.addEntry(key= u"komun", language='czech', type='sem', group= u'radix', value= u'r6 r7')
     
     #suffixes
     d.addEntry(key= u"á", language='czech', type='sem', group= u'suffix', value= u's1')

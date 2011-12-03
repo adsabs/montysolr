@@ -7,6 +7,7 @@ from newseman.sea import callbacks
 from newseman.content.Document import Token, TokenCollection, Document
 from newseman.ci8.semes import filter_semantic_tokens
 from newseman.sea.callbacks import tokenfeature_orig
+from newseman.content.Document import SemStr
 
 JArray_object = j.JArray_object
 JArray_string = j.JArray_string
@@ -111,7 +112,15 @@ def configure_seman(message):
                                                       max_dist=max_distance,
                                                       grp_action=action,
                                                       grp_cleaning=cleaning))
-        
+    
+    val_separator = str(message.getParam('value_separator') or '|')
+    def prepare_dict_value(x):
+            s = SemStr(val_separator.join(x.value.split(' ')))
+            s.set('t', x.type)
+            s.set('l', x.language)
+            s.set('g', x.group)
+            return s
+    seman.registerCallback('prepare_dict_value', prepare_dict_value)
         
 
 def translate_tokens(message):

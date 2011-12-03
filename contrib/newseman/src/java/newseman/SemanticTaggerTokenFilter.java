@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenFilter;
@@ -58,8 +59,9 @@ import org.apache.solr.common.util.SimpleOrderedMap;
 public class SemanticTaggerTokenFilter extends TokenFilter {
 
 	/** The Token.type used to indicate semes to higher level filters. */
-	public static final String SEM_TOKEN_TYPE = "SEM";
-	public static final String POS_TOKEN_TYPE = "POS";
+	public static final String TOKEN_TYPE_SEM = "SEM";
+	public static final String TOKEN_TYPE_SYNONYM = "SYN";
+	public static final String TOKEN_TYPE_CANONICAL = "CAN";
 
 	protected SemanticTagger semanTagger = null; // Seman wrapper
 	protected int maxBuffer = 4096; // # of tokens we send to Seman in one go
@@ -77,7 +79,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	private final SemanticTagAttribute semAtt = addAttribute(SemanticTagAttribute.class);
 
 	
-	private String[] stack = null;
+	private ArrayList<Object> stack = new ArrayList<Object>();
 	private int index = 0;
 	private AttributeSource.State current = null;
 	private int todo = 0;
@@ -113,6 +115,8 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 			wrapper.addAttribute(SemanticTagAttribute.class);
 			wrapper.addAttribute(PayloadAttribute.class);
 		}
+		
+		valueSeparator = Pattern.quote(semanTagger.getSeparator());
 	}
 	
 
@@ -120,8 +124,16 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	@Override
 	public final boolean incrementToken() throws IOException {
 		
-		while (todo > 0) { // pop semes from stack
-			if (createToken(stack[index++], current)) {
+		while (todo > 0) { // pop items from stack
+			Object curVal = stack.get(index++);
+			if (curVal instanceof String) {
+				if (createToken(current, (String) curVal, (String) stack.get(index++), (Integer) stack.get(index++))) {
+					todo = todo - 3;
+					return true;
+				}
+			}
+			else {
+				restoreState((State) curVal);
 				todo--;
 				return true;
 			}
@@ -143,16 +155,46 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		if (etIterator.hasNext()) {
 			TokenState ct = etIterator.next();
 			restoreState(ct.getState());
-			String[] semes = ct.getSemes();
-			if (semes!=null) {
-				stack = semes;
-				index = 0;
-				current = captureState();
-				todo = stack.length;
+			
+			stack.clear();
+			
+			if (ct.hasOtherNames()) {
+				for (String name: ct.getOtherNames()) {
+					stack.add(name);
+					stack.add(TOKEN_TYPE_CANONICAL);
+					stack.add(0);
+				}
+			
 			}
-			else {
-				todo = 0;
-				index = 0;
+			
+			if (ct.hasSynonyms()) {
+				for (String name: ct.getSynonyms()) {
+					stack.add(name);
+					stack.add(TOKEN_TYPE_SYNONYM);
+					stack.add(0);
+				}
+			
+			}
+			
+			if (ct.hasSemes()) {
+				for (String sem: ct.getSemes()) {
+					stack.add(sem);
+					stack.add(TOKEN_TYPE_SEM);
+					stack.add(0);
+				}
+			}
+			
+			if (ct.hasTokenElements()) {
+				for (TokenState s: ct.getTokenElements()) {
+					stack.add(s.getState());
+				}
+			}
+			
+			
+			todo = stack.size();
+			index = 0;
+			if (todo > 0) {
+				current = captureState();
 			}
 		}
 		
@@ -168,6 +210,8 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	
 	/**
 	 * Gets the buffer of tokens (enhanced/translated) from SEMAN
+	 * Each {@link TokenState} represents one token, with added information
+	 * such as semes, synonyms, other tokens (this token was made of)
 	 * 
 	 * @return List<TokenState> collection of token ids, and token
 	 * 		states
@@ -255,7 +299,17 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
     			token = tokens.get(id2state.get(id));
     		}
     		else {
-    			token = createNewTokenState(r, token); //TODO: split id|id|id values
+    			if (id.contains(semanTagger.getSeparator())) {
+    				String ids[] = id.split(valueSeparator); // we deal with multi-token
+    				TokenState[] elements = new TokenState[ids.length];
+    				for (int t=0;t<ids.length;t++) {
+    					elements[t] = tokens.get(id2state.get(ids[t]));
+    				}
+    				token = createNewTokenState(r, elements);
+    			}
+    			else {
+    				token = createNewTokenState(r, token, null);
+    			}
     			//throw new IOException("SEMAN created a new token which is not in TokenStream");
     		}
 	    	
@@ -289,41 +343,55 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	}
 	
 	
+	private TokenState createNewTokenState(String[] data, TokenState[] elements) {
+		
+		TokenState ts = createNewTokenState(data, elements[0], elements[elements.length-1]);
+		ts.setTokenElements(elements);
+		return ts;
+	}
+	
 	/**
+	 * 
+	 * Creates a new token which is based on the previous token (or if that is empty, it 
+	 * has offset 0)
+	 * 
 	 * TODO: should we change the underlying offset parameters? Probably not, as the input
-	 * source is a different thing. But should we set differetn offset for multigroup
-	 * tokens?
+	 * source is a different thing. 
 	 * 
 	 * @param data
 	 * @param previousToken
 	 * @return
 	 */
 	private TokenState createNewTokenState(String[] data, 
-			TokenState previousToken) {
+			TokenState previousToken, TokenState lastToken) {
 		
 		String token = data[0];
 		
-		wrapper.clearAttributes();
 		
-		int incr;
-		int startOffset;
-		int endOffset;
 		
-		if (previousToken == null) {
-			incr = 1;
-			startOffset = 0;
-			endOffset = 0;
-		}
-		else {
-			wrapper.restoreState(previousToken.getState());
+		int incr = 1; 
+		int startOffset = 0;
+		int endOffset = 0;
+		
+		if (lastToken != null) {
+			wrapper.clearAttributes();
+			wrapper.restoreState(lastToken.getState());
 			incr = wrapper.getAttribute(PositionIncrementAttribute.class).getPositionIncrement();
-			startOffset = wrapper.getAttribute(OffsetAttribute.class).startOffset();
 			endOffset = wrapper.getAttribute(OffsetAttribute.class).endOffset();
 		}
 		
+		if (previousToken != null) {
+			wrapper.clearAttributes();
+			wrapper.restoreState(previousToken.getState());
+			startOffset = wrapper.getAttribute(OffsetAttribute.class).startOffset();
+			incr = incr == 0 ? wrapper.getAttribute(PositionIncrementAttribute.class).getPositionIncrement() : incr;
+			endOffset = endOffset == 0 ? wrapper.getAttribute(OffsetAttribute.class).endOffset() : endOffset;
+		}
+
+		
 		wrapper.getAttribute(CharTermAttribute.class).setEmpty().append(token);
 		wrapper.getAttribute(OffsetAttribute.class).setOffset(startOffset, endOffset);
-		wrapper.getAttribute(PositionIncrementAttribute.class).setPositionIncrement(0);
+		wrapper.getAttribute(PositionIncrementAttribute.class).setPositionIncrement(incr);
 		
 		return new TokenState(wrapper.captureState());
 	}
@@ -332,19 +400,18 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	 * Creates and returns a token for the given synonym of the current input
 	 * token; Override for custom (stateless or stateful) behavior, if desired.
 	 * 
-	 * @param synonym
-	 *            a synonym for the current token's term
 	 * @param current
 	 *            the current token from the underlying child stream
 	 * @return a new token, or null to indicate that the given synonym should be
 	 *         ignored
 	 */
-	protected boolean createToken(String sem, AttributeSource.State current) {
+	protected boolean createToken(AttributeSource.State current, 
+			String value, String type, int incr) {
 		clearAttributes();
 		restoreState(current);
-		termAtt.setEmpty().append(sem);
-		typeAtt.setType(SEM_TOKEN_TYPE);
-		posIncrAtt.setPositionIncrement(0);
+		termAtt.setEmpty().append(value);
+		typeAtt.setType(type);
+		posIncrAtt.setPositionIncrement(incr);
 		return true;
 	}
 
@@ -366,9 +433,21 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		String[] otherNames = null;
 		String[] otherSemes = null;
 		String[] synonyms = null;
+		TokenState[] tokenElements = null;
 		
 		TokenState(State state) {
 			this.state = state;
+		}
+		public boolean hasTokenElements() {
+			return tokenElements != null;
+		}
+		public void setTokenElements(TokenState[] elements) {
+			tokenElements = elements;
+			
+		}
+		public TokenState[] getTokenElements() {
+			return tokenElements;
+			
 		}
 		public State getState() {
 			return this.state;

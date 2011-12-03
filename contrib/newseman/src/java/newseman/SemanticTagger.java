@@ -25,12 +25,22 @@ public class SemanticTagger {
 	
 	private String url = null;
 	private String name = null;
+	private String valueSeparator = "|";
 	
 	 
 	SemanticTagger(String url) {
 		this.url = url;
 		this.name = getClass().getCanonicalName() + Thread.currentThread().getId();
 		createTagger(this.url, this.name);
+	}
+	
+	
+	public String getSeparator() {
+		return valueSeparator;
+	}
+	
+	public void setSeparator(String valueSeparator) {
+		this.valueSeparator = valueSeparator;
 	}
 	
 	public String getUrl() {
@@ -105,6 +115,7 @@ public class SemanticTagger {
 				.createMessage("translate_tokens")
 				.setSender(this.getClass().getCanonicalName())
 				.setParam("url", this.name)
+				.setParam("joinChar", this.valueSeparator)
 				.setParam("tokens", tokens);
 		
 		MontySolrVM.INSTANCE.sendMessage(message);
