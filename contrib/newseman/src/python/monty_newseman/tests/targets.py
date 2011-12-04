@@ -21,7 +21,6 @@ def fill_newseman_dictionary(message):
         seman = targets.Cacher.get_last()
     db = seman.surface().getSurfaceDictionary()
     unittest_translation.fill_dictionary(db)
-    
 
 
 

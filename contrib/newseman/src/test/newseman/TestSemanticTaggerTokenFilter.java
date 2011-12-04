@@ -52,13 +52,16 @@ public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestC
 		
 		
 		tagger = new SemanticTagger(url);
-		tagger.configureTagger("czech", 2, "add", "purge");
-		
-		// fill the db with test data
+
+		// fill the db with test data, must happen before we configure seman to have data
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage(
 				"fill_newseman_dictionary")
 				.setParam("url", tagger.getName());
 		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		tagger.configureTagger("czech", 2, "rewrite", "purge");
+		
+		
 	}
 	
 	@Override
@@ -70,14 +73,14 @@ public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestC
 
 	public void testSemanticTokenFilter() throws IOException {
 		String text = "velká světová revoluce byla velká říjnová revoluce " +
-        "s velkou extra říjnovou revolucí komunistická";
+        "s velkou extra říjnovou revolucí";
     
 	
 		StringReader reader = new StringReader(text);
 		SemanticTaggerTokenFilter stream = 
 			new SemanticTaggerTokenFilter(
-				new StopFilter( Version.LUCENE_31,
-					new StandardTokenizer(Version.LUCENE_31, reader),
+				new StopFilter( TEST_VERSION_CURRENT,
+					new StandardTokenizer(TEST_VERSION_CURRENT, reader),
 					new HashSet(Arrays.asList(new String[] {"s", "a"}))
 				),
 				tagger
@@ -109,15 +112,16 @@ public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestC
 			
 		}
 		
-		System.out.println(buf);
 		
 		assertEquals(buf.toString().trim(),
-				"velká[0:5]/1 r0[0:5]/0 světová[6:13]/1 r1[6:13]/0 revoluce[14:22]/1 r2[14:22]/0 byla[23:27]/1 r4[23:27]/0 " + 
-				"velká[28:32]/1 velká říjnová revoluce[28:32]/0 velk říjn revol[28:32]/0 XXX[28:32]/0 " +
-				"říjnová[33:40]/1 revoluce[41:50]/1 " +
-				"velkou[53:83]/2 velkou říjnovou revolucí[53:83]/0 velk říjn revol[53:83]/0 XXX[53:83]/0 " + 
-				"extra[60:65]/1 říjnovou[66:74]/1 revolucí[75:83]/1 komunistická[84:96]/1 r6[84:96]/0 r7[84:96]/0");
-				
+				"velká[0:5]/1 r0[0:5]/0 světová[6:13]/1 r1[6:13]/0 revoluce[14:22]/1 r2[14:22]/0 " +
+				"byla[23:27]/1 r4[23:27]/0 " + 
+				"velká[28:33]/1 velká říjnová revoluce[28:50]/0 XXX[28:50]/0 " +
+				"říjnová[34:41]/1 revoluce[42:50]/1 " +
+				"velkou[53:59]/2 velkou říjnovou revolucí[53:83]/0 velk říjn revol[53:83]/0 XXX[53:83]/0 " + 
+				"extra[60:65]/1 říjnovou[66:74]/1 revolucí[75:83]/1");
+		
+		//komunistická[84:96]/1 r6[84:96]/0 r7[84:96]/0
 	}
 	
 }

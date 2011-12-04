@@ -21,6 +21,7 @@ tokenfeature_success = Surface.tokenfeature_success
 tokenfeature_extrasem = callbacks.tokenfeature_extrasem
 tokenfeature_extrasurface = callbacks.tokenfeature_extrasurface
 tokenfeature_extracanonical = callbacks.tokenfeature_extracanonical
+tokenfeature_multi = callbacks.tokenfeature_multi
 
 class Cacher(object):
     def __init__(self):
@@ -152,6 +153,7 @@ def translate_tokens(message):
         ret_keys.append("extra-sem") # the sem of the group
         ret_keys.append("extra-canonical") #when a group is identified, its canonical form
         ret_keys.append("extra-synonyms") #when a group is identified, its canonical form
+        ret_keys.append(tokenfeature_multi) #indicator of the callback
         #ret_keys.append("synonyms")
         
         
@@ -162,6 +164,7 @@ def translate_tokens(message):
         ret_features.append(tokenfeature_extrasem)
         ret_features.append(tokenfeature_extracanonical)
         ret_features.append(tokenfeature_extrasurface)
+        ret_features.append(tokenfeature_multi)
         #ret_features.append(tokenfeature_synonyms)
         
         
@@ -203,11 +206,6 @@ def translate_tokens(message):
         # insert rows
         i = 0
         r = 1
-        idx_sem = ret_keys.index("sem")
-        idx_grp_syn = ret_keys.index("extra-synonyms")
-        idx_grp_sem = ret_keys.index("extra-sem")
-        idx_grp_can = ret_keys.index("extra-canonical")
-        
         ret_arr = [None] * len(ret_keys) # care must be taken to place vals into correct place
         while i < final_len:
             
@@ -223,7 +221,7 @@ def translate_tokens(message):
                     if isinstance(val, list):
                         t[ii] = join_char.join(val)
                     else:
-                        t[ii] = val
+                        t[ii] = str(val)
                 ii += 1
             
             final_results[r] = JArray_string(t[:max_col+1]) # we want to limit amount of data sent

@@ -50,6 +50,47 @@ import org.apache.solr.common.util.SimpleOrderedMap;
  * enriches tokens with semantic categories (so called semes). This enrichment
  * is controlled/governed by the dictionary/taxonomy/ontology.
  * 
+ * So for example you have this sentence:
+ * 	<pre>
+ * 		The proton colliders contain vacuum foo pumps.
+ * </pre>
+ * 
+ * It was previously tokenized by the chain of filters:
+ * 
+ * <pre>
+ *  [the] 
+ *  [proton] 
+ *  [colliders] 
+ *  [contain] 
+ *  [vacuum] 
+ *  [foo]
+ *  [pumps]
+ * </pre>
+ * 
+ * Then after we process it (given we have a proper dictionary), the results may
+ * be:
+ * 
+ * <pre>
+ * tokens                      explanation
+ * -----------------------------------------------------------------------------
+ *  [the] 
+ *  [proton]                   original token, offset=[5:11]
+ *  	[proton collider]      multi-token group: position increment=0, type=TOKEN_TYPE_SYN, offset=[5:11]
+ *  	[PP collider]          canonical form: position increment=0, type=TOKEN_TYPE_SYN, offset=[5:11]
+ *  	[abc]                  semantic code: position increment=0, type=TOKEN_TYPE_SEM, offset=[5:11]
+ *  	[bce]								
+ *  	[dce] 								
+ *  [collider]                 position increment=1
+ *  [contain] 
+ *  [vacuum]                   original token, offset=[29:35]
+ *  	[vacuum pumps]         SEMAN found 'vacuum pumps' despite the interjected 'foo', multi-token group: position increment=0, type=TOKEN_TYPE_SYN, offset=[29:49]
+ *  	[vacuum pump]          multi-token group: position increment=0, type=TOKEN_TYPE_CANONICAL, offset=[29:49]
+ *  	[abe]                  semantic code: position increment=0, type=TOKEN_TYPE_SEM, offset=[29:49]
+ *  	[bcf]                    (note how the offset is set to cover the range vacuum-foo-pumps)
+ *  [foo]                      position increment=1, offset=[39:42]
+ *  [pumps]	                   position increment=1, offset=[43:49]
+ * 
+ * </pre>
  * The translation is done by a Pythonic library called SEMAN. Please see 
  * documentation of SEMAN for further details.
  * 
@@ -133,7 +174,9 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 				}
 			}
 			else {
+				clearAttributes();
 				restoreState((State) curVal);
+				current = captureState();
 				todo--;
 				return true;
 			}
@@ -184,9 +227,21 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 				}
 			}
 			
+			if (ct.hasOtherSemes()) {
+				for (String sem: ct.getOtherSemes()) {
+					stack.add(sem);
+					stack.add(TOKEN_TYPE_SEM);
+					stack.add(0);
+				}
+			}
+			
 			if (ct.hasTokenElements()) {
-				for (TokenState s: ct.getTokenElements()) {
-					stack.add(s.getState());
+				// special treatment - multi-tokens, we want the multi-t to be after the first member
+				TokenState[] elements = ct.getTokenElements();
+				restoreState(elements[0].getState());
+				stack.add(0, ct.getState());
+				for (int e=1;e<elements.length;e++) {
+					stack.add(elements[e].getState());
 				}
 			}
 			
@@ -265,6 +320,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		int synonyms_idx = 0;
 		int multi_synonyms_idx = 0;
 		int pos_idx = 0;
+		int multi_idx = 0;
 	    for (int j=2;j<header.length;j++) {
 	    	String h = header[j];
 	    	if (h.equals("sem")) { // semantic code of this token (or multi-token if we used rewrite)
@@ -281,6 +337,9 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	    	}
 	    	else if(h.equals("POS")) { // part-of-speech tag
 	    		pos_idx = j;
+	    	}
+	    	else if(h.equals("multi")) { // indicator which says the token was created by extra-callback
+	    		multi_idx = j;
 	    	}
 	    }
 	    
@@ -306,17 +365,21 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
     					elements[t] = tokens.get(id2state.get(ids[t]));
     				}
     				token = createNewTokenState(r, elements);
+    				// token was post-merged, we have the elements after it
+    				// this feels hacking: the best would be to send offsets to SEMAN
+    				// and modify the semans using some callback (but that seems slower)
+    				if (r.length>multi_idx && r[multi_idx]!= null) {
+    					token.setTokenElements(new TokenState[]{elements[0]});
+    				}
     			}
     			else {
     				token = createNewTokenState(r, token, null);
     			}
-    			//throw new IOException("SEMAN created a new token which is not in TokenStream");
     		}
 	    	
 	    	for (int c=2;c<r.length;c++) {
 	    		if (c == sem_idx && r[sem_idx] != null) {
-	    			semes = r[sem_idx].split(valueSeparator);
-		    		token.setSemes(semes);
+		    		token.setSemes(r[sem_idx].split(valueSeparator));
 	    		}
 	    		else if (c == synonyms_idx && r[synonyms_idx] != null) {
 		    		token.setSynonyms(r[synonyms_idx].split(valueSeparator));
@@ -325,7 +388,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		    		token.setOtherSemes(r[multi_sem_idx].split(valueSeparator));
 		    	}
 	    		else if (c == multi_synonyms_idx && r[multi_synonyms_idx] != null) {
-		    		token.setOtherSemes(r[multi_synonyms_idx].split(valueSeparator));
+		    		token.setOtherNames(r[multi_synonyms_idx].split(valueSeparator));
 		    	}
 	    		// TODO: add POS attribute?
 		    	/*
@@ -369,14 +432,14 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 		
 		
 		
-		int incr = 1; 
+		int incr = 0; 
 		int startOffset = 0;
 		int endOffset = 0;
 		
 		if (lastToken != null) {
 			wrapper.clearAttributes();
 			wrapper.restoreState(lastToken.getState());
-			incr = wrapper.getAttribute(PositionIncrementAttribute.class).getPositionIncrement();
+			//incr = wrapper.getAttribute(PositionIncrementAttribute.class).getPositionIncrement();
 			endOffset = wrapper.getAttribute(OffsetAttribute.class).endOffset();
 		}
 		
@@ -384,7 +447,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 			wrapper.clearAttributes();
 			wrapper.restoreState(previousToken.getState());
 			startOffset = wrapper.getAttribute(OffsetAttribute.class).startOffset();
-			incr = incr == 0 ? wrapper.getAttribute(PositionIncrementAttribute.class).getPositionIncrement() : incr;
+			//incr = incr == 0 ? wrapper.getAttribute(PositionIncrementAttribute.class).getPositionIncrement() : incr;
 			endOffset = endOffset == 0 ? wrapper.getAttribute(OffsetAttribute.class).endOffset() : endOffset;
 		}
 
@@ -407,7 +470,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	 */
 	protected boolean createToken(AttributeSource.State current, 
 			String value, String type, int incr) {
-		clearAttributes();
+		//clearAttributes();
 		restoreState(current);
 		termAtt.setEmpty().append(value);
 		typeAtt.setType(type);
@@ -419,7 +482,7 @@ public class SemanticTaggerTokenFilter extends TokenFilter {
 	@Override
 	public void reset() throws IOException {
 		super.reset();
-		stack = null;
+		stack.clear();
 		index = 0;
 		current = null;
 		todo = 0;
