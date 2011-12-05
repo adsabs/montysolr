@@ -26,6 +26,9 @@
 	<property name="maven.dist.dir" location="../../dist/maven"/>
 
 	<import file="../common-build.xml"/>
+	
+	<!-- load and make available for projects the generic montysolr/build configuration -->
+	<property file="${common.dir}/build/build.properties" prefix="prop"/>
 
 	<available property="contrib.has.tests" type="dir" file="src/test" />
 

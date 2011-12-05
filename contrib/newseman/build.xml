@@ -25,14 +25,13 @@
 
     <import file="../contrib-build.xml"/>
 	
-	<property file="${common.dir}/build/build.properties" prefix="A"/>
 	
 	<path id="test.classpath">
         <path refid="classpath"/>
         <path refid="test.base.classpath"/>
-		<pathelement location="${A.jcc_egg}/jcc/classes"/>
+		<pathelement location="${prop.jcc_egg}/jcc/classes"/>
     </path>
 	
-	
+	<target name="test" depends="compile, common.test" />
 
 </project>

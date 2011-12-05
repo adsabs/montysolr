@@ -7,6 +7,13 @@ import java.lang.reflect.*;
 
 import org.apache.lucene.queryParser.aqp.parser.*;
 
+/**
+ * A utility class for generating the dot/graph representations of the query
+ * 
+ * @author rchyla
+ *
+ */
+
 //import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarLexer;
 //import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarParser;
 

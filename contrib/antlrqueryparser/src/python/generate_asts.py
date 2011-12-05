@@ -3,16 +3,24 @@ import sys
 import subprocess as sub
 import os
 
-def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.jar:/x/dev/antlr-34/lib/antlr-3.4-complete.jar'):
+def run(grammar_name, basedir='', 
+        cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.jar:/x/dev/antlr-34/lib/antlr-3.4-complete.jar',
+        parserdir=''):
+    
     
     if not basedir:
-        basedir = os.path.abspath('../../../../../../../../bin')
+        basedir = os.path.abspath('../../../../../../../../../../bin')
 
-    old_dir = os.getcwd()        
-    thisdir = os.path.dirname(os.path.abspath(__file__))
+    old_dir = os.getcwd()
+    
+    thisdir = parserdir
+    if not thisdir:        
+        thisdir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(thisdir)
     
     cp += os.pathsep + basedir
+
+    #print "We'll generate ANTLR graphs\ngramar: %s\nbasedir: %s\nclasspath: %s\nparserdir: %s" % (grammar_name, basedir, cp, thisdir)
     
     grammar_file = os.path.join(thisdir, grammar_name + '.g')
     
@@ -24,7 +32,6 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     gunit_file = os.path.join(thisdir, grammar_name + '.gunit')
     generate_ast_command = 'java -cp %s org.apache.lucene.queryParser.aqp.parser.BuildAST %s "%%s"' % (cp, grammar_name)
     
-    generate_grammar_command = '%s/demo.sh build-only %s' % (thisdir, grammar_name)
     
     generate_svg_command = 'dot -Tsvg %s' % tmp_file
     
@@ -44,12 +51,6 @@ def run(grammar_name, basedir='', cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.ja
     data = []
     
     toc.append('<a name="toc" />')
-    
-    p = sub.Popen(generate_grammar_command.split(),stdout=sub.PIPE,stderr=sub.PIPE, cwd=thisdir)
-    output, errors = p.communicate()
-    if errors and 'Exception' in errors:
-        raise Exception(errors)
-    #os.system(generate_grammar_command)
     
     for section,values in test_cases.items():
         output = tree = svg = ''

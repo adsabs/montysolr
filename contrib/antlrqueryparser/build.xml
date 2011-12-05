@@ -29,6 +29,7 @@
 	<property name="aqp.classes.dir" location="${build.dir}/classes/java" />
 	<property name="aqp.classes.parser.dir" location="${aqp.classes.dir}/org/apache/lucene/queryParser/aqp/parser" />
 	<property name="aqp.dotfile" location="${build.dir}/graph.dot" />
+	<property name="aqp.generate.py" location="src/python/generate_asts.py" />
 
 
 
@@ -65,6 +66,7 @@
 	<path id="test.classpath">
 		<path refid="classpath"/>
 		<path refid="test.base.classpath"/>
+		<pathelement location="${build.dir}/classes/test"/>
 		<fileset dir="lib">
 			<include name="**/*.jar"/>
 		</fileset>
@@ -194,4 +196,24 @@
 	<target name="test" depends="default" >
 		<antcall target="common.test" />
 	</target>
+	
+	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" depends="antlr-compile" >
+	   <mkdir dir="${build.dir}/classes/test"/>
+	   
+		<javac classpathref="test.classpath" 
+		            srcdir="src/test"
+		            destdir="${build.dir}/classes/test"
+		            >
+		            <include name="**/BuildAST.java"/>
+		        </javac>
+		
+	   <exec executable="${prop.python}" failonerror="true" >
+	   	    <arg value="${aqp.generate.py}"/>
+	        <arg value="${aqp.grammar}"/>
+	        <arg value="${build.dir}"/>
+	        <arg value="${toString:test.classpath}" />
+	        <arg value="${aqp.parser.dir}"/>
+	    </exec>
+	</target>
+	
 </project>
