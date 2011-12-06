@@ -9,11 +9,10 @@ tokens {
   OPERATOR;
   ATOM;
   MODIFIER;
-  VALUE;
+  TMODIFIER;
   CLAUSE;
   FIELD;
   FUZZY;
-  ADDED;
   BOOST;
   QNORMAL;
   QPHRASE;
@@ -22,6 +21,7 @@ tokens {
   QRANGEIN;
   QRANGEEX;
   QANYTHING;
+  QDATE;
 }
 
 @header{
@@ -32,43 +32,49 @@ tokens {
 }
 
 mainQ : 
-	clauseDefault+ -> ^(OPERATOR["AND"] clauseDefault+) // Default operator
+	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
 	;
    
   
-clauseDefault
-  : (first=clauseStrongest -> $first) (NOT others=clauseStrongest -> ^(OPERATOR["NOT"] clauseStrongest+ ))*
+clauseOr
+  : (first=clauseAnd -> $first) (or others=clauseAnd -> ^(OPERATOR["OR"] clauseAnd+ ))*
   ;
 
-clauseStrongest
-  : (first=clauseStrong  -> $first) (AND others=clauseStrong -> ^(OPERATOR["AND"] clauseStrong+ ))*
+clauseAnd
+  : (first=clauseNot  -> $first) (and others=clauseNot -> ^(OPERATOR["AND"] clauseNot+ ))*
   ;
   
-clauseStrong
-  : (first=clauseWeak -> $first) (OR others=clauseWeak -> ^(OPERATOR["OR"] clauseWeak+ ))*
+clauseNot
+  : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
   
-clauseWeak
-  : (first=primaryClause -> $first) (near others=primaryClause -> ^(near primaryClause+) )* 
+clauseNear
+  : (first=clauseBasic -> $first) (near others=clauseBasic -> ^(near clauseBasic+) )* 
   ;
   
-primaryClause
-	: 
-	
-	(modifier LPAREN clauseDefault+ RPAREN )=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
-	| (LPAREN clauseDefault+ RPAREN CARAT NUMBER)=> modifier? LPAREN clauseDefault+ RPAREN (CARAT NUMBER)? -> ^(CLAUSE ^(MODIFIER modifier?) ^(BOOST NUMBER?) ^(OPERATOR["AND"] clauseDefault+) ) // Default operator
-	| (LPAREN)=> LPAREN clauseDefault+ RPAREN -> clauseDefault+
-	| atom 
+clauseBasic
+	:
+	(modifier LPAREN clauseOr+ RPAREN )=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
+	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	| (LPAREN clauseOr+ RPAREN term_modifier)=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
+	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	| (LPAREN )=> LPAREN clauseOr+ RPAREN
+	 -> clauseOr+
+	| atom
 	;
     
 
 atom   
 	: 
-	modifier? field multi_value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field) ^(VALUE multi_value))
-	| modifier? field? value -> ^(ATOM ^(MODIFIER modifier?) ^(FIELD field?) ^(VALUE value))
+	modifier? field multi_value term_modifier?
+	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field multi_value))))
+	| modifier? field? value term_modifier? 
+	 -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
+	| modifier? (STAR COLON)? STAR 
+	 -> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
 	;
    
-	   
+
 field	
 	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
@@ -76,15 +82,13 @@ field
 
 value  
 	: 
-	( 
 	range_term_in -> ^(QRANGEIN range_term_in)
 	| range_term_ex -> ^(QRANGEEX range_term_ex) 
-	| normal -> ^(QNORMAL normal)
-	| truncated -> ^(QTRUNCATED truncated)
+	| normal -> ^(QNORMAL normal)	
+	| truncated -> ^(QTRUNCATED truncated)	
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	)
-	term_modifier? -> term_modifier? $value
+	| QMARK -> ^(QTRUNCATED QMARK)
   	;
 
 	
@@ -92,7 +96,7 @@ value
 range_term_in
 	:	
        LBRACK
-       (a=range_value -> range_value ^(QANYTHING ))
+       (a=range_value -> range_value ^(QANYTHING QANYTHING["*"]))
        ( TO? b=range_value -> $a $b? )?
        RBRACK
 	;
@@ -101,29 +105,81 @@ range_term_in
 range_term_ex
 	:	
        LCURLY
-       ( a=range_value -> range_value ^(QANYTHING ))
+       ( a=range_value -> range_value ^(QANYTHING QANYTHING["*"]))
        ( TO? b=range_value -> $a $b? )?
        RCURLY
 	;	
 
 range_value
 	:	
-	normal -> ^(QNORMAL normal)
-	| truncated -> ^(QTRUNCATED truncated)
+	truncated -> ^(QTRUNCATED truncated)
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| STAR -> ^(QANYTHING )
+	| date -> ^(QNORMAL date)
+	| normal -> ^(QNORMAL normal)	
+	| STAR -> ^(QANYTHING STAR)
 	;
 
 multi_value
 	: 
-	LPAREN mterm+ RPAREN -> mterm+
+	LPAREN multiClause RPAREN -> multiClause
 	;
+
+
+
+multiClause	
+	:
 	
+	//m:(a b NEAR c OR d OR e)
 	
+	// without duplicating the rules (but it allows recursion)
+	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
+	
+	// allows only limited set of operations
+	//multiDefault
+	
+	// this is also working, but i want operator precedence
+	//multiClause:
+	//(mterm+ -> mterm+)
+	//(op=operator rhs=fclause -> ^(OPERATOR ^(OPERATOR["DEFOP"] $mclause) $rhs))?
+	//;
+	//flause:mclause;
+	;
+
+multiDefault
+	:	
+	multiOr+ -> ^(OPERATOR["DEFOP"] multiOr+)
+	;
+
+multiOr	
+	:	
+	(first=multiAnd  -> $first) (or others=multiAnd-> ^(OPERATOR["OR"] multiAnd+ ))*
+	;	
+		
+multiAnd
+	:	
+	(first=multiNot  -> $first) (and others=multiNot -> ^(OPERATOR["AND"] multiNot+ ))*
+	;	
+
+multiNot	
+	:	
+	(first=multiNear  -> $first) (not others=multiNear-> ^(OPERATOR["NOT"] multiNear+ ))*
+	;	
+
+multiNear	
+	:	
+	(first=multiBasic  -> $first) (near others=multiBasic-> ^(near multiBasic+ ))*
+	;	
+
+
+multiBasic
+	:	
+	mterm
+	;
+		
 mterm	
 	:	
-	(modifier? value -> ^(ATOM ^(MODIFIER modifier?) ^(VALUE value)))
+	modifier? value -> ^(MODIFIER modifier? value)
 	;
 	
 
@@ -154,9 +210,16 @@ quoted	:
 
 
 	
-operator: (AND | OR | NOT | NEAR);
+operator: (
+	AND -> OPERATOR["AND"]
+	| OR -> OPERATOR["OR"]
+	| NOT -> OPERATOR["NOT"]
+	| NEAR -> OPERATOR["NEAR"]
+	);
 
-modifier: ('#');
+modifier: 
+	PLUS -> PLUS["+"]
+	| MINUS -> MINUS["-"];
 
 
 /*
@@ -169,35 +232,58 @@ This grammar has problem with following
 	where 999 is another term, not a fuzzy value
 */
 term_modifier	:	
+	TILDE CARAT? -> ^(BOOST CARAT?) ^(FUZZY TILDE) 
+	| CARAT TILDE? -> ^(BOOST CARAT) ^(FUZZY TILDE?)
+/*
 	// first alternative
 	(
-	  (CARAT b=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY ))
+	  (CARAT b=NUMBER -> ^(BOOST $b) ^(FUZZY )
 	 ) 
 	( //syntactic predicate
-	 (TILDE NUMBER )=>TILDE f=NUMBER -> ^(MODIFIER ^(BOOST $b) ^(FUZZY $f)) //
-	 | TILDE -> ^(MODIFIER ^(BOOST $b) ^(FUZZY NUMBER["0.5"]))
+	 (TILDE NUMBER )=>TILDE f=NUMBER -> ^(BOOST $b) ^(FUZZY $f)
+	 | TILDE -> ^(BOOST $b) ^(FUZZY NUMBER["0.5"])
 	 )* // set the default value
 	
 	)
 	// second alternative [only ~ | ~NUMBER]
 	| 
-	  (TILDE -> ^(MODIFIER ^(BOOST) ^(FUZZY NUMBER["0.5"])) ) // set the default value
-	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(MODIFIER ^(BOOST ) ^(FUZZY $f?)) )* //replace the default but '~' must not be followed by WS
+	  (TILDE -> ^(BOOST) ^(FUZZY NUMBER["0.5"])) // set the default value
+	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(BOOST) ^(FUZZY $f?) )* //replace the default but '~' must not be followed by WS
+*/	
+	;
+
+
+boost	:
+	(CARAT -> ^(BOOST NUMBER["DEF"])) // set the default value
+	(NUMBER -> ^(BOOST NUMBER))? //replace the default with user input
+	;
+
+fuzzy	:
+	(TILDE -> ^(FUZZY NUMBER["DEF"])) // set the default value
+	(NUMBER -> ^(FUZZY NUMBER))? //replace the default with user input
+	;
+
+not	:	
+	(AND NOT)=> AND NOT
+	| NOT
+	;
 	
+and 	:	
+	AND
 	;
-
-boost	:	
-	CARAT NUMBER
-	;
-
-fuzzy	:	
-	TILDE NUMBER
-	;
-
+	
+or 	:	
+	OR
+	;		
 
 near	:	
-	(NEAR -> ^(OPERATOR["NEAR 5"]) )
-	('/' b=NUMBER -> ^(OPERATOR["NEAR " + $b.getText()]) )?
+	(NEAR -> ^(OPERATOR["NEAR"]) )
+	('/' b=NUMBER -> ^(OPERATOR["NEAR:" + $b.getText()]) )?
+	;
+
+date	:	
+	//a=NUMBER '/' b=NUMBER '/' c=NUMBER -> ^(QDATE $a $b $c)
+	DATE_TOKEN
 	;
 
 /* ================================================================
@@ -219,11 +305,11 @@ COLON   : ':' ;  //this must NOT be fragment
 
 PLUS  : '+' ;
 
-MINUS : '-';
+MINUS : ('-'|'\!');
 
 STAR  : '*' ;
 
-QMARK  : '?' ;
+QMARK  : '?'+ ;
 
 fragment VBAR  : '|' ;
 
@@ -233,9 +319,9 @@ LCURLY  : '{' ;
 
 RCURLY  : '}' ;
 
-CARAT : '^';
+CARAT : '^' (INT+ ('.' INT+)?)?;
 
-TILDE : '~' ;
+TILDE : '~' (INT+ ('.' INT+)?)?;
 
 DQUOTE	
 	:	'\"';
@@ -244,14 +330,14 @@ SQUOTE
 	:	'\'';
 
 
-ESC_CHAR:  '\\' .; 
+
 
 TO	:	'TO';
 
 /* We want to be case insensitive */
-AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?) | PLUS) ;
+AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
 OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
-NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T') | '!' | MINUS);
+NOT   : ('n' | 'N') ('o' | 'O') ('t' | 'T');
 NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 
@@ -259,19 +345,44 @@ WS  :   ( ' '
         | '\t'
         | '\r'
         | '\n'
+        | '\u3000'
         ) 
         {$channel=HIDDEN;}
     ;
 
-
-fragment INT: '0' .. '9';
-
-fragment NORMAL_CHAR  : ~(' ' | '\t' | '\n' | '\r'
+      
+/*	
+fragment TERM_CHAR  : 
+     ~(' ' | '\t' | '\n' | '\r' | '\u3000'
       | '\\' | '\'' | '\"' 
       | '(' | ')' | '[' | ']' | '{' | '}'
       | '+' | '-' | '!' | ':' | '~' | '^' 
       | '*' | '|' | '&' | '?' | '\\\"' | '/'  //this line is not present in lucene StandardParser.jj
       );  	
+*/
+
+
+fragment INT: '0' .. '9';
+
+
+fragment ESC_CHAR:  '\\' .; 
+
+
+fragment TERM_START_CHAR
+	:
+	(~(' ' | '\t' | '\n' | '\r' | '\u3000'
+	      | '\'' | '\"' 
+	      | '(' | ')' | '[' | ']' | '{' | '}'
+	      | '+' | '-' | '!' | ':' | '~' | '^' 
+	      | '?' | '*' | '\\'
+	      )
+	 | ESC_CHAR );  	
+
+
+fragment TERM_CHAR
+	:	
+	(TERM_START_CHAR | '-' | '+')
+	;
 
 
 NUMBER  
@@ -279,24 +390,30 @@ NUMBER
 	INT+ ('.' INT+)?
 	;
 
+DATE_TOKEN
+	:	
+	INT INT? ('/'|'-'|'.') INT INT? ('/'|'-'|'.') INT INT (INT INT)?
+	;
 
 TERM_NORMAL
 	: 
-	( NORMAL_CHAR | ESC_CHAR) ( NORMAL_CHAR | ESC_CHAR)*
+	TERM_START_CHAR ( TERM_CHAR )*
 	;
 
 
 TERM_TRUNCATED: 
-	(NORMAL_CHAR | (STAR | QMARK))+
-	//(STAR | QMARK)? NORMAL_CHAR+ ((STAR | QMARK) (NORMAL_CHAR+ (STAR | QMARK))?)?
+	(STAR|QMARK) (TERM_CHAR+ (QMARK|STAR))+ (TERM_CHAR)*
+	| TERM_START_CHAR (TERM_CHAR* (QMARK|STAR))+ (TERM_CHAR)*
+	| (STAR|QMARK) TERM_CHAR+
 	;
 
 
 PHRASE	
 	:	
-	DQUOTE ~('\"'|'?'|'*')+ DQUOTE
+	DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
 	;
 
 PHRASE_ANYTHING	:	
-	DQUOTE ~('\"')+ DQUOTE
+	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
 	;
+

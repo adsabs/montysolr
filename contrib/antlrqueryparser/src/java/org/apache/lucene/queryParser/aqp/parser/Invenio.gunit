@@ -10,8 +10,7 @@ package org.apache.lucene.queryParser.aqp.parser;
 //------------------- mainQ
 mainQ:
 
-"+(author:\"richter, burton*\" | exactauthor:\"richter, b *\" | exactauthor:\"richter, b\" | exactauthor:\"richter, bu\" | exactauthor:\"richter, bur\" | exactauthor:\"richter, burt\" | exactauthor:\"richter, burto\" | author:\"richter, burton, *\" +title:quark" -> ""
-"title:Do it right" OK
+"+(author:\"richter, burton*\" | exactauthor:\"richter, b *\" | exactauthor:\"richter, b\" | exactauthor:\"richter, bu\" | exactauthor:\"richter, bur\" | exactauthor:\"richter, burt\" | exactauthor:\"richter, burto\" | author:\"richter, burton, *\" +title:quark)" -> ""
 
 "expr1" OK
 
@@ -68,9 +67,9 @@ mainQ:
 
 "(expr1 + expr2) or expr3" -> ""
 
-"(expr1) - expr2 | "expressions - in + quotes | (are) not - parsed " - (expr3) | expr4" -> "" // ['+', 'expr1', '-', 'expr2', '|', '"expressions - in + quotes | (are) not - parsed "', '-', 'expr3', '|', 'expr4']
+"(expr1) - expr2 | \\"expressions - in + quotes | (are) not - parsed \\" - (expr3) | expr4" -> "" // ['+', 'expr1', '-', 'expr2', '|', '"expressions - in + quotes | (are) not - parsed "', '-', 'expr3', '|', 'expr4']
 
-"(expr1) - expr2 | 'expressions - in + quotes | (are) not - parsed ' - (expr3) | expr4" -> "" // ['+', 'expr1', '-', 'expr2', '|', "'expressions - in + quotes | (are) not - parsed '", '-', 'expr3', '|', 'expr4']
+"(expr1) - expr2 | \\'expressions - in + quotes | (are) not - parsed \\' - (expr3) | expr4" -> "" // ['+', 'expr1', '-', 'expr2', '|', "'expressions - in + quotes | (are) not - parsed '", '-', 'expr3', '|', 'expr4']
 
 "expr1 \\' expr2 +(expr3) -expr4 \\' + (expr5)" -> "" // ['+', 'expr1', '+', "\\'", '+', 'expr2', '+', 'expr3', '-', 'expr4', '+', "\\'", '+', 'expr5']
 
@@ -111,275 +110,165 @@ mainQ:
 "refersto:(author:ellis or author:hawking)" -> "" // ['+', 'refersto:"author:ellis | author:hawking"']
 
 
-"te?t" OK
+// -- from: http://inspirehep.net/help/search-guide
 
-"test*"  -> (AND (ATOM MODIFIER FIELD (VALUE (QTRUNCATED test*))))
+"ellis standard model" -> ""
 
-"te*t"  -> (AND (ATOM MODIFIER FIELD (VALUE (QTRUNCATED te*t))))
+"author:\"Ellis, J\" title:(muon neutrino) year:2001" -> ""
 
-"\"te*t\"" OK
+"ellis muon" -> ""
 
-"\"text\"" OK
+"2001" -> ""
 
-"roam~0.8" OK
+"\"Ellis, J\"" -> ""
 
-"roam~" OK
+"\'muon decay\'" -> ""
 
-"9999" OK
+"\'Ellis, J\'" -> ""
 
-"\"jakarta apache\"~10" OK
+"ellis +muon" -> ""
 
-"mod_date:[20020101 TO 20030101]" OK
+"ellis muon" -> ""
 
-"title:{Aida TO Carmen}" OK
+"ellis and muon" -> ""
 
-"jakarta^4 apache" OK
+"ellis -muon" -> ""
 
-"\"jakarta apache\"^4 \"Apache Lucene\"" OK
+"ellis not muon" -> ""
 
-"\"jakarta apache\" OR jakarta" OK
+"ellis |muon" -> ""
 
-"\"jakarta apache\" AND \"Apache Lucene\"" OK
+"ellis or muon" -> ""
 
-"+jakarta lucene" OK
+"muon or kaon and ellis" -> ""
 
-"\"jakarta apache\" NOT \"Apache Lucene\"" OK
+"ellis and muon or kaon" -> ""
 
-"\"jakarta apache\" -\"Apache Lucene\"" OK
+"muon or kaon and ellis -decay" -> ""
 
-"(jakarta OR apache) AND website" OK
+"(gravity OR supergravity) AND (ellis OR perelstein)" -> ""
 
-"title:(+return +\"pink panther\")" OK
 
-"\(1\+1\)\:2" OK
+// special chars and punctuation
 
-// TODO: fix
-"escape:(\+\-\&\&\|\|\!\(\)\{\}\[\]\^\"\~\*\?\:\\)" FAIL
+"C++" -> ""
 
+"O\'Shea" -> ""
 
-//---------------- primaryClause
+"$e^{+}e^{-}$" -> ""
 
-"this (that)" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+"hep-ph/0204133" -> ""
 
-"this ((that))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+"BlaCK hOlEs" -> ""
 
-"(this) ((((((that))))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+"пушкин" -> ""
 
-"(this) (that)" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))"
+// Lemaître
+"author:Lemaitre" -> ""
 
-"this +(that)" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+"muon*" -> ""
 
-"this ((((+(that)))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+"CERN-TH*31" -> ""
 
-"this (+(((+(that)))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+"a*" -> ""
 
-"this +((((+(that)))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+"\"Neutrino mass*\"" -> ""
 
-"this +(+((((that)))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) BOOST (AND (CLAUSE (MODIFIER +) BOOST (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))))"
+"author:ellis" -> ""
 
-"this (+(((+(that))))" FAIL
+"author:ellis title:muon*" -> ""
 
-"this (++(((+(that)))))" FAIL
+"experiment:NA60 year:2001" -> ""
 
-"this (+(that)^7)" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+"title:/^E.*s$/" -> ""
 
-"this ((((+(that)^7))))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+"author:/^Ellis, (J|John)$/" -> ""
 
-"this (-(that)^7))" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER -) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+"title:/dense ([^ l]* )?matter/" -> ""
 
-"this -((that))^7" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER -) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))))))"
+"collection:PREPRINT -year:/^[0-9]{4}([\?\-]|\-[0-9]{4})?$/" -> ""
 
-"this +(that thus)^7" -> "(AND (ATOM MODIFIER FIELD (VALUE (QNORMAL this))) (CLAUSE (MODIFIER +) (BOOST 7) (AND (ATOM MODIFIER FIELD (VALUE (QNORMAL that))) (ATOM MODIFIER FIELD (VALUE (QNORMAL thus))))))"
+"collection:PREPRINT -year:/^[[:digit:]]{4}([\?\-]|\-[[:digit:]]{4})?$/" -> ""
 
+"muon decay year:1983->1992" -> ""
 
-//---------------- atom
-atom:
+"author:\"Ellis, J\"->\"Ellis, Qqq\"" -> ""
 
-"field:value" -> "(ATOM MODIFIER (FIELD field) (VALUE (QNORMAL value)))"
+"refersto:reportnumber:hep-th/0201100" -> ""
 
-"field:\"value\"" -> "(ATOM MODIFIER (FIELD field) (VALUE (QPHRASE \"value\")))"
+"citedby:author:klebanov" -> ""
 
-"field:(one two three)" -> "(ATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM MODIFIER (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+"refersto:author:\"Klebanov, I\"" -> ""
 
-"field:(one +two -three)" -> "(ATOM MODIFIER (FIELD field) (VALUE (ATOM MODIFIER (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM (MODIFIER -) (VALUE (QNORMAL three)))))"
+"refersto:keyword:gravitino" -> ""
 
-"+field:(-one +two three)" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+"author:klebanov AND citedby:author:papadimitriou NOT refersto:author:papadimitriou" -> ""
 
-"-field:(-one +two three)" -> "(ATOM (MODIFIER -) (FIELD field) (VALUE (ATOM (MODIFIER -) (VALUE (QNORMAL one))) (ATOM (MODIFIER +) (VALUE (QNORMAL two))) (ATOM MODIFIER (VALUE (QNORMAL three)))))"
+"refersto:/author:\"Klebanov, I\" title:O(N)/" -> ""
 
-"+value" -> "(ATOM (MODIFIER +) FIELD (VALUE (QNORMAL value)))"
+"author:ellis -muon* +abstract:\'dense quark matter\' year:200*" -> ""
 
-"-value" -> "(ATOM (MODIFIER -) FIELD (VALUE (QNORMAL value)))"
+"higgs or reference:higgs or fulltext:higgs" -> ""
 
-"+field:" FAIL
+"author:lin fulltext:Schwarzschild fulltext:AdS reference:\"Adv. Theor. Math. Phys.\"" -> ""
 
-"+field:[this TO that]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+// -- from: http://inspirehep.net/help/search-tips (05-12-2011)
 
-"+field:[   this TO that   ]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+//"find a l everett or t light higgs and j phys.rev.lett. and primarch hep-ex"
+// logical operators (no precedence)
+"a:everett or t:light higgs and j:phys.rev.lett. and primarch:hep-ex" -> ""
 
-"+field:{this TO that}" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEEX (QNORMAL this) (QNORMAL that))))"
+// find a rober* and t dyso*
+"a:rober* and t:dyso*" -> ""
 
-"+field: [this TO that]" -> "(ATOM (MODIFIER +) (FIELD field) (VALUE (QRANGEIN (QNORMAL this) (QNORMAL that))))"
+"find j phys.rev.lett.,62,1825" -> ""
 
-//---------------- value
+"find j prlta and a smith and c hep-th/9711200" -> ""
 
-value:
+"find j \"Phys.Lett.,B*\" or j Phys.Rev.Lett. and a d rainwater" -> ""
 
-"this" -> "(QNORMAL this)"
+"find d 1997-11" -> ""
 
-"th\*is" -> "(QNORMAL th\\*is)"
+"find da today and title neutrino*" -> ""
 
-"this999" -> "(QNORMAL this999)"
+"find da today - 2 and primarch hep-th" -> ""
 
-"this0.9" -> "(QNORMAL this0.9)"
+"find da today - 2 and primarch hep-th" -> ""
 
-"\"this\"" -> "(QPHRASE \"this\")"
+"find eprint arxiv:0711.2908 or arxiv:0705.4298 or eprint hep-ph/0504227" -> ""
 
-"\"this  \"" -> "(QPHRASE \"this  \")"
+"find a unruh or t cauchy not t problem and primarch gr-qc" -> ""
 
-"\"this  \"   " -> "(QPHRASE \"this  \")"
+"find a m albrow and j phys.rev.lett. and t quark* and topcite 137+" -> ""
 
-"\"  this  \"" -> "(QPHRASE \"  this  \")"
+"find a bando and topcite 100->500" -> ""
 
-"\"this*\"" -> "(QPHRASETRUNC \"this*\")"
+"find c Phys.Rev.Lett.,28,1421 or c arXiv:0711.4556" -> ""
 
-"\"this*a\"" -> "(QPHRASETRUNC \"this*a\")"
+"find af harvard u." -> ""
 
-"\"this?\"" -> "(QPHRASETRUNC \"this?\")"
+"find citedby hep-th/9711200 and author cvetic" -> ""
 
-"\"this?a\"" -> "(QPHRASETRUNC \"this?a\")"
+"find a parke and citedby author witten" -> ""
 
-"\"this val*\"" -> "(QPHRASETRUNC \"this val*\")"
+"find a witten and refersto author parke, s j" -> ""
 
-"\"this val?\"" -> "(QPHRASETRUNC \"this val?\")"
+"find refersto hep-th/9711200 and t nucl*" -> ""
 
-"\"this*val?\"" -> "(QPHRASETRUNC \"this*val?\")"
+"find refersto a parke or refersto a lykken and a witten" -> ""
 
-"\"?this\"" -> "(QPHRASETRUNC \"?this\")"
+"fin af oxford u. and refersto title muon*" -> ""
 
-"\"*this\"" -> "(QPHRASETRUNC \"*this\")"
+"find refersto j Phys.Rev.Lett." -> ""
 
-"\"+() AND that\"" -> "(QPHRASE \"+() AND that\")"
+"find ft \"faster than light\"" -> ""
 
-"\"func(*) AND that\"" -> "(QPHRASETRUNC \"func(*) AND that\")"
+"find ft neutrino axion \"dark matter\" cosmology" -> ""
 
+"find caption soft SUSY breaking" -> ""
 
+"find a t dorigo and tc p" -> ""
 
+ 
 
 
-"[this TO that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this that]" -> "(QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO *]" -> "(QRANGEIN (QNORMAL this) QANYTHING)"
-
-"[this]" -> "(QRANGEIN (QNORMAL this) QANYTHING)"
-
-"[* this]" -> "(QRANGEIN QANYTHING (QNORMAL this))"
-
-"[* TO this]" -> "(QRANGEIN QANYTHING (QNORMAL this))"
-
-"[\"this\" TO \"that*\"]" -> "(QRANGEIN (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
-
-"[\"#$%^&\" TO \"&*()\"]" -> "(QRANGEIN (QPHRASE \"#$%^&\") (QPHRASETRUNC \"&*()\"))"
-
-"{this TO that}" -> "(QRANGEEX (QNORMAL this) (QNORMAL that))"
-
-"{this that}" -> "(QRANGEEX (QNORMAL this) (QNORMAL that))"
-
-"{this TO *}" -> "(QRANGEEX (QNORMAL this) QANYTHING)"
-
-"{* this}" -> "(QRANGEEX QANYTHING (QNORMAL this))"
-
-"{* TO this}" -> "(QRANGEEX QANYTHING (QNORMAL this))"
-
-"{\"this\" TO \"that*\"}" -> "(QRANGEEX (QPHRASE \"this\") (QPHRASETRUNC \"that*\"))"
-
-"{\"#$%^&\" TO \"&*()\"}" -> "(QRANGEEX (QPHRASE \"#$%^&\") (QPHRASETRUNC \"&*()\"))"
-
-"{}" FAIL
-
-"[]" FAIL
-
-
-
-
-"this*" -> "(QTRUNCATED this*)"
-
-"*this*" -> "(QTRUNCATED *this*)"
-
-"*this" -> "(QTRUNCATED *this)"
-
-"th*is" -> "(QTRUNCATED th*is)"
-
-"this?" -> "(QTRUNCATED this?)"
-
-"?this?" -> "(QTRUNCATED ?this?)"
-
-"?this" -> "(QTRUNCATED ?this)"
-
-"th?is" -> "(QTRUNCATED th?is)"
-
-"th?is*" -> "(QTRUNCATED th?is*)"
-
-"*th?is" -> "(QTRUNCATED *th?is)"
-
-//TODO
-//"th*?is" FAIL
-//"th****?is" FAIL
-
-"*" FAIL
-
-
-
-
-// testing term modifiers
-
-"this^0.5" -> "(MODIFIER (BOOST 0.5) FUZZY) (QNORMAL this)"
-
-"this^5" -> "(MODIFIER (BOOST 5) FUZZY) (QNORMAL this)"
-
-"this^9999999999999" -> "(MODIFIER (BOOST 9999999999999) FUZZY) (QNORMAL this)"
-
-"this^6666.o" FAIL
-
-"this^ 5" -> "(MODIFIER (BOOST 5) FUZZY) (QNORMAL this)"
-
-
-//TODO: this should make '9' as a new term
-"this^5~ 9" -> "(MODIFIER (BOOST 5) (FUZZY 9)) (QNORMAL this)"  
-
-"this^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QNORMAL this)"
-
-"this^5~7" -> "(MODIFIER (BOOST 5) (FUZZY 7)) (QNORMAL this)"
-
-"this^5~8.9999" -> "(MODIFIER (BOOST 5) (FUZZY 8.9999)) (QNORMAL this)"
-
-"this~" -> "(MODIFIER BOOST (FUZZY 0.5)) (QNORMAL this)"
-
-"this~0.6" -> "(MODIFIER BOOST (FUZZY 0.6)) (QNORMAL this)"
-
-
-//TODO: either make the term_modifier accept any order or ~ and ^ or throw error
-// now it parses it wrongly (MODIFIER BOOST (FUZZY 5)) (QNORMAL this)
-"this~5^7" FAIL
-
-"this^~" FAIL
-
-"\"this that\"^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QPHRASE \"this that\")"
-
-"\"this that\"^5~6" -> "(MODIFIER (BOOST 5) (FUZZY 6)) (QPHRASE \"this that\")"
-
-"\"this that*\"^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QPHRASETRUNC \"this that*\")"
-
-"\"this that*\"^5~6" -> "(MODIFIER (BOOST 5) (FUZZY 6)) (QPHRASETRUNC \"this that*\")"
-
-"[this TO that]^5" -> "(MODIFIER (BOOST 5) FUZZY) (QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO that]^5~" -> "(MODIFIER (BOOST 5) (FUZZY 0.5)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO that]^5~0.6" -> "(MODIFIER (BOOST 5) (FUZZY 0.6)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO that]~" -> "(MODIFIER BOOST (FUZZY 0.5)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
-
-"[this TO that]~9" -> "(MODIFIER BOOST (FUZZY 9)) (QRANGEIN (QNORMAL this) (QNORMAL that))"
