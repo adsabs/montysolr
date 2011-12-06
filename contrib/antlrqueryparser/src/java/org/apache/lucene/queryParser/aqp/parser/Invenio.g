@@ -34,8 +34,13 @@ tokens {
 mainQ : 
 	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
 	;
-   
-  
+
+clauseOr
+  : 
+  clauseBasic (operator^ clauseBasic)*
+  ;
+     
+/*  
 clauseOr
   : (first=clauseAnd -> $first) (or others=clauseAnd -> ^(OPERATOR["OR"] clauseAnd+ ))*
   ;
@@ -49,8 +54,9 @@ clauseNot
   ;
   
 clauseNear
-  : (first=clauseBasic -> $first) (near others=clauseBasic -> ^(near clauseBasic+) )* 
+  : (first=clauseBasic -> $first) (near others=clauseBasic -> ^(near clauseBasic+ ))* 
   ;
+*/
   
 clauseBasic
 	:
@@ -187,6 +193,7 @@ normal
 	:	
 	TERM_NORMAL
 	| NUMBER
+	| IDENTIFIER
 	;	
 
 	
@@ -217,9 +224,10 @@ operator: (
 	| NEAR -> OPERATOR["NEAR"]
 	);
 
-modifier: 
+modifier:
 	PLUS -> PLUS["+"]
-	| MINUS -> MINUS["-"];
+	| MINUS -> MINUS["-"]
+	;
 
 
 /*
@@ -291,7 +299,10 @@ date	:
  * ================================================================
  */
 
-
+IDENTIFIER
+	:	('arXiv'|'arxiv') ':' TERM_CHAR+
+	| INT+ '.' INT+ '/' INT+ ('.' INT+)?
+	;
 
 LPAREN  : '(';
 
@@ -305,7 +316,7 @@ COLON   : ':' ;  //this must NOT be fragment
 
 PLUS  : '+' ;
 
-MINUS : ('-'|'\!');
+MINUS : '-';
 
 STAR  : '*' ;
 
@@ -329,15 +340,16 @@ DQUOTE
 SQUOTE
 	:	'\'';
 
-
+BAR	:	'#'
+	;
 
 
 TO	:	'TO';
 
 /* We want to be case insensitive */
-AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
-OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
-NOT   : ('n' | 'N') ('o' | 'O') ('t' | 'T');
+AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D')) | (AMPER AMPER?) ;
+OR  : (('o' | 'O') ('r' | 'R')) | (VBAR VBAR?);
+NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T')) | MINUS;
 NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 
@@ -374,14 +386,14 @@ fragment TERM_START_CHAR
 	      | '\'' | '\"' 
 	      | '(' | ')' | '[' | ']' | '{' | '}'
 	      | '+' | '-' | '!' | ':' | '~' | '^' 
-	      | '?' | '*' | '\\'
+	      | '?' | '*' | '\\' | '#'
 	      )
 	 | ESC_CHAR );  	
 
 
 fragment TERM_CHAR
 	:	
-	(TERM_START_CHAR | '-' | '+')
+	(TERM_START_CHAR | '-' | '+' | '#')
 	;
 
 
@@ -410,10 +422,12 @@ TERM_TRUNCATED:
 
 PHRASE	
 	:	
-	DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
+	DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'|'\\\''))+ DQUOTE
+	| SQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'|'\\\''))+ SQUOTE
 	;
 
 PHRASE_ANYTHING	:	
 	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
+	| SQUOTE (ESC_CHAR|~('\"'|'\\'|'\\\''))+ SQUOTE
 	;
 

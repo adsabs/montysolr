@@ -94,8 +94,8 @@ def run(grammar_name, basedir='',
             
             tree, errors = p.communicate()
             if tree:
-                q = query.replace('\\', '\\\\').replace('"', '\\"')
-                t = tree.strip().replace('"', '\\"').replace('\\', '\\\\')
+                q = query.replace('\\', '\\\\').replace('"', '\\"').replace('\'', '\\\'')
+                t = tree.strip().replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'")
                 print "\"%s\" -> \"%s\"" % (q, t)
             else:
                 print 'Error generating AST for: ' + query
@@ -153,7 +153,7 @@ def load_gunit_file(gunit_file):
             test_cases.setdefault(section, [])
         elif len(parts) > 1 and parts[1].lower() != 'fail':
             query = parts[0]
-            query = query.replace('\\\"', '"').replace('\\\\', '\\')
+            query = query.replace('\\\"', '"').replace('\\\'', '\'').replace('\\\\', '\\')
             test_cases[section].append(query)
     fi.close()
     return test_cases
