@@ -22,6 +22,7 @@ tokens {
   QRANGEEX;
   QANYTHING;
   QDATE;
+  AMBIGUITY;
 }
 
 @header{
@@ -32,7 +33,8 @@ tokens {
 }
 
 mainQ : 
-	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
+	operator clauseOr+ -> ^(AMBIGUITY["leftmost-operation"] operator clauseOr+)
+	| clauseOr+
 	;
 
 clauseOr
@@ -225,8 +227,9 @@ operator: (
 	);
 
 modifier:
-	PLUS -> PLUS["+"]
-	| MINUS -> MINUS["-"]
+	//PLUS -> PLUS["+"]
+	//| MINUS -> MINUS["-"]
+	BAR
 	;
 
 
@@ -314,9 +317,9 @@ RBRACK  : ']';
 
 COLON   : ':' ;  //this must NOT be fragment
 
-PLUS  : '+' ;
+fragment PLUS  : '+' ;
 
-MINUS : '-';
+fragment MINUS : '-';
 
 STAR  : '*' ;
 
@@ -347,7 +350,7 @@ BAR	:	'#'
 TO	:	'TO';
 
 /* We want to be case insensitive */
-AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D')) | (AMPER AMPER?) ;
+AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D')) | (AMPER AMPER?) | PLUS;
 OR  : (('o' | 'O') ('r' | 'R')) | (VBAR VBAR?);
 NOT   : (('n' | 'N') ('o' | 'O') ('t' | 'T')) | MINUS;
 NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
