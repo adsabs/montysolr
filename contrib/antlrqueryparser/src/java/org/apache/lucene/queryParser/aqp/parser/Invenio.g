@@ -33,13 +33,14 @@ tokens {
 }
 
 mainQ : 
-	operator clauseTop+ -> ^(AMBIGUITY["leftmost-operation"] operator clauseTop+)
-	| clauseTop+
+	operator clauseTop -> ^(AMBIGUITY["leftmost-operation"] operator clauseTop+)
+	| clauseTop
 	;
 
 clauseTop
   :
-  clauseOr -> ^(OPERATOR["DEFOP"] clauseOr)
+  //(clauseOr -> ^(OPERATOR["DEFOP"] $clauseTop clauseOr))+
+  (clauseOr^)+
   ;
 
 clauseOr
