@@ -190,7 +190,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
   }
 
   private int originalMaxClauses;
-  private boolean debugParser = false;
+  protected boolean debugParser = false;
 
   @Override
   public void setUp() throws Exception {

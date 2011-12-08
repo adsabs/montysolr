@@ -29,6 +29,7 @@ import org.apache.lucene.queryParser.aqp.builders.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.parser.AqpSyntaxParser;
+import org.apache.lucene.queryParser.aqp.parser.AqpSyntaxParserInvenio;
 import org.apache.lucene.queryParser.aqp.processors.AqpDebuggingQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.aqp.processors.AqpQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
@@ -152,6 +153,19 @@ public class AqpQueryParser extends QueryParserHelper {
 				new AqpQueryNodeProcessorPipeline(null),
 				new AqpStandardQueryTreeBuilder());
 	}
+	
+	public AqpQueryParser(
+			AqpStandardQueryConfigHandler aqpStandardQueryConfigHandler,
+			AqpSyntaxParser aqpSyntaxParser,
+			AqpQueryNodeProcessorPipeline aqpQueryNodeProcessorPipeline,
+			AqpStandardQueryTreeBuilder aqpStandardQueryTreeBuilder) {
+		
+		super(aqpStandardQueryConfigHandler, 
+				aqpSyntaxParser,
+				aqpQueryNodeProcessorPipeline,
+				aqpStandardQueryTreeBuilder);
+	}
+	
 
 	/**
 	 * Constructs a {@link StandardQueryParser} object and sets an
@@ -170,6 +184,7 @@ public class AqpQueryParser extends QueryParserHelper {
 		this();
 		this.setAnalyzer(analyzer);
 	}
+
 
 	@Override
 	public String toString() {
