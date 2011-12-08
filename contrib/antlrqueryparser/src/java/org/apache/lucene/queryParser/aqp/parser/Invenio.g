@@ -431,7 +431,7 @@ fragment TERM_START_CHAR
 
 fragment TERM_CHAR
 	:	
-	(TERM_START_CHAR | '-' | '+' | '#' | '/')
+	(TERM_START_CHAR | '-' | '+' | '#' | '/' | '\'')
 	;
 
 

@@ -188,7 +188,7 @@ mainQ:
 
 "C++" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL C++))))"
 
-"O\'Shea" -> ""
+"O\'Shea" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL O'Shea))))"
 
 "$e^{+}e^{-}$" -> ""
 
