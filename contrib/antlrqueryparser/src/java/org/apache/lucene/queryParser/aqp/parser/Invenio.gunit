@@ -88,7 +88,7 @@ mainQ:
 "(expr1) - expr2 | \"expressions - in + quotes | (are) not - parsed \" - (expr3) | expr4" -> "(OR (NOT (OR (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expressions - in + quotes | (are) not - parsed \"))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
 
 // ['+', 'expr1', '-', 'expr2', '|', "'expressions - in + quotes | (are) not - parsed '", '-', 'expr3', '|', 'expr4']
-"(expr1) - expr2 | \'expressions - in + quotes | (are) not - parsed \' - (expr3) | expr4" -> "(OR (NOT (NOT (NOT (OR (AND (NOT (OR (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expressions))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL in))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL quotes))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL are))))) <unexpected: [@28,57:57=\'-\',<26>,1:57], resync=->) (MODIFIER (TMODIFIER (FIELD (QNORMAL parsed))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
+"(expr1) - expr2 | \'expressions - in + quotes | (are) not - parsed \' - (expr3) | expr4" -> "(OR (NOT (OR (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QPHRASE 'expressions - in + quotes | (are) not - parsed '))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
 
 // ['+', 'expr1', '+', "\\'", '+', 'expr2', '+', 'expr3', '-', 'expr4', '+', "\\'", '+', 'expr5']
 "expr1 \\\' expr2 +(expr3) -expr4 \\\' + (expr5)" -> "(AND (DEFOP (NOT (AND (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\'))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\'))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr5)))))"
@@ -122,7 +122,7 @@ mainQ:
 "refersto:(author:\"s parke\" or author:ellis)" -> "(refersto (OR (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"s parke\")))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis))))))" 
 
 // ['+', 'refersto:"author:\'s parke\' | author:ellis"']
-"refersto:(author:\'s parke\' or author:ellis)" -> "" 
+"refersto:(author:\'s parke\' or author:ellis)" -> "(refersto (OR (MODIFIER (TMODIFIER (FIELD author (QPHRASE 's parke')))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis))))))" 
 
 // ['+', 'refersto:author:"s parke"']
 "refersto:(author:\"s parke\")" -> "(refersto (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"s parke\")))))" 
@@ -241,7 +241,7 @@ mainQ:
 
 "refersto:/author:\"Klebanov, I\" title:O(N)/" -> "(refersto (MODIFIER (TMODIFIER (FIELD (QREGEX /author:\"Klebanov, I\" title:O(N)/)))))"
 
-"author:ellis -muon* +abstract:'dense quark matter' year:200*" -> "(DEFOP (AND (NOT (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QTRUNCATED muon*))))) <unexpected: [@8,21:28=\'abstract\',<51>,1:21], resync=abstract>) <unexpected: [@8,21:28=\'abstract\',<51>,1:21], resync=abstract:>)"
+"author:ellis -muon* +abstract:'dense quark matter' year:200*" -> "(DEFOP (AND (NOT (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QTRUNCATED muon*))))) (MODIFIER (TMODIFIER (FIELD abstract (QPHRASE 'dense quark matter'))))) (MODIFIER (TMODIFIER (FIELD year (QTRUNCATED 200*)))))"
 
 "author:ellis -muon* +abstract:\"dense quark matter\" year:200*" -> "(DEFOP (AND (NOT (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QTRUNCATED muon*))))) (MODIFIER (TMODIFIER (FIELD abstract (QPHRASE \"dense quark matter\"))))) (MODIFIER (TMODIFIER (FIELD year (QTRUNCATED 200*)))))"
 

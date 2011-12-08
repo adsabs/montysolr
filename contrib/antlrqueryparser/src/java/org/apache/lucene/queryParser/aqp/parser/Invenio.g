@@ -111,10 +111,10 @@ value
 	: 
 	range_term_in -> ^(QRANGEIN range_term_in)
 	| range_term_ex -> ^(QRANGEEX range_term_ex) 
-	| quoted -> ^(QPHRASE quoted)
-	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
 	| normal -> ^(QNORMAL normal)	
 	| truncated -> ^(QTRUNCATED truncated)	
+	| quoted -> ^(QPHRASE quoted)
+	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
 	| QMARK -> ^(QTRUNCATED QMARK)
 	| REGEX -> ^(QREGEX REGEX)
   	;
@@ -461,12 +461,12 @@ TERM_TRUNCATED:
 PHRASE	
 	:	
 	DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'|'\\\''))+ DQUOTE
-	| SQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'|'\\\''))+ SQUOTE
+	| SQUOTE (ESC_CHAR|~('\''|'\\'|'?'|'*'|'\\\''))+ SQUOTE
 	;
 
 PHRASE_ANYTHING	:	
 	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
-	| SQUOTE (ESC_CHAR|~('\"'|'\\'|'\\\''))+ SQUOTE
+	| SQUOTE (ESC_CHAR|~('\''|'\\'|'\\\''))+ SQUOTE
 	;
 
 REGEX	
