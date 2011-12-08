@@ -12,114 +12,120 @@ mainQ:
 
 //"+(author:\"richter, burton*\" | exactauthor:\"richter, b *\" | exactauthor:\"richter, b\" | exactauthor:\"richter, bu\" | exactauthor:\"richter, bur\" | exactauthor:\"richter, burt\" | exactauthor:\"richter, burto\" | author:\"richter, burton, *\" +title:quark)" -> "(DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (OR (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"richter, burton*\")))) (MODIFIER"
 
-"+(author:\"richter, burton*\" | exactauthor:\"richter, b *\" | exactauthor:\"richter, b\" | exactauthor:\"richter, bu\" | exactauthor:\"richter, bur\" | exactauthor:\"richter, burt\" | exactauthor:\"richter, burto\" | author:\"richter, burton, *\" +title:quark)" -> "(DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (OR (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"richter, burton*\")))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASETRUNC \"richter, b *\")))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, b\")))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, bu\")))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, bur\")))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, burt\")))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, burto\")))) (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"richter, burton, *\"))))) (MODIFIER + (TMODIFIER (FIELD title (QNORMAL quark)))))))))"
+"+(author:\"richter, burton*\" | exactauthor:\"richter, b *\" | exactauthor:\"richter, b\" | exactauthor:\"richter, bu\" | exactauthor:\"richter, bur\" | exactauthor:\"richter, burt\" | exactauthor:\"richter, burto\" | author:\"richter, burton, *\" +title:quark)" -> "(leftmost-operation AND (AND (OR (OR (OR (OR (OR (OR (OR (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"richter, burton*\")))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASETRUNC \"richter, b *\"))))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, b\"))))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, bu\"))))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, bur\"))))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, burt\"))))) (MODIFIER (TMODIFIER (FIELD exactauthor (QPHRASE \"richter, burto\"))))) (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"richter, burton, *\"))))) (MODIFIER (TMODIFIER (FIELD title (QNORMAL quark))))))"
 
-"expr1" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))))"  //+ expr
+//+ expr
+"expr1" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL expr1))))"
 
-"(expr1)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))))" //['+', 'expr1', '-', 'expr2']
+//['+', 'expr1', '-', 'expr2']
+"(expr1)" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL expr1))))"
 
-"expr1 - (expr2)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))))))" // ['+', 'expr1', '-', 'expr2']
+// ['+', 'expr1', '-', 'expr2']
+"expr1 - (expr2)" -> "(NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))" 
 
-"+ expr1 - (expr2)" -> "(DEFOP (MODIFIER + (TMODIFIER (FIELD (QNORMAL expr1)))) (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))))))" // ['+', 'expr1', '-', 'expr2']
+// ['+', 'expr1', '-', 'expr2']
+"+ expr1 - (expr2)" -> "(leftmost-operation AND (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))))"
 
-"+ expr1 - (expr2)" -> "(DEFOP (MODIFIER + (TMODIFIER (FIELD (QNORMAL expr1)))) (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))))))" // ['+', 'expr1', '+', 'expr2']
+// ['+', 'expr1', '+', 'expr2']
+"+ expr1 - (expr2)" -> "(leftmost-operation AND (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))))"
 
-"expr1 (expr2)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))" // ['+', 'expr1', '-', 'expr2']
+// ['+', 'expr1', '-', 'expr2']
+"expr1 (expr2)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))"
 
-"(expr1) - expr2" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr2)))))" // ['+', 'expr1', '-', 'expr2']
+// ['+', 'expr1', '-', 'expr2']
+"(expr1) - expr2" -> "(NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))"
 
-"(expr1)-(expr2)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))))))" // ['-', 'expr1', '-', 'expr2']
+// ['-', 'expr1', '-', 'expr2']
+"(expr1)-(expr2)" -> "(NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))"
 
-"(expr1) - expr2 + (expr3)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr2)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))))))" // ['+', 'expr1', '-', 'expr2', '+', 'expr3']
+// ['+', 'expr1', '-', 'expr2', '+', 'expr3']
+"(expr1) - expr2 + (expr3)" -> "(AND (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))"
 
 // ['+', 'expr1', '-', 'expr2', '+', 'expr3', '|', 'expr4']
-"(expr1) - expr2 + (expr3) | expr4" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr2)))) (OR (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))))"
+"(expr1) - expr2 + (expr3) | expr4" -> "(OR (AND (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
 
 // ['+', 'expr1', '-', 'expr2', '+', 'expr3 | expr4', '|', '"expr5 + expr6"']
-"(expr1) - expr2 + (expr3 | expr4) | \"expr5 + expr6\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr2)))) (OR (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))))))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr5 + expr6\"))))))"
+"(expr1) - expr2 + (expr3 | expr4) | \"expr5 + expr6\"" -> "(OR (AND (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr5 + expr6\")))))"
 
 // ['+', '"expr1"', '+', 'expr2', '+', 'expr3']
-"\"expr1\" (expr2) expr3" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr1\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))"
+"\"expr1\" (expr2) expr3" -> "(DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr1\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))"
 
 // '+', '"expr1"->"expr2"
 "\"expr1\"\"expr2\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr1\")))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr2\")))))"
 
 // ['+', 'expr1', '+', 'expr2', '+', 'expr3', '|', 'expr4']
-"(expr1) expr2 (expr3) | expr4" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))))"
+"(expr1) expr2 (expr3) | expr4" -> "(OR (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
 
 // ['+', 'expr1', '+', 'expr2', '-', 'expr3'
-"((expr1)) + (expr2 - expr3)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr3)))))))))"
+"((expr1)) + (expr2 - expr3)" -> "(AND (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))))"
 
 // ['+', 'expr1', '+', '- expr2 | expr3 | expr4']
-"expr1 - (expr2 - (expr3 | expr4))" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))))))))))))"
+"expr1 - (expr2 - (expr3 | expr4))" -> "(NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))))"
 
 "(expr" FAIL
 
 "expr)" FAIL
 
 // ['+', 'expr1', '-', 'expr2', '+', 'expr3', '|', 'expr4']
-"(expr1) not expr2 and (expr3) or expr4" -> "(DEFOP (OR (AND (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))))"
+"(expr1) not expr2 and (expr3) or expr4" -> "(OR (AND (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
 
 // ['+', 'expr1', '-', 'expr2', '|', '"expressions not in and quotes | (are) not - parsed "', '-', 'expr3', '|', 'expr4']
-"(expr1) not expr2 | \"expressions not in and quotes | (are) not - parsed \" - (expr3) or expr4" -> "(DEFOP (OR (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expressions not in and quotes | (are) not - parsed \"))))) (OR (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))))"
+"(expr1) not expr2 | \"expressions not in and quotes | (are) not - parsed \" - (expr3) or expr4" -> "(OR (NOT (OR (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expressions not in and quotes | (are) not - parsed \"))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
 
 // ['+', 'expr1', '+', '\\"', '+', 'expr2', '+', 'foo(expr3)', '-', 'expr4', '+', '\\"', '+', 'expr5']
-"expr1 \\\" expr2 foo(expr3) not expr4 \\\" and (expr5)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))) (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr5))))))"
+"expr1 \\\" expr2 foo(expr3) not expr4 \\\" and (expr5)" -> "(AND (DEFOP (NOT (DEFOP (DEFOP (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\"))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL foo))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\"))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr5)))))"
 
-// XXX: example of the confusion of '+' and AND
 // ['+', 'expr1 + expr2', '|', 'expr3'] 
-"(expr1 and expr2) or expr3" -> "(DEFOP (OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))))"
+"(expr1 and expr2) or expr3" -> "(OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))"
 
-"(expr1 and expr2) or expr3" -> "(DEFOP (OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))))"
+"(expr1 + expr2) | expr3" -> "(OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))"
 
-"(expr1 + expr2) | expr3" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER + (TMODIFIER (FIELD (QNORMAL expr2)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))))"
+"(expr1 and expr2) or expr3" -> "(OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))"
 
-"(expr1 and expr2) or expr3" -> "(DEFOP (OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))))"
-
-"(expr1 + expr2) or expr3" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER + (TMODIFIER (FIELD (QNORMAL expr2)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))))"
+"(expr1 + expr2) or expr3" -> "(OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))"
 
 // ['+', 'expr1', '-', 'expr2', '|', '"expressions - in + quotes | (are) not - parsed "', '-', 'expr3', '|', 'expr4']
-"(expr1) - expr2 | \"expressions - in + quotes | (are) not - parsed \" - (expr3) | expr4" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (OR (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr2)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expressions - in + quotes | (are) not - parsed \"))))) (OR (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))))"
+"(expr1) - expr2 | \"expressions - in + quotes | (are) not - parsed \" - (expr3) | expr4" -> "(OR (NOT (OR (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expressions - in + quotes | (are) not - parsed \"))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
 
 // ['+', 'expr1', '-', 'expr2', '|', "'expressions - in + quotes | (are) not - parsed '", '-', 'expr3', '|', 'expr4']
-"(expr1) - expr2 | \'expressions - in + quotes | (are) not - parsed \' - (expr3) | expr4" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (OR (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr2)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expressions))))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL in)))) (OR (MODIFIER + (TMODIFIER (FIELD (QNORMAL quotes)))) (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL are)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL parsed)))))) (OR (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))))"
+"(expr1) - expr2 | \'expressions - in + quotes | (are) not - parsed \' - (expr3) | expr4" -> "(OR (NOT (NOT (NOT (OR (AND (NOT (OR (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expressions))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL in))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL quotes))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL are))))) <unexpected: [@28,57:57=\'-\',<26>,1:57], resync=->) (MODIFIER (TMODIFIER (FIELD (QNORMAL parsed))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4)))))"
 
-
-"expr1 \\' expr2 +(expr3) -expr4 \\' + (expr5)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\')))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr4)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\')))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr5)))))))))" // ['+', 'expr1', '+', "\\'", '+', 'expr2', '+', 'expr3', '-', 'expr4', '+', "\\'", '+', 'expr5']
+// ['+', 'expr1', '+', "\\'", '+', 'expr2', '+', 'expr3', '-', 'expr4', '+', "\\'", '+', 'expr5']
+"expr1 \\\' expr2 +(expr3) -expr4 \\\' + (expr5)" -> "(AND (DEFOP (NOT (AND (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\'))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\'))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr5)))))"
 
 // ['+', 'expr1', '+', '\\"', '+', 'expr2', '+', 'expr3', '-', 'expr4', '+', '\\"', '+', 'expr5']
-"expr1 \\\' expr2 +(expr3) -expr4 \\\' + (expr5)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\')))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3)))))))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL expr4)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\')))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr5)))))))))"
+"expr1 \\\' expr2 +(expr3) -expr4 \\\' + (expr5)" -> "(AND (DEFOP (NOT (AND (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\'))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr4))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\\'))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr5)))))"
 
 
 // ['+', '"expr1"', '-', 'expr2']
-"\"expr1\" - (expr2)" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr1\")))) (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))))))"
+"\"expr1\" - (expr2)" -> "(NOT (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr1\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))"
 
 // ['-', '"expr1"', '-', 'expr2']
-"-\"expr1\" - (expr2)" -> "(DEFOP (MODIFIER - (TMODIFIER (FIELD (QPHRASE \"expr1\")))) (CLAUSE (MODIFIER - (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2)))))))))"
+"-\"expr1\" - (expr2)" -> "(leftmost-operation NOT (NOT (MODIFIER (TMODIFIER (FIELD (QPHRASE \"expr1\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL expr2))))))"
 
 // ['+', 'p0', '|', 'p1', '|', 'p2', '|', 'p3', '|', 'p4']
-"p0 or p1 or p2 or p3 or p4" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL p0)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p2)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p3)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p4))))))"
+"p0 or p1 or p2 or p3 or p4" -> "(OR (OR (OR (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL p0)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p1))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p2))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p3))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p4)))))"
 
 //  ['+', 'p0 | p1', '-', 'p2']
-"(p0 or p1) not p2" -> "(DEFOP (NOT (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL p0)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p1))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p2))))))"
+"(p0 or p1) not p2" -> "(NOT (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL p0)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p1))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL p2)))))"
 
 // ['+', 'foo', '|', 'bar']
-"foo oR bar" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar))))))"
+"foo oR bar" -> "(OR (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))"
 
 // ['+', 'ellis']
-"(ellis )" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))))"
+"(ellis )" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL ellis))))"
 
 // ['+', 'u(1) | sl(2,z)']
 "(U(1) or SL(2,Z))" -> "" 
 
 // ['+', 'refersto:\'author:"s parke" | author:ellis\'']
-"refersto:(author:\"s parke\" or author:ellis)" -> "" 
+"refersto:(author:\"s parke\" or author:ellis)" -> "(refersto (OR (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"s parke\")))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis))))))" 
 
 // ['+', 'refersto:"author:\'s parke\' | author:ellis"']
 "refersto:(author:\'s parke\' or author:ellis)" -> "" 
 
 // ['+', 'refersto:author:"s parke"']
-"refersto:(author:\"s parke\")" -> "" 
+"refersto:(author:\"s parke\")" -> "(refersto (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"s parke\")))))" 
 
 // ['+', 'e(+)e(-)']
 "e(+)e(-)" -> "" 
@@ -135,191 +141,191 @@ mainQ:
 "Measurements of CP-conserving trilinear gauge boson couplings WWV (V gamma, Z) in e(+)e(-) collisions at LEP2" -> "" 
 
 // ['+', 'refersto:"author:ellis | author:hawking"']
-"refersto:(author:ellis or author:hawking)" -> "" 
+"refersto:(author:ellis or author:hawking)" -> "(refersto (OR (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL hawking))))))" 
 
 
 
 // -- from: http://inspirehep.net/help/search-guide
 
-"ellis standard model" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL standard)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL model)))))"
+"ellis standard model" -> "(DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL standard))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL model)))))"
 
-"author:\"Ellis, J\" title:(muon neutrino) year:2001" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"Ellis, J\")))) (CLAUSE (MODIFIER (TMODIFIER (FIELD title (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL neutrino))))))))) (MODIFIER (TMODIFIER (FIELD year (QNORMAL 2001)))))"
-
-"ellis muon" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
-
-"2001" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL 2001)))))"
-
-"\"Ellis, J\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"Ellis, J\")))))"
-
-"\'muon decay\'" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \'muon decay\')))))"
-
-"\'Ellis, J\'" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \'Ellis, J\')))))"
-
-"ellis +muon" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER + (TMODIFIER (FIELD (QNORMAL muon)))))"
+"author:\"Ellis, J\" title:(muon neutrino) year:2001" -> "(DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"Ellis, J\")))) (CLAUSE (MODIFIER (TMODIFIER (FIELD title (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL neutrino)))))))))) (MODIFIER (TMODIFIER (FIELD year (QNORMAL 2001)))))"
 
 "ellis muon" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
 
-"ellis and muon" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon))))))"
+"2001" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL 2001))))"
 
-"ellis -muon" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL muon)))))"
+"\"Ellis, J\"" -> "(MODIFIER (TMODIFIER (FIELD (QPHRASE \"Ellis, J\"))))"
 
-"ellis not muon" -> "(DEFOP (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon))))))"
+"\'muon decay\'" -> "(MODIFIER (TMODIFIER (FIELD (QPHRASE \'muon decay\'))))"
 
-"ellis |muon" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL |muon)))))"
+"\'Ellis, J\'" -> "(MODIFIER (TMODIFIER (FIELD (QPHRASE \'Ellis, J\'))))"
 
-"ellis or muon" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon))))))"
+"ellis +muon" -> "(AND (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
 
-"muon or kaon and ellis" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))) (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL kaon)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))))))"
+"ellis muon" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
 
-"ellis and muon or kaon" -> "(DEFOP (OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL kaon))))))"
+"ellis and muon" -> "(AND (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
 
-"muon or kaon and ellis -decay" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))) (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL kaon)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL decay)))))"
+"ellis -muon" -> "(NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
 
-"(gravity OR supergravity) AND (ellis OR perelstein)" -> "(DEFOP (AND (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL gravity)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL supergravity))))) (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL perelstein)))))))"
+"ellis not muon" -> "(NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
+
+"ellis |muon" -> "(OR (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
+
+"ellis or muon" -> "(OR (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))))"
+
+"muon or kaon and ellis" -> "(AND (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL kaon))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))))"
+
+"ellis and muon or kaon" -> "(OR (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL muon))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL kaon)))))"
+
+"muon or kaon and ellis -decay" -> "(NOT (AND (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL kaon))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL decay)))))"
+
+"(gravity OR supergravity) AND (ellis OR perelstein)" -> "(AND (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL gravity)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL supergravity))))) (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL perelstein))))))"
 
 
 // special chars and punctuation
 
-"C++" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL C++)))))"
+"C++" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL C++))))"
 
 "O\'Shea" -> ""
 
 "$e^{+}e^{-}$" -> ""
 
-"hep-ph/0204133" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL hep-ph/0204133)))))"
+"hep-ph/0204133" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL hep-ph/0204133))))"
 
 "BlaCK hOlEs" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL BlaCK)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL hOlEs)))))"
 
-"пушкин" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL пушкин)))))"
+"пушкин" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL пушкин))))"
 
 // Lemaître
-"author:Lemaitre" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD author (QNORMAL Lemaitre)))))"
+"author:Lemaitre" -> "(MODIFIER (TMODIFIER (FIELD author (QNORMAL Lemaitre))))"
 
-"muon*" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QTRUNCATED muon*)))))"
+"muon*" -> "(MODIFIER (TMODIFIER (FIELD (QTRUNCATED muon*))))"
 
-"CERN-TH*31" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QTRUNCATED CERN-TH*31)))))"
+"CERN-TH*31" -> "(MODIFIER (TMODIFIER (FIELD (QTRUNCATED CERN-TH*31))))"
 
-"a*" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QTRUNCATED a*)))))"
+"a*" -> "(MODIFIER (TMODIFIER (FIELD (QTRUNCATED a*))))"
 
-"\"Neutrino mass*\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASETRUNC \"Neutrino mass*\")))))"
+"\"Neutrino mass*\"" -> "(MODIFIER (TMODIFIER (FIELD (QPHRASETRUNC \"Neutrino mass*\"))))"
 
-"author:ellis" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))))"
+"author:ellis" -> "(MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis))))"
 
 "author:ellis title:muon*" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD title (QTRUNCATED muon*)))))"
 
 "experiment:NA60 year:2001" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD experiment (QNORMAL NA60)))) (MODIFIER (TMODIFIER (FIELD year (QNORMAL 2001)))))"
 
-"title:/^E.*s$/" -> ""
+"title:/^E.*s$/" -> "(MODIFIER (TMODIFIER (FIELD title (QREGEX /^E.*s$/))))"
 
-"author:/^Ellis, (J|John)$/" -> ""
+"author:/^Ellis, (J|John)$/" -> "(MODIFIER (TMODIFIER (FIELD author (QREGEX /^Ellis, (J|John)$/))))"
 
-"title:/dense ([^ l]* )?matter/" -> ""
+"title:/dense ([^ l]* )?matter/" -> "(MODIFIER (TMODIFIER (FIELD title (QREGEX /dense ([^ l]* )?matter/))))"
 
-"collection:PREPRINT -year:/^[0-9]{4}([\?\-]|\-[0-9]{4})?$/" -> ""
+"collection:PREPRINT -year:/^[0-9]{4}([\\?\\-]|\\-[0-9]{4})?$/" -> "(NOT (MODIFIER (TMODIFIER (FIELD collection (QNORMAL PREPRINT)))) (MODIFIER (TMODIFIER (FIELD year (QREGEX /^[0-9]{4}([\\?\\-]|\\-[0-9]{4})?$/)))))"
 
-"collection:PREPRINT -year:/^[[:digit:]]{4}([\?\-]|\-[[:digit:]]{4})?$/" -> ""
+"collection:PREPRINT -year:/^[[:digit:]]{4}([\\?\\-]|\\-[[:digit:]]{4})?$/" -> "(NOT (MODIFIER (TMODIFIER (FIELD collection (QNORMAL PREPRINT)))) (MODIFIER (TMODIFIER (FIELD year (QREGEX /^[[:digit:]]{4}([\\?\\-]|\\-[[:digit:]]{4})?$/)))))"
 
-"muon decay year:1983->1992" -> ""
+"muon decay year:1983->1992" -> "(DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL muon)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL decay))))) (MODIFIER (TMODIFIER (FIELD year (QNORMAL 1983->1992)))))"
 
 "author:\"Ellis, J\"\"Ellis, Qqq\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"Ellis, J\")))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"Ellis, Qqq\")))))"
 
-"refersto:reportnumber:hep-th/0201100" -> ""
+"refersto:reportnumber:hep-th/0201100" -> "(refersto (MODIFIER (TMODIFIER (FIELD reportnumber (QNORMAL hep-th/0201100)))))"
 
-"citedby:author:klebanov" -> ""
+"citedby:author:klebanov" -> "(citedby (MODIFIER (TMODIFIER (FIELD author (QNORMAL klebanov)))))"
 
-"refersto:author:\"Klebanov, I\"" -> ""
+"refersto:author:\"Klebanov, I\"" -> "(refersto (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"Klebanov, I\")))))"
 
-"refersto:keyword:gravitino" -> ""
+"refersto:keyword:gravitino" -> "(refersto (MODIFIER (TMODIFIER (FIELD keyword (QNORMAL gravitino)))))"
 
-"author:klebanov AND citedby:author:papadimitriou NOT refersto:author:papadimitriou" -> ""
+"author:klebanov AND citedby:author:papadimitriou NOT refersto:author:papadimitriou" -> "(NOT (AND (MODIFIER (TMODIFIER (FIELD author (QNORMAL klebanov)))) (citedby (MODIFIER (TMODIFIER (FIELD author (QNORMAL papadimitriou)))))) (refersto (MODIFIER (TMODIFIER (FIELD author (QNORMAL papadimitriou))))))"
 
-"refersto:/author:\"Klebanov, I\" title:O(N)/" -> ""
+"refersto:/author:\"Klebanov, I\" title:O(N)/" -> "(refersto (MODIFIER (TMODIFIER (FIELD (QREGEX /author:\"Klebanov, I\" title:O(N)/)))))"
 
-"author:ellis -muon* +abstract:\'dense quark matter\' year:200*" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER - (TMODIFIER (FIELD (QTRUNCATED muon*)))) (MODIFIER + (TMODIFIER (FIELD abstract (QPHRASE \'dense quark matter\')))) (MODIFIER (TMODIFIER (FIELD year (QTRUNCATED 200*)))))"
+"author:ellis -muon* +abstract:'dense quark matter' year:200*" -> "(DEFOP (AND (NOT (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QTRUNCATED muon*))))) <unexpected: [@8,21:28=\'abstract\',<51>,1:21], resync=abstract>) <unexpected: [@8,21:28=\'abstract\',<51>,1:21], resync=abstract:>)"
 
-"author:ellis -muon* +abstract:\"dense quark matter\" year:200*" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER - (TMODIFIER (FIELD (QTRUNCATED muon*)))) (MODIFIER + (TMODIFIER (FIELD abstract (QPHRASE \"dense quark matter\")))) (MODIFIER (TMODIFIER (FIELD year (QTRUNCATED 200*)))))"
+"author:ellis -muon* +abstract:\"dense quark matter\" year:200*" -> "(DEFOP (AND (NOT (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD (QTRUNCATED muon*))))) (MODIFIER (TMODIFIER (FIELD abstract (QPHRASE \"dense quark matter\"))))) (MODIFIER (TMODIFIER (FIELD year (QTRUNCATED 200*)))))"
 
-"higgs or reference:higgs or fulltext:higgs" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL higgs)))) (MODIFIER (TMODIFIER (FIELD reference (QNORMAL higgs)))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL higgs))))))"
+"higgs or reference:higgs or fulltext:higgs" -> "(OR (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL higgs)))) (MODIFIER (TMODIFIER (FIELD reference (QNORMAL higgs))))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL higgs)))))"
 
-"author:lin fulltext:Schwarzschild fulltext:AdS reference:\"Adv. Theor. Math. Phys.\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD author (QNORMAL lin)))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL Schwarzschild)))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL AdS)))) (MODIFIER (TMODIFIER (FIELD reference (QPHRASE \"Adv. Theor. Math. Phys.\")))))"
+"author:lin fulltext:Schwarzschild fulltext:AdS reference:\"Adv. Theor. Math. Phys.\"" -> "(DEFOP (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD author (QNORMAL lin)))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL Schwarzschild))))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL AdS))))) (MODIFIER (TMODIFIER (FIELD reference (QPHRASE \"Adv. Theor. Math. Phys.\")))))"
 
 // -- from: http://inspirehep.net/help/search-tips (05-12-2011)
 
 //"find a l everett or t light higgs and j phys.rev.lett. and primarch hep-ex"
 // logical operators (no precedence)
-"a:everett or t:light higgs and j:phys.rev.lett. and primarch:hep-ex" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD a (QNORMAL everett)))) (MODIFIER (TMODIFIER (FIELD t (QNORMAL light))))) (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL higgs)))) (MODIFIER (TMODIFIER (FIELD j (QNORMAL phys.rev.lett.)))) (MODIFIER (TMODIFIER (FIELD primarch (QNORMAL hep-ex))))))"
+"a:everett or t:light higgs and j:phys.rev.lett. and primarch:hep-ex" -> "(AND (AND (DEFOP (OR (MODIFIER (TMODIFIER (FIELD a (QNORMAL everett)))) (MODIFIER (TMODIFIER (FIELD t (QNORMAL light))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL higgs))))) (MODIFIER (TMODIFIER (FIELD j (QNORMAL phys.rev.lett.))))) (MODIFIER (TMODIFIER (FIELD primarch (QNORMAL hep-ex)))))"
 
 // find a rober* and t dyso*
-"a:rober* and t:dyso*" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD a (QTRUNCATED rober*)))) (MODIFIER (TMODIFIER (FIELD t (QTRUNCATED dyso*))))))"
+"a:rober* and t:dyso*" -> "(AND (MODIFIER (TMODIFIER (FIELD a (QTRUNCATED rober*)))) (MODIFIER (TMODIFIER (FIELD t (QTRUNCATED dyso*)))))"
 
 //"find j phys.rev.lett.,62,1825" -> ""
-"journal:phys.rev.lett.,62,1825" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD journal (QNORMAL phys.rev.lett.,62,1825)))))"
+"journal:phys.rev.lett.,62,1825" -> "(MODIFIER (TMODIFIER (FIELD journal (QNORMAL phys.rev.lett.,62,1825))))"
 
 //"find j prlta and a smith and c hep-th/9711200" -> ""
-"journal:prlta  and author:smith  and reference:hep-th/9711200" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD journal (QNORMAL prlta)))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL smith)))) (MODIFIER (TMODIFIER (FIELD reference (QNORMAL hep-th/9711200))))))"
+"journal:prlta  and author:smith  and reference:hep-th/9711200" -> "(AND (AND (MODIFIER (TMODIFIER (FIELD journal (QNORMAL prlta)))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL smith))))) (MODIFIER (TMODIFIER (FIELD reference (QNORMAL hep-th/9711200)))))"
 
 //"find j \"Phys.Lett.,B*\" or j Phys.Rev.Lett. and a d rainwater" 
-"journal:\"Phys.Lett.,B*\"  or journal:Phys.Rev.Lett.  and (author:\"rainwater, d*\")"-> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD journal (QPHRASETRUNC \"Phys.Lett.,B*\")))) (AND (MODIFIER (TMODIFIER (FIELD journal (QNORMAL Phys.Rev.Lett.)))) (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"rainwater, d*\")))))))"
+"journal:\"Phys.Lett.,B*\"  or journal:Phys.Rev.Lett.  and (author:\"rainwater, d*\")" -> "(AND (OR (MODIFIER (TMODIFIER (FIELD journal (QPHRASETRUNC \"Phys.Lett.,B*\")))) (MODIFIER (TMODIFIER (FIELD journal (QNORMAL Phys.Rev.Lett.))))) (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"rainwater, d*\")))))"
 
 //"find d 1997-11" -> ""
-"year:1997-11" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD year (QNORMAL 1997-11)))))"
+"year:1997-11" -> "(MODIFIER (TMODIFIER (FIELD year (QNORMAL 1997-11))))"
 
 //"find da today and title neutrino*"
-"datecreated:2011-12-06  and title:neutrino*" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD datecreated (QNORMAL 2011-12-06)))) (MODIFIER (TMODIFIER (FIELD title (QTRUNCATED neutrino*))))))"
+"datecreated:2011-12-06  and title:neutrino*" -> "(AND (MODIFIER (TMODIFIER (FIELD datecreated (QNORMAL 2011-12-06)))) (MODIFIER (TMODIFIER (FIELD title (QTRUNCATED neutrino*)))))"
 
 //"find da today - 2 and primarch hep-th"
-"datecreated:2011-12-04  and 037__c:hep-th" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD datecreated (QNORMAL 2011-12-04)))) (MODIFIER (TMODIFIER (FIELD 037__c (QNORMAL hep-th))))))"
+"datecreated:2011-12-04  and 037__c:hep-th" -> "(AND (MODIFIER (TMODIFIER (FIELD datecreated (QNORMAL 2011-12-04)))) (MODIFIER (TMODIFIER (FIELD 037__c (QNORMAL hep-th)))))"
 
 //"find eprint arxiv:0711.2908 or arxiv:0705.4298 or eprint hep-ph/0504227"
-"reportnumber:arxiv:0711.2908  or arxiv:0705.4298  or reportnumber:hep-ph/0504227" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD reportnumber (QNORMAL arxiv:0711.2908)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL arxiv:0705.4298)))) (MODIFIER (TMODIFIER (FIELD reportnumber (QNORMAL hep-ph/0504227))))))"
+"reportnumber:arxiv:0711.2908  or arxiv:0705.4298  or reportnumber:hep-ph/0504227" -> "(OR (OR (MODIFIER (TMODIFIER (FIELD reportnumber (QNORMAL arxiv:0711.2908)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL arxiv:0705.4298))))) (MODIFIER (TMODIFIER (FIELD reportnumber (QNORMAL hep-ph/0504227)))))"
 
 //"find a unruh or t cauchy not t problem and primarch gr-qc"
-"author:unruh  or title:cauchy  not title:problem  and 037__c:gr-qc" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD author (QNORMAL unruh)))) (AND (NOT (MODIFIER (TMODIFIER (FIELD title (QNORMAL cauchy)))) (MODIFIER (TMODIFIER (FIELD title (QNORMAL problem))))) (MODIFIER (TMODIFIER (FIELD 037__c (QNORMAL gr-qc)))))))"
+"author:unruh  or title:cauchy  not title:problem  and 037__c:gr-qc" -> "(AND (NOT (OR (MODIFIER (TMODIFIER (FIELD author (QNORMAL unruh)))) (MODIFIER (TMODIFIER (FIELD title (QNORMAL cauchy))))) (MODIFIER (TMODIFIER (FIELD title (QNORMAL problem))))) (MODIFIER (TMODIFIER (FIELD 037__c (QNORMAL gr-qc)))))"
 
 //"find a m albrow and j phys.rev.lett. and t quark* and topcite 137+"
-"(author:\"albrow, m*\")  and journal:phys.rev.lett.  and title:quark*  and cited:137->999999999" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"albrow, m*\")))) (MODIFIER (TMODIFIER (FIELD journal (QNORMAL phys.rev.lett.)))) (MODIFIER (TMODIFIER (FIELD title (QTRUNCATED quark*)))) (MODIFIER (TMODIFIER (FIELD cited (QNORMAL 137->999999999))))))"
+"(author:\"albrow, m*\")  and journal:phys.rev.lett.  and title:quark*  and cited:137999999999" -> "(AND (AND (AND (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"albrow, m*\")))) (MODIFIER (TMODIFIER (FIELD journal (QNORMAL phys.rev.lett.))))) (MODIFIER (TMODIFIER (FIELD title (QTRUNCATED quark*))))) (cited (MODIFIER (TMODIFIER (FIELD (QNORMAL 137999999999))))))"
 
 //"find a bando and topcite 100->500"
-"author:bando  and cited:100->500" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD author (QNORMAL bando)))) (MODIFIER (TMODIFIER (FIELD cited (QNORMAL 100->500))))))"
+"author:bando  and cited:100500" -> "(AND (MODIFIER (TMODIFIER (FIELD author (QNORMAL bando)))) (cited (MODIFIER (TMODIFIER (FIELD (QNORMAL 100500))))))"
 
 //"find c Phys.Rev.Lett.,28,1421 or c arXiv:0711.4556"
-"reference:Phys.Rev.Lett.,28,1421  or reference:arXiv:0711.4556" -> "(DEFOP (OR (MODIFIER (TMODIFIER (FIELD reference (QNORMAL Phys.Rev.Lett.,28,1421)))) (MODIFIER (TMODIFIER (FIELD reference (QNORMAL arXiv:0711.4556))))))"
+"reference:Phys.Rev.Lett.,28,1421  or reference:arXiv:0711.4556" -> "(OR (MODIFIER (TMODIFIER (FIELD reference (QNORMAL Phys.Rev.Lett.,28,1421)))) (MODIFIER (TMODIFIER (FIELD reference (QNORMAL arXiv:0711.4556)))))"
 
 //"find af harvard u."
-"affiliation:\"harvard u.\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD affiliation (QPHRASE \"harvard u.\")))))"
+"affiliation:\"harvard u.\"" -> "(MODIFIER (TMODIFIER (FIELD affiliation (QPHRASE \"harvard u.\"))))"
 
 //"find citedby hep-th/9711200 and author cvetic"
-"citedby:\"hep-th/9711200\"  and author:cvetic" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD citedby (QPHRASE \"hep-th/9711200\")))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL cvetic))))))"
+"citedby:\"hep-th/9711200\"  and author:cvetic" -> "(AND (citedby (MODIFIER (TMODIFIER (FIELD (QPHRASE \"hep-th/9711200\"))))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL cvetic)))))"
 
 //"find a parke and citedby author witten"
-"author:parke  and citedby:author:witten" ->""
+"author:parke  and citedby:author:witten" -> "(AND (MODIFIER (TMODIFIER (FIELD author (QNORMAL parke)))) (citedby (MODIFIER (TMODIFIER (FIELD author (QNORMAL witten))))))"
 
 //"find a witten and refersto author parke, s j"
-"author:witten  and refersto:(author:\"parke, s* j*\")" ->""
+"author:witten  and refersto:(author:\"parke, s* j*\")" -> "(AND (MODIFIER (TMODIFIER (FIELD author (QNORMAL witten)))) (refersto (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"parke, s* j*\"))))))"
 
 //"find refersto hep-th/9711200 and t nucl*"
-"refersto:\"hep-th/9711200\"  and title:nucl*" ->""
+"refersto:\"hep-th/9711200\"  and title:nucl*" -> "(AND (refersto (MODIFIER (TMODIFIER (FIELD (QPHRASE \"hep-th/9711200\"))))) (MODIFIER (TMODIFIER (FIELD title (QTRUNCATED nucl*)))))"
 
 //"find refersto a parke or refersto a lykken and a witten"
-"refersto:author:parke  or refersto:author:lykken  and author:witten" ->""
+"refersto:author:parke  or refersto:author:lykken  and author:witten" ->"(AND (OR (refersto (MODIFIER (TMODIFIER (FIELD author (QNORMAL parke))))) (refersto (MODIFIER (TMODIFIER (FIELD author (QNORMAL lykken)))))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL witten)))))"
 
 //"fin af oxford u. and refersto title muon*"
-"affiliation:\"oxford u.\"  and refersto:title:muon*" -> ""
+"affiliation:\"oxford u.\"  and refersto:title:muon*" -> "(AND (MODIFIER (TMODIFIER (FIELD affiliation (QPHRASE \"oxford u.\")))) (refersto (MODIFIER (TMODIFIER (FIELD title (QTRUNCATED muon*))))))"
 
 //"find refersto j Phys.Rev.Lett."
-"refersto:journal:Phys.Rev.Lett." -> "(DEFOP (MODIFIER (TMODIFIER (FIELD refersto (QNORMAL journal)))))"
+"refersto:journal:Phys.Rev.Lett." -> "(refersto (MODIFIER (TMODIFIER (FIELD journal (QNORMAL Phys.Rev.Lett.)))))"
 
 //"find ft "faster than light""
-"fulltext:\"faster than light\"" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD fulltext (QPHRASE \"faster than light\")))))"
+"fulltext:\"faster than light\"" -> "(MODIFIER (TMODIFIER (FIELD fulltext (QPHRASE \"faster than light\"))))"
 
 //"find ft neutrino axion "dark matter" cosmology"
-"(fulltext:neutrino and fulltext:axion and fulltext:\"dark matter\" and fulltext:cosmology)" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL neutrino)))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL axion)))) (MODIFIER (TMODIFIER (FIELD fulltext (QPHRASE \"dark matter\")))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL cosmology))))))"
+"(fulltext:neutrino and fulltext:axion and fulltext:\"dark matter\" and fulltext:cosmology)" -> "(AND (AND (AND (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL neutrino)))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL axion))))) (MODIFIER (TMODIFIER (FIELD fulltext (QPHRASE \"dark matter\"))))) (MODIFIER (TMODIFIER (FIELD fulltext (QNORMAL cosmology)))))"
 
 //"find caption soft SUSY breaking"
-"(caption:soft and caption:SUSY and caption:breaking)" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD caption (QNORMAL soft)))) (MODIFIER (TMODIFIER (FIELD caption (QNORMAL SUSY)))) (MODIFIER (TMODIFIER (FIELD caption (QNORMAL breaking))))))"
+"(caption:soft and caption:SUSY and caption:breaking)" -> "(AND (AND (MODIFIER (TMODIFIER (FIELD caption (QNORMAL soft)))) (MODIFIER (TMODIFIER (FIELD caption (QNORMAL SUSY))))) (MODIFIER (TMODIFIER (FIELD caption (QNORMAL breaking)))))"
 
 //"find a t dorigo and tc p"
-"(author:\"dorigo, t*\")  and collection:p" -> "(DEFOP (AND (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"dorigo, t*\")))) (MODIFIER (TMODIFIER (FIELD collection (QNORMAL p))))))"
+"(author:\"dorigo, t*\")  and collection:p" -> "(AND (MODIFIER (TMODIFIER (FIELD author (QPHRASETRUNC \"dorigo, t*\")))) (MODIFIER (TMODIFIER (FIELD collection (QNORMAL p)))))"
 
 
  

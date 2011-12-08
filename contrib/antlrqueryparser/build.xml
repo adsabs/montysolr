@@ -209,7 +209,7 @@
 			<include name="**/BuildAST.java"/>
 		</javac>
 
-		<exec executable="${prop.python}" failonerror="true" output="${build.dir}/${aqp.grammar}.out" >
+		<exec executable="${prop.python}" failonerror="true" >
 			<arg value="${aqp.generate.py}"/>
 			<arg value="${aqp.grammar}"/>
 			<arg value="${build.dir}"/>
@@ -218,7 +218,6 @@
 		</exec>
 		<echo>
 		The html with diagram is at: ${build.dir}/${aqp.grammar}.html
-	    The AST tree output at: ${build.dir}/${aqp.grammar}.out
 	    </echo>
 	</target>
 

@@ -15,11 +15,13 @@ tokens {
   FUZZY;
   BOOST;
   QNORMAL;
+  QFUNC;
   QPHRASE;
   QPHRASETRUNC;
   QTRUNCATED;
   QRANGEIN;
   QRANGEEX;
+  QREGEX;  
   QANYTHING;
   QDATE;
   AMBIGUITY;
@@ -33,7 +35,7 @@ tokens {
 }
 
 mainQ : 
-	operator clauseTop -> ^(AMBIGUITY["leftmost-operation"] operator clauseTop+)
+	operator clauseTop -> ^(AMBIGUITY["leftmost-operation"] operator clauseTop)
 	| clauseTop
 	;
 
@@ -46,8 +48,9 @@ clauseTop
 
 clauseOr
   : 
-  (clauseBare -> clauseBare)
-  (operator a=clauseBare -> ^(operator $clauseOr $a))*
+  (clauseBasic -> clauseBasic)
+  (operator a=clauseBasic -> ^(operator $clauseOr $a)
+  | a=clauseBasic -> ^(OPERATOR["DEFOP"] $clauseOr $a))*
   ;
 
 clauseBare
@@ -78,17 +81,18 @@ clauseNear
 clauseBasic
 	:
 	(modifier LPAREN clauseOr RPAREN )=> modifier? LPAREN clauseOr RPAREN term_modifier? 
-	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? clauseOr)))
 	| (LPAREN clauseOr RPAREN term_modifier)=> modifier? LPAREN clauseOr RPAREN term_modifier? 
-	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? clauseOr)))
 	| (LPAREN )=> LPAREN clauseOr RPAREN
 	 -> clauseOr
+	| second_order_op clauseBasic -> ^(second_order_op clauseBasic)
 	| atom
 	;
     
 
 atom   
-	: 
+	:
 	modifier? field multi_value term_modifier?
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field multi_value))))
 	| modifier? field? value term_modifier? 
@@ -107,11 +111,12 @@ value
 	: 
 	range_term_in -> ^(QRANGEIN range_term_in)
 	| range_term_ex -> ^(QRANGEEX range_term_ex) 
-	| normal -> ^(QNORMAL normal)	
-	| truncated -> ^(QTRUNCATED truncated)	
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	| normal -> ^(QNORMAL normal)	
+	| truncated -> ^(QTRUNCATED truncated)	
 	| QMARK -> ^(QTRUNCATED QMARK)
+	| REGEX -> ^(QREGEX REGEX)
   	;
 
 	
@@ -313,15 +318,29 @@ date	:
 	DATE_TOKEN
 	;
 
+second_order_op
+	:	
+	o=SECOND_ORDER_OP COLON -> ^(QFUNC[$o.getText()])
+	;
+
 /* ================================================================
  * =                     LEXER                                    =
  * ================================================================
  */
+SECOND_ORDER_OP
+	:	
+	('refersto'
+	| 'citedby'
+	| 'cited')
+	;
+
 
 IDENTIFIER
 	:	('arXiv'|'arxiv') ':' TERM_CHAR+
 	| INT+ '.' INT+ '/' INT+ ('.' INT+)?
 	;
+
+SLASH   : '/';
 
 LPAREN  : '(';
 
@@ -402,17 +421,17 @@ fragment ESC_CHAR:  '\\' .;
 fragment TERM_START_CHAR
 	:
 	(~(' ' | '\t' | '\n' | '\r' | '\u3000'
-	      | '\'' | '\"' 
+	      | '\'' | '\"'
 	      | '(' | ')' | '[' | ']' | '{' | '}'
 	      | '+' | '-' | '!' | ':' | '~' | '^' 
-	      | '?' | '*' | '\\' | '#' | '|'
+	      | '?' | '*' | '\\' | '#' | '|' | '/'
 	      )
 	 | ESC_CHAR );  	
 
 
 fragment TERM_CHAR
 	:	
-	(TERM_START_CHAR | '-' | '+' | '#')
+	(TERM_START_CHAR | '-' | '+' | '#' | '/')
 	;
 
 
@@ -450,3 +469,9 @@ PHRASE_ANYTHING	:
 	| SQUOTE (ESC_CHAR|~('\"'|'\\'|'\\\''))+ SQUOTE
 	;
 
+REGEX	
+	:	
+	SLASH (ESC_CHAR|~('\\'|'\\/'))+ SLASH
+	;
+
+		
