@@ -40,13 +40,22 @@ mainQ :
 clauseTop
   :
   //(clauseOr -> ^(OPERATOR["DEFOP"] $clauseTop clauseOr))+
-  (clauseOr^)+
+  //(clauseOr^)+
+  clauseOr -> clauseOr
   ;
 
 clauseOr
   : 
-  clauseBasic (operator^ clauseBasic)*
+  (clauseBare -> clauseBare)
+  (operator a=clauseBare -> ^(operator $clauseOr $a))*
   ;
+
+clauseBare
+  :
+  (clauseBasic -> clauseBasic)
+  (a=clauseBasic -> ^(OPERATOR["DEFOP"] $clauseBare $a))*
+  ;
+  
      
 /*  
 clauseOr
@@ -68,12 +77,12 @@ clauseNear
   
 clauseBasic
 	:
-	(modifier LPAREN clauseOr+ RPAREN )=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
+	(modifier LPAREN clauseOr RPAREN )=> modifier? LPAREN clauseOr RPAREN term_modifier? 
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
-	| (LPAREN clauseOr+ RPAREN term_modifier)=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
+	| (LPAREN clauseOr RPAREN term_modifier)=> modifier? LPAREN clauseOr RPAREN term_modifier? 
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
-	| (LPAREN )=> LPAREN clauseOr+ RPAREN
-	 -> clauseOr+
+	| (LPAREN )=> LPAREN clauseOr RPAREN
+	 -> clauseOr
 	| atom
 	;
     
@@ -147,7 +156,8 @@ multiClause
 	//m:(a b NEAR c OR d OR e)
 	
 	// without duplicating the rules (but it allows recursion)
-	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
+	//clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
+	clauseTop
 	
 	// allows only limited set of operations
 	//multiDefault
