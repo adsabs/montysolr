@@ -84,6 +84,7 @@ public class TestAqpQPHelperInvenio extends TestAqpQPHelper {
 	  }
 	  
 	  public void testAmbiguity() throws Exception {
+		  setDebug(true);
 		    super.assertQueryEquals("e(+)e(-)", null, "e(+)e(-)");
 		}
 }
