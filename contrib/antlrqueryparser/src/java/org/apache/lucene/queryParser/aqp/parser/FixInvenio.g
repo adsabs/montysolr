@@ -67,13 +67,16 @@ tokens {
 
 
 mainQ : 
-	space*  token+
-	(space token+)* space*
-	{
+	group
+	//{
 	//System.out.print("corrected=>\n" + corrected + "\n<=\n");
-	}
+	//}
 	;
-	
+
+group	:	
+	LPAREN group RPAREN
+	| (space? token (space? token space?)* (LPAREN group RPAREN)?)+
+	;	
 
 token	:
 	( suspicious {corrected.append(correctSuspicious($token.text));} -> ^(AMBIGUITY suspicious {new CommonTree(new CommonToken(AMBIGUITY, correctSuspicious($token.text)))})
@@ -107,9 +110,9 @@ space	:
 
 fragment SLASH   : '/';
 
-fragment LPAREN  : '(';
+LPAREN  : '(';
 
-fragment RPAREN  : ')';
+RPAREN  : ')';
 
 
 fragment DQUOTE	
@@ -150,6 +153,14 @@ SAFE_TOKEN
 	 | ESC_CHAR )+; 
 
 SUSPICIOUS_TOKEN
-	:(SAFE_TOKEN | ')' | '(' | '/')+; 
+	:
+	(SAFE_TOKEN LPAREN SUB_SUS? RPAREN)+ SUB_SUS?
+	;
 
-		
+
+	
+fragment SUB_SUS
+	:
+	LPAREN SUB_SUS RPAREN
+	| SAFE_TOKEN
+	;		
