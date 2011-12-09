@@ -7,17 +7,30 @@ options {
 
 /*
 This is a small grammar that helps to deal with some pathological
-cases, such as e(+)e(-)
+cases, such as e(+)e(-), it will escape special characters and 
+have the results available in the public property 'corrected'
+
+It also returns the token that can be used to change the query.
+The 'suspicious' token is what should be inspected.
+
+Basically, what we change are only groups of characters that happen
+to be inside brackets without spaces (well, don't blame for this,
+it is not my invention and don't consider it as a best solution).
+
 */
 
 tokens {
   AMBIGUITY;
   QREGEX;
   QPHRASE;
+  TOKEN;
+  SPACE;
 }
 
 @header{
    package org.apache.lucene.queryParser.aqp.parser;
+   import java.util.regex.Pattern;
+   import java.util.regex.Matcher;
 }
 @lexer::header {
    package org.apache.lucene.queryParser.aqp.parser;
@@ -25,6 +38,7 @@ tokens {
 
 @members {
 	public StringBuffer corrected = new StringBuffer();
+	Pattern escapePattern = Pattern.compile("(?<!\\\\\\\\)([()+-:\\[\\]\\}\\{])");
 	public String correctSuspicious(String text) {
 		char[] charr = text.toCharArray();
 		int lBrack = 0;
@@ -43,9 +57,11 @@ tokens {
 			}
 		}
 		if (lBrack == rBrack) {
-			text= text.replaceAll("(?!\\\\)([()])", "\\\\$1");
-		}
-		return text;
+    			Matcher z = escapePattern.matcher(text);
+        		text = z.replaceAll("\\\\$1");
+    			
+    		}
+    		return text;
 	}
 }
 
@@ -54,16 +70,16 @@ mainQ :
 	space*  token+
 	(space token+)* space*
 	{
-	System.out.print(corrected);
+	//System.out.print("corrected=>\n" + corrected + "\n<=\n");
 	}
 	;
 	
 
 token	:
-	( suspicious {corrected.append(correctSuspicious($token.text));} -> ^(AMBIGUITY[$suspicious.text])
-	| safe {corrected.append($token.text);} -> safe 
-	| phrase {corrected.append($token.text);} -> phrase
-	| regex {corrected.append($token.text);} -> regex
+	( suspicious {corrected.append(correctSuspicious($token.text));} -> ^(AMBIGUITY suspicious {new CommonTree(new CommonToken(AMBIGUITY, correctSuspicious($token.text)))})
+	| safe {corrected.append($token.text);} -> ^(TOKEN safe)
+	| phrase {corrected.append($token.text);} -> ^(QPHRASE phrase)
+	| regex {corrected.append($token.text);} -> ^(QREGEX regex)
 	)
 	;
 	
@@ -82,7 +98,7 @@ regex	:
 	REGEX
 	;
 space	:	
-	WS {corrected.append($space.text);}
+	WS {corrected.append($space.text);} -> ^(SPACE WS)
 	;
 /* ================================================================
  * =                     LEXER                                    =

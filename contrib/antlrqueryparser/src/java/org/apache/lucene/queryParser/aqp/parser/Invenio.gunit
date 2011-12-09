@@ -116,7 +116,7 @@ mainQ:
 "(ellis )" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL ellis))))"
 
 // ['+', 'u(1) | sl(2,z)']
-"(U(1) or SL(2,Z))" -> "" 
+"(U\\(1\\) or SL\\(2,Z\\))" -> "" 
 
 // ['+', 'refersto:\'author:"s parke" | author:ellis\'']
 "refersto:(author:\"s parke\" or author:ellis)" -> "(refersto (OR (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"s parke\")))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis))))))" 
@@ -128,17 +128,17 @@ mainQ:
 "refersto:(author:\"s parke\")" -> "(refersto (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"s parke\")))))" 
 
 // ['+', 'e(+)e(-)']
-"e(+)e(-)" -> "" 
+"e\\(\\+\\)e\\(\\-\\)" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL e\\(\\+\\)e\\(\\-\\)))))" 
 
 // ['+', 'fe(2+)']
-"Fe(2+)" -> "" 
+"Fe\\(\\2\\+\\)" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL Fe\\(\\2\\+\\)))))" 
 
 /*
 '+', 'measurements', '+', 'of', '+', 'cp-conserving', '+', 'trilinear', '+', 'gauge', \
 '+', 'boson', '+', 'couplings', '+', 'wwv', '+', 'v + gamma, + z', \
 '+', 'in', '+', 'e(+)e(-)', '+', 'collisions', '+', 'at', '+', 'lep2'
 */
-"Measurements of CP-conserving trilinear gauge boson couplings WWV (V gamma, Z) in e(+)e(-) collisions at LEP2" -> "" 
+"Measurements of CP-conserving trilinear gauge boson couplings WWV (V gamma, Z) in e\\(\\+\\)e\\(\\-\\) collisions at LEP2" -> "(DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL Measurements)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL of))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL CP-conserving))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL trilinear))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL gauge))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL boson))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL couplings))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL WWV))))) (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL V)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL gamma,))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL Z)))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL in))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL e\\(\\+\\)e\\(\\-\\)))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL collisions))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL at))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL LEP2)))))" 
 
 // ['+', 'refersto:"author:ellis | author:hawking"']
 "refersto:(author:ellis or author:hawking)" -> "(refersto (OR (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis)))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL hawking))))))" 

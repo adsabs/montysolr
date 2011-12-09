@@ -184,7 +184,7 @@
 	<target name="try-view" description="Like view, but regenerates the grammar first" depends="antlr-compile,view" />
 	<target name="try-tree" description="Like view, but regenerates the grammar first" depends="antlr-compile,tree" />
 
-	<target name="gunit" description="Run the gunit test suite, usage: ant -Dgrammar=name">
+	<target name="gunit" description="Run the gunit test suite, usage: ant -Dgrammar=name" depends="antlr">
 		<echo>
         Running GUNIT: ${aqp.grammar}        
         </echo>
