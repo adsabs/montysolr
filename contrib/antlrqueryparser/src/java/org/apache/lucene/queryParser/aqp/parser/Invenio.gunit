@@ -116,7 +116,7 @@ mainQ:
 "(ellis )" -> "(MODIFIER (TMODIFIER (FIELD (QNORMAL ellis))))"
 
 // ['+', 'u(1) | sl(2,z)']
-"(U\\(1\\) or SL\\(2,Z\\))" -> "" 
+"(U\\(1\\) or SL\\(2,Z\\))" -> "(OR (MODIFIER (TMODIFIER (FIELD (QNORMAL U\\(1\\))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL SL\\(2,Z\\))))))" 
 
 // ['+', 'refersto:\'author:"s parke" | author:ellis\'']
 "refersto:(author:\"s parke\" or author:ellis)" -> "(refersto (OR (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"s parke\")))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL ellis))))))" 

@@ -71,13 +71,14 @@ mainQ :
 	//{
 	//System.out.print("corrected=>\n" + corrected + "\n<=\n");
 	//}
-	;
-
-group	:	
-	LPAREN group RPAREN
-	| (space? token (space? token space?)* (LPAREN group RPAREN)?)+
 	;	
 
+group  :       
+       LPAREN group RPAREN
+       | (space? token (space? token space?)* (LPAREN group RPAREN)?)+
+        ; 
+        
+	
 token	:
 	( suspicious {corrected.append(correctSuspicious($token.text));} -> ^(AMBIGUITY suspicious {new CommonTree(new CommonToken(AMBIGUITY, correctSuspicious($token.text)))})
 	| safe {corrected.append($token.text);} -> ^(TOKEN safe)
