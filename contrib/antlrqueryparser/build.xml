@@ -25,6 +25,7 @@
 
 	<import file="../contrib-build.xml"/>
 
+	<property name="aqp.grammars.dir" location="./grammars" />
 	<property name="aqp.parser.dir" location="src/java/org/apache/lucene/queryParser/aqp/parser" />
 	<property name="aqp.classes.dir" location="${build.dir}/classes/java" />
 	<property name="aqp.classes.parser.dir" location="${aqp.classes.dir}/org/apache/lucene/queryParser/aqp/parser" />
@@ -103,7 +104,7 @@
             >
 			<arg value="-o"/>
 			<arg value="${aqp.classes.parser.dir}"/>
-			<arg value="${aqp.parser.dir}/${aqp.grammar}.g"/>
+			<arg value="${aqp.grammars.dir}/${aqp.grammar}.g"/>
 		</java>
 
 		<!-- also copy the grammar lexer/token into the src dir -->
@@ -114,6 +115,9 @@
 				<include name="${aqp.grammar}*.tokens" />
 			</fileset>
 		</copy>
+		
+		<!-- generate the wrappr for lucene -->
+		<antcall target="build-wrapper" />
 
 	</target>
 
@@ -191,7 +195,7 @@
 		<java classpathref="test.classpath"
             classname="org.antlr.gunit.Interp"
             >
-			<arg value="${aqp.parser.dir}/${aqp.grammar}.gunit"/>
+			<arg value="${aqp.grammars.dir}/${aqp.grammar}.gunit"/>
 		</java>
 	</target>
 
@@ -214,11 +218,102 @@
 			<arg value="${aqp.grammar}"/>
 			<arg value="${build.dir}"/>
 			<arg value="${toString:test.classpath}" />
-			<arg value="${aqp.parser.dir}"/>
+			<arg value="${aqp.grammars.dir}"/>
 		</exec>
 		<echo>
 		The html with diagram is at: ${build.dir}/${aqp.grammar}.html
 	    </echo>
+	</target>
+	
+	<target name="build-wrapper" >
+		
+        <echo file="${aqp.parser.dir}/${aqp.grammar}SyntaxParser.java">
+              <![CDATA[
+package org.apache.lucene.queryParser.aqp.parser;
+
+
+/**
+ * Automatically generated SyntaxParser wrapper built by ant
+ * from the grammar source: ${aqp.grammars.dir}/${aqp.grammar}.g
+ * 
+ * YOUR CHANGES MAY BE OVERWRITTEN AUTOMATICALLY!
+ */
+
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
+import org.apache.lucene.messages.Message;
+import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.AqpCommonTree;
+import org.apache.lucene.queryParser.aqp.AqpCommonTreeAdaptor;
+import org.apache.lucene.queryParser.core.QueryNodeParseException;
+import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
+import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryParser.core.parser.SyntaxParser;
+
+import org.apache.lucene.queryParser.aqp.parser.${aqp.grammar}Lexer;
+import org.apache.lucene.queryParser.aqp.parser.${aqp.grammar}Parser;
+
+
+public class ${aqp.grammar}SyntaxParser implements SyntaxParser {
+    
+    
+    @Override
+    /**
+     * Parses a query and returns QueryNode tree. It does not use reflection.
+     * 
+     * @param query
+     * @param field
+     * @return
+     * @throws QueryNodeParseException
+     */
+    public QueryNode parse(CharSequence query, CharSequence field)
+            throws QueryNodeParseException {
+
+        ANTLRStringStream in = new ANTLRStringStream(query.toString());
+        ${aqp.grammar}Lexer lexer = new ${aqp.grammar}Lexer(in);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ${aqp.grammar}Parser parser = new ${aqp.grammar}Parser(
+                tokens);
+        ${aqp.grammar}Parser.mainQ_return returnValue;
+        
+        AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor(parser.getTokenNames());
+        parser.setTreeAdaptor(adaptor);
+        
+        AqpCommonTree astTree;
+        
+        try {
+            returnValue = parser.mainQ();
+            astTree = (AqpCommonTree) returnValue.getTree();
+            return astTree.toQueryNodeTree();
+        } catch (RecognitionException e) {
+            throw new QueryNodeParseException(new MessageImpl(query + " " + parser.getErrorMessage(e, parser.getTokenNames())));
+        } catch (Exception e) {
+            Message message = new MessageImpl(
+                    QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
+                    e.getMessage());
+            QueryNodeParseException ee = new QueryNodeParseException(e);
+            ee.setQuery(query);
+            ee.setNonLocalizedMessage(message);
+            throw ee;
+        } catch (Error e) {
+            Message message = new MessageImpl(
+                    QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
+                    e.getMessage());
+            QueryNodeParseException ee = new QueryNodeParseException(e);
+            ee.setQuery(query);
+            ee.setNonLocalizedMessage(message);
+            throw ee;
+        }
+        
+        
+    }
+
+}
+]]>     
+      </echo>
+
+		
 	</target>
 
 </project>

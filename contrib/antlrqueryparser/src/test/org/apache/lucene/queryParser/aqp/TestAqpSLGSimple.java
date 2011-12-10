@@ -17,7 +17,7 @@ import org.apache.lucene.util.LuceneTestCase;
  * 
  * Tests QueryParser.
  */
-public class TestAqpSimple extends TestAqpAbstractCase {
+public class TestAqpSLGSimple extends TestAqpAbstractCase {
 	
 	private boolean verbose = true;
 
