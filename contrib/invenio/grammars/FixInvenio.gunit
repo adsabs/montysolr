@@ -1,0 +1,23 @@
+gunit FixInvenio;
+
+@header {
+package org.apache.lucene.queryParser.aqp.parser;
+}
+
+
+//------------------- mainQ
+mainQ:
+
+"e(+)e(-)" -> "(AMBIGUITY e(+)e(-) e\\(\\+\\)e\\(\\-\\))"
+
+"U(1)" -> "(AMBIGUITY U(1) U\\(\\1\\))"
+
+"U((1))" -> "(AMBIGUITY U((1)) U\\(\\(\\1\\)\\))"
+
+"Measurements of CP-conserving trilinear gauge boson couplings WWV (V gamma, Z) in e(+)e(-) collisions at LEP2" -> "(TOKEN Measurements) (SPACE  ) (TOKEN of) (SPACE  ) (TOKEN CP-conserving) (SPACE  ) (TOKEN trilinear) (SPACE  ) (TOKEN gauge) (SPACE  ) (TOKEN boson) (SPACE  ) (TOKEN couplings) (SPACE  ) (TOKEN WWV) (SPACE  ) ( (TOKEN V) (SPACE  ) (TOKEN gamma,) (SPACE  ) (TOKEN Z) ) (SPACE  ) (TOKEN in) (SPACE  ) (AMBIGUITY e(+)e(-) e\\(\\+\\)e\\(\\-\\)) (SPACE  ) (TOKEN collisions) (SPACE  ) (TOKEN at) (SPACE  ) (TOKEN LEP2)"
+
+"$e^{+}e^{-}$" -> ""
+
+"Fe(2+)" -> "(AMBIGUITY Fe(2+) Fe\\(\\2\\+\\))"
+
+"(U(1) or SL(2,Z))" -> "( (AMBIGUITY U(1) U\\(\\1\\)) (SPACE  ) (TOKEN or) (SPACE  ) (AMBIGUITY SL(2,Z) SL\\(\\2\\,Z\\)) )"

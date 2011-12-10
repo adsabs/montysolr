@@ -30,7 +30,7 @@
 	<property name="aqp.classes.dir" location="${build.dir}/classes/java" />
 	<property name="aqp.classes.parser.dir" location="${aqp.classes.dir}/org/apache/lucene/queryParser/aqp/parser" />
 	<property name="aqp.dotfile" location="${build.dir}/graph.dot" />
-	<property name="aqp.generate.py" location="src/python/generate_asts.py" />
+	<property name="aqp.generate.py" location="${common.dir}/contrib/antlrqueryparser/src/python/generate_asts.py" />
 
 
 
@@ -73,59 +73,45 @@
 		</fileset>
 	</path>
 
+
+
+
 	<target name="clean">
 		<delete dir="${build.dir}" />
+		<clean-parser grammar-name="${aqp.grammar}" parser-dir="${aqp.parser.dir}"/>
 	</target>
 
 	<target name="compile-core" depends="antlr,compile"/>
 
 	<!--
     NOTE: see the README.antlr for details on how to fully regenerate the parser
-  -->
-	<target name="antlr" depends="antlr-generate,antlr-compile" 
+    -->
+	
+	<target name="antlr" depends="antlr-generate" 
 		description="Regenerates grammar; usage -Dgrammar=&lt;name&gt;"/>
 
 	<target name="antlr-generate" >
-		<echo>
-		Regenerating: ${aqp.grammar}
-		Output: ${aqp.classes.parser.dir}
-        </echo>
-		<mkdir dir="${aqp.classes.parser.dir}"/>
-		<delete dir="${aqp.classes.parser.dir}" failonerror="false}">
-			<fileset dir="${aqp.classes.parser.dir}">
-				<include name="${aqp.grammar}*.java" />
-				<include name="${aqp.grammar}*.tokens" />
-			</fileset>
-		</delete>
-
-		<java classpathref="test.classpath"
-            classname="org.antlr.Tool"
-			failonerror="true"
-            >
-			<arg value="-o"/>
-			<arg value="${aqp.classes.parser.dir}"/>
-			<arg value="${aqp.grammars.dir}/${aqp.grammar}.g"/>
-		</java>
-
-		<!-- also copy the grammar lexer/token into the src dir -->
-
-		<copy todir="${aqp.parser.dir}">
-			<fileset dir="${aqp.classes.parser.dir}">
-				<include name="${aqp.grammar}*.java" />
-				<include name="${aqp.grammar}*.tokens" />
-			</fileset>
-		</copy>
 		
-		<!-- generate the wrappr for lucene -->
-		<antcall target="build-wrapper" />
+		<generate-grammar grammar-name="${aqp.grammar}"
+			 grammar-dir="${aqp.grammars.dir}"
+			 parser-dir="${aqp.parser.dir}"
+			 build-dir="${aqp.classes.dir}"
+			 classpathref="test.classpath"
+			   />
 
 	</target>
 
-	<target name="antlr-compile" depends="antlr-generate">
-		<javac classpathref="classpath" 
-			srcdir="${aqp.classes.parser.dir}"
-			destdir="${aqp.classes.dir}"
-			/>
+
+	<!-- compiles both grammar and the test classes -->
+	<target name="compile-all" depends="compile">
+
+		<mkdir dir="${build.dir}/classes/test"/>
+		<javac classpathref="test.classpath" 
+                    srcdir="src/test"
+                    destdir="${build.dir}/classes/test"
+                    >
+			<include name="**/BuildAST.java"/>
+		</javac>
 	</target>
 
 	<target name="compile" description="Compiles all the java classes" depends="antlr">
@@ -139,96 +125,219 @@
 
 
 	<target name="dot" >
-		<delete file="${aqp.dotfile}" />
-		<echo>
-        Generating DOT: ${aqp.grammar}  
-		Query: ${aqp.query} 
-		Rule: ${aqp.rule}   
-        </echo>
-		<java classpathref="test.classpath"
-            classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
-        	output="${aqp.dotfile}"
-        	errorproperty="aqp.antlr-dot.error"
-			failonerror="true"
-            >
-			<arg value="${aqp.grammar}"/>
-			<arg value="${aqp.query}" />
-			<arg value="${aqp.rule}"/>
-		</java>
+		<generate-dot grammar-name="${aqp.grammar}"
+		            query="${aqp.query}"
+		            rule="${aqp.rule}"
+		            classpathref="test.classpath"
+			        output-file="${aqp.dotfile}"
+		        />
 	</target>
 
+	
 	<target name="tree" >
-		<echo>
-			Generating TREE: ${aqp.grammar}  
-			Query: ${aqp.query} 
-			Rule: ${aqp.rule}       
-        </echo>
-		<java classpathref="test.classpath"
-            classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
-            >
-			<arg value="${aqp.grammar}"/>
-			<arg value="${aqp.query}"/>
-			<arg value="${aqp.rule}"/>
-			<arg value="tree"/>
-		</java>
+		<generate-tree grammar-name="${aqp.grammar}"
+			query="${aqp.query}"
+			rule="${aqp.rule}"
+			classpathref="test.classpath"
+		/>
+
 	</target>
 
+	
 	<target name="display" depends="dot" >
 		<exec executable="${dot_viewer}" failifexecutionfails="true">
 			<arg line="${aqp.dotfile}"/>
 		</exec>
 	</target>
 
+	
 	<target name="view" description="Test the string, usage: ant -Dquery=string">
 		<antcall target="dot" />
 		<antcall target="tree" />
 		<antcall target="display" />
 	</target>
-	
-	<target name="try-view" description="Like view, but regenerates the grammar first" depends="antlr-compile,view" />
-	<target name="try-tree" description="Like view, but regenerates the grammar first" depends="antlr-compile,tree" />
+
+	<target name="try-view" description="Like view, but regenerates the grammar first" depends="compile-all,view" />
+	<target name="try-tree" description="Like view, but regenerates the grammar first" depends="compile-all,tree" />
 
 	<target name="gunit" description="Run the gunit test suite, usage: ant -Dgrammar=name" depends="antlr">
-		<echo>
-        Running GUNIT: ${aqp.grammar}        
-        </echo>
-		<java classpathref="test.classpath"
-            classname="org.antlr.gunit.Interp"
-            >
-			<arg value="${aqp.grammars.dir}/${aqp.grammar}.gunit"/>
-		</java>
+		<run-gunit grammar-name="${aqp.grammar}" grammar-dir="${aqp.grammars.dir}" classpathref="test.classpath"/>
+
 	</target>
 
+	
 	<target name="test" depends="default" >
 		<antcall target="common.test" />
 	</target>
 
-	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" depends="antlr-compile" >
-		<mkdir dir="${build.dir}/classes/test"/>
-
-		<javac classpathref="test.classpath" 
-		            srcdir="src/test"
-		            destdir="${build.dir}/classes/test"
-		            >
-			<include name="**/BuildAST.java"/>
-		</javac>
-
-		<exec executable="${prop.python}" failonerror="true" >
-			<arg value="${aqp.generate.py}"/>
-			<arg value="${aqp.grammar}"/>
-			<arg value="${build.dir}"/>
-			<arg value="${toString:test.classpath}" />
-			<arg value="${aqp.grammars.dir}"/>
-		</exec>
-		<echo>
-		The html with diagram is at: ${build.dir}/${aqp.grammar}.html
-	    </echo>
-	</target>
 	
-	<target name="build-wrapper" >
-		
-        <echo file="${aqp.parser.dir}/${aqp.grammar}SyntaxParser.java">
-              <![CDATA[
+	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" depends="compile-all" >
+
+		<generate-html python-executable="${prop.python}"
+			  python-generator="${aqp.generate.py}"
+			  grammar-name="${aqp.grammar}"
+			  build-dir="${build.dir}"
+			  classpath="${toString:test.classpath}"
+			  grammar-dir="${aqp.grammars.dir}"
+			  />
+	</target>
+
+	
+
+	<!--
+	============================================================================================
+	                                           MACROS
+    ============================================================================================
+	//-->
+    
+	<macrodef name="clean-parser">
+        <attribute name="grammar-name"/>
+        <attribute name="parser-dir"/>
+        <sequential>
+        	<delete dir="@{grammar-dir}" failonerror="false">
+	            <fileset dir="@{parser-dir}">
+	                <include name="@{grammar-name}*.java" />
+	            	<include name="@{grammar-name}*.class" />
+	                <include name="@{grammar-name}*.tokens" />
+	            </fileset>
+	        </delete>
+        </sequential>
+    </macrodef>
+
+	<macrodef name="generate-grammar">
+		<attribute name="grammar-name"/>
+		<attribute name="grammar-dir"/>
+		<attribute name="build-dir"/>
+		<attribute name="parser-dir"/>
+		<attribute name="classpathref"/>
+		<sequential>
+			
+			<clean-parser parser-dir="@{parser-dir}" grammar-name="@{grammar-name}"/>
+			<clean-parser parser-dir="@{build-dir}" grammar-name="@{grammar-name}"/>
+			
+			<echo>
+    	        Regenerating: @{grammar-name}
+    	        Output: @{parser-dir}
+    	        </echo>
+
+			
+			<java classpathref="@{classpathref}"
+    	            classname="org.antlr.Tool"
+    	            failonerror="true"
+    	            >
+				<arg value="-o"/>
+				<arg value="@{parser-dir}"/>
+				<arg value="@{grammar-dir}/@{grammar-name}.g"/>
+			</java>
+		    
+			<mkdir dir="@{build-dir}"/>
+			<javac classpathref="@{classpathref}" 
+	        	            srcdir="@{parser-dir}"
+	        	            destdir="@{build-dir}"
+	        	            >
+				<include name="**/@{grammar-name}Parser.java" />
+				<include name="**/@{grammar-name}Lexer.java" />
+				<include name="**/@{grammar-name}.tokens" />
+			</javac>
+			
+			<!-- generate the wrapper for lucene -->
+	        <generate-syntax-parser parser-dir="@{parser-dir}" grammar-name="@{grammar-name}"/>
+			
+		</sequential>
+	</macrodef>
+
+	<macrodef name="generate-dot">
+		<attribute name="grammar-name"/>
+		<attribute name="query"/>
+		<attribute name="rule"/>
+		<attribute name="output-file"/>
+		<attribute name="classpathref"/>
+		<sequential>
+			<delete file="@{output-file}" failonerror="false"/>
+			<echo>
+	                Generating DOT: @{grammar-name}  
+	                Query: @{query} 
+	                Rule: @{rule}       
+	            </echo>
+			<java classpathref="@{classpathref}"
+	                classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
+	            	output="@{output-file}"
+	            	            errorproperty="aqp.antlr-dot.error"
+	            	            failonerror="true"
+	                >
+				<arg value="@{grammar-name}"/>
+				<arg value="@{query}"/>
+				<arg value="@{rule}"/>
+				<arg value="dot"/>
+			</java>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="generate-tree">
+		<attribute name="grammar-name"/>
+		<attribute name="query"/>
+		<attribute name="rule"/>
+		<attribute name="classpathref"/>
+		<sequential>
+			<echo>
+   	            Generating TREE: @{grammar-name}  
+   	            Query: @{query} 
+   	            Rule: @{rule}       
+   	        </echo>
+			<java classpathref="@{classpathref}"
+   	            classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
+   	            >
+				<arg value="@{grammar-name}"/>
+				<arg value="@{query}"/>
+				<arg value="@{rule}"/>
+				<arg value="tree"/>
+			</java>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="run-gunit">
+		<attribute name="grammar-name"/>
+		<attribute name="grammar-dir"/>
+		<attribute name="classpathref"/>
+		<sequential>
+			<echo>
+        Running GUNIT: @{grammar-name}        
+        </echo>
+			<java classpathref="@{classpathref}"
+            classname="org.antlr.gunit.Interp"
+            >
+				<arg value="@{grammar-dir}/@{grammar-name}.gunit"/>
+			</java>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="generate-html">
+		<attribute name="python-executable" default="python"/>
+		<attribute name="python-generator" />
+		<attribute name="grammar-name" />
+		<attribute name="build-dir" />
+		<attribute name="classpath" />
+		<attribute name="grammar-dir" />
+		<sequential>
+			<exec executable="@{python-executable}" failonerror="true" >
+				<arg value="@{python-generator}"/>
+				<arg value="@{grammar-name}"/>
+				<arg value="@{build-dir}"/>
+				<arg value="@{classpath}" />
+				<arg value="@{grammar-dir}"/>
+			</exec>
+			<echo>
+	        The html with diagram is at: @{grammar-dir}/@{grammar-name}.html
+	        </echo>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="generate-syntax-parser">
+		<attribute name="grammar-name"/>
+		<attribute name="parser-dir"/>
+		<sequential>
+			<echo file="@{parser-dir}/@{grammar-name}SyntaxParser.java">
+				<![CDATA[
 package org.apache.lucene.queryParser.aqp.parser;
 
 
@@ -251,11 +360,11 @@ import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.parser.SyntaxParser;
 
-import org.apache.lucene.queryParser.aqp.parser.${aqp.grammar}Lexer;
-import org.apache.lucene.queryParser.aqp.parser.${aqp.grammar}Parser;
+import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Lexer;
+import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Parser;
 
 
-public class ${aqp.grammar}SyntaxParser implements SyntaxParser {
+public class @{grammar-name}SyntaxParser implements SyntaxParser {
     
     
     @Override
@@ -271,11 +380,11 @@ public class ${aqp.grammar}SyntaxParser implements SyntaxParser {
             throws QueryNodeParseException {
 
         ANTLRStringStream in = new ANTLRStringStream(query.toString());
-        ${aqp.grammar}Lexer lexer = new ${aqp.grammar}Lexer(in);
+        @{grammar-name}Lexer lexer = new @{grammar-name}Lexer(in);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        ${aqp.grammar}Parser parser = new ${aqp.grammar}Parser(
+        @{grammar-name}Parser parser = new @{grammar-name}Parser(
                 tokens);
-        ${aqp.grammar}Parser.mainQ_return returnValue;
+        @{grammar-name}Parser.mainQ_return returnValue;
         
         AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor(parser.getTokenNames());
         parser.setTreeAdaptor(adaptor);
@@ -310,10 +419,10 @@ public class ${aqp.grammar}SyntaxParser implements SyntaxParser {
     }
 
 }
-]]>     
-      </echo>
+]]>
+			</echo>
 
-		
-	</target>
+		</sequential>
+	</macrodef>
 
 </project>
