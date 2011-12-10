@@ -39,7 +39,7 @@ import org.apache.lucene.util.LuceneTestCase;
  * Test QueryParser's ability to deal with Analyzers that return more than one
  * token per position or that return tokens with a position increment &gt; 1.
  */
-public class TestAqpMultiAnalyzerQPHelper extends LuceneTestCase {
+public class TestAqpSLGMultiAnalyzer extends TestAqpAbstractCase {
 
   private static int multiToken = 0;
 

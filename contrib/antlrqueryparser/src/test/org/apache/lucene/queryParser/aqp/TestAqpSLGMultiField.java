@@ -46,7 +46,7 @@ import org.apache.lucene.util.LuceneTestCase;
  * 
  * Tests QueryParser.
  */
-public class TestAqpMultiFieldQPHelper extends LuceneTestCase {
+public class TestAqpSLGMultiField extends TestAqpAbstractCase {
 
   /**
    * test stop words parsing for both the non static form, and for the
@@ -62,9 +62,6 @@ public class TestAqpMultiFieldQPHelper extends LuceneTestCase {
     assertStopQueryEquals("((stop))", "");
   }
   
-  private AqpQueryParser getParser() throws Exception {
-	  return new AqpQueryParser("StandardLuceneGrammar");
-  }
 
   // verify parsing of query using a stopping analyzer
   private void assertStopQueryEquals(String qtxt, String expectedRes)

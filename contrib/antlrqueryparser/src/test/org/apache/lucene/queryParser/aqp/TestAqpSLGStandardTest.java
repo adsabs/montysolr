@@ -20,21 +20,16 @@ package org.apache.lucene.queryParser.aqp;
 import java.io.IOException;
 import java.io.Reader;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Collections;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.LowerCaseTokenizer;
-import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenFilter;
@@ -52,22 +47,14 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.messages.MessageImpl;
-import org.apache.lucene.queryParser.aqp.processors.AqpDebuggingQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.QueryParserHelper;
-import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
-import org.apache.lucene.queryParser.standard.QueryParserUtil;
-import org.apache.lucene.queryParser.standard.StandardQueryParser;
-import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryParser.standard.processors.GroupQueryNodeProcessor;
-import org.apache.lucene.queryParser.standard.processors.StandardQueryNodeProcessorPipeline;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
@@ -83,7 +70,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.LuceneTestCase;
 
 /**
  * This test case is a copy of the core Lucene query parser test, it was adapted
@@ -91,7 +77,7 @@ import org.apache.lucene.util.LuceneTestCase;
  * 
  * Tests QueryParser.
  */
-public class TestAqpQPHelper extends LuceneTestCase {
+public class TestAqpStandardLuceneGrammarBigTest extends TestAqpAbstractCase {
 
   public static Analyzer qpAnalyzer = new QPTestAnalyzer();
 
@@ -189,8 +175,6 @@ public class TestAqpQPHelper extends LuceneTestCase {
 
   }
 
-  private int originalMaxClauses;
-  protected boolean debugParser = false;
 
   @Override
   public void setUp() throws Exception {
@@ -198,181 +182,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
     originalMaxClauses = BooleanQuery.getMaxClauseCount();
   }
   
-  public static void fail(String message) {
-	  System.err.println(message);
-	  LuceneTestCase.fail(message);
-  }
-  
-  public void setDebug(boolean d) {
-	  debugParser = d;
-  }
       
-
-  public AqpQueryParser getParser(Analyzer a) throws Exception {
-    if (a == null)
-      a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
-    AqpQueryParser qp = getParser();
-    qp.setAnalyzer(a);
-
-    qp.setDefaultOperator(Operator.OR);
-    qp.setDebug(this.debugParser);
-    return qp;
-
-  }
-  
-  public QueryParserHelper getParser(boolean standard) throws Exception {
-	  
-	  class DebuggingQueryNodeProcessorPipeline extends StandardQueryNodeProcessorPipeline {
-		  DebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
-			  super(queryConfig);
-		  }
-		  public QueryNode process(QueryNode queryTree) throws QueryNodeException {
-				String oldVal = null;
-				String newVal = null;
-				
-				oldVal = queryTree.toString();
-				int i = 1;
-				System.out.println("     0. starting");
-				System.out.println("--------------------------------------------");
-				System.out.println(oldVal);
-				
-				Iterator<QueryNodeProcessor> it = this.iterator();
-
-				QueryNodeProcessor processor;
-				while (it.hasNext()) {
-					processor = it.next();
-					
-					System.out.println("     " + i + ". step "	+ processor.getClass().toString());
-					queryTree = processor.process(queryTree);
-					newVal = queryTree.toString();
-					System.out.println("     Tree changed: " + (newVal.equals(oldVal) ? "NO" : "YES"));
-					System.out.println("--------------------------------------------");
-					System.out.println(newVal);
-					oldVal = newVal;
-					i += 1;
-				}
-				
-				System.out.println("");
-				System.out.println("final result:");
-				System.out.println("--------------------------------------------");
-				System.out.println(queryTree.toString());
-				return queryTree;
-
-			}
-	  }
-	  if (standard) {
-		  StandardQueryParser sp = new StandardQueryParser();
-		  sp.setQueryNodeProcessor(new DebuggingQueryNodeProcessorPipeline(sp.getQueryConfigHandler()));
-		  return sp;
-	  }
-	  else {
-	      return new AqpQueryParser("StandardLuceneGrammar");
-	  }
-  }
-  
-  public AqpQueryParser getParser() throws Exception {
-	  AqpQueryParser qp = new AqpQueryParser("StandardLuceneGrammar");
-	  return qp;
-  }
-
-  public Query getQuery(String query, Analyzer a) throws Exception {
-    return getParser(a).parse(query, "field");
-  }
-
-  public Query getQueryAllowLeadingWildcard(String query, Analyzer a) throws Exception {
-    AqpQueryParser parser = getParser(a);
-    parser.setAllowLeadingWildcard(true);
-    return parser.parse(query, "field");
-  }
-
-  public void assertQueryEquals(String query, Analyzer a, String result)
-      throws Exception {
-    Query q = getQuery(query, a);
-    String s = q.toString("field");
-    if (!s.equals(result)) {
-      fail("Query /" + query + "/ yielded /" + s + "/, expecting /" + result
-          + "/");
-    }
-  }
-
-  public void assertQueryEqualsAllowLeadingWildcard(String query, Analyzer a, String result)
-      throws Exception {
-    Query q = getQueryAllowLeadingWildcard(query, a);
-    String s = q.toString("field");
-    if (!s.equals(result)) {
-      fail("Query /" + query + "/ yielded /" + s + "/, expecting /" + result
-          + "/");
-    }
-  }
-
-  public void assertQueryEquals(AqpQueryParser qp, String field,
-      String query, String result) throws Exception {
-    Query q = qp.parse(query, field);
-    String s = q.toString(field);
-    if (!s.equals(result)) {
-      fail("Query /" + query + "/ yielded /" + s + "/, expecting /" + result
-          + "/");
-    }
-  }
-
-  public void assertEscapedQueryEquals(String query, Analyzer a, String result)
-      throws Exception {
-    String escapedQuery = QueryParserUtil.escape(query);
-    if (!escapedQuery.equals(result)) {
-      fail("Query /" + query + "/ yielded /" + escapedQuery + "/, expecting /"
-          + result + "/");
-    }
-  }
-
-  public void assertWildcardQueryEquals(String query, boolean lowercase,
-      String result, boolean allowLeadingWildcard) throws Exception {
-    AqpQueryParser qp = getParser(null);
-    qp.setLowercaseExpandedTerms(lowercase);
-    qp.setAllowLeadingWildcard(allowLeadingWildcard);
-    Query q = qp.parse(query, "field");
-    String s = q.toString("field");
-    if (!s.equals(result)) {
-      fail("WildcardQuery /" + query + "/ yielded /" + s + "/, expecting /"
-          + result + "/");
-    }
-  }
-
-  public void assertWildcardQueryEquals(String query, boolean lowercase,
-      String result) throws Exception {
-    assertWildcardQueryEquals(query, lowercase, result, false);
-  }
-
-  public void assertWildcardQueryEquals(String query, String result)
-      throws Exception {
-    AqpQueryParser qp = getParser(null);
-    Query q = qp.parse(query, "field");
-    String s = q.toString("field");
-    if (!s.equals(result)) {
-      fail("WildcardQuery /" + query + "/ yielded /" + s + "/, expecting /"
-          + result + "/");
-    }
-  }
-
-  public Query getQueryDOA(String query, Analyzer a) throws Exception {
-    if (a == null)
-      a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
-    AqpQueryParser qp = getParser();
-    qp.setAnalyzer(a);
-    qp.setDefaultOperator(Operator.AND);
-
-    return qp.parse(query, "field");
-
-  }
-
-  public void assertQueryEqualsDOA(String query, Analyzer a, String result)
-      throws Exception {
-    Query q = getQueryDOA(query, a);
-    String s = q.toString("field");
-    if (!s.equals(result)) {
-      fail("Query /" + query + "/ yielded /" + s + "/, expecting /" + result
-          + "/");
-    }
-  }
 
   public void testConstantScoreAutoRewrite() throws Exception {
     AqpQueryParser qp = new AqpQueryParser(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
@@ -749,48 +559,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
     ramDir.close();
   }
 
-  /** for testing legacy DateField support */
-  private String getLegacyDate(String s) throws Exception {
-    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-    return DateField.dateToString(df.parse(s));
-  }
-
-  /** for testing DateTools support */
-  private String getDate(String s, DateTools.Resolution resolution)
-      throws Exception {
-    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-    return getDate(df.parse(s), resolution);
-  }
-
-  /** for testing DateTools support */
-  private String getDate(Date d, DateTools.Resolution resolution)
-      throws Exception {
-    if (resolution == null) {
-      return DateField.dateToString(d);
-    } else {
-      return DateTools.dateToString(d, resolution);
-    }
-  }
   
-  private String escapeDateString(String s) {
-    if (s.contains(" ")) {
-      return "\"" + s + "\"";
-    } else {
-      return s;
-    }
-  }
-
-  private String getLocalizedDate(int year, int month, int day) {
-    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-    Calendar calendar = new GregorianCalendar();
-    calendar.clear();
-    calendar.set(year, month, day);
-    calendar.set(Calendar.HOUR_OF_DAY, 23);
-    calendar.set(Calendar.MINUTE, 59);
-    calendar.set(Calendar.SECOND, 59);
-    calendar.set(Calendar.MILLISECOND, 999);
-    return df.format(calendar.getTime());
-  }
 
   /** for testing legacy DateField support */
   public void testLegacyDateRange() throws Exception {
@@ -854,16 +623,6 @@ public class TestAqpQPHelper extends LuceneTestCase {
         endDateExpected.getTime(), DateTools.Resolution.HOUR);
   }
 
-  public void assertDateRangeQueryEquals(AqpQueryParser qp,
-      String field, String startDate, String endDate, Date endDateInclusive,
-      DateTools.Resolution resolution) throws Exception {
-    assertQueryEquals(qp, field, field + ":[" + escapeDateString(startDate) + " TO " + escapeDateString(endDate)
-        + "]", "[" + getDate(startDate, resolution) + " TO "
-        + getDate(endDateInclusive, resolution) + "]");
-    assertQueryEquals(qp, field, field + ":{" + escapeDateString(startDate) + " TO " + escapeDateString(endDate)
-        + "}", "{" + getDate(startDate, resolution) + " TO "
-        + getDate(endDate, resolution) + "}");
-  }
 
   public void testEscaped() throws Exception {
     Analyzer a = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
@@ -1059,14 +818,7 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertEquals(1.0f, q.getBoost(), 0.01f);
   }
 
-  public void assertQueryNodeException(String queryString) throws Exception {
-    try {
-      getQuery(queryString, null);
-    } catch (QueryNodeException expected) {
-      return;
-    }
-    fail("ParseException expected, not thrown");
-  }
+  
 
   public void testException() throws Exception {
     assertQueryNodeException("*leadingWildcard"); // disallowed by default
@@ -1148,68 +900,6 @@ public class TestAqpQPHelper extends LuceneTestCase {
     ramDir.close();
   }
 
-  public void testStarParsing() throws Exception {
-    // final int[] type = new int[1];
-    // AqpQueryParser qp = new AqpQueryParser("field", new
-    // WhitespaceAnalyzer()) {
-    // protected Query getWildcardQuery(String field, String termStr) throws
-    // ParseException {
-    // // override error checking of superclass
-    // type[0]=1;
-    // return new TermQuery(new Term(field,termStr));
-    // }
-    // protected Query getPrefixQuery(String field, String termStr) throws
-    // ParseException {
-    // // override error checking of superclass
-    // type[0]=2;
-    // return new TermQuery(new Term(field,termStr));
-    // }
-    //
-    // protected Query getFieldQuery(String field, String queryText) throws
-    // ParseException {
-    // type[0]=3;
-    // return super.getFieldQuery(field, queryText);
-    // }
-    // };
-    //
-    // TermQuery tq;
-    //
-    // tq = (TermQuery)qp.parse("foo:zoo*");
-    // assertEquals("zoo",tq.getTerm().text());
-    // assertEquals(2,type[0]);
-    //
-    // tq = (TermQuery)qp.parse("foo:zoo*^2");
-    // assertEquals("zoo",tq.getTerm().text());
-    // assertEquals(2,type[0]);
-    // assertEquals(tq.getBoost(),2,0);
-    //
-    // tq = (TermQuery)qp.parse("foo:*");
-    // assertEquals("*",tq.getTerm().text());
-    // assertEquals(1,type[0]); // could be a valid prefix query in the
-    // future too
-    //
-    // tq = (TermQuery)qp.parse("foo:*^2");
-    // assertEquals("*",tq.getTerm().text());
-    // assertEquals(1,type[0]);
-    // assertEquals(tq.getBoost(),2,0);
-    //
-    // tq = (TermQuery)qp.parse("*:foo");
-    // assertEquals("*",tq.getTerm().field());
-    // assertEquals("foo",tq.getTerm().text());
-    // assertEquals(3,type[0]);
-    //
-    // tq = (TermQuery)qp.parse("*:*");
-    // assertEquals("*",tq.getTerm().field());
-    // assertEquals("*",tq.getTerm().text());
-    // assertEquals(1,type[0]); // could be handled as a prefix query in the
-    // future
-    //
-    // tq = (TermQuery)qp.parse("(*:*)");
-    // assertEquals("*",tq.getTerm().field());
-    // assertEquals("*",tq.getTerm().text());
-    // assertEquals(1,type[0]);
-
-  }
 
   public void testStopwords() throws Exception {
     AqpQueryParser qp = getParser();
@@ -1270,39 +960,6 @@ public class TestAqpQPHelper extends LuceneTestCase {
     assertTrue(bq.getClauses()[1].getQuery() instanceof MatchAllDocsQuery);
   }
 
-  private void assertHits(int expected, String query, IndexSearcher is)
-      throws IOException, QueryNodeException {
-    AqpQueryParser qp;
-	try {
-		qp = getParser();
-	} catch (Exception e) {
-		e.printStackTrace();
-		throw new QueryNodeException(e);
-	}
-    qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
-    qp.setLocale(Locale.ENGLISH);
-
-    Query q = qp.parse(query, "date");
-    ScoreDoc[] hits = is.search(q, null, 1000).scoreDocs;
-    assertEquals(expected, hits.length);
-  }
-
-  private void addDateDoc(String content, int year, int month, int day,
-      int hour, int minute, int second, IndexWriter iw) throws IOException {
-    Document d = new Document();
-    d.add(newField("f", content, Field.Store.YES, Field.Index.ANALYZED));
-    Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-    cal.set(year, month - 1, day, hour, minute, second);
-    d.add(newField("date", DateField.dateToString(cal.getTime()),
-        Field.Store.YES, Field.Index.NOT_ANALYZED));
-    iw.addDocument(d);
-  }
-
-  @Override
-  public void tearDown() throws Exception {
-    BooleanQuery.setMaxClauseCount(originalMaxClauses);
-    super.tearDown();
-  }
 
   private class CannedTokenStream extends TokenStream {
     private int upto = 0;

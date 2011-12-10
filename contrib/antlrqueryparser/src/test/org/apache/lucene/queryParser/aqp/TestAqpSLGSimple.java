@@ -4,6 +4,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.QueryParserHelper;
 import org.apache.lucene.queryParser.standard.StandardQueryParser;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.search.BooleanQuery;
@@ -16,7 +17,7 @@ import org.apache.lucene.util.LuceneTestCase;
  * 
  * Tests QueryParser.
  */
-public class TestAqpSimple extends LuceneTestCase {
+public class TestAqpSimple extends TestAqpAbstractCase {
 	
 	private boolean verbose = true;
 
@@ -27,95 +28,10 @@ public class TestAqpSimple extends LuceneTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		originalMaxClauses = BooleanQuery.getMaxClauseCount();
-	}
-
-	@Override
-	public void tearDown() throws Exception {
-		BooleanQuery.setMaxClauseCount(originalMaxClauses);
-		super.tearDown();
+		setGrammarName("StandardLuceneGrammar");
 	}
 
 	
-	public AqpQueryParser getParser(Analyzer a) throws Exception {
-		if (a == null)
-			a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
-		AqpQueryParser qp = new AqpQueryParser();
-		
-		qp.setAnalyzer(a);
-		return qp;
-	}
-	
-	
-	public StandardQueryParser getStandardParser(Analyzer a) throws Exception {
-		if (a == null)
-			a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
-		StandardQueryParser qp = new StandardQueryParser();
-		qp.setAnalyzer(a);
-		return qp;
-	}
-	
-
-	public Query getQuery(String query, Analyzer a) throws Exception {
-		return getParser(a).parse(query, "field");
-	}
-
-
-	
-
-	private void assertQueryMatch(AqpQueryParser qp, String queryString,
-			String defaultField, String expectedResult) throws Exception {
-		
-		try {
-			Query query = qp.parse(queryString, defaultField);
-			String queryParsed = query.toString();
-			
-			if (!queryParsed.equals(expectedResult)) {
-				
-				if (this.verbose) {
-					
-					System.out.println("query:\t\t" + queryString);
-					
-					if (qp.getDebug()!=true) { // it already printed debug
-						qp.setDebug(true);
-						qp.parse(queryString, defaultField);
-						qp.setDebug(false);
-					}
-					System.out.println("");
-				    System.out.println("query:\t\t" + queryString);
-					System.out.println("result:\t\t" + queryParsed);
-					
-				}
-				
-				String msg = "Query /" + queryString + "/ with field: " + defaultField
-				+ "/ yielded /" + queryParsed
-				+ "/, expecting /" + expectedResult + "/";
-				
-				if (this.verbose) {
-					System.err.println(msg);
-				}
-				else {
-					fail(msg);
-				}
-			}
-			else {
-				if (this.verbose) {
-					System.out.println("OK \"" + queryString + "\" --->  " + queryParsed );
-				}
-			}
-		} catch (Exception e) {
-			if (this.verbose) {
-				System.err.println(queryString);
-				e.printStackTrace();
-			}
-			else {
-				throw e;
-			}
-		}
-		
-		
-		
-		
-	}
 
 	public void testBooleanQuery() throws Exception {
 		
@@ -123,7 +39,7 @@ public class TestAqpSimple extends LuceneTestCase {
 		
 		AqpQueryParser qp = getParser(analyzer);
 		
-		StandardQueryParser sp = getStandardParser(analyzer);
+		StandardQueryParser sp = (StandardQueryParser) getParser(analyzer, true);
 		
 		//DEFAULT OPERATOR IS AND
 		qp.setDefaultOperator(Operator.AND);
