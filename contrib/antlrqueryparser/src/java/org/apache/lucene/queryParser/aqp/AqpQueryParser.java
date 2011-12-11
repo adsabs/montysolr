@@ -31,8 +31,12 @@ import org.apache.lucene.queryParser.aqp.AqpSyntaxParser;
 import org.apache.lucene.queryParser.aqp.processors.AqpDebuggingQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.aqp.processors.AqpQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.core.QueryParserHelper;
+import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.standard.builders.StandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.standard.config.AllowLeadingWildcardAttribute;
 import org.apache.lucene.queryParser.standard.config.AnalyzerAttribute;
@@ -141,7 +145,7 @@ public class AqpQueryParser extends QueryParserHelper {
 		this("StandardLuceneGrammar");
 	}
 
-	public AqpQueryParser(String grammarName) throws Exception {
+	public AqpQueryParser(String grammarName) throws QueryNodeParseException {
 		super(new AqpStandardQueryConfigHandler(), 
 				new AqpSyntaxParserImpl().initializeGrammar(grammarName),
 				new AqpQueryNodeProcessorPipeline(null),
@@ -149,10 +153,10 @@ public class AqpQueryParser extends QueryParserHelper {
 	}
 	
 	public AqpQueryParser(
-			AqpStandardQueryConfigHandler aqpStandardQueryConfigHandler,
+			QueryConfigHandler aqpStandardQueryConfigHandler,
 			AqpSyntaxParser aqpSyntaxParser,
-			AqpQueryNodeProcessorPipeline aqpQueryNodeProcessorPipeline,
-			AqpStandardQueryTreeBuilder aqpStandardQueryTreeBuilder) {
+			QueryNodeProcessorPipeline aqpQueryNodeProcessorPipeline,
+			QueryTreeBuilder aqpStandardQueryTreeBuilder) {
 		
 		super(aqpStandardQueryConfigHandler, 
 				aqpSyntaxParser,
@@ -191,8 +195,12 @@ public class AqpQueryParser extends QueryParserHelper {
 	 */
 	public void setDebug(boolean debug) {
 		if (debug) {
-			this.setQueryNodeProcessor(new AqpDebuggingQueryNodeProcessorPipeline(
-					getQueryConfigHandler()));
+			QueryNodeProcessor qp = this.getQueryNodeProcessor();
+			AqpDebuggingQueryNodeProcessorPipeline np = new AqpDebuggingQueryNodeProcessorPipeline(
+					getQueryConfigHandler());
+			np.add(qp);
+			
+			this.setQueryNodeProcessor(np);
 		} else {
 			this.setQueryNodeProcessor(new AqpQueryNodeProcessorPipeline(
 					getQueryConfigHandler()));

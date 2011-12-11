@@ -12,7 +12,9 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.queryParser.InvenioQueryParser;
+import org.apache.lucene.queryParser.aqp.AqpQueryParserInvenio;
+import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DefaultSolrParams;
@@ -183,19 +185,23 @@ class InvenioQParser extends QParser {
 		Query mainq;
 
 		if (querySyntax.equals("invenio")) {
-			InvenioQueryParser invParser = new InvenioQueryParser(Version.LUCENE_29, schema.getDefaultSearchFieldName(), schema.getAnalyzer());
+			AqpQueryParserInvenio invParser = new AqpQueryParserInvenio();
+			invParser.setAnalyzer(schema.getAnalyzer());
 			String opParam = getParam(QueryParsing.OP);
 			if (opParam != null) {
-				invParser.setDefaultOperator("AND".equals(opParam) ? InvenioQueryParser.Operator.AND
-						: InvenioQueryParser.Operator.OR);
+				invParser.setDefaultOperator("AND".equals(opParam) ? Operator.AND : Operator.OR);
 			} else {
 				// try to get default operator from schema
 				QueryParser.Operator operator = getReq().getSchema()
 						.getSolrQueryParser(null).getDefaultOperator();
-				invParser.setDefaultOperator(null == operator ? InvenioQueryParser.Operator.OR
-						: (operator == QueryParser.AND_OPERATOR ? InvenioQueryParser.Operator.AND : InvenioQueryParser.Operator.OR));
+				invParser.setDefaultOperator(null == operator ? Operator.OR
+						: (operator == QueryParser.AND_OPERATOR ? Operator.AND : Operator.OR));
 			}
-			mainq = invParser.parse(getString());
+			try {
+				mainq = invParser.parse(getString(), schema.getDefaultSearchFieldName());
+			} catch (QueryNodeException e) {
+				throw new ParseException(e.getMessage());
+			}
 		}
 		else {
 

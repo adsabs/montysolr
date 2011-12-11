@@ -6,9 +6,10 @@ import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 
 public class AqpDebuggingQueryNodeProcessorPipeline extends
-		AqpQueryNodeProcessorPipeline {
+		QueryNodeProcessorPipeline {
 
 	public AqpDebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
 		super(queryConfig);

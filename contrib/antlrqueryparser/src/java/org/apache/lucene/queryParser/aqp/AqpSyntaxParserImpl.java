@@ -17,6 +17,7 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.TreeAdaptor;
 import org.apache.lucene.messages.Message;
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
@@ -45,8 +46,9 @@ public class AqpSyntaxParserImpl implements AqpSyntaxParser {
     	// empty constructor
     }
     
-	public AqpSyntaxParser initializeGrammar(String grammarName) throws Exception {
+	public AqpSyntaxParser initializeGrammar(String grammarName) throws QueryNodeParseException {
 		
+		try {
 		// get the Classes
         clsLexer = Class.forName("org.apache.lucene.queryParser.aqp.parser." + grammarName + "Lexer");
         clsParser = Class.forName("org.apache.lucene.queryParser.aqp.parser." + grammarName + "Parser");
@@ -88,6 +90,10 @@ public class AqpSyntaxParserImpl implements AqpSyntaxParser {
         //AqpCommonTree ast = parseTest("hey:joe");
         
         return this;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new QueryNodeParseException(e);
+		}
         
 	}
 	

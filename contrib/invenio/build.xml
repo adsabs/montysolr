@@ -23,12 +23,13 @@
     Invenio embedded in Solr
   </description>
 
-	<import file="../contrib-build.xml"/>
+	<import file="../contrib-build.xml" />
+	
+	<import file="../antlrqueryparser/macros.xml" />
+	
+    <property name="inv.grammars.dir" location="./grammars" />
+    <property name="inv.parser.dir" location="src/java/org/apache/lucene/queryParser/aqp/parser" />
 
-	<!--Needed only if you want to regenerate InvenioQueryParser syntax,
-	        which is probably not what you need to do -->
-
-	<property name="javacc.home" value="/some/path/javacc-5.0" />
 
 	<path id="classpath">
 		<path refid="base.classpath"/>
@@ -40,6 +41,22 @@
 		<path refid="classpath"/>
 		<pathelement location="${build.dir}/classes/java"/>
 	</path>
+	
+	<path id="antlr.classpath">
+        <path refid="classpath"/>
+        <path refid="base.classpath"/>
+        
+        <fileset dir="${common.dir}/build/contrib/antlrqueryparser">
+            <include name="**/montysolr-antlrqueryparser*.jar"/>
+        </fileset>
+        
+        <pathelement location="${prop.jcc_egg}/jcc/classes"/>
+        <pathelement location="${common.dir}/build/contrib/antlrqueryparser/classes/test"/>
+        
+        <fileset dir="lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
@@ -48,8 +65,8 @@
 	<target name="compile-core" depends="compile,common.compile-core"/>
 
 
-	<target name="compile" description="Compiles all the java classes" >
-		<javac classpathref="classpath" 
+	<target name="compile" description="Compiles all the java classes" depends="build-grammar">
+		<javac classpathref="antlr.classpath" 
             srcdir="src/java"
             destdir="${build.dir}/classes/java"
             >
@@ -59,46 +76,45 @@
     
     	
     
-	<import file="../antlrqueryparser/build.xml"/>
-	<property name="inv.grammars.dir" location="./grammars" />
-    <property name="inv.parser.dir" location="src/java/org/apache/lucene/queryParser/aqp/parser" />
 	
-	<target name="xxx" >
-		   <generate-syntax-parser grammar-dir="${aqp.parser.dir}" grammar-name="Invenio"/>
-		<generate-syntax-parser grammar-dir="${aqp.parser.dir}" grammar-name="FixInvenio"/> 
-	</target>
-	
-
-	<target name="get-grammar" description="Compiles the grammar for Invenio" depends="config-antlr">
+    	
+	<target name="build-grammar" description="Compiles the grammar for Invenio">
 		<!-- it is little bit more complex, as we have 2 grammars to take care of -->
 		
 		<generate-grammar grammar-name="FixInvenio"
 		             grammar-dir="${inv.grammars.dir}"
 		             parser-dir="${inv.parser.dir}"
 		             build-dir="${build.dir}/classes/java"
-		             classpathref="test.classpath"
+		             classpathref="antlr.classpath"
 		               />
 		<generate-grammar grammar-name="Invenio"
-		                     grammar-dir="${inv.grammars.dir}"
-		                     parser-dir="${inv.parser.dir}"
-		                     build-dir="${build.dir}/classes/java"
-		                     classpathref="test.classpath"
-		                       />
-		
+                     grammar-dir="${inv.grammars.dir}"
+                     parser-dir="${inv.parser.dir}"
+                     build-dir="${build.dir}/classes/java"
+                     classpathref="antlr.classpath"
+                       />
 	</target>
+	
+	
+	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" depends="" >
 
-	<target name="config-antlr" >
-		<path id="test.classpath">
-			<path refid="classpath"/>
-			<path refid="test.base.classpath"/>
-			<pathelement location="${build.dir}/classes/test"/>
-			<pathelement location="${common.dir}/build/contrib/antlrqueryparser/classes/test"/>
-			<pathelement location="${common.dir}/build/contrib/antlrqueryparser/classes/java"/>
-			<fileset dir="../antlrqueryparser/lib">
-				<include name="**/*.jar"/>
-			</fileset>
-		</path>
-	</target>
+        <generate-html python-executable="${prop.python}"
+              python-generator="${aqp.generate.py}"
+              grammar-name="FixInvenio"
+              build-dir="${build.dir}"
+              classpath="${toString:antlr.classpath}"
+              grammar-dir="${inv.grammars.dir}"
+              />
+		<generate-html python-executable="${prop.python}"
+              python-generator="${aqp.generate.py}"
+              grammar-name="Invenio"
+              build-dir="${build.dir}"
+              classpath="${toString:antlr.classpath}"
+              grammar-dir="${inv.grammars.dir}"
+              />
+    </target>
+    
+	
 
 
 </project>

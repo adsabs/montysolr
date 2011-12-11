@@ -11,7 +11,7 @@ import org.apache.lucene.search.TermQuery;
 
 public class AqpFieldQueryNodeBuilder implements StandardQueryBuilder {
 	
-	AqpFieldQueryNodeBuilder() {
+	public AqpFieldQueryNodeBuilder() {
 		// empty constructor
 	}
 

@@ -40,7 +40,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
  */
 public class AqpQRANGEEXProcessor extends AqpQRANGEINProcessor {
 
-	AqpQRANGEEXProcessor() {
+	public AqpQRANGEEXProcessor() {
 		lowerComparator = CompareOperator.GT;
 		upperComparator = CompareOperator.LT;
 	}

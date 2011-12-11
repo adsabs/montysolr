@@ -1,5 +1,6 @@
 package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.core.parser.SyntaxParser;
 
 public interface AqpSyntaxParser extends SyntaxParser {
@@ -13,5 +14,5 @@ public interface AqpSyntaxParser extends SyntaxParser {
 	   * @return AqpSyntaxParser
 	   */
 	  public AqpSyntaxParser initializeGrammar(String grammarName)
-	      throws Exception;
+	      throws QueryNodeParseException;
 }
