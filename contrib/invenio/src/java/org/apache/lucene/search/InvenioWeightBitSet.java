@@ -21,11 +21,11 @@ public class InvenioWeightBitSet extends InvenioWeight {
 
 	private static final long serialVersionUID = -4934126443764572711L;
 	
-	protected String pythonFunctionName = "perform_request_search_bitset";
 	
 	public InvenioWeightBitSet(IndexSearcher searcher, InvenioQuery query, String idField)
 			throws IOException {
 		super(searcher, query, idField);
+		pythonFunctionName = "perform_request_search_bitset";
 
 	}
 
@@ -79,14 +79,15 @@ public class InvenioWeightBitSet extends InvenioWeight {
 					if (bitSet == null || bitSet.isEmpty()) {
 						return doc = NO_MORE_DOCS;
 					}
+					recid=0;
 				}
 
 				if ((recid = bitSet.nextSetBit(recid)) == -1) {
 					return doc = NO_MORE_DOCS;
 				}
-
 				try {
 					doc = recidToDocid.get(recid);
+					recid++;
 				}
 				catch (NullPointerException e) {
 					throw new NullPointerException("Doc with recid=" + recid + " missing. You should update Invenio recids!");

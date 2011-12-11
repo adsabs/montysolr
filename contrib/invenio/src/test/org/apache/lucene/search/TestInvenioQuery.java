@@ -22,7 +22,7 @@ import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
 
 public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 	
-	private String idField;
+	protected String idField;
 
 
 	public void setUp() throws Exception {
@@ -37,7 +37,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 	}
 	
 
-	private IndexedDocs indexDocsPython(int no_docs) {
+	protected IndexedDocs indexDocsPython(int no_docs) {
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage("index_docs")
 			.setParam("no_docs", no_docs);
 		MontySolrVM.INSTANCE.sendMessage(message);
@@ -50,7 +50,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		return new IndexedDocs(recids, words, docs);
 	}
 	
-	private Directory indexDocsLucene(IndexedDocs docs) throws IOException {
+	protected Directory indexDocsLucene(IndexedDocs docs) throws IOException {
 		Directory ramdir = newDirectory();
 	    Analyzer analyzer = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 	    IndexWriter writer = new IndexWriter(ramdir,
@@ -106,7 +106,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		
 	}
 	
-	class IndexedDocs {
+	public class IndexedDocs {
 		public int[] recids;
 		public String[] words;
 		public HashMap<Integer, ArrayList<String>> docs;

@@ -11,7 +11,10 @@ public class InvenioQueryBitSet extends InvenioQuery {
 
 	public InvenioQueryBitSet(Query query, String idField) {
 		super(query, idField);
-
+	}
+	
+	public InvenioQueryBitSet(Query query, String idField, String pythonResponder) {
+		super(query, idField, pythonResponder);
 	}
 
 	/**
@@ -20,9 +23,13 @@ public class InvenioQueryBitSet extends InvenioQuery {
 	 * <p>
 	 * Only implemented by primitive queries, which re-write to themselves.
 	 */
-	public Weight createWeight(IndexSearcher searcher) throws IOException {
+	public Weight createWeight(Searcher searcher) throws IOException {
 
-		return new InvenioWeightBitSet(searcher, this, this.idField);
+		InvenioWeightBitSet w = new InvenioWeightBitSet((IndexSearcher) searcher, this, this.idField);
+		if (pythonResponder != null) {
+			w.setPythonResponder(pythonResponder);
+		}
+		return w;
 	}
 
 

@@ -48,7 +48,7 @@ def index_docs(message):
 
 
 def fake_search(message):
-    """receives the query and returns random ids"""
+    """receives the query and returns ids"""
     q = str(message.getParam("query"))
     if ':' in q:
         field, val = q.split(':')
@@ -64,12 +64,32 @@ def fake_search(message):
     message.setResults(j.JArray_int(ret))
     
     
-    
 
+def fake_search_intbitset(message):    
+    """receives the query and returns ids encoded
+    as intbitsets"""
+    
+    from invenio import intbitset
+    
+    q = str(message.getParam("query"))
+    if ':' in q:
+        field, val = q.split(':')
+    else:
+        field, val = 'text', q
+        
+    index = _docs[field]
+    
+    ret = intbitset.intbitset()
+    if val in index:
+        for i in index[val]:
+            ret.add(i)
+    
+    message.setResults(j.JArray_byte(ret.fastdump()))
 
 
 def montysolr_targets():
     return make_targets("InvenioQuery:fake_search", fake_search,
+                        "InvenioQuery:fake_search_intbitset", fake_search_intbitset,
                         fake_search=fake_search,
                         index_docs=index_docs,
                         
