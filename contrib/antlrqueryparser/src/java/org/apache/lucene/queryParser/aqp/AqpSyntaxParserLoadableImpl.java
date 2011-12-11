@@ -20,7 +20,15 @@ import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.aqp.AqpCommonTree;
 import org.apache.lucene.queryParser.aqp.AqpCommonTreeAdaptor;
 
-public abstract class AqpSyntaxParserImpl implements AqpSyntaxParser {
+/**
+ * This implementation can load any AST grammar from the repository of
+ * grammars without a need to provide a Java implementation. It uses 
+ * reflection, so it might be slower than a dedicated parsing class.
+ * 
+ * @author rchyla
+ *
+ */
+public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
 	
 	private Class clsLexer;
 	private Class clsParser;
@@ -36,19 +44,10 @@ public abstract class AqpSyntaxParserImpl implements AqpSyntaxParser {
     
     private String[] tokenNames;
 	
-    public AqpSyntaxParserImpl() {
+    public AqpSyntaxParserLoadableImpl() {
     	// empty constructor
     }
     
-    /**
-	 * This parse method uses reflection so that it can load any grammar
-	 * without knowing in advance its name
-	 */
-    @Override public QueryNode parse(CharSequence query, CharSequence field)
-	throws QueryNodeParseException {
-    	TokenStream tokens = getTokenStream(query);
-    	return parseTokenStream(tokens, query, field);
-    }
     
     @Override
 	public AqpSyntaxParser initializeGrammar(String grammarName) throws QueryNodeParseException {

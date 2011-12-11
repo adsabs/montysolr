@@ -18,6 +18,8 @@ package org.apache.lucene.queryParser.aqp;
  */
 
 import java.text.Collator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TooManyListenersException;
@@ -147,7 +149,7 @@ public class AqpQueryParser extends QueryParserHelper {
 
 	public AqpQueryParser(String grammarName) throws QueryNodeParseException {
 		super(new AqpStandardQueryConfigHandler(), 
-				new AqpSyntaxParserImpl().initializeGrammar(grammarName),
+				new AqpSyntaxParserLoadableImpl().initializeGrammar(grammarName),
 				new AqpQueryNodeProcessorPipeline(null),
 				new AqpStandardQueryTreeBuilder());
 	}
@@ -198,13 +200,14 @@ public class AqpQueryParser extends QueryParserHelper {
 			QueryNodeProcessor qp = this.getQueryNodeProcessor();
 			AqpDebuggingQueryNodeProcessorPipeline np = new AqpDebuggingQueryNodeProcessorPipeline(
 					getQueryConfigHandler());
-			np.add(qp);
 			
+			List<QueryNodeProcessor> qnp = (List<QueryNodeProcessor>) qp;
+			ListIterator<QueryNodeProcessor> it = qnp.listIterator();
+			while (it.hasNext()) {
+				np.add(it.next());
+			}
 			this.setQueryNodeProcessor(np);
-		} else {
-			this.setQueryNodeProcessor(new AqpQueryNodeProcessorPipeline(
-					getQueryConfigHandler()));
-		}
+		} 
 		debugMode = debug;
 	}
 	

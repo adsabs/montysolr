@@ -21,7 +21,7 @@ public class InvenioQueryNodeBuilder implements StandardQueryBuilder {
 		QueryNode q = ((InvenioQueryNode) queryNode).getChild();
 		String idField = ((InvenioQueryNode) queryNode).getIdField();
 		
-		return new InvenioQuery((Query)master.build(q), "idField");
+		return new InvenioQuery((Query)master.build(q), idField);
 		
 
 	  }

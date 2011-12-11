@@ -7,6 +7,7 @@ import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.nodes.InvenioQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.NonAnalyzedQueryNode;
 import org.apache.lucene.queryParser.aqp.parser.InvenioSyntaxParser;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpCLAUSEProcessor;
@@ -16,6 +17,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpFUZZYProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpGroupQueryOptimizerProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpInvenioMODIFIERProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpInvenioQPHRASEProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOptimizationProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQANYTHINGProcessor;
@@ -94,17 +96,17 @@ import org.apache.lucene.queryParser.standard.processors.RemoveEmptyNonLeafQuery
 import org.apache.lucene.queryParser.standard.processors.WildcardQueryNodeProcessor;
 import org.apache.lucene.search.Query;
 
-public class AqpQueryParserInvenio extends AqpQueryParser {
+public class AqpInvenioQueryParser extends AqpQueryParser {
 
-	public AqpQueryParserInvenio() throws QueryNodeParseException {
-		super(new InvenioQueryConfigHandler(), new InvenioSyntaxParser()
+	public AqpInvenioQueryParser() throws QueryNodeParseException {
+		super(new InvenioQueryConfigHandler(), new AqpInvenioSyntaxParser()
 				.initializeGrammar("Invenio"),
 				new InvenioNodeProcessorPipeline(null),
 				new InvenioQueryTreeBuilder());
 		
 	}
 
-	public AqpQueryParserInvenio(String grammarName) throws Exception {
+	public AqpInvenioQueryParser(String grammarName) throws Exception {
 		throw new IllegalArgumentException(
 				"Invenio query parser does not use reflection");
 	}
@@ -153,7 +155,7 @@ public class AqpQueryParserInvenio extends AqpQueryParser {
 			add(new AqpQRANGEINProcessor());
 			add(new AqpQRANGEEXProcessor());
 			add(new AqpQNORMALProcessor());
-			add(new AqpQPHRASEProcessor());
+			add(new AqpInvenioQPHRASEProcessor());
 			add(new AqpQPHRASETRUNCProcessor());
 			add(new AqpQTRUNCATEDProcessor());
 			add(new AqpQRANGEINProcessor());
@@ -194,6 +196,7 @@ public class AqpQueryParserInvenio extends AqpQueryParser {
 		public InvenioQueryTreeBuilder() {
 			setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 			setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
+			setBuilder(NonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
 			setBuilder(InvenioQueryNode.class,
 					new InvenioQueryNodeBuilder(this));
 			setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());

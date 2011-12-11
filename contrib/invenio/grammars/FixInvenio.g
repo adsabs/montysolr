@@ -61,7 +61,7 @@ tokens {
         		text = z.replaceAll("\\\\$1");
     			
     		}
-    		return text;
+    		return "\u300c" + text + "\u300c";
 	}
 }
 
@@ -116,6 +116,7 @@ LPAREN  : '(';
 RPAREN  : ')';
 
 
+
 fragment DQUOTE	
 	:	'\"';
 
@@ -150,7 +151,8 @@ REGEX
 
 SAFE_TOKEN
 	:(~(' ' | '\t' | '\n' | '\r' | '\u3000'
-	   | '\'' | '\"'| '\\' | '/' | ')' | '(')
+	   | '\'' | '\"'| '\\' | '/' | ')' | '('
+	   )
 	 | ESC_CHAR )+; 
 
 SUSPICIOUS_TOKEN

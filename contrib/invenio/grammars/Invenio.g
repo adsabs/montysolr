@@ -373,7 +373,7 @@ CARAT : '^' (INT+ ('.' INT+)?)?;
 TILDE : '~' (INT+ ('.' INT+)?)?;
 
 DQUOTE	
-	:	'\"';
+	:	'\"' | '\u300C'; // the left white corner is used to mark special processing
 
 SQUOTE
 	:	'\'';
@@ -425,6 +425,7 @@ fragment TERM_START_CHAR
 	      | '(' | ')' | '[' | ']' | '{' | '}'
 	      | '+' | '-' | '!' | ':' | '~' | '^' 
 	      | '?' | '*' | '\\' | '#' | '|' | '/'
+	      | '\u300C'
 	      )
 	 | ESC_CHAR );  	
 
@@ -460,12 +461,12 @@ TERM_TRUNCATED:
 
 PHRASE	
 	:	
-	DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'|'\\\''))+ DQUOTE
+	DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'|'\\\''|'\u300C'))+ DQUOTE
 	| SQUOTE (ESC_CHAR|~('\''|'\\'|'?'|'*'|'\\\''))+ SQUOTE
 	;
 
 PHRASE_ANYTHING	:	
-	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
+	DQUOTE (ESC_CHAR|~('\"'|'\\'|'\u300C'))+ DQUOTE
 	| SQUOTE (ESC_CHAR|~('\''|'\\'|'\\\''))+ SQUOTE
 	;
 

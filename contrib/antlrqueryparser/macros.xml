@@ -172,14 +172,15 @@ package org.apache.lucene.queryParser.aqp.parser;
 
 /**
  * Automatically generated SyntaxParser wrapper built by ant
- * from the grammar source: ${aqp.grammars.dir}/${aqp.grammar}.g
+ * from the grammar source: @{parser-dir}/@{grammar-name}.g
  * 
- * YOUR CHANGES MAY BE OVERWRITTEN AUTOMATICALLY!
+ * YOUR CHANGES WILL BE OVERWRITTEN AUTOMATICALLY!
  */
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.TokenStream;
 import org.apache.lucene.messages.Message;
 import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.AqpCommonTree;
@@ -187,33 +188,34 @@ import org.apache.lucene.queryParser.aqp.AqpCommonTreeAdaptor;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.core.parser.SyntaxParser;
 
-import org.apache.lucene.queryParser.aqp.AqpSyntaxParser;
+import org.apache.lucene.queryParser.aqp.AqpSyntaxParser;            	
+import org.apache.lucene.queryParser.aqp.AqpSyntaxParserAbstract;
 import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Lexer;
 import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Parser;
 
 
-public class @{grammar-name}SyntaxParser implements AqpSyntaxParser {
+public class @{grammar-name}SyntaxParser extends AqpSyntaxParserAbstract {
     
     
     @Override
-    /**
-     * Parses a query and returns QueryNode tree. It does not use reflection.
-     * 
-     * @param query
-     * @param field
-     * @return
-     * @throws QueryNodeParseException
-     */
-    public QueryNode parse(CharSequence query, CharSequence field)
+    public AqpSyntaxParser initializeGrammar(String grammarName)
             throws QueryNodeParseException {
+        return this;
+    }
 
-        ANTLRStringStream in = new ANTLRStringStream(query.toString());
+    @Override
+    public TokenStream getTokenStream(CharSequence input) {
+        ANTLRStringStream in = new ANTLRStringStream(input.toString());
         @{grammar-name}Lexer lexer = new @{grammar-name}Lexer(in);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        @{grammar-name}Parser parser = new @{grammar-name}Parser(
-                tokens);
+        return tokens;
+    }
+
+    @Override
+    public QueryNode parseTokenStream(TokenStream tokens, CharSequence query,
+            CharSequence field) throws QueryNodeParseException {
+        @{grammar-name}Parser parser = new @{grammar-name}Parser(tokens);
         @{grammar-name}Parser.mainQ_return returnValue;
         
         AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor(parser.getTokenNames());
@@ -244,17 +246,11 @@ public class @{grammar-name}SyntaxParser implements AqpSyntaxParser {
             ee.setNonLocalizedMessage(message);
             throw ee;
         }
-        
-        
-    }
-    
-    @Override
-    public AqpSyntaxParser initializeGrammar(String grammarName)
-            throws QueryNodeParseException {
-        return this;
     }
 
 }
+
+            
 ]]>
             </echo>
 
