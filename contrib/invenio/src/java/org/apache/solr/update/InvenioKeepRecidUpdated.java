@@ -32,6 +32,7 @@ import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
@@ -41,7 +42,6 @@ import org.apache.solr.handler.dataimport.SolrWriter;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.util.DictionaryCache;
 
 /**
  * Ping solr core
@@ -53,7 +53,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	private volatile boolean busy = false;
 
 	@Override
-	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
+	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws IOException
 			 {
 
 		if (isBusy()) {
@@ -87,7 +87,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		if (params.getInt("last_recid") != null) {
 			last_recid = params.getInt("last_recid");
 		} else {
-			int[] ids = DictionaryCache.INSTANCE.getLuceneCache(req
+			int[] ids = DictionaryRecIdCache.INSTANCE.getLuceneCache(req
 					.getSearcher().getReader(), schema.getUniqueKeyField()
 					.getName());
 			for (int m : ids) {

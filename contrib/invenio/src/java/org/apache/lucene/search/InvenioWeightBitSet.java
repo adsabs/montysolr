@@ -1,4 +1,4 @@
-package org.apache.solr.search;
+package org.apache.lucene.search;
 
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.jni.MontySolrVM;
@@ -7,27 +7,25 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 import org.ads.solr.InvenioBitSet;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Collector;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
-import org.apache.lucene.search.TermQuery;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.request.SolrQueryRequest;
 
 
 import com.jcraft.jzlib.ZInputStream;
 
 public class InvenioWeightBitSet extends InvenioWeight {
 
-	public InvenioWeightBitSet(InvenioQuery query, SolrParams localParams,
-			SolrQueryRequest req, Map<Integer, Integer> recidToDocid)
+	private static final long serialVersionUID = -4934126443764572711L;
+	
+	protected String pythonFunctionName = "perform_request_search_bitset";
+	
+	public InvenioWeightBitSet(IndexSearcher searcher, InvenioQuery query, String idField)
 			throws IOException {
-		super(query, localParams, req, recidToDocid);
+		super(searcher, query, idField);
 
 	}
 
@@ -50,12 +48,12 @@ public class InvenioWeightBitSet extends InvenioWeight {
 				}
 			}
 
-			private void searchInvenio() {
+			private void searchInvenio() throws IOException {
 				// ask Invenio to give us recids
 				String qval = query.getInvenioQuery();
 
 				PythonMessage message = MontySolrVM.INSTANCE
-						.createMessage("perform_request_search_bitset")
+						.createMessage(pythonFunctionName)
 						.setSender("InvenioQuery").setParam("query", qval);
 				
 				MontySolrVM.INSTANCE.sendMessage(message);
@@ -91,8 +89,7 @@ public class InvenioWeightBitSet extends InvenioWeight {
 					doc = recidToDocid.get(recid);
 				}
 				catch (NullPointerException e) {
-					log.error("Doc with recid=" + recid + " missing. You should update Invenio recids!");
-					throw e;
+					throw new NullPointerException("Doc with recid=" + recid + " missing. You should update Invenio recids!");
 				}
 
 				return doc;

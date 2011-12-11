@@ -20,9 +20,8 @@ import org.apache.solr.search.DocList;
 import org.apache.solr.search.DocListAndSet;
 import org.apache.solr.search.DocSlice;
 import org.apache.solr.search.SolrIndexReader;
-import org.apache.solr.search.SolrIndexSearcher.QueryCommand;
 import org.apache.solr.search.SortSpec;
-import org.apache.solr.util.DictionaryCache;
+import org.apache.lucene.search.DictionaryRecIdCache;
 
 
 public class InvenioFormatter extends SearchComponent
@@ -65,7 +64,7 @@ public class InvenioFormatter extends SearchComponent
 	}
 
 	@Override
-	public void process(ResponseBuilder rb) {
+	public void process(ResponseBuilder rb) throws IOException {
 
 		if ( activated ) {
 			SolrParams params = rb.req.getParams();
@@ -85,7 +84,7 @@ public class InvenioFormatter extends SearchComponent
 			DocIterator it = dl.iterator();
 
 			SolrIndexReader reader = rb.req.getSearcher().getReader();
-			int[] docidMap = DictionaryCache.INSTANCE.getLuceneCache(reader, "id");
+			int[] docidMap = DictionaryRecIdCache.INSTANCE.getLuceneCache(reader, "id");
 
 			// translate into Invenio ID's
 			for (int i=0;it.hasNext();i++) {
@@ -121,7 +120,7 @@ public class InvenioFormatter extends SearchComponent
 			    rsp.add("response",rb.getResults().docList);
 			}
 			else {
-				Map<Integer, Integer> recidToDocid = DictionaryCache.INSTANCE
+				Map<Integer, Integer> recidToDocid = DictionaryRecIdCache.INSTANCE
 						.getTranslationCache(reader, rb.req.getSchema().getUniqueKeyField().getName());
 				int[] recs = (int[]) result;
 

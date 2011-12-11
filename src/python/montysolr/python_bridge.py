@@ -13,7 +13,9 @@ to the handlers - we don't need to instantiate it everytime
 as is the case when calling from Java. Therefore we can 
 put the VM and the bridge parts together.
 
-It intentionally has the java-style method names
+It intentionally has the java-style method names, it is a java
+object behind it!!!
+
 '''
 
 from montysolr import initvm

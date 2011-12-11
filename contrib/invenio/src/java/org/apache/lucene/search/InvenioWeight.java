@@ -1,4 +1,4 @@
-package org.apache.solr.search;
+package org.apache.lucene.search;
 
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.jni.MontySolrVM;
@@ -12,42 +12,43 @@ import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.Similarity;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.Weight;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.handler.InvenioHandler;
-import org.apache.solr.request.SolrQueryRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class InvenioWeight extends Weight {
 
-	public static final Logger log = LoggerFactory
-		.getLogger(InvenioWeight.class);
 
+	private static final long serialVersionUID = 1090438140913506853L;
+	
+	protected String pythonFunctionName = "perform_request_search_ints";
+	
 	protected Weight weight;
 	protected Similarity similarity;
 	protected InvenioQuery query;
-	protected TermQuery innerQuery;
-	protected SolrParams localParams;
+	protected Query innerQuery;
 	protected Map<Integer, Integer> recidToDocid;
 	protected float value;
+	protected String idField;
 
 	private int searcherCounter;
 
-	public InvenioWeight(InvenioQuery query, SolrParams localParams,
-			SolrQueryRequest req, Map<Integer, Integer> recidToDocid)
+	public InvenioWeight(IndexSearcher searcher, InvenioQuery query, String idField)
 			throws IOException {
-		SolrIndexSearcher searcher = req.getSearcher();
-		this.innerQuery = (TermQuery) query.query;
+		this.innerQuery = query.getInnerQuery();
 		this.weight = innerQuery.createWeight(searcher);
 		this.similarity = innerQuery.getSimilarity(searcher);
 		this.query = query;
-		this.localParams = localParams;
-		this.recidToDocid = recidToDocid;
+		this.recidToDocid = DictionaryRecIdCache.INSTANCE.getTranslationCache(
+				searcher.getIndexReader(), idField);
 		this.searcherCounter = 0;
+		this.idField = idField;
+		
 	}
+	
+	public void setPythonResponder(String functionName) {
+		pythonFunctionName = functionName;
+	}
+	
 	public Scorer scorer(IndexReader indexReader, boolean scoreDocsInOrder,
 			boolean topScorer) throws IOException {
 
@@ -78,7 +79,7 @@ public class InvenioWeight extends Weight {
 				String qval = query.getInvenioQuery();
 
 				PythonMessage message = MontySolrVM.INSTANCE
-						.createMessage("perform_request_search_ints")
+						.createMessage(pythonFunctionName)
 						.setSender("InvenioQuery").setParam("query", qval);
 				
 				MontySolrVM.INSTANCE.sendMessage(message);
@@ -87,10 +88,9 @@ public class InvenioWeight extends Weight {
 				if (result != null) {
 					recids = (int[]) result;
 					max_counter = recids.length - 1;
-					log.info("Invenio returned: " + recids.length + " hits");
 				}
 				else {
-					log.info("Invenio returned: null");
+					throw new NullPointerException("Invenio returned: null");
 				}
 			}
 
@@ -112,8 +112,7 @@ public class InvenioWeight extends Weight {
 					doc = recidToDocid.get(recids[recids_counter]);
 				}
 				catch (NullPointerException e) {
-					log.error("Doc with recid=" + recids[recids_counter] + " missing. You should update Invenio recids!");
-					throw e;
+					throw new IOException("Doc with recid=" + recids[recids_counter] + " missing. You should update Invenio recids!");
 				}
 
 				return doc;
@@ -136,7 +135,7 @@ public class InvenioWeight extends Weight {
 			}
 		};// Scorer
 	}// scorer
-
+	
 	// pass these methods through to enclosed query's weight
 	public float getValue() {
 		return value;

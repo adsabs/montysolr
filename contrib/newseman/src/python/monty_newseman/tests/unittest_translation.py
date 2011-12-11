@@ -3,29 +3,24 @@
 import unittest
 from montysolr import handler
 from montysolr.initvm import JAVA as J
-from montysolr.python_bridge import JVMBridge
-from montysolr.utils import make_targets
 
 from monty_newseman import targets
 import sys
 import os
 
+from montysolr.tests.montysolr_testcase import LuceneTestCase
 
 
-class Test(unittest.TestCase):
+class Test(LuceneTestCase):
     
     def setUp(self):
-        self._old_handler = JVMBridge.getHandler()
-        self.bridge = JVMBridge
-        self.set_targets(targets)
+        LuceneTestCase.setUp(self)
+        self.setTargets(targets)
         targets.Cacher.cache = {}
         self.basedir = os.path.dirname(os.path.abspath(os.path.abspath(__file__) + '../../../..'))
         #self.seman_url = 'sqlite:///%s/resources/test_database.sqlite' % self.basedir
         self.seman_url = 'sqlite:///:memory:'
 
-    def tearDown(self):
-        JVMBridge.setHandler(self._old_handler)
-    
     
     def set_targets(self, targets):
         if not isinstance(targets, list):

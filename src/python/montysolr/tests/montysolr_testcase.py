@@ -7,6 +7,9 @@ Created on Feb 4, 2011
 import os
 import sys
 import tempfile
+import sys
+
+from montysolr.python_bridge import JVMBridge
 
 # "-Djava.util.logging.config.file=/x/dev/workspace/sandbox/montysolr/example/etc/test.logging.properties"
 os.environ['MONTYSOLR_JVMARGS_PYTHON'] = ""
@@ -18,6 +21,7 @@ sj = initvm.montysolr_java
 
 
 class MontySolrTestCase(unittest.TestCase):
+    """use this to test Solr related code"""
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
@@ -36,9 +40,11 @@ class MontySolrTestCase(unittest.TestCase):
         
         sj.System.setProperty('solr.solr.home', self.getSolrHome())
         sj.System.setProperty('solr.data.dir', self.data_dir)
-
-        if self.getHandler():
-            self.bridge = java_bridge.SimpleBridge(self.getHandler())
+        
+        self.bridge = JVMBridge
+        
+        #if self.getHandler():
+        #    self.bridge = java_bridge.SimpleBridge(self.getHandler())
 
         #self.initializer = sj.CoreContainer.Initializer()
         #self.core_container = self.initializer.initialize()
@@ -81,6 +87,12 @@ class MontySolrTestCase(unittest.TestCase):
 
     def setHandler(self, handler):
         self.handler = handler
+        
+    def getBridge(self):
+        return self.bridge
+    
+    def setBridge(self, bridge):
+        self.bridge = bridge
 
     def getHandler(self):
         return self.handler
@@ -92,7 +104,28 @@ class MontySolrTestCase(unittest.TestCase):
             def init(self):
                 self.discover_targets(module_path)
         return TestHandler()
+    
+    def addSysPath(self, paths):
+        if not isinstance(paths, list):
+            paths = [paths]
+        for p in paths:
+            if p not in sys.path:
+                sys.path.insert(0, p)
+                
+    def setTargets(self, targets):
+        self.bridge.setHandler(self.loadHandler(targets))
+        
+        
 
+class LuceneTestCase(MontySolrTestCase):
+    """Use this to test a code that is needing only lucene
+    - usually what I write in python in order to test the
+    python part (what is called from solr)
+    """
+    def setUp(self):
+        self.bridge = JVMBridge
+    def tearDown(self):
+        pass
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.solr.search.QueryParsing;
-import org.apache.solr.util.DictionaryCache;
 
 
 
@@ -335,20 +334,15 @@ class InvenioQParser extends QParser {
 	}
 
 
-	private Query createInvenioQuery(String field, String value, Map<Integer, Integer> recidToDocid) {
+	private Query createInvenioQuery(String field, String value, String idField) {
 		Query newQuery = null;
 		String newField = field;
 		if (field.equals(schema.getDefaultSearchFieldName())) {
 			newField = "";
 		}
-		if (exchangeType.equals("bitset")) {
-			newQuery = new InvenioQueryBitSet(new TermQuery(new Term(newField, value)), req, localParams, recidToDocid);
-		}
-		else {
-			newQuery = new InvenioQuery(new TermQuery(new Term(newField, value)), req, localParams, recidToDocid);
-		}
-		return newQuery;
-
+		
+		//if (exchangeType.equals("bitset")) { // TODO: check
+		return new SolrInvenioQuery(new TermQuery(new Term(newField, value)), req, localParams, idField);
 	}
 
 
@@ -361,15 +355,6 @@ class InvenioQParser extends QParser {
 		Query newQuery = null;
 
 		SolrIndexReader reader = req.getSearcher().getReader();
-		Map<Integer, Integer> recidToDocid = null;
-		try {
-			recidToDocid = DictionaryCache.INSTANCE.getTranslationCache(reader,
-					InvenioQParserPlugin.IDFIELD);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new ParseException(
-					"Invenio translation table recid<->docid is not available!");
-		}
 
 		StringBuffer out = new StringBuffer();
 		if (query instanceof TermQuery) {
@@ -377,7 +362,7 @@ class InvenioQParser extends QParser {
 			Term t = q.getTerm();
 			String invf = getInvField(t.field());
 			if (invf != null) {
-				newQuery = createInvenioQuery(invf, t.text(), recidToDocid);
+				newQuery = createInvenioQuery(invf, t.text(), InvenioQParserPlugin.IDFIELD);
 			}
 
 		} else if (query instanceof TermRangeQuery) {
@@ -410,7 +395,7 @@ class InvenioQParser extends QParser {
 				// TermRangeQuery(q.getField().replaceFirst(PREFIX, ""),
 				// q.getLowerTerm(), q.getUpperTerm(),
 				// q.includesLower(), q.includesUpper());
-				newQuery = createInvenioQuery(invf, out.toString(), recidToDocid);
+				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD);
 			}
 
 		} else if (query instanceof NumericRangeQuery) {
@@ -438,7 +423,7 @@ class InvenioQParser extends QParser {
 				}
 
 				out.append(q.includesMax() ? ']' : '}');
-				newQuery = createInvenioQuery(invf, out.toString(), recidToDocid);
+				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD);
 
 
 				// TODO: Invneio is using int ranges only, i think, but we shall
@@ -477,7 +462,7 @@ class InvenioQParser extends QParser {
 				//		flags);
 				out.append(prefix.text());
 				out.append('*');
-				newQuery = createInvenioQuery(invf, out.toString(), recidToDocid);
+				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD);
 
 			}
 
@@ -490,7 +475,7 @@ class InvenioQParser extends QParser {
 				//		flags);
 				out.append(prefix.text());
 				out.append('*');
-				newQuery = createInvenioQuery(invf, out.toString(), recidToDocid);
+				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD);
 
 			}
 		} else if (query instanceof WildcardQuery) {
@@ -501,7 +486,7 @@ class InvenioQParser extends QParser {
 				//FieldType ft = QueryParsing.writeFieldName(invf, schema, out,
 				//		flags);
 				out.append(t.text());
-				newQuery = createInvenioQuery(invf, out.toString(), recidToDocid); //TODO: is this correct?
+				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD); //TODO: is this correct?
 			}
 		} else if (query instanceof PhraseQuery) {
 			PhraseQuery q = (PhraseQuery) query;
@@ -516,7 +501,7 @@ class InvenioQParser extends QParser {
 					out.append(((Term)terms[i]).text());
 				}
 				out.append(q.getSlop() > 0 ? "'" : "\"");
-				newQuery = createInvenioQuery(invf, out.toString(), recidToDocid); //TODO: is this correct?
+				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD); //TODO: is this correct?
 			}
 
 		} else if (query instanceof FuzzyQuery) {

@@ -38,7 +38,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.util.DictionaryCache;
+import org.apache.lucene.search.DictionaryRecIdCache;
 
 
 
@@ -89,7 +89,7 @@ public class CitationQuery extends Query {
 	public Map<Integer, int[]> getDictCache() throws IOException {
 		try {
 			return getDictCache(this.dictName);
-		} catch (InterruptedException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			// return empty map, that is ok because it will affect only
 			// this query, the next will get a new cache
@@ -97,10 +97,10 @@ public class CitationQuery extends Query {
 		}
 	}
 
-	public Map<Integer, int[]> getDictCache(String dictname) {
+	public Map<Integer, int[]> getDictCache(String dictname) throws IOException {
 
 
-		Map<Integer, int[]> cache = DictionaryCache.INSTANCE.getCache(dictname);
+		Map<Integer, int[]> cache = DictionaryRecIdCache.INSTANCE.getCache(dictname);
 
 
 		if (cache == null) {
@@ -181,7 +181,7 @@ public class CitationQuery extends Query {
 				}
 			}
 
-			DictionaryCache.INSTANCE.setCache(dictname, citationDict);
+			DictionaryRecIdCache.INSTANCE.setCache(dictname, citationDict);
 			return citationDict;
 		}
 		return cache;

@@ -6,3 +6,5 @@ examples/*
 build
 *~
 contrib/antlrqueryparser/src/java/org/apache/lucene/queryParser/aqp/parser/*
+contrib/invenio/src/java/org/apache/lucene/queryParser/aqp/parser/*
+

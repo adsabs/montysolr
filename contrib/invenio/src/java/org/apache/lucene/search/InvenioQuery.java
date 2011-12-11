@@ -1,44 +1,54 @@
-package org.apache.solr.search;
+package org.apache.lucene.search;
 
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Searcher;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Similarity;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.Weight;
 import org.apache.lucene.util.ToStringUtils;
 
+import invenio.montysolr.jni.MontySolrVM;
+
 import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.InvenioQParserPlugin;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ * {@link InvenioQuery} extends {@link Query} by adding ability 
+ * to query and retrieve data from the Python process using
+ * {@link MontySolrVM}
+ * 
+ * The real work is done by the {@link InvenioWeight} class,
+ * which queries the underlying Python process and returns
+ * the doc ids (they will be translated from the Invenio recids
+ * into lucene docids) on the fly.
+ * 
+ * @author rchyla
+ *
+ */
 
 public class InvenioQuery extends Query {
 
-	public static final Logger log = LoggerFactory
-			.getLogger(InvenioQuery.class);
 
 	private float boost = 1.0f; // query boost factor
-	Query query;
-	SolrParams localParams;
-	SolrQueryRequest req;
-	Map<Integer, Integer> recidToDocid = null;
-
-	public InvenioQuery(TermQuery query, SolrQueryRequest req,
-			SolrParams localParams, Map<Integer, Integer> recidToDocid) {
+	protected Query query;
+	protected String idField = "recid";
+	protected String pythonResponder = null;
+	
+	public InvenioQuery(Query query, String idField) {
+		super();
 		this.query = query;
-		this.localParams = localParams;
-		this.req = req;
-		this.recidToDocid = recidToDocid;
-
+		this.idField = idField;
+	}
+	
+	public InvenioQuery(Query query, String idField, String pythonResponder) {
+		super();
+		this.query = query;
+		this.idField = idField;
+		this.pythonResponder = pythonResponder;
 	}
 
 	/**
@@ -67,7 +77,11 @@ public class InvenioQuery extends Query {
 	 */
 	public Weight createWeight(Searcher searcher) throws IOException {
 
-		return new InvenioWeight(this, localParams, req, recidToDocid);
+		InvenioWeight w = new InvenioWeight((IndexSearcher) searcher, this, idField);
+		if (pythonResponder != null) {
+			w.setPythonResponder(pythonResponder);
+		}
+		return w;
 	}
 
 	/**
@@ -141,15 +155,8 @@ public class InvenioQuery extends Query {
 	public String toString(String s) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("<");
-		Term t = ((TermQuery) query).getTerm();
-		if (t.field().length() > 0 ) {
-			buffer.append(t.field());
-			buffer.append("|");
-		}
-		buffer.append(t.text());
-		//buffer.append(query.toString(s));
+		buffer.append(query.toString());
 		buffer.append(">");
-		buffer.append(ToStringUtils.boost(getBoost()));
 		return buffer.toString();
 	}
 
@@ -177,6 +184,10 @@ public class InvenioQuery extends Query {
 			qval = qval.substring(1, qval.length()-1);
 		}
 		return qval;
+	}
+	
+	public Query getInnerQuery() {
+		return query;
 	}
 }
 

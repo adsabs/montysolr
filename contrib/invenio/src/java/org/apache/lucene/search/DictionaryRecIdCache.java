@@ -1,4 +1,4 @@
-package org.apache.solr.util;
+package org.apache.lucene.search;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -7,7 +7,27 @@ import java.util.Map;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.FieldCache;
 
-public enum DictionaryCache {
+/**
+ * This class helps to translate from external source ids to lucene ids.
+ * It is assumed, that you index the field (the field is unique for each
+ * documement). And the external source is returned the values of the 
+ * field in the place of lucene docids. 
+ * 
+ * So, for example, Invenio has records with recids: 0...5,8,10
+ * 
+ * You are indexing these records with Lucene, and they get assigned these
+ * lucene docids: 0..7 (0=0,...,10=7)
+ * 
+ * The search returned recids: 2,10 --> they will be translated automatically
+ * into lucene docids 2,7
+ * 
+ * Wheneven you remove/update/delete document, we'll automatically update the
+ * recid Cache.
+ * 
+ * @author rchyla
+ *
+ */
+public enum DictionaryRecIdCache {
 	INSTANCE;
 	//Map<String, Map<Integer, int[]>> cache = null;
 	

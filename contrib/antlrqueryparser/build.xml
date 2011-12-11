@@ -360,11 +360,12 @@ import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.parser.SyntaxParser;
 
+import org.apache.lucene.queryParser.aqp.AqpSyntaxParser;
 import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Lexer;
 import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Parser;
 
 
-public class @{grammar-name}SyntaxParser implements SyntaxParser {
+public class @{grammar-name}SyntaxParser implements AqpSyntaxParser {
     
     
     @Override
@@ -416,6 +417,12 @@ public class @{grammar-name}SyntaxParser implements SyntaxParser {
         }
         
         
+    }
+	
+	@Override
+    public AqpSyntaxParser initializeGrammar(String grammarName)
+            throws Exception {
+        return this;
     }
 
 }

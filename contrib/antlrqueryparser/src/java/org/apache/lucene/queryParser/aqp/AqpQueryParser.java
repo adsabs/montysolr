@@ -143,7 +143,7 @@ public class AqpQueryParser extends QueryParserHelper {
 
 	public AqpQueryParser(String grammarName) throws Exception {
 		super(new AqpStandardQueryConfigHandler(), 
-				new AqpSyntaxParser().initializeGrammar(grammarName),
+				new AqpSyntaxParserImpl().initializeGrammar(grammarName),
 				new AqpQueryNodeProcessorPipeline(null),
 				new AqpStandardQueryTreeBuilder());
 	}

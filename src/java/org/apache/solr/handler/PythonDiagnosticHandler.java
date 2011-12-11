@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
 
+import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -17,7 +18,6 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.search.DocSlice;
-import org.apache.solr.util.DictionaryCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,7 @@ public class PythonDiagnosticHandler extends RequestHandlerBase {
 			String r1 = null;
 			String r2 = null;
 	
-			Map<Integer, Integer> recidToDocid = DictionaryCache.INSTANCE.getTranslationCache(req.getSearcher().getReader(),
+			Map<Integer, Integer> recidToDocid = DictionaryRecIdCache.INSTANCE.getTranslationCache(req.getSearcher().getReader(),
 					req.getSchema().getUniqueKeyField().getName());
 	
 			for (int i=0; i<queries.length; i++) {
@@ -137,7 +137,7 @@ public class PythonDiagnosticHandler extends RequestHandlerBase {
 			}
 	
 			String defaultField = req.getSchema().getUniqueKeyField().getName();
-			int[] lCache = DictionaryCache.INSTANCE.getLuceneCache(req.getSearcher().getReader(),
+			int[] lCache = DictionaryRecIdCache.INSTANCE.getLuceneCache(req.getSearcher().getReader(),
 					defaultField);
 			String rinfo = "Lucene knows about " + recidToDocid.size() + " recids." + "[inside field \"" + defaultField + "\"]...";
 			Integer d = (lCache.length / 2);

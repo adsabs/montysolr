@@ -2,14 +2,14 @@ package org.apache.lucene.queryParser.aqp;
 
 import org.apache.lucene.queryParser.aqp.builders.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
-import org.apache.lucene.queryParser.aqp.parser.AqpSyntaxParserInvenio;
+import org.apache.lucene.queryParser.aqp.parser.InvenioSyntaxParser;
 import org.apache.lucene.queryParser.aqp.processors.AqpQueryNodeProcessorPipeline;
 
 public class AqpQueryParserInvenio extends AqpQueryParser {
 
 	public AqpQueryParserInvenio() throws Exception {
 		super(new AqpStandardQueryConfigHandler(), 
-				new AqpSyntaxParserInvenio(),
+				new InvenioSyntaxParser(),
 				new AqpQueryNodeProcessorPipeline(null),
 				new AqpStandardQueryTreeBuilder());
 	}
