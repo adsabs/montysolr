@@ -1,14 +1,13 @@
 package org.ads.solr;
 
-import java.io.*;
 import java.util.BitSet;
 import java.util.Arrays;
 
 public class InvenioBitSet extends BitSet {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -947279400324884920L;
 
-    public InvenioBitSet() {
+	public InvenioBitSet() {
         super();
     }
 

@@ -13,17 +13,19 @@ import invenio.montysolr.jni.MontySolrVM;
 public class PythonTextField extends TextField {
 	public Field createField(SchemaField field, String externalVal, float boost) {
 
-		// String val = bridge.workoutFieldValue(this.getClass().getName(),
-		// field, externalVal, boost);
 		PythonMessage message = MontySolrVM.INSTANCE
 				.createMessage("workout_field_value")
-				.setSender("PythonTextField").setParam("field", field)
-				.setParam("externalVal", externalVal).setParam("boost", boost);
+				.setSender("PythonTextField")
+				.setParam("field", field)
+				.setParam("externalVal", externalVal)
+				.setParam("boost", boost);
 
 		MontySolrVM.INSTANCE.sendMessage(message);
+		
 		Object res = message.getResults();
+		
 		if (res != null) {
-			String val = (String) message.getResults();
+			String val = (String) res;
 			if (val != null)
 				return super.createField(field, val, boost);
 		}

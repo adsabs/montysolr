@@ -15,17 +15,17 @@ import org.apache.solr.util.WebUtils;
 
 
 
-public class InvenioHandler extends SearchHandler {
+public class InvenioRequestHandler extends SearchHandler {
 
 	public static final Logger log = LoggerFactory
-			.getLogger(InvenioHandler.class);
+			.getLogger(InvenioRequestHandler.class);
 
 
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
 			throws Exception {
 		SolrParams params = req.getParams();
 		String q = params.get(CommonParams.Q);
-
+		
 		// get the invenio parameters and set them into the request
 		String invParams = params.get("inv.params");
 		Map<String, String> qs = null;

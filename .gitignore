@@ -7,4 +7,5 @@ build
 *~
 contrib/antlrqueryparser/src/java/org/apache/lucene/queryParser/aqp/parser/*
 contrib/invenio/src/java/org/apache/lucene/queryParser/aqp/parser/*
-
+# a symbolic links to other grammars in contrib/invenio
+contrib/antlrqueryparser/grammars/*Invenio.*

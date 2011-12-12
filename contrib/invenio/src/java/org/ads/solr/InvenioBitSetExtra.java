@@ -1,4 +1,4 @@
-package invenio.montysolr.util;
+package org.ads.solr;
 
 import java.io.*;
 import java.util.BitSet;
@@ -9,18 +9,21 @@ import java.util.zip.*;
  * This file was developed by Jan for Invenio, taken from
  * http://invenio-software
  * .org/cgi-bin/cgit/personal/invenio-jan/tree/modules/miscutil
- * /lib/InvenioBitSet.java?h=lucene-connect
+ * /lib/InvenioBitSet.java?h=lucene-connect 
+ * who took it from Jay Luker, at ADS
+ * 
+ * I added some code but I think it is not finished yet
  *
  * @author Jan Iwaszkiewicz
  * @author rca - added fastLoad and fastDump
  *
  */
 
-public class InvenioBitSet extends BitSet {
+public class InvenioBitSetExtra extends BitSet {
 
 	private static final long serialVersionUID = 1L;
 
-	public InvenioBitSet() {
+	public InvenioBitSetExtra() {
 		super();
 	}
 
@@ -40,13 +43,13 @@ public class InvenioBitSet extends BitSet {
 		return bout;
 	}
 
-	public static InvenioBitSet fastLoad(String input) throws DataFormatException {
+	public static InvenioBitSetExtra fastLoad(String input) throws DataFormatException {
 		byte[] bytes = input.getBytes();
-		return InvenioBitSet.fastLoad(bytes);
+		return InvenioBitSetExtra.fastLoad(bytes);
 	}
 
-	public static InvenioBitSet fastLoad(byte[] input) throws DataFormatException {
-		InvenioBitSet bitSet = new InvenioBitSet();
+	public static InvenioBitSetExtra fastLoad(byte[] input) throws DataFormatException {
+		InvenioBitSetExtra bitSet = new InvenioBitSetExtra();
 
 		// Decompress the bytes
 		Inflater decompresser = new Inflater();
@@ -78,12 +81,12 @@ public class InvenioBitSet extends BitSet {
 		return result;
 	}
 
-	public InvenioBitSet(int nbits) {
+	public InvenioBitSetExtra(int nbits) {
 		super(nbits);
 	}
 
 	// TODO: remove the trailing 8 bytes (added by intbitset format) and test
-	public InvenioBitSet(byte[] bytes) {
+	public InvenioBitSetExtra(byte[] bytes) {
 		this(bytes == null ? 0 : bytes.length * 8);
 		for (int i = 0; i < size(); i++) {
 			if (isBitOn(i, bytes))
@@ -142,14 +145,14 @@ public class InvenioBitSet extends BitSet {
 
 		int min = 0;
 		int max = 5000;
-		InvenioBitSet ibs = new InvenioBitSet(max);
+		InvenioBitSetExtra ibs = new InvenioBitSetExtra(max);
 		for (int i = 0; i < 500; i++) {
 			int r = min + (int) (Math.random() * ((max - min) + 1));
 			ibs.set(r);
 		}
 		ByteArrayOutputStream b = ibs.fastDump();
-		InvenioBitSet bs;
-		bs = InvenioBitSet.fastLoad(b.toByteArray());
+		InvenioBitSetExtra bs;
+		bs = InvenioBitSetExtra.fastLoad(b.toByteArray());
 		System.out.println("set lengths: " + ibs.cardinality() + " - " + bs.cardinality());
 		System.out.println("Set equals? " + ibs.equals(bs));
 
