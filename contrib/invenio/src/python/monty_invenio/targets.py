@@ -128,58 +128,6 @@ def get_citation_dict(message):
 
 
         
-def workout_field_value(message):
-    sender = str(message.getSender())
-    if sender in 'PythonTextField':
-        value = message.getParam('externalVal')
-        if not value:
-            return
-        value = str(value)
-        #print 'searching for', value
-        vals = {}
-        #ret = value.lower() + ' Hey! '
-        ret = None
-        if value:
-            parts = value.split('|')
-            for p in parts:
-                k, v = p.split(':', 1)
-                if v[0] == '[' and v[-1] == ']':
-                    v = v[1:-1]
-                vals[k] = v
-            if 'arxiv_id' in vals and 'src_dir' in vals:
-                #print vals
-                dirs = vals['src_dir'].split(',')
-                ax = vals['arxiv_id'].split(',')[0].strip()
-                if ax.find('/') > -1:
-                    arx_parts = ax.split('/') #math-gt/060889
-                    fname = ''.join(arx_parts)
-                    topdir = arx_parts[1][:4]
-                elif ax.find('.') > -1:
-                    arx_parts = ax.replace('arXiv:', '').split('.', 1) #arXiv:0712.0712
-                    topdir = arx_parts[0]
-                    fname = '.'.join(arx_parts)
-                else:
-                    return ret
-
-                if len(arx_parts) == 2:
-
-
-                    for d in dirs:
-                        #print (d, topdir, fname + '.txt')
-                        newname = os.path.join(d, topdir, fname + '.txt')
-                        if os.path.exists(newname):
-                            fo = open('/tmp/solr-index.txt', 'a')
-                            fo.write(newname + '\n')
-                            fo.close()
-                            ret = open(newname, 'r').read()
-                            if ret:
-                                message.setResults(ret.decode('utf8'))
-                        else:
-                            fo = open('/tmp/solr-not-found.txt', 'a')
-                            fo.write('%s\t%s\n' % (newname, value))
-                            fo.close()
-                        break
-
 
 
 def sort_and_format(message):
@@ -294,7 +242,6 @@ def search_unit_solr(message):
 
 def montysolr_targets():
     targets = [
-           MontySolrTarget('PythonTextField:workout_field_value', workout_field_value),
            MontySolrTarget('handleRequestBody', handle_request_body),
            MontySolrTarget('rca.python.solr.handler.InvenioHandler:handleRequestBody', handle_request_body),
            MontySolrTarget('CitationQuery:get_citation_dict', get_citation_dict),

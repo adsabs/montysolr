@@ -36,7 +36,9 @@ import org.apache.solr.search.DocSlice;
  */
 public class TestInvenioHandler extends MontySolrAbstractTestCase {
 
-  @Override public String getSchemaFile() { return "schema.xml"; }
+  @Override public String getSchemaFile() { 
+	  return "schema.xml"; 
+	  }
   @Override public String getSolrConfigFile() { 
 	  
 	  return getMontySolrHome() + 

@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import invenio.montysolr.jni.MontySolrVM;
+
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
@@ -712,7 +714,19 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 	      base = base.getParentFile();
 	    }
 	    return base.getAbsolutePath();
-	    
+	}
+	
+	public void addToSysPath(String... paths) {
+		for (String path: paths) {
+			MontySolrVM.INSTANCE.evalCommand("import sys;\'" + path + "\' in sys.path or sys.path.insert(0, \'" + path + "\')");
+		}
+	}
+	
+	public void addTargetsToHandler(String... modules) {
+		for (String path: modules) {
+			// this is a quick hack, i should make the handler to have a defined place (or find some better way of adding)
+			MontySolrVM.INSTANCE.evalCommand("self._handler.discover_targets([\'" + path + "\'])");
+		}
 	}
 }
 

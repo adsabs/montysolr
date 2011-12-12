@@ -9,12 +9,17 @@ import invenio.montysolr.jni.MontySolrVM;
  * <code>TextField</code> is the basic type for configurable text analysis.
  * Analyzers for field types using this implementation should be defined in the
  * schema.
+ * 
+ * {@link PythonTextField} is a pythonic extension, the code responsibe for
+ * retrieving the text is in the module monty_invenio.scheme.targets
  */
 public class PythonTextField extends TextField {
+	private String pythonFunctionName = "get_field_value";
+	
 	public Field createField(SchemaField field, String externalVal, float boost) {
 
 		PythonMessage message = MontySolrVM.INSTANCE
-				.createMessage("workout_field_value")
+				.createMessage(pythonFunctionName)
 				.setSender("PythonTextField")
 				.setParam("field", field)
 				.setParam("externalVal", externalVal)
