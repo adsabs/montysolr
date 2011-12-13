@@ -130,7 +130,7 @@ import org.apache.solr.schema.IndexSchema;
  *  
  */
 public class InvenioKeepRecidUpdated extends RequestHandlerBase {
-	private volatile List<String> urlsToFetch = new ArrayList<String>();
+	protected volatile List<String> urlsToFetch = new ArrayList<String>();
 	private volatile int counter = 0;
 
 	@Override
@@ -206,7 +206,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			
 		} else {
 			rsp.add("message", "Generating " + dictData.get("ADDED").length + " empty records");
-			runAsyncGeneration(dictData, schema, params.getBool("commit", false), updateHandler);
+			runAsyncProcessing(dictData, schema, params.getBool("commit", false), updateHandler);
 		}
 
 
@@ -219,7 +219,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 
 	
 	
-	private Map<String, int[]> retrieveRecids(int lastRecid, SolrParams params, SolrQueryRequest req,
+	protected Map<String, int[]> retrieveRecids(int lastRecid, SolrParams params, SolrQueryRequest req,
             SolrQueryResponse rsp) {
 		
 		Map<String, int[]> dictData;
@@ -259,7 +259,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		return dictData;
     }
 
-	private int getLastRecid(SolrParams params, SolrQueryRequest req) throws IOException {
+	
+	
+	protected int getLastRecid(SolrParams params, SolrQueryRequest req) throws IOException {
 		int last_recid = -1; // -1 means get the first created doc
 
 		// Either generate or retrieve the docid of the last-indexed record
@@ -298,7 +300,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 	
 	
-	private void runAsyncGeneration(Map<String, int[]> dictData, IndexSchema schema,
+	private void runAsyncProcessing(Map<String, int[]> dictData, IndexSchema schema,
 			boolean commit, UpdateHandler updateHandler) {
 		final Map<String, int[]> dataToProcess = dictData;
 		final IndexSchema indexSchema = schema;
@@ -309,7 +311,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			@Override
 			public void run() {
 				try {
-	                runGeneration(dataToProcess, indexSchema, commitIndex, uHandler);
+	                runProcessing(dataToProcess, indexSchema, commitIndex, uHandler);
                 } catch (IOException e) {
 	                e.printStackTrace();
                 } finally {
@@ -320,7 +322,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 	
 	
-	private void runGeneration(Map<String, int[]> dictData, IndexSchema schema,
+	protected void runProcessing(Map<String, int[]> dictData, IndexSchema schema,
 			boolean commit, UpdateHandler updateHandler) throws IOException {
 		
 		if (dictData.containsKey("ADDED")) {
@@ -340,11 +342,29 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 					updateHandler.addDoc(addCmd);
 				}
 			}
-			CommitUpdateCommand updateCmd = new CommitUpdateCommand(commit);
-			updateHandler.commit(updateCmd);
+			
 		}
-		setBusy(false);
-	
+		
+		if (dictData.containsKey("DELETED")) {
+			DeleteUpdateCommand delCmd = new DeleteUpdateCommand();
+			delCmd.fromCommitted = true;
+	        delCmd.fromPending = true;
+			int[] recids = dictData.get("DELETED");
+			if (recids.length > 0) {
+				
+				Map<Integer, Integer> map = DictionaryRecIdCache.INSTANCE.getTranslationCache(null, 
+						schema.getUniqueKeyField().getName());
+				
+				for (int i = 0; i < recids.length; i++) {
+					delCmd.id = map.get(recids[i]).toString();
+					updateHandler.delete(delCmd);
+				}
+			}
+			
+		}
+		
+		CommitUpdateCommand updateCmd = new CommitUpdateCommand(commit);
+		updateHandler.commit(updateCmd);
 	}
 	
 	
@@ -363,7 +383,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		}.start();
 	}
 
-	private void runUpload() throws MalformedURLException, IOException,
+	
+	protected void runUpload() throws MalformedURLException, IOException,
 			InterruptedException {
 		while (urlsToFetch.size() > 0) {
 			String url = urlsToFetch.remove(0);
@@ -375,7 +396,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 
 	}
 
-	private String getFetchURL(String importurl, String inveniourl,
+	protected String getFetchURL(String importurl, String inveniourl,
 			String queryPart, Integer maximport)
 			throws UnsupportedEncodingException {
 		return importurl

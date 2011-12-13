@@ -21,16 +21,21 @@ import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MapSolrParams;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.DocSlice;
+import org.apache.solr.update.TestInvenioKeepRecidUpdated.MyInvenioKeepRecidUpdated;
 
 /**
  * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
@@ -80,7 +85,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
 	public void testIndexing() throws Exception {
 		SolrCore core = h.getCore();
-
+		
+		Thread.sleep(1000);
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage("create_record");
 		MontySolrVM.INSTANCE.sendMessage(message);
 		Integer firstAdded = (Integer) message.getResults();
@@ -93,22 +99,66 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 						.setParam("recids", new int[]{1,2,3,4,5,6,7,8,9});
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
-		message = MontySolrVM.INSTANCE.createMessage("delete")
+		message = MontySolrVM.INSTANCE.createMessage("delete_record")
 			.setParam("recid", firstAdded);
 		MontySolrVM.INSTANCE.sendMessage(message);
-
-		InvenioKeepRecidUpdated handler = new InvenioKeepRecidUpdated();
 		
 		
-		assertQ("Make sure they got in",
-				req("qt", "invenio_update", "last_recid", "-1",
-						"inveniourl", inveniourl,
+		MyInvenioKeepRecidUpdated handler = new MyInvenioKeepRecidUpdated();
+		
+		SolrQueryResponse rsp = new SolrQueryResponse();
+		
+		core.execute(handler, req("last_recid", "-1", 
+					    "inveniourl", inveniourl,
 						"importurl", importurl,
 						"updateurl", updateurl,
-						"deleteurl", deleteurl), 
-				"//*[@importStatus='busy']");
+						"deleteurl", deleteurl), rsp);
 		
-
-
+		assertTrue(handler.lastRecId == -1);
+		assertTrue(handler.retrievedRecIds.get("ADDED").length == 1);
+		assertTrue(handler.retrievedRecIds.get("UPDATED").length == 9);
+		assertTrue(handler.retrievedRecIds.get("DELETED").length == 1);
+		
+		// clean up after us
+		message = MontySolrVM.INSTANCE.createMessage("wipeout_record")
+			.setParam("recid", firstAdded);
+		MontySolrVM.INSTANCE.sendMessage(message);
+		message.setParam("recid", secondAdded);
+		MontySolrVM.INSTANCE.sendMessage(message);
+	}
+	
+	
+	public class MyInvenioKeepRecidUpdated extends InvenioKeepRecidUpdated {
+		
+		public Map<String, int[]> retrievedRecIds;
+		public int lastRecId;
+		
+		@Override
+		protected int getLastRecid(SolrParams params, SolrQueryRequest req) throws IOException {
+		     lastRecId = super.getLastRecid(params, req);
+		     return lastRecId;
+		}
+		
+		@Override
+		protected Map<String, int[]> retrieveRecids(int lastRecid, SolrParams params,
+		        SolrQueryRequest req, SolrQueryResponse rsp) {
+			
+		    retrievedRecIds = super.retrieveRecids(lastRecid, params, req, rsp);
+		    return retrievedRecIds;
+		}
+		
+		@Override
+		protected void runUpload() throws MalformedURLException, IOException, InterruptedException {
+		    //super.runUpload();
+			System.out.println("Do nothing runUpload");
+		}
+		
+		@Override
+		protected void runProcessing(Map<String, int[]> dictData, IndexSchema schema,
+		        boolean commit, UpdateHandler updateHandler) throws IOException {
+		    //super.runProcessing(dictData, schema, commit, updateHandler);
+			System.out.println("Do nothing runProcessing");
+		}
+		
 	}
 }

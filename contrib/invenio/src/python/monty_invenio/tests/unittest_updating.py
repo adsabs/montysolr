@@ -64,30 +64,31 @@ def create_delete(message):
     
     recs = bibupload.xml_marc_to_records(xml_to_delete)
     err, recid, msg = bibupload.bibupload(recs[0], opt_mode='insert')
-    message.setResults(recid)    
+    message.setResults(j.Integer(recid))    
 
 def create_record(message):
     """creates record"""
     recid = bibupload.create_new_record()
-    message.setResults(recid)      
+    message.setResults(j.Integer(int(recid)))      
     
 def delete_record(message):
     """deletes record"""
-    recid = int(str(j.Integer.cast_(message.getParam('recid'))))
+    recid = int(j.Integer.cast_(message.getParam('recid')).intValue())
     record = search_engine.get_record(recid)
     bibrecord.record_add_field(record, "980", subfields=[("c", "DELETED")])
     err, recid, msg = bibupload.bibupload(record, opt_mode='replace')
-    message.setResults(recid)
+    message.setResults(j.Integer(recid))
         
     
 def wipeout_record(message):
-    recid = int(str(message.getParam('recid')))
+    recid = int(j.Integer.cast_(message.getParam('recid')).intValue())
     bibupload_regression_tests.wipe_out_record_from_all_tables(recid)  
         
         
         
 def montysolr_targets():
-    return make_targets(change_records=change_records,
+    return make_targets("MyInvenioKeepRecidUpdated:get_recids_changes", targets.get_recids_changes, # register for the Java unittest
+                        change_records=change_records,
                         reset_records=reset_records,
                         add_records=add_records,
                         create_delete=create_delete,
