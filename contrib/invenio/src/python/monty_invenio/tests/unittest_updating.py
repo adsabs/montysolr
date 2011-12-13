@@ -7,7 +7,7 @@ from montysolr.utils import make_targets
 
 import monty_invenio.targets as targets
 
-from invenio import dbquery, bibupload, bibupload_regression_tests
+from invenio import dbquery, bibupload, bibupload_regression_tests, search_engine, bibrecord
 
 import sys
 import time
@@ -64,9 +64,21 @@ def create_delete(message):
     
     recs = bibupload.xml_marc_to_records(xml_to_delete)
     err, recid, msg = bibupload.bibupload(recs[0], opt_mode='insert')
-    
     message.setResults(recid)    
+
+def create_record(message):
+    """creates record"""
+    recid = bibupload.create_new_record()
+    message.setResults(recid)      
     
+def delete_record(message):
+    """deletes record"""
+    recid = int(str(j.Integer.cast_(message.getParam('recid'))))
+    record = search_engine.get_record(recid)
+    bibrecord.record_add_field(record, "980", subfields=[("c", "DELETED")])
+    err, recid, msg = bibupload.bibupload(record, opt_mode='replace')
+    message.setResults(recid)
+        
     
 def wipeout_record(message):
     recid = int(str(message.getParam('recid')))
@@ -79,7 +91,9 @@ def montysolr_targets():
                         reset_records=reset_records,
                         add_records=add_records,
                         create_delete=create_delete,
-                        wipeout_record=wipeout_record)
+                        wipeout_record=wipeout_record,
+                        create_record=create_record,
+                        delete_record=delete_record)
 
 
 
@@ -91,7 +105,7 @@ class Test(InvenioDemoTestCaseLucene):
     def setUp(self):
         LuceneTestCase.setUp(self)
         handler = self.bridge.getHandler()
-        if not handler.has_target('InvenioKeepRecidUpdated:get_recids_changes'):
+        if not handler.has_target('*:wipeout_record'):
             self.addTargets(targets)
             self.addTargets(sys.modules[__name__])
         reset_records(None)
@@ -212,10 +226,15 @@ class Test(InvenioDemoTestCaseLucene):
     def test_get_recids_deleted(self):
         
         time.sleep(1) # otherwise the new record has the same creation time as the old recs
-        message = self.bridge.createMessage('create_delete')
+        #message = self.bridge.createMessage('create_delete')
+        #self.bridge.sendMessage(message)
+        message = self.bridge.createMessage('create_record')
         self.bridge.sendMessage(message)
+        created_recid = int(str(message.getResults()))
         
-        deleted_recid = int(str(j.Integer.cast_(message.getResults())))
+        message = self.bridge.createMessage('delete_record').setParam('recid', created_recid)
+        self.bridge.sendMessage(message)
+        deleted_recid = int(str(message.getResults()))
         
         
         req = j.QueryRequest()
@@ -238,7 +257,7 @@ class Test(InvenioDemoTestCaseLucene):
         message = self.bridge.createMessage('wipeout_record') \
                   .setParam('recid', deleted_recid)
         self.bridge.sendMessage(message)
-        
+        assert created_recid == deleted_recid
         assert len(added) == 0
         assert len(updated) == 0
         assert len(deleted) == 1

@@ -710,7 +710,7 @@
        It is important that invenio-formatter comes right after the search.
     -->
 
-  <requestHandler name="/invenio" class="solr.InvenioHandler" default="true">
+  <requestHandler name="/invenio" class="solr.InvenioRequestHandler" default="true">
     <arr name="components">
       <str>query</str>
       <str>invenio-formatter</str>

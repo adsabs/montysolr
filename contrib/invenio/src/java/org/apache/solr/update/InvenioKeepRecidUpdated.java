@@ -38,19 +38,100 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.RequestHandlerBase;
+import org.apache.solr.handler.dataimport.DataImportHandler;
 import org.apache.solr.handler.dataimport.SolrWriter;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
 
 /**
- * Ping solr core
- *
- * @since solr 1.3
+ * This handler keeps Solr index in sync with the Invenio database.
+ * Basically, on every invocation it calls Invenio to retrieve set
+ * of added/updated/deleted document recids.
+ * 
+ * When we have these ids, we'll call the respective handlers and
+ * pass them recids. This implementation extends {@link DataImportHandler}
+ * therefore it is sequential. While one import is running, consecutive
+ * requests to the same import handler class will respond with 
+ * importStatus <b>busy</b>
+ * 
+ * 	@param request parameters
+ * 		<p>
+ * 		- <b>last_recid</b>: the recid of the reference record, it will be the
+ * 			orientation point to find all newer changed/added/deleted recs
+ * 			
+ * 			If null, we find the highest <code>recid</code> from
+ * 		    {@link DictionaryRecIdCache} using {@link IndexSchema}#getUniqueKeyField()
+ * 			
+ * 			If last_recid == -1, we start from the first document
+ * 		<p>
+ * 		- <b>generate</b>: boolean parameter which means empty lucene documents
+ * 			should be generated in the range <b>{last_recid, max_recid}</b>
+ * 
+ *  		- <b>max_recid</b>: integer, marks the end of the interval, must be
+ *  			supplied when using generate
+ *  		If <b>generate</b> is false, then we will try to retrieve recids
+ *  		from invenio and start the indexing/updates
+ *  
+ * 		<p>
+ *  	- <b>inveniourl</b> : complete url to the Invenio search (we'll prepend query
+ *        		parameters, eg. inveniourl?p=recid:x->y)
+ *      <p>
+ *  	- <b>updateurl</b> : complete url to the Solr update handler (this handler
+ *              should fetch <b>updated</b> source documents and index them)
+ *      <p>
+ *  	- <b>importurl</b> : complete url to the Solr update handler (this handler
+ *              should fetch <b>new</b> source documents and index them)
+ *      <p>
+ *  	- <b>deleteurl</b> : complete url to the Solr update handler (this handler
+ *              should remove <b>deleted</b> documents from Solr index)
+ *              
+ *              
+ *  <p>            
+ *  Example configuration:
+ *  <pre>
+ *    last_recid: 90
+ *    inveniourl: http://invenio-server/search
+ *    updateurl: http://localhost:8983/solr/update-dataimport?command=full-import&dirs=/proj/fulltext/extracted    
+ *    importurl: http://localhost:8983/solr/waiting-dataimport?command=full-import&arg1=val1&arg2=val2
+ *    deleteurl: http://localhost:8983/solr/delete-dataimport?command=full-import
+ *    maximport: 200
+ *  
+ *  using modification date of the recid 90 we discover...
+ *  
+ *    updated records: 53, 54, 55, 100
+ *    added records: 101,103
+ *    deleted records: 91,92,93,102
+ *  
+ *  ...which results in 3 requests (newline breaks added for readability):
+ *  
+ *  
+ *  1. http://localhost:8983/solr/update-dataimport?command=full-import&dirs=/proj/fulltext/extracted
+ *     &url=http://invenio-server/search?p=recid:53->55 OR recid:100&rg=200&of=xm
+ *     
+ *  2. http://localhost:8983/solr/waiting-dataimport?command=full-import&arg1=val1&arg2=val2
+ *     &url=http://invenio-server/search?p=recid:101 OR recid:103&rg=200&of=xm
+ *  
+ *  3. http://localhost:8983/solr/delete-dataimport?command=full-import
+ *     &url=http://invenio-server/search?p=recid:91-93 OR recid:102&rg=200&of=xm
+ *  
+ *  </pre>
+ *  
+ *  NOTE: the url parameter <b>url</b> is url-encoded (it is here in plain form for readability)
+ *  
+ *  <p>
+ *  Also, if you want to try the update handler manually, you must encode the parameters, eg:
+ *  
+ *  <code>
+ *  http://localhost:8983/solr/invenio_update?last_recid=100&index=true
+ *    &inveniourl=http%3A%2F%2Finvenio-server%2Fsearch
+ *    &importurl=http%3A%2F%2Flocalhost%3A8983%2Fsolr%2Fwaiting-dataimport%3Fcommand%3Dfull-import%26dirs%3D%2Fproj%2Fadsx%2Ffulltext%2Fextracted
+ *  </code>   
+ *  
  */
 public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	private volatile List<String> urlsToFetch = new ArrayList<String>();
-	private volatile boolean busy = false;
+	private volatile int counter = 0;
 
 	@Override
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws IOException
@@ -59,7 +140,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		if (isBusy()) {
 			rsp.add("message",
 					"Import is already running, please retry later...");
-			rsp.add("status", "busy");
+			rsp.add("importStatus", "busy");
 			return;
 		}
 
@@ -69,48 +150,91 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		SolrParams required = params.required();
 		SolrCore core = req.getCore();
 		IndexSchema schema = req.getSchema();
-
 		UpdateHandler updateHandler = core.getUpdateHandler();
 
 		long start = System.currentTimeMillis();
+		
+		int last_recid = getLastRecid(params, req);
+		rsp.add("lastRecid", last_recid);
 
-		AddUpdateCommand addCmd = new AddUpdateCommand();
-		addCmd.allowDups = false;
-		addCmd.overwriteCommitted = false;
-		addCmd.overwritePending = false;
-
-		int last_recid = -1; // -1 means get the first created doc
-
-		// Either generate or retrieve the docid of the last-indexed record
-		// TODO: this considers only the highest id, but we should get the
-		// oldest
-		if (params.getInt("last_recid") != null) {
-			last_recid = params.getInt("last_recid");
-		} else {
-			int[] ids = DictionaryRecIdCache.INSTANCE.getLuceneCache(req
-					.getSearcher().getReader(), schema.getUniqueKeyField()
-					.getName());
-			for (int m : ids) {
-				if (m > last_recid) {
-					last_recid = m;
-				}
-			}
+		
+		Map<String, int[]> dictData = retrieveRecids(last_recid, params, req, rsp);
+		if (dictData == null) {
+			setBusy(false);
+			return;
 		}
 
-		rsp.add("last_recid", last_recid);
+		
+		Boolean index = params.getBool("index", false);
+		String inveniourl = params.get("inveniourl", null);
+		String importurl = params.get("importurl", null);
+		String updateurl = params.get("updateurl", importurl);
+		String deleteurl = params.get("deleteurl", importurl);
+		Integer maximport = params.getInt("maximport", 200);
 
+		if (index && inveniourl != null) {
+			rsp.add("message", "Fetching max of " + maximport + " recids from: " + importurl
+					+ " Using url: " + inveniourl);
+			
+			List<String> queryParts;
+
+			if (dictData.containsKey("ADDED") && importurl != null) {
+				queryParts = getQueryIds(maximport, dictData.get("ADDED"));
+				for (String queryPart : queryParts) {
+					urlsToFetch.add(getFetchURL(importurl, inveniourl,
+							queryPart, maximport));
+				}
+			}
+			
+			if (dictData.containsKey("UPDATED") && updateurl != null) {
+				queryParts = getQueryIds(maximport, dictData.get("UPDATED"));
+				for (String queryPart : queryParts) {
+					urlsToFetch.add(getFetchURL(updateurl, inveniourl,
+							queryPart, maximport));
+				}
+			}
+
+			if (dictData.containsKey("DELETED") && deleteurl != null) {
+				queryParts = getQueryIds(maximport, dictData.get("DELETED"));
+				for (String queryPart : queryParts) {
+					urlsToFetch.add(getFetchURL(deleteurl, inveniourl,
+							queryPart, maximport));
+				}
+			}
+
+			runAsyncUpload();
+			
+		} else {
+			rsp.add("message", "Generating " + dictData.get("ADDED").length + " empty records");
+			runAsyncGeneration(dictData, schema, params.getBool("commit", false), updateHandler);
+		}
+
+
+
+		long end = System.currentTimeMillis();
+
+		rsp.add("importStatus", isBusy() ? "busy" : "OK");
+		rsp.add("QTime", end - start);
+	}
+
+	
+	
+	private Map<String, int[]> retrieveRecids(int lastRecid, SolrParams params, SolrQueryRequest req,
+            SolrQueryResponse rsp) {
+		
 		Map<String, int[]> dictData;
-
+		// we'll generate empty records (good just to have a mapping between invenio
+		// and lucene docids; necessary for search operations)
 		if (params.getBool("generate", false)) {
 			Integer max_recid = params.getInt("max_recid", 0);
-			if (max_recid == 0 || max_recid < last_recid) {
+			if (max_recid == 0 || max_recid < lastRecid) {
 				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
 						"The max_recid parameter missing!");
 			}
 
 			dictData = new HashMap<String, int[]>();
-			int[] a = new int[max_recid - last_recid];
-			for (int i = 0, ii = last_recid + 1; ii < max_recid + 1; i++, ii++) {
+			int[] a = new int[max_recid - lastRecid];
+			for (int i = 0, ii = lastRecid + 1; ii < max_recid + 1; i++, ii++) {
 				a[i] = ii;
 			}
 			dictData.put("ADDED", a);
@@ -121,84 +245,110 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 					.createMessage("get_recids_changes")
 					.setSender(this.getClass().getSimpleName())
 					.setSolrQueryRequest(req).setSolrQueryResponse(rsp)
-					.setParam("last_recid", last_recid);
+					.setParam("last_recid", lastRecid);
 			MontySolrVM.INSTANCE.sendMessage(message);
 
 			Object results = message.getResults();
 			if (results == null) {
 				rsp.add("message",
-						"Invenio returned null. We cannot update anything.");
-				return;
+						"No new/updated/deleted records according to Invenio.");
+				return null;
 			}
 			dictData = (HashMap<String, int[]>) results;
 		}
+		return dictData;
+    }
 
-		Boolean index = params.getBool("index", false);
-		String datasource = params.get("datasource", null);
-		String importurl = params.get("importurl", null);
-		Integer maximport = params.getInt("maximport", 200);
+	private int getLastRecid(SolrParams params, SolrQueryRequest req) throws IOException {
+		int last_recid = -1; // -1 means get the first created doc
 
-		if (index && datasource != null && importurl != null) {
-			rsp.add("message", "Fetching max of " + maximport + " recids from: " + importurl
-					+ " Using url: " + datasource);
-			List<String> queryParts;
-
-			// let's start with the updated records
-			if (dictData.containsKey("UPDATED")) {
-				queryParts = getQueryIds(maximport, dictData.get("UPDATED"));
-				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(importurl, datasource,
-							queryPart, maximport));
-				}
-			}
-
-			if (dictData.containsKey("ADDED")) {
-				queryParts = getQueryIds(maximport, dictData.get("ADDED"));
-				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(importurl, datasource,
-							queryPart, maximport));
-				}
-			}
-
-			runAsyncUpload();
+		// Either generate or retrieve the docid of the last-indexed record
+		// TODO: this considers only the highest id, but we should get the
+		// oldest
+		if (params.getInt("last_recid") != null) {
+			last_recid = params.getInt("last_recid");
 		} else {
-			rsp.add("message", "Generating empty records");
-
-			if (dictData.containsKey("ADDED")) {
-				int[] recids = dictData.get("ADDED");
-				if (recids.length > 0) {
-					SolrInputDocument doc = null;
-					for (int i = 0; i < recids.length; i++) {
-						doc = new SolrInputDocument();
-						doc.addField(schema.getUniqueKeyField().getName(),
-								recids[i]);
-						addCmd.doc = DocumentBuilder.toDocument(doc, schema);
-						updateHandler.addDoc(addCmd);
-					}
+			int[] ids = DictionaryRecIdCache.INSTANCE.getLuceneCache(req
+					.getSearcher().getReader(), req.getSchema().getUniqueKeyField()
+					.getName());
+			for (int m : ids) {
+				if (m > last_recid) {
+					last_recid = m;
 				}
-				CommitUpdateCommand updateCmd = new CommitUpdateCommand(params.getBool("commit", false));
-				updateHandler.commit(updateCmd);
-				rsp.add("added", recids.length);
 			}
-			setBusy(false);
 		}
+		return last_recid;
 
-
-
-		long end = System.currentTimeMillis();
-
-		rsp.add("status", isBusy() ? "busy" : "OK");
-		rsp.add("QTime", end - start);
-	}
+    }
 
 	private void setBusy(boolean b) {
-		busy = b;
+		if (b == true) {
+			counter++;
+		}
+		else {
+			counter--;
+		}
 	}
 
 	private boolean isBusy() {
-		return busy;
+		if (counter<0) {
+			throw new IllegalStateException("Huh, 2+2 is not 4?! Should never happen.");
+		}
+		return counter > 0;
 	}
-
+	
+	
+	private void runAsyncGeneration(Map<String, int[]> dictData, IndexSchema schema,
+			boolean commit, UpdateHandler updateHandler) {
+		final Map<String, int[]> dataToProcess = dictData;
+		final IndexSchema indexSchema = schema;
+		final boolean commitIndex = commit; 
+		final UpdateHandler uHandler = updateHandler;
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+	                runGeneration(dataToProcess, indexSchema, commitIndex, uHandler);
+                } catch (IOException e) {
+	                e.printStackTrace();
+                } finally {
+                	setBusy(false);
+                }
+			}
+		}).start();
+	}
+	
+	
+	private void runGeneration(Map<String, int[]> dictData, IndexSchema schema,
+			boolean commit, UpdateHandler updateHandler) throws IOException {
+		
+		if (dictData.containsKey("ADDED")) {
+			AddUpdateCommand addCmd = new AddUpdateCommand();
+			addCmd.allowDups = false;
+			addCmd.overwriteCommitted = false;
+			addCmd.overwritePending = false;
+			
+			int[] recids = dictData.get("ADDED");
+			if (recids.length > 0) {
+				SolrInputDocument doc = null;
+				for (int i = 0; i < recids.length; i++) {
+					doc = new SolrInputDocument();
+					doc.addField(schema.getUniqueKeyField().getName(),
+							recids[i]);
+					addCmd.doc = DocumentBuilder.toDocument(doc, schema);
+					updateHandler.addDoc(addCmd);
+				}
+			}
+			CommitUpdateCommand updateCmd = new CommitUpdateCommand(commit);
+			updateHandler.commit(updateCmd);
+		}
+		setBusy(false);
+	
+	}
+	
+	
+	
 	private void runAsyncUpload() {
 		new Thread() {
 			@Override
@@ -225,13 +375,13 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 
 	}
 
-	private String getFetchURL(String importurl, String datasource,
+	private String getFetchURL(String importurl, String inveniourl,
 			String queryPart, Integer maximport)
 			throws UnsupportedEncodingException {
 		return importurl
 				+ "&url="
 				+ java.net.URLEncoder.encode(
-					datasource + "?p=" + queryPart + "&rg=" + maximport + "&of=xm",
+					inveniourl + "?p=" + queryPart + "&rg=" + maximport + "&of=xm",
 					"UTF-8");
 
 	}
