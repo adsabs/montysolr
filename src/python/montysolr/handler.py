@@ -32,7 +32,9 @@ class Handler(object):
         target = self.get_target(message)
         target(message)
             
-
+        
+    def has_target(self, message_id):
+        return message_id in self._db
 
     def get_target(self, message):
         """Must return only a callables that receive

@@ -7,10 +7,11 @@ Created on Feb 4, 2011
 from cStringIO import StringIO
 from invenio.intbitset import intbitset
 from montysolr.initvm import montysolr_java as sj
-from montysolr.utils import MontySolrTarget
+from montysolr.utils import MontySolrTarget, make_targets
 import logging
 import os
-import montysolr.inveniopie.multiprocess_api_calls as api_calls
+#import monty_invenio.multiprocess_api_calls as api_calls
+import monty_invenio.api_calls as api_calls
 
 import time
 
@@ -241,17 +242,16 @@ def search_unit_solr(message):
 '''
 
 def montysolr_targets():
-    targets = [
-           MontySolrTarget('handleRequestBody', handle_request_body),
-           MontySolrTarget('rca.python.solr.handler.InvenioHandler:handleRequestBody', handle_request_body),
-           MontySolrTarget('CitationQuery:get_citation_dict', get_citation_dict),
-           MontySolrTarget('InvenioQuery:perform_request_search_ints', perform_request_search_ints),
-           MontySolrTarget('InvenioQuery:perform_request_search_bitset', perform_request_search_bitset),
-           MontySolrTarget('InvenioFormatter:format_search_results', format_search_results),
-           MontySolrTarget('InvenioKeepRecidUpdated:get_recids_changes', get_recids_changes),
-           MontySolrTarget('InvenioFormatter:sort_and_format', sort_and_format),
-           MontySolrTarget('Invenio:diagnostic_test', diagnostic_test),
-           ]
+    targets = make_targets('handleRequestBody', handle_request_body,
+           'rca.python.solr.handler.InvenioHandler:handleRequestBody', handle_request_body,
+           'CitationQuery:get_citation_dict', get_citation_dict,
+           'InvenioQuery:perform_request_search_ints', perform_request_search_ints,
+           'InvenioQuery:perform_request_search_bitset', perform_request_search_bitset,
+           'InvenioFormatter:format_search_results', format_search_results,
+           'InvenioKeepRecidUpdated:get_recids_changes', get_recids_changes,
+           'InvenioFormatter:sort_and_format', sort_and_format,
+           'Invenio:diagnostic_test', diagnostic_test,
+           )
 
 
     # start multiprocessing with that many processes in the pool

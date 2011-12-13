@@ -6,7 +6,7 @@ Created on Feb 4, 2011
 #@PydevCodeAnalysisIgnore
 
 import unittest
-from montysolr_testcase import MontySolrTestCase, sj
+from montysolr.tests.montysolr_testcase import MontySolrTestCase, sj
 
 import os
 
@@ -17,7 +17,7 @@ class Test(MontySolrTestCase):
     def setUp(self):
         self.setSolrHome(os.path.join(self.getBaseDir(), 'examples/invenio/solr'))
         self.setDataDir(os.path.join(self.getBaseDir(), 'examples/invenio/solr/data'))
-        self.setHandler(self.loadHandler('montysolr.inveniopie.targets'))
+        self.setHandler(self.loadHandler('monty_invenio.targets'))
         MontySolrTestCase.setUp(self)
 
 
@@ -72,77 +72,6 @@ class Test(MontySolrTestCase):
         assert 'inv_response' in result
         assert '<p>' in result
 
-    def test_get_recids_changes(self):
-
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
-
-        message = sj.PythonMessage('get_recids_changes') \
-                    .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
-                    .setParam('last_recid', 30)
-        self.bridge.receive_message(message)
-
-        results = message.getResults()
-        out = sj.HashMap.cast_(results)
-
-        added = sj.JArray_int.cast_(out.get('ADDED'))
-        assert len(added) > 1
-
-    def test_get_recids_changes2(self):
-
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
-
-        message = sj.PythonMessage('get_recids_changes') \
-                    .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
-                    .setParam('last_recid', 0) #test we can deal with extreme cases
-        self.bridge.receive_message(message)
-
-        results = message.getResults()
-        out = sj.HashMap.cast_(results)
-
-        added = sj.JArray_int.cast_(out.get('ADDED'))
-        assert len(added) > 1
-
-    def test_get_recids_changes3(self):
-
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
-
-        message = sj.PythonMessage('get_recids_changes') \
-                    .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
-                    .setParam('last_recid', 9999999)
-        self.bridge.receive_message(message)
-
-        results = message.getResults()
-        assert results is None
-
-
-    def test_get_recids_changes4(self):
-
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
-
-        message = sj.PythonMessage('get_recids_changes') \
-                    .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
-                    .setParam('last_recid', -1)
-        self.bridge.receive_message(message)
-
-        results = message.getResults()
-        out = sj.HashMap.cast_(results)
-
-        added = sj.JArray_int.cast_(out.get('ADDED'))
-        updated = sj.JArray_int.cast_(out.get('CHANGED'))
-        deleted = sj.JArray_int.cast_(out.get('DELETED'))
-
-
-        assert len(added) == 104
-        assert len(updated) == 0
-        assert len(deleted) == 0
 
 
     def test_perform_request_search_ints(self):

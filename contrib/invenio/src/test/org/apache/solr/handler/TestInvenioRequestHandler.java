@@ -34,7 +34,7 @@ import org.apache.solr.search.DocSlice;
  * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
  * 
  */
-public class TestInvenioHandler extends MontySolrAbstractTestCase {
+public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 
   @Override public String getSchemaFile() { 
 	  return "schema.xml"; 

@@ -8,10 +8,13 @@ class MontySolrTarget(object):
     """Simple class that represents the target that is registered
     by handlers
     
-    It has a str id, which is made of <sender>:<recipiend>
+    It has a str id, which is made of <sender>:<recipient>
         eg. SolrRequestHandler:answer_query
         
-    Where recipient may be empty, which means it can be any sender
+        sender = the Java side class (usually)
+        recipient = the Python side function name (always)
+        
+    Where sender may be empty, which means it can be any sender
         eg *:answer_query
         
     """

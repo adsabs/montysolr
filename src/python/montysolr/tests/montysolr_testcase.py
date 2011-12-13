@@ -115,6 +115,11 @@ class MontySolrTestCase(unittest.TestCase):
     def setTargets(self, targets):
         self.bridge.setHandler(self.loadHandler(targets))
         
+    def addTargets(self, targets):
+        if not isinstance(targets, list):
+            targets = [targets]
+        self.bridge.getHandler().discover_targets(targets)
+        
         
 
 class LuceneTestCase(MontySolrTestCase):

@@ -24,7 +24,18 @@ def dispatch(func_name, *args, **kwargs):
     return [tid, out]
 
 def get_recids_changes(last_recid, max_recs=10000):
-
+    """
+    Retrieves the sets of records that were added/updated/deleted
+    
+    The time is selected according to some know recid, ie. 
+    we retrieve the modification time of one record and look
+    at those that are older.
+    
+    added => bibrec.modification_date == bibrec.creation_date
+    updated => bibrec.modification_date >= bibrec.creation_date
+    deleted => bibrec.status == DELETED
+    """
+    
     search_op = '>'
 
     if last_recid == -1:
@@ -43,19 +54,30 @@ def get_recids_changes(last_recid, max_recs=10000):
         return
     modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM bibrec "
                     "WHERE modification_date " + search_op + "%s LIMIT %s", (mod_date, max_recs )))
-
-    out = {'DELETED': [], 'UPDATED': [], 'ADDED': []}
+    
+    if not len(modified_records):
+        return
+    
+    added = []
+    updated = []
+    deleted = []
+    
+    
+    changed = 0
     for recid, mod_date, create_date in modified_records:
-        if mod_date == create_date:
-            out['ADDED'].append(recid)
+        
+        #rec = search_engine.get_record(recid)
+        #status = bibrecord.record_get_field_value(rec, tag='980', code='c')
+        status = search_engine.record_exists(recid)
+        
+        if status == -1:
+            deleted.append(recid)
+        elif mod_date == create_date:
+            added.append(recid)
         else:
-            rec = search_engine.get_record(recid)
-            status = bibrecord.record_get_field_value(rec, tag='980', code='c')
-            if status == 'DELETED':
-                out['DELETED'].append(recid)
-            else:
-                out['UPDATED'].append(recid)
-    return out
+            updated.append(recid)
+            
+    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}
 
 def citation_summary(recids, of, ln, p, f):
     out = StringIO()

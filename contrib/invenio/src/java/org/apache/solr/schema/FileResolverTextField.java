@@ -13,6 +13,8 @@ import java.io.FileNotFoundException;
 
 /** <code>TextField</code> is the basic type for configurable text analysis.
  * Analyzers for field types using this implementation should be defined in the schema.
+ * 
+ * This implementation just compares java against puthon.
  */
 public class FileResolverTextField extends TextField {
 
