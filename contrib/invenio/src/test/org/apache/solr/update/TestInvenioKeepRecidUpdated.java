@@ -113,18 +113,33 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 						"importurl", importurl,
 						"updateurl", updateurl,
 						"deleteurl", deleteurl), rsp);
+
+		// must wait for the landler to finish his threads
+		while (handler.isBusy()) {
+			Thread.sleep(100);
+		}
 		
-		assertTrue(handler.lastRecId == -1);
-		assertTrue(handler.retrievedRecIds.get("ADDED").length == 1);
-		assertTrue(handler.retrievedRecIds.get("UPDATED").length == 9);
-		assertTrue(handler.retrievedRecIds.get("DELETED").length == 1);
+		int[] added = handler.retrievedRecIds.get("ADDED");
+		int[] updated = handler.retrievedRecIds.get("UPDATED");
+		int[] deleted = handler.retrievedRecIds.get("DELETED");
+		
 		
 		// clean up after us
 		message = MontySolrVM.INSTANCE.createMessage("wipeout_record")
 			.setParam("recid", firstAdded);
 		MontySolrVM.INSTANCE.sendMessage(message);
+		
 		message.setParam("recid", secondAdded);
 		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		assertTrue(handler.lastRecId == -1);
+		System.out.println(added.length);
+		System.out.println(updated.length);
+		System.out.println(deleted.length);
+		
+		assertTrue(added.length > 104-9);
+		assertTrue(updated.length == 9);
+		assertTrue(deleted.length == 1);
 	}
 	
 	

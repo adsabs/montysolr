@@ -292,7 +292,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		}
 	}
 
-	private boolean isBusy() {
+	public boolean isBusy() {
 		if (counter<0) {
 			throw new IllegalStateException("Huh, 2+2 is not 4?! Should never happen.");
 		}
