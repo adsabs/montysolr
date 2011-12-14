@@ -37,12 +37,15 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.InvenioRequestHandler;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.handler.dataimport.DataImportHandler;
 import org.apache.solr.handler.dataimport.SolrWriter;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This handler keeps Solr index in sync with the Invenio database.
@@ -130,12 +133,18 @@ import org.apache.solr.schema.IndexSchema;
  *  
  */
 public class InvenioKeepRecidUpdated extends RequestHandlerBase {
+	
+	public static final Logger log = LoggerFactory
+		.getLogger(InvenioRequestHandler.class);
+	
+	
 	protected volatile List<String> urlsToFetch = new ArrayList<String>();
 	private volatile int counter = 0;
 	private boolean asynchronous = true;
 
 	@Override
-	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws IOException
+	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) 
+		throws IOException, InterruptedException
 			 {
 
 		if (isBusy()) {
@@ -181,9 +190,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 
 	
-	private void runSynchronously(SolrParams params, Map<String, int[]> dictData, IndexSchema schema, UpdateHandler updateHandler) {
+	private void runSynchronously(SolrParams params, Map<String, int[]> dictData, 
+			IndexSchema schema, UpdateHandler updateHandler) 
+			throws MalformedURLException, IOException, InterruptedException {
 		
-		Boolean index = params.getBool("index", false);
 		String inveniourl = params.get("inveniourl", null);
 		String importurl = params.get("importurl", null);
 		String updateurl = params.get("updateurl", importurl);
@@ -203,7 +213,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				runUpload();
 			}
 			else {
-				
+				runProcessingAdded(dictData.get("ADDED"), schema, commit, updateHandler);
 			}
 			
 		}
@@ -218,24 +228,28 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				runUpload();
 			}
 			else {
-				
+				runProcessingUpdated(dictData.get("UPDATED"), schema, commit, updateHandler);
 			}
 		}
 
 		if (dictData.containsKey("DELETED") ) {
-			if (updateurl != null) {
+			if (deleteurl != null) {
 				queryParts = getQueryIds(maximport, dictData.get("DELETED"));
 				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(updateurl, inveniourl,
+					urlsToFetch.add(getFetchURL(updateurl, deleteurl,
 							queryPart, maximport));
 				}
 				runUpload();
 			}
 			else {
-				
+				runProcessingDeleted(dictData.get("DELETED"), schema, commit, updateHandler);
 			}
 		}
-			
+		
+		if (commit) {
+			CommitUpdateCommand updateCmd = new CommitUpdateCommand(commit);
+			updateHandler.commit(updateCmd);
+		}
 	    
     }
 
@@ -253,8 +267,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				try {
 	                runSynchronously(params, dataToProcess, indexSchema, uHandler);
                 } catch (IOException e) {
-	                e.printStackTrace();
-                } finally {
+                	log.error(e.getLocalizedMessage());
+                } catch (InterruptedException e) {
+                	log.error(e.getLocalizedMessage());
+				} finally {
                 	setBusy(false);
                 }
 			}
@@ -262,7 +278,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
     }
 
 
-	protected boolean setAsynchronous(boolean val) {
+	protected void setAsynchronous(boolean val) {
 		asynchronous = val;
 	}
 	
@@ -352,71 +368,49 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 	
 	
-	private void runAsyncProcessing(Map<String, int[]> dictData, IndexSchema schema,
-			boolean commit, UpdateHandler updateHandler) {
-		final Map<String, int[]> dataToProcess = dictData;
-		final IndexSchema indexSchema = schema;
-		final boolean commitIndex = commit; 
-		final UpdateHandler uHandler = updateHandler;
-		
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-	                runProcessing(dataToProcess, indexSchema, commitIndex, uHandler);
-                } catch (IOException e) {
-	                e.printStackTrace();
-                } finally {
-                	setBusy(false);
-                }
-			}
-		}).start();
-	}
-	
-	
-	protected void runProcessing(Map<String, int[]> dictData, IndexSchema schema,
+	protected void runProcessingAdded(int[] recids, IndexSchema schema,
 			boolean commit, UpdateHandler updateHandler) throws IOException {
 		
-		if (dictData.containsKey("ADDED")) {
-			AddUpdateCommand addCmd = new AddUpdateCommand();
-			addCmd.allowDups = false;
-			addCmd.overwriteCommitted = false;
-			addCmd.overwritePending = false;
-			
-			int[] recids = dictData.get("ADDED");
-			if (recids.length > 0) {
-				SolrInputDocument doc = null;
-				for (int i = 0; i < recids.length; i++) {
-					doc = new SolrInputDocument();
-					doc.addField(schema.getUniqueKeyField().getName(),
-							recids[i]);
-					addCmd.doc = DocumentBuilder.toDocument(doc, schema);
-					updateHandler.addDoc(addCmd);
-				}
-			}
-			
-		}
+		AddUpdateCommand addCmd = new AddUpdateCommand();
+		addCmd.allowDups = false;
+		addCmd.overwriteCommitted = false;
+		addCmd.overwritePending = false;
 		
-		if (dictData.containsKey("DELETED")) {
-			DeleteUpdateCommand delCmd = new DeleteUpdateCommand();
-			delCmd.fromCommitted = true;
-	        delCmd.fromPending = true;
-			int[] recids = dictData.get("DELETED");
-			if (recids.length > 0) {
-				
-				Map<Integer, Integer> map = DictionaryRecIdCache.INSTANCE.getTranslationCache(null, 
-						schema.getUniqueKeyField().getName());
-				
-				for (int i = 0; i < recids.length; i++) {
-					delCmd.id = map.get(recids[i]).toString();
-					updateHandler.delete(delCmd);
-				}
+		if (recids.length > 0) {
+			SolrInputDocument doc = null;
+			for (int i = 0; i < recids.length; i++) {
+				doc = new SolrInputDocument();
+				doc.addField(schema.getUniqueKeyField().getName(),
+						recids[i]);
+				addCmd.doc = DocumentBuilder.toDocument(doc, schema);
+				updateHandler.addDoc(addCmd);
 			}
-			
 		}
+			
+	}
+	
+	protected void runProcessingUpdated(int[] recids, IndexSchema schema,
+			boolean commit, UpdateHandler updateHandler) throws IOException {
+		runProcessingAdded(recids, schema, commit, updateHandler);
+	}
+	
+	protected void runProcessingDeleted(int[] recids, IndexSchema schema,
+			boolean commit, UpdateHandler updateHandler) throws IOException {
 		
-		CommitUpdateCommand updateCmd = new CommitUpdateCommand(commit);
-		updateHandler.commit(updateCmd);
+		DeleteUpdateCommand delCmd = new DeleteUpdateCommand();
+		delCmd.fromCommitted = true;
+        delCmd.fromPending = true;
+
+        if (recids.length > 0) {
+			
+			Map<Integer, Integer> map = DictionaryRecIdCache.INSTANCE.getTranslationCache(null, 
+					schema.getUniqueKeyField().getName());
+			
+			for (int i = 0; i < recids.length; i++) {
+				delCmd.id = map.get(recids[i]).toString();
+				updateHandler.delete(delCmd);
+			}
+		}
 	}
 	
 	
@@ -503,7 +497,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		return ret;
 
 	}
-
+	
 	@Override
 	public String getVersion() {
 		return "";
@@ -523,4 +517,5 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	public String getSource() {
 		return "";
 	}
+	
 }

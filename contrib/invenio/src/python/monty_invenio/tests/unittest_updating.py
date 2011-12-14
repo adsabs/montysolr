@@ -67,7 +67,8 @@ def create_delete(message):
         """ 
     
     recs = bibupload.xml_marc_to_records(xml_to_delete)
-    err, recid, msg = bibupload.bibupload(recs[0], opt_mode='insert')
+    ret = bibupload.bibupload(recs[0], opt_mode='insert')
+    recid = ret[1]
     message.setResults(j.Integer(recid))    
     dbquery.run_sql("UPDATE bibrec SET modification_date=NOW()+%s, creation_date=NOW() + %s WHERE id=%s" % (diff, diff,recid))
 
@@ -87,7 +88,8 @@ def delete_record(message):
     recid = int(j.Integer.cast_(message.getParam('recid')).intValue())
     record = search_engine.get_record(recid)
     bibrecord.record_add_field(record, "980", subfields=[("c", "DELETED")])
-    err, recid, msg = bibupload.bibupload(record, opt_mode='replace')
+    ret = bibupload.bibupload(record, opt_mode='replace')
+    recid = ret[1]
     message.setResults(j.Integer(recid))
         
     
