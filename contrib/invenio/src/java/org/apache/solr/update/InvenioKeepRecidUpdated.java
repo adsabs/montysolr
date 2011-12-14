@@ -132,6 +132,7 @@ import org.apache.solr.schema.IndexSchema;
 public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	protected volatile List<String> urlsToFetch = new ArrayList<String>();
 	private volatile int counter = 0;
+	private boolean asynchronous = true;
 
 	@Override
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws IOException
@@ -165,51 +166,13 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		}
 
 		
-		Boolean index = params.getBool("index", false);
-		String inveniourl = params.get("inveniourl", null);
-		String importurl = params.get("importurl", null);
-		String updateurl = params.get("updateurl", importurl);
-		String deleteurl = params.get("deleteurl", importurl);
-		Integer maximport = params.getInt("maximport", 200);
-
-		if (index && inveniourl != null) {
-			rsp.add("message", "Fetching max of " + maximport + " recids from: " + importurl
-					+ " Using url: " + inveniourl);
-			
-			List<String> queryParts;
-
-			if (dictData.containsKey("ADDED") && importurl != null) {
-				queryParts = getQueryIds(maximport, dictData.get("ADDED"));
-				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(importurl, inveniourl,
-							queryPart, maximport));
-				}
-			}
-			
-			if (dictData.containsKey("UPDATED") && updateurl != null) {
-				queryParts = getQueryIds(maximport, dictData.get("UPDATED"));
-				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(updateurl, inveniourl,
-							queryPart, maximport));
-				}
-			}
-
-			if (dictData.containsKey("DELETED") && deleteurl != null) {
-				queryParts = getQueryIds(maximport, dictData.get("DELETED"));
-				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(deleteurl, inveniourl,
-							queryPart, maximport));
-				}
-			}
-
-			runAsyncUpload();
-			
-		} else {
-			rsp.add("message", "Generating " + dictData.get("ADDED").length + " empty records");
-			runAsyncProcessing(dictData, schema, params.getBool("commit", false), updateHandler);
+		if (isAsynchronous()) {
+			runAsynchronously(params, dictData, schema, updateHandler);
 		}
-
-
+		else {
+			runSynchronously(params, dictData, schema, updateHandler);
+		}
+		
 
 		long end = System.currentTimeMillis();
 
@@ -218,6 +181,95 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 
 	
+	private void runSynchronously(SolrParams params, Map<String, int[]> dictData, IndexSchema schema, UpdateHandler updateHandler) {
+		
+		Boolean index = params.getBool("index", false);
+		String inveniourl = params.get("inveniourl", null);
+		String importurl = params.get("importurl", null);
+		String updateurl = params.get("updateurl", importurl);
+		String deleteurl = params.get("deleteurl", importurl);
+		Integer maximport = params.getInt("maximport", 200);
+		Boolean commit = params.getBool("commit", false);
+		
+		List<String> queryParts;
+
+		if (dictData.containsKey("ADDED") ) {
+			if (importurl != null) {
+				queryParts = getQueryIds(maximport, dictData.get("ADDED"));
+				for (String queryPart : queryParts) {
+					urlsToFetch.add(getFetchURL(importurl, inveniourl,
+							queryPart, maximport));
+				}
+				runUpload();
+			}
+			else {
+				
+			}
+			
+		}
+		
+		if (dictData.containsKey("UPDATED") ) {
+			if (updateurl != null) {
+				queryParts = getQueryIds(maximport, dictData.get("UPDATED"));
+				for (String queryPart : queryParts) {
+					urlsToFetch.add(getFetchURL(updateurl, inveniourl,
+							queryPart, maximport));
+				}
+				runUpload();
+			}
+			else {
+				
+			}
+		}
+
+		if (dictData.containsKey("DELETED") ) {
+			if (updateurl != null) {
+				queryParts = getQueryIds(maximport, dictData.get("DELETED"));
+				for (String queryPart : queryParts) {
+					urlsToFetch.add(getFetchURL(updateurl, inveniourl,
+							queryPart, maximport));
+				}
+				runUpload();
+			}
+			else {
+				
+			}
+		}
+			
+	    
+    }
+
+
+	private void runAsynchronously(SolrParams solrParams, Map<String, int[]> dictData, IndexSchema schema, UpdateHandler updateHandler) {
+		
+		final SolrParams params = solrParams;
+		final Map<String, int[]> dataToProcess = dictData;
+		final IndexSchema indexSchema = schema;
+		final UpdateHandler uHandler = updateHandler;
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+	                runSynchronously(params, dataToProcess, indexSchema, uHandler);
+                } catch (IOException e) {
+	                e.printStackTrace();
+                } finally {
+                	setBusy(false);
+                }
+			}
+		}).start();
+    }
+
+
+	protected boolean setAsynchronous(boolean val) {
+		asynchronous = val;
+	}
+	
+	
+	protected boolean isAsynchronous() {
+		return asynchronous;
+	}
 	
 	protected Map<String, int[]> retrieveRecids(int lastRecid, SolrParams params, SolrQueryRequest req,
             SolrQueryResponse rsp) {

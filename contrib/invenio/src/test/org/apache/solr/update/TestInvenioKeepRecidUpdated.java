@@ -24,6 +24,7 @@ import invenio.montysolr.util.MontySolrAbstractTestCase;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.common.params.CommonParams;
@@ -86,21 +87,30 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	public void testIndexing() throws Exception {
 		SolrCore core = h.getCore();
 		
-		Thread.sleep(1000);
-		PythonMessage message = MontySolrVM.INSTANCE.createMessage("create_record");
+		PythonMessage message = MontySolrVM.INSTANCE.createMessage("create_record")
+								.setParam("diff", 5);
 		MontySolrVM.INSTANCE.sendMessage(message);
 		Integer firstAdded = (Integer) message.getResults();
 		
-		message = MontySolrVM.INSTANCE.createMessage("create_record");
+		message = MontySolrVM.INSTANCE.createMessage("create_record")
+								.setParam("diff", 5);;
 		MontySolrVM.INSTANCE.sendMessage(message);
 		Integer secondAdded = (Integer) message.getResults();
 		
 		message = MontySolrVM.INSTANCE.createMessage("change_records")
-						.setParam("recids", new int[]{1,2,3,4,5,6,7,8,9});
+						.setParam("recids", new int[]{1,2,3,4,5,6,7,8,9})
+						.setParam("diff", 5);;
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		message = MontySolrVM.INSTANCE.createMessage("delete_record")
-			.setParam("recid", firstAdded);
+			.setParam("recid", firstAdded)
+			.setParam("diff", 5);;
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		// extra query needed as invenio sets modification date (that will be lower than creation)
+		message = MontySolrVM.INSTANCE.createMessage("change_records")
+			.setParam("recids", new int[]{firstAdded})
+			.setParam("diff", 5);;
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		
@@ -123,6 +133,14 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		int[] updated = handler.retrievedRecIds.get("UPDATED");
 		int[] deleted = handler.retrievedRecIds.get("DELETED");
 		
+		List<String> urlsToFetch = handler.urlsToFetch;
+		System.out.println(urlsToFetch);
+		
+		assertTrue(handler.lastRecId == -1);
+		
+		assertTrue(added.length == 1);
+		assertTrue(updated.length == 9);
+		assertTrue(deleted.length == 1);
 		
 		// clean up after us
 		message = MontySolrVM.INSTANCE.createMessage("wipeout_record")
@@ -131,15 +149,6 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		message.setParam("recid", secondAdded);
 		MontySolrVM.INSTANCE.sendMessage(message);
-		
-		assertTrue(handler.lastRecId == -1);
-		System.out.println(added.length);
-		System.out.println(updated.length);
-		System.out.println(deleted.length);
-		
-		assertTrue(added.length > 104-9);
-		assertTrue(updated.length == 9);
-		assertTrue(deleted.length == 1);
 	}
 	
 	
