@@ -56,8 +56,8 @@ def get_recids_changes(last_recid, max_recs=10000):
     modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM bibrec "
                     "WHERE modification_date " + search_op + "%s ORDER BY id ASC LIMIT %s", (mod_date, max_recs )))
     
-    print "SELECT id,modification_date, creation_date FROM bibrec WHERE modification_date " + search_op + "%s ORDER BY id ASC LIMIT %s" % (mod_date, max_recs )
-    print len(modified_records)
+    #print "SELECT id,modification_date, creation_date FROM bibrec WHERE modification_date " + search_op + "%s ORDER BY id ASC LIMIT %s" % (mod_date, max_recs )
+    #print len(modified_records)
     
     if not len(modified_records):
         return

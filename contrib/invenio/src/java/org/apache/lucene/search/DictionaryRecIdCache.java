@@ -36,6 +36,7 @@ public enum DictionaryRecIdCache {
 	
 	private HashMap<String, Map<Integer, Integer>>
 		translation_cache = new HashMap<String, Map<Integer, Integer>>(2);
+	
 	private HashMap<String, Integer>
 		translation_cache_tracker = new HashMap<String, Integer>(2);
 		
@@ -62,6 +63,19 @@ public enum DictionaryRecIdCache {
 		return fromFieldToLuceneId;
 	}
 	
+	/**
+	 * Provides the mapping <b>from</b> the external source ids <b>into</b>
+	 * lucene doc ids. This class is thread safe if you read data only.
+	 * 
+	 * The cache is always checked for the updates before the mapping is 
+	 * returned, so you are sure to obtain the latest stage at the moment
+	 * when you ask for it.
+	 * 
+	 * @param reader
+	 * @param field
+	 * @return
+	 * @throws IOException
+	 */
 	public Map<Integer, Integer> getTranslationCache(IndexReader reader, String field) throws IOException {
 		int[] idMapping = getLuceneCache(reader, field);
 		Integer h = idMapping.hashCode();
