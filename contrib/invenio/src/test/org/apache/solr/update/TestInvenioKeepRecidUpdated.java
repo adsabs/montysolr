@@ -23,10 +23,12 @@ import invenio.montysolr.util.MontySolrAbstractTestCase;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -45,9 +47,9 @@ import org.apache.solr.update.TestInvenioKeepRecidUpdated.MyInvenioKeepRecidUpda
 public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
 	//TODO: dynamically retrieve these values
-	private String importurl = "http://localhost:8983/solr/waiting-dataimport";
-	private String updateurl = "http://localhost:8983/solr/waiting-dataimport";
-	private String deleteurl = "http://localhost:8983/solr/waiting-dataimport";
+	private String importurl = "http://localhost:8983/solr/import-dataimport";
+	private String updateurl = "http://localhost:8983/solr/update-dataimport&dirs=x";
+	private String deleteurl = "http://localhost:8983/solr/delete-dataimport";
 	private String inveniourl = "http://insdev01.cern.ch/search";
 	
 	
@@ -86,37 +88,44 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
 	public void testIndexing() throws Exception {
 		SolrCore core = h.getCore();
-		
-		PythonMessage message = MontySolrVM.INSTANCE.createMessage("create_record")
-								.setParam("diff", 5);
-		MontySolrVM.INSTANCE.sendMessage(message);
-		Integer firstAdded = (Integer) message.getResults();
-		
-		message = MontySolrVM.INSTANCE.createMessage("create_record")
-								.setParam("diff", 5);;
-		MontySolrVM.INSTANCE.sendMessage(message);
-		Integer secondAdded = (Integer) message.getResults();
-		
-		message = MontySolrVM.INSTANCE.createMessage("change_records")
-						.setParam("recids", new int[]{1,2,3,4,5,6,7,8,9})
-						.setParam("diff", 5);;
-		MontySolrVM.INSTANCE.sendMessage(message);
-		
-		message = MontySolrVM.INSTANCE.createMessage("delete_record")
-			.setParam("recid", firstAdded)
-			.setParam("diff", 5);;
-		MontySolrVM.INSTANCE.sendMessage(message);
-		
-		// extra query needed as invenio sets modification date (that will be lower than creation)
-		message = MontySolrVM.INSTANCE.createMessage("change_records")
-			.setParam("recids", new int[]{firstAdded})
-			.setParam("diff", 5);;
-		MontySolrVM.INSTANCE.sendMessage(message);
-		
-		
 		MyInvenioKeepRecidUpdated handler = new MyInvenioKeepRecidUpdated();
-		
 		SolrQueryResponse rsp = new SolrQueryResponse();
+		
+		int[] recids = new int[104];
+		for (int i=0;i<104;i++) {
+			recids[i] = i+1;
+		}
+		
+		
+		// fresh state, everything reset
+		core.execute(handler, req("last_recid", "-1", 
+					    "inveniourl", inveniourl,
+						"importurl", importurl,
+						"updateurl", updateurl,
+						"deleteurl", deleteurl), rsp);
+	
+		// must wait for the landler to finish his threads
+		while (handler.isBusy()) {
+			Thread.sleep(100);
+		}
+		
+		int[] added = handler.retrievedRecIds.get("ADDED");
+		int[] updated = handler.retrievedRecIds.get("UPDATED");
+		int[] deleted = handler.retrievedRecIds.get("DELETED");
+		
+		assertTrue(handler.lastRecId == -1);
+		assertTrue(added.length > 104);
+	
+	
+	
+		// changes made
+	
+		PythonMessage message = MontySolrVM.INSTANCE
+			.createMessage("change_records")
+			.setParam("recids", recids)
+			.setParam("diff", 5);
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
 		
 		core.execute(handler, req("last_recid", "-1", 
 					    "inveniourl", inveniourl,
@@ -129,18 +138,214 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 			Thread.sleep(100);
 		}
 		
-		int[] added = handler.retrievedRecIds.get("ADDED");
-		int[] updated = handler.retrievedRecIds.get("UPDATED");
-		int[] deleted = handler.retrievedRecIds.get("DELETED");
+		added = handler.retrievedRecIds.get("ADDED");
+		updated = handler.retrievedRecIds.get("UPDATED");
+		deleted = handler.retrievedRecIds.get("DELETED");
+		
+		assertTrue(handler.lastRecId == -1);
+		assertTrue(added.length == 0);
+		assertTrue(updated.length == 104);
+		assertTrue(deleted.length == 0);
+		
+		
+		
+		
+		// now test additions/changes/updates
+		
+		message = MontySolrVM.INSTANCE
+			.createMessage("reset_records");
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		
+		message = MontySolrVM.INSTANCE.createMessage("create_record")
+		.setParam("diff", 5);
+		MontySolrVM.INSTANCE.sendMessage(message);
+		Integer firstAdded = (Integer) message.getResults();
+		
+		message = MontySolrVM.INSTANCE.createMessage("create_record")
+			.setParam("diff", 5);;
+		MontySolrVM.INSTANCE.sendMessage(message);
+		Integer secondAdded = (Integer) message.getResults();
+		
+		message = MontySolrVM.INSTANCE.createMessage("change_records")
+		.setParam("recids", new int[]{1,2,3,4,5,6,7,8,9})
+		.setParam("diff", 5);;
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		message = MontySolrVM.INSTANCE.createMessage("delete_record")
+		.setParam("recid", firstAdded)
+		.setParam("diff", 5);;
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		// extra query needed as invenio sets modification date (that will be lower than creation)
+		message = MontySolrVM.INSTANCE.createMessage("change_records")
+		.setParam("recids", new int[]{firstAdded})
+		.setParam("diff", 5);;
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		
+		core.execute(handler, req("last_recid", "-1", 
+					    "inveniourl", inveniourl,
+						"importurl", importurl,
+						"updateurl", updateurl,
+						"deleteurl", deleteurl), rsp);
+
+		// must wait for the landler to finish his threads
+		while (handler.isBusy()) {
+			Thread.sleep(100);
+		}
+		
+		added = handler.retrievedRecIds.get("ADDED");
+		updated = handler.retrievedRecIds.get("UPDATED");
+		deleted = handler.retrievedRecIds.get("DELETED");
 		
 		List<String> urlsToFetch = handler.urlsToFetch;
-		System.out.println(urlsToFetch);
 		
 		assertTrue(handler.lastRecId == -1);
 		
 		assertTrue(added.length == 1);
 		assertTrue(updated.length == 9);
 		assertTrue(deleted.length == 1);
+		assertTrue(handler.added == null);
+		
+		
+		
+		// different starting point
+		
+		handler = new MyInvenioKeepRecidUpdated();
+		core.execute(handler, req("last_recid", "30", 
+			    "inveniourl", inveniourl,
+				"importurl", importurl,
+				"updateurl", updateurl,
+				"deleteurl", deleteurl), rsp);
+
+		while (handler.isBusy()) {
+			Thread.sleep(100);
+		}
+		
+		added = handler.retrievedRecIds.get("ADDED");
+		updated = handler.retrievedRecIds.get("UPDATED");
+		deleted = handler.retrievedRecIds.get("DELETED");
+		
+		urlsToFetch = handler.urlsToFetch;
+		
+		assertTrue(handler.lastRecId == 30);
+		
+		assertTrue(added.length == 1);
+		assertTrue(updated.length == 9);
+		assertTrue(deleted.length == 1);
+		assertTrue(handler.added == null);
+		
+		
+		// internal processing (now with index)
+		
+		
+		handler = new MyInvenioKeepRecidUpdated();
+		core.execute(handler, req("last_recid", "30", 
+			    "inveniourl", inveniourl,
+				"importurl", "blankrecords",
+				"updateurl", "blankrecords",
+				"deleteurl", "blankrecords",
+				"commit", "true"), rsp);
+
+		while (handler.isBusy()) {
+			Thread.sleep(100);
+		}
+		
+		added = handler.retrievedRecIds.get("ADDED");
+		updated = handler.retrievedRecIds.get("UPDATED");
+		deleted = handler.retrievedRecIds.get("DELETED");
+		
+		assertTrue(handler.lastRecId == 30);
+		assertTrue(added.length == 1);
+		assertTrue(updated.length == 9);
+		assertTrue(deleted.length == 1);
+		
+		assertQ(req("q", "*:*"), "//*[@numFound='10']");
+		
+		
+		
+		
+		// delete one record (but not commit)
+		
+		handler = new MyInvenioKeepRecidUpdated();
+		core.execute(handler, req("last_recid", "30", 
+			    "inveniourl", inveniourl,
+				"importurl", "blankrecords",
+				"updateurl", "blankrecords",
+				"deleteurl", "blankrecords"), rsp);
+
+		while (handler.isBusy()) {
+			Thread.sleep(100);
+		}
+		
+		message = MontySolrVM.INSTANCE.createMessage("delete_record")
+			.setParam("recid", secondAdded)
+			.setParam("diff", 5);
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		// extra query needed as invenio sets modification date (that will be lower than creation)
+		message = MontySolrVM.INSTANCE.createMessage("change_records")
+		.setParam("recids", new int[]{firstAdded})
+		.setParam("diff", 5);;
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		assertQ(req("q", "*:*"), "//*[@numFound='10']");
+		
+		
+		// now commit
+		
+		handler = new MyInvenioKeepRecidUpdated();
+		core.execute(handler, req("last_recid", "30", 
+			    "inveniourl", inveniourl,
+				"importurl", "barerecords",
+				"updateurl", "barerecords",
+				"deleteurl", "barerecords",
+				"commit", "true"), rsp);
+
+		while (handler.isBusy()) {
+			Thread.sleep(100);
+		}
+		
+		added = handler.retrievedRecIds.get("ADDED");
+		updated = handler.retrievedRecIds.get("UPDATED");
+		deleted = handler.retrievedRecIds.get("DELETED");
+		
+		assertTrue(handler.lastRecId == 30);
+		assertTrue(added.length == 1);
+		assertTrue(updated.length == 9);
+		assertTrue(deleted.length == 1);
+		
+		assertQ(req("q", "*:*"), "//*[@numFound='9']");
+		
+		
+		// dataimport processing
+		
+		
+		handler = new MyInvenioKeepRecidUpdated();
+		core.execute(handler, req("last_recid", "30", 
+			    "inveniourl", inveniourl,
+				"importurl", "dataimport",
+				"updateurl", "dataimport",
+				"deleteurl", "dataimport"), rsp);
+
+		while (handler.isBusy()) {
+			Thread.sleep(100);
+		}
+		
+		added = handler.retrievedRecIds.get("ADDED");
+		updated = handler.retrievedRecIds.get("UPDATED");
+		deleted = handler.retrievedRecIds.get("DELETED");
+		
+		urlsToFetch = handler.urlsToFetch;
+		
+		assertTrue(handler.lastRecId == 30);
+		
+		assertTrue(added.length == 1);
+		assertTrue(updated.length == 9);
+		assertTrue(deleted.length == 1);
+		
+
 		
 		// clean up after us
 		message = MontySolrVM.INSTANCE.createMessage("wipeout_record")
@@ -156,6 +361,12 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		public Map<String, int[]> retrievedRecIds;
 		public int lastRecId;
+		private int stage = 0;
+		private String[] stages = new String[]{importurl + "?", updateurl + "&", deleteurl};
+		public int[] added = null;
+		public int[] updated = null;
+		public int[] deleted = null;
+		
 		
 		@Override
 		protected int getLastRecid(SolrParams params, SolrQueryRequest req) throws IOException {
@@ -173,16 +384,29 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		@Override
 		protected void runUpload() throws MalformedURLException, IOException, InterruptedException {
-		    //super.runUpload();
-			System.out.println("Do nothing runUpload");
+			while (urlsToFetch.size() > 0) {
+				String url = urlsToFetch.remove(0);
+				assert url.contains(java.net.URLEncoder.encode(inveniourl, "UTF-8"));
+				assert url.contains(stages[stage]);
+			}
+			stage++;
 		}
 		
 		@Override
-		protected void runProcessing(Map<String, int[]> dictData, IndexSchema schema,
-		        boolean commit, UpdateHandler updateHandler) throws IOException {
-		    //super.runProcessing(dictData, schema, commit, updateHandler);
-			System.out.println("Do nothing runProcessing");
+		protected void runProcessingAdded(int[] recids, SolrParams params) throws IOException {
+			added = recids;
+			super.runProcessingAdded(recids, params);
 		}
 		
+		@Override
+		protected void runProcessingUpdated(int[] recids, SolrParams params) throws IOException {
+			updated = recids;
+			super.runProcessingUpdated(recids, params);
+		}
+		@Override
+		protected void runProcessingDeleted(int[] recids, SolrParams params) throws IOException {
+			deleted = recids;
+			super.runProcessingDeleted(recids, params);
+		}
 	}
 }

@@ -41,6 +41,7 @@ import org.apache.solr.handler.InvenioRequestHandler;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.handler.dataimport.DataImportHandler;
 import org.apache.solr.handler.dataimport.SolrWriter;
+import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
@@ -204,7 +205,13 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		List<String> queryParts;
 
 		if (dictData.containsKey("ADDED") ) {
-			if (importurl != null) {
+			if (importurl != null && importurl.equals("blankrecords")) {
+				runProcessingAdded(dictData.get("ADDED"), schema, updateHandler);
+			}
+			else if (importurl != null && importurl.equals("dataimport")) {
+				runProcessingAdded(dictData.get("ADDED"), params);
+			}
+			else if (importurl != null) {
 				queryParts = getQueryIds(maximport, dictData.get("ADDED"));
 				for (String queryPart : queryParts) {
 					urlsToFetch.add(getFetchURL(importurl, inveniourl,
@@ -213,13 +220,19 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				runUpload();
 			}
 			else {
-				runProcessingAdded(dictData.get("ADDED"), schema, commit, updateHandler);
+				// pass
 			}
 			
 		}
 		
 		if (dictData.containsKey("UPDATED") ) {
-			if (updateurl != null) {
+			if (updateurl != null && updateurl.equals("blankrecords")) {
+				runProcessingUpdated(dictData.get("UPDATED"), schema, updateHandler);
+			}
+			else if (updateurl != null && updateurl.equals("dataimport")) {
+				runProcessingUpdated(dictData.get("UPDATED"), params);
+			}
+			else if (updateurl != null) {
 				queryParts = getQueryIds(maximport, dictData.get("UPDATED"));
 				for (String queryPart : queryParts) {
 					urlsToFetch.add(getFetchURL(updateurl, inveniourl,
@@ -228,12 +241,18 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				runUpload();
 			}
 			else {
-				runProcessingUpdated(dictData.get("UPDATED"), schema, commit, updateHandler);
+				// pass
 			}
 		}
 
 		if (dictData.containsKey("DELETED") ) {
-			if (deleteurl != null) {
+			if (deleteurl != null && deleteurl.equals("blankrecords")) {
+				runProcessingDeleted(dictData.get("DELETED"), schema, updateHandler);
+			}
+			else if (deleteurl != null && deleteurl.equals("dataimport")) {
+				runProcessingUpdated(dictData.get("DELETED"), params);
+			}
+			else if (deleteurl != null) {
 				queryParts = getQueryIds(maximport, dictData.get("DELETED"));
 				for (String queryPart : queryParts) {
 					urlsToFetch.add(getFetchURL(updateurl, deleteurl,
@@ -242,7 +261,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				runUpload();
 			}
 			else {
-				runProcessingDeleted(dictData.get("DELETED"), schema, commit, updateHandler);
+				// pass
 			}
 		}
 		
@@ -368,8 +387,13 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 	
 	
+	
+	/*
+	 * Processing where we add empty docs directly to the index
+	 */
+	
 	protected void runProcessingAdded(int[] recids, IndexSchema schema,
-			boolean commit, UpdateHandler updateHandler) throws IOException {
+			UpdateHandler updateHandler) throws IOException {
 		
 		AddUpdateCommand addCmd = new AddUpdateCommand();
 		addCmd.allowDups = false;
@@ -390,12 +414,12 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 	
 	protected void runProcessingUpdated(int[] recids, IndexSchema schema,
-			boolean commit, UpdateHandler updateHandler) throws IOException {
-		runProcessingAdded(recids, schema, commit, updateHandler);
+			UpdateHandler updateHandler) throws IOException {
+		runProcessingAdded(recids, schema, updateHandler);
 	}
 	
 	protected void runProcessingDeleted(int[] recids, IndexSchema schema,
-			boolean commit, UpdateHandler updateHandler) throws IOException {
+			UpdateHandler updateHandler) throws IOException {
 		
 		DeleteUpdateCommand delCmd = new DeleteUpdateCommand();
 		delCmd.fromCommitted = true;
@@ -413,6 +437,19 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		}
 	}
 	
+	
+	/*
+	 * Internally calling dataimport handler
+	 */
+	protected void runProcessingAdded(int[] recids, SolrParams params) throws IOException {
+		throw new IllegalAccessError("Not implemented yet");
+	}
+	protected void runProcessingUpdated(int[] recids, SolrParams params) throws IOException {
+		throw new IllegalAccessError("Not implemented yet");
+	}
+	protected void runProcessingDeleted(int[] recids, SolrParams params) throws IOException {
+		throw new IllegalAccessError("Not implemented yet");
+	}
 	
 	
 	private void runAsyncUpload() {
@@ -445,8 +482,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	protected String getFetchURL(String importurl, String inveniourl,
 			String queryPart, Integer maximport)
 			throws UnsupportedEncodingException {
+		String sign = importurl.contains("?") ? "&" : "?";
 		return importurl
-				+ "&url="
+				+ sign
+				+ "url="
 				+ java.net.URLEncoder.encode(
 					inveniourl + "?p=" + queryPart + "&rg=" + maximport + "&of=xm",
 					"UTF-8");

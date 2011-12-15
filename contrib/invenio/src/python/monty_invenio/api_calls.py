@@ -46,6 +46,7 @@ def get_recids_changes(last_recid, max_recs=10000):
         l = list(dbquery.run_sql("SELECT id FROM bibrec WHERE id >= %s LIMIT 1", (last_recid,)))
         if not len(l):
             return
+        
     last_recid = l[0][0]
 
     # there is not api to get this (at least i haven't found it)
@@ -54,6 +55,9 @@ def get_recids_changes(last_recid, max_recs=10000):
         return
     modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM bibrec "
                     "WHERE modification_date " + search_op + "%s ORDER BY id ASC LIMIT %s", (mod_date, max_recs )))
+    
+    print "SELECT id,modification_date, creation_date FROM bibrec WHERE modification_date " + search_op + "%s ORDER BY id ASC LIMIT %s" % (mod_date, max_recs )
+    print len(modified_records)
     
     if not len(modified_records):
         return
