@@ -157,19 +157,23 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	private volatile int counter = 0;
 	private boolean asynchronous = true;
 	
-	static final String IKRU_PROPERTIES = "invenio_ikru.properties";
-	static final String LAST_RECID = "last_recid";
-	static final String LAST_UPDATE = "last_update";
-	static final String ADDED = "ADDED";
+	static final String IKRU_PROPERTIES = "invenio_ikru.properties"; // will be put into context
+	static final String LAST_RECID = "last_recid"; // name of the param from url and also what is passed to python
+	static final String LAST_UPDATE = "mod_date"; // name of the param from url and also what is passed to python
+	
+	static final String ADDED = "ADDED"; // datastructure returned from python with recids is keyed
 	static final String UPDATED = "UPDATED";
 	static final String DELETED = "DELETED";
-	static final String LAST = "LAST";
-	static final String PARAM_INVENIO = "inveniourl";
+	
+	static final String PARAM_INVENIO = "inveniourl"; // url params that influence processing
 	static final String PARAM_IMPORT = "importurl";
 	static final String PARAM_UPDATE = "updateurl";
 	static final String PARAM_DELETE = "deleteurl";
 	static final String PARAM_MAXIMPORT = "maximport";
 	static final String PARAM_COMMIT = "commit";
+	static final String PARAM_MAX_RECID = "max_recid";
+	
+	private String pythonFunctionName = "get_recids_changes";
 	
 
 	@Override
@@ -221,7 +225,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 
 	
 	
-
+	
+	public void setPythonFunctionName(String name) {
+		pythonFunctionName = name;
+	}
 
 	private void runSynchronously(Map<String, Object> data, 
 			SolrQueryRequest req) 
@@ -236,15 +243,21 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		Boolean commit = params.getBool(PARAM_COMMIT, false);
 		
 		HashMap<String, int[]> dictData = (HashMap<String, int[]>) data.get("dictData");
-		String lastUpdate = null;
-		if (data.containsKey(LAST_UPDATE)) {
-			lastUpdate = (String) data.get(LAST_UPDATE);
-		}
 		
 		List<String> queryParts;
 		
 		Properties prop = (Properties) req.getContext().get(IKRU_PROPERTIES);
-		int last_recid = (Integer) req.getContext().get(LAST_RECID); 
+		
+		Integer last_recid = null; // what is passed onto python
+		String last_mod_date = null; // what is passed onto python (but previous steps figured out its preference)
+		
+		if (prop.containsKey(LAST_RECID)) {
+			last_recid = Integer.valueOf(prop.getProperty(LAST_RECID));
+		}
+		
+		if (prop.containsKey(LAST_UPDATE)) {
+			last_mod_date = prop.getProperty(LAST_UPDATE);
+		}
 		
 
 		if (dictData.containsKey(ADDED) && dictData.get(ADDED).length > 0) {
@@ -307,14 +320,11 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			}
 		}
 		
-		// this must be there
-		int last_id = dictData.get(LAST)[0];
-		if (last_recid != last_id) {
-			prop.put(LAST_RECID, String.valueOf(last_id));
-		}
-		if (lastUpdate != null) {
-			prop.put(LAST_UPDATE, lastUpdate);
-		}
+
+		// save the state into the properties (the modification date must be there
+		// in all situations 
+		prop.put(LAST_UPDATE, (String) data.get(LAST_UPDATE));
+		prop.put(LAST_RECID, String.valueOf((Integer) data.get(LAST_RECID)));
 		saveProperties(prop);
 		
 		if (commit) {
@@ -371,17 +381,39 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	    		prop.load(new FileInputStream(f));
 	    	}
 	    	
+	    	String prop_recid = null;
+	    	if (prop.containsKey(LAST_RECID)) {
+	    		prop_recid = (String) prop.remove(LAST_RECID);
+	    	}
 	    	
-	    	// parameters in url have always precedence
+	    	String prop_mod_date = null;
+	    	if (prop.containsKey(LAST_UPDATE)) {
+	    		prop_mod_date = (String) prop.remove(LAST_UPDATE);
+	    	}
+	    	
+	    	boolean userParam = false;
+	    	
+	    	// parameters in url have always precedence (if both set
+	    	// it is up to the python to figure out who has precedence
 			if (params.getInt(LAST_RECID) != null) {
 				prop.put(LAST_RECID, params.get(LAST_RECID));
+				userParam = true;
 			} 
 			
 			if (params.get(LAST_UPDATE, null) != null) {
 				prop.put(LAST_UPDATE, params.get(LAST_UPDATE));
+				userParam = true;
 			}
 			
-			
+			if (!userParam) {
+				// when no user params were supplied, prefer the mod_date over recid
+				if (prop_mod_date != null) {
+					prop.put(LAST_UPDATE, prop_mod_date);
+				}
+				else {
+					prop.put(LAST_RECID, prop_recid);
+				}
+			}
 			
 	    	return prop;
 	}
@@ -403,10 +435,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		
 		Integer lastRecid = null;
 		String lastUpdate = null;
-		if (prop.contains(LAST_RECID)) {
+		if (prop.containsKey(LAST_RECID)) {
 			lastRecid = Integer.valueOf(prop.getProperty(LAST_RECID));
 		}
-		if (prop.contains(LAST_UPDATE)) {
+		if (prop.containsKey(LAST_UPDATE)) {
 			lastUpdate = prop.getProperty(LAST_UPDATE);
 		}
 		
@@ -414,7 +446,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		// we'll generate empty records (good just to have a mapping between invenio
 		// and lucene docids; necessary for search operations)
 		if (params.getBool("generate", false)) {
-			Integer max_recid = params.getInt("max_recid", 0);
+			Integer max_recid = params.getInt(PARAM_MAX_RECID, 0);
 			if (max_recid == 0 || max_recid < lastRecid) {
 				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
 						"The max_recid parameter missing!");
@@ -426,17 +458,19 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				a[i] = ii;
 			}
 			dictData.put("ADDED", a);
+			retData.put(LAST_UPDATE, null);
+			retData.put(LAST_RECID, max_recid);
 			
 		} else {
 			// get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
 			// int }
 			PythonMessage message = MontySolrVM.INSTANCE
-					.createMessage("get_recids_changes")
+					.createMessage(pythonFunctionName)
 					.setSender(this.getClass().getSimpleName())
 					.setSolrQueryRequest(req).setSolrQueryResponse(rsp);
 			
-			if (lastRecid != null) message.setParam("last_recid", lastRecid);
-			if (lastUpdate != null) message.setParam("mod_date", lastUpdate);
+			if (lastRecid != null) message.setParam(LAST_RECID, lastRecid);
+			if (lastUpdate != null) message.setParam(LAST_UPDATE, lastUpdate);
 			
 			MontySolrVM.INSTANCE.sendMessage(message);
 
@@ -447,7 +481,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				return null;
 			}
 			dictData = (HashMap<String, int[]>) results;
-			retData.put(LAST_UPDATE, (String) message.getParam("mod_date"));
+			retData.put(LAST_UPDATE, (String) message.getParam(LAST_UPDATE));
+			retData.put(LAST_RECID, (Integer) message.getParam(LAST_RECID));
 		}
 		retData.put("dictData", dictData);
 		return retData;

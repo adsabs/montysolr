@@ -113,7 +113,6 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		int[] added = handler.retrievedRecIds.get("ADDED");
 		int[] updated = handler.retrievedRecIds.get("UPDATED");
 		int[] deleted = handler.retrievedRecIds.get("DELETED");
-		int[] lastid = handler.retrievedRecIds.get("LAST");
 		
 		assertTrue(handler.lastRecId == -1); // cause we havent indexed them
 		assertTrue(added.length >= 104);
@@ -150,13 +149,12 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		added = handler.retrievedRecIds.get("ADDED");
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
-		lastid = handler.retrievedRecIds.get("LAST");
 		
 		assertTrue(handler.lastRecId == -1);
 		assertTrue(added.length == 0);
 		assertTrue(updated.length == 104);
 		assertTrue(deleted.length == 0); // will work on fresh demo
-		assertTrue(lastid[0] == recids[recids.length-1]);
+		assertTrue(handler.lastUpdatedRecId.equals(recids[recids.length-1]));
 		
 		
 		
@@ -185,7 +183,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		message = MontySolrVM.INSTANCE.createMessage("delete_record")
 		.setParam("recid", firstAdded)
-		.setParam("diff", 6);
+		.setParam("diff", 7);
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		
@@ -207,14 +205,13 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		added = handler.retrievedRecIds.get("ADDED");
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
-		lastid = handler.retrievedRecIds.get("LAST");
 		
 		assertTrue(handler.lastRecId == -1); // cause we use test class
 		
 		assertTrue(added.length == 1);
 		assertTrue(updated.length == 9);
 		assertTrue(deleted.length == 1);
-		assertTrue(lastid[0] == firstAdded);
+		assertTrue(handler.lastUpdatedRecId.equals(firstAdded));
 		assertTrue(handler.added == null); // these are there when processing runs
 		
 		
@@ -243,14 +240,13 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		added = handler.retrievedRecIds.get("ADDED");
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
-		lastid = handler.retrievedRecIds.get("LAST");
 		
 		
-		assertTrue(handler.lastRecId == 30);
+		assertTrue(handler.lastRecId.equals(30));
 		assertTrue(added.length == 1);
 		assertTrue(updated.length == 9);
 		assertTrue(deleted.length == 1);
-		assertTrue(lastid[0] == firstAdded);
+		assertTrue(handler.lastUpdatedRecId.equals(firstAdded));
 		assertTrue(handler.added == null); // these are there only when processing runs
 		
 		
@@ -279,22 +275,21 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		added = handler.retrievedRecIds.get("ADDED");
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
-		lastid = handler.retrievedRecIds.get("LAST");
 		
-		assertTrue(handler.lastRecId == 30);
+		assertTrue(handler.lastRecId.equals(30));
 		assertTrue(added.length == 1);
 		assertTrue(updated.length == 9);
 		assertTrue(deleted.length == 1);
-		assertTrue(lastid[0] == firstAdded);
+		assertTrue(handler.lastUpdatedRecId.equals(firstAdded));
 		assertTrue(handler.added != null); // these are there only when processing runs
 		
 		assertQ(req("q", "*:*"), "//*[@numFound='10']");
 		
 		
 		
-		// after this step the lastid should be stored in 
-		// a file, so if we run the handler again, the lastRecid
-		// should be the same as that of the deleted record
+		// after this step the last update should be stored in 
+		// a file, so if we run the handler again nothing should be 
+		// found
 		
 		// expected: nothing new, but lastRecid contains correct value
 		
@@ -308,14 +303,14 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		while (handler.isBusy()) {
 			Thread.sleep(10);
 		}
-		assertTrue(handler.lastRecId == firstAdded);
+		assertTrue(handler.lastRecId == null);
 		assertTrue(handler.added == null); // these are there only when processing runs
 		
 		
 		
 		// now we'll delete the second record (but not commit it to the index)
 		
-		// expected: deleted=1 & lastRecid=firstAdded & LAST=secondAdded
+		// expected: deleted=1 & lastUpdatedRecid=secondAdded & lastRecId == null
 		//           index still has 10 docs
 		
 		message = MontySolrVM.INSTANCE.createMessage("delete_record")
@@ -337,14 +332,14 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		added = handler.retrievedRecIds.get("ADDED");
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
-		lastid = handler.retrievedRecIds.get("LAST");
 		
 		
-		assertTrue(handler.lastRecId == firstAdded);
+		
+		assertTrue(handler.lastRecId == null);
 		assertTrue(added.length == 0);
 		assertTrue(updated.length == 0);
 		assertTrue(deleted.length == 1);
-		assertTrue(lastid[0] == secondAdded);
+		assertTrue(handler.lastUpdatedRecId.equals(secondAdded));
 		assertQ(req("q", "*:*"), "//*[@numFound='10']");
 
 		
@@ -355,7 +350,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		// new
 		
 		// extected: nothing is found, index is not changed
-		//           lastRecid=secondAdded (retrieved by handler)
+		//           lastRecid=null (retrieved by handler)
 		
 		handler = new MyInvenioKeepRecidUpdated();
 		core.execute(handler, req(
@@ -368,7 +363,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 			Thread.sleep(10);
 		}
 		
-		assertTrue(handler.lastRecId == secondAdded);
+		assertTrue(handler.lastRecId == null);
 		assertTrue(handler.added == null); // these are there only when processing runs
 		assertQ(req("q", "*:*"), "//*[@numFound='10']");
 		
@@ -397,13 +392,13 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		added = handler.retrievedRecIds.get("ADDED");
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
-		lastid = handler.retrievedRecIds.get("LAST");
 		
-		assertTrue(handler.lastRecId == 30);
+		
+		assertTrue(handler.lastRecId.equals(30));
 		assertTrue(added.length == 0);
 		assertTrue(updated.length == 9);
 		assertTrue(deleted.length == 2);
-		assertTrue(lastid[0] == secondAdded);
+		assertTrue(handler.lastUpdatedRecId.equals(secondAdded));
 		assertQ(req("q", "*:*"), "//*[@numFound='9']");
 		
 		
@@ -415,11 +410,11 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		// now create a third new record and run the updater
 		
 		// expected: added=1, the rest empty
-		//           LAST=thirdAdded, lastRecid=secondAdded
+		//           LAST=thirdAdded
 		//           index contains 9+1 docs
 		
 		message = MontySolrVM.INSTANCE.createMessage("create_record")
-			.setParam("diff", 5);
+			.setParam("diff", 15);
 		MontySolrVM.INSTANCE.sendMessage(message);
 		Integer thirdAdded = (Integer) message.getResults();
 		
@@ -438,13 +433,12 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		added = handler.retrievedRecIds.get("ADDED");
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
-		lastid = handler.retrievedRecIds.get("LAST");
+		
 		
 		assertTrue(added.length == 1);
 		assertTrue(updated.length == 0);
 		assertTrue(deleted.length == 0);
-		assertTrue(lastid[0] == thirdAdded);
-		assertTrue(handler.lastRecId == secondAdded);
+		assertTrue(handler.lastUpdatedRecId.equals(thirdAdded));
 		assertQ(req("q", "*:*"), "//*[@numFound='10']");
 
 		
@@ -466,7 +460,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		
 		// expected: added=0, updated=0, deleted=1
-		//           LAST=thirdAdded & lastRecid=thirdAdded
+		//           LAST=thirdAdded & lastRecid=null
 		//           index has 9 docs
 		
 		handler = new MyInvenioKeepRecidUpdated();
@@ -484,10 +478,10 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		added = handler.retrievedRecIds.get("ADDED");
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
-		lastid = handler.retrievedRecIds.get("LAST");
 		
-		assertTrue(handler.lastRecId == thirdAdded);
-		assertTrue(lastid[0] == thirdAdded);
+		
+		assertTrue(handler.lastRecId == null);
+		assertTrue(handler.lastUpdatedRecId.equals(thirdAdded));
 		assertTrue(added.length == 0);
 		assertTrue(updated.length == 0);
 		assertTrue(deleted.length == 1);
@@ -514,6 +508,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		public Map<String, int[]> retrievedRecIds;
 		public Integer lastRecId;
+		public Integer lastUpdatedRecId;
 		private int stage = 0;
 		private String[] stages = new String[]{importurl + "?", updateurl + "&", deleteurl};
 		public int[] added = null;
@@ -533,6 +528,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		    Map<String, Object> ret = super.retrieveRecids(prop, req, rsp);
 		    if (ret != null) {
 		    	retrievedRecIds = (Map<String, int[]>) ret.get("dictData");
+		    	lastUpdatedRecId = (Integer) ret.get(LAST_RECID);
 		    }
 		    return ret;
 		}

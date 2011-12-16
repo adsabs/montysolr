@@ -87,7 +87,7 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
         else:
             updated.append(recid)
     
-    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added, 'LAST': [recid]}, str(mod_date)
+    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, recid, str(mod_date)
 
 def citation_summary(recids, of, ln, p, f):
     out = StringIO()

@@ -107,12 +107,13 @@ def get_recids_changes(message):
             max_records = mr
     (wid, results) = api_calls.dispatch("get_recids_changes", last_recid, max_records, mod_date=mod_date)
     if results:
-        data, mod_date = results
+        data, last_recid, mod_date = results
         out = sj.HashMap().of_(sj.String, sj.JArray_int)
         for k,v in data.items():
             out.put(k, sj.JArray_int(v))
         message.setResults(out)
         message.setParam('mod_date', mod_date)
+        message.setParam('last_recid', last_recid)
 
 
 
