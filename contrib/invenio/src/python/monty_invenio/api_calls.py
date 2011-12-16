@@ -2,6 +2,7 @@
 
 import os
 import thread
+import sys
 
 from invenio import search_engine
 from invenio import search_engine_summarizer
@@ -23,7 +24,7 @@ def dispatch(func_name, *args, **kwargs):
     out = globals()[func_name](*args, **kwargs)
     return [tid, out]
 
-def get_recids_changes(last_recid, max_recs=10000):
+def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
     """
     Retrieves the sets of records that were added/updated/deleted
     
@@ -31,32 +32,39 @@ def get_recids_changes(last_recid, max_recs=10000):
     we retrieve the modification time of one record and look
     at those that are older.
     
+        OR
+        
+    You can pass in the date that you are interested in, in the 
+    format: YYYY-MM-DD HH:MM:SS
+    
     added => bibrec.modification_date == bibrec.creation_date
     updated => bibrec.modification_date >= bibrec.creation_date
     deleted => bibrec.status == DELETED
     """
-    
-    search_op = '>'
 
-    if last_recid == -1:
-        l = list(dbquery.run_sql("SELECT id FROM bibrec ORDER BY creation_date ASC LIMIT 1"))
-        search_op = '>='
-    else:
-        # let's make sure we have a valid recid (or get the close valid one)
-        l = list(dbquery.run_sql("SELECT id FROM bibrec WHERE id >= %s LIMIT 1", (last_recid,)))
-        if not len(l):
+    search_op = '>'    
+    if not mod_date:
+        if last_recid == -1:
+            l = list(dbquery.run_sql("SELECT id FROM bibrec ORDER BY creation_date ASC LIMIT 1"))
+            search_op = '>='
+        else:
+            # let's make sure we have a valid recid (or get the close valid one)
+            l = list(dbquery.run_sql("SELECT id FROM bibrec WHERE id >= %s LIMIT 1", (last_recid,)))
+            if not len(l):
+                return
+            
+        last_recid = l[0][0]
+    
+        # there is not api to get this (at least i haven't found it)
+        mod_date = search_engine.get_modification_date(last_recid, fmt="%Y-%m-%d %H:%i:%S")
+        if not mod_date:
             return
         
-    last_recid = l[0][0]
-
-    # there is not api to get this (at least i haven't found it)
-    mod_date = search_engine.get_modification_date(last_recid, fmt="%Y-%m-%d %H:%i:%S")
-    if not mod_date:
-        return
     modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM bibrec "
-                    "WHERE modification_date " + search_op + "%s ORDER BY id ASC LIMIT %s", (mod_date, max_recs )))
+                    "WHERE modification_date " + search_op + "%s ORDER BY modification_date ASC, id ASC LIMIT %s", 
+                    (mod_date, max_recs )))
     
-    #print "SELECT id,modification_date, creation_date FROM bibrec WHERE modification_date " + search_op + "%s ORDER BY id ASC LIMIT %s" % (mod_date, max_recs )
+    sys.stderr.write('%s, %s\n' % (last_recid, "SELECT id,modification_date, creation_date FROM bibrec WHERE modification_date " + search_op + " \"%s\" ORDER BY id ASC LIMIT %s" % (mod_date, max_recs )))
     #print len(modified_records)
     
     if not len(modified_records):
@@ -66,8 +74,6 @@ def get_recids_changes(last_recid, max_recs=10000):
     updated = []
     deleted = []
     
-    
-    changed = 0
     for recid, mod_date, create_date in modified_records:
         
         #rec = search_engine.get_record(recid)
@@ -80,8 +86,8 @@ def get_recids_changes(last_recid, max_recs=10000):
             added.append(recid)
         else:
             updated.append(recid)
-            
-    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}
+    
+    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added, 'LAST': [recid]}, str(mod_date)
 
 def citation_summary(recids, of, ln, p, f):
     out = StringIO()

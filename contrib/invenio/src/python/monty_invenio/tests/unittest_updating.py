@@ -23,7 +23,7 @@ def change_records(message):
     else:
         diff = 5 # 5 secs older
     for r in recids:
-        dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s", (diff, r))
+        dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s" % (diff, r))
 
 def add_records(message):
     """We are not adding, but if creation_date == modification_date
@@ -85,12 +85,22 @@ def create_record(message):
     
 def delete_record(message):
     """deletes record"""
+    diff = message.getParam('diff')
+    if diff:
+        diff = int(str(diff))
+    else:
+        diff = 5 # 5 secs older
     recid = int(j.Integer.cast_(message.getParam('recid')).intValue())
     record = search_engine.get_record(recid)
     bibrecord.record_add_field(record, "980", subfields=[("c", "DELETED")])
     ret = bibupload.bibupload(record, opt_mode='replace')
     recid = ret[1]
     message.setResults(j.Integer(recid))
+    
+    # extra query needed because invenio sets modification date=NOW()
+    # and so the deleted recs have modification_date<creation_date
+    dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s" % (diff, recid))
+    sys.stderr.write("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s" % (diff, recid))
         
     
 def wipeout_record(message):
@@ -125,10 +135,12 @@ class Test(InvenioDemoTestCaseLucene):
         reset_records(None)
         self.max_recs = dbquery.run_sql("SELECT COUNT(*) FROM bibrec")[0][0]
         self.max_id = dbquery.run_sql("SELECT MAX(id) FROM bibrec")[0][0]
-    
+        time.sleep(0.5)
+        
     def test_get_recids_added(self):
         
         message = self.bridge.createMessage('add_records') \
+                    .setParam('diff', 6) \
                     .setParam('recids', j.JArray_int(range(1, 11)))
         self.bridge.sendMessage(message)
         
@@ -239,7 +251,7 @@ class Test(InvenioDemoTestCaseLucene):
         
     def test_get_recids_deleted(self):
         
-        time.sleep(1) # otherwise the new record has the same creation time as the old recs
+        #time.sleep(1) # otherwise the new record has the same creation time as the old recs
         #message = self.bridge.createMessage('create_delete')
         #self.bridge.sendMessage(message)
         message = self.bridge.createMessage('create_record')
@@ -277,8 +289,80 @@ class Test(InvenioDemoTestCaseLucene):
         assert len(deleted) == 1
         
         assert int(str(deleted[0])) == deleted_recid 
+
+    def test_get_recids_add_change(self):
+        
+        #time.sleep(1) # otherwise the new record has the same creation time as the old recs
+        #message = self.bridge.createMessage('create_delete')
+        #self.bridge.sendMessage(message)
+        message = self.bridge.createMessage('create_record')
+        self.bridge.sendMessage(message)
+        created_recid = int(j.Integer.cast_(message.getResults()).intValue())
+        
+        
+        req = j.QueryRequest()
+        rsp = j.SolrQueryResponse()
+
+        message = self.bridge.createMessage('get_recids_changes') \
+                    .setSender('InvenioKeepRecidUpdated') \
+                    .setSolrQueryResponse(rsp) \
+                    .setParam('last_recid', 30)
+        self.bridge.sendMessage(message)
+        
+        last_updated = str(message.getParam('mod_date'))
+
+        results = message.getResults()
+        out = j.HashMap.cast_(results)
+        
+        added = j.JArray_int.cast_(out.get('ADDED'))
+        updated = j.JArray_int.cast_(out.get('UPDATED'))
+        deleted = j.JArray_int.cast_(out.get('DELETED'))
+        
+        
+        
+        assert len(added) == 1
+        assert len(updated) == 0
+        assert len(deleted) == 0
+        
+        
+        message = self.bridge.createMessage('delete_record') \
+            .setParam('recid', created_recid) \
+            .setParam('diff', 10)
+        self.bridge.sendMessage(message)
+        deleted_recid = int(str(message.getResults()))
+        
+        
+        message = self.bridge.createMessage('get_recids_changes') \
+                    .setSender('InvenioKeepRecidUpdated') \
+                    .setSolrQueryResponse(rsp) \
+                    .setParam('last_recid', deleted_recid) \
+                    .setParam('mod_date', last_updated)
+                    
+        self.bridge.sendMessage(message)
+        
+
+        results = message.getResults()
+        out = j.HashMap.cast_(results)
+        
+        added = j.JArray_int.cast_(out.get('ADDED'))
+        updated = j.JArray_int.cast_(out.get('UPDATED'))
+        deleted = j.JArray_int.cast_(out.get('DELETED'))
+        
+        
+        
+        assert len(added) == 0
+        assert len(updated) == 0
+        assert len(deleted) == 1
+        
+        
+        message = self.bridge.createMessage('wipeout_record') \
+                  .setParam('recid', deleted_recid)
+        self.bridge.sendMessage(message)
+        assert created_recid == deleted_recid
+        
+        assert int(str(deleted[0])) == deleted_recid 
         
 
 if __name__ == "__main__":
-    import sys;sys.argv = ['', 'Test.test_get_recids_deleted']
+    import sys;sys.argv = ['', 'Test.test_get_recids_add_change']
     unittest.main()
