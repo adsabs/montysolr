@@ -10,6 +10,7 @@ from montysolr.initvm import montysolr_java as sj
 from montysolr.utils import MontySolrTarget, make_targets
 import logging
 import os
+import sys
 #import monty_invenio.multiprocess_api_calls as api_calls
 import monty_invenio.api_calls as api_calls
 
@@ -96,7 +97,8 @@ def get_recids_changes(message):
     """Retrieves the recids of the last changed documents"""
     last_recid = None
     if message.getParam("last_recid"):
-        last_recid = int(sj.Integer.cast_(message.getParam("last_recid")).intValue())
+        #last_recid = int(sj.Integer.cast_(message.getParam("last_recid")).intValue())
+        last_recid = int(str(message.getParam("last_recid")))
     mod_date = None
     if message.getParam("mod_date"):
         mod_date = str(message.getParam("mod_date"))
@@ -105,6 +107,8 @@ def get_recids_changes(message):
         mr = int(sj.Integer.cast_(message.getParam("max_records")).intValue())
         if mr < 100001:
             max_records = mr
+    if last_recid and last_recid == -1:
+        mod_date = None
     (wid, results) = api_calls.dispatch("get_recids_changes", last_recid, max_records, mod_date=mod_date)
     if results:
         data, last_recid, mod_date = results

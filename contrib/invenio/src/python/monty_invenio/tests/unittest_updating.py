@@ -14,6 +14,24 @@ import time
 import unittest
 
 # beware, granularity is in seconds!!!
+def change_date(recid, diff=1, cdiff=0):
+    def change(d, x):
+        t = time.mktime(d.timetuple())
+        t += x
+        n = d.fromtimestamp(t)
+        return n.strftime(format="%Y-%m-%d %H:%M:%S")
+            
+    recs = dbquery.run_sql("SELECT id, creation_date, modification_date FROM bibrec WHERE id=%s" % recid)
+    c = recs[0][1]
+    c_date = change(c, cdiff)
+    
+    m = recs[0][2]
+    m_date = change(m, diff)
+    sys.stderr.write('cdate: %s x %s; mdate: %s x %s --> ' % (c, c_date, m, m_date))
+    
+    sys.stderr.write("UPDATE bibrec SET creation_date='%s', modification_date='%s' WHERE id=%s\n" % (c_date,m_date,recid))
+    return dbquery.run_sql("UPDATE bibrec SET creation_date='%s', modification_date='%s' WHERE id=%s" % (c_date,m_date,recid))
+
         
 def change_records(message):
     recids = list(j.JArray_int.cast_(message.getParam('recids')))
@@ -23,7 +41,8 @@ def change_records(message):
     else:
         diff = 5 # 5 secs older
     for r in recids:
-        dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s" % (diff, r))
+        change_date(r, diff=diff)
+        #dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s" % (diff, r))
 
 def add_records(message):
     """We are not adding, but if creation_date == modification_date
@@ -38,8 +57,14 @@ def add_records(message):
     for r in recids:
         dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s, creation_date=NOW() + %s WHERE id=%s" % (diff,diff, r))
 
+
 def reset_records(message):
     dbquery.run_sql("UPDATE bibrec SET modification_date=NOW(), creation_date=NOW()")
+    
+    recs = dbquery.run_sql("SELECT id FROM bibrec WHERE id>104")
+    for x in recs:
+        rid = x[0]
+        bibupload_regression_tests.wipe_out_record_from_all_tables(rid)
 
 def create_delete(message):
     """creates and deletes the record"""
@@ -69,8 +94,9 @@ def create_delete(message):
     recs = bibupload.xml_marc_to_records(xml_to_delete)
     ret = bibupload.bibupload(recs[0], opt_mode='insert')
     recid = ret[1]
-    message.setResults(j.Integer(recid))    
-    dbquery.run_sql("UPDATE bibrec SET modification_date=NOW()+%s, creation_date=NOW() + %s WHERE id=%s" % (diff, diff,recid))
+    message.setResults(j.Integer(recid))
+    change_date(recid, diff=diff)
+    #dbquery.run_sql("UPDATE bibrec SET modification_date=NOW()+%s, creation_date=NOW() + %s WHERE id=%s" % (diff, diff,recid))
 
 def create_record(message):
     """creates record"""
@@ -81,7 +107,8 @@ def create_record(message):
         diff = 5 # 5 secs older
     recid = bibupload.create_new_record()
     message.setResults(j.Integer(int(recid)))
-    dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s, creation_date=NOW() + %s WHERE id=%s" % (diff, diff,recid))      
+    #dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s, creation_date=NOW() + %s WHERE id=%s" % (diff, diff,recid))
+    change_date(recid, diff=diff, cdiff=diff)    
     
 def delete_record(message):
     """deletes record"""
@@ -99,8 +126,9 @@ def delete_record(message):
     
     # extra query needed because invenio sets modification date=NOW()
     # and so the deleted recs have modification_date<creation_date
-    dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s" % (diff, recid))
-    sys.stderr.write("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s" % (diff, recid))
+    #dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s WHERE id=%s" % (diff, recid))
+    change_date(recid, diff=diff)
+    
         
     
 def wipeout_record(message):

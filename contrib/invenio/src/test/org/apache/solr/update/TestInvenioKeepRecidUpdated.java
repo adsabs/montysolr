@@ -115,9 +115,9 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		int[] deleted = handler.retrievedRecIds.get("DELETED");
 		
 		assertTrue(handler.lastRecId == -1); // cause we havent indexed them
-		assertTrue(added.length >= 104);
+		assertTrue(added.length == 104);
 		assertTrue(updated.length == 0);
-		//assertTrue(deleted.length == 0); // this can work only for fresh demo
+		assertTrue(deleted.length == 0); // this can work only for fresh demo
 		
 		
 		
@@ -193,7 +193,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		// expected: 1 added, 9 changed, 1 deleted AND lastid will 
 		// be the deleted recs
 		
-		core.execute(handler, req("last_recid", "-1", 
+		core.execute(handler, req("last_recid", "10", 
 					    "inveniourl", inveniourl,
 						"importurl", importurl,
 						"updateurl", updateurl,
@@ -206,7 +206,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		updated = handler.retrievedRecIds.get("UPDATED");
 		deleted = handler.retrievedRecIds.get("DELETED");
 		
-		assertTrue(handler.lastRecId == -1); // cause we use test class
+		assertTrue(handler.lastRecId == 10); // cause we use test class
 		
 		assertTrue(added.length == 1);
 		assertTrue(updated.length == 9);
@@ -292,7 +292,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		// found
 		
 		// expected: nothing new, but lastRecid contains correct value
-		
+		// (nothing, because we use mod_date now from the config)
 		handler = new MyInvenioKeepRecidUpdated();
 		core.execute(handler, req( 
 			    "inveniourl", inveniourl,
@@ -312,10 +312,10 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		// expected: deleted=1 & lastUpdatedRecid=secondAdded & lastRecId == null
 		//           index still has 10 docs
-		
+		//Thread.sleep(500);
 		message = MontySolrVM.INSTANCE.createMessage("delete_record")
 			.setParam("recid", secondAdded)
-			.setParam("diff", 7);
+			.setParam("diff", 10);
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		

@@ -12,6 +12,7 @@ from invenio.intbitset import intbitset
 
 from invenio.bibrank_citation_searcher import get_citation_dict
 
+import datetime
 
 
 from cStringIO import StringIO
@@ -23,6 +24,7 @@ def dispatch(func_name, *args, **kwargs):
     tid = thread.get_ident()
     out = globals()[func_name](*args, **kwargs)
     return [tid, out]
+
 
 def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
     """
@@ -41,30 +43,34 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
     updated => bibrec.modification_date >= bibrec.creation_date
     deleted => bibrec.status == DELETED
     """
-
     search_op = '>'    
     if not mod_date:
         if last_recid == -1:
-            l = list(dbquery.run_sql("SELECT id FROM bibrec ORDER BY creation_date ASC LIMIT 1"))
+            l = list(dbquery.run_sql("SELECT modification_date FROM bibrec ORDER BY modification_date ASC LIMIT 1"))
+            mod_date = l[0][0].strftime(format="%Y-%m-%d %H:%M:%S")
             search_op = '>='
         else:
             # let's make sure we have a valid recid (or get the close valid one)
-            l = list(dbquery.run_sql("SELECT id FROM bibrec WHERE id >= %s LIMIT 1", (last_recid,)))
+            l = list(dbquery.run_sql("SELECT id, modification_date FROM bibrec WHERE id >= %s LIMIT 1", (last_recid,)))
             if not len(l):
                 return
+            last_recid = l[0][0]
+            mod_date = l[0][1].strftime(format="%Y-%m-%d %H:%M:%S")
             
-        last_recid = l[0][0]
-    
-        # there is not api to get this (at least i haven't found it)
-        mod_date = search_engine.get_modification_date(last_recid, fmt="%Y-%m-%d %H:%i:%S")
-        if not mod_date:
-            return
+            # there is not api to get this (at least i haven't found it)
+            #mod_date = search_engine.get_modification_date(last_recid, fmt="%Y-%m-%d %H:%i:%S")
+            #if not mod_date:
+            #    return
         
     modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM bibrec "
-                    "WHERE modification_date " + search_op + "%s ORDER BY modification_date ASC, id ASC LIMIT %s", 
+                    "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
                     (mod_date, max_recs )))
     
-    sys.stderr.write('%s, %s\n' % (last_recid, "SELECT id,modification_date, creation_date FROM bibrec WHERE modification_date " + search_op + " \"%s\" ORDER BY id ASC LIMIT %s" % (mod_date, max_recs )))
+    sys.stderr.write('%s, %s, %s\n' % (last_recid, mod_date,
+        "SELECT id,modification_date, creation_date FROM bibrec "
+        "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
+        (mod_date, max_recs )))
+    
     #print len(modified_records)
     
     if not len(modified_records):
