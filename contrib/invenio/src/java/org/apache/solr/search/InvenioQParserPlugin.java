@@ -14,6 +14,7 @@ import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.queryParser.aqp.AqpInvenioQueryParser;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -185,7 +186,13 @@ class InvenioQParser extends QParser {
 		Query mainq;
 
 		if (querySyntax.equals("invenio")) {
-			AqpInvenioQueryParser invParser = new AqpInvenioQueryParser();
+			AqpInvenioQueryParser invParser;
+			try {
+				invParser = new AqpInvenioQueryParser();
+			} catch (QueryNodeParseException e1) {
+				e1.printStackTrace();
+				throw new ParseException(e1.getLocalizedMessage());
+			}
 			invParser.setAnalyzer(schema.getAnalyzer());
 			String opParam = getParam(QueryParsing.OP);
 			if (opParam != null) {

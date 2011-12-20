@@ -371,4 +371,10 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
   }
 
   public static final String ENABLE_DEBUG = "enableDebug";
+  
+  // just used for debugging
+  public boolean isBusy() {
+	  if (importer == null) return false;
+	  return importer.isBusy();
+  }
 }

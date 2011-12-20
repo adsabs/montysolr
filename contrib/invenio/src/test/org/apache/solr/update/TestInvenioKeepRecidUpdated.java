@@ -23,23 +23,13 @@ import invenio.montysolr.util.MontySolrAbstractTestCase;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.search.DocSlice;
-import org.apache.solr.update.TestInvenioKeepRecidUpdated.MyInvenioKeepRecidUpdated;
 
 /**
  * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
