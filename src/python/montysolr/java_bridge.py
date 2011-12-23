@@ -1,5 +1,5 @@
 
-from montysolr.config import MSBUGDEBUG, MSKILLLOAD, MSIAMHANDLER
+from montysolr import config
 from montysolr.initvm import montysolr_java as sj
 
 import time
@@ -27,14 +27,14 @@ class SimpleBridge(sj.MontySolrBridge):
 
     def __init__(self, handler=None):
         if not handler:
-            handler_module = __import__(MSIAMHANDLER, globals(), locals(), fromlist=['Handler'])
+            handler_module = __import__(config.MONTYSOLR_HANDLER, globals(), locals(), fromlist=['Handler'])
             handler = handler_module.Handler
         super(SimpleBridge, self).__init__()
         self._handler = handler
         self._handler_module = handler.__module__
 
     def receive_message(self, message):
-        if MSKILLLOAD:
+        if config.MONTYSOLR_KILLLOAD:
             req = message.getSolrQueryRequest()
             if req:
                 params = req.getParams()
@@ -42,10 +42,10 @@ class SimpleBridge(sj.MontySolrBridge):
                     message.threadInfo('Reloading ourselves mylord!', self._handler_module)
                     self._handler_module = reload(self._handler_module)
                     self._handler = self._handler_module.Handler
-        if MSBUGDEBUG:
+        if config.MONTYSOLR_BUGDEBUG:
             start = time.time()
             self._handler.handle_message(message)
-            message.threadInfo('Total time: %s' (time.time() - start))
+            message.threadInfo('Total time: %s' % (time.time() - start,))
         else:
             self._handler.handle_message(message)
     

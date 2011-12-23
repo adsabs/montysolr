@@ -6,12 +6,14 @@ Created on Feb 4, 2011
 
 from cStringIO import StringIO
 from invenio.intbitset import intbitset
+from montysolr import config
 from montysolr.initvm import montysolr_java as sj
 from montysolr.utils import MontySolrTarget, make_targets
 import logging
 import os
 import sys
-#import monty_invenio.multiprocess_api_calls as api_calls
+
+import monty_invenio.multiprocess_api_calls as multi_api_calls
 import monty_invenio.api_calls as api_calls
 
 import time
@@ -267,9 +269,8 @@ def montysolr_targets():
 
 
     # start multiprocessing with that many processes in the pool
-    if hasattr(api_calls, "start_multiprocessing"):
-        if os.getenv('MONTYSOLR_MAX_WORKERS'):
-            api_calls.start_multiprocessing(int(os.getenv('MONTYSOLR_MAX_WORKERS')))
-        else:
-            api_calls.start_multiprocessing()
+    if config.MONTYSOLR_MULTIPROC and int(config.MONTYSOLR_MAX_WORKERS) > 1:
+        multi_api_calls.start_multiprocessing(int(config.MONTYSOLR_MAX_WORKERS))
+        api_calls = multi_api_calls # swap the providers
+        
     return targets

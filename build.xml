@@ -13,7 +13,7 @@
 	<property name="montysolr.home" location="." />
 	<property name="src.dir.java" location="src/java" />
 	<property name="src.dir.python" location="src/python" />
-	<property name="build.dir" value="build" />
+	<property name="build.dir" location="build" />
 	<property name="dist.dir" value="build/dist" />
 	<property name="classes.dir" value="bin" />
 	<property name="jar.dir" value="${build.dir}/jar" />
@@ -533,6 +533,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 			<arg value="/solr"/>
 			<arg line="${env.MONTYSOLR_ARGS}"/>
 		</java>
+		
 
 	</target>
 

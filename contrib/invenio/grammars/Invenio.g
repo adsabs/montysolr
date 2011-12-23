@@ -331,7 +331,8 @@ SECOND_ORDER_OP
 	:	
 	('refersto'
 	| 'citedby'
-	| 'cited')
+	| 'cited'
+	| 'cocitedwith')
 	;
 
 

@@ -4,9 +4,8 @@ Created on Feb 4, 2011
 @author: rca
 '''
 
-from montysolr.config import MSTARGETUS
-from montysolr import handler
-
+from montysolr import handler, config
+import sys
 
 class Handler(handler.Handler):
     '''Simple handler that just calls the methods sequentially
@@ -14,7 +13,8 @@ class Handler(handler.Handler):
     '''
 
     def init(self):
-        self.discover_targets(MSTARGETUS)
+        sys.stderr.write(str(config.MONTYSOLR_TARGETS))
+        self.discover_targets(config.MONTYSOLR_TARGETS)
 
 
 

@@ -19,6 +19,7 @@ except:
     import solr_java
     import montysolr_java
 
+from montysolr import config 
 
 #if os.getenv('MONTYSOLR_DEBUG'):
 #    from invenio import remote_debugger

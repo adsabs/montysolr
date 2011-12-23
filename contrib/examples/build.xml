@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+ 
+        http://www.apache.org/licenses/LICENSE-2.0
+ 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+
+<project name="examples" default="default">
+
+    <description>
+    Examples for MontySolr
+  </description>
+
+    <import file="../contrib-build.xml"/>
+	
+	<condition property="example.name" value="invenio">
+        <not>
+            <isset property="ename"/>
+        </not>
+    </condition>
+	<property name="example.name" value="${ename}"/>
+	
+	<condition property="example.ignore-environment" value="true">
+        <not>
+            <isset property="ignore-environment"/>
+        </not>
+    </condition>
+    <property name="example.ignore-environment" value="${ignore-environment}"/>
+	
+	
+	<condition property="example.jvmargs" value="-d64 -Xmx1024m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200">
+        <not>
+            <isset property="jvmargs"/>
+        </not>
+    </condition>
+    <property name="example.jvmargs" value="${jvmargs}"/>
+	
+	
+    <!-- these will be used when running tests and command line montysolr
+         you can set them as:
+         export MONTYSOLR_JVMARGS=-Djava.util.logging.config.file=./example/etc/test.logging.properties
+
+         If you are using python c-extensions, make sure they are compatible with the
+         java - if your java starts in 64bit mode, also the extensions must be available in 64bit
+         By default, we run in 64bit mode: -d64
+     //-->
+    <property environment="env"/>
+    <property name="subant.jvmargs" value="" />
+    <property name="subant.args" value="" />
+    <property name="subant.newenvironment" value="true" />
+    <property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
+    <property name="env.MONTYSOLR_ARGS" value="${subant.args}"/>
+    <property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
+    <property name="env.PYTHONPATH" value=""/>
+	
+   <path id="examples.classpath">
+       	<!-- all contrib compiled classes -->
+        <dirset dir="${common.dir}/build/contrib">
+            <include name="**/classes/java"/>
+        </dirset>
+
+        <path refid="base.classpath"/>
+    
+        <!-- montysolr jars -->
+        <fileset dir="${common.dir}/lib">
+            <include name="**/*.jar"/>
+        </fileset>
+   	
+   	    <!-- montysolr jars -->
+        <fileset dir="${common.dir}/build/jar">
+            <include name="**/*.jar"/>
+        </fileset>
+        
+   	    <!-- all contrib jars -->
+        <fileset dir="../">
+            <include name="**/lib/*.jar"/>
+        </fileset>
+   	
+   	    <!-- examples compiled classes, if any -->
+   	    <pathelement location="${build.dir}/classes/java"/>
+   	
+   	    <!-- jcc classpath -->
+   	    <pathelement location="${prop.jcc_egg}/jcc/classes"/>
+   	
+        <!-- solr/dist jars -->
+        <fileset dir="${prop.solr.real.location}/dist">
+            <include name="**/*.jar"/>
+        </fileset>
+   	
+   	    <!-- example libs -->
+        <fileset dir="${build.dir}">
+            <include name="${example.name}/lib/**/*.jar"/>
+        </fileset>
+    </path>
+
+	
+	<target name="default" depends="build-all">
+	
+	</target>
+	
+	<target name="build-all" description="Assembles all examples">
+		   <assemble-example example-name="invenio" montysolr-example="${basedir}/invenio" solr-example="${prop.solr.real.location}/example"/>
+	</target>
+	
+	
+	<target name="build-one">
+		<assemble-example example-name="${example.name}" 
+			montysolr-example="${basedir}/${example.name}" 
+			solr-example="${prop.solr.real.location}/example"/>		   
+	</target>
+	
+	
+	<target name="run" description="Run the example, usage: ant run -Dename={example-name}">
+		<echo >
+			${toString:examples.classpath}
+			</echo>
+		<exec executable="ant" failonerror="true" dir="${basedir}">
+            <env key="MONTYSOLR_MAX_WORKERS" value="4" />
+            <env key="MONTYSOLR_JVMARGS" value="${example.jvmargs} ${env.MONTYSOLR_JVMARGS}" />
+            <env key="MONTYSOLR_ARGS" value="${env.MONTYSOLR_ARGS} --daemon" />
+            <arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}" />
+            <arg value="run-bare"/>
+			<arg value="-v"/>
+        </exec>
+	</target>
+	
+	<target name="run-daemon" depends="" >
+        <exec executable="ant" failonerror="true" dir="${basedir}">
+            <env key="MONTYSOLR_MAX_WORKERS" value="4" />
+            <env key="MONTYSOLR_JVMARGS" value="${example.jvmargs} -Djava.util.logging.config.file=${build.dir}/${example.name}/etc/logging.properties ${env.MONTYSOLR_JVMARGS}" />
+            <env key="MONTYSOLR_ARGS" value="${env.MONTYSOLR_ARGS} --daemon" />
+        	<arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}"/>
+            <arg value="run-bare"/>
+        </exec>
+    </target>
+	
+	<target name="run-bare" depends="build-one">
+		   <run-montysolr classpath="${prop.jcc_egg}"
+		      classpathref="examples.classpath"
+		   	  ignore-environment="${example.ignore-environment}"
+		   	  pythonpath="${prop.python_path}${path.separator}${common.dir}/build/dist${path.separator}${common.dir}/src/python${path.separator}${env.PYTHONPATH}"
+		   	  webroot="${build.dir}/${example.name}/webapps/solr.war"
+		      solr-home-dir="${build.dir}/${example.name}/solr"
+		   	  solr-data-dir="${build.dir}/${example.name}/solr/data"
+		   	  jcc-classpath="${prop.jcc_egg}"
+		   	  jvmargs="${env.MONTYSOLR_JVMARGS}"
+		   	  arguments="${env.MONTYSOLR_ARGS}"
+		   />
+	</target>
+
+
+</project>

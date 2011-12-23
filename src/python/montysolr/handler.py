@@ -70,18 +70,22 @@ class Handler(object):
             raise Exception("The argument must be a list")
 
         for place in places:
-            if isinstance(place, basestring):
-                if os.path.exists(place): # it is a module
-                    try:
-                        obj = self.create_module(place)
+            try:
+                if isinstance(place, basestring):
+                    if os.path.exists(place): # it is a module
+                        try:
+                            obj = self.create_module(place)
+                            self.retrieve_targets(obj)
+                        except:
+                            self.log.error(traceback.format_exc())
+                    else:
+                        obj = self.import_module(place)
                         self.retrieve_targets(obj)
-                    except:
-                        self.log.error(traceback.format_exc())
                 else:
-                    obj = self.import_module(place)
-                    self.retrieve_targets(obj)
-            else:
-                self.retrieve_targets(place)
+                    self.retrieve_targets(place)
+            except Exception, e:
+                sys.stderr.write('Error when loading: %s\n' % place)
+                raise e
 
     def import_module(self, module_name):
         """Import workflow module

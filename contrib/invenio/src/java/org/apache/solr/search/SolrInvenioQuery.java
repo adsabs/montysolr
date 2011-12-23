@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 public class SolrInvenioQuery extends InvenioQuery {
 
 
+	private static final long serialVersionUID = -2909094681391799279L;
+
 	public static final Logger log = LoggerFactory
 			.getLogger(SolrInvenioQuery.class);
 

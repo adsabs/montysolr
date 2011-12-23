@@ -13,6 +13,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.queryParser.aqp.AqpInvenioQueryParser;
+import org.apache.lucene.queryParser.aqp.AqpQueryParser;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
@@ -84,7 +85,12 @@ public class InvenioQParserPlugin extends QParserPlugin {
 	@Override
 	public QParser createParser(String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req) {
-		return new InvenioQParser(qstr, localParams, params, req);
+		try {
+			return new InvenioQParser(qstr, localParams, params, req);
+		} catch (QueryNodeParseException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }
@@ -94,20 +100,16 @@ class InvenioQParser extends QParser {
 	public static final Logger log = LoggerFactory
 			.getLogger(InvenioQParser.class);
 
-	public static Pattern fieldPattern = Pattern
-			.compile("\\b([a-zA-Z_0-9]+)\\:");
-
 	String sortStr;
-	SolrQueryParser lparser;
+	AqpQueryParser invParser;
 	ArrayList<String> xfields = null;
-
 	private String operationMode = "maxinvenio";
 	private String exchangeType = "ints";
 	private String querySyntax = "invenio";
 	private IndexSchema schema = null;
 
 	public InvenioQParser(String qstr, SolrParams localParams,
-			SolrParams params, SolrQueryRequest req) {
+			SolrParams params, SolrQueryRequest req) throws QueryNodeParseException {
 		super(qstr, localParams, params, req);
 
 		SolrParams solrParams = localParams == null ? params : new DefaultSolrParams(localParams, params);
@@ -146,33 +148,14 @@ class InvenioQParser extends QParser {
 		if (eType.contains("bitset")) {
 			exchangeType = "bitset";
 		}
-
-		String sType = solrParams.get("iq.syntax", "invenio");
-		if (sType.contains("lucene")) {
-			querySyntax = "lucene";
-		}
+		
+		invParser = new AqpInvenioQueryParser();
 	}
 
 	public Query parse() throws ParseException {
-
+		
 		if (getString() == null) {
 			throw new ParseException("The query parameter is empty");
-		}
-
-		setString(normalizeInvenioQuery(getString()));
-		String qstr = getString();
-
-
-
-		// detect field not in the schema, but only if we are not in the
-		// all-tracking mode (because in that mode we can do it much smarter and
-		// without regex)
-		if (operationMode.equals("maxsolr") && !schema.hasExplicitField("*")) {
-			String q2 = changeInvenioQuery(req, qstr);
-			if (!q2.equals(qstr)) {
-				log.info(qstr + "  -->  " + q2);
-				setString(q2);
-			}
 		}
 
 
@@ -180,136 +163,29 @@ class InvenioQParser extends QParser {
 		if (defaultField == null) {
 			defaultField = getReq().getSchema().getDefaultSearchFieldName();
 		}
-
-
-		// Now use the specific parser to fight with the syntax
-		Query mainq;
-
-		if (querySyntax.equals("invenio")) {
-			AqpInvenioQueryParser invParser;
-			try {
-				invParser = new AqpInvenioQueryParser();
-			} catch (QueryNodeParseException e1) {
-				e1.printStackTrace();
-				throw new ParseException(e1.getLocalizedMessage());
-			}
-			invParser.setAnalyzer(schema.getAnalyzer());
-			String opParam = getParam(QueryParsing.OP);
-			if (opParam != null) {
-				invParser.setDefaultOperator("AND".equals(opParam) ? Operator.AND : Operator.OR);
-			} else {
-				// try to get default operator from schema
-				QueryParser.Operator operator = getReq().getSchema()
-						.getSolrQueryParser(null).getDefaultOperator();
-				invParser.setDefaultOperator(null == operator ? Operator.OR
-						: (operator == QueryParser.AND_OPERATOR ? Operator.AND : Operator.OR));
-			}
-			try {
-				mainq = invParser.parse(getString(), schema.getDefaultSearchFieldName());
-			} catch (QueryNodeException e) {
-				throw new ParseException(e.getMessage());
-			}
+		
+		invParser.setAnalyzer(schema.getAnalyzer());
+		String opParam = getParam(QueryParsing.OP);
+		
+		if (opParam != null) {
+			invParser.setDefaultOperator("AND".equals(opParam) ? Operator.AND : Operator.OR);
+		} else {
+			// try to get default operator from schema
+			QueryParser.Operator operator = getReq().getSchema()
+					.getSolrQueryParser(null).getDefaultOperator();
+			invParser.setDefaultOperator(null == operator ? Operator.OR
+					: (operator == QueryParser.AND_OPERATOR ? Operator.AND : Operator.OR));
 		}
-		else {
-
-			lparser = new SolrQueryParser(this, defaultField);
-			// these could either be checked & set here, or in the SolrQueryParser
-			// constructor
-			String opParam = getParam(QueryParsing.OP);
-			if (opParam != null) {
-				lparser.setDefaultOperator("AND".equals(opParam) ? QueryParser.Operator.AND
-						: QueryParser.Operator.OR);
-			} else {
-				// try to get default operator from schema
-				QueryParser.Operator operator = getReq().getSchema()
-						.getSolrQueryParser(null).getDefaultOperator();
-				lparser.setDefaultOperator(null == operator ? QueryParser.Operator.OR
-						: operator);
-			}
-			mainq = lparser.parse(getString());
-		}
-		/**
-		else {
-			StandardQueryParser qpHelper = new StandardQueryParser();
-			qpHelper.setAllowLeadingWildcard(true);
-			qpHelper.setAnalyzer(new StandardAnalyzer());
-			try {
-				mainq = qpHelper.parse(getString(), schema.getDefaultSearchFieldName());
-			} catch (QueryNodeException e) {
-				throw new ParseException();
-			}
-		}
-		**/
-
-		Query mainq2;
+		
 		try {
-			mainq2 = rewriteQuery(mainq, 0);
-			if (!mainq2.equals(mainq)) {
-				log.info(getString() + " --> " + mainq2.toString());
-				mainq = mainq2;
-			}
-		} catch (IOException e) {
-			throw new ParseException();
+			return invParser.parse(getString(), defaultField);
+		} catch (QueryNodeException e) {
+			throw new ParseException(e.getLocalizedMessage());
 		}
-
-		return mainq;
+		
 	}
 
-	private Pattern weird_or = Pattern.compile("( \\|)([a-zA-Z\"])");
-	private String normalizeInvenioQuery(String q) {
-		try {
-		Matcher matcher = weird_or.matcher(q);
-			q = matcher.replaceAll(" || $2");
-		}
-		catch (Exception e) {
-			System.out.println(q);
-		}
-		q = q.replace("refersto:", "refersto\\:");
-		q = q.replace("citedby:", "citedby\\:");
-		q = q.replace("cited:", "cited\\:");
-		q = q.replace("cocitedwith:", "cocitedwith\\:");
-		q = q.replace("reportnumber:", "reportnumber\\:");
-		q = q.replace("reference:", "reference\\:");
-		return q;
 
-	}
-
-	/**
-	 * Help method to change query into invenio fields (if the field is not defined
-	 * in the schema, it is considered to be Invenio). However we use this simplistic
-	 * rewriting only when '*' is not activated and when iq.mode=maxsolr
-	 * @param req
-	 * @param q
-	 * @return
-	 */
-	private String changeInvenioQuery(SolrQueryRequest req, String q) {
-		IndexSchema schema = req.getSchema();
-		// SolrQueryParser qparser = new SolrQueryParser(schema, "all");
-		// log.info(qparser.escape(q));
-
-		// leave this to invenio
-		// q = q.replace("refersto:", "{!relation rel=refersto}");
-		// q = q.replace("citedby:", "{!relation rel=citedby}");
-		q = q.replace("journal:", "publication:");
-		q = q.replace("arXiv:", "reportnumber:");
-
-		String q2 = q;
-
-		Matcher matcher = fieldPattern.matcher(q);
-		while (matcher.find()) {
-			String field = q.substring(matcher.start(), matcher.end() - 1);
-			try {
-				if (schema.getFieldType(field) != null) {
-					continue;
-				}
-			} catch (SolrException e) {
-				// pass - not serious
-			}
-			q2 = q2.replace(field + ":", InvenioQParserPlugin.PREFIX + field
-					+ ":");
-		}
-		return q2;
-	}
 
 	/**
 	 * Returns a field (string) IFF we should pass the query to Invenio.
@@ -536,8 +412,5 @@ class InvenioQParser extends QParser {
 
 	}
 
-	public String[] getDefaultHighlightFields() {
-		return new String[] { lparser.getField() };
-	}
 
 }

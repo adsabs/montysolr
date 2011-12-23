@@ -196,8 +196,15 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		
 		Properties prop = loadProperties(params);
 		
+		Map<String, Object> dictData = null;
 		
-		Map<String, Object> dictData = retrieveRecids(prop, req, rsp);
+		try {
+			dictData = retrieveRecids(prop, req, rsp);
+		}
+		catch (RuntimeException e) {
+			setBusy(false);
+			throw e;
+		}
 		
 		if (dictData == null) {
 			setBusy(false);
