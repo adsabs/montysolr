@@ -56,7 +56,7 @@ public class AqpInvenioQPHRASEProcessor extends AqpQProcessor {
 		else if (phraseType.equals("\'")) { // the same position query
 			throw new QueryNodeException(new MessageImpl("Not implemented yet!"));
 		}
-		else if (phraseType.equals("\u300c")) {
+		else if (phraseType.equals("\u300c")) { // non-analyzed field
 			return new NonAnalyzedQueryNode(field,
 					EscapeQuerySyntaxImpl.discardEscapeChar(subChild
 							.getTokenInput().substring(1, subChild.getTokenInput().length()-1)), 

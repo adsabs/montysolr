@@ -26,8 +26,8 @@ class TestingMethods():
             message.setParam("result", data)
         
         return [
-           MontySolrTarget(':test_a', test_a),
-           MontySolrTarget(':test_b', test_b),
+           MontySolrTarget('test_a', test_a),
+           MontySolrTarget('test_b', test_b),
                 ]
 
 class TestHandler(handler.Handler):

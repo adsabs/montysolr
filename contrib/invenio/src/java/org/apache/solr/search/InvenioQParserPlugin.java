@@ -1,54 +1,36 @@
 package org.apache.solr.search;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.queryParser.aqp.AqpInvenioQueryParser;
 import org.apache.lucene.queryParser.aqp.AqpQueryParser;
+import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
+import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
+import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DefaultSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.core.PluginInfo;
+import org.apache.solr.core.SolrConfig;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.ConstantScoreQuery;
-import org.apache.lucene.search.FuzzyQuery;
-import org.apache.lucene.search.NumericRangeQuery;
-import org.apache.lucene.search.PhraseQuery;
-import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TermRangeQuery;
-import org.apache.lucene.search.WildcardQuery;
-import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.solr.search.QueryParsing;
 
-
-
 /**
  * Parse query that is made of the solr fields as well as Invenio query syntax,
  * the field that are prefixed using the special code <code>inv_</code> get
  * automatically passed to Invenio
- *
+ * 
  * Other parameters:
  * <ul>
  * <li>q.op - the default operator "OR" or "AND"</li>
@@ -56,40 +38,78 @@ import org.apache.solr.search.QueryParsing;
  * </ul>
  * <br>
  * Example: <code>{!iq mode=maxinv xfields=fulltext}035:arxiv +bar -baz</code>
- *
+ * 
  * The example above would query everything as Invenio field, but fulltext will
  * be served by Solr.
- *
+ * 
  * Example:
  * <code>{!iq iq.mode=maxsolr iq.xfields=fulltext,abstract iq.channel=bitset}035:arxiv +bar -baz</code>
- *
+ * 
  * The example above will try to map all the fields into the Solr schema, if the
  * field exists, it will be served by Solr. The fulltext will be served by
  * Invenio no matter if it is defined in schema. And communication between Java
  * and Invenio is done using bitset
- *
+ * 
  * If the query is written as:<code>inv_field:value</code> the search will be
  * always passed to Invenio.
- *
+ * 
  */
 public class InvenioQParserPlugin extends QParserPlugin {
 	public static String NAME = "iq";
 	public static String FIELDNAME = "InvenioQuery";
-	public static String PREFIX = "inv_";
-	public static String IDFIELD = "id";
+
+	private String idField = null;
 
 	@Override
 	public void init(NamedList args) {
+
 	}
 
 	@Override
 	public QParser createParser(String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req) {
 		try {
-			return new InvenioQParser(qstr, localParams, params, req);
+			return new InvenioQParser(qstr, localParams, params, req, getIdField(req));
 		} catch (QueryNodeParseException e) {
-			e.printStackTrace();
-			return null;
+			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, e.getLocalizedMessage());
+		}
+	}
+
+	
+	private String getIdField(SolrQueryRequest req) {
+		if (idField != null) {
+			return idField;
+		}
+
+		SolrConfig config = req.getCore().getSolrConfig();
+		PluginInfo pluginInfo = null;
+		for (PluginInfo info : config.getPluginInfos(QParserPlugin.class.getCanonicalName())) {
+			if (info.name.equals(NAME)) {
+				pluginInfo = info;
+				break;
+			}
+		}
+		if (pluginInfo == null) {
+			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE,
+					"Configuration error, InvenioQParserPlugin must be registered under the name: " + NAME);
+		}
+		Object o = pluginInfo.initArgs.get("defaults");
+		SolrParams defaults;
+		if (o != null && o instanceof NamedList) {
+			defaults = SolrParams.toSolrParams((NamedList) o);
+			idField = defaults.get("idfield");
+			
+			IndexSchema schema = req.getSchema();
+			if (idField == null || !schema.hasExplicitField(idField)) {
+				throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE,
+						"Wrong configuration, the required idfield is missing or not present in schema. "
+					  + "We cannot map external ids onto lucene docids without it.");
+			}
+			
+			return idField;
+		} else {
+			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
+					"Wrong configuration, missing idfield");
 		}
 	}
 
@@ -100,317 +120,67 @@ class InvenioQParser extends QParser {
 	public static final Logger log = LoggerFactory
 			.getLogger(InvenioQParser.class);
 
-	String sortStr;
 	AqpQueryParser invParser;
-	ArrayList<String> xfields = null;
-	private String operationMode = "maxinvenio";
-	private String exchangeType = "ints";
-	private String querySyntax = "invenio";
-	private IndexSchema schema = null;
 
 	public InvenioQParser(String qstr, SolrParams localParams,
-			SolrParams params, SolrQueryRequest req) throws QueryNodeParseException {
+			SolrParams params, SolrQueryRequest req, String idField) throws QueryNodeParseException {
 		super(qstr, localParams, params, req);
 
-		SolrParams solrParams = localParams == null ? params : new DefaultSolrParams(localParams, params);
-
-		schema = req.getSchema();
-
-		String m = solrParams.get("iq.mode");
-		if (m != null ) {
-			if (m.contains("maxinv") && !schema.hasExplicitField("*")) {
-				throw new SolrException(
-						SolrException.ErrorCode.SERVER_ERROR,
-						"Query parser is configured to pass as many fields to Invenio as possible," +
-						" for this to work, schema must contain a dynamic field declared as '*'" +
-						"<dynamicField name=\"*\" type=\"text\" multiValued=\"true\" />");
-			}
-			operationMode = m;
-		}
-
-
-		xfields = new ArrayList<String>();
-		String[] overriden_fields = solrParams.getParams("iq.xfields");
-		if (overriden_fields != null) {
-			for (String f: overriden_fields) {
-				if (f.indexOf(",") > -1) {
-					for (String x: f.split(",")) {
-						xfields.add(x);
-					}
-				}
-				else {
-					xfields.add(f);
-				}
-			}
-		}
-
-		String eType = solrParams.get("iq.channel", "default");
-		if (eType.contains("bitset")) {
-			exchangeType = "bitset";
-		}
-		
-		invParser = new AqpInvenioQueryParser();
-	}
-
-	public Query parse() throws ParseException {
-		
 		if (getString() == null) {
-			throw new ParseException("The query parameter is empty");
+			throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "The query is empty");
 		}
 
+		SolrParams solrParams = localParams == null ? params
+				: new DefaultSolrParams(localParams, params);
+
+		IndexSchema schema = req.getSchema();
+		invParser = new AqpInvenioQueryParserSolr();
+
+		// this is allowed to be only in the config (no locals possible)
+		QueryConfigHandler config = invParser.getQueryConfigHandler();
+		
+
+		config.getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField(
+				idField);
+
+		InvenioQueryAttribute iqAttr = config
+				.getAttribute(InvenioQueryAttribute.class);
+		iqAttr.setMode(solrParams.get("iq.mode"), schema.hasExplicitField("*"));
+		iqAttr.setChannel(solrParams.get("iq.channel", "default"));
+		iqAttr.setOverridenFields(solrParams.getParams("iq.xfields"));
+
+		invParser.setAnalyzer(schema.getAnalyzer());
 
 		String defaultField = getParam(CommonParams.DF);
 		if (defaultField == null) {
 			defaultField = getReq().getSchema().getDefaultSearchFieldName();
 		}
-		
-		invParser.setAnalyzer(schema.getAnalyzer());
+
 		String opParam = getParam(QueryParsing.OP);
-		
+
 		if (opParam != null) {
-			invParser.setDefaultOperator("AND".equals(opParam) ? Operator.AND : Operator.OR);
+			invParser.setDefaultOperator("AND".equals(opParam) ? Operator.AND
+					: Operator.OR);
 		} else {
 			// try to get default operator from schema
 			QueryParser.Operator operator = getReq().getSchema()
 					.getSolrQueryParser(null).getDefaultOperator();
 			invParser.setDefaultOperator(null == operator ? Operator.OR
-					: (operator == QueryParser.AND_OPERATOR ? Operator.AND : Operator.OR));
+					: (operator == QueryParser.AND_OPERATOR ? Operator.AND
+							: Operator.OR));
 		}
-		
+	}
+
+	public Query parse() throws ParseException {
 		try {
-			return invParser.parse(getString(), defaultField);
+			return invParser.parse(getString());
 		} catch (QueryNodeException e) {
 			throw new ParseException(e.getLocalizedMessage());
 		}
-		
 	}
 
-
-
-	/**
-	 * Returns a field (string) IFF we should pass the query to Invenio.
-	 *
-	 * @param field
-	 * @return
-	 * @throws ParseException
-	 */
-	private String getInvField(String field) throws ParseException {
-		String v = null;
-		// always consider it as Invenio field if the prefix is present
-		if (field.startsWith(InvenioQParserPlugin.PREFIX)) {
-			v = field.substring(InvenioQParserPlugin.PREFIX.length());
-			return v;
-		}
-
-
-		// consider it as solr field if it is in the schema
-		if (operationMode.equals("maxsolr")) {
-			if(schema.hasExplicitField(field) && xfields.indexOf(field) == -1) {
-				return null;
-			}
-			return field; // consider it Invenio field
-		}
-		else { // pass all fields to Invenio
-			if (xfields.indexOf(field) > -1) { // besides explicitly solr fields
-				if (!schema.hasExplicitField(field)) {
-					throw new ParseException("The field '" + field + "' is not defined for Solr.");
-				}
-				return null;
-			}
-			return field;
-		}
-
+	public AqpQueryParser getParser() {
+		return invParser;
 	}
-
-
-	private Query createInvenioQuery(String field, String value, String idField) {
-		Query newQuery = null;
-		String newField = field;
-		if (field.equals(schema.getDefaultSearchFieldName())) {
-			newField = "";
-		}
-		
-		//if (exchangeType.equals("bitset")) { // TODO: check
-		return new SolrInvenioQuery(new TermQuery(new Term(newField, value)), req, localParams, idField);
-	}
-
-
-	/** @see #QueryParsing.toString(Query,IndexSchema) */
-	public Query rewriteQuery(Query query, int flags) throws IOException,
-			ParseException {
-
-		boolean writeBoost = true;
-
-		Query newQuery = null;
-
-		SolrIndexReader reader = req.getSearcher().getReader();
-
-		StringBuffer out = new StringBuffer();
-		if (query instanceof TermQuery) {
-			TermQuery q = (TermQuery) query;
-			Term t = q.getTerm();
-			String invf = getInvField(t.field());
-			if (invf != null) {
-				newQuery = createInvenioQuery(invf, t.text(), InvenioQParserPlugin.IDFIELD);
-			}
-
-		} else if (query instanceof TermRangeQuery) {
-			TermRangeQuery q = (TermRangeQuery) query;
-			String invf = getInvField(q.getField());
-			if (invf != null) {
-				String fname = q.getField();
-				FieldType ft = QueryParsing.writeFieldName(invf, schema, out,
-						flags);
-				out.append(q.includesLower() ? '[' : '{');
-				String lt = q.getLowerTerm();
-				String ut = q.getUpperTerm();
-				if (lt == null) {
-					out.append('*');
-				} else {
-					QueryParsing.writeFieldVal(lt, ft, out, flags);
-				}
-
-				out.append(" TO ");
-
-				if (ut == null) {
-					out.append('*');
-				} else {
-					QueryParsing.writeFieldVal(ut, ft, out, flags);
-				}
-
-				out.append(q.includesUpper() ? ']' : '}');
-
-				// newQuery = new
-				// TermRangeQuery(q.getField().replaceFirst(PREFIX, ""),
-				// q.getLowerTerm(), q.getUpperTerm(),
-				// q.includesLower(), q.includesUpper());
-				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD);
-			}
-
-		} else if (query instanceof NumericRangeQuery) {
-			NumericRangeQuery q = (NumericRangeQuery) query;
-			String invf = getInvField(q.getField());
-			if (invf != null) {
-				String fname = q.getField();
-				FieldType ft = QueryParsing.writeFieldName(invf, schema, out,
-						flags);
-				out.append(q.includesMin() ? '[' : '{');
-				Number lt = q.getMin();
-				Number ut = q.getMax();
-				if (lt == null) {
-					out.append('*');
-				} else {
-					out.append(lt.toString());
-				}
-
-				out.append(" TO ");
-
-				if (ut == null) {
-					out.append('*');
-				} else {
-					out.append(ut.toString());
-				}
-
-				out.append(q.includesMax() ? ']' : '}');
-				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD);
-
-
-				// TODO: Invneio is using int ranges only, i think, but we shall
-				// not hardcode it here
-				// SchemaField ff =
-				// schema.getField(q.getField().substring(PREFIX.length()));
-				// newQuery = NumericRangeQuery.newIntRange(ff.getName(),
-				// (Integer)q.getMin(), (Integer)q.getMax(),
-				// q.includesMin(), q.includesMax());
-			}
-
-		} else if (query instanceof BooleanQuery) {
-			BooleanQuery q = (BooleanQuery) query;
-			newQuery = new BooleanQuery();
-
-			List<BooleanClause>clauses = (List<BooleanClause>) q.clauses();
-
-			Query subQuery;
-			for (int i=0;i<clauses.size();i++) {
-				BooleanClause c = clauses.get(i);
-				Query qq = c.getQuery();
-				subQuery = rewriteQuery(qq, flags);
-				BooleanClause newClause = new BooleanClause(subQuery,
-						c.getOccur());
-				((BooleanQuery) newQuery).add(newClause);
-			}
-			((BooleanQuery) newQuery).setMinimumNumberShouldMatch(q
-					.getMinimumNumberShouldMatch());
-
-		} else if (query instanceof PrefixQuery) {
-			PrefixQuery q = (PrefixQuery) query;
-			Term prefix = q.getPrefix();
-			String invf = getInvField(prefix.field());
-			if (invf != null) {
-				//FieldType ft = QueryParsing.writeFieldName(invf, schema, out,
-				//		flags);
-				out.append(prefix.text());
-				out.append('*');
-				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD);
-
-			}
-
-		} else if (query instanceof ConstantScorePrefixQuery) {
-			ConstantScorePrefixQuery q = (ConstantScorePrefixQuery) query;
-			Term prefix = q.getPrefix();
-			String invf = getInvField(prefix.field());
-			if (invf != null) {
-				//FieldType ft = QueryParsing.writeFieldName(invf, schema, out,
-				//		flags);
-				out.append(prefix.text());
-				out.append('*');
-				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD);
-
-			}
-		} else if (query instanceof WildcardQuery) {
-			WildcardQuery q = (WildcardQuery) query;
-			Term t = q.getTerm();
-			String invf = getInvField(t.field());
-			if (invf != null) {
-				//FieldType ft = QueryParsing.writeFieldName(invf, schema, out,
-				//		flags);
-				out.append(t.text());
-				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD); //TODO: is this correct?
-			}
-		} else if (query instanceof PhraseQuery) {
-			PhraseQuery q = (PhraseQuery) query;
-			Term[] terms = q.getTerms();
-			String invf = getInvField(terms[0].field());
-			if (invf != null) {
-				out.append(q.getSlop() > 0 ? "'" : "\"");
-				for (int i=0;i<terms.length;i++) {
-					if (i != 0) {
-						out.append(" ");
-					}
-					out.append(((Term)terms[i]).text());
-				}
-				out.append(q.getSlop() > 0 ? "'" : "\"");
-				newQuery = createInvenioQuery(invf, out.toString(), InvenioQParserPlugin.IDFIELD); //TODO: is this correct?
-			}
-
-		} else if (query instanceof FuzzyQuery) {
-			// do nothing
-		} else if (query instanceof ConstantScoreQuery) {
-			// do nothing
-		} else {
-			// do nothing
-		}
-
-		if (newQuery != null) {
-			if (writeBoost && query.getBoost() != 1.0f) {
-				newQuery.setBoost(query.getBoost());
-			}
-			return newQuery;
-		} else {
-			return query;
-		}
-
-	}
-
 
 }

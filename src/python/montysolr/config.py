@@ -12,7 +12,7 @@ MONTYSOLR_HANDLER = 'montysolr.sequential_handler'
 MONTYSOLR_TARGETS = ['montysolr.examples.twitter_test'] #'montysolr.inveniopie.targets', 'montysolr.examples.twitter_test']
 
 # use the multiprocessing version of api_calls
-MONTYSOLR_MULTIPROC = True
+MONTYSOLR_MULTIPROC = False
 
 # will be appended to jvm args when starting the virtual machine (Java inside Python)
 MONTYSOLR_JVMARGS_PYTHON = ''

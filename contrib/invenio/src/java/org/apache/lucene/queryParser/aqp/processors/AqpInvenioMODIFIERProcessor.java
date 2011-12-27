@@ -1,10 +1,15 @@
 package org.apache.lucene.queryParser.aqp.processors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.builders.InvenioQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
+import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
+import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute.Channel;
+import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute.QMode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.nodes.InvenioQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
@@ -49,6 +54,10 @@ import org.apache.lucene.search.InvenioQuery;
  */
 public class AqpInvenioMODIFIERProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
+	
+	private Channel channel = null;
+	private QMode qMode = null;
+	private ArrayList<String> xFields = null;
 
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
@@ -56,14 +65,39 @@ public class AqpInvenioMODIFIERProcessor extends QueryNodeProcessorImpl implemen
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("MODIFIER")) {
 			
 			if (node.getChildren().size()==1) {
-				return node.getChildren().get(0);
+				node = node.getChildren().get(0); // usually TMODIFIER
+				ArrayList<String> xFields = getExcludedFields();
+				String field = getExistingField(node, 2); //how deep to search for FIELD
+				InvenioQueryNode iq;
+				
+				if (getDefaultQMode() == QMode.MAXINV) {
+					if (xFields == null || !xFields.contains(field)) {
+						iq = new InvenioQueryNode(node, getIdField());
+						iq.setChannel(getDefaultChannel());
+						iq.setSeatchField(field);
+						return iq;
+					}
+				}
+				else if (getDefaultQMode() == qMode.MAXSOLR) {
+					if (xFields.contains(field)) {
+						iq = new InvenioQueryNode(node, getIdField());
+						iq.setChannel(getDefaultChannel());
+						iq.setSeatchField(field);
+						return iq;
+					}
+				}
+				return node;
 			}
 			
 			
 			String modifier = ((AqpANTLRNode) node.getChildren().get(0)).getTokenName();
 			node = node.getChildren().get(node.getChildren().size()-1);
 			if (modifier.equals("BAR")) {
-				return new InvenioQueryNode(node, getIdField());
+				String field = getExistingField(node, 2); //how deep to search for FIELD
+				InvenioQueryNode iq = new InvenioQueryNode(node, getIdField());
+				iq.setChannel(getDefaultChannel());
+				iq.setSeatchField(field);
+				return iq;
 			}
 			else {
 				throw new QueryNodeParseException(new MessageImpl("Unknown modifier: " + modifier));
@@ -96,6 +130,74 @@ public class AqpInvenioMODIFIERProcessor extends QueryNodeProcessorImpl implemen
 		}
 		return queryConfig.getAttribute(
 				DefaultIdFieldAttribute.class).getDefaultIdField();
+	}
+	
+	
+	private Channel getDefaultChannel() throws QueryNodeException {
+		if (channel != null) {
+			return channel;
+		}
+		
+		QueryConfigHandler queryConfig = getQueryConfigHandler();
+		if (queryConfig == null || !queryConfig.hasAttribute(InvenioQueryAttribute.class)) {
+			throw new QueryNodeException(new MessageImpl(
+	                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+	                "Configuration error: " + InvenioQueryAttribute.class.toString() + " is missing"));
+		}
+		
+		channel =  queryConfig.getAttribute(
+				InvenioQueryAttribute.class).getChannel();
+		return channel;
+	}
+	
+	private QMode getDefaultQMode() throws QueryNodeException {
+		if (qMode != null) {
+			return qMode;
+		}
+		
+		QueryConfigHandler queryConfig = getQueryConfigHandler();
+		if (queryConfig == null || !queryConfig.hasAttribute(InvenioQueryAttribute.class)) {
+			throw new QueryNodeException(new MessageImpl(
+	                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+	                "Configuration error: " + InvenioQueryAttribute.class.toString() + " is missing"));
+		}
+		
+		qMode =  queryConfig.getAttribute(
+				InvenioQueryAttribute.class).getMode();
+		return qMode;
+	}
+	
+	private ArrayList<String> getExcludedFields() throws QueryNodeException {
+		if (xFields != null) {
+			return xFields;
+		}
+		
+		QueryConfigHandler queryConfig = getQueryConfigHandler();
+		if (queryConfig == null || !queryConfig.hasAttribute(InvenioQueryAttribute.class)) {
+			throw new QueryNodeException(new MessageImpl(
+	                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+	                "Configuration error: " + InvenioQueryAttribute.class.toString() + " is missing"));
+		}
+		
+		xFields =  (ArrayList<String>) queryConfig.getAttribute(
+				InvenioQueryAttribute.class).getOverridenFields();
+		return xFields;
+	}
+	
+	
+	private String getExistingField(QueryNode curNode, int level) {
+		if (level < 1) {
+			return null;
+		}
+		
+		for (QueryNode child: curNode.getChildren()) {
+			if (child instanceof AqpANTLRNode && ((AqpANTLRNode) child).getTokenLabel().equals("FIELD")) {
+				if (child.getChildren()!=null) {
+					return ((AqpANTLRNode) child.getChildren().get(0)).getTokenInput();
+				}
+			}
+		}
+		return getExistingField(curNode.getChildren().get(curNode.getChildren().size()-1), level-1);
 	}
 
 }

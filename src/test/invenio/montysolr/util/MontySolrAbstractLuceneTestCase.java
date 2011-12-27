@@ -3,7 +3,9 @@ package invenio.montysolr.util;
 import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
 import invenio.montysolr.util.MontySolrTestCaseJ4;
 import invenio.montysolr.util.ProcessUtils;
@@ -23,6 +25,7 @@ public abstract class MontySolrAbstractLuceneTestCase extends LuceneTestCase {
 		// the path added to sys.path is the parent
 		System.setProperty("montysolr.modulepath", getChildModulePath());
 		
+		
 		// discover and set -Djava.library.path
 		String jccpath = ProcessUtils.getJCCPath();
 		ProcessUtils.setLibraryPath(jccpath);
@@ -34,7 +37,16 @@ public abstract class MontySolrAbstractLuceneTestCase extends LuceneTestCase {
 		
 		System.setProperty("montysolr.bridge", getModuleName());
 
-		
+		// for testing purposes add what is in the pythonpath
+		File f = new File(getMontySolrHome() + "/build/build.properties");
+		if (f.exists()) {
+			Properties p = new Properties();
+			p.load(new FileInputStream(f));
+			if (p.containsKey("python_path")) {
+				String pp = p.getProperty("python_path");
+				addToSysPath(pp);
+			}
+		}
 	}
 	
 	public String getMontySolrHome() {

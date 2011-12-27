@@ -159,6 +159,16 @@
 		   	  arguments="${env.MONTYSOLR_ARGS}"
 		   />
 	</target>
+	
+	<target name="run-configured">
+		<property prefix="${example.name}" file="${example.name}/montysolr.properties"/>
+		<exec executable="ant" failonerror="true" dir="${basedir}">
+            <env key="MONTYSOLR_TARGETS" value="${example.name}.MONTYSOLR_TARGETS" />
+			<env key="PYTHONPATH" value="${example.name}.PYTHONPATH" />
+            <arg line="-Dename=${example.name} -Dignore-environment=false"/>
+            <arg value="run"/>
+        </exec>
+	</target>
 
 
 </project>

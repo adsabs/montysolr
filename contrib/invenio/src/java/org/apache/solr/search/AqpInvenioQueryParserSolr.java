@@ -1,9 +1,12 @@
-package org.apache.lucene.queryParser.aqp;
+package org.apache.solr.search;
 
+import org.apache.lucene.queryParser.aqp.AqpInvenioSyntaxParser;
+import org.apache.lucene.queryParser.aqp.AqpQueryParser;
 import org.apache.lucene.queryParser.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.InvenioQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
+import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.aqp.nodes.InvenioQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.NonAnalyzedQueryNode;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
@@ -100,9 +103,9 @@ import org.apache.lucene.search.Query;
  *
  */
 
-public class AqpInvenioQueryParser extends AqpQueryParser {
+public class AqpInvenioQueryParserSolr extends AqpQueryParser {
 
-	public AqpInvenioQueryParser() throws QueryNodeParseException {
+	public AqpInvenioQueryParserSolr() throws QueryNodeParseException {
 		super(new InvenioQueryConfigHandler(), new AqpInvenioSyntaxParser()
 				.initializeGrammar("Invenio"),
 				new InvenioNodeProcessorPipeline(null),
@@ -110,7 +113,7 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 	}
 
 	
-	public AqpInvenioQueryParser(String grammarName) throws Exception {
+	public AqpInvenioQueryParserSolr(String grammarName) throws Exception {
 		throw new IllegalArgumentException(
 				"Invenio query parser does not use reflection");
 	}
@@ -137,7 +140,9 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 			addAttribute(DefaultPhraseSlopAttribute.class);
 			addAttribute(MultiTermRewriteMethodAttribute.class);
 			
-			getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
+			// Special attributes
+			addAttribute(InvenioQueryAttribute.class);
+			
 		}
 	}
 
@@ -202,8 +207,7 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 			setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 			setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 			setBuilder(NonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
-			setBuilder(InvenioQueryNode.class,
-					new InvenioQueryNodeBuilder(this));
+			setBuilder(InvenioQueryNode.class,	new InvenioQueryNodeBuilder(this));
 			setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
 			setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());
 			setBuilder(BoostQueryNode.class, new BoostQueryNodeBuilder());

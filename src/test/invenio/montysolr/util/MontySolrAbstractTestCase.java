@@ -3,7 +3,9 @@ package invenio.montysolr.util;
 import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
 import invenio.montysolr.util.MontySolrTestCaseJ4;
 import invenio.montysolr.util.ProcessUtils;
@@ -26,12 +28,24 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		String jccpath = ProcessUtils.getJCCPath();
 		ProcessUtils.setLibraryPath(jccpath);
 		
+		
 		// this is necessary to run in the main thread and because of the 
 		// python loads the parent folder and inserts it into the pythonpath
 		// we trick it
 		MontySolrVM.INSTANCE.start(getModulePath());
 		
 		System.setProperty("montysolr.bridge", getModuleName());
+		
+		// for testing purposes add what is in the pythonpath
+		File f = new File(getMontySolrHome() + "/build/build.properties");
+		if (f.exists()) {
+			Properties p = new Properties();
+			p.load(new FileInputStream(f));
+			if (p.containsKey("python_path")) {
+				String pp = p.getProperty("python_path");
+				addToSysPath(pp);
+			}
+		}
 
 		
 	}
@@ -49,9 +63,8 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		return MontySolrTestCaseJ4.getFile(name);
 	}
 	
-	public String getModuleName() throws Exception {
-		throw new Exception("You must implement this in your class!");
-	}
+	public abstract String getModuleName() throws Exception;
+		
 	
 	public String getModulePath() {
 		return MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python/montysolr";

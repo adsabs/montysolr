@@ -2,6 +2,7 @@ package org.apache.lucene.queryParser.aqp.nodes;
 
 
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute.Channel;
 import org.apache.lucene.queryParser.core.QueryNodeError;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
@@ -12,6 +13,8 @@ public class InvenioQueryNode extends QueryNodeImpl implements QueryNode {
 
 	private static final long serialVersionUID = 3935454544149998076L;
 	private String idField = null;
+	private Channel channel = Channel.DEFAULT;
+	private String searchField = null;
 	
 	public InvenioQueryNode(QueryNode query, String idField) {
 		if (query == null) {
@@ -57,5 +60,20 @@ public class InvenioQueryNode extends QueryNodeImpl implements QueryNode {
 		return idField;
 	}
 	
+	public String getSearchField() {
+		return searchField;
+	}
+	
+	public void setSeatchField(String field) {
+		searchField = field;
+	}
+	
+	public Channel getChannel() {
+		return channel;
+	}
+	
+	public void setChannel(Channel ch) {
+		channel = ch;
+	}
 
 }

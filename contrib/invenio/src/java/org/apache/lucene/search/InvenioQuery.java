@@ -5,15 +5,12 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Similarity;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.Weight;
-import org.apache.lucene.util.ToStringUtils;
-
 import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.IOException;
 import java.util.Set;
 
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
 
 
 /**
@@ -33,21 +30,26 @@ import org.apache.lucene.index.Term;
 public class InvenioQuery extends Query {
 
 
+	private static final long serialVersionUID = -5151676153419588281L;
+	
 	private float boost = 1.0f; // query boost factor
 	protected Query query;
-	protected String idField = "recid";
+	protected String idField = null;
+	protected String searchField = null;
 	protected String pythonResponder = null;
 	
-	public InvenioQuery(Query query, String idField) {
+	public InvenioQuery(Query query, String idField, String searchField) {
 		super();
 		this.query = query;
 		this.idField = idField;
+		this.searchField = searchField;
 	}
 	
-	public InvenioQuery(Query query, String idField, String pythonResponder) {
+	public InvenioQuery(Query query, String idField, String searchField, String pythonResponder) {
 		super();
 		this.query = query;
 		this.idField = idField;
+		this.searchField = searchField;
 		this.pythonResponder = pythonResponder;
 	}
 
@@ -154,8 +156,12 @@ public class InvenioQuery extends Query {
 	/** Prints a user-readable version of this query. */
 	public String toString(String s) {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("<");
-		buffer.append(query.toString());
+		buffer.append("<(");
+		buffer.append("ints,");
+		buffer.append(idField);
+		buffer.append(")");
+		//buffer.append(query.toString());
+		buffer.append(getInvenioQuery());
 		buffer.append(">");
 		return buffer.toString();
 	}
@@ -175,14 +181,17 @@ public class InvenioQuery extends Query {
 	}
 
 	public String getInvenioQuery() {
-		String qfield = ((TermQuery) query).getTerm().field();
+		//String qfield = ((TermQuery) query).getTerm().field();
 		String qval = ((TermQuery) query).getTerm().text();
-		if (qfield.length() > 0) {
-			qval = qfield + ":" + qval;
-		}
+		
 		if (qval.substring(0, 1).equals("\"/")) {
 			qval = qval.substring(1, qval.length()-1);
 		}
+		
+		if (searchField != null) {
+			qval = searchField + ":" + qval;
+		}
+		
 		return qval;
 	}
 	

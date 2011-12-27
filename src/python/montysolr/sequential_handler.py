@@ -13,7 +13,6 @@ class Handler(handler.Handler):
     '''
 
     def init(self):
-        sys.stderr.write(str(config.MONTYSOLR_TARGETS))
         self.discover_targets(config.MONTYSOLR_TARGETS)
 
 

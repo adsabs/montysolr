@@ -9,12 +9,13 @@ public class InvenioQueryBitSet extends InvenioQuery {
 	private static final long serialVersionUID = -2624111746562481355L;
 	private float boost = 1.0f; // query boost factor
 
-	public InvenioQueryBitSet(Query query, String idField) {
-		super(query, idField);
+	public InvenioQueryBitSet(Query query, String idField, String searchField) {
+		super(query, idField, searchField);
 	}
 	
-	public InvenioQueryBitSet(Query query, String idField, String pythonResponder) {
-		super(query, idField, pythonResponder);
+	public InvenioQueryBitSet(Query query, String idField, String searchField, 
+			String pythonResponder) {
+		super(query, idField, searchField, pythonResponder);
 	}
 
 	/**
@@ -30,6 +31,18 @@ public class InvenioQueryBitSet extends InvenioQuery {
 			w.setPythonResponder(pythonResponder);
 		}
 		return w;
+	}
+
+	public String toString(String s) {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("<(");
+		buffer.append("intbitset,");
+		buffer.append(idField);
+		buffer.append(")");
+		//buffer.append(query.toString());
+		buffer.append(getInvenioQuery());
+		buffer.append(">");
+		return buffer.toString();
 	}
 
 

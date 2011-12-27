@@ -215,6 +215,22 @@ public class AqpQueryParser extends QueryParserHelper {
 		return debugMode;
 	}
 
+	
+	/**
+	 * The modern query parser has all configuration set up through
+	 * the ConfigHandler system, therefore the default field is not
+	 * necessary anymore
+	 * 
+	 * @param query
+	 * @return
+	 * @throws QueryNodeException 
+	 */
+	public Query parse(String query) throws QueryNodeException {
+		return (Query) super.parse(query, null);
+	}
+	
+	
+	
 	/**
 	 * Overrides {@link QueryParserHelper#parse(String, String)} so it casts the
 	 * return object to {@link Query}. For more reference about this method,

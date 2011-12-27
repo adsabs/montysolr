@@ -1548,11 +1548,11 @@
   </requestHandler>
   
   <!-- Handler that keeps Invenio in-sync on request -->
-  <requestHandler name="/invenio/update" class="org.apache.solr.update.InvenioKeepRecidUpdated" default="false">
+  <requestHandler name="/invenio/update" class="solr.InvenioKeepRecidUpdated" default="false">
      <lst name="defaults">
        <str name="inveniourl">http://invenio-demo.cern.ch/search</str>
-       <str name="importurl">http://localhost:8983/waiting-dataimport</str>
-       <str name="updateurl">http://localhost:8983/waiting-dataimport</str>
+       <str name="importurl">http://localhost:8983/solr/invenio/import?command=full-import&amp;dirs=</str>
+       <str name="updateurl">http://localhost:8983/solr/invenio/import?command=full-import&amp;dirs=</str>
        <str name="deleteurl">blankrecords</str>
      </lst>
   </requestHandler>
@@ -1561,7 +1561,7 @@
         indexing handlers, the waiting-* handlers are
         slighlty customized versions of the standard handlers  
   -->
-  <requestHandler name="/waiting-dataimport" class="solr.WaitingDataImportHandler">
+  <requestHandler name="/invenio/import" class="solr.WaitingDataImportHandler">
     <lst name="defaults">
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
