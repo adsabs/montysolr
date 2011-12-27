@@ -186,7 +186,7 @@ public class AqpInvenioMODIFIERProcessor extends QueryNodeProcessorImpl implemen
 	
 	
 	private String getExistingField(QueryNode curNode, int level) {
-		if (level < 1) {
+		if (level < 1 || curNode == null || curNode.getChildren() == null) {
 			return null;
 		}
 		

@@ -10,15 +10,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.search.Query;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.core.PluginInfo;
+import org.apache.solr.core.SolrConfig;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.DocListAndSet;
 import org.apache.solr.search.DocSlice;
+import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.SolrIndexReader;
 import org.apache.solr.search.SortSpec;
 import org.apache.lucene.search.DictionaryRecIdCache;
@@ -29,6 +34,7 @@ public class InvenioFormatter extends SearchComponent
 	public static final String COMPONENT_NAME = "invenio-formatter";
 	private boolean activated = false;
 	private Map<String, String> invParams = null;
+	private String idField = null;
 
 	@Override
 	public void prepare(ResponseBuilder rb) throws IOException {
@@ -84,7 +90,7 @@ public class InvenioFormatter extends SearchComponent
 			DocIterator it = dl.iterator();
 
 			SolrIndexReader reader = rb.req.getSearcher().getReader();
-			int[] docidMap = DictionaryRecIdCache.INSTANCE.getLuceneCache(reader, "id");
+			int[] docidMap = DictionaryRecIdCache.INSTANCE.getLuceneCache(reader, getIdField(rb.req));
 
 			// translate into Invenio ID's
 			for (int i=0;it.hasNext();i++) {
@@ -142,6 +148,43 @@ public class InvenioFormatter extends SearchComponent
 
 		rb.rsp.add("inv_query", rb.getQuery().toString());
 
+	}
+	
+	private String getIdField(SolrQueryRequest req) {
+		if (idField  != null) {
+			return idField;
+		}
+
+		SolrConfig config = req.getCore().getSolrConfig();
+		PluginInfo pluginInfo = null;
+		for (PluginInfo info : config.getPluginInfos(this.getClass().getCanonicalName())) {
+			if (info.className.contains(this.getClass().getName())) {
+				pluginInfo = info;
+				break;
+			}
+		}
+		if (pluginInfo == null) {
+			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE,
+					"Configuration error, InvenioFormatter not found");
+		}
+		Object o = pluginInfo.initArgs.get("defaults");
+		SolrParams defaults;
+		if (o != null && o instanceof NamedList) {
+			defaults = SolrParams.toSolrParams((NamedList) o);
+			idField = defaults.get("idfield");
+			
+			IndexSchema schema = req.getSchema();
+			if (idField == null || !schema.hasExplicitField(idField)) {
+				throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE,
+						"Wrong configuration, the required idfield is missing or not present in schema. "
+					  + "We cannot map external ids onto lucene docids without it.");
+			}
+			
+			return idField;
+		} else {
+			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
+					"Wrong configuration, missing idfield");
+		}
 	}
 
 	@Override

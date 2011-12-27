@@ -184,10 +184,6 @@ public class InvenioQuery extends Query {
 		//String qfield = ((TermQuery) query).getTerm().field();
 		String qval = ((TermQuery) query).getTerm().text();
 		
-		if (qval.substring(0, 1).equals("\"/")) {
-			qval = qval.substring(1, qval.length()-1);
-		}
-		
 		if (searchField != null) {
 			qval = searchField + ":" + qval;
 		}

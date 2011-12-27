@@ -1550,7 +1550,8 @@
   <!-- Handler that keeps Invenio in-sync on request -->
   <requestHandler name="/invenio/update" class="solr.InvenioKeepRecidUpdated" default="false">
      <lst name="defaults">
-       <str name="inveniourl">http://invenio-demo.cern.ch/search</str>
+       <!--  <str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
+       <str name="inveniourl">http://inspirehep.net/search</str>
        <str name="importurl">http://localhost:8983/solr/invenio/import?command=full-import&amp;dirs=</str>
        <str name="updateurl">http://localhost:8983/solr/invenio/import?command=full-import&amp;dirs=</str>
        <str name="deleteurl">blankrecords</str>
@@ -1573,12 +1574,18 @@
        This component is responsible for returning the citation
        search results (in the html form, as produced by Invenio)
        -->
-  <searchComponent name="invenio-formatter" 
-       class="solr.InvenioFormatter" />
+  <searchComponent name="invenio-formatter" class="solr.InvenioFormatter" >
+    <lst name="defaults">
+       <str name="idfield">recid</str>
+    </lst>
+  </searchComponent>
 
   <!--  MontySolr/Invenio query parser -->
   
-  <queryParser name="iq" class="solr.InvenioQParserPlugin"/>
-
+  <queryParser name="iq" class="solr.InvenioQParserPlugin">
+	<lst name="defaults">
+       <str name="idfield">recid</str>
+    </lst>
+  </queryParser>
 
 </config>
