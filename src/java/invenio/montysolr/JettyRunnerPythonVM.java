@@ -118,6 +118,13 @@ public class JettyRunnerPythonVM {
 		}
 	}
 
+	public static JettyRunnerPythonVM init() {
+		JettyRunnerPythonVM jr = new JettyRunnerPythonVM();
+		ClassLoader currentContextLoader = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(jr.getClass().getClassLoader()); // load jetty
+		//Thread.currentThread().setContextClassLoader(currentContextLoader );
+		return jr;
+	}
 	private void join() throws Exception {
 		if (!isRunning) {
 			this.start();
@@ -170,11 +177,7 @@ public class JettyRunnerPythonVM {
 		System.out.println("bootstrap.Main loader = " + JettyRunnerPythonVM.class.getClassLoader().toString());
 		JettyRunnerPythonVM jr = null;
 		try {
-			jr = new JettyRunnerPythonVM();
-			ClassLoader currentContextLoader = Thread.currentThread().getContextClassLoader();
-			Thread.currentThread().setContextClassLoader(jr.getClass().getClassLoader()); // load jetty
-			//Thread.currentThread().setContextClassLoader(currentContextLoader );
-
+			jr = init(); 
 			jr.configure(args);
 
 			if (jr.daemonMode) {

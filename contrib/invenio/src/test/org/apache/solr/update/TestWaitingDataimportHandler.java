@@ -18,12 +18,14 @@
 package org.apache.solr.update;
 
 import invenio.montysolr.util.MontySolrAbstractTestCase;
+import invenio.montysolr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
+import org.junit.BeforeClass;
 
 /**
  * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
@@ -33,33 +35,28 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 	
 	private String inveniourl = "http://inspirehep.net/search";
 	
+	@BeforeClass
+	public static void beforeClassMontySolrTestCase() throws Exception {
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/src/python");
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
+	}
 	
 	@Override
 	public String getSchemaFile() {
-		return getMontySolrHome()
+		return MontySolrSetup.getMontySolrHome()
 		+ "/contrib/invenio/src/test-files/solr/conf/schema-invenio-keeprecid-updater.xml";
 	}
 
 	@Override
 	public String getSolrConfigFile() {
-		return getMontySolrHome()
+		return MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
 	}
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		
-		addToSysPath(getMontySolrHome() + "/contrib/invenio/src/python");
-		addTargetsToHandler("monty_invenio.schema.targets");
-		
-	}
 
 	
-	@Override
-	public String getModuleName() {
-		return "montysolr.java_bridge.SimpleBridge";
-	}
 
 	private String esc(String...params) {
 		StringBuffer out = new StringBuffer();
@@ -77,7 +74,7 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 	
 	public void testImport() throws InterruptedException {
 		
-		String testDir = getMontySolrHome() + "/src/test-files/data/";
+		String testDir = MontySolrSetup.getMontySolrHome() + "/src/test-files/data/";
 		
 		indexDoc("/waiting-dataimport", 
 				req("command", "full-import",

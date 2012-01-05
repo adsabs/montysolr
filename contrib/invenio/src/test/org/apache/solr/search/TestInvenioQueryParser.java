@@ -18,6 +18,7 @@ package org.apache.solr.search;
  */
 
 import invenio.montysolr.util.MontySolrAbstractTestCase;
+import invenio.montysolr.util.MontySolrSetup;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
@@ -31,34 +32,34 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.InvenioQParserPlugin;
+import org.junit.BeforeClass;
 
 public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 
 	protected boolean debugParser = false;
 	protected String grammarName = "Invenio";
 	
-	public void setUp() throws Exception {
-		super.setUp();
-		addToSysPath(getMontySolrHome() + "/contrib/invenio/src/python");
-		addTargetsToHandler("monty_invenio.targets");
+	@BeforeClass
+	public static void beforeClassMontySolrTestCase() throws Exception {
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/src/python");
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 	}
-
+	
 	
 	public String getSchemaFile() {
-		return "schema.xml";
+		return MontySolrSetup.getMontySolrHome() + 
+		"/contrib/invenio/src/test-files/solr/conf/schema-minimal.xml";
 	}
 
 	
 	public String getSolrConfigFile() {
-		return getMontySolrHome() + "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-query-parser.xml";
+		return MontySolrSetup.getMontySolrHome() + 
+		"/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-query-parser.xml";
 	}
 
 
-	@Override
-	public String getModuleName() throws Exception {
-		return "montysolr.java_bridge.SimpleBridge";
-	}
-	
 	public String getCoreName() {
 		return "basic";
 	}

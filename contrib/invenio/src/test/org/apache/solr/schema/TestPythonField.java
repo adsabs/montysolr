@@ -17,7 +17,10 @@
 
 package org.apache.solr.schema;
 
+import org.junit.BeforeClass;
+
 import invenio.montysolr.util.MontySolrAbstractTestCase;
+import invenio.montysolr.util.MontySolrSetup;
 
 
 /**
@@ -26,32 +29,35 @@ import invenio.montysolr.util.MontySolrAbstractTestCase;
  */
 public class TestPythonField extends MontySolrAbstractTestCase {
 
+	@BeforeClass
+	public static void beforeClassMontySolrTestCase() throws Exception {
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/src/python");
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
+	}
+	
   @Override public String getSchemaFile() { 
-	  return getMontySolrHome() + 
-	  "/contrib/invenio/src/test-files/solr/conf/schema-python-field.xml";
+	  return MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/solr/conf/" + 
+	  "schema-python-field.xml";
 	  }
+  
   @Override public String getSolrConfigFile() { 
 	  
-	  return "solrconfig.xml";
+	  return MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/solr/conf/" +
+	  "solrconfig.xml";
 	  
   }
-  @Override public void setUp() throws Exception {
-    super.setUp();
-    addToSysPath(getMontySolrHome() + "/contrib/invenio/src/python");
-    addTargetsToHandler("monty_invenio.schema.targets");
-  }
   
-  @Override
-  public String getModuleName() {
-	  return "montysolr.java_bridge.SimpleBridge";
-  }
   
 public void testSorting() throws Exception {
     
-	assertU(adoc("id", "9",  "title", "test", "text", getMontySolrHome() + "/contrib/invenio/src/test-files/data/text1.txt"));
-    assertU(adoc("id", "10", "title", "test", "text", getMontySolrHome() + "/contrib/invenio/src/test-files/data/text1.txt"));
-    assertU(adoc("id", "11", "title", "test", "text", getMontySolrHome() + "/contrib/invenio/src/test-files/data/text2.txt"));
-    assertU(adoc("id", "12", "title", "nonexisting", "text", getMontySolrHome() + "/contrib/invenio/src/test-files/text-nonexisting.txt"));
+	String tp = MontySolrSetup.getMontySolrHome();
+	
+	assertU(adoc("id", "9",  "title", "test", "text", tp + "/contrib/invenio/src/test-files/data/text1.txt"));
+    assertU(adoc("id", "10", "title", "test", "text", tp + "/contrib/invenio/src/test-files/data/text1.txt"));
+    assertU(adoc("id", "11", "title", "test", "text", tp + "/contrib/invenio/src/test-files/data/text2.txt"));
+    assertU(adoc("id", "12", "title", "nonexisting", "text", tp + "/contrib/invenio/src/test-files/text-nonexisting.txt"));
     assertU(commit());
     
     

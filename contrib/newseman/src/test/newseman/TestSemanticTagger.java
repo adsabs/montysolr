@@ -8,21 +8,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.BeforeClass;
+
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
+import invenio.montysolr.util.MontySolrSetup;
 
 public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 	
 	private String url;
 	private SemanticTagger tagger;
 	
+	@BeforeClass
+	public static void beforeClassMontySolrTestCase() throws Exception {
+		MontySolrAbstractLuceneTestCase.beforeClassMontySolrTestCase();
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/newseman/src/python");
+		MontySolrSetup.addTargetsToHandler("monty_newseman.targets", "monty_newseman.tests.targets");
+	}
+	
 	public void setUp() throws Exception {
 		super.setUp();
-		
-		addToSysPath(getMontySolrHome() + "/contrib/newseman/src/python");
-		addTargetsToHandler("monty_newseman.targets", "monty_newseman.tests.targets");
 		
 		this.url = "sqlite:///:memory:"; 
 		
@@ -35,14 +42,6 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 		MontySolrVM.INSTANCE.sendMessage(message);
 	}
 
-	/**
-	   * Must return a fully qualified name of the python module to load, eg:
-	   * "montysolr.tests.basic"
-	   */
-	@Override
-	public String getModuleName() {
-		return "montysolr.java_bridge.SimpleBridge";
-	}
 
 	
 	private String[][] createTokens(String[] words) {

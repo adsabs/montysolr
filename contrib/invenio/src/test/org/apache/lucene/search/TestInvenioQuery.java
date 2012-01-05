@@ -15,27 +15,25 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
+import org.junit.BeforeClass;
 
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
+import invenio.montysolr.util.MontySolrSetup;
 
 public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 	
 	protected String idField;
-
-
-	public void setUp() throws Exception {
-		super.setUp();
-		addToSysPath(getMontySolrHome() + "/contrib/invenio/src/python");
-		addTargetsToHandler("monty_invenio.tests.fake_query.targets");
-		
-	}
 	
-	public String getModuleName() {
-		return "montysolr.java_bridge.SimpleBridge";
+	@BeforeClass
+	public static void beforeClassMontySolrTestCase() throws Exception {
+		MontySolrAbstractLuceneTestCase.beforeClassMontySolrTestCase();
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.fake_query.targets");
 	}
-	
+
 
 	protected IndexedDocs indexDocsPython(int no_docs) {
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage("index_docs")
@@ -89,22 +87,21 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		String rWord = words[new Random().nextInt(words.length)];
 		
 		for (String word: words) {
-			TermQuery tq = new TermQuery(new Term("text", rWord));
-			InvenioQuery iq = new InvenioQuery(tq, "recid", "fake_search");
-			assertEquals(iq.toString(), "<" + tq.toString() + ">");
+			TermQuery tq = new TermQuery(new Term("text", word));
+			InvenioQuery iq = new InvenioQuery(tq, "recid", "text", "fake_search");
+			assertEquals(iq.toString(), "<(ints,recid)text:" + word + ">");
 			
 			TopDocs hits = searcher.search(iq, 100);
 			TopDocs hits2 = searcher.search(tq, 100);
 			
+			//System.out.println("tq=" + hits2.totalHits + ", iq=" + hits.totalHits);
 			assertTrue(hits.totalHits == hits2.totalHits);
-			
 		}
 		
 		searcher.close();
 		ramdir.close();
-		
-		
 	}
+
 	
 	public class IndexedDocs {
 		public int[] recids;

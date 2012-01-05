@@ -20,6 +20,8 @@ package org.apache.solr.update;
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
+import invenio.montysolr.util.MontySolrSetup;
+import invenio.montysolr.util.MontySolrTestCaseJ4;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,6 +32,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.junit.BeforeClass;
 
 /**
  * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
@@ -43,16 +46,24 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	private String deleteurl = "http://localhost:8983/solr/delete-dataimport";
 	private String inveniourl = "http://insdev01.cern.ch/search";
 	
+	@BeforeClass
+	public static void beforeClassMontySolrTestCase() throws Exception {
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/src/python");
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.unittest_updating");
+	}
 	
 	@Override
 	public String getSchemaFile() {
-		return getMontySolrHome()
+		return MontySolrSetup.getMontySolrHome()
 		+ "/contrib/invenio/src/test-files/solr/conf/schema-invenio-keeprecid-updater.xml";
 	}
 
 	@Override
 	public String getSolrConfigFile() {
-		return getMontySolrHome()
+		return MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
 	}
 
@@ -60,21 +71,12 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		addToSysPath(getMontySolrHome() + "/contrib/invenio/src/python");
-		
-		addTargetsToHandler("monty_invenio.targets");
-		addTargetsToHandler("monty_invenio.tests.unittest_updating");
-		
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage("reset_records");
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
 	}
 
 	
-	@Override
-	public String getModuleName() {
-		return "montysolr.java_bridge.SimpleBridge";
-	}
 
 	
 	public void testIndexing() throws Exception {
@@ -565,4 +567,6 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 			super.runProcessingDeleted(recids, params);
 		}
 	}
+
+
 }

@@ -28,8 +28,8 @@ public class SolrInvenioQuery extends InvenioQuery {
 	Map<Integer, Integer> recidToDocid = null;
 
 	public SolrInvenioQuery(Query query, SolrQueryRequest req,
-			SolrParams localParams, String idField) {
-		super(query, idField);
+			SolrParams localParams, String idField, String searchField) {
+		super(query, idField, searchField);
 		this.query = query;
 		this.localParams = localParams;
 		this.req = req;

@@ -7,32 +7,34 @@ import invenio.montysolr.jni.PythonBridge;
 import invenio.montysolr.jni.PythonMessage;
 
 import org.apache.jcc.PythonException;
+import org.junit.BeforeClass;
+
+import invenio.montysolr.util.MontySolrSetup;
 import invenio.montysolr.util.MontySolrTestCaseJ4;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 
 public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 	
 	
-
-	/**
-	   * Must return a fully qualified name of the python module to load, eg:
-	   * 
-	   * "montysolr.tests.basic"
-	   * 
-	   */
-	@Override
-	public String getModuleName() {
-		return "montysolr.tests.basic.bridge.Bridge";
+	@BeforeClass
+	public static void beforeClassMontySolrTestCase() throws Exception {
+		MontySolrSetup.init("montysolr.tests.basic.bridge.Bridge", 
+				MontySolrSetup.getMontySolrHome() + "/src/python");
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 	}
+	
 
 	@Override
 	public String getSchemaFile() {
-		return "schema-minimal.xml";
+		return MontySolrSetup.getMontySolrHome() + "/src/test-files/solr/conf/" +
+		"schema-minimal.xml";
 	}
 
 	@Override
 	public String getSolrConfigFile() {
-		return "solrconfig-diagnostic-test.xml";
+		return MontySolrSetup.getMontySolrHome() + "/src/test-files/solr/conf/" +
+		"solrconfig-diagnostic-test.xml";
 	}
 
 	public void testBasicOperations() throws IOException {
