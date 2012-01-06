@@ -2,7 +2,6 @@ package newseman;
 
 import org.junit.BeforeClass;
 
-import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 

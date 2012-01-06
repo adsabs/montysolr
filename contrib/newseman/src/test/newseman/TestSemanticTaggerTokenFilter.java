@@ -64,12 +64,6 @@ public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestC
 		
 	}
 	
-	@Override
-	public String getModuleName() {
-		//return "monty_newseman.tests.bridge.Bridge";
-		return "montysolr.java_bridge.SimpleBridge";
-	}
-
 
 	public void testSemanticTokenFilter() throws IOException {
 		String text = "velká světová revoluce byla velká říjnová revoluce " +

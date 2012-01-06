@@ -420,8 +420,8 @@
                and old cache.  
       -->
     <filterCache class="solr.FastLRUCache"
-                 size="0"
-                 initialSize="0"
+                 size="512"
+                 initialSize="512"
                  autowarmCount="0"/>
 
     <!-- Query Result Cache
@@ -430,8 +430,8 @@
          (DocList) based on a query, a sort, and the range of documents requested.  
       -->
     <queryResultCache class="solr.LRUCache"
-                     size="0"
-                     initialSize="0"
+                     size="512"
+                     initialSize="512"
                      autowarmCount="0"/>
    
     <!-- Document Cache
@@ -441,8 +441,8 @@
          this cache will not be autowarmed.  
       -->
     <documentCache class="solr.LRUCache"
-                   size="0"
-                   initialSize="0"
+                   size="512"
+                   initialSize="512"
                    autowarmCount="0"/>
     
     <!-- Field Value Cache
@@ -1551,7 +1551,7 @@
   <requestHandler name="/invenio/update" class="solr.InvenioKeepRecidUpdated" default="false">
      <lst name="defaults">
        <str name="inveniourl">http://localhost/search</str>
-       <str name="inveniourl">http://invenio-demo.cern.ch/search</str>
+       <!-- str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
        <!--  <str name="inveniourl">http://inspirehep.net/search</str> -->
        <str name="importurl">http://localhost:8983/solr/invenio/import?command=full-import&amp;dirs=</str>
        <str name="updateurl">http://localhost:8983/solr/invenio/import?command=full-import&amp;dirs=</str>

@@ -171,6 +171,7 @@ class InvenioQParser extends QParser {
 		}
 	}
 
+	
 	public Query parse() throws ParseException {
 		try {
 			return invParser.parse(getString());
@@ -179,6 +180,7 @@ class InvenioQParser extends QParser {
 		}
 	}
 
+	
 	public AqpQueryParser getParser() {
 		return invParser;
 	}

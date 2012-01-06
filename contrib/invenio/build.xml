@@ -36,6 +36,7 @@
 		<fileset dir="../antlrqueryparser/lib">
 			<include name="**/*.jar"/>
 		</fileset>
+		<pathelement location="${common.dir}/build/contrib/antlrqueryparser/classes/java"/>
 	</path>
 	<path id="run.classpath">
 		<path refid="classpath"/>

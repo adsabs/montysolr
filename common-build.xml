@@ -740,20 +740,21 @@
 	        <attribute name="montysolr-example"/>
 	        <attribute name="solr-example"/>
 		<attribute name="example-name"/>
+		<attribute name="build-dir" default="${build.dir}"/>
 	        <sequential>
-	        	<delete dir="${build.dir}/@{example-name}" failonerror="false"/>
+	        	<delete dir="@{build.dir}/@{example-name}" failonerror="false"/>
 	        	
-	        	<mkdir dir="${build.dir}/@{example-name}"/>
+	        	<mkdir dir="@{build.dir}/@{example-name}"/>
 	        	
 	        	<!-- first copy the montysolr files -->
-    	        <copy todir="${build.dir}/@{example-name}" overwrite="true">
+    	        <copy todir="@{build.dir}/@{example-name}" overwrite="true">
     	            <fileset dir="@{montysolr-example}">
     	                <include name="**/**" />
     	            </fileset>
     	        </copy>
 	        	
 	        	<!-- then the remaining solr files -->
-                <copy todir="${build.dir}/@{example-name}" overwrite="false">
+                <copy todir="@{build.dir}/@{example-name}" overwrite="false">
                     <fileset dir="@{solr-example}">
                         <include name="**/**" />
                     </fileset>

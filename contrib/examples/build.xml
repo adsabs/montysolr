@@ -118,7 +118,14 @@
 	<target name="build-one">
 		<assemble-example example-name="${example.name}" 
 			montysolr-example="${basedir}/${example.name}" 
-			solr-example="${prop.solr.real.location}/example"/>		   
+			solr-example="${prop.solr.real.location}/example"/>
+		
+		<!-- put contrib jars into example/lib -->
+      <copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true">
+          <fileset dir="${common.dir}/build/contrib">
+              <include name="*/montysolr*.jar" />
+          </fileset>
+      </copy>
 	</target>
 	
 	
@@ -131,6 +138,7 @@
             <env key="MONTYSOLR_JVMARGS" value="${example.jvmargs} ${env.MONTYSOLR_JVMARGS}" />
             <env key="MONTYSOLR_ARGS" value="${env.MONTYSOLR_ARGS} --daemon" />
             <arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}" />
+			<arg line="-Dsolr.abortOnConfigurationError=false" />
             <arg value="run-bare"/>
 			<arg value="-v"/>
         </exec>

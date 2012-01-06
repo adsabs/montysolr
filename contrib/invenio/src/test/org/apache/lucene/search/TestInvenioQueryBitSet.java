@@ -19,12 +19,6 @@ import org.apache.lucene.store.Directory;
  */
 public class TestInvenioQueryBitSet extends TestInvenioQuery {
 	
-	public void setUp() throws Exception {
-		super.setUp();
-		// let's play dirty
-		addToSysPath("/opt/invenio/lib/python");
-	}
-	
 	private BitSet getBitSet(TopDocs hits) {
 		BitSet out = new BitSet();
 		ScoreDoc[] dd = hits.scoreDocs;
@@ -49,8 +43,8 @@ public class TestInvenioQueryBitSet extends TestInvenioQuery {
 		
 		for (String word: words) {
 			TermQuery tq = new TermQuery(new Term("text", word));
-			InvenioQuery iq = new InvenioQueryBitSet(tq, "recid", "fake_search_intbitset");
-			assertEquals(iq.toString(), "<" + tq.toString() + ">");
+			InvenioQuery iq = new InvenioQueryBitSet(tq, "recid", "text", "fake_search_intbitset");
+			assertEquals("<(intbitset,recid)text:" + word + ">", iq.toString());
 			
 			TopDocs hits2 = searcher.search(tq, 100);
 			TopDocs hits = searcher.search(iq, 100);

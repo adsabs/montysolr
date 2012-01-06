@@ -2,34 +2,16 @@ package examples.invenio;
 
 import invenio.montysolr.JettyRunnerPythonVM;
 import invenio.montysolr.util.MontySolrSetup;
-import invenio.montysolr.util.MontySolrTestCaseJ4;
 import invenio.montysolr.util.ProcessUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Properties;
-
-import javax.xml.xpath.XPathExpressionException;
-
 import junit.framework.Assert;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.lucene.analysis.SimpleAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.request.SolrQueryRequest;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import examples.MontySolrJettyBase;
@@ -126,6 +108,7 @@ public class TestInvenioExample extends MontySolrJettyBase {
 		qr = server.query(que("qt", "/invenio", "q", "*:*"));
 		Assert.assertEquals(0, qr.getResults().getNumFound());
 		
+		// no effect, becasuse no new recids found
 		//qr = server.query(que("qt", "/invenio/update", "commit", "true"));
 		Thread.sleep(5000);
 		server.commit(true, true);
