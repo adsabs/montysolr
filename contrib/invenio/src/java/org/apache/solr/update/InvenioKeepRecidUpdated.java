@@ -417,7 +417,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				if (prop_mod_date != null) {
 					prop.put(LAST_UPDATE, prop_mod_date);
 				}
-				else {
+				else if (prop_recid != null) {
 					prop.put(LAST_RECID, prop_recid);
 				}
 			}

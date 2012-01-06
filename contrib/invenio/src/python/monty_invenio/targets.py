@@ -246,9 +246,14 @@ def montysolr_targets():
            'Invenio:diagnostic_test', diagnostic_test,
            )
 
-    # start multiprocessing with that many processes in the pool
-    if config.MONTYSOLR_MULTIPROC and int(config.MONTYSOLR_MAX_WORKERS) > 1:
-        api_calls = multi_api_calls # swap the providers
-        api_calls.start_multiprocessing(int(config.MONTYSOLR_MAX_WORKERS))
+    num_cpus = 0
     
+    # start multiprocessing with that many processes in the pool
+    if str(config.MONTYSOLR_MAX_WORKERS) == '-1':
+        num_cpus = multi_api_calls.start_multiprocessing(None) # detect no of cpus automatically
+    elif int(config.MONTYSOLR_MAX_WORKERS) > 1:
+        num_cpus = multi_api_calls.start_multiprocessing(int(config.MONTYSOLR_MAX_WORKERS))
+    
+    if num_cpus > 1:
+         api_calls = multi_api_calls # swap the providers
     return targets

@@ -19,6 +19,8 @@
 
 <project name="aqp-macros" >
 
+	<import file="../../common-build.xml"/>
+	
 	<macrodef name="clean-parser">
         <attribute name="grammar-name"/>
         <attribute name="parser-dir"/>
@@ -60,15 +62,16 @@
             </java>
             
             <mkdir dir="@{build-dir}"/>
-            <javac classpathref="@{classpathref}" 
-                            srcdir="@{parser-dir}"
-                            destdir="@{build-dir}"
-                            >
-                <include name="**/@{grammar-name}Parser.java" />
+        	
+        	<compile classpathref="@{classpathref}" 
+                srcdir="@{parser-dir}"
+                destdir="@{build-dir}">
+        		<include name="**/@{grammar-name}Parser.java" />
                 <include name="**/@{grammar-name}Lexer.java" />
                 <include name="**/@{grammar-name}.tokens" />
-            </javac>
-            
+        	</compile>
+        	
+        	
             <!-- generate the wrapper for lucene -->
             <generate-syntax-parser parser-dir="@{parser-dir}" grammar-name="@{grammar-name}"/>
             

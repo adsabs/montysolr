@@ -19,36 +19,43 @@
 
 <project name="examples" default="default">
 
-    <description>
+	<description>
     Examples for MontySolr
   </description>
 
-    <import file="../contrib-build.xml"/>
-	
+	<import file="../contrib-build.xml"/>
+
 	<condition property="example.name" value="invenio">
-        <not>
-            <isset property="ename"/>
-        </not>
-    </condition>
+		<not>
+			<isset property="ename"/>
+		</not>
+	</condition>
 	<property name="example.name" value="${ename}"/>
-	
+
 	<condition property="example.ignore-environment" value="true">
-        <not>
-            <isset property="ignore-environment"/>
-        </not>
-    </condition>
-    <property name="example.ignore-environment" value="${ignore-environment}"/>
-	
-	
+		<not>
+			<isset property="ignore-environment"/>
+		</not>
+	</condition>
+	<property name="example.ignore-environment" value="${ignore-environment}"/>
+
+
 	<condition property="example.jvmargs" value="-d64 -Xmx1024m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200">
-        <not>
-            <isset property="jvmargs"/>
-        </not>
-    </condition>
-    <property name="example.jvmargs" value="${jvmargs}"/>
-	
-	
-    <!-- these will be used when running tests and command line montysolr
+		<not>
+			<isset property="jvmargs"/>
+		</not>
+	</condition>
+	<property name="example.jvmargs" value="${jvmargs}"/>
+
+	<condition property="example.config" value="default.properties">
+		<not>
+			<isset property="profile"/>
+		</not>
+	</condition>
+	<property name="example.config" value="${profile}"/>
+
+
+	<!-- these will be used when running tests and command line montysolr
          you can set them as:
          export MONTYSOLR_JVMARGS=-Djava.util.logging.config.file=./example/etc/test.logging.properties
 
@@ -56,106 +63,115 @@
          java - if your java starts in 64bit mode, also the extensions must be available in 64bit
          By default, we run in 64bit mode: -d64
      //-->
-    <property environment="env"/>
-    <property name="subant.jvmargs" value="" />
-    <property name="subant.args" value="" />
-    <property name="subant.newenvironment" value="true" />
-    <property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
-    <property name="env.MONTYSOLR_ARGS" value="${subant.args}"/>
-    <property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
-    <property name="env.PYTHONPATH" value=""/>
-	
-   <path id="examples.classpath">
-       	<!-- all contrib compiled classes -->
-        <dirset dir="${common.dir}/build/contrib">
-            <include name="**/classes/java"/>
-        </dirset>
+	<property environment="env"/>
+	<property name="subant.jvmargs" value="" />
+	<property name="subant.args" value="" />
+	<property name="subant.newenvironment" value="true" />
+	<property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
+	<property name="env.MONTYSOLR_ARGS" value="${subant.args}"/>
+	<property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
+	<property name="env.PYTHONPATH" value=""/>
 
-        <path refid="base.classpath"/>
-    
-        <!-- montysolr jars -->
-        <fileset dir="${common.dir}/lib">
-            <include name="**/*.jar"/>
-        </fileset>
-   	
-   	    <!-- montysolr jars -->
-        <fileset dir="${common.dir}/build/jar">
-            <include name="**/*.jar"/>
-        </fileset>
-        
-   	    <!-- all contrib jars -->
-        <fileset dir="../">
-            <include name="**/lib/*.jar"/>
-        </fileset>
-   	
-   	    <!-- examples compiled classes, if any -->
-   	    <pathelement location="${build.dir}/classes/java"/>
-   	
-   	    <!-- jcc classpath -->
-   	    <pathelement location="${prop.jcc_egg}/jcc/classes"/>
-   	
-        <!-- solr/dist jars -->
-        <fileset dir="${prop.solr.real.location}/dist">
-            <include name="**/*.jar"/>
-        </fileset>
-   	
-   	    <!-- example libs -->
-        <fileset dir="${build.dir}">
-            <include name="${example.name}/lib/**/*.jar"/>
-        </fileset>
-    </path>
+	<path id="examples.classpath">
+		<!-- all contrib compiled classes -->
+		<dirset dir="${common.dir}/build/contrib">
+			<include name="**/classes/java"/>
+		</dirset>
 
-	
+		<path refid="base.classpath"/>
+
+		<!-- montysolr jars -->
+		<fileset dir="${common.dir}/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+
+		<!-- montysolr jars -->
+		<fileset dir="${common.dir}/build/jar">
+			<include name="**/*.jar"/>
+		</fileset>
+
+		<!-- all contrib jars -->
+		<fileset dir="../">
+			<include name="**/lib/*.jar"/>
+		</fileset>
+
+		<!-- examples compiled classes, if any -->
+		<pathelement location="${build.dir}/classes/java"/>
+
+		<!-- jcc classpath -->
+		<pathelement location="${prop.jcc_egg}/jcc/classes"/>
+
+		<!-- solr/dist jars -->
+		<fileset dir="${prop.solr.real.location}/dist">
+			<include name="**/*.jar"/>
+		</fileset>
+
+		<!-- example libs -->
+		<fileset dir="${build.dir}">
+			<include name="${example.name}/lib/**/*.jar"/>
+		</fileset>
+	</path>
+
+
 	<target name="default" depends="build-all">
-	
+
 	</target>
-	
+
 	<target name="build-all" description="Assembles all examples">
-		   <assemble-example example-name="invenio" montysolr-example="${basedir}/invenio" solr-example="${prop.solr.real.location}/example"/>
+		<assemble-example example-name="invenio" montysolr-example="${basedir}/invenio" solr-example="${prop.solr.real.location}/example"/>
 	</target>
-	
-	
+
+
 	<target name="build-one">
 		<assemble-example example-name="${example.name}" 
 			montysolr-example="${basedir}/${example.name}" 
 			solr-example="${prop.solr.real.location}/example"/>
-		
+
 		<!-- put contrib jars into example/lib -->
-      <copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true">
-          <fileset dir="${common.dir}/build/contrib">
-              <include name="*/montysolr*.jar" />
-          </fileset>
-      </copy>
+		<copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true">
+			<fileset dir="${common.dir}/build/contrib">
+				<include name="*/montysolr*.jar" />
+			</fileset>
+		</copy>
 	</target>
-	
-	
+
+
 	<target name="run" description="Run the example, usage: ant run -Dename={example-name}">
-		<echo >
-			${toString:examples.classpath}
-			</echo>
 		<exec executable="ant" failonerror="true" dir="${basedir}">
-            <env key="MONTYSOLR_MAX_WORKERS" value="4" />
-            <env key="MONTYSOLR_JVMARGS" value="${example.jvmargs} ${env.MONTYSOLR_JVMARGS}" />
-            <env key="MONTYSOLR_ARGS" value="${env.MONTYSOLR_ARGS} --daemon" />
-            <arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}" />
+			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
+			<env key="MONTYSOLR_JVMARGS" value="${example.jvmargs} ${env.MONTYSOLR_JVMARGS}" />
+			<env key="MONTYSOLR_ARGS" value="${env.MONTYSOLR_ARGS} --daemon" />
+			<arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}" />
 			<arg line="-Dsolr.abortOnConfigurationError=false" />
-            <arg value="run-bare"/>
+			<arg value="run-bare"/>
 			<arg value="-v"/>
-        </exec>
+		</exec>
 	</target>
-	
-	<target name="run-daemon" depends="" >
-        <exec executable="ant" failonerror="true" dir="${basedir}">
-            <env key="MONTYSOLR_MAX_WORKERS" value="4" />
-            <env key="MONTYSOLR_JVMARGS" value="${example.jvmargs} -Djava.util.logging.config.file=${build.dir}/${example.name}/etc/logging.properties ${env.MONTYSOLR_JVMARGS}" />
-            <env key="MONTYSOLR_ARGS" value="${env.MONTYSOLR_ARGS} --daemon" />
-        	<arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}"/>
-            <arg value="run-bare"/>
-        </exec>
-    </target>
-	
+
+
+
+	<target name="run-configured" description="Run the example with special configuration, usage: ant run -Dename={example-name} -Dprofile={profile}">
+		
+		<!-- i can't do ${example.name}.PYTHON without external lib
+		     eg. http://ant.apache.org/antlibs/props/index.html -->
+		
+		<property prefix="xxx" file="${example.name}/${example.config}" />
+
+		<exec executable="ant" failonerror="true" >
+			<env key="PYTHONPATH" value="${xxx.PYTHONPATH}" />
+			<env key="MONTYSOLR_HANDLER" value="${xxx.MONTYSOLR_HANDLER}" />
+			<env key="MONTYSOLR_TARGETS" value="${xxx.MONTYSOLR_TARGETS}" />
+			<env key="MONTYSOLR_MAX_WORKERS" value="${xxx.MONTYSOLR_MAX_WORKERS}" />
+			<env key="MONTYSOLR_JVMARGS" value="${xxx.MONTYSOLR_JVMARGS}" />
+			<env key="MONTYSOLR_ARGS" value="${xxx.MONTYSOLR_ARGS}" />
+			<arg line="-Dename=${example.name} -Dignore-environment=false"/>
+			<arg value="run-bare"/>
+		</exec>
+	</target>
+
+
 	<target name="run-bare" depends="build-one">
-		   <run-montysolr classpath="${prop.jcc_egg}"
+		<run-montysolr classpath="${prop.jcc_egg}"
 		      classpathref="examples.classpath"
 		   	  ignore-environment="${example.ignore-environment}"
 		   	  pythonpath="${prop.python_path}${path.separator}${common.dir}/build/dist${path.separator}${common.dir}/src/python${path.separator}${env.PYTHONPATH}"
@@ -165,18 +181,10 @@
 		   	  jcc-classpath="${prop.jcc_egg}"
 		   	  jvmargs="${env.MONTYSOLR_JVMARGS}"
 		   	  arguments="${env.MONTYSOLR_ARGS}"
+		   	  basedir="${build.dir}/${example.name}"
 		   />
 	</target>
-	
-	<target name="run-configured">
-		<property prefix="${example.name}" file="${example.name}/montysolr.properties"/>
-		<exec executable="ant" failonerror="true" dir="${basedir}">
-            <env key="MONTYSOLR_TARGETS" value="${example.name}.MONTYSOLR_TARGETS" />
-			<env key="PYTHONPATH" value="${example.name}.PYTHONPATH" />
-            <arg line="-Dename=${example.name} -Dignore-environment=false"/>
-            <arg value="run"/>
-        </exec>
-	</target>
+
 
 
 </project>

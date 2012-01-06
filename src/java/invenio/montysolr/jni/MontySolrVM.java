@@ -246,6 +246,7 @@ public enum MontySolrVM {
 class PythonVMBridge {
     static protected PythonBridge bridge = null;
     private static String bridgeId = null;
+    static boolean warned = false;
     
     protected PythonVMBridge() {
     	// empty constructor
@@ -253,14 +254,17 @@ class PythonVMBridge {
     
     static public PythonBridge start(String bridgeName) throws PythonException {
     	if (bridgeName==null) {
-    		System.err.println("please set montysolr.bridge system property (using default: montysolr.java_bridge.SimpleBridge)");
+    		if (!warned) {
+    			System.err.println("please set montysolr.bridge system property (using default: montysolr.java_bridge.SimpleBridge)");
+    			warned = true;
+    		}
     		bridgeName = "montysolr.java_bridge.SimpleBridge";
     	}
-    	String[] parts = bridgeName.split("\\.");
     	
     	if (bridge!=null && bridgeName.equals(bridgeId))
     		return bridge;
     	
+    	String[] parts = bridgeName.split("\\.");
     	bridgeId = bridgeName;
     	
     	if (parts.length > 1) {

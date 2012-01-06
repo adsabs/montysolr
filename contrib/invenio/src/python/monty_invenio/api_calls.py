@@ -64,10 +64,10 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
                     "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
                     (mod_date, max_recs )))
     
-    sys.stderr.write('%s, %s, %s\n' % (last_recid, mod_date,
-        "SELECT id,modification_date, creation_date FROM bibrec "
-        "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
-        (mod_date, max_recs )))
+    #sys.stderr.write('%s, %s, %s\n' % (last_recid, mod_date,
+    #    "SELECT id,modification_date, creation_date FROM bibrec "
+    #    "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
+    #    (mod_date, max_recs )))
     
     #print len(modified_records)
     

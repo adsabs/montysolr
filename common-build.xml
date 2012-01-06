@@ -665,6 +665,7 @@
 	<macrodef name="compile">
 		<attribute name="srcdir"/>
 		<attribute name="destdir"/>
+		<attribute name="classpathref" default=""/>
 		<attribute name="javac.source" default="${javac.source}"/>
 		<attribute name="javac.target" default="${javac.target}"/>
 		<element name="nested" implicit="yes" optional="yes"/>
@@ -672,6 +673,7 @@
 		<sequential>
 			<mkdir dir="@{destdir}"/>
 			<javac
+		classpathref="@{classpathref}"
         includeAntRuntime="${javac.includeAntRuntime}"
         encoding="${build.encoding}"
         srcdir="@{srcdir}"
@@ -682,9 +684,10 @@
         target="@{javac.target}">
 				<nested/>
 				<!-- <compilerarg line="-Xmaxwarns 10000000"/>
-        <compilerarg line="-Xmaxerrs 10000000"/> -->
+                <compilerarg line="-Xmaxerrs 10000000"/> -->
 				<!-- for generics in Java 1.5: -->
 				<compilerarg line="-Xlint -Xlint:-deprecation -Xlint:-serial"/>
+				
 			</javac>
 		</sequential>
 	</macrodef>
@@ -742,26 +745,26 @@
 		<attribute name="example-name"/>
 		<attribute name="build-dir" default="${build.dir}"/>
 	        <sequential>
-	        	<delete dir="@{build.dir}/@{example-name}" failonerror="false"/>
+	        	<delete dir="@{build-dir}/@{example-name}" failonerror="false"/>
 	        	
-	        	<mkdir dir="@{build.dir}/@{example-name}"/>
+	        	<mkdir dir="@{build-dir}/@{example-name}"/>
 	        	
 	        	<!-- first copy the montysolr files -->
-    	        <copy todir="@{build.dir}/@{example-name}" overwrite="true">
+    	        <copy todir="@{build-dir}/@{example-name}" overwrite="true">
     	            <fileset dir="@{montysolr-example}">
     	                <include name="**/**" />
     	            </fileset>
     	        </copy>
 	        	
 	        	<!-- then the remaining solr files -->
-                <copy todir="@{build.dir}/@{example-name}" overwrite="false">
+                <copy todir="@{build-dir}/@{example-name}" overwrite="false">
                     <fileset dir="@{solr-example}">
                         <include name="**/**" />
                     </fileset>
                 </copy>
 	        	
     	        <echo>
-    	          Assembled @{example-name} at ${build.dir}/@{example-name}
+    	          Assembled @{example-name} at @{build-dir}/@{example-name}
     	       </echo>
 	        	
 	        </sequential>
