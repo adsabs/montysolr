@@ -226,7 +226,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 
 		long end = System.currentTimeMillis();
 
-		rsp.add("importStatus", isBusy() ? "busy" : "OK");
+		rsp.add("importStatus", isBusy() ? "busy" : "idle");
 		rsp.add("QTime", end - start);
 	}
 
@@ -484,7 +484,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			Object results = message.getResults();
 			if (results == null) {
 				rsp.add("message",
-						"No new/updated/deleted records according to Invenio.");
+						"No new/updated/deleted records inside Invenio.");
+				rsp.add("importStatus", "idle");
 				return null;
 			}
 			dictData = (HashMap<String, int[]>) results;

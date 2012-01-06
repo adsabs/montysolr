@@ -2,6 +2,15 @@
 from montysolr.tests.montysolr_testcase import LuceneTestCase, MontySolrTestCase
 from invenio import dbquery
 
+'''
+Abstract classes that are used for running regression tests,
+it will check the presence of the demo site (in a very
+rudimentary way) and then throw Exception if we have some
+suspicion to the contrary
+
+Regression tests should subclass from classes here
+'''
+
 class InvenioDemoTestCaseLucene(LuceneTestCase):
     pass
 

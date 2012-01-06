@@ -7,6 +7,11 @@ import random
 
 _docs = {}
 
+'''
+The following code is used from Java to simulate indexing and 
+retrieval of documents from Python to Lucene. 
+'''
+
 def index_docs(message):
     _docs.clear()
     

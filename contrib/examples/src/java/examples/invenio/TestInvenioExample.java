@@ -12,14 +12,23 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
+import javax.xml.xpath.XPathExpressionException;
+
+import junit.framework.Assert;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.request.SolrQueryRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -33,7 +42,8 @@ public class TestInvenioExample extends MontySolrJettyBase {
 	static String port = "8983";
 	static String context = "/solr";
 	static JettyRunnerPythonVM jr = null;
-	private String basePath;
+	private String baseUrl;
+	private CommonsHttpSolrServer server;
 	
 	@BeforeClass
 	  public static void beforeClass() throws Exception {
@@ -47,59 +57,99 @@ public class TestInvenioExample extends MontySolrJettyBase {
 		
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 	  }
 	
 	
 	public void setUp() throws Exception {
 		
-		basePath = schema + "://" + host + ":" + port + "/" + context + "/";
+		baseUrl = schema + "://" + host + ":" + port + context;
 		
 		jr = JettyRunnerPythonVM.init();
 		String base = MontySolrSetup.getMontySolrHome();
 		String exampleHome = base + "/build/contrib/examples/invenio";
 		
 		System.setProperty("solr.solr.home", exampleHome + "/solr");
-		jr.configure(new String[]{"--webroot", exampleHome,
+		jr.configure(new String[]{"--webroot", exampleHome + "/webapps/solr.war",
 				"--port", port, "--context", context});
 		jr.start();
+		
+	  server = new CommonsHttpSolrServer( baseUrl );
+	  //server.setSoTimeout(20000);  // socket read timeout
+	  //server.setConnectionTimeout(1000);
+	  server.setDefaultMaxConnectionsPerHost(100);
+	  server.setMaxTotalConnections(100);
+	  server.setFollowRedirects(false);  // defaults to false
+	  server.setMaxRetries(1); // defaults to 0.  > 1 not recommended.
 	}
 	
 	public void tearDown() throws Exception {
 		jr.stop();
 	}
 	
-	public void testAll() throws MalformedURLException, IOException, SolrServerException {
+	public SolrQuery que(String...params) {
+		SolrQuery q = new SolrQuery();
+		for (int i=0;i<params.length;i=i+2){
+			q.set(params[i], params[i+1]);
+		}
+		return q;
+	}
+	
+	
+	public void testAll() throws MalformedURLException, IOException, SolrServerException, InterruptedException {
 		// Currently not an extensive test, but it does make sure the basic functionality works
-
-	    String queryPath = basePath + "/invenio";
-	    String adminPath = basePath + "/admin/";
-
-	    String html = IOUtils.toString( new URL(queryPath).openStream() );
-	    assert html.contains("<body"); // real error will be an exception
-
-	    html = IOUtils.toString( new URL(adminPath).openStream() );
-	    assert html.contains("Solr Admin"); // real error will be an exception
-	    
-
-	    // analysis
-	    html = IOUtils.toString( new URL(adminPath+"analysis.jsp").openStream() );
-	    assert html.contains("Field Analysis"); // real error will be an exception
-
-	    // schema browser
-	    html = IOUtils.toString( new URL(adminPath+"schema.jsp").openStream() );
-	    assert html.contains("Schema"); // real error will be an exception
-
-	    // schema browser
-	    html = IOUtils.toString( new URL(adminPath+"threaddump.jsp").openStream() );
-	    assert html.contains("org.apache.solr"); // real error will be an exception
-
-	    
-	    // special caching query
-	    html = IOUtils.toString( new URL(queryPath+"select/?q=*%3A*&version=2.2&start=0&rows=10&indent=on&qt=iq").openStream());
-	    System.out.println(html);
-
-	    // special caching query
-	    html = IOUtils.toString( new URL(queryPath+"select/?q=*%3A*&version=2.2&start=0&rows=10&indent=on&qt=iq").openStream());
-	    System.out.println(html);
+		
+		server.deleteByQuery("*:*");
+		server.commit(true, true);
+		
+		QueryResponse qr;
+		
+		qr = server.query(que("qt", "/invenio", "q", "*:*"));
+		Assert.assertEquals(0, qr.getResults().getNumFound());
+		
+		
+		qr = server.query(que("qt", "/invenio/update", "last_recid", "-1",
+				"inveniourl", "http://localhost/search"
+				//"inveniourl", java.net.URLEncoder.encode( "file://" 
+				//+ MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml", 
+				//"UTF-8")
+				));
+		Assert.assertEquals(0, qr.getStatus());
+		Assert.assertEquals("busy", qr.getResponse().get("importStatus"));
+		
+		qr = server.query(que("qt", "/invenio/update"));
+		while (qr.getResponse().get("importStatus").equals("busy")) {
+			qr = server.query(que("qt", "/invenio/update"));
+			Thread.sleep(50);
+		}
+		
+		qr = server.query(que("qt", "/invenio", "q", "*:*"));
+		Assert.assertEquals(0, qr.getResults().getNumFound());
+		
+		//qr = server.query(que("qt", "/invenio/update", "commit", "true"));
+		Thread.sleep(5000);
+		server.commit(true, true);
+		
+		
+		qr = server.query(que("qt", "/invenio", "q", "*:*"));
+		Assert.assertEquals(96, qr.getResults().getNumFound());
+		
+		qr = server.query(que("qt", "/invenio", "q", "#boson"));
+		Assert.assertEquals(5, qr.getResults().getNumFound());
+		Assert.assertEquals("<(ints,recid)boson>", qr.getResponse().get("inv_query"));
+		
+		qr = server.query(que("qt", "/invenio", "q", "#boson",
+				"inv.params", "of=hcs")); //of=hcs --> citation summary
+		
+		String cs1 = qr.getResponse().get("inv_response").toString();
+		Assert.assertTrue(cs1.contains("id=\"citesummary\""));
+		
+		qr = server.query(que("qt", "/invenio", "q", "boson",
+				"inv.params", "of=hcs")); //of=hcs --> citation summary
+		String cs2 = qr.getResponse().get("inv_response").toString();
+		
+		Assert.assertTrue(cs2.contains("id=\"citesummary\""));
+		
+		Assert.assertTrue(cs1.equals(cs2));
 	}
 }

@@ -1,6 +1,13 @@
 package org.apache.solr.schema;
 
+import java.io.IOException;
+import java.util.Map;
+
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.document.Field;
+import org.apache.solr.common.ResourceLoader;
+import org.apache.solr.util.plugin.ResourceLoaderAware;
 
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.jni.MontySolrVM;
@@ -15,6 +22,16 @@ import invenio.montysolr.jni.MontySolrVM;
  */
 public class PythonTextField extends TextField {
 	private String pythonFunctionName = "get_field_value";
+	
+	@Override
+	protected void init(IndexSchema schema, Map<String,String> args) {
+		String pythonImpl = args.get("pythonFunctionName");
+	    if (pythonImpl != null) {
+	      pythonFunctionName = pythonImpl;
+	    }
+	    args.remove("pythonFunctionName");
+	}
+	
 	
 	public Field createField(SchemaField field, String externalVal, float boost) {
 

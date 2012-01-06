@@ -82,7 +82,7 @@
         
         
         <field column="fulltext"        
-            template="id:${inspire.id}|arxiv_id:${inspire.reportnumber}|src_dir:${dataimporter.request.dirs}" />
+            template="${inspire.id}" />
                         
         </entity>
         

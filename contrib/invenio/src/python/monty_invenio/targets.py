@@ -7,7 +7,7 @@ Created on Feb 4, 2011
 from cStringIO import StringIO
 from invenio.intbitset import intbitset
 from montysolr import config
-from montysolr.initvm import montysolr_java as sj
+from montysolr.initvm import JAVA as sj
 from montysolr.utils import MontySolrTarget, make_targets
 import logging
 import os
@@ -21,6 +21,7 @@ import time
 
 
 def format_search_results(message):
+    '''Returns the citation summary for the given recids'''
     req = message.getSolrQueryRequest()
     rsp = message.getSolrQueryResponse()
     recids = message.getParamArray_int("recids")
@@ -33,7 +34,9 @@ def format_search_results(message):
     message.threadInfo("end: citation_summary pid=%s, finished in %s" % (wid, time.time() - start))
     rsp.add("inv_response", output)
 
+
 def format_search_results_local(message):
+    '''TODO: unittest'''
     req = message.getSolrQueryRequest()
     rsp = message.getSolrQueryResponse()
 
@@ -50,13 +53,16 @@ def format_search_results_local(message):
 
 
 def perform_request_search_bitset(message):
+    '''Search and use bitset for exchange of data'''
     query = unicode(message.getParam("query")).encode("utf8")
     #offset, hit_dump, total_matches, searcher_id = searching.multiprocess_search(query, 0)
     (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, 0)
     #message.threadInfo("query=%s, total_hits=%s" % (query, total_matches))
     message.setResults(sj.JArray_byte(intbitset(hits).fastdump()))
 
+
 def perform_request_search_ints(message):
+    '''Search and use ints for exchange of data'''
     query = unicode(message.getParam("query")).encode("utf8")
     #offset, hit_list, total_matches, searcher_id = searching.multiprocess_search(query, 0)
     (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, 0)
@@ -67,33 +73,7 @@ def perform_request_search_ints(message):
 
     message.setParam("total", total_matches)
 
-def handle_request_body(message):
-    req = message.getSolrQueryRequest()
-    rsp = message.getSolrQueryResponse()
-    params = message.getParams()
 
-    start = time.time()
-    q = params.get("q").encode('utf8') #TODO: sj.CommonParams.Q is overshadowed by solr.util.CommonParams or is not wrapped at all
-
-    #offset, hit_list, total_matches, searcher_id = searching.multiprocess_search(str(q))
-    (wid, (offset, hit_list, total_matches)) = api_calls.dispatch('search', str(q))
-
-    t = time.time() - start
-    #message.threadInfo("Query took: %s s. hits=%s and was executed by: %s" % (t, total_matches, searcher_id))
-
-    reader = req.getSearcher().getReader();
-
-    # translate invenio recids into lucene docids
-    transl_table = sj.DictionaryCache.INSTANCE.getTranslationCache(reader, "id")
-    res = []
-    for h in hit_list:
-        if transl_table.containsKey(h):
-            res.append(transl_table.get(h))
-
-    #logging.error(transl_table.size())
-
-    ds = sj.DocSlice(offset,len(res),res, None, total_matches, 1.0)
-    rsp.add("response", ds)
 
 def get_recids_changes(message):
     """Retrieves the recids of the last changed documents"""
@@ -122,30 +102,28 @@ def get_recids_changes(message):
         message.setParam('last_recid', last_recid)
 
 
-
-
 def get_citation_dict(message):
-
-    dictname = str(message.getParam('dictname'))
-    hm = sj.HashMap.cast_(message.getParam('result'))
-
+    '''TODO: unittest'''
+    dictname = sj.String.cast_(message.getParam('dictname'))
+    
     # we will call the local module (not dispatched remotely)
-    cd = api_calls._dispatch("get_citation_dict", dictname)
-    message.threadInfo("%s: %s" % (dictname, str(len(cd))))
+    if hasattr(api_calls, '_dispatch'):
+        wid, cd = api_calls._dispatch("get_citation_dict", dictname)
+    else:
+        wid, cd = api_calls.dispatch("get_citation_dict", dictname)
+    
     if cd:
-        #hm = sj.HashMap().of_(sj.Integer, sj.JArray_int)
-
-        message.threadInfo('creating hashmap')
+        hm = sj.HashMap().of_(sj.String, sj.JArray_int)
         for k,v in cd.items():
             j_array = sj.JArray_int(v)
-            hm.put(int(k), j_array)
-        message.threadInfo('finished')
-
-
+            hm.put(k, j_array)
+        message.put('result', hm)
         
+    #message.threadInfo("%s: %s" % (dictname, str(len(cd))))
 
 
 def sort_and_format(message):
+    '''Calls sorting XOR formatting over the result set'''
     req = message.getSolrQueryRequest()
     rsp = message.getSolrQueryResponse()
 
@@ -173,7 +151,7 @@ def sort_and_format(message):
     c_time = time.time()
 
     message.threadInfo("int[] converted to intbitset in: %s, size=%s" % (time.time() - c_time, len(recids)))
-    (wid, (output)) = api_calls._dispatch('sort_and_format', recids, kws)
+    (wid, (output)) = api_calls.dispatch('sort_and_format', recids, kws)
 
     message.threadInfo("end: citation_summary pid=%s, finished in %s" % (wid, time.time() - start))
 
@@ -183,6 +161,8 @@ def sort_and_format(message):
     else:
         message.setResults(output)
         message.setParam("rtype", "string")
+
+
 
 def diagnostic_test(message):
     out = []
@@ -256,8 +236,7 @@ def search_unit_solr(message):
 '''
 
 def montysolr_targets():
-    targets = make_targets('handleRequestBody', handle_request_body,
-           'rca.python.solr.handler.InvenioHandler:handleRequestBody', handle_request_body,
+    targets = make_targets(
            'CitationQuery:get_citation_dict', get_citation_dict,
            'InvenioQuery:perform_request_search_ints', perform_request_search_ints,
            'InvenioQuery:perform_request_search_bitset', perform_request_search_bitset,

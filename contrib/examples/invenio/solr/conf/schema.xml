@@ -296,7 +296,7 @@
     
     <!--  MontySolr special Python fields -->
 
-    <fieldType name="textgen_py" class="solr.PythonTextField" positionIncrementGap="100">
+    <fieldType name="textgen_py" class="solr.PythonTextField" positionIncrementGap="100" pythonFunctionName="get_bibrec_bibdoc">
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />

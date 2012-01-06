@@ -5,6 +5,12 @@ from montysolr.tests.montysolr_testcase import LuceneTestCase
 import targets
 import random
 
+'''
+Here we test (on the Python side) the fake_query.targets --
+on the Java side, something similar is run in one of the 
+InvenioQuery tests
+'''
+
 class Test(LuceneTestCase):
 
 

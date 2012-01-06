@@ -3,7 +3,26 @@
 from montysolr.initvm import JAVA as j
 from montysolr.utils import make_targets
 
+from invenio import bibdocfile
+
 import os
+
+
+def get_bibrec_bibdoc(message):
+    """Simply retrieves the text of all the documents attached
+    to the given recid"""
+    value = message.getParam('externalVal')
+    if not value:
+        return
+    value = str(value)
+    
+    out = []
+    bibrec = bibdocfile.BibRecDocs(value)
+    bibdocs = bibrec.list_bibdocs()
+    for doc in bibdocs:
+        out.append(doc.get_text())
+    return ' '.join(out)
+    
 
 
 def get_field_value(message):
@@ -85,4 +104,5 @@ def arxiv_field_value(message):
 def montysolr_targets():
     return make_targets("PythonTextField:get_field_value", get_field_value,
                         "PythonTextField:arxiv_field_value", arxiv_field_value,
+                        "PythonTextField:get_bibrec_bibdoc", get_bibrec_bibdoc,
                         )

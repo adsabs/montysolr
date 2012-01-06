@@ -13,6 +13,10 @@ import sys
 import time
 import unittest
 
+'''Tests the Python side of the InvenioKeepRecidUpdated - 
+this is a very comprehensive suite, it requires demo site
+'''
+
 # beware, granularity is in seconds!!!
 def change_date(recid, diff=1, cdiff=0):
     def change(d, x):
@@ -392,5 +396,5 @@ class Test(InvenioDemoTestCaseLucene):
         
 
 if __name__ == "__main__":
-    import sys;sys.argv = ['', 'Test.test_get_recids_add_change']
+    #import sys;sys.argv = ['', 'Test.test_get_recids_add_change']
     unittest.main()

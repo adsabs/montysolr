@@ -1,0 +1,211 @@
+<collection>
+<record>
+  <controlfield tag="001">1</controlfield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-EX-0106015</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Photolab</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">ALEPH experiment: Candidate of Higgs boson production</subfield>
+  </datafield>
+  <datafield tag="246" ind1=" " ind2="1">
+    <subfield code="a">Expérience ALEPH: Candidat de la production d'un boson Higgs</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">14 06 2000</subfield>
+  </datafield>
+  <datafield tag="340" ind1=" " ind2=" ">
+    <subfield code="a">FILM</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">Candidate for the associated production of the Higgs boson and Z boson. Both, the Higgs and Z boson decay into 2 jets each. The green and the yellow jets belong to the Higgs boson. They represent the fragmentation of a bottom andanti-bottom quark. The red and the blue jets stem from the decay of the Z boson into a quark anti-quark pair. Left: View of the event along the beam axis. Bottom right: Zoom around the interaction point at the centre showing detailsof the fragmentation of the bottom and anti-bottom quarks. As expected for b quarks, in each jet the decay of a long-lived B meson is visible. Top right: "World map" showing the spatial distribution of the jets in the event.</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">Press</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Experiments and Tracks</subfield>
+  </datafield>
+  <datafield tag="653" ind1="1" ind2=" ">
+    <subfield code="a">LEP</subfield>
+  </datafield>
+  <datafield tag="856" ind1="0" ind2=" ">
+    <subfield code="f">neil.calder@cern.ch</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://localhost/record/1/files/0106015_01.jpg</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://localhost/record/1/files/0106015_01.gif?subformat=icon</subfield>
+    <subfield code="x">icon</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="o">0003717PHOPHO</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="y">2000</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="b">81</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="1">
+    <subfield code="c">2001-06-14</subfield>
+    <subfield code="l">50</subfield>
+    <subfield code="m">2001-08-27</subfield>
+    <subfield code="o">CM</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="P">
+    <subfield code="p">Bldg. 2</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="P">
+    <subfield code="r">Calder, N</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="S">
+    <subfield code="s">n</subfield>
+    <subfield code="w">200231</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">PICTURE</subfield>
+  </datafield>
+</record>
+
+
+<record>
+  <controlfield tag="001">2</controlfield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-EX-0104007</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Patrice Loïez</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">The first CERN-built module of the barrel section of ATLAS's electromagnetic calorimeter</subfield>
+  </datafield>
+  <datafield tag="246" ind1=" " ind2="1">
+    <subfield code="a">Premier module du tonneau du calorimètre electromagnétique d'ATLAS</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">10 Apr 2001</subfield>
+  </datafield>
+  <datafield tag="340" ind1=" " ind2=" ">
+    <subfield code="a">DIGITAL</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">Behind the module, left to right Ralf Huber, Andreas Bies and Jorgen Beck Hansen. In front of the module, left to right: Philippe Lançon and Edward Wood.</subfield>
+  </datafield>
+  <datafield tag="590" ind1=" " ind2=" ">
+    <subfield code="a">Derrière le module, de gauche à droite: Ralf Huber, Andreas Bies, Jorgen Beck Hansen. Devant le module, de gauche à droite : Philippe Lançon et Edward Wood.</subfield>
+  </datafield>
+  <datafield tag="595" ind1=" " ind2=" ">
+    <subfield code="a">CERN EDS</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Experiments and Tracks</subfield>
+  </datafield>
+  <datafield tag="856" ind1="0" ind2=" ">
+    <subfield code="f">marie.noelle.pages.ribeiro@cern.ch</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://localhost/record/2/files/0104007_02.jpeg</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://localhost/record/2/files/0104007_02.gif?subformat=icon</subfield>
+    <subfield code="x">icon</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="o">0003601PHOPHO</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="y">2001</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="b">81</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="1">
+    <subfield code="c">2001-04-23</subfield>
+    <subfield code="l">50</subfield>
+    <subfield code="m">2001-06-18</subfield>
+    <subfield code="o">CM</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="K">
+    <subfield code="b">0020699</subfield>
+    <subfield code="l">ADMBUL</subfield>
+    <subfield code="t">CERN Bulletin 18/2001 : 30 April 2001 (English)</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="K">
+    <subfield code="b">0020700</subfield>
+    <subfield code="l">ADMBUL</subfield>
+    <subfield code="t">CERN Bulletin 18/2001 : 30 avril 2001 (French)</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="P">
+    <subfield code="p">Bldg. 184</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="P">
+    <subfield code="r">Fassnacht, P</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="S">
+    <subfield code="s">n</subfield>
+    <subfield code="w">200231</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">PICTURE</subfield>
+  </datafield>
+</record>
+
+
+<record>
+  <controlfield tag="001">3</controlfield>
+  <datafield tag="037" ind1=" " ind2=" ">
+    <subfield code="a">CERN-HI-6902127</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">European Molecular Biology Conference</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">Jul 1969</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">In February, the Agreement establishing the European Molecular Biology Conference was signed at CERN. Willy Spuhler is signing for Switzerland.</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="2">SzGeCERN</subfield>
+    <subfield code="a">Personalities and History of CERN</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://localhost/record/3/files/6902127.jpeg</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://localhost/record/3/files/6902127.gif?subformat=icon</subfield>
+    <subfield code="x">icon</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="o">0002690PHOPHO</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="y">1969</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="0">
+    <subfield code="b">81</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="1">
+    <subfield code="c">2000-06-13</subfield>
+    <subfield code="l">50</subfield>
+    <subfield code="m">2000-06-13</subfield>
+    <subfield code="o">CM</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="P">
+    <subfield code="s">127-2-69</subfield>
+  </datafield>
+  <datafield tag="909" ind1="C" ind2="S">
+    <subfield code="s">n</subfield>
+    <subfield code="w">200024</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">PICTURE</subfield>
+  </datafield>
+</record>
+</collection>

@@ -9,13 +9,11 @@ from invenio import search_engine_summarizer
 from invenio import dbquery
 from invenio import bibrecord
 from invenio.intbitset import intbitset
-
-from invenio.bibrank_citation_searcher import get_citation_dict
-
-import datetime
+from invenio import bibrank_citation_searcher as bcs
 
 
-from cStringIO import StringIO
+
+from StringIO import StringIO as sIO
 
 def dispatch(func_name, *args, **kwargs):
     """Dispatches the call to the *local* worker
@@ -96,7 +94,7 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
     return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, recid, str(mod_date)
 
 def citation_summary(recids, of, ln, p, f):
-    out = StringIO()
+    out = ReqStringIO()
     x = search_engine_summarizer.summarize_records(recids, of, ln, p, f, out)
     if x:
         output = x
@@ -118,16 +116,16 @@ def search(q, max_len=25):
 
 def sort_and_format(hits, kwargs):
 
-    kwargs = search_engine._cleanup_arguments(**kwargs)
+    kwargs = search_engine.prs_cleanup_arguments(**kwargs)
     t1 = os.times()[4]
-    req = StringIO()
+    req = ReqStringIO()  # new ver of Invenio is looking at args
     kwargs['req'] = req
 
     if 'hosted_colls_actual_or_potential_results_p' not in kwargs:
         kwargs['hosted_colls_actual_or_potential_results_p'] = True # this prevents display of the nearest-term box
 
     # search stage 4 and 5: intersection with collection universe and sorting/limiting
-    output = search_engine._collect_sort_display(hits, kwargs=kwargs, **kwargs)
+    output = search_engine.prs_collect_sort_display(hits, kwargs=kwargs, **kwargs)
     if output is not None:
         req.seek(0)
         return req.read() + output
@@ -136,7 +134,7 @@ def sort_and_format(hits, kwargs):
     cpu_time = t2 - t1
     kwargs['cpu_time'] = cpu_time
 
-    recids = search_engine._rank_results(kwargs=kwargs, **kwargs)
+    recids = search_engine.prs_rank_results(kwargs=kwargs, **kwargs)
 
     if 'of' in kwargs and kwargs['of'].startswith('hc'):
         output = citation_summary(intbitset(recids), kwargs['of'], kwargs['ln'], kwargs['p'], kwargs['f'])
@@ -146,18 +144,19 @@ def sort_and_format(hits, kwargs):
     return recids
 
 
-def get_citation_dict(message):
-    dictname = sj.String.cast_(message.getParam('dictname'))
-    cd = bcs.get_citation_dict(dictname)
-    if cd:
-        hm = sj.HashMap().of_(sj.String, sj.JArray_int)
+def get_citation_dict(dictname):
+    return bcs.get_citation_dict(dictname)
 
-        for k,v in cd.items():
-            j_array = sj.JArray_int(v)
-            hm.put(k, j_array)
 
-        message.put('result', hm)
 
+class ReqStringIO(sIO):
+    '''Because of Invenio insisting to have args inside the 
+    req object, we cannot use cStringIO'''
+    
+    def __init__(self, *args, **kwargs):
+        sIO.__init__(self, *args, **kwargs)
+        self.args = None
+        self.uri = None
 
 if __name__ == '__main__':
-    print dispatch("get_recids_changes", 85)
+    pass

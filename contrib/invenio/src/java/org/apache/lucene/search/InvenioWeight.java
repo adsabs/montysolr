@@ -112,7 +112,7 @@ public class InvenioWeight extends Weight {
 					doc = recidToDocid.get(recids[recids_counter]);
 				}
 				catch (NullPointerException e) {
-					throw new IOException("Doc with recid=" + recids[recids_counter] + " missing. You should update Invenio recids!");
+					throw new IOException("Doc with recid=" + recids[recids_counter] + " is unknown to Lucene. You should reindex!");
 				}
 
 				return doc;

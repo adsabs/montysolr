@@ -1,5 +1,6 @@
 package org.apache.lucene.search;
 
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Similarity;
@@ -8,9 +9,12 @@ import org.apache.lucene.search.Weight;
 import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.solr.search.ConstantScorePrefixQuery;
 
 
 /**
@@ -182,13 +186,113 @@ public class InvenioQuery extends Query {
 
 	public String getInvenioQuery() {
 		//String qfield = ((TermQuery) query).getTerm().field();
-		String qval = ((TermQuery) query).getTerm().text();
+		String qval = getInvenioQueryValue(new StringBuffer(), query).toString();
 		
 		if (searchField != null) {
 			qval = searchField + ":" + qval;
 		}
-		
 		return qval;
+	}
+	
+	public StringBuffer getInvenioQueryValue(StringBuffer out, Query query) {
+		if (query instanceof TermQuery) {
+			out.append(((TermQuery) query).getTerm().text());
+		}
+		else if (query instanceof MatchAllDocsQuery) {
+			out.append("");
+		}
+		else if (query instanceof TermRangeQuery) {
+			TermRangeQuery q = (TermRangeQuery) query;
+			//out.append(q.includesLower() ? '[' : '{'); // invenio doesn't understand these
+			String lt = q.getLowerTerm();
+			String ut = q.getUpperTerm();
+			if (lt == null) {
+				out.append('*');
+			} else {
+				out.append(lt);
+			}
+
+			out.append("->");
+
+			if (ut == null) {
+				out.append('*');
+			} else {
+				out.append(ut);
+			}
+		}
+		else if (query instanceof NumericRangeQuery) {
+			NumericRangeQuery q = (NumericRangeQuery) query;
+			//out.append(q.includesLower() ? '[' : '{'); // invenio doesn't understand these
+			//TODO: verify Invneio is using int ranges only
+			Number lt = q.getMin();
+			Number ut = q.getMax();
+			if (lt == null) {
+				out.append("-999999");
+			} else {
+				out.append(lt.intValue());
+			}
+
+			out.append("->");
+
+			if (ut == null) {
+				out.append("999999");
+			} else {
+				out.append(ut.intValue());
+			}
+		} 
+		else if (query instanceof BooleanQuery) {
+			BooleanQuery q = (BooleanQuery) query;
+			List<BooleanClause>clauses = (List<BooleanClause>) q.clauses();
+			out.append("(");
+			for (int i=0;i<clauses.size();i++) {
+				BooleanClause c = clauses.get(i);
+				Query qq = c.getQuery();
+				out.append(c.getOccur().toString());
+				out.append(" ");
+				getInvenioQueryValue(out, qq);
+			}
+			out.append(")");
+		} 
+		else if (query instanceof PrefixQuery) {
+			PrefixQuery q = (PrefixQuery) query;
+			Term prefix = q.getPrefix();
+			out.append(prefix.text());
+			out.append('*');
+		} 
+		else if (query instanceof ConstantScorePrefixQuery) {
+			ConstantScorePrefixQuery q = (ConstantScorePrefixQuery) query;
+			Term prefix = q.getPrefix();
+			out.append(prefix.text());
+			out.append('*');
+		} 
+		else if (query instanceof WildcardQuery) {
+			WildcardQuery q = (WildcardQuery) query;
+			Term t = q.getTerm();
+			out.append(t.text());
+		} 
+		else if (query instanceof PhraseQuery) {
+			PhraseQuery q = (PhraseQuery) query;
+			Term[] terms = q.getTerms();
+			String slop = q.getSlop() > 0 ? "'" : "\"";
+			out.append(slop);
+			for (int i=0;i<terms.length;i++) {
+				if (i != 0) {
+					out.append(" ");
+				}
+				out.append(((Term)terms[i]).text());
+			}
+			out.append(slop);
+		} 
+		else if (query instanceof FuzzyQuery) {
+			// do nothing
+		} 
+		else if (query instanceof ConstantScoreQuery) {
+			// do nothing
+		} else {
+			throw new IllegalStateException(query.toString());
+		}
+		
+		return out;
 	}
 	
 	public Query getInnerQuery() {

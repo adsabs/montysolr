@@ -157,8 +157,8 @@ public class InvenioFormatter extends SearchComponent
 
 		SolrConfig config = req.getCore().getSolrConfig();
 		PluginInfo pluginInfo = null;
-		for (PluginInfo info : config.getPluginInfos(this.getClass().getCanonicalName())) {
-			if (info.className.contains(this.getClass().getName())) {
+		for (PluginInfo info : config.getPluginInfos(SearchComponent.class.getCanonicalName())) {
+			if (info.className.contains(this.getClass().getSimpleName())) {
 				pluginInfo = info;
 				break;
 			}
