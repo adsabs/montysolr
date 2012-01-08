@@ -67,12 +67,9 @@
 
 
 	<target name="compile" description="Compiles all the java classes" depends="build-grammar">
-		<javac classpathref="antlr.classpath" 
-            srcdir="src/java"
-            destdir="${build.dir}/classes/java"
-            >
-			<include name="**/*.java"/>
-		</javac>
+		<compile classpathref="antlr.classpath" srcdir="src/java" destdir="${build.dir}/classes/java">
+			<include name="**/*.java"/>	
+		</compile>
 	</target>
     
     	

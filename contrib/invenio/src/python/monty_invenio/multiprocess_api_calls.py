@@ -57,6 +57,7 @@ def start_multiprocessing(num_proc=None, default=4):
         POOL = multiprocessing.Pool(processes=num_proc)
     else:
         POOL = multiprocessing.Pool(processes=num_proc)
+    return num_proc
 
 # ======================================================
 #    Some code to execute on lazy-initialization

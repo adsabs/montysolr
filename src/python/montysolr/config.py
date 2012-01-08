@@ -11,14 +11,13 @@ MONTYSOLR_HANDLER = 'montysolr.sequential_handler'
 ## List of modules where we load MontySolr targets
 MONTYSOLR_TARGETS = ['montysolr.examples.twitter_test'] #'montysolr.inveniopie.targets', 'montysolr.examples.twitter_test']
 
-# use the multiprocessing version of api_calls
-MONTYSOLR_MULTIPROC = False
+# use the multiprocessing version of api_calls, value -1 means: detect number of cpus
+MONTYSOLR_MAX_WORKERS = 2
 
 # will be appended to jvm args when starting the virtual machine (Java inside Python)
 MONTYSOLR_JVMARGS_PYTHON = ''
 
-# when multiprocessing is activated, how many workers shall be started
-MONTYSOLR_MAX_WORKERS = 2
+
 
 
 
