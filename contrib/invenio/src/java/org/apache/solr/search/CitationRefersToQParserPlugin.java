@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.Collector;
@@ -200,6 +201,7 @@ extends Query {
 	        	  }
 
 	          /** @deprecated use {@link #nextDoc()} instead. */
+	          @Deprecated
 	          public boolean next() throws IOException {
 	            return nextDoc() != NO_MORE_DOCS;
 	          }
@@ -214,6 +216,7 @@ extends Query {
 	          public int docID() { return doc; }
 
 	          /** @deprecated use {@link #advance(int)} instead. */
+	          @Deprecated
 	          public boolean skipTo(int i) throws IOException {
 	            return advance(i) != NO_MORE_DOCS;
 	          }
@@ -269,7 +272,7 @@ extends Query {
 	  }
 
 	  // inherit javadoc
-	  public void extractTerms(Set terms) {
+	  public void extractTerms(Set<Term> terms) {
 	      getQuery().extractTerms(terms);
 	  }
 

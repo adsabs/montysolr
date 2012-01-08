@@ -249,6 +249,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		Integer maximport = params.getInt(PARAM_MAXIMPORT, 200);
 		Boolean commit = params.getBool(PARAM_COMMIT, false);
 		
+		@SuppressWarnings("unchecked")
 		HashMap<String, int[]> dictData = (HashMap<String, int[]>) data.get("dictData");
 		
 		List<String> queryParts;
@@ -432,6 +433,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 	
 
+	@SuppressWarnings("unchecked")
 	protected Map<String, Object> retrieveRecids(Properties prop,
 			SolrQueryRequest req,
             SolrQueryResponse rsp) {

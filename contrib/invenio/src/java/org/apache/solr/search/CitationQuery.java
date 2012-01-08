@@ -163,6 +163,7 @@ public class CitationQuery extends Query {
 			Map<Integer, int[]> citationDict = new HashMap<Integer, int[]>(0);
 			if (message.containsKey("result")) {
 
+				@SuppressWarnings("unchecked")
 				Map<Integer, Object> result = (Map<Integer, Object>) message.getResults();
 				citationDict = new HashMap<Integer, int[]>(result.size());
 				for (Entry<Integer, Object> e: result.entrySet()) {
@@ -290,6 +291,7 @@ public class CitationQuery extends Query {
 	          public int docID() { return doc; }
 
 	          /** @deprecated use {@link #advance(int)} instead. */
+	          @Deprecated
 	          public boolean skipTo(int i) throws IOException {
 	            return advance(i) != NO_MORE_DOCS;
 	          }
@@ -386,7 +388,7 @@ public class CitationQuery extends Query {
 	 * @throws UnsupportedOperationException
 	 *             if this query is not yet rewritten
 	 */
-	public void extractTerms(Set terms) {
+	public void extractTerms(Set<Term> terms) {
 		query.extractTerms(terms);
 	}
 

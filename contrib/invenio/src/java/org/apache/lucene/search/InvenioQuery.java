@@ -143,7 +143,7 @@ public class InvenioQuery extends Query {
 	 * @throws UnsupportedOperationException
 	 *             if this query is not yet rewritten
 	 */
-	public void extractTerms(Set terms) {
+	public void extractTerms(Set<Term> terms) {
 		query.extractTerms(terms);
 	}
 
@@ -242,7 +242,7 @@ public class InvenioQuery extends Query {
 		} 
 		else if (query instanceof BooleanQuery) {
 			BooleanQuery q = (BooleanQuery) query;
-			List<BooleanClause>clauses = (List<BooleanClause>) q.clauses();
+			List<BooleanClause>clauses = q.clauses();
 			out.append("(");
 			for (int i=0;i<clauses.size();i++) {
 				BooleanClause c = clauses.get(i);
@@ -279,7 +279,7 @@ public class InvenioQuery extends Query {
 				if (i != 0) {
 					out.append(" ");
 				}
-				out.append(((Term)terms[i]).text());
+				out.append(terms[i].text());
 			}
 			out.append(slop);
 		} 

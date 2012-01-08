@@ -36,6 +36,7 @@ public class InvenioFormatter extends SearchComponent
 	private Map<String, String> invParams = null;
 	private String idField = null;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void prepare(ResponseBuilder rb) throws IOException {
 		activated = false;
@@ -43,26 +44,29 @@ public class InvenioFormatter extends SearchComponent
 		Map<Object, Object> context = rb.req.getContext();
 
 		if (context.containsKey("inv.params")) {
-			invParams = (Map<String, String>) context.get("inv.params");
-			if (invParams.containsKey("of")) {
-				String of = invParams.get("of");
-				if (of.equals("hcs")) { // citation summary
-					ModifiableSolrParams rawParams = new ModifiableSolrParams(rb.req.getParams());
-					Integer old_limit = params.getInt("rows", 10);
-					int max_len = params.getInt("inv.rows", 25000);
-					rawParams.set("rows", max_len);
-					rawParams.set("old_rows", old_limit);
-					rb.req.setParams(rawParams);
-					SortSpec sortSpec = rb.getSortSpec();
-					SortSpec nss = new SortSpec(sortSpec.getSort(), sortSpec.getOffset(), max_len);
-					rb.setSortSpec(nss);
-					activated = true;
-				}
-				else if(invParams.containsKey("rm") && ((String)invParams.get("rm")).length() > 0) {
-					activated = true;
-				}
-				else if(invParams.containsKey("sf") && ((String)invParams.get("sf")).length() > 0) {
-					activated = true;
+			Object par = context.get("inv.params");
+			if (par != null) {
+				invParams = (Map<String, String>) par;
+				if (invParams.containsKey("of")) {
+					String of = invParams.get("of");
+					if (of.equals("hcs")) { // citation summary
+						ModifiableSolrParams rawParams = new ModifiableSolrParams(rb.req.getParams());
+						Integer old_limit = params.getInt("rows", 10);
+						int max_len = params.getInt("inv.rows", 25000);
+						rawParams.set("rows", max_len);
+						rawParams.set("old_rows", old_limit);
+						rb.req.setParams(rawParams);
+						SortSpec sortSpec = rb.getSortSpec();
+						SortSpec nss = new SortSpec(sortSpec.getSort(), sortSpec.getOffset(), max_len);
+						rb.setSortSpec(nss);
+						activated = true;
+					}
+					else if(invParams.containsKey("rm") && invParams.get("rm").length() > 0) {
+						activated = true;
+					}
+					else if(invParams.containsKey("sf") && invParams.get("sf").length() > 0) {
+						activated = true;
+					}
 				}
 			}
 		}
