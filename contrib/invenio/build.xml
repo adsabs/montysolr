@@ -73,8 +73,6 @@
 		</compile>
 	</target>
     
-    	
-    
 	
     	
 	<target name="build-grammar" description="Compiles the grammar for Invenio">

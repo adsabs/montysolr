@@ -175,7 +175,7 @@
 
 	
 	<target name="test" depends="default" >
-		<antcall target="common.test" />
+		<antcall target="common.test" inheritRefs="true"/>
 	</target>
 
 	

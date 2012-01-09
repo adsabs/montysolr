@@ -216,19 +216,6 @@ public class AqpQueryParser extends QueryParserHelper {
 	}
 
 	
-	/**
-	 * The modern query parser has all configuration set up through
-	 * the ConfigHandler system, therefore the default field is not
-	 * necessary anymore
-	 * 
-	 * @param query
-	 * @return
-	 * @throws QueryNodeException 
-	 */
-	public Query parse(String query) throws QueryNodeException {
-		return (Query) super.parse(query, null);
-	}
-	
 	
 	
 	/**
@@ -249,12 +236,13 @@ public class AqpQueryParser extends QueryParserHelper {
 	@Override
 	public Query parse(String query, String defaultField)
 			throws QueryNodeException {
-
-		QueryConfigHandler cfg = getQueryConfigHandler();
-		DefaultFieldAttribute attr = cfg
-				.getAttribute(DefaultFieldAttribute.class);
-		attr.setDefaultField(defaultField);
-
+		
+		if(defaultField != null) {
+			QueryConfigHandler cfg = getQueryConfigHandler();
+			DefaultFieldAttribute attr = cfg
+					.getAttribute(DefaultFieldAttribute.class);
+			attr.setDefaultField(defaultField);
+		}
 		return (Query) super.parse(query, defaultField);
 
 	}

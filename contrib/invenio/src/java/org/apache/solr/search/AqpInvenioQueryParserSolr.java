@@ -236,5 +236,9 @@ public class AqpInvenioQueryParserSolr extends AqpQueryParser {
 		}
 
 	}
+	
+	public Query parse(String query) throws QueryNodeException {
+		return (Query) super.parse(query, null);
+	}
 
 }
