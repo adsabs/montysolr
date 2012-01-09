@@ -52,6 +52,7 @@
         </fileset>
         
         <pathelement location="${prop.jcc_egg}/jcc/classes"/>
+		<pathelement location="${build.dir}/classes/java"/>
         <pathelement location="${common.dir}/build/contrib/antlrqueryparser/classes/test"/>
         
         <fileset dir="lib">
@@ -69,7 +70,7 @@
 
 	<target name="compile" description="Compiles all the java classes" depends="build-grammar">
 		<compile classpathref="antlr.classpath" srcdir="src/java" destdir="${build.dir}/classes/java">
-			<include name="**/*.java"/>	
+				
 		</compile>
 	</target>
     
