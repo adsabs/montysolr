@@ -1,0 +1,27 @@
+In order to install MontySolr on a SLC5 machine (and take advantage of the multiprocessing module of Python v.2.6 and higher), we must do the following:
+
+
+
+sudo yum install python26
+sudo yum install python26-devel.x86_64
+sudo yum install java-1.6.0-openjdk-devel.x86_64
+sudo yum install python26-distribute.noarch
+
+sudo ln -f /usr/bin/python2.6 /usr/local/bin/python   # optional, changes the default python (log in/out to take effect)
+sudo /usr/sbin/update-alternatives --config python
+
+
+cd /opt
+svn co http://svn.apache.org/repos/asf/lucene/pylucene/tags/pylucene_3_1_0
+
+cd pylucene_3_1_0/jcc
+export USE_DISTUTILS
+export JCC_JDK=/usr/lib/jvm/java-openjdk
+python setup.py build
+
+sudo env JCC_JDK=$JCC_JDK python2.6 setup.py install  # note: root has different environtment, so we must pass JCC_JDK and use python2.6
+
+
+
+# optional
+sudo yum install python-pip.noarch
