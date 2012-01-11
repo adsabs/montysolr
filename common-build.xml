@@ -665,7 +665,6 @@
 	<macrodef name="compile">
 		<attribute name="srcdir"/>
 		<attribute name="destdir"/>
-		<attribute name="classpathref" default=""/>
 		<attribute name="javac.source" default="${javac.source}"/>
 		<attribute name="javac.target" default="${javac.target}"/>
 		<element name="nested" implicit="yes" optional="yes"/>
@@ -673,21 +672,19 @@
 		<sequential>
 			<mkdir dir="@{destdir}"/>
 			<javac
-		classpathref="@{classpathref}"
-        includeAntRuntime="${javac.includeAntRuntime}"
-        encoding="${build.encoding}"
-        srcdir="@{srcdir}"
-        destdir="@{destdir}"
-        deprecation="${javac.deprecation}"
-        debug="${javac.debug}"
-        source="@{javac.source}"
-        target="@{javac.target}">
-				<nested/>
-				<!-- <compilerarg line="-Xmaxwarns 10000000"/>
-                <compilerarg line="-Xmaxerrs 10000000"/> -->
-				<!-- for generics in Java 1.5: -->
-				<compilerarg line="-Xlint -Xlint:deprecation -Xlint:-serial"/>
-				
+            includeAntRuntime="${javac.includeAntRuntime}"
+            encoding="${build.encoding}"
+            srcdir="@{srcdir}"
+            destdir="@{destdir}"
+            deprecation="${javac.deprecation}"
+            debug="${javac.debug}"
+            source="@{javac.source}"
+            target="@{javac.target}">
+    		<nested/>
+    		<!-- <compilerarg line="-Xmaxwarns 10000000"/>
+            <compilerarg line="-Xmaxerrs 10000000"/> -->
+    		<!-- for generics in Java 1.5: -->
+    		<compilerarg line="-Xlint -Xlint:-deprecation -Xlint:-serial"/>
 			</javac>
 		</sequential>
 	</macrodef>

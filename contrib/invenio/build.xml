@@ -37,6 +37,9 @@
 			<include name="**/*.jar"/>
 		</fileset>
 		<pathelement location="${common.dir}/build/contrib/antlrqueryparser/classes/java"/>
+		<fileset dir="lib">
+            <include name="**/*.jar"/>
+        </fileset>
 	</path>
 	<path id="run.classpath">
 		<path refid="classpath"/>
@@ -52,12 +55,12 @@
         </fileset>
         
         <pathelement location="${prop.jcc_egg}/jcc/classes"/>
-		<pathelement location="${build.dir}/classes/java"/>
         <pathelement location="${common.dir}/build/contrib/antlrqueryparser/classes/test"/>
         
         <fileset dir="lib">
             <include name="**/*.jar"/>
         </fileset>
+		<pathelement location="${build.dir}/classes/java"/>
     </path>
 	
 
@@ -69,8 +72,9 @@
 
 
 	<target name="compile" description="Compiles all the java classes" depends="build-grammar">
-		<compile classpathref="antlr.classpath" srcdir="src/java" destdir="${build.dir}/classes/java">
-				
+		<compile srcdir="src/java" destdir="${build.dir}/classes/java">
+			<include name="**/*.jar" />
+			<classpath refid="antlr.classpath"/>
 		</compile>
 	</target>
     
@@ -113,6 +117,8 @@
     </target>
     
 	
-
+	<target name="test" depends="default" >
+        <antcall target="common.test" inheritRefs="true"/>
+    </target>
 
 </project>

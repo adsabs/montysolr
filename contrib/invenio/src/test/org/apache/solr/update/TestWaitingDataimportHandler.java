@@ -116,15 +116,17 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		
 		core.execute(handler, req, rsp);
-		// we must give handler time to load its components
+		// we must give handler time to do the indexing
 		try {
-			Thread.sleep(50);
+			Thread.sleep(500);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
 		
+		/*
 		// must wait for the landler to finish his threads
-		while (((WaitingDataImportHandler) handler).isBusy()) {
+		WaitingDataImportHandler wih = (WaitingDataImportHandler) handler;
+		while (wih.isBusy()) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -132,6 +134,7 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 				break;
 			}
 		}
+		*/
 		return rsp;
 	}
 }

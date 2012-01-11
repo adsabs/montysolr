@@ -22,7 +22,6 @@ import org.junit.BeforeClass;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
-
 /**
  * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
  * 
@@ -31,58 +30,57 @@ public class TestPythonField extends MontySolrAbstractTestCase {
 
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge",
 				MontySolrSetup.getMontySolrHome() + "/src/python");
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
+				+ "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 	}
-	
-  @Override public String getSchemaFile() { 
-	  return MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/solr/conf/" + 
-	  "schema-python-field.xml";
-	  }
-  
-  @Override public String getSolrConfigFile() { 
-	  
-	  return MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/solr/conf/" +
-	  "solrconfig.xml";
-	  
-  }
-  
-  
-public void testSorting() throws Exception {
-    
-	String tp = MontySolrSetup.getMontySolrHome();
-	
-	assertU(adoc("id", "9",  "title", "test", "text", tp + "/contrib/invenio/src/test-files/data/text1.txt"));
-    assertU(adoc("id", "10", "title", "test", "text", tp + "/contrib/invenio/src/test-files/data/text1.txt"));
-    assertU(adoc("id", "11", "title", "test", "text", tp + "/contrib/invenio/src/test-files/data/text2.txt"));
-    assertU(adoc("id", "12", "title", "nonexisting", "text", tp + "/contrib/invenio/src/test-files/text-nonexisting.txt"));
-    assertU(commit());
-    
-    
-    
-    assertQ("Make sure they got in", req("q", "title:test")
-            ,"//*[@numFound='3']"
-            );
-    
-    assertQ("Make sure they got in", req("q", "title:nonexisting")
-            ,"//*[@numFound='1']"
-            );
-    
-    
-    assertQ("Make sure they got in", req("q", "text:PythonTextField")
-            ,"//*[@numFound='2']"
-            );
-    
-    assertQ("Make sure they got in", req("q", "text:blind")
-            ,"//*[@numFound='1']"
-            );
-    
-    assertQ("Make sure they got in", req("q", "text:HI")
-            ,"//*[@numFound='3']"
-            );
-    
-    
-  }
+
+	@Override
+	public String getSchemaFile() {
+		return MontySolrSetup.getMontySolrHome()
+				+ "/contrib/invenio/src/test-files/solr/conf/"
+				+ "schema-python-field.xml";
+	}
+
+	@Override
+	public String getSolrConfigFile() {
+
+		return MontySolrSetup.getMontySolrHome()
+				+ "/contrib/invenio/src/test-files/solr/conf/"
+				+ "solrconfig.xml";
+
+	}
+
+	public void testSorting() throws Exception {
+
+		String tp = MontySolrSetup.getMontySolrHome();
+
+		assertU(adoc("id", "9", "title", "test", "text", tp
+				+ "/contrib/invenio/src/test-files/data/text1.txt"));
+		assertU(adoc("id", "10", "title", "test", "text", tp
+				+ "/contrib/invenio/src/test-files/data/text1.txt"));
+		assertU(adoc("id", "11", "title", "test", "text", tp
+				+ "/contrib/invenio/src/test-files/data/text2.txt"));
+		assertU(adoc("id", "12", "title", "nonexisting", "text", tp
+				+ "/contrib/invenio/src/test-files/text-nonexisting.txt"));
+		assertU(commit());
+
+		assertQ("Make sure they got in", req("q", "title:test"),
+				"//*[@numFound='3']");
+
+		assertQ("Make sure they got in", req("q", "title:nonexisting"),
+				"//*[@numFound='1']");
+
+		assertQ("Make sure they got in", req("q", "text:PythonTextField"),
+				"//*[@numFound='2']");
+
+		assertQ("Make sure they got in", req("q", "text:blind"),
+				"//*[@numFound='1']");
+
+		assertQ("Make sure they got in", req("q", "text:HI"),
+				"//*[@numFound='3']");
+
+	}
 }

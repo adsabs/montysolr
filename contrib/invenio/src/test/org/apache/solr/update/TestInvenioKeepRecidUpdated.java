@@ -508,19 +508,18 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		public int[] deleted = null;
 		
 		
-		
-		@Override
+		@SuppressWarnings("unchecked")
 		protected Map<String, Object> retrieveRecids(Properties prop, 
 				SolrQueryRequest req, SolrQueryResponse rsp) {
 			
-			if (prop.containsKey(LAST_RECID)) {
-				lastRecId = Integer.valueOf(prop.getProperty(LAST_RECID));
+			if (prop.containsKey("last_recid")) {
+				lastRecId = Integer.valueOf(prop.getProperty("last_recid"));
 			}
 			
 		    Map<String, Object> ret = super.retrieveRecids(prop, req, rsp);
 		    if (ret != null) {
 		    	retrievedRecIds = (Map<String, int[]>) ret.get("dictData");
-		    	lastUpdatedRecId = (Integer) ret.get(LAST_RECID);
+		    	lastUpdatedRecId = (Integer) ret.get("last_recid");
 		    }
 		    return ret;
 		}

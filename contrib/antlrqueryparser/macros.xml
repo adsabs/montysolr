@@ -63,12 +63,13 @@
             
             <mkdir dir="@{build-dir}"/>
         	
-        	<compile classpathref="@{classpathref}" 
+        	<compile
                 srcdir="@{parser-dir}"
                 destdir="@{build-dir}">
         		<include name="**/@{grammar-name}Parser.java" />
                 <include name="**/@{grammar-name}Lexer.java" />
                 <include name="**/@{grammar-name}.tokens" />
+        		<classpath refid="@{classpathref}" />
         	</compile>
         	
         	

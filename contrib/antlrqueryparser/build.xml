@@ -77,7 +77,7 @@
 	<path id="test.classpath">
 		<path refid="classpath"/>
 		<path refid="test.base.classpath"/>
-		<pathelement location="${build.dir}/classes/test"/>
+		<path refid="common.junit.classpath"/>
 		<fileset dir="lib">
 			<include name="**/*test*.jar"/>
 		</fileset>
@@ -174,9 +174,9 @@
 	</target>
 
 	
-	<target name="test" depends="default" >
-		<antcall target="common.test" inheritRefs="true"/>
-	</target>
+    <target name="test" depends="default,compile-all" >
+        <antcall target="common.test" inheritRefs="true"/>
+    </target>
 
 	
 	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" depends="compile-all" >

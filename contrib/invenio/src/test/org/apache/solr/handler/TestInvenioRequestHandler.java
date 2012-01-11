@@ -55,11 +55,10 @@ public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 		lrf = h.getRequestFactory("standard", 0, 20);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "unchecked" })
 	public void testSorting() throws Exception {
 		SolrCore core = h.getCore();
 
-		InvenioRequestHandler handler = new InvenioRequestHandler();
 
 		assertU(adoc("id", "10", "title", "test", "val_s1", "aaa"));
 		assertU(adoc("id", "11", "title", "test", "val_s1", "bbb"));

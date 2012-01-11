@@ -259,8 +259,9 @@
 
 	<!-- Compiles all java classes -->
 	<target name="compile" depends="config-build">
-		<compile srcdir="${src.dir.java}" destdir="${classes.dir}" classpathref="montysolr.classpath">
+		<compile srcdir="${src.dir.java}" destdir="${classes.dir}">
 			<classpath path="${jcc_egg}/jcc/classes"/>
+			<classpath refid="montysolr.classpath"/>
 		</compile>
 	</target>
 

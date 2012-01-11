@@ -54,7 +54,6 @@ public class MontySolrBridge implements PythonBridge {
 	 * to the remote site over the JNI/JCC bridge
 	 * @param message
 	 */
-	@Override
 	public void sendMessage(PythonMessage message) {
 		PythonVM vm = PythonVM.get();
 		vm.acquireThreadState();
@@ -68,7 +67,6 @@ public class MontySolrBridge implements PythonBridge {
 	 * The main method for chaning Python environment
 	 * @param pythonString
 	 */
-	@Override
 	public void evalCommand(String pythonString) {
 		PythonVM vm = PythonVM.get();
 		vm.acquireThreadState();

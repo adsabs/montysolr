@@ -1,6 +1,5 @@
 package org.apache.lucene.search;
 
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Similarity;
@@ -43,17 +42,13 @@ public class InvenioQuery extends Query {
 	protected String pythonResponder = null;
 	
 	public InvenioQuery(Query query, String idField, String searchField) {
-		super();
 		this.query = query;
 		this.idField = idField;
 		this.searchField = searchField;
 	}
 	
 	public InvenioQuery(Query query, String idField, String searchField, String pythonResponder) {
-		super();
-		this.query = query;
-		this.idField = idField;
-		this.searchField = searchField;
+		this(query, idField, searchField);
 		this.pythonResponder = pythonResponder;
 	}
 
