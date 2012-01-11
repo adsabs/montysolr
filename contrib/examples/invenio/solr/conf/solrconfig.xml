@@ -1550,7 +1550,7 @@
   <!-- Handler that keeps Invenio in-sync on request -->
   <requestHandler name="/invenio/update" class="solr.InvenioKeepRecidUpdated" default="false">
      <lst name="defaults">
-       <str name="inveniourl">http://localhost/search</str>
+       <str name="inveniourl">${solr.inveniourl:http://localhost/search}</str>
        <!-- str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
        <!--  <str name="inveniourl">http://inspirehep.net/search</str> -->
        <str name="importurl">http://localhost:8983/solr/invenio/import?command=full-import&amp;dirs=</str>

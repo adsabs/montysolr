@@ -66,11 +66,10 @@
      -->
 	<property name="montysolr.classes" value="
 		invenio.montysolr.jni.MontySolrBridge
+		invenio.montysolr.jni.MontySolrVM
 		invenio.montysolr.jni.PythonBridge
 		invenio.montysolr.jni.PythonMessage
-		invenio.montysolr.util.InvenioBitSet
 		invenio.montysolr.JettyRunner
-		org.apache.solr.util.DictionaryCache
 		" />
 	<property name="jcc.build" value="${montysolr.classes}" />
 	<property name="jcc.packages" value="

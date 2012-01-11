@@ -1,27 +1,96 @@
-In order to install MontySolr on a SLC5 machine (and take advantage of the multiprocessing module of Python v.2.6 and higher), we must do the following:
+In order to install MontySolr on a SLC5 machine (and take advantage of the multiprocessing module of Python v.2.6 and higher), certain packages must be installed:
 
 
+== GLOBAL PREREQUISITIES ==
 
-sudo yum install python26
-sudo yum install python26-devel.x86_64
-sudo yum install java-1.6.0-openjdk-devel.x86_64
-sudo yum install python26-distribute.noarch
+sudo yum install python26 python26-devel.x86_64 python-setuptools.noarch \
+	python26-distribute.noarch java-1.6.0-openjdk-devel.x86_64 \
+	ant.x86_64 ant-junit.x86_64 git
 
-sudo ln -f /usr/bin/python2.6 /usr/local/bin/python   # optional, changes the default python (log in/out to take effect)
+# changes the default python (optional)
 sudo /usr/sbin/update-alternatives --config python
-
-
-cd /opt
-svn co http://svn.apache.org/repos/asf/lucene/pylucene/tags/pylucene_3_1_0
-
-cd pylucene_3_1_0/jcc
-export USE_DISTUTILS
-export JCC_JDK=/usr/lib/jvm/java-openjdk
-python setup.py build
-
-sudo env JCC_JDK=$JCC_JDK python2.6 setup.py install  # note: root has different environtment, so we must pass JCC_JDK and use python2.6
-
-
 
 # optional
 sudo yum install python-pip.noarch
+
+
+
+== JCC/PYLUCENE PREREQUISITIES ==
+
+cd /opt
+svn co http://svn.apache.org/repos/asf/lucene/pylucene/tags/pylucene_3_1_0
+cd pylucene_3_1_0/jcc
+export USE_DISTUTILS
+export JCC_JDK=/usr/lib/jvm/java-openjdk
+python2.6 setup.py build
+sudo env JCC_JDK=$JCC_JDK python2.6 setup.py install 
+
+
+
+
+# if you get a message that setuptools needs to be patched
+
+cp -r /usr/lib/python2.6/site-packages/setuptools /tmp
+sudo patch -d /tmp -Nup0 < /opt/pylucene_3_1_0/jcc/jcc/patches/patch.43.0.6c11
+# if it fails, then
+vim /tmp/setuptools/command/build_ext.py
+
+around line 85
+-------%<------------
+    def get_ext_filename(self, fullname):
+        filename = _build_ext.get_ext_filename(self,fullname)
+        if fullname not in self.ext_map:
+            return filename
+        ext = self.ext_map[fullname]
+        if isinstance(ext,Library):
+            if ext.force_shared and not use_stubs:
+                _libtype = 'shared'
+            else:
+                _libtype = libtype
+            fn, ext = os.path.splitext(filename)
+            return self.shlib_compiler.library_filename(fn,_libtype)
+        elif use_stubs and ext._links_to_dynamic:
+            d,fn = os.path.split(filename)
+            return os.path.join(d,'dl-'+fn)
+        else:
+            return filename
+-------%<------------
+sudo cp -r /tmp/setuptools/* /usr/lib/python2.6/site-packages/setuptools
+
+
+
+# for pylucene
+
+cd ../
+vim Makefile
+-------%<------------
+PREFIX_PYTHON=/usr
+ANT=ant
+PYTHON=$(PREFIX_PYTHON)/bin/python2.6
+JCC=$(PYTHON) -m jcc.__main__ --shared
+NUM_FILES=3
+-------%<------------
+make
+sudo make install
+
+
+== MONTYSOLR INSTALLATION ==
+
+
+cd /opt
+git clone git@github.com:romanchyla/montysolr.git   (or read-only access: git://github.com:romanchyla/montysolr.git)
+vim build.properties
+-------%<------------
+jcc=-m jcc.__main__
+-------%<------------
+cd montysolr.git
+ant build-all
+cd /opt/montysolr/contrib/antlrqueryparser
+ant
+cd /opt/montysolr/contrib/invenio
+ant
+cd /opt/montysolr/contrib/seman
+ant
+cd /opt/montysolr/contrib/examples
+ant run-configured -Dprofile=normal.profile -Dename=invenio
+
