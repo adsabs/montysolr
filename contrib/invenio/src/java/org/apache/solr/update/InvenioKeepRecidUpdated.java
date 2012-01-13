@@ -476,7 +476,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			PythonMessage message = MontySolrVM.INSTANCE
 					.createMessage(pythonFunctionName)
 					.setSender(this.getClass().getSimpleName())
-					.setSolrQueryRequest(req).setSolrQueryResponse(rsp);
+					.setParam("request", req)
+					.setParam("response", rsp);
 			
 			if (lastRecid != null) message.setParam(LAST_RECID, lastRecid);
 			if (lastUpdate != null) message.setParam(LAST_UPDATE, lastUpdate);

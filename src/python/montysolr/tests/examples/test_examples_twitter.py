@@ -29,8 +29,8 @@ class Test(MontySolrTestCase):
 
         message = sj.PythonMessage('twitter_api') \
                     .setSender('TwitterAPIHandler') \
-                    .setSolrQueryResponse(rsp) \
-                    .setSolrQueryRequest(req)
+                    .setParam('response', rsp) \
+                    .setParam('request', req)
 
         self.bridge.receive_message(message)
 

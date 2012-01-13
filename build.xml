@@ -382,8 +382,7 @@ lucene.version=${lucene.version}
     ==================================================================
     -->
 
-
-	<target name="build-all" depends="examples,build-solr,build"
+	<target name="build-all" depends="examples,build-solr,build,build-contrib"
 		description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
 
 	<target name="build" depends="config-build,compile-montysolr-egg,unzip-egg"
@@ -443,7 +442,16 @@ lucene.version=${lucene.version}
 
 	<target name="build-solr" depends="config-build,compile-solr-egg,unzip-solr"
 	           description="Build separately the Python egg of Solr"/>
-
+    
+    <target name="build-contrib" >
+    	<apply executable="ant" parallel="false">
+    	  <arg value="build-all"/>
+    	  <arg value="-f"/>
+    	  <fileset dir="${common.dir}/contrib">
+    	  	<include name="**/build.xml"/>
+	  	  </fileset>
+    	</apply>
+    </target>
 
 	<target name="compile-solr-egg" depends="config-build">
 		<mkdir dir="${build.dir}" />

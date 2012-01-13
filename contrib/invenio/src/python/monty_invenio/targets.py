@@ -21,51 +21,63 @@ import time
 
 
 def format_search_results(message):
-    '''Returns the citation summary for the given recids'''
-    req = message.getSolrQueryRequest()
-    rsp = message.getSolrQueryResponse()
+    '''Returns the citation summary for the given recids. This method
+    inserts the Invenio formatted citation summary directly into the
+    response object
+    
+    @var message: 
+        recids: Java int[]
+        req: SolrQueryRequest
+        rsp: SolrQueryResponse
+    
+    '''
+    rsp = sj.SolrQueryResponse.cast_(message.getParam('response'))
+    
     recids = message.getParamArray_int("recids")
     start = time.time()
-    message.threadInfo("start: citation_summary")
+    if config.MONTYSOLR_BUGDEBUG:
+        message.threadInfo("start: citation_summary")
     c_time = time.time()
     iset = intbitset(recids)
-    message.threadInfo("int[] converted to intbitset in: %s, size=%s" % (time.time() - c_time, len(iset)))
+    if config.MONTYSOLR_BUGDEBUG:
+        message.threadInfo("int[] converted to intbitset in: %s, size=%s" % (time.time() - c_time, len(iset)))
     (wid, (output)) = api_calls.dispatch('citation_summary', iset, 'hcs', 'en', '', '')
-    message.threadInfo("end: citation_summary pid=%s, finished in %s" % (wid, time.time() - start))
+    if config.MONTYSOLR_BUGDEBUG:
+        message.threadInfo("end: citation_summary pid=%s, finished in %s" % (wid, time.time() - start))
     rsp.add("inv_response", output)
 
-
-def format_search_results_local(message):
-    '''TODO: unittest'''
-    req = message.getSolrQueryRequest()
-    rsp = message.getSolrQueryResponse()
-
-    recids = message.getParamArray_int("recids")
-    out = StringIO()
-    # TODO: pass the ln and other arguments
-    (wid, (output,)) = api_calls.dispatch("sumarize_records", intbitset(recids), 'hcs', 'en', '', '', out)
-    if not output:
-        out.seek(0)
-        output = out.read()
-    del out
-    rsp.add("inv_response", output)
 
 
 
 def perform_request_search_bitset(message):
-    '''Search and use bitset for exchange of data'''
+    '''Search and use bitset for exchange of data
+    @param query: (str) query string
+    @param max_len: (int) how many max results to return
+    @param offset: (int) start from the xth element
+    '''
     query = unicode(message.getParam("query")).encode("utf8")
+    max_len = message.getParam_int('max_len', 25)
+    offset = message.getParam_int('offset', 0)
+    
     #offset, hit_dump, total_matches, searcher_id = searching.multiprocess_search(query, 0)
-    (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, 0)
+    (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, max_len=max_len, offset=offset)
     #message.threadInfo("query=%s, total_hits=%s" % (query, total_matches))
     message.setResults(sj.JArray_byte(intbitset(hits).fastdump()))
 
 
+
 def perform_request_search_ints(message):
-    '''Search and use ints for exchange of data'''
+    '''Search and use ints for exchange of data
+    @param query: (str) query string
+    @param max_len: (int) how many max results to return
+    @param offset: (int) start from the xth element
+    '''
     query = unicode(message.getParam("query")).encode("utf8")
+    max_len = message.getParam_int('max_len', 25)
+    offset = message.getParam_int('offset', 0)
+        
     #offset, hit_list, total_matches, searcher_id = searching.multiprocess_search(query, 0)
-    (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, 0)
+    (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, max_len=max_len, offset=offset)
     if len(hits):
         message.setResults(sj.JArray_int(hits))
     else:
@@ -124,9 +136,9 @@ def get_citation_dict(message):
 
 def sort_and_format(message):
     '''Calls sorting XOR formatting over the result set'''
-    req = message.getSolrQueryRequest()
-    rsp = message.getSolrQueryResponse()
-
+    
+    start = time.time()
+    
     recids = intbitset(message.getParamArray_int("recids"))
     kwargs = sj.HashMap.cast_(message.getParam('kwargs'))
 
@@ -145,15 +157,16 @@ def sort_and_format(message):
                 pass
         kws[str(kset[i])] = v
         i += 1
-
-    start = time.time()
-    message.threadInfo("start: citation_summary")
-    c_time = time.time()
-
-    message.threadInfo("int[] converted to intbitset in: %s, size=%s" % (time.time() - c_time, len(recids)))
+    
+    
+    if config.MONTYSOLR_BUGDEBUG:
+        message.threadInfo("start: citation_summary")
+        message.threadInfo("int[] converted to intbitset in: %s, size=%s" % (time.time() - start, len(recids)))
+        
     (wid, (output)) = api_calls.dispatch('sort_and_format', recids, kws)
-
-    message.threadInfo("end: citation_summary pid=%s, finished in %s" % (wid, time.time() - start))
+    
+    if config.MONTYSOLR_BUGDEBUG:
+        message.threadInfo("end: citation_summary pid=%s, finished in %s" % (wid, time.time() - start))
 
     if isinstance(output, list):
         message.setResults(sj.JArray_int(output))

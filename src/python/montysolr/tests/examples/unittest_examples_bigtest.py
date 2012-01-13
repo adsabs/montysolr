@@ -42,8 +42,8 @@ class Test(MontySolrTestCase):
         rsp = sj.SolrQueryResponse()
 
         message = sj.PythonMessage('bigtest') \
-                    .setSolrQueryResponse(rsp) \
-                    .setSolrQueryRequest(req)
+                    .setParam('response', rsp) \
+                    .setParam('request', req)
 
         self.bridge.receive_message(message)
 
@@ -67,8 +67,8 @@ class Test(MontySolrTestCase):
         rsp = sj.SolrQueryResponse()
 
         message = sj.PythonMessage('bigtest') \
-                    .setSolrQueryResponse(rsp) \
-                    .setSolrQueryRequest(req)
+                    .setParam('response', rsp) \
+                    .setParam('request', req)
 
         self.bridge.receive_message(message)
 
@@ -92,8 +92,8 @@ class Test(MontySolrTestCase):
         rsp = sj.SolrQueryResponse()
 
         message = sj.PythonMessage('bigtest') \
-                    .setSolrQueryResponse(rsp) \
-                    .setSolrQueryRequest(req)
+                    .setParam('response', rsp) \
+                    .setParam('request', req)
 
         self.bridge.receive_message(message)
 
@@ -117,8 +117,8 @@ class Test(MontySolrTestCase):
         rsp = sj.SolrQueryResponse()
 
         message = sj.PythonMessage('bigtest') \
-                    .setSolrQueryResponse(rsp) \
-                    .setSolrQueryRequest(req)
+                    .setParam('response', rsp) \
+                    .setParam('request', req)
 
         self.bridge.receive_message(message)
 
@@ -142,8 +142,8 @@ class Test(MontySolrTestCase):
         rsp = sj.SolrQueryResponse()
 
         message = sj.PythonMessage('bigtest') \
-                    .setSolrQueryResponse(rsp) \
-                    .setSolrQueryRequest(req)
+                    .setParam('response', rsp) \
+                    .setParam('request', req)
 
         self.bridge.receive_message(message)
 
@@ -171,8 +171,8 @@ class Test(MontySolrTestCase):
         rsp = sj.SolrQueryResponse()
 
         message = sj.PythonMessage('bigtest') \
-                    .setSolrQueryResponse(rsp) \
-                    .setSolrQueryRequest(req)
+                    .setParam('response', rsp) \
+                    .setParam('request', req)
 
         self.bridge.receive_message(message)
         res = sj.JArray_byte.cast_(message.getResults())

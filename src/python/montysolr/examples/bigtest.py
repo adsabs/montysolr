@@ -12,8 +12,8 @@ import random
 import time
 
 def bigtest(message):
-    req = message.getSolrQueryRequest()
-    rsp = message.getSolrQueryResponse()
+    req = sj.SolrQueryRequest.cast_(message.getParam('request'))
+    rsp = sj.SolrQueryResponse.cast_(message.getParam('response'))
 
     params = req.getParams()
     action = params.get("action")

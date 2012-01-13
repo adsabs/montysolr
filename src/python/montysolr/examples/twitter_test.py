@@ -10,8 +10,8 @@ from montysolr.utils import MontySolrTarget
 import twitter
 
 def twitter_api(message):
-    req = message.getSolrQueryRequest()
-    rsp = message.getSolrQueryResponse()
+    req = sj.SolrQueryRequest.cast_(message.getParam('request'))
+    rsp = sj.SolrQueryResponse.cast_(message.getParam('response'))
 
     params = req.getParams()
     core = sj.SolrCore.cast_(req.getCore())

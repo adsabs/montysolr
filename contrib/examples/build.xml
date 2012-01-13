@@ -113,13 +113,16 @@
 	</path>
 
 
-	<target name="default" depends="build-all">
+	<target name="default" depends="build-all-examples">
 
 	</target>
 
-	<target name="build-all" description="Assembles all examples">
+	<target name="build-all-examples" description="Assembles all examples">
 		<assemble-example example-name="invenio" montysolr-example="${basedir}/invenio" solr-example="${prop.solr.real.location}/example"/>
 	</target>
+	
+	<!-- does nothing, because build-all is called from the main build and at that time we don't have all jars for contribs yet -->
+    <target name="build-all"  depends="" />
 
 
 	<target name="build-one">
@@ -185,6 +188,7 @@
 		   />
 	</target>
 
-
+	
+	    
 
 </project>

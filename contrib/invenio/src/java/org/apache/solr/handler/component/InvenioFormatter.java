@@ -103,8 +103,8 @@ public class InvenioFormatter extends SearchComponent
 
 			PythonMessage message = MontySolrVM.INSTANCE.createMessage("sort_and_format")
 				.setSender("InvenioFormatter")
-				.setSolrQueryRequest(req)
-				.setSolrQueryResponse(rsp)
+				.setParam("request", req)
+				.setParam("response", rsp)
 				.setParam("recids", recids)
 				.setParam("kwargs", invParams);
 

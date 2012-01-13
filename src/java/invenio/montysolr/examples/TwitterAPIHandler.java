@@ -19,8 +19,8 @@ public class TwitterAPIHandler extends RequestHandlerBase{
 		PythonMessage message = MontySolrVM.INSTANCE
 			.createMessage("twitter_api")
 			.setSender(this.getClass().getSimpleName())
-			.setSolrQueryRequest(req)
-			.setSolrQueryResponse(rsp);
+			.setParam("request", req)
+			.setParam("response", rsp);
 
 		MontySolrVM.INSTANCE.sendMessage(message);
 

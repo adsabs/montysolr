@@ -119,5 +119,9 @@
 	<target name="test" depends="default" >
         <antcall target="common.test" inheritRefs="true"/>
     </target>
+	
+	<target name="build-all"  depends="clean,default">
+	    
+    </target>
 
 </project>

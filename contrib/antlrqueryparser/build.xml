@@ -190,7 +190,9 @@
 			  />
 	</target>
 
+	<target name="build-all"  depends="clean,default,compile-all">
 	
+	</target>
 
 	<!--
 	============================================================================================

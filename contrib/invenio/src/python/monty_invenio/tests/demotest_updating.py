@@ -181,7 +181,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('last_recid', 30)
         self.bridge.sendMessage(message)
 
@@ -204,7 +204,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('last_recid', 0) #test we can deal with extreme cases
         self.bridge.sendMessage(message)
 
@@ -219,7 +219,7 @@ class Test(InvenioDemoTestCaseLucene):
         
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('max_records', 10) \
                     .setParam('last_recid', 0) #test we can deal with extreme cases
         self.bridge.sendMessage(message)
@@ -241,7 +241,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('last_recid', 9999999)
         self.bridge.sendMessage(message)
 
@@ -250,7 +250,7 @@ class Test(InvenioDemoTestCaseLucene):
         
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('last_recid', int(self.max_id))
         self.bridge.sendMessage(message)
 
@@ -264,7 +264,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('last_recid', -1)
         self.bridge.sendMessage(message)
 
@@ -300,7 +300,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('last_recid', 30)
         self.bridge.sendMessage(message)
 
@@ -337,7 +337,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('last_recid', 30)
         self.bridge.sendMessage(message)
         
@@ -366,7 +366,7 @@ class Test(InvenioDemoTestCaseLucene):
         
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('last_recid', deleted_recid) \
                     .setParam('mod_date', last_updated)
                     

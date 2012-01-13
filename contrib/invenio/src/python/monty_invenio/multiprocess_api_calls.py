@@ -76,7 +76,9 @@ bcs.get_citation_dict("reversedict")
 # ======================================================
 
 def dispatch(func_name, *args, **kwargs):
-    """Dispatches the call to the remote worker"""
+    """Dispatches the call to a remote worker
+    @return: (worker_id, result)
+    """
     g = globals()
     func_name_pre = '%s_local_pre' % func_name
     func_name_post = '%s_local_post' % func_name

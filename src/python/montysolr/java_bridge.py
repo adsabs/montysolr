@@ -35,13 +35,9 @@ class SimpleBridge(sj.MontySolrBridge):
 
     def receive_message(self, message):
         if config.MONTYSOLR_KILLLOAD:
-            req = message.getSolrQueryRequest()
-            if req:
-                params = req.getParams()
-                if params.get("reload"):
-                    message.threadInfo('Reloading ourselves mylord!', self._handler_module)
-                    self._handler_module = reload(self._handler_module)
-                    self._handler = self._handler_module.Handler
+            message.threadInfo('Reloading ourselves mylord!', self._handler_module)
+            self._handler_module = reload(self._handler_module)
+            self._handler = self._handler_module.Handler
         if config.MONTYSOLR_BUGDEBUG:
             start = time.time()
             self._handler.handle_message(message)

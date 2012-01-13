@@ -33,5 +33,9 @@
     </path>
 	
 	<target name="test" depends="compile, common.test" />
+	
+	<target name="build-all"  depends="clean,default">
+	    
+    </target>
 
 </project>

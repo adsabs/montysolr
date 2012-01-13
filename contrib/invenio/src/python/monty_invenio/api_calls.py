@@ -93,6 +93,7 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
     
     return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, recid, str(mod_date)
 
+
 def citation_summary(recids, of, ln, p, f):
     out = ReqStringIO()
     x = search_engine_summarizer.summarize_records(recids, of, ln, p, f, out)
@@ -103,8 +104,8 @@ def citation_summary(recids, of, ln, p, f):
         output = out.read()
     return output
 
-def search(q, max_len=25):
-    offset = 0
+
+def search(q, max_len=25, offset=0):
     #hits = search_engine.search_pattern_parenthesised(None, q)
     hits = search_engine.perform_request_search(None, p=q)
     total_matches = len(hits)
@@ -113,6 +114,7 @@ def search(q, max_len=25):
         return [offset, hits[:max_len], total_matches]
     else:
         return [offset, hits, total_matches]
+
 
 def sort_and_format(hits, kwargs):
 

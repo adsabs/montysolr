@@ -27,7 +27,8 @@ class Test(InvenioDemoTestCaseLucene):
         self.setSolrHome(os.path.join(self.getBaseDir(), 'build/contrib/examples/invenio/solr'))
         self.setDataDir(os.path.join(self.getBaseDir(), 'build/contrib/examples/invenio/solr/data'))
         InvenioDemoTestCaseLucene.setUp(self)
-        self.addTargets('monty_invenio.targets')
+        if not self.hasTarget("InvenioQuery:perform_request_search_ints"):
+            self.addTargets('monty_invenio.targets')
 
 
     def test_dict_cache(self):
@@ -49,7 +50,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('format_search_results') \
                     .setSender('InvenioFormatter') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('recids', sj.JArray_int(range(0, 93)))
         self.bridge.sendMessage(message)
 
@@ -67,7 +68,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('perform_request_search_ints') \
                     .setSender('InvenioQuery') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('query', 'ellis')
         self.bridge.sendMessage(message)
 
@@ -84,7 +85,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('perform_request_search_bitset') \
                     .setSender('InvenioQuery') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('query', 'ellis')
         self.bridge.sendMessage(message)
 
@@ -107,7 +108,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('sort_and_format') \
                     .setSender('InvenioFormatter') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('recids', sj.JArray_int(range(0, 93))) \
                     .setParam("kwargs", kwargs)
 
@@ -129,7 +130,7 @@ class Test(InvenioDemoTestCaseLucene):
 
         message = self.bridge.createMessage('sort_and_format') \
                     .setSender('InvenioFormatter') \
-                    .setSolrQueryResponse(rsp) \
+                    .setParam('response', rsp) \
                     .setParam('recids', sj.JArray_int(range(0, 93))) \
                     .setParam("kwargs", kwargs)
 

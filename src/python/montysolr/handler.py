@@ -34,8 +34,10 @@ class Handler(object):
             
         
     def has_target(self, message_id):
+        """Tests whether a handler with this name is already registered"""
         return message_id in self._db
-
+    
+    
     def get_target(self, message):
         """Must return only a callables that receive
         a PythonMessage object"""

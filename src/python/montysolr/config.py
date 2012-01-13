@@ -1,9 +1,9 @@
 
 ## Show error messages and log prints
-MONTYSOLR_BUGDEBUG = True
+MONTYSOLR_BUGDEBUG = False
 
-## Reload handler code on every run
-MONTYSOLR_KILLLOAD = True
+## Reload handler code on every invocation
+MONTYSOLR_KILLLOAD = False
 
 ## Default bridge that is used for projects
 MONTYSOLR_HANDLER = 'montysolr.sequential_handler'
