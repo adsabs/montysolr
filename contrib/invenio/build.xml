@@ -54,7 +54,6 @@
             <include name="**/montysolr-antlrqueryparser*.jar"/>
         </fileset>
         
-        <pathelement location="${prop.jcc_egg}/jcc/classes"/>
         <pathelement location="${common.dir}/build/contrib/antlrqueryparser/classes/test"/>
         
         <fileset dir="lib">

@@ -35,8 +35,8 @@
 	<!-- if you extend the classpath refid in one contrib's build.xml (add JARs), use this as basis: -->
 	<path id="base.classpath">
 		<path refid="common.classpath"/>
-
 		<pathelement path="${project.classpath}"/>
+		<pathelement location="${prop.jcc_egg}/jcc/classes" />
 	</path>
 
 	<!-- default classpath refid, can be overridden by contrib's build.xml (use the above base.classpath as basis): -->

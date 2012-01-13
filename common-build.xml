@@ -26,7 +26,12 @@
 	<dirname file="${ant.file.common}" property="common.dir"/>
 
 	<property name="junit.includes" value="**/Test*.java"/>
-
+    
+	<condition property="tests.sequential" value="true">
+        <not>
+            <isset property="tests.parallel"/>
+        </not>
+    </condition>
 
 	<property name="junit.jar" value="junit-4.7.jar"/>
 	<property name="junit-location.jar" value="${common.dir}/lib/${junit.jar}"/>
