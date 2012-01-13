@@ -26,12 +26,12 @@
 	<dirname file="${ant.file.common}" property="common.dir"/>
 
 	<property name="junit.includes" value="**/Test*.java"/>
-    
+
 	<condition property="tests.sequential" value="true">
-        <not>
-            <isset property="tests.parallel"/>
-        </not>
-    </condition>
+		<not>
+			<isset property="tests.parallel"/>
+		</not>
+	</condition>
 
 	<property name="junit.jar" value="junit-4.7.jar"/>
 	<property name="junit-location.jar" value="${common.dir}/lib/${junit.jar}"/>
@@ -73,8 +73,8 @@
 
 	<path id="common.test.classpath">
 		<dirset dir="${common.dir}/build/solr-download">
-            <include name = "**/solr/src/test-files"/>
-        </dirset>
+			<include name = "**/solr/src/test-files"/>
+		</dirset>
 
 		<path refid="common.classpath"/>
 		<path refid="junit-path"/>
@@ -93,8 +93,8 @@
 		<dirset dir="${common.dir}/build/solr-download">
 			<include name = "**/solr/build/tests"/>
 		</dirset>
-		
-		
+
+
 	</path>
 
 	<path id="common.junit.classpath">
@@ -685,11 +685,11 @@
             debug="${javac.debug}"
             source="@{javac.source}"
             target="@{javac.target}">
-    		<nested/>
-    		<!-- <compilerarg line="-Xmaxwarns 10000000"/>
+				<nested/>
+				<!-- <compilerarg line="-Xmaxwarns 10000000"/>
             <compilerarg line="-Xmaxerrs 10000000"/> -->
-    		<!-- for generics in Java 1.5: -->
-    		<compilerarg line="-Xlint -Xlint:-deprecation -Xlint:-serial"/>
+				<!-- for generics in Java 1.5: -->
+				<compilerarg line="-Xlint -Xlint:-deprecation -Xlint:-serial"/>
 			</javac>
 		</sequential>
 	</macrodef>
@@ -741,54 +741,54 @@
 	</sequential>
 </macrodef>
 
-	<macrodef name="assemble-example">
-	        <attribute name="montysolr-example"/>
-	        <attribute name="solr-example"/>
-		<attribute name="example-name"/>
-		<attribute name="build-dir" default="${build.dir}"/>
-	        <sequential>
-	        	<delete dir="@{build-dir}/@{example-name}" failonerror="false"/>
-	        	
-	        	<mkdir dir="@{build-dir}/@{example-name}"/>
-	        	
-	        	<!-- first copy the montysolr files -->
-    	        <copy todir="@{build-dir}/@{example-name}" overwrite="true">
-    	            <fileset dir="@{montysolr-example}">
-    	                <include name="**/**" />
-    	            </fileset>
-    	        </copy>
-	        	
-	        	<!-- then the remaining solr files -->
-                <copy todir="@{build-dir}/@{example-name}" overwrite="false">
-                    <fileset dir="@{solr-example}">
-                        <include name="**/**" />
-                    </fileset>
-                </copy>
-	        	
-    	        <echo>
+<macrodef name="assemble-example">
+	<attribute name="montysolr-example"/>
+	<attribute name="solr-example"/>
+	<attribute name="example-name"/>
+	<attribute name="build-dir" default="${build.dir}"/>
+	<sequential>
+		<delete dir="@{build-dir}/@{example-name}" failonerror="false"/>
+
+		<mkdir dir="@{build-dir}/@{example-name}"/>
+
+		<!-- first copy the montysolr files -->
+		<copy todir="@{build-dir}/@{example-name}" overwrite="true">
+			<fileset dir="@{montysolr-example}">
+				<include name="**/**" />
+			</fileset>
+		</copy>
+
+		<!-- then the remaining solr files -->
+		<copy todir="@{build-dir}/@{example-name}" overwrite="false">
+			<fileset dir="@{solr-example}">
+				<include name="**/**" />
+			</fileset>
+		</copy>
+
+		<echo>
     	          Assembled @{example-name} at @{build-dir}/@{example-name}
     	       </echo>
-	        	
-	        </sequential>
-	    </macrodef>
-	
-    <macrodef name="run-montysolr">
-        <attribute name="classpath" />
-    	<attribute name="classpathref" />
-    	<attribute name="jvmargs" />
-    	<attribute name="webroot" />
-    	<attribute name="context" default="/solr" />
-    	<attribute name="arguments" default="" />
-    	<attribute name="solr-home-dir" />
-    	<attribute name="solr-data-dir" />
-    	<attribute name="jcc-classpath" default="${prop.jcc_egg}"/>
-    	<attribute name="ignore-environment" default="true" />
-    	<attribute name="montysolr-class" default="invenio.montysolr.JettyRunnerPythonVM" />
-    	<attribute name="pythonpath" default="${prop.python_path}"/>
-    	<attribute name="basedir" default="${basedir}"/>
-    	
-        <sequential>
-        	<echo level="verbose">
+
+	</sequential>
+</macrodef>
+
+<macrodef name="run-montysolr">
+	<attribute name="classpath" />
+	<attribute name="classpathref" />
+	<attribute name="jvmargs" />
+	<attribute name="webroot" />
+	<attribute name="context" default="/solr" />
+	<attribute name="arguments" default="" />
+	<attribute name="solr-home-dir" />
+	<attribute name="solr-data-dir" />
+	<attribute name="jcc-classpath" default="${prop.jcc_egg}"/>
+	<attribute name="ignore-environment" default="true" />
+	<attribute name="montysolr-class" default="invenio.montysolr.JettyRunnerPythonVM" />
+	<attribute name="pythonpath" default="${prop.python_path}"/>
+	<attribute name="basedir" default="${basedir}"/>
+
+	<sequential>
+		<echo level="verbose">
         	Running MontySolr as:
         	========
         		
@@ -806,7 +806,7 @@
         	    --context @{context}
         	    @{arguments}
 	        </echo>
-	        <java classpath="@{classpath}"
+		<java classpath="@{classpath}"
 	            classpathref="@{classpathref}"
 	            fork="true"
 	            newenvironment="@{ignore-environment}"
@@ -814,20 +814,46 @@
 	        	dir="@{basedir}"
 	            >
 
-	            <env key="PYTHONPATH" path="@{pythonpath}" />
-	            <jvmarg line="-Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir}"/>
-	            <jvmarg line="-Djava.library.path=@{jcc-classpath}"/>
-	            <jvmarg line="@{jvmargs}"/>
-	            <arg value="--webroot"/>
-	            <arg value="@{webroot}"/>
-	            <arg value="--context"/>
-	            <arg value="@{context}"/>
-	            <arg line="@{arguments}"/>
-	        </java>
-            
+			<env key="PYTHONPATH" path="@{pythonpath}" />
+			<jvmarg line="-Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir}"/>
+			<jvmarg line="-Djava.library.path=@{jcc-classpath}"/>
+			<jvmarg line="@{jvmargs}"/>
+			<arg value="--webroot"/>
+			<arg value="@{webroot}"/>
+			<arg value="--context"/>
+			<arg value="@{context}"/>
+			<arg line="@{arguments}"/>
+		</java>
+
+	</sequential>
+</macrodef>
+
+	<macrodef name="run-python-unittests">
+        <attribute name="srcdir"/>
+        <attribute name="python"/>
+        <attribute name="args" default="${javac.source}"/>
+        <attribute name="javac.target" default="${javac.target}"/>
+        <element name="nested" implicit="yes" optional="yes"/>
+
+        <sequential>
+            <mkdir dir="@{destdir}"/>
+            <javac
+            includeAntRuntime="${javac.includeAntRuntime}"
+            encoding="${build.encoding}"
+            srcdir="@{srcdir}"
+            destdir="@{destdir}"
+            deprecation="${javac.deprecation}"
+            debug="${javac.debug}"
+            source="@{javac.source}"
+            target="@{javac.target}">
+                <nested/>
+                <!-- <compilerarg line="-Xmaxwarns 10000000"/>
+            <compilerarg line="-Xmaxerrs 10000000"/> -->
+                <!-- for generics in Java 1.5: -->
+                <compilerarg line="-Xlint -Xlint:-deprecation -Xlint:-serial"/>
+            </javac>
         </sequential>
-    </macrodef>
-	
-	
+    </macrodef>	
+
 
 </project>

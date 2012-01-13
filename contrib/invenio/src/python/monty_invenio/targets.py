@@ -260,7 +260,7 @@ def montysolr_targets():
            )
 
     num_cpus = 0
-    
+    global api_calls
     # start multiprocessing with that many processes in the pool
     if str(config.MONTYSOLR_MAX_WORKERS) == '-1':
         num_cpus = multi_api_calls.start_multiprocessing(None) # detect no of cpus automatically
