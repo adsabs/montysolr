@@ -1,0 +1,80 @@
+<dataConfig>
+    <script><![CDATA[
+            function pubdate_sort(row) {
+            	var date_string = row.get('publication_date');
+            	row.put('publication_date_sort', date_string.replace('-', ''));
+            	return row
+            }
+            function bibstem(row) {
+            	var bibcode = row.get('bibcode');
+            	row.put('bibstem', bibcode.substr(4,5));
+            	return row;
+            }
+    ]]></script>
+    <dataSource type="URLDataSource" />
+    <document>
+        <entity name="adslabs"
+            pk="id"
+            url="${dataimporter.request.url}"
+            processor="XPathEntityProcessor"
+            transformer="TemplateTransformer,script:pubdate_sort,script:bibstem,DateFormatTransformer"
+            forEach="/collection/record"
+            flatten="false"
+            >
+        
+        <field column="id" 
+            xpath="/collection/record/controlfield[@tag='001']" />
+            
+        <field column="bibcode" 
+            xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
+            
+        <field column="reportnumber"        
+            xpath="/collection/record/datafield[@tag='037']/subfield[@code='a']" />
+            
+        <field column="first_author"        
+            xpath="/collection/record/datafield[@tag='100']/subfield[@code='a']" />
+        <field column="first_author_norm"        
+            xpath="/collection/record/datafield[@tag='100']/subfield[@code='b']" />   
+        <field column="first_author_affiliation"        
+            xpath="/collection/record/datafield[@tag='100']/subfield[@code='u']" />   
+
+        <field column="author"        
+            xpath="/collection/record/datafield[@tag='700']/subfield[@code='a']" />
+        <field column="author_norm"        
+            xpath="/collection/record/datafield[@tag='700']/subfield[@code='b']" />   
+        <field column="author_affiliation"        
+            xpath="/collection/record/datafield[@tag='700']/subfield[@code='u']" />   
+
+        <field column="abstract"        
+            xpath="/collection/record/datafield[@tag='520']/subfield[@code='a']" />
+
+        <field column="title"        
+            xpath="/collection/record/datafield[@tag='245']/subfield[@code='a']" />
+        <field column="title"        
+            xpath="/collection/record/datafield[@tag='242']/subfield[@code='a']" />      
+        
+        <field column="publication"        
+            xpath="/collection/record/datafield[@tag='773']/subfield" />
+        
+        <field column="collection"        
+            xpath="/collection/record/datafield[@tag='980']/subfield[@code='a']" />
+
+        <field column="collection_type"        
+            xpath="/collection/record/datafield[@tag='690']/subfield[@code='a']" />
+
+        <field column="keyword"        
+            xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />
+            
+
+        <field column="publication_year"        
+            xpath="/collection/record/datafield[@tag='260']/subfield[@code='c']" />
+
+        <field column="publication_date" 
+            xpath="/collection/record/datafield[@tag='269']/subfield[@code='c']" />
+            
+        <field column="fulltext" template="${adslabs.bibcode}"/>
+
+        </entity>
+        
+    </document>
+</dataConfig>
