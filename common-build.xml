@@ -827,31 +827,32 @@
 
 	</sequential>
 </macrodef>
-
+    
+	<!-- a cheap unittesting routine that executes all the tests found in the folder and below -->
 	<macrodef name="run-python-unittests">
         <attribute name="srcdir"/>
         <attribute name="python"/>
-        <attribute name="args" default="${javac.source}"/>
-        <attribute name="javac.target" default="${javac.target}"/>
-        <element name="nested" implicit="yes" optional="yes"/>
+		<attribute name="test-file" default=""/>
+		<attribute name="python-path"/>
+		<attribute name="failonerror" default="true"/>
 
         <sequential>
-            <mkdir dir="@{destdir}"/>
-            <javac
-            includeAntRuntime="${javac.includeAntRuntime}"
-            encoding="${build.encoding}"
-            srcdir="@{srcdir}"
-            destdir="@{destdir}"
-            deprecation="${javac.deprecation}"
-            debug="${javac.debug}"
-            source="@{javac.source}"
-            target="@{javac.target}">
-                <nested/>
-                <!-- <compilerarg line="-Xmaxwarns 10000000"/>
-            <compilerarg line="-Xmaxerrs 10000000"/> -->
-                <!-- for generics in Java 1.5: -->
-                <compilerarg line="-Xlint -Xlint:-deprecation -Xlint:-serial"/>
-            </javac>
+        	<apply executable="@{python}" failonerror="@{failonerror}">
+                <env key="PYTHONPATH" value="@{python-path}${dist.dir}${path.separator}${env.PYTHONPATH}" />
+                <arg value="-c" />
+                <arg value="import os,sys,unittest;x=sys.argv.pop();print 'Testing ', x;a,b=os.path.split(x);sys.path.insert(0,a);m=__import__(os.path.basename(b.split('.')[0]));y=unittest.main(m)"/>
+	            <fileset dir="@{srcdir}">
+	              <include name="**/unittest_*.py"/>
+	            </fileset>
+	        </apply>
+        	
+        	<!--
+        	<exec executable="@{python}" failonerror="true">
+	            <env key="PYTHONPATH" value="@{python-path}${dist.dir}${path.separator}${env.PYTHONPATH}" />
+        		<arg value="-c" />
+        	    <arg value="x='@{test-file}';import os,sys,unittest;a,b=os.path.split(x);sys.path.insert(0,a);m=__import__(os.path.basename(b.split('.')[0]));y=unittest.main(m)" />
+        	</exec>
+        	-->
         </sequential>
     </macrodef>	
 

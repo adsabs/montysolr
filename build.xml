@@ -811,4 +811,10 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
         <echo>@${solr_home}@</echo>
        </target>
 	
+	<target name="test-python">
+	   <run-python-unittests python="${python}" python-path="/opt/invenio/lib/python:/dvt/workspace/montysolr/src/python"
+	    srcdir="${common.dir}/src/python"
+	   />
+	</target>
+	
 	</project>

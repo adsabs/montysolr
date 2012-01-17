@@ -11,39 +11,39 @@ python unittest_example_bigtest.py Test.test_bigtest01
 '''
 
 import unittest
-from montysolr_testcase import MontySolrTestCase, sj
+from montysolr.tests.montysolr_testcase import LuceneTestCase
+from montysolr.initvm import JAVA as sj
 import os
 import time
 import sys
 
 
-class Test(MontySolrTestCase):
+class Test(LuceneTestCase):
 
     def setUp(self):
         self.size = 500000
-        self.setSolrHome(os.path.join(self.getBaseDir(), 'examples/twitter/solr'))
-        self.setDataDir(os.path.join(self.getBaseDir(), 'examples/twitter/solr/data'))
         self.setHandler(self.loadHandler('montysolr.examples.bigtest'))
-        MontySolrTestCase.setUp(self)
+        LuceneTestCase.setUp(self)
 
 
 
     def test_bigtest01(self):
         '''Get int[]'''
 
-        #req = sj.QueryRequest()
+        req = sj.QueryRequest()
         size = self.size
         hm = sj.HashMap().of_(sj.String, sj.String)
         hm.put('action', 'recids_int')
         hm.put('size', str(size))
         params = sj.MapSolrParams(hm)
-        req = sj.LocalSolrQueryRequest(self.core, params)
+        #req = sj.LocalSolrQueryRequest(self.core, params)
 
         rsp = sj.SolrQueryResponse()
 
         message = sj.PythonMessage('bigtest') \
-                    .setParam('response', rsp) \
                     .setParam('request', req)
+                    #.setParam('response', rsp)
+                    
 
         self.bridge.receive_message(message)
 
