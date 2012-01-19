@@ -61,6 +61,8 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		MontySolrVM.INSTANCE.sendMessage(message);
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
+		// can't use solr log facility
+		System.err.println("Please ignore ERROR messages, if any...");
 		caught = false;
 		try {
 			message = MontySolrVM.INSTANCE.createMessage(
@@ -73,6 +75,7 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 			caught = true;
 		}
 		assertTrue(caught);
+		System.err.println("...after now ERROR messages are again relevant");
 		
 		PythonBridge ba = MontySolrVM.INSTANCE.getBridge();
 		assertSame(ba, MontySolrVM.INSTANCE.getBridge());
