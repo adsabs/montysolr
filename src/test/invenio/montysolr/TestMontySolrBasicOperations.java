@@ -20,8 +20,6 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 	public static void beforeClassMontySolrTestCase() throws Exception {
 		MontySolrSetup.init("montysolr.tests.basic.bridge.Bridge", 
 				MontySolrSetup.getMontySolrHome() + "/src/python");
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 	}
 	
 
