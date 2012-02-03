@@ -133,7 +133,9 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
           throws Exception {
     rsp.setHttpCaching(false);
     SolrParams params = req.getParams();
-    DataImporter.RequestParams requestParams = new DataImporter.RequestParams(getParamsMap(params));
+    Map<String, Object> paramsMap = getParamsMap(params);
+    paramsMap.put("url", ((String) paramsMap.get("url")).replaceAll(" ", "+"));
+    DataImporter.RequestParams requestParams = new DataImporter.RequestParams(paramsMap);
     String command = requestParams.command;
     Iterable<ContentStream> streams = req.getContentStreams();
     if(streams != null){
