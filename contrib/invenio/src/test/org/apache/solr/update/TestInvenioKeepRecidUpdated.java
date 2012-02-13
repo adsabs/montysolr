@@ -52,7 +52,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 				MontySolrSetup.getMontySolrHome() + "/src/python");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.unittest_updating");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
 	}
 	
 	@Override
