@@ -642,7 +642,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 				+ sign
 				+ "url="
 				+ java.net.URLEncoder.encode(
-					inveniourl + "?p=" + queryPart + "&rg=" + maximport + "&of=xm",
+					inveniourl + "?p=" + java.net.URLEncoder.encode(queryPart, "UTF-8") + "&rg=" + maximport + "&of=xm",
 					"UTF-8");
 
 	}
