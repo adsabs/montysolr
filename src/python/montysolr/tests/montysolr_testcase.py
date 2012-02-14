@@ -86,7 +86,7 @@ class MontySolrTestCase(unittest.TestCase):
         self.data_dir = datadir
 
     def setHandler(self, handler):
-        self.handler = handler
+        self.bridge.setHandler(handler)
         
     def getBridge(self):
         return self.bridge
@@ -95,7 +95,7 @@ class MontySolrTestCase(unittest.TestCase):
         self.bridge = bridge
 
     def getHandler(self):
-        return self.handler
+        return self.bridge.getHandler()
 
     def loadHandler(self, module_path):
         if not isinstance(module_path, list):
@@ -103,7 +103,9 @@ class MontySolrTestCase(unittest.TestCase):
         class TestHandler(handler.Handler):
             def init(self):
                 self.discover_targets(module_path)
-        return TestHandler()
+        h = TestHandler()
+        h.init()
+        return h
     
     def addSysPath(self, paths):
         if not isinstance(paths, list):
@@ -130,7 +132,7 @@ class LuceneTestCase(MontySolrTestCase):
     python part (what is called from solr)
     """
     def setUp(self):
-        self.bridge = JVMBridge
+        self.bridge = JVMBridge()
     def tearDown(self):
         pass
 

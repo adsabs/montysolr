@@ -4,26 +4,20 @@ Created on Feb 4, 2011
 @author: rca
 '''
 
-from montysolr.initvm import montysolr_java as sj
-from montysolr.utils import MontySolrTarget
+from montysolr.initvm import JAVA as sj
+from montysolr.utils import make_targets
 
 
 import random
 import time
 
+
 def bigtest(message):
-    req = sj.SolrQueryRequest.cast_(message.getParam('request'))
-    rsp = sj.SolrQueryResponse.cast_(message.getParam('response'))
-
-    params = req.getParams()
-    action = params.get("action")
-
-    start = time.time()
-
+    action = str(message.getParam('action'))
+    size = message.getParam_int("size", 5000)
+    filled = message.getParam_int("filled", 1000)
+    
     if 'recids' in action:
-
-        size = params.getInt("size", 5000)
-
         if action == 'recids_int':
             result = range(0, size)
             result = sj.JArray_int(result)
@@ -44,7 +38,6 @@ def bigtest(message):
                 result.put(x, x)
         elif action == 'recids_bitset':
             from invenio import intbitset
-            filled = int(params.getInt('filled').intValue())
             result = intbitset.intbitset(rhs=size)
             step = int(size / filled)
             for x in xrange(0, size, step):
@@ -55,6 +48,22 @@ def bigtest(message):
 
         message.setResults(result)
 
+def bigtest_www(message):
+    req = sj.SolrQueryRequest.cast_(message.getParam('request'))
+    rsp = sj.SolrQueryResponse.cast_(message.getParam('response'))
+
+    params = req.getParams()
+    action = params.get("action")
+
+    start = time.time()
+
+    if 'recids' in action:
+        size = params.getInt("size", 5000)
+        filled = int(params.getInt('filled', 1000).intValue())
+        message.setParam('size', size)
+        message.setParam('filled', filled)
+        message.setParam('action', action)
+        bigtest_www(message)
     else:
         help = '''
         action:args:description
@@ -73,7 +82,5 @@ def bigtest(message):
 
 
 def montysolr_targets():
-    targets = [
-           MontySolrTarget(':bigtest', bigtest),
-           ]
+    targets = make_targets(bigtest=bigtest, bigtest_www=bigtest_www);
     return targets

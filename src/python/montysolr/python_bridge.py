@@ -23,7 +23,8 @@ import sys
 
 class JVMBridge(object):
     
-    def __new__(cls, *args):
+    def x__new__(cls, *args):
+        """This will force singleton"""
         if hasattr(initvm.montysolr_java, '_JVMBridge_SINGLETON'):
             return getattr(initvm.montysolr_java, '_JVMBridge_SINGLETON')
         else:
@@ -33,7 +34,7 @@ class JVMBridge(object):
             return instance
         
     def __del__(self):
-        if 'solr.container' in self._store:
+        if hasattr(self, '_store') and 'solr.container' in self._store:
             self._store['solr.container'].shutdown()
     
     def __init__(self, handler=None):
@@ -59,7 +60,7 @@ class JVMBridge(object):
         return self.getObjMontySolr().PythonMessage(receiver)
     
     def getObjMontySolr(self):
-        return initvm.montysolr_java
+        return initvm.JAVA
     
     def getObjLucene(self):
         return initvm.lucene
@@ -76,5 +77,5 @@ class JVMBridge(object):
     def hasObj(self, name):
         return name in self._store
     
-JVMBridge = JVMBridge()
+#JVMBridge = JVMBridge()
     
