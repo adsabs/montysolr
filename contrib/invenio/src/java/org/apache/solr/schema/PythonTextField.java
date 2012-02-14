@@ -30,6 +30,7 @@ public class PythonTextField extends TextField {
 	      pythonFunctionName = pythonImpl;
 	    }
 	    args.remove("pythonFunctionName");
+	    super.init(schema, args);
 	}
 	
 	
