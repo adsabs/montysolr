@@ -4,7 +4,7 @@ Created on Feb 13, 2011
 @author: rca
 '''
 
-from montysolr.adslabs import api_calls
+from adslabs import api_calls
 from invenio.intbitset import intbitset
 import os
 import multiprocessing
@@ -57,6 +57,7 @@ def start_multiprocessing(num_proc=None, default=4):
         POOL = multiprocessing.Pool(processes=num_proc)
     else:
         POOL = multiprocessing.Pool(processes=num_proc)
+    return num_proc
 
 # ======================================================
 #    Some code to execute on lazy-initialization
@@ -75,7 +76,9 @@ bcs.get_citation_dict("reversedict")
 # ======================================================
 
 def dispatch(func_name, *args, **kwargs):
-    """Dispatches the call to the remote worker"""
+    """Dispatches the call to a remote worker
+    @return: (worker_id, result)
+    """
     g = globals()
     func_name_pre = '%s_local_pre' % func_name
     func_name_post = '%s_local_post' % func_name
