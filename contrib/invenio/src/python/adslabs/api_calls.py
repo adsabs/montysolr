@@ -150,10 +150,10 @@ def get_citation_dict(dictname):
     return bcs.get_citation_dict(dictname)
 
 
-def load_fulltext(bibcode):
+def load_fulltext(bibcode, field_name):
     ptree_path = ptree.id2ptree(bibcode)
-#    full_path = config.MSFTBASEPATH + ptree_path + 'body.txt'
-    full_path = '/proj/ads/fulltext/extracted' + ptree_path + 'body.txt'
+    # TODO: make this path a config setting again
+    full_path = '/proj/ads/fulltext/extracted%s%s.txt' % (ptree_path, field_name)
     if os.path.exists(full_path):
         fo = open(full_path, 'r')
         text = fo.read()

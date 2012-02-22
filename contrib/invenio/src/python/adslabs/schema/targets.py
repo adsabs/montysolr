@@ -1,6 +1,6 @@
 
 
-from montysolr.initvm import JAVA as j
+from montysolr.initvm import JAVA as sj
 from montysolr.utils import make_targets
 
 from invenio import bibdocfile
@@ -28,15 +28,21 @@ def get_bibrec_bibdoc(message):
     
 
 def get_field_value(message):
+    
     value = message.getParam('externalVal')
     if not value:
         return
     bibcode = str(value)
     message.threadInfo('got bibcode ' + bibcode)
+    
+    field = sj.SchemaField.cast_(message.getParam('field'))
+    field_name = field.getName()
+    message.threadInfo('getting field value for field: %s' % field_name)
+    
     ret = None
     if bibcode:
         start = time.time()
-        (wid, results) = api_calls.dispatch('load_fulltext', bibcode)
+        (wid, results) = api_calls.dispatch('load_fulltext', bibcode, field_name)
         t = time.time() - start
         message.threadInfo("Fulltext load took: %s s. len=%s and was executed by: %s" % (t, len(results), wid))
         message.setResults(results)

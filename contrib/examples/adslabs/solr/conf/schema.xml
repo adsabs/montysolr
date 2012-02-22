@@ -599,6 +599,7 @@
 
    <!-- MontySolr: Pythonic text -->
    <field name="fulltext" type="textgen_py" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
+   <field name="acknowledgements" type="textgen_py" indexed="true" stored="true" />
 
    <!-- Uncommenting the following will create a "timestamp" field using
         a default value of "NOW" to indicate when each document was indexed.

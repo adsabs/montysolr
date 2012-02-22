@@ -73,6 +73,8 @@
             xpath="/collection/record/datafield[@tag='269']/subfield[@code='c']" />
             
         <field column="fulltext" template="${adslabs.bibcode}"/>
+        
+        <field column="acknowledgements" template="${adslabs.bibcode}" />
 
         </entity>
         
