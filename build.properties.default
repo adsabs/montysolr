@@ -33,7 +33,7 @@ python=python
   * python 2.3: python site-packages/jcc egg directory/jcc/__init__.py
 //-->
 
-jcc=jcc.__main__
+jcc=-m jcc.__main__
 
 
 # The path where your Solr installation lives - note that

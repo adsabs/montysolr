@@ -69,7 +69,6 @@
 		invenio.montysolr.jni.MontySolrVM
 		invenio.montysolr.jni.PythonBridge
 		invenio.montysolr.jni.PythonMessage
-		invenio.montysolr.JettyRunner
 		" />
 	<property name="jcc.build" value="${montysolr.classes}" />
 	<property name="jcc.packages" value="
@@ -251,7 +250,7 @@
 		<path id="montysolr.classpath">
 			<fileset dir="${jar.dir}" includes="**/*.jar" />
 			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
-			<fileset dir="${webdist.home}/lib" includes="**/*.jar" />
+			<fileset dir="${webdist.home}" includes="lib/**/*.jar" />
 			<fileset dir="${lib.dir}" includes="**/*.jar" />
 		</path>
 	</target>
@@ -370,7 +369,7 @@ lucene.version=${lucene.version}
 	<target name="test-egg" depends="config-build">
 		<exec executable="${python}" dir="${dist.dir}" failonerror="true">
 			<arg value="-c" />
-			<arg value="import ${app.name} as X;X.initVM(X.CLASSPATH+'${path.separator}${toString:montysolr.classpath}',vmargs='-Dsolr.solr.home=/x/dev/workspace/test-solr/solr,-Dsolr.data.dir=/x/dev/workspace/test-solr/solr/data');assert (X.__file__ == 'montysolr/__init__.pyc');print X.JettyRunner,X.JettyRunner.main(('solr.home', '/x/dev/workspace/test-solr/solr'))" />
+			<arg value="import ${app.name} as X;X.initVM(X.CLASSPATH+'${path.separator}${toString:montysolr.classpath}',vmargs='-Dsolr.solr.home=/x/dev/workspace/test-solr/solr,-Dsolr.data.dir=/x/dev/workspace/test-solr/solr/data');assert (X.__file__ == 'montysolr/__init__.pyc')" />
 		</exec>
 	</target>
 
@@ -483,7 +482,11 @@ lucene.version=${lucene.version}
 			<arg value="${app.solr.name}" />
 			<arg value="${ddash}build" />
 			<arg value="${ddash}bdist" />
-			<arg line="${ddash}exclude org.apache.solr.search.FunctionQParser" />
+			<!-- We exclude the embedded classes because they are Jetty specific -->
+			<arg line="${ddash}exclude org.apache.solr.search.FunctionQParser
+				       ${ddash}exclude org.apache.solr.client.solrj.embedded.NoLog 
+				       ${ddash}exclude org.apache.solr.client.solrj.embedded.JettySolrRunner
+			          " />
 		</exec>
 	</target>
 
