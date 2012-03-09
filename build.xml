@@ -250,6 +250,7 @@
 		<path id="montysolr.classpath">
 			<fileset dir="${jar.dir}" includes="**/*.jar" />
 			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
+			<fileset dir="${solr.real.location}" includes="example/lib/**/*.jar" />
 			<fileset dir="${webdist.home}" includes="lib/**/*.jar" />
 			<fileset dir="${lib.dir}" includes="**/*.jar" />
 		</path>
@@ -648,14 +649,18 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 		<echo>Downloading Solr, please wait...</echo>
 
 		<get src="${solr.mirror}/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" />
-		<untar dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}-src.tgz" compression="gzip"/>
-
+		
+	    <antcall target="untar-solr" />
+		
 		<!-- set the property, it may be used by other targets (see check-solr-location target) -->
 		<property name="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr"/>
 	</target>
 
+	<target name="untar-solr" >
+		<untar dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}-src.tgz" compression="gzip"/>
+	</target>
 
-	<target name="build-solr-example" if="solr.real.location">
+	<target name="build-solr-example" depends="check-solr-location">
 		<echo>Building the Solr example</echo>
 
 		<!--
@@ -715,7 +720,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 	</target>
 
 	
-	<target name="get-solr-mirror" depends="init" >
+	<target name="get-solr-mirror" depends="init" unless="solr.real.location">
 		<exec executable="${python}" outputproperty="solr.mirror" failonerror="true">
 			<arg value="-c" />
 			<arg  value="import urllib;t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));print l[0]"/>
