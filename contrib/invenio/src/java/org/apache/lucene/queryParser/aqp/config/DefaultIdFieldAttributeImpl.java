@@ -1,6 +1,5 @@
 package org.apache.lucene.queryParser.aqp.config;
 
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,45 +22,35 @@ import org.apache.lucene.queryParser.aqp.processors.AqpQNORMALProcessor;
 import org.apache.lucene.util.AttributeImpl;
 
 /**
- * This attribute is used by {@link AqpQNORMALProcessor} processor and
- * must be defined in the {@link QueryConfigHandler}. This attribute tells the
- * processor what is the default field when no field is defined in a
- * phrase. <br/>
+ * This attribute is used by {@link AqpQNORMALProcessor} processor and must be
+ * defined in the {@link QueryConfigHandler}. This attribute tells the processor
+ * what is the default field when no field is defined in a phrase. <br/>
  * 
  */
-public class DefaultIdFieldAttributeImpl extends AttributeImpl 
-				implements DefaultIdFieldAttribute {
+public class DefaultIdFieldAttributeImpl extends AttributeImpl implements
+		DefaultIdFieldAttribute {
 
-
-	
 	private static final long serialVersionUID = 3664676068061966884L;
 	protected String defaultField = "defaultField";
 
-	@Override
 	public void setDefaultIdField(String defaultField) {
 		this.defaultField = defaultField;
 	}
 
-	@Override
 	public String getDefaultIdField() {
 		return this.defaultField;
 	}
 
-	@Override
 	public void clear() {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public void copyTo(AttributeImpl target) {
 		throw new UnsupportedOperationException();
 	}
-	
-	@Override
-	  public String toString() {
-	    return "<defaultIdField value=" + this.defaultField  + "/>";
-	  }
 
+	public String toString() {
+		return "<defaultIdField value=" + this.defaultField + "/>";
+	}
 
 }
-

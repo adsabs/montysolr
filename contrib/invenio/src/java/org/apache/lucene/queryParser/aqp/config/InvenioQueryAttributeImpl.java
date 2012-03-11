@@ -42,7 +42,7 @@ public class InvenioQueryAttributeImpl extends AttributeImpl
 	private QMode mode = QMode.MAXSOLR;
 	private Channel channel = Channel.DEFAULT;
 	
-	@Override
+	
 	public void setChannel(String channel) {
 		if (channel == null) {
 			return;
@@ -57,7 +57,7 @@ public class InvenioQueryAttributeImpl extends AttributeImpl
 	
 	
 
-	@Override
+	
 	public void setOverridenFields(String[] overridenFields) {
 		if (overridenFields == null) {
 			return;
@@ -77,12 +77,12 @@ public class InvenioQueryAttributeImpl extends AttributeImpl
 		setOverridenFields(xfields);
 	}
 
-	@Override
+	
 	public void setOverridenFields(ArrayList<String> xfields) {
 		overridenFields = xfields;
 	}
 
-	@Override
+	
 	public void setMode(String mode, Boolean schemaHasExplicitAsteriskField) {
 		if (mode != null ) {
 			if (mode.contains("maxinv") && !schemaHasExplicitAsteriskField) {
@@ -105,33 +105,33 @@ public class InvenioQueryAttributeImpl extends AttributeImpl
 
 	}
 	
-	@Override
+	
 	  public void clear() {
 	    throw new UnsupportedOperationException();
 	  }
 
-	  @Override
+	  
 	  public void copyTo(AttributeImpl target) {
 	    throw new UnsupportedOperationException();
 	  }
 
 
 
-	@Override
+	
 	public Channel getChannel() {
 		return channel;
 	}
 
 
 
-	@Override
+	
 	public List<String> getOverridenFields() {
 		return overridenFields;
 	}
 
 
 
-	@Override
+	
 	public QMode getMode() {
 		return mode;
 	}

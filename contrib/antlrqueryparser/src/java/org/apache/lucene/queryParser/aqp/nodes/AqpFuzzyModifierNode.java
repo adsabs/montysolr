@@ -26,7 +26,7 @@ public class AqpFuzzyModifierNode extends QueryNodeImpl implements QueryNode {
 		this.fuzzy = fuzzy;
 	}
 
-	@Override
+	
 	public CharSequence toQueryString(EscapeQuerySyntax escapeSyntaxParser) {
 		if (getChild() == null)
 			return "";
@@ -44,7 +44,7 @@ public class AqpFuzzyModifierNode extends QueryNodeImpl implements QueryNode {
 
 	}
 
-	@Override
+	
 	public String toString() {
 		return "<fuzzy value='" + this.fuzzy.toString() + "'>" + "\n"
 				+ getChild().toString() + "\n</fuzzy>";

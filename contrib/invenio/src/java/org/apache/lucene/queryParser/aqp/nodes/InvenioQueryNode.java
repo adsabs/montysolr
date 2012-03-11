@@ -29,7 +29,7 @@ public class InvenioQueryNode extends QueryNodeImpl implements QueryNode {
 		this.idField = idField;
 	}
 
-	@Override
+	
 	public CharSequence toQueryString(EscapeQuerySyntax escapeSyntaxParser) {
 		if (getChild() == null)
 			return "";
@@ -47,7 +47,7 @@ public class InvenioQueryNode extends QueryNodeImpl implements QueryNode {
 
 	}
 
-	@Override
+	
 	public String toString() {
 		return "<invenio>\n"  + getChild().toString() + "\n</invenio>";
 	}

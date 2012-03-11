@@ -37,27 +37,27 @@ public class DefaultFieldAttributeImpl extends AttributeImpl
 	
 	protected String defaultField = "defaultField";
 
-	@Override
+	
 	public void setDefaultField(String defaultField) {
 		this.defaultField = defaultField;
 	}
 
-	@Override
+	
 	public String getDefaultField() {
 		return this.defaultField;
 	}
 
-	@Override
+	
 	public void clear() {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
+	
 	public void copyTo(AttributeImpl target) {
 		throw new UnsupportedOperationException();
 	}
 	
-	@Override
+	
 	  public String toString() {
 	    return "<defaultField defaultField=" + this.defaultField
 	        + "/>";

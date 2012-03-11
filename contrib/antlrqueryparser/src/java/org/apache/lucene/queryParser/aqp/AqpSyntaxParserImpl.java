@@ -20,7 +20,7 @@ import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.aqp.AqpCommonTree;
 import org.apache.lucene.queryParser.aqp.AqpCommonTreeAdaptor;
 
-public abstract class AqpSyntaxParserImpl implements AqpSyntaxParser {
+public abstract class AqpSyntaxParserImpl extends AqpSyntaxParserAbstract implements AqpSyntaxParser {
 	
 	private Class clsLexer;
 	private Class clsParser;
@@ -40,17 +40,7 @@ public abstract class AqpSyntaxParserImpl implements AqpSyntaxParser {
     	// empty constructor
     }
     
-    /**
-	 * This parse method uses reflection so that it can load any grammar
-	 * without knowing in advance its name
-	 */
-    @Override public QueryNode parse(CharSequence query, CharSequence field)
-	throws QueryNodeParseException {
-    	TokenStream tokens = getTokenStream(query);
-    	return parseTokenStream(tokens, query, field);
-    }
     
-    @Override
 	public AqpSyntaxParser initializeGrammar(String grammarName) throws QueryNodeParseException {
 		
 		try {
@@ -103,7 +93,6 @@ public abstract class AqpSyntaxParserImpl implements AqpSyntaxParser {
         
 	}
 	
-    @Override
     public TokenStream getTokenStream(CharSequence query) {
     	ANTLRStringStream input = new ANTLRStringStream(query.toString());		
 		lexer.setCharStream(input);
@@ -115,7 +104,6 @@ public abstract class AqpSyntaxParserImpl implements AqpSyntaxParser {
     
     
 	
-	@Override
 	public QueryNode parseTokenStream(TokenStream tokens, CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 		
