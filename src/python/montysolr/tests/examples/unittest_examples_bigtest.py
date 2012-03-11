@@ -98,21 +98,6 @@ class Test(LuceneTestCase):
         assert sj.Integer.cast_(res.get(5)).equals(5)
 
 
-    def test_bigtest06(self):
-        '''Get recids_bitset - needs invenio.intbitset'''
-
-        from invenio import intbitset
-        message = self.bridge.createMessage('bigtest') \
-                    .setParam('action', 'recids_bitset') \
-                    .setParam('size', self.size) \
-                    .setParam('filled', int(self.size * 0.3))
-
-        self.bridge.sendMessage(message)
-        res = sj.JArray_byte.cast_(message.getResults())
-        ibs = intbitset.intbitset()
-        ibs = ibs.fastload(res.string_)
-
-        assert len(ibs) > 0
 
     
     def xtest_bigtest05(self):

@@ -70,7 +70,7 @@
 	<property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
 	<property name="env.MONTYSOLR_ARGS" value="${subant.args}"/>
 	<property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
-	<property name="env.PYTHONPATH" value=""/>
+	<property name="env.PYTHONPATH" value="${common.dir}/build/dist${path.separator}${common.dir}/src/python${path.separator}"/>
 
 	<path id="examples.classpath">
 		<!-- all contrib compiled classes -->
@@ -177,7 +177,7 @@
 		<run-montysolr classpath="${prop.jcc_egg}"
 		      classpathref="examples.classpath"
 		   	  ignore-environment="${example.ignore-environment}"
-		   	  pythonpath="${prop.python_path}${path.separator}${common.dir}/build/dist${path.separator}${common.dir}/src/python${path.separator}${env.PYTHONPATH}"
+		   	  pythonpath="${env.PYTHONPATH}"
 		   	  webroot="${build.dir}/${example.name}/webapps/solr.war"
 		      solr-home-dir="${build.dir}/${example.name}/solr"
 		   	  solr-data-dir="${build.dir}/${example.name}/solr/data"

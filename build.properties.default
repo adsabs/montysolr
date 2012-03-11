@@ -49,12 +49,3 @@ solr_home=./build/solr-download/apache-solr-${solr.version}
 webdist=./contrib/examples/invenio
 
 
-# PYTHONPATH : the tasks with the name of run-* (eg. run-daemon)
-# are starting JVM with Python interpreter inside. This Python
-# interpreter needs to know where to look for python packages
-# By default, run-* tasks add ./python and ./build/dist folders
-# to the classpath, but here you can add or change it, this
-# PYTHONPATH will be prepended
-
-python_path=/opt/invenio/lib/python
-

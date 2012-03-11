@@ -49,7 +49,6 @@
 
 	     If you are using python c-extensions, make sure they are compatible with the
 	     java - if your java starts in 64bit mode, also the extensions must be available in 64bit
-	     By default, we run in 64bit mode: -d64
      //-->
 	<property environment="env"/>
 	<property name="subant.jvmargs" value="" />
@@ -58,7 +57,7 @@
 	<property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
 	<property name="env.MONTYSOLR_ARGS" value="${subant.args}"/>
 	<property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
-	<property name="env.PYTHONPATH" value=""/>
+	<property name="env.PYTHONPATH" value="${dist.dir}${path.separator}${src.dir.python}${path.separator}"/>
 
 	<!--
     these classes must be made available/known to JCC when we compile the wrapper
@@ -289,7 +288,6 @@ jcc=${jcc}
 jcc_egg=${jcc_egg}
 webdist=${webdist}
 webdist.home=${webdist.home}
-python_path=${python_path}
 python=${python}
 solr.version=${solr.version}    
 lucene.version=${lucene.version}
@@ -531,7 +529,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 			classname="invenio.montysolr.JettyRunnerPythonVM"
 			>
 
-			<env key="PYTHONPATH" path="${python_path}${path.separator}${dist.dir}${path.separator}${src.dir.python}${path.separator}${env.PYTHONPATH}" />
+			<env key="PYTHONPATH" path="${env.PYTHONPATH}" />
 			<jvmarg line="-Dsolr.solr.home=${webdist.home}/solr -Dsolr.data.dir=${webdist.home}/solr/data"/>
 			<jvmarg line="-Djava.library.path=${jcc_egg}"/>
 			<jvmarg line="${env.MONTYSOLR_JVMARGS}"/>
@@ -821,7 +819,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
        </target>
 	
 	<target name="test-python">
-	   <run-python-unittests python="${python}" python-path="/opt/invenio/lib/python:/dvt/workspace/montysolr/src/python"
+	   <run-python-unittests python="${python}" python-path="${dist.dir}${path.separator}${src.dir.python}"
 	    srcdir="${common.dir}/src/python"
 	   />
 	</target>
