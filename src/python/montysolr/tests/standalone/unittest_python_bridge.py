@@ -5,23 +5,22 @@ Created on Feb 4, 2011
 '''
 import unittest
 from montysolr import handler
-from montysolr.python_bridge import JVMBridge
+from montysolr.tests.montysolr_testcase import LuceneTestCase
 from montysolr.utils import MontySolrTarget
-import sys
-import os
+from montysolr import initvm
+j = initvm.JAVA
 
-sj = JVMBridge.getObjMontySolr()
 
 class TestingMethods():
     def montysolr_targets(self):
         
         def test_a(message):
-            data = sj.JArray_int.cast_(message.getParam("data"))
+            data = j.JArray_int.cast_(message.getParam("data"))
             data = data * 2
-            message.setParam("result", sj.JArray_int(data))
+            message.setParam("result", j.JArray_int(data))
             
         def test_b(message):
-            data = sj.JArray_int.cast_(message.getParam("data"))
+            data = j.JArray_int.cast_(message.getParam("data"))
             data = str(data)
             message.setParam("result", data)
         
@@ -34,34 +33,31 @@ class TestHandler(handler.Handler):
     def init(self):
         self.discover_targets([TestingMethods()])
 
-class Test(unittest.TestCase):
+class Test(LuceneTestCase):
 
     def setUp(self):
-        self._handler = JVMBridge._handler
-        JVMBridge.setHandler(TestHandler())
+        LuceneTestCase.setUp(self)
+        self.setHandler(TestHandler())
 
-    def tearDown(self):
-        JVMBridge.setHandler(self._handler)
     
     def test_basic(self):
         """Testing basic functions (outside solr)"""
-        sj = JVMBridge.getObjMontySolr()
-        message = JVMBridge.createMessage("test_a") \
-            .setParam('data', sj.JArray_int([0,1,2]))
+        message = self.bridge.createMessage("test_a") \
+            .setParam('data', j.JArray_int([0,1,2]))
         
-        JVMBridge.sendMessage(message)
-        res = list(sj.JArray_int.cast_(message.getParam("result")))
+        self.bridge.sendMessage(message)
+        res = list(j.JArray_int.cast_(message.getParam("result")))
         assert res == [0, 1, 2, 0, 1, 2]
         
         #lets reuse the message object
         message.setReceiver("test_b")
-        JVMBridge.sendMessage(message)
+        self.bridge.sendMessage(message)
         res = str(message.getParam("result"))
         assert res.find("[0, 1, 2]") > -1
         
-        message = JVMBridge.createMessage("test_b") \
-            .setParam('data', sj.JArray_int([0,1,2]))
-        JVMBridge.sendMessage(message)
+        message = self.bridge.createMessage("test_b") \
+            .setParam('data', j.JArray_int([0,1,2]))
+        self.bridge.sendMessage(message)
         res = str(message.getParam("result"))
         assert res.find("[0, 1, 2]") > -1
         

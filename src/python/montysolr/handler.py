@@ -142,7 +142,7 @@ class Handler(object):
                 message_id = t.getMessageId()
                 target = t.getTarget()
                 if message_id in db:
-                    self.log.error("The message with id '%s' already has a target: %s" %
+                    self.log.warning("The message with id '%s' already has a target: %s" %
                                     (message_id, db[message_id]))
                 db[message_id] = target
         else:

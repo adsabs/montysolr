@@ -452,6 +452,7 @@ lucene.version=${lucene.version}
 	  	  </fileset>
     	</apply>
     </target>
+	
 
 	<target name="compile-solr-egg" depends="config-build">
 		<mkdir dir="${build.dir}" />

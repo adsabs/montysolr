@@ -23,7 +23,8 @@ class Test(LuceneTestCase):
     def setUp(self):
         LuceneTestCase.setUp(self)
         self.size = 500000
-        self.setHandler(self.loadHandler(['montysolr.examples.bigtest']))
+        if not self.hasTarget('*:bigtest'):
+            self.addTargets(['montysolr.examples.bigtest'])
         
 
     def test_bigtest01(self):
