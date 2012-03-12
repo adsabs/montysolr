@@ -59,7 +59,6 @@ public class TestAqpAbstractCase extends LuceneTestCase {
 	protected boolean debugParser = false;
 	protected String grammarName = "StandardLuceneGrammar";
 
-	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		originalMaxClauses = BooleanQuery.getMaxClauseCount();

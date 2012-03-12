@@ -4,6 +4,7 @@ import org.apache.lucene.queryParser.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.InvenioQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
+import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.aqp.nodes.InvenioQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.NonAnalyzedQueryNode;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
@@ -136,6 +137,7 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 			addAttribute(LocaleAttribute.class);
 			addAttribute(DefaultPhraseSlopAttribute.class);
 			addAttribute(MultiTermRewriteMethodAttribute.class);
+			addAttribute(InvenioQueryAttribute.class);
 			
 			getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
 		}
