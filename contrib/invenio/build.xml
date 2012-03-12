@@ -46,6 +46,7 @@
 		<pathelement location="${build.dir}/classes/java"/>
 	</path>
 	
+	
 	<path id="antlr.classpath">
         <path refid="classpath"/>
         <path refid="base.classpath"/>
@@ -60,6 +61,12 @@
             <include name="**/*.jar"/>
         </fileset>
 		<pathelement location="${build.dir}/classes/java"/>
+    </path>
+	
+	<path id="test.classpath">
+        <path refid="run.classpath"/>
+        <path refid="test.base.classpath"/>
+        <path refid="common.junit.classpath"/>
     </path>
 	
 
@@ -117,7 +124,15 @@
     
 	
 	<target name="test" depends="default" >
-        <antcall target="common.test" inheritRefs="true"/>
+		<!-- we are using some classes from the parser test framework
+		     so we must compile them ourselves (not to depend on luck) -->
+		<compile srcdir="${common.dir}/contrib/antlrqueryparser/src/test" 
+            destdir="${build.dir}/classes/test">
+            <classpath refid="test.classpath"/>
+            <include name="**/*AbstractCase.java"/>
+        </compile>
+        
+		<antcall target="common.test" inheritRefs="true"/>
     </target>
 	
 	<target name="build-all"  depends="clean,default">
