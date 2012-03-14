@@ -838,7 +838,7 @@
 
         <sequential>
         	<apply executable="@{python}" failonerror="@{failonerror}">
-                <!--<env key="PYTHONPATH" value="@{python-path}" />-->
+                <env key="PYTHONPATH" value="@{python-path}" />
                 <arg value="-c" />
                 <arg value="import os,sys,unittest;x=sys.argv.pop();print 'Testing ', x;a,b=os.path.split(x);sys.path.insert(0,a);m=__import__(os.path.basename(b.split('.')[0]));y=unittest.main(m)"/>
 	            <fileset dir="@{srcdir}">
