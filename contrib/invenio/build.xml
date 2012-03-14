@@ -129,7 +129,7 @@
 		<compile srcdir="${common.dir}/contrib/antlrqueryparser/src/test" 
             destdir="${build.dir}/classes/test">
             <classpath refid="test.classpath"/>
-            <include name="**/*AbstractCase.java"/>
+            <include name="**/*AbstractCase*.java"/>
         </compile>
         
 		<antcall target="common.test" inheritRefs="true"/>

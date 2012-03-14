@@ -1,6 +1,6 @@
 package org.apache.lucene.queryParser.aqp;
 
-public class TestAqpInvenioSimple extends TestAqpAbstractCase {
+public class TestAqpInvenioSimple extends AqpTestAbstractCase {
 	
 	public void setUp() throws Exception {
 		super.setUp();

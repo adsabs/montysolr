@@ -819,7 +819,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
        </target>
 	
 	<target name="test-python">
-	   <run-python-unittests python="${python}" python-path="${dist.dir}${path.separator}${src.dir.python}"
+	   <run-python-unittests python="${python}" python-path="${env.PYTHONPATH}${path.separator}${dist.dir}${path.separator}${src.dir.python}"
 	    srcdir="${common.dir}/src/python"
 	   />
 	</target>

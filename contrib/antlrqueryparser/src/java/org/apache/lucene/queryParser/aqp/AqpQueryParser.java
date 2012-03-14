@@ -207,7 +207,12 @@ public class AqpQueryParser extends QueryParserHelper {
 				np.add(it.next());
 			}
 			this.setQueryNodeProcessor(np);
-		} 
+			
+			this.setQueryBuilder(new AqpStandardQueryTreeBuilder(debug));
+		}
+		else {
+			this.setQueryBuilder(new AqpStandardQueryTreeBuilder(debug));
+		}
 		debugMode = debug;
 	}
 	

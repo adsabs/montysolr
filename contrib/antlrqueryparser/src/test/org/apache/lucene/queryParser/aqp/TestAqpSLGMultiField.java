@@ -46,7 +46,7 @@ import org.apache.lucene.util.LuceneTestCase;
  * 
  * Tests QueryParser.
  */
-public class TestAqpSLGMultiField extends TestAqpAbstractCase {
+public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
   /**
    * test stop words parsing for both the non static form, and for the

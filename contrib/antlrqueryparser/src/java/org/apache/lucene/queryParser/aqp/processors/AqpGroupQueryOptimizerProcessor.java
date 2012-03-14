@@ -48,8 +48,13 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 				}
 				if (data.getModifier()!=null) {
 					List<QueryNode> children = new ArrayList<QueryNode>();
-					children.add(new ModifierQueryNode(node, data.getModifier()));
-					node = new BooleanQueryNode(children);
+					if (children.size() == 1) {
+						return children.get(0);
+					}
+					else {
+						children.add(new ModifierQueryNode(node, data.getModifier()));
+						node = new BooleanQueryNode(children);
+					}
 				}
 				
 				

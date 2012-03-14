@@ -77,7 +77,7 @@ import org.apache.lucene.store.Directory;
  * 
  * Tests QueryParser.
  */
-public class TestAqpSLGStandardTest extends TestAqpAbstractCase {
+public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public static Analyzer qpAnalyzer = new QPTestAnalyzer();
 

@@ -39,16 +39,18 @@ import org.apache.lucene.util.LuceneTestCase;
  * Test QueryParser's ability to deal with Analyzers that return more than one
  * token per position or that return tokens with a position increment &gt; 1.
  */
-public class TestAqpSLGMultiAnalyzer extends TestAqpAbstractCase {
+public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
 
   private static int multiToken = 0;
 
   public void testMultiAnalyzer() throws QueryNodeException, Exception {
-
+	  
+	
     AqpQueryParser qp = new AqpQueryParser();
     qp.setDefaultOperator(Operator.OR);
     qp.setAnalyzer(new MultiAnalyzer());
-
+    
+    
     // trivial, no multiple tokens:
     assertEquals("foo", qp.parse("foo", "").toString());
     assertEquals("foo", qp.parse("\"foo\"", "").toString());
@@ -62,6 +64,9 @@ public class TestAqpSLGMultiAnalyzer extends TestAqpAbstractCase {
     assertEquals("foo (multi multi2)", qp.parse("foo multi", "").toString());
     assertEquals("(multi multi2) (multi multi2)", qp.parse("multi multi", "")
         .toString());
+    qp.setDebug(true);
+    System.out.println(qp.parse("+t1 -t2 t3", "").toString());
+    System.out.println(qp.parse("+(foo multi)", "").toString());
     assertEquals("+(foo (multi multi2)) +(bar (multi multi2))", qp.parse(
         "+(foo multi) +(bar multi)", "").toString());
     assertEquals("+(foo (multi multi2)) field:\"bar (multi multi2)\"", qp
