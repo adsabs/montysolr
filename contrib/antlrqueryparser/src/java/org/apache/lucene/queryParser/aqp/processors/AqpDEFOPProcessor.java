@@ -10,6 +10,7 @@ import org.apache.lucene.queryParser.aqp.util.AqpUtils;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
+import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
@@ -47,6 +48,7 @@ import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Op
  *             |        |
  * </pre>
  *              
+ *              
  * @see DefaultOperatorAttribute
  * @see AqpQueryParser#setDefaultOperator(org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator)
  * 
@@ -60,15 +62,20 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 		
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("DEFOP")) {
 			
+			// only one child, we'll simplify
 			if (node.getChildren().size()==1) {
 				return node.getChildren().get(0);
 			}
 			
-			AqpANTLRNode n = (AqpANTLRNode) node;
+			if (true) {
+				return new BooleanQueryNode(node.getChildren());
+			}
+			
+			AqpANTLRNode thisNode = (AqpANTLRNode) node;
 			Operator op = getDefaultOperator();
-			// TODO: we can allow many more operators as default operators (but will have to use our
-			// own enum class to harvest them)
-			n.setTokenLabel(op==Operator.AND ? "AND" : "OR");
+			
+			// Turn the DEFOP into the default operator
+			thisNode.setTokenLabel(op.name());
 			
 			List<QueryNode> children = node.getChildren();
 			if (children!=null && children.size()==1) {
@@ -80,8 +87,11 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 				}
 			}
 			else if(children!=null && children.size() > 1) {
+				// several childeren (=clauses) below the operator
+				// we check if we can put them together, ie
+				// (this) AND (that) --> this AND that
 				
-				String thisOp = n.getTokenLabel();
+				String thisOp = thisNode.getTokenLabel();
 				String last = ((AqpANTLRNode)children.get(0)).getTokenLabel();
 				boolean rewriteSafe = true;
 				
@@ -107,7 +117,7 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 					}
 					
 					children.clear();
-					n.set(childrenList);
+					thisNode.set(childrenList);
 				}
 			}
 		}
