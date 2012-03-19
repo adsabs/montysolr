@@ -30,6 +30,8 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.util.LuceneTestCase;
 
 /**
@@ -64,11 +66,9 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
     assertEquals("foo (multi multi2)", qp.parse("foo multi", "").toString());
     assertEquals("(multi multi2) (multi multi2)", qp.parse("multi multi", "")
         .toString());
-    qp.setDebug(true);
-    System.out.println(qp.parse("+t1 -t2 t3", "").toString());
-    System.out.println(qp.parse("+(foo multi)", "").toString());
-    assertEquals("+(foo (multi multi2)) +(bar (multi multi2))", qp.parse(
-        "+(foo multi) +(bar multi)", "").toString());
+    Query q = qp.parse("(foo multi) +(bar multi)", "");
+    assertEquals("foo (multi multi2) +(bar (multi multi2))", 
+    		qp.parse("(foo multi) +(bar multi)", "").toString());
     assertEquals("+(foo (multi multi2)) field:\"bar (multi multi2)\"", qp
         .parse("+(foo multi) field:\"bar multi\"", "").toString());
 

@@ -53,6 +53,7 @@ import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
+import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryParser.standard.processors.GroupQueryNodeProcessor;
 import org.apache.lucene.search.BooleanClause;
@@ -323,12 +324,19 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     
     assertQueryEquals("((a OR b) AND NOT c) OR d", null, "(+(a b) -c) d");
     assertQueryEquals("((a OR b) NOT c) OR d", null, "(+(a b) -c) d");
+    
     assertQueryEquals("+(apple \"steve jobs\") -(foo bar baz)", null,
         "+(apple \"steve jobs\") -(foo bar baz)");
-    setDebug(true);
     assertQueryEquals("+title:(dog OR cat) -author:\"bob dole\"", null,
         "+(title:dog title:cat) -author:\"bob dole\"");
-    setDebug(true);
+    
+    AqpQueryParser qp = getParser();
+    qp.setDefaultOperator(Operator.OR);
+    assertQueryMatch(qp, "title:(+a -b c)", "text", "+title:a -title:b title:c");
+    
+    qp.setDefaultOperator(Operator.AND);
+    assertQueryMatch(qp, "title:(+a -b c)", "text", "+title:a -title:b +title:c");
+    
   }
 
   public void testPunct() throws Exception {

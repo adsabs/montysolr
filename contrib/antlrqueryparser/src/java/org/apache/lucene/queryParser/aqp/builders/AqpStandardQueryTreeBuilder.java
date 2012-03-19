@@ -67,6 +67,7 @@ public class AqpStandardQueryTreeBuilder extends QueryTreeBuilder implements
 		StandardQueryBuilder {
 
 	private boolean debug = false;
+	private int counter = 0;
 
 	public AqpStandardQueryTreeBuilder(boolean debug) {
 		this.debug = debug;
@@ -102,6 +103,7 @@ public class AqpStandardQueryTreeBuilder extends QueryTreeBuilder implements
 
 	@Override
 	public Query build(QueryNode queryNode) throws QueryNodeException {
+		this.counter = 0;
 		return (Query) super.build(queryNode);
 	}
 
@@ -130,16 +132,19 @@ public class AqpStandardQueryTreeBuilder extends QueryTreeBuilder implements
 		}
 
 		public Object build(QueryNode queryNode) throws QueryNodeException {
-			System.out.println("     building");
 			System.out.println("--------------------------------------------");
-			System.out.println(clazz.getName());
-			System.out.println(realBuilder.getClass());
-			System.out.println("--------------------------------------------");
+			System.out.println("step     " + counter++ + ".");
+			System.out.println("builder: " + realBuilder.getClass().getName());
+			System.out.println("node:    " + clazz.getName() );
 			System.out.println(queryNode.toString());
-
+			System.out.println("   -->");
 			Object result = realBuilder.build(queryNode);
-			System.out.println(((Query) result).toString());
-			System.out.println("--------------------------------------------");
+			if (result != null) {
+				System.out.println(((Query) result).toString() + "  <"+result.getClass().getName()+">");
+			}
+			else {
+				System.out.println("null");
+			}
 			System.out.println("--------------------------------------------");
 			return result;
 		}

@@ -54,7 +54,8 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 		qa = sp.parse("\"a \\\"b c\\\" d\"", "x");
 		qb = qp.parse("\"a \\\"b c\\\" d\"", "x");
 		
-		//qp.setDebug(true);
+		qp.setDebug(true);
+		System.out.println(qp.parse("a -(a x)^0.5", ""));
 		assertQueryMatch(qp, "(+(-(a b)))^0.8 OR -(x y)^0.2", "field", 
         "((-(+field:a +field:b))^0.8) ((-(+field:x +field:y))^0.2)");
 		

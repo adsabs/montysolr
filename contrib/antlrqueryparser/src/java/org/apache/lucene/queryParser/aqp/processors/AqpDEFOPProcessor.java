@@ -67,10 +67,6 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 				return node.getChildren().get(0);
 			}
 			
-			if (true) {
-				return new BooleanQueryNode(node.getChildren());
-			}
-			
 			AqpANTLRNode thisNode = (AqpANTLRNode) node;
 			Operator op = getDefaultOperator();
 			

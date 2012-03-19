@@ -25,7 +25,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
  * 
  * <pre>this (+(-(+(-(that thus))^0.1))^0.3)</pre>
  * 
- * Will be optimized into:
+ * Will be optimized into (when DEFOP = AND):
  * 
  * <pre>+field:this -((+field:that +field:thus)^0.1)</pre>
  * 
@@ -41,12 +41,16 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 			
 			ClauseData data = harvestData(node);
 			
-			if (data.getLastChild()!=null && !node.equals(data.getLastChild())) {
+			if (data.getLastChild()!=null && data.getLastChild() != node) {
 				node = data.getLastChild();
 				if (data.getBoost()!=null) {
 					node = new BoostQueryNode(node, data.getBoost());
 				}
 				if (data.getModifier()!=null) {
+					node = new ModifierQueryNode(node, data.getModifier());
+					/*
+					 * Why was I doing this? Firstly, it is buggy, the second
+					 * branch always executes - why am i creating new BooleanNode?
 					List<QueryNode> children = new ArrayList<QueryNode>();
 					if (children.size() == 1) {
 						return children.get(0);
@@ -55,9 +59,8 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 						children.add(new ModifierQueryNode(node, data.getModifier()));
 						node = new BooleanQueryNode(children);
 					}
+					*/
 				}
-				
-				
 				return node;
 			}
 		}
@@ -113,7 +116,7 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 	class ClauseData {
 		private ModifierQueryNode.Modifier modifier;
 		private Float boost;
-		private QueryNode lastNonClause;
+		private QueryNode lastValidNode;
 		
 		ClauseData() {
 			
@@ -121,7 +124,7 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 		ClauseData(ModifierQueryNode.Modifier mod, Float boost) {
 			this.modifier = mod;
 			this.boost = boost;
-			this.lastNonClause = lastNonClause;
+			this.lastValidNode = lastValidNode;
 		}
 		public ModifierQueryNode.Modifier getModifier() {
 			return modifier;
@@ -136,10 +139,10 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 			this.boost = boost;
 		}
 		public QueryNode getLastChild() {
-			return lastNonClause;
+			return lastValidNode;
 		}
 		public void setLastChild(QueryNode lastNonClause) {
-			this.lastNonClause = lastNonClause;
+			this.lastValidNode = lastNonClause;
 		}
 		
 	}
