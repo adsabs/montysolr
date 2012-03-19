@@ -35,7 +35,7 @@ public class DefaultFieldAttributeImpl extends AttributeImpl
 
 	private static final long serialVersionUID = -4268918577762615525L;
 	
-	protected String defaultField = "defaultField";
+	protected String defaultField = null;
 
 	
 	public void setDefaultField(String defaultField) {

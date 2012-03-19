@@ -93,6 +93,10 @@ public class AqpQueryNodeProcessorPipeline extends
     
     add(new AqpFuzzyModifierProcessor());
     
+    
+    // TODO: remove the processors which are not needed
+    // these were the standard guys before AQP were added
+    
     add(new WildcardQueryNodeProcessor());
     add(new MultiFieldQueryNodeProcessor());
     add(new FuzzyQueryNodeProcessor());

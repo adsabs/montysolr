@@ -1,15 +1,11 @@
 package org.apache.lucene.queryParser.aqp;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.QueryParserHelper;
 import org.apache.lucene.queryParser.standard.StandardQueryParser;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.util.LuceneTestCase;
 
 /**
  * This test case is a copy of the core Lucene query parser test, it was adapted
@@ -45,27 +41,50 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 		qp.setDefaultOperator(Operator.AND);
 		sp.setDefaultOperator(Operator.AND);
 		
+		
+		// test the clause rewriting/optimization
+		Query q = qp.parse("a -(-(+(-(x)^0.6))^0.2)^0.3", "");
+		assertQueryMatch(qp, "a -(-(+(-(x)^0.6))^0.2)^0.3", "", "+a -x^0.3");
+		assertQueryMatch(qp, "-(-(+(-(x)^0.6))^0.2)^0.3", "", "x^0.3"); // not minus, because that is not allowed
+		assertQueryMatch(qp, "-(-(+(-(x)^0.6))^0.2)^", "", "x"); // because defualt boost is 1.0f
+		assertQueryMatch(qp, "-(-(+(-(x)^))^0.2)^0.1", "", "x^0.1"); // because defualt boost is 1.0f
+		
+		
 		Query qa = sp.parse("kahnn-strauss", "x");
 		Query qb = qp.parse("kahnn-strauss", "x");
+		assertQueryMatch(qp, "kahnn-strauss", "x", qa.toString());
 		
 		qa = sp.parse("a \\\"b \\\"c d", "x");
 		qb = qp.parse("a \\\"b \\\"c d", "x");
+		assertQueryMatch(qp, "a \\\"b \\\"c d", "x", qa.toString());
 		
 		qa = sp.parse("\"a \\\"b c\\\" d\"", "x");
 		qb = qp.parse("\"a \\\"b c\\\" d\"", "x");
+		assertQueryMatch(qp, "\"a \\\"b c\\\" d\"", "x", qa.toString());
 		
-		qp.setDebug(true);
-		System.out.println(qp.parse("a -(a x)^0.5", ""));
+		assertQueryMatch(qp, "+(-(-(-(x)^0.6))^0.2)^", "field", 
+        	"field:x");
+		assertQueryMatch(qp, "+(-(-(-(x)^0.6))^0.2)^0.5", "field", 
+    		"field:x^0.5");
+		
+		
+		// the first element will be positive, because the negative X NOT Y
+		// is currently implemented that way (the first must return something)
+		// TODO: this should be: "((+field:a +field:b)^0.8) -((+field:x +field:y)^0.2)"
+		
 		assertQueryMatch(qp, "(+(-(a b)))^0.8 OR -(x y)^0.2", "field", 
-        "((-(+field:a +field:b))^0.8) ((-(+field:x +field:y))^0.2)");
+        "+((+field:a +field:b)^0.8) -((+field:x +field:y)^0.2)");
+		
+		assertQueryMatch(qp, "(+(-(a b)))^0.8 AND -(x y)^0.2", "field", 
+        "+((+field:a +field:b)^0.8) -((+field:x +field:y)^0.2)");
 		
 		assertQueryMatch(qp, "(+(-(a b)))^0.8 -(x y)", "field", 
-        "+((-(+field:a +field:b))^0.8) +(-(+field:x +field:y))");
+        "+((+field:a +field:b)^0.8) -(+field:x +field:y)");
 		// or does -(x y) have different semantics? ... -field:x -field:y
 		// +((-(+field:a +field:b))^0.8) -field:x -field:y
 		
 		assertQueryMatch(qp, "+((+(-(a b)))^0.8)^0.7 OR -(x y)^0.2", "field", 
-        "((-((+field:a +field:b)^0.8))^0.7) ((-(+field:x +field:y))^0.2)");
+        "+((+field:a +field:b)^0.7) -((+field:x +field:y)^0.2)");
 		
 		
 		assertQueryMatch(qp, "+title:(dog cat)", "field", 
@@ -125,10 +144,17 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 
 		assertQueryMatch(qp, "one two^0.5 three~0.2", "field", 
         					"+field:one +field:two^0.5 +field:three~0.2");
-
+		System.out.println(qp.getDefaultOperator());
+		q = qp.parse("one (two three)^0.8", "field");
+		setDebug(true);
+		// I know where the problem is: I have change AqpBooleanNodes to
+		// be not overwriting existing modifiers, but I should get the 
+		// order correct
+		qa = qp.parse("one (two three)^0.8", "field");
 		assertQueryMatch(qp, "one (two three)^0.8", "field", 
         					"+field:one +((+field:two +field:three)^0.8)");
-
+		
+		
 		assertQueryMatch(qp, "one (x:two three)^0.8", "field", 
         					"+field:one +((+x:two +field:three)^0.8)");
 		
@@ -174,11 +200,11 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 		assertQueryMatch(qp, "this (+(that thus)^0.7)", "field", 
 							"+field:this +((+field:that +field:thus)^0.7)");
 		
-		assertQueryMatch(qp, "this (+(-(that thus))^0.7)", "field", 
+		assertQueryMatch(qp, "this (-(+(that thus))^0.7)", "field", 
 							"+field:this -((+field:that +field:thus)^0.7)");
 		
 		assertQueryMatch(qp, "this (+(-(+(-(that thus))^0.1))^0.3)", "field", 
-							"+field:this -((+field:that +field:thus)^0.1)");
+							"+field:this +((+field:that +field:thus)^0.3)");
 		
 		BooleanQuery.setMaxClauseCount(2);
 		try {

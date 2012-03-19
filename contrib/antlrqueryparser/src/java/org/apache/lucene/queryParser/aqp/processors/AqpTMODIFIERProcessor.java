@@ -48,7 +48,7 @@ public class AqpTMODIFIERProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
 
 	@Override
-	protected QueryNode preProcessNode(QueryNode node)
+	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 		
 		if (node instanceof AqpANTLRNode
@@ -87,7 +87,7 @@ public class AqpTMODIFIERProcessor extends QueryNodeProcessorImpl implements
 	}
 
 	@Override
-	protected QueryNode postProcessNode(QueryNode node)
+	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
 		return node;
 	}

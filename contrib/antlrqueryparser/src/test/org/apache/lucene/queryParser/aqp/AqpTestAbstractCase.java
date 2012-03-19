@@ -58,6 +58,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 	public int originalMaxClauses;
 	protected boolean debugParser = false;
 	protected String grammarName = "StandardLuceneGrammar";
+	protected int noFailures = 0;
 
 	public void setUp() throws Exception {
 		super.setUp();
@@ -96,8 +97,10 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 			throws Exception {
 		if (standard) {
 			StandardQueryParser sp = new StandardQueryParser(a);
-			sp.setQueryNodeProcessor(new DebuggingQueryNodeProcessorPipeline(sp
+			if (this.debugParser) {
+				sp.setQueryNodeProcessor(new DebuggingQueryNodeProcessorPipeline(sp
 					.getQueryConfigHandler()));
+			}
 			return sp;
 		} else {
 			return getParser(a);
@@ -337,6 +340,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 						+ "/, expecting /" + expectedResult + "/";
 
 				if (this.debugParser) {
+					System.err.println("Number of failures: " + ++noFailures);
 					System.err.println(msg);
 				} else {
 					fail(msg);

@@ -3,8 +3,6 @@ package org.apache.lucene.queryParser.aqp.processors;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryParser.aqp.util.AqpUtils.Modifier;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
@@ -13,6 +11,7 @@ import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.standard.nodes.BooleanModifierNode;
 
 
 /**
@@ -38,16 +37,19 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
 		if (node instanceof GroupQueryNode) {
+			QueryNode immediateChild = node.getChildren().get(0);
+			ClauseData data = harvestData(immediateChild);
+			QueryNode changedNode = data.getLastChild();
 			
-			ClauseData data = harvestData(node);
-			
-			if (data.getLastChild()!=null && data.getLastChild() != node) {
-				node = data.getLastChild();
+			if (data.getLevelsDeep() > 0) {
+				boolean modified = false;
 				if (data.getBoost()!=null) {
-					node = new BoostQueryNode(node, data.getBoost());
+					changedNode = new BoostQueryNode(changedNode, data.getBoost());
+					modified = true;
 				}
 				if (data.getModifier()!=null) {
-					node = new ModifierQueryNode(node, data.getModifier());
+					changedNode = new BooleanModifierNode(changedNode, data.getModifier());
+					modified = true;
 					/*
 					 * Why was I doing this? Firstly, it is buggy, the second
 					 * branch always executes - why am i creating new BooleanNode?
@@ -61,8 +63,16 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 					}
 					*/
 				}
-				return node;
+				/*
+				if (modified && node.getParent()==null) {
+					List<QueryNode> children = new ArrayList<QueryNode>();
+					children.add(node);
+					changedNode = new BooleanQueryNode(children);
+				}
+				*/
+				return changedNode;
 			}
+			return immediateChild;
 		}
 		return node;
 	}
@@ -100,7 +110,7 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 			data.setBoost(((BoostQueryNode) node).getValue());
 		}
 		else if (node instanceof GroupQueryNode) {
-			//pass
+			data.addLevelsDeep();
 		}
 		else {
 			data.setLastChild(node);
@@ -117,25 +127,33 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 		private ModifierQueryNode.Modifier modifier;
 		private Float boost;
 		private QueryNode lastValidNode;
+		private boolean keepOutmost = true; // change this to false if you want that 
+		// modifiers that are closer to the clause are applied to ti
+		private int levelsDeep = 0;
 		
 		ClauseData() {
-			
 		}
+		
 		ClauseData(ModifierQueryNode.Modifier mod, Float boost) {
 			this.modifier = mod;
 			this.boost = boost;
-			this.lastValidNode = lastValidNode;
 		}
 		public ModifierQueryNode.Modifier getModifier() {
 			return modifier;
 		}
 		public void setModifier(ModifierQueryNode.Modifier modifier) {
+			if (keepOutmost && this.modifier != null) {
+				return;
+			}
 			this.modifier = modifier;
 		}
 		public Float getBoost() {
 			return boost;
 		}
 		public void setBoost(Float boost) {
+			if (keepOutmost && this.boost != null) {
+				return;
+			}
 			this.boost = boost;
 		}
 		public QueryNode getLastChild() {
@@ -144,7 +162,12 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 		public void setLastChild(QueryNode lastNonClause) {
 			this.lastValidNode = lastNonClause;
 		}
-		
+		public int getLevelsDeep() {
+			return levelsDeep;
+		}
+		public void addLevelsDeep() {
+			this.levelsDeep++;
+		}
 	}
 
 }
