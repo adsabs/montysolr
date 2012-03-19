@@ -720,15 +720,19 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     // Tests bug LUCENE-800
     assertQueryEquals("(item:\\\\ item:ABCD\\\\)", a, "item:\\ item:ABCD\\");
+    setDebug(true);
     assertQueryNodeException("(item:\\\\ item:ABCD\\\\))"); // unmatched closing
+    setDebug(false);
     // paranthesis
     assertQueryEquals("\\*", a, "*");
     assertQueryEquals("\\\\", a, "\\"); // escaped backslash
 
     assertQueryNodeException("\\"); // a backslash must always be escaped
-
+    
+    setDebug(true);
     // LUCENE-1189
     assertQueryEquals("(\"a\\\\\") or (\"b\")", a, "a\\ or b");
+    setDebug(false);
   }
 
   public void testQueryStringEscaping() throws Exception {
@@ -830,12 +834,16 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testException() throws Exception {
     assertQueryNodeException("*leadingWildcard"); // disallowed by default
+    setDebug(true);
     assertQueryNodeException("\"some phrase");
+    setDebug(false);
     assertQueryNodeException("(foo bar");
+    setDebug(true);
     assertQueryNodeException("foo bar))");
     assertQueryNodeException("field:term:with:colon some more terms");
     assertQueryNodeException("(sub query)^5.0^2.0 plus more");
-    assertQueryNodeException("secret AND illegal) AND access:confidential");    
+    assertQueryNodeException("secret AND illegal) AND access:confidential");
+    setDebug(false);
   }
 
   public void testCustomQueryParserWildcard() throws Exception {

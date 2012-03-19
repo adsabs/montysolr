@@ -75,6 +75,7 @@ public class AqpQueryNodeProcessorPipeline extends
     
     add(new AqpCLAUSEProcessor());
     add(new AqpMODIFIERProcessor());
+    
     add(new AqpOPERATORProcessor());
     add(new AqpTMODIFIERProcessor());
     add(new AqpBOOSTProcessor());
@@ -115,8 +116,9 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new BoostQueryNodeProcessor());
     add(new MultiTermRewriteMethodProcessor());
     
-    add(new AqpGroupQueryOptimizerProcessor());
+    
     add(new AqpOptimizationProcessor());
+    add(new AqpGroupQueryOptimizerProcessor());
   }
   
   

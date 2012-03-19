@@ -127,8 +127,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 		Query q = getQuery(query, a);
 		String s = q.toString("field");
 		if (!s.equals(result)) {
-			fail("Query /" + query + "/ yielded /" + s + "/, expecting /"
-					+ result + "/");
+			debugFail(q.toString(), result, s);
 		}
 	}
 
@@ -296,7 +295,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 		} catch (QueryNodeException expected) {
 			return;
 		}
-		fail("ParseException expected, not thrown");
+		debugFail("ParseException expected, not thrown");
 	}
 
 	public void addDateDoc(String content, int year, int month, int day,
@@ -338,13 +337,9 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 				String msg = "Query /" + queryString + "/ with field: "
 						+ defaultField + "/ yielded /" + queryParsed
 						+ "/, expecting /" + expectedResult + "/";
-
-				if (this.debugParser) {
-					System.err.println("Number of failures: " + ++noFailures);
-					System.err.println(msg);
-				} else {
-					fail(msg);
-				}
+				
+				debugFail(queryString, expectedResult, queryParsed);
+				
 			} else {
 				if (this.debugParser) {
 					System.out.println("OK \"" + queryString + "\" --->  "
@@ -361,7 +356,25 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 		}
 
 	}
-
+	
+	public void debugFail(String message) {
+		if (this.debugParser) {
+			System.err.println("Number of failures: " + ++noFailures);
+			System.err.println(message);
+		} else {
+			fail(message);
+		}
+	}
+	
+	public void debugFail(String query, String expected, String actual) {
+		if (this.debugParser) {
+			System.err.println("Number of failures: " + ++noFailures);
+			System.err.println("query:/" + query + "/ expected:/" + expected + "/ actual:/" + actual + "/");
+		} else {
+			assertEquals(expected, actual);
+		}
+	}
+	
 	@Override
 	public void tearDown() throws Exception {
 		BooleanQuery.setMaxClauseCount(originalMaxClauses);

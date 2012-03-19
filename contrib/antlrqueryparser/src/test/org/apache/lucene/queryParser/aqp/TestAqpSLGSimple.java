@@ -157,12 +157,14 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 		
 		assertQueryMatch(qp, "one (x:two three)^0.8", "field", 
         					"+field:one +((+x:two +field:three)^0.8)");
+		assertQueryMatch(qp, "-one:(two three)^0.8", "field", 
+							"-((+one:two +one:three)^0.8)");
 		
+		setDebug(false);
 		assertQueryMatch(qp, "one:(two three)^0.8", "field", 
         					"(+one:two +one:three)^0.8");
 		
-		assertQueryMatch(qp, "-one:(two three)^0.8", "field", 
-       						"-((+one:two +one:three)^0.8)");
+		
 		
 		assertQueryMatch(qp, "+one:(two three)^0.8", "field", 
         					"(+one:two +one:three)^0.8");
