@@ -92,7 +92,7 @@
 
 
 	<!-- retrieves the location of the jcc and stores in inside jcc_egg -->
-	<exec executable="${python}" failonerror="true" outputproperty="jcc_egg" >
+	<exec executable="${python}" failonerror="true" outputproperty="jcc_egg" logerror="true">
 		<arg value="-c"/>
 		<arg value="import os, jcc; print os.path.dirname(os.path.dirname(jcc.__file__))" />
 	</exec>
@@ -165,7 +165,7 @@
 		<fail unless="import_ok" message="${test_import_errors}${line.separator}Please install the required Python modules first (jcc, lucene)" />
 
 
-		<exec executable="${python}" failonerror="true" outputproperty="webdist.webapp">
+		<exec executable="${python}" failonerror="true" outputproperty="webdist.webapp" logerror="true">
 			<arg value="-c"/>
 			<arg value="import os;d='${webdist.home}';print os.path.exists(d+'/webapps/solr.war') and d+'/webapps/solr.war' or d+'/webapps'" />
 		</exec>
@@ -318,7 +318,7 @@ lucene.version=${lucene.version}
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 
-		<exec executable="${python}" dir="${build.dir}" failonerror="true">
+		<exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
 			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
 			<!--<arg value="${ddash}no-generics" />-->
@@ -366,7 +366,7 @@ lucene.version=${lucene.version}
 
 	<!-- Just a basic test to verify that our montysolr package is correctly compiled and contains the necessary classes -->
 	<target name="test-egg" depends="config-build">
-		<exec executable="${python}" dir="${dist.dir}" failonerror="true">
+		<exec executable="${python}" dir="${dist.dir}" failonerror="true" logerror="true">
 			<arg value="-c" />
 			<arg value="import ${app.name} as X;X.initVM(X.CLASSPATH+'${path.separator}${toString:montysolr.classpath}',vmargs='-Dsolr.solr.home=/x/dev/workspace/test-solr/solr,-Dsolr.data.dir=/x/dev/workspace/test-solr/solr/data');assert (X.__file__ == 'montysolr/__init__.pyc')" />
 		</exec>
@@ -394,7 +394,7 @@ lucene.version=${lucene.version}
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 
-		<exec executable="${python}" dir="${build.dir}" failonerror="true">
+		<exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
 			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}../${dist.dir}${path.separator}${env.PYTHONPATH}" />
 
 			<!-- this is mac specific, i will yet have to find out how to make it os-specific -->
@@ -458,7 +458,7 @@ lucene.version=${lucene.version}
 
 		<echo message="You can watch Monty Python, this takes a while..." />
 
-		<exec executable="${python}" dir="${build.dir}" failonerror="true">
+		<exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
 			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}${env.PYTHONPATH}" />
 
 			<!-- this is mac specific, i will yet have to find out how to make it os-specific,
@@ -493,7 +493,7 @@ lucene.version=${lucene.version}
 
 	<target name="unzip-solr">
 		<!-- retrieves the location of the jcc -->
-		<exec executable="${python}" failonerror="true" outputproperty="_tmp_solr_err" dir="${build.dir}/dist">
+		<exec executable="${python}" failonerror="true" outputproperty="_tmp_solr_err" dir="${build.dir}/dist" logerror="true">
 			<arg value="-c"/>
 			<arg value="import os,glob; print os.path.abspath(glob.glob('./${app.solr.name}*.egg')[0])" />
 		</exec>
@@ -544,7 +544,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 	</target>
 
 	<target name="run-daemon" depends="config" >
-		<exec executable="ant" failonerror="true" dir="${montysolr.home}">
+		<exec executable="ant" failonerror="true" dir="${montysolr.home}" logerror="true">
 			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
 			<env key="MONTYSOLR_JVMARGS" value="${run.solr.jvmargs} ${env.MONTYSOLR_JVMARGS} -Djava.util.logging.config.file=${webdist.home}/etc/logging.properties" />
 			<env key="MONTYSOLR_ARGS" value="${run.solr.args} ${env.MONTYSOLR_ARGS} --daemon" />
@@ -555,7 +555,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 	<target name="run" depends="config"
         description="Starts MontySolr">
 
-		<exec executable="ant" failonerror="true" dir="${montysolr.home}">
+		<exec executable="ant" failonerror="true" dir="${montysolr.home}" logerror="true">
 			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
 			<env key="MONTYSOLR_JVMARGS" value="${run.solr.jvmargs} ${env.MONTYSOLR_JVMARGS} " />
 			<env key="MONTYSOLR_ARGS" value="${run.solr.args} ${env.MONTYSOLR_ARGS} --daemon"/>
@@ -670,7 +670,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
         />
         -->
 
-		<exec executable="ant" dir="${solr.real.location}" >
+		<exec executable="ant" dir="${solr.real.location}" logerror="true">
 			<env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
 			<arg value="example" />
 		</exec>
@@ -720,7 +720,7 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 	
 	<target name="get-solr-mirror" depends="init" unless="solr.real.location">
-		<exec executable="${python}" outputproperty="solr.mirror" failonerror="true">
+		<exec executable="${python}" outputproperty="solr.mirror" failonerror="true" logerror="true">
 			<arg value="-c" />
 			<arg  value="import urllib;t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));print l[0]"/>
 		</exec>
@@ -732,12 +732,12 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 		<property name="_home" location="." />
 
-		<exec executable="${python}" failonerror="true" outputproperty="_top_folder">
+		<exec executable="${python}" failonerror="true" outputproperty="_top_folder" logerror="true">
 			<arg value="-c"/>
 			<arg value="import os;print os.path.basename(os.path.abspath('.'))" />
 		</exec>
 
-		<exec executable="${python}" failonerror="true" outputproperty="_python_ver">
+		<exec executable="${python}" failonerror="true" outputproperty="_python_ver" logerror="true">
 			<arg value="-c"/>
 			<arg value="import sys;print '%s.%s' % sys.version_info[:2]" />
 		</exec>
