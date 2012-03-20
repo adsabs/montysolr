@@ -83,4 +83,9 @@ public class TestPythonField extends MontySolrAbstractTestCase {
 				"//*[@numFound='3']");
 
 	}
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestPythonField.class);
+    }
 }

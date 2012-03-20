@@ -1,5 +1,7 @@
 package org.apache.lucene.queryParser.aqp;
 
+import invenio.montysolr.TestMontySolrBasicOperations;
+
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.standard.StandardQueryParser;
@@ -218,6 +220,11 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 			// too many boolean clauses, so ParseException is expected
 		}
 	}
-
+	
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestAqpSLGSimple.class);
+    }
 
 }

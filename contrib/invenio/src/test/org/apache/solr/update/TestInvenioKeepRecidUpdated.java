@@ -21,12 +21,11 @@ import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
-import invenio.montysolr.util.MontySolrTestCaseJ4;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Properties;
+
 
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
@@ -566,6 +565,12 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 			super.runProcessingDeleted(recids, params);
 		}
 	}
+	
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestInvenioKeepRecidUpdated.class);
+    }
 
 
 }

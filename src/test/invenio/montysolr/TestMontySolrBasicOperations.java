@@ -141,5 +141,12 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		
 		assertTrue(caught);
 	}
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestMontySolrBasicOperations.class);
+    }
 
 }
+
+

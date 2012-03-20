@@ -21,4 +21,9 @@ public class TestAqpInvenioSimple extends AqpTestAbstractCase {
 	public void testSwitchingQuery() throws Exception {
 		assertQueryEquals("f:this #f:query", null, "f:this <(ints,recid)f:query>");
 	}
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestAqpInvenioSimple.class);
+    }
 }

@@ -31,6 +31,7 @@ import newseman.SemanticTaggerTokenFilter;
 import newseman.SemanticTagger;
 import newseman.MontySolrBaseTokenStreamTestCase;
 
+import invenio.montysolr.TestMontySolrBasicOperations;
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 
@@ -118,4 +119,8 @@ public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestC
 		//komunistická[84:96]/1 r6[84:96]/0 r7[84:96]/0
 	}
 	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestSemanticTaggerTokenFilter.class);
+    }
 }

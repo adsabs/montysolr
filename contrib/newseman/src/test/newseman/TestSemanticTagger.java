@@ -1,6 +1,5 @@
 package newseman;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,7 +12,6 @@ import org.junit.BeforeClass;
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
-import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
 public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
@@ -189,4 +187,9 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 		assertTrue(Collections.frequency(tok, "velké říjnové revoluce") == 1);
 	}
 	
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestSemanticTagger.class);
+    }
 }

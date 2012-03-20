@@ -20,6 +20,7 @@ package org.apache.solr.update;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
+
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
@@ -137,4 +138,9 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 		*/
 		return rsp;
 	}
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestWaitingDataimportHandler.class);
+    }
 }

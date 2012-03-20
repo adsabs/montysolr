@@ -17,6 +17,8 @@ package org.apache.lucene.queryParser.aqp;
  * limitations under the License.
  */
 
+import invenio.montysolr.TestMontySolrBasicOperations;
+
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
@@ -366,6 +368,12 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
         return false;
       }
     }
+  }
+  
+  
+  //Uniquely for Junit 3
+  public static junit.framework.Test suite() {
+      return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiField.class);
   }
 
 }

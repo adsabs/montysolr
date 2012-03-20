@@ -17,6 +17,8 @@ package org.apache.lucene.queryParser.aqp;
  * limitations under the License.
  */
 
+import invenio.montysolr.TestMontySolrBasicOperations;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.text.Collator;
@@ -1028,6 +1030,11 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     r.close();
     w.close();
     dir.close();
+  }
+  
+  //Uniquely for Junit 3
+  public static junit.framework.Test suite() {
+      return new junit.framework.JUnit4TestAdapter(TestAqpSLGStandardTest.class);
   }
 
 }

@@ -118,4 +118,9 @@ public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 				.containsKey("test3"));
 
 	}
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestInvenioRequestHandler.class);
+    }
 }
