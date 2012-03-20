@@ -41,7 +41,7 @@ public class AqpOrQueryNode extends AqpBooleanQueryNode {
 		
 		operator = "OR";
 		
-		applyModifier(clauses, Modifier.MOD_NONE);
+		//applyModifier(clauses, Modifier.MOD_NONE);
 		
 		// unfortunately we have to do it like this (when subclassing from
 		// BooleanQueryNode)

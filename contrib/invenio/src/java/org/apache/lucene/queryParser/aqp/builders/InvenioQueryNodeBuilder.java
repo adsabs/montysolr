@@ -33,7 +33,6 @@ public class InvenioQueryNodeBuilder implements StandardQueryBuilder {
 		master = parentBuilder;
 	}
 	
-	@Override
 	public Query build(QueryNode queryNode) throws QueryNodeException {
 		
 		InvenioQueryNode iq = (InvenioQueryNode) queryNode;

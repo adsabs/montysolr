@@ -41,11 +41,11 @@ import org.apache.solr.search.CitationQuery;
 public class CitationRefersToQParserPlugin extends QParserPlugin {
 	public static String NAME = "refersto";
 
-	@Override
+	
 	public void init(NamedList args) {
 	}
 
-	@Override
+	
 	public QParser createParser(String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req) {
 		return new InvenioRefersToQParser(qstr, localParams, params, req);
@@ -305,10 +305,15 @@ extends Query {
 class CitationRefersToFilter extends Filter {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4597506988705644683L;
+
+	/**
 	 * This method returns a set of documents that are referring (citing)
 	 * the set of documents we retrieved in the underlying query
 	 */
-	  @Override
+	  
 	  public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
 	    final OpenBitSet bitSet = new OpenBitSet(reader.maxDoc());
 	    for (int i=0; i < reader.maxDoc(); i++) {

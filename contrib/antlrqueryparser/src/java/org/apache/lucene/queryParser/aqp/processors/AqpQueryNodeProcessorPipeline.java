@@ -73,9 +73,10 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new AqpDEFOPProcessor());
     add(new AqpTreeRewriteProcessor());
     
-    add(new AqpMODIFIERProcessor());
-    add(new AqpOPERATORProcessor());
     add(new AqpCLAUSEProcessor());
+    add(new AqpMODIFIERProcessor());
+    
+    add(new AqpOPERATORProcessor());
     add(new AqpTMODIFIERProcessor());
     add(new AqpBOOSTProcessor());
     add(new AqpFUZZYProcessor());
@@ -92,6 +93,10 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new AqpFIELDProcessor());
     
     add(new AqpFuzzyModifierProcessor());
+    
+    
+    // TODO: remove the processors which are not needed
+    // these were the standard guys before AQP were added
     
     add(new WildcardQueryNodeProcessor());
     add(new MultiFieldQueryNodeProcessor());
@@ -111,8 +116,9 @@ public class AqpQueryNodeProcessorPipeline extends
     add(new BoostQueryNodeProcessor());
     add(new MultiTermRewriteMethodProcessor());
     
-    add(new AqpGroupQueryOptimizerProcessor());
+    
     add(new AqpOptimizationProcessor());
+    add(new AqpGroupQueryOptimizerProcessor());
   }
   
   

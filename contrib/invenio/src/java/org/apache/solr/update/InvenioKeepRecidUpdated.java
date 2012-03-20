@@ -176,7 +176,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	private String pythonFunctionName = "get_recids_changes";
 	
 
-	@Override
+	
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) 
 		throws IOException, InterruptedException
 			 {
@@ -350,7 +350,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		final SolrQueryRequest request = req;
 		
 		new Thread(new Runnable() {
-			@Override
+			
 			public void run() {
 				try {
 	                runSynchronously(dataToProcess, request);
@@ -609,7 +609,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	
 	private void runAsyncUpload() {
 		new Thread() {
-			@Override
+			
 			public void run() {
 				try {
 					runUpload();
@@ -692,22 +692,22 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 
 	}
 	
-	@Override
+	
 	public String getVersion() {
 		return "";
 	}
 
-	@Override
+	
 	public String getDescription() {
 		return "Updates the Invenio recid with the missing/new docs (if any)";
 	}
 
-	@Override
+	
 	public String getSourceId() {
 		return "";
 	}
 
-	@Override
+	
 	public String getSource() {
 		return "";
 	}

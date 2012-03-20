@@ -34,13 +34,13 @@ import org.apache.lucene.queryParser.aqp.parser.InvenioParser;
 public class AqpInvenioSyntaxParser extends AqpSyntaxParserAbstract {
     
     
-    @Override
+    
     public AqpSyntaxParser initializeGrammar(String grammarName)
             throws QueryNodeParseException {
         return this;
     }
 
-	@Override
+	
 	public TokenStream getTokenStream(CharSequence input) throws QueryNodeParseException {
 		ANTLRStringStream in = new ANTLRStringStream(input.toString());
 		FixInvenioLexer fLexer = new FixInvenioLexer(in);
@@ -60,7 +60,7 @@ public class AqpInvenioSyntaxParser extends AqpSyntaxParserAbstract {
         return tokens;
 	}
 
-	@Override
+	
 	public QueryNode parseTokenStream(TokenStream tokens, CharSequence query,
 			CharSequence field) throws QueryNodeParseException {
 		InvenioParser parser = new InvenioParser(tokens);

@@ -43,12 +43,12 @@ public class InvenioQParserPlugin extends QParserPlugin {
 
 	private String idField = null;
 
-	@Override
+	
 	public void init(NamedList args) {
 
 	}
 
-	@Override
+	
 	public QParser createParser(String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req) {
 		try {

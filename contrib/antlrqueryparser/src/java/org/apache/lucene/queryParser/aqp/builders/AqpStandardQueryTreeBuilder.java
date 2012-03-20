@@ -18,6 +18,7 @@ package org.apache.lucene.queryParser.aqp.builders;
  */
 
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
@@ -63,32 +64,91 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryNodeProcessorPipeline
  */
 public class AqpStandardQueryTreeBuilder extends QueryTreeBuilder implements
-    StandardQueryBuilder {
+		StandardQueryBuilder {
 
-  public AqpStandardQueryTreeBuilder() {
-    setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
-    setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
-    setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
-    setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());
-    setBuilder(BoostQueryNode.class, new BoostQueryNodeBuilder());
-    setBuilder(ModifierQueryNode.class, new ModifierQueryNodeBuilder());
-    setBuilder(WildcardQueryNode.class, new WildcardQueryNodeBuilder());
-    setBuilder(TokenizedPhraseQueryNode.class, new PhraseQueryNodeBuilder());
-    setBuilder(MatchNoDocsQueryNode.class, new MatchNoDocsQueryNodeBuilder());
-    setBuilder(PrefixWildcardQueryNode.class,
-        new PrefixWildcardQueryNodeBuilder());
-    setBuilder(RangeQueryNode.class, new RangeQueryNodeBuilder());
-    setBuilder(SlopQueryNode.class, new SlopQueryNodeBuilder());
-    setBuilder(StandardBooleanQueryNode.class,
-        new StandardBooleanQueryNodeBuilder());
-    setBuilder(MultiPhraseQueryNode.class, new MultiPhraseQueryNodeBuilder());
-    setBuilder(MatchAllDocsQueryNode.class, new MatchAllDocsQueryNodeBuilder());
+	private boolean debug = false;
+	private int counter = 0;
 
-  }
+	public AqpStandardQueryTreeBuilder(boolean debug) {
+		this.debug = debug;
+		init();
+	}
 
-  @Override
-  public Query build(QueryNode queryNode) throws QueryNodeException {
-    return (Query) super.build(queryNode);
-  }
+	public AqpStandardQueryTreeBuilder() {
+		init();
+	}
+
+	private void init() {
+		setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
+		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
+		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
+		setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());
+		setBuilder(BoostQueryNode.class, new BoostQueryNodeBuilder());
+		setBuilder(ModifierQueryNode.class, new ModifierQueryNodeBuilder());
+		setBuilder(WildcardQueryNode.class, new WildcardQueryNodeBuilder());
+		setBuilder(TokenizedPhraseQueryNode.class, new PhraseQueryNodeBuilder());
+		setBuilder(MatchNoDocsQueryNode.class,
+				new MatchNoDocsQueryNodeBuilder());
+		setBuilder(PrefixWildcardQueryNode.class,
+				new PrefixWildcardQueryNodeBuilder());
+		setBuilder(RangeQueryNode.class, new RangeQueryNodeBuilder());
+		setBuilder(SlopQueryNode.class, new SlopQueryNodeBuilder());
+		setBuilder(StandardBooleanQueryNode.class,
+				new StandardBooleanQueryNodeBuilder());
+		setBuilder(MultiPhraseQueryNode.class,
+				new MultiPhraseQueryNodeBuilder());
+		setBuilder(MatchAllDocsQueryNode.class,
+				new MatchAllDocsQueryNodeBuilder());
+	}
+
+	@Override
+	public Query build(QueryNode queryNode) throws QueryNodeException {
+		this.counter = 0;
+		return (Query) super.build(queryNode);
+	}
+
+	public void debug(boolean debug) {
+		this.debug = debug;
+	}
+
+	public void setBuilder(Class<? extends QueryNode> queryNodeClass,
+			QueryBuilder builder) {
+		if (this.debug) {
+			super.setBuilder(queryNodeClass, new DebuggingNodeBuilder(
+					queryNodeClass, builder));
+		} else {
+			super.setBuilder(queryNodeClass, builder);
+		}
+	}
+
+	class DebuggingNodeBuilder implements QueryBuilder {
+		private Class<? extends QueryNode> clazz = null;
+		private QueryBuilder realBuilder = null;
+
+		DebuggingNodeBuilder(Class<? extends QueryNode> queryNodeClass,
+				QueryBuilder builder) {
+			clazz = queryNodeClass;
+			realBuilder = builder;
+		}
+
+		public Object build(QueryNode queryNode) throws QueryNodeException {
+			System.out.println("--------------------------------------------");
+			System.out.println("step     " + counter++ + ".");
+			System.out.println("builder: " + realBuilder.getClass().getName());
+			System.out.println("node:    " + clazz.getName() );
+			System.out.println(queryNode.toString());
+			System.out.println("   -->");
+			Object result = realBuilder.build(queryNode);
+			if (result != null) {
+				System.out.println(((Query) result).toString() + "  <"+result.getClass().getName()+">");
+			}
+			else {
+				System.out.println("null");
+			}
+			System.out.println("--------------------------------------------");
+			return result;
+		}
+
+	};
 
 }

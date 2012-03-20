@@ -202,13 +202,11 @@ import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Parser;
 public class @{grammar-name}SyntaxParser extends AqpSyntaxParserAbstract {
     
     
-    @Override
     public AqpSyntaxParser initializeGrammar(String grammarName)
             throws QueryNodeParseException {
         return this;
     }
 
-    @Override
     public TokenStream getTokenStream(CharSequence input) {
         ANTLRStringStream in = new ANTLRStringStream(input.toString());
         @{grammar-name}Lexer lexer = new @{grammar-name}Lexer(in);
@@ -216,7 +214,6 @@ public class @{grammar-name}SyntaxParser extends AqpSyntaxParserAbstract {
         return tokens;
     }
 
-    @Override
     public QueryNode parseTokenStream(TokenStream tokens, CharSequence query,
             CharSequence field) throws QueryNodeParseException {
         @{grammar-name}Parser parser = new @{grammar-name}Parser(tokens);

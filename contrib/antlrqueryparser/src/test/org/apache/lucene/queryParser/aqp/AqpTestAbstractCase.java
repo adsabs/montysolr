@@ -53,13 +53,13 @@ import org.apache.lucene.util.LuceneTestCase;
  * 
  * Tests QueryParser.
  */
-public class TestAqpAbstractCase extends LuceneTestCase {
+public class AqpTestAbstractCase extends LuceneTestCase {
 
 	public int originalMaxClauses;
 	protected boolean debugParser = false;
 	protected String grammarName = "StandardLuceneGrammar";
+	protected int noFailures = 0;
 
-	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		originalMaxClauses = BooleanQuery.getMaxClauseCount();
@@ -97,8 +97,10 @@ public class TestAqpAbstractCase extends LuceneTestCase {
 			throws Exception {
 		if (standard) {
 			StandardQueryParser sp = new StandardQueryParser(a);
-			sp.setQueryNodeProcessor(new DebuggingQueryNodeProcessorPipeline(sp
+			if (this.debugParser) {
+				sp.setQueryNodeProcessor(new DebuggingQueryNodeProcessorPipeline(sp
 					.getQueryConfigHandler()));
+			}
 			return sp;
 		} else {
 			return getParser(a);
@@ -125,8 +127,7 @@ public class TestAqpAbstractCase extends LuceneTestCase {
 		Query q = getQuery(query, a);
 		String s = q.toString("field");
 		if (!s.equals(result)) {
-			fail("Query /" + query + "/ yielded /" + s + "/, expecting /"
-					+ result + "/");
+			debugFail(q.toString(), result, s);
 		}
 	}
 
@@ -294,7 +295,7 @@ public class TestAqpAbstractCase extends LuceneTestCase {
 		} catch (QueryNodeException expected) {
 			return;
 		}
-		fail("ParseException expected, not thrown");
+		debugFail("ParseException expected, not thrown");
 	}
 
 	public void addDateDoc(String content, int year, int month, int day,
@@ -336,12 +337,9 @@ public class TestAqpAbstractCase extends LuceneTestCase {
 				String msg = "Query /" + queryString + "/ with field: "
 						+ defaultField + "/ yielded /" + queryParsed
 						+ "/, expecting /" + expectedResult + "/";
-
-				if (this.debugParser) {
-					System.err.println(msg);
-				} else {
-					fail(msg);
-				}
+				
+				debugFail(queryString, expectedResult, queryParsed);
+				
 			} else {
 				if (this.debugParser) {
 					System.out.println("OK \"" + queryString + "\" --->  "
@@ -358,7 +356,25 @@ public class TestAqpAbstractCase extends LuceneTestCase {
 		}
 
 	}
-
+	
+	public void debugFail(String message) {
+		if (this.debugParser) {
+			System.err.println("Number of failures: " + ++noFailures);
+			System.err.println(message);
+		} else {
+			fail(message);
+		}
+	}
+	
+	public void debugFail(String query, String expected, String actual) {
+		if (this.debugParser) {
+			System.err.println("Number of failures: " + ++noFailures);
+			System.err.println("query:/" + query + "/ expected:/" + expected + "/ actual:/" + actual + "/");
+		} else {
+			assertEquals(expected, actual);
+		}
+	}
+	
 	@Override
 	public void tearDown() throws Exception {
 		BooleanQuery.setMaxClauseCount(originalMaxClauses);

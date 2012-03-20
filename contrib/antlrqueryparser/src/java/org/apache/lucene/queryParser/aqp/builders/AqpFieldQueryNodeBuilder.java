@@ -15,7 +15,6 @@ public class AqpFieldQueryNodeBuilder implements StandardQueryBuilder {
 		// empty constructor
 	}
 
-	@Override
 	public Query build(QueryNode queryNode) throws QueryNodeException {
 	    FieldQueryNode fieldNode = (FieldQueryNode) queryNode;
 	    

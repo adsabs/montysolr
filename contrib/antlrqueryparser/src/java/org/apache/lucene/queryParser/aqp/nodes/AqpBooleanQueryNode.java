@@ -87,7 +87,7 @@ public class AqpBooleanQueryNode extends BooleanQueryNode {
 		for (int i = 0; i < clauses.size(); i++) {
 			QueryNode child = clauses.get(i);
 
-			if (child instanceof ModifierQueryNode) {
+			if (child instanceof ModifierQueryNode || child instanceof GroupQueryNode) {
 				if (overrideModifiers) {
 					clauses.set(i, new ModifierQueryNode(
 						((ModifierQueryNode) child).getChild(), mod));

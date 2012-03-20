@@ -75,8 +75,8 @@ atom
 	-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
 	| modifier? (STAR COLON)? STAR 
 	-> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
-	| modifier? func_name value (',' value)* RPAREN
-	-> ^(MODIFIER modifier? ^(QFUNC func_name value+ ))
+	| modifier? func_name clauseBasic (',' clauseBasic)* RPAREN
+	-> ^(MODIFIER modifier? ^(QFUNC func_name clauseBasic+ RPAREN ))
 	;
    
 

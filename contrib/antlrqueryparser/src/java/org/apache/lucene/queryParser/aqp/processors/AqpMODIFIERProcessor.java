@@ -44,6 +44,12 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
  *  +title:a -title:b title:c
  * </pre>
  * 
+ * and when AND is the default operator:
+ * 
+ * <pre>
+ *  +title:a -title:b +title:c
+ * </pre>
+ * 
  * @see Modifier
  * @see AqpBooleanQueryNode
  */

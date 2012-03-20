@@ -53,6 +53,7 @@ import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
+import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryParser.standard.processors.GroupQueryNodeProcessor;
 import org.apache.lucene.search.BooleanClause;
@@ -77,7 +78,7 @@ import org.apache.lucene.store.Directory;
  * 
  * Tests QueryParser.
  */
-public class TestAqpSLGStandardTest extends TestAqpAbstractCase {
+public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public static Analyzer qpAnalyzer = new QPTestAnalyzer();
 
@@ -323,12 +324,19 @@ public class TestAqpSLGStandardTest extends TestAqpAbstractCase {
     
     assertQueryEquals("((a OR b) AND NOT c) OR d", null, "(+(a b) -c) d");
     assertQueryEquals("((a OR b) NOT c) OR d", null, "(+(a b) -c) d");
+    
     assertQueryEquals("+(apple \"steve jobs\") -(foo bar baz)", null,
         "+(apple \"steve jobs\") -(foo bar baz)");
-    setDebug(true);
     assertQueryEquals("+title:(dog OR cat) -author:\"bob dole\"", null,
         "+(title:dog title:cat) -author:\"bob dole\"");
-    setDebug(true);
+    
+    AqpQueryParser qp = getParser();
+    qp.setDefaultOperator(Operator.OR);
+    assertQueryMatch(qp, "title:(+a -b c)", "text", "+title:a -title:b title:c");
+    
+    qp.setDefaultOperator(Operator.AND);
+    assertQueryMatch(qp, "title:(+a -b c)", "text", "+title:a -title:b +title:c");
+    
   }
 
   public void testPunct() throws Exception {
@@ -712,15 +720,19 @@ public class TestAqpSLGStandardTest extends TestAqpAbstractCase {
 
     // Tests bug LUCENE-800
     assertQueryEquals("(item:\\\\ item:ABCD\\\\)", a, "item:\\ item:ABCD\\");
+    setDebug(true);
     assertQueryNodeException("(item:\\\\ item:ABCD\\\\))"); // unmatched closing
+    setDebug(false);
     // paranthesis
     assertQueryEquals("\\*", a, "*");
     assertQueryEquals("\\\\", a, "\\"); // escaped backslash
 
     assertQueryNodeException("\\"); // a backslash must always be escaped
-
+    
+    setDebug(true);
     // LUCENE-1189
     assertQueryEquals("(\"a\\\\\") or (\"b\")", a, "a\\ or b");
+    setDebug(false);
   }
 
   public void testQueryStringEscaping() throws Exception {
@@ -822,12 +834,16 @@ public class TestAqpSLGStandardTest extends TestAqpAbstractCase {
 
   public void testException() throws Exception {
     assertQueryNodeException("*leadingWildcard"); // disallowed by default
+    setDebug(true);
     assertQueryNodeException("\"some phrase");
+    setDebug(false);
     assertQueryNodeException("(foo bar");
+    setDebug(true);
     assertQueryNodeException("foo bar))");
     assertQueryNodeException("field:term:with:colon some more terms");
     assertQueryNodeException("(sub query)^5.0^2.0 plus more");
-    assertQueryNodeException("secret AND illegal) AND access:confidential");    
+    assertQueryNodeException("secret AND illegal) AND access:confidential");
+    setDebug(false);
   }
 
   public void testCustomQueryParserWildcard() throws Exception {

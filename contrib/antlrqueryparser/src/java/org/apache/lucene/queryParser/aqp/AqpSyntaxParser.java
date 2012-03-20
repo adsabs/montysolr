@@ -34,4 +34,7 @@ public interface AqpSyntaxParser extends SyntaxParser {
 	  
 	  public QueryNode parseTokenStream(TokenStream tokens, CharSequence query, CharSequence field)
 	  	 throws QueryNodeParseException;
+
+	  public QueryNode parse(CharSequence query, CharSequence field)
+			throws QueryNodeParseException;
 }

@@ -40,13 +40,15 @@ import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode.Modifier;
  *   	- creates {@link AqpOrQueryNode}
  *   NOT
  *   	- creates {@link AqpNotQueryNode}
+ *   NEAR
+ *   	- creates {@link AqpNearQueryNode}
  *   WITH
  *   	- not implemented yet
  *   PARAGRAPH
  *   	- not implemented yet
  * </pre>
  *   
- * This processor should run after {@link AqpDEFOPProcessor}, but before 
+ * This processor should run after {@link AqpDEFOPProcessor}, and also after 
  * {@link AqpMODIFIERProcessor} because modifiers should
  * have precedence over operators. Like in the query: "this OR +that" 
  *

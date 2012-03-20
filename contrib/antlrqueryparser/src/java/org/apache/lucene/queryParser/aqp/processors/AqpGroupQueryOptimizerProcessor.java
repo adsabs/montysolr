@@ -3,8 +3,6 @@ package org.apache.lucene.queryParser.aqp.processors;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryParser.aqp.util.AqpUtils.Modifier;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
@@ -13,6 +11,7 @@ import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.standard.nodes.BooleanModifierNode;
 
 
 /**
@@ -25,7 +24,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
  * 
  * <pre>this (+(-(+(-(that thus))^0.1))^0.3)</pre>
  * 
- * Will be optimized into:
+ * Will be optimized into (when DEFOP = AND):
  * 
  * <pre>+field:this -((+field:that +field:thus)^0.1)</pre>
  * 
@@ -38,23 +37,42 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
 		if (node instanceof GroupQueryNode) {
+			QueryNode immediateChild = node.getChildren().get(0);
+			ClauseData data = harvestData(immediateChild);
+			QueryNode changedNode = data.getLastChild();
 			
-			ClauseData data = harvestData(node);
-			
-			if (data.getLastChild()!=null && !node.equals(data.getLastChild())) {
-				node = data.getLastChild();
+			if (data.getLevelsDeep() > 0) {
+				boolean modified = false;
 				if (data.getBoost()!=null) {
-					node = new BoostQueryNode(node, data.getBoost());
+					changedNode = new BoostQueryNode(changedNode, data.getBoost());
+					modified = true;
 				}
 				if (data.getModifier()!=null) {
+					changedNode = new BooleanModifierNode(changedNode, data.getModifier());
+					modified = true;
+					/*
+					 * Why was I doing this? Firstly, it is buggy, the second
+					 * branch always executes - why am i creating new BooleanNode?
 					List<QueryNode> children = new ArrayList<QueryNode>();
-					children.add(new ModifierQueryNode(node, data.getModifier()));
-					node = new BooleanQueryNode(children);
+					if (children.size() == 1) {
+						return children.get(0);
+					}
+					else {
+						children.add(new ModifierQueryNode(node, data.getModifier()));
+						node = new BooleanQueryNode(children);
+					}
+					*/
 				}
-				
-				
-				return node;
+				/*
+				if (modified && node.getParent()==null) {
+					List<QueryNode> children = new ArrayList<QueryNode>();
+					children.add(node);
+					changedNode = new BooleanQueryNode(children);
+				}
+				*/
+				return changedNode;
 			}
+			return immediateChild;
 		}
 		return node;
 	}
@@ -92,7 +110,7 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 			data.setBoost(((BoostQueryNode) node).getValue());
 		}
 		else if (node instanceof GroupQueryNode) {
-			//pass
+			data.addLevelsDeep();
 		}
 		else {
 			data.setLastChild(node);
@@ -108,35 +126,48 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 	class ClauseData {
 		private ModifierQueryNode.Modifier modifier;
 		private Float boost;
-		private QueryNode lastNonClause;
+		private QueryNode lastValidNode;
+		private boolean keepOutmost = true; // change this to false if you want that 
+		// modifiers that are closer to the clause are applied to ti
+		private int levelsDeep = 0;
 		
 		ClauseData() {
-			
 		}
+		
 		ClauseData(ModifierQueryNode.Modifier mod, Float boost) {
 			this.modifier = mod;
 			this.boost = boost;
-			this.lastNonClause = lastNonClause;
 		}
 		public ModifierQueryNode.Modifier getModifier() {
 			return modifier;
 		}
 		public void setModifier(ModifierQueryNode.Modifier modifier) {
+			if (keepOutmost && this.modifier != null) {
+				return;
+			}
 			this.modifier = modifier;
 		}
 		public Float getBoost() {
 			return boost;
 		}
 		public void setBoost(Float boost) {
+			if (keepOutmost && this.boost != null) {
+				return;
+			}
 			this.boost = boost;
 		}
 		public QueryNode getLastChild() {
-			return lastNonClause;
+			return lastValidNode;
 		}
 		public void setLastChild(QueryNode lastNonClause) {
-			this.lastNonClause = lastNonClause;
+			this.lastValidNode = lastNonClause;
 		}
-		
+		public int getLevelsDeep() {
+			return levelsDeep;
+		}
+		public void addLevelsDeep() {
+			this.levelsDeep++;
+		}
 	}
 
 }

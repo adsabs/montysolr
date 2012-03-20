@@ -2,10 +2,7 @@ package org.apache.lucene.queryParser.aqp.nodes;
 
 import java.util.List;
 
-import org.antlr.runtime.Token;
-import org.antlr.runtime.tree.Tree;
 import org.apache.lucene.queryParser.aqp.AqpCommonTree;
-import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryParser.core.parser.EscapeQuerySyntax;
@@ -50,7 +47,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 		}
 	}
 
-	@Override
+	
 	public CharSequence toQueryString(EscapeQuerySyntax escaper) {
 		if (getTokenInput() != null) {
 			return "(" + getTokenLabel() + getTokenInput() + ")";
@@ -69,7 +66,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 		}
 	}
 
-	@Override
+	
 	public String toString() {
 		return toString(0);
 	}

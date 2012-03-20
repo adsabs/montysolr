@@ -35,29 +35,29 @@ public class DefaultFieldAttributeImpl extends AttributeImpl
 
 	private static final long serialVersionUID = -4268918577762615525L;
 	
-	protected String defaultField = "defaultField";
+	protected String defaultField = null;
 
-	@Override
+	
 	public void setDefaultField(String defaultField) {
 		this.defaultField = defaultField;
 	}
 
-	@Override
+	
 	public String getDefaultField() {
 		return this.defaultField;
 	}
 
-	@Override
+	
 	public void clear() {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
+	
 	public void copyTo(AttributeImpl target) {
 		throw new UnsupportedOperationException();
 	}
 	
-	@Override
+	
 	  public String toString() {
 	    return "<defaultField defaultField=" + this.defaultField
 	        + "/>";

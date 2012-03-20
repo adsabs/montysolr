@@ -90,7 +90,7 @@ public class AqpBOOSTProcessor extends QueryNodeProcessorImpl implements
 				if (queryConfig == null || !queryConfig.hasAttribute(BoostAttribute.class)) {
 					throw new QueryNodeException(new MessageImpl(
 			                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-			                "Configuration error: " + DefaultFieldAttribute.class.toString() + " is missing"));
+			                "Configuration error: " + BoostAttribute.class.toString() + " is missing"));
 				}
 				boost = queryConfig.getAttribute(BoostAttribute.class).getBoost();
 			}

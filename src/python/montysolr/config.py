@@ -9,7 +9,7 @@ MONTYSOLR_KILLLOAD = False
 MONTYSOLR_HANDLER = 'montysolr.sequential_handler'
 
 ## List of modules where we load MontySolr targets
-MONTYSOLR_TARGETS = ['montysolr.examples.twitter_test'] #'montysolr.inveniopie.targets', 'montysolr.examples.twitter_test']
+MONTYSOLR_TARGETS = [] #'montysolr.inveniopie.targets', 'montysolr.examples.twitter_test']
 
 # use the multiprocessing version of api_calls, value -1 means: detect number of cpus
 MONTYSOLR_MAX_WORKERS = 0

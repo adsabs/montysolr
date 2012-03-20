@@ -49,7 +49,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
     }
     
     
-    @Override
+    
 	public AqpSyntaxParser initializeGrammar(String grammarName) throws QueryNodeParseException {
 		
 		try {
@@ -102,7 +102,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
         
 	}
 	
-    @Override
+    
     public TokenStream getTokenStream(CharSequence query) {
     	ANTLRStringStream input = new ANTLRStringStream(query.toString());		
 		lexer.setCharStream(input);
@@ -114,7 +114,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
     
     
 	
-	@Override
+	
 	public QueryNode parseTokenStream(TokenStream tokens, CharSequence query, CharSequence field)
 			throws QueryNodeParseException {
 		
