@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class ProcessUtils {
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
-	public static void setLibraryPath(String path) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+	public static void setLibraryPath_old(String path) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 		System.setProperty( "java.library.path", path );
 
 		Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
@@ -29,6 +30,33 @@ public class ProcessUtils {
 		
 		fieldSysPath.setAccessible( true );
 		fieldSysPath.set( null, null );
+	}
+	
+	
+	/**
+	* Adds the specified path to the java library path
+	*
+	* @param pathToAdd the path to add
+	* @throws Exception
+	*/
+	public static void setLibraryPath(String pathToAdd) throws Exception{
+	    final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+	    usrPathsField.setAccessible(true);
+	 
+	    //get array of paths
+	    final String[] paths = (String[])usrPathsField.get(null);
+	 
+	    //check if the path to add is already present
+	    for(String path : paths) {
+	        if(path.equals(pathToAdd)) {
+	            return;
+	        }
+	    }
+	 
+	    //add the new path
+	    final String[] newPaths = Arrays.copyOf(paths, paths.length + 1);
+	    newPaths[newPaths.length-1] = pathToAdd;
+	    usrPathsField.set(null, newPaths);
 	}
 	
 	/**
