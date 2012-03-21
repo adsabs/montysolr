@@ -1,6 +1,7 @@
 package invenio.montysolr.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
@@ -42,7 +43,24 @@ public class ProcessUtils {
 	* http://fahdshariff.blogspot.com/2011/08/changing-java-library-path-at-runtime.html
 	*/
 	public static void addLibraryPath(String pathToAdd) throws Exception{
-	    final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+		final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+	    usrPathsField.setAccessible(true);
+	    
+	    //get array of paths
+	    final String[] paths = (String[])usrPathsField.get(null);
+	    
+		if (! hasLibraryPath(pathToAdd)) {
+		    //add the new path
+		    final String[] newPaths = Arrays.copyOf(paths, paths.length + 1);
+		    newPaths[newPaths.length-1] = pathToAdd;
+		    usrPathsField.set(null, newPaths);
+		}
+	}
+	
+	
+	public static boolean hasLibraryPath(String pathToAdd) throws Exception {
+		
+		final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
 	    usrPathsField.setAccessible(true);
 	 
 	    //get array of paths
@@ -51,14 +69,10 @@ public class ProcessUtils {
 	    //check if the path to add is already present
 	    for(String path : paths) {
 	        if(path.equals(pathToAdd)) {
-	            return;
+	            return true;
 	        }
 	    }
-	 
-	    //add the new path
-	    final String[] newPaths = Arrays.copyOf(paths, paths.length + 1);
-	    newPaths[newPaths.length-1] = pathToAdd;
-	    usrPathsField.set(null, newPaths);
+		return false;
 	}
 	
 	/**
@@ -125,6 +139,52 @@ public class ProcessUtils {
 		}
 	}
 
+	
+	/**
+	 * Checks whether java.library.path is set and contains path to the
+	 * JCC, if not, it will try to find it (but it is executing python,
+	 * so it assumes that you are not running a different interpreter)
+	 * 
+	 * @throws Exception
+	 */
+	public static void checkJCCPath() throws Exception {
+		
+		final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+		usrPathsField.setAccessible(true);
+		
+		//get array of paths
+	    final String[] paths = (String[])usrPathsField.get(null);
+	    
+	    //check if the path to add is already present
+	    for(String path : paths) {
+	        if( (new File(path + "/libjcc.so")).canRead() ||  (new File(path + "/libjcc.a")).canRead()
+	        		|| (new File(path + "/jcc.dll")).canRead()) {
+	            return;
+	        }
+	    }
+	    
+	    
+	    
+	    String jlp = System.getProperty("java.library.path.ignore.montysolr");
+	    if (jlp == null || jlp.trim().equals("")) {
+	    	System.err.println("Warning: MontySolr thinks that JCC is not available. You should set -Djava.library.path");
+	    	System.err.println("Warning: MontySolr will try to find JCC and add it to java.library.path");
+	    	System.err.println("Warning: This is not guaranteed to work (we execute default 'python')");
+	    	System.err.println("Warning: Alternatively, you can deactivate this by setting -Djava.library.path.ignore.montysolr=1");
+	    	
+	    	String jPath = getJCCPath();
+	    	if (jPath != null && jPath.length() > 0) {
+	    		System.err.println("Warning: Adding java.library.path=" + jPath);
+	    		addLibraryPath(jPath);
+	    	}
+	    	else {
+	    		System.err.println("Warning: We were not successful in finding JCC");
+	    	}
+	    }
+		
+	}
+	
+	
 	/**
 	 * Runs Python in the console and retrieves the location of the JCC egg
 	 * 

@@ -23,8 +23,8 @@ public class MontySolrSetup {
 				getChildModulePath(mainModulePath));
 
 		// discover and set -Djava.library.path
-		String jccpath = ProcessUtils.getJCCPath();
-		ProcessUtils.setLibraryPath(jccpath);
+		ProcessUtils.checkJCCPath();
+		
 
 		// this is necessary to run in the main thread and because of the
 		// python loads the parent folder and inserts it into the pythonpath
