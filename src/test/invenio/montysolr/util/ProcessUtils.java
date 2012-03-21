@@ -22,7 +22,7 @@ public class ProcessUtils {
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
-	public static void setLibraryPath_old(String path) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+	public static void setLibraryPath(String path) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 		System.setProperty( "java.library.path", path );
 
 		Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
@@ -38,8 +38,10 @@ public class ProcessUtils {
 	*
 	* @param pathToAdd the path to add
 	* @throws Exception
+	* 
+	* http://fahdshariff.blogspot.com/2011/08/changing-java-library-path-at-runtime.html
 	*/
-	public static void setLibraryPath(String pathToAdd) throws Exception{
+	public static void addLibraryPath(String pathToAdd) throws Exception{
 	    final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
 	    usrPathsField.setAccessible(true);
 	 
