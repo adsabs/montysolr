@@ -74,7 +74,7 @@ def run(grammar_name, basedir='',
             
             toc.append('%s. <a href="#anchor%s"><pre>%s</pre></a><br/>' % (i, i, query))
             
-            print '%s/%s :: %s' % (i, total, query)
+            print '//%s/%s :: %s' % (i, total, query)
             
             
             #generate graph
@@ -161,7 +161,7 @@ def load_gunit_file(gunit_file):
         if len(parts) == 1 and parts[0][-1] == ':':
             section = parts[0][:-1]
             test_cases.setdefault(section, [])
-        elif len(parts) > 1 and parts[1].lower() != 'fail':
+        elif len(parts) > 1 and parts[1].lower() != 'fails':
             query = parts[0]
             query = query.replace('\\\"', '"').replace('\\\'', '\'').replace('\\\\', '\\')
             test_cases[section].append(query)
