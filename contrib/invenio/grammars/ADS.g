@@ -396,6 +396,14 @@ FUNC_NAME
 	;	
 
 
+WS  :   ( ' '
+        | '\t'
+        | '\r'
+        | '\n'
+        | '\u3000'
+        ) 
+        {$channel=HIDDEN;}
+    ;	
 
 fragment INT: '0' .. '9';
 
