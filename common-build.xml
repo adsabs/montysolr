@@ -487,6 +487,8 @@
 
 				<sysproperty key="testmethod" value="${testmethod}"/>
 				<sysproperty key="jetty.testMode" value="1"/>
+				
+				<env key="PYTHONPATH" />
 
 				<formatter type="xml"/>
 				<formatter classname="${junit.details.formatter}" usefile="false"/>
