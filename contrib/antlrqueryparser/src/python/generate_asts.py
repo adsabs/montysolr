@@ -5,7 +5,10 @@ import os
 
 def run(grammar_name, basedir='', 
         cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.jar:/x/dev/antlr-34/lib/antlr-3.4-complete.jar',
-        parserdir=''):
+        grammardir='',
+        java_executable='java',
+        dot_executable='dot'
+        ):
     
     
     if not basedir:
@@ -13,7 +16,7 @@ def run(grammar_name, basedir='',
 
     old_dir = os.getcwd()
     
-    thisdir = parserdir
+    thisdir = grammardir
     if not thisdir:        
         thisdir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(thisdir)
@@ -30,10 +33,10 @@ def run(grammar_name, basedir='',
     tmp_file = os.path.join(basedir, 'ast-tree.dot')
     index_file = os.path.join(basedir, '%s.html' % grammar_name)
     gunit_file = os.path.join(thisdir, grammar_name + '.gunit')
-    generate_ast_command = 'java -cp %s org.apache.lucene.queryParser.aqp.parser.BuildAST %s "%%s"' % (cp, grammar_name)
+    generate_ast_command = '%s -cp %s org.apache.lucene.queryParser.aqp.parser.BuildAST %s "%%s"' % (java_executable, cp, grammar_name)
     
     
-    generate_svg_command = 'dot -Tsvg %s' % tmp_file
+    generate_svg_command = '%s -Tsvg %s' % (dot_executable, tmp_file)
     
     test_cases = load_gunit_file(gunit_file)
     
@@ -106,8 +109,13 @@ def run(grammar_name, basedir='',
             cmds.pop()
                         
             cmds_svg[-1] = tmp_dot
-             
-            p = sub.Popen(cmds_svg,stdout=sub.PIPE,stderr=sub.PIPE)
+            
+            try:
+                p = sub.Popen(cmds_svg,stdout=sub.PIPE,stderr=sub.PIPE)
+            except Exception, e:
+                print "The following command failed:"
+                print ' '.join(cmds_svg)
+                raise e
             
             output, errors = p.communicate()
             

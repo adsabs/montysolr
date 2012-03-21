@@ -41,6 +41,7 @@
         <attribute name="build-dir"/>
         <attribute name="parser-dir"/>
         <attribute name="classpathref"/>
+    	<attribute name="compilerarg" default="-nowarn"/> <!-- Because parser is a generated code, we have little control over it and  disable the warnings -->
         <sequential>
             
             <clean-parser parser-dir="@{parser-dir}" grammar-name="@{grammar-name}"/>
@@ -70,6 +71,7 @@
                 <include name="**/@{grammar-name}Lexer.java" />
                 <include name="**/@{grammar-name}.tokens" />
         		<classpath refid="@{classpathref}" />
+        		<compilerarg line="@{compilerarg}" />
         	</compile>
         	
         	
@@ -151,6 +153,9 @@
         <attribute name="build-dir" />
         <attribute name="classpath" />
         <attribute name="grammar-dir" />
+    	<attribute name="java-executable" default="java"/>
+    	<attribute name="dot-executable" default="dot"/>
+    	
         <sequential>
             <exec executable="@{python-executable}" failonerror="true" >
                 <arg value="@{python-generator}"/>
@@ -158,6 +163,8 @@
                 <arg value="@{build-dir}"/>
                 <arg value="@{classpath}" />
                 <arg value="@{grammar-dir}"/>
+            	<arg value="@{java-executable}"/>
+        		<arg value="@{dot-executable}"/>
             </exec>
             <echo>
             The html with diagram is at: @{grammar-dir}/@{grammar-name}.html
