@@ -88,6 +88,8 @@ def run(grammar_name, basedir='',
             else:
                 print 'Error generating AST for: ' + query
                 print errors
+                if 'java.lang.ClassNotFoundException' in errors:
+                    raise Exception('Please fix your classpath')
                 continue
 
             #generate tree

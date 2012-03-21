@@ -113,8 +113,8 @@
 	<target name="generate-antlr" depends="antlr-generate" 
 		description="Regenerates grammar; usage -Dgrammar=&lt;name&gt;"/>
 
+	
 	<target name="antlr-generate" >
-		
 		<generate-grammar grammar-name="${aqp.grammar}"
 			 grammar-dir="${aqp.grammars.dir}"
 			 parser-dir="${aqp.parser.dir}"
@@ -125,15 +125,17 @@
 
 
 	<!-- compiles both grammar and the test classes -->
-	<target name="compile-all" depends="compile">
+	<target name="compile-all" depends="compile,compile-ast" />
+		
+    
+	<target name="compile-ast">
 		<mkdir dir="${build.dir}/classes/test"/>
-		<compile srcdir="${common.dir}/contrib/${ant.project.name}/src/test" 
-			destdir="${build.dir}/classes/test">
-			<classpath refid="compile.classpath"/>
-			<include name="**/BuildAST.java"/>
-		</compile>
+        <compile srcdir="${common.dir}/contrib/antlrqueryparser/src/test" 
+            destdir="${build.dir}/classes/test">
+            <classpath refid="compile.classpath"/>
+            <include name="**/BuildAST.java"/>
+        </compile>
 	</target>
-
 	
 	<target name="compile" description="Compiles all the java classes" depends="generate-antlr">
 		<compile srcdir="src/java" 
@@ -166,7 +168,8 @@
 
 	
 	<target name="display" depends="dot" >
-		<exec executable="${dot_viewer}" failifexecutionfails="true">
+		<echo>${dotprop.dot_viewer} ${aqp.dotfile}</echo>
+		<exec executable="${dotprop.dot_viewer}" failifexecutionfails="true">
 			<arg line="${aqp.dotfile}"/>
 		</exec>
 	</target>
@@ -181,7 +184,7 @@
 
 	<target name="gunit" description="Run the gunit test suite, usage: ant -Dgrammar=name" 
 		depends="generate-antlr">
-		
+		 
 		<run-gunit grammar-name="${aqp.grammar}" 
 			grammar-dir="${aqp.grammars.dir}" 
 			classpathref="compile.classpath"/>
@@ -195,7 +198,12 @@
 
 	
 	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" depends="compile-all" >
-
+	    
+		<echo>
+		        Generating graphs for the grammar ${aqp.grammar}
+			    Note: the ${dotprop.dot_viewer} must exist and be executable
+			    You can fix the path in ${common.dir}/contrib/antlrqueryparser/build.properties
+		</echo>
 		<generate-html python-executable="${prop.python}"
 			  python-generator="${aqp.generate.py}"
 			  grammar-name="${aqp.grammar}"

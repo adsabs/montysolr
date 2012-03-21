@@ -136,11 +136,11 @@
         <attribute name="classpathref"/>
         <sequential>
             <echo>
-        Running GUNIT: @{grammar-name}        
-        </echo>
+            Running GUNIT: @{grammar-name}        
+            </echo>
             <java classpathref="@{classpathref}"
-            classname="org.antlr.gunit.Interp"
-            >
+                classname="org.antlr.gunit.Interp"
+                >
                 <arg value="@{grammar-dir}/@{grammar-name}.gunit"/>
             </java>
         </sequential>
