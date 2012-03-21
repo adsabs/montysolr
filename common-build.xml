@@ -488,8 +488,6 @@
 				<sysproperty key="testmethod" value="${testmethod}"/>
 				<sysproperty key="jetty.testMode" value="1"/>
 				
-				<env key="PYTHONPATH" value="${env.PYTHONPATH}"/>
-
 				<formatter type="xml"/>
 				<formatter classname="${junit.details.formatter}" usefile="false"/>
 				<batchtest fork="yes" todir="@{junit.output.dir}" if="runall">
