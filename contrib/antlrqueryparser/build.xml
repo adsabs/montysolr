@@ -197,7 +197,8 @@
     </target>
 
 	
-	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" depends="compile-all" >
+	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" 
+		depends="compile-all,generate-antlr" >
 	    
 		<echo>
 		        Generating graphs for the grammar ${aqp.grammar}
