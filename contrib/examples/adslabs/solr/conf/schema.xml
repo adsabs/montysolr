@@ -319,7 +319,8 @@
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
     </fieldType>
-
+    
+    <fieldType name="reader_data" class="solr.MongoDataField" omitNorms="true" database="ads_data" collection="reader_data"/>
 
     <!-- A general unstemmed text field that indexes tokens normally and also
          reversed (via ReversedWildcardFilterFactory), to enable more efficient 
@@ -564,16 +565,16 @@
    <!-- rca: because elevation has 'id' hardcoded, we cannot use recid and elevantion
         at the same time, so i will use 'id' name -->
    <field name="id" type="string" indexed="true" stored="true" required="true" />
-   <field name="recid" type="int" indexed="true" stored="true" required="false" />
+   <field name="recid" type="string" indexed="true" stored="true" required="false" />
    <field name="bibcode" type="string" indexed="true" stored="true" required="true" />
    <field name="bibstem" type="string" indexed="true" stored="true" />
-   <field name="abstract" type="ads_text" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
-   <field name="publication" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
-   <field name="reportnumber" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="abs" type="ads_text" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
+   <field name="pub" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
+   <field name="reportnumber" type="string" indexed="true" stored="true" multiValued="true"/>
 
-   <field name="publication_year" type="string" stored="true" indexed="true"/>
-   <field name="publication_date" type="string" stored="true" indexed="true"/>
-   <field name="publication_date_sort" type="int" stored="true" indexed="true"/>
+   <field name="year" type="string" stored="true" indexed="true"/>
+   <field name="pubdate" type="string" stored="true" indexed="true"/>
+   <field name="pubdate_sort" type="int" stored="true" indexed="true"/>
 
    <!-- Common metadata fields, named specifically to match up with
      SolrCell metadata when parsing rich documents such as Word, PDF.
@@ -583,13 +584,11 @@
    <field name="all" type="text" indexed="true" stored="false" multiValued="true"/>
    <field name="title" type="ads_text" indexed="true" stored="true" multiValued="true"/>
    <field name="collection" type="text" indexed="true" stored="true"/>
-   <field name="collaboration" type="text" indexed="true" stored="true"/>
-   <field name="doi" type="text" indexed="true" stored="true"/>
+   <field name="collection_type" type="string" indexed="true" stored="true"/>
    <field name="author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
-   <field name="author_facet" type="string" indexed="true" stored="false" multiValued="true"/>
-   <field name="keyword" type="normalized_string" indexed="true" stored="true" multiValued="true"/>
-   <field name="keyword_facet" type="string" indexed="true" stored="false" multiValued="true"/>
-   <field name="category" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="author_norm" type="string" indexed="true" stored="false" multiValued="true"/>
+   <field name="aff" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="topic" type="normalized_string" indexed="true" stored="true" multiValued="true"/>
    
    <!-- MontySolr: needed when InvneioParser is used in maxinv mode -->
    <dynamicField name="*" type="text" multiValued="true" />
@@ -598,8 +597,9 @@
    <dynamicField name="inv_*" type="text" indexed="false" stored="false" multiValued="true"/>
 
    <!-- MontySolr: Pythonic text -->
-   <field name="fulltext" type="textgen_py" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
-   <field name="acknowledgements" type="textgen_py" indexed="true" stored="true" />
+   <field name="full" type="textgen_py" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
+   <field name="ack" type="textgen_py" indexed="true" stored="true" />
+   <field name="reader" type="string_mongo" indexed="true" stored="true" />
 
    <!-- Uncommenting the following will create a "timestamp" field using
         a default value of "NOW" to indicate when each document was indexed.
@@ -635,7 +635,13 @@
    <copyField source="id" dest="recid"/>
    <copyField source="author" dest="author_facet"/>
    <copyField source="keyword" dest="keyword_facet"/>
-
+   <copyField source="title" dest="all"/>
+   <copyField source="author" dest="all"/>
+   <copyField source="year" dest="all"/>
+   <copyField source="abs" dest="all"/>
+   <copyField source="bibcode" dest="all"/>
+   <copyField source="pub" dest="all"/>
+   <copyField source="full" dest="all"/>
 
    <!-- Above, multiple source fields are copied to the [text] field.
 	  Another way to map multiple source fields to the same

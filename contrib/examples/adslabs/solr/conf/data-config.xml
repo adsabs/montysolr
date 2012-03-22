@@ -1,8 +1,8 @@
 <dataConfig>
     <script><![CDATA[
             function pubdate_sort(row) {
-            	var date_string = row.get('publication_date');
-            	row.put('publication_date_sort', date_string.replace('-', ''));
+            	var date_string = row.get('pubdate');
+            	row.put('pubdate_sort', date_string.replace('-', ''));
             	return row
             }
             function bibstem(row) {
@@ -11,7 +11,7 @@
             	return row;
             }
     ]]></script>
-    <dataSource type="URLDataSource" />
+    <dataSource type="AdsDataSource" mongoHost="localhost" mongoPort="27017" jdbcConfig="" />
     <document>
         <entity name="adslabs"
             pk="id"
@@ -31,21 +31,14 @@
         <field column="reportnumber"        
             xpath="/collection/record/datafield[@tag='037']/subfield[@code='a']" />
             
-        <field column="first_author"        
-            xpath="/collection/record/datafield[@tag='100']/subfield[@code='a']" />
-        <field column="first_author_norm"        
-            xpath="/collection/record/datafield[@tag='100']/subfield[@code='b']" />   
-        <field column="first_author_affiliation"        
-            xpath="/collection/record/datafield[@tag='100']/subfield[@code='u']" />   
-
         <field column="author"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='a']" />
         <field column="author_norm"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='b']" />   
-        <field column="author_affiliation"        
+        <field column="aff"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='u']" />   
 
-        <field column="abstract"        
+        <field column="abs"        
             xpath="/collection/record/datafield[@tag='520']/subfield[@code='a']" />
 
         <field column="title"        
@@ -53,7 +46,7 @@
         <field column="title"        
             xpath="/collection/record/datafield[@tag='242']/subfield[@code='a']" />      
         
-        <field column="publication"        
+        <field column="pub"        
             xpath="/collection/record/datafield[@tag='773']/subfield" />
         
         <field column="collection"        
@@ -62,19 +55,24 @@
         <field column="collection_type"        
             xpath="/collection/record/datafield[@tag='690']/subfield[@code='a']" />
 
-        <field column="keyword"        
+        <field column="topic"        
             xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />
             
 
-        <field column="publication_year"        
+        <field column="year"        
             xpath="/collection/record/datafield[@tag='260']/subfield[@code='c']" />
 
-        <field column="publication_date" 
+        <field column="pubdate" 
             xpath="/collection/record/datafield[@tag='269']/subfield[@code='c']" />
             
-        <field column="fulltext" template="${adslabs.bibcode}"/>
+        <!-- field column="entdate" xpath="" / -->
+        <!-- field column="bibgroup" xpath="" / -->
+            
+        <field column="full" template="${adslabs.bibcode}"/>
         
-        <field column="acknowledgements" template="${adslabs.bibcode}" />
+        <field column="ack" template="${adslabs.bibcode}" />
+        
+        <field column="reader" template="${adslabs.bibcode}" />
 
         </entity>
         
