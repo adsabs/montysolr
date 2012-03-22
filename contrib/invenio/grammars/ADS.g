@@ -75,8 +75,8 @@ atom
 	-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
 	| modifier? (STAR COLON)? STAR 
 	-> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
-	| modifier? func_name clauseBasic (',' clauseBasic)* RPAREN
-	-> ^(MODIFIER modifier? ^(QFUNC func_name clauseBasic+ RPAREN ))
+	| modifier? func_name clauseOr (',' clauseOr)* RPAREN
+	-> ^(MODIFIER modifier? ^(QFUNC func_name clauseOr+ RPAREN ))
 	;
    
 
@@ -396,6 +396,14 @@ FUNC_NAME
 	;	
 
 
+WS  :   ( ' '
+        | '\t'
+        | '\r'
+        | '\n'
+        | '\u3000'
+        ) 
+        {$channel=HIDDEN;}
+    ;	
 
 fragment INT: '0' .. '9';
 
