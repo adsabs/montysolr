@@ -42,8 +42,12 @@
     <property name="inv.parser.dir" location="src/java/org/apache/lucene/queryParser/aqp/parser" />
     
     
+	<!-- don't overrdie run.classpath, compile.classpath and test.classpath
+	     they are defined inside contrib/antlrqueryparser -->
     
 	<path id="additional.classpath">
+		<path refid="test.classpath"/>
+		<path refid="compile.classpath"/>
 		<fileset dir="lib">
             <include name="**/**.jar"/>
         </fileset>
@@ -65,41 +69,26 @@
 	</target>
 	
     	
-	<target name="invenio-build-grammar" description="Compiles the grammar for Invenio">
+	<target name="invenio-build-grammar" description="Compiles the grammar for Invenio"
+		depends="compile-prerequisites">
 		<!-- it is little bit more complex, as we have 2 grammars to take care of -->
-		
-		<generate-grammar grammar-name="FixInvenio"
-		             grammar-dir="${inv.grammars.dir}"
-		             parser-dir="${inv.parser.dir}"
-		             build-dir="${build.dir}/classes/java"
-		             classpathref="compile.classpath"
-		               />
-		<generate-grammar grammar-name="Invenio"
-                     grammar-dir="${inv.grammars.dir}"
-                     parser-dir="${inv.parser.dir}"
-                     build-dir="${build.dir}/classes/java"
-                     classpathref="compile.classpath"
-                       />
+		<antcall target="generate-antlr" inheritall="false" inheritrefs="false">
+            <param name="grammar" value="FixInvenio" />
+        </antcall>
+		<antcall target="generate-antlr" inheritall="false" inheritrefs="false">
+            <param name="grammar" value="FixInvenio" />
+        </antcall>
 	</target>
 	
 	
 	<target name="invenio-generate-html" description="Generates a html page for the grammar X (from X.gunit file)" 
-		depends="antlrqueryparser.compile-ast" >
-
-        <generate-html python-executable="${prop.python}"
-              python-generator="${aqp.generate.py}"
-              grammar-name="FixInvenio"
-              build-dir="${build.dir}"
-              classpath="${toString:test.classpath}"
-              grammar-dir="${inv.grammars.dir}"
-              />
-		<generate-html python-executable="${prop.python}"
-              python-generator="${aqp.generate.py}"
-              grammar-name="Invenio"
-              build-dir="${build.dir}"
-              classpath="${toString:test.classpath}"
-              grammar-dir="${inv.grammars.dir}"
-              />
+		>
+	    <antcall target="generate-html" inheritall="false" inheritrefs="false">
+	    	<param name="grammar" value="FixInvenio" />
+	    </antcall>
+		<antcall target="generate-html" inheritall="false" inheritrefs="false">
+            <param name="grammar" value="Invenio" />
+        </antcall>
     </target>
     
 	
