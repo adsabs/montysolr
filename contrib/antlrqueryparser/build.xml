@@ -202,7 +202,7 @@
 	    
 		<echo>
 		        Generating graphs for the grammar ${aqp.grammar}
-			    Note: the ${dotprop.dot_viewer} must exist and be executable
+			    Note: the ${dotprop.svg_generator} must exist and be executable
 			    You can fix the path in ${common.dir}/contrib/antlrqueryparser/build.properties
 		</echo>
 		<generate-html python-executable="${prop.python}"
@@ -212,7 +212,7 @@
 			  classpath="${toString:compile.classpath}"
 			  grammar-dir="${aqp.grammars.dir}"
 			  java-executable="${dotprop.java_executable}"
-			  dot-executable="${dotprop.dot_viewer}"
+			  dot-executable="${dotprop.svg_generator}"
 			  />
 	</target>
 
