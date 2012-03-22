@@ -74,7 +74,7 @@ def run(grammar_name, basedir='',
             
             toc.append('%s. <a href="#anchor%s"><pre>%s</pre></a><br/>' % (i, i, query))
             
-            print '//%s/%s :: %s' % (i, total, query)
+            print '//  %s/%s :: %s' % (i, total, query)
             
             
             #generate graph
