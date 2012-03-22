@@ -167,7 +167,7 @@
         		<arg value="@{dot-executable}"/>
             </exec>
             <echo>
-            The html with diagram is at: @{grammar-dir}/@{grammar-name}.html
+            The html with diagram is at: @{build-dir}/@{grammar-name}.html
             </echo>
         </sequential>
     </macrodef>
