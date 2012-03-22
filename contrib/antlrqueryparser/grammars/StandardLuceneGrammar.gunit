@@ -166,7 +166,7 @@ atom:
 "\"  this  \"" 	->	"(MODIFIER (TMODIFIER (FIELD (QPHRASE \"  this  \"))))"		
 "\"a \\\"b c\\\" d\"" 	->	"(MODIFIER (TMODIFIER (FIELD (QPHRASE \"a \\\"b c\\\" d\"))))"		
 "a\\\\\\+b" 	->	"(MODIFIER (TMODIFIER (FIELD (QNORMAL a\\\\\\+b))))"		
-"\"a \\\"b c\\\" d\""	->	""		
+"\"a \\\"b c\\\" d\"" 	->	"(MODIFIER (TMODIFIER (FIELD (QPHRASE \"a \\\"b c\\\" d\"))))"		
 "\"a \\\"b c\\\" d\"" 	->	"(MODIFIER (TMODIFIER (FIELD (QPHRASE \"a \\\"b c\\\" d\"))))"		
 "\"a \\+b c d\"" 	->	"(MODIFIER (TMODIFIER (FIELD (QPHRASE \"a \\+b c d\"))))"		
 "a\\u0062c" 	->	"(MODIFIER (TMODIFIER (FIELD (QNORMAL a\\u0062c))))"		
