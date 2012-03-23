@@ -24,6 +24,7 @@ tokens {
   QDATE;
   QFIRST;
   QFUNC;
+  QCOMMA;
 }
 
 @header{
@@ -75,8 +76,8 @@ atom
 	-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
 	| modifier? (STAR COLON)? STAR 
 	-> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
-	| modifier? func_name clauseOr (',' clauseOr)* RPAREN
-	-> ^(MODIFIER modifier? ^(QFUNC func_name clauseOr+ RPAREN ))
+	| modifier? func_name clauseBasic (',' clauseBasic)* RPAREN
+	-> ^(MODIFIER modifier? ^(QFUNC func_name clauseBasic+ RPAREN ))
 	;
    
 
@@ -96,6 +97,7 @@ value
 	| DATE_RANGE -> ^(QDATE DATE_RANGE)
 	| AUTHOR_SEARCH -> ^(QFIRST AUTHOR_SEARCH)
 	| QMARK -> ^(QTRUNCATED QMARK)
+	| COMMA -> ^(QCOMMA COMMA)
   	;
 
 	
@@ -339,11 +341,11 @@ CARAT : '^' (INT+ ('.' INT+)?)?;
 
 TILDE : '~' (INT+ ('.' INT+)?)?;
 
-DQUOTE	
-	:	'\"';
+DQUOTE	:	'\"';
 
-SQUOTE
-	:	'\'';
+SQUOTE	:	'\'';
+
+COMMA	:	',';
 
 
 fragment ESC_CHAR:  '\\' .; 
@@ -371,11 +373,11 @@ as	:
 	
 AUTHOR_SEARCH
 	:
-	'^' AS_CHAR+ (',' (' ' | AS_CHAR)+)?
+	'^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
 	;
 fragment AS_CHAR
 	:
-	~('0' .. '9' | ' ' | ',' | '+' | '-')
+	~('0' .. '9' | ' ' | ',' | '+' | '-' | '$')
 	;
 	
 DATE_RANGE
