@@ -18,6 +18,7 @@ public class MongoConnection {
 
     public synchronized static Mongo init(String host, int port) 
     		throws UnknownHostException, MongoException {
+        log.info("initializing mongo connection using host " + host + " and port " + port);
     	m = new Mongo(host, port);
     	return getInstance();
     }

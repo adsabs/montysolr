@@ -27,14 +27,14 @@ public class AdsDataSource extends URLDataSource {
 		String mongoHost = initProps.getProperty(MONGO_HOST);
 		int mongoPort = Integer.parseInt(initProps.getProperty(MONGO_PORT));
 		
+		log.info("creating mongo connection instance");
 		try {
 			mongoInstance = MongoConnection.init(mongoHost, mongoPort);
+			log.info("mongo instance: " + mongoInstance);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getStackTrace().toString());
 		} catch (MongoException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getStackTrace().toString());
 		}
 	}
 }
