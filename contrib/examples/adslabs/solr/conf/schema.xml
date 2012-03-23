@@ -320,7 +320,7 @@
       </analyzer>
     </fieldType>
     
-    <fieldType name="reader_data" class="solr.MongoDataField" omitNorms="true" database="ads_data" collection="reader_data"/>
+    <fieldType name="reader_data" class="solr.MongoDataField" omitNorms="true" databaseName="solr4ads" collectionName="docs" mongoFieldName="readers"/>
 
     <!-- A general unstemmed text field that indexes tokens normally and also
          reversed (via ReversedWildcardFilterFactory), to enable more efficient 
@@ -599,7 +599,7 @@
    <!-- MontySolr: Pythonic text -->
    <field name="full" type="textgen_py" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
    <field name="ack" type="textgen_py" indexed="true" stored="true" />
-   <field name="reader" type="string_mongo" indexed="true" stored="true" />
+   <field name="reader" type="reader_data" indexed="true" stored="true" multiValued="true" />
 
    <!-- Uncommenting the following will create a "timestamp" field using
         a default value of "NOW" to indicate when each document was indexed.
@@ -623,7 +623,7 @@
  <uniqueKey>id</uniqueKey>
 
  <!-- field for the QueryParser to use when an explicit fieldname is absent -->
- <defaultSearchField>fulltext</defaultSearchField>
+ <defaultSearchField>all</defaultSearchField>
 
  <!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
  <solrQueryParser defaultOperator="AND"/>

@@ -10,14 +10,19 @@
             	row.put('bibstem', bibcode.substr(4,5));
             	return row;
             }
+            function year(row) {
+                var pubdate = row.get('pubdate');
+                row.put('year', pubdate.substr(0,4));
+                return row;
+            }
     ]]></script>
-    <dataSource type="AdsDataSource" mongoHost="localhost" mongoPort="27017" jdbcConfig="" />
+    <dataSource type="AdsDataSource" mongoHost="adszee" mongoPort="27017" jdbcConfig="" />
     <document>
         <entity name="adslabs"
             pk="id"
             url="${dataimporter.request.url}"
             processor="XPathEntityProcessor"
-            transformer="TemplateTransformer,script:pubdate_sort,script:bibstem,DateFormatTransformer"
+            transformer="TemplateTransformer,script:year,script:pubdate_sort,script:bibstem,DateFormatTransformer"
             forEach="/collection/record"
             flatten="false"
             >
@@ -58,12 +63,13 @@
         <field column="topic"        
             xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />
             
-
+        <!--
         <field column="year"        
             xpath="/collection/record/datafield[@tag='260']/subfield[@code='c']" />
+        -->
 
         <field column="pubdate" 
-            xpath="/collection/record/datafield[@tag='269']/subfield[@code='c']" />
+            xpath="/collection/record/datafield[@tag='260']/subfield[@code='c']" />
             
         <!-- field column="entdate" xpath="" / -->
         <!-- field column="bibgroup" xpath="" / -->
