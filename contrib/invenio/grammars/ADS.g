@@ -91,8 +91,8 @@ field
 
 value  
 	: 
-	range_term_in -> ^(QRANGEIN range_term_in)
-	| range_term_ex -> ^(QRANGEEX range_term_ex) 
+	(LBRACK ) => range_term_in -> ^(QRANGEIN range_term_in)
+//	| range_term_ex -> ^(QRANGEEX range_term_ex) 
 	| identifier -> ^(QIDENTIFIER identifier)
 	| coordinate -> ^(QCOORDINATE coordinate)
 	| normal -> ^(QNORMAL normal)	
@@ -108,21 +108,25 @@ value
 	
 
 range_term_in
+        options {greedy=true;}
 	:	
        LBRACK
        (a=range_value -> range_value ^(QANYTHING QANYTHING["*"]))
-       ( TO? b=range_value -> $a $b? )?
+       (TO?  b=range_value -> $a $b? )?
        RBRACK
 	;
 
+/*
+deactivated for the time being
 
 range_term_ex
 	:	
        LCURLY
        ( a=range_value -> range_value ^(QANYTHING QANYTHING["*"]))
-       ( TO? b=range_value -> $a $b? )?
+       ( 'TO' ? b=range_value -> $a $b? )?
        RCURLY
 	;	
+*/
 
 range_value
 	:	
@@ -167,6 +171,8 @@ multiClause
 	//flause:mclause;
 	;
 
+/* this works, could be used, it is stricter
+
 multiDefault
 	:	
 	multiOr+ -> ^(OPERATOR["DEFOP"] multiOr+)
@@ -202,12 +208,22 @@ mterm
 	:	
 	lmodifier? value -> ^(MODIFIER lmodifier? value)
 	;
+
+
 	
+operator: (
+	AND -> OPERATOR["AND"]
+	| OR -> OPERATOR["OR"]
+	| NOT -> OPERATOR["NOT"]
+	| NEAR -> OPERATOR["NEAR"]
+	);	
+*/	
 
 normal	
 	:
 	TERM_NORMAL
 	| NUMBER
+	| TO
 	;	
 
 	
@@ -229,15 +245,6 @@ quoted	:
 	;
 
 
-
-	
-operator: (
-	AND -> OPERATOR["AND"]
-	| OR -> OPERATOR["OR"]
-	| NOT -> OPERATOR["NOT"]
-	| NEAR -> OPERATOR["NEAR"]
-	);
-
 lmodifier: 
 	PLUS -> PLUS["+"]
 	| MINUS -> MINUS["-"]
@@ -246,34 +253,10 @@ lmodifier:
 	;
 
 
-/*
-This terribly convoluted grammar is here because of weird AST rewrite rules
-and because we need to allow for default value when TILDE is not followed by
-anything
 
-This grammar has problem with following
-	:	term^4~ 9999
-	where 999 is another term, not a fuzzy value
-*/
 rmodifier	:	
 	TILDE CARAT? -> ^(BOOST CARAT?) ^(FUZZY TILDE) 
 	| CARAT TILDE? -> ^(BOOST CARAT) ^(FUZZY TILDE?)
-/*
-	// first alternative
-	(
-	  (CARAT b=NUMBER -> ^(BOOST $b) ^(FUZZY )
-	 ) 
-	( //syntactic predicate
-	 (TILDE NUMBER )=>TILDE f=NUMBER -> ^(BOOST $b) ^(FUZZY $f)
-	 | TILDE -> ^(BOOST $b) ^(FUZZY NUMBER["0.5"])
-	 )* // set the default value
-	
-	)
-	// second alternative [only ~ | ~NUMBER]
-	| 
-	  (TILDE -> ^(BOOST) ^(FUZZY NUMBER["0.5"])) // set the default value
-	  ((~(WS|TILDE|CARAT))=>f=NUMBER -> ^(BOOST) ^(FUZZY $f?) )* //replace the default but '~' must not be followed by WS
-*/	
 	;
 
 
@@ -317,7 +300,20 @@ identifier
 	
 coordinate
 	:
-	COORDINATE
+	//20 54 05.689 +37 01 17.38
+	//NUMBER NUMBER NUMBER (PLUS|MINUS) NUMBER NUMBER NUMBER
+	//| //10:12:45.3-45:17:50
+	HOUR
+	| //15h17m-11d10m
+	H_NUMBER M_NUMBER (PLUS|MINUS) D_NUMBER M_NUMBER
+	| // 15h17+89d15
+	H_NUMBER NUMBER (PLUS|MINUS) D_NUMBER NUMBER
+	| // 275d11m15.6954s+17d59m59.876s 
+	D_NUMBER M_NUMBER S_NUMBER (PLUS|MINUS) D_NUMBER M_NUMBER S_NUMBER
+	| // 12.34567h-17.87654d
+	H_NUMBER (PLUS|MINUS) D_NUMBER
+	| // 350.123456d-17.33333d <=> 350.123456 -17.33333
+	TERM_NORMAL '<=>' TERM_NORMAL
 	;	
 	
 /* ================================================================
@@ -339,23 +335,20 @@ COLON   : ':' ;  //this must NOT be fragment
 
 PLUS  : '+' ;
 
-MINUS : ('-'|'\!');
+MINUS : '-';
 
 STAR  : '*' ;
 
 QMARK  : '?'+ ;
 
-fragment VBAR  : '|' ;
 
-fragment AMPER : '&' ;
+//LCURLY  : '{' ;
 
-LCURLY  : '{' ;
+//RCURLY  : '}' ;
 
-RCURLY  : '}' ;
+CARAT : '^' NUMBER?;
 
-CARAT : '^' (INT+ ('.' INT+)?)?;
-
-TILDE : '~' (INT+ ('.' INT+)?)?;
+TILDE : '~' NUMBER?;
 
 DQUOTE	:	'\"';
 
@@ -375,8 +368,8 @@ fragment ESC_CHAR:  '\\' .;
 TO	:	'TO';
 
 /* We want to be case insensitive */
-AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)|',') ;
-OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
+AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D')) ;
+OR  : (('o' | 'O') ('r' | 'R'));
 NOT   : ('n' | 'N') ('o' | 'O') ('t' | 'T');
 NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
@@ -387,6 +380,34 @@ AUTHOR_SEARCH
 	:
 	'^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
 	;
+
+/*
+COORDINATE
+	:
+	// AS a LEXICAL token, these patterns work, but they generate too a big
+	// lexer code, either they must be built into a separate grammar, or
+	// be done differently, with regex for example
+	
+	//20 54 05.689 +37 01 17.38
+	INT INT INT INT '.' INT INT INT ('+'|'-') INT INT INT INT INT INT '.' INT INT 
+	| //10:12:45.3-45:17:50
+	INT INT ':' INT INT ':' INT INT '.' INT ('+'|'-') INT INT ':' INT INT ':' INT INT ':' INT INT	
+	| //15h17m-11d10m
+	INT INT 'h' INT INT 'm' ('+'|'-') INT INT 'd' INT INT 'm'	
+	| // 15h17+89d15
+	INT INT 'h' INT INT ('+'|'-') INT INT 'd' INT INT	
+
+	| // 275d11m15.6954s+17d59m59.876s 
+	INT+ 'd' INT INT 'm' INT INT '.' INT+ 's' ('+'|'-') INT+ 'd' INT INT 'm' INT INT '.' INT+ 's'	
+	| // 12.34567h-17.87654d
+	INT INT '.' INT INT INT INT INT 'h' ('+'|'-') INT INT '.' INT INT INT INT INT 'd'	
+	| // 350.123456d-17.33333d <=> 350.123456 -17.33333
+	INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'? '<' '=' '>' INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'?
+	;
+	*/
+	
+	
+	
 
 	
 DATE_RANGE
@@ -438,14 +459,31 @@ fragment TERM_CHAR
 	;
 
 
+DATE_TOKEN
+	:	
+	INT INT? ('/'|'-'|'.') INT INT? ('/'|'-'|'.') INT INT (INT INT)?
+	;
+
 NUMBER  
 	: 
 	INT+ ('.' INT+)?
 	;
 
-DATE_TOKEN
+fragment M_NUMBER:	
+	NUMBER 'm'
+	;	
+fragment H_NUMBER:	
+	NUMBER 'h'
+	;	
+fragment D_NUMBER:	
+	NUMBER 'd'
+	;	
+fragment S_NUMBER:	
+	NUMBER 's'
+	;			
+HOUR
 	:	
-	INT INT? ('/'|'-'|'.') INT INT? ('/'|'-'|'.') INT INT (INT INT)?
+	INT INT COLON INT INT COLON NUMBER ('-'|'+') INT INT COLON INT INT COLON NUMBER
 	;
 
 TERM_NORMAL
@@ -470,24 +508,4 @@ PHRASE_ANYTHING	:
 	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
 	;
 
-
-COORDINATE
-	:
-	/*	
-	//20 54 05.689 +37 01 17.38
-	INT INT INT INT '.' INT INT INT ('+'|'-') INT INT INT INT INT INT '.' INT INT 
-	| //10:12:45.3-45:17:50
-	INT INT ':' INT INT ':' INT INT '.' INT ('+'|'-') INT INT ':' INT INT ':' INT INT ':' INT INT	
-	| //15h17m-11d10m
-	INT INT 'h' INT INT 'm' ('+'|'-') INT INT 'd' INT INT 'm'	
-	| // 15h17+89d15
-	INT INT 'h' INT INT ('+'|'-') INT INT 'd' INT INT	
-
-	| // 275d11m15.6954s+17d59m59.876s 
-	INT+ 'd' INT INT 'm' INT INT '.' INT+ 's' ('+'|'-') INT+ 'd' INT INT 'm' INT INT '.' INT+ 's'	
-	| // 12.34567h-17.87654d
-	INT INT '.' INT INT INT INT INT 'h' ('+'|'-') INT INT '.' INT INT INT INT INT 'd'	
-	| // 350.123456d-17.33333d <=> 350.123456 -17.33333
-	INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'? '<' '=' '>' INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'?
-	*/
-	;	
+	
