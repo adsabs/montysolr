@@ -41,7 +41,7 @@ def run(grammar_name, basedir='',
     test_cases = load_gunit_file(gunit_file)
     
     index_fo = open(index_file, 'w')
-    index_fo.write('<h1>Test cases generated from grammar %s</h1>\n' % grammar_name)
+    index_fo.write('<h1>Test cases generated from grammar: %s</h1>\n' % grammar_name)
     
     out_lines = []
     i = 0
@@ -58,7 +58,7 @@ def run(grammar_name, basedir='',
     for section,values in test_cases.items():
         output = tree = svg = ''
         
-        toc.append('<a href="#anchor%s"><pre>%s</pre></a><br/>' % (section, section))
+        toc.append('The rule: <a href="#anchor%s"><pre>%s</pre></a><br/>' % (section, section))
         
         # generate AST tree
         for query in values:

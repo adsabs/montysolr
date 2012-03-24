@@ -22,9 +22,12 @@ tokens {
   QRANGEEX;
   QANYTHING;
   QDATE;
-  QFIRST;
+  QPOSITION;
   QFUNC;
   QCOMMA;
+  QIDENTIFIER;
+  QCOORDINATE;
+  SYNOP;
 }
 
 @header{
@@ -57,10 +60,10 @@ clauseNear
   
 clauseBasic
 	: 
-	(modifier LPAREN clauseOr+ RPAREN )=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
-	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
-	| (LPAREN clauseOr+ RPAREN term_modifier)=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
-	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	(lmodifier LPAREN clauseOr+ RPAREN )=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
+	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+	| (LPAREN clauseOr+ RPAREN rmodifier)=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
+	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN )=> LPAREN clauseOr+ RPAREN
 		-> clauseOr+
 	| atom
@@ -69,15 +72,15 @@ clauseBasic
 
 atom   
 	: 
-	modifier? field multi_value term_modifier?
-	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field multi_value))))
+	lmodifier? field multi_value rmodifier?
+	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field multi_value))))
 	| 
-	modifier? field? value term_modifier? 
-	-> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
-	| modifier? (STAR COLON)? STAR 
-	-> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
-	| modifier? func_name clauseBasic (',' clauseBasic)* RPAREN
-	-> ^(MODIFIER modifier? ^(QFUNC func_name clauseBasic+ RPAREN ))
+	lmodifier? field? value rmodifier? 
+	-> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
+	| lmodifier? (STAR COLON)? STAR 
+	-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
+	| lmodifier? func_name clauseBasic (',' clauseBasic)* RPAREN
+	-> ^(MODIFIER lmodifier? ^(QFUNC func_name clauseBasic+ RPAREN))
 	;
    
 
@@ -90,12 +93,14 @@ value
 	: 
 	range_term_in -> ^(QRANGEIN range_term_in)
 	| range_term_ex -> ^(QRANGEEX range_term_ex) 
+	| identifier -> ^(QIDENTIFIER identifier)
+	| coordinate -> ^(QCOORDINATE coordinate)
 	| normal -> ^(QNORMAL normal)	
 	| truncated -> ^(QTRUNCATED truncated)	
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
 	| DATE_RANGE -> ^(QDATE DATE_RANGE)
-	| AUTHOR_SEARCH -> ^(QFIRST AUTHOR_SEARCH)
+	| AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
 	| QMARK -> ^(QTRUNCATED QMARK)
 	| COMMA -> ^(QCOMMA COMMA)
   	;
@@ -195,14 +200,12 @@ multiBasic
 		
 mterm	
 	:	
-	modifier? value -> ^(MODIFIER modifier? value)
+	lmodifier? value -> ^(MODIFIER lmodifier? value)
 	;
 	
 
 normal	
 	:
-	IDENTIFIER
-	|
 	TERM_NORMAL
 	| NUMBER
 	;	
@@ -235,9 +238,12 @@ operator: (
 	| NEAR -> OPERATOR["NEAR"]
 	);
 
-modifier: 
+lmodifier: 
 	PLUS -> PLUS["+"]
-	| MINUS -> MINUS["-"];
+	| MINUS -> MINUS["-"]
+	| '=' -> SYNOP["="]
+	| '#' -> SYNOP["#"]
+	;
 
 
 /*
@@ -249,7 +255,7 @@ This grammar has problem with following
 	:	term^4~ 9999
 	where 999 is another term, not a fuzzy value
 */
-term_modifier	:	
+rmodifier	:	
 	TILDE CARAT? -> ^(BOOST CARAT?) ^(FUZZY TILDE) 
 	| CARAT TILDE? -> ^(BOOST CARAT) ^(FUZZY TILDE?)
 /*
@@ -304,6 +310,16 @@ date	:
 	DATE_TOKEN
 	;
 
+identifier	
+	:	
+	IDENTIFIER
+	;
+	
+coordinate
+	:
+	COORDINATE
+	;	
+	
 /* ================================================================
  * =                     LEXER                                    =
  * ================================================================
@@ -348,6 +364,12 @@ SQUOTE	:	'\'';
 COMMA	:	',';
 
 
+fragment AS_CHAR
+	:
+	~('0' .. '9' | ' ' | ',' | '+' | '-' | '$')
+	;
+	
+	
 fragment ESC_CHAR:  '\\' .; 
 
 TO	:	'TO';
@@ -360,37 +382,26 @@ NEAR  : (('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') | 'n') ;
 
 
 
-// just used for debugging
-id	:	
-	IDENTIFIER
-	;
-
-as	:	
-	AUTHOR_SEARCH
-	;
-// debugging end
-
 	
 AUTHOR_SEARCH
 	:
 	'^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
 	;
-fragment AS_CHAR
-	:
-	~('0' .. '9' | ' ' | ',' | '+' | '-' | '$')
-	;
+
 	
 DATE_RANGE
 	:	
-	'-'? INT INT INT INT
+	'-' INT INT INT INT
 	| INT INT INT INT '-' (INT INT INT INT)?
 	;
 	
 IDENTIFIER
 	:	('arXiv'|'arxiv') ':' TERM_CHAR+
-	| INT+ '.' INT+ '/' INT+ ('.' INT+)?
+	|'doi:' TERM_CHAR+
+	//| INT+ '.' INT+ '/' INT+ ('.' INT+)?
 	;
 
+	
 
 FUNC_NAME
 	:	
@@ -416,14 +427,14 @@ fragment TERM_START_CHAR
 	      | '\'' | '\"' 
 	      | '(' | ')' | '[' | ']' | '{' | '}'
 	      | '+' | '-' | '!' | ':' | '~' | '^' 
-	      | '?' | '*' | '\\'|','
+	      | '?' | '*' | '\\'|',' | '=' | '#'
 	      )
 	 | ESC_CHAR );  	
 
 
 fragment TERM_CHAR
 	:	
-	(TERM_START_CHAR | '-' | '+')
+	(TERM_START_CHAR | '-' | '+' | '=' | '#')
 	;
 
 
@@ -458,3 +469,25 @@ PHRASE
 PHRASE_ANYTHING	:	
 	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
 	;
+
+
+COORDINATE
+	:
+	/*	
+	//20 54 05.689 +37 01 17.38
+	INT INT INT INT '.' INT INT INT ('+'|'-') INT INT INT INT INT INT '.' INT INT 
+	| //10:12:45.3-45:17:50
+	INT INT ':' INT INT ':' INT INT '.' INT ('+'|'-') INT INT ':' INT INT ':' INT INT ':' INT INT	
+	| //15h17m-11d10m
+	INT INT 'h' INT INT 'm' ('+'|'-') INT INT 'd' INT INT 'm'	
+	| // 15h17+89d15
+	INT INT 'h' INT INT ('+'|'-') INT INT 'd' INT INT	
+
+	| // 275d11m15.6954s+17d59m59.876s 
+	INT+ 'd' INT INT 'm' INT INT '.' INT+ 's' ('+'|'-') INT+ 'd' INT INT 'm' INT INT '.' INT+ 's'	
+	| // 12.34567h-17.87654d
+	INT INT '.' INT INT INT INT INT 'h' ('+'|'-') INT INT '.' INT INT INT INT INT 'd'	
+	| // 350.123456d-17.33333d <=> 350.123456 -17.33333
+	INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'? '<' '=' '>' INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'?
+	*/
+	;	
