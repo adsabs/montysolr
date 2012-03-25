@@ -79,7 +79,7 @@ atom
 	-> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
 	| lmodifier? (STAR COLON)? STAR 
 	-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
-	| lmodifier? func_name clauseBasic (',' clauseBasic)* RPAREN
+	| lmodifier? func_name clauseBasic+  RPAREN
 	-> ^(MODIFIER lmodifier? ^(QFUNC func_name clauseBasic+ RPAREN))
 	;
    
@@ -91,7 +91,7 @@ field
 
 value  
 	: 
-	(LBRACK ) => range_term_in -> ^(QRANGEIN range_term_in)
+	range_term_in -> ^(QRANGEIN range_term_in)
 //	| range_term_ex -> ^(QRANGEEX range_term_ex) 
 	| identifier -> ^(QIDENTIFIER identifier)
 	| coordinate -> ^(QCOORDINATE coordinate)
@@ -313,7 +313,7 @@ coordinate
 	| // 12.34567h-17.87654d
 	H_NUMBER (PLUS|MINUS) D_NUMBER
 	| // 350.123456d-17.33333d <=> 350.123456 -17.33333
-	TERM_NORMAL '<=>' TERM_NORMAL
+	'<=>'
 	;	
 	
 /* ================================================================
@@ -335,7 +335,7 @@ COLON   : ':' ;  //this must NOT be fragment
 
 PLUS  : '+' ;
 
-MINUS : '-';
+MINUS : ('-'|'–');
 
 STAR  : '*' ;
 
@@ -359,7 +359,7 @@ COMMA	:	',';
 
 fragment AS_CHAR
 	:
-	~('0' .. '9' | ' ' | ',' | '+' | '-' | '$')
+	~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
 	;
 	
 	
@@ -449,19 +449,20 @@ fragment TERM_START_CHAR
 	      | '(' | ')' | '[' | ']' | '{' | '}'
 	      | '+' | '-' | '!' | ':' | '~' | '^' 
 	      | '?' | '*' | '\\'|',' | '=' | '#'
+	      | '–'
 	      )
 	 | ESC_CHAR );  	
 
 
 fragment TERM_CHAR
 	:	
-	(TERM_START_CHAR | '-' | '+' | '=' | '#')
+	(TERM_START_CHAR  | '+' | '-' | '–' | '=' | '#')
 	;
 
 
 DATE_TOKEN
 	:	
-	INT INT? ('/'|'-'|'.') INT INT? ('/'|'-'|'.') INT INT (INT INT)?
+	INT INT? ('/'|MINUS|'.') INT INT? ('/'|MINUS|'.') INT INT (INT INT)?
 	;
 
 NUMBER  
@@ -483,7 +484,7 @@ fragment S_NUMBER:
 	;			
 HOUR
 	:	
-	INT INT COLON INT INT COLON NUMBER ('-'|'+') INT INT COLON INT INT COLON NUMBER
+	INT INT COLON INT INT COLON NUMBER (PLUS|MINUS) INT INT COLON INT INT COLON NUMBER
 	;
 
 TERM_NORMAL
