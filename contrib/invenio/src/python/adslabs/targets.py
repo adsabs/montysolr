@@ -108,10 +108,11 @@ def get_recids_changes(message):
         data, last_recid, mod_date = results
         out = sj.HashMap().of_(sj.String, sj.JArray_int)
         for k,v in data.items():
+            v = [int(x) for x in v]
             out.put(k, sj.JArray_int(v))
         message.setResults(out)
         message.setParam('mod_date', mod_date)
-        message.setParam('last_recid', last_recid)
+        message.setParam('last_recid', int(last_recid))
 
 
 def get_citation_dict(message):
