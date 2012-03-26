@@ -1,8 +1,5 @@
 package org.apache.solr.schema;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
-
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -59,13 +56,13 @@ public class MongoDataField extends TextField {
 	  
 	public Field createField(SchemaField field, String externalVal, float boost) {
 
-		DBObject doc = this.executeMongoQuery(externalVal);
+		String fieldName = this.mongoFieldName != null
+			? this.mongoFieldName
+			: field.name;
+		
+		DBObject doc = this.executeMongoQuery(externalVal, fieldName);
 		
 		if (doc != null) {
-			String fieldName = this.mongoFieldName != null
-				? this.mongoFieldName
-				: field.name;
-		
 			String val = (String) doc.get(fieldName);
 			
 			if (val != null)
@@ -77,28 +74,30 @@ public class MongoDataField extends TextField {
 	
 	public Fieldable[] createFields(SchemaField field, String externalVal, float boost) {
 
-		DBObject doc = this.executeMongoQuery(externalVal);
-		
-		if (doc == null) {
-			return new Field[0];
-		}
-		else {
-			String fieldName = this.mongoFieldName != null
-				? this.mongoFieldName
-				: field.name;
+		String fieldName = this.mongoFieldName != null
+			? this.mongoFieldName
+			: field.name;
 			
+		DBObject doc = this.executeMongoQuery(externalVal, fieldName);
+		
+		if (doc != null) {
 			ArrayList<String> data = (ArrayList<String>) doc.get(fieldName);
-			Field[] fields = new Field[data.size()];
+			
+			if (data != null) {
+				Field[] fields = new Field[data.size()];
+				
+				for (int i = 0; i < data.size(); i++) {
+					fields[i] = super.createField(field, data.get(i), boost);
+				}
 		
-			for (int i = 0; i < data.size(); i++) {
-				fields[i] = super.createField(field, data.get(i), boost);
+				return fields;
 			}
-		
-			return fields;
 		}
+		
+		return new Field[0];
 	}
 		
-	public DBObject executeMongoQuery(String externalVal) {
+	public DBObject executeMongoQuery(String externalVal, String fieldName) {
 		
 		Mongo m = MongoConnection.getInstance();
 		DB db = m.getDB(this.databaseName);
@@ -107,7 +106,12 @@ public class MongoDataField extends TextField {
 		BasicDBObject query = new BasicDBObject();
 		query.put(DEFAULT_QUERY_KEY, externalVal);
 		log.debug("query: " + query);
-		DBObject doc = collection.findOne(query);
+		
+		BasicDBObject wanted = new BasicDBObject();
+		wanted.put(fieldName, 1);
+		
+		DBObject doc = collection.findOne(query, wanted);
+		
 		return doc;
 	}
 		
