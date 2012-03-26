@@ -296,7 +296,7 @@
     
     <!--  MontySolr special Python fields -->
 
-    <fieldType name="textgen_py" class="solr.PythonTextField" positionIncrementGap="100" pythonFunctionName="get_field_value">
+    <fieldType name="fulltext" class="solr.MongoDataField" positionIncrementGap="100" databaseName="solr4ads" collectionName="docs">
        <analyzer type="index">
         <tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
         <filter class="solr.PatternReplaceFilterFactory" pattern="-?\s+-?" replacement="-" replace="all"/>
@@ -320,7 +320,7 @@
       </analyzer>
     </fieldType>
     
-    <fieldType name="reader_data" class="solr.MongoDataField" omitNorms="true" databaseName="solr4ads" collectionName="docs" mongoFieldName="readers"/>
+    <fieldType name="reader_data" class="solr.MongoDataField" omitNorms="true" databaseName="solr4ads" collectionName="docs" mongoFieldName="readers" isPolyField="true" />
 
     <!-- A general unstemmed text field that indexes tokens normally and also
          reversed (via ReversedWildcardFilterFactory), to enable more efficient 
@@ -597,8 +597,8 @@
    <dynamicField name="inv_*" type="text" indexed="false" stored="false" multiValued="true"/>
 
    <!-- MontySolr: Pythonic text -->
-   <field name="full" type="textgen_py" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
-   <field name="ack" type="textgen_py" indexed="true" stored="true" />
+   <field name="full" type="fulltext" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
+   <field name="ack" type="fulltext" indexed="true" stored="true" />
    <field name="reader" type="reader_data" indexed="true" stored="true" multiValued="true" />
 
    <!-- Uncommenting the following will create a "timestamp" field using
@@ -607,7 +607,7 @@
    <field name="indexstamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
    
    <!--  MontySolr: have some dynamic Pythonic fields -->
-   <dynamicField name="*_py" type="textgen_py" indexed="true" stored="false"/>
+<!--   <dynamicField name="*_py" type="textgen_py" indexed="true" stored="false"/> -->
 
    <!-- uncomment the following to ignore any fields that don't already match an existing 
         field name or dynamic field, rather than reporting them as an error. 

@@ -1,5 +1,8 @@
 package org.apache.solr.schema;
 
+import invenio.montysolr.jni.MontySolrVM;
+import invenio.montysolr.jni.PythonMessage;
+
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -27,59 +30,85 @@ public class MongoDataField extends TextField {
 	
 	public static final Logger log = LoggerFactory.getLogger(TextField.class);
 
+	private static final String DEFAULT_QUERY_KEY = "bibcode";
+	
 	private String collectionName = null;
 	private String databaseName = null;
 	private String mongoFieldName = null;
+	private boolean polyField = false;
 	
 	@Override
 	protected void init(IndexSchema schema, Map<String,String> args) {
 		this.collectionName = args.get("collectionName");
-		this.databaseName = args.get("databaseName");
-		this.mongoFieldName = args.get("mongoFieldName");
-        log.info("initialized using db: " + this.databaseName + ", collection: " + this.collectionName);
 	    args.remove("collectionName");
+		this.databaseName = args.get("databaseName");
 	    args.remove("databaseName");
+		this.mongoFieldName = args.get("mongoFieldName");
 	    args.remove("mongoFieldName");
+		this.polyField = Boolean.parseBoolean(args.get("isPolyField"));
+        log.info("polyField: " + this.polyField);
+	    args.remove("isPolyField");
+        log.info("initialized using db: " + this.databaseName + ", collection: " + this.collectionName);
 	    super.init(schema, args);
 	}
 	
 	@Override
 	public boolean isPolyField() {
-	    return true;   // really only true if the field is indexed
+		return this.polyField;
 	}
 	  
+	public Field createField(SchemaField field, String externalVal, float boost) {
+
+		DBObject doc = this.executeMongoQuery(externalVal);
+		
+		if (doc != null) {
+			String fieldName = this.mongoFieldName != null
+				? this.mongoFieldName
+				: field.name;
+		
+			String val = (String) doc.get(fieldName);
+			
+			if (val != null)
+				return super.createField(field, val, boost);
+		}
+
+		return null;
+	}
+	
 	public Fieldable[] createFields(SchemaField field, String externalVal, float boost) {
 
-		Mongo m = MongoConnection.getInstance();
-		DB db = m.getDB(this.databaseName);
-		DBCollection collection = db.getCollection(this.collectionName);
-		if (this.mongoFieldName == null) {
-			this.mongoFieldName = field.name;
-		}
-		
-		log.info("using field name: " + this.mongoFieldName);
-		
-		BasicDBObject query = new BasicDBObject();
-		query.put("bibcode", externalVal);
-		log.info("query: " + query);
-		DBObject doc = collection.findOne(query);
-		log.info("doc: " + doc);
+		DBObject doc = this.executeMongoQuery(externalVal);
 		
 		if (doc == null) {
 			return new Field[0];
 		}
 		else {
+			String fieldName = this.mongoFieldName != null
+				? this.mongoFieldName
+				: field.name;
 			
-			ArrayList<String> readers = (ArrayList<String>) doc.get(this.mongoFieldName);
-			log.info("readers: " + readers);
-			Field[] fields = new Field[readers.size()];
+			ArrayList<String> data = (ArrayList<String>) doc.get(fieldName);
+			Field[] fields = new Field[data.size()];
 		
-			for (int i = 0; i < readers.size(); i++) {
-				log.info("creating field for " + readers.get(i));
-				fields[i] = this.createField(field, readers.get(i), boost);
+			for (int i = 0; i < data.size(); i++) {
+				fields[i] = super.createField(field, data.get(i), boost);
 			}
 		
 			return fields;
 		}
 	}
+		
+	public DBObject executeMongoQuery(String externalVal) {
+		
+		Mongo m = MongoConnection.getInstance();
+		DB db = m.getDB(this.databaseName);
+		DBCollection collection = db.getCollection(this.collectionName);
+		
+		BasicDBObject query = new BasicDBObject();
+		query.put(DEFAULT_QUERY_KEY, externalVal);
+		log.debug("query: " + query);
+		DBObject doc = collection.findOne(query);
+		return doc;
+	}
+		
 }
