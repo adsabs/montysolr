@@ -4,7 +4,7 @@ public class TestAqpInvenioSimple extends AqpTestAbstractCase {
 	
 	public void setUp() throws Exception {
 		super.setUp();
-		setDebug(false);
+		setDebug(true);
 	}
 	
 	public AqpQueryParser getParser() throws Exception {

@@ -78,7 +78,7 @@ public class AqpStandardQueryTreeBuilder extends QueryTreeBuilder implements
 		init();
 	}
 
-	private void init() {
+	public void init() {
 		setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());

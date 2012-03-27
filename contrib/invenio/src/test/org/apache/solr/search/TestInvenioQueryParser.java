@@ -43,6 +43,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 	public static void beforeClassMontySolrTestCase() throws Exception {
 		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
 				MontySolrSetup.getMontySolrHome() + "/src/python");
+		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 	}
@@ -154,7 +155,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 				"iq.channel", "intbit"), 
 				"+<(intbitset,recid)title:invenio> +fulltext:solr");
 		
-		setDebug(true);
+		//setDebug(true);
 		assertQueryEquals(req("q", "invenio AND fulltext:solr",
 				"iq.mode", "maxinv"), 
 				"+<(ints,recid)invenio> +<(ints,recid)fulltext:solr>");

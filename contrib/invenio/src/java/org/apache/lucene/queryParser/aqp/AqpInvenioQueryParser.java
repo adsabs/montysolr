@@ -68,6 +68,7 @@ import org.apache.lucene.queryParser.standard.config.FieldDateResolutionFCListen
 import org.apache.lucene.queryParser.standard.config.FuzzyAttribute;
 import org.apache.lucene.queryParser.standard.config.LocaleAttribute;
 import org.apache.lucene.queryParser.standard.config.LowercaseExpandedTermsAttribute;
+import org.apache.lucene.queryParser.standard.config.MultiFieldAttribute;
 import org.apache.lucene.queryParser.standard.config.MultiTermRewriteMethodAttribute;
 import org.apache.lucene.queryParser.standard.config.PositionIncrementsAttribute;
 import org.apache.lucene.queryParser.standard.config.RangeCollatorAttribute;
@@ -138,6 +139,7 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 			addAttribute(DefaultPhraseSlopAttribute.class);
 			addAttribute(MultiTermRewriteMethodAttribute.class);
 			addAttribute(InvenioQueryAttribute.class);
+			addAttribute(MultiFieldAttribute.class);
 			
 			getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
 		}
@@ -196,7 +198,11 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 		}
 
 	}
-
+	
+	
+	// TODO: turn into AQPStandardQueryTreeBuilder into an abstract
+	// class and let this one provide the same interface (extend
+	// that one as well)
 	static class InvenioQueryTreeBuilder extends QueryTreeBuilder implements
 			StandardQueryBuilder {
 

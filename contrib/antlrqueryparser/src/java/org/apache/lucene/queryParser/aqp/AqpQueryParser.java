@@ -35,6 +35,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpQueryNodeProcessorPipelin
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.core.QueryParserHelper;
+import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
@@ -195,7 +196,7 @@ public class AqpQueryParser extends QueryParserHelper {
 	/*
 	 * De/activates the debugging print of the processed query tree
 	 */
-	public void setDebug(boolean debug) {
+	public void setDebug(boolean debug) throws InstantiationException, IllegalAccessException {
 		if (debug) {
 			QueryNodeProcessor qp = this.getQueryNodeProcessor();
 			AqpDebuggingQueryNodeProcessorPipeline np = new AqpDebuggingQueryNodeProcessorPipeline(
@@ -208,10 +209,21 @@ public class AqpQueryParser extends QueryParserHelper {
 			}
 			this.setQueryNodeProcessor(np);
 			
-			this.setQueryBuilder(new AqpStandardQueryTreeBuilder(debug));
+			QueryBuilder qb = this.getQueryBuilder();
+			QueryBuilder newBuilder = qb.getClass().newInstance();
+			if (newBuilder instanceof AqpStandardQueryTreeBuilder) {
+				((AqpStandardQueryTreeBuilder) newBuilder).debug(debug);
+				((AqpStandardQueryTreeBuilder) newBuilder).init();
+				this.setQueryBuilder(newBuilder);
+			}
+			
 		}
 		else {
-			this.setQueryBuilder(new AqpStandardQueryTreeBuilder(debug));
+			if (debugMode != debug) {
+				QueryBuilder qb = this.getQueryBuilder();
+				QueryBuilder newBuilder = qb.getClass().newInstance();
+				this.setQueryBuilder(newBuilder);
+			}
 		}
 		debugMode = debug;
 	}
