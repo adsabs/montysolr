@@ -118,7 +118,7 @@ def search(q, max_len=25, offset=0):
 
 def sort_and_format(hits, kwargs):
 
-    kwargs = search_engine.prs_cleanup_arguments(**kwargs)
+    kwargs = search_engine.prs_wash_arguments(**kwargs)
     t1 = os.times()[4]
     req = ReqStringIO()  # new ver of Invenio is looking at args
     kwargs['req'] = req
@@ -127,7 +127,7 @@ def sort_and_format(hits, kwargs):
         kwargs['hosted_colls_actual_or_potential_results_p'] = True # this prevents display of the nearest-term box
 
     # search stage 4 and 5: intersection with collection universe and sorting/limiting
-    output = search_engine.prs_collect_sort_display(hits, kwargs=kwargs, **kwargs)
+    output = search_engine.prs_intersect_with_colls_and_apply_search_limits(hits, kwargs=kwargs, **kwargs)
     if output is not None:
         req.seek(0)
         return req.read() + output
