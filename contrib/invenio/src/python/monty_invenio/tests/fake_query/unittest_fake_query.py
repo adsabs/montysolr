@@ -16,7 +16,8 @@ class Test(LuceneTestCase):
 
     def setUp(self):
         LuceneTestCase.setUp(self)
-        self.setTargets(targets)
+        if not self.hasTarget('InvenioQuery:fake_search'):
+            self.addTargets(targets)
         
     def test_indexing(self):
         message = self.bridge.createMessage("index_docs").setParam('no_docs', 10)

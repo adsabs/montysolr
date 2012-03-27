@@ -54,10 +54,10 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 	}
 
 	@Override
-  public void setUp() throws Exception {
-    super.setUp();
-    log.info("###Starting " + getName());  // returns <unknown>???
-  }
+	public void setUp() throws Exception {
+		super.setUp();
+		log.info("###Starting " + getName()); // returns <unknown>???
+	}
 
 	@Override
 	public void tearDown() throws Exception {

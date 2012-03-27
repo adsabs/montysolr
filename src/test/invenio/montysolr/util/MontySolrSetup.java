@@ -5,18 +5,34 @@ import invenio.montysolr.jni.MontySolrVM;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Properties;
 
-public class MontySolrSetup {
-	private static Properties prop = getProperties();
 
+/**
+ * Automatic setup for Test classes, do not use this in a production
+ * classes!
+ * 
+ * @author rchyla
+ *
+ */
+
+
+public class MontySolrSetup {
+	private static HashMap<String, Properties> prop = new HashMap<String, Properties>();
+	
+	
+	/**
+	 * Initializes the environment so that tests that expect JCC 
+	 * environment can run properly. 
+	 * 
+	 * @param mainModuleName
+	 * @param mainModulePath
+	 * @throws Exception
+	 */
 	public static void init(String mainModuleName, String mainModulePath)
 			throws Exception {
 
-		// chaning PYTHONPATH (has no effect on the embedded interpereter)
-		// String pythonpath = MontySolrTestCaseJ4.MONTYSOLR_HOME +
-		// "/src/python";
-		// ProcessUtils.addEnv("PYTHONPATH", pythonpath);
 
 		// the path added to sys.path is the parent
 		System.setProperty("montysolr.modulepath",
@@ -28,62 +44,111 @@ public class MontySolrSetup {
 
 		// this is necessary to run in the main thread and because of the
 		// python loads the parent folder and inserts it into the pythonpath
-		// we trick it
+		// we trick it to add the folder to sys.path
 		MontySolrVM.INSTANCE.start(getChildModulePath(mainModulePath));
-
+		
+		
+		// used by MontySolrVM instance to recognize the handler
 		System.setProperty("montysolr.bridge", mainModuleName);
-
-		// for testing purposes add what is in the pythonpath
-		File f = new File(getMontySolrHome() + "/build/build.properties");
-		if (f.exists()) {
-			Properties p = new Properties();
-			p.load(new FileInputStream(f));
-			if (p.containsKey("python_path")) {
-				String pp = p.getProperty("python_path");
-				addToSysPath(pp);
-			}
-		}
+		
+		
+		
+		// Now add to PYTHONPATH the core (you can call it repeatedly, eg.
+		// for contrib modules)
+		
+		// chaning PYTHONPATH (has no effect on the embedded interpereter)
+		// String pythonpath = MontySolrTestCaseJ4.MONTYSOLR_HOME + "/src/python";
+		// ProcessUtils.addEnv("PYTHONPATH", pythonpath);
+		
+		// so we must do it using python
+		addBuildProperties("build");
 
 		// other methods like starting a jetty instance need these too
 		System.setProperty("solr.test.sys.prop1", "propone");
 		System.setProperty("solr.test.sys.prop2", "proptwo");
 
 	}
-
-	public static Properties getProperties() {
-		if (prop != null) {
-			return prop;
+	
+	
+	
+	/**
+	 * Will find the build.properties for the project and 
+	 * set some interesting variables into PYTHON
+	 */
+	
+	public static void addBuildProperties(String projectName) {
+		Properties p = loadProperties(getMontySolrHome(), projectName);
+		if (p.containsKey("python_path")) {
+			String pp = p.getProperty("python_path");
+			addToSysPath(pp);
 		}
-		return loadProperties();
+		
+	}
+	
+	/**
+	 * Load the properties from the file (build.properties)
+	 * This is used only by the tests that need a working 
+	 * MontySolr instance
+	 * 
+	 * By default, this returns the Properties for the core
+	 * 
+	 * @return
+	 */
+	public static Properties getProperties(String projectName) {
+		return getProperties(getMontySolrHome(), projectName); // the default MontySolr main project
+	}
+
+	public static Properties getProperties(String base, String project) {
+		project = project.trim();
+		while (project.indexOf("/") == 0) {
+			project = project.substring(1);
+		}
+		while (project.indexOf("/") == project.length()) {
+			project = project.substring(0, project.length()-1);
+		}
+		if (prop.containsKey(project)) {
+			return prop.get(project);
+		}
+		
+		Properties p = loadProperties(base, project);
+		prop.put(project, p);
+		return p;
 	}
 
 	/**
 	 * MontySolr depends on the properties file for unittesting, as it was too
 	 * much hassle to load interpolated strings from the build.properties file
 	 * (without adding more jars) and the discovery of files using file
-	 * structure crawling is ugly
+	 * structure crawling is ugly.
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
-	private static Properties loadProperties() throws IllegalStateException {
+	
+	private static Properties loadProperties(String base, String project) throws IllegalStateException {
+		base = base + "/" + project;
 		Properties prop = new Properties();
-		String base = getMontySolrHome();
 		try {
 			prop.load(new FileInputStream(new File(base
-					+ "/build/build.properties")));
+					+ "/build.properties")));
 		} catch (IOException e) {
 			throw new IllegalStateException("Your montysolr installation does not have "
-					+ base + "build/build.properties file! "
-					+ "You should run ant build-all in the root folder");
+					+ base + "/build.properties file! "
+					+ "You should fix this (by running ant build-all for the core)");
 		}
 		return prop;
 	}
 
 	public static String getSolrHome() {
 		String base = getMontySolrHome();
-
-		String solr_home = prop.getProperty("solr.home");
+		
+		
+		String solr_home = null;
+		
+		Properties p = getProperties("build");
+		if (p != null && p.containsKey("solr.home")) {
+			solr_home = p.getProperty("solr.home");
+		}
 
 		if (solr_home == null || !(new File(solr_home).exists())) {
 			throw new IllegalStateException(
