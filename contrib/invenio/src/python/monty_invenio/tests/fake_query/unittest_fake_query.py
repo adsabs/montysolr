@@ -16,7 +16,7 @@ class Test(LuceneTestCase):
 
     def setUp(self):
         LuceneTestCase.setUp(self)
-        if not self.hasTarget('InvenioQuery:fake_search'):
+        if not self.hasTarget('*:fake_search'):
             self.addTargets(targets)
         
     def test_indexing(self):

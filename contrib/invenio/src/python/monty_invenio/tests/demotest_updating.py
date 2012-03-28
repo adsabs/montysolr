@@ -162,8 +162,9 @@ class Test(InvenioDemoTestCaseLucene):
         LuceneTestCase.setUp(self)
         handler = self.bridge.getHandler()
         if not handler.has_target('*:wipeout_record'):
-            self.addTargets(targets)
             self.addTargets(sys.modules[__name__])
+        if not handler.has_target('InvenioQuery:perform_request_search_ints'):
+            self.addTargets(targets)
         reset_records(None)
         self.max_recs = dbquery.run_sql("SELECT COUNT(*) FROM bibrec")[0][0]
         self.max_id = dbquery.run_sql("SELECT MAX(id) FROM bibrec")[0][0]

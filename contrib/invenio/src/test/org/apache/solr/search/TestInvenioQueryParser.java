@@ -71,7 +71,6 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 		AqpQueryParser qp = getParser();
 		qp.setAnalyzer(a);
 		qp.setDefaultOperator(Operator.OR);
-		qp.setDebug(this.debugParser);
 		return qp;
 
 	}
@@ -89,7 +88,9 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 	}
 
 	public AqpQueryParser getParser() throws Exception {
-		return new AqpQueryParser(getGrammarName());
+		AqpQueryParser qp = new AqpQueryParser(getGrammarName());
+		qp.setDebug(true);
+		return qp;
 	}
 
 	public Query getQuery(String query, Analyzer a) throws Exception {
@@ -155,7 +156,6 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 				"iq.channel", "intbit"), 
 				"+<(intbitset,recid)title:invenio> +fulltext:solr");
 		
-		setDebug(true);
 		assertQueryEquals(req("q", "invenio AND fulltext:solr",
 				"iq.mode", "maxinv"), 
 				"+<(ints,recid)invenio> +<(ints,recid)fulltext:solr>");

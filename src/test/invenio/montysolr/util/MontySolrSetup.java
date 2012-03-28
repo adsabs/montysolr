@@ -66,6 +66,7 @@ public class MontySolrSetup {
 		// other methods like starting a jetty instance need these too
 		System.setProperty("solr.test.sys.prop1", "propone");
 		System.setProperty("solr.test.sys.prop2", "proptwo");
+		System.setProperty("montysolr.home", getMontySolrHome());
 
 	}
 	

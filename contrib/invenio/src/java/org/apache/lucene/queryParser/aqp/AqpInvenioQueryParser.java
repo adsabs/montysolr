@@ -178,12 +178,13 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 
 			add(new WildcardQueryNodeProcessor());
 			add(new MultiFieldQueryNodeProcessor()); // expands to multiple fields if field=null
+			add(new AqpNullDefaultFieldProcessor());
 			add(new FuzzyQueryNodeProcessor());
 			add(new MatchAllDocsQueryNodeProcessor());
 			add(new LowercaseExpandedTermsQueryNodeProcessor());
 			add(new ParametricRangeQueryNodeProcessor());
 			add(new AllowLeadingWildcardProcessor());
-			add(new AqpNullDefaultFieldProcessor());
+			
 			add(new AnalyzerQueryNodeProcessor());
 			add(new PhraseSlopQueryNodeProcessor());
 

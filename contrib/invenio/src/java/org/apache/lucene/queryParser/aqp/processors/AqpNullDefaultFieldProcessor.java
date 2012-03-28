@@ -2,7 +2,6 @@ package org.apache.lucene.queryParser.aqp.processors;
 
 import java.util.List;
 
-import org.apache.lucene.queryParser.aqp.AqpInvenioQueryParser;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
@@ -11,6 +10,7 @@ import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.standard.processors.AnalyzerQueryNodeProcessor;
+import org.apache.lucene.queryParser.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.MultiFieldQueryNodeProcessor;
 
 /**
@@ -31,6 +31,10 @@ import org.apache.lucene.queryParser.standard.processors.MultiFieldQueryNodeProc
  * field is a string value - to be precise, it asks the current analyzer
  * to check the field. And if the field was null, then with SOLR this
  * throws {@link NullPointerException}
+ * 
+ * Please put {@link AqpNullDefaultFieldProcessor} also before 
+ * {@link MatchAllDocsQueryNodeProcessor} otherwise you will get 
+ * {@link NullPointerException} if the default field is null
  * 
  * @see FieldableNode
  * @see MultiFieldQueryNodeProcessor

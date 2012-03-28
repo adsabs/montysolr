@@ -52,6 +52,11 @@
             <include name="**/**.jar"/>
         </fileset>
     </path>
+	
+	<path id="junit.classpath">
+		<path refid="common.junit.classpath"/>
+		<path refid="additional.classpath"/>
+	</path>
 
 	<target name="clean">
 		<delete dir="${build.dir}" />

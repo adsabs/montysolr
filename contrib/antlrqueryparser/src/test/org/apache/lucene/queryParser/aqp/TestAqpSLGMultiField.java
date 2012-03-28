@@ -17,8 +17,6 @@ package org.apache.lucene.queryParser.aqp;
  * limitations under the License.
  */
 
-import invenio.montysolr.TestMontySolrBasicOperations;
-
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +38,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.LuceneTestCase;
 
 /**
  * This test case is a copy of the core Lucene query parser test, it was adapted
