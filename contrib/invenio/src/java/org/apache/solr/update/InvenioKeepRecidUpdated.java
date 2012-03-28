@@ -17,8 +17,8 @@ package org.apache.solr.update;
  * limitations under the License.
  */
 
-import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.jni.MontySolrVM;
+import invenio.montysolr.jni.PythonMessage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,36 +29,24 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.search.DictionaryRecIdCache;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopFieldDocs;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.InvenioRequestHandler;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.handler.dataimport.DataImportHandler;
-import org.apache.solr.handler.dataimport.SolrWriter;
-import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.schema.SchemaField;
-import org.apache.solr.search.QueryParsing;
-import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.search.SolrQueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,7 +141,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		.getLogger(InvenioRequestHandler.class);
 	
 	
-	protected volatile List<String> urlsToFetch = new ArrayList<String>();
+	
 	private volatile int counter = 0;
 	private boolean asynchronous = true;
 	
@@ -241,6 +229,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			SolrQueryRequest req) 
 			throws MalformedURLException, IOException, InterruptedException {
 		
+		List<String> urlsToFetch = new ArrayList<String>();
+		
 		SolrParams params = req.getParams();
 		String inveniourl = params.get(PARAM_INVENIO, null);
 		String importurl = params.get(PARAM_IMPORT, null);
@@ -281,7 +271,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 					urlsToFetch.add(getFetchURL(importurl, inveniourl,
 							queryPart, maximport));
 				}
-				runUpload();
+				runUpload(urlsToFetch);
 			}
 			else {
 				// pass
@@ -301,7 +291,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 					urlsToFetch.add(getFetchURL(updateurl, inveniourl,
 							queryPart, maximport));
 				}
-				runUpload();
+				runUpload(urlsToFetch);
 			}
 			else {
 				// pass
@@ -318,10 +308,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			else if (deleteurl != null) {
 				queryParts = getQueryIds(maximport, dictData.get(DELETED));
 				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(updateurl, deleteurl,
+					urlsToFetch.add(getFetchURL(deleteurl, inveniourl,
 							queryPart, maximport));
 				}
-				runUpload();
+				runUpload(urlsToFetch);
 			}
 			else {
 				// pass
@@ -607,22 +597,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	}
 	
 	
-	private void runAsyncUpload() {
-		new Thread() {
-			
-			public void run() {
-				try {
-					runUpload();
-				} catch (Exception e) {
-					// pass
-				}
-				setBusy(false);
-			}
-		}.start();
-	}
-
 	
-	protected void runUpload() throws MalformedURLException, IOException,
+	protected void runUpload(List<String> urlsToFetch) throws MalformedURLException, IOException,
 			InterruptedException {
 		while (urlsToFetch.size() > 0) {
 			String url = urlsToFetch.remove(0);

@@ -99,3 +99,4 @@ def montysolr_targets():
                         index_docs=index_docs,
                         
                         )
+

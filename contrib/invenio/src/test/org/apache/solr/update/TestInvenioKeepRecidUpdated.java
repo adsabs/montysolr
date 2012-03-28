@@ -23,6 +23,7 @@ import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -49,6 +50,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	public static void beforeClassMontySolrTestCase() throws Exception {
 		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
 				MontySolrSetup.getMontySolrHome() + "/src/python");
+		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
@@ -81,6 +83,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	public void testIndexing() throws Exception {
 		SolrCore core = h.getCore();
 		MyInvenioKeepRecidUpdated handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-00");
+		
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		
 		// fresh state, everything reset - we are not committing anything
@@ -128,6 +132,11 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 			.setParam("recids", recids)
 			.setParam("diff", 5);
 		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		
+		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-00-b");
+		handler.skipStage(); // because there is no added rec
 		core.execute(handler, req("last_recid", "-1", 
 					    "inveniourl", inveniourl,
 						"importurl", importurl,
@@ -178,12 +187,12 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		
-
 		
 		
 		// expected: 1 added, 9 changed, 1 deleted AND lastid will 
 		// be the deleted recs
-		
+		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-00-c");
 		core.execute(handler, req("last_recid", "10", 
 					    "inveniourl", inveniourl,
 						"importurl", importurl,
@@ -219,6 +228,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		// expected: added=1, updated=9, deleted=1
 		
 		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-01");
+		
 		core.execute(handler, req("last_recid", "30", 
 			    "inveniourl", inveniourl,
 				"importurl", importurl,
@@ -253,6 +264,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		
 		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-02");
+		
 		core.execute(handler, req("last_recid", "30", 
 			    "inveniourl", inveniourl,
 				"importurl", "blankrecords",
@@ -285,6 +298,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		// expected: nothing new, but lastRecid contains correct value
 		// (nothing, because we use mod_date now from the config)
 		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-03");
+		
 		core.execute(handler, req( 
 			    "inveniourl", inveniourl,
 				"importurl", "blankrecords",
@@ -311,6 +326,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		
 		
 		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-04");
+		
 		core.execute(handler, req( 
 			    "inveniourl", inveniourl,
 				"importurl", "blankrecords",
@@ -344,6 +361,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		//           lastRecid=null (retrieved by handler)
 		
 		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-05");
+		
 		core.execute(handler, req(
 			    "inveniourl", inveniourl,
 				"importurl", "blankrecords",
@@ -369,6 +388,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		//           index contains 9 docs
 		
 		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-06");
+		
 		core.execute(handler, req("last_recid", "30", 
 			    "inveniourl", inveniourl,
 				"importurl", "blankrecords",
@@ -410,6 +431,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		Integer thirdAdded = (Integer) message.getResults();
 		
 		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-07");
+		
 		core.execute(handler, req( 
 			    "inveniourl", inveniourl,
 				"importurl", "blankrecords",
@@ -455,6 +478,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		//           index has 9 docs
 		
 		handler = new MyInvenioKeepRecidUpdated();
+		handler.setName("h-08");
+		
 		core.execute(handler, req( 
 			    "inveniourl", inveniourl,
 				"importurl", "blankrecords",
@@ -501,11 +526,18 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		public Integer lastRecId;
 		public Integer lastUpdatedRecId;
 		private int stage = 0;
-		private String[] stages = new String[]{importurl + "?", updateurl + "&", deleteurl};
+		private String[] stages = new String[]{importurl, updateurl, deleteurl};
 		public int[] added = null;
 		public int[] updated = null;
 		public int[] deleted = null;
+		public String tName = null;
 		
+		public void setName(String name) {
+			tName = name;
+		}
+		public void skipStage() {
+			stage++;
+		}
 		
 		@SuppressWarnings("unchecked")
 		protected Map<String, Object> retrieveRecids(Properties prop, 
@@ -524,11 +556,14 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		}
 		
 		@Override
-		protected void runUpload() throws MalformedURLException, IOException, InterruptedException {
+		protected void runUpload(List<String> urlsToFetch) throws MalformedURLException, IOException, InterruptedException {
 			while (urlsToFetch.size() > 0) {
 				String url = urlsToFetch.remove(0);
-				assert url.contains(java.net.URLEncoder.encode(inveniourl, "UTF-8"));
-				assert url.contains(stages[stage]);
+				assertTrue("Name: " + tName + "\nStage: " + stage + "\nUrl: " + url + "\nDoest not contain: " + inveniourl,
+						url.contains(java.net.URLEncoder.encode(inveniourl, "UTF-8")));
+				assertTrue("Name: " + tName + "\nStage: " + stage + "\nUrl: " + url + "\nDoest not contain: " + stages[stage],
+						url.contains(stages[stage]));
+				urlsToFetch.clear(); // we want just once
 			}
 			stage++;
 		}

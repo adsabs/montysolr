@@ -314,7 +314,7 @@
   <requestHandler name="invenio_update.lazy" class="solr.InvenioKeepRecidUpdated" startup="lazy">
     <lst name="defaults">
       <int name="maximport">200</int>
-      <str name="inveniourl">http://insdev01.cern.ch/dataimport</str>
+      <str name="inveniourl">${montysolr.inveniourl:http://insdev01.cern.ch/search}</str>
     </lst>
   </requestHandler>
   

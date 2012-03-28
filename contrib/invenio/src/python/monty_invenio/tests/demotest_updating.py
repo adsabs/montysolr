@@ -31,9 +31,9 @@ def change_date(recid, diff=1, cdiff=0):
     
     m = recs[0][2]
     m_date = change(m, diff)
-    sys.stderr.write('cdate: %s x %s; mdate: %s x %s --> ' % (c, c_date, m, m_date))
+    #sys.stderr.write('cdate: %s x %s; mdate: %s x %s --> ' % (c, c_date, m, m_date))
     
-    sys.stderr.write("UPDATE bibrec SET creation_date='%s', modification_date='%s' WHERE id=%s\n" % (c_date,m_date,recid))
+    #sys.stderr.write("UPDATE bibrec SET creation_date='%s', modification_date='%s' WHERE id=%s\n" % (c_date,m_date,recid))
     return dbquery.run_sql("UPDATE bibrec SET creation_date='%s', modification_date='%s' WHERE id=%s" % (c_date,m_date,recid))
 
         
