@@ -88,7 +88,6 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 		AqpQueryParser qp = getParser();
 		qp.setAnalyzer(a);
 		qp.setDefaultOperator(Operator.OR);
-		qp.setDebug(this.debugParser);
 		return qp;
 
 	}
@@ -108,7 +107,9 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 	}
 
 	public AqpQueryParser getParser() throws Exception {
-		return new AqpQueryParser(getGrammarName());
+		AqpQueryParser qp = new AqpQueryParser(getGrammarName());
+		qp.setDebug(this.debugParser);
+		return qp;
 	}
 
 	public Query getQuery(String query, Analyzer a) throws Exception {

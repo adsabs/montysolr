@@ -16,6 +16,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpGroupQueryOptimizerProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpInvenioMODIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpInvenioQPHRASEProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpNullDefaultFieldProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOptimizationProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQANYTHINGProcessor;
@@ -95,8 +96,9 @@ import org.apache.lucene.search.Query;
 
 
 /**
- * Class that can be used inside Lucene, without knowledge of Solr
- * schema etc
+ * The complete configuration for the Invenio query 
+ * parser, this is the main object which parses the 
+ * query, from the string, until the query object.
  * 
  * @author rca
  *
@@ -175,12 +177,13 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 			add(new AqpFuzzyModifierProcessor());
 
 			add(new WildcardQueryNodeProcessor());
-			add(new MultiFieldQueryNodeProcessor());
+			add(new MultiFieldQueryNodeProcessor()); // expands to multiple fields if field=null
 			add(new FuzzyQueryNodeProcessor());
 			add(new MatchAllDocsQueryNodeProcessor());
 			add(new LowercaseExpandedTermsQueryNodeProcessor());
 			add(new ParametricRangeQueryNodeProcessor());
 			add(new AllowLeadingWildcardProcessor());
+			add(new AqpNullDefaultFieldProcessor());
 			add(new AnalyzerQueryNodeProcessor());
 			add(new PhraseSlopQueryNodeProcessor());
 

@@ -155,7 +155,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 				"iq.channel", "intbit"), 
 				"+<(intbitset,recid)title:invenio> +fulltext:solr");
 		
-		//setDebug(true);
+		setDebug(true);
 		assertQueryEquals(req("q", "invenio AND fulltext:solr",
 				"iq.mode", "maxinv"), 
 				"+<(ints,recid)invenio> +<(ints,recid)fulltext:solr>");

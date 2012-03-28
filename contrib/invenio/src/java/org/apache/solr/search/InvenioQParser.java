@@ -2,7 +2,9 @@ package org.apache.solr.search;
 
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryParser.aqp.AqpInvenioQueryParser;
 import org.apache.lucene.queryParser.aqp.AqpQueryParser;
+import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.core.QueryNodeException;
@@ -41,7 +43,7 @@ public class InvenioQParser extends QParser {
 				: new DefaultSolrParams(localParams, params);
 
 		IndexSchema schema = req.getSchema();
-		invParser = new AqpInvenioQueryParserSolr();
+		invParser = new AqpInvenioQueryParser();
 
 		// this is allowed to be only in the config (no locals possible)
 		QueryConfigHandler config = invParser.getQueryConfigHandler();
@@ -61,6 +63,11 @@ public class InvenioQParser extends QParser {
 		if (defaultField == null) {
 			defaultField = getReq().getSchema().getDefaultSearchFieldName();
 		}
+		if (defaultField != null) {
+			DefaultFieldAttribute defFieldAttr = config.getAttribute(DefaultFieldAttribute.class);
+			defFieldAttr.setDefaultField(defaultField);
+		}
+		
 
 		String opParam = getParam(QueryParsing.OP);
 

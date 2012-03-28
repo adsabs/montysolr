@@ -9,7 +9,6 @@ import org.apache.lucene.queryParser.standard.builders.StandardQueryBuilder;
 import org.apache.lucene.search.InvenioQuery;
 import org.apache.lucene.search.InvenioQueryBitSet;
 import org.apache.lucene.search.Query;
-import org.apache.solr.search.AqpInvenioQueryParserSolr;
 
 
 /**

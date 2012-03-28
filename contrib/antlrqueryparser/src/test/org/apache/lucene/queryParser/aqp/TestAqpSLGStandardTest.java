@@ -17,8 +17,6 @@ package org.apache.lucene.queryParser.aqp;
  * limitations under the License.
  */
 
-import invenio.montysolr.TestMontySolrBasicOperations;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.text.Collator;
