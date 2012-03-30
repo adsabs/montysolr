@@ -21,7 +21,7 @@
 
 	<description>
     Examples for MontySolr
-  </description>
+    </description>
 
 	<import file="../contrib-build.xml"/>
 
@@ -123,12 +123,26 @@
 	
 	<!-- does nothing, because build-all is called from the main build and at that time we don't have all jars for contribs yet -->
     <target name="build-all"  depends="" />
-
+    
+    <target name="build" >
+	   <echo>
+         Please use: ant build-one -Dename={name}
+         We have intentionally disabled the 'build' target to avoid confusion
+	   </echo>
+       <fail />
+	</target>
 
 	<target name="build-one">
 		<assemble-example example-name="${example.name}" 
 			montysolr-example="${basedir}/${example.name}" 
 			solr-example="${prop.solr.real.location}/example"/>
+
+		<!-- put core jar into example/lib -->
+        <copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true">
+            <fileset dir="${common.dir}/build/jar">
+                <include name="*/montysolr*.jar" />
+            </fileset>
+        </copy>
 
 		<!-- put contrib jars into example/lib -->
 		<copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true">
@@ -136,8 +150,39 @@
 				<include name="*/montysolr*.jar" />
 			</fileset>
 		</copy>
-	</target>
+		
+		<!-- put contrib lib/jars into example/lib -->
+        <copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true">
+            <fileset dir="${common.dir}/contrib">
+                <include name="**/lib/*.jar" />
+            </fileset>
+        </copy>
 
+		<copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true" >
+			<fileset dir="${common.dir}/src/python">
+                <include name="**/*.py" />
+            </fileset>
+		</copy>
+	
+		<!-- gather and copy the python code to example/python -->
+        <mkdir dir="${build.dir}/${example.name}/python"/>
+        <copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true" >
+            <fileset dir="${common.dir}/contrib">
+                <include name="**/src/python/*.py" />
+            </fileset>
+            <regexpmapper from=".*/src/python/(.*)" to="\1" />
+        </copy>
+		
+		<!-- gather and copy the python wrappers to example/python -->
+        <mkdir dir="${build.dir}/${example.name}/python"/>
+        <copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true" >
+            <fileset dir="${common.dir}/build/dist">
+                <include name="**" />
+            </fileset>
+        </copy>
+
+	</target>
+	
 
 	<target name="run" description="Run the example, usage: ant run -Dename={example-name}">
 		<exec executable="ant" failonerror="true" dir="${basedir}">

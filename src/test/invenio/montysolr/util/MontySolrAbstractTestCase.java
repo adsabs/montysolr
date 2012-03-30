@@ -19,7 +19,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	}
 
 	public String getSolrHome() {
-		return MontySolrTestCaseJ4.EXAMPLE_HOME;
+		return MontySolrSetup.getSolrHome();
 	}
 	
 	/** @see MontySolrTestCaseJ4#getFile */

@@ -143,6 +143,18 @@ public class MontySolrSetup {
 	public static String getSolrHome() {
 		String base = getMontySolrHome();
 		
+		String home = System.getProperty("solr.solr.home");
+		if (home!= null ) {
+			if ((new File(home)).exists()) {
+				System.err.println("MontySolrSetup: solr.solr.home is set to \'" + home + "\'\n" +
+						           "...ignoring the test setup");
+				return home;
+			}
+			else {
+				System.err.println("MontySolrSetup: solr.solr.home is set to \'" + home + "\'\n" +
+		           "...but this path does not exist");
+			}
+		}
 		
 		String solr_home = null;
 		
@@ -226,7 +238,14 @@ public class MontySolrSetup {
 							+ "\'])");
 		}
 	}
-
+	
+	public static void evalCommand(String... commands) {
+		for (String command : commands) {
+			System.out.println(command);
+			MontySolrVM.INSTANCE.evalCommand(command);
+		}
+	}
+	
 	/**
 	 * Trick to find any existing folder/file inside the main module path and
 	 * return it to be set by python into the PYTHONPATH
