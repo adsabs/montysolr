@@ -115,6 +115,10 @@
 	<path id="junit.classpath">
         <path refid="common.junit.classpath"/>
         <path refid="examples.classpath"/>
+		<!-- all examples test classes -->
+        <dirset dir="${common.dir}/build/contrib">
+            <include name="**/classes/test"/>
+        </dirset>
     </path>
 
 
