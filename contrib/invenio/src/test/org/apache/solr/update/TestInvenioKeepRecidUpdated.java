@@ -21,6 +21,8 @@ import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
+import invenio.montysolr.util.MontySolrTestCaseJ4;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -66,6 +68,10 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
+	}
+	
+	public String getSolrHome() {
+		return MontySolrTestCaseJ4.EXAMPLE_HOME;
 	}
 
 	@Override
