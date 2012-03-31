@@ -19,6 +19,7 @@ package org.apache.solr.update;
 
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
+import invenio.montysolr.util.MontySolrTestCaseJ4;
 
 
 import org.apache.solr.core.SolrCore;
@@ -56,7 +57,9 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 				+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
 	}
 
-
+	public String getSolrHome() {
+		return MontySolrTestCaseJ4.EXAMPLE_HOME;
+	}
 	
 
 	private String esc(String...params) {
