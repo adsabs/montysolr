@@ -111,6 +111,11 @@
 			<include name="${example.name}/lib/**/*.jar"/>
 		</fileset>
 	</path>
+	
+	<path id="junit.classpath">
+        <path refid="common.junit.classpath"/>
+        <path refid="examples.classpath"/>
+    </path>
 
 
 	<target name="default" depends="build-all-examples">
