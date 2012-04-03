@@ -48,6 +48,38 @@ def format_search_results(message):
 
 
 
+def invenio_search(message):
+    '''Search Invenio using high-level API
+    @param kwargs: (Map<String, String[]>) list of parameters
+    
+    This search is problematic becuase it can return different
+    types of values: None, list of ints, String
+    '''
+    params = message.getParam('kwargs')
+    if params is None:
+        return
+    
+    params = sj.HashMap.cast_(params).of_(sj.String, sj.List)
+    kwargs = {}
+    
+    kset = params.keySet().toArray()
+    vset = params.values().toArray()
+    max_size = len(vset)
+    i = 0
+    while i < max_size:
+        v = list(sj.ArrayList(vset[i]).of_(sj.String))
+        if len(v) == 1:
+            kwargs[str(kset[i])] = v[0]
+        else:
+            kwargs[str(kset[i])] = v
+        i += 1
+    
+    (wid, result) = api_calls.dispatch('invenio_search', kwargs)
+    
+    if not (isinstance(result, str) or result is None):
+        raise Exception('Wrong arguments - I\'ll rather die than give you what you want!')
+    message.setResults(result)
+    
 
 def perform_request_search_bitset(message):
     '''Search and use bitset for exchange of data
@@ -257,6 +289,7 @@ def montysolr_targets():
            'InvenioKeepRecidUpdated:get_recids_changes', get_recids_changes,
            'InvenioFormatter:sort_and_format', sort_and_format,
            'Invenio:diagnostic_test', diagnostic_test,
+           '*:invenio_search', invenio_search,
            )
 
     num_cpus = 0

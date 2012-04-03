@@ -42,6 +42,7 @@ import org.junit.BeforeClass;
  */
 public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
+	//TODO: convert to BlackBox test
 	//TODO: dynamically retrieve these values
 	private String importurl = "http://localhost:8983/solr/import-dataimport";
 	private String updateurl = "http://localhost:8983/solr/update-dataimport&dirs=x";
@@ -589,22 +590,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 			updated = recids;
 			super.runProcessingUpdated(recids, req);
 		}
-		@Override
-		protected void runProcessingAdded(int[] recids, SolrParams params) throws IOException {
-			added = recids;
-			super.runProcessingAdded(recids, params);
-		}
 		
-		@Override
-		protected void runProcessingUpdated(int[] recids, SolrParams params) throws IOException {
-			updated = recids;
-			super.runProcessingUpdated(recids, params);
-		}
-		@Override
-		protected void runProcessingDeleted(int[] recids, SolrParams params) throws IOException {
-			deleted = recids;
-			super.runProcessingDeleted(recids, params);
-		}
 	}
 	
 	

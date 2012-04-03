@@ -40,11 +40,13 @@ import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.InvenioRequestHandler;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.handler.dataimport.DataImportHandler;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
 import org.slf4j.Logger;
@@ -54,6 +56,8 @@ import org.slf4j.LoggerFactory;
  * This handler keeps Solr index in sync with the Invenio database.
  * Basically, on every invocation it calls Invenio to retrieve set
  * of added/updated/deleted document recids.
+ * 
+ * Note from the author: I don't like my code at all, it should be simpler
  * 
  * When we have these ids, we'll call the respective handlers and
  * pass them recids. This implementation extends {@link DataImportHandler}
@@ -160,6 +164,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	static final String PARAM_MAXIMPORT = "maximport";
 	static final String PARAM_COMMIT = "commit";
 	static final String PARAM_MAX_RECID = "max_recid";
+	static final String PARAM_INTERNAL_ADD_HANDLER = "add_handler";
+	static final String PARAM_INTERNAL_UPDATE_HANDLER = "update_handler";
+	static final String PARAM_INTERNAL_DELTE_HANDLER = "delete_handler";
 	
 	private String pythonFunctionName = "get_recids_changes";
 	
@@ -586,13 +593,29 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	/*
 	 * Internally calling dataimport handler
 	 */
-	protected void runProcessingAdded(int[] recids, SolrParams params) throws IOException {
+	protected void runProcessingAddedInternal(int[] recids, SolrQueryRequest req) throws IOException {
+		SolrCore core = req.getCore();
+		SolrParams params = req.getParams();
+		
+		String hName = params.get(PARAM_INTERNAL_ADD_HANDLER, null);
+		if (hName == null) {
+			throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
+					"The parameter \'" + PARAM_INTERNAL_ADD_HANDLER + "\' is missing!");
+		}
+		
+		SolrRequestHandler handler = core.getRequestHandler(hName);
+		
+		if (handler == null) {
+			throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
+					"There exist not handler with name\'" + PARAM_INTERNAL_ADD_HANDLER + "\'!");
+		}
+		SolrQueryResponse rsp = new SolrQueryResponse();
+		core.execute(handler, req, rsp);
+	}
+	protected void runProcessingUpdatedInternal(int[] recids, SolrQueryRequest req) throws IOException {
 		throw new IllegalAccessError("Not implemented yet");
 	}
-	protected void runProcessingUpdated(int[] recids, SolrParams params) throws IOException {
-		throw new IllegalAccessError("Not implemented yet");
-	}
-	protected void runProcessingDeleted(int[] recids, SolrParams params) throws IOException {
+	protected void runProcessingDeletedInternal(int[] recids, SolrQueryRequest req) throws IOException {
 		throw new IllegalAccessError("Not implemented yet");
 	}
 	

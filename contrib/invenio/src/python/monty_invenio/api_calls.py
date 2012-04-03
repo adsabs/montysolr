@@ -3,6 +3,7 @@
 import os
 import thread
 import sys
+import cStringIO
 
 from invenio import search_engine
 from invenio import search_engine_summarizer
@@ -103,6 +104,24 @@ def citation_summary(recids, of, ln, p, f):
         out.seek(0)
         output = out.read()
     return output
+
+def invenio_search(kwargs):
+    
+    # because of invenio bug, sanity checking of rg is wrong
+    if 'rg' in kwargs:
+        kwargs['rg'] = int(kwargs['rg'])
+    
+    req = cStringIO.StringIO()
+    result = search_engine.perform_request_search(req, **kwargs)
+    data = None
+    if not result:
+        req.seek(0)
+        data = req.read()
+    req.close()
+    if result:
+        return result
+    if data:
+        return data
 
 
 def search(q, max_len=25, offset=0):

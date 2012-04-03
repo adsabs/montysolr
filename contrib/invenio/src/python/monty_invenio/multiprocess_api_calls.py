@@ -14,6 +14,21 @@ POOL = None
 
 # ======================================================
 #  Multiprocess versions  of the api_call methods
+# 
+#  It works by wrapping the standard call into a
+#  a series of normalizers (basically, what you want
+#  to do in these serializers is to de/serialize data
+#
+#  Sequence for func_X is:
+#  
+#  0. func_X_local_pre()
+#    1. func_X_remote_pre()
+#      2. func_X()
+#    3. func_X_remote_post()
+#  4. func_X_local_post()
+#
+#  Steps 1-3 are executed on the remote machine.
+#  
 # ======================================================
 
 def citation_summary_local_pre(args, kwargs):
@@ -41,6 +56,7 @@ def sort_and_format_local_pre(args, kwargs):
 
 def sort_and_format_remote_pre(args, kwargs):
     args[0] = intbitset().fastload(args[0])
+
 
 
 # ======================================================

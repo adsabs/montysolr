@@ -17,6 +17,8 @@ Tests for the main Invenio API targets - we expect to run
 over the example which was built with ant. See contrib/examples
 ant build-one
 
+We also expect the invenio database with demo site loaded
+
 
 '''
 
@@ -141,9 +143,50 @@ class Test(InvenioDemoTestCaseLucene):
         assert result[0] == 77
 
 
+    def test_invenio_search(self):
+        kws = sj.HashMap().of_(sj.String, sj.List)
+        p = sj.ArrayList().of_(sj.String)
+        of = sj.ArrayList().of_(sj.String)
+        rg = sj.ArrayList().of_(sj.String)
+        
+        p.add('recid:94')
+        of.add('xm')
+        
+        kws.put('p', p)
+        kws.put('of', of)
+        
+        message = self.bridge.createMessage('invenio_search') \
+                    .setParam('kwargs', kws)
 
-
+        self.bridge.sendMessage(message)
+        result = str(sj.String.cast_(message.getResults()))
+        assert '<controlfield tag="001">94</controlfield>' in result
+        
+        
+        
+        p.clear()
+        p.add('recid:0->50')
+        message = self.bridge.createMessage('invenio_search') \
+                    .setParam('kwargs', kws)
+        self.bridge.sendMessage(message)
+        result = str(sj.String.cast_(message.getResults()))
+        
+        assert 'Search-Engine-Total-Number-Of-Results: 42' in result
+        assert len(result) > 1000
+        assert result.count('<record>') == 10
+        
+        rg.add('200')
+        kws.put('rg', rg)
+        
+        message = self.bridge.createMessage('invenio_search') \
+                    .setParam('kwargs', kws)
+        self.bridge.sendMessage(message)
+        result = str(sj.String.cast_(message.getResults()))
+        
+        assert 'Search-Engine-Total-Number-Of-Results: 42' in result
+        assert len(result) > 1000
+        assert result.count('<record>') == 42
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.test_sorting']
+    import sys;sys.argv = ['', 'Test.test_invenio_search']
     unittest.main()

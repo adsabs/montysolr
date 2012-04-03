@@ -9,6 +9,18 @@ import org.slf4j.LoggerFactory;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import org.ads.mongodb.MongoConnection;
+import org.apache.solr.schema.MongoDataField;
+
+
+/**
+ * {@link AdsDataSource} makes sure that the MongoDB is initialized
+ * before being used by the data-importer.
+ * 
+ * This is necessary for the fields that are of type {@link MongoDataField}
+ * and are used in the data-config.xml
+ * 
+ *
+ */
 
 public class AdsDataSource extends URLDataSource {
 

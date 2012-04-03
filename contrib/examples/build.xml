@@ -177,7 +177,7 @@
         <mkdir dir="${build.dir}/${example.name}/python"/>
         <copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true" >
             <fileset dir="${common.dir}/contrib">
-                <include name="**/src/python/*.py" />
+                <include name="**/src/python/**/*.py" />
             </fileset>
             <regexpmapper from=".*/src/python/(.*)" to="\1" />
         </copy>
