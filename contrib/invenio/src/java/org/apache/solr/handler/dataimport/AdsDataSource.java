@@ -19,10 +19,11 @@ import org.apache.solr.schema.MongoDataField;
  * This is necessary for the fields that are of type {@link MongoDataField}
  * and are used in the data-config.xml
  * 
+ * TODO: add unittest/blackbox test to make sure this works
  *
  */
 
-public class AdsDataSource extends URLDataSource {
+public class AdsDataSource extends InvenioDataSource {
 
 	Logger log = LoggerFactory.getLogger(MongoConnection.class);
 
