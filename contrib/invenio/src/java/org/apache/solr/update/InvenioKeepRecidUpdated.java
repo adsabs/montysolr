@@ -218,6 +218,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		else {
 			runSynchronously(dictData, locReq);
 			locReq.close();
+			setBusy(false);
 		}
 		
 

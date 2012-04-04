@@ -44,8 +44,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
 	//TODO: convert to BlackBox test
 	//TODO: dynamically retrieve these values
-	//private String importurl = "http://localhost:8983/solr/import-dataimport";
-	private String importurl = "/waiting-dataimport?command=full-import";
+	private String importurl = "http://localhost:8983/solr/import-dataimport";
+	//private String importurl = "/waiting-dataimport?command=full-import";
 	private String updateurl = "http://localhost:8983/solr/update-dataimport&dirs=x";
 	private String deleteurl = "http://localhost:8983/solr/delete-dataimport";
 	private String inveniourl = "http://insdev01.cern.ch/search";
