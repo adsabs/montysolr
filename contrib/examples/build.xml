@@ -80,11 +80,12 @@
 		   else -->
 		
 		<!-- example libs -->
-        <fileset dir="${build.dir}">
-            <include name="${example.name}/lib/**/*.jar"/>
+        <fileset dir="${build.dir}/${example.name}/lib">
+            <include name="**/*.jar"/>
         </fileset>
 		
 	</path>
+	
 	
 	<path id="old.examples.classpath">
 		<!-- all contrib compiled classes -->
@@ -126,16 +127,21 @@
 		</fileset>
 	</path>
 	
-	<path id="junit.classpath">
-        <path refid="common.junit.classpath"/>
-        <path refid="examples.classpath"/>
+	<path id="test.classpath">
+		
+		<path refid="examples.classpath"/>
+        <path refid="common.test.classpath"/>
+        
 		
 		<!-- all contrib test classes -->
         <dirset dir="${common.dir}/build/contrib">
             <include name="**/classes/test"/>
         </dirset>
 		
+		<pathelement location="${prop.jcc_egg}/jcc/classes" />
     </path>
+	
+	
 
 
 	<target name="default" depends="build-all-examples">
@@ -144,6 +150,7 @@
 
 	<target name="build-all-examples" description="Assembles all examples">
 		<assemble-example example-name="invenio" montysolr-example="${basedir}/invenio" solr-example="${prop.solr.real.location}/example"/>
+		<assemble-example example-name="adslabs" montysolr-example="${basedir}/invenio" solr-example="${prop.solr.real.location}/example"/>
 	</target>
 	
 	<!-- does nothing, because build-all is called from the main build and at that time we don't have all jars for contribs yet -->
