@@ -53,7 +53,7 @@ class Handler(object):
             raise Exception("Unknown target; message_id=%s" %
                            (message_id,))
 
-    def discover_targets(self, places):
+    def discover_targets(self, places, silent=False):
         '''Queries the different objects for existence of the callable
         called montysolr_targets. If that callable is present, it will
         get from it the MontySolrTarget instances, which represent the
@@ -77,14 +77,14 @@ class Handler(object):
                     if os.path.exists(place): # it is a module
                         try:
                             obj = self.create_module(place)
-                            self.retrieve_targets(obj)
+                            self.retrieve_targets(obj, silent=silent)
                         except:
                             self.log.error(traceback.format_exc())
                     else:
                         obj = self.import_module(place)
-                        self.retrieve_targets(obj)
+                        self.retrieve_targets(obj, silent=silent)
                 else:
-                    self.retrieve_targets(place)
+                    self.retrieve_targets(place, silent=silent)
             except Exception, e:
                 sys.stderr.write('Error when loading: %s\n' % place)
                 raise e
@@ -135,13 +135,13 @@ class Handler(object):
                 return
         return x
 
-    def retrieve_targets(self, obj):
+    def retrieve_targets(self, obj, silent=False):
         if hasattr(obj, 'montysolr_targets'):
             db = self._db
             for t in obj.montysolr_targets():
                 message_id = t.getMessageId()
                 target = t.getTarget()
-                if message_id in db:
+                if message_id in db and not silent:
                     self.log.warning("The message with id '%s' already has a target: %s" %
                                     (message_id, db[message_id]))
                 db[message_id] = target

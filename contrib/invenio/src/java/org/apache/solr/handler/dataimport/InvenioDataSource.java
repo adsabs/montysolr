@@ -12,6 +12,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+
 import org.apache.solr.common.SolrException;
 import org.apache.solr.util.WebUtils;
 
@@ -19,10 +21,15 @@ public class InvenioDataSource extends URLDataSource implements PythonCall {
 	
 	
 	private String pyFuncName = "invenio_search";
+	
+	@Override
+	public void init(Context context, Properties initProps) {
+		super.init(context, initProps);
+	}
 
 	@Override
 	public Reader getData(String query) {
-		if (query.substring(0, 9).equals("python://")) {
+		if (query != null && query.length() > 8 && query.substring(0, 9).equals("python://")) {
 			URI uri;
 			try {
 				uri = new URI(query);

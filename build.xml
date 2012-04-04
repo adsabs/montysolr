@@ -15,7 +15,7 @@
 	<property name="src.dir.python" location="src/python" />
 	<property name="build.dir" location="build" />
 	<property name="dist.dir" value="build/dist" />
-	<property name="classes.dir" value="bin" />
+	<property name="classes.dir" value="build/classes/java" />
 	<property name="jar.dir" value="${build.dir}/jar" />
 
 	<property file="build.properties" />

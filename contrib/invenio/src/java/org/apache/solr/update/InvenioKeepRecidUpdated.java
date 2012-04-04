@@ -151,7 +151,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	
 	
 	private volatile int counter = 0;
-	private boolean asynchronous = false;
+	private boolean asynchronous = true;
 	
 	static final String IKRU_PROPERTIES = "invenio_ikru.properties"; // will be put into context
 	static final String LAST_RECID = "last_recid"; // name of the param from url and also what is passed to python
@@ -331,12 +331,12 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
     }
 
 
-	protected void setAsynchronous(boolean val) {
+	public void setAsynchronous(boolean val) {
 		asynchronous = val;
 	}
 	
 	
-	protected boolean isAsynchronous() {
+	public boolean isAsynchronous() {
 		return asynchronous;
 	}
 	

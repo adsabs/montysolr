@@ -72,7 +72,21 @@
 	<property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
 	<property name="env.PYTHONPATH" value="${common.dir}/build/dist${path.separator}${common.dir}/src/python${path.separator}"/>
 
+	
 	<path id="examples.classpath">
+		   <!-- 
+		   we include only the classpaths that are inside 
+		   the example, so that it can run without anything 
+		   else -->
+		
+		<!-- example libs -->
+        <fileset dir="${build.dir}">
+            <include name="${example.name}/lib/**/*.jar"/>
+        </fileset>
+		
+	</path>
+	
+	<path id="old.examples.classpath">
 		<!-- all contrib compiled classes -->
 		<dirset dir="${common.dir}/build/contrib">
 			<include name="**/classes/java"/>
@@ -115,10 +129,12 @@
 	<path id="junit.classpath">
         <path refid="common.junit.classpath"/>
         <path refid="examples.classpath"/>
-		<!-- all examples test classes -->
+		
+		<!-- all contrib test classes -->
         <dirset dir="${common.dir}/build/contrib">
             <include name="**/classes/test"/>
         </dirset>
+		
     </path>
 
 
@@ -147,14 +163,16 @@
 			solr-example="${prop.solr.real.location}/example"/>
 
 		<!-- put core jar into example/lib -->
-        <copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true">
+        <copy todir="${build.dir}/${example.name}/lib" flatten="true" 
+        	overwrite="true" verbose="yes">
             <fileset dir="${common.dir}/build/jar">
                 <include name="*/montysolr*.jar" />
             </fileset>
         </copy>
 
 		<!-- put contrib jars into example/lib -->
-		<copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true">
+		<copy todir="${build.dir}/${example.name}/lib" flatten="true" 
+			overwrite="true" verbose="false">
 			<fileset dir="${common.dir}/build/contrib">
 				<include name="*/montysolr*.jar" />
 			</fileset>
@@ -166,7 +184,8 @@
                 <include name="**/lib/*.jar" />
             </fileset>
         </copy>
-
+	    
+		<echo>Putting Python code together into: "${build.dir}/${example.name}/python</echo> 
 		<copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true" >
 			<fileset dir="${common.dir}/src/python">
                 <include name="**/*.py" />

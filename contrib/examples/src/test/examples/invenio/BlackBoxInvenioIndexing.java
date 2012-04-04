@@ -5,6 +5,7 @@ import invenio.montysolr.util.MontySolrSetup;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.update.InvenioKeepRecidUpdated;
 import org.junit.BeforeClass;
 
 import examples.BlackBoxAbstractTestCase;
@@ -23,6 +24,9 @@ public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
 		SolrCore core = h.getCore();
 		
 		SolrRequestHandler handler = core.getRequestHandler("/invenio/update");
+		
+		((InvenioKeepRecidUpdated) handler).setAsynchronous(false);
+		
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		
 		core.execute(handler, req("last_recid", "-1",
