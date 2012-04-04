@@ -1,5 +1,5 @@
 <dataConfig>
-    <dataSource type="URLDataSource" />
+    <dataSource type="InvenioDataSource" />
     <document>
         <entity name="inspire"
             pk="id"

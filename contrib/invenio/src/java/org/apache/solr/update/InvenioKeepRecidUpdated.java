@@ -17,6 +17,7 @@ package org.apache.solr.update;
  * limitations under the License.
  */
 
+import invenio.montysolr.PythonCall;
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 
@@ -27,6 +28,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +52,7 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +143,7 @@ import org.slf4j.LoggerFactory;
  *  </code>   
  *  
  */
-public class InvenioKeepRecidUpdated extends RequestHandlerBase {
+public class InvenioKeepRecidUpdated extends RequestHandlerBase implements PythonCall {
 	
 	public static final Logger log = LoggerFactory
 		.getLogger(InvenioRequestHandler.class);
@@ -147,7 +151,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	
 	
 	private volatile int counter = 0;
-	private boolean asynchronous = true;
+	private boolean asynchronous = false;
 	
 	static final String IKRU_PROPERTIES = "invenio_ikru.properties"; // will be put into context
 	static final String LAST_RECID = "last_recid"; // name of the param from url and also what is passed to python
@@ -164,9 +168,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	static final String PARAM_MAXIMPORT = "maximport";
 	static final String PARAM_COMMIT = "commit";
 	static final String PARAM_MAX_RECID = "max_recid";
-	static final String PARAM_INTERNAL_ADD_HANDLER = "add_handler";
-	static final String PARAM_INTERNAL_UPDATE_HANDLER = "update_handler";
-	static final String PARAM_INTERNAL_DELTE_HANDLER = "delete_handler";
+
 	
 	private String pythonFunctionName = "get_recids_changes";
 	
@@ -224,212 +226,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		rsp.add("importStatus", isBusy() ? "busy" : "idle");
 		rsp.add("QTime", end - start);
 	}
-
 	
-	
-	
-	public void setPythonFunctionName(String name) {
-		pythonFunctionName = name;
-	}
-
-	private void runSynchronously(Map<String, Object> data, 
-			SolrQueryRequest req) 
-			throws MalformedURLException, IOException, InterruptedException {
-		
-		List<String> urlsToFetch = new ArrayList<String>();
-		
-		SolrParams params = req.getParams();
-		String inveniourl = params.get(PARAM_INVENIO, null);
-		String importurl = params.get(PARAM_IMPORT, null);
-		String updateurl = params.get(PARAM_UPDATE, null);
-		String deleteurl = params.get(PARAM_DELETE, null);
-		Integer maximport = params.getInt(PARAM_MAXIMPORT, 200);
-		Boolean commit = params.getBool(PARAM_COMMIT, false);
-		
-		@SuppressWarnings("unchecked")
-		HashMap<String, int[]> dictData = (HashMap<String, int[]>) data.get("dictData");
-		
-		List<String> queryParts;
-		
-		Properties prop = (Properties) req.getContext().get(IKRU_PROPERTIES);
-		
-		Integer last_recid = null; // what is passed onto python
-		String last_mod_date = null; // what is passed onto python (but previous steps figured out its preference)
-		
-		if (prop.containsKey(LAST_RECID)) {
-			last_recid = Integer.valueOf(prop.getProperty(LAST_RECID));
-		}
-		
-		if (prop.containsKey(LAST_UPDATE)) {
-			last_mod_date = prop.getProperty(LAST_UPDATE);
-		}
-		
-
-		if (dictData.containsKey(ADDED) && dictData.get(ADDED).length > 0) {
-			if (importurl != null && importurl.equals("blankrecords")) {
-				runProcessingAdded(dictData.get(ADDED), req);
-			}
-			else if (importurl != null && importurl.equals("dataimport")) {
-				runProcessingAdded(dictData.get(ADDED), req);
-			}
-			else if (importurl != null) {
-				queryParts = getQueryIds(maximport, dictData.get("ADDED"));
-				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(importurl, inveniourl,
-							queryPart, maximport));
-				}
-				runUpload(urlsToFetch);
-			}
-			else {
-				// pass
-			}
-		}
-		
-		if (dictData.containsKey(UPDATED) && dictData.get(UPDATED).length > 0) {
-			if (updateurl != null && updateurl.equals("blankrecords")) {
-				runProcessingUpdated(dictData.get(UPDATED), req);
-			}
-			else if (updateurl != null && updateurl.equals("dataimport")) {
-				runProcessingUpdated(dictData.get(UPDATED), req);
-			}
-			else if (updateurl != null) {
-				queryParts = getQueryIds(maximport, dictData.get(UPDATED));
-				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(updateurl, inveniourl,
-							queryPart, maximport));
-				}
-				runUpload(urlsToFetch);
-			}
-			else {
-				// pass
-			}
-		}
-
-		if (dictData.containsKey(DELETED) && dictData.get(DELETED).length > 0 ) {
-			if (deleteurl != null && deleteurl.equals("blankrecords")) {
-				runProcessingDeleted(dictData.get(DELETED), req);
-			}
-			else if (deleteurl != null && deleteurl.equals("dataimport")) {
-				runProcessingDeleted(dictData.get(DELETED), req);
-			}
-			else if (deleteurl != null) {
-				queryParts = getQueryIds(maximport, dictData.get(DELETED));
-				for (String queryPart : queryParts) {
-					urlsToFetch.add(getFetchURL(deleteurl, inveniourl,
-							queryPart, maximport));
-				}
-				runUpload(urlsToFetch);
-			}
-			else {
-				// pass
-			}
-		}
-		
-
-		// save the state into the properties (the modification date must be there
-		// in all situations 
-		prop.put(LAST_UPDATE, (String) data.get(LAST_UPDATE));
-		prop.put(LAST_RECID, String.valueOf((Integer) data.get(LAST_RECID)));
-		saveProperties(prop);
-		
-		if (commit) {
-			CommitUpdateCommand updateCmd = new CommitUpdateCommand(commit);
-			req.getCore().getUpdateHandler().commit(updateCmd);
-		}
-	    
-    }
-
-
-	private void runAsynchronously(Map<String, Object> dictData, 
-			SolrQueryRequest req) {
-		
-		final Map<String, Object> dataToProcess = dictData;
-		final SolrQueryRequest request = req;
-		
-		new Thread(new Runnable() {
-			
-			public void run() {
-				try {
-	                runSynchronously(dataToProcess, request);
-                } catch (IOException e) {
-                	log.error(e.getLocalizedMessage());
-                } catch (InterruptedException e) {
-                	log.error(e.getLocalizedMessage());
-				} finally {
-                	setBusy(false);
-                	request.close();
-                }
-			}
-		}).start();
-    }
-
-
-	protected void setAsynchronous(boolean val) {
-		asynchronous = val;
-	}
-	
-	
-	protected boolean isAsynchronous() {
-		return asynchronous;
-	}
-	
-	private File getPropertyFile() {
-		return new File("invenio.properties");
-	}
-	
-	private Properties loadProperties(SolrParams params) throws FileNotFoundException, IOException {
-	    	Properties prop = new Properties();
-	    	
-			
-	    	File f = getPropertyFile();
-	    	if (f.exists()) {
-	    		prop.load(new FileInputStream(f));
-	    	}
-	    	
-	    	String prop_recid = null;
-	    	if (prop.containsKey(LAST_RECID)) {
-	    		prop_recid = (String) prop.remove(LAST_RECID);
-	    	}
-	    	
-	    	String prop_mod_date = null;
-	    	if (prop.containsKey(LAST_UPDATE)) {
-	    		prop_mod_date = (String) prop.remove(LAST_UPDATE);
-	    	}
-	    	
-	    	boolean userParam = false;
-	    	
-	    	// parameters in url have always precedence (if both set
-	    	// it is up to the python to figure out who has precedence
-			if (params.getInt(LAST_RECID) != null) {
-				prop.put(LAST_RECID, params.get(LAST_RECID));
-				userParam = true;
-			} 
-			
-			if (params.get(LAST_UPDATE, null) != null) {
-				prop.put(LAST_UPDATE, params.get(LAST_UPDATE));
-				userParam = true;
-			}
-			
-			if (!userParam) {
-				// when no user params were supplied, prefer the mod_date over recid
-				if (prop_mod_date != null) {
-					prop.put(LAST_UPDATE, prop_mod_date);
-				}
-				else if (prop_recid != null) {
-					prop.put(LAST_RECID, prop_recid);
-				}
-			}
-			
-	    	return prop;
-	}
-	
-	private void saveProperties(Properties prop) throws IOException {
-		File f = getPropertyFile();
-		FileOutputStream out = new FileOutputStream(f);
-		prop.store(out, null);
-	}
-	
-
+	/*
+	 * The method that discovers what was changed in Invenio DB
+	 */
 	@SuppressWarnings("unchecked")
 	protected Map<String, Object> retrieveRecids(Properties prop,
 			SolrQueryRequest req,
@@ -497,8 +297,48 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
     }
 
 	
+	public void setPythonFunctionName(String name) {
+		pythonFunctionName = name;
+	}
 	
+	public String getPythonFunctionName() {
+		return pythonFunctionName;
+	}
 
+	
+	private void runAsynchronously(Map<String, Object> dictData, 
+			SolrQueryRequest req) {
+		
+		final Map<String, Object> dataToProcess = dictData;
+		final SolrQueryRequest request = req;
+		
+		new Thread(new Runnable() {
+			
+			public void run() {
+				try {
+	                runSynchronously(dataToProcess, request);
+                } catch (IOException e) {
+                	log.error(e.getLocalizedMessage());
+                } catch (InterruptedException e) {
+                	log.error(e.getLocalizedMessage());
+				} finally {
+                	setBusy(false);
+                	request.close();
+                }
+			}
+		}).start();
+    }
+
+
+	protected void setAsynchronous(boolean val) {
+		asynchronous = val;
+	}
+	
+	
+	protected boolean isAsynchronous() {
+		return asynchronous;
+	}
+	
 	private void setBusy(boolean b) {
 		if (b == true) {
 			counter++;
@@ -514,11 +354,202 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		}
 		return counter > 0;
 	}
-	
+
 	
 	
 	/*
-	 * Processing where we add empty docs directly to the index
+	 * The main method/logic
+	 */
+	private void runSynchronously(Map<String, Object> data, 
+			SolrQueryRequest req) 
+			throws MalformedURLException, IOException, InterruptedException {
+		
+		
+		SolrParams params = req.getParams();
+		SolrCore core = req.getCore();
+		
+		String importurl = params.get(PARAM_IMPORT, null);
+		String updateurl = params.get(PARAM_UPDATE, null);
+		String deleteurl = params.get(PARAM_DELETE, null);
+		
+		
+		@SuppressWarnings("unchecked")
+		HashMap<String, int[]> dictData = (HashMap<String, int[]>) data.get("dictData");
+		Properties prop = (Properties) req.getContext().get(IKRU_PROPERTIES);
+		
+
+		if (dictData.containsKey(ADDED) && dictData.get(ADDED).length > 0) {
+			if (importurl != null) {
+				if (importurl.equals("blankrecords")) {
+					runProcessingAdded(dictData.get(ADDED), req);
+				}
+				else {
+					runProcessing(core, importurl, dictData.get(ADDED), req);
+				}
+			}
+		}
+		
+		if (dictData.containsKey(UPDATED) && dictData.get(UPDATED).length > 0) {
+			if (updateurl != null) {
+				if (updateurl.equals("blankrecords")) {
+					runProcessingUpdated(dictData.get(UPDATED), req);
+				}
+				else {
+					runProcessing(core, updateurl, dictData.get(UPDATED), req);
+				}
+			}
+		}
+
+		if (dictData.containsKey(DELETED) && dictData.get(DELETED).length > 0 ) {
+			if (deleteurl != null) {
+				if (deleteurl.equals("blankrecords")) {
+					runProcessingDeleted(dictData.get(DELETED), req);
+				}
+				else {
+					runProcessing(core, deleteurl, dictData.get(DELETED), req);
+				}
+			}
+		}
+
+		// save the state into the properties (the modification date must be there
+		// in all situations 
+		prop.put(LAST_UPDATE, (String) data.get(LAST_UPDATE));
+		prop.put(LAST_RECID, String.valueOf((Integer) data.get(LAST_RECID)));
+		saveProperties(prop);
+		
+		
+		if (params.getBool(PARAM_COMMIT, false)) {
+			CommitUpdateCommand updateCmd = new CommitUpdateCommand(true);
+			req.getCore().getUpdateHandler().commit(updateCmd);
+		}
+	    
+    }
+
+
+		
+	private void runProcessing(SolrCore core, String handlerUrl, int[] recids,
+			SolrQueryRequest req) throws MalformedURLException, IOException, InterruptedException {
+		
+		SolrParams params = req.getParams();
+		Integer maximport = params.getInt(PARAM_MAXIMPORT, 200);
+		String inveniourl = params.get(PARAM_INVENIO, null);
+		
+		List<String> queryParts = getQueryIds(maximport, recids);
+		List<String> urlsToFetch = new ArrayList<String>();
+		
+		URI u = null;
+		SolrRequestHandler handler = null;
+		try {
+			u = new URI(handlerUrl);
+			String p = u.getPath();
+			if (u.getHost() == null || u.getHost() == "") {
+				if (core.getRequestHandler(p) != null) {
+					handler = core.getRequestHandler(p);
+				}
+				else if (!p.startsWith("/") && core.getRequestHandler("/" + p) != null) {
+					handler = core.getRequestHandler("/" + p);
+				}
+				
+				if (handler != null) {
+					Map<String, List<String>> handlerParams = WebUtils.parseQuery(u.getQuery());
+					HashMap<String, String[]> hParams = new HashMap<String, String[]>();
+					for (String val: handlerParams.keySet()) {
+						String[] nV = new String[handlerParams.get(val).size()];
+						int i = 0;
+						for (String v: handlerParams.get(val)) {
+							nV[i] = v;
+							i++;
+						}
+						hParams.put(val, nV);
+					}
+					
+					LocalSolrQueryRequest localReq = null;
+					for (String queryPart : queryParts) {
+						
+						String[] invP = new String[1];
+						invP[0] = getFetchURL(handlerUrl, inveniourl, queryPart, maximport);
+						hParams.put(PARAM_INVENIO, invP);
+						localReq = new LocalSolrQueryRequest(core, hParams);
+						SolrQueryResponse rsp = new SolrQueryResponse();
+						core.execute(handler, localReq, rsp);
+					}
+					return;
+				}
+			}
+		}
+		catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		
+		
+		for (String queryPart : queryParts) {
+			urlsToFetch.add(getFetchURL(handlerUrl, inveniourl,
+					queryPart, maximport));
+		}
+		runUpload(urlsToFetch);
+	}
+
+	private File getPropertyFile() {
+		return new File("invenio.properties");
+	}
+	
+	private Properties loadProperties(SolrParams params) throws FileNotFoundException, IOException {
+	    	Properties prop = new Properties();
+	    	
+			
+	    	File f = getPropertyFile();
+	    	if (f.exists()) {
+	    		prop.load(new FileInputStream(f));
+	    	}
+	    	
+	    	String prop_recid = null;
+	    	if (prop.containsKey(LAST_RECID)) {
+	    		prop_recid = (String) prop.remove(LAST_RECID);
+	    	}
+	    	
+	    	String prop_mod_date = null;
+	    	if (prop.containsKey(LAST_UPDATE)) {
+	    		prop_mod_date = (String) prop.remove(LAST_UPDATE);
+	    	}
+	    	
+	    	boolean userParam = false;
+	    	
+	    	// parameters in url have always precedence (if both set
+	    	// it is up to the python to figure out who has precedence
+			if (params.getInt(LAST_RECID) != null) {
+				prop.put(LAST_RECID, params.get(LAST_RECID));
+				userParam = true;
+			} 
+			
+			if (params.get(LAST_UPDATE, null) != null) {
+				prop.put(LAST_UPDATE, params.get(LAST_UPDATE));
+				userParam = true;
+			}
+			
+			if (!userParam) {
+				// when no user params were supplied, prefer the mod_date over recid
+				if (prop_mod_date != null) {
+					prop.put(LAST_UPDATE, prop_mod_date);
+				}
+				else if (prop_recid != null) {
+					prop.put(LAST_RECID, prop_recid);
+				}
+			}
+			
+	    	return prop;
+	}
+	
+	private void saveProperties(Properties prop) throws IOException {
+		File f = getPropertyFile();
+		FileOutputStream out = new FileOutputStream(f);
+		prop.store(out, null);
+	}
+	
+	
+
+	
+	/*
+	 * When method-blankrecords we are creating/adding empty docs
 	 */
 	
 	protected void runProcessingAdded(int[] recids, SolrQueryRequest req) throws IOException {
@@ -593,34 +624,21 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	/*
 	 * Internally calling dataimport handler
 	 */
-	protected void runProcessingAddedInternal(int[] recids, SolrQueryRequest req) throws IOException {
+	protected void runProcessingInternally(SolrRequestHandler handler, 
+			int[] recids, SolrQueryRequest req) throws IOException {
 		SolrCore core = req.getCore();
 		SolrParams params = req.getParams();
 		
-		String hName = params.get(PARAM_INTERNAL_ADD_HANDLER, null);
-		if (hName == null) {
-			throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
-					"The parameter \'" + PARAM_INTERNAL_ADD_HANDLER + "\' is missing!");
-		}
 		
-		SolrRequestHandler handler = core.getRequestHandler(hName);
 		
-		if (handler == null) {
-			throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
-					"There exist not handler with name\'" + PARAM_INTERNAL_ADD_HANDLER + "\'!");
-		}
 		SolrQueryResponse rsp = new SolrQueryResponse();
-		core.execute(handler, req, rsp);
-	}
-	protected void runProcessingUpdatedInternal(int[] recids, SolrQueryRequest req) throws IOException {
-		throw new IllegalAccessError("Not implemented yet");
-	}
-	protected void runProcessingDeletedInternal(int[] recids, SolrQueryRequest req) throws IOException {
-		throw new IllegalAccessError("Not implemented yet");
+		//core.execute(handler, req, rsp);
 	}
 	
 	
-	
+	/*
+	 * Calling external URL's
+	 */
 	protected void runUpload(List<String> urlsToFetch) throws MalformedURLException, IOException,
 			InterruptedException {
 		while (urlsToFetch.size() > 0) {
@@ -710,5 +728,6 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	public String getSource() {
 		return "";
 	}
+	
 	
 }
