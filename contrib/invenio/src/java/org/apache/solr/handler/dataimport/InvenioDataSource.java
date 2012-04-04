@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -36,9 +37,17 @@ public class InvenioDataSource extends URLDataSource implements PythonCall {
 			} catch (URISyntaxException e1) {
 				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
 						e1.getMessage());
-			}
+			} 
+			
 			
 			String q = uri.getQuery();
+			
+			if (q == null) {
+				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, 
+						"Wrong url parameter, no query specified: " + query);
+			}
+			LOG.debug("Python request: " + q);
+			
 			Map<String, List<String>> params;
 			try {
 				params = WebUtils.parseQuery(q);
