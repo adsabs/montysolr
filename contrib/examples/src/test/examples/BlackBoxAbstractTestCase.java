@@ -4,6 +4,8 @@ import java.io.File;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 
 public abstract class BlackBoxAbstractTestCase extends MontySolrAbstractTestCase {
@@ -11,10 +13,28 @@ public abstract class BlackBoxAbstractTestCase extends MontySolrAbstractTestCase
 	static String ename = null;
 	static String base = null;
 	static String path = "/build/contrib/examples/";
+	protected EmbeddedSolrServer embedded;
+	protected DirectSolrConnection direct;
+	
+	
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
 		exampleInit();
+	}
+	
+	public void setUp() throws Exception {
+		super.setUp();
+		embedded = getServer();
+		direct = getDirectConnection();
+	}
+	
+	public EmbeddedSolrServer getServer() {
+		return new EmbeddedSolrServer(h.getCoreContainer(), h.getCore().getName());
+	}
+	
+	public DirectSolrConnection getDirectConnection() {
+		return new DirectSolrConnection(h.getCore());
 	}
 	
 	public static void exampleInit() throws Exception {

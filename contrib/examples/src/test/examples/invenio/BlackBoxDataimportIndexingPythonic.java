@@ -1,7 +1,11 @@
 package examples.invenio;
 
+import java.io.IOException;
+
 import invenio.montysolr.util.MontySolrSetup;
 
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
@@ -14,6 +18,7 @@ public class BlackBoxDataimportIndexingPythonic extends BlackBoxAbstractTestCase
 	
 	String mainUrl = "python://inspirebeta.net/search";
 	
+	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
 		setEName("invenio");
@@ -22,8 +27,17 @@ public class BlackBoxDataimportIndexingPythonic extends BlackBoxAbstractTestCase
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 	}
 	
-	public void testUpdates() throws InterruptedException {
+	
+	
+	public void testUpdates() throws Exception {
 		SolrCore core = h.getCore();
+		
+		embedded.deleteByQuery("*:*");
+		embedded.commit();
+		
+		assertQ(req("q", "*:*"),
+	            "//*[@numFound='0']"
+	            );
 		
 		SolrRequestHandler handler = core.getRequestHandler("/invenio/import");
 		
@@ -40,6 +54,11 @@ public class BlackBoxDataimportIndexingPythonic extends BlackBoxAbstractTestCase
 		assertQ(req("q", "*:*"),
 	            "//*[@numFound='46']"
 	            );
+		
+		String data = direct.request("/select?echoParams=explicit&q=*:*", null);
+		System.out.println(data);
+		
+		
 	}
 	
 	private boolean isIdle(SolrRequestHandler handler, String ... vals) {
