@@ -37,6 +37,7 @@ public class BlackBoxDataimportIndexing extends BlackBoxAbstractTestCase{
 			Thread.sleep(50);
 		}
 		
+		Thread.sleep(100);
 		assertQ(req("q", "*:*"),
 	            "//*[@numFound='46']"
 	            );

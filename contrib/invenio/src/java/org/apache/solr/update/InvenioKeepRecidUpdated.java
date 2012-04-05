@@ -468,8 +468,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 					for (String queryPart : queryParts) {
 						
 						String[] invP = new String[1];
-						invP[0] = getFetchURL(handlerUrl, inveniourl, queryPart, maximport);
-						hParams.put(PARAM_INVENIO, invP);
+						invP[0] = getInternalURL(inveniourl, queryPart, maximport);
+						hParams.put("url", invP);
 						localReq = new LocalSolrQueryRequest(core, hParams);
 						SolrQueryResponse rsp = new SolrQueryResponse();
 						core.execute(handler, localReq, rsp);
@@ -656,13 +656,23 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			String queryPart, Integer maximport)
 			throws UnsupportedEncodingException {
 		String sign = importurl.contains("?") ? "&" : "?";
+		String sign2 = inveniourl.contains("?") ? "&" : "?";
 		return importurl
 				+ sign
 				+ "url="
 				+ java.net.URLEncoder.encode(
-					inveniourl + "?p=" + java.net.URLEncoder.encode(queryPart, "UTF-8") + "&rg=" + maximport + "&of=xm",
+					inveniourl + sign2 + "p=" + java.net.URLEncoder.encode(queryPart, "UTF-8") + "&rg=" + maximport + "&of=xm",
 					"UTF-8");
-
+	}
+	
+	protected String getInternalURL(String sourceUrl,
+			String queryPart, Integer maximport)
+			throws UnsupportedEncodingException {
+		String sign = sourceUrl.contains("?") ? "&" : "?";
+		return sourceUrl
+				+ sign
+				+ "p=" + java.net.URLEncoder.encode(queryPart, "UTF-8") 
+				+ "&rg=" + maximport + "&of=xm";
 	}
 
 	// ////////////////////// SolrInfoMBeans methods //////////////////////

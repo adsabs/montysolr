@@ -112,7 +112,7 @@ def invenio_search(kwargs):
         kwargs['rg'] = int(kwargs['rg'])
     
     req = cStringIO.StringIO()
-    result = search_engine.perform_request_search(req, **kwargs)
+    result = search_engine.perform_request_search(req=req, **kwargs)
     data = None
     if not result:
         req.seek(0)
