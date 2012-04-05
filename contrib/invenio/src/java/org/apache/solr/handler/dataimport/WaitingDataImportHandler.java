@@ -190,15 +190,6 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
       importer.runCmd(requestParams, null);
     }
     else {
-    	if (importer.isBusy()) {
-  	      while(true) {
-  	    	  Thread.sleep(30);
-  	    	  if (!importer.isBusy()) {
-  	    		  break;
-  	    	  }
-  	      }
-    	}
-
     	if (command != null) {
 	      if (DataImporter.FULL_IMPORT_CMD.equals(command)
 	              || DataImporter.DELTA_IMPORT_CMD.equals(command) ||
@@ -226,6 +217,7 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
 	          // Asynchronous request for normal mode
 	          if(requestParams.contentStream == null){
 	            importer.runAsync(requestParams, sw);
+	            Thread.sleep(5);
 	          } else {
 	              importer.runCmd(requestParams, sw);
 	          }
@@ -237,6 +229,17 @@ public class WaitingDataImportHandler extends RequestHandlerBase implements
 	      }
     	}
     }
+    
+    
+    if (importer.isBusy()) {
+	      while(true) {
+	    	  Thread.sleep(30);
+	    	  if (!importer.isBusy()) {
+	    		  break;
+	    	  }
+	      }
+  	}
+    
     rsp.add("status", importer.isBusy() ? "busy" : "idle");
     rsp.add("importResponse", message);
     rsp.add("statusMessages", importer.getStatusMessages());

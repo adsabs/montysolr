@@ -1,6 +1,9 @@
 package examples;
 
 import java.io.File;
+
+import javax.xml.xpath.XPathExpressionException;
+
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
@@ -74,6 +77,23 @@ public abstract class BlackBoxAbstractTestCase extends MontySolrAbstractTestCase
 	
 	public String getSolrConfigFile() {
 		return getConf("solr/conf/solrconfig.xml");
+	}
+	
+	public void assertQDirect(String query, String body, String expected) {
+		try {
+	      String response = direct.request(query, body);
+	      String results = h.validateXPath(response, expected);
+	      if (null != results) {
+	        fail("query failed XPath: " + results +
+	             "\n xml response was: " + response +
+	             "\n request was: " + query + 
+	             "\n body was: " + body);
+	      }
+	    } catch (XPathExpressionException e1) {
+	      throw new RuntimeException("XPath is invalid", e1);
+	    } catch (Exception e2) {
+	      throw new RuntimeException("Exception during query", e2);
+	    }
 	}
 
 }

@@ -66,7 +66,7 @@ public class InvenioDataSource extends URLDataSource implements PythonCall {
 			Object results = message.getResults();
 			if (results == null) {
 				LOG.info("No new/updated/deleted records inside Invenio.");
-				return null;
+				return new StringReader("");
 			}
 			else {
 				return new StringReader((String) results);

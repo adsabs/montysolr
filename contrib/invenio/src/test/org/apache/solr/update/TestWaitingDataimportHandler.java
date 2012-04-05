@@ -35,7 +35,6 @@ import org.junit.BeforeClass;
  */
 public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 	
-	private String inveniourl = "http://inspirehep.net/search";
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
@@ -62,44 +61,32 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 	}
 	
 
-	private String esc(String...params) {
-		StringBuffer out = new StringBuffer();
-		assert params.length % 2 == 0;
-		out.append(inveniourl);
-		out.append("?");
-		for (int i=0;i<params.length;i=i+2) {
-			out.append(params[i]);
-			out.append("=");
-			out.append(java.net.URLEncoder.encode(params[i+1]));
-			out.append("&");
-		}
-		return out.toString();
-	}
 	
 	public void testImport() throws InterruptedException {
 		
-		// TODO: this test belongs to the contrib/examples and requires 
-		// running web service
-		if (true) {
-			return;
-		}
 		
 		String testDir = MontySolrSetup.getMontySolrHome() + "/src/test-files/data/";
 		
-		indexDoc("/waiting-dataimport", 
-				req("command", "full-import",
-					"dirs", testDir,
-					"commit", "true",
-					"url", esc("p", "recid:53->55 OR recid:100", 
-							"rg", "200", "of", "xm")
-							
-					));
+		WaitingDataImportHandler handler = (WaitingDataImportHandler) h.getCore().getRequestHandler("/waiting-dataimport");
+		
+		SolrCore core = h.getCore();
+		
+		SolrQueryRequest req = req("command", "full-import",
+				"dirs", testDir,
+				"commit", "true",
+				"url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml"
+				);
+		SolrQueryResponse rsp = new SolrQueryResponse();
+		
+		core.execute(handler, req, rsp);
+		
+		commit("waitFlush", "true", "waitSearcher", "true");
 		
 		assertQ(req("q", "recid:53"), "//*[@numFound='1']");
 		assertQ(req("q", "recid:54"), "//*[@numFound='1']");
 		assertQ(req("q", "recid:55"), "//*[@numFound='1']");
-		assertQ(req("q", "title:annihilation"), "//*[@numFound='1']");
-		assertQ(req("q", "author:Bander"), "//*[@numFound='1']");
+		assertQ(req("q", "title:\"ALEPH experiment\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:feldhaus"), "//*[@numFound='1']");
 		
 		assertQ(req("q", "recid:100"), "//*[@numFound='1']");
 		
@@ -107,46 +94,6 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 		
 	}
 	
-	public SolrQueryResponse indexDoc(SolrQueryRequest req) throws InterruptedException {
-		SolrCore core = h.getCore();
-		WaitingDataImportHandler handler = new WaitingDataImportHandler();
-		handler.inform(core);
-		return indexDoc(handler, req);
-	}
-	
-	public SolrQueryResponse indexDoc(String handlerName, SolrQueryRequest req) throws InterruptedException {
-		SolrCore core = h.getCore();
-		SolrRequestHandler handler = core.getRequestHandler(handlerName);
-		return indexDoc(handler, req);
-		
-	}
-	
-	private SolrQueryResponse indexDoc(SolrRequestHandler handler, SolrQueryRequest req) {
-		SolrCore core = req.getCore();
-		SolrQueryResponse rsp = new SolrQueryResponse();
-		
-		core.execute(handler, req, rsp);
-		// we must give handler time to do the indexing
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-		
-		/*
-		// must wait for the landler to finish his threads
-		WaitingDataImportHandler wih = (WaitingDataImportHandler) handler;
-		while (wih.isBusy()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				break;
-			}
-		}
-		*/
-		return rsp;
-	}
 	
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {

@@ -47,6 +47,7 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.InvenioRequestHandler;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.handler.dataimport.DataImportHandler;
+import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
@@ -153,7 +154,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	private volatile int counter = 0;
 	private boolean asynchronous = true;
 	
-	static final String IKRU_PROPERTIES = "invenio_ikru.properties"; // will be put into context
+	static final String IKRU_PROPERTIES = "invenio_updater.properties"; // will be put into context
 	static final String LAST_RECID = "last_recid"; // name of the param from url and also what is passed to python
 	static final String LAST_UPDATE = "mod_date"; // name of the param from url and also what is passed to python
 	
@@ -431,12 +432,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	private void runProcessing(SolrCore core, String handlerUrl, int[] recids,
 			SolrQueryRequest req) throws MalformedURLException, IOException, InterruptedException {
 		
-		SolrParams params = req.getParams();
-		Integer maximport = params.getInt(PARAM_MAXIMPORT, 200);
-		String inveniourl = params.get(PARAM_INVENIO, null);
 		
-		List<String> queryParts = getQueryIds(maximport, recids);
-		List<String> urlsToFetch = new ArrayList<String>();
 		
 		URI u = null;
 		SolrRequestHandler handler = null;
@@ -464,16 +460,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 						hParams.put(val, nV);
 					}
 					
-					LocalSolrQueryRequest localReq = null;
-					for (String queryPart : queryParts) {
-						
-						String[] invP = new String[1];
-						invP[0] = getInternalURL(inveniourl, queryPart, maximport);
-						hParams.put("url", invP);
-						localReq = new LocalSolrQueryRequest(core, hParams);
-						SolrQueryResponse rsp = new SolrQueryResponse();
-						core.execute(handler, localReq, rsp);
-					}
+					runProcessingInternally(handler, recids, req, hParams);
 					return;
 				}
 			}
@@ -482,16 +469,11 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			e.printStackTrace();
 		}
 		
-		
-		for (String queryPart : queryParts) {
-			urlsToFetch.add(getFetchURL(handlerUrl, inveniourl,
-					queryPart, maximport));
-		}
-		runUpload(urlsToFetch);
+		runProcessingUpload(handlerUrl, recids, req);
 	}
 
-	private File getPropertyFile() {
-		return new File("invenio.properties");
+	public File getPropertyFile() {
+		return new File(IKRU_PROPERTIES);
 	}
 	
 	private Properties loadProperties(SolrParams params) throws FileNotFoundException, IOException {
@@ -626,14 +608,51 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	 * Internally calling dataimport handler
 	 */
 	protected void runProcessingInternally(SolrRequestHandler handler, 
-			int[] recids, SolrQueryRequest req) throws IOException {
-		SolrCore core = req.getCore();
+			int[] recids, SolrQueryRequest req, HashMap<String, String[]> hParams) 
+		throws IOException, InterruptedException {
+		
 		SolrParams params = req.getParams();
+		Integer maximport = params.getInt(PARAM_MAXIMPORT, 200);
+		String inveniourl = params.get(PARAM_INVENIO, null);
+		List<String> queryParts = getQueryIds(maximport, recids);
 		
+		LocalSolrQueryRequest localReq = null;
+		int i = 0;
+		for (String queryPart : queryParts) {
+			i++;
+			String[] invP = new String[1];
+			invP[0] = getInternalURL(inveniourl, queryPart, maximport);
+			hParams.put("url", invP);
+			localReq = new LocalSolrQueryRequest(req.getCore(), hParams);
+			SolrQueryResponse rsp = new SolrQueryResponse();
+			req.getCore().execute(handler, localReq, rsp);
+			
+			// XXX: this is not very clean
+			if (handler instanceof WaitingDataImportHandler) {
+				while (((WaitingDataImportHandler) handler).isBusy()) {
+					Thread.sleep(20);
+				}
+			}
+			else if (queryParts.size() > 1) {
+				log.warn("Warning, we have started the importer, but it runs in parallel!");
+				log.warn("And we will initiate another: " + (queryParts.size() - i));
+			}
+		}
+	}
+	
+	protected void runProcessingUpload(String handlerUrl, int[] recids, SolrQueryRequest req) 
+		throws MalformedURLException, IOException, InterruptedException {
+		SolrParams params = req.getParams();
+		Integer maximport = params.getInt(PARAM_MAXIMPORT, 200);
+		String inveniourl = params.get(PARAM_INVENIO, null);
 		
-		
-		SolrQueryResponse rsp = new SolrQueryResponse();
-		//core.execute(handler, req, rsp);
+		List<String> urlsToFetch = new ArrayList<String>();
+		List<String> queryParts = getQueryIds(maximport, recids);
+		for (String queryPart : queryParts) {
+			urlsToFetch.add(getFetchURL(handlerUrl, inveniourl,
+					queryPart, maximport));
+		}
+		runUpload(urlsToFetch);
 	}
 	
 	
@@ -664,6 +683,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 					inveniourl + sign2 + "p=" + java.net.URLEncoder.encode(queryPart, "UTF-8") + "&rg=" + maximport + "&of=xm",
 					"UTF-8");
 	}
+	
+	
 	
 	protected String getInternalURL(String sourceUrl,
 			String queryPart, Integer maximport)

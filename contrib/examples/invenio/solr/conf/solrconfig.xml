@@ -1548,13 +1548,14 @@
   </requestHandler>
   
   <!-- Handler that keeps Invenio in-sync on request -->
-  <requestHandler name="/invenio/update" class="solr.InvenioKeepRecidUpdated" default="false">
+  <requestHandler name="/invenio-updater" class="solr.InvenioKeepRecidUpdated" default="false">
      <lst name="defaults">
-       <str name="inveniourl">${solr.inveniourl:python://localhost/search}</str>
-       <!-- str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
-       <!--  <str name="inveniourl">http://inspirehep.net/search</str> -->
-       <str name="importurl">${montysolr.importurl:/invenio/import?command=full-import&amp;dirs=}</str>
-       <str name="updateurl">${montysolr.updateurl:/invenio/import?command=full-import&amp;dirs=}</str>
+       <!-- if you have invenio installed and running on localhost, you can use this:
+       <str name="inveniourl">http://localhost/search</str>
+        -->
+       <str name="inveniourl">${montysolr.inveniourl:python://localhost/search}</str>
+       <str name="importurl">${montysolr.importurl:/invenio-importer?command=full-import&amp;dirs=}</str>
+       <str name="updateurl">${montysolr.updateurl:/invenio-importer?command=full-import&amp;dirs=}</str>
        <str name="deleteurl">blankrecords</str>
      </lst>
   </requestHandler>
@@ -1563,7 +1564,7 @@
         indexing handlers, the waiting-* handlers are
         slighlty customized versions of the standard handlers  
   -->
-  <requestHandler name="/invenio/import" class="solr.WaitingDataImportHandler">
+  <requestHandler name="/invenio-importer" class="solr.WaitingDataImportHandler">
     <lst name="defaults">
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>

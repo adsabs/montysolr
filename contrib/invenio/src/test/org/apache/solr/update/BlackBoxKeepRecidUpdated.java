@@ -37,20 +37,19 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 
 /**
- * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
+ * This extensive suite verifies that we are able to pick changes
+ * that are happening inside Invenio. We are not running any actual
+ * indexing, but we do test whether the handlers *would* be called.
+ * We do not change anything in the Invenio DB, not Solr index.
+ * 
+ * This test requires access to Invenio demo-site.
  * 
  */
-public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
+public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
-	//TODO: convert to BlackBox test
-	//TODO: dynamically retrieve these values
 	private String importurl = "http://localhost:8983/solr/import-dataimport";
 	private String updateurl = "http://localhost:8983/solr/update-dataimport&dirs=x";
 	private String deleteurl = "http://localhost:8983/solr/delete-dataimport";
-	
-	//private String importurl = "/waiting-dataimport?command=full-import";
-	//private String updateurl = "/waiting-dataimport&dirs=x";
-	//private String deleteurl = "blankrecords";
 	private String inveniourl = "http://inspirebeta.net/search";
 	
 	@BeforeClass
@@ -601,7 +600,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
-        return new junit.framework.JUnit4TestAdapter(TestInvenioKeepRecidUpdated.class);
+        return new junit.framework.JUnit4TestAdapter(BlackBoxKeepRecidUpdated.class);
     }
 
 
