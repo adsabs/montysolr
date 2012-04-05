@@ -18,9 +18,10 @@ public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
 		setEName("invenio");
 		exampleInit();
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 	}
 	
-	public void testUpdates() {
+	public void testUpdates() throws Exception {
 		SolrCore core = h.getCore();
 		
 		SolrRequestHandler handler = core.getRequestHandler("/invenio/update");
@@ -32,7 +33,10 @@ public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
 		core.execute(handler, req("last_recid", "-1",
 				"commit", "true"), rsp);
 		
-		System.out.println(rsp.toString());
+		Thread.sleep(500);
+		String out = direct.request("/select?q=*:*", null);
+		
+		assert out.contains("numFound=\"87\"");
 		
 	}
 	
