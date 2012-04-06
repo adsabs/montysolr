@@ -46,6 +46,7 @@ public abstract class BlackBoxAbstractTestCase extends MontySolrAbstractTestCase
 		}
 		System.setProperty("solr.solr.home", MontySolrSetup.getMontySolrHome() + base + "/solr");
 		
+		
 		System.err.println("Remember, BlackBox tests are to be run with the example assembled!");
 		
 		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 

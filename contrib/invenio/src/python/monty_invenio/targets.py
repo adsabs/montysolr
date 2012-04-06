@@ -74,7 +74,11 @@ def invenio_search(message):
             kwargs[str(kset[i])] = v
         i += 1
     
-    (wid, result) = api_calls.dispatch('invenio_search', kwargs)
+    # versatile
+    #(wid, result) = api_calls.dispatch('invenio_search', kwargs)
+    
+    # dumb, but fast
+    (wid, result) = api_calls.dispatch('invenio_search_xml', kwargs)
     
     if not (isinstance(result, str) or result is None):
         raise Exception('Wrong arguments - I\'ll rather die than give you what you want!')

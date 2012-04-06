@@ -82,6 +82,23 @@ public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
 		assertQDirect("/invenio-updater", null, "//str[@name='importStatus']/text()='idle'");
 		
 		
+		uHandler.setAsynchronous(true);
+		core.execute(uHandler, req("last_recid", "-1", "inveniourl", "python://search",
+				"importurl", "/invenio-importer?command=full-import&amp;dirs=",
+				"updateurl", "/invenio-importer?command=full-import&amp;dirs=",
+				"deleteurl", "blankrecords"
+				), rsp);
+		assertQDirect("/invenio-updater", null, "//str[@name='importStatus']/text()='busy'");
+		
+		try {
+			while (true) {
+				Thread.sleep(50);
+				assertQDirect("/invenio-updater", null, "//str[@name='importStatus']/text()='busy'");
+			}
+		}
+		catch (AssertionError r) {
+			assertQDirect("/invenio-updater", null, "//str[@name='importStatus']/text()='idle'");
+		}
 		
 	}
 	

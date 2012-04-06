@@ -153,6 +153,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	
 	private volatile int counter = 0;
 	private boolean asynchronous = true;
+	private volatile String workerMessage = "";
 	
 	static final String IKRU_PROPERTIES = "invenio_updater.properties"; // will be put into context
 	static final String LAST_RECID = "last_recid"; // name of the param from url and also what is passed to python
@@ -172,6 +173,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 
 	
 	private String pythonFunctionName = "get_recids_changes";
+
+
+
+	private int max_batch_size = 200; //TODO: retrieve value of this from the config
 	
 
 	
@@ -183,6 +188,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			rsp.add("message",
 					"Import is already running, please retry later...");
 			rsp.add("importStatus", "busy");
+			rsp.add("workerMessage", getWorkerMessage());
 			return;
 		}
 
@@ -226,7 +232,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		long end = System.currentTimeMillis();
 
 		rsp.add("importStatus", isBusy() ? "busy" : "idle");
+		rsp.add("workerMessage", getWorkerMessage());
 		rsp.add("QTime", end - start);
+		setWorkerMessage("Last import finished in: " + (end - start));
 	}
 	
 	/*
@@ -356,7 +364,15 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		}
 		return counter > 0;
 	}
-
+	
+	public void setWorkerMessage(String msg) {
+		log.info(msg);
+		workerMessage = msg;
+	}
+	
+	public String getWorkerMessage() {
+		return workerMessage;
+	}
 	
 	
 	/*
@@ -379,8 +395,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		HashMap<String, int[]> dictData = (HashMap<String, int[]>) data.get("dictData");
 		Properties prop = (Properties) req.getContext().get(IKRU_PROPERTIES);
 		
-
 		if (dictData.containsKey(ADDED) && dictData.get(ADDED).length > 0) {
+			setWorkerMessage("Phase 1/3. Adding records: " + dictData.get(ADDED).length);
 			if (importurl != null) {
 				if (importurl.equals("blankrecords")) {
 					runProcessingAdded(dictData.get(ADDED), req);
@@ -392,6 +408,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		}
 		
 		if (dictData.containsKey(UPDATED) && dictData.get(UPDATED).length > 0) {
+			setWorkerMessage("Phase 2/3. Updating records: " + dictData.get(UPDATED).length);
 			if (updateurl != null) {
 				if (updateurl.equals("blankrecords")) {
 					runProcessingUpdated(dictData.get(UPDATED), req);
@@ -403,6 +420,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		}
 
 		if (dictData.containsKey(DELETED) && dictData.get(DELETED).length > 0 ) {
+			setWorkerMessage("Phase 3/3. deleting records: " + dictData.get(DELETED).length);
 			if (deleteurl != null) {
 				if (deleteurl.equals("blankrecords")) {
 					runProcessingDeleted(dictData.get(DELETED), req);
@@ -421,6 +439,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		
 		
 		if (params.getBool(PARAM_COMMIT, false)) {
+			setWorkerMessage("Phase 3/3. Writing index...");
 			CommitUpdateCommand updateCmd = new CommitUpdateCommand(true);
 			req.getCore().getUpdateHandler().commit(updateCmd);
 		}
@@ -612,7 +631,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		throws IOException, InterruptedException {
 		
 		SolrParams params = req.getParams();
-		Integer maximport = params.getInt(PARAM_MAXIMPORT, 200);
+		Integer maximport = params.getInt(PARAM_MAXIMPORT, max_batch_size);
 		String inveniourl = params.get(PARAM_INVENIO, null);
 		List<String> queryParts = getQueryIds(maximport, recids);
 		
@@ -643,7 +662,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	protected void runProcessingUpload(String handlerUrl, int[] recids, SolrQueryRequest req) 
 		throws MalformedURLException, IOException, InterruptedException {
 		SolrParams params = req.getParams();
-		Integer maximport = params.getInt(PARAM_MAXIMPORT, 200);
+		Integer maximport = params.getInt(PARAM_MAXIMPORT, max_batch_size );
 		String inveniourl = params.get(PARAM_INVENIO, null);
 		
 		List<String> urlsToFetch = new ArrayList<String>();

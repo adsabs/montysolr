@@ -64,7 +64,7 @@ public class InvenioDataSource extends URLDataSource implements PythonCall {
 			MontySolrVM.INSTANCE.sendMessage(message);
 
 			Object results = message.getResults();
-			if (results == null) {
+			if (!(results instanceof String)) {
 				LOG.info("No new/updated/deleted records inside Invenio.");
 				return new StringReader("");
 			}

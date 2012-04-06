@@ -86,13 +86,13 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
         status = search_engine.record_exists(recid)
         
         if status == -1:
-            deleted.append(recid)
+            deleted.append(int(recid))
         elif mod_date == create_date:
-            added.append(recid)
+            added.append(int(recid))
         else:
-            updated.append(recid)
+            updated.append(int(recid))
     
-    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, recid, str(mod_date)
+    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, int(recid), str(mod_date)
 
 
 def citation_summary(recids, of, ln, p, f):
@@ -106,6 +106,7 @@ def citation_summary(recids, of, ln, p, f):
     return output
 
 def invenio_search(kwargs):
+    """This search uses Invenio API to retrieve anything"""
     
     # because of invenio bug, sanity checking of rg is wrong
     if 'rg' in kwargs:
@@ -122,6 +123,44 @@ def invenio_search(kwargs):
         return result
     if data:
         return data
+    
+
+def invenio_search_xml(kwargs):
+    """Simple version which just fetches XML records
+    from Invenio. It only understands query of type:
+    p=recid:1->50 OR recid:50 OR recid:....
+    
+    Unfortunately, we cannot use 'print_records' because
+    that one (for strange reasons) creates a range out 
+    of recIDS. And I don't want to use bibformat, 
+    because bibformat is not working nicely with 
+    strings (it is slower)
+    
+    """
+    out = []
+    p = kwargs['p']
+    of = 'xm'
+    if 'of' in kwargs:
+        of = kwargs['of']
+    
+    if of == 'xm':
+        out.append('<?xml version="1.0" encoding="UTF-8"?>')
+        out.append('<collection xmlns="http://www.loc.gov/MARC21/slim">')
+    
+    clauses = p.split(' OR ')
+    for c in clauses:
+        c = c.replace('recid:', '')
+        if '->' in c:
+            ints = c.split('->')
+            for x in xrange(int(ints[0]), int(ints[1])):
+                out.append(search_engine.print_record(x, format=of))
+        else:
+            out.append(search_engine.print_record(int(c), format=of))
+    if of == 'xm':
+        out.append('</collection>')
+    
+    return '\n'.join(out)
+    
 
 
 def search(q, max_len=25, offset=0):
