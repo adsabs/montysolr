@@ -7,10 +7,10 @@ import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 
-import examples.BlackBoxAbstractTestCase;
+import examples.BlackAbstractTestCase;
 
 
-public class BlackBoxDataimportIndexingPythonic extends BlackBoxAbstractTestCase{
+public class BlackBoxDataimportIndexingPythonic extends BlackAbstractTestCase{
 	
 	String mainUrl = "python://inspirebeta.net/search";
 	

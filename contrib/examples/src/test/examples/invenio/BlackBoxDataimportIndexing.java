@@ -7,10 +7,10 @@ import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 
-import examples.BlackBoxAbstractTestCase;
+import examples.BlackAbstractTestCase;
 
 
-public class BlackBoxDataimportIndexing extends BlackBoxAbstractTestCase{
+public class BlackBoxDataimportIndexing extends BlackAbstractTestCase{
 	
 	String mainUrl = "http://inspirebeta.net/search";
 	

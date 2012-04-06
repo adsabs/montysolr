@@ -8,10 +8,10 @@ import java.net.URLEncoder;
 import org.apache.solr.handler.dataimport.InvenioDataSource;
 import org.junit.BeforeClass;
 
-import examples.BlackBoxAbstractLuceneTestCase;
+import examples.BlackAbstractLuceneTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
-public class BlackBoxInvenioDataSource extends BlackBoxAbstractLuceneTestCase {
+public class BlackBoxInvenioDataSource extends BlackAbstractLuceneTestCase {
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {

@@ -149,12 +149,21 @@
 	</target>
 
 	<target name="build-all-examples" description="Assembles all examples">
-		<assemble-example example-name="invenio" montysolr-example="${basedir}/invenio" solr-example="${prop.solr.real.location}/example"/>
-		<assemble-example example-name="adslabs" montysolr-example="${basedir}/invenio" solr-example="${prop.solr.real.location}/example"/>
+		<exec executable="ant" failonerror="true">
+            <arg line="build-one -Dename=invenio" />
+        </exec>
+		
+       <exec executable="ant" failonerror="true">
+            <arg line="build-one -Dename=adslabs" />
+       </exec>
 	</target>
 	
-	<!-- does nothing, because build-all is called from the main build and at that time we don't have all jars for contribs yet -->
-    <target name="build-all"  depends="" />
+    <target name="build-all"  depends="" >
+    	<echo>
+    	    Does nothing, because build-all is called from the main build and at that time we don't have all jars for contribs yet.
+    	    Call build-all-examples instead 
+    	</echo>
+    </target>
     
     <target name="build" >
 	   <echo>

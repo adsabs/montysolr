@@ -11,7 +11,7 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 
-public abstract class BlackBoxAbstractTestCase extends MontySolrAbstractTestCase {
+public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 
 	static String ename = null;
 	static String base = null;

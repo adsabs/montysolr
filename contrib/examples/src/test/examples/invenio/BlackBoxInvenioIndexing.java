@@ -13,10 +13,10 @@ import org.junit.BeforeClass;
 
 
 
-import examples.BlackBoxAbstractTestCase;
+import examples.BlackAbstractTestCase;
 
 
-public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
+public class BlackBoxInvenioIndexing extends BlackAbstractTestCase{
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {

@@ -2,20 +2,17 @@ package examples.adslabs;
 
 import java.io.File;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.update.InvenioKeepRecidUpdated;
 import org.junit.BeforeClass;
 
-import examples.BlackBoxAbstractTestCase;
+import examples.BlackAbstractTestCase;
 
 
-public class BlackBoxAdslabsIndexing extends BlackBoxAbstractTestCase{
+public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {

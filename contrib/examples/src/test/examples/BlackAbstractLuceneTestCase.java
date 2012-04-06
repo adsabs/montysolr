@@ -7,7 +7,7 @@ import invenio.montysolr.util.MontySolrSetup;
 
 import org.junit.BeforeClass;
 
-public abstract class BlackBoxAbstractLuceneTestCase extends MontySolrAbstractLuceneTestCase {
+public abstract class BlackAbstractLuceneTestCase extends MontySolrAbstractLuceneTestCase {
 
 	static String ename = null;
 	static String base = null;

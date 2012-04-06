@@ -408,6 +408,7 @@
 		<attribute name="test.classpath"/>
 		<attribute name="javac.source" default="${javac.source}"/>
 		<attribute name="javac.target" default="${javac.target}"/>
+		
 		<sequential>
 			<compile
         srcdir="@{srcdir}" 
@@ -431,6 +432,7 @@
 		<attribute name="tempDir" default="${build.dir}/test"/>
 		<attribute name="threadNum" default="1"/>
 		<attribute name="threadTotal" default="1"/>
+		<attribute name="testId" default="Test"/>
 
 		<sequential>
 			<condition property="runall">
@@ -491,7 +493,7 @@
 				<formatter type="xml"/>
 				<formatter classname="${junit.details.formatter}" usefile="false"/>
 				<batchtest fork="yes" todir="@{junit.output.dir}" if="runall">
-					<fileset dir="@{dataDir}" includes="**/Test*.java,**/*Test.java" excludes="${junit.excludes}">
+					<fileset dir="@{dataDir}" includes="**/@{testId}*.java,**/*@{testId}.java" excludes="${junit.excludes}">
 						<custom classname="${junit.parallel.selector}" classpathref="@{junit.classpath}">
 							<param name="divisor" value="@{threadTotal}" />
 							<param name="part" value="@{threadNum}" />
@@ -499,7 +501,7 @@
 					</fileset>
 				</batchtest>
 				<batchtest fork="yes" todir="@{junit.output.dir}" if="testpackage">
-					<fileset dir="@{dataDir}" includes="**/${testpackage}/**/Test*.java,**/${testpackage}/**/*Test.java" excludes="${junit.excludes}">
+					<fileset dir="@{dataDir}" includes="**/${testpackage}/**/@{testId}*.java,**/${testpackage}/**/*@{testId}.java" excludes="${junit.excludes}">
 						<custom classname="${junit.parallel.selector}" classpathref="@{junit.classpath}">
 							<param name="divisor" value="@{threadTotal}" />
 							<param name="part" value="@{threadNum}" />
@@ -507,7 +509,7 @@
 					</fileset>
 				</batchtest>
 				<batchtest fork="yes" todir="@{junit.output.dir}" if="testpackageroot">
-					<fileset dir="@{dataDir}" includes="**/${testpackageroot}/Test*.java,**/${testpackageroot}/*Test.java" excludes="${junit.excludes}">
+					<fileset dir="@{dataDir}" includes="**/${testpackageroot}/@{testId}*.java,**/${testpackageroot}/*@{testId}.java" excludes="${junit.excludes}">
 						<custom classname="${junit.parallel.selector}" classpathref="@{junit.classpath}">
 							<param name="divisor" value="@{threadTotal}" />
 							<param name="part" value="@{threadNum}" />
@@ -523,7 +525,11 @@
 	</macrodef>
 
 	<target name="test" depends="compile-test,junit-mkdir,junit-sequential,junit-parallel" description="Runs unit tests"/>
-
+    
+	<target name="blackbox-test" depends="compile-test,junit-mkdir" description="Runs BlackBox tests">
+		   <test-macro testId="BlackBox"/>
+	</target>
+	
 	<target name="junit-mkdir">
 		<mkdir dir="${junit.output.dir}"/>
 	</target>
