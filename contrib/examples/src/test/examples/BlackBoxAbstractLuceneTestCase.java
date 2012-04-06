@@ -23,10 +23,8 @@ public abstract class BlackBoxAbstractLuceneTestCase extends MontySolrAbstractLu
 			throw new IllegalStateException("Please call setEName() first");
 		}
 		
-		System.err.println("Remember, BlackBox tests are to be run with the example assembled!");
+		envInit();
 		
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + base + "/python");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/" + base + "/python");
 		MontySolrSetup.addBuildProperties(base);
 	}
@@ -38,6 +36,12 @@ public abstract class BlackBoxAbstractLuceneTestCase extends MontySolrAbstractLu
 	public static void setEName(String name) {
 		ename = name;
 		base = path + ename;
+	}
+	
+	// must redifine, because we want to use different python path
+	public static void envInit() throws Exception {
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/" + base + "/python");
 	}
 	
 }

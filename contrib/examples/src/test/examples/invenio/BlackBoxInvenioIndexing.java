@@ -7,10 +7,11 @@ import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.update.InvenioKeepRecidUpdated;
 import org.junit.BeforeClass;
+
+
 
 import examples.BlackBoxAbstractTestCase;
 
@@ -24,6 +25,9 @@ public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
+		
+		System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
+		System.setProperty("solr.test.leavedatadir", "yes");
 	}
 	
 	@Override
@@ -40,9 +44,6 @@ public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
 		SolrCore core = h.getCore();
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		String out = "";
-		
-		embedded.deleteByQuery("*:*");
-		embedded.commit();
 		
 		
 		InvenioKeepRecidUpdated uHandler = (InvenioKeepRecidUpdated) core.getRequestHandler("/invenio-updater");
@@ -68,8 +69,9 @@ public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
 		
 		
 		embedded.commit(true, true);
-		assertQDirect("/select?q=*:*", null,
-				"//*[@numFound='96']");
+		assertQDirect("/select?q=*:*&fl=id", null,
+			"//*[@numFound='104']");
+		
 		
 		// now do the same, but because the handler 
 		assertQDirect("/invenio-updater?command=full-import&inveniourl=python://search&" +
@@ -99,6 +101,23 @@ public class BlackBoxInvenioIndexing extends BlackBoxAbstractTestCase{
 		catch (AssertionError r) {
 			assertQDirect("/invenio-updater", null, "//str[@name='importStatus']/text()='idle'");
 		}
+		
+		embedded.deleteByQuery("*:*");
+		embedded.commit(true, true);
+		
+		uHandler.setAsynchronous(false);
+		// now import in batches per 20 recs
+		core.execute(uHandler, req("last_recid", "-1", "inveniourl", "python://search",
+				"importurl", "/invenio-importer?command=full-import&amp;dirs=",
+				"updateurl", "/invenio-importer?command=full-import&amp;dirs=",
+				"deleteurl", "blankrecords",
+				"maximport", "20"
+				), rsp);
+		
+		
+		embedded.commit(true, true);
+		assertQDirect("/select?q=*:*&fl=id", null,
+			"//*[@numFound='104']");
 		
 	}
 	

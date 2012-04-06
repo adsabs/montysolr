@@ -142,7 +142,7 @@ def invenio_search_xml(kwargs):
     of = 'xm'
     if 'of' in kwargs:
         of = kwargs['of']
-    
+
     if of == 'xm':
         out.append('<?xml version="1.0" encoding="UTF-8"?>')
         out.append('<collection xmlns="http://www.loc.gov/MARC21/slim">')
@@ -152,7 +152,7 @@ def invenio_search_xml(kwargs):
         c = c.replace('recid:', '')
         if '->' in c:
             ints = c.split('->')
-            for x in xrange(int(ints[0]), int(ints[1])):
+            for x in xrange(int(ints[0]), int(ints[1])+1):
                 out.append(search_engine.print_record(x, format=of))
         else:
             out.append(search_engine.print_record(int(c), format=of))

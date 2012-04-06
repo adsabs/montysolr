@@ -215,6 +215,13 @@
                 <include name="**" />
             </fileset>
         </copy>
+		
+		<!-- set the python files not-readable so that i am not tempted to mess w/ them -->
+		<chmod perm="ugo-x">
+			<fileset dir="${build.dir}/${example.name}/python">
+                <include name="**" />
+            </fileset>
+		</chmod>
 
 	</target>
 	

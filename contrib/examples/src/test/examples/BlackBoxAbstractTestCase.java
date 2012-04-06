@@ -40,17 +40,21 @@ public abstract class BlackBoxAbstractTestCase extends MontySolrAbstractTestCase
 		return new DirectSolrConnection(h.getCore());
 	}
 	
+	// must redifine, because we want to use different python path
+	public static void envInit() throws Exception {
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/" + base + "/python");
+	}
+	
 	public static void exampleInit() throws Exception {
 		if (ename == null) {
 			throw new IllegalStateException("Please call setEName() first");
 		}
 		System.setProperty("solr.solr.home", MontySolrSetup.getMontySolrHome() + base + "/solr");
 		
+		envInit();
 		
-		System.err.println("Remember, BlackBox tests are to be run with the example assembled!");
-		
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + base + "/python");
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/" + base + "/python");
 		MontySolrSetup.addBuildProperties(base);
 	}
 	

@@ -1,11 +1,7 @@
 package examples.invenio;
 
-import java.io.IOException;
-
 import invenio.montysolr.util.MontySolrSetup;
 
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
@@ -39,7 +35,7 @@ public class BlackBoxDataimportIndexingPythonic extends BlackBoxAbstractTestCase
 	            "//*[@numFound='0']"
 	            );
 		
-		SolrRequestHandler handler = core.getRequestHandler("/invenio/import");
+		SolrRequestHandler handler = core.getRequestHandler("/invenio-importer");
 		
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		

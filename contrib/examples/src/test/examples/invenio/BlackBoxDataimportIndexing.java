@@ -25,7 +25,7 @@ public class BlackBoxDataimportIndexing extends BlackBoxAbstractTestCase{
 	public void testUpdates() throws InterruptedException {
 		SolrCore core = h.getCore();
 		
-		SolrRequestHandler handler = core.getRequestHandler("/invenio/import");
+		SolrRequestHandler handler = core.getRequestHandler("/invenio-importer");
 		
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		

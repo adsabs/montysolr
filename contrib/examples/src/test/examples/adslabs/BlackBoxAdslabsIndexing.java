@@ -19,7 +19,7 @@ public class BlackBoxAdslabsIndexing extends BlackBoxAbstractTestCase{
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		setEName("invenio");
+		setEName("adslabs");
 		exampleInit();
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
