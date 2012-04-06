@@ -21,8 +21,6 @@ import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
-import invenio.montysolr.util.MontySolrTestCaseJ4;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -30,7 +28,6 @@ import java.util.Map;
 import java.util.Properties;
 
 
-import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
@@ -42,7 +39,8 @@ import org.junit.BeforeClass;
  * indexing, but we do test whether the handlers *would* be called.
  * We do not change anything in the Invenio DB, not Solr index.
  * 
- * This test requires access to Invenio demo-site.
+ * This test requires python access to Invenio demo-site. And we 
+ * use the solr/example - to serve as solr installation.
  * 
  */
 public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
@@ -54,10 +52,10 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + "/src/python");
+		envInit();
 		MontySolrSetup.addBuildProperties("contrib/invenio");
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
+				+ "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
 	}
@@ -75,7 +73,7 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 	}
 	
 	public String getSolrHome() {
-		return MontySolrTestCaseJ4.EXAMPLE_HOME; 
+		return MontySolrSetup.getSolrHome() + "/example/solr"; 
 		
 	}
 
@@ -602,6 +600,4 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 	public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(BlackBoxKeepRecidUpdated.class);
     }
-
-
 }

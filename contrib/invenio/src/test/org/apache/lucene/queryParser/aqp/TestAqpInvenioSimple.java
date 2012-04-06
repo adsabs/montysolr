@@ -1,10 +1,15 @@
 package org.apache.lucene.queryParser.aqp;
 
+/**
+ * Tests that invenio grammar is able to handle the 'strange'
+ * cases.
+ */
+
 public class TestAqpInvenioSimple extends AqpTestAbstractCase {
 	
 	public void setUp() throws Exception {
 		super.setUp();
-		setDebug(true);
+		//setDebug(true);
 	}
 	
 	public AqpQueryParser getParser() throws Exception {

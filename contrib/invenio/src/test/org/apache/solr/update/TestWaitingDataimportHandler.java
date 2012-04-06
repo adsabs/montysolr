@@ -19,18 +19,15 @@ package org.apache.solr.update;
 
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
-import invenio.montysolr.util.MontySolrTestCaseJ4;
-
-
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 
 /**
- * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
+ * Tests that the dataimport handler does really wait and does not
+ * return immediately. Also, one of the fields is fetched by Python.
  * 
  */
 public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
@@ -38,10 +35,10 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + "/src/python");
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
+		envInit();
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
+				+ "/contrib/invenio/src/python");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
 	}
 	
 	@Override
@@ -53,11 +50,11 @@ public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
 	@Override
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
+		+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
 	}
 
 	public String getSolrHome() {
-		return MontySolrTestCaseJ4.EXAMPLE_HOME;
+		return MontySolrSetup.getSolrHome() + "/example/solr";
 	}
 	
 

@@ -32,7 +32,8 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocSlice;
 
 /**
- * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
+ * Testing the (legacy) Invenio handler. Now, the AQP is the 
+ * preferred way to handle queries.
  * 
  */
 public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {

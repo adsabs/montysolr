@@ -177,6 +177,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 
 
 	private int max_batch_size = 200; //TODO: retrieve value of this from the config
+	private int max_lookup_size = 50000;
 	
 
 	
@@ -280,14 +281,19 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		} else {
 			// get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
 			// int }
+			
 			PythonMessage message = MontySolrVM.INSTANCE
 					.createMessage(pythonFunctionName)
 					.setSender(this.getClass().getSimpleName())
+					.setParam("max_records", max_lookup_size)
 					.setParam("request", req)
 					.setParam("response", rsp);
 			
 			if (lastRecid != null) message.setParam(LAST_RECID, lastRecid);
 			if (lastUpdate != null) message.setParam(LAST_UPDATE, lastUpdate);
+			
+			log.info("Retrieving changed recs: max_records=" + max_lookup_size + 
+					" last_recid=" + lastRecid + " last_update=" + lastUpdate);
 			
 			MontySolrVM.INSTANCE.sendMessage(message);
 
@@ -301,6 +307,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			dictData = (HashMap<String, int[]>) results;
 			retData.put(LAST_UPDATE, (String) message.getParam(LAST_UPDATE));
 			retData.put(LAST_RECID, (Integer) message.getParam(LAST_RECID));
+			
+			log.info("Retrieved: last_update=" + retData.get(LAST_UPDATE) + 
+					" last_recid=" + retData.get(LAST_RECID));
 		}
 		retData.put("dictData", dictData);
 		return retData;

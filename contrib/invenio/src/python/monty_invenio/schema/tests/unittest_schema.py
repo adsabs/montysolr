@@ -14,6 +14,7 @@ class Test(LuceneTestCase):
         LuceneTestCase.setUp(self)
         if not self.hasTarget("PythonTextField:get_field_value"):
             self.addTargets('monty_invenio.schema.targets')
+            self.addTargets('monty_invenio.schema.tests.targets')
     
     def test_workout_field_value(self):
         u = self.getBaseDir() + "/contrib/invenio/src/test-files/data/text1.txt"

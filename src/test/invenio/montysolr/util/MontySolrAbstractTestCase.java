@@ -11,11 +11,22 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", MontySolrSetup.getMontySolrHome() + "/src/python");
+		envInit();
 	}
 
 	@AfterClass
 	public static void afterClassMontySolrTestCase() throws Exception {
+	}
+	
+	/**
+	 * This must be called first, so that we make sure the Python 
+	 * interpreter is loaded
+	 * 
+	 * @throws Exception
+	 */
+	public static void envInit() throws Exception {
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/src/python");
 	}
 
 	public String getSolrHome() {

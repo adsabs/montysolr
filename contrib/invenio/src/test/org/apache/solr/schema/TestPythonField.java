@@ -23,18 +23,17 @@ import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
 /**
- * Most of the tests for StandardRequestHandler are in ConvertedLegacyTest
+ * Tests if the document is made of values fetched by Python
  * 
  */
 public class TestPythonField extends MontySolrAbstractTestCase {
 
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge",
-				MontySolrSetup.getMontySolrHome() + "/src/python");
+		envInit();
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
+		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
 	}
 
 	@Override
