@@ -25,10 +25,8 @@ public class BlackBoxInvenioIndexing extends BlackAbstractTestCase{
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
-		
-		System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
-		System.setProperty("solr.test.leavedatadir", "yes");
-	}
+		//System.setProperty("blackbox.persist.index", getExampleHome() + "/solr/data");
+		}
 	
 	@Override
 	public void setUp() throws Exception {

@@ -21,8 +21,7 @@ public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 		//MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
-		
-		System.setProperty("solr.test.leavedatadir", "yes");
+		System.setProperty("blackbox.persist.index", getExampleHome() + "/solr/data");
 	}
 	
 	@Override
@@ -45,7 +44,7 @@ public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 		embedded.commit();
 		
 		
-		InvenioKeepRecidUpdated uHandler = (InvenioKeepRecidUpdated) core.getRequestHandler("/invenio-updater");
+		InvenioKeepRecidUpdated uHandler = (InvenioKeepRecidUpdated) core.getRequestHandler("/invenio/update");
 		uHandler.setAsynchronous(false);
 		
 		// remove the update file (if exists)

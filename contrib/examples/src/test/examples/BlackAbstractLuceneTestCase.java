@@ -18,6 +18,13 @@ public abstract class BlackAbstractLuceneTestCase extends MontySolrAbstractLucen
 		exampleInit();
 	}
 	
+	public void setUp() throws Exception {
+		if (System.getProperty("blackbox.persist.index") != null) {
+			throw new RuntimeException("blackbox.persist.index has no meaning for the lucene blackbox tests!");
+		}
+		super.setUp();
+	}
+	
 	public static void exampleInit() throws Exception {
 		if (ename == null) {
 			throw new IllegalStateException("Please call setEName() first");
@@ -43,5 +50,7 @@ public abstract class BlackAbstractLuceneTestCase extends MontySolrAbstractLucen
 		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
 				MontySolrSetup.getMontySolrHome() + "/" + base + "/python");
 	}
+	
+	
 	
 }
