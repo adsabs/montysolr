@@ -65,11 +65,9 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
                     "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
                     (mod_date, max_recs )))
     
-    #sys.stderr.write('%s, %s, %s\n' % (last_recid, mod_date,
-    #    "SELECT id,modification_date, creation_date FROM bibrec "
-    #    "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
-    #    (mod_date, max_recs )))
-    
+    #sys.stderr.write(str(("SELECT id,modification_date, creation_date FROM bibrec "
+    #                "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
+    #                (mod_date, max_recs ))) + "\n")
     #print len(modified_records)
     
     if not len(modified_records):
@@ -79,20 +77,32 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
     updated = []
     deleted = []
     
-    for recid, mod_date, create_date in modified_records:
-        
-        #rec = search_engine.get_record(recid)
-        #status = bibrecord.record_get_field_value(rec, tag='980', code='c')
-        status = search_engine.record_exists(recid)
-        
-        if status == -1:
-            deleted.append(int(recid))
-        elif mod_date == create_date:
-            added.append(int(recid))
-        else:
-            updated.append(int(recid))
+    dels = {}
+    for x in list(dbquery.run_sql("""SELECT distinct(id_bibrec) FROM bibrec_bib98x WHERE 
+        id_bibrec >= %s AND id_bibrec <= %s AND 
+        id_bibxxx=(SELECT id FROM bib98x WHERE VALUE='%s')""" % (modified_records[0][0],
+                                                          modified_records[-1][0],
+                                                          'DELETED'))):
+        dels[int(x[0])] = 1
     
-    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, int(recid), str(mod_date)
+    sys.stderr.write(str(dels) + "\n")
+    
+    for recid, mod_date, create_date in modified_records:
+        recid = int(recid)
+        
+        # this is AWFULLY slow! 100x times
+        #status = search_engine.record_exists(recid)
+        
+        if recid in dels:
+        #if status == -1:
+            deleted.append(recid)
+        elif mod_date == create_date:
+            added.append(recid)
+        else:
+            updated.append(recid)
+    
+    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, recid, str(mod_date)
+
 
 
 def citation_summary(recids, of, ln, p, f):

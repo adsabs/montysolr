@@ -21,7 +21,6 @@ public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 		//MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
-		System.setProperty("blackbox.persist.index", getExampleHome() + "/solr/data");
 	}
 	
 	@Override

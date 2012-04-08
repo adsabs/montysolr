@@ -134,9 +134,7 @@ def get_recids_changes(message):
         mod_date = str(message.getParam("mod_date"))
     max_records = 10000
     if message.getParam('max_records'):
-        mr = int(sj.Integer.cast_(message.getParam("max_records")).intValue())
-        if mr < 100001:
-            max_records = mr
+        max_records = int(sj.Integer.cast_(message.getParam("max_records")).intValue())
     if last_recid and last_recid == -1:
         mod_date = None
     (wid, results) = api_calls.dispatch("get_recids_changes", last_recid, max_recs=max_records, mod_date=mod_date)

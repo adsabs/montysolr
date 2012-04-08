@@ -225,7 +225,7 @@ public class MontySolrSetup {
 	public static void addToSysPath(String... paths) {
 		for (String path : paths) {
 			MontySolrVM.INSTANCE.evalCommand("import sys;\'" + path
-					+ "\' in sys.path or sys.path.insert(0, \'" + path + "\')");
+					+ "\' in sys.path or sys.path.append(\'" + path + "\')");
 		}
 	}
 
