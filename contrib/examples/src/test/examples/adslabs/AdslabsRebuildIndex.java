@@ -45,6 +45,7 @@ public class AdslabsRebuildIndex extends BlackAbstractTestCase{
 		long start = System.currentTimeMillis();
 		long timeNow = System.currentTimeMillis();
 		long lastGo = System.currentTimeMillis();
+		int maximport = 200;
 		int batchSize =  10000;
 		int maxRecords = 10000000;
 		long maxTime = 48 * 3600 * 1000;
@@ -60,7 +61,8 @@ public class AdslabsRebuildIndex extends BlackAbstractTestCase{
 				"importurl", "/invenio/import?command=full-import&amp;dirs=",
 				"updateurl", "/invenio/import?command=full-import&amp;dirs=",
 				"deleteurl", "blankrecords",
-				"maximport", String.valueOf(batchSize)
+				"maximport", String.valueOf(maximport),
+				"batchsize", String.valueOf(batchSize)
 				), rsp);
 		
 		
@@ -83,7 +85,8 @@ public class AdslabsRebuildIndex extends BlackAbstractTestCase{
 					"importurl", "/invenio/import?command=full-import&amp;dirs=",
 					"updateurl", "/invenio/import?command=full-import&amp;dirs=",
 					"deleteurl", "blankrecords",
-					"maximport", String.valueOf(batchSize)
+					"maximport", String.valueOf(maximport),
+					"batchsize", String.valueOf(batchSize)
 					), rsp);
 			timeNow = System.currentTimeMillis();
 			i++;
@@ -104,7 +107,7 @@ public class AdslabsRebuildIndex extends BlackAbstractTestCase{
 		System.out.println("Committing index...");
 		embedded.commit(true, true);
 		
-		System.out.println(direct.request("/select?q=*:*", null));
+		System.out.println(direct.request("/select?q=*:*&fl=id", null));
 				
 	}
 	

@@ -168,6 +168,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	static final String PARAM_UPDATE = "updateurl";
 	static final String PARAM_DELETE = "deleteurl";
 	static final String PARAM_MAXIMPORT = "maximport";
+	static final String PARAM_BATCHSIZE = "batchsize";
 	static final String PARAM_COMMIT = "commit";
 	static final String PARAM_MAX_RECID = "max_recid";
 
@@ -176,8 +177,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 
 
 
-	private int max_batch_size = 200; //TODO: retrieve value of this from the config
-	private int max_lookup_size = 50000;
+	private int max_maximport = 200; //TODO: retrieve value of this from the config
+	private int max_batchsize = 50000;
 	
 
 	
@@ -285,14 +286,14 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			PythonMessage message = MontySolrVM.INSTANCE
 					.createMessage(pythonFunctionName)
 					.setSender(this.getClass().getSimpleName())
-					.setParam("max_records", max_lookup_size)
+					.setParam("max_records", params.getInt(PARAM_BATCHSIZE))
 					.setParam("request", req)
 					.setParam("response", rsp);
 			
 			if (lastRecid != null) message.setParam(LAST_RECID, lastRecid);
 			if (lastUpdate != null) message.setParam(LAST_UPDATE, lastUpdate);
 			
-			log.info("Retrieving changed recs: max_records=" + max_lookup_size + 
+			log.info("Retrieving changed recs: max_records=" + params.getInt(PARAM_BATCHSIZE) + 
 					" last_recid=" + lastRecid + " last_update=" + lastUpdate);
 			
 			MontySolrVM.INSTANCE.sendMessage(message);
@@ -444,6 +445,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		// in all situations 
 		prop.put(LAST_UPDATE, (String) data.get(LAST_UPDATE));
 		prop.put(LAST_RECID, String.valueOf((Integer) data.get(LAST_RECID)));
+		prop.remove(PARAM_BATCHSIZE);
+		prop.remove(PARAM_MAXIMPORT);
 		saveProperties(prop);
 		
 		
@@ -547,6 +550,26 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 				}
 			}
 			
+			if (params.get(PARAM_BATCHSIZE, null) != null) {
+				int bs = params.getInt(PARAM_BATCHSIZE);
+				if (bs > max_batchsize) {
+					prop.put(PARAM_BATCHSIZE, max_batchsize);
+				}
+				else {
+					prop.put(PARAM_BATCHSIZE, bs);
+				}
+			}
+			
+			if (params.get(PARAM_MAXIMPORT, null) != null) {
+				int mi = params.getInt(PARAM_MAXIMPORT);
+				if (mi > max_maximport) {
+					prop.put(PARAM_MAXIMPORT, max_maximport);
+				}
+				else {
+					prop.put(PARAM_MAXIMPORT, mi);
+				}
+			}
+			
 	    	return prop;
 	}
 	
@@ -640,7 +663,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		throws IOException, InterruptedException {
 		
 		SolrParams params = req.getParams();
-		Integer maximport = params.getInt(PARAM_MAXIMPORT, max_batch_size);
+		Integer maximport = params.getInt(PARAM_MAXIMPORT, max_maximport);
 		String inveniourl = params.get(PARAM_INVENIO, null);
 		List<String> queryParts = getQueryIds(maximport, recids);
 		
@@ -671,7 +694,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	protected void runProcessingUpload(String handlerUrl, int[] recids, SolrQueryRequest req) 
 		throws MalformedURLException, IOException, InterruptedException {
 		SolrParams params = req.getParams();
-		Integer maximport = params.getInt(PARAM_MAXIMPORT, max_batch_size );
+		Integer maximport = params.getInt(PARAM_MAXIMPORT, max_maximport );
 		String inveniourl = params.get(PARAM_INVENIO, null);
 		
 		List<String> urlsToFetch = new ArrayList<String>();
