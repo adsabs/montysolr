@@ -373,7 +373,6 @@ lucene.version=${lucene.version}
 		   description="Build MontySolr separately"/>
 
 
-	<target name="build-test" depends="build,run" />
 
 	<!-- Compile egg for embedding into Java VM -->
 	<target name="compile-montysolr-egg" depends="jar">
@@ -496,58 +495,8 @@ lucene.version=${lucene.version}
 	</target>
 
 
-	<target name="run-bare" depends="config-build,compile">
-		<echo>
-Running montysolr as:
-========
-java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}${toString:montysolr.classpath}'
-	-Dsolr.solr.home=${webdist.home}/solr -Dsolr.data.dir=${webdist.home}/solr/data
-	-Djava.library.path=${jcc_egg}
-	${env.MONTYSOLR_JVMARGS}
-	--webroot ${webdist.webapp}
-	--context /solr
-	${env.MONTYSOLR_ARGS}
-		</echo>
-		<java classpath="${jcc_egg}/jcc/classes${path.separator}${classes.dir}"
-			classpathref="montysolr.classpath"
-			fork="true"
-			newenvironment="${env.MONTYSOLR_NEWENVIRONMENT}"
-			classname="invenio.montysolr.JettyRunnerPythonVM"
-			>
 
-			<env key="PYTHONPATH" path="${env.PYTHONPATH}" />
-			<jvmarg line="-Dsolr.solr.home=${webdist.home}/solr -Dsolr.data.dir=${webdist.home}/solr/data"/>
-			<jvmarg line="-Djava.library.path=${jcc_egg}"/>
-			<jvmarg line="${env.MONTYSOLR_JVMARGS}"/>
-			<arg value="--webroot"/>
-			<arg value="${webdist.webapp}"/>
-			<arg value="--context"/>
-			<arg value="/solr"/>
-			<arg line="${env.MONTYSOLR_ARGS}"/>
-		</java>
-		
 
-	</target>
-
-	<target name="run-daemon" depends="config" >
-		<exec executable="ant" failonerror="true" dir="${montysolr.home}" logerror="true">
-			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
-			<env key="MONTYSOLR_JVMARGS" value="${run.solr.jvmargs} ${env.MONTYSOLR_JVMARGS} -Djava.util.logging.config.file=${webdist.home}/etc/logging.properties" />
-			<env key="MONTYSOLR_ARGS" value="${run.solr.args} ${env.MONTYSOLR_ARGS} --daemon" />
-			<arg value="run-bare"/>
-		</exec>
-	</target>
-
-	<target name="run" depends="config"
-        description="Starts MontySolr">
-
-		<exec executable="ant" failonerror="true" dir="${montysolr.home}" logerror="true">
-			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
-			<env key="MONTYSOLR_JVMARGS" value="${run.solr.jvmargs} ${env.MONTYSOLR_JVMARGS} " />
-			<env key="MONTYSOLR_ARGS" value="${run.solr.args} ${env.MONTYSOLR_ARGS} --daemon"/>
-			<arg value="run-bare"/>
-		</exec>
-	</target>
 
 
 
@@ -700,8 +649,14 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 
 	<target name="run-example"
-	   description="Assembles and runs the example"
-	   depends="run-daemon">
+	   description="Assembles *everything* and runs the example"
+	   depends="build-all">
+
+		<exec executable="ant" dir="${common.dir}/contrib/examples" logerror="true" 
+			newenvironment="true">
+            <arg line="build-one run-configured -Dename=invenio -Dprofile=normal.profile" />
+        </exec>
+
 	</target>
 
 	

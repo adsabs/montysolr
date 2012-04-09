@@ -255,7 +255,6 @@
 			<arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}" />
 			<arg line="-Dsolr.abortOnConfigurationError=false" />
 			<arg value="run-bare"/>
-			<arg value="-v"/>
 		</exec>
 	</target>
 
