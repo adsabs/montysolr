@@ -118,7 +118,7 @@
 	<target name="compile-test" depends="compile,common.compile-test" />
 
 	<target name="config" depends="init">
-		<property name="my.montysolr.jar" value="${build.dir}/${final.name}" />
+		<property name="my.montysolr.jar" value="${build.dir}/${final.name}.jar" />
 
 	</target>
 
@@ -127,8 +127,7 @@
 	          description="Prints out instructions">
 		<echo message="Welcome to the MontySolr project!" />
 		<echo message="Use 'ant build-all' to compile MontySolr and prepare demos." />
-		<echo message="Use 'ant run' to run the example." />
-		<echo message="Use 'ant run-daemon' to run the example with logging." />
+		<echo message="Use 'ant run-example' to run the example." />
 
 		<echo message="And for developers:"/>
 		<echo message="Use 'ant clean' to clean compiled files." />
@@ -366,7 +365,7 @@ lucene.version=${lucene.version}
     ==================================================================
     -->
 
-	<target name="build-all" depends="examples,build-solr,build,build-contrib"
+	<target name="build-all" depends="example,build-solr,build,build-contrib"
 		description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
 
 	<target name="build" depends="config-build,compile-montysolr-egg,unzip-egg"
@@ -375,7 +374,7 @@ lucene.version=${lucene.version}
 
 
 	<!-- Compile egg for embedding into Java VM -->
-	<target name="compile-montysolr-egg" depends="jar">
+	<target name="compile-montysolr-egg" depends="compile,jar">
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 
@@ -507,47 +506,11 @@ lucene.version=${lucene.version}
     -->
 
 	
-	<target name="examples"
-          description="Assembels MontySolr example demos (from Solr and our sources)"
+	<target name="example"
           depends="check-solr-location,download-solr,build-solr-example">
-
-		<apply executable="ant" type="dir" dir="${montysolr.home}">
-
-			<arg line="assemble-example" />
-			<arg line="-Dassemble.source"/>
-			<arg value="${solr.real.location}/example" />
-			<arg line="-Dassemble.target"/>
-			<srcfile />
-
-			<dirset dir="${montysolr.home}">
-				<include name="examples/*"/>
-			</dirset>
-		</apply>
-
-
-		<echo>
-	    The MontySolr examples were assembled from the original Solr example distribution
-		(${solr.home}/example)
-		See ${montysolr.home}/examples/README.txt for instructions on how to
-		run the demos.
-		</echo>
 	</target>
 
 	
-	<target name="assemble-example" depends="config-build">
-		<!-- called only from the examples target, automatically -->
-		<copy todir="${assemble.target}" overwrite="false">
-			<fileset dir="${assemble.source}">
-				<include name="**/**" />
-			</fileset>
-		</copy>
-		<echo>
-	      Copied from ${assemble.source} to ${assemble.target}
-	   </echo>
-	</target>
-
-
-
 
 	<!-- this target sets the location of the solr, if not present, we'll assume build/solr-download/apache-solr-${solr.version}/solr
 	   The property may also be set by a download-solr task
@@ -649,8 +612,8 @@ lucene.version=${lucene.version}
 
 
 	<target name="run-example"
-	   description="Assembles *everything* and runs the example"
-	   depends="build-all">
+	   description="Assembles Invenio example and starts MontySolr (don't forget to do build-all first)"
+	   depends="">
 
 		<exec executable="ant" dir="${common.dir}/contrib/examples" logerror="true" 
 			newenvironment="true">

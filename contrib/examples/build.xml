@@ -268,7 +268,7 @@
 		<property prefix="xxx" file="${example.name}/${example.config}" />
 		
 		<exec executable="ant" failonerror="true" >
-			<env key="PYTHONPATH" value="${xxx.PYTHONPATH}" />
+			<env key="PYTHONPATH" value="${xxx.PYTHONPATH}${path.separator}${build.dir}/${example.name}/python" />
 			<env key="MONTYSOLR_HANDLER" value="${xxx.MONTYSOLR_HANDLER}" />
 			<env key="MONTYSOLR_TARGETS" value="${xxx.MONTYSOLR_TARGETS}" />
 			<env key="MONTYSOLR_MAX_WORKERS" value="${xxx.MONTYSOLR_MAX_WORKERS}" />

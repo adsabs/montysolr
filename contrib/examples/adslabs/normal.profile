@@ -1,4 +1,4 @@
-PYTHONPATH=/proj/adsx/invenio26/lib/python:${common.dir}/build/dist:${common.dir}/src/python:${common.dir}/contrib/invenio/src/python
+PYTHONPATH=/proj/adsx/invenio26/lib/python
 MONTYSOLR_HANDLER=montysolr.sequential_handler
 MONTYSOLR_TARGETS=adslabs.targets,adslabs.schema.targets
 MONTYSOLR_MAX_WORKERS=4
