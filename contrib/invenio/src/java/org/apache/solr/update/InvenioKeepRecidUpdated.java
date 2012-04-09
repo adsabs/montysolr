@@ -177,7 +177,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 
 
 
-	private int max_maximport = 200; //TODO: retrieve value of this from the config
+	private int max_maximport = 50000; //TODO: retrieve value of this from the config
 	private int max_batchsize = 50000;
 	
 

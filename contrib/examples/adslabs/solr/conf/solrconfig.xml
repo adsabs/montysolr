@@ -293,12 +293,11 @@
                    since a document was added before automaticly
                    triggering a new commit. 
       -->
-    <!--
+
        <autoCommit> 
          <maxDocs>10000</maxDocs>
          <maxTime>1000</maxTime> 
        </autoCommit>
-      -->
 
     <!-- Update Related Event Listeners
          
@@ -1567,7 +1566,7 @@
     <lst name="defaults">
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
-      <bool name="commit">true</bool>
+      <bool name="commit">false</bool>
     </lst>
   </requestHandler>
 

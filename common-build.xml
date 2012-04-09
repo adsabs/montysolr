@@ -796,24 +796,41 @@
 	<attribute name="basedir" default="${basedir}"/>
 
 	<sequential>
-		<echo level="verbose">
-        	Running MontySolr as:
-        	========
-        		
-        	basedir: @{basedir}
-        	ignore-environment: @{ignore-environment}
-        	classpathref: @{classpathref}
-        	classname: @{montysolr-class}
-        	PYTHONPATH: @{pythonpath}
-        		
-        	java -cp '@{classpath}'
-        	    -Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir}
-        	    -Djava.library.path=@{jcc-classpath}
-        		@{jvmargs}
-        	    --webroot @{webroot}
-        	    --context @{context}
+		<echo file="@{basedir}/run.sh">#!/bin/bash
+			
+#        	Running MontySolr:
+#        	========
+#        		
+#        	basedir: @{basedir}
+#        	ignore-environment: @{ignore-environment}
+#        	classpathref: @{classpathref}
+#        	classname: @{montysolr-class}
+
+export HOMEDIR=@@@			
+export PYTHONPATH=@{pythonpath}
+export MONTYSOLR_HANDLER=${env.MONTYSOLR_HANDLER}
+export MONTYSOLR_TARGETS=${env.MONTYSOLR_TARGETS}
+export MONTYSOLR_MAX_WORKERS=${env.MONTYSOLR_MAX_WORKERS}
+
+export JCC_CP="@{classpath}"
+export JAVA_CP="${toString:@{classpathref}}"			
+export CP="$JCC_CP${path.separator}$JAVA_CP"			
+			
+java -cp $CP \
+        	    -Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir} \
+        	    -Djava.library.path=@{jcc-classpath} \
+                @{jvmargs} \
+			    @{montysolr-class} \
+        	    --webroot @{webroot} \
+        	    --context @{context} \
         	    @{arguments}
+			
 	        </echo>
+		
+		<replace file="@{basedir}/run.sh" token="@{basedir}" value="$HOMEDIR"/>
+		<replace file="@{basedir}/run.sh" token="@@@" value="@{basedir}"/>
+		<chmod file="@{basedir}/run.sh" perm="u+x" />
+		
 		<java classpath="@{classpath}"
 	            classpathref="@{classpathref}"
 	            fork="true"

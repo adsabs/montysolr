@@ -16,7 +16,6 @@
 	<property name="build.dir" location="build" />
 	<property name="dist.dir" value="build/dist" />
 	<property name="classes.dir" value="build/classes/java" />
-	<property name="jar.dir" value="${build.dir}/jar" />
 
 	<property file="build.properties" />
 
@@ -32,7 +31,6 @@
 	<property name="lib.dir" value="lib" />
 	<property name="app.name" value="montysolr_java" />
 	<property name="app.version" value="0.1" />
-	<property name="jar.dir" value="${jar.dir}/${app.name}-${app.version}.jar" />
 	<property name="jar.suffix" value="${app.name}-${app.version}.jar" />
 	<property name="app.solr.name" value="solr_java" />
 	<property name="app.solr.version" value="0.1" />
@@ -120,7 +118,7 @@
 	<target name="compile-test" depends="compile,common.compile-test" />
 
 	<target name="config" depends="init">
-		<property name="my.montysolr.jar" value="${jar.dir}/${jar.suffix}" />
+		<property name="my.montysolr.jar" value="${build.dir}/${final.name}" />
 
 	</target>
 
@@ -247,7 +245,7 @@
 
 
 		<path id="montysolr.classpath">
-			<fileset dir="${jar.dir}" includes="**/*.jar" />
+			<fileset dir="${build.dir}" includes="montysolr*.jar" />
 			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
 			<fileset dir="${solr.real.location}" includes="example/lib/**/*.jar" />
 			<fileset dir="${webdist.home}" includes="lib/**/*.jar" />
@@ -264,18 +262,6 @@
 	</target>
 
 
-	<!-- create a montysolr.jar that we can include and that contains our extra code -->
-	<target name="build-jar" depends="config-build,compile">
-		<mkdir dir="${jar.dir}" />
-		<jar destfile="${my.montysolr.jar}" filesetmanifest="mergewithoutmain">
-			<manifest>
-				<attribute name="Built-By" value="${user.name}" />
-				<attribute name="Main-Class" value="${jcc.build}" />
-				<attribute name="Class-Path" value="." />
-			</manifest>
-			<fileset dir="${classes.dir}" />
-		</jar>
-	</target>
 
 	<!-- writes into a simple format various config variables, they can be used by unittests/java -->
 	<target name="write-properties">
@@ -310,11 +296,11 @@ lucene.version=${lucene.version}
 
 	<!-- Builds jar and also compile Java-Pyhon wrapper - this is all you need to run Solr inside Python -->
 	<target name="montysolr-jetty-build"
-		depends="config-build,build-jar,montysolr-jetty-egg-compilation,unzip-egg">
+		depends="config-build,jar,montysolr-jetty-egg-compilation,unzip-egg">
 	</target>
 
 
-	<target name="montysolr-jetty-egg-compilation" depends="build-jar">
+	<target name="montysolr-jetty-egg-compilation" depends="jar">
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 
@@ -390,7 +376,7 @@ lucene.version=${lucene.version}
 	<target name="build-test" depends="build,run" />
 
 	<!-- Compile egg for embedding into Java VM -->
-	<target name="compile-montysolr-egg" depends="build-jar">
+	<target name="compile-montysolr-egg" depends="jar">
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 

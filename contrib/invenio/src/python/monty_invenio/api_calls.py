@@ -85,7 +85,6 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
                                                           'DELETED'))):
         dels[int(x[0])] = 1
     
-    sys.stderr.write(str(dels) + "\n")
     
     for recid, mod_date, create_date in modified_records:
         recid = int(recid)
