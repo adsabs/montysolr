@@ -7,7 +7,7 @@ Created on Feb 4, 2011
 from cStringIO import StringIO
 from invenio.intbitset import intbitset
 from montysolr import config
-from montysolr.initvm import JAVA as sj
+from montysolr.initvm import JAVA as j
 from montysolr.utils import MontySolrTarget, make_targets
 import logging
 import os
@@ -18,7 +18,14 @@ import adslabs.api_calls as api_calls
 
 import time
 
+SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+JArray_byte = j.JArray_byte #@UndefinedVariable
+JArray_int = j.JArray_int #@UndefinedVariable
+String = j.String #@UndefinedVariable
+HashMap = j.HashMap #@UndefinedVariable
+Integer = j.Integer #@UndefinedVariable
 
+# XXX: code duplication, most of these functions are in invenio package
 
 def format_search_results(message):
     '''Returns the citation summary for the given recids. This method
@@ -31,7 +38,7 @@ def format_search_results(message):
         rsp: SolrQueryResponse
     
     '''
-    rsp = sj.SolrQueryResponse.cast_(message.getParam('response'))
+    rsp = SolrQueryResponse.cast_(message.getParam('response'))
     
     recids = message.getParamArray_int("recids")
     start = time.time()
@@ -62,7 +69,7 @@ def perform_request_search_bitset(message):
     #offset, hit_dump, total_matches, searcher_id = searching.multiprocess_search(query, 0)
     (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, max_len=max_len, offset=offset)
     #message.threadInfo("query=%s, total_hits=%s" % (query, total_matches))
-    message.setResults(sj.JArray_byte(intbitset(hits).fastdump()))
+    message.setResults(JArray_byte(intbitset(hits).fastdump()))
 
 
 
@@ -79,9 +86,9 @@ def perform_request_search_ints(message):
     #offset, hit_list, total_matches, searcher_id = searching.multiprocess_search(query, 0)
     (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, max_len=max_len, offset=offset)
     if len(hits):
-        message.setResults(sj.JArray_int(hits))
+        message.setResults(JArray_int(hits))
     else:
-        message.setResults(sj.JArray_int([]))
+        message.setResults(JArray_int([]))
 
     message.setParam("total", total_matches)
 
@@ -90,7 +97,7 @@ def perform_request_search_ints(message):
 
 def get_citation_dict(message):
     '''TODO: unittest'''
-    dictname = sj.String.cast_(message.getParam('dictname'))
+    dictname = String.cast_(message.getParam('dictname'))
     
     # we will call the local module (not dispatched remotely)
     if hasattr(api_calls, '_dispatch'):
@@ -99,9 +106,9 @@ def get_citation_dict(message):
         wid, cd = api_calls.dispatch("get_citation_dict", dictname)
     
     if cd:
-        hm = sj.HashMap().of_(sj.String, sj.JArray_int)
+        hm = HashMap().of_(String, JArray_int)
         for k,v in cd.items():
-            j_array = sj.JArray_int(v)
+            j_array = JArray_int(v)
             hm.put(k, j_array)
         message.put('result', hm)
         
@@ -114,7 +121,7 @@ def sort_and_format(message):
     start = time.time()
     
     recids = intbitset(message.getParamArray_int("recids"))
-    kwargs = sj.HashMap.cast_(message.getParam('kwargs'))
+    kwargs = HashMap.cast_(message.getParam('kwargs'))
 
     kws = {}
 
@@ -143,7 +150,7 @@ def sort_and_format(message):
         message.threadInfo("end: citation_summary pid=%s, finished in %s" % (wid, time.time() - start))
 
     if isinstance(output, list):
-        message.setResults(sj.JArray_int(output))
+        message.setResults(JArray_int(output))
         message.setParam("rtype", "int")
     else:
         message.setResults(output)
@@ -155,9 +162,9 @@ def diagnostic_test(message):
     out = []
     message.setParam("query", "boson")
     perform_request_search_ints(message)
-    res = sj.JArray_int.cast_(message.getResults())
+    res = JArray_int.cast_(message.getResults())
     out.append('Search for "boson" retrieved: %s hits' % len(res) )
-    out.append('Total hits: %s' % sj.Integer.cast_(message.getParam("total")))
+    out.append('Total hits: %s' % Integer.cast_(message.getParam("total")))
     message.setResults('\n'.join(out))
 
 '''
@@ -165,19 +172,19 @@ def _get_solr():
     # HACK: this should be lazy loaded and in a separate module
     from montysolr.python_bridge import JVMBridge
     if not hasattr(sj, '__server') and not JVMBridge.hasObj("solr.server"):
-        initializer = sj.CoreContainer.Initializer()
+        initializer = CoreContainer.Initializer()
         conf = {'solr_home': '/x/dev/workspace/sandbox/montysolr/example/solr',
                  'data_dir': '/x/dev/workspace/sandbox/montysolr/example/solr/data'}
 
-        sj.System.setProperty('solr.solr.home', conf['solr_home'])
-        sj.System.setProperty('solr.data.dir', conf['data_dir'])
+        System.setProperty('solr.solr.home', conf['solr_home'])
+        System.setProperty('solr.data.dir', conf['data_dir'])
         core_container = initializer.initialize()
-        server = sj.EmbeddedSolrServer(core_container, "")
+        server = EmbeddedSolrServer(core_container, "")
         JVMBridge.setObj("solr.server", server)
         JVMBridge.setObj("solr.container", core_container)
-        sj.__server = server
+        j.__server = server
         return server
-    return sj.__server
+    return j.__server
     return JVMBridge.getObj("solr.server")
 
 
@@ -189,7 +196,7 @@ def search_unit_solr(message):
     server = _get_solr()
     q = str(message.getParam("query")) #String
 
-    query = sj.SolrQuery()
+    query = SolrQuery()
     query.setQuery(q)
     query.setParam("fl", ("id",))
     query_response = server.query(query)
@@ -201,7 +208,7 @@ def search_unit_solr(message):
     nf = res_part.getNumFound()
 
     a_size = res_part.size()
-    res = sj.JArray_int(a_size)
+    res = JArray_int(a_size)
     res_part = res_part.toArray()
     if a_size:
         #it = res_part.iterator()
@@ -209,7 +216,7 @@ def search_unit_solr(message):
         #while it.hasNext():
         for i in xrange(a_size):
             #x = it.next()
-            doc = sj.SolrDocument.cast_(res_part[i])
+            doc = SolrDocument.cast_(res_part[i])
             # we must do this gymnastics because of the tests
             s = str(doc.getFieldValue("id"))  # 002800500
             if s[0] == '0':

@@ -5,8 +5,8 @@ import solr
 
 from invenio import search_engine
 
-s = solr.SolrConnection('http://localhost:8983/solr')
-s.select = solr.SearchHandler(s, '/invenio')
+s = solr.SolrConnection('http://localhost:8983/solr') #@UndefinedVariable
+s.select = solr.SearchHandler(s, '/invenio') #@UndefinedVariable
 
 
 def run(query_file):

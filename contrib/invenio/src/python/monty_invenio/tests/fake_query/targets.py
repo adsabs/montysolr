@@ -7,10 +7,15 @@ import random
 
 _docs = {}
 
+
 '''
 The following code is used from Java to simulate indexing and 
 retrieval of documents from Python to Lucene. 
 '''
+
+JArray_string = j.JArray_string #@UndefinedVariable
+JArray_int = j.JArray_int #@UndefinedVariable
+JArray_byte = j.JArray_byte #@UndefinedVariable
 
 def index_docs(message):
     _docs.clear()
@@ -47,9 +52,9 @@ def index_docs(message):
         if i > len(words):
             i = 0
         
-    message.setParam('text', j.JArray_string(words))
-    message.setParam('recid', j.JArray_int(recids))
-    message.setParam('docs', j.JArray_string(docstr))
+    message.setParam('text', JArray_string(words)) #@UndefinedVariable
+    message.setParam('recid', j.JArray_int(recids)) #@UndefinedVariable
+    message.setParam('docs', JArray_string(docstr)) #@UndefinedVariable
 
 
 def fake_search(message):
@@ -66,7 +71,7 @@ def fake_search(message):
     if val in index:
         ret.extend(index[val])
     
-    message.setResults(j.JArray_int(ret))
+    message.setResults(JArray_int(ret))
     
     
 
@@ -89,7 +94,7 @@ def fake_search_intbitset(message):
         for i in index[val]:
             ret.add(i)
     
-    message.setResults(j.JArray_byte(ret.fastdump()))
+    message.setResults(JArray_byte(ret.fastdump()))
 
 
 def montysolr_targets():

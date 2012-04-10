@@ -9,7 +9,7 @@ This class is used for unittests
 '''
 
 
-class Bridge(sj.MontySolrBridge):
+class Bridge(sj.MontySolrBridge): #@UndefinedVariable
 
     def __init__(self):
         super(Bridge, self).__init__()

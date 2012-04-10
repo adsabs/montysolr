@@ -3,6 +3,9 @@ Created on Jan 13, 2011
 
 @author: rca
 '''
+
+#@PydevCodeAnalysisIgnore
+
 import os
 import sys
 import lucene

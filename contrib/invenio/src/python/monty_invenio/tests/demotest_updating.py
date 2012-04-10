@@ -13,6 +13,15 @@ import sys
 import time
 import unittest
 
+JArray_string = j.JArray_string #@UndefinedVariable
+JArray_int = j.JArray_int #@UndefinedVariable
+JArray_byte = j.JArray_byte #@UndefinedVariable
+QueryRequest = j.QueryRequest #@UndefinedVariable
+SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+Integer = j.Integer #@UndefinedVariable
+HashMap = j.HashMap #@UndefinedVariable
+
+
 '''Tests the Python side of the InvenioKeepRecidUpdated - 
 this is a very comprehensive suite, it requires demo site
 '''
@@ -38,7 +47,7 @@ def change_date(recid, diff=1, cdiff=0):
 
         
 def change_records(message):
-    recids = list(j.JArray_int.cast_(message.getParam('recids')))
+    recids = list(JArray_int.cast_(message.getParam('recids')))
     diff = message.getParam('diff')
     if diff:
         diff = int(str(diff))
@@ -52,7 +61,7 @@ def add_records(message):
     """We are not adding, but if creation_date == modification_date
     then recs are considerd new"""
     
-    recids = list(j.JArray_int.cast_(message.getParam('recids')))
+    recids = list(JArray_int.cast_(message.getParam('recids')))
     diff = message.getParam('diff')
     if diff:
         diff = int(str(diff))
@@ -72,6 +81,7 @@ def reset_records(message):
 
 def create_delete(message):
     """creates and deletes the record"""
+    diff = message.getParam('diff')
     if diff:
         diff = int(str(diff))
     else:
@@ -98,7 +108,7 @@ def create_delete(message):
     recs = bibupload.xml_marc_to_records(xml_to_delete)
     ret = bibupload.bibupload(recs[0], opt_mode='insert')
     recid = ret[1]
-    message.setResults(j.Integer(recid))
+    message.setResults(Integer(recid))
     change_date(recid, diff=diff)
     #dbquery.run_sql("UPDATE bibrec SET modification_date=NOW()+%s, creation_date=NOW() + %s WHERE id=%s" % (diff, diff,recid))
 
@@ -110,7 +120,7 @@ def create_record(message):
     else:
         diff = 5 # 5 secs older
     recid = bibupload.create_new_record()
-    message.setResults(j.Integer(int(recid)))
+    message.setResults(Integer(int(recid)))
     #dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s, creation_date=NOW() + %s WHERE id=%s" % (diff, diff,recid))
     change_date(recid, diff=diff, cdiff=diff)    
     
@@ -121,12 +131,12 @@ def delete_record(message):
         diff = int(str(diff))
     else:
         diff = 5 # 5 secs older
-    recid = int(j.Integer.cast_(message.getParam('recid')).intValue())
+    recid = int(Integer.cast_(message.getParam('recid')).intValue())
     record = search_engine.get_record(recid)
     bibrecord.record_add_field(record, "980", subfields=[("c", "DELETED")])
     ret = bibupload.bibupload(record, opt_mode='replace')
     recid = ret[1]
-    message.setResults(j.Integer(recid))
+    message.setResults(Integer(recid))
     
     # extra query needed because invenio sets modification date=NOW()
     # and so the deleted recs have modification_date<creation_date
@@ -136,7 +146,7 @@ def delete_record(message):
         
     
 def wipeout_record(message):
-    recid = int(j.Integer.cast_(message.getParam('recid')).intValue())
+    recid = int(Integer.cast_(message.getParam('recid')).intValue())
     bibupload_regression_tests.wipe_out_record_from_all_tables(recid)  
         
         
@@ -174,11 +184,11 @@ class Test(InvenioDemoTestCaseLucene):
         
         message = self.bridge.createMessage('add_records') \
                     .setParam('diff', 6) \
-                    .setParam('recids', j.JArray_int(range(1, 11)))
+                    .setParam('recids', JArray_int(range(1, 11)))
         self.bridge.sendMessage(message)
         
-        req = j.QueryRequest()
-        rsp = j.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
@@ -187,9 +197,9 @@ class Test(InvenioDemoTestCaseLucene):
         self.bridge.sendMessage(message)
 
         results = message.getResults()
-        out = j.HashMap.cast_(results)
+        out = HashMap.cast_(results)
 
-        added = j.JArray_int.cast_(out.get('ADDED'))
+        added = JArray_int.cast_(out.get('ADDED'))
         assert len(added) == 10
 
     def test_get_recids_added_all(self):
@@ -197,11 +207,11 @@ class Test(InvenioDemoTestCaseLucene):
         # make all records appear as old
         message = self.bridge.createMessage('change_records') \
                     .setParam('diff', -1) \
-                    .setParam('recids', j.JArray_int([1]))
+                    .setParam('recids', JArray_int([1]))
         self.bridge.sendMessage(message)
                     
-        req = j.QueryRequest()
-        rsp = j.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
@@ -210,11 +220,11 @@ class Test(InvenioDemoTestCaseLucene):
         self.bridge.sendMessage(message)
 
         results = message.getResults()
-        out = j.HashMap.cast_(results)
+        out = HashMap.cast_(results)
 
-        added = j.JArray_int.cast_(out.get('ADDED'))
-        updated = j.JArray_int.cast_(out.get('UPDATED'))
-        deleted = j.JArray_int.cast_(out.get('DELETED'))
+        added = JArray_int.cast_(out.get('ADDED'))
+        updated = JArray_int.cast_(out.get('UPDATED'))
+        deleted = JArray_int.cast_(out.get('DELETED'))
         
         assert (len(added)+len(updated)+len(deleted)) == self.max_recs -1
         
@@ -226,19 +236,19 @@ class Test(InvenioDemoTestCaseLucene):
         self.bridge.sendMessage(message)
 
         results = message.getResults()
-        out = j.HashMap.cast_(results)
+        out = HashMap.cast_(results)
 
-        added = j.JArray_int.cast_(out.get('ADDED'))
-        updated = j.JArray_int.cast_(out.get('UPDATED'))
-        deleted = j.JArray_int.cast_(out.get('DELETED'))
+        added = JArray_int.cast_(out.get('ADDED'))
+        updated = JArray_int.cast_(out.get('UPDATED'))
+        deleted = JArray_int.cast_(out.get('DELETED'))
         
         assert (len(added) == 10)
 
 
     def test_get_recids_nothing_changed(self):
 
-        req = j.QueryRequest()
-        rsp = j.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
@@ -260,8 +270,8 @@ class Test(InvenioDemoTestCaseLucene):
 
     def test_get_recids_minus_one(self):
 
-        req = j.QueryRequest()
-        rsp = j.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
@@ -270,11 +280,11 @@ class Test(InvenioDemoTestCaseLucene):
         self.bridge.sendMessage(message)
 
         results = message.getResults()
-        out = j.HashMap.cast_(results)
+        out = HashMap.cast_(results)
 
-        added = j.JArray_int.cast_(out.get('ADDED'))
-        updated = j.JArray_int.cast_(out.get('UPDATED'))
-        deleted = j.JArray_int.cast_(out.get('DELETED'))
+        added = JArray_int.cast_(out.get('ADDED'))
+        updated = JArray_int.cast_(out.get('UPDATED'))
+        deleted = JArray_int.cast_(out.get('DELETED'))
 
 
         assert (len(added)+len(updated)+len(deleted)) == self.max_recs
@@ -289,15 +299,15 @@ class Test(InvenioDemoTestCaseLucene):
         #self.bridge.sendMessage(message)
         message = self.bridge.createMessage('create_record')
         self.bridge.sendMessage(message)
-        created_recid = int(j.Integer.cast_(message.getResults()).intValue())
+        created_recid = int(Integer.cast_(message.getResults()).intValue())
         
         message = self.bridge.createMessage('delete_record').setParam('recid', created_recid)
         self.bridge.sendMessage(message)
         deleted_recid = int(str(message.getResults()))
         
         
-        req = j.QueryRequest()
-        rsp = j.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
@@ -306,11 +316,11 @@ class Test(InvenioDemoTestCaseLucene):
         self.bridge.sendMessage(message)
 
         results = message.getResults()
-        out = j.HashMap.cast_(results)
+        out = HashMap.cast_(results)
         
-        added = j.JArray_int.cast_(out.get('ADDED'))
-        updated = j.JArray_int.cast_(out.get('UPDATED'))
-        deleted = j.JArray_int.cast_(out.get('DELETED'))
+        added = JArray_int.cast_(out.get('ADDED'))
+        updated = JArray_int.cast_(out.get('UPDATED'))
+        deleted = JArray_int.cast_(out.get('DELETED'))
         
         
         message = self.bridge.createMessage('wipeout_record') \
@@ -330,11 +340,11 @@ class Test(InvenioDemoTestCaseLucene):
         #self.bridge.sendMessage(message)
         message = self.bridge.createMessage('create_record')
         self.bridge.sendMessage(message)
-        created_recid = int(j.Integer.cast_(message.getResults()).intValue())
+        created_recid = int(Integer.cast_(message.getResults()).intValue())
         
         
-        req = j.QueryRequest()
-        rsp = j.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('get_recids_changes') \
                     .setSender('InvenioKeepRecidUpdated') \
@@ -345,11 +355,11 @@ class Test(InvenioDemoTestCaseLucene):
         last_updated = str(message.getParam('mod_date'))
 
         results = message.getResults()
-        out = j.HashMap.cast_(results)
+        out = HashMap.cast_(results)
         
-        added = j.JArray_int.cast_(out.get('ADDED'))
-        updated = j.JArray_int.cast_(out.get('UPDATED'))
-        deleted = j.JArray_int.cast_(out.get('DELETED'))
+        added = JArray_int.cast_(out.get('ADDED'))
+        updated = JArray_int.cast_(out.get('UPDATED'))
+        deleted = JArray_int.cast_(out.get('DELETED'))
         
         
         
@@ -375,11 +385,11 @@ class Test(InvenioDemoTestCaseLucene):
         
 
         results = message.getResults()
-        out = j.HashMap.cast_(results)
+        out = HashMap.cast_(results)
         
-        added = j.JArray_int.cast_(out.get('ADDED'))
-        updated = j.JArray_int.cast_(out.get('UPDATED'))
-        deleted = j.JArray_int.cast_(out.get('DELETED'))
+        added = JArray_int.cast_(out.get('ADDED'))
+        updated = JArray_int.cast_(out.get('UPDATED'))
+        deleted = JArray_int.cast_(out.get('DELETED'))
         
         
         

@@ -1,6 +1,6 @@
 
 
-from montysolr.initvm import JAVA as sj
+from montysolr.initvm import JAVA as j
 from montysolr.utils import make_targets
 
 from invenio import bibdocfile
@@ -10,6 +10,8 @@ import adslabs.api_calls as api_calls
 
 import os
 import time
+
+SchemaField = j.SchemaField #@UndefinedVariable
 
 def get_bibrec_bibdoc(message):
     """Simply retrieves the text of all the documents attached
@@ -35,7 +37,7 @@ def get_field_value(message):
     bibcode = str(value)
     message.threadInfo('got bibcode ' + bibcode)
     
-    field = sj.SchemaField.cast_(message.getParam('field'))
+    field = SchemaField.cast_(message.getParam('field'))
     field_name = field.getName()
     message.threadInfo('getting field value for field: %s' % field_name)
     
