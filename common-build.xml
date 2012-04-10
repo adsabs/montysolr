@@ -823,7 +823,13 @@ java -cp $CP \
 			    @{montysolr-class} \
         	    --webroot @{webroot} \
         	    --context @{context} \
-        	    @{arguments}
+        	    @{arguments}   &amp;
+
+pid=$!
+echo "Solr pid=$!"
+trap "kill $pid" TERM
+trap "kill $pid" SIGINT
+wait $pid               			
 			
 	        </echo>
 		
