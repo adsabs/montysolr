@@ -295,8 +295,8 @@
       -->
 
        <autoCommit> 
-         <maxDocs>10000</maxDocs>
-         <maxTime>1000</maxTime> 
+         <maxDocs>40000</maxDocs>
+         <maxTime>1800000</maxTime> 
        </autoCommit>
 
     <!-- Update Related Event Listeners
