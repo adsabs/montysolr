@@ -172,7 +172,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	static final String PARAM_BATCHSIZE = "batchsize";
 	static final String PARAM_COMMIT = "commit";
 	static final String PARAM_MAX_RECID = "max_recid";
-	static final String PARAM_TOKEN = "token";
+	static final String PARAM_TOKEN = "idtoken";
 
 	
 	private String pythonFunctionName = "get_recids_changes";
@@ -193,7 +193,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 					"Import is already running, please retry later...");
 			rsp.add("importStatus", "busy");
 			rsp.add("workerMessage", getWorkerMessage());
-			rsp.add("token", getToken());
+			rsp.add(PARAM_TOKEN, getToken());
 			return;
 		}
 
@@ -241,8 +241,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		rsp.add("workerMessage", getWorkerMessage());
 		rsp.add("QTime", end - start);
 		setWorkerMessage("Last import finished in: " + (end - start));
+		rsp.add(PARAM_TOKEN, getToken());
 		setToken("");
-		rsp.add("token", getToken());
+		
 	}
 	
 	private void setToken(String string) {

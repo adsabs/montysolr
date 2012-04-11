@@ -88,7 +88,7 @@ def recreate_index(solr_url,
         rsp = req(up_url, token=old_token, **params)
         now = time.time()
         
-        if rsp['token'] == old_token:
+        if rsp['idtoken'] == old_token:
             time.sleep(delay)
             continue
         
@@ -98,7 +98,7 @@ def recreate_index(solr_url,
         recs = recs + batchsize
          
         log.info('Indexing (round/recs/last-round-ms/total-s): %s./%s/%sms/%ss' 
-                 % (round, recs, time.time() - last_round, (start - now) / 1000))
+                 % (round, recs, time.time() - last_round, (now-start) / 1000))
         
             
         
