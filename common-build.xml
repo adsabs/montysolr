@@ -780,6 +780,66 @@
 	</sequential>
 </macrodef>
 
+<macrodef name="create-run.sh">
+	<attribute name="classpath" />
+    <attribute name="classpathref" />
+    <attribute name="jvmargs" />
+    <attribute name="webroot" />
+    <attribute name="context" default="/solr" />
+    <attribute name="arguments" default="" />
+    <attribute name="solr-home-dir" />
+    <attribute name="solr-data-dir" />
+    <attribute name="jcc-classpath" default="${prop.jcc_egg}"/>
+    <attribute name="ignore-environment" default="true" />
+    <attribute name="montysolr-class" default="invenio.montysolr.JettyRunnerPythonVM" />
+    <attribute name="pythonpath" default=""/>
+    <attribute name="basedir" default="${basedir}"/>
+	<sequential>
+	    <echo file="@{basedir}/run.sh">#!/bin/bash
+	            
+	#           MontySolr:
+	#           ========
+	#               
+	#           basedir: @{basedir}
+	#           ignore-environment: @{ignore-environment}
+	#           classpathref: @{classpathref}
+	#           classname: @{montysolr-class}
+
+	export HOMEDIR=@@@          
+	export PYTHONPATH=@{pythonpath}
+	export MONTYSOLR_HANDLER=${env.MONTYSOLR_HANDLER}
+	export MONTYSOLR_TARGETS=${env.MONTYSOLR_TARGETS}
+	export MONTYSOLR_MAX_WORKERS=${env.MONTYSOLR_MAX_WORKERS}
+
+	export JCC_CP="@{classpath}"
+	export JAVA_CP="${toString:@{classpathref}}"            
+	export CP="$JCC_CP${path.separator}$JAVA_CP"            
+	            
+	java -cp $CP \
+	                -Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir} \
+	                -Djava.library.path=@{jcc-classpath} \
+	                @{jvmargs} \
+	                @{montysolr-class} \
+	                --webroot @{webroot} \
+	                --context @{context} \
+	                @{arguments}   &amp;
+
+	pid=$!
+	echo "Solr pid=$!"
+	trap "kill $pid" TERM
+	trap "kill $pid" SIGINT
+	wait $pid                           
+	            
+	            </echo>
+	        
+	        <replace file="@{basedir}/run.sh" token="@{basedir}" value="$HOMEDIR"/>
+	        <replace file="@{basedir}/run.sh" token="@@@" value="@{basedir}"/>
+	        <chmod file="@{basedir}/run.sh" perm="u+x" />
+
+	</sequential>
+	
+</macrodef>	
+	
 <macrodef name="run-montysolr">
 	<attribute name="classpath" />
 	<attribute name="classpathref" />
@@ -796,47 +856,6 @@
 	<attribute name="basedir" default="${basedir}"/>
 
 	<sequential>
-		<echo file="@{basedir}/run.sh">#!/bin/bash
-			
-#        	Running MontySolr:
-#        	========
-#        		
-#        	basedir: @{basedir}
-#        	ignore-environment: @{ignore-environment}
-#        	classpathref: @{classpathref}
-#        	classname: @{montysolr-class}
-
-export HOMEDIR=@@@			
-export PYTHONPATH=@{pythonpath}
-export MONTYSOLR_HANDLER=${env.MONTYSOLR_HANDLER}
-export MONTYSOLR_TARGETS=${env.MONTYSOLR_TARGETS}
-export MONTYSOLR_MAX_WORKERS=${env.MONTYSOLR_MAX_WORKERS}
-
-export JCC_CP="@{classpath}"
-export JAVA_CP="${toString:@{classpathref}}"			
-export CP="$JCC_CP${path.separator}$JAVA_CP"			
-			
-java -cp $CP \
-        	    -Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir} \
-        	    -Djava.library.path=@{jcc-classpath} \
-                @{jvmargs} \
-			    @{montysolr-class} \
-        	    --webroot @{webroot} \
-        	    --context @{context} \
-        	    @{arguments}   &amp;
-
-pid=$!
-echo "Solr pid=$!"
-trap "kill $pid" TERM
-trap "kill $pid" SIGINT
-wait $pid               			
-			
-	        </echo>
-		
-		<replace file="@{basedir}/run.sh" token="@{basedir}" value="$HOMEDIR"/>
-		<replace file="@{basedir}/run.sh" token="@@@" value="@{basedir}"/>
-		<chmod file="@{basedir}/run.sh" perm="u+x" />
-		
 		<java classpath="@{classpath}"
 	            classpathref="@{classpathref}"
 	            fork="true"

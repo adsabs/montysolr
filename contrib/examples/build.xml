@@ -54,6 +54,13 @@
 	</condition>
 	<property name="example.config" value="${profile}"/>
 
+	<condition property="run.target" value="run-bare">
+        <not>
+            <isset property="target"/>
+        </not>
+    </condition>
+    <property name="run.target" value="${target}"/>
+	
 
 	<!-- these will be used when running tests and command line montysolr
          you can set them as:
@@ -260,7 +267,8 @@
 
 
 
-	<target name="run-configured" description="Run the example with special configuration, usage: ant run -Dename={example-name} -Dprofile={profile}">
+	<target name="run-configured" description="Run the example with special configuration, usage: ant run-configured -Dename={example-name} -Dprofile={profile}.
+		If you only want to generate shell script,use: ant run-configured -Dename={example-name} -Dprofile={profile} -Dtarget=generate-run.sh">
 		
 		<!-- i can't do ${example.name}.PYTHON without external lib
 		     eg. http://ant.apache.org/antlibs/props/index.html -->
@@ -275,13 +283,12 @@
 			<env key="MONTYSOLR_JVMARGS" value="${xxx.MONTYSOLR_JVMARGS}" />
 			<env key="MONTYSOLR_ARGS" value="${xxx.MONTYSOLR_ARGS}" />
 			<arg line="-Dename=${example.name} -Dignore-environment=false"/>
-			<arg value="run-bare"/>
-			<arg value="-v"/>
+			<arg value="${run.target}"/>
 		</exec>
 	</target>
 
 
-	<target name="run-bare" >
+	<target name="run-bare" depends="generate-run.sh">
 		<run-montysolr classpath="${prop.jcc_egg}"
 		      classpathref="examples.classpath"
 		   	  ignore-environment="${example.ignore-environment}"
@@ -295,7 +302,22 @@
 		   	  basedir="${build.dir}/${example.name}"
 		   />
 	</target>
-
+    
+	<target name="generate-run.sh">
+		<create-run.sh classpath="${prop.jcc_egg}"
+		              classpathref="examples.classpath"
+		              ignore-environment="${example.ignore-environment}"
+		              pythonpath="${env.PYTHONPATH}"
+		              webroot="${build.dir}/${example.name}/webapps/solr.war"
+		              solr-home-dir="${build.dir}/${example.name}/solr"
+		              solr-data-dir="${build.dir}/${example.name}/solr/data"
+		              jcc-classpath="${prop.jcc_egg}"
+		              jvmargs="${env.MONTYSOLR_JVMARGS}"
+		              arguments="${env.MONTYSOLR_ARGS}"
+		              basedir="${build.dir}/${example.name}"
+		           />   
+	</target>
+	
 	
 	    
 
