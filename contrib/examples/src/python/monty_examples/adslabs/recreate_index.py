@@ -53,10 +53,10 @@ def req(url, **kwargs):
 
 def recreate_index(solr_url, 
                    max_time=3600,
-                   delay=30,
+                   delay=3,
                    handler_name='/invenio/update',
-                   maximport=20,
-                   batchsize=100,
+                   maximport=200,
+                   batchsize=1000,
                    inveniourl='python://search',
                    importurl='/invenio/import?command=full-import&amp;dirs=',
                    updateurl='/invenio/import?command=full-import&amp;dirs=',
@@ -81,25 +81,29 @@ def recreate_index(solr_url,
     recs = 0
     last_round = time.time()
     now = time.time()
-    old_token = '#0'
+    idtoken = '#0'
+    i = 0
     
     while (start - now) < max_time: 
+        i = i + 1
+        idtoken = '#%s' % i
         
-        rsp = req(up_url, token=old_token, **params)
+        rsp = req(up_url, idtoken=idtoken, **params)
         now = time.time()
         
-        if rsp['idtoken'] == old_token:
+        if rsp['idtoken'] != idtoken:
             time.sleep(delay)
             continue
         
+        
         round = round + 1
-        old_token = '#%s' % round
         
         recs = recs + batchsize
          
         log.info('Indexing (round/recs/last-round-ms/total-s): %s./%s/%sms/%ss' 
-                 % (round, recs, time.time() - last_round, (now-start) / 1000))
+                 % (round, recs, last_round - time.time(), (now-start) / 1000))
         
+        last_round = time.time()
             
         
     

@@ -200,11 +200,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		setBusy(true);
 
 		SolrParams params = req.getParams();
-		long start = System.currentTimeMillis();
-		
-		
 		Properties prop = loadProperties(params);
 		setToken(prop.getProperty(PARAM_TOKEN));
+		
+		long start = System.currentTimeMillis();
 		
 		Map<String, Object> dictData = null;
 		
