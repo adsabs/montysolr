@@ -60,7 +60,8 @@ def recreate_index(solr_url,
                    inveniourl='python://search',
                    importurl='/invenio/import?command=full-import&amp;dirs=',
                    updateurl='/invenio/import?command=full-import&amp;dirs=',
-                   deleteurl='blankrecords'):
+                   deleteurl='blankrecords', 
+                   startfrom=-1):
     
     up_url = solr_url + handler_name
     delay = int(delay)
@@ -75,7 +76,7 @@ def recreate_index(solr_url,
                   inveniourl=inveniourl, importurl=importurl,
                   updateurl=updateurl, deleteurl=deleteurl)
     
-    rsp = req(up_url, last_recid=-1, **params)
+    rsp = req(up_url, last_recid=startfrom, **params)
     
     round = 0
     recs = 0

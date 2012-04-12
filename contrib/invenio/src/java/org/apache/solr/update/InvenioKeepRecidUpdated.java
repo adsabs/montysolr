@@ -528,7 +528,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			
 	    	File f = getPropertyFile();
 	    	if (f.exists()) {
-	    		prop.load(new FileInputStream(f));
+	    		FileInputStream input = new FileInputStream(f);
+	    		prop.load(input);
+	    		input.close();
 	    	}
 	    	
 	    	String prop_recid = null;
