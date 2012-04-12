@@ -4,6 +4,7 @@ import os
 import thread
 import sys
 import cStringIO
+import zlib
 
 from invenio import search_engine
 from invenio import search_engine_summarizer
@@ -170,6 +171,56 @@ def invenio_search_xml(kwargs):
     
     return '\n'.join(out)
     
+
+def invenio_search_xml2(kwargs):
+    """Simple version which just fetches XML records
+    from Invenio. It only understands query of type:
+    p=recid:1->50 OR recid:50 OR recid:....
+    
+    This is an optimized version
+    
+    """
+    out = []
+    p = kwargs['p']
+    of = 'xm'
+    if 'of' in kwargs:
+        of = kwargs['of']
+
+    if of == 'xm':
+        out.append('<?xml version="1.0" encoding="UTF-8"?>')
+        out.append('<collection xmlns="http://www.loc.gov/MARC21/slim">')
+    
+    query = ['SELECT id_bibrec, `value` FROM bibfmt WHERE `format`=\'xm\' AND']
+    
+    # first expand the recids
+    clauses = p.split(' OR ')
+    ccs = []
+    for c in clauses:
+        c = c.replace('recid:', '')
+        if '->' in c:
+            ints = c.split('->')
+            ccs.append('(id_bibrec>=%s AND id_bibrec<=%s)' % tuple(ints))
+        else:
+            ccs.append('(id_bibrec=%s)' % c)
+    
+    query.append('(')
+    query.append(' OR '.join(ccs))
+    query.append(')')
+    
+    
+    query = ' '.join(query)    
+    # now retrieve the record xml
+    decompress = zlib.decompress
+    for value in dbquery.run_sql(query):
+        ### In case of corruption, we fail (intentionally)
+        out.append(decompress(value[1]))
+            
+    
+    if of == 'xm':
+        out.append('</collection>')
+    
+    return '\n'.join(out)
+
 
 
 def search(q, max_len=25, offset=0):

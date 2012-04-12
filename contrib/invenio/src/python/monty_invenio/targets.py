@@ -87,7 +87,7 @@ def invenio_search(message):
     #(wid, result) = api_calls.dispatch('invenio_search', kwargs)
     
     # dumb, but fast
-    (wid, result) = api_calls.dispatch('invenio_search_xml', kwargs)
+    (wid, result) = api_calls.dispatch('invenio_search_xml2', kwargs)
     
     if not (isinstance(result, str) or result is None):
         raise Exception('Wrong arguments - I\'ll rather die than give you what you want!')
