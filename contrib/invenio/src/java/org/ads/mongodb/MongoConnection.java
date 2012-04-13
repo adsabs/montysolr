@@ -8,8 +8,11 @@ import org.slf4j.LoggerFactory;
 import com.mongodb.Mongo;
 import com.mongodb.DB;
 import com.mongodb.MongoException;
+import com.mongodb.MongoOptions;
+import com.mongodb.ServerAddress;
 
-public class MongoConnection {
+public enum MongoConnection {
+	INSTANCE;
 	
 	public static final Logger log = LoggerFactory.getLogger(MongoConnection.class);
 	
@@ -18,9 +21,14 @@ public class MongoConnection {
 
     public synchronized static Mongo init(String host, int port) 
     		throws UnknownHostException, MongoException {
-        log.info("initializing mongo connection using host " + host + " and port " + port);
-    	m = new Mongo(host, port);
-    	return getInstance();
+    	if (m == null) {
+	        log.info("initializing mongo connection using host " + host + " and port " + port);
+	        ServerAddress addr = new ServerAddress(host,port);
+	        MongoOptions opts = new MongoOptions();
+	        opts.socketKeepAlive = true;
+	    	m = new Mongo(addr, opts);
+    	}
+    	return m;
     }
     public synchronized static Mongo getInstance() {
         if (m == null) {
