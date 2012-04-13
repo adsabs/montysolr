@@ -11,6 +11,10 @@ on the Java side, something similar is run in one of the
 InvenioQuery tests
 '''
 
+JArray_string = j.JArray_string #@UndefinedVariable
+JArray_int = j.JArray_int #@UndefinedVariable
+
+
 class Test(LuceneTestCase):
 
 
@@ -31,9 +35,9 @@ class Test(LuceneTestCase):
         assert recid != None
         assert docs != None
         
-        text = list(j.JArray_string.cast_(text))
-        docs = list(j.JArray_string.cast_(docs))
-        recid = list(j.JArray_int.cast_(recid))
+        text = list(JArray_string.cast_(text))
+        docs = list(JArray_string.cast_(docs))
+        recid = list(JArray_int.cast_(recid))
         
         assert len(text) > 10
         assert len(recid) == 10
@@ -57,7 +61,7 @@ class Test(LuceneTestCase):
             res = message.getResults()
             assert res != None
             
-            hits = list(j.JArray_int.cast_(res))
+            hits = list(JArray_int.cast_(res))
             
             hits = self.get_hits(r_word)
             
@@ -69,20 +73,20 @@ class Test(LuceneTestCase):
             
         message = self.bridge.createMessage("fake_search").setParam('query', r_word+'bla')
         self.bridge.sendMessage(message)
-        hits = list(j.JArray_int.cast_(message.getResults()))
+        hits = list(JArray_int.cast_(message.getResults()))
         assert len(hits) == 0
         
         
     def get_hits(self, q):
         message = self.bridge.createMessage("fake_search").setParam('query', q)
         self.bridge.sendMessage(message)
-        hits = list(j.JArray_int.cast_(message.getResults()))
+        hits = list(JArray_int.cast_(message.getResults()))
         return hits
     
     def get_docs(self, message):
-        text = list(j.JArray_string.cast_(message.getParam('text')))
-        recid = list(j.JArray_int.cast_(message.getParam('recid')))
-        docs = list(j.JArray_string.cast_(message.getParam('docs')))
+        text = list(JArray_string.cast_(message.getParam('text')))
+        recid = list(JArray_int.cast_(message.getParam('recid')))
+        docs = list(JArray_string.cast_(message.getParam('docs')))
         out = {'text': text, 'recid': recid, 'index': {}}
         index = out['index']
         for d in docs:

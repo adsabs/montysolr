@@ -20,7 +20,7 @@ public class AdslabsRebuildIndex extends BlackAbstractTestCase{
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 		
 		System.setProperty("blackbox.persist.index", getExampleHome() + "/solr/data");
-		System.setProperty("java.util.logging.config.file", getExampleHome() + "/etc/logging.properties");
+		//System.setProperty("java.util.logging.config.file", getExampleHome() + "/etc/logging.properties");
 	}
 	
 	@Override
@@ -46,7 +46,7 @@ public class AdslabsRebuildIndex extends BlackAbstractTestCase{
 		long timeNow = System.currentTimeMillis();
 		long lastGo = System.currentTimeMillis();
 		int maximport = 200;
-		int batchSize =  10000;
+		int batchSize =  20000;
 		int maxRecords = 10000000;
 		long maxTime = 48 * 3600 * 1000;
 		int recsSoFar = 0;

@@ -9,8 +9,9 @@ from newseman.ci8.semes import filter_semantic_tokens
 from newseman.sea.callbacks import tokenfeature_orig
 from newseman.content.Document import SemStr
 
-JArray_object = j.JArray_object
-JArray_string = j.JArray_string
+JArray_object = j.JArray_object #@UndefinedVariable
+JArray_string = j.JArray_string #@UndefinedVariable
+
 tokenfeature_cleared = Surface.tokenfeature_cleared
 tokenfeature_sem = Surface.tokenfeature_sem
 tokenfeature_parsed_surface = Surface.tokenfeature_parsed_surface

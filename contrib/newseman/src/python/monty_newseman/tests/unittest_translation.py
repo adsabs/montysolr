@@ -2,13 +2,16 @@
 
 import unittest
 from montysolr import handler
-from montysolr.initvm import JAVA as J
+from montysolr.initvm import JAVA as j
 
 from monty_newseman import targets
 import sys
 import os
 
 from montysolr.tests.montysolr_testcase import LuceneTestCase
+
+JArray_object = j.JArray_object #@UndefinedVariable
+JArray_string = j.JArray_string #@UndefinedVariable
 
 
 class Test(LuceneTestCase):
@@ -49,14 +52,14 @@ class Test(LuceneTestCase):
     def _create_array(self, words):
         
         header = ['token', 'id']
-        t_array = J.JArray_object(len(words)+1)
+        t_array = JArray_object(len(words)+1)
         
-        header = J.JArray_string(['token', 'id'])
+        header = JArray_string(['token', 'id'])
         t_array[0] = header 
         
         w = 0
         while w < len(words):
-            t = J.JArray_string(len(header))
+            t = JArray_string(len(header))
             t[0] = words[w]
             t[1] = str(w)
             t_array[w+1] = t
@@ -65,8 +68,8 @@ class Test(LuceneTestCase):
     
     def _get_results(self, results):
         
-        results = J.JArray_object.cast_(results)
-        header = list(J.JArray_string.cast_(results[0]))
+        results = JArray_object.cast_(results)
+        header = list(JArray_string.cast_(results[0]))
         h = ["token", "id", "sem", "extra-sem", "synonyms", "extra-synonyms", "pos", "extra-canonical"]
         out = {}
         
@@ -76,7 +79,7 @@ class Test(LuceneTestCase):
             out.setdefault(x, [])
             
         for i in range(1, len((results))):
-            row = list(J.JArray_string.cast_(results[i]))
+            row = list(JArray_string.cast_(results[i]))
             for ii in range(len(header)):
                 key = header[ii]
                 if len(row) > ii:

@@ -4,12 +4,24 @@ Created on Feb 4, 2011
 @author: rca
 '''
 
-from montysolr.initvm import JAVA as sj
+from montysolr.initvm import JAVA as j
 from montysolr.utils import make_targets
 
 
 import random
 import time
+
+
+JArray_string = j.JArray_string #@UndefinedVariable
+JArray_int = j.JArray_int #@UndefinedVariable
+JArray_byte = j.JArray_byte #@UndefinedVariable
+SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+SolrQueryRequest = j.SolrQueryRequest #@UndefinedVariable
+Integer = j.Integer #@UndefinedVariable
+HashMap = j.HashMap #@UndefinedVariable
+List = j.List #@UndefinedVariable
+String = j.String #@UndefinedVariable
+ArrayList = j.ArrayList #@UndefinedVariable
 
 
 def bigtest(message):
@@ -20,20 +32,20 @@ def bigtest(message):
     if 'recids' in action:
         if action == 'recids_int':
             result = range(0, size)
-            result = sj.JArray_int(result)
+            result = JArray_int(result)
         elif action == 'recids_str':
             result = [ '%s' % x for x in xrange(size)]
-            result = sj.JArray_string(result)
+            result = JArray_string(result)
         elif action == 'recids_hm_strstr':
-            result = sj.HashMap().of_(sj.String, sj.String)
+            result = HashMap().of_(String, String)
             for x in xrange(size):
                 result.put(str(x), str(x))
         elif action == 'recids_hm_strint':
-            result = sj.HashMap().of_(sj.String, sj.Integer)
+            result = HashMap().of_(String, Integer)
             for x in xrange(size):
                 result.put(str(x), x)
         elif action == 'recids_hm_intint':
-            result = sj.HashMap().of_(sj.Integer, sj.Integer)
+            result = HashMap().of_(Integer, Integer)
             for x in xrange(size):
                 result.put(x, x)
         elif action == 'recids_bitset':
@@ -42,15 +54,15 @@ def bigtest(message):
             step = int(size / filled)
             for x in xrange(0, size, step):
                 result.add(x)
-            result = sj.JArray_byte(result.fastdump())
+            result = JArray_byte(result.fastdump())
         else:
             result = None
 
         message.setResults(result)
 
 def bigtest_www(message):
-    req = sj.SolrQueryRequest.cast_(message.getParam('request'))
-    rsp = sj.SolrQueryResponse.cast_(message.getParam('response'))
+    req = SolrQueryRequest.cast_(message.getParam('request'))
+    rsp = SolrQueryResponse.cast_(message.getParam('response'))
 
     params = req.getParams()
     action = params.get("action")

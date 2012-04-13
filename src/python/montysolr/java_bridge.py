@@ -23,7 +23,7 @@ Created on Jan 13, 2011
 '''
 
 
-class SimpleBridge(sj.MontySolrBridge):
+class SimpleBridge(sj.MontySolrBridge): #@UndefinedVariable
 
     def __init__(self, handler=None):
         if not handler:

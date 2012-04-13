@@ -12,10 +12,11 @@ python unittest_example_bigtest.py Test.test_bigtest01
 
 import unittest
 from montysolr.tests.montysolr_testcase import LuceneTestCase
-from montysolr.initvm import JAVA as sj
+from montysolr.initvm import JAVA as j
 from invenio import intbitset
 import time
 
+JArray_byte = j.JArray_byte #@UndefinedVariable
 
 class Test(LuceneTestCase):
 
@@ -36,7 +37,7 @@ class Test(LuceneTestCase):
                     .setParam('filled', int(self.size * 0.3))
 
         self.bridge.sendMessage(message)
-        res = sj.JArray_byte.cast_(message.getResults())
+        res = JArray_byte.cast_(message.getResults())
         ibs = intbitset.intbitset()
         ibs = ibs.fastload(res.string_)
 

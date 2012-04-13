@@ -16,7 +16,6 @@
 	<property name="build.dir" location="build" />
 	<property name="dist.dir" value="build/dist" />
 	<property name="classes.dir" value="build/classes/java" />
-	<property name="jar.dir" value="${build.dir}/jar" />
 
 	<property file="build.properties" />
 
@@ -32,7 +31,6 @@
 	<property name="lib.dir" value="lib" />
 	<property name="app.name" value="montysolr_java" />
 	<property name="app.version" value="0.1" />
-	<property name="jar.dir" value="${jar.dir}/${app.name}-${app.version}.jar" />
 	<property name="jar.suffix" value="${app.name}-${app.version}.jar" />
 	<property name="app.solr.name" value="solr_java" />
 	<property name="app.solr.version" value="0.1" />
@@ -120,7 +118,7 @@
 	<target name="compile-test" depends="compile,common.compile-test" />
 
 	<target name="config" depends="init">
-		<property name="my.montysolr.jar" value="${jar.dir}/${jar.suffix}" />
+		<property name="my.montysolr.jar" value="${build.dir}/${final.name}.jar" />
 
 	</target>
 
@@ -129,8 +127,7 @@
 	          description="Prints out instructions">
 		<echo message="Welcome to the MontySolr project!" />
 		<echo message="Use 'ant build-all' to compile MontySolr and prepare demos." />
-		<echo message="Use 'ant run' to run the example." />
-		<echo message="Use 'ant run-daemon' to run the example with logging." />
+		<echo message="Use 'ant run-example' to run the example." />
 
 		<echo message="And for developers:"/>
 		<echo message="Use 'ant clean' to clean compiled files." />
@@ -247,7 +244,7 @@
 
 
 		<path id="montysolr.classpath">
-			<fileset dir="${jar.dir}" includes="**/*.jar" />
+			<fileset dir="${build.dir}" includes="montysolr*.jar" />
 			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
 			<fileset dir="${solr.real.location}" includes="example/lib/**/*.jar" />
 			<fileset dir="${webdist.home}" includes="lib/**/*.jar" />
@@ -264,18 +261,6 @@
 	</target>
 
 
-	<!-- create a montysolr.jar that we can include and that contains our extra code -->
-	<target name="build-jar" depends="config-build,compile">
-		<mkdir dir="${jar.dir}" />
-		<jar destfile="${my.montysolr.jar}" filesetmanifest="mergewithoutmain">
-			<manifest>
-				<attribute name="Built-By" value="${user.name}" />
-				<attribute name="Main-Class" value="${jcc.build}" />
-				<attribute name="Class-Path" value="." />
-			</manifest>
-			<fileset dir="${classes.dir}" />
-		</jar>
-	</target>
 
 	<!-- writes into a simple format various config variables, they can be used by unittests/java -->
 	<target name="write-properties">
@@ -310,11 +295,11 @@ lucene.version=${lucene.version}
 
 	<!-- Builds jar and also compile Java-Pyhon wrapper - this is all you need to run Solr inside Python -->
 	<target name="montysolr-jetty-build"
-		depends="config-build,build-jar,montysolr-jetty-egg-compilation,unzip-egg">
+		depends="config-build,jar,montysolr-jetty-egg-compilation,unzip-egg">
 	</target>
 
 
-	<target name="montysolr-jetty-egg-compilation" depends="build-jar">
+	<target name="montysolr-jetty-egg-compilation" depends="jar">
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 
@@ -380,17 +365,16 @@ lucene.version=${lucene.version}
     ==================================================================
     -->
 
-	<target name="build-all" depends="examples,build-solr,build,build-contrib"
+	<target name="build-all" depends="example,build-solr,build,build-contrib"
 		description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
 
 	<target name="build" depends="config-build,compile-montysolr-egg,unzip-egg"
 		   description="Build MontySolr separately"/>
 
 
-	<target name="build-test" depends="build,run" />
 
 	<!-- Compile egg for embedding into Java VM -->
-	<target name="compile-montysolr-egg" depends="build-jar">
+	<target name="compile-montysolr-egg" depends="compile,jar">
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
 
@@ -510,58 +494,8 @@ lucene.version=${lucene.version}
 	</target>
 
 
-	<target name="run-bare" depends="config-build,compile">
-		<echo>
-Running montysolr as:
-========
-java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}${toString:montysolr.classpath}'
-	-Dsolr.solr.home=${webdist.home}/solr -Dsolr.data.dir=${webdist.home}/solr/data
-	-Djava.library.path=${jcc_egg}
-	${env.MONTYSOLR_JVMARGS}
-	--webroot ${webdist.webapp}
-	--context /solr
-	${env.MONTYSOLR_ARGS}
-		</echo>
-		<java classpath="${jcc_egg}/jcc/classes${path.separator}${classes.dir}"
-			classpathref="montysolr.classpath"
-			fork="true"
-			newenvironment="${env.MONTYSOLR_NEWENVIRONMENT}"
-			classname="invenio.montysolr.JettyRunnerPythonVM"
-			>
 
-			<env key="PYTHONPATH" path="${env.PYTHONPATH}" />
-			<jvmarg line="-Dsolr.solr.home=${webdist.home}/solr -Dsolr.data.dir=${webdist.home}/solr/data"/>
-			<jvmarg line="-Djava.library.path=${jcc_egg}"/>
-			<jvmarg line="${env.MONTYSOLR_JVMARGS}"/>
-			<arg value="--webroot"/>
-			<arg value="${webdist.webapp}"/>
-			<arg value="--context"/>
-			<arg value="/solr"/>
-			<arg line="${env.MONTYSOLR_ARGS}"/>
-		</java>
-		
 
-	</target>
-
-	<target name="run-daemon" depends="config" >
-		<exec executable="ant" failonerror="true" dir="${montysolr.home}" logerror="true">
-			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
-			<env key="MONTYSOLR_JVMARGS" value="${run.solr.jvmargs} ${env.MONTYSOLR_JVMARGS} -Djava.util.logging.config.file=${webdist.home}/etc/logging.properties" />
-			<env key="MONTYSOLR_ARGS" value="${run.solr.args} ${env.MONTYSOLR_ARGS} --daemon" />
-			<arg value="run-bare"/>
-		</exec>
-	</target>
-
-	<target name="run" depends="config"
-        description="Starts MontySolr">
-
-		<exec executable="ant" failonerror="true" dir="${montysolr.home}" logerror="true">
-			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
-			<env key="MONTYSOLR_JVMARGS" value="${run.solr.jvmargs} ${env.MONTYSOLR_JVMARGS} " />
-			<env key="MONTYSOLR_ARGS" value="${run.solr.args} ${env.MONTYSOLR_ARGS} --daemon"/>
-			<arg value="run-bare"/>
-		</exec>
-	</target>
 
 
 
@@ -572,47 +506,11 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
     -->
 
 	
-	<target name="examples"
-          description="Assembels MontySolr example demos (from Solr and our sources)"
+	<target name="example"
           depends="check-solr-location,download-solr,build-solr-example">
-
-		<apply executable="ant" type="dir" dir="${montysolr.home}">
-
-			<arg line="assemble-example" />
-			<arg line="-Dassemble.source"/>
-			<arg value="${solr.real.location}/example" />
-			<arg line="-Dassemble.target"/>
-			<srcfile />
-
-			<dirset dir="${montysolr.home}">
-				<include name="examples/*"/>
-			</dirset>
-		</apply>
-
-
-		<echo>
-	    The MontySolr examples were assembled from the original Solr example distribution
-		(${solr.home}/example)
-		See ${montysolr.home}/examples/README.txt for instructions on how to
-		run the demos.
-		</echo>
 	</target>
 
 	
-	<target name="assemble-example" depends="config-build">
-		<!-- called only from the examples target, automatically -->
-		<copy todir="${assemble.target}" overwrite="false">
-			<fileset dir="${assemble.source}">
-				<include name="**/**" />
-			</fileset>
-		</copy>
-		<echo>
-	      Copied from ${assemble.source} to ${assemble.target}
-	   </echo>
-	</target>
-
-
-
 
 	<!-- this target sets the location of the solr, if not present, we'll assume build/solr-download/apache-solr-${solr.version}/solr
 	   The property may also be set by a download-solr task
@@ -714,8 +612,14 @@ java -cp '${jcc_egg}/jcc/classes${path.separator}${classes.dir}${path.separator}
 
 
 	<target name="run-example"
-	   description="Assembles and runs the example"
-	   depends="run-daemon">
+	   description="Assembles Invenio example and starts MontySolr (don't forget to do build-all first)"
+	   depends="">
+
+		<exec executable="ant" dir="${common.dir}/contrib/examples" logerror="true" 
+			newenvironment="true">
+            <arg line="build-one run-configured -Dename=invenio -Dprofile=normal.profile" />
+        </exec>
+
 	</target>
 
 	

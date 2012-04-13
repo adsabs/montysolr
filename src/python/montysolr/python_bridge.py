@@ -23,7 +23,7 @@ import sys
 
 class JVMBridge(object):
     
-    def x__new__(cls, *args):
+    def x__new__(cls, *args): #@NoSelf
         """This will force singleton"""
         if hasattr(initvm.montysolr_java, '_JVMBridge_SINGLETON'):
             return getattr(initvm.montysolr_java, '_JVMBridge_SINGLETON')

@@ -12,11 +12,20 @@ python unittest_example_bigtest.py Test.test_bigtest01
 
 import unittest
 from montysolr.tests.montysolr_testcase import LuceneTestCase
-from montysolr.initvm import JAVA as sj
+from montysolr.initvm import JAVA as j
 import os
 import time
 import sys
 
+JArray_string = j.JArray_string #@UndefinedVariable
+JArray_int = j.JArray_int #@UndefinedVariable
+JArray_byte = j.JArray_byte #@UndefinedVariable
+Integer = j.Integer #@UndefinedVariable
+HashMap = j.HashMap #@UndefinedVariable
+String = j.String #@UndefinedVariable
+MapSolrParams = j.MapSolrParams #@UndefinedVariable
+SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+LocalSolrQueryRequest = j.LocalSolrQueryRequest #@UndefinedVariable
 
 class Test(LuceneTestCase):
 
@@ -36,7 +45,7 @@ class Test(LuceneTestCase):
 
         self.bridge.sendMessage(message)
 
-        res = sj.JArray_int.cast_(message.getResults())
+        res = JArray_int.cast_(message.getResults())
         res = list(res)
         assert len(res) == self.size
         assert res[0] == 0
@@ -50,7 +59,7 @@ class Test(LuceneTestCase):
                     .setParam('action', 'recids_str') \
                     .setParam('size', self.size)
         self.bridge.sendMessage(message)
-        res = sj.JArray_string.cast_(message.getResults())
+        res = JArray_string.cast_(message.getResults())
         assert len(res) == self.size
         assert res[0] == '0'
         assert res[5] == '5'
@@ -64,10 +73,10 @@ class Test(LuceneTestCase):
                     .setParam('size', self.size)
 
         self.bridge.sendMessage(message)
-        res = sj.HashMap.cast_(message.getResults())
+        res = HashMap.cast_(message.getResults())
         assert res.size() == self.size
-        assert str(sj.String.cast_(res.get('0'))) == '0'
-        assert str(sj.String.cast_(res.get('5'))) == '5'
+        assert str(String.cast_(res.get('0'))) == '0'
+        assert str(String.cast_(res.get('5'))) == '5'
 
 
 
@@ -79,10 +88,10 @@ class Test(LuceneTestCase):
 
         self.bridge.sendMessage(message)
 
-        res = sj.HashMap.cast_(message.getResults())
+        res = HashMap.cast_(message.getResults())
         assert res.size() == self.size
-        assert sj.Integer.cast_(res.get('0')).equals(0)
-        assert sj.Integer.cast_(res.get('5')).equals(5)
+        assert Integer.cast_(res.get('0')).equals(0)
+        assert Integer.cast_(res.get('5')).equals(5)
 
 
     def test_bigtest05(self):
@@ -92,10 +101,10 @@ class Test(LuceneTestCase):
                     .setParam('action', 'recids_hm_intint') \
                     .setParam('size', self.size)
         self.bridge.sendMessage(message)
-        res = sj.HashMap.cast_(message.getResults())
+        res = HashMap.cast_(message.getResults())
         assert res.size() == self.size
-        assert sj.Integer.cast_(res.get(0)).equals(0)
-        assert sj.Integer.cast_(res.get(5)).equals(5)
+        assert Integer.cast_(res.get(0)).equals(0)
+        assert Integer.cast_(res.get(5)).equals(5)
 
 
 
@@ -104,14 +113,14 @@ class Test(LuceneTestCase):
         '''Get recids_hm_intint -- TODO: move to demotest,
         it will not work, because it needs solr instance'''
 
-        #req = sj.QueryRequest()
+        #req = QueryRequest()
         size = self.size
-        hm = sj.HashMap().of_(sj.String, sj.String)
+        hm = HashMap().of_(String, String)
         hm.put('action', 'recids_hm_intint')
         hm.put('size', str(size))
-        params = sj.MapSolrParams(hm)
-        req = sj.LocalSolrQueryRequest(self.core, params)
-        rsp = sj.SolrQueryResponse()
+        params = MapSolrParams(hm)
+        req = LocalSolrQueryRequest(self.core, params)
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('bigtest_www') \
                     .setParam('response', rsp) \
@@ -119,10 +128,10 @@ class Test(LuceneTestCase):
 
         self.bridge.sendMessage(message)
 
-        res = sj.HashMap.cast_(message.getResults())
+        res = HashMap.cast_(message.getResults())
         assert res.size() == self.size
-        assert sj.Integer.cast_(res.get(0)).equals(0)
-        assert sj.Integer.cast_(res.get(5)).equals(5)
+        assert Integer.cast_(res.get(0)).equals(0)
+        assert Integer.cast_(res.get(5)).equals(5)
 
 
     def timeit(self):

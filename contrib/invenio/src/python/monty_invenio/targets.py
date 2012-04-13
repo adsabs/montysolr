@@ -7,7 +7,7 @@ Created on Feb 4, 2011
 from cStringIO import StringIO
 from invenio.intbitset import intbitset
 from montysolr import config
-from montysolr.initvm import JAVA as sj
+from montysolr.initvm import JAVA as j
 from montysolr.utils import MontySolrTarget, make_targets
 import logging
 import os
@@ -15,9 +15,18 @@ import sys
 
 import monty_invenio.multiprocess_api_calls as multi_api_calls
 import monty_invenio.api_calls as api_calls
-
 import time
 
+JArray_string = j.JArray_string #@UndefinedVariable
+JArray_int = j.JArray_int #@UndefinedVariable
+JArray_byte = j.JArray_byte #@UndefinedVariable
+QueryRequest = j.QueryRequest #@UndefinedVariable
+SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+Integer = j.Integer #@UndefinedVariable
+HashMap = j.HashMap #@UndefinedVariable
+List = j.List #@UndefinedVariable
+String = j.String #@UndefinedVariable
+ArrayList = j.ArrayList #@UndefinedVariable
 
 
 def format_search_results(message):
@@ -31,7 +40,7 @@ def format_search_results(message):
         rsp: SolrQueryResponse
     
     '''
-    rsp = sj.SolrQueryResponse.cast_(message.getParam('response'))
+    rsp = SolrQueryResponse.cast_(message.getParam('response'))
     
     recids = message.getParamArray_int("recids")
     start = time.time()
@@ -59,7 +68,7 @@ def invenio_search(message):
     if params is None:
         return
     
-    params = sj.HashMap.cast_(params).of_(sj.String, sj.List)
+    params = HashMap.cast_(params).of_(String, List)
     kwargs = {}
     
     kset = params.keySet().toArray()
@@ -67,7 +76,7 @@ def invenio_search(message):
     max_size = len(vset)
     i = 0
     while i < max_size:
-        v = list(sj.ArrayList(vset[i]).of_(sj.String))
+        v = list(ArrayList(vset[i]).of_(String))
         if len(v) == 1:
             kwargs[str(kset[i])] = v[0]
         else:
@@ -78,7 +87,7 @@ def invenio_search(message):
     #(wid, result) = api_calls.dispatch('invenio_search', kwargs)
     
     # dumb, but fast
-    (wid, result) = api_calls.dispatch('invenio_search_xml', kwargs)
+    (wid, result) = api_calls.dispatch('invenio_search_xml2', kwargs)
     
     if not (isinstance(result, str) or result is None):
         raise Exception('Wrong arguments - I\'ll rather die than give you what you want!')
@@ -98,7 +107,7 @@ def perform_request_search_bitset(message):
     #offset, hit_dump, total_matches, searcher_id = searching.multiprocess_search(query, 0)
     (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, max_len=max_len, offset=offset)
     #message.threadInfo("query=%s, total_hits=%s" % (query, total_matches))
-    message.setResults(sj.JArray_byte(intbitset(hits).fastdump()))
+    message.setResults(JArray_byte(intbitset(hits).fastdump()))
 
 
 
@@ -115,9 +124,9 @@ def perform_request_search_ints(message):
     #offset, hit_list, total_matches, searcher_id = searching.multiprocess_search(query, 0)
     (wid, (offset, hits, total_matches)) = api_calls.dispatch('search', query, max_len=max_len, offset=offset)
     if len(hits):
-        message.setResults(sj.JArray_int(hits))
+        message.setResults(JArray_int(hits))
     else:
-        message.setResults(sj.JArray_int([]))
+        message.setResults(JArray_int([]))
 
     message.setParam("total", total_matches)
 
@@ -127,22 +136,22 @@ def get_recids_changes(message):
     """Retrieves the recids of the last changed documents"""
     last_recid = None
     if message.getParam("last_recid"):
-        #last_recid = int(sj.Integer.cast_(message.getParam("last_recid")).intValue())
+        #last_recid = int(Integer.cast_(message.getParam("last_recid")).intValue())
         last_recid = int(str(message.getParam("last_recid")))
     mod_date = None
     if message.getParam("mod_date"):
         mod_date = str(message.getParam("mod_date"))
     max_records = 10000
     if message.getParam('max_records'):
-        max_records = int(sj.Integer.cast_(message.getParam("max_records")).intValue())
+        max_records = int(Integer.cast_(message.getParam("max_records")).intValue())
     if last_recid and last_recid == -1:
         mod_date = None
     (wid, results) = api_calls.dispatch("get_recids_changes", last_recid, max_recs=max_records, mod_date=mod_date)
     if results:
         data, last_recid, mod_date = results
-        out = sj.HashMap().of_(sj.String, sj.JArray_int)
+        out = HashMap().of_(String, JArray_int)
         for k,v in data.items():
-            out.put(k, sj.JArray_int(v))
+            out.put(k, JArray_int(v))
         message.setResults(out)
         message.setParam('mod_date', mod_date)
         message.setParam('last_recid', last_recid)
@@ -150,7 +159,7 @@ def get_recids_changes(message):
 
 def get_citation_dict(message):
     '''TODO: unittest'''
-    dictname = sj.String.cast_(message.getParam('dictname'))
+    dictname = String.cast_(message.getParam('dictname'))
     
     # we will call the local module (not dispatched remotely)
     if hasattr(api_calls, '_dispatch'):
@@ -159,9 +168,9 @@ def get_citation_dict(message):
         wid, cd = api_calls.dispatch("get_citation_dict", dictname)
     
     if cd:
-        hm = sj.HashMap().of_(sj.String, sj.JArray_int)
+        hm = HashMap().of_(String, JArray_int)
         for k,v in cd.items():
-            j_array = sj.JArray_int(v)
+            j_array = JArray_int(v)
             hm.put(k, j_array)
         message.put('result', hm)
         
@@ -174,7 +183,7 @@ def sort_and_format(message):
     start = time.time()
     
     recids = intbitset(message.getParamArray_int("recids"))
-    kwargs = sj.HashMap.cast_(message.getParam('kwargs'))
+    kwargs = HashMap.cast_(message.getParam('kwargs'))
 
     kws = {}
 
@@ -203,7 +212,7 @@ def sort_and_format(message):
         message.threadInfo("end: citation_summary pid=%s, finished in %s" % (wid, time.time() - start))
 
     if isinstance(output, list):
-        message.setResults(sj.JArray_int(output))
+        message.setResults(JArray_int(output))
         message.setParam("rtype", "int")
     else:
         message.setResults(output)
@@ -215,9 +224,9 @@ def diagnostic_test(message):
     out = []
     message.setParam("query", "boson")
     perform_request_search_ints(message)
-    res = sj.JArray_int.cast_(message.getResults())
+    res = JArray_int.cast_(message.getResults())
     out.append('Search for "boson" retrieved: %s hits' % len(res) )
-    out.append('Total hits: %s' % sj.Integer.cast_(message.getParam("total")))
+    out.append('Total hits: %s' % Integer.cast_(message.getParam("total")))
     message.setResults('\n'.join(out))
 
 '''
@@ -261,7 +270,7 @@ def search_unit_solr(message):
     nf = res_part.getNumFound()
 
     a_size = res_part.size()
-    res = sj.JArray_int(a_size)
+    res = JArray_int(a_size)
     res_part = res_part.toArray()
     if a_size:
         #it = res_part.iterator()

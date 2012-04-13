@@ -54,6 +54,13 @@
 	</condition>
 	<property name="example.config" value="${profile}"/>
 
+	<condition property="run.target" value="run-bare">
+        <not>
+            <isset property="target"/>
+        </not>
+    </condition>
+    <property name="run.target" value="${target}"/>
+	
 
 	<!-- these will be used when running tests and command line montysolr
          you can set them as:
@@ -83,6 +90,9 @@
         <fileset dir="${build.dir}/${example.name}/lib">
             <include name="**/*.jar"/>
         </fileset>
+		
+		<!-- location of JCC classes -->
+        <pathelement location="${prop.jcc_egg}/jcc/classes" />
 		
 	</path>
 	
@@ -181,8 +191,8 @@
 		<!-- put core jar into example/lib -->
         <copy todir="${build.dir}/${example.name}/lib" flatten="true" 
         	overwrite="true" verbose="yes">
-            <fileset dir="${common.dir}/build/jar">
-                <include name="*/montysolr*.jar" />
+            <fileset dir="${common.dir}/build">
+                <include name="montysolr*.jar" />
             </fileset>
         </copy>
 
@@ -231,6 +241,15 @@
                 <include name="**" />
             </fileset>
 		</chmod>
+		
+		<!-- TODO: to remove this after we stop using MontySolrJettyRunner -->
+		<mkdir dir="${build.dir}/${example.name}/lib/solr-extracted"/>
+		<copy todir="${build.dir}/${example.name}/lib/solr-extracted" overwrite="false" flatten="true">
+            <fileset dir="${common.dir}/build/solr-download">
+                <include name="apache-solr*/solr/dist/montysolr-extracted/*.jar" />
+            </fileset>
+        </copy>
+		
 
 	</target>
 	
@@ -243,19 +262,19 @@
 			<arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}" />
 			<arg line="-Dsolr.abortOnConfigurationError=false" />
 			<arg value="run-bare"/>
-			<arg value="-v"/>
 		</exec>
 	</target>
 
 
 
-	<target name="run-configured" description="Run the example with special configuration, usage: ant run -Dename={example-name} -Dprofile={profile}">
+	<target name="run-configured" description="Run the example with special configuration, usage: ant run-configured -Dename={example-name} -Dprofile={profile}.
+		If you only want to generate shell script,use: ant run-configured -Dename={example-name} -Dprofile={profile} -Dtarget=generate-run.sh">
 		
 		<!-- i can't do ${example.name}.PYTHON without external lib
 		     eg. http://ant.apache.org/antlibs/props/index.html -->
 		
 		<property prefix="xxx" file="${example.name}/${example.config}" />
-
+		
 		<exec executable="ant" failonerror="true" >
 			<env key="PYTHONPATH" value="${xxx.PYTHONPATH}" />
 			<env key="MONTYSOLR_HANDLER" value="${xxx.MONTYSOLR_HANDLER}" />
@@ -264,12 +283,12 @@
 			<env key="MONTYSOLR_JVMARGS" value="${xxx.MONTYSOLR_JVMARGS}" />
 			<env key="MONTYSOLR_ARGS" value="${xxx.MONTYSOLR_ARGS}" />
 			<arg line="-Dename=${example.name} -Dignore-environment=false"/>
-			<arg value="run-bare"/>
+			<arg value="${run.target}"/>
 		</exec>
 	</target>
 
 
-	<target name="run-bare" depends="build-one">
+	<target name="run-bare" depends="generate-run.sh">
 		<run-montysolr classpath="${prop.jcc_egg}"
 		      classpathref="examples.classpath"
 		   	  ignore-environment="${example.ignore-environment}"
@@ -283,7 +302,22 @@
 		   	  basedir="${build.dir}/${example.name}"
 		   />
 	</target>
-
+    
+	<target name="generate-run.sh">
+		<create-run.sh classpath="${prop.jcc_egg}"
+		              classpathref="examples.classpath"
+		              ignore-environment="${example.ignore-environment}"
+		              pythonpath="${env.PYTHONPATH}"
+		              webroot="${build.dir}/${example.name}/webapps/solr.war"
+		              solr-home-dir="${build.dir}/${example.name}/solr"
+		              solr-data-dir="${build.dir}/${example.name}/solr/data"
+		              jcc-classpath="${prop.jcc_egg}"
+		              jvmargs="${env.MONTYSOLR_JVMARGS}"
+		              arguments="${env.MONTYSOLR_ARGS}"
+		              basedir="${build.dir}/${example.name}"
+		           />   
+	</target>
+	
 	
 	    
 

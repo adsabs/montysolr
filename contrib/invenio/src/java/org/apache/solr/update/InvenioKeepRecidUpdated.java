@@ -154,6 +154,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	private volatile int counter = 0;
 	private boolean asynchronous = true;
 	private volatile String workerMessage = "";
+	private volatile String tokenMessage = "";
 	
 	static final String IKRU_PROPERTIES = "invenio_updater.properties"; // will be put into context
 	static final String LAST_RECID = "last_recid"; // name of the param from url and also what is passed to python
@@ -171,13 +172,14 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	static final String PARAM_BATCHSIZE = "batchsize";
 	static final String PARAM_COMMIT = "commit";
 	static final String PARAM_MAX_RECID = "max_recid";
+	static final String PARAM_TOKEN = "idtoken";
 
 	
 	private String pythonFunctionName = "get_recids_changes";
 
 
 
-	private int max_maximport = 200; //TODO: retrieve value of this from the config
+	private int max_maximport = 50000; //TODO: retrieve value of this from the config
 	private int max_batchsize = 50000;
 	
 
@@ -191,16 +193,17 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 					"Import is already running, please retry later...");
 			rsp.add("importStatus", "busy");
 			rsp.add("workerMessage", getWorkerMessage());
+			rsp.add(PARAM_TOKEN, getToken());
 			return;
 		}
 
 		setBusy(true);
 
 		SolrParams params = req.getParams();
-		long start = System.currentTimeMillis();
-		
-		
 		Properties prop = loadProperties(params);
+		setToken(prop.getProperty(PARAM_TOKEN));
+		
+		long start = System.currentTimeMillis();
 		
 		Map<String, Object> dictData = null;
 		
@@ -237,8 +240,19 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		rsp.add("workerMessage", getWorkerMessage());
 		rsp.add("QTime", end - start);
 		setWorkerMessage("Last import finished in: " + (end - start));
+		rsp.add(PARAM_TOKEN, getToken());
+		setToken("");
+		
 	}
 	
+	private void setToken(String string) {
+		tokenMessage = string;
+	}
+
+	private String getToken() {
+		return tokenMessage;
+	}
+
 	/*
 	 * The method that discovers what was changed in Invenio DB
 	 */
@@ -447,6 +461,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		prop.put(LAST_RECID, String.valueOf((Integer) data.get(LAST_RECID)));
 		prop.remove(PARAM_BATCHSIZE);
 		prop.remove(PARAM_MAXIMPORT);
+		prop.remove(PARAM_TOKEN);
 		saveProperties(prop);
 		
 		
@@ -513,7 +528,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			
 	    	File f = getPropertyFile();
 	    	if (f.exists()) {
-	    		prop.load(new FileInputStream(f));
+	    		FileInputStream input = new FileInputStream(f);
+	    		prop.load(input);
+	    		input.close();
 	    	}
 	    	
 	    	String prop_recid = null;
@@ -569,6 +586,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 					prop.put(PARAM_MAXIMPORT, mi);
 				}
 			}
+			
+			prop.put(PARAM_TOKEN, params.get(PARAM_TOKEN, ""));
 			
 	    	return prop;
 	}
