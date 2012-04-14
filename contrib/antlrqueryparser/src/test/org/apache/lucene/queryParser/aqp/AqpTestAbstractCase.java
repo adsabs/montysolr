@@ -123,13 +123,23 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 		return parser.parse(query, "field");
 	}
 
-	public void assertQueryEquals(String query, Analyzer a, String result)
+	public Query assertQueryEquals(String query, Analyzer a, String result)
 			throws Exception {
 		Query q = getQuery(query, a);
 		String s = q.toString("field");
 		if (!s.equals(result)) {
 			debugFail(q.toString(), result, s);
 		}
+		return q;
+	}
+	
+	public Query assertQueryEquals(String query, Analyzer a, String result, Class<?> clazz)
+		throws Exception {
+		Query q = assertQueryEquals(query, a, result);
+		if (!q.getClass().isAssignableFrom(clazz)) {
+			debugFail(q.toString(), result, "Query is not: " + clazz + " but: " + q.getClass());
+		}
+		return q;
 	}
 
 	public void assertQueryEqualsAllowLeadingWildcard(String query, Analyzer a,

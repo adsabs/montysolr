@@ -283,23 +283,23 @@ mainQ:
 "A – b"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL A)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL b)))))"		
 "A + b"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL A)))) (MODIFIER + (TMODIFIER (FIELD (QNORMAL b)))))"		
 				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
+// examples added March27	->			
+mainQ:				
+"weak NEAR lensing"	->	"(DEFOP (NEAR (MODIFIER (TMODIFIER (FIELD (QNORMAL weak)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL lensing))))))"		
+//TODO	->			
+"\"weak lensing\""~	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"weak lensing\")))))"		
+"author:(huchra)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (FIELD author (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL huchra))))))))))"		
+"author:(huchra, j)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (FIELD author (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL huchra)))) (MODIFIER (TMODIFIER (FIELD (QCOMMA ,)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL j))))))))))"		
+"author:(kurtz; -eichhorn, g)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (FIELD author (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL kurtz;)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL eichhorn)))) (MODIFIER (TMODIFIER (FIELD (QCOMMA ,)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL g))))))))))"		
+"author:(kurzz~2; -echhorn)^2 OR ^accomazzi, a"	->	"(DEFOP (OR (CLAUSE (MODIFIER (TMODIFIER (BOOST ^2) FUZZY (FIELD author (DEFOP (MODIFIER (TMODIFIER BOOST (FUZZY ~2) (FIELD (QNORMAL kurzz)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL ;)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL echhorn))))))))) (MODIFIER (TMODIFIER (FIELD (QPOSITION ^accomazzi, a))))))"		
+"author:(muench-nashrallah)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (FIELD author (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL muench-nashrallah))))))))))"		
+"\"dark matter\" OR (dark matter -LHC)"	->	"(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QPHRASE \"dark matter\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL dark)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL matter)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL LHC))))))"		
+"year:[2000 TO *]"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD year (QRANGEIN (QNORMAL 2000) (QANYTHING *))))))"		
+"year:2000-"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD year (QDATE 2000-)))))"		
+"2000-"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QDATE 2000-)))))"		
+"CO2+"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL CO2+)))))"		
+//TODO	->			
+"one identifier:doi:123.123456"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD identifier (QIDENTIFIER doi:123.123456)))))"		
 				
 				
 				

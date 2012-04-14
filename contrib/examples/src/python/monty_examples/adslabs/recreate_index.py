@@ -53,7 +53,7 @@ def req(url, **kwargs):
 
 def recreate_index(solr_url, 
                    max_time=3600,
-                   delay=3,
+                   delay=15,
                    handler_name='/invenio/update',
                    maximport=200,
                    batchsize=1000,
@@ -102,7 +102,7 @@ def recreate_index(solr_url,
         recs = recs + batchsize
          
         log.info('Indexing (round/recs/last-round-ms/total-s): %s./%s/%sms/%ss' 
-                 % (round, recs, last_round - time.time(), (now-start) / 1000))
+                 % (round, recs, time.time() - last_round, (time.time()-start) / 1000))
         
         last_round = time.time()
             
