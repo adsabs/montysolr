@@ -87,7 +87,11 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("200xAJ....125..525J", wsa, "200xAJ....125..525J");
 	}
 	
-	
+	/**
+	 * 
+	 * 
+	 * @throws Exception
+	 */
 	public void testDateRanges() throws Exception {
 		assertQueryEquals("intitle:\"QSO\" 1995-2000", null, "intitle:\"qso\" year:[1995 2000]");
 		
@@ -106,6 +110,11 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("2000-", null, "");
 	}
 	
+	/**
+	 * OK, 17Apr
+	 * 
+	 * @throws Exception
+	 */
 	public void testRanges() throws Exception {
 		
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
@@ -158,46 +167,46 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	
 	
 	public void testModifiers() throws Exception {
-		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
-		assertQueryEquals("jakarta^4 apache", null, "jakarta^4 apache");
-		assertQueryEquals("\"jakarta apache\"^4 \"Apache Lucene\"", null, "\"jakarta apache\"^4 \"apache lucene\"");
 		
-		assertQueryEquals("this +(that thus)^7", null, "this +(that thus)^7");
-		assertQueryEquals("this (+(that)^7)", null, "this +(that)^7");
+		assertQueryEquals("jakarta^4 apache", null, "jakarta^4.0 apache");
+		assertQueryEquals("\"jakarta apache\"^4 \"Apache Lucene\"", null, "\"jakarta apache\"^4.0 \"apache lucene\"");
 		
-		assertQueryEquals("roam~", null, "roam");
+		assertQueryEquals("this +(that thus)^7", null, "this +((that thus)^7.0)");
+		assertQueryEquals("this (+(that)^7)", null, "this +that^7.0");
+		
+		assertQueryEquals("roam~", null, "roam~0.5");
 		assertQueryEquals("roam~0.8", null, "roam~0.8");
-		assertQueryEquals("roam~0.899999999", null, "roam~0.899999999");
-		assertQueryEquals("roam~8", null, "roam~8");
+		assertQueryEquals("roam~0.899999999", null, "roam~0.9");
+		assertQueryNodeException("roam~8");
 		assertQueryEquals("roam^", null, "roam");
 		assertQueryEquals("roam^0.8", null, "roam^0.8");
-		assertQueryEquals("roam^0.899999999", null, "roam^0.899999999");
-		assertQueryEquals("roam^8", null, "roam^8");
+		assertQueryEquals("roam^0.899999999", null, "roam^0.9");
+		assertQueryEquals("roam^8", null, "roam^8.0");
 		
 		
-		// this should fail?
-		//assertQueryEquals("roam^~", null, "");
-		assertQueryEquals("roam^0.8~", null, "roam^0.8");
-		assertQueryEquals("roam^0.899999999~0.5", null, "roam^0.899999999~0.5");
+		// this should fail
+		assertQueryNodeException("roam^~");
+		assertQueryEquals("roam^0.8~", null, "roam~0.5^0.8");
+		assertQueryEquals("roam^0.899999999~0.5", null, "roam~0.5^0.9");
 		
-		// this should fail?
-		assertQueryEquals("roam~^", null, "");
-		assertQueryEquals("roam~0.8^", null, "");
-		assertQueryEquals("roam~0.899999999^0.5", null, "");
-		assertQueryEquals("this^ 5", null, "");
+		// should this fail?
+		assertQueryEquals("roam~^", null, "roam~0.5");
+		assertQueryEquals("roam~0.8^", null, "roam~0.8");
+		assertQueryEquals("roam~0.899999999^0.5", null, "roam~0.9^0.5");
+		assertQueryEquals("this^ 5", null, "this^5.0");
 		assertQueryEquals("this^5~ 9", null, "");
-		assertQueryEquals("9999", null, "");
-		assertQueryEquals("9999.1", null, "");
-		assertQueryEquals("0.9999", null, "");
-		assertQueryEquals("00000000.9999", null, "");
+		assertQueryEquals("9999", null, "9999");
+		assertQueryEquals("9999.1", null, "9999.1");
+		assertQueryEquals("0.9999", null, "0.9999");
+		assertQueryEquals("00000000.9999", null, "00000000.9999");
 		
-		assertQueryEquals("\"weak lensing\"~", null, "");
+		assertQueryEquals("\"weak lensing\"~", null, "\"weak lensing\"");
 		assertQueryEquals("\"jakarta apache\"~10", null, "\"jakarta apache\"~10");
-		assertQueryEquals("\"jakarta apache\"^10", null, "\"jakarta apache\"^10");
+		assertQueryEquals("\"jakarta apache\"^10", null, "\"jakarta apache\"^10.0");
 		assertQueryEquals("\"jakarta apache\"~10^", null, "\"jakarta apache\"~10");
-		assertQueryEquals("\"jakarta apache\"^10~", null, "\"jakarta apache\"^10~");
-		assertQueryEquals("\"jakarta apache\"~10^0.6", null, "\"jakarta apache\"~10^0.6");
-		assertQueryEquals("\"jakarta apache\"^10~0.6", null, "\"jakarta apache\"~0.6^10");
+		assertQueryEquals("\"jakarta apache\"^10~", null, "\"jakarta apache\"^10.0");
+		assertQueryEquals("\"jakarta apache\"~10^0.6", null, "\"jakarta apache\"~10.0^0.6");
+		assertQueryEquals("\"jakarta apache\"^10~0.6", null, "\"jakarta apache\"~0.6^10.0");
 		
 		assertQueryEquals("#synonyms", null, "");
 		assertQueryEquals("#(request synonyms)", null, "");

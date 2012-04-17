@@ -2,8 +2,10 @@ package org.apache.lucene.queryParser.aqp.processors;
 
 import java.util.List;
 
+import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
@@ -67,8 +69,20 @@ public class AqpMODIFIERProcessor extends QueryNodeProcessorImpl implements
 			
 			
 			String modifier = ((AqpANTLRNode) node.getChildren().get(0)).getTokenName();
-			node = node.getChildren().get(node.getChildren().size()-1);
-			return new ModifierQueryNode(node, modifier.equals("PLUS") ?  ModifierQueryNode.Modifier.MOD_REQ : ModifierQueryNode.Modifier.MOD_NOT);
+			
+			QueryNode childNode = node.getChildren().get(node.getChildren().size()-1);
+			if (modifier.equals("PLUS")) {
+				return new ModifierQueryNode(childNode, ModifierQueryNode.Modifier.MOD_REQ);
+			}
+			else if (modifier.equals("MINUS")) {
+				return new ModifierQueryNode(childNode, ModifierQueryNode.Modifier.MOD_REQ);
+			}
+			else {
+				throw new QueryNodeException(new MessageImpl(
+		                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+		                "Unknown modifier: " + modifier + "\n" + node.toString()));
+			}
+			
 			
 		}
 		return node;

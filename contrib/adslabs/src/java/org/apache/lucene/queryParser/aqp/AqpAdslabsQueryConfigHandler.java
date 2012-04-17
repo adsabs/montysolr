@@ -7,6 +7,7 @@ import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.standard.config.AllowLeadingWildcardAttribute;
 import org.apache.lucene.queryParser.standard.config.AnalyzerAttribute;
+import org.apache.lucene.queryParser.standard.config.BoostAttribute;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute;
 import org.apache.lucene.queryParser.standard.config.DefaultPhraseSlopAttribute;
 import org.apache.lucene.queryParser.standard.config.FieldBoostMapFCListener;
@@ -43,6 +44,7 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		addAttribute(InvenioQueryAttribute.class);
 		addAttribute(MultiFieldAttribute.class);
 		addAttribute(DefaultProximityAttribute.class);
+		addAttribute(BoostAttribute.class);
 		
 		getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
 		getAttribute(AllowLeadingWildcardAttribute.class).setAllowLeadingWildcard(true);
