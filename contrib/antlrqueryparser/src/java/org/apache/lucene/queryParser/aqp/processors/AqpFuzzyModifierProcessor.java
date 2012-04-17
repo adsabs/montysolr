@@ -60,7 +60,7 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 			else  {
 				throw new QueryNodeException(new MessageImpl(
 						QueryParserMessages.INVALID_SYNTAX,
-						node.toString(), "Use of is ~ not allowed here"));
+						node.toString() + "\nUse of ~ is not allowed here"));
 			}
 			
 		}

@@ -101,37 +101,44 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("one 2009-2012", null, "");
 		assertQueryEquals("notdate 09-12", null, "");
 		assertQueryEquals("notdate 09-2012", null, "");
+		
+		assertQueryEquals("year:2000-", null, "");
+		assertQueryEquals("2000-", null, "");
 	}
 	
 	public void testRanges() throws Exception {
 		
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		
 		assertQueryEquals("[20020101 TO 20030101]", null, "[20020101 TO 20030101]");
 		assertQueryEquals("[20020101 TO 20030101]^0.5", null, "[20020101 TO 20030101]^0.5");
-		assertQueryEquals("[20020101 TO 20030101]^0.5~", null, "[20020101 TO 20030101]^0.5");
-		assertQueryEquals("[20020101 TO 20030101]^0.5~", null, "[20020101 TO 20030101]^0.5");
+		assertQueryNodeException("[20020101 TO 20030101]^0.5~");
+		assertQueryNodeException("[20020101 TO 20030101]^0.5~");
 		assertQueryEquals("title:[20020101 TO 20030101]", null, "title:[20020101 TO 20030101]");
 		assertQueryEquals("title:[20020101 TO 20030101]^0.5", null, "title:[20020101 TO 20030101]^0.5");
-		assertQueryEquals("title:[20020101 TO 20030101]^0.5~", null, "title:[20020101 TO 20030101]^0.5");
-		assertQueryEquals("title:[20020101 TO 20030101]^0.5~", null, "title:[20020101 TO 20030101]^0.5");
+		assertQueryNodeException("title:[20020101 TO 20030101]^0.5~");
+		assertQueryNodeException("title:[20020101 TO 20030101]^0.5~");
 		assertQueryEquals("[* TO 20030101]", null, "[* TO 20030101]");
 		assertQueryEquals("[20020101 TO *]^0.5", null, "[20020101 TO *]^0.5");
-		assertQueryEquals("[* 20030101]^0.5~", null, "[* 20030101]^0.5");
-		assertQueryEquals("[20020101 *]^0.5~", null, "[20020101 *]^0.5");
+		assertQueryNodeException("[* 20030101]^0.5~");
+		assertQueryNodeException("[20020101 *]^0.5~");
 		assertQueryEquals("[this TO that]", null, "[this TO that]");
 		assertQueryEquals("[this that]", null, "[this TO that]");
 		assertQueryEquals("[this TO *]", null, "[this TO *]");
 		assertQueryEquals("[this]", null, "[this TO *]");
 		assertQueryEquals("[* this]", null, "[* TO this]");
 		assertQueryEquals("[* TO this]", null, "[* TO this]");
-		assertQueryEquals("[\"this\" TO \"that*\"]", null, "[\"this\" TO \"that*\"]");
-		assertQueryEquals("[\"#$%^&\" TO \"&*()\"]", null, "[\"#$%^&\" TO \"&*()\"]");
+		assertQueryEquals("[\"this\" TO \"that*\"]", null, "[this TO that*]");
+		// TODO: verify this is correct (this phrase is not a phrase inside a range query)
+		assertQueryEquals("[\"this phrase\" TO \"that phrase*\"]", null, "[this phrase TO that phrase*]");
+		
+		assertQueryEquals("[\"#$%^&\" TO \"&*()\"]", wsa, "[#$%^& TO &*()]");
 		
 		assertQueryEquals("+a:[this TO that]", null, "a:[this TO that]");
 		assertQueryEquals("+a:[   this TO that   ]", null, "a:[this TO that]");
 		
-		assertQueryEquals("year:[2000 TO *]", null, "");
-		assertQueryEquals("year:2000-", null, "");
-		assertQueryEquals("2000-", null, "");
+		assertQueryEquals("year:[2000 TO *]", null, "year:[2000 TO *]");
+		
 	}
 	
 	public void testFunctionalQueries() throws Exception {
