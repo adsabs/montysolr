@@ -49,7 +49,7 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 				if (fuzzy<0.0f || fuzzy>=1.0f) {
 					throw new QueryNodeException(new MessageImpl(
 						QueryParserMessages.INVALID_SYNTAX,
-						node.toString(), "Similarity s must be 0.0 > s < 1.0"));
+						node.toString() + "\nSimilarity s must be 0.0 > s < 1.0"));
 				}
 				
 				FieldQueryNode fn = (FieldQueryNode) child;

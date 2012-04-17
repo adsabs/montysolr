@@ -52,7 +52,7 @@ clauseAnd
   ;
 
 clauseSemicolon
-  : (first=clauseComma  -> $first) (semicolon others=clauseComma -> ^(OPERATOR["SEMI"] clauseComma+ ))*
+  : (first=clauseComma  -> $first) (semicolon others=clauseComma -> ^(OPERATOR["SEMICOLON"] clauseComma+ ))*
   ;
 
 clauseComma

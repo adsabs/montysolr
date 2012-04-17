@@ -1,5 +1,7 @@
 package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsOPERATORProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsQPOSITIONProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpCLAUSEProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpDEFOPProcessor;
@@ -51,7 +53,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpTreeRewriteProcessor());
 	
 		add(new AqpMODIFIERProcessor());
-		add(new AqpOPERATORProcessor());
+		add(new AqpAdslabsOPERATORProcessor());
 		add(new AqpCLAUSEProcessor());
 		add(new AqpTMODIFIERProcessor());
 		add(new AqpBOOSTProcessor());
@@ -93,6 +95,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 	
 		add(new AqpGroupQueryOptimizerProcessor());
 		add(new AqpOptimizationProcessor());
+		add(new AqpAdslabsQPOSITIONProcessor());
 	}
 
 }

@@ -13,6 +13,7 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 
 
+
 /**
  * A generic class that is used by other query processors, eg.
  * {@link AqpQNORMALProcessor}
