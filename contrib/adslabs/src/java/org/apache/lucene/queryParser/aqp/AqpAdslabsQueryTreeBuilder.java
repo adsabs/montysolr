@@ -1,8 +1,10 @@
 package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryParser.aqp.builders.AqpAdslabsIdentifierNodeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.InvenioQueryNodeBuilder;
+import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsIdentifierNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.InvenioQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.NonAnalyzedQueryNode;
@@ -40,6 +42,7 @@ public class AqpAdslabsQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
 
 	public void init() {
 		setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
+		setBuilder(AqpAdslabsIdentifierNode.class, new AqpAdslabsIdentifierNodeBuilder());
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(NonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(InvenioQueryNode.class, new InvenioQueryNodeBuilder(this));

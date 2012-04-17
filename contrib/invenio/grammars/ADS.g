@@ -402,6 +402,7 @@ AUTHOR_SEARCH
 	'^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
 	;
 
+
 /*
 COORDINATE
 	:
@@ -463,6 +464,7 @@ WS  :   ( ' '
 fragment INT: '0' .. '9';
 
 
+
 fragment TERM_START_CHAR
 	:
 	(~(' ' | '\t' | '\n' | '\r' | '\u3000'
@@ -481,6 +483,7 @@ fragment TERM_CHAR
 	;
 
 
+	
 DATE_TOKEN
 	:	
 	INT INT? ('/'|MINUS|'.') INT INT? ('/'|MINUS|'.') INT INT (INT INT)?

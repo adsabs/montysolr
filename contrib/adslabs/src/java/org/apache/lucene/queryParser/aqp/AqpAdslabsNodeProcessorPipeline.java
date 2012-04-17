@@ -3,6 +3,7 @@ package org.apache.lucene.queryParser.aqp;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsQPOSITIONProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpCLAUSEProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpDEFOPProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFIELDProcessor;
@@ -16,6 +17,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpNullDefaultFieldProcessor
 import org.apache.lucene.queryParser.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOptimizationProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQANYTHINGProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQIDENTIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQNORMALProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQPHRASEProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQPHRASETRUNCProcessor;
@@ -62,6 +64,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpQRANGEINProcessor());
 		add(new AqpQRANGEEXProcessor());
 		add(new AqpQPHRASEProcessor());
+		add(new AqpQIDENTIFIERProcessor());
 		add(new AqpQNORMALProcessor());
 		add(new AqpQPHRASETRUNCProcessor());
 		add(new AqpQTRUNCATEDProcessor());
@@ -72,6 +75,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 	
 		add(new AqpFuzzyModifierProcessor());
 	
+		add(new AqpBibcodeProcessor()); // finds bibcode and converts to AqpAdslabsIdentifier
 		add(new WildcardQueryNodeProcessor());
 		add(new MultiFieldQueryNodeProcessor()); // expands to multiple fields if field=null
 		add(new AqpNullDefaultFieldProcessor());

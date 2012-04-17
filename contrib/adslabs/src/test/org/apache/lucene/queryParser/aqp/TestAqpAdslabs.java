@@ -23,12 +23,14 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	public void testAnalyzers() throws Exception {
+		
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		
 		assertQueryEquals("\"term germ\"~2", null, "\"term germ\"~2");
-		assertQueryEquals("\"this\" AND that", null, "\"this\" AND that", PhraseQuery.class);
+		assertQueryEquals("\"this\" AND that", null, "+\"this\" +that", PhraseQuery.class);
+		
 		assertQueryEquals("\"this\"", null, "\"this\"", PhraseQuery.class);
-		
 		assertQueryEquals("\"this  \"", null, "\"this  \"");
-		
 		assertQueryEquals("\"this  \"   ", null, "\"this  \"   ");
 		assertQueryEquals("\"  this  \"", null, "\"  this  \"");
 	}
@@ -56,20 +58,32 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("\"dark matter\" -LHC", null, "\"dark matter\" -lhc");
 	}
 	
+	
+	/**
+	 * OK, done 17Apr
+	 * 
+	 * @throws Exception
+	 */
 	public void testIdentifiers() throws Exception {
-		assertQueryEquals("arXiv:1012.5859", null, "identifier:\"arxiv:1012.5859\"");
-		assertQueryEquals("10.1086/345794", null, "identifier:10.1086/345794");
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		Query q = null;
+		setDebug(true);
+		assertQueryEquals("arXiv:1012.5859", wsa, "arxiv:1012.5859");
+		assertQueryEquals("xfield:10.1086/345794", wsa, "xfield:10.1086/345794");
 		
-		assertQueryEquals("arXiv:astro-ph/0601223", null, "identifier:arxiv:astro-ph/0601223");
-		assertQueryEquals("arXiv:0711.2886", null, "identifier:arxiv:0711.2886");
+		assertQueryEquals("arXiv:astro-ph/0601223", wsa, "arxiv:astro-ph/0601223");
+		q = assertQueryEquals("xfield:arXiv:0711.2886", wsa, "xfield:arxiv:0711.2886");
 		
-		assertQueryEquals("2003AJ....125..525J", null, "identifier:2003aj....125..525j");
-		// todo: maybe deal with the 3dot char?
-		//assertQueryEquals("2003AJ….125..525J", null, "identifier:2003AJ….125..525J");
+		assertQueryEquals("foo AND bar AND 2003AJ....125..525J", wsa, "+foo +bar +2003aj....125..525j");
 		
-		assertQueryEquals("one doi:word/word doi:word/123", null, "one identifier:doi:word/word identifier:doi:word/123");
-		assertQueryEquals("doi:hey/156-8569", null, "");
-		assertQueryEquals("doi:10.1000/182", null, "");
+		assertQueryEquals("2003AJ….125..525J", wsa, "2003aj....125..525j");
+		
+		assertQueryEquals("one doi:word/word doi:word/123", wsa, "one identifier:doi:word/word identifier:doi:word/123");
+		assertQueryEquals("doi:hey/156-8569", wsa, "doi:hey/156-8569");
+		q = assertQueryEquals("doi:10.1000/182", wsa, "doi:10.1000/182");
+		
+		// pretend we are sending bibcode (this should be handled as a normal token)
+		assertQueryEquals("200xAJ....125..525J", wsa, "200xAJ....125..525J");
 	}
 	
 	
@@ -262,13 +276,22 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	public void testEscaped() throws Exception {
-		assertQueryEquals("\\(1\\+1\\)\\:2", null, "(1+1):2", TermQuery.class);
-		assertQueryEquals("th\\*is", null, "th*is", TermQuery.class);
-		assertQueryEquals("a\\\\\\+b", null, "a\\\\\\+b", TermQuery.class);
-		assertQueryEquals("a\\u0062c", null, "");
-		assertQueryEquals("\\*t", null, "");
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		assertQueryEquals("\\(1\\+1\\)\\:2", wsa, "(1+1):2", TermQuery.class);
+		assertQueryEquals("th\\*is", wsa, "th*is", TermQuery.class);
+		assertQueryEquals("a\\\\\\\\+b", wsa, "a\\\\+b", TermQuery.class);
+		assertQueryEquals("a\\u0062c", wsa, "abc", TermQuery.class);
+		assertQueryEquals("\\*t", wsa, "*t", TermQuery.class);
 	}
 	
+	/**
+	 * Almost finished: 17Apr
+	 * 	TODO: x NEAR/2 y
+	 *        x:four -field:(-one +two x:three)
+	 *        "\"func(*) AND that\"" (should not be analyzed; AND becomes and)
+	 *        
+	 * @throws Exception
+	 */
 	public void testBasics() throws Exception{
 		
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
@@ -379,11 +402,6 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		//assertQueryEquals("\"func(*) AND that\"", wsa, "\"func(*) AND that\"");
 		
 		assertQueryEquals("CO2+", wsa, "CO2+", TermQuery.class);
-		
-		
-		
-		
-		
 
 	}
 }
