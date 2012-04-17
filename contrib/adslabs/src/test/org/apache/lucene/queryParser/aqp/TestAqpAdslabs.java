@@ -1,6 +1,7 @@
 package org.apache.lucene.queryParser.aqp;
 
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
@@ -235,10 +236,12 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	
 	public void testWildCards() throws Exception {
 		Query q = null;
-		q = assertQueryEquals("te?t", null, "te?t", PrefixQuery.class);
-		assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
+		q = assertQueryEquals("te?t", null, "te?t", WildcardQuery.class);
 		
 		q = assertQueryEquals("test*", null, "test*", PrefixQuery.class);
+	    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
+	    
+	    q = assertQueryEquals("test?", null, "test?", WildcardQuery.class);
 	    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
 		
 		assertQueryEquals("te*t", null, "te*t", WildcardQuery.class);
@@ -248,33 +251,48 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("te?t", null, "te?t", WildcardQuery.class);
 		assertQueryEquals("te??t", null, "te??t", WildcardQuery.class);
 		
-		//assertQueryEquals("te*?t"		OK	
 		
-		assertQueryEquals("\"text\"", null, "\"text\"");
-		assertQueryEquals("\"te*t\"", null, "\"te*t\"");
-		assertQueryEquals("\"test*\"", null, "\"test*\"");
-		assertQueryEquals("\"te*t\"", null, "\"te*t\"");
-		assertQueryEquals("\"*te*t\"", null, "\"*te*t\"");
-		assertQueryEquals("\"*te*t*\"", null, "\"*te*t*\"");
-		assertQueryEquals("\"?te*t?\"", null, "\"?te*t?\"");
-		assertQueryEquals("\"te?t\"", null, "\"te?t\"");
-		assertQueryEquals("\"te??t\"", null, "\"te??t\"");
-		assertQueryEquals("\"te*?t\"", null, "\"te*?t\"");
-		
-		assertQueryEquals("*", null, "*:*");
-		assertQueryEquals("*:*", null, "*:*");
-		
-		assertQueryEquals("?", null, "");
+		assertQueryNodeException("te*?t");	
+		assertQueryNodeException("te?*t");
 		
 		
-		assertQueryEquals("*t\\*a", null, "*t*a"); // todo: test that the word = 't*a'
-		assertQueryEquals("*t*a\\*", null, "*t*a*");
-		assertQueryEquals("*t*a\\?", null, "");
-		assertQueryEquals("*t*\\a", null, "");
+		// as I am discovering, there is no such a thing as a quoted wildcard 
+		// query, it just turns into a regular wildcard query, well...
+		
+		assertQueryEquals("\"te*t phrase\"", null, "te*t phrase", WildcardQuery.class);
+		assertQueryEquals("\"test* phrase\"", null, "test* phrase", WildcardQuery.class);
+		assertQueryEquals("\"te*t phrase\"", null, "te*t phrase", WildcardQuery.class);
+		assertQueryEquals("\"*te*t phrase\"", null, "*te*t phrase", WildcardQuery.class);
+		assertQueryEquals("\"*te*t* phrase\"", null, "*te*t* phrase", WildcardQuery.class);
+		assertQueryEquals("\"?te*t? phrase\"", null, "?te*t? phrase", WildcardQuery.class);
+		assertQueryEquals("\"te?t phrase\"", null, "te?t phrase", WildcardQuery.class);
+		assertQueryEquals("\"te??t phrase\"", null, "te??t phrase", WildcardQuery.class);
+		assertQueryEquals("\"te*?t phrase\"", null, "te*?t phrase", WildcardQuery.class);
+		
+		assertQueryEquals("*", null, "*:*", MatchAllDocsQuery.class);
+		assertQueryEquals("*:*", null, "*:*", MatchAllDocsQuery.class);
+		
+		assertQueryEquals("?", null, "?", WildcardQuery.class);
+		
+		
+		// XXX: in fact, in the WildcardQuery, even escaped start \* will become *
+		// so it is not possible to search for words that contain * as a literal 
+		// character, to have it differently, WildcardTermEnum class would have 
+		// to think of skipping \* and \?
+		
+		q = assertQueryEquals("*t\\*a", null, "*t*a", WildcardQuery.class); 
+		
+		assertQueryEquals("*t*a\\*", null, "*t*a*", WildcardQuery.class);
+		assertQueryEquals("*t*a\\?", null, "*t*a?", WildcardQuery.class);
+		assertQueryEquals("*t*\\a", null, "*t*a", WildcardQuery.class);
 		
 		
 	}
 	
+	/**
+	 * OK: 17Apr
+	 * @throws Exception
+	 */
 	public void testEscaped() throws Exception {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		assertQueryEquals("\\(1\\+1\\)\\:2", wsa, "(1+1):2", TermQuery.class);

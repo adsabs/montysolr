@@ -45,5 +45,6 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		addAttribute(DefaultProximityAttribute.class);
 		
 		getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
+		getAttribute(AllowLeadingWildcardAttribute.class).setAllowLeadingWildcard(true);
 	}
 }
