@@ -301,9 +301,9 @@ mainQ:
 //TODO	->			
 "one identifier:doi:123.123456"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD identifier (QIDENTIFIER doi:123.123456)))))"		
 				
-				
-				
-				
+//16April – cases, discovered while working on the query parser backend	->			
+"+\"that\" a"	->	"(DEFOP (MODIFIER + (TMODIFIER (FIELD (QPHRASE \"that\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL a)))))"		
+"+\"that\""	->	""		
 				
 				
 				

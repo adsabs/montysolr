@@ -1,4 +1,4 @@
-package org.apache.lucene.queryParser.aqp.processors;
+package org.apache.lucene.queryParser.aqp;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -17,13 +17,27 @@ package org.apache.lucene.queryParser.aqp.processors;
  * limitations under the License.
  */
 
-import java.util.Iterator;
-
-import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpCLAUSEProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpDEFOPProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpFIELDProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpFUZZYProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpFuzzyModifierProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpGroupQueryOptimizerProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpMODIFIERProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpOPERATORProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpOptimizationProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQANYTHINGProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQNORMALProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQPHRASEProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQPHRASETRUNCProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQRANGEEXProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQRANGEINProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQTRUNCATEDProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpTMODIFIERProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpTreeRewriteProcessor;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.NoChildOptimizationQueryNodeProcessor;
-import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.processors.RemoveDeletedQueryNodesProcessor;
 import org.apache.lucene.queryParser.standard.builders.StandardQueryTreeBuilder;
@@ -35,7 +49,6 @@ import org.apache.lucene.queryParser.standard.processors.BooleanSingleChildOptim
 import org.apache.lucene.queryParser.standard.processors.BoostQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.DefaultPhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.FuzzyQueryNodeProcessor;
-import org.apache.lucene.queryParser.standard.processors.GroupQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.MultiFieldQueryNodeProcessor;
@@ -64,10 +77,10 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryConfigHandler
  * @see StandardSyntaxParser
  */
-public class AqpQueryNodeProcessorPipeline extends
+public class AqpStandardQueryNodeProcessorPipeline extends
     QueryNodeProcessorPipeline {
 
-  public AqpQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
+  public AqpStandardQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
     super(queryConfig);
     
     add(new AqpDEFOPProcessor());

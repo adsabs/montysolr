@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.messages.MessageImpl;
-import org.apache.lucene.queryParser.aqp.builders.InvenioQueryNodeBuilder;
-import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute.Channel;
@@ -16,14 +14,11 @@ import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
-import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
-import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
-import org.apache.lucene.queryParser.standard.config.FuzzyAttribute;
 import org.apache.lucene.search.InvenioQuery;
 
 /**
@@ -74,7 +69,7 @@ public class AqpInvenioMODIFIERProcessor extends QueryNodeProcessorImpl implemen
 					if (xFields == null || !xFields.contains(field)) {
 						iq = new InvenioQueryNode(node, getIdField());
 						iq.setChannel(getDefaultChannel());
-						iq.setSeatchField(field);
+						iq.setSearchField(field);
 						return iq;
 					}
 				}
@@ -82,7 +77,7 @@ public class AqpInvenioMODIFIERProcessor extends QueryNodeProcessorImpl implemen
 					if (xFields.contains(field)) {
 						iq = new InvenioQueryNode(node, getIdField());
 						iq.setChannel(getDefaultChannel());
-						iq.setSeatchField(field);
+						iq.setSearchField(field);
 						return iq;
 					}
 				}
@@ -96,7 +91,7 @@ public class AqpInvenioMODIFIERProcessor extends QueryNodeProcessorImpl implemen
 				String field = getExistingField(node, 2); //how deep to search for FIELD
 				InvenioQueryNode iq = new InvenioQueryNode(node, getIdField());
 				iq.setChannel(getDefaultChannel());
-				iq.setSeatchField(field);
+				iq.setSearchField(field);
 				return iq;
 			}
 			else {

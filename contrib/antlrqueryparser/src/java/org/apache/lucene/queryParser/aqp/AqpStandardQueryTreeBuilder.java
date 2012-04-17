@@ -1,4 +1,4 @@
-package org.apache.lucene.queryParser.aqp.builders;
+package org.apache.lucene.queryParser.aqp;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -17,6 +17,7 @@ package org.apache.lucene.queryParser.aqp.builders;
  * limitations under the License.
  */
 
+import org.apache.lucene.queryParser.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;

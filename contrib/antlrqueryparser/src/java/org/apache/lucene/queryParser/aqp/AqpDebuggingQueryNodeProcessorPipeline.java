@@ -1,4 +1,4 @@
-package org.apache.lucene.queryParser.aqp.processors;
+package org.apache.lucene.queryParser.aqp;
 
 import java.util.Iterator;
 

@@ -26,12 +26,12 @@ import java.util.TooManyListenersException;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.DateTools;
-import org.apache.lucene.queryParser.aqp.builders.AqpStandardQueryTreeBuilder;
-import org.apache.lucene.queryParser.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryParser.aqp.AqpStandardQueryTreeBuilder;
+import org.apache.lucene.queryParser.aqp.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.AqpSyntaxParser;
-import org.apache.lucene.queryParser.aqp.processors.AqpDebuggingQueryNodeProcessorPipeline;
-import org.apache.lucene.queryParser.aqp.processors.AqpQueryNodeProcessorPipeline;
+import org.apache.lucene.queryParser.aqp.AqpDebuggingQueryNodeProcessorPipeline;
+import org.apache.lucene.queryParser.aqp.AqpStandardQueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.core.QueryParserHelper;
@@ -151,7 +151,7 @@ public class AqpQueryParser extends QueryParserHelper {
 	public AqpQueryParser(String grammarName) throws QueryNodeParseException {
 		super(new AqpStandardQueryConfigHandler(), 
 				new AqpSyntaxParserLoadableImpl().initializeGrammar(grammarName),
-				new AqpQueryNodeProcessorPipeline(null),
+				new AqpStandardQueryNodeProcessorPipeline(null),
 				new AqpStandardQueryTreeBuilder());
 	}
 	

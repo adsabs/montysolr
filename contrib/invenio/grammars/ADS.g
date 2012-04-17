@@ -46,10 +46,19 @@ clauseOr
   : (first=clauseAnd -> $first) (or others=clauseAnd -> ^(OPERATOR["OR"] clauseAnd+ ))*
   ;
 
+
 clauseAnd
-  : (first=clauseNot  -> $first) (and others=clauseNot -> ^(OPERATOR["AND"] clauseNot+ ))*
+  : (first=clauseSemicolon  -> $first) (and others=clauseSemicolon -> ^(OPERATOR["AND"] clauseSemicolon+ ))*
   ;
-  
+
+clauseSemicolon
+  : (first=clauseComma  -> $first) (semicolon others=clauseComma -> ^(OPERATOR["SEMI"] clauseComma+ ))*
+  ;
+
+clauseComma
+  : (first=clauseNot  -> $first) (comma others=clauseNot -> ^(OPERATOR["COMMA"] clauseNot+ ))*
+  ;
+    
 clauseNot
   : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
@@ -60,7 +69,9 @@ clauseNear
   
 clauseBasic
 	: 
-	(lmodifier LPAREN clauseOr+ RPAREN )=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
+	 (lmodifier? func_name) => lmodifier? func_name clauseOr+  RPAREN
+	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(QFUNC func_name ^(OPERATOR["DEFOP"] clauseOr+))))
+	| (lmodifier LPAREN clauseOr+ RPAREN )=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
 	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN clauseOr+ RPAREN rmodifier)=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
 	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
@@ -79,8 +90,7 @@ atom
 	-> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
 	| lmodifier? (STAR COLON)? STAR 
 	-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
-	| lmodifier? func_name clauseBasic+  RPAREN
-	-> ^(MODIFIER lmodifier? ^(QFUNC func_name clauseBasic+ RPAREN))
+	
 	;
    
 
@@ -102,7 +112,7 @@ value
 	| DATE_RANGE -> ^(QDATE DATE_RANGE)
 	| AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
 	| QMARK -> ^(QTRUNCATED QMARK)
-	| COMMA -> ^(QCOMMA COMMA)
+	//| COMMA -> ^(QCOMMA COMMA)
   	;
 
 	
@@ -288,6 +298,15 @@ near	:
 	('/' b=NUMBER -> ^(OPERATOR["NEAR:" + $b.getText()]) )?
 	;
 
+comma	:	
+	COMMA+
+	;	
+
+semicolon
+	:
+	SEMICOLON+
+	;
+
 date	:	
 	//a=NUMBER '/' b=NUMBER '/' c=NUMBER -> ^(QDATE $a $b $c)
 	DATE_TOKEN
@@ -355,6 +374,8 @@ DQUOTE	:	'\"';
 SQUOTE	:	'\'';
 
 COMMA	:	',';
+
+SEMICOLON:	';';
 
 
 fragment AS_CHAR
@@ -449,7 +470,7 @@ fragment TERM_START_CHAR
 	      | '(' | ')' | '[' | ']' | '{' | '}'
 	      | '+' | '-' | '!' | ':' | '~' | '^' 
 	      | '?' | '*' | '\\'|',' | '=' | '#'
-	      | '–'
+	      | '–' | ';'
 	      )
 	 | ESC_CHAR );  	
 

@@ -1,6 +1,7 @@
 package org.apache.lucene.queryParser.aqp;
 
 import org.apache.lucene.queryParser.aqp.builders.AqpFieldQueryNodeBuilder;
+import org.apache.lucene.queryParser.aqp.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.InvenioQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
@@ -27,9 +28,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpQRANGEINProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQTRUNCATEDProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpTMODIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpTreeRewriteProcessor;
-import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
-import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
@@ -39,7 +38,6 @@ import org.apache.lucene.queryParser.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryParser.core.nodes.MatchAllDocsQueryNode;
 import org.apache.lucene.queryParser.core.nodes.MatchNoDocsQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryParser.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryParser.core.processors.NoChildOptimizationQueryNodeProcessor;
@@ -58,7 +56,6 @@ import org.apache.lucene.queryParser.standard.builders.PrefixWildcardQueryNodeBu
 import org.apache.lucene.queryParser.standard.builders.RangeQueryNodeBuilder;
 import org.apache.lucene.queryParser.standard.builders.SlopQueryNodeBuilder;
 import org.apache.lucene.queryParser.standard.builders.StandardBooleanQueryNodeBuilder;
-import org.apache.lucene.queryParser.standard.builders.StandardQueryBuilder;
 import org.apache.lucene.queryParser.standard.builders.WildcardQueryNodeBuilder;
 import org.apache.lucene.queryParser.standard.config.AllowLeadingWildcardAttribute;
 import org.apache.lucene.queryParser.standard.config.AnalyzerAttribute;
@@ -92,7 +89,6 @@ import org.apache.lucene.queryParser.standard.processors.ParametricRangeQueryNod
 import org.apache.lucene.queryParser.standard.processors.PhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.WildcardQueryNodeProcessor;
-import org.apache.lucene.search.Query;
 
 
 /**
@@ -204,13 +200,9 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 	}
 	
 	
-	// TODO: turn into AQPStandardQueryTreeBuilder into an abstract
-	// class and let this one provide the same interface (extend
-	// that one as well)
-	static class InvenioQueryTreeBuilder extends QueryTreeBuilder implements
-			StandardQueryBuilder {
+	static class InvenioQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
 
-		public InvenioQueryTreeBuilder() {
+		public void init() {
 			setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 			setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 			setBuilder(NonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
@@ -238,10 +230,6 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 
 		}
 
-		@Override
-		public Query build(QueryNode queryNode) throws QueryNodeException {
-			return (Query) super.build(queryNode);
-		}
 
 	}
 

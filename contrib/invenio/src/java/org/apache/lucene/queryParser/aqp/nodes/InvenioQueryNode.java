@@ -64,7 +64,7 @@ public class InvenioQueryNode extends QueryNodeImpl implements QueryNode {
 		return searchField;
 	}
 	
-	public void setSeatchField(String field) {
+	public void setSearchField(String field) {
 		searchField = field;
 	}
 	

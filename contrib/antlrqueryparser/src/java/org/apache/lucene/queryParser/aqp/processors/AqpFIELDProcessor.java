@@ -26,7 +26,7 @@ public class AqpFIELDProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
 
 	@Override
-	protected QueryNode preProcessNode(QueryNode node)
+	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("FIELD")) {
 			if (node.getChildren().size()==1) {
@@ -46,7 +46,7 @@ public class AqpFIELDProcessor extends QueryNodeProcessorImpl implements
 	}
 
 	@Override
-	protected QueryNode postProcessNode(QueryNode node)
+	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
 		return node;
 	}

@@ -1,5 +1,6 @@
-package org.apache.lucene.queryParser.aqp.config;
+package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.standard.config.AllowLeadingWildcardAttribute;
 import org.apache.lucene.queryParser.standard.config.AnalyzerAttribute;
