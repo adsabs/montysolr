@@ -330,7 +330,8 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		
-		assertQueryEquals("weak lensing", null, "weak lensing");		
+		assertQueryEquals("weak lensing", null, "weak lensing");
+		setDebug(true);
 		assertQueryEquals("+contact +binaries -eclipsing", null, "+contact +binaries -eclipsing");
 		assertQueryEquals("+contact +xfield:binaries -eclipsing", null, "+contact +xfield:binaries -eclipsing");
 		assertQueryEquals("intitle:\"yellow symbiotic\"", null, "intitle:\"yellow symbiotic\"");

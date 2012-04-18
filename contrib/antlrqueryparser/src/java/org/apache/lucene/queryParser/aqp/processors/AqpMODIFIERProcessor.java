@@ -75,7 +75,7 @@ public class AqpMODIFIERProcessor extends QueryNodeProcessorImpl implements
 				return new ModifierQueryNode(childNode, ModifierQueryNode.Modifier.MOD_REQ);
 			}
 			else if (modifier.equals("MINUS")) {
-				return new ModifierQueryNode(childNode, ModifierQueryNode.Modifier.MOD_REQ);
+				return new ModifierQueryNode(childNode, ModifierQueryNode.Modifier.MOD_NOT);
 			}
 			else {
 				throw new QueryNodeException(new MessageImpl(
