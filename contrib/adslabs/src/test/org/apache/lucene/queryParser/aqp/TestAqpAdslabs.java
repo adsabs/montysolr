@@ -51,6 +51,7 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	
 	public void testOldPositionalSearch() throws Exception {
 		// also, we want to generate a warning message
+		setDebug(true);
 		assertQueryEquals("one ^two", null, "one pos(field, two, 0)");
 		assertQueryEquals("^one ^two$", null, "pos(field, one, 0) pos(field, two, 0, -1)");
 		assertQueryEquals("^one NOT two$", null, "pos(field, one, 0) -pos(field, two, 0, -1");

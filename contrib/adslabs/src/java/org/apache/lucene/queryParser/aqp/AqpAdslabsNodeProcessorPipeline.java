@@ -55,6 +55,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 	
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
+		add(new AqpAdslabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
 	
 		add(new AqpAdslabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
 		add(new AqpAdslabsOPERATORProcessor()); // extends standard operators with COMMA and SEMICOLON
@@ -103,7 +104,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 	
 		add(new AqpGroupQueryOptimizerProcessor());
 		add(new AqpOptimizationProcessor());
-		add(new AqpAdslabsQPOSITIONProcessor());
+		
 	}
 
 }
