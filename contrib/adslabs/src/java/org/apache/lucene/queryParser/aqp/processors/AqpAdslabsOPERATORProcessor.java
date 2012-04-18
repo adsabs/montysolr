@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpAndQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpNearQueryNode;
-import org.apache.lucene.queryParser.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 

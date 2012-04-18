@@ -27,7 +27,8 @@ tokens {
   QCOMMA;
   QIDENTIFIER;
   QCOORDINATE;
-  SYNOP;
+  EQUAL;
+  HASH;
 }
 
 @header{
@@ -258,8 +259,8 @@ quoted	:
 lmodifier: 
 	PLUS -> PLUS["+"]
 	| MINUS -> MINUS["-"]
-	| '=' -> SYNOP["="]
-	| '#' -> SYNOP["#"]
+	| '=' -> EQUAL["="]
+	| '#' -> HASH["#"]
 	;
 
 

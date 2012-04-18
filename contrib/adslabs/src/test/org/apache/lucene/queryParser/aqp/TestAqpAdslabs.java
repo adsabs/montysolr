@@ -46,6 +46,20 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("author:\"M. J. Kurtz\" author:\"G. Eichhorn\" 2004", null, "author:\"m. j. kurtz\" author:\"g. eichhorn\" 2004");
 		assertQueryEquals("author:\"M. J. Kurtz\" author:\"G. Eichhorn\" 2004", null, "author:\"m. j. kurtz\" author:\"g. eichhorn\" -2004");
 		
+		
+	}
+	
+	public void testOldPositionalSearch() throws Exception {
+		// also, we want to generate a warning message
+		assertQueryEquals("one ^two", null, "one pos(field, two, 0)");
+		assertQueryEquals("^one ^two$", null, "pos(field, one, 0) pos(field, two, 0, -1)");
+		assertQueryEquals("^one NOT two$", null, "pos(field, one, 0) -pos(field, two, 0, -1");
+		assertQueryEquals("one ^two, j, k$", null, "one pos(field, \"field:two +field:j +field:k\", 0, -1)");
+		assertQueryEquals("one ^two,j,k$", null, "one pos(field, \"field:two +field:j +field:k\", 0, -1)");
+		
+		assertQueryEquals("one \"^author phrase\"", null, "");
+		assertQueryEquals("one \"^author phrase$\"", null, "");
+		
 		assertQueryEquals("author:\"^Peter H. Smith\"", null, "pos(author:peter author:h. author:smith; 0)");
 		
 		
@@ -168,6 +182,8 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	
 	public void testModifiers() throws Exception {
 		
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		
 		assertQueryEquals("jakarta^4 apache", null, "jakarta^4.0 apache");
 		assertQueryEquals("\"jakarta apache\"^4 \"Apache Lucene\"", null, "\"jakarta apache\"^4.0 \"apache lucene\"");
 		
@@ -193,38 +209,49 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("roam~^", null, "roam~0.5");
 		assertQueryEquals("roam~0.8^", null, "roam~0.8");
 		assertQueryEquals("roam~0.899999999^0.5", null, "roam~0.9^0.5");
-		assertQueryEquals("this^ 5", null, "this^5.0");
-		assertQueryEquals("this^5~ 9", null, "");
-		assertQueryEquals("9999", null, "9999");
-		assertQueryEquals("9999.1", null, "9999.1");
-		assertQueryEquals("0.9999", null, "0.9999");
-		assertQueryEquals("00000000.9999", null, "00000000.9999");
 		
+		// with wsa analyzer the 5 is retained as a token
+		assertQueryEquals("this^ 5", wsa, "this 5");
+		
+		// with standard tokenizer, it goes away
+		assertQueryEquals("this^ 5", null, "this");
+		
+		assertQueryEquals("this^0. 5", wsa, "this 5");
+		assertQueryEquals("this^0.4 5", wsa, "this^0.4 5");
+		
+		assertQueryEquals("this^5~ 9", null, "this~0.5^5.0");
+		assertQueryEquals("this^5~ 9", wsa, "this~0.5^5.0 9");
+		
+		assertQueryEquals("9999", wsa, "9999");
+		assertQueryEquals("9999.1", wsa, "9999.1");
+		assertQueryEquals("0.9999", wsa, "0.9999");
+		assertQueryEquals("00000000.9999", wsa, "00000000.9999");
+		
+		// tilda used for phrases has a different meaning (it is not a fuzzy paramater)
+		// but a proximity operator, thus it can be >= 1.0
 		assertQueryEquals("\"weak lensing\"~", null, "\"weak lensing\"");
 		assertQueryEquals("\"jakarta apache\"~10", null, "\"jakarta apache\"~10");
 		assertQueryEquals("\"jakarta apache\"^10", null, "\"jakarta apache\"^10.0");
 		assertQueryEquals("\"jakarta apache\"~10^", null, "\"jakarta apache\"~10");
 		assertQueryEquals("\"jakarta apache\"^10~", null, "\"jakarta apache\"^10.0");
-		assertQueryEquals("\"jakarta apache\"~10^0.6", null, "\"jakarta apache\"~10.0^0.6");
-		assertQueryEquals("\"jakarta apache\"^10~0.6", null, "\"jakarta apache\"~0.6^10.0");
-		
-		assertQueryEquals("#synonyms", null, "");
-		assertQueryEquals("#(request synonyms)", null, "");
-		assertQueryEquals("this and (one #two)", null, "");
-		
-		assertQueryEquals("=(exact search)", null, "");
-		assertQueryEquals("=\"exact phrase\"", null, "");
+		assertQueryEquals("\"jakarta apache\"~10^0.6", null, "\"jakarta apache\"~10^0.6");
+		assertQueryEquals("\"jakarta apache\"^10~0.6", null, "\"jakarta apache\"^10.0");
+		assertQueryEquals("\"jakarta apache\"^10~2.4", null, "\"jakarta apache\"~2^10.0");
 		
 		
-		// also, we want to generate a warning message
-		assertQueryEquals("one ^two", null, "one pos(field, two, 0)");
-		assertQueryEquals("^one ^two$", null, "pos(field, one, 0) pos(field, two, 0, -1)");
-		assertQueryEquals("^one NOT two$", null, "pos(field, one, 0) -pos(field, two, 0, -1");
-		assertQueryEquals("one ^two, j, k$", null, "one pos(field, \"field:two +field:j +field:k\", 0, -1)");
-		assertQueryEquals("one ^two,j,k$", null, "one pos(field, \"field:two +field:j +field:k\", 0, -1)");
+		// this is an example of how complex the query parsing can be, and impossible
+		// without a powerful builder (this would just be unthinkable with the standard
+		// lucene parser and impossible with the invenio parser)
+		assertQueryEquals("#5", null, "");
+		assertQueryEquals("#(request synonyms 5)", null, "request synonyms");
+		assertQueryEquals("this and (one #5)", null, "+this +one");
+		assertQueryEquals("this and (one #5)", wsa, "+this +one +5");
 		
-		assertQueryEquals("one \"^author phrase\"", null, "");
-		assertQueryEquals("one \"^author phrase$\"", null, "");
+		assertQueryEquals("=5", null, "5");
+		assertQueryEquals("=(request synonyms 5)", null, "request synonyms 5");
+		assertQueryEquals("this and (one =5)", null, "+this +one +5");
+		assertQueryEquals("this and (one =5)", wsa, "+this +one +5");
+		
 	}
 	
 	public void testExceptions() throws Exception {
@@ -331,7 +358,6 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		
 		assertQueryEquals("weak lensing", null, "weak lensing");
-		setDebug(true);
 		assertQueryEquals("+contact +binaries -eclipsing", null, "+contact +binaries -eclipsing");
 		assertQueryEquals("+contact +xfield:binaries -eclipsing", null, "+contact +xfield:binaries -eclipsing");
 		assertQueryEquals("intitle:\"yellow symbiotic\"", null, "intitle:\"yellow symbiotic\"");

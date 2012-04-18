@@ -3,8 +3,10 @@ package org.apache.lucene.queryParser.aqp.processors;
 import java.util.List;
 
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
 import org.apache.lucene.queryParser.aqp.nodes.AqpFuzzyModifierNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
@@ -42,6 +44,14 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 			if (child instanceof QuotedFieldQueryNode ||
 					child instanceof WildcardQueryNode) {
 				
+				if (fuzzy.intValue() < fuzzy) {
+					QueryConfigHandler config = getQueryConfigHandler();
+					if (config.hasAttribute(AqpFeedback.class)) {
+						config.getAttribute(AqpFeedback.class).sendEvent(AqpFeedback.TYPE.WARN, node, 
+								"For phrases and wildcard queries the float attribute " + fuzzy + 
+								" is automatically converted to: " + fuzzy.intValue());
+					}
+				}
 				return new SlopQueryNode(child, fuzzy.intValue());
 			}
 			else if (child instanceof FieldQueryNode) {

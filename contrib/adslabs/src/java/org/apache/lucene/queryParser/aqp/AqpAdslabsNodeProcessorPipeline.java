@@ -1,7 +1,9 @@
 package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsMODIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsQPOSITIONProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsSynonymNodeProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpCLAUSEProcessor;
@@ -54,10 +56,11 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 	
-		add(new AqpMODIFIERProcessor());
-		add(new AqpAdslabsOPERATORProcessor());
+		add(new AqpAdslabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
+		add(new AqpAdslabsOPERATORProcessor()); // extends standard operators with COMMA and SEMICOLON
 		add(new AqpCLAUSEProcessor());
-		add(new AqpTMODIFIERProcessor());
+		
+		add(new AqpTMODIFIERProcessor()); // changes AST to more manageable form
 		add(new AqpBOOSTProcessor());
 		add(new AqpFUZZYProcessor());
 	
@@ -85,6 +88,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new ParametricRangeQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());
 		
+		add(new AqpAdslabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
 		add(new AnalyzerQueryNodeProcessor());
 		add(new PhraseSlopQueryNodeProcessor());
 	

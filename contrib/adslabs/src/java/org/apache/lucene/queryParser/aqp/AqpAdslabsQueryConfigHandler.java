@@ -1,5 +1,7 @@
 package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryParser.aqp.config.AqpAdslabsLoggingHandler;
+import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultProximityAttribute;
@@ -19,9 +21,14 @@ import org.apache.lucene.queryParser.standard.config.MultiFieldAttribute;
 import org.apache.lucene.queryParser.standard.config.MultiTermRewriteMethodAttribute;
 import org.apache.lucene.queryParser.standard.config.PositionIncrementsAttribute;
 import org.apache.lucene.queryParser.standard.config.RangeCollatorAttribute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
+	public static final Logger log = LoggerFactory
+			.getLogger(AqpAdslabsQueryConfigHandler.class);
+	
 	public AqpAdslabsQueryConfigHandler() {
 		// Add listener that will build the FieldConfig attributes.
 		addFieldConfigListener(new FieldBoostMapFCListener(this));
@@ -45,6 +52,9 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		addAttribute(MultiFieldAttribute.class);
 		addAttribute(DefaultProximityAttribute.class);
 		addAttribute(BoostAttribute.class);
+		
+		addAttribute(AqpFeedback.class); // to collect/work with exceptions
+		addAttribute(AqpFeedback.class).registerEventHandler(new AqpAdslabsLoggingHandler());
 		
 		getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
 		getAttribute(AllowLeadingWildcardAttribute.class).setAllowLeadingWildcard(true);

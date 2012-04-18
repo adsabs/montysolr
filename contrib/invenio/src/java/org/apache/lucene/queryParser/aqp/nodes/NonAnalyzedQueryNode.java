@@ -31,7 +31,7 @@ public class NonAnalyzedQueryNode extends WildcardQueryNode {
 
 	private static final long serialVersionUID = 6921391439471630844L;
 
-/**
+  /**
    * @param field
    *          - field name
    * @param text
