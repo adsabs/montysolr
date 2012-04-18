@@ -24,7 +24,7 @@ public class AcronymTokenFilterFactory extends BaseTokenFilterFactory {
         super.init(args);
         assureMatchVersion();
         this.emitBoth = this.getBoolean("emitBoth", true);
-        this.lowercaseAcronyms = this.getBoolean("emitBoth", true);
+        this.lowercaseAcronyms = this.getBoolean("lowercaseAcronyms", true);
     }
 
     public TokenStream create(TokenStream input) {
