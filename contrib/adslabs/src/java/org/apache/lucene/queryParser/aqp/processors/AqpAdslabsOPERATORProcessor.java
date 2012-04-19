@@ -18,7 +18,6 @@ public class AqpAdslabsOPERATORProcessor extends AqpOPERATORProcessor {
 		if (label.equals("COMMA")) {
 			List<QueryNode> children = node.getChildren();
 			AqpNearQueryNode nearNode = new AqpNearQueryNode(children, 1);
-			
 			String fChild = getTokenInput(children.get(0));
 			String lChild = getTokenInput(children.get(children.size()-1));
 			

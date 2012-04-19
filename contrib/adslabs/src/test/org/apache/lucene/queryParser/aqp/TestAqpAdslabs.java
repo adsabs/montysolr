@@ -181,6 +181,8 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	
 	public void testFunctionalQueries() throws Exception {
 		setDebug(true);
+		assertQueryEquals("pos(author, \"Accomazzi, A\", 1, \\-1)", null, "pos(author,\"Accomazzi, A\",1,-1)");
+		
 		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
 		assertQueryEquals("cites((title:(lectures physics) and author:Feynman))", null, "");
 		
@@ -192,7 +194,7 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("simbad(12.34567h-17.87654d)", null, "");
 		assertQueryEquals("simbad(350.123456d-17.33333d <=> 350.123456-17.33333)", null, "");
 		
-		assertQueryEquals("pos(\"Accomazzi, A\", 1, -1)", null, "");
+		
 	}
 	
 	

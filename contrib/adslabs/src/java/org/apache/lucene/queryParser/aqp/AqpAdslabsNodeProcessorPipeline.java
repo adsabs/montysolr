@@ -1,5 +1,6 @@
 package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsAnalyzerProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsMODIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsQPOSITIONProcessor;
@@ -57,6 +58,8 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 	
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
+		
+		
 		add(new AqpAdslabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
 	
 		add(new AqpAdslabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
@@ -64,6 +67,8 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpCLAUSEProcessor());
 		
 		add(new AqpTMODIFIERProcessor()); // changes AST to more manageable form
+		add(new AqpQFUNCProcessor());
+		
 		add(new AqpBOOSTProcessor());
 		add(new AqpFUZZYProcessor());
 	
@@ -79,7 +84,6 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpQRANGEINProcessor());
 		add(new AqpQRANGEEXProcessor());
 		add(new AqpQANYTHINGProcessor());
-		add(new AqpQFUNCProcessor());
 		add(new AqpFIELDProcessor());
 		
 	
@@ -97,7 +101,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		
 		add(new AqpAdslabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
 		
-		add(new AnalyzerQueryNodeProcessor());
+		add(new AqpAdslabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
 		add(new PhraseSlopQueryNodeProcessor());
 	
 		// add(new GroupQueryNodeProcessor());

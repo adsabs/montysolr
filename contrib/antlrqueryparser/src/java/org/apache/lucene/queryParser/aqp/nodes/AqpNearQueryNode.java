@@ -46,7 +46,16 @@ public class AqpNearQueryNode extends QueryNodeImpl implements QueryNode {
 
 	
 	public String toString() {
-		return "<near slop=\"" + slop + "\">\n"  + getChild().toString() + "\n</near>";
+		StringBuffer bo = new StringBuffer();
+		bo.append("<near slop=\"");
+		bo.append(slop);
+		bo.append("\">\n");
+		for (QueryNode child: this.getChildren()) {
+			bo.append(child.toString());
+			bo.append("\n");
+		}
+		bo.append("\n</near>");
+		return bo.toString();
 	}
 
 	public QueryNode getChild() {
