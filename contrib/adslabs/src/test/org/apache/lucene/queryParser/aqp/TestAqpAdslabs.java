@@ -1,6 +1,10 @@
 package org.apache.lucene.queryParser.aqp;
 
+import java.util.regex.Pattern;
+
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.miscellaneous.PatternAnalyzer;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.PhraseQuery;
@@ -24,16 +28,16 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	public void testAnalyzers() throws Exception {
-		
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		PatternAnalyzer pa = new PatternAnalyzer(TEST_VERSION_CURRENT, Pattern.compile("\\|"), false, null);
 		
 		assertQueryEquals("\"term germ\"~2", null, "\"term germ\"~2");
-		assertQueryEquals("\"this\" AND that", null, "+\"this\" +that", PhraseQuery.class);
+		assertQueryEquals("\"this\" AND that", null, "+this +that", BooleanQuery.class);
 		
-		assertQueryEquals("\"this\"", null, "\"this\"", PhraseQuery.class);
-		assertQueryEquals("\"this  \"", null, "\"this  \"");
-		assertQueryEquals("\"this  \"   ", null, "\"this  \"   ");
-		assertQueryEquals("\"  this  \"", null, "\"  this  \"");
+		assertQueryEquals("\"this\"", null, "this");
+		assertQueryEquals("word:\"this  \"", pa, "word:this  ");
+		assertQueryEquals("\"this  \"   ", pa, "this  ");
+		assertQueryEquals("\"  this  \"", pa, "  this  ");
 	}
 	
 	public void testAuthorField() throws Exception {
@@ -103,7 +107,7 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	/**
-	 * 
+	 * OK, Apr19
 	 * 
 	 * @throws Exception
 	 */
@@ -176,6 +180,7 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	public void testFunctionalQueries() throws Exception {
+		setDebug(true);
 		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
 		assertQueryEquals("cites((title:(lectures physics) and author:Feynman))", null, "");
 		

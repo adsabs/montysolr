@@ -20,6 +20,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOptimizationProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQANYTHINGProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQDATEProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQFUNCProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQIDENTIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQNORMALProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQPHRASEProcessor;
@@ -78,7 +79,9 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpQRANGEINProcessor());
 		add(new AqpQRANGEEXProcessor());
 		add(new AqpQANYTHINGProcessor());
+		add(new AqpQFUNCProcessor());
 		add(new AqpFIELDProcessor());
+		
 	
 		add(new AqpFuzzyModifierProcessor());
 	
@@ -93,6 +96,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AllowLeadingWildcardProcessor());
 		
 		add(new AqpAdslabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
+		
 		add(new AnalyzerQueryNodeProcessor());
 		add(new PhraseSlopQueryNodeProcessor());
 	

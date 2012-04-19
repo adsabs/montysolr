@@ -22,6 +22,12 @@ public class AqpAdslabsOPERATORProcessor extends AqpOPERATORProcessor {
 			String fChild = getTokenInput(children.get(0));
 			String lChild = getTokenInput(children.get(children.size()-1));
 			
+			if (fChild == null || lChild == null) {
+				// we deal with something else than the MODIFIER-TMODIFIER-FIELD...
+				// probably it is a nested function or nested clause
+				return nearNode;
+			}
+			
 			// test if we deal with J, Name
 			if (fChild.length() < 3 || fChild.length() < lChild.length()) {
 				nearNode.setInOrder(false);
