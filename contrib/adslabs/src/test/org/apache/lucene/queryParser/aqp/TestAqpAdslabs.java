@@ -108,21 +108,31 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	 * @throws Exception
 	 */
 	public void testDateRanges() throws Exception {
-		assertQueryEquals("intitle:\"QSO\" 1995-2000", null, "intitle:\"qso\" year:[1995 2000]");
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		
+		assertQueryEquals("intitle:\"QSO\" 1995-2000", null, "intitle:qso date:[1995 TO 2000]");
+		
+		
+		assertQueryEquals("2011-2012", null, "date:[2011 TO 2012]");
+		assertQueryEquals("xf:2011-2012", null, "xf:[2011 TO 2012]");
+		assertQueryEquals("one 2009-2012", null, "one date:[2009 TO 2012]");
+		assertQueryEquals("notdate 09-12", wsa, "notdate 09-12");
+		assertQueryEquals("notdate 09-2012", wsa, "notdate 09-2012");
+		
+		
+		//TODO - also test that warning messages were generated
+		//TODO - throw syntax error?
+		assertQueryEquals("2011-", null, "date:[2011 TO *]");
+		assertQueryEquals("-2011", null, "date:[* TO 2011]");
+		assertQueryEquals("-2009", null, "date:[* TO 2009]");
+		assertQueryEquals("2009-", null, "date:[2009 TO *]");
+		assertQueryEquals("year:2000-", null, "year:[2000 TO *]");
+		assertQueryEquals("2000-", null, "date:[2000 TO *]");
+		
+		// i don't think we should try to guess this as a date
 		assertQueryEquals("2011", null, "");
-		assertQueryEquals("2011-", null, "");
-		assertQueryEquals("-2011", null, "");
-		assertQueryEquals("2011-2012", null, "");
+		assertQueryEquals("2011", wsa, "2011");
 		
-		assertQueryEquals("-2009", null, "");
-		assertQueryEquals("2009-", null, "");
-		assertQueryEquals("one 2009-2012", null, "");
-		assertQueryEquals("notdate 09-12", null, "");
-		assertQueryEquals("notdate 09-2012", null, "");
-		
-		assertQueryEquals("year:2000-", null, "");
-		assertQueryEquals("2000-", null, "");
 	}
 	
 	/**

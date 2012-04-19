@@ -19,6 +19,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpNullDefaultFieldProcessor
 import org.apache.lucene.queryParser.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOptimizationProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQANYTHINGProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpQDATEProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQIDENTIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQNORMALProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpQPHRASEProcessor;
@@ -66,7 +67,9 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpFUZZYProcessor());
 	
 		add(new AqpQRANGEINProcessor());
-		add(new AqpQRANGEEXProcessor());
+		//add(new AqpQRANGEEXProcessor());
+		
+		add(new AqpQDATEProcessor());
 		add(new AqpQPHRASEProcessor());
 		add(new AqpQIDENTIFIERProcessor());
 		add(new AqpQNORMALProcessor());

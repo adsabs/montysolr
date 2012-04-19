@@ -2,6 +2,7 @@ package org.apache.lucene.queryParser.aqp;
 
 import org.apache.lucene.queryParser.aqp.config.AqpAdslabsLoggingHandler;
 import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
+import org.apache.lucene.queryParser.aqp.config.DefaultDateRangeField;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultProximityAttribute;
@@ -52,11 +53,13 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		addAttribute(MultiFieldAttribute.class);
 		addAttribute(DefaultProximityAttribute.class);
 		addAttribute(BoostAttribute.class);
+		addAttribute(DefaultDateRangeField.class);
 		
 		addAttribute(AqpFeedback.class); // to collect/work with exceptions
 		addAttribute(AqpFeedback.class).registerEventHandler(new AqpAdslabsLoggingHandler());
 		
 		getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
+		getAttribute(DefaultDateRangeField.class).setField("date");
 		getAttribute(AllowLeadingWildcardAttribute.class).setAllowLeadingWildcard(true);
 	}
 }

@@ -1,17 +1,16 @@
 package org.apache.lucene.queryParser.aqp.config;
 
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
+import org.apache.lucene.util.Attribute;
 
-public class AqpFeedbackEvent {
-	public AqpFeedback.TYPE level = null;
-	public QueryNode node = null;
-	public String message = null;
-	public Object[] args = null;
+
+public interface AqpFeedbackEvent extends Attribute {
 	
-	AqpFeedbackEvent(AqpFeedback.TYPE level, QueryNode node, String message, Object...args) {
-		this.level = level;
-		this.node = node;
-		this.message = message;
-		this.args = args;
-	}
+	public AqpFeedback.TYPE getType();
+	public Class<? extends QueryNodeProcessor> getCaller();
+	public QueryNode getNode();
+	public String getMessage();
+	public Object[] getArgs();
+	
 }

@@ -4,7 +4,7 @@ import org.apache.lucene.queryParser.aqp.config.AqpFeedbackEvent;
 
 public interface AqpFeedbackEventHandler {
 	
-	public enum ACTION {STOP,CONTINUE, BREAK};  
+	public enum ACTION {STOP, SAVE_EVENT};  
 	
 	/**
 	 * Handles the {@link AqpFeedbackEvent}

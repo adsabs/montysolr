@@ -3,6 +3,7 @@ package org.apache.lucene.queryParser.aqp.processors;
 import java.util.List;
 
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
@@ -75,6 +76,18 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
 		throw new QueryNodeException(new MessageImpl(
                 QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
                 "Configuration error: " + DefaultFieldAttribute.class.toString() + " is missing"));
+	}
+	
+	public AqpFeedback getFeedbackAttr() throws QueryNodeException {
+		QueryConfigHandler config = getQueryConfigHandler();
+		if (config.hasAttribute(AqpFeedback.class)) {
+			return config.getAttribute(AqpFeedback.class);
+		}
+		else {
+			throw new QueryNodeException(new MessageImpl(
+					QueryParserMessages.NODE_ACTION_NOT_SUPPORTED,
+					"Configuration error, missing AqpFeedback.class from the config!"));
+		}
 	}
 
 }

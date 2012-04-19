@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.util.AttributeImpl;
 import org.apache.lucene.queryParser.aqp.config.AqpFeedbackEventHandler.ACTION;
 
@@ -46,26 +47,28 @@ public class AqpFeedbackImpl extends AttributeImpl
 		throw new UnsupportedOperationException();
 	}
 
-	public void sendEvent(AqpFeedback.TYPE type, QueryNode node, String msg,
-			Object... args) {
-		
-		AqpFeedbackEvent event = new AqpFeedbackEvent(type, node, msg, args);
-		for (AqpFeedbackEventHandler handler : handlers) {
-			ACTION r = handler.handle(event);
-			if (r == ACTION.BREAK) {
-				break;
-			}
-			else if (r == ACTION.STOP) {
-				return;
-			}
-			
-		}
-		events.add(event);
-		
-	}
-
 	public void registerEventHandler(AqpFeedbackEventHandler handler) {
 		handlers.add(handler);
+	}
+
+	public AqpFeedbackEvent createEvent(TYPE level,
+			Class<? extends QueryNodeProcessor> qnClass, QueryNode node,
+			String msg, Object... args) {
+		return new AqpFeedbackEventImpl(level, qnClass, node, msg, args);
+	}
+
+	public void sendEvent(AqpFeedbackEvent event) {
+		for (AqpFeedbackEventHandler handler : handlers) {
+			ACTION r = handler.handle(event);
+			if (r == ACTION.STOP) {
+				return;
+			}
+			else if (r == ACTION.SAVE_EVENT) {
+				if (!events.contains(event)) {
+					events.add(event);
+				}
+			}
+		}
 	}
 
 

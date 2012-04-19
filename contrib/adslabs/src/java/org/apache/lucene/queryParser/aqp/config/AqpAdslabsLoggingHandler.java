@@ -2,6 +2,7 @@ package org.apache.lucene.queryParser.aqp.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.lucene.queryParser.aqp.config.AqpFeedback.TYPE;
 import org.apache.lucene.queryParser.aqp.config.AqpFeedbackEvent;
 
 public class AqpAdslabsLoggingHandler implements AqpFeedbackEventHandler {
@@ -10,16 +11,17 @@ public class AqpAdslabsLoggingHandler implements AqpFeedbackEventHandler {
 		.getLogger(AqpAdslabsLoggingHandler.class); 
 	
 	public ACTION handle(AqpFeedbackEvent event) {
-		if (event.level.equals(AqpFeedback.TYPE.INFO)) {
-			log.info(event.message);
-			log.debug(event.node.toString());
+		TYPE type = event.getType();
+		if (type.equals(AqpFeedback.TYPE.INFO)) {
+			log.info(event.getMessage());
+			log.debug(event.getNode().toString());
 		}
-		else if (event.level.equals(AqpFeedback.TYPE.DEBUG)) {
-			log.debug(event.message);
-			log.debug(event.node.toString());
+		else if (type.equals(AqpFeedback.TYPE.DEBUG)) {
+			log.debug(event.getMessage());
+			log.debug(event.getNode().toString());
 		}
-		else if (event.level.equals(AqpFeedback.TYPE.WARN)) {
-			log.warn(event.message);
+		else if (type.equals(AqpFeedback.TYPE.WARN)) {
+			log.warn(event.getMessage());
 		}
 		return ACTION.STOP;
 	}

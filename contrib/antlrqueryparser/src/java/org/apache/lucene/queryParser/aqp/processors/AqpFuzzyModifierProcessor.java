@@ -16,7 +16,6 @@ import org.apache.lucene.queryParser.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
-import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
 
 /**
  * Rewrites the query node which is below the {@link AqpFuzzyModifierNode}
@@ -47,9 +46,11 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 				if (fuzzy.intValue() < fuzzy) {
 					QueryConfigHandler config = getQueryConfigHandler();
 					if (config.hasAttribute(AqpFeedback.class)) {
-						config.getAttribute(AqpFeedback.class).sendEvent(AqpFeedback.TYPE.WARN, node, 
+						AqpFeedback feedback = config.getAttribute(AqpFeedback.class);
+						feedback.sendEvent(feedback.createEvent(AqpFeedback.TYPE.WARN, 
+								this.getClass(), node, 
 								"For phrases and wildcard queries the float attribute " + fuzzy + 
-								" is automatically converted to: " + fuzzy.intValue());
+								" is automatically converted to: " + fuzzy.intValue()));
 					}
 				}
 				return new SlopQueryNode(child, fuzzy.intValue());

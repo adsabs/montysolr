@@ -20,6 +20,7 @@ package org.apache.lucene.queryParser.aqp.config;
 
 
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.util.Attribute;
 
 
@@ -31,7 +32,7 @@ import org.apache.lucene.util.Attribute;
  */
 public interface AqpFeedback extends Attribute {
 	
-	public enum TYPE { DEBUG, INFO, WARN, ERROR, SYNTAX_SUGGESTION };
+	public enum TYPE { DEBUG, INFO, WARN, ERROR, SYNTAX_SUGGESTION, DEPRECATED };
 	
 	/*
 	 * I am NOT trying to re-implement a wheel, I am just 
@@ -39,8 +40,14 @@ public interface AqpFeedback extends Attribute {
 	 * by SOLR (but not by Lucene) and not introduce it as
 	 * a dependency to Lucene
 	 */
-	public void sendEvent(TYPE level, QueryNode node, String msg, Object...args);
+	public AqpFeedbackEvent createEvent(TYPE level, 
+			Class<? extends QueryNodeProcessor> qnClass, 
+			QueryNode node, 
+			String msg, Object...args);
 	
+	public void sendEvent(AqpFeedbackEvent event);
+	
+
 	
 	public void registerEventHandler(AqpFeedbackEventHandler handler);
 }
