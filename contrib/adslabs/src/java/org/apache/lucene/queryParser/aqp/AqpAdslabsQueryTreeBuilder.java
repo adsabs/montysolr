@@ -43,6 +43,7 @@ import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
 public class AqpAdslabsQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
 
 	public void init() {
+		
 		setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 		setBuilder(AqpAdslabsIdentifierNode.class, new AqpAdslabsIdentifierNodeBuilder());
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
@@ -61,9 +62,9 @@ public class AqpAdslabsQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
 		setBuilder(StandardBooleanQueryNode.class, new StandardBooleanQueryNodeBuilder());
 		setBuilder(MultiPhraseQueryNode.class, new MultiPhraseQueryNodeBuilder());
 		setBuilder(MatchAllDocsQueryNode.class,	new MatchAllDocsQueryNodeBuilder());
-		setBuilder(AqpNearQueryNode.class,	new AqpNearQueryNodeBuilder());
 		setBuilder(AqpFunctionQueryNode.class,	new AqpFunctionQueryNodeBuilder());
-
+		setBuilder(AqpNearQueryNode.class,	new AqpNearQueryNodeBuilder());
+		
 	}
 
 }

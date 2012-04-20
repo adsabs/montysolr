@@ -10,6 +10,10 @@ public class AqpAdslabsMODIFIERProcessor extends AqpMODIFIERProcessor {
 	@Override
 	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
 		
+		if (node.getChildren().size() == 1) {
+			return node.getChildren().get(0);
+		}
+		
 		AqpANTLRNode subNode = getModifierNode(node);
 		
 		String sign = subNode.getTokenLabel();

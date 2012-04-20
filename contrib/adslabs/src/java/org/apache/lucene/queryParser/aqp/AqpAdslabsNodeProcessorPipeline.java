@@ -3,20 +3,17 @@ package org.apache.lucene.queryParser.aqp;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsAnalyzerProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsMODIFIERProcessor;
-import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsQPOSITIONProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsSynonymNodeProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpCLAUSEProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpCOMMAProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpDEFOPProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFIELDProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFUZZYProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpGroupQueryOptimizerProcessor;
-import org.apache.lucene.queryParser.aqp.processors.AqpInvenioMODIFIERProcessor;
-import org.apache.lucene.queryParser.aqp.processors.AqpInvenioQPHRASEProcessor;
-import org.apache.lucene.queryParser.aqp.processors.AqpMODIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpNullDefaultFieldProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOptimizationProcessor;
@@ -37,7 +34,6 @@ import org.apache.lucene.queryParser.core.processors.NoChildOptimizationQueryNod
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryParser.core.processors.RemoveDeletedQueryNodesProcessor;
 import org.apache.lucene.queryParser.standard.processors.AllowLeadingWildcardProcessor;
-import org.apache.lucene.queryParser.standard.processors.AnalyzerQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.BooleanSingleChildOptimizationQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.BoostQueryNodeProcessor;
 import org.apache.lucene.queryParser.standard.processors.DefaultPhraseSlopQueryNodeProcessor;
@@ -63,9 +59,10 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpAdslabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$
 		add(new AqpAdslabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
 		add(new AqpQFUNCProcessor()); // prepares function node (may decide which implementation to call)
-	
+		
+		add(new AqpCOMMAProcessor()); // extends with COMMA and SEMICOLON
 		add(new AqpAdslabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
-		add(new AqpAdslabsOPERATORProcessor()); // extends standard operators with COMMA and SEMICOLON
+		add(new AqpOPERATORProcessor()); 
 		add(new AqpCLAUSEProcessor());
 		
 		add(new AqpTMODIFIERProcessor()); // changes AST to more manageable form

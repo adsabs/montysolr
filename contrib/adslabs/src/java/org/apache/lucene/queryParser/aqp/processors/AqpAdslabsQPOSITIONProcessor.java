@@ -54,11 +54,12 @@ public class AqpAdslabsQPOSITIONProcessor extends AqpQProcessorPost {
 	                "^~ is very concise and therefore cool, but I am afraid you must tell me more. Try something like: word^0.5~"));
 		}
 		
-		Integer start = 1;
+		Integer start = -1;
 		Integer end = 1;
 		
 		if (input.startsWith("^")) {
 			input = input.substring(1, input.length());
+			start = 1;
 		}
 		
 		if (input.endsWith("$")) {
@@ -79,28 +80,28 @@ public class AqpAdslabsQPOSITIONProcessor extends AqpQProcessorPost {
 		semicolonNode.setTokenName("OPERATOR");
 		semicolonNode.setTokenLabel("COMMA");
 		
-		// 1. value
+		// 1. value (field name)
 		AqpANTLRNode field = new AqpANTLRNode(tree);
 		field.setTokenLabel("TOKEN");
 		field.setTokenName("TOKEN");
-		field.setTokenInput("author"); // the first argument should be the field name
+		field.setTokenInput(getFieldName(node, "author")); // the first argument should be the field name
 		semicolonNode.add(getChain(field));
 		
-		// 2nd value
+		// 2nd value (user input)
 		AqpANTLRNode author = new AqpANTLRNode(tree);
 		author.setTokenName(input.startsWith("\"") ? "PHRASE" : "TOKEN");
 		author.setTokenLabel(input.startsWith("\"") ? "PHRASE" : "TOKEN");
 		author.setTokenInput(input);
 		semicolonNode.add(getChain(author));
 		
-		// 3rd value
+		// 3rd value (starting position)
 		AqpANTLRNode startNode = new AqpANTLRNode(tree);
 		startNode.setTokenName("TOKEN");
 		startNode.setTokenLabel("TOKEN");
 		startNode.setTokenInput(String.valueOf(start));
 		semicolonNode.add(getChain(startNode));
 		
-		// 4th value
+		// 4th value (ending position)
 		AqpANTLRNode endNode = new AqpANTLRNode(tree);
 		endNode.setTokenName("TOKEN");
 		endNode.setTokenLabel("TOKEN");
@@ -133,6 +134,24 @@ public class AqpAdslabsQPOSITIONProcessor extends AqpQProcessorPost {
 		return funcNode;
 	}
 	
+	// tries to discover the field (if present, otherwise returns the default)
+	private String getFieldName(AqpANTLRNode node, String defaultField) {
+		String fieldName = defaultField;
+		
+		if (node.getParent().getChildren().size() != 2) {
+			return fieldName;
+		}
+		
+		QueryNode possibleField = node.getParent().getChildren().get(0);
+		if (possibleField instanceof AqpANTLRNode) {
+			String testValue = ((AqpANTLRNode) possibleField).getTokenInput();
+			if (testValue != null) {
+				fieldName = testValue;
+			}
+		}
+		return fieldName;
+	}
+
 	protected AqpANTLRNode getChain(AqpANTLRNode finalNode) {
 		
 		AqpCommonTree tree = finalNode.getTree();

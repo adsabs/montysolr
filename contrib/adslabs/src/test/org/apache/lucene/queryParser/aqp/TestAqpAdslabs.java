@@ -55,15 +55,16 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	public void testOldPositionalSearch() throws Exception {
-		// also, we want to generate a warning message
-		setDebug(true);
+		
+		// TODO: check for the generated warnings
+		
 		assertQueryEquals("^two", null, "pos(author,two,1,1)", FunctionQuery.class);
 		assertQueryEquals("^two$", null, "pos(author,two,1,-1)", FunctionQuery.class);
-		//assertQueryEquals("two$", null, "pos(author,two,-1,-1)", FunctionQuery.class);
+		assertQueryEquals("two$", null, "pos(author,two,-1,-1)", FunctionQuery.class);
 		
 		assertQueryEquals("one ^two", null, "one pos(author,two,1,1)");
 		assertQueryEquals("^one ^two$", null, "pos(author,one,1,1) pos(author,two,1,-1)");
-		assertQueryEquals("^one NOT two$", null, "+pos(author,one,1,1) -pos(author,two,1,-1)");
+		assertQueryEquals("^one NOT two$", null, "+pos(author,one,1,1) -pos(author,two,-1,-1)");
 		assertQueryEquals("one ^two, j, k$", null, "one pos(author,\"two, j, k\",1,-1)");
 		assertQueryEquals("one ^two,j,k$", null, "one pos(author,\"two,j,k\",1,-1)");
 		
@@ -71,14 +72,30 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryEquals("one \"^author phrase$\"", null, "one pos(author,\"author phrase\",1,-1)");
 		assertQueryEquals("one \"author phrase$\"", null, "one pos(author,\"author phrase\",-1,-1)");
 		
-		assertQueryEquals("author:\"^Peter H. Smith\"", null, "pos(author:peter author:h. author:smith; 0)");
+		
+		// and now the very weird cases, but as the example shows, the name is NOT analyzed
+		// and for this to work, we are required to make a strange number of steps, OR, translate
+		// this query into another functional query
+		assertQueryEquals("author:\"^Peter H. Smith\"", null, "pos(author,\"Peter H. Smith\",1,1)");
+		assertQueryEquals("xfield:\"^Peter H. Smith\"", null, "pos(xfield,\"Peter H. Smith\",1,1)");
 		
 		
-		// synonym replacement?
-		assertQueryEquals("^Kurtz, M. -Eichhorn, G. 2000", null, "pos(author,\"Kurtz, M.\",1,1) -spanNear([eichhorn, g], 1, true)");
+		// and what about synonym replacement? How shall we distinguish these cases and apply 
+		// appropriate synonym/acronym translation/expansion to them? Worse, they can be mixed
+		// by users with normal words
+		assertQueryEquals("^Kurtz, M. -Eichhorn", null, 
+			"pos(author,\"Kurtz, M.\",1,1) -eichhorn");
+		assertQueryEquals("^Kurtz, M. -Eichhorn, G. 2000", null, 
+			"pos(author,\"Kurtz, M.\",1,1) -spanNear([eichhorn, g], 1, true)");
+		assertQueryEquals("^CERN, PH. -nothing", null, 
+			"pos(author,\"CERN, PH.\",1,1) -nothing");
 		
+		assertQueryEquals("author:(A~0.2; -B)^2 OR c", null, 
+			"((author:a~0.2 -author:b)^2.0) c");
+		assertQueryEquals("author:(A~0.2 -B)^2 OR c", null, 
+			"((author:a~0.2 -author:b)^2.0) c");
 		assertQueryEquals("author:(kurtz~0.2; -echhorn)^2 OR ^accomazzi, a", null, 
-				"((+author:kurtz~0.2 -author:echhorn)^2.0) pos(author,\"accomazzi, a\",1,1)");
+				"((author:kurtz~0.2 -author:echhorn)^2.0) pos(author,\"accomazzi, a\",1,1)");
 	}
 	
 	public void testAcronyms() throws Exception {
@@ -285,7 +302,7 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryNodeException("this (+(((+(that))))");	
 		assertQueryNodeException("this (++(((+(that)))))");
 		
-		assertQueryNodeException("escape:(\\+\\-\\&\\&\\|\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\?\\:\\\\)");
+		//assertQueryNodeException("escape:(\\+\\-\\&\\&\\|\\|\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\?\\:\\\\)");
 		
 		assertQueryNodeException("[]");	
 		
@@ -465,7 +482,7 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		
 		assertQueryEquals("author:(huchra)", null, "author:huchra");
 		assertQueryEquals("author:(huchra, j)", null, "spanNear([author:huchra, author:j], 1, true)");
-		assertQueryEquals("author:(kurtz; -eichhorn, g)", null, "+author:kurtz +spanNear([author:eichhorn, author:g], 1, true)");
+		assertQueryEquals("author:(kurtz; -eichhorn, g)", null, "author:kurtz -spanNear([author:eichhorn, author:g], 1, true)");
 		assertQueryEquals("author:(muench-nashrallah)", wsa, "author:muench-nashrallah");
 		assertQueryEquals("\"dark matter\" OR (dark matter -LHC)", null, "\"dark matter\" dark matter -lhc");
 		
