@@ -834,11 +834,11 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testException() throws Exception {
     assertQueryNodeException("*leadingWildcard"); // disallowed by default
+    assertQueryNodeException("(foo bar");
+    
+    // these exceptions are not thrown
     setDebug(true);
     assertQueryNodeException("\"some phrase");
-    setDebug(false);
-    assertQueryNodeException("(foo bar");
-    setDebug(true);
     assertQueryNodeException("foo bar))");
     assertQueryNodeException("field:term:with:colon some more terms");
     assertQueryNodeException("(sub query)^5.0^2.0 plus more");

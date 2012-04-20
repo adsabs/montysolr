@@ -314,7 +314,9 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		assertQueryNodeException("+field:");
 		
 		assertQueryNodeException("=");
-		assertQueryNodeException("one ^\"author phrase\"");		
+		assertQueryNodeException("one ^\"author phrase\"");
+		
+		setDebug(true);
 		assertQueryNodeException("one ^\"author phrase\"$");
 		
 		assertQueryNodeException("this =and that");

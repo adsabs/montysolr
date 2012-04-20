@@ -233,6 +233,11 @@ public class @{grammar-name}SyntaxParser extends AqpSyntaxParserAbstract {
         
         try {
             returnValue = parser.mainQ();
+            // this prevents parser from recovering, however it can also interfere
+            // with custom error handling (if present inside the grammar)
+        	if (parser.getNumberOfSyntaxErrors() > 0) {
+                throw new Exception("The parser reported a syntax error, antlrqueryparser hates errors!");
+            }
             astTree = (AqpCommonTree) returnValue.getTree();
             return astTree.toQueryNodeTree();
         } catch (RecognitionException e) {
