@@ -124,7 +124,16 @@ public class AqpANTLRNode extends QueryNodeImpl {
 	public void setTokenType(int tokenType) {
 		this.tokenType = tokenType;
 	}
-
+	
+	/**
+	 * Label is what is displayed in the AST 
+	 * tree, for example and, And, AND will 
+	 * all have label=AND
+	 * 
+	 * (But their internal name is an 'OPERATOR')
+	 * 
+	 * @return
+	 */
 	public String getTokenLabel() {
 		return tokenLabel;
 	}
@@ -136,7 +145,12 @@ public class AqpANTLRNode extends QueryNodeImpl {
 	public String getTokenName() {
 		return tokenName;
 	}
-
+	
+	/**
+	 * Name is the name of the group, ie. 'AND'
+	 * is an OPERATOR (but its label says: 'AND')
+	 * @param tokenName
+	 */
 	public void setTokenName(String tokenName) {
 		this.tokenName = tokenName;
 	}

@@ -1,6 +1,7 @@
 package org.apache.lucene.queryParser.aqp;
 
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsAnalyzerProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsMODIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsQPOSITIONProcessor;
@@ -59,15 +60,16 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 		
-		
+		add(new AqpAdslabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$
 		add(new AqpAdslabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
+		add(new AqpQFUNCProcessor()); // prepares function node (may decide which implementation to call)
 	
 		add(new AqpAdslabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
 		add(new AqpAdslabsOPERATORProcessor()); // extends standard operators with COMMA and SEMICOLON
 		add(new AqpCLAUSEProcessor());
 		
 		add(new AqpTMODIFIERProcessor()); // changes AST to more manageable form
-		add(new AqpQFUNCProcessor());
+		
 		
 		add(new AqpBOOSTProcessor());
 		add(new AqpFUZZYProcessor());

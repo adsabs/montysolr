@@ -13,6 +13,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.Version;
+import org.apache.solr.search.function.FunctionQuery;
 
 public class TestAqpAdslabs extends AqpTestAbstractCase {
 
@@ -56,22 +57,28 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	public void testOldPositionalSearch() throws Exception {
 		// also, we want to generate a warning message
 		setDebug(true);
-		assertQueryEquals("one ^two", null, "one pos(field, two, 0)");
-		assertQueryEquals("^one ^two$", null, "pos(field, one, 0) pos(field, two, 0, -1)");
-		assertQueryEquals("^one NOT two$", null, "pos(field, one, 0) -pos(field, two, 0, -1");
-		assertQueryEquals("one ^two, j, k$", null, "one pos(field, \"field:two +field:j +field:k\", 0, -1)");
-		assertQueryEquals("one ^two,j,k$", null, "one pos(field, \"field:two +field:j +field:k\", 0, -1)");
+		assertQueryEquals("^two", null, "pos(author,two,1,1)", FunctionQuery.class);
+		assertQueryEquals("^two$", null, "pos(author,two,1,-1)", FunctionQuery.class);
+		//assertQueryEquals("two$", null, "pos(author,two,-1,-1)", FunctionQuery.class);
 		
-		assertQueryEquals("one \"^author phrase\"", null, "");
-		assertQueryEquals("one \"^author phrase$\"", null, "");
+		assertQueryEquals("one ^two", null, "one pos(author,two,1,1)");
+		assertQueryEquals("^one ^two$", null, "pos(author,one,1,1) pos(author,two,1,-1)");
+		assertQueryEquals("^one NOT two$", null, "+pos(author,one,1,1) -pos(author,two,1,-1)");
+		assertQueryEquals("one ^two, j, k$", null, "one pos(author,\"two, j, k\",1,-1)");
+		assertQueryEquals("one ^two,j,k$", null, "one pos(author,\"two,j,k\",1,-1)");
+		
+		assertQueryEquals("one \"^author phrase\"", null, "one pos(author,\"author phrase\",1,1)");
+		assertQueryEquals("one \"^author phrase$\"", null, "one pos(author,\"author phrase\",1,-1)");
+		assertQueryEquals("one \"author phrase$\"", null, "one pos(author,\"author phrase\",-1,-1)");
 		
 		assertQueryEquals("author:\"^Peter H. Smith\"", null, "pos(author:peter author:h. author:smith; 0)");
 		
 		
 		// synonym replacement?
-		assertQueryEquals("^Kurtz, M. -Eichhorn, G. 2000", null, "");
+		assertQueryEquals("^Kurtz, M. -Eichhorn, G. 2000", null, "pos(author,\"Kurtz, M.\",1,1) -spanNear([eichhorn, g], 1, true)");
 		
-		assertQueryEquals("author:(kurtz~0.2; -echhorn)^2 OR ^accomazzi, a", null, "");
+		assertQueryEquals("author:(kurtz~0.2; -echhorn)^2 OR ^accomazzi, a", null, 
+				"((+author:kurtz~0.2 -author:echhorn)^2.0) pos(author,\"accomazzi, a\",1,1)");
 	}
 	
 	public void testAcronyms() throws Exception {
@@ -180,7 +187,6 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	public void testFunctionalQueries() throws Exception {
-		setDebug(true);
 		assertQueryEquals("pos(author, \"Accomazzi, A\", 1, \\-1)", null, "pos(author,\"Accomazzi, A\",1,-1)");
 		
 		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
