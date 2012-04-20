@@ -42,15 +42,21 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	public void testAuthorField() throws Exception {
-		assertQueryEquals("author:\"huchra, j\"", null, "author:\"huchra, j\"");
+		// note: nothing too much exciting here - the real tests must be done with the 
+		// ADS author query, and for that we will need solr unittests - so for now, just basic stuff
 		
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		
-		assertQueryEquals("author:\"A Einstein\"", null, "author:\"a einstein\"");
-		assertQueryEquals("=author:\"A Einstein\"", null, "author:\"A Einstein\"");
+		assertQueryEquals("author:\"A Einstein\"", null, "author:\"a einstein\"", PhraseQuery.class);
+		// probably, this should construct a different query (a phrase perhaps)
+		assertQueryEquals("=author:\"A Einstein\"", null, "author:A Einstein", TermQuery.class);
 		
-		assertQueryEquals("author:\"M. J. Kurtz\" author:\"G. Eichhorn\" 2004", null, "author:\"m. j. kurtz\" author:\"g. eichhorn\" 2004");
-		assertQueryEquals("author:\"M. J. Kurtz\" author:\"G. Eichhorn\" 2004", null, "author:\"m. j. kurtz\" author:\"g. eichhorn\" -2004");
+		assertQueryEquals("author:\"M. J. Kurtz\" author:\"G. Eichhorn\" 2004", wsa, "author:\"M. J. Kurtz\" author:\"G. Eichhorn\" 2004");
+		assertQueryEquals("author:\"M. J. Kurtz\" =author:\"G. Eichhorn\" 2004", null, "author:\"m j kurtz\" author:G. Eichhorn");
 		
+		assertQueryEquals("author:\"huchra, j\"", wsa, "author:\"huchra, j\"");
+		assertQueryEquals("author:\"huchra, j\"", null, "author:\"huchra j\"");
+		assertQueryEquals("=author:\"huchra, j\"", wsa, "author:huchra, j", TermQuery.class);
 		
 	}
 	
@@ -111,7 +117,6 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	public void testIdentifiers() throws Exception {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		Query q = null;
-		setDebug(true);
 		assertQueryEquals("arXiv:1012.5859", wsa, "arxiv:1012.5859");
 		assertQueryEquals("xfield:10.1086/345794", wsa, "xfield:10.1086/345794");
 		
@@ -122,7 +127,7 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 		
 		assertQueryEquals("2003AJ….125..525J", wsa, "2003aj....125..525j");
 		
-		assertQueryEquals("one doi:word/word doi:word/123", wsa, "one identifier:doi:word/word identifier:doi:word/123");
+		assertQueryEquals("one x:doi:word/word doi:word/123", wsa, "one x:doi:word/word doi:word/123");
 		assertQueryEquals("doi:hey/156-8569", wsa, "doi:hey/156-8569");
 		q = assertQueryEquals("doi:10.1000/182", wsa, "doi:10.1000/182");
 		
