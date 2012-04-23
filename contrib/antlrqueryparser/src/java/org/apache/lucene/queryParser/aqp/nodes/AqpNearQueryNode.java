@@ -34,7 +34,7 @@ public class AqpNearQueryNode extends QueryNodeImpl implements QueryNode {
 		String leftParenthensis = "";
 		String rightParenthensis = "";
 
-		if (getChild() != null && getChild() instanceof InvenioQueryNode) {
+		if (getChild() != null && getChild() instanceof AqpNearQueryNode) {
 			leftParenthensis = "(";
 			rightParenthensis = ")";
 		}
