@@ -3,6 +3,7 @@ package org.apache.lucene.queryParser.aqp;
 import org.apache.lucene.queryParser.aqp.builders.AqpAdslabsIdentifierNodeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.AqpFunctionQueryNodeBuilder;
+import org.apache.lucene.queryParser.aqp.builders.IgnoreQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.InvenioQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsIdentifierNode;
@@ -18,6 +19,7 @@ import org.apache.lucene.queryParser.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryParser.core.nodes.MatchAllDocsQueryNode;
 import org.apache.lucene.queryParser.core.nodes.MatchNoDocsQueryNode;
 import org.apache.lucene.queryParser.core.nodes.ModifierQueryNode;
+import org.apache.lucene.queryParser.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryParser.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryParser.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryParser.standard.builders.BooleanQueryNodeBuilder;
@@ -64,6 +66,7 @@ public class AqpAdslabsQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
 		setBuilder(MatchAllDocsQueryNode.class,	new MatchAllDocsQueryNodeBuilder());
 		setBuilder(AqpFunctionQueryNode.class,	new AqpFunctionQueryNodeBuilder());
 		setBuilder(AqpNearQueryNode.class,	new AqpNearQueryNodeBuilder());
+		setBuilder(OpaqueQueryNode.class,	new IgnoreQueryNodeBuilder());
 		
 	}
 

@@ -1,7 +1,9 @@
 package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryParser.aqp.builders.AqpAdslabsFunctionProvider;
 import org.apache.lucene.queryParser.aqp.config.AqpAdslabsLoggingHandler;
 import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
+import org.apache.lucene.queryParser.aqp.config.AqpFunctionQueryBuilderConfig;
 import org.apache.lucene.queryParser.aqp.config.DefaultDateRangeField;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
@@ -54,6 +56,7 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		addAttribute(DefaultProximityAttribute.class);
 		addAttribute(BoostAttribute.class);
 		addAttribute(DefaultDateRangeField.class);
+		addAttribute(AqpFunctionQueryBuilderConfig.class);
 		
 		addAttribute(AqpFeedback.class); // to collect/work with exceptions
 		addAttribute(AqpFeedback.class).registerEventHandler(new AqpAdslabsLoggingHandler());
@@ -61,5 +64,7 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
 		getAttribute(DefaultDateRangeField.class).setField("date");
 		getAttribute(AllowLeadingWildcardAttribute.class).setAllowLeadingWildcard(true);
+		
+		getAttribute(AqpFunctionQueryBuilderConfig.class).addProvider(new AqpAdslabsFunctionProvider());
 	}
 }

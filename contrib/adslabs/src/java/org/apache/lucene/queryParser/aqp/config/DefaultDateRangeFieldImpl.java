@@ -5,6 +5,7 @@ import org.apache.lucene.util.AttributeImpl;
 public class DefaultDateRangeFieldImpl extends AttributeImpl 
 	implements DefaultDateRangeField {
 	
+	private static final long serialVersionUID = -3259843643284838152L;
 	private String dateField = null;
 	
 	public void setField(String fieldName) {

@@ -1,14 +1,15 @@
 package org.apache.lucene.queryParser.aqp.processors;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.aqp.builders.AqpFunctionQueryBuilder;
+import org.apache.lucene.queryParser.aqp.config.AqpFunctionQueryBuilderConfig;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryParser.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
+import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
-import org.apache.lucene.queryParser.standard.parser.ParseException;
 
 public class AqpQFUNCProcessor extends AqpQProcessorPost {
 	
@@ -27,42 +28,23 @@ public class AqpQFUNCProcessor extends AqpQProcessorPost {
 			funcName = funcName.substring(0, funcName.length()-1);
 		}
 		
-		List<String> rawData = harvestChildrenData(children.get(1));
-		return new AqpFunctionQueryNode(funcName, children.get(1), rawData);
+		QueryConfigHandler config = getQueryConfigHandler();
 		
-	}
-
-	// get the raw input from the children, we do not go 
-	// into nested QFUNCs, that is intentional,
-	// we see only the immediate level
-	private List<String> harvestChildrenData(QueryNode node) {
-		List<String> rawInput = new ArrayList<String>();
-		swimDeep(rawInput, node);
-		return rawInput;
-	}
-
-	private void swimDeep(List<String> rawInput, QueryNode node) {
-		if (node instanceof AqpANTLRNode) {
-			AqpANTLRNode a = (AqpANTLRNode) node;
-			if (a.getTokenInput() != null) {
-				try {
-					rawInput.add(
-						EscapeQuerySyntaxImpl.discardEscapeChar(a.getTokenInput()).toString()
-								);
-				} catch (ParseException e) {
-					rawInput.add(a.getTokenInput());
-				}
-			}
+		if (!config.hasAttribute(AqpFunctionQueryBuilderConfig.class)) {
+			throw new QueryNodeException(new MessageImpl(
+					"Invalid configuration",
+					"Missing FunctionQueryBuilder provider"));
 		}
-		else if (node instanceof AqpFunctionQueryNode) {
-			rawInput.add("QFUNC");
-			return;
+		
+		AqpFunctionQueryBuilder builder = config.getAttribute(AqpFunctionQueryBuilderConfig.class)
+										.getBuilder(funcName, node);
+		
+		if (builder == null) {
+			throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
+					"Unknown function \"" + funcName + "\"" ));
 		}
-		if (!node.isLeaf()) {
-			for (QueryNode child: node.getChildren()) {
-				swimDeep(rawInput, child);
-			}
-		}
+		
+		return builder.createQNode(children.get(1));
 		
 	}
 

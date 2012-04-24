@@ -1,32 +1,23 @@
 package org.apache.lucene.queryParser.aqp.builders;
 
-import java.util.List;
-
 import org.apache.lucene.queryParser.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.solr.search.function.FunctionQuery;
-import org.apache.solr.search.function.PositionSearchFunction;
+import org.apache.lucene.queryParser.standard.builders.StandardQueryBuilder;
+import org.apache.lucene.search.Query;
 
-public class AqpFunctionQueryNodeBuilder implements QueryBuilder {
+public class AqpFunctionQueryNodeBuilder implements StandardQueryBuilder {
 
-	public Object build(QueryNode queryNode) throws QueryNodeException {
+	public AqpFunctionQueryNodeBuilder() {
+		// empty constructor
+	}
+	
+	public Query build(QueryNode queryNode) throws QueryNodeException {
 		AqpFunctionQueryNode node = (AqpFunctionQueryNode) queryNode;
 		
-		String funcName = node.getName();
-		
-		// XXX: tired now, will do better later
-		if (funcName.equals("pos")) {
-			List<String> rawInput = node.getRawData();
-			PositionSearchFunction ps = new PositionSearchFunction(rawInput.get(0), 
-					rawInput.get(1), 
-					Integer.valueOf(rawInput.get(2)), 
-					Integer.valueOf(rawInput.get(3)));
-			return new FunctionQuery(ps);
-		}
-		
-		return null;
+		AqpFunctionQueryBuilder builder = node.getBuilder();
+		return (Query) builder.build(node);
 	}
+
 
 }
