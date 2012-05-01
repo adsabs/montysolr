@@ -5,7 +5,7 @@ from montysolr.utils import make_targets
 
 from invenio import bibdocfile
 
-import adslabs.api_calls as api_calls
+import adsabs.api_calls as api_calls
 import os
 import time
 

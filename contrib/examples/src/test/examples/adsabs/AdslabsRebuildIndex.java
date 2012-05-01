@@ -1,4 +1,4 @@
-package examples.adslabs;
+package examples.adsabs;
 
 import invenio.montysolr.util.MontySolrSetup;
 
@@ -14,7 +14,7 @@ public class AdslabsRebuildIndex extends BlackAbstractTestCase{
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		setEName("adslabs");
+		setEName("adsabs");
 		exampleInit();
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");

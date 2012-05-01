@@ -1,4 +1,4 @@
-package examples.adslabs;
+package examples.adsabs;
 
 import java.io.File;
 
@@ -16,7 +16,7 @@ public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		setEName("adslabs");
+		setEName("adsabs");
 		exampleInit();
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");

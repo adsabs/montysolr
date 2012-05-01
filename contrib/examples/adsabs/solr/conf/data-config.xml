@@ -18,7 +18,7 @@
     ]]></script>
     <dataSource type="AdsDataSource" mongoHost="adszee" mongoPort="27017" jdbcConfig="" />
     <document>
-        <entity name="adslabs"
+        <entity name="adsabs"
             pk="id"
             url="${dataimporter.request.url}"
             processor="XPathEntityProcessor"
@@ -74,11 +74,11 @@
         <!-- field column="entdate" xpath="" / -->
         <!-- field column="bibgroup" xpath="" / -->
             
-        <field column="full" template="${adslabs.bibcode}"/>
+        <field column="full" template="${adsabs.bibcode}"/>
         
-        <field column="ack" template="${adslabs.bibcode}" />
+        <field column="ack" template="${adsabs.bibcode}" />
         
-        <field column="reader" template="${adslabs.bibcode}" />
+        <field column="reader" template="${adsabs.bibcode}" />
 
         </entity>
         

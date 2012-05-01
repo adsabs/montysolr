@@ -128,5 +128,5 @@ if __name__ == '__main__':
         examples:
         python recreate_index.py http://localhost:8984/solr/invenio-updater 3600
         """
-    log = get_logger("montysolr.example.adslabs")
+    log = get_logger("montysolr.example.adsabs")
     recreate_index(*sys.argv[1:])

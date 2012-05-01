@@ -164,7 +164,7 @@
         </exec>
 		
        <exec executable="ant" failonerror="true">
-            <arg line="build-one -Dename=adslabs" />
+            <arg line="build-one -Dename=adsabs" />
        </exec>
 	</target>
 	

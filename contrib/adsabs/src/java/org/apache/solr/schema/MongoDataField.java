@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Fieldable;
 
-import org.ads.mongodb.MongoConnection;
+import org.adsabs.mongodb.MongoConnection;
 import com.mongodb.Mongo;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;

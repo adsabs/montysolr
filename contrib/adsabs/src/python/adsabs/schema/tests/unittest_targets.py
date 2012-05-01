@@ -11,7 +11,7 @@ class Test(LuceneTestCase):
 
     def setUp(self):
         LuceneTestCase.setUp(self)
-        self.addTargets('adslabs.schema.targets')
+        self.addTargets('adsabs.schema.targets')
     
     def test_get_field_value_using_bibcode(self):
         return "not implemented!"

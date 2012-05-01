@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import org.ads.mongodb.MongoConnection;
+import org.adsabs.mongodb.MongoConnection;
 import org.apache.solr.schema.MongoDataField;
 
 
