@@ -12,7 +12,6 @@ public class AuthorVariationFilterFactory extends BaseTokenFilterFactory {
         super.init(args);
     }
     
-	@Override
 	public TokenStream create(TokenStream input) {
 		return new AuthorVariationFilter(input);
 	}

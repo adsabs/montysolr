@@ -11,8 +11,6 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.solr.analysis.BaseTokenFilterFactory;
-import org.apache.solr.analysis.SynonymFilter;
-import org.apache.solr.analysis.SynonymMap;
 import org.apache.solr.common.ResourceLoader;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.StrUtils;
@@ -31,7 +29,6 @@ public class AuthorSynonymFilterFactory extends BaseTokenFilterFactory implement
     
     private AuthorSynonymMap synMap;
     
-	@Override
 	public void inform(ResourceLoader loader) {
 		String synonyms = args.get("synonyms");
 		if (synonyms == null)
@@ -85,7 +82,6 @@ public class AuthorSynonymFilterFactory extends BaseTokenFilterFactory implement
 		this.synMap = synMap;
 	}
 	  
-	@Override
 	public TokenStream create(TokenStream input) {
 		return new AuthorSynonymFilter(input, synMap);
 	}

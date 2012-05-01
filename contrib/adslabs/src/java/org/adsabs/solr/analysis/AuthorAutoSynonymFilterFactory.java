@@ -22,7 +22,6 @@ public class AuthorAutoSynonymFilterFactory extends BaseTokenFilterFactory {
 	/* (non-Javadoc)
 	 * @see org.apache.solr.analysis.TokenFilterFactory#create(org.apache.lucene.analysis.TokenStream)
 	 */
-	@Override
 	public AuthorAutoSynonymFilter create(TokenStream input) {
 		return new AuthorAutoSynonymFilter(input);
 	}

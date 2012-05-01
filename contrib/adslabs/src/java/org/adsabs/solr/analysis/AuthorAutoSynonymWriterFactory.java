@@ -29,7 +29,6 @@ public class AuthorAutoSynonymWriterFactory extends BaseTokenFilterFactory imple
 	
     public static final Logger log = LoggerFactory.getLogger(AuthorAutoSynonymWriterFactory.class);
     
-    @Override
 	public void inform(ResourceLoader loader) {
     	
 		this.outFile = args.get("outFile");
@@ -63,7 +62,6 @@ public class AuthorAutoSynonymWriterFactory extends BaseTokenFilterFactory imple
 	/* (non-Javadoc)
 	 * @see org.apache.solr.analysis.TokenFilterFactory#create(org.apache.lucene.analysis.TokenStream)
 	 */
-	@Override
 	public TokenStream create(TokenStream input) {
 		return new AuthorAutoSynonymWriter(input, this.writer);
 	}
