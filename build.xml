@@ -165,7 +165,7 @@
 	        <arg value="-c"/>
 	        <arg value="import os, jcc; print os.path.dirname(os.path.dirname(jcc.__file__))" />
 	    </exec>
-
+	    
 	</target>
 
 
@@ -258,6 +258,9 @@
 		</compile>
 	</target>
 
+	<target name="test" depends="write-properties">
+		   <antcall target="common.test" inheritall="true" inheritrefs="true"/>
+	</target>
 
 
 	<!-- writes into a simple format various config variables, they can be used by unittests/java -->
