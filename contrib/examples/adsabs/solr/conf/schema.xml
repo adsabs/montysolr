@@ -668,7 +668,7 @@
  </similarity>
  -->
 
- <similarity class="org.ads.solr.SweetSpotSimilarityFactory">
+ <similarity class="org.adsabs.solr.SweetSpotSimilarityFactory">
     <str name="min">1000</str>
     <str name="max">20000</str>
     <str name="steepness">0.5</str>

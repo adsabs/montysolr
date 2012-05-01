@@ -1,5 +1,4 @@
 
-import solr
 import sys
 import time
 import logging
@@ -126,7 +125,7 @@ if __name__ == '__main__':
                     [batchsize=1000]
                     [inveniourl=python://search]
         examples:
-        python recreate_index.py http://localhost:8984/solr/invenio-updater 3600
+        python recreate_index.py http://localhost:8984/solr 3600 30 /invenio-updater 200
         """
     log = get_logger("montysolr.example.adsabs")
     recreate_index(*sys.argv[1:])
