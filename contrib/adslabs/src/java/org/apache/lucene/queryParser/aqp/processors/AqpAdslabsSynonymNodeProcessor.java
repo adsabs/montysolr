@@ -3,7 +3,7 @@ package org.apache.lucene.queryParser.aqp.processors;
 import java.util.List;
 
 import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsSynonymQueryNode;
-import org.apache.lucene.queryParser.aqp.nodes.NonAnalyzedQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
@@ -37,11 +37,11 @@ public class AqpAdslabsSynonymNodeProcessor extends QueryNodeProcessorImpl imple
 
 	protected QueryNode applyNonAnalyzableToAllChildren(QueryNode node) {
 		
-		if (node instanceof NonAnalyzedQueryNode) {
+		if (node instanceof AqpNonAnalyzedQueryNode) {
 			return node;
 		}
 		else if (node instanceof FieldQueryNode) {
-			return new NonAnalyzedQueryNode((FieldQueryNode) node); 
+			return new AqpNonAnalyzedQueryNode((FieldQueryNode) node); 
 		}
 		
 		List<QueryNode> children = node.getChildren();

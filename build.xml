@@ -430,7 +430,10 @@ lucene.version=${lucene.version}
     	  <arg value="build-all"/>
     	  <arg value="-f"/>
     	  <fileset dir="${common.dir}/contrib">
-    	  	<include name="**/build.xml"/>
+    	  	<include name="**/anlrqueryparser/build.xml"/>
+    	  	<include name="**/invenio/build.xml"/>
+    	  	<include name="**/newseman/build.xml"/>
+    	  	<include name="**/adsabs/build.xml"/>
 	  	  </fileset>
     	</apply>
     </target>

@@ -4,10 +4,10 @@ import org.apache.lucene.queryParser.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.builders.InvenioQueryNodeBuilder;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
-import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
+import org.apache.lucene.queryParser.aqp.config.InvenioDefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.aqp.nodes.InvenioQueryNode;
-import org.apache.lucene.queryParser.aqp.nodes.NonAnalyzedQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpCLAUSEProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpDEFOPProcessor;
@@ -124,7 +124,7 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 
 			// Default Values
 			addAttribute(DefaultFieldAttribute.class);
-			addAttribute(DefaultIdFieldAttribute.class);
+			addAttribute(InvenioDefaultIdFieldAttribute.class);
 			addAttribute(RangeCollatorAttribute.class);
 			addAttribute(DefaultOperatorAttribute.class);
 			addAttribute(AnalyzerAttribute.class);
@@ -139,7 +139,7 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 			addAttribute(InvenioQueryAttribute.class);
 			addAttribute(MultiFieldAttribute.class);
 			
-			getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
+			getAttribute(InvenioDefaultIdFieldAttribute.class).setDefaultIdField("recid");
 		}
 	}
 
@@ -205,7 +205,7 @@ public class AqpInvenioQueryParser extends AqpQueryParser {
 		public void init() {
 			setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 			setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
-			setBuilder(NonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
+			setBuilder(AqpNonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
 			setBuilder(InvenioQueryNode.class,
 					new InvenioQueryNodeBuilder(this));
 			setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());

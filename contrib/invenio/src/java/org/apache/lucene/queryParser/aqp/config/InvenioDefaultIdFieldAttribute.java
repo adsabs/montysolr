@@ -30,7 +30,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpInvenioMODIFIERProcessor;
  * system IDs and lucene doc ids' <br/>
  * 
  */
-public interface DefaultIdFieldAttribute extends Attribute {
+public interface InvenioDefaultIdFieldAttribute extends Attribute {
   public void setDefaultIdField(String defaultField);
   public String getDefaultIdField();
 }

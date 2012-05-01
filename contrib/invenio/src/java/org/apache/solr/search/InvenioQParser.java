@@ -5,7 +5,7 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.queryParser.aqp.AqpInvenioQueryParser;
 import org.apache.lucene.queryParser.aqp.AqpQueryParser;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
-import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
+import org.apache.lucene.queryParser.aqp.config.InvenioDefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
@@ -48,7 +48,7 @@ public class InvenioQParser extends QParser {
 		// this is allowed to be only in the config (no locals possible)
 		QueryConfigHandler config = invParser.getQueryConfigHandler();
 
-		config.getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField(
+		config.getAttribute(InvenioDefaultIdFieldAttribute.class).setDefaultIdField(
 				idField);
 
 		InvenioQueryAttribute iqAttr = config

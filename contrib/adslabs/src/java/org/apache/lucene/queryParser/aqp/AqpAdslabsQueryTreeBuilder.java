@@ -10,7 +10,7 @@ import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsIdentifierNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.InvenioQueryNode;
-import org.apache.lucene.queryParser.aqp.nodes.NonAnalyzedQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
@@ -49,7 +49,7 @@ public class AqpAdslabsQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
 		setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 		setBuilder(AqpAdslabsIdentifierNode.class, new AqpAdslabsIdentifierNodeBuilder());
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
-		setBuilder(NonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
+		setBuilder(AqpNonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(InvenioQueryNode.class, new InvenioQueryNodeBuilder(this));
 		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
 		setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());

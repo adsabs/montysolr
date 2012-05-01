@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.messages.MessageImpl;
-import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
+import org.apache.lucene.queryParser.aqp.config.InvenioDefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute.Channel;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute.QMode;
@@ -118,13 +118,13 @@ public class AqpInvenioMODIFIERProcessor extends QueryNodeProcessorImpl implemen
 	
 	private String getIdField() throws QueryNodeException {
 		QueryConfigHandler queryConfig = getQueryConfigHandler();
-		if (queryConfig == null || !queryConfig.hasAttribute(DefaultIdFieldAttribute.class)) {
+		if (queryConfig == null || !queryConfig.hasAttribute(InvenioDefaultIdFieldAttribute.class)) {
 			throw new QueryNodeException(new MessageImpl(
 	                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-	                "Configuration error: " + DefaultIdFieldAttribute.class.toString() + " is missing"));
+	                "Configuration error: " + InvenioDefaultIdFieldAttribute.class.toString() + " is missing"));
 		}
 		return queryConfig.getAttribute(
-				DefaultIdFieldAttribute.class).getDefaultIdField();
+				InvenioDefaultIdFieldAttribute.class).getDefaultIdField();
 	}
 	
 	

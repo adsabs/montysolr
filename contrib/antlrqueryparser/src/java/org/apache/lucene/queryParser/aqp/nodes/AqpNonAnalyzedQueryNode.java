@@ -27,7 +27,7 @@ import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
  * 
  * Example: e(+)
  */
-public class NonAnalyzedQueryNode extends WildcardQueryNode {
+public class AqpNonAnalyzedQueryNode extends WildcardQueryNode {
 
 	private static final long serialVersionUID = 6921391439471630844L;
 
@@ -41,12 +41,12 @@ public class NonAnalyzedQueryNode extends WildcardQueryNode {
    * @param end
    *          - position in the query string
    */
-  public NonAnalyzedQueryNode(CharSequence field, CharSequence text, int begin,
+  public AqpNonAnalyzedQueryNode(CharSequence field, CharSequence text, int begin,
       int end) {
     super(field, text, begin, end);
   }
 
-  public NonAnalyzedQueryNode(FieldQueryNode fqn) {
+  public AqpNonAnalyzedQueryNode(FieldQueryNode fqn) {
     this(fqn.getField(), fqn.getText(), fqn.getBegin(), fqn.getEnd());
   }
 
@@ -57,8 +57,8 @@ public class NonAnalyzedQueryNode extends WildcardQueryNode {
   }
 
   @Override
-  public NonAnalyzedQueryNode cloneTree() throws CloneNotSupportedException {
-    NonAnalyzedQueryNode clone = (NonAnalyzedQueryNode) super.cloneTree();
+  public AqpNonAnalyzedQueryNode cloneTree() throws CloneNotSupportedException {
+    AqpNonAnalyzedQueryNode clone = (AqpNonAnalyzedQueryNode) super.cloneTree();
 
     // nothing to do here
 

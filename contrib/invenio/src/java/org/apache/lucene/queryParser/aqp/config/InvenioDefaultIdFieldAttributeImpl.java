@@ -27,8 +27,8 @@ import org.apache.lucene.util.AttributeImpl;
  * what is the default field when no field is defined in a phrase. <br/>
  * 
  */
-public class DefaultIdFieldAttributeImpl extends AttributeImpl implements
-		DefaultIdFieldAttribute {
+public class InvenioDefaultIdFieldAttributeImpl extends AttributeImpl implements
+		InvenioDefaultIdFieldAttribute {
 
 	private static final long serialVersionUID = 3664676068061966884L;
 	protected String defaultField = "defaultField";

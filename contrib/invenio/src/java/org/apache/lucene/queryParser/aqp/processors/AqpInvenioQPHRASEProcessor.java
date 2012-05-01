@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryParser.aqp.nodes.NonAnalyzedQueryNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
@@ -57,7 +57,7 @@ public class AqpInvenioQPHRASEProcessor extends AqpQProcessor {
 			throw new QueryNodeException(new MessageImpl("Not implemented yet!"));
 		}
 		else if (phraseType.equals("\u300c")) { // non-analyzed field
-			return new NonAnalyzedQueryNode(field,
+			return new AqpNonAnalyzedQueryNode(field,
 					EscapeQuerySyntaxImpl.discardEscapeChar(subChild
 							.getTokenInput().substring(1, subChild.getTokenInput().length()-1)), 
 							subChild.getTokenStart()+1,

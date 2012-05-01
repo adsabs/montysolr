@@ -6,7 +6,6 @@ import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
 import org.apache.lucene.queryParser.aqp.config.AqpFunctionQueryBuilderConfig;
 import org.apache.lucene.queryParser.aqp.config.DefaultDateRangeField;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
-import org.apache.lucene.queryParser.aqp.config.DefaultIdFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultProximityAttribute;
 import org.apache.lucene.queryParser.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
@@ -39,7 +38,6 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 
 		// Default Values
 		addAttribute(DefaultFieldAttribute.class);
-		addAttribute(DefaultIdFieldAttribute.class);
 		addAttribute(RangeCollatorAttribute.class);
 		addAttribute(DefaultOperatorAttribute.class);
 		addAttribute(AnalyzerAttribute.class);
@@ -61,7 +59,6 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		addAttribute(AqpFeedback.class); // to collect/work with exceptions
 		addAttribute(AqpFeedback.class).registerEventHandler(new AqpAdslabsLoggingHandler());
 		
-		getAttribute(DefaultIdFieldAttribute.class).setDefaultIdField("recid");
 		getAttribute(DefaultDateRangeField.class).setField("date");
 		getAttribute(AllowLeadingWildcardAttribute.class).setAllowLeadingWildcard(true);
 		
