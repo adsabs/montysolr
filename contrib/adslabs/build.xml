@@ -72,9 +72,8 @@
         </compile>
     </target>
     
-        
     
-    <target name="test" depends="compile" >
+	<target name="test" depends="compile" >
         <antcall target="common.test" inheritRefs="true"/>
     </target>
     

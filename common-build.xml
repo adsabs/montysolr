@@ -64,6 +64,8 @@
 		</fileset>
 		<!-- location of JCC classes, found only when imported from main build.xml -->
 		<pathelement location="${jcc_egg}/jcc/classes" />
+		<!-- location of JCC classes, from the generated build.properties -->
+        <pathelement location="${prop.jcc_egg}/jcc/classes" />
 	</path>
 
 	<path id="common.demo.classpath">
@@ -125,6 +127,9 @@
 	<property file="${user.home}/build.properties"/>
 	<property file="${basedir}/build.properties"/>
 	<property file="${common.dir}/build.properties"/>
+	
+	<!-- load and make available for projects the generic montysolr/build configuration -->
+    <property file="${common.dir}/build/build.properties" prefix="prop"/>
 
 	<tstamp>
 		<format property="current.year" pattern="yyyy"/>

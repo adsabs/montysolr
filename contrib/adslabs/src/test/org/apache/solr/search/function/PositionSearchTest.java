@@ -19,7 +19,6 @@ package org.apache.solr.search.function;
 
 import invenio.montysolr.util.MontySolrSetup;
 
-import org.apache.lucene.search.TestInvenioQuery;
 import org.apache.solr.util.AbstractSolrTestCase;
 
 /**
@@ -87,6 +86,6 @@ public class PositionSearchTest extends AbstractSolrTestCase {
 	
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
-        return new junit.framework.JUnit4TestAdapter(TestInvenioQuery.class);
+        return new junit.framework.JUnit4TestAdapter(PositionSearchTest.class);
     }
 }
