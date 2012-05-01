@@ -204,19 +204,35 @@ Q: I have several versions of Python installed, how to run MontySolr with the no
 In the past, I was doing something like this:
 
 
-# first set up environment vars that make your shell to see different Python
+	# first set up environment vars that make your shell to see different Python
 
-$ export LD_LIBRARY_PATH=/opt/rchyla/python26/lib/:/opt/rchyla/python26/lib/python2.6/lib-dynload/
-$ export PYTHONHOME=/opt/rchyla/python26/
-$ export PYTHONPATH=/opt/rchyla/workspace/:/opt/rchyla/workspace/solrpie/python/
-$ export PATH=/opt/rchyla/python26/bin:/opt/rchyla/python26:/afs/cern.ch/user/r/rchyla/public/jdk1.6.0_18/bin/:$PATH
+	$ export LD_LIBRARY_PATH=/opt/rchyla/python26/lib/:/opt/rchyla/python26/lib/python2.6/lib-dynload/
+	$ export PYTHONHOME=/opt/rchyla/python26/
+	$ export PYTHONPATH=/opt/rchyla/workspace/:/opt/rchyla/workspace/solrpie/python/
+	$ export PATH=/opt/rchyla/python26/bin:/opt/rchyla/python26:/afs/cern.ch/user/r/rchyla/public/jdk1.6.0_18/bin/:$PATH
 
-# then use the ant to run MontySolr as a daemon
+	# then use the ant to run MontySolr as a daemon
 
-$ export SOLRPIE_ARGS='--port 8443 --daemon'
-$ export SOLRPIE_JVMARGS='-d64 -Xmx2048m -Dsolrpie.max_workers=5 -Dsolrpie.max_threads=200'
-$ export SOLRPIE_MAX_WORKERS=5
-$ export SOLRPIE_NEWENVIRONMENT=false
-$ ant run-solrpie-daemon
+	$ export SOLRPIE_ARGS='--port 8443 --daemon'
+	$ export SOLRPIE_JVMARGS='-d64 -Xmx2048m -Dsolrpie.max_workers=5 -Dsolrpie.max_threads=200'
+	$ export SOLRPIE_MAX_WORKERS=5
+	$ export SOLRPIE_NEWENVIRONMENT=false
+	$ ant run-solrpie-daemon
+
+
+Q: MontySolr (Python) fails with ImportError: module x is not available. But I am sure it is available.
+
+Most likely, the sys.paths are not pointing to the correct folders (ie. when you run Python interpreter
+inside Java - when you run Python interpreter directly, the interpreter can deduce path of the site-packages
+from its location). Fortunately, the solution is simple, just make sure PYTHONHOME points to the proper
+path before you start Java
+
+ie. if you Python executable is in /var/lib/hudson-local/hudson/jobs/001-python/workspace/python/bin/python
+do:
+
+export PYTHONHOME=/var/lib/hudson-local/hudson/jobs/001-python/workspace/python
+
+And Python will magically populate sys.path with the dist-packages, site-packages etc.
+
 
 

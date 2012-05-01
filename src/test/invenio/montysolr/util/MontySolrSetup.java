@@ -67,7 +67,7 @@ public class MontySolrSetup {
 		System.setProperty("solr.test.sys.prop1", "propone");
 		System.setProperty("solr.test.sys.prop2", "proptwo");
 		System.setProperty("montysolr.home", getMontySolrHome());
-
+		
 	}
 	
 	

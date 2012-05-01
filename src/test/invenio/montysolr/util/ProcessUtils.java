@@ -175,10 +175,14 @@ public class ProcessUtils {
 	    	String jPath = getJCCPath();
 	    	if (jPath != null && jPath.length() > 0) {
 	    		System.err.println("Warning: Adding java.library.path=" + jPath);
-	    		addLibraryPath(jPath);
+	    		addLibraryPath(jPath.trim());
 	    	}
 	    	else {
-	    		System.err.println("Warning: We were not successful in finding JCC");
+	    		System.err.println("Warning: We were not successful in finding JCC. To help you debug...\n\n");
+	    		System.err.println("python -c \"import sys;print sys.path\"");
+	    		System.err.println(execCommand("python|-c|import sys;print \'\\n\'.join(sys.path)".split("\\|")));
+	    		System.err.println("python -c \"import os;print os.environ\"");
+	    		System.err.println(execCommand("python|-c|import os;print str(os.environ).replace(',',',\\n')".split("\\|")));
 	    	}
 	    }
 		
@@ -226,6 +230,7 @@ public class ProcessUtils {
 		try {
 			while ((line = buf.readLine()) != null) {
 				out.append(line);
+				out.append("\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

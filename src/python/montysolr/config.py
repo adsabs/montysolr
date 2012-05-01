@@ -51,3 +51,5 @@ def update_values():
                 setattr(main, var, val)
                 
 update_values()
+
+#sys.stderr.write("\n".join([str(sys.path), 'prefix', sys.prefix, 'executable', sys.executable, 'exec_prefix', sys.exec_prefix]))
