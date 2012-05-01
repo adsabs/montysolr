@@ -110,9 +110,12 @@
 		
 		<!-- we are using some classes from the parser test framework
              so we must compile them ourselves (not to depend on luck)
+             
+             But we'll place them into test so that they don't clutter
+             the generated jars (and create other sorts of problems)
         --> 
         <compile srcdir="${common.dir}/contrib/antlrqueryparser/src/java" 
-            destdir="${build.dir}/classes/java">
+            destdir="${build.dir}/classes/test">
             <classpath refid="test.classpath"/>
             <include name="**/**.java"/>
         </compile>

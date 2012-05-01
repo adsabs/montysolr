@@ -28,6 +28,9 @@
     
     <!-- with this we'll trick antlrqueryparser into generating grammars for us in our folder -->
     <property name="aqp.grammardir" location="${common.dir}/contrib/${ant.project.name}/grammars"/>
+	
+	<property name="ads.grammars.dir" location="./grammars" />
+    <property name="ads.parser.dir" location="src/java/org/apache/lucene/queryParser/aqp/parser" />
     
     <condition property="aqp.grammar" value="ADS">
         <not>
@@ -57,8 +60,8 @@
 
     <target name="clean">
         <delete dir="${build.dir}" />
-        <clean-parser grammar-name="${aqp.grammar}" parser-dir="${inv.parser.dir}"/>
-        <clean-parser grammar-name="ADS" parser-dir="${inv.parser.dir}"/>
+        <clean-parser grammar-name="${aqp.grammar}" parser-dir="${ads.parser.dir}"/>
+        <clean-parser grammar-name="ADS" parser-dir="${ads.parser.dir}"/>
     </target>
 
     <target name="compile-core" depends="compile,common.compile-core"/>
@@ -82,9 +85,12 @@
         
         <!-- we are using some classes from the parser test framework
              so we must compile them ourselves (not to depend on luck)
+             
+             But we'll put them into test so that it is not included
+             inside generated jars
         --> 
         <compile srcdir="${common.dir}/contrib/antlrqueryparser/src/java" 
-            destdir="${build.dir}/classes/java">
+            destdir="${build.dir}/classes/test">
             <classpath refid="test.classpath"/>
         	<classpath refid="additional.classpath"/>
             <include name="**/**.java"/>
@@ -100,7 +106,7 @@
         </compile>
     	
     	<compile srcdir="${common.dir}/contrib/invenio/src/java" 
-            destdir="${build.dir}/classes/java">
+            destdir="${build.dir}/classes/test">
             <classpath refid="test.classpath"/>
     		<classpath refid="additional.classpath"/>
             <include name="**/**.java"/>
