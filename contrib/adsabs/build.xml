@@ -64,6 +64,7 @@
     <target name="compile-core" depends="compile,common.compile-core"/>
 
     <target name="compile" depends="compile-prerequisites" >
+    	<antcall target="generate-antlr" />
         <compile srcdir="src/java" 
             destdir="${build.dir}/classes/java">
             <classpath refid="compile.classpath"/>
