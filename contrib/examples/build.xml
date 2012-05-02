@@ -80,78 +80,78 @@
 	<property name="env.PYTHONPATH" value="${common.dir}/build/dist${path.separator}${common.dir}/src/python${path.separator}"/>
 
 	
-	<path id="examples.classpath">
-		   <!-- 
-		   we include only the classpaths that are inside 
-		   the example, so that it can run without anything 
-		   else -->
-		
-		<!-- example libs -->
-        <fileset dir="${build.dir}/${example.name}/lib">
-            <include name="**/*.jar"/>
-        </fileset>
-		
-		<!-- location of JCC classes -->
-        <pathelement location="${prop.jcc_egg}/jcc/classes" />
-		
-	</path>
-	
-	
-	<path id="old.examples.classpath">
-		<!-- all contrib compiled classes -->
-		<dirset dir="${common.dir}/build/contrib">
-			<include name="**/classes/java"/>
-		</dirset>
-
-		<path refid="base.classpath"/>
-
-		<!-- montysolr jars -->
-		<fileset dir="${common.dir}/lib">
-			<include name="**/*.jar"/>
-		</fileset>
-
-		<!-- montysolr jars -->
-		<fileset dir="${common.dir}/build/jar">
-			<include name="**/*.jar"/>
-		</fileset>
-
-		<!-- all contrib jars -->
-		<fileset dir="../">
-			<include name="**/lib/*.jar"/>
-		</fileset>
-
-		<!-- examples compiled classes, if any -->
-		<pathelement location="${build.dir}/classes/java"/>
-
-		<!-- jcc classpath -->
-		<pathelement location="${prop.jcc_egg}/jcc/classes"/>
-
-		<!-- solr/dist jars -->
-		<fileset dir="${prop.solr.real.location}/dist">
-			<include name="**/*.jar"/>
-		</fileset>
-
-		<!-- example libs -->
-		<fileset dir="${build.dir}">
-			<include name="${example.name}/lib/**/*.jar"/>
-		</fileset>
-	</path>
-	
-	<path id="test.classpath">
-		
-		<path refid="examples.classpath"/>
-        <path refid="common.test.classpath"/>
-        
-		
-		<!-- all contrib test classes -->
-        <dirset dir="${common.dir}/build/contrib">
-            <include name="**/classes/test"/>
-        </dirset>
-		
-		<pathelement location="${prop.jcc_egg}/jcc/classes" />
-    </path>
-	
-	
+	<target name="populate-classpath" >
+    	<path id="examples.classpath">
+    		<!-- 
+    		   we include only the classpaths that are inside 
+    		   the example, so that it can run without anything 
+    		   else -->
+    		
+    		<!-- example libs -->
+            <fileset dir="${build.dir}/${example.name}/lib">
+                <include name="**/*.jar"/>
+            </fileset>
+    		
+    		<!-- location of JCC classes -->
+            <pathelement location="${prop.jcc_egg}/jcc/classes" />
+    		
+    	</path>
+    	
+    	
+    	<path id="old.examples.classpath">
+    		<!-- all contrib compiled classes -->
+    		<dirset dir="${common.dir}/build/contrib">
+    			<include name="**/classes/java"/>
+    		</dirset>
+    
+    		<path refid="base.classpath"/>
+    
+    		<!-- montysolr jars -->
+    		<fileset dir="${common.dir}/lib">
+    			<include name="**/*.jar"/>
+    		</fileset>
+    
+    		<!-- montysolr jars -->
+    		<fileset dir="${common.dir}/build/jar">
+    			<include name="**/*.jar"/>
+    		</fileset>
+    
+    		<!-- all contrib jars -->
+    		<fileset dir="../">
+    			<include name="**/lib/*.jar"/>
+    		</fileset>
+    
+    		<!-- examples compiled classes, if any -->
+    		<pathelement location="${build.dir}/classes/java"/>
+    
+    		<!-- jcc classpath -->
+    		<pathelement location="${prop.jcc_egg}/jcc/classes"/>
+    
+    		<!-- solr/dist jars -->
+    		<fileset dir="${prop.solr.real.location}/dist">
+    			<include name="**/*.jar"/>
+    		</fileset>
+    
+    		<!-- example libs -->
+    		<fileset dir="${build.dir}">
+    			<include name="${example.name}/lib/**/*.jar"/>
+    		</fileset>
+    	</path>
+    	
+    	<path id="test.classpath">
+    		
+    		<path refid="examples.classpath"/>
+            <path refid="common.test.classpath"/>
+            
+    		
+    		<!-- all contrib test classes -->
+            <dirset dir="${common.dir}/build/contrib">
+                <include name="**/classes/test"/>
+            </dirset>
+    		
+    		<pathelement location="${prop.jcc_egg}/jcc/classes" />
+        </path>
+	</target>	
 
 
 	<target name="default" depends="build-all-examples">
@@ -250,7 +250,8 @@
             </fileset>
         </copy>
 		
-
+		<antcall target="populate-classpath" />
+		
 	</target>
 	
 
@@ -275,6 +276,8 @@
 		
 		<property prefix="xxx" file="${example.name}/${example.config}" />
 		
+		<antcall target="populate-classpath" />
+		
 		<exec executable="ant" failonerror="true" >
 			<env key="PYTHONPATH" value="${xxx.PYTHONPATH}" />
 			<env key="MONTYSOLR_HANDLER" value="${xxx.MONTYSOLR_HANDLER}" />
@@ -288,7 +291,7 @@
 	</target>
 
 
-	<target name="run-bare" depends="generate-run.sh">
+	<target name="run-bare" depends="populate-classpath,generate-run.sh">
 		<run-montysolr classpath="${prop.jcc_egg}"
 		      classpathref="examples.classpath"
 		   	  ignore-environment="${example.ignore-environment}"
@@ -318,7 +321,7 @@
 		           />   
 	</target>
 	
-	
+	<target name="test" depends="populate-classpath,common.test" />
 	    
 
 </project>
