@@ -80,7 +80,7 @@
 	<property name="env.PYTHONPATH" value="${common.dir}/build/dist${path.separator}${common.dir}/src/python${path.separator}"/>
 
 	
-	<target name="populate-classpath" >
+	<target name="populate-classpath">
     	<path id="examples.classpath">
     		<!-- 
     		   we include only the classpaths that are inside 
@@ -306,7 +306,7 @@
 		   />
 	</target>
     
-	<target name="generate-run.sh">
+	<target name="generate-run.sh" depends="populate-classpath">
 		<create-run.sh classpath="${prop.jcc_egg}"
 		              classpathref="examples.classpath"
 		              ignore-environment="${example.ignore-environment}"
