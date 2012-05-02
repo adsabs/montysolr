@@ -269,7 +269,8 @@
 
 
 	<target name="run-configured" description="Run the example with special configuration, usage: ant run-configured -Dename={example-name} -Dprofile={profile}.
-		If you only want to generate shell script,use: ant run-configured -Dename={example-name} -Dprofile={profile} -Dtarget=generate-run.sh">
+		If you only want to generate shell script,use: ant run-configured -Dename={example-name} -Dprofile={profile} -Dtarget=generate-run.sh"
+		depends="build-one">
 		
 		<!-- i can't do ${example.name}.PYTHON without external lib
 		     eg. http://ant.apache.org/antlibs/props/index.html -->
