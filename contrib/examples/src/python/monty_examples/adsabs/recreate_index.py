@@ -52,15 +52,16 @@ def req(url, **kwargs):
 
 def recreate_index(solr_url, 
                    max_time=3600,
-                   delay=15,
+                   delay=5,
                    handler_name='/invenio/update',
-                   maximport=200,
-                   batchsize=1000,
+                   maximport=500,
+                   batchsize=2000,
+                   startfrom=-1,
                    inveniourl='python://search',
                    importurl='/invenio/import?command=full-import&amp;dirs=',
                    updateurl='/invenio/import?command=full-import&amp;dirs=',
                    deleteurl='blankrecords', 
-                   startfrom=-1):
+                   ):
     
     up_url = solr_url + handler_name
     delay = int(delay)
@@ -70,6 +71,20 @@ def recreate_index(solr_url,
     start = time.time()
     
     log.info("Starting index (re)build from the scratch")
+    log.info("""
+    solr_url=%s
+    max_time=%s
+    delay=%s
+    handler_name=%s
+    maximport=%s
+    batchsize=%s
+    inveniourl=%s
+    importurl=%s
+    updateurl=%s
+    deleteurl=%s
+    startfrom=%s
+    """ % (solr_url, max_time, delay, handler_name, maximport, batchsize, inveniourl, importurl, updateurl,
+           deleteurl, startfrom))
     
     params = dict(maximport=maximport, batchsize=batchsize,
                   inveniourl=inveniourl, importurl=importurl,
@@ -84,7 +99,7 @@ def recreate_index(solr_url,
     idtoken = '#0'
     i = 0
     
-    while (start - now) < max_time: 
+    while (now - start) < max_time: 
         i = i + 1
         idtoken = '#%s' % i
         
@@ -100,13 +115,13 @@ def recreate_index(solr_url,
         
         recs = recs + batchsize
          
-        log.info('Indexing (round/recs/last-round-ms/total-s): %s./%s/%sms/%ss' 
+        log.info('Indexing (round/recs/last-round-ms/total-s): %s./%s/%s/%ss' 
                  % (round, recs, time.time() - last_round, (time.time()-start) / 1000))
         
         last_round = time.time()
             
         
-    
+    log.info('Stopped at round: %s, total time: %s' % (round, time.time() - start))
     
     
     
