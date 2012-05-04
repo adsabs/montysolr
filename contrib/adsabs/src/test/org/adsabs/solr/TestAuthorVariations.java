@@ -7,6 +7,14 @@ import junit.framework.TestCase;
 
 public class TestAuthorVariations extends TestCase {
 	
+	public void testGetQueryVariations() {
+		HashSet<String> name = AuthorVariations.getQueryVariations("Hector, Gomez Q");
+		for (String n: name) {
+			System.out.println(n);
+		}
+		
+	}
+	
 	public void testGenerateQueryVariations1() {
 		HashMap<String,String> input = new HashMap<String,String>();
 		input.put("first", "HECTOR");

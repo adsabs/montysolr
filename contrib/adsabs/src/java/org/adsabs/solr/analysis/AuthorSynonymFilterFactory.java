@@ -35,11 +35,9 @@ public class AuthorSynonymFilterFactory extends BaseTokenFilterFactory implement
 			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Missing required argument 'synonyms'.");
 	    List<String> rules=null;
 	    try {
-	    	File synonymFile = new File(((SolrResourceLoader) loader).getConfigDir() + synonyms);
-	        if (synonymFile.exists()) {
-	        	rules = loader.getLines(synonyms);
-	      	} else {
-	      		log.error("can't find " + synonyms);
+	    	rules = loader.getLines(synonyms);
+	        if (rules == null) {
+	      		throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "can't find " + synonyms);
 	      	}
 	    } catch (IOException e) {
 	      	throw new RuntimeException(e);

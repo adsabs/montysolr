@@ -38,7 +38,7 @@ class Test(LuceneTestCase):
 
     def test_bigtest01(self):
         '''Get int[]'''
-
+        
         message = self.bridge.createMessage('bigtest') \
                     .setParam('action', 'recids_int') \
                     .setParam('size', self.size)

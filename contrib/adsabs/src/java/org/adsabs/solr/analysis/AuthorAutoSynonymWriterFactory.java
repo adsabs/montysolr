@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -44,9 +45,15 @@ public class AuthorAutoSynonymWriterFactory extends BaseTokenFilterFactory imple
 		
 		Charset UTF_8 = Charset.forName("UTF-8");
 		try {
+			if (!outFilePath.exists()) {
+				outFilePath.createNewFile();
+				log.warn("We have created " + outFilePath);
+			}
 			Writer w = new OutputStreamWriter(new FileOutputStream(outFilePath, true), UTF_8);
 			this.writer = new BufferedWriter(w);
 		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}

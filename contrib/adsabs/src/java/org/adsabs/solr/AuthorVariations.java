@@ -10,6 +10,12 @@ import java.util.HashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Creates a variations of the author names, it receives eg:
+ * John, K
+ * @author jluker
+ *
+ */
 public class AuthorVariations {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorVariations.class);
