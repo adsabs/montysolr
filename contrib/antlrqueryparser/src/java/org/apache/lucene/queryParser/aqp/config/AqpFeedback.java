@@ -47,7 +47,5 @@ public interface AqpFeedback extends Attribute {
 	
 	public void sendEvent(AqpFeedbackEvent event);
 	
-
-	
 	public void registerEventHandler(AqpFeedbackEventHandler handler);
 }

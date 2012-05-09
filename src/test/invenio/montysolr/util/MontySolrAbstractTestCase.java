@@ -8,7 +8,9 @@ import java.net.URLClassLoader;
 
 import invenio.montysolr.util.MontySolrTestCaseJ4;
 
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.servlet.DirectSolrConnection;
 import org.apache.solr.util.AbstractSolrTestCase;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -80,4 +82,11 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		}
 	}
 
+	public EmbeddedSolrServer getEmbeddedServer() {
+		return new EmbeddedSolrServer(h.getCoreContainer(), h.getCore().getName());
+	}
+	
+	public DirectSolrConnection getDirectServer() {
+		return new DirectSolrConnection(h.getCore());
+	}
 }

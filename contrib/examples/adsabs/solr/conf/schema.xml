@@ -565,9 +565,12 @@
    <!-- rca: because elevation has 'id' hardcoded, we cannot use recid and elevantion
         at the same time, so i will use 'id' name -->
    <field name="id" type="string" indexed="true" stored="true" required="true" />
-   <field name="recid" type="string" indexed="true" stored="true" required="false" />
+   <field name="recid" type="int" indexed="true" stored="true" required="true" />
    <field name="bibcode" type="string" indexed="true" stored="true" required="true" />
+   
    <field name="bibstem" type="string" indexed="true" stored="true" />
+   
+   
    <field name="abs" type="ads_text" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
    <field name="pub" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="reportnumber" type="string" indexed="true" stored="true" multiValued="true"/>

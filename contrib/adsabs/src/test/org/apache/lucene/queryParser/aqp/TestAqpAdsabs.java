@@ -15,7 +15,7 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.Version;
 import org.apache.solr.search.function.FunctionQuery;
 
-public class TestAqpAdslabs extends AqpTestAbstractCase {
+public class TestAqpAdsabs extends AqpTestAbstractCase {
 
 	public void setUp() throws Exception {
 		setGrammarName("ADS");
@@ -23,7 +23,7 @@ public class TestAqpAdslabs extends AqpTestAbstractCase {
 	}
 	
 	public AqpQueryParser getParser() throws Exception {
-		AqpQueryParser qp = new AqpAdslabsQueryParser(getGrammarName());
+		AqpQueryParser qp = new AqpAdsabsQueryParser(getGrammarName());
 		qp.setDebug(this.debugParser);
 		return qp;
 	}

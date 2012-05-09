@@ -52,8 +52,8 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		}
 		
 		super.setUp();
-		embedded = getServer();
-		direct = getDirectConnection();
+		embedded = getEmbeddedServer();
+		direct = getDirectServer();
 	}
 	
 	public void tearDown() throws Exception {
@@ -76,14 +76,6 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		if (factoryPropShadow == null) {
 	         System.clearProperty("solr.directoryFactory");
 	    }
-	}
-	
-	public EmbeddedSolrServer getServer() {
-		return new EmbeddedSolrServer(h.getCoreContainer(), h.getCore().getName());
-	}
-	
-	public DirectSolrConnection getDirectConnection() {
-		return new DirectSolrConnection(h.getCore());
 	}
 	
 	public static String getExampleHome() {

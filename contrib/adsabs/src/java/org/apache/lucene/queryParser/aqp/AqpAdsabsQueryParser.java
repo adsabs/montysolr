@@ -9,14 +9,14 @@ import org.apache.lucene.queryParser.aqp.parser.ADSSyntaxParser;
 
 
 
-public class AqpAdslabsQueryParser extends AqpQueryParser {
+public class AqpAdsabsQueryParser extends AqpQueryParser {
 
-	public AqpAdslabsQueryParser() throws Exception {
-		new AqpAdslabsQueryParser("ADS");
+	public AqpAdsabsQueryParser() throws Exception {
+		new AqpAdsabsQueryParser("ADS");
 	}
 
 	
-	public AqpAdslabsQueryParser(String grammarName) throws Exception {
+	public AqpAdsabsQueryParser(String grammarName) throws Exception {
 		super(new AqpAdslabsQueryConfigHandler(), 
 				  new ADSSyntaxParser(),
 				  new AqpAdslabsNodeProcessorPipeline(null),
