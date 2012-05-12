@@ -24,6 +24,7 @@ public class AqpAdsabsQParser extends QParser {
 			.getLogger(AqpAdsabsQParser.class);
 
 	private AqpQueryParser qParser;
+	private static String adsConfigName = "ads-config";
 
 	public AqpAdsabsQParser(AqpQueryParser parser, String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req)
@@ -48,7 +49,7 @@ public class AqpAdsabsQParser extends QParser {
 		
 		
 		QueryConfigHandler config = qParser.getQueryConfigHandler();
-		AdsConfigHandler extra = (AdsConfigHandler) req.getCore().getRequestHandler("ads-config");
+		AdsConfigHandler extra = (AdsConfigHandler) req.getCore().getRequestHandler(adsConfigName);
 		if (extra == null) {
 			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
 				"Configuration error, ads-config resource missing");

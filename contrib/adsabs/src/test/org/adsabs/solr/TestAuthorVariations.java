@@ -7,15 +7,33 @@ import junit.framework.TestCase;
 
 public class TestAuthorVariations extends TestCase {
 	
-	public void testGetQueryVariations() {
-		HashSet<String> name = AuthorVariations.getQueryVariations("Hector, Gomez Q");
+	public void xtestgetNameVariations() {
+		HashSet<String> name = AuthorVariations.getNameVariations("Hector, Gomez Q");
 		for (String n: name) {
 			System.out.println(n);
 		}
 		
+		System.out.println("-------------");
+		name = AuthorVariations.getSynonymVariations("Hector, Gomez Q");
+		for (String n: name) {
+			System.out.println(n);
+		}
+		
+		System.out.println("-------------");
+		
+		name = AuthorVariations.getNameVariations("H quintero gomez");
+		for (String n: name) {
+			System.out.println(n);
+		}
+		
+		System.out.println("-------------");
+		name = AuthorVariations.getSynonymVariations("H quintero gomez");
+		for (String n: name) {
+			System.out.println(n);
+		}
 	}
 	
-	public void testGenerateQueryVariations1() {
+	public void testgenerateNameVariations1() {
 		HashMap<String,String> input = new HashMap<String,String>();
 		input.put("first", "HECTOR");
 		input.put("last", "GOMEZ");
@@ -26,10 +44,10 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H Q.*");
 		expected.add("GOMEZ, H");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateQueryVariations(input);
+		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
-	public void testGenerateQueryVariations2() {
+	public void testgenerateNameVariations2() {
 		HashMap<String,String> input = new HashMap<String,String>();
 		input.put("first", "HECTOR");
 		input.put("last", "GOMEZ");
@@ -38,20 +56,20 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H\\b.*");
 		expected.add("GOMEZ, H");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateQueryVariations(input);
+		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
-	public void testGenerateQueryVariations3() {
+	public void testgenerateNameVariations3() {
 		HashMap<String,String> input = new HashMap<String,String>();
 		input.put("first", "H");
 		input.put("last", "GOMEZ");
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("GOMEZ, H.*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateQueryVariations(input);
+		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
-	public void testGenerateQueryVariations4() {
+	public void testgenerateNameVariations4() {
 		HashMap<String,String> input = new HashMap<String,String>();
 		input.put("first", "H");
 		input.put("last", "GOMEZ");
@@ -60,11 +78,11 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H\\w* Q.*");
 		expected.add("GOMEZ, H\\w*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateQueryVariations(input);
+		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	
-	public void testGenerateQueryVariations5() {
+	public void testgenerateNameVariations5() {
 		HashMap<String,String> input = new HashMap<String,String>();
 		input.put("first", "H");
 		input.put("last", "GOMEZ");
@@ -74,16 +92,16 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H\\w* Q.*");
 		expected.add("GOMEZ, H\\w*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateQueryVariations(input);
+		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	
-	public void testGenerateQueryVariations6() {
+	public void testgenerateNameVariations6() {
 		HashMap<String,String> input = new HashMap<String,String>();
 		input.put("last", "GOMEZ");
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("GOMEZ,.*");
-		HashSet<String> actual = AuthorVariations.generateQueryVariations(input);
+		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	

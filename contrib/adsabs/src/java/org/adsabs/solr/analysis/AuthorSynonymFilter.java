@@ -1,13 +1,13 @@
 package org.adsabs.solr.analysis;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Stack;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeSource;
@@ -18,9 +18,9 @@ public class AuthorSynonymFilter extends TokenFilter {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorSynonymFilter.class);
     public static final String TOKEN_TYPE_AUTHOR_CURATED_SYN = "AUTHOR_CURATED_SYN";
-    private final AuthorSynonymMap synMap;  
+    private final WriteableSynonymMap synMap;  
     
-	protected AuthorSynonymFilter(TokenStream input, AuthorSynonymMap synMap) {
+	protected AuthorSynonymFilter(TokenStream input, WriteableSynonymMap synMap) {
 		super(input);
 		if (synMap == null)
 			throw new IllegalArgumentException("map is required");
@@ -64,8 +64,16 @@ public class AuthorSynonymFilter extends TokenFilter {
 	private boolean getSynonyms() {
 	    String authorTok = termAtt.toString();
 	    log.debug("looking for synonyms for " + authorTok);
-	    Pattern p = Pattern.compile(authorTok);
-	    List<String> synonyms = this.synMap.get(p);
+	    
+	    List<String> synonyms;
+	    if (authorTok.contains("*") || authorTok.contains("\\")) {
+	    	Pattern p = Pattern.compile(authorTok);
+	    	synonyms = this.synMap.get(p);
+	    }
+	    else {
+	    	synonyms = this.synMap.get(authorTok);
+	    }
+	    
 	    if (synonyms != null && synonyms.size() > 0) {
 		    log.debug("synonyms: " + synonyms);
 		    for (String s : synonyms) {

@@ -20,7 +20,30 @@ public class AuthorVariations {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorVariations.class);
 
-	public static HashSet<String> getQueryVariations(String authorString) {
+    /**
+     * This method takes input string, e.g. "Hector, Gomez Q" and generates variations
+     * of the author name.
+     * 
+     *  HECTOR, GOMEZ
+	 *	HECTOR, G
+	 *  HECTOR,
+	 *  HECTOR, GOMEZ Q.*
+	 *  HECTOR, G Q.*
+     * 
+     * It is essentially the same output as you get from getSynonymVariations except
+     * a few special cases (TODO: not clear to me)
+     * 
+     * Example "h quintero gomez" will output:
+     * 
+     * GOMEZ, H\w* QUINTERO\b.*
+	 * GOMEZ,
+  	 * GOMEZ, H\w*
+	 * GOMEZ, H\w* Q.*   <-- only this one is extra added
+     *  
+     * @param authorString
+     * @return
+     */
+	public static HashSet<String> getNameVariations(String authorString) {
 		
 		HashMap<String,String> parsedAuthor = null;
 		try {
@@ -34,16 +57,16 @@ public class AuthorVariations {
 			variations.add(authorString);
 			return variations;
 		}
-		generateQueryVariations(parsedAuthor, variations);
+		generateNameVariations(parsedAuthor, variations);
 		return variations;
 	}
 	
-	public static HashSet<String> generateQueryVariations(HashMap<String,String> parsedAuthor) {
+	public static HashSet<String> generateNameVariations(HashMap<String,String> parsedAuthor) {
 		HashSet<String> variations = new HashSet<String>();
-		return generateQueryVariations(parsedAuthor, variations);
+		return generateNameVariations(parsedAuthor, variations);
 	}
 	
-	public static HashSet<String> generateQueryVariations(
+	public static HashSet<String> generateNameVariations(
 			HashMap<String,String> parsedAuthor,
 			HashSet<String> variations) {
 		
@@ -76,6 +99,40 @@ public class AuthorVariations {
 		return variations;
 	}
 	
+	
+	
+	
+	/**
+     * This method takes input string, e.g. "Hector, Gomez Q" and generates variations
+     * of the author name PLUS enhances the variations with regular expression patterns.
+     * 
+     *  HECTOR, GOMEZ
+	 *	HECTOR, G
+	 *  HECTOR,
+	 *  HECTOR, GOMEZ Q.*
+	 *  HECTOR, G Q.*
+     * 
+     *  
+     * @param authorString
+     * @return
+     */
+	public static HashSet<String> getSynonymVariations(String authorString) {
+		
+		HashMap<String,String> parsedAuthor = null;
+		try {
+			parsedAuthor = AuthorUtils.parseAuthor(authorString);
+		} catch (NameParsingException npe) {
+			log.error(npe.getMessage());
+		}
+		
+		HashSet<String> variations = new HashSet<String>();
+		if (parsedAuthor == null) {
+			variations.add(authorString);
+			return variations;
+		}
+		return generateSynonymVariations(parsedAuthor, variations);
+	}
+
 	public static HashSet<String> generateSynonymVariations(HashMap<String,String> parsedAuthor) {
 		HashSet<String> variations = new HashSet<String>();
 		return generateSynonymVariations(parsedAuthor, variations);

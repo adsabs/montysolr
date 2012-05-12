@@ -13,7 +13,7 @@ public class TestAuthorSynonymFilterFactory {
 		List<String> rules = new ArrayList<String>();
 		rules.add("MILLER, WILLIAM => MILLER, B; MILLER, BILL; MILLER,; MILLER, BILL\\b.*");
 		rules.add("MILLER, BILL => MILLER, WILLIAM; MILLER, WILLIAM\\b.*; MILLER,; MILLER, W");
-	    AuthorSynonymMap synMap = new AuthorSynonymMap();
+	    WriteableSynonymMap synMap = new WriteableSynonymMap(null);
 	    AuthorSynonymFilterFactory asff = new AuthorSynonymFilterFactory();
 	    asff.parseRules(rules, synMap);
 	    List<String> expected = new ArrayList<String>();

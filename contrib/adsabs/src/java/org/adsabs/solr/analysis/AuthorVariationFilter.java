@@ -1,11 +1,9 @@
 package org.adsabs.solr.analysis;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Stack;
 
-import org.adsabs.solr.AuthorUtils;
 import org.adsabs.solr.AuthorVariations;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
@@ -13,8 +11,6 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeSource;
-import org.apache.lucene.util.CharacterUtils;
-import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +59,7 @@ public class AuthorVariationFilter extends TokenFilter {
 	private boolean genVariations() {
 	    String authorName = termAtt.toString();
 	    log.debug("generating variations for " + authorName);
-	    HashSet<String> variations = AuthorVariations.getQueryVariations(authorName);
+	    HashSet<String> variations = AuthorVariations.getNameVariations(authorName);
 	    if (variations.size() > 0) {
 		    log.debug("variations: " + variations);
 		    for (String s : variations) {

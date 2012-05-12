@@ -3,19 +3,15 @@
  */
 package org.adsabs.solr.analysis;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.BaseTokenFilterFactory;
+import org.apache.solr.analysis.WriteableTokenFilterFactory;
 import org.apache.solr.common.ResourceLoader;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.StrUtils;
 import org.apache.solr.util.plugin.ResourceLoaderAware;
-import org.apache.solr.core.SolrResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +19,14 @@ import org.slf4j.LoggerFactory;
  * @author jluker
  *
  */
-public class AuthorSynonymFilterFactory extends BaseTokenFilterFactory implements ResourceLoaderAware {
+public class AuthorSynonymFilterFactory extends WriteableTokenFilterFactory implements ResourceLoaderAware {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorSynonymFilter.class);
     
-    private AuthorSynonymMap synMap;
     
 	public void inform(ResourceLoader loader) {
+		super.inform(loader);
+		
 		String synonyms = args.get("synonyms");
 		if (synonyms == null)
 			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Missing required argument 'synonyms'.");
@@ -43,11 +40,10 @@ public class AuthorSynonymFilterFactory extends BaseTokenFilterFactory implement
 	      	throw new RuntimeException(e);
 	    }
 	    
-	    synMap = new AuthorSynonymMap();
-	    parseRules(rules, synMap);
+	    parseRules(rules, getSynonymMap());
 	}
 	
-	public void parseRules(List<String> rules, AuthorSynonymMap synMap) {
+	public void parseRules(List<String> rules, WriteableSynonymMap synMap) {
 		
 		for (String rule : rules) {
 			List<String> mapping = StrUtils.splitSmart(rule, "=>", false);
@@ -67,20 +63,8 @@ public class AuthorSynonymFilterFactory extends BaseTokenFilterFactory implement
 		return list;
 	}
 
-	@Override
-    public void init(Map<String, String> args) {
-	    super.init(args);
-	}
 	
-	public AuthorSynonymMap getSynonymMap() {
-		return synMap;
-	}
-	
-	public void setSynonymMap(AuthorSynonymMap synMap) {
-		this.synMap = synMap;
-	}
-	  
 	public TokenStream create(TokenStream input) {
-		return new AuthorSynonymFilter(input, synMap);
+		return new AuthorSynonymFilter(input, getSynonymMap());
 	}
 }
