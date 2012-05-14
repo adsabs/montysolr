@@ -39,7 +39,7 @@ public class MontySolrSetup {
 				getChildModulePath(mainModulePath));
 
 		// discover and set -Djava.library.path
-		ProcessUtils.checkJCCPath();
+		checkJCCPath();
 		
 
 		// this is necessary to run in the main thread and because of the
@@ -72,6 +72,26 @@ public class MontySolrSetup {
 	
 	
 	
+	private static void checkJCCPath() throws Exception {
+		
+		// first check if we have the build/build.properties
+		try {
+			Properties p = loadProperties(getMontySolrHome(), "build");
+			if (p.containsKey("python")) {
+				ProcessUtils.checkJCCPath(p.getProperty("python").trim());
+				return;
+			}
+			
+		} catch (IllegalStateException e) {
+			// pass
+		}
+		
+		ProcessUtils.checkJCCPath(null);
+		
+	}
+
+
+
 	/**
 	 * Will find the build.properties for the project and 
 	 * set some interesting variables into PYTHON

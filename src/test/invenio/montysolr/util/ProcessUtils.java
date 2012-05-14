@@ -147,7 +147,9 @@ public class ProcessUtils {
 	 * 
 	 * @throws Exception
 	 */
-	public static void checkJCCPath() throws Exception {
+	public static void checkJCCPath(String pythonExec) throws Exception {
+		
+		pythonExec = pythonExec == null ? "python" : pythonExec;
 		
 		final Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
 		usrPathsField.setAccessible(true);
@@ -179,10 +181,10 @@ public class ProcessUtils {
 	    	}
 	    	else {
 	    		System.err.println("Warning: We were not successful in finding JCC. To help you debug...\n\n");
-	    		System.err.println("python -c \"import sys;print sys.path\"");
-	    		System.err.println(execCommand("python|-c|import sys;print \'\\n\'.join(sys.path)".split("\\|")));
-	    		System.err.println("python -c \"import os;print os.environ\"");
-	    		System.err.println(execCommand("python|-c|import os;print str(os.environ).replace(',',',\\n')".split("\\|")));
+	    		System.err.println(pythonExec + " -c \"import sys;print sys.path\"");
+	    		System.err.println(execCommand((pythonExec + "|-c|import sys;print \'\\n\'.join(sys.path)").split("\\|")));
+	    		System.err.println(pythonExec + " -c \"import os;print os.environ\"");
+	    		System.err.println(execCommand((pythonExec + "|-c|import os;print str(os.environ).replace(',',',\\n')").split("\\|")));
 	    	}
 	    }
 		
@@ -201,6 +203,7 @@ public class ProcessUtils {
 		return execCommand(cmd);
 	}
 	
+	// obsolete
 	public static void loadJCC() throws Exception {
 		String base = getJCCPath();
 		String library = base + "/libjcc.so";
