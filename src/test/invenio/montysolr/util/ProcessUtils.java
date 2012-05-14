@@ -174,7 +174,7 @@ public class ProcessUtils {
 	    	System.err.println("Warning: This is not guaranteed to work (we execute default 'python')");
 	    	System.err.println("Warning: Alternatively, you can deactivate this by setting -Djava.library.path.ignore.montysolr=1");
 	    	
-	    	String jPath = getJCCPath();
+	    	String jPath = getJCCPath(pythonExec);
 	    	if (jPath != null && jPath.length() > 0) {
 	    		System.err.println("Warning: Adding java.library.path=" + jPath);
 	    		addLibraryPath(jPath.trim());
@@ -197,15 +197,15 @@ public class ProcessUtils {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static String getJCCPath() throws Exception {
-		String[] cmd = { "python", "-c",
+	public static String getJCCPath(String pythonExec) throws Exception {
+		String[] cmd = { pythonExec, "-c",
 				"import os, jcc; print os.path.dirname(os.path.dirname(jcc.__file__))" };
 		return execCommand(cmd);
 	}
 	
 	// obsolete
 	public static void loadJCC() throws Exception {
-		String base = getJCCPath();
+		String base = getJCCPath("python");
 		String library = base + "/libjcc.so";
 		System.load(library);
 	}
