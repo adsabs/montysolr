@@ -40,6 +40,7 @@ public class AuthorSynonymFilterFactory extends WriteableTokenFilterFactory impl
 	      	throw new RuntimeException(e);
 	    }
 	    
+	    log.info("Loading: " + synonyms);
 	    parseRules(rules, getSynonymMap());
 	}
 	

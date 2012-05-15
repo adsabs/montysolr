@@ -19,19 +19,25 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author jluker
+ * 
+ * This class harvests different spellings and variations of the
+ * author names as they are indexed (it was initially called
+ * AuthorAutoSynonymFilter)
  *
  */
-public class AuthorAutoSynonymFilter extends TokenFilter {
+public class AuthorNameVariantsFilter extends TokenFilter {
 
-    public static final Logger log = LoggerFactory.getLogger(AuthorAutoSynonymFilter.class);
+    public static final Logger log = LoggerFactory.getLogger(AuthorNameVariantsFilter.class);
     public static final String TOKEN_TYPE_AUTHOR_AUTO_SYN = "AUTHOR_AUTO_SYN";
+	private WriteableSynonymMap synMap;
     
-	public AuthorAutoSynonymFilter(TokenStream input) {
+	public AuthorNameVariantsFilter(TokenStream input, WriteableSynonymMap synMap) {
 		super(input);
 		this.termAtt = addAttribute(CharTermAttribute.class);
 		this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
 		this.synonymStack = new Stack<String>();
 		this.typeAtt = addAttribute(TypeAttribute.class);
+		this.synMap = synMap;
 	}
 	
 	private Stack<String> synonymStack;
@@ -69,15 +75,22 @@ public class AuthorAutoSynonymFilter extends TokenFilter {
 	
 	private boolean genSynonyms() {
 	    String authorName = termAtt.toString();
-	    log.debug("generating synonyms for " + authorName);
-	    ArrayList<String> synonyms = AuthorUtils.genSynonyms(authorName);
-	    if (synonyms.size() > 0) {
-		    log.debug("synonyms: " + synonyms);
-		    for (String s : synonyms) {
-		    	synonymStack.push(s);
-		    }
-	        return true;
+	    if (this.synMap.containsKey(authorName)) {
+	    	synonymStack.addAll(this.synMap.get(authorName));
 	    }
+	    else {
+	    	log.debug("generating name variants for: " + authorName);
+		    ArrayList<String> synonyms = AuthorUtils.genSynonyms(authorName);
+		    this.synMap.put(authorName, synonyms);
+		    if (synonyms.size() > 0) {
+			    log.debug("variants: " + synonyms);
+			    for (String s : synonyms) {
+			    	synonymStack.push(s);
+			    }
+		        return true;
+		    }
+	    }
+	    
 	    return false;
 	}
 

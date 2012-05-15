@@ -14,6 +14,14 @@ import org.apache.lucene.util.AttributeSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This filter checks if the token has its translation inside the SynonymMap
+ * and if yes, it adds the variants of the name into the token stream.
+ * 
+ * @author jluker
+ *
+ */
+
 public class AuthorSynonymFilter extends TokenFilter {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorSynonymFilter.class);

@@ -72,7 +72,7 @@ public class MontySolrSetup {
 	
 	
 	
-	private static void checkJCCPath() throws Exception {
+	public static void checkJCCPath() throws Exception {
 		
 		// first check if we have the build/build.properties
 		try {

@@ -31,8 +31,7 @@ public class TestInvenioExample extends MontySolrJettyBase {
 	  public static void beforeClass() throws Exception {
 		
 		// discover and set -Djava.library.path
-		String jccpath = ProcessUtils.getJCCPath();
-		ProcessUtils.setLibraryPath(jccpath);
+		MontySolrSetup.checkJCCPath();
 		
 		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
 				MontySolrSetup.getMontySolrHome() + "/src/python");

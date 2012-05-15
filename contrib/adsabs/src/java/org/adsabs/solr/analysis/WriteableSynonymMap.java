@@ -46,6 +46,10 @@ public class WriteableSynonymMap {
 		return null;
 	}
 	
+	public boolean containsKey(String key) {
+		return this.map.containsKey(key);
+	}
+	
 	public boolean isDirty() {
 		if (numUpdates > 0) 
 			return true;
@@ -88,12 +92,23 @@ public class WriteableSynonymMap {
 		int max = 1000;
 		int i = 0;
 		for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+			/*
 			for (String s : entry.getValue()) { // escape the entry
 				out.append(s.replace(",", "\\,").replace(" ", "\\ "));
 				out.append(",");
 			}
 			out.append(entry.getKey().replace(",", "\\,").replace(" ", "\\ "));
 			out.append("\n");
+			*/
+			
+			out.append(entry.getKey());
+			out.append("=>");
+			for (String s : entry.getValue()) {
+				out.append(s);
+				out.append(";");
+			}
+			out.append("\n");
+			
 			i++;
 			if (i > max) {
 				i = 0;
