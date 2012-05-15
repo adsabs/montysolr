@@ -10,6 +10,8 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.*;
 
+import org.apache.solr.analysis.SynonymFilterFactory;
+import org.apache.solr.common.util.StrUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,11 +103,14 @@ public class WriteableSynonymMap {
 			out.append("\n");
 			*/
 			
-			out.append(entry.getKey());
+			// I don't like this format, but SynonymFilter is using it, so 
+			// let's be compliant...
+			
+			out.append(entry.getKey().replace(",", "\\,").replace(" ", "\\ "));
 			out.append("=>");
 			for (String s : entry.getValue()) {
-				out.append(s);
-				out.append(";");
+				out.append(s.replace(",", "\\,").replace(" ", "\\ "));
+				out.append(",");
 			}
 			out.append("\n");
 			
@@ -139,4 +144,30 @@ public class WriteableSynonymMap {
 			}
 		
 	}
+	
+	/*
+	 * this is much simplified version of synonym rules that
+	 * supports:
+	 * 
+	 * token=>token,token\\ tokenb,token
+	 */
+	public void parseRules(List<String> rules) {
+		for (String rule : rules) {
+			List<String> mapping = StrUtils.splitSmart(rule, "=>", false);
+		    if (mapping.size() != 2) 
+		    	log.error("Invalid Synonym Rule:" + rule);
+		    String key = mapping.get(0).trim();
+		    List<String> values = getSynList(mapping.get(1));
+		    this.map.put(key.replace("\\,", ",").replace("\\ ", " "), values);
+		}
+	}
+	
+	private List<String> getSynList(String synonyms) {
+		List<String> list = new ArrayList<String>();
+		for (String s : StrUtils.splitSmart(synonyms, ",", false)) {
+			list.add(s.trim().replace("\\,", ",").replace("\\ ", " "));
+		}
+		return list;
+	}
+	
 }

@@ -67,7 +67,7 @@ public class TestWriteableSynonymMap extends BaseTokenTestCase {
 	    // now test the map is correctly written to disk
 	    
 	    synMap.persist();
-	    checkOutput(tmpFile, "MÜller, Bill=>MUEller, Bill;MUller, Bill;\nMÜLLER, BILL=>MUELLER, BILL;MULLER, BILL;\n");
+	    checkOutput(tmpFile, "MÜller\\,\\ Bill=>MUEller\\,\\ Bill,MUller\\,\\ Bill,\nMÜLLER\\,\\ BILL=>MUELLER\\,\\ BILL,MULLER\\,\\ BILL,\n");
 	    
 	    // now simulate the map was updated and we are closing, it should save itself
 	    synMap.put("MÜLLER, BILL", synMap.get("MÜLLER, BILL"));
@@ -79,8 +79,18 @@ public class TestWriteableSynonymMap extends BaseTokenTestCase {
 	    System.gc();
 	    Thread.sleep(30);
 	    
-	    checkOutput(tmpFile, "MÜller, Bill=>MUEller, Bill;MUller, Bill;\nMÜLLER, BILL=>MUELLER, BILL;MULLER, BILL;\n");
+	    checkOutput(tmpFile, "MÜller\\,\\ Bill=>MUEller\\,\\ Bill,MUller\\,\\ Bill,\nMÜLLER\\,\\ BILL=>MUELLER\\,\\ BILL,MULLER\\,\\ BILL,\n");
 	    
+	    // now load the factory and check the synonyms were loaded properly
+	    factory = new AuthorNameVariantsFilterFactory();
+	    args.put("synonyms", tmpFile.getAbsolutePath());
+	    factory.init(args);
+	    synMap = factory.getSynonymMap();
+	    
+	    
+	    assertTrue(synMap.containsKey("MÜLLER, BILL"));
+	    assertTrue(synMap.containsKey("MÜller, Bill"));
+	    assertEquals(expected, synMap.get("MÜLLER, BILL"));
 	    
 	}
 	

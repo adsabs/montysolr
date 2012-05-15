@@ -41,9 +41,14 @@ public class AuthorSynonymFilterFactory extends WriteableTokenFilterFactory impl
 	    }
 	    
 	    log.info("Loading: " + synonyms);
-	    parseRules(rules, getSynonymMap());
+	    getSynonymMap().parseRules(rules);
 	}
 	
+	public TokenStream create(TokenStream input) {
+		return new AuthorSynonymFilter(input, getSynonymMap());
+	}
+	
+	/* obsolete
 	public void parseRules(List<String> rules, WriteableSynonymMap synMap) {
 		
 		for (String rule : rules) {
@@ -63,9 +68,7 @@ public class AuthorSynonymFilterFactory extends WriteableTokenFilterFactory impl
 		}
 		return list;
 	}
-
+	*/
 	
-	public TokenStream create(TokenStream input) {
-		return new AuthorSynonymFilter(input, getSynonymMap());
-	}
+	
 }

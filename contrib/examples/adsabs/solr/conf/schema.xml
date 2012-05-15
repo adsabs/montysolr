@@ -460,14 +460,14 @@
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorAutoSynonymWriterFactory" outFile="author_auto.synonyms" />
+        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory" outFile="author_indexed.variants" />
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
         <filter class="org.adsabs.solr.analysis.AuthorVariationFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorAutoSynonymFilterFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author_auto.synonyms" ignoreCase="true" expand="true"/>
+        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true"/>
         <filter class="org.adsabs.solr.analysis.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
       </analyzer>
