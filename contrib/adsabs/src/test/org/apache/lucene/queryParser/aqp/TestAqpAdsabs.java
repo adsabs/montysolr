@@ -209,13 +209,17 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	
 	public void testFunctionalQueries() throws Exception {
 		assertQueryEquals("pos(author, \"Accomazzi, A\", 1, \\-1)", null, "pos(author,\"Accomazzi, A\",1,-1)", FunctionQuery.class);
-		
 		assertQueryEquals("pos(author, Kurtz, 1, 1)", null, "pos(author,Kurtz,1,1)", FunctionQuery.class);
-		assertQueryEquals("pos(author, Kurtz, 1)", null, "pos(author,Kurtz,1,1)", FunctionQuery.class);
-		assertQueryEquals("pos(author, Kurtz, 5)", null, "pos(author,Kurtz,5,5)", FunctionQuery.class);
+		
+		
+		// with the new parser, we are stricter (or lazier ;)) - i am not sure if it was a good idea to 
+		// fill in the missing values
+		//assertQueryEquals("pos(author, Kurtz, 1)", null, "pos(author,Kurtz,1,1)", FunctionQuery.class);
+		//assertQueryEquals("pos(author, Kurtz, 5)", null, "pos(author,Kurtz,5,5)", FunctionQuery.class);
 		
 		assertQueryNodeException("pos(author:\"Accomazzi, A\", 1, \\-1)");
-		assertQueryNodeException("pos(author, Kurtz, 1, \\-1, 5)");
+		//assertQueryNodeException("pos(author, Kurtz, 1, \\-1, 5)");
+		assertQueryNodeException("pos(author, Kurtz, 1)");
 		
 		setDebug(true);
 		assertQueryEquals("ord(author)", null, "top(ord(author))", FunctionQuery.class);
@@ -224,6 +228,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		assertQueryEquals("max(5, 10)", null, "max(5,10)", FunctionQuery.class);
 		assertQueryEquals("max(10, 5)", null, "max(10,5)", FunctionQuery.class);
+		assertQueryEquals("log(0)", null, "log(0)", FunctionQuery.class);
+		assertQueryEquals("sum(10, 5)", null, "sum(10,5)", FunctionQuery.class);
+		
 		
 		/*
 		TODO: i don't yet have the implementations for these

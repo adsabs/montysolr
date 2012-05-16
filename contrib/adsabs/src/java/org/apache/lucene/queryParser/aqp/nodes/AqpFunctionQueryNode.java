@@ -1,28 +1,50 @@
 package org.apache.lucene.queryParser.aqp.nodes;
 
-import java.util.List;
-
-import org.apache.lucene.queryParser.aqp.builders.AqpFunctionQueryBuilder;
+import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryParser.core.parser.EscapeQuerySyntax;
 
+/**
+ * This QNode receives all the children of the QFUNC node, so typically
+ *                            QFUNC
+ *                              |
+ *                            /   \
+ *                        fName   DEFOP
+ *                                  |
+ *                                COMMA
+ *                                  |
+ *                             /    |     \
+ *                          ...  MODIFIER  ...
+ *                                  |
+ *                              TMODIFIER
+ *                                  |
+ *                                FIELD
+ *                                  |
+ *                                Q<node>
+ *                                  |
+ *                                <value>
+ * @author rchyla
+ *
+ */
 public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 
 	private static final long serialVersionUID = 751068795564006998L;
-	private AqpFunctionQueryBuilder builder = null;
+	private QueryBuilder builder = null;
+	private String name = null;
 	
-	public AqpFunctionQueryNode(AqpFunctionQueryBuilder builder, List<QueryNode> children) {
+	public AqpFunctionQueryNode(String name, QueryBuilder builder, QueryNode node) {
 		allocate();
 		setLeaf(false);
-		add(children);
+		add(node.getChildren().get(1).getChildren()); // we keep only the values
 		this.builder = builder;
+		this.name = name;
 	}
 
 	public String toString() {
 		StringBuffer bo = new StringBuffer();
 		bo.append("<function name=\"");
-		bo.append(getBuilder().getClass());
+		bo.append(this.name == null ? getBuilder().getClass() : this.name);
 		bo.append("\">\n");
 		for (QueryNode child: this.getChildren()) {
 			bo.append(child.toString());
@@ -40,8 +62,12 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		return getBuilder().toString();
 	}
 	
-	public AqpFunctionQueryBuilder getBuilder() {
+	public QueryBuilder getBuilder() {
 		return builder;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 }

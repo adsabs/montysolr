@@ -6,7 +6,9 @@ import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryParser.aqp.config.AqpFunctionQueryBuilderConfig;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryParser.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
@@ -55,15 +57,15 @@ public class AqpQFUNCProcessor extends AqpQProcessorPost {
 					"Missing FunctionQueryBuilder provider"));
 		}
 		
-		AqpFunctionQueryBuilder builder = config.getAttribute(AqpFunctionQueryBuilderConfig.class)
-										.getBuilder(funcName, node);
+		QueryBuilder builder = config.getAttribute(AqpFunctionQueryBuilderConfig.class)
+										.getBuilder(funcName, (QueryNode) node, config);
 		
 		if (builder == null) {
 			throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
 					"Unknown function \"" + funcName + "\"" ));
 		}
 		
-		return builder.createQNode(children.get(1));
+		return new AqpFunctionQueryNode(funcName, builder, node);
 		
 	}
 
