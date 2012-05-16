@@ -23,7 +23,7 @@ public abstract class AqpFunctionQueryBuilderAbstract extends QueryTreeBuilder
 	 */
 	public AqpFunctionQueryNode createQNode(QueryNode node)
 		throws QueryNodeException {
-		throw new IllegalStateException("So late!");
+		return new AqpFunctionQueryNode(this, node.getChildren());
 	}
 	
 	/**
@@ -31,13 +31,13 @@ public abstract class AqpFunctionQueryBuilderAbstract extends QueryTreeBuilder
 	 * into nested QFUNCs, that is intentional,
 	 * we see only the immediate level
 	 */
-	protected List<String> harvestInput(QueryNode node) {
+	public static List<String> harvestInput(QueryNode node) {
 		List<String> rawInput = new ArrayList<String>();
 		swimDeep(rawInput, node);
 		return rawInput;
 	}
 
-	private void swimDeep(List<String> rawInput, QueryNode node) {
+	public static void swimDeep(List<String> rawInput, QueryNode node) {
 		if (node instanceof AqpANTLRNode) {
 			AqpANTLRNode a = (AqpANTLRNode) node;
 			if (a.getTokenInput() != null) {

@@ -1,13 +1,10 @@
 package org.adsabs.solr.analysis;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.KeywordTokenizer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.solr.analysis.BaseTokenTestCase;
 import org.apache.solr.analysis.PatternTokenizer;

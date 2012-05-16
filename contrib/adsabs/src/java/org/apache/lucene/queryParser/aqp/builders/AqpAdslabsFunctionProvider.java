@@ -3,11 +3,17 @@ package org.apache.lucene.queryParser.aqp.builders;
 import java.util.List;
 
 import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.search.Query;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.FunctionQParser;
+import org.apache.solr.search.ValueSourceParser;
 import org.apache.solr.search.function.FunctionQuery;
 import org.apache.solr.search.function.PositionSearchFunction;
 
@@ -58,6 +64,27 @@ public class AqpAdslabsFunctionProvider implements
 					return new AqpFunctionQueryNode(this, children);
 				}
 			};
+		}
+		else if (ValueSourceParser.standardValueSourceParsers.containsKey(funcName)) {
+			
+			// XXX: such an ugly mess...
+			final ValueSourceParser argParser = ValueSourceParser.standardValueSourceParsers.get(funcName);
+			final AqpFunctionQParser fParser = new AqpFunctionQParser(null, null, null, null);
+			final List<String> inputVals = AqpFunctionQueryBuilderAbstract.harvestInput(node);
+			inputVals.remove(0);
+			
+			return new AqpFunctionQueryBuilderAbstract(){
+				public Query build(QueryNode node) {
+					try {
+						fParser.setQueryNode(node);
+						fParser.setInputValues(inputVals);
+						return new FunctionQuery(argParser.parse(fParser));
+					} catch (ParseException e1) {
+						throw new RuntimeException("My function is screwed!");
+					}
+				}
+			};
+			
 		}
 		return null;
 	}

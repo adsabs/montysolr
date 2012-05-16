@@ -217,6 +217,14 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryNodeException("pos(author:\"Accomazzi, A\", 1, \\-1)");
 		assertQueryNodeException("pos(author, Kurtz, 1, \\-1, 5)");
 		
+		setDebug(true);
+		assertQueryEquals("ord(author)", null, "top(ord(author))", FunctionQuery.class);
+		assertQueryEquals("literal(author)", null, "literal(author)", FunctionQuery.class);
+		assertQueryEquals("literal(\"author\")", null, "literal(\"author\")", FunctionQuery.class);
+		
+		assertQueryEquals("max(5, 10)", null, "max(5,10)", FunctionQuery.class);
+		assertQueryEquals("max(10, 5)", null, "max(10,5)", FunctionQuery.class);
+		
 		/*
 		TODO: i don't yet have the implementations for these
 		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
