@@ -4,6 +4,7 @@
 package org.adsabs.solr.analysis;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.lucene.analysis.TokenStream;
@@ -30,18 +31,18 @@ public class AuthorSynonymFilterFactory extends WriteableTokenFilterFactory impl
 		String synonyms = args.get("synonyms");
 		if (synonyms == null)
 			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Missing required argument 'synonyms'.");
-	    List<String> rules=null;
-	    try {
-	    	rules = loader.getLines(synonyms);
+		
+	    InputStream rules;
+		try {
+	    	rules = loader.openResource(synonyms);
 	        if (rules == null) {
 	      		throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "can't find " + synonyms);
 	      	}
+	        rules.close();
 	    } catch (IOException e) {
 	      	throw new RuntimeException(e);
 	    }
 	    
-	    log.info("Loading: " + synonyms);
-	    getSynonymMap().parseRules(rules);
 	}
 	
 	public TokenStream create(TokenStream input) {

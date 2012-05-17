@@ -2,7 +2,6 @@ package org.adsabs.solr.analysis;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Tokenizer;
@@ -22,11 +21,8 @@ public class TestWriteableSynonymMap extends BaseTokenTestCase {
 	  	Tokenizer tokenizer = new PatternTokenizer(new StringReader("MÜLLER, BILL"), Pattern.compile(";"), -1);
 	  	AuthorNameVariantsFilterFactory factory = new AuthorNameVariantsFilterFactory();
 	  	
-	  	HashMap<String, String> args = new HashMap<String, String>();
 	  	File tmpFile = File.createTempFile("variants", ".tmp");
 	  	
-	  	args.put("outFile", tmpFile.getAbsolutePath());
-	  	factory.init(args);
 	  	
 	    AuthorNameVariantsFilter filter = factory.create(tokenizer);
 	    
@@ -40,6 +36,7 @@ public class TestWriteableSynonymMap extends BaseTokenTestCase {
 		// String expected = "MUELLER\\,\\ BILL,MÜLLER\\,\\ BILL,MULLER\\,\\ BILL\n";
 		
 		WriteableSynonymMap synMap = factory.getSynonymMap();
+		synMap.setOutput(tmpFile.getAbsolutePath());
 		
 		assertTrue(synMap.containsKey("MÜLLER, BILL"));
 		
@@ -80,9 +77,8 @@ public class TestWriteableSynonymMap extends BaseTokenTestCase {
 	    
 	    // now load the factory and check the synonyms were loaded properly
 	    factory = new AuthorNameVariantsFilterFactory();
-	    args.put("synonyms", tmpFile.getAbsolutePath());
-	    factory.init(args);
 	    synMap = factory.getSynonymMap();
+	    synMap.parseRules(synMap.getLines(tmpFile.getAbsolutePath()));
 	    
 	    
 	    assertTrue(synMap.containsKey("MÜLLER, BILL"));

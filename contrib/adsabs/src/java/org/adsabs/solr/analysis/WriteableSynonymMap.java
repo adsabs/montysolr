@@ -1,16 +1,22 @@
 package org.adsabs.solr.analysis;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.*;
 
 import org.apache.solr.analysis.SynonymFilterFactory;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.StrUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +32,10 @@ public class WriteableSynonymMap {
 	public WriteableSynonymMap(String outFile) {
 		this.map = new HashMap<String, List<String>>();
 		this.outFile = outFile;
+	}
+	
+	public void setOutput(String out) {
+		this.outFile = out;
 	}
 	
 	public List<String> put(String k, List<String> v) {
@@ -168,6 +178,49 @@ public class WriteableSynonymMap {
 			list.add(s.trim().replace("\\,", ",").replace("\\ ", " "));
 		}
 		return list;
+	}
+	
+	/**
+	 * This is just a helper method, you should be using SolrResouceLoader#getLines()
+	 * instead
+	 * 
+	 * @param inputFile
+	 * @return
+	 * @throws IOException
+	 */
+	public List<String> getLines(String inputFile) throws IOException {
+		ArrayList<String> lines;
+		BufferedReader input = null;
+		try {
+			input = new BufferedReader(new InputStreamReader(
+					new FileInputStream(new File(inputFile)),
+					Charset.forName("UTF-8")));
+
+			lines = new ArrayList<String>();
+			for (String word = null; (word = input.readLine()) != null;) {
+				// skip initial bom marker
+				if (lines.isEmpty() && word.length() > 0
+						&& word.charAt(0) == '\uFEFF')
+					word = word.substring(1);
+				// skip comments
+				if (word.startsWith("#"))
+					continue;
+				word = word.trim();
+				// skip blank lines
+				if (word.length() == 0)
+					continue;
+				lines.add(word);
+			}
+		} catch (CharacterCodingException ex) {
+			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
+					"Error loading resource (wrong encoding?): " + inputFile,
+					ex);
+		} finally {
+			if (input != null)
+				input.close();
+		}
+		return lines;
+
 	}
 	
 }

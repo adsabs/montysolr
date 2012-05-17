@@ -1,9 +1,13 @@
 package org.apache.solr.search;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.aqp.NestedParseException;
+import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryParser.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
@@ -33,11 +37,17 @@ public class AqpFunctionQParser extends FunctionQParser {
 	private QueryNode qNode = null;
 	
 	protected boolean canConsume() {
-		return qNode.getChildren().size()-1 > currChild+1;
+		return currChild+1 <= qNode.getChildren().size()-1;
 	}
 	protected QueryNode consume() {
 		currChild++;
-		return qNode.getChildren().get(currChild);
+		try {
+			return qNode.getChildren().get(currChild);
+		}
+		catch (Exception e) {
+			throw new NestedParseException("Function tried to get a new argument, but none is available" + qNode.toString());
+		}
+			
 	}
 	
 	protected String consumeAsString() {
@@ -149,4 +159,22 @@ public class AqpFunctionQParser extends FunctionQParser {
 	    }
 	    return sources;
 	  }
+	
+	// here we differ from the standard lucene/solr way
+	// I'd say we differ because we can handle it in an elegant
+	// way and have the nested queries directly inside, however
+	// this means we are not compatible
+	public Query parseNestedQuery() throws ParseException {
+	    // check if there is a query already built inside our node
+		QueryNode node = consume();
+		if (node.containsTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID)) {
+			return (Query) node.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
+		}
+		
+		throw new ParseException("Nested query was expected, instead we have: " + node.toString());
+	  }
+	
+	public boolean hasMoreArguments() {
+		return canConsume();
+	}
 }

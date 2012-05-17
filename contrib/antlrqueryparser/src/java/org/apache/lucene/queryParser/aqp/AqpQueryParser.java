@@ -260,7 +260,12 @@ public class AqpQueryParser extends QueryParserHelper {
 					.getAttribute(DefaultFieldAttribute.class);
 			attr.setDefaultField(defaultField);
 		}
-		return (Query) super.parse(query, defaultField);
+		try {
+			return (Query) super.parse(query, defaultField);
+		}
+		catch (NestedParseException e) {
+			throw new QueryNodeException(e);
+		}
 
 	}
 

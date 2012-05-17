@@ -18,9 +18,13 @@ public class TestAuthorSynonymFilter extends BaseTokenTestCase {
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
 		WriteableSynonymMap map = new WriteableSynonymMap(null);
 		List<String> rules = new ArrayList<String>();
-		rules.add("MILLER, WILLIAM => MILLER, B; MILLER, BILL; MILLER,; MILLER, BILL\\b.*");
-		rules.add("MILLER, BILL => MILLER, WILLIAM; MILLER, WILLIAM\\b.*; MILLER,; MILLER, W");
-		factory.parseRules(rules, map);
+		rules.add("MILLER, WILLIAM=>MILLER, B;MILLER, BILL;MILLER,;MILLER, BILL\\b.*");
+		rules.add("MILLER, BILL=>MILLER, WILLIAM;MILLER, WILLIAM\\b.*;MILLER,;MILLER, W");
+		
+		for (int i=0; i<rules.size();i++) {
+			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
+		}
+		map.parseRules(rules);
 		factory.setSynonymMap(map);
 		TokenStream stream = factory.create(tokenizer);
 		String[] expected = { "MILLER, BILL", "MILLER, W", "MILLER,", "MILLER, WILLIAM\\b.*", "MILLER, WILLIAM" };
@@ -38,10 +42,15 @@ public class TestAuthorSynonymFilter extends BaseTokenTestCase {
 		// it doesn't expand the pattern to match all possible names
 		// example: "GRANT, CAROLYN;GRANT,;GRANT, C\b.*;GRANT, CAROLYN\b.*;GRANT, C"
 		
-		rules.add("GRANT, CAROLYN S => STERN, CAROLYN P;STERN, C P.*;STERN, CAROLYN P.*;STERN GRANT, CAROLYN\b.*;STERN GRANT, C;STERN GRANT, CAROLYN;STERN, CAROLYN;STERN,;STERN GRANT,;STERN, C");
-		rules.add("STERN GRANT, CAROLYN => STERN, CAROLYN P;GRANT, C;GRANT, CAROLYN S;STERN, C P.*;GRANT, CAROLYN;STERN, CAROLYN P.*;GRANT, C S.*;GRANT, CAROLYN S.*;STERN, CAROLYN;STERN,;GRANT,; STERN, C");
-		rules.add("STERN, CAROLYN P => GRANT, C;GRANT, CAROLYN S;GRANT, CAROLYN;GRANT, C S.*;STERN GRANT, CAROLYN\b.*;STERN GRANT, C;STERN GRANT, CAROLYN;GRANT, CAROLYN S.*;GRANT,;STERN GRANT,");
-		factory.parseRules(rules, map);
+		rules.add("GRANT, CAROLYN S=>STERN, CAROLYN P;STERN, C P.*;STERN, CAROLYN P.*;STERN GRANT, CAROLYN\b.*;STERN GRANT, C;STERN GRANT, CAROLYN;STERN, CAROLYN;STERN,;STERN GRANT,;STERN, C");
+		rules.add("STERN GRANT, CAROLYN=>STERN, CAROLYN P;GRANT, C;GRANT, CAROLYN S;STERN, C P.*;GRANT, CAROLYN;STERN, CAROLYN P.*;GRANT, C S.*;GRANT, CAROLYN S.*;STERN, CAROLYN;STERN,;GRANT,; STERN, C");
+		rules.add("STERN, CAROLYN P=>GRANT, C;GRANT, CAROLYN S;GRANT, CAROLYN;GRANT, C S.*;STERN GRANT, CAROLYN\b.*;STERN GRANT, C;STERN GRANT, CAROLYN;GRANT, CAROLYN S.*;GRANT,;STERN GRANT,");
+		
+		for (int i=0; i<rules.size();i++) {
+			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
+		}
+		map.parseRules(rules);
+		
 		factory.setSynonymMap(map);
 		TokenStream stream = factory.create(tokenizer);
 		String[] expected = {
@@ -64,8 +73,8 @@ public class TestAuthorSynonymFilter extends BaseTokenTestCase {
 		assertTokenStreamContents(stream, expected);
 		
 		
-		// XXX: this should work, but doesn't
-		
+		// according to jay this is not supposed to work this way
+		/*
 		reader = new StringReader("STERN, C");
 		tokenizer = new PatternTokenizer(reader, Pattern.compile(";"), -1);
 		stream = factory.create(tokenizer);
@@ -87,5 +96,6 @@ public class TestAuthorSynonymFilter extends BaseTokenTestCase {
 				"GRANT, C" 
 		};
 		assertTokenStreamContents(stream, expected2);
+		*/
 	}
 }

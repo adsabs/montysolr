@@ -6,7 +6,6 @@ package org.adsabs.solr.analysis;
 import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.BaseTokenFilterFactory;
 import org.apache.solr.analysis.WriteableTokenFilterFactory;
 
 /**

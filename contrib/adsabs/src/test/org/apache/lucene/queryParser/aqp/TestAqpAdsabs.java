@@ -218,18 +218,17 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		//assertQueryEquals("pos(author, Kurtz, 5)", null, "pos(author,Kurtz,5,5)", FunctionQuery.class);
 		
 		assertQueryNodeException("pos(author:\"Accomazzi, A\", 1, \\-1)");
-		//assertQueryNodeException("pos(author, Kurtz, 1, \\-1, 5)");
+		assertQueryNodeException("pos(author, Kurtz, 1, \\-1, 5)");
 		assertQueryNodeException("pos(author, Kurtz, 1)");
 		
-		setDebug(true);
 		assertQueryEquals("ord(author)", null, "top(ord(author))", FunctionQuery.class);
 		assertQueryEquals("literal(author)", null, "literal(author)", FunctionQuery.class);
 		assertQueryEquals("literal(\"author\")", null, "literal(\"author\")", FunctionQuery.class);
 		
-		assertQueryEquals("max(5, 10)", null, "max(5,10)", FunctionQuery.class);
-		assertQueryEquals("max(10, 5)", null, "max(10,5)", FunctionQuery.class);
-		assertQueryEquals("log(0)", null, "log(0)", FunctionQuery.class);
-		assertQueryEquals("sum(10, 5)", null, "sum(10,5)", FunctionQuery.class);
+		assertQueryEquals("max(5, 10)", null, "max(const(5.0),10.0)", FunctionQuery.class);
+		assertQueryEquals("max(10, 5)", null, "max(const(10.0),5.0)", FunctionQuery.class);
+		assertQueryEquals("log(0)", null, "log(const(0.0))", FunctionQuery.class);
+		assertQueryEquals("sum(10, 5)", null, "sum(const(10.0),const(5.0))", FunctionQuery.class);
 		
 		
 		/*

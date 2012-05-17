@@ -1,6 +1,7 @@
 package org.apache.lucene.queryParser.aqp.builders;
 
 import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.aqp.NestedParseException;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
@@ -18,16 +19,15 @@ public class AqpAdslabsFunctionProvider implements
 		ValueSourceParser.addParser("pos", new ValueSourceParser() {
 	      @Override
 	      public ValueSource parse(FunctionQParser fp) throws ParseException {
-	    	  try {
-	    		  return new PositionSearchFunction(
-	    			  fp.parseId(),
-	    			  fp.getString(),
-	    			  fp.parseInt(),
-	    			  fp.parseInt());
-	    	  }
-	    	  catch (Exception e) {
-	    		  throw new ParseException("Wrong function arguments");
-	    	  }
+    		  PositionSearchFunction o = new PositionSearchFunction(
+    			  fp.parseId(),
+    			  fp.getString(),
+    			  fp.parseInt(),
+    			  fp.parseInt());
+    		  if (fp.hasMoreArguments()) {
+    			  throw new NestedParseException("Wrong number of arguments");
+    		  }
+    		  return o;
 	      }
 	    });
 	};
