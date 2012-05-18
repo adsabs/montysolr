@@ -221,6 +221,12 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryNodeException("pos(author, Kurtz, 1, \\-1, 5)");
 		assertQueryNodeException("pos(author, Kurtz, 1)");
 		
+		
+		/*
+		 * 
+		XXX: these work with our provider but should be inside SolrFunctionProvider
+		as they may depend on the req objects
+		 
 		assertQueryEquals("ord(author)", null, "top(ord(author))", FunctionQuery.class);
 		assertQueryEquals("literal(author)", null, "literal(author)", FunctionQuery.class);
 		assertQueryEquals("literal(\"author\")", null, "literal(\"author\")", FunctionQuery.class);
@@ -229,6 +235,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("max(10, 5)", null, "max(const(10.0),5.0)", FunctionQuery.class);
 		assertQueryEquals("log(0)", null, "log(const(0.0))", FunctionQuery.class);
 		assertQueryEquals("sum(10, 5)", null, "sum(const(10.0),const(5.0))", FunctionQuery.class);
+		*/
+		
 		
 		
 		/*

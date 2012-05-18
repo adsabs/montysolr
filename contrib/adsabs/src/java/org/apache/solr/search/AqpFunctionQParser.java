@@ -28,6 +28,8 @@ import org.apache.solr.search.function.ValueSource;
 
 public class AqpFunctionQParser extends FunctionQParser {
 
+	private static final String TAGID = QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID.toLowerCase();
+
 	public AqpFunctionQParser(String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req) {
 		super(qstr, localParams, params, req);
@@ -62,8 +64,8 @@ public class AqpFunctionQParser extends FunctionQParser {
 		
 		// check if there is a query already built inside our node
 		QueryNode node = consume();
-		if (node.containsTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID)) {
-			Query q = (Query) node.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
+		if (node.containsTag(TAGID)) {
+			Query q = (Query) node.getTag(TAGID);
 			if (q instanceof FunctionQuery) {
 				return ((FunctionQuery) q).getValueSource();
 			}
@@ -100,6 +102,8 @@ public class AqpFunctionQParser extends FunctionQParser {
 		}
 		
 		QueryParsing.StrParser p = new QueryParsing.StrParser(input);
+		
+		try {
 		Number num = p.getNumber();
 		
 		if (num instanceof Long) {
@@ -110,6 +114,10 @@ public class AqpFunctionQParser extends FunctionQParser {
 	        // shouldn't happen
 	        return new ConstValueSource(num.floatValue());
 	      }
+		}
+		catch (NumberFormatException e) {
+			return new LiteralValueSource(input);
+		}
 		
 		
 	}
@@ -167,8 +175,8 @@ public class AqpFunctionQParser extends FunctionQParser {
 	public Query parseNestedQuery() throws ParseException {
 	    // check if there is a query already built inside our node
 		QueryNode node = consume();
-		if (node.containsTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID)) {
-			return (Query) node.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
+		if (node.containsTag(TAGID)) {
+			return (Query) node.getTag(TAGID);
 		}
 		
 		throw new ParseException("Nested query was expected, instead we have: " + node.toString());

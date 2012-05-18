@@ -1,6 +1,8 @@
 package org.apache.lucene.queryParser.aqp;
 
 import org.apache.lucene.queryParser.aqp.builders.AqpAdslabsFunctionProvider;
+import org.apache.lucene.queryParser.aqp.builders.AqpAdslabsSubSueryProvider;
+import org.apache.lucene.queryParser.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryParser.aqp.config.AqpAdslabsLoggingHandler;
 import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
 import org.apache.lucene.queryParser.aqp.config.AqpFunctionQueryBuilderConfig;
@@ -70,7 +72,8 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		
 		if (solrActive) {
 			addAttribute(AqpSolrRequestHandlerParams.class);
-			getAttribute(AqpSolrRequestHandlerParams.class);
+			getAttribute(AqpFunctionQueryBuilderConfig.class).addProvider(new AqpSolrFunctionProvider());
+			getAttribute(AqpFunctionQueryBuilderConfig.class).addProvider(new AqpAdslabsSubSueryProvider());
 		}
 	}
 }
