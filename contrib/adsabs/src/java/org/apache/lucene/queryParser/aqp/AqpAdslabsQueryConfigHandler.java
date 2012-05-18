@@ -6,7 +6,7 @@ import org.apache.lucene.queryParser.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryParser.aqp.config.AqpAdslabsLoggingHandler;
 import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
 import org.apache.lucene.queryParser.aqp.config.AqpFunctionQueryBuilderConfig;
-import org.apache.lucene.queryParser.aqp.config.AqpSolrRequestHandlerParams;
+import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryParser.aqp.config.DefaultDateRangeField;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.aqp.config.DefaultProximityAttribute;
@@ -60,7 +60,7 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		addAttribute(BoostAttribute.class);
 		addAttribute(DefaultDateRangeField.class);
 		addAttribute(AqpFunctionQueryBuilderConfig.class);
-		
+		addAttribute(AqpRequestParams.class);
 		
 		addAttribute(AqpFeedback.class); // to collect/work with exceptions
 		addAttribute(AqpFeedback.class).registerEventHandler(new AqpAdslabsLoggingHandler());
@@ -71,7 +71,7 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		getAttribute(AqpFunctionQueryBuilderConfig.class).addProvider(new AqpAdslabsFunctionProvider());
 		
 		if (solrActive) {
-			addAttribute(AqpSolrRequestHandlerParams.class);
+			
 			getAttribute(AqpFunctionQueryBuilderConfig.class).addProvider(new AqpSolrFunctionProvider());
 			getAttribute(AqpFunctionQueryBuilderConfig.class).addProvider(new AqpAdslabsSubSueryProvider());
 		}

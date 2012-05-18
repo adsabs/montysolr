@@ -138,9 +138,6 @@ public class AqpFunctionQParser extends FunctionQParser {
 		
 	}
 	
-	public String getString() {
-		return consumeAsString();
-	}
 	
 	public int parseInt() {
 		return Integer.valueOf(consumeAsString());

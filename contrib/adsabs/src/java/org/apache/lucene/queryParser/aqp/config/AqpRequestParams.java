@@ -5,7 +5,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 
-public interface AqpSolrRequestHandlerParams extends Attribute {
+public interface AqpRequestParams extends Attribute {
 	
 	public SolrQueryRequest getRequest();
 	public void setRequest(SolrQueryRequest req);
@@ -18,4 +18,7 @@ public interface AqpSolrRequestHandlerParams extends Attribute {
 
 	public SolrParams getLocalParams();
 	public SolrParams getParams();
+	
+	public String getQueryString();
+	public void setQueryString(String query);
 }

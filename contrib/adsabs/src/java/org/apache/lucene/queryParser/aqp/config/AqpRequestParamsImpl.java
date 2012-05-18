@@ -5,8 +5,8 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 
-public class AqpSolrRequestHandlerParamsImpl extends AttributeImpl 
-	implements AqpSolrRequestHandlerParams {
+public class AqpRequestParamsImpl extends AttributeImpl
+	implements AqpRequestParams {
 	
 	private static final long serialVersionUID = -1243402092650568132L;
 	
@@ -14,6 +14,7 @@ public class AqpSolrRequestHandlerParamsImpl extends AttributeImpl
 	private SolrQueryResponse rsp;
 	private SolrParams localParams;
 	private SolrParams params;
+	private String query;
 	
 	public SolrQueryRequest getRequest() {
 		return req;
@@ -58,6 +59,14 @@ public class AqpSolrRequestHandlerParamsImpl extends AttributeImpl
 
 	public SolrParams getParams() {
 		return params;
+	}
+
+	public String getQueryString() {
+		return query;
+	}
+
+	public void setQueryString(String query) {
+		this.query = query;
 	}
 	
 }

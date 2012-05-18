@@ -2,7 +2,7 @@ package org.apache.solr.search;
 
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.aqp.AqpQueryParser;
-import org.apache.lucene.queryParser.aqp.config.AqpSolrRequestHandlerParams;
+import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
@@ -83,10 +83,13 @@ public class AqpAdsabsQParser extends QParser {
 			"The defaultOperator is set to null");
 		}
 		
-		AqpSolrRequestHandlerParams reqAttr = config.getAttribute(AqpSolrRequestHandlerParams.class);
+		AqpRequestParams reqAttr = config.getAttribute(AqpRequestParams.class);
+		reqAttr.setQueryString(getString());
 		reqAttr.setRequest(req);
 		reqAttr.setLocalParams(localParams);
 		reqAttr.setParams(params);
+		
+		
 	}
 
 	public Query parse() throws ParseException {

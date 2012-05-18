@@ -1,6 +1,6 @@
 package org.apache.lucene.queryParser.aqp.builders;
 
-import org.apache.lucene.queryParser.aqp.config.AqpSolrRequestHandlerParams;
+import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
@@ -22,7 +22,7 @@ public class AqpSolrFunctionProvider implements AqpFunctionQueryBuilderProvider 
 	public QueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
 		throws QueryNodeException {
 		
-		AqpSolrRequestHandlerParams reqAttr = config.getAttribute(AqpSolrRequestHandlerParams.class);
+		AqpRequestParams reqAttr = config.getAttribute(AqpRequestParams.class);
 		
 		SolrQueryRequest req = reqAttr.getRequest();
 		if (req == null)

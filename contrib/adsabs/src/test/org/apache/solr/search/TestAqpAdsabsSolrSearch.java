@@ -3,16 +3,15 @@ package org.apache.solr.search;
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryParser.aqp.AqpQueryParser;
+import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.aqp.AqpTestAbstractCase;
 import org.apache.lucene.queryParser.aqp.TestAqpAdsabs;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.function.FunctionQuery;
 
 
 /**
@@ -68,24 +67,42 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 			
 			
 		};
+		tp.setUp();
 	}
 	
 	public void tearDown() throws Exception {
-		super.tearDown();
 		tp.tearDown();
+		super.tearDown();
 	}
 	
 	
 	public void test() throws Exception {
 		
-		tp.setDebug(true);
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(this OR that)"), "", null);
+		//tp.setDebug(true);
 		
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)"), 
+				"+((all:dog) (all:cat))", BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat)"), 
+				"+(+(all:dog) +(all:cat))", BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(frank bank)"), 
+				"+(((all:frank) (all:bank))~2)", BooleanQuery.class);
+		
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR bat"), 
+				"(+((all:dog) (all:cat))) all:bat", BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat) AND bat"), 
+				"+(+(+(all:dog) +(all:cat))) +all:bat", BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(frank bank) bat"), 
+				"(+(((all:frank) (all:bank))~2)) all:bat", BooleanQuery.class);
+		
+		//  {!raw f=myfield}Foo Bar creates TermQuery(Term("myfield","Foo Bar"))
+		assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=myfield}Foo Bar)"), "myfield:Foo Bar", TermQuery.class);
+		assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=x}\"Foo Bar\")"), "x:\"Foo Bar\"", TermQuery.class);
+		
+		assertQueryParseException(req("qt", "aqp", "f", "myfield", "q", "raw(Foo Bar)"));
 	}
 	
-	public Query assertQueryEquals(SolrQueryRequest req, String result, Class<?> clazz)
-		throws Exception {
-		
+	
+	public QParser getParser(SolrQueryRequest req) throws ParseException, InstantiationException, IllegalAccessException {
 		SolrParams params = req.getParams();
 		String query = params.get(CommonParams.Q);
 		String qt = params.get(CommonParams.QT);
@@ -94,6 +111,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		if (qParser instanceof AqpAdsabsQParser) {
 			((AqpAdsabsQParser) qParser).getParser().setDebug(tp.debugParser);
 		}
+		return qParser;
+		
+	}
+	
+	public Query assertQueryEquals(SolrQueryRequest req, String result, Class<?> clazz)
+		throws Exception {
+		
+		QParser qParser = getParser(req);
 		
 		Query q = qParser.parse();
 		
@@ -110,5 +135,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		
 		return q;
 	}
+	
+	public void assertQueryParseException(SolrQueryRequest req) throws Exception {
+		try {
+			getParser(req).parse();
+		} catch (ParseException expected) {
+			return;
+		}
+		tp.debugFail("ParseException expected, not thrown");
+	} 
 	
 }
