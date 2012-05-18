@@ -26,7 +26,7 @@ public class AqpAdslabsFunctionProvider implements
 	      public ValueSource parse(FunctionQParser fp) throws ParseException {
     		  PositionSearchFunction o = new PositionSearchFunction(
     			  fp.parseId(),
-    			  fp.getString(),
+    			  fp.parseId(),
     			  fp.parseInt(),
     			  fp.parseInt());
     		  if (fp.hasMoreArguments()) {
