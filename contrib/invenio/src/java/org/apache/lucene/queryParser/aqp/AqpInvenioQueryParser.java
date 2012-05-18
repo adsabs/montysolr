@@ -29,6 +29,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpQTRUNCATEDProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpTMODIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpTreeRewriteProcessor;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
+import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryParser.core.nodes.BoostQueryNode;
@@ -102,17 +103,25 @@ import org.apache.lucene.queryParser.standard.processors.WildcardQueryNodeProces
 
 public class AqpInvenioQueryParser extends AqpQueryParser {
 
-	public AqpInvenioQueryParser() throws QueryNodeParseException {
-		super(new InvenioQueryConfigHandler(), new AqpInvenioSyntaxParser()
-				.initializeGrammar("Invenio"),
+	public static AqpInvenioQueryParser init () 
+		throws QueryNodeParseException {
+		return new AqpInvenioQueryParser(new InvenioQueryConfigHandler(), 
+				new AqpInvenioSyntaxParser(), //.initializeGrammar("Invenio"),
 				new InvenioNodeProcessorPipeline(null),
 				new InvenioQueryTreeBuilder());
 	}
 
 	
-	public AqpInvenioQueryParser(String grammarName) throws Exception {
+	public static AqpInvenioQueryParser init(String grammarName) throws Exception {
 		throw new IllegalArgumentException(
-				"Invenio query parser does not use reflection");
+				"Invenio query parser does not support loadable grammars");
+	}
+	
+	public AqpInvenioQueryParser(QueryConfigHandler config,
+			AqpSyntaxParser parser,
+			QueryNodeProcessorPipeline processor,
+			QueryTreeBuilder builder) {
+		super(config, parser, processor, builder);
 	}
 
 	

@@ -56,7 +56,7 @@ import org.apache.lucene.util.LuceneTestCase;
 public class AqpTestAbstractCase extends LuceneTestCase {
 
 	public int originalMaxClauses;
-	protected boolean debugParser = false;
+	public boolean debugParser = false;
 	protected String grammarName = "StandardLuceneGrammar";
 	protected int noFailures = 0;
 
@@ -107,7 +107,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 	}
 
 	public AqpQueryParser getParser() throws Exception {
-		AqpQueryParser qp = new AqpQueryParser(getGrammarName());
+		AqpQueryParser qp = AqpStandardLuceneParser.init(getGrammarName());
 		qp.setDebug(this.debugParser);
 		return qp;
 	}

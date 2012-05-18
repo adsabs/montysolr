@@ -48,6 +48,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.messages.MessageImpl;
 import org.apache.lucene.queryParser.core.QueryNodeException;
+import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
+import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
 import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
@@ -131,11 +133,19 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public static class QPTestParser extends AqpQueryParser {
-    public QPTestParser(Analyzer a) throws Exception {
-      ((QueryNodeProcessorPipeline)getQueryNodeProcessor())
-          .add(new QPTestParserQueryNodeProcessor());
-      this.setAnalyzer(a);
+    public QPTestParser(QueryConfigHandler config, AqpSyntaxParser parser,
+			QueryNodeProcessorPipeline processor, QueryTreeBuilder builder) {
+		super(config, parser, processor, builder);
+		// TODO Auto-generated constructor stub
+	}
 
+	public static AqpQueryParser init(Analyzer a) throws Exception {
+    	AqpQueryParser p = AqpStandardLuceneParser.init();
+    	
+      ((QueryNodeProcessorPipeline)p.getQueryNodeProcessor())
+          .add(new QPTestParserQueryNodeProcessor());
+      p.setAnalyzer(a);
+      return p;
     }
 
     private static class QPTestParserQueryNodeProcessor extends
@@ -186,7 +196,9 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
       
 
   public void testConstantScoreAutoRewrite() throws Exception {
-    AqpQueryParser qp = new AqpQueryParser(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    AqpQueryParser qp = AqpStandardLuceneParser.init(getGrammarName());
+    qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    
     Query q = qp.parse("foo*bar", "field");
     assertTrue(q instanceof WildcardQuery);
     assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
@@ -820,7 +832,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     q = qp.parse("\"on\"^1.0", "field");
     assertNotNull(q);
 
-    AqpQueryParser qp2 = new AqpQueryParser();
+    AqpQueryParser qp2 = AqpStandardLuceneParser.init();
     qp2.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
 
     q = qp2.parse("the^3", "field");
@@ -848,7 +860,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testCustomQueryParserWildcard() throws Exception {
     try {
-      new QPTestParser(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse("a?t", "contents");
+      QPTestParser.init(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse("a?t", "contents");
       fail("Wildcard queries should not be allowed");
     } catch (QueryNodeException expected) {
       // expected exception
@@ -857,7 +869,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testCustomQueryParserFuzzy() throws Exception {
     try {
-      new QPTestParser(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse("xunit~", "contents");
+      QPTestParser.init(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse("xunit~", "contents");
       fail("Fuzzy queries should not be allowed");
     } catch (QueryNodeException expected) {
       // expected exception
@@ -1021,7 +1033,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     IndexReader r = IndexReader.open(w, true);
     IndexSearcher s = newSearcher(r);
     
-    Query q = new AqpQueryParser(new CannedAnalyzer()).parse("\"a\"", "field");
+    Query q = QPTestParser.init(new CannedAnalyzer()).parse("\"a\"", "field");
     assertTrue(q instanceof MultiPhraseQuery);
     assertEquals(1, s.search(q, 10).totalHits);
     s.close();

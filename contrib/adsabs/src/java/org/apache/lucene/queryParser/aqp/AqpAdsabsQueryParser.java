@@ -15,18 +15,20 @@ import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
 public class AqpAdsabsQueryParser extends AqpQueryParser {
 
 
-
-	public AqpAdsabsQueryParser() throws Exception {
-		new AqpAdsabsQueryParser("ADS");
-	}
-
-	
-	public AqpAdsabsQueryParser(String grammarName) throws Exception {
-		super(new AqpAdslabsQueryConfigHandler(), 
+	public static AqpQueryParser init() throws Exception {
+		return new AqpAdsabsQueryParser(new AqpAdslabsQueryConfigHandler(), 
 				  new ADSSyntaxParser(),
 				  new AqpAdslabsNodeProcessorPipeline(null),
 				  new AqpAdslabsQueryTreeBuilder());
 	}
+
+	public static AqpQueryParser init(String grammarName) throws Exception {
+		return new AqpAdsabsQueryParser(new AqpAdslabsQueryConfigHandler(), 
+				new AqpSyntaxParserLoadableImpl().initializeGrammar(grammarName),
+				  new AqpAdslabsNodeProcessorPipeline(null),
+				  new AqpAdslabsQueryTreeBuilder());
+	}
+	
 
 	public AqpAdsabsQueryParser(
 			QueryConfigHandler config,

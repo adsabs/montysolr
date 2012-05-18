@@ -23,7 +23,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	public AqpQueryParser getParser() throws Exception {
-		AqpQueryParser qp = new AqpAdsabsQueryParser(getGrammarName());
+		AqpQueryParser qp = AqpAdsabsQueryParser.init(getGrammarName());
 		qp.setDebug(this.debugParser);
 		return qp;
 	}

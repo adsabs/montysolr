@@ -38,6 +38,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
 	
 	private Method invokeMainQ;
     private Method getTreeMethod;
+    private Method getNumberOfSyntaxErrorsMethod;
     
     private Lexer lexer;
     private Parser parser;
@@ -90,6 +91,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
         // get the mainQ parser rule & return value 
         invokeMainQ= clsParser.getDeclaredMethod("mainQ");
         getTreeMethod = invokeMainQ.getReturnType().getMethod("getTree");
+        getNumberOfSyntaxErrorsMethod = clsParser.getMethod("getNumberOfSyntaxErrors");
         
         //AqpCommonTree ast = parseTest("hey:joe");
         
@@ -128,6 +130,14 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
 		try {
 			retVal = invokeMainQ.invoke(iParser);
 			astTree = (AqpCommonTree) (getTreeMethod.invoke(retVal));
+			
+            // this prevents parser from recovering, however it can also interfere
+            // with custom error handling (if present inside the grammar)
+			Object errNo = getNumberOfSyntaxErrorsMethod.invoke(iParser);
+			
+        	if (errNo instanceof Integer && ((Integer) errNo > 0)) {
+                throw new Exception("The parser reported a syntax error, antlrqueryparser hates errors!");
+            }
 		} catch (Error e) {
 			Message message = new MessageImpl(
 					QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
@@ -137,7 +147,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
 			ee.setNonLocalizedMessage(message);
 			throw ee;
 		} catch (Exception e) { //TODO: these exceptions are from the code, should not be printed
-			e.printStackTrace();
+			//e.printStackTrace();
 			QueryNodeParseException ee = new QueryNodeParseException(e);
 			throw ee;
 		}

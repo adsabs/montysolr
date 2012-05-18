@@ -23,6 +23,7 @@ import invenio.montysolr.util.MontySolrSetup;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.aqp.AqpInvenioQueryParser;
 import org.apache.lucene.queryParser.aqp.AqpQueryParser;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.search.Query;
@@ -88,7 +89,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 	}
 
 	public AqpQueryParser getParser() throws Exception {
-		AqpQueryParser qp = new AqpQueryParser(getGrammarName());
+		AqpQueryParser qp = AqpInvenioQueryParser.init();
 		qp.setDebug(true);
 		return qp;
 	}

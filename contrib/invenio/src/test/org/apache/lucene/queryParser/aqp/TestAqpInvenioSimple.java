@@ -13,7 +13,7 @@ public class TestAqpInvenioSimple extends AqpTestAbstractCase {
 	}
 	
 	public AqpQueryParser getParser() throws Exception {
-		AqpQueryParser qp = new AqpInvenioQueryParser();
+		AqpQueryParser qp = AqpInvenioQueryParser.init();
 		return qp;
 	}
 

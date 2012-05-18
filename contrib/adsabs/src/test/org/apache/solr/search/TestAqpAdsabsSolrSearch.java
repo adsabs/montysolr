@@ -25,7 +25,7 @@ import org.apache.solr.search.function.FunctionQuery;
  * because they depend on the settings from the other 
  * project (contrib/examples) - on the other hand, I 
  * don't want to duplicate the code/config files. So, 
- * for now I rezigned, and I think of contrib/examples
+ * for now I resigned, and I think of contrib/examples
  * as a dependency for adsabs
  * 
  * contrib/examples should contain only a code for the
@@ -33,12 +33,16 @@ import org.apache.solr.search.function.FunctionQuery;
  * for it here and we'll test it here 
  * (inside contrib/adsabs)
  * 
- * Let's call it pragmatic resignation (non-puritanism)
+ * Let's do it pragmatically (not as code puritans)
  *
  */
-public class TestAqpAdsabsSolrSearch extends AqpTestAbstractCase {
+public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 
 	public String getSchemaFile() {
+		makeResourcesVisible(this.solrConfig.getResourceLoader(),
+	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/conf",
+	    				      MontySolrSetup.getSolrHome() + "/example/solr/conf"
+	    	});
 		return MontySolrSetup.getMontySolrHome()
 				+ "/contrib/examples/adsabs/solr/conf/schema.xml";
 	}
@@ -48,53 +52,34 @@ public class TestAqpAdsabsSolrSearch extends AqpTestAbstractCase {
 				+ "/contrib/examples/adsabs/solr/conf/solrconfig.xml";
 	}
 	
-	private MontySolrAbstractTestCase solr = null;
+	private AqpTestAbstractCase tp = null;
 	
-	public SolrCore core = null; 
 	public void setUp() throws Exception {
 		super.setUp();
 		
 		final TestAqpAdsabsSolrSearch that = this;
 		
-		solr = new MontySolrAbstractTestCase() {
+		tp = new AqpTestAbstractCase() {
 			
-			@Override
-			public String getSolrConfigFile() {
-				return that.getSolrConfigFile();
-			}
-			
-			@Override
-			public String getSchemaFile() {
-				makeResourcesVisible(this.solrConfig.getResourceLoader(),
-			    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/conf",
-			    				      MontySolrSetup.getSolrHome() + "/example/solr/conf"
-			    	});
-				return that.getSchemaFile();
-			}
 			@Override
 			public void setUp() throws Exception {
 				super.setUp();
-				that.core = h.getCore();
 			}
+			
+			
 		};
-		solr.setUp();
 	}
 	
 	public void tearDown() throws Exception {
 		super.tearDown();
-		solr.tearDown();
+		tp.tearDown();
 	}
 	
-	public AqpQueryParser getParser() throws Exception {
-		AqpQueryParser qp = new AqpQueryParser(getGrammarName());
-		qp.setDebug(this.debugParser);
-		return qp;
-	}
 	
 	public void test() throws Exception {
 		
-		setDebug(true);
-		assertQueryEquals(solr.req("qt", "aqp", "q", "edismax(this OR that)"), "", null);
+		tp.setDebug(true);
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(this OR that)"), "", null);
 		
 	}
 	
@@ -107,22 +92,23 @@ public class TestAqpAdsabsSolrSearch extends AqpTestAbstractCase {
 		QParser qParser = QParser.getParser(query, qt, req);
 		
 		if (qParser instanceof AqpAdsabsQParser) {
-			((AqpAdsabsQParser) qParser).getParser().setDebug(this.debugParser);
+			((AqpAdsabsQParser) qParser).getParser().setDebug(tp.debugParser);
 		}
 		
 		Query q = qParser.parse();
 		
 		String s = q.toString("field");
 		if (!s.equals(result)) {
-			debugFail(q.toString(), result, s);
+			tp.debugFail(q.toString(), result, s);
 		}
 		
 		if (clazz != null) {
 			if (!q.getClass().isAssignableFrom(clazz)) {
-				debugFail(q.toString(), result, "Query is not: " + clazz + " but: " + q.getClass());
+				tp.debugFail(q.toString(), result, "Query is not: " + clazz + " but: " + q.getClass());
 			}
 		}
 		
 		return q;
 	}
+	
 }

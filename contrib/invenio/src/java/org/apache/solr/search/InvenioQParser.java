@@ -43,7 +43,7 @@ public class InvenioQParser extends QParser {
 				: new DefaultSolrParams(localParams, params);
 
 		IndexSchema schema = req.getSchema();
-		invParser = new AqpInvenioQueryParser();
+		invParser = AqpInvenioQueryParser.init();
 
 		// this is allowed to be only in the config (no locals possible)
 		QueryConfigHandler config = invParser.getQueryConfigHandler();

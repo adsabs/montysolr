@@ -46,7 +46,7 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   public void testMultiAnalyzer() throws QueryNodeException, Exception {
 	  
 	
-    AqpQueryParser qp = new AqpQueryParser();
+    AqpQueryParser qp = AqpStandardLuceneParser.init();
     qp.setDefaultOperator(Operator.OR);
     qp.setAnalyzer(new MultiAnalyzer());
     
@@ -133,7 +133,7 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   // }
 
   public void testPosIncrementAnalyzer() throws QueryNodeException, Exception {
-    AqpQueryParser qp = new AqpQueryParser();
+    AqpQueryParser qp = AqpStandardLuceneParser.init();
     qp.setDefaultOperator(Operator.OR);
     
     qp.setAnalyzer(new PosIncrementAnalyzer());

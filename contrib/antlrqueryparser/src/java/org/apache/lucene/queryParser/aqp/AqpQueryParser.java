@@ -137,59 +137,23 @@ import org.apache.lucene.search.Query;
 public class AqpQueryParser extends QueryParserHelper {
 	
 	private boolean debugMode = false;
-
-	/**
-	 * Constructs a {@link StandardQueryParser} object. The default grammar used
-	 * is "LuceneGrammar" {@see AqpQueryParser#AqpQueryParser(String)}
-	 * 
-	 * @throws Exception
-	 */
-	public AqpQueryParser() throws Exception {
-		this("StandardLuceneGrammar");
-	}
-
-	public AqpQueryParser(String grammarName) throws QueryNodeParseException {
-		super(new AqpStandardQueryConfigHandler(), 
-				new AqpSyntaxParserLoadableImpl().initializeGrammar(grammarName),
-				new AqpStandardQueryNodeProcessorPipeline(null),
-				new AqpStandardQueryTreeBuilder());
-	}
+	private String syntaxName = null;
 	
-	public AqpQueryParser(
-			QueryConfigHandler aqpStandardQueryConfigHandler,
-			AqpSyntaxParser aqpSyntaxParser,
-			QueryNodeProcessorPipeline aqpQueryNodeProcessorPipeline,
-			QueryTreeBuilder aqpStandardQueryTreeBuilder) {
+	
+	public AqpQueryParser(QueryConfigHandler config, AqpSyntaxParser parser,
+			QueryNodeProcessorPipeline processor, QueryTreeBuilder builder) {
 		
-		super(aqpStandardQueryConfigHandler, 
-				aqpSyntaxParser,
-				aqpQueryNodeProcessorPipeline,
-				aqpStandardQueryTreeBuilder);
+		super(config, parser,processor, builder);
+		syntaxName = parser.getClass().getName();
 	}
 	
 
-	/**
-	 * Constructs a {@link StandardQueryParser} object and sets an
-	 * {@link Analyzer} to it. The same as:
-	 * 
-	 * <ul>
-	 * StandardQueryParser qp = new StandardQueryParser();
-	 * qp.getQueryConfigHandler().setAnalyzer(analyzer);
-	 * </ul>
-	 * 
-	 * @param analyzer
-	 *            the analyzer to be used by this query parser helper
-	 * @throws Exception
-	 */
-	public AqpQueryParser(Analyzer analyzer) throws Exception {
-		this();
-		this.setAnalyzer(analyzer);
-	}
 
 
 	@Override
 	public String toString() {
 		return "<AqpQueryParser config=\"" + this.getQueryConfigHandler()
+				+ "\" grammar=\"" + syntaxName
 				+ "\"/>";
 	}
 

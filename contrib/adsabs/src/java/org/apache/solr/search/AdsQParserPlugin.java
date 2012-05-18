@@ -6,10 +6,7 @@ import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.core.PluginInfo;
-import org.apache.solr.core.SolrConfig;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.schema.IndexSchema;
 
 /**
  * Parse query that is made of the solr fields as well as Invenio query syntax,
@@ -52,7 +49,7 @@ public class AdsQParserPlugin extends QParserPlugin {
 		try {
 			// TODO: optimization -- keep the instance of the parser 
 			// and instantiate only AqpAdsabsQParser
-			AqpAdsabsQueryParser parser = new AqpAdsabsQueryParser();
+			AqpQueryParser parser = AqpAdsabsQueryParser.init();
 			return new AqpAdsabsQParser(parser, qstr, localParams, params, req);
 		} catch (QueryNodeParseException e) {
 			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, e.getLocalizedMessage());
