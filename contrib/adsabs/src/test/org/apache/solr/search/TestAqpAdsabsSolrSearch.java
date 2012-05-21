@@ -78,7 +78,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 	
 	public void test() throws Exception {
 		
-		//tp.setDebug(true);
+//		tp.setDebug(true);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)"), 
 				"+((all:dog) (all:cat))", BooleanQuery.class);
@@ -89,6 +89,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR bat"), 
 				"(+((all:dog) (all:cat))) all:bat", BooleanQuery.class);
+		
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat) AND bat"), 
 				"+(+(+(all:dog) +(all:cat))) +all:bat", BooleanQuery.class);
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(frank bank) bat"), 
@@ -99,6 +100,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=x}\"Foo Bar\")"), "x:\"Foo Bar\"", TermQuery.class);
 		
 		assertQueryParseException(req("qt", "aqp", "f", "myfield", "q", "raw(Foo Bar)"));
+		
+		
+		// if we use the solr analyzer to parse the query, all is configured to remove stopwords 
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but"), 
+				"(+((all:dog) (all:cat))) title:bat", BooleanQuery.class);
+		// but topic is normalized_string with a different analyzer and should retain 'but'
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat title:but"), 
+				"(+((all:dog) (all:cat))) title:bat title:but", BooleanQuery.class);
 	}
 	
 	

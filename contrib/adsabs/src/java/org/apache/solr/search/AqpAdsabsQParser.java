@@ -1,5 +1,6 @@
 package org.apache.solr.search;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.aqp.AqpQueryParser;
 import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
@@ -7,6 +8,7 @@ import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.QueryNodeParseException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
+import org.apache.lucene.queryParser.standard.config.AnalyzerAttribute;
 import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
@@ -16,6 +18,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.SchemaField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,6 +91,10 @@ public class AqpAdsabsQParser extends QParser {
 		reqAttr.setRequest(req);
 		reqAttr.setLocalParams(localParams);
 		reqAttr.setParams(params);
+		
+		
+		// now add the special analyzer that knows to use solr token chains
+		config.getAttribute(AnalyzerAttribute.class).setAnalyzer(req.getSchema().getQueryAnalyzer());
 		
 		
 	}

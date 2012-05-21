@@ -48,7 +48,7 @@ public class AdsQParserPlugin extends QParserPlugin {
 			SolrParams params, SolrQueryRequest req) {
 		try {
 			// TODO: optimization -- keep the instance of the parser 
-			// and instantiate only AqpAdsabsQParser
+			// and instantiate only the syntax parser
 			AqpQueryParser parser = AqpAdsabsQueryParser.init();
 			return new AqpAdsabsQParser(parser, qstr, localParams, params, req);
 		} catch (QueryNodeParseException e) {
