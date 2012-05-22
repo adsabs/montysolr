@@ -65,14 +65,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 				super.setUp();
 			}
 			
+			@Override
+			public void tearDown() throws Exception {
+				super.tearDown();
+			}
+			
 			
 		};
 		tp.setUp();
 	}
 	
 	public void tearDown() throws Exception {
-		tp.tearDown();
 		super.tearDown();
+		
+		tp.tearDown();
+		tp = null;
+		
 	}
 	
 	
@@ -106,8 +114,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but"), 
 				"(+((all:dog) (all:cat))) title:bat", BooleanQuery.class);
 		// but topic is normalized_string with a different analyzer and should retain 'but'
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat title:but"), 
-				"(+((all:dog) (all:cat))) title:bat title:but", BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat OR topic:but"), 
+				"(+((all:dog) (all:cat))) title:bat topic:but", BooleanQuery.class);
 	}
 	
 	

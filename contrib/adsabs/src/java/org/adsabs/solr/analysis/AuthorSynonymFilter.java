@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class AuthorSynonymFilter extends TokenFilter {
+public final class AuthorSynonymFilter extends TokenFilter {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorSynonymFilter.class);
     public static final String TOKEN_TYPE_AUTHOR_CURATED_SYN = "AUTHOR_CURATED_SYN";

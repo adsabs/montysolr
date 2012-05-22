@@ -14,7 +14,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
  * @author jluker
  *
  */
-public class AuthorNormalizeFilter extends TokenFilter {
+public final class AuthorNormalizeFilter extends TokenFilter {
 
 	private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
 

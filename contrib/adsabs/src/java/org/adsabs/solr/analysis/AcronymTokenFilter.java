@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * Checks if the token is an acronym (is present in the HashMap) and 
  * adds the full name after the term (depends on the value of emitBoth)
  */
-public class AcronymTokenFilter extends TokenFilter {
+public final class AcronymTokenFilter extends TokenFilter {
     public static final Logger log = LoggerFactory.getLogger(AcronymTokenFilter.class);
     public static final String TOKEN_TYPE_ACRONYM = "ACRONYM";
     public static final int ACRONYM_MIN_LENGTH = 2;

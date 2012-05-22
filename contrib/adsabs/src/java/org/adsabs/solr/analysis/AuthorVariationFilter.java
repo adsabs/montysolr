@@ -14,7 +14,7 @@ import org.apache.lucene.util.AttributeSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AuthorVariationFilter extends TokenFilter {
+public final class AuthorVariationFilter extends TokenFilter {
 	
     public static final Logger log = LoggerFactory.getLogger(AuthorVariationFilter.class);
     public static final String TOKEN_TYPE_AUTHOR_VARIATION = "AUTHOR_VARIATION";

@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * AuthorAutoSynonymFilter)
  *
  */
-public class AuthorNameVariantsFilter extends TokenFilter {
+public final class AuthorNameVariantsFilter extends TokenFilter {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorNameVariantsFilter.class);
     public static final String TOKEN_TYPE_AUTHOR_AUTO_SYN = "AUTHOR_AUTO_SYN";
