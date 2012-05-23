@@ -62,11 +62,9 @@
 	</target>
 
 	<target name="init" depends="common.init,build-montysolr"/>
-	<target name="compile-test" depends="init" if="contrib.has.tests">
-		<antcall target="common.compile-test" inheritRefs="true" />
+	<target name="compile-test" depends="init,common.compile-test" if="contrib.has.tests">
 	</target>
-	<target name="test" depends="init" if="contrib.has.tests">
-		<antcall target="common.test" inheritRefs="true" />
+	<target name="test" depends="init,common.test" if="contrib.has.tests">
 	</target>
 	<target name="build-artifacts-and-tests" depends="jar, compile-test" />
 
