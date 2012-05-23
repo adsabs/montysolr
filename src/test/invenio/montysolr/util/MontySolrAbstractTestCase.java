@@ -36,7 +36,10 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
 				MontySolrSetup.getMontySolrHome() + "/src/python");
 	}
-
+	
+	// normally we set this to point to default solr/example config
+	// but BlackBox tests should override the method and return only
+	// the solr home
 	public String getSolrHome() {
 		return MontySolrSetup.getSolrHome() + "/example/solr";
 	}

@@ -26,6 +26,10 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		exampleInit();
 	}
 	
+	public String getSolrHome() {
+		return getExampleHome() + "/solr";
+	}
+	
 	public void setUp() throws Exception {
 		
 		if (System.getProperty("blackbox.persist.index") != null) { 
