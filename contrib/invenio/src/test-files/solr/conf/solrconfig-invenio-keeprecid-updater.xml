@@ -309,7 +309,12 @@
   </admin>
 
   <!-- Handler that keeps Invenio in-sync on request -->
-  <requestHandler name="/invenio_update" class="solr.InvenioKeepRecidUpdated" default="false" />
+  <requestHandler name="/invenio_update" class="solr.InvenioKeepRecidUpdated" default="false" >
+    <lst name="defaults">
+        <str name="max_maximport">500</str>
+        <str name="propertiesFile">test.import</str>
+    </lst>
+  </requestHandler>
    
   <requestHandler name="invenio_update.lazy" class="solr.InvenioKeepRecidUpdated" startup="lazy">
     <lst name="defaults">

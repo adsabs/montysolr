@@ -43,6 +43,7 @@ import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.InvenioRequestHandler;
 import org.apache.solr.handler.RequestHandlerBase;
@@ -156,7 +157,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	private volatile String workerMessage = "";
 	private volatile String tokenMessage = "";
 	
-	static final String IKRU_PROPERTIES = "invenio_updater.properties"; // will be put into context
+	static String IKRU_PROPERTIES = "invenio_updater.properties"; // will be put into context
 	static final String LAST_RECID = "last_recid"; // name of the param from url and also what is passed to python
 	static final String LAST_UPDATE = "mod_date"; // name of the param from url and also what is passed to python
 	
@@ -176,13 +177,38 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 
 	
 	private String pythonFunctionName = "get_recids_changes";
-
-
-
-	private int max_maximport = 50000; //TODO: retrieve value of this from the config
+	private int max_maximport = 50000;
 	private int max_batchsize = 50000;
 	
-
+	
+	
+	public void init(NamedList args) {
+		
+		super.init(args);
+		
+		if (args.get("defaults") == null) {
+			return;
+		}
+		
+		NamedList defs = (NamedList) args.get("defaults");
+		
+		if (defs.get("max_maximport") != null) {
+			max_maximport = Integer.valueOf((String) defs.get("max_maximport"));
+		}
+		
+		if (defs.get("max_batchsize") != null) {
+			max_batchsize = Integer.valueOf((String) defs.get("max_batchsize"));
+		}
+		
+		if (defs.get("pythonFunctionName") != null) {
+			pythonFunctionName = (String) defs.get("pythonFunctionName");
+		}
+		
+		if (defs.get("propertiesFile") != null) {
+			IKRU_PROPERTIES = (String) defs.get("propertiesFile");
+		}
+	}
+	
 	
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) 
 		throws IOException, InterruptedException
@@ -596,6 +622,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		File f = getPropertyFile();
 		FileOutputStream out = new FileOutputStream(f);
 		prop.store(out, null);
+		out.close();
 	}
 	
 	

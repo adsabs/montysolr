@@ -106,6 +106,9 @@ def recreate_index(solr_url,
         rsp = req(up_url, idtoken=idtoken, **params)
         now = time.time()
         
+        if 'idtoken' not in rsp:
+            break
+        
         if rsp['idtoken'] != idtoken:
             time.sleep(delay)
             continue

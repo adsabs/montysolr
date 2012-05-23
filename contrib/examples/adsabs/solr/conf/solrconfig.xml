@@ -1558,6 +1558,17 @@
      </lst>
   </requestHandler>
   
+  <requestHandler name="/invenio/update2" class="solr.InvenioKeepRecidUpdated" default="false">
+     <lst name="defaults">
+       <str name="inveniourl">${solr.inveniourl:http://adsx/search}</str>
+       <!-- str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
+       <!--  <str name="inveniourl">http://inspirehep.net/search</str> -->
+       <str name="importurl">/invenio/import2?command=full-import&amp;dirs=</str>
+       <str name="updateurl">/invenio/import2?command=full-import&amp;dirs=</str>
+       <str name="deleteurl">blankrecords</str>
+     </lst>
+  </requestHandler>
+  
   <!--  MontySolr 
         indexing handlers, the waiting-* handlers are
         slighlty customized versions of the standard handlers  
@@ -1570,6 +1581,14 @@
     </lst>
   </requestHandler>
 
+  <requestHandler name="/invenio/import2" class="solr.WaitingDataImportHandler">
+    <lst name="defaults">
+      <str name="config">data-config.xml</str>
+      <bool name="clean">false</bool>
+      <bool name="commit">false</bool>
+    </lst>
+  </requestHandler>
+  
   <!-- MontySolr:
        This component is responsible for returning the citation
        search results (in the html form, as produced by Invenio)

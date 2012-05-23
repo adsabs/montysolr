@@ -427,8 +427,8 @@ lucene.version=${lucene.version}
 	           description="Build separately the Python egg of Solr"/>
     
     <target name="build-contrib" >
-    	<apply executable="ant" parallel="false">
-    	  <arg value="build-all"/>
+    	<apply executable="ant" parallel="false" failonerror="true">
+    	  <arg line="build-all"/>
     	  <arg value="-f"/>
     	  <fileset dir="${common.dir}/contrib">
     	  	<include name="**/anlrqueryparser/build.xml"/>
