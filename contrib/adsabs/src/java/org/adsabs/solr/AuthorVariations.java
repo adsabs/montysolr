@@ -46,11 +46,7 @@ public class AuthorVariations {
 	public static HashSet<String> getNameVariations(String authorString) {
 		
 		HashMap<String,String> parsedAuthor = null;
-		try {
-			parsedAuthor = AuthorUtils.parseAuthor(authorString);
-		} catch (NameParsingException npe) {
-			log.error(npe.getMessage());
-		}
+		parsedAuthor = AuthorUtils.parseAuthor(authorString);
 		
 		HashSet<String> variations = new HashSet<String>();
 		if (parsedAuthor == null) {
@@ -119,11 +115,7 @@ public class AuthorVariations {
 	public static HashSet<String> getSynonymVariations(String authorString) {
 		
 		HashMap<String,String> parsedAuthor = null;
-		try {
-			parsedAuthor = AuthorUtils.parseAuthor(authorString);
-		} catch (NameParsingException npe) {
-			log.error(npe.getMessage());
-		}
+		parsedAuthor = AuthorUtils.parseAuthor(authorString);
 		
 		HashSet<String> variations = new HashSet<String>();
 		if (parsedAuthor == null) {
