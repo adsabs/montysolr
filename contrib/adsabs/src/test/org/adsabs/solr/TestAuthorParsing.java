@@ -469,13 +469,6 @@ public class TestAuthorParsing extends TestCase {
         expected.put("first", "O");
         System.err.println("#########   ERROR - this case is known to fail and no remedy so far!   ########");
         System.err.println("expected: " + expected.toString());
-        try {
-        	System.err.println("actual:" + AuthorUtils.parseAuthor("CYR, O C ST").toString());
-        }
-        catch (NameParsingException e) {
-        	System.err.println("actual:");
-        	e.printStackTrace();
-        }
         //assertEquals(expected, AuthorUtils.parseAuthor("CYR, O C ST"));
 	}
 	

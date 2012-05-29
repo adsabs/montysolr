@@ -117,6 +117,14 @@
         
     </target>
     
-    
+	<target name="process-synonyms" depends="compile">
+		<echo>Processing synonyms...</echo>
+		<java classname="org.adsabs.solr.analysis.ProcessCuratedAuthorSynonyms">
+			<classpath path="${build.dir}/classes/java"/>
+			<classpath refid="additional.classpath"/>
+			<arg value="/proj/ads/abstracts/config/author.syn.new"/>
+			<arg value="/tmp/syn.out"/>
+		</java>
+	</target>
 
 </project>

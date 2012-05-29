@@ -32,11 +32,11 @@ public class AuthorUtils {
 		return a;
 	}
 	
-	public static HashMap<String,String> parseAuthor(String a) throws NameParsingException {
+	public static HashMap<String,String> parseAuthor(String a) {
 		return parseAuthor(a, true);
 	}
 	
-	public static HashMap<String,String> parseAuthor(String a, boolean normalize) throws NameParsingException {
+	public static HashMap<String,String> parseAuthor(String a, boolean normalize) {
 		HashMap<String,String> parsed = new HashMap<String,String>();
 		if (a == null || a.length() == 0) {
 			return parsed;
@@ -49,7 +49,7 @@ public class AuthorUtils {
 		try {
 			p = np.parseName(a);
 		} catch (Exception e) {
-			throw new NameParsingException(e.getCause());
+			throw new RuntimeException(e);
 		}
 		String[] keys = {"title", "first", "middle", "last", "suffix"};
 		for (int i = 0; i < keys.length; i++) {
@@ -280,12 +280,4 @@ public class AuthorUtils {
 		return syn;
 	}
 		
-}
-
-class NameParsingException extends Exception {
-
-  public NameParsingException(Throwable cause)
-  {
-    super(cause);             // call superclass constructor
-  }
 }
