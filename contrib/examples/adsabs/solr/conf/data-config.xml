@@ -69,11 +69,16 @@
         <field column="title"        
             xpath="/collection/record/datafield[@tag='242']/subfield[@code='a']" />
             
-        <!--  the date should be precomputed for us by bib-export -->    
-        <field column="date"        
+        <!--  the date should be precomputed for us by bib-export    
+        <field column="pubdate"        
             xpath="/collection/record/datafield[@tag='260']/subfield[@code='a']" />    
+        -->
         
-        <field column="pages"        
+        <field column="pubdate" 
+            xpath="/collection/record/datafield[@tag='260' and subfield[@code='t']='main-date']/subfield[@code='c']" />
+            
+            
+        <field column="page"        
             xpath="/collection/record/datafield[@tag='300']/subfield[@code='a']" />
             
         
@@ -123,23 +128,33 @@
             
         <field column="collaboration"        
             xpath="/collection/record/datafield[@tag='710']/subfield[@code='t']" />
+
         
         
-        
-        <field column="pub"        
-            xpath="/collection/record/datafield[@tag='773']/subfield[@code='p']" />
-        
-        <field column="year"
-            xpath="/collection/record/datafield[@tag='773']/subfield[@code='y']" />
             
+        <!--  journal info -->
+        <field column="source"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='p']" />
+        <field column="source"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='z']" />    
+        <field column="page"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='c']" />
+        <field column="doi"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='i']" />    
+        <field column="issue"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='n']" />    
+        <field column="volume"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='v']" />
+        <field column="year"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='y']" />    
+                
+        
+
+        <field column="collection_type"        
+            xpath="/collection/record/datafield[@tag='690']/subfield[@code='a']" />
+        
         <field column="collection"        
             xpath="/collection/record/datafield[@tag='980']/subfield[@code='a']" />
-
-        <field column="topic"        
-            xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />
-            
-        <field column="pubdate" 
-            xpath="/collection/record/datafield[@tag='260' and subfield[@code='t']='main-date']/subfield[@code='c']" />
             
         <field column="refereed"
             xpath="/collection/record/datafield[@tag='980' and subfield[@code='a']='REFEREED']/subfield[@code='a']"/>
@@ -155,6 +170,8 @@
             
         <field column="bibgroup"
             xpath="/collection/record/datafield[@tag='980' and subfield[@code='m']='bibgroup']/subfield[@code='a']"/>
+            
+
             
         <!-- field column="entdate" xpath="" / -->
         <!-- field column="bibgroup" xpath="" / -->
