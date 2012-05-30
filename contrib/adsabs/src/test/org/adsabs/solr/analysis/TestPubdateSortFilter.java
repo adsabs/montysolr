@@ -9,7 +9,7 @@ import org.apache.lucene.analysis.WhitespaceTokenizer;
 import org.apache.lucene.util.Version;
 import org.apache.solr.analysis.BaseTokenTestCase;
 
-public class TestPubdateSortFilter extends BaseTokenTestCase {
+public final class TestPubdateSortFilter extends BaseTokenTestCase {
 	
 	  public void testFilter() throws Exception {
 		  	Reader reader = new StringReader("2005-11-00 2010-00-00 1998-01-05");

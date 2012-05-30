@@ -10,25 +10,25 @@ import org.apache.lucene.util.Version;
 import org.apache.solr.analysis.BaseTokenTestCase;
 
 
-public class TestBibstemFacetFilter extends BaseTokenTestCase {
+public final class TestBibstemFacetFilter extends BaseTokenTestCase {
 
 	public void testHasVolume() {
-		this.assertTrue(BibstemFacetFilter.hasVolume("1992ApJ...389..510D"));
-		this.assertTrue(BibstemFacetFilter.hasVolume("1999AJ....118.1131W"));
-		this.assertTrue(BibstemFacetFilter.hasVolume("1993NYASA.688..184M"));
-		this.assertFalse(BibstemFacetFilter.hasVolume("1991abe..conf.1276H"));
-		this.assertFalse(BibstemFacetFilter.hasVolume("1989asme.proc..289C"));
+		assertTrue(BibstemFacetFilter.hasVolume("1992ApJ...389..510D"));
+		assertTrue(BibstemFacetFilter.hasVolume("1999AJ....118.1131W"));
+		assertTrue(BibstemFacetFilter.hasVolume("1993NYASA.688..184M"));
+		assertFalse(BibstemFacetFilter.hasVolume("1991abe..conf.1276H"));
+		assertFalse(BibstemFacetFilter.hasVolume("1989asme.proc..289C"));
 	}
 	
 	public void testIsBibcode() {
-		this.assertTrue(BibstemFacetFilter.isBibcode("1999AJ....118.1131W"));
-		this.assertFalse(BibstemFacetFilter.isBibcode("foo bar"));
-		this.assertFalse(BibstemFacetFilter.isBibcode("1234abe..conf.1276HH"));
+		assertTrue(BibstemFacetFilter.isBibcode("1999AJ....118.1131W"));
+		assertFalse(BibstemFacetFilter.isBibcode("foo bar"));
+		assertFalse(BibstemFacetFilter.isBibcode("1234abe..conf.1276HH"));
 	}
 	
 	public void testExtractBibstem() {
-		this.assertEquals("abe..conf", BibstemFacetFilter.extractBibstem("1234abe..conf.1276H"));
-		this.assertEquals("ApJ", BibstemFacetFilter.extractBibstem("1992ApJ...389..510D"));
+		assertEquals("abe..conf", BibstemFacetFilter.extractBibstem("1234abe..conf.1276H"));
+		assertEquals("ApJ", BibstemFacetFilter.extractBibstem("1992ApJ...389..510D"));
 	}
 	
 	  public void testBibcodeWithVolume() throws Exception {

@@ -8,7 +8,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BibstemFacetFilter extends TokenFilter {
+public final class BibstemFacetFilter extends TokenFilter {
 	
     public static final Logger log = LoggerFactory.getLogger(BibstemFacetFilter.class);
     

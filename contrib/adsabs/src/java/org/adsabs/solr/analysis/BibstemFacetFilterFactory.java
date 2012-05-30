@@ -5,7 +5,6 @@ import org.apache.solr.analysis.BaseTokenFilterFactory;
 
 public class BibstemFacetFilterFactory extends BaseTokenFilterFactory {
 
-	@Override
 	public TokenStream create(TokenStream input) {
 		return new BibstemFacetFilter(input);
 	}
