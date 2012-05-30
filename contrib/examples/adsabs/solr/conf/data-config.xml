@@ -10,7 +10,12 @@
             flatten="false"
             >
         
-        <field column="id" 
+        <!--  the unique id of each record -->
+        <field column="bibcode" 
+            xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
+            
+                        
+        <field column="recid" 
             xpath="/collection/record/controlfield[@tag='001']" />
             
         <!--  0xx fields, accompanying metadata -->
@@ -28,8 +33,6 @@
             xpath="/collection/record/datafield[@tag='041']/subfield[@code='a']" />
                 
             
-        <field column="bibcode" 
-            xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
             
         
         <!--  main descriptive metadata -->
@@ -149,9 +152,29 @@
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='y']" />    
                 
         
+        <field column="instrument"        
+            xpath="/collection/record/datafield[@tag='908']/subfield[@code='a']" />
+            
+        <field column="object"        
+            xpath="/collection/record/datafield[@tag='909']/subfield[@code='a']" />
+                
+        <field column="object"        
+            xpath="/collection/record/datafield[@tag='909']/subfield[@code='a']" />
+        
+        
+        <!--  record date-stamps -->
+        <field column="created"        
+            xpath="/collection/record/datafield[@tag='961']/subfield[@code='x']" />
 
-        <field column="collection_type"        
-            xpath="/collection/record/datafield[@tag='690']/subfield[@code='a']" />
+        <field column="modified"        
+            xpath="/collection/record/datafield[@tag='961']/subfield[@code='c']" />
+        
+        
+            
+        <!--  I still have problem with the schema, in this way the collection
+              will contain everything; besides being slow for indexing, i don't see
+              why the marc record could not have 980 separated into different
+              subfields -->
         
         <field column="collection"        
             xpath="/collection/record/datafield[@tag='980']/subfield[@code='a']" />
@@ -171,8 +194,33 @@
         <field column="bibgroup"
             xpath="/collection/record/datafield[@tag='980' and subfield[@code='m']='bibgroup']/subfield[@code='a']"/>
             
-
+        
+        <!--  this is not a timestamp, but st like a signature of a records extracted
+              from ADS (maybe can be useful for comparing imports) -->
+        <field column="stamp"        
+            xpath="/collection/record/datafield[@tag='995']/subfield[@code='a']" />
             
+        
+        <!--  for indexing, we put all field inside the reference index, and also build a special index for 
+              the individual subfields -->
+        <field column="reference"        
+            xpath="/collection/record/datafield[@tag='999']/subfield[@code='a']" /> <!-- DOI -->    
+        <field column="reference"        
+            xpath="/collection/record/datafield[@tag='999']/subfield[@code='b']" /> <!-- whole reference string -->
+            
+        <field column="ref_doi"        
+            xpath="/collection/record/datafield[@tag='999']/subfield[@code='a']" />
+        <field column="ref_string"        
+            xpath="/collection/record/datafield[@tag='999']/subfield[@code='b']" />
+        <field column="ref_score"        
+            xpath="/collection/record/datafield[@tag='999']/subfield[@code='e']" />
+        <field column="ref_source"        
+            xpath="/collection/record/datafield[@tag='999']/subfield[@code='f']" />
+        <field column="ref_bibcode"        
+            xpath="/collection/record/datafield[@tag='999']/subfield[@code='i']" />
+        <field column="ref_arxivid"        
+            xpath="/collection/record/datafield[@tag='999']/subfield[@code='r']" />    
+        
         <!-- field column="entdate" xpath="" / -->
         <!-- field column="bibgroup" xpath="" / -->
             
