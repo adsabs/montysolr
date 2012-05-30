@@ -1,28 +1,11 @@
 <dataConfig>
-    <script><![CDATA[
-            function pubdate_sort(row) {
-            	var date_string = row.get('pubdate');
-            	row.put('pubdate_sort', date_string.replace('-', ''));
-            	return row
-            }
-            function bibstem(row) {
-            	var bibcode = row.get('bibcode');
-            	row.put('bibstem', bibcode.substr(4,5));
-            	return row;
-            }
-            function year(row) {
-                var pubdate = row.get('pubdate');
-                row.put('year', pubdate.substr(0,4));
-                return row;
-            }
-    ]]></script>
     <dataSource type="AdsDataSource" mongoHost="adszee" mongoPort="27017" jdbcConfig="" />
     <document>
         <entity name="adsabs"
             pk="id"
             url="${dataimporter.request.url}"
             processor="XPathEntityProcessor"
-            transformer="TemplateTransformer,script:year,script:pubdate_sort,script:bibstem,DateFormatTransformer"
+            transformer="TemplateTransformer,DateFormatTransformer"
             forEach="/collection/record"
             flatten="false"
             >
@@ -144,20 +127,34 @@
         
         
         <field column="pub"        
-            xpath="/collection/record/datafield[@tag='773']/subfield" />
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='p']" />
         
+        <field column="year"
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='y']" />
+            
         <field column="collection"        
             xpath="/collection/record/datafield[@tag='980']/subfield[@code='a']" />
-
-        <field column="collection_type"        
-            xpath="/collection/record/datafield[@tag='690']/subfield[@code='a']" />
 
         <field column="topic"        
             xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />
             
-
         <field column="pubdate" 
-            xpath="/collection/record/datafield[@tag='260']/subfield[@code='c']" />
+            xpath="/collection/record/datafield[@tag='260' and subfield[@code='t']='main-date']/subfield[@code='c']" />
+            
+        <field column="refereed"
+            xpath="/collection/record/datafield[@tag='980' and subfield[@code='a']='REFEREED']/subfield[@code='a']"/>
+            
+        <field column="openaccess"
+            xpath="/collection/record/datafield[@tag='980' and subfield[@code='a']='OPENACCESS']/subfield[@code='a']"/>
+            
+        <field column="database"
+            xpath="/collection/record/datafield[@tag='980' and subfield[@code='m']='database']/subfield[@code='a']"/>
+            
+        <field column="preprint"
+            xpath="/collection/record/datafield[@tag='907' and subfield[@code='a']='ARXIV']/subfield[@code='a']"/>
+            
+        <field column="bibgroup"
+            xpath="/collection/record/datafield[@tag='980' and subfield[@code='m']='bibgroup']/subfield[@code='a']"/>
             
         <!-- field column="entdate" xpath="" / -->
         <!-- field column="bibgroup" xpath="" / -->

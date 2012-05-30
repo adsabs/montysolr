@@ -535,7 +535,29 @@
       </analyzer>
     </fieldType>
 
- </types>
+    <!-- TODO: create this filter class
+    <fieldType name="bibstem" class="solr.StrField" sortMissingLast="true" omitNorms="true">
+        <analyzer type="index">
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="org.adsabs.solr.analysis.BibstemFilterFactory"/>
+        </analyzer>
+    </fieldType>
+    -->
+    
+    <fieldType name="bibstem_facet" class="solr.StrField" sortMissingLast="true" omitNorms="true">
+        <analyzer type="index">
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="org.adsabs.solr.analysis.BibstemFacetFilterFactory"/>
+        </analyzer>
+    </fieldType>
+    
+        <fieldType name="pubdate_sort" class="solr.TrieIntField" sortMissingLast="true" omitNorms="true">
+        <analyzer type="index">
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="org.adsabs.solr.analysis.PubdateSortFilterFactory"/>
+        </analyzer>
+    </fieldType>
+</types>
 
 
  <fields>
@@ -568,14 +590,14 @@
    <field name="recid" type="int" indexed="true" stored="true" required="true" />
    <field name="bibcode" type="string" indexed="true" stored="true" required="true" />
    
-   <field name="bibstem" type="string" indexed="true" stored="true" />
-   
+   <!-- field name="bibstem" type="bibstem" indexed="true" stored="true" /-->
+   <field name="bibstem_facet" type="string" indexed="true" stored="true" />
    
    <field name="abs" type="ads_text" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
-   <field name="pub" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="reportnumber" type="string" indexed="true" stored="true" multiValued="true"/>
 
    <field name="year" type="string" stored="true" indexed="true"/>
+   <field name="pub" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="pubdate" type="string" stored="true" indexed="true"/>
    <field name="pubdate_sort" type="int" stored="true" indexed="true"/>
 
@@ -584,14 +606,18 @@
      Some fields are multiValued only because Tika currently may return
      multiple values for them.
    -->
-   <field name="all" type="text" indexed="true" stored="false" multiValued="true"/>
    <field name="title" type="ads_text" indexed="true" stored="true" multiValued="true"/>
-   <field name="collection" type="text" indexed="true" stored="true"/>
-   <field name="collection_type" type="string" indexed="true" stored="true"/>
+   <field name="collection" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
    <field name="author_norm" type="string" indexed="true" stored="false" multiValued="true"/>
-   <field name="aff" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="aff" type="ads_text" indexed="true" stored="true" multiValued="true"/>
    <field name="topic" type="normalized_string" indexed="true" stored="true" multiValued="true"/>
+   
+   <field name="preprint" type="string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="refereed" type="string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="openaccess" type="string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="database" type="string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="bibgroup" type="string" indexed="true" stored="false" omitNorms="true"/>
    
    <!-- MontySolr: needed when InvneioParser is used in maxinv mode -->
    <dynamicField name="*" type="text" multiValued="true" />
@@ -638,13 +664,9 @@
    <copyField source="id" dest="recid"/>
    <copyField source="author" dest="author_facet"/>
    <copyField source="keyword" dest="keyword_facet"/>
-   <copyField source="title" dest="all"/>
-   <copyField source="author" dest="all"/>
-   <copyField source="year" dest="all"/>
-   <copyField source="abs" dest="all"/>
-   <copyField source="bibcode" dest="all"/>
-   <copyField source="pub" dest="all"/>
-   <copyField source="full" dest="all"/>
+   <copyField source="bibcode" dest="bibstem"/>
+   <copyField source="bibcode" dest="bibstem_facet"/>
+   <copyField source="pubdate" dest="pubdate_sort"/>
 
    <!-- Above, multiple source fields are copied to the [text] field.
 	  Another way to map multiple source fields to the same
