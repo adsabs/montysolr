@@ -174,14 +174,20 @@
    <field name="database" type="string" indexed="true" stored="false" omitNorms="true"/>
    <field name="bibgroup" type="string" indexed="true" stored="false" omitNorms="true"/>
    
+   <!--  quick fixes, can be removed -->
+   <field name="author_facet" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="keyword_facet" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="keyword" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="bibstem" type="string" indexed="true" stored="true" multiValued="true" />
+   
    <!-- MontySolr: needed when InvneioParser is used in maxinv mode
         but we don't use InvenioParser so this goes out
-   <dynamicField name="*" type="text" multiValued="true" />
-   
-   //this is just a fake field, we use it to translate invenio query field
-   <dynamicField name="inv_*" type="text" indexed="false" stored="false" multiValued="true"/>
+   <dynamicField name="*" type="text" multiValued="true" />   
     -->
 
+   <!-- this is just a fake field, we use it to translate invenio query field -->
+   <dynamicField name="inv_*" type="text" indexed="false" stored="false" multiValued="true"/>
+   
    <!-- MontySolr: Fields where value is fetched from Mongo text -->
    <field name="full" type="fulltext" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
    <field name="ack" type="fulltext" indexed="true" stored="true" />
