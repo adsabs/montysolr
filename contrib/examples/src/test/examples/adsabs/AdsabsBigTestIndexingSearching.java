@@ -86,12 +86,12 @@ public class AdsabsBigTestIndexingSearching extends MontySolrAbstractTestCase {
 		assertTrue(field.getType().getClass().isAssignableFrom(TrieIntField.class));
 		
 		// check field ID is copied to field RECID
-		List<CopyField> copyFields = schema.getCopyFieldsList(AdsConfig.FIELD_ID);
-		assertTrue(copyFields.size() == 1);
-		CopyField cField = copyFields.get(0);
-		cField.getSource().getName().equals(AdsConfig.FIELD_ID);
-		cField.getDestination().getName().equals(AdsConfig.FIELD_RECID);
-		field = cField.getDestination();
+//		List<CopyField> copyFields = schema.getCopyFieldsList(AdsConfig.FIELD_ID);
+//		assertTrue(copyFields.size() == 1);
+//		CopyField cField = copyFields.get(0);
+//		cField.getSource().getName().equals(AdsConfig.FIELD_ID);
+//		cField.getDestination().getName().equals(AdsConfig.FIELD_RECID);
+//		field = cField.getDestination();
 		
 		
 		

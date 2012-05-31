@@ -67,7 +67,7 @@ public class BlackBoxInvenioIndexing extends BlackAbstractTestCase{
 		
 		
 		embedded.commit(true, true);
-		assertQDirect("/select?q=*:*&fl=id", null,
+		assertQDirect("/select?q=*:*&fl=recid", null,
 			"//*[@numFound='104']");
 		
 		
@@ -114,7 +114,7 @@ public class BlackBoxInvenioIndexing extends BlackAbstractTestCase{
 		
 		
 		embedded.commit(true, true);
-		assertQDirect("/select?q=*:*&fl=id", null,
+		assertQDirect("/select?q=*:*&fl=recid", null,
 			"//*[@numFound='104']");
 		
 	}

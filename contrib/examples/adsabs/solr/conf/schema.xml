@@ -127,25 +127,23 @@
 
     <!--  TODO: since we don't actually need separate bibstem vs. bibstem_facet fields
           maybe rename this to just "facet" and the classes to BibstemFilter(Factory) --> 
-    <fieldType name="bibstem_facet" class="solr.StrField" sortMissingLast="true" omitNorms="true">
+    <fieldType name="bibstem_facet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
         <analyzer type="index">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
             <filter class="org.adsabs.solr.analysis.BibstemFacetFilterFactory"/>
         </analyzer>
     </fieldType>
     
-        <fieldType name="pubdate_sort" class="solr.TrieIntField" sortMissingLast="true" omitNorms="true">
-        <analyzer type="index">
-            <tokenizer class="solr.KeywordTokenizerFactory"/>
-            <filter class="org.adsabs.solr.analysis.PubdateSortFilterFactory"/>
-        </analyzer>
+    <fieldType name="pubdate" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+    <analyzer type="index">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="org.adsabs.solr.analysis.PubdateSortFilterFactory"/>
+    </analyzer>
     </fieldType>
 </types>
 
  <fields>
  
-   <!-- rca: because elevation has 'id' hardcoded, we cannot use recid and elevantion
-        at the same time, so i will use 'id' name -->
    <field name="id" type="string" indexed="true" stored="true" required="true" />
    <field name="recid" type="int" indexed="true" stored="true" required="true" />
    <field name="bibcode" type="string" indexed="true" stored="true" required="true" />
@@ -158,13 +156,21 @@
 
    <field name="year" type="string" stored="true" indexed="true"/>
    <field name="pub" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
-   <field name="pubdate" type="string" stored="true" indexed="true"/>
-   <field name="pubdate_sort" type="pubdate_sort" stored="true" indexed="true"/>
+   
+   <!--  pubdate should be date field - but that requires more work; pubdate_sort cannot have analyzers
+         inside (unless a new class is created), TrieFields do not accept analyzer chains -->
+   <field name="pubdate" type="pubdate" stored="true" indexed="true"/>
+   <field name="pubdate_sort" type="int" stored="true" indexed="true"/>
 
    <field name="title" type="ads_text" indexed="true" stored="true" multiValued="true"/>
    <field name="collection" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
    <field name="author_norm" type="string" indexed="true" stored="false" multiValued="true"/>
+   
+   <!-- tmp fix for markus, should be handled with positional search -->
+   <field name="first_author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
+   <field name="first_author_norm" type="string" indexed="true" stored="false" multiValued="true"/>
+   
    <field name="aff" type="ads_text" indexed="true" stored="true" multiValued="true"/>
    <field name="topic" type="normalized_string" indexed="true" stored="true" multiValued="true"/>
    
@@ -174,19 +180,18 @@
    <field name="database" type="string" indexed="true" stored="false" omitNorms="true"/>
    <field name="bibgroup" type="string" indexed="true" stored="false" omitNorms="true"/>
    
-   <!--  quick fixes, can be removed -->
-   <field name="author_facet" type="string" indexed="true" stored="true" multiValued="true" />
-   <field name="keyword_facet" type="string" indexed="true" stored="true" multiValued="true" />
-   <field name="keyword" type="string" indexed="true" stored="true" multiValued="true" />
-   <field name="bibstem" type="string" indexed="true" stored="true" multiValued="true" />
+   
+   <!--  this is just a fake field (for the moment) -->
+   <field name="all" type="ads_text" indexed="true" stored="false" multiValued="false"/>
+
    
    <!-- MontySolr: needed when InvneioParser is used in maxinv mode
-        but we don't use InvenioParser so this goes out
-   <dynamicField name="*" type="text" multiValued="true" />   
+        but now we don't use InvenioParser in that mode
+        <dynamicField name="*" type="text" multiValued="true" />   
     -->
 
-   <!-- this is just a fake field, we use it to translate invenio query field -->
-   <dynamicField name="inv_*" type="text" indexed="false" stored="false" multiValued="true"/>
+   <!-- this is just a fake field, we use it to recognize (old-style) invenio queries -->
+   <dynamicField name="inv_*" type="ignored" indexed="false" stored="false" multiValued="true"/>
    
    <!-- MontySolr: Fields where value is fetched from Mongo text -->
    <field name="full" type="fulltext" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
@@ -199,7 +204,7 @@
    <field name="indexstamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
    
    <!--  MontySolr: have some dynamic Pythonic fields -->
-<!--   <dynamicField name="*_py" type="textgen_py" indexed="true" stored="false"/> -->
+   <!--   <dynamicField name="*_py" type="textgen_py" indexed="true" stored="false"/> -->
 
    <!-- uncomment the following to ignore any fields that don't already match an existing 
         field name or dynamic field, rather than reporting them as an error. 
@@ -212,14 +217,16 @@
  <uniqueKey>id</uniqueKey>
 
  <!-- field for the QueryParser to use when an explicit fieldname is absent -->
- <defaultSearchField>full</defaultSearchField>
+ <defaultSearchField>all</defaultSearchField>
 
  <!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
  <solrQueryParser defaultOperator="AND"/>
 
    <copyField source="bibcode" dest="bibstem"/>
    <copyField source="bibcode" dest="bibstem_facet"/>
+   
    <copyField source="pubdate" dest="pubdate_sort"/>
+   
    <copyField source="first_author" dest="author"/>
    <copyField source="first_author_norm" dest="author_norm"/>
 

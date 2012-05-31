@@ -67,6 +67,7 @@
         	<compile
                 srcdir="@{parser-dir}"
                 destdir="@{build-dir}">
+        		<exclude name="**/*" />
         		<include name="**/@{grammar-name}Parser.java" />
                 <include name="**/@{grammar-name}Lexer.java" />
                 <include name="**/@{grammar-name}.tokens" />
