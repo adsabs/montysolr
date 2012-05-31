@@ -13,7 +13,6 @@
         <!--  the unique id of each record -->
         <field column="bibcode" 
             xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
-            
                         
         <field column="recid" 
             xpath="/collection/record/controlfield[@tag='001']" />
@@ -27,22 +26,17 @@
             xpath="/collection/record/datafield[@tag='024']/subfield[@code='2']" />
         <field column="identifier" 
             xpath="/collection/record/datafield[@tag='035']/subfield[@code='a']" />
-        <field column="reportnumber"        
-            xpath="/collection/record/datafield[@tag='037']/subfield[@code='a']" />  <!--  used by ADS? -->
         <field column="lang" 
             xpath="/collection/record/datafield[@tag='041']/subfield[@code='a']" />
-                
-            
-            
         
         <!--  main descriptive metadata -->
-        <field column="author"        
+        <field column="first_author"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='a']" />
         <field column="author"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='a']" />
         
         <!--  normalized author names -->
-        <field column="author_norm"        
+        <field column="first_author_norm"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='b']" />
         <field column="author_norm"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='b']" />
@@ -79,10 +73,6 @@
         
         <field column="pubdate" 
             xpath="/collection/record/datafield[@tag='260' and subfield[@code='t']='main-date']/subfield[@code='c']" />
-            
-            
-        <field column="page"        
-            xpath="/collection/record/datafield[@tag='300']/subfield[@code='a']" />
             
         
         <field column="abstract"        
@@ -136,12 +126,12 @@
         
             
         <!--  journal info -->
-        <field column="source"        
+        <field column="pub"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='p']" />
-        <field column="source"        
-            xpath="/collection/record/datafield[@tag='773']/subfield[@code='z']" />    
         <field column="page"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='c']" />
+        <field column="page"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='i']" />
         <field column="doi"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='i']" />    
         <field column="issue"        
@@ -155,9 +145,6 @@
         <field column="instrument"        
             xpath="/collection/record/datafield[@tag='908']/subfield[@code='a']" />
             
-        <field column="object"        
-            xpath="/collection/record/datafield[@tag='909']/subfield[@code='a']" />
-                
         <field column="object"        
             xpath="/collection/record/datafield[@tag='909']/subfield[@code='a']" />
         
