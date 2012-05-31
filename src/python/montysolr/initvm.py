@@ -8,6 +8,18 @@ Created on Jan 13, 2011
 
 import os
 import sys
+
+print sys.stderr.write("""
+###################################################
+MontySolr start (on the Python side):
+sys.executable=%s
+workdir=%s
+PYTHONHOME=%s
+PYTHONPATH=%s
+###################################################
+
+""" % (sys.executable, os.getcwd(), os.getenv('PYTHONHOME'), '\n    '.join(sys.path)))
+
 import lucene
 
 try:
@@ -16,7 +28,7 @@ try:
 except:
     _d = os.path.abspath(os.path.dirname(__file__) + '/../../../build/dist')
     if _d not in sys.path and os.path.exists(_d):
-        sys.stderr.write('Warning: we add the default folder to sys.path:\n')
+        sys.stderr.write('MontySolr Warning (initvm.py): we add the default folder to sys.path:\n')
         sys.stderr.write(_d + '\n')
         sys.path.append(_d)
     import solr_java

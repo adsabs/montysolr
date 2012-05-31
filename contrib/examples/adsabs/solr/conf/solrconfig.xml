@@ -553,7 +553,7 @@
           <str name="q">static firstSearcher warming in solrconfig.xml</str>
         </lst>
         <lst> 
-          <str name="q">{!iq iq.mode=maxinv}anyfield:init-python</str>
+          <str name="q">{!iq iq.mode=maxsolr}inv_field:init-python</str>
         </lst>
       </arr>
     </listener>
