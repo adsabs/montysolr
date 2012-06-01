@@ -167,7 +167,7 @@ def get_astro_changes(message):
         #last_recid = int(Integer.cast_(message.getParam("last_recid")).intValue())
         last_recid = int(str(message.getParam("last_recid")))
         if last_recid == -1:
-            api_calls.dispatch("create_collection_bibrec", "_astro_bibrec", "Articles")
+            api_calls.dispatch("create_collection_bibrec", "_astro_bibrec", "Astronomy")
     message.setParam("table", "_astro_bibrec")
     get_recids_changes(message)
     
