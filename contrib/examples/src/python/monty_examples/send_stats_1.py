@@ -17,7 +17,8 @@ def run(workdir, solrurl, user, passw, ):
    
    os.system('wget -O %s/stats.xml %s/admin/stats.jsp' % (workdir, solrurl))
    
-   cmd = '''%s %s/extract_values.py '//entry/name[contains(string(.),"/invenio/import\\n")]/..//stat' --input ./stats.xml > %s/extracted.txt''' % (sys.executable, ourdir, workdir)
+   cmd = '''%s %s/extract_values.py '//entry/name[contains(string(.),"/invenio/import\\n")]/..//stat' --input %s/stats.xml > %s/extracted.txt''' \
+         % (sys.executable, ourdir, workdir, workdir)
    print cmd
    
    os.system(cmd)
