@@ -65,16 +65,16 @@
     </fieldType>
     
     
-    <fieldType name="page_string" class="solr.TextField">
+    <fieldType name="first_string" class="solr.TextField">
       <analyzer type="index">
         <tokenizer class="solr.PatternTokenizerFactory" pattern=";" group="-1" />
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-| )*([^- ]+)(.*)" replacement="$2" replace="all"/>
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-| )*([^- ,]+)(.*)" replacement="$2" replace="all"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.PatternTokenizerFactory" pattern=";" group="-1" />
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-| )*([^- ]+)(.*)" replacement="$2" replace="all"/>
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-| )*([^- ,]+)(.*)" replacement="$2" replace="all"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
@@ -189,8 +189,8 @@
 
    
    <field name="pub" type="ads_text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
-   <field name="page" type="page_string" indexed="true" stored="true" multiValued="true"/>
-   <field name="year" type="page_string" stored="true" indexed="true"/>
+   <field name="page" type="first_string" indexed="true" stored="true" multiValued="true"/>
+   <field name="year" type="first_string" stored="true" indexed="true"/>
    <field name="issue" type="easy_string" stored="true" indexed="true" multiValued="false"/>
    <field name="volume" type="easy_string" stored="true" indexed="true" multiValued="false"/>
    
@@ -208,6 +208,7 @@
    <!-- tmp fix for markus, should be handled with positional search -->
    <field name="first_author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
    <field name="first_author_norm" type="string" indexed="true" stored="false" multiValued="true"/>
+   <field name="first_author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
    
    <field name="aff" type="ads_text" indexed="true" stored="true" multiValued="true"/>
    <field name="email" type="easy_string" indexed="true" stored="true" multiValued="true"/>
@@ -267,8 +268,7 @@
    
    <copyField source="pubdate" dest="pubdate_sort"/>
    
-   <copyField source="first_author" dest="author"/>
-   <copyField source="first_author_norm" dest="author_norm"/>
+   <copyField source="first_author" dest="first_author_surname"/>
 
  <similarity class="org.adsabs.solr.SweetSpotSimilarityFactory">
     <str name="min">1000</str>

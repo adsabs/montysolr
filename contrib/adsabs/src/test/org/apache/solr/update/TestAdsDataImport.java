@@ -88,6 +88,16 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		System.out.println(direct.request("/select?q=*:*", null).replace("</", "\n</"));
 		//assertQ(req("q", "*:*"), "//*[@numFound='1']");
 		
+		/*
+		 * For the reference resolver, the field which contains only the last
+		 * name of the first author 
+		 */
+		assertQ(req("q", "first_author_surname:cutri"), "//*[@numFound='1']");
+		assertQ(req("q", "first_author_surname:Cutri"), "//*[@numFound='1']");
+		assertQ(req("q", "first_author_surname:\"Cutri,\""), "//*[@numFound='1']");
+		assertQ(req("q", "first_author_surname:\"Cutri,R\""), "//*[@numFound='1']");
+		assertQ(req("q", "first_author_surname:\"CUTRI\""), "//*[@numFound='1']");
+		
 	}
 	
 	
