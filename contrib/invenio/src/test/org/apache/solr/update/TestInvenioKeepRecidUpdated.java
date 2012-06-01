@@ -30,6 +30,7 @@ import invenio.montysolr.util.MontySolrSetup;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.update.BlackBoxKeepRecidUpdated.MyInvenioKeepRecidUpdated;
 import org.junit.BeforeClass;
@@ -70,12 +71,17 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		return MontySolrSetup.getSolrHome() + "/example/solr";
 	}
 	
+	
 
 	
 	public void testImport() throws InterruptedException {
 		
 		
 		SolrCore core = h.getCore();
+		
+		InvenioKeepRecidUpdated lazy = (InvenioKeepRecidUpdated) core.getRequestHandler("invenio_update.mock");
+		assertEquals("get_changed_recids_mock", lazy.getPythonFunctionName());
+		
 		MockInvenioKeepRecidUpdated handler = new MockInvenioKeepRecidUpdated();
 		handler.setPythonFunctionName("get_changed_recids_mock");
 		handler.setName("h-00");

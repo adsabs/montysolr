@@ -313,6 +313,7 @@
     <lst name="defaults">
         <str name="max_maximport">500</str>
         <str name="propertiesFile">test.import</str>
+        
     </lst>
   </requestHandler>
    
@@ -323,6 +324,13 @@
     </lst>
   </requestHandler>
   
+  <requestHandler name="invenio_update.mock" class="solr.InvenioKeepRecidUpdated">
+    <lst name="defaults">
+      <int name="maximport">200</int>
+      <str name="inveniourl">${montysolr.inveniourl:http://insdev01.cern.ch/search}</str>
+      <str name="pythonFunctionName">get_changed_recids_mock</str>
+    </lst>
+  </requestHandler>
   
   <!--  MontySolr indexing handlers, the waiting-* handlers are
       slighlty customized versions of the standard handlers  -->

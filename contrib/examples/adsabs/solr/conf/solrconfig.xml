@@ -1556,6 +1556,7 @@
        <str name="importurl">/invenio/import?command=full-import&amp;dirs=</str>
        <str name="updateurl">/invenio/import?command=full-import&amp;dirs=</str>
        <str name="deleteurl">blankrecords</str>
+       <str name="pythonFunctionName">get_recids_changes</str>
      </lst>
   </requestHandler>
   
@@ -1579,7 +1580,6 @@
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
-      <str name="pythonFunctionName">get_recids_changes</str>
     </lst>
   </requestHandler>
 
