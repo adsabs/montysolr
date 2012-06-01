@@ -21,7 +21,9 @@ def run(workdir, solrurl, user, passw, ):
          % (sys.executable, ourdir, workdir, workdir)
    print cmd
    
-   os.system(cmd)
+   x = os.system(cmd)
+   if x != 0:
+       print 'error, so i am giving up...'
    
    sf = ('@name=Total Documents Processed', '@name=totalTime')
    
