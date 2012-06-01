@@ -23,6 +23,7 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 
 /**
@@ -63,7 +64,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	
 
 	
-	public void testImport() throws InterruptedException {
+	public void testImport() throws Exception {
 		
 		
 		String testDir = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/";
@@ -83,7 +84,9 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		commit("waitFlush", "true", "waitSearcher", "true");
 		
-		//assertQ(req("q", "*:*"), "//*[@numFound='1']");
+		DirectSolrConnection direct = getDirectServer();
+		System.out.println(direct.request("/select?q=*:*", null).replace("</", "\n</"));
+		assertQ(req("q", "*:*"), "//*[@numFound='1']");
 		
 	}
 	

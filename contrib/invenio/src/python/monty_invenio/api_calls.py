@@ -26,7 +26,7 @@ def dispatch(func_name, *args, **kwargs):
     return [tid, out]
 
 
-def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
+def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'):
     """
     Retrieves the sets of records that were added/updated/deleted
     
@@ -43,15 +43,16 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
     updated => bibrec.modification_date >= bibrec.creation_date
     deleted => bibrec.status == DELETED
     """
+    table = dbquery.real_escape_string(table)
     search_op = '>'    
     if not mod_date:
         if last_recid == -1:
-            l = list(dbquery.run_sql("SELECT modification_date FROM bibrec ORDER BY modification_date ASC LIMIT 1"))
+            l = list(dbquery.run_sql("SELECT modification_date FROM `%s` ORDER BY modification_date ASC LIMIT 1" % (table,)))
             mod_date = l[0][0].strftime(format="%Y-%m-%d %H:%M:%S")
             search_op = '>='
         else:
             # let's make sure we have a valid recid (or get the close valid one)
-            l = list(dbquery.run_sql("SELECT id, modification_date FROM bibrec WHERE id >= %s LIMIT 1", (last_recid,)))
+            l = list(dbquery.run_sql("SELECT id, modification_date FROM `" + table + "` WHERE id >= %s LIMIT 1", (last_recid,)))
             if not len(l):
                 return
             last_recid = l[0][0]
@@ -62,8 +63,8 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None):
             #if not mod_date:
             #    return
         
-    modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM bibrec "
-                    "WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
+    modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM `" + table +
+                    "` WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
                     (mod_date, max_recs )))
     
     #sys.stderr.write(str(("SELECT id,modification_date, creation_date FROM bibrec "
@@ -267,6 +268,30 @@ def sort_and_format(hits, kwargs):
 def get_citation_dict(dictname):
     return bcs.get_citation_dict(dictname)
 
+
+def create_collection_bibrec(table_name, coll_name, step_size=10000):
+    if table_name[0] != '_':
+        raise Exception("By convention, temporary tables must begin with '_'. I don't want to give you tools to screw st important")
+    
+    create_stmt = dbquery.run_sql("SHOW CREATE TABLE bibrec")[0][1].replace('bibrec', dbquery.real_escape_string(table_name))
+    dbquery.run_sql("DROP TABLE IF EXISTS `%s`" % dbquery.real_escape_string(table_name))
+    dbquery.run_sql(create_stmt)
+    
+    #now retrieve the collection
+    c = search_engine.get_collection_reclist(coll_name)
+    if len(c) < 0:
+        sys.stderr.write("The collection %s is empty!\n" % coll_name)
+    
+    c = list(c)
+    l = len(c)
+    i = 0
+    sys.stderr.write("Copying bibrec data\n")
+    while i < l:
+        dbquery.run_sql("INSERT INTO `%s` SELECT * FROM `bibrec` WHERE bibrec.id IN (%s)" % 
+                             (dbquery.real_escape_string(table_name), ','.join(map(str, c[i:i+step_size]))))
+        i = i + step_size
+        sys.stderr.write("%s\n" % i)
+    
 
 
 class ReqStringIO(sIO):

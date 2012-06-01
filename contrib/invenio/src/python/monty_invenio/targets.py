@@ -135,6 +135,9 @@ def perform_request_search_ints(message):
 def get_recids_changes(message):
     """Retrieves the recids of the last changed documents"""
     last_recid = None
+    table = 'bibrec'
+    if message.getParam("table"):
+        table = str(message.getParam("table"))
     if message.getParam("last_recid"):
         #last_recid = int(Integer.cast_(message.getParam("last_recid")).intValue())
         last_recid = int(str(message.getParam("last_recid")))
@@ -146,7 +149,8 @@ def get_recids_changes(message):
         max_records = int(Integer.cast_(message.getParam("max_records")).intValue())
     if last_recid and last_recid == -1:
         mod_date = None
-    (wid, results) = api_calls.dispatch("get_recids_changes", last_recid, max_recs=max_records, mod_date=mod_date)
+    (wid, results) = api_calls.dispatch("get_recids_changes", last_recid, max_recs=max_records, 
+                                        mod_date=mod_date, table=table)
     if results:
         data, last_recid, mod_date = results
         out = HashMap().of_(String, JArray_int)
@@ -156,6 +160,17 @@ def get_recids_changes(message):
         message.setParam('mod_date', mod_date)
         message.setParam('last_recid', last_recid)
 
+
+def get_astro_changes(message):
+    """This is a special hack to retrieve only astro papers"""
+    if message.getParam("last_recid"):
+        #last_recid = int(Integer.cast_(message.getParam("last_recid")).intValue())
+        last_recid = int(str(message.getParam("last_recid")))
+        if last_recid == -1:
+            api_calls.dispatch("create_collection_bibrec", "_astro_bibrec", "Articles")
+    message.setParam("table", "_astro_bibrec")
+    get_recids_changes(message)
+    
 
 def get_citation_dict(message):
     '''TODO: unittest'''
@@ -298,6 +313,7 @@ def montysolr_targets():
            'InvenioQuery:perform_request_search_bitset', perform_request_search_bitset,
            'InvenioFormatter:format_search_results', format_search_results,
            'InvenioKeepRecidUpdated:get_recids_changes', get_recids_changes,
+           'InvenioKeepRecidUpdated:get_astro_changes', get_astro_changes,
            'InvenioFormatter:sort_and_format', sort_and_format,
            'Invenio:diagnostic_test', diagnostic_test,
            '*:invenio_search', invenio_search,

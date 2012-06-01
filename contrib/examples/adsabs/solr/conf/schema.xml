@@ -63,7 +63,38 @@
         <filter class="org.adsabs.solr.analysis.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
       </analyzer>
     </fieldType>
-
+    
+    
+    <fieldType name="page_string" class="solr.TextField">
+      <analyzer type="index">
+        <tokenizer class="solr.PatternTokenizerFactory" pattern=";" group="-1" />
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-| )*([^- ]+)(.*)" replacement="$2" replace="all"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.TrimFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.PatternTokenizerFactory" pattern=";" group="-1" />
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-| )*([^- ]+)(.*)" replacement="$2" replace="all"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.TrimFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    
+    <fieldType name="easy_string" class="solr.TextField">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
+    
     <fieldType name="normalized_string" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -144,18 +175,25 @@
 
  <fields>
  
-   <field name="id" type="string" indexed="true" stored="true" required="true" />
+   <field name="id" type="easy_string" indexed="true" stored="true" required="false" />
    <field name="recid" type="int" indexed="true" stored="true" required="true" />
    <field name="bibcode" type="string" indexed="true" stored="true" required="true" />
+   <field name="doi" type="easy_string" indexed="true" stored="true" required="false" />
+   <field name="identifier" type="easy_string" indexed="true" stored="true" required="false" />
    
    <field name="bibstem" type="bibstem_facet" indexed="true" stored="true" />
    <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="true" />
    
    <field name="abstract" type="ads_text" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
-   <field name="reportnumber" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="reportnumber" type="easy_string" indexed="true" stored="true" multiValued="true"/>
 
-   <field name="year" type="string" stored="true" indexed="true"/>
-   <field name="pub" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
+   
+   <field name="pub" type="ads_text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
+   <field name="page" type="page_string" indexed="true" stored="true" multiValued="true"/>
+   <field name="year" type="page_string" stored="true" indexed="true"/>
+   <field name="issue" type="easy_string" stored="true" indexed="true" multiValued="false"/>
+   <field name="volume" type="easy_string" stored="true" indexed="true" multiValued="false"/>
+   
    
    <!--  pubdate should be date field - but that requires more work; pubdate_sort cannot have analyzers
          inside (unless a new class is created), TrieFields do not accept analyzer chains -->
@@ -172,13 +210,15 @@
    <field name="first_author_norm" type="string" indexed="true" stored="false" multiValued="true"/>
    
    <field name="aff" type="ads_text" indexed="true" stored="true" multiValued="true"/>
+   <field name="email" type="easy_string" indexed="true" stored="true" multiValued="true"/>
+   
    <field name="topic" type="normalized_string" indexed="true" stored="true" multiValued="true"/>
    
-   <field name="preprint" type="string" indexed="true" stored="false" omitNorms="true"/>
-   <field name="refereed" type="string" indexed="true" stored="false" omitNorms="true"/>
-   <field name="openaccess" type="string" indexed="true" stored="false" omitNorms="true"/>
-   <field name="database" type="string" indexed="true" stored="false" omitNorms="true"/>
-   <field name="bibgroup" type="string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="preprint" type="easy_string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="refereed" type="easy_string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="openaccess" type="easy_string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="database" type="easy_string" indexed="true" stored="false" omitNorms="true"/>
+   <field name="bibgroup" type="easy_string" indexed="true" stored="false" omitNorms="true"/>
    
    
    <!--  this is just a fake field (for the moment) -->
@@ -214,7 +254,7 @@
    
  </fields>
 
- <uniqueKey>id</uniqueKey>
+ <uniqueKey>bibcode</uniqueKey>
 
  <!-- field for the QueryParser to use when an explicit fieldname is absent -->
  <defaultSearchField>all</defaultSearchField>

@@ -153,13 +153,16 @@ def wipeout_record(message):
         
 def montysolr_targets():
     return make_targets("MyInvenioKeepRecidUpdated:get_recids_changes", targets.get_recids_changes, # register for the Java unittest
+                        get_astro_changes=targets.get_astro_changes,
                         change_records=change_records,
                         reset_records=reset_records,
                         add_records=add_records,
                         create_delete=create_delete,
                         wipeout_record=wipeout_record,
                         create_record=create_record,
-                        delete_record=delete_record)
+                        delete_record=delete_record,
+                        
+                        )
 
 
 
