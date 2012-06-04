@@ -14,6 +14,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpFIELDProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFUZZYProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpGroupQueryOptimizerProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpLowercaseExpandedTermsQueryNodeProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpNullDefaultFieldProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpOptimizationProcessor;
@@ -94,7 +95,8 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpNullDefaultFieldProcessor());
 		add(new FuzzyQueryNodeProcessor());
 		add(new MatchAllDocsQueryNodeProcessor());
-		add(new LowercaseExpandedTermsQueryNodeProcessor());
+		
+		add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
 		add(new ParametricRangeQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());
 		

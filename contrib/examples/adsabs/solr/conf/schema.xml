@@ -163,8 +163,9 @@
             <tokenizer class="solr.KeywordTokenizerFactory"/>
             <filter class="org.adsabs.solr.analysis.BibstemFacetFilterFactory"/>
         </analyzer>
-        <analyzer type="query">
+        <analyzer type="query"> 
             <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <!-- note: do not use BibstemFFF in the query phase, we cannot assume the input has certain form -->
         </analyzer>
     </fieldType>
     

@@ -53,7 +53,11 @@ public class AqpAdsabsQParser extends QParser {
 		
 		
 		QueryConfigHandler config = qParser.getQueryConfigHandler();
+		
+		
 		AdsConfigHandler extra = (AdsConfigHandler) req.getCore().getRequestHandler(adsConfigName);
+		
+		
 		if (extra == null) {
 			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
 				"Configuration error, ads-config resource missing");
@@ -96,6 +100,17 @@ public class AqpAdsabsQParser extends QParser {
 		// now add the special analyzer that knows to use solr token chains
 		config.getAttribute(AnalyzerAttribute.class).setAnalyzer(req.getSchema().getQueryAnalyzer());
 		
+		if (params.getBool("debugQuery", false) != false) {
+			try {
+				qParser.setDebug(true);
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 	}
 

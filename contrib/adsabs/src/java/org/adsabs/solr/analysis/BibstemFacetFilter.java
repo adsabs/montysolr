@@ -45,8 +45,7 @@ public final class BibstemFacetFilter extends TokenFilter {
         }
 		String origTerm = termAtt.toString();
 		if (!isBibcode(origTerm)) {
-			log.error("Input was not a bibcode!: " + origTerm);
-			return false;
+			throw new IOException("Input was not a bibcode!: " + origTerm);
 		}
 		
 		String bibstem = extractBibstem(origTerm);
