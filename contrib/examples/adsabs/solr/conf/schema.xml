@@ -163,6 +163,9 @@
             <tokenizer class="solr.KeywordTokenizerFactory"/>
             <filter class="org.adsabs.solr.analysis.BibstemFacetFilterFactory"/>
         </analyzer>
+        <analyzer type="query">
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+        </analyzer>
     </fieldType>
     
     <fieldType name="pubdate" class="solr.TextField" sortMissingLast="true" omitNorms="true">
