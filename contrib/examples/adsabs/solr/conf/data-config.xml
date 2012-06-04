@@ -137,6 +137,8 @@
         <!--  journal info -->
         <field column="pub"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='p']" />
+        <field column="pub_raw"        
+            xpath="/collection/record/datafield[@tag='773']/subfield[@code='z']" />
 
         <field column="page"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='c']" />
@@ -167,25 +169,17 @@
         
         
             
-        <!--  I still have problem with the schema, in this way the collection
-              will contain everything; besides being slow for indexing, i don't see
-              why the marc record could not have 980 separated into different
-              subfields -->
-        
-        <field column="collection"        
-            xpath="/collection/record/datafield[@tag='980']/subfield[@code='a']" />
-            
-        <field column="refereed"
+        <field column="attribute"
             xpath="/collection/record/datafield[@tag='980' and subfield[@code='a']='REFEREED']/subfield[@code='a']"/>
             
-        <field column="openaccess"
+        <field column="attribute"
             xpath="/collection/record/datafield[@tag='980' and subfield[@code='a']='OPENACCESS']/subfield[@code='a']"/>
+            
+        <field column="attribute"
+            xpath="/collection/record/datafield[@tag='907' and subfield[@code='a']='ARXIV']/subfield[@code='a']"/>
             
         <field column="database"
             xpath="/collection/record/datafield[@tag='980' and subfield[@code='m']='database']/subfield[@code='a']"/>
-            
-        <field column="preprint"
-            xpath="/collection/record/datafield[@tag='907' and subfield[@code='a']='ARXIV']/subfield[@code='a']"/>
             
         <field column="bibgroup"
             xpath="/collection/record/datafield[@tag='980' and subfield[@code='m']='bibgroup']/subfield[@code='a']"/>
@@ -200,22 +194,22 @@
         <!--  for indexing, we put all field inside the reference index, and also build a special index for 
               the individual subfields -->
         <field column="reference"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='a']" /> <!-- DOI -->    
+            xpath="/collection/record/datafield[@tag='999' and subfield[@code='e']='1']/subfield[@code='a']" /> <!-- DOI -->    
         <field column="reference"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='b']" /> <!-- whole reference string -->
+            xpath="/collection/record/datafield[@tag='999'and subfield[@code='e']='1']/subfield[@code='b']" /> <!-- whole reference string -->
             
         <field column="ref_doi"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='a']" />
+            xpath="/collection/record/datafield[@tag='999'and subfield[@code='e']='1']/subfield[@code='a']" />
         <field column="ref_string"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='b']" />
+            xpath="/collection/record/datafield[@tag='999'and subfield[@code='e']='1']/subfield[@code='b']" />
         <field column="ref_score"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='e']" />
+            xpath="/collection/record/datafield[@tag='999'and subfield[@code='e']='1']/subfield[@code='e']" />
         <field column="ref_source"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='f']" />
+            xpath="/collection/record/datafield[@tag='999'and subfield[@code='e']='1']/subfield[@code='f']" />
         <field column="ref_bibcode"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='i']" />
+            xpath="/collection/record/datafield[@tag='999'and subfield[@code='e']='1']/subfield[@code='i']" />
         <field column="ref_arxivid"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='r']" />    
+            xpath="/collection/record/datafield[@tag='999'and subfield[@code='e']='1']/subfield[@code='r']" />    
         
         <!-- field column="entdate" xpath="" / -->
         <!-- field column="bibgroup" xpath="" / -->

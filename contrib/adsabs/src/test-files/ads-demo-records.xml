@@ -6,12 +6,17 @@
   <controlfield tag="005">20120430113553.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
+    <subfield code="m">database</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">NONARTICLE</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">CATALOG</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">CfA</subfield>
+    <subfield code="m">bibgroup</subfield>
   </datafield>
   <datafield tag="970" ind1=" " ind2=" ">
     <subfield code="a">2012yCat.2311....0C</subfield>
@@ -27,6 +32,7 @@
     <subfield code="a">Cutri, R. M.</subfield>
     <subfield code="b">Cutri, R</subfield>
     <subfield code="e">regular</subfield>
+    <subfield code="m">rcutri@example.edu</subfield>
   </datafield>
   <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">et al.</subfield>
@@ -82,6 +88,11 @@
   <controlfield tag="005">20120430113552.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
+    <subfield code="m">database</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">CfA</subfield>
+    <subfield code="m">bibgroup</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">NONARTICLE</subfield>
@@ -103,16 +114,19 @@
     <subfield code="a">Mosser, B.</subfield>
     <subfield code="b">Mosser, B</subfield>
     <subfield code="e">regular</subfield>
+    <subfield code="m">bmosser@example.edu</subfield>
   </datafield>
   <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Goupil, M. J.</subfield>
     <subfield code="b">Goupil, M</subfield>
     <subfield code="e">regular</subfield>
+    <subfield code="m">mgoupil@example.edu</subfield>
   </datafield>
   <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Belkacem, K.</subfield>
     <subfield code="b">Belkacem, K</subfield>
     <subfield code="e">regular</subfield>
+    <subfield code="m">kbelkacem@example.edu</subfield>
   </datafield>
   <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Michel, E.</subfield>
@@ -241,6 +255,7 @@
   <controlfield tag="005">20120430113552.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
+    <subfield code="m">database</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">NONARTICLE</subfield>
@@ -262,6 +277,7 @@
     <subfield code="a">Girardi, M.</subfield>
     <subfield code="b">Girardi, M</subfield>
     <subfield code="e">regular</subfield>
+    <subfield code="m">mgirardi@example.edu</subfield>
   </datafield>
   <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Bardelli, S.</subfield>
@@ -340,6 +356,7 @@
   <controlfield tag="005">20120430113552.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
+    <subfield code="m">database</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">NONARTICLE</subfield>
@@ -361,11 +378,13 @@
     <subfield code="a">Tenenbaum, P.</subfield>
     <subfield code="b">Tenenbaum, P</subfield>
     <subfield code="e">regular</subfield>
+    <subfield code="u">Massachusetts Institute of Technology, Kavli Institute for Astrophysics and Space Research, 77 Massachusetts Avenue, Cambridge, MA 02139, USA</subfield>
   </datafield>
   <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Christiansen, J. L.</subfield>
     <subfield code="b">Christiansen, J</subfield>
     <subfield code="e">regular</subfield>
+    <subfield code="u">Astrophysics Science Division, Mail Code 662, NASA Goddard Space Flight Center, Greenbelt, MD 20771, USA</subfield>
   </datafield>
   <datafield tag="700" ind1=" " ind2=" ">
     <subfield code="a">Jenkins, J. M.</subfield>
@@ -484,7 +503,8 @@
   </datafield>
   <datafield tag="773" ind1=" " ind2=" ">
     <subfield code="p"/>
-    <subfield code="v">219</subfield>
+    <subfield code="v">L219</subfield>
+    <subfield code="n">4</subfield>
     <subfield code="c">90024</subfield>
     <subfield code="y">2012</subfield>
     <subfield code="z">VizieR On-line Data Catalog: J/ApJS/199/24.</subfield>
@@ -533,5 +553,55 @@
     <subfield code="9">AST</subfield>
   </datafield>
 </record>
-
+<record>
+  <controlfield tag="001">1427245</controlfield>
+  <controlfield tag="005">20120418071710.0</controlfield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ASTRONOMY</subfield>
+    <subfield code="m">database</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">INPROCEEDINGS</subfield>
+  </datafield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">1955stat.conf..163M</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">1955stat.conf..163M</subfield>
+    <subfield code="2">ADS bibcode</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="z">1954stat.conf..163M</subfield>
+    <subfield code="2">deleted</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Some Observational Results on the Spectra of Late-Type Giant Stars</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">McKellar, Andrew</subfield>
+    <subfield code="b">McKellar, A</subfield>
+    <subfield code="e">regular</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="p">Proceedings of the National Science Foundation conference on Stellar Atmospheres</subfield>
+    <subfield code="c">163</subfield>
+    <subfield code="y">1955</subfield>
+    <subfield code="z">Proceedings of the National Science Foundation conference on Stellar Atmospheres, held at Indiana University, September 30, October 1 and 2, 1954. Edited by Marshal H. Wrubel, 1955., p.163</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">1955-00-00</subfield>
+    <subfield code="t">date-published</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1955stat.conf..163M&amp;link_type=TOC</subfield>
+    <subfield code="y">Table of Contents</subfield>
+  </datafield>
+  <datafield tag="907" ind1=" " ind2=" ">
+    <subfield code="a">ADS</subfield>
+  </datafield>
+  <datafield tag="995" ind1=" " ind2=" ">
+    <subfield code="a">{"abs":[{"p":"/proj/ads/abstracts/ast/text/J55/J55-14936.abs","t":"1298441803"}],"prop":["toc"]}</subfield>
+    <subfield code="9">AST</subfield>
+  </datafield>
+</record>
 </collection>

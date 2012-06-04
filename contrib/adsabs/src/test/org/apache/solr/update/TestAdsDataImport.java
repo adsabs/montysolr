@@ -73,10 +73,12 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		SolrCore core = h.getCore();
 		
+		String url = "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/ads-demo-records.xml";
+		
 		SolrQueryRequest req = req("command", "full-import",
 				"dirs", testDir,
 				"commit", "true",
-				"url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/ads-demo-records.xml"
+				"url", url
 				);
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		
@@ -97,6 +99,29 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "first_author_surname:\"Cutri,\""), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:\"Cutri,R\""), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:\"CUTRI\""), "//*[@numFound='1']");
+		assertQ(req("q", "author_norm:\"tenenbaum, p\""), "//*[@numFound='1']");
+		assertQ(req("q", "author_norm:\"mosser, b\""), "//*[@numFound='1']");
+		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
+		assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
+		assertQ(req("q", "page:2056 AND recid:9106451"), "//*[@numFound='1']");
+		assertQ(req("q", "volume:l219"), "//*[@numFound='1']");
+		assertQ(req("q", "volume:L219"), "//*[@numFound='1']");
+		assertQ(req("q", "issue:4"), "//*[@numFound='1']");
+		assertQ(req("q", "aff:nasa"), "//*[@numFound='1']");
+		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']");
+		assertQ(req("q", "aff:kavli"), "//*[@numFound='1']");
+		assertQ(req("q", "email:rcutri@example.edu"), "//*[@numFound='1']");
+		assertQ(req("q", "bibstem:ycat"), "//*[@numFound='4']");
+		assertQ(req("q", "bibstem:stat.conf"), "//*[@numFound='1']");
+
+		
+		/*
+		 * These aren't working as of yet, possibly due to the data import
+		 * not supporting the xpath syntax being used in data-config.xml for these fields
+		 */
+//		assertQ(req("q", "database:astronomy"), "//*[@numFound='5']");
+//		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
+		
 		
 	}
 	

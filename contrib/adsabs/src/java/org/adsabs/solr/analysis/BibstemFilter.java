@@ -9,14 +9,14 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class BibstemFacetFilter extends TokenFilter {
+public final class BibstemFilter extends TokenFilter {
 	
-    public static final Logger log = LoggerFactory.getLogger(BibstemFacetFilter.class);
+    public static final Logger log = LoggerFactory.getLogger(BibstemFilter.class);
     
     private static Pattern fourDigit = Pattern.compile("^\\d{4}.+"); 
     private static Pattern lastFour = Pattern.compile("^[\\.\\d]+$");
     	
-	protected BibstemFacetFilter(TokenStream input) {
+	protected BibstemFilter(TokenStream input) {
 		super(input);
 	}
 
