@@ -188,6 +188,10 @@
 	        <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
 	        <filter class="solr.LowerCaseFilterFactory"/>
         </analyzer>
+        <analyzer type="query"> 
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <!-- note: do not use BibstemFFF in the query phase, we cannot assume the input has certain form -->
+        </analyzer>
     </fieldType>
     
     <fieldType name="pubdate_sort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
@@ -201,8 +205,16 @@
 
 <fields>
  
-   <field name="recid" type="int" indexed="true" stored="true" required="true" />
-   <field name="bibcode" type="string" indexed="true" stored="true" required="true" />
+   <!-- 
+    The uniqueKey index must be implemented using StrField therefore we cannot use bibcode (and have
+    it lowercased). And for the same reasons, we cannot have recid to be int. We are getting an 
+    error:
+    
+    QueryElevationComponent requires the schema to have a uniqueKeyField implemented using StrField
+   
+    -->
+   <field name="recid" type="string" indexed="true" stored="true" required="true" />
+   <field name="bibcode" type="normalized_string" indexed="true" stored="true" required="true" />
    <field name="doi" type="normalized_string" indexed="true" stored="true" required="false" multiValued="true"/>
    <field name="identifier" type="normalized_string" indexed="true" stored="true" required="false" multiValued="true"/>
    
@@ -236,6 +248,7 @@
    <field name="first_author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
    <field name="first_author_norm" type="normalized_string" indexed="true" stored="true" multiValued="true"/>
    <field name="first_author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
+   <field name="author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
    
    <field name="aff" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
    <field name="email" type="first_string" indexed="true" stored="true" multiValued="true"/>
@@ -282,7 +295,7 @@
    
  </fields>
 
- <uniqueKey>bibcode</uniqueKey>
+ <uniqueKey>recid</uniqueKey>
 
  <!-- field for the QueryParser to use when an explicit fieldname is absent -->
  <defaultSearchField>all</defaultSearchField>
@@ -302,6 +315,7 @@
    <copyField source="author_norm" dest="author_facet"/>
    
    <copyField source="pub" dest="pub_raw"/>
+   <copyField source="author" dest="author_surname"/>
 
  <similarity class="org.adsabs.solr.SweetSpotSimilarityFactory">
     <str name="min">1000</str>

@@ -84,6 +84,15 @@
   </datafield>
 </record>
 <record>
+  <controlfield tag="001">02</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2012yCat..35a09143M</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Bibcode without the volume info inside</subfield>
+  </datafield>
+</record>
+<record>
   <controlfield tag="001">9106442</controlfield>
   <controlfield tag="005">20120430113552.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">

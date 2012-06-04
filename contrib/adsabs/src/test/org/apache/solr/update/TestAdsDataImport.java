@@ -19,6 +19,9 @@ package org.apache.solr.update;
 
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
+
+import org.adsabs.mongodb.MongoConnection;
+import org.apache.lucene.queryParser.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
@@ -63,6 +66,10 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	}
 	
 
+	public void tearDown() throws Exception {
+		MongoConnection.INSTANCE.close();
+		super.tearDown();
+	}
 	
 	public void testImport() throws Exception {
 		
@@ -87,13 +94,13 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		commit("waitFlush", "true", "waitSearcher", "true");
 		
 		DirectSolrConnection direct = getDirectServer();
-		System.out.println(direct.request("/select?q=*:*", null).replace("</", "\n</"));
-		//assertQ(req("q", "*:*"), "//*[@numFound='1']");
+		
 		
 		/*
 		 * For the reference resolver, the field which contains only the last
 		 * name of the first author 
 		 */
+		
 		assertQ(req("q", "first_author_surname:cutri"), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:Cutri"), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:\"Cutri,\""), "//*[@numFound='1']");
@@ -123,6 +130,44 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 //		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
 		
 		
+		/*
+		 * Bibcodes
+		 */
+		
+		assertQ(req("q", "bibcode:2012yCat..35409143M"), "//*[@numFound='1']");
+		assertQ(req("q", "bibcode:2012ycat..35409143m"), "//*[@numFound='1']");
+		assertQ(req("q", "bibcode:2012YCAT..35409143M"), "//*[@numFound='1']");
+		assertQ(req("q", "bibcode:2012YCAT..*", "debugQuery", "true"), "//*[@numFound='4']");
+		assertQ(req("q", "bibcode:201?YCAT..35409143M"), "//*[@numFound='1']");
+		assertQ(req("q", "bibcode:*YCAT..35409143M"), "//*[@numFound='1']");
+		
+		
+		/*
+		 * Bibstem is derived from bibcode, it is either the bibcode[4:9] OR
+		 * bibcode[4:13] when the volume information is NOT present
+		 * 
+		 * So this bibcode: 2012yCat..35a09143M
+		 * has bibstem:     yCat..35a
+		 * 
+		 * But this bicode: 2012yCat..35009143M
+		 * has bibstem:     yCat
+		 * 
+		 * Bibstem is case sensitive (at least for now)
+		 * 
+		 * However! This also means that search for bibstem:yCat
+		 * will not find the first record (!!)
+		 * 
+		 */
+		assertQ(req("q", "bibstem:YCAT"), "//*[@numFound='0']");
+		assertQ(req("q", "bibstem:yCat"), "//*[@numFound='4']");
+		assertQ(req("q", "bibstem:yCat..35a"), "//*[@numFound='1']");
+		
+		
+		// this works because we use the solr analyzer when available
+		// (not the default action which is to lowercase wildcards)
+		assertQ(req("q", "bibstem:yCat..*", "debugQuery", "true"), "//*[@numFound='1']");
+		
+		//System.out.println(direct.request("/select?q=*:*&fl=bibcode,recid,title", null).replace("</", "\n</"));
 	}
 	
 	
