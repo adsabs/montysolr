@@ -110,16 +110,29 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "author_norm:\"mosser, b\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
+		
+		
 		assertQ(req("q", "page:2056 AND recid:9106451"), "//*[@numFound='1']");
+		assertQ(req("q", "page:2056-2059 AND recid:9106451"), "//*[@numFound='1']");
+		assertQ(req("q", "page:a056"), "//*[@numFound='1']");
+		assertQ(req("q", "page:a056-"), "//*[@numFound='1']");
+		assertQ(req("q", "page:a056-2059 AND recid:2"), "//*[@numFound='1']");
+		
 		assertQ(req("q", "volume:l219"), "//*[@numFound='1']");
 		assertQ(req("q", "volume:L219"), "//*[@numFound='1']");
 		assertQ(req("q", "issue:4"), "//*[@numFound='1']");
 		assertQ(req("q", "aff:nasa"), "//*[@numFound='1']");
 		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']");
 		assertQ(req("q", "aff:kavli"), "//*[@numFound='1']");
+		
+		
+		/*
+		 * email
+		 */
 		assertQ(req("q", "email:rcutri@example.edu"), "//*[@numFound='1']");
-		assertQ(req("q", "bibstem:ycat"), "//*[@numFound='4']");
-		assertQ(req("q", "bibstem:stat.conf"), "//*[@numFound='1']");
+		assertQ(req("q", "email:rCutri@example.edu"), "//*[@numFound='1']");
+		assertQ(req("q", "email:rcutri@example*"), "//*[@numFound='1']");
+		
 
 		
 		/*
@@ -137,7 +150,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "bibcode:2012yCat..35409143M"), "//*[@numFound='1']");
 		assertQ(req("q", "bibcode:2012ycat..35409143m"), "//*[@numFound='1']");
 		assertQ(req("q", "bibcode:2012YCAT..35409143M"), "//*[@numFound='1']");
-		assertQ(req("q", "bibcode:2012YCAT..*", "debugQuery", "true"), "//*[@numFound='4']");
+		assertQ(req("q", "bibcode:2012YCAT..*"), "//*[@numFound='4']");
 		assertQ(req("q", "bibcode:201?YCAT..35409143M"), "//*[@numFound='1']");
 		assertQ(req("q", "bibcode:*YCAT..35409143M"), "//*[@numFound='1']");
 		
@@ -152,20 +165,24 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		 * But this bicode: 2012yCat..35009143M
 		 * has bibstem:     yCat
 		 * 
-		 * Bibstem is case sensitive (at least for now)
-		 * 
-		 * However! This also means that search for bibstem:yCat
-		 * will not find the first record (!!)
+		 * Bibstem is not case sensitive (at least for now, so the above values
+		 * are lowercased)
 		 * 
 		 */
-		assertQ(req("q", "bibstem:YCAT"), "//*[@numFound='0']");
+		assertQ(req("q", "bibstem:YCAT"), "//*[@numFound='4']");
 		assertQ(req("q", "bibstem:yCat"), "//*[@numFound='4']");
 		assertQ(req("q", "bibstem:yCat..35a"), "//*[@numFound='1']");
+		assertQ(req("q", "bibstem:ycat"), "//*[@numFound='4']");
 		
 		
 		// this works because we use the solr analyzer when available
 		// (not the default action which is to lowercase wildcards)
-		assertQ(req("q", "bibstem:yCat..*", "debugQuery", "true"), "//*[@numFound='1']");
+		assertQ(req("q", "bibstem:yCat..*"), "//*[@numFound='1']");
+		assertQ(req("q", "bibstem:yCat*"), "//*[@numFound='5']");
+		
+		
+		assertQ(req("q", "bibstem:stat.conf"), "//*[@numFound='1']");
+		
 		
 		//System.out.println(direct.request("/select?q=*:*&fl=bibcode,recid,title", null).replace("</", "\n</"));
 	}
