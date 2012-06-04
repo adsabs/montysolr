@@ -212,6 +212,7 @@
    <field name="first_author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
    <field name="first_author_norm" type="string" indexed="true" stored="false" multiValued="true"/>
    <field name="first_author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
+   <field name="author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
    
    <field name="aff" type="ads_text" indexed="true" stored="true" multiValued="true"/>
    <field name="email" type="easy_string" indexed="true" stored="true" multiValued="true"/>
@@ -272,6 +273,7 @@
    <copyField source="pubdate" dest="pubdate_sort"/>
    
    <copyField source="first_author" dest="first_author_surname"/>
+   <copyField source="author" dest="author_surname"/>
 
  <similarity class="org.adsabs.solr.SweetSpotSimilarityFactory">
     <str name="min">1000</str>
