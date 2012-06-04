@@ -178,9 +178,16 @@
 
  <fields>
  
-   <field name="id" type="easy_string" indexed="true" stored="true" required="false" />
-   <field name="recid" type="int" indexed="true" stored="true" required="true" />
-   <field name="bibcode" type="string" indexed="true" stored="true" required="true" />
+   <!-- 
+    The uniqueKey index must be implemented using StrField therefore we cannot use bibcode (and have
+    it lowercased). And for the same reasons, we cannot have recid to be int. We are getting an 
+    error:
+    
+    QueryElevationComponent requires the schema to have a uniqueKeyField implemented using StrField
+   
+    -->
+   <field name="recid" type="string" indexed="true" stored="true" required="true" />
+   <field name="bibcode" type="easy_string" indexed="true" stored="true" required="true" />
    <field name="doi" type="easy_string" indexed="true" stored="true" required="false" />
    <field name="identifier" type="easy_string" indexed="true" stored="true" required="false" />
    
@@ -259,7 +266,7 @@
    
  </fields>
 
- <uniqueKey>bibcode</uniqueKey>
+ <uniqueKey>recid</uniqueKey>
 
  <!-- field for the QueryParser to use when an explicit fieldname is absent -->
  <defaultSearchField>all</defaultSearchField>

@@ -19,6 +19,8 @@ package org.apache.solr.update;
 
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
+
+import org.adsabs.mongodb.MongoConnection;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
@@ -63,6 +65,10 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	}
 	
 
+	public void tearDown() throws Exception {
+		MongoConnection.INSTANCE.close();
+		super.tearDown();
+	}
 	
 	public void testImport() throws Exception {
 		
@@ -85,8 +91,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		commit("waitFlush", "true", "waitSearcher", "true");
 		
 		DirectSolrConnection direct = getDirectServer();
-		System.out.println(direct.request("/select?q=*:*", null).replace("</", "\n</"));
-		//assertQ(req("q", "*:*"), "//*[@numFound='1']");
+		
 		
 		/*
 		 * For the reference resolver, the field which contains only the last
@@ -97,6 +102,15 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "first_author_surname:\"Cutri,\""), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:\"Cutri,R\""), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:\"CUTRI\""), "//*[@numFound='1']");
+		
+		/*
+		 * Bibcodes and bistems
+		 */
+		//System.out.println(direct.request("/select?q=*:*&fl=bibcode,recid,title", null).replace("</", "\n</"));
+		assertQ(req("q", "bibcode:2012yCat..35409143M"), "//*[@numFound='1']");
+		assertQ(req("q", "bibcode:2012ycat..35409143m"), "//*[@numFound='1']");
+		assertQ(req("q", "bibcode:2012YCAT..35409143M"), "//*[@numFound='1']");
+		
 		
 	}
 	

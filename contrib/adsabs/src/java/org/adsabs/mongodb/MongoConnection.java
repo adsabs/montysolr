@@ -42,5 +42,11 @@ public enum MongoConnection {
         return m;
     }
     
+    public static void close() {
+    	if (m != null) {
+    		m.close();
+    	}
+    	m = null;
+    }
     
 }
