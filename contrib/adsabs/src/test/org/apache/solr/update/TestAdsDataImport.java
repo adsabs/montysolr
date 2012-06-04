@@ -179,10 +179,35 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		// (not the default action which is to lowercase wildcards)
 		assertQ(req("q", "bibstem:yCat..*"), "//*[@numFound='1']");
 		assertQ(req("q", "bibstem:yCat*"), "//*[@numFound='5']");
-		
-		
 		assertQ(req("q", "bibstem:stat.conf"), "//*[@numFound='1']");
+		assertQ(req("q", "bibstem:STAT.CONF"), "//*[@numFound='1']");
 		
+		/*
+		 * recid
+		 */
+		
+		assertQ(req("q", "recid:2"), "//*[@numFound='1']");
+		assertQ(req("q", "recid:9106442"), "//*[@numFound='1']");
+		assertQ(req("q", "recid:002"), "//*[@numFound='1']");
+		
+		
+		/*
+		 * doi:
+		 * 
+		 * According to the standard, doi can contain almost any utf-8
+		 * char
+		 */
+		
+		assertQ(req("q", "doi:abcds/esdfs.123045"), "//*[@numFound='1']");
+		assertQ(req("q", "doi:doi\\:abcds/esdfs.123045"), "//*[@numFound='1']");
+		//TODO
+		//assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\"", "debugQuery", "true"), "//*[@numFound='1']");
+		//assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
+		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ.123456789\""), "//*[@numFound='1']");
+		assertQ(req("q", "doi:\"doi:žščřďťň.123456789\""), "//*[@numFound='1']");
+		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
+		//TODO (must fix QINDENTIFIER first)
+		//assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\"", "debugQuery", "true"), "//*[@numFound='2']");
 		
 		//System.out.println(direct.request("/select?q=*:*&fl=bibcode,recid,title", null).replace("</", "\n</"));
 	}

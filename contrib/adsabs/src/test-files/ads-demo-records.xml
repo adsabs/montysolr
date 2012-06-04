@@ -4,6 +4,10 @@
 <record>
   <controlfield tag="001">9106451</controlfield>
   <controlfield tag="005">20120430113553.0</controlfield>
+  <datafield tag="024" ind1=" " ind2=" ">
+    <subfield code="a">doi:abcds/esdfs.123045</subfield>
+  </datafield>
+  
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
     <subfield code="m">database</subfield>
@@ -99,8 +103,14 @@
     <subfield code="i">a056-2089</subfield>
     <subfield code="z">VizieR On-line Data Catalog: II/311.  Originally</subfield>
   </datafield>
+  <datafield tag="024" ind1=" " ind2=" ">
+    <subfield code="a">doi:ŽŠČŘĎŤŇ:123456789</subfield>
+  </datafield>
 </record>
 <record>
+<datafield tag="024" ind1=" " ind2=" ">
+    <subfield code="a">doi:ŽŠČŘĎŤŇ.123456789</subfield>
+  </datafield>
   <controlfield tag="001">9106442</controlfield>
   <controlfield tag="005">20120430113552.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">

@@ -15,7 +15,7 @@
             xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
         
         <!--  the unique id of each record -->                
-        <field column="recid" 
+        <field column="id" 
             xpath="/collection/record/controlfield[@tag='001']" />
             
         <!--  0xx fields, accompanying metadata -->
