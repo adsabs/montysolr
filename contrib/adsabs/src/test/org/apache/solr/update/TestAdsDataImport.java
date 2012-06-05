@@ -140,8 +140,8 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		 * These aren't working as of yet, possibly due to the data import
 		 * not supporting the xpath syntax being used in data-config.xml for these fields
 		 */
-//		assertQ(req("q", "database:astronomy"), "//*[@numFound='5']");
-//		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
+		assertQ(req("q", "database:astronomy"), "//*[@numFound='6']");
+		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
 		
 		
 		/*
@@ -179,7 +179,8 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "bibstem:yCat..35*"), "//*[@numFound='3']");
 		assertQ(req("q", "bibstem:yCat..35?"), "//*[@numFound='3']");
 		
-		
+		assertQ(req("q", "bibstem:apj.."), "//*[@numFound='1']");
+
 		assertQ(req("q", "bibstem:yCat..*"), "//*[@numFound='4']");
 		assertQ(req("q", "bibstem:yCat.*"), "//*[@numFound='5']");
 		assertQ(req("q", "bibstem:yCat*"), "//*[@numFound='5']");

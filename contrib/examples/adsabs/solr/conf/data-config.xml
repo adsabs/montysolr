@@ -170,20 +170,14 @@
         
         
             
-        <field column="attribute"
-            xpath="/collection/record/datafield[@tag='980' and subfield[@code='a']='REFEREED']/subfield[@code='a']"/>
-            
-        <field column="attribute"
-            xpath="/collection/record/datafield[@tag='980' and subfield[@code='a']='OPENACCESS']/subfield[@code='a']"/>
-            
-        <field column="attribute"
-            xpath="/collection/record/datafield[@tag='907' and subfield[@code='a']='ARXIV']/subfield[@code='a']"/>
+        <field column="property"
+            xpath="/collection/record/datafield[@tag='980']/subfield[@code='p']"/>
             
         <field column="database"
-            xpath="/collection/record/datafield[@tag='980' and subfield[@code='m']='database']/subfield[@code='a']"/>
+            xpath="/collection/record/datafield[@tag='980']/subfield[@code='a']"/>
             
         <field column="bibgroup"
-            xpath="/collection/record/datafield[@tag='980' and subfield[@code='m']='bibgroup']/subfield[@code='a']"/>
+            xpath="/collection/record/datafield[@tag='980']/subfield[@code='b']"/>
             
         
         <!--  this is not a timestamp, but st like a signature of a records extracted

@@ -10,17 +10,15 @@
   
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
-    <subfield code="m">database</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">NONARTICLE</subfield>
+    <subfield code="p">NONARTICLE</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">CATALOG</subfield>
+    <subfield code="p">CATALOG</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">CfA</subfield>
-    <subfield code="m">bibgroup</subfield>
+    <subfield code="b">CfA</subfield>
   </datafield>
   <datafield tag="970" ind1=" " ind2=" ">
     <subfield code="a">2012yCat.2311....0C</subfield>
@@ -115,17 +113,15 @@
   <controlfield tag="005">20120430113552.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
-    <subfield code="m">database</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">CfA</subfield>
-    <subfield code="m">bibgroup</subfield>
+    <subfield code="b">CfA</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">NONARTICLE</subfield>
+    <subfield code="p">NONARTICLE</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">CATALOG</subfield>
+    <subfield code="p">CATALOG</subfield>
   </datafield>
   <datafield tag="970" ind1=" " ind2=" ">
     <subfield code="a">2012yCat..35409143M</subfield>
@@ -282,13 +278,12 @@
   <controlfield tag="005">20120430113552.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
-    <subfield code="m">database</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">NONARTICLE</subfield>
+    <subfield code="p">NONARTICLE</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">CATALOG</subfield>
+    <subfield code="p">CATALOG</subfield>
   </datafield>
   <datafield tag="970" ind1=" " ind2=" ">
     <subfield code="a">2012yCat..35369089G</subfield>
@@ -383,13 +378,12 @@
   <controlfield tag="005">20120430113552.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
-    <subfield code="m">database</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">NONARTICLE</subfield>
+    <subfield code="p">NONARTICLE</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">CATALOG</subfield>
+    <subfield code="p">CATALOG</subfield>
   </datafield>
   <datafield tag="970" ind1=" " ind2=" ">
     <subfield code="a">2012yCat..21990024T</subfield>
@@ -585,10 +579,9 @@
   <controlfield tag="005">20120418071710.0</controlfield>
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
-    <subfield code="m">database</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
-    <subfield code="a">INPROCEEDINGS</subfield>
+    <subfield code="p">INPROCEEDINGS</subfield>
   </datafield>
   <datafield tag="970" ind1=" " ind2=" ">
     <subfield code="a">1955stat.conf..163M</subfield>
@@ -628,6 +621,94 @@
   </datafield>
   <datafield tag="995" ind1=" " ind2=" ">
     <subfield code="a">{"abs":[{"p":"/proj/ads/abstracts/ast/text/J55/J55-14936.abs","t":"1298441803"}],"prop":["toc"]}</subfield>
+    <subfield code="9">AST</subfield>
+  </datafield>
+</record>
+<record>
+  <controlfield tag="001">3041003</controlfield>
+  <controlfield tag="005">20120418153436.0</controlfield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ASTRONOMY</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">OPENACCESS</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">REFEREED</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">1981ApJ...243..677D</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">1981ApJ...243..677D</subfield>
+    <subfield code="2">ADS bibcode</subfield>
+  </datafield>
+  <datafield tag="024" ind1="7" ind2=" ">
+    <subfield code="a">10.1086/158633</subfield>
+    <subfield code="2">DOI</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Erratum - Excitation Mechanisms for the Unidentified Infrared Emission Features</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Dwek, E.</subfield>
+    <subfield code="b">Dwek, E</subfield>
+    <subfield code="e">regular</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Sellgren, K.</subfield>
+    <subfield code="b">Sellgren, K</subfield>
+    <subfield code="e">regular</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Soifer, B. T.</subfield>
+    <subfield code="b">Soifer, B</subfield>
+    <subfield code="e">regular</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Werner, M. W.</subfield>
+    <subfield code="b">Werner, M</subfield>
+    <subfield code="e">regular</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="p">Astrophysical Journal</subfield>
+    <subfield code="v">243</subfield>
+    <subfield code="c">677</subfield>
+    <subfield code="y">1981</subfield>
+    <subfield code="z">Astrophysical Journal, Vol.243, P. 677, 1981</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">1981-01-00</subfield>
+    <subfield code="t">date-published</subfield>
+  </datafield>
+  <datafield tag="591" ind1=" " ind2=" ">
+    <subfield code="a">1980ApJ...238..140D</subfield>
+    <subfield code="c">Main Paper</subfield>
+  </datafield>
+  <datafield tag="591" ind1=" " ind2=" ">
+    <subfield code="a">1981ApJ...243..677D</subfield>
+    <subfield code="c">Erratum</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1981ApJ...243..677D&amp;link_type=GIF</subfield>
+    <subfield code="y">Scanned Article (GIF)</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2="^">
+    <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1981ApJ...243..677D&amp;link_type=ARTICLE</subfield>
+    <subfield code="y">Full Printable Article (PDF/Postscript)</subfield>
+  </datafield>
+  <datafield tag="907" ind1=" " ind2=" ">
+    <subfield code="a">KNUDSEN</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">A&amp;amp;AA ID. AAA029.133.901</subfield>
+    <subfield code="9">ADS</subfield>
+  </datafield>
+  <datafield tag="995" ind1=" " ind2=" ">
+    <subfield code="a">{"abs":[{"p":"/proj/ads/abstracts/ast/text/J81/J81-05387.abs","t":"1321424820"}],"links":{"associated":[{"t":"Main Paper","u":"1980ApJ...238..140D"},{"t":"Erratum","u":"1981ApJ...243..677D"}]},"prop":["article","refereed"]}</subfield>
     <subfield code="9">AST</subfield>
   </datafield>
 </record>
