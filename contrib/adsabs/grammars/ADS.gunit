@@ -9,7 +9,7 @@ mainQ:
 "author:\"huchra, j\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD author (QPHRASE \"huchra, j\")))))"		
 "\"dark matter\" -LHC"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"dark matter\")))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL LHC)))))"		
 "intitle:\"QSO\" 1995-2000"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD intitle (QPHRASE \"QSO\")))) (MODIFIER (TMODIFIER (FIELD (QDATE 1995-2000)))))"		
-"arXiv:1012.5859"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER arXiv:1012.5859)))))"		
+"arXiv:1012.5859"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER arxiv 1012.5859)))))"		
 "10.1086/345794"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL 10.1086/345794)))))"		
 "2003AJ….125..525J"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL 2003AJ….125..525J)))))"		
 "+contact +binaries -eclipsing"	->	"(DEFOP (MODIFIER + (TMODIFIER (FIELD (QNORMAL contact)))) (MODIFIER + (TMODIFIER (FIELD (QNORMAL binaries)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL eclipsing)))))"		
@@ -25,8 +25,8 @@ mainQ:
 "2011-"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QDATE 2011-)))))"		
 "-2011"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QDATE -2011)))))"		
 "2011-2012"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QDATE 2011-2012)))))"		
-"arXiv:astro-ph/0601223"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER arXiv:astro-ph/0601223)))))"		
-"arXiv:0711.2886"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER arXiv:0711.2886)))))"		
+"arXiv:astro-ph/0601223"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER arxiv astro-ph/0601223)))))"		
+"arXiv:0711.2886"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER arxiv 0711.2886)))))"		
 "funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC funcA( (DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC funcB( (DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC funcC( (DEFOP (COMMA (MODIFIER (TMODIFIER (FIELD (QNORMAL value)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"phrase value\")))) (CLAUSE (MODIFIER (TMODIFIER (QFUNC nestedFunc( (DEFOP (COMMA (MODIFIER (TMODIFIER (FIELD (QNORMAL 0)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 2)))))))))))))))))))))))))))"		
 				
 mainQ:				
@@ -266,10 +266,10 @@ mainQ:
 // adding bibcode is rather tricky, because it looks as normal token except that normal tokens are not 19 chars long (but that can be easily detected in the after stage)	->			
 				
 mainQ:				
-"one doi:word/word doi:word/123"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi:word/word)))) (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi:word/123)))))"		
+"one doi:word/word doi:word/123"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi word/word)))) (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi word/123)))))"		
 "(doi:tricky:01235)"		FAIL		
-"doi:hey/156-8569"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi:hey/156-8569)))))"		
-"doi:10.1000/182"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi:10.1000/182)))))"		
+"doi:hey/156-8569"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi hey/156-8569)))))"		
+"doi:10.1000/182"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi 10.1000/182)))))"		
 "simbad(20 54 05.689 +37 01 17.38)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC simbad( (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL 20)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 54)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 05.689)))) (MODIFIER + (TMODIFIER (FIELD (QNORMAL 37)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 01)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 17.38))))))))))"		
 "simbad(10:12:45.3-45:17:50)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC simbad( (DEFOP (MODIFIER (TMODIFIER (FIELD (QCOORDINATE 10:12:45.3-45:17:50))))))))))"		
 "simbad(15h17m-11d10m)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC simbad( (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL 15h17m-11d10m))))))))))"		
@@ -299,17 +299,17 @@ mainQ:
 "2000-"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QDATE 2000-)))))"		
 "CO2+"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL CO2+)))))"		
 "pos(\"Accomazzi, A\", 1, \-1)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC pos( (DEFOP (COMMA (MODIFIER (TMODIFIER (FIELD (QPHRASE \"Accomazzi, A\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 1)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL \\-1)))))))))))"		
-"one identifier:doi:123.123456"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD identifier (QIDENTIFIER doi:123.123456)))))"		
+"one identifier:doi:123.123456"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD identifier (QIDENTIFIER doi 123.123456)))))"		
 				
 //16April – cases, discovered while working on the query parser backend (adding COMMA and SEMICOLON as operators)	->			
 "+\"that\" a"	->	"(DEFOP (MODIFIER + (TMODIFIER (FIELD (QPHRASE \"that\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL a)))))"		
 "+\"that\""	->	"(DEFOP (MODIFIER + (TMODIFIER (FIELD (QPHRASE \"that\")))))"		
 				
-				
-				
-				
-				
-				
+//5June – modified identifier parsing	->			
+"doi:whatever:ever"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi whatever)))))"		
+"doi:\"doi:whatever:ever\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi (QPHRASE \"doi:whatever:ever\"))))))"		
+"doi:1023:3456"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi 1023)))))"		
+"doi:\"doi.nature:foo\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi (QPHRASE \"doi.nature:foo\"))))))"		
 				
 				
 				

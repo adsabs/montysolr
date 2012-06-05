@@ -315,7 +315,13 @@ date	:
 
 identifier	
 	:	
-	IDENTIFIER
+	//IDENTIFIER	
+	('doi:' -> QNORMAL["doi"]
+	|'arxiv:' -> QNORMAL["arxiv"]
+	|'arXiv:'  -> QNORMAL["arxiv"])
+	(TERM_NORMAL -> $identifier TERM_NORMAL
+	| PHRASE -> $identifier ^(QPHRASE PHRASE)
+	| NUMBER  -> $identifier NUMBER)
 	;
 	
 coordinate
@@ -439,11 +445,11 @@ DATE_RANGE
 	| INT INT INT INT '-' (INT INT INT INT)?
 	;
 	
-IDENTIFIER
-	:	('arXiv'|'arxiv') ':' TERM_CHAR+
-	|'doi:' TERM_CHAR+
-	//| INT+ '.' INT+ '/' INT+ ('.' INT+)?
-	;
+//IDENTIFIER
+//	:	('arXiv'|'arxiv') ':' TERM_CHAR+
+//	|'doi:' TERM_CHAR+
+//	//| INT+ '.' INT+ '/' INT+ ('.' INT+)?
+//	;
 
 	
 
