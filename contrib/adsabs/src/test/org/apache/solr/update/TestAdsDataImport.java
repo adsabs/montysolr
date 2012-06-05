@@ -205,14 +205,12 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		assertQ(req("q", "doi:abcds/esdfs.123045"), "//*[@numFound='1']");
 		assertQ(req("q", "doi:doi\\:abcds/esdfs.123045"), "//*[@numFound='1']");
-		//TODO
-		//assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\"", "debugQuery", "true"), "//*[@numFound='1']");
-		//assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
+		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
+		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ.123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:žščřďťň.123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
-		//TODO (must fix QINDENTIFIER first)
-		//assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\"", "debugQuery", "true"), "//*[@numFound='2']");
+		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
 		
 		
 	}

@@ -77,13 +77,13 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		
 		add(new AqpQDATEProcessor());
 		add(new AqpQPHRASEProcessor());
-		add(new AqpQIDENTIFIERProcessor());
 		add(new AqpQNORMALProcessor());
 		add(new AqpQPHRASETRUNCProcessor());
 		add(new AqpQTRUNCATEDProcessor());
 		add(new AqpQRANGEINProcessor());
 		add(new AqpQRANGEEXProcessor());
 		add(new AqpQANYTHINGProcessor());
+		add(new AqpQIDENTIFIERProcessor());
 		add(new AqpFIELDProcessor());
 		
 	

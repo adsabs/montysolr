@@ -5,6 +5,7 @@ import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsIdentifierNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
+import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryParser.core.util.UnescapedCharSequence;
@@ -36,13 +37,34 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 	
 	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
 		//String field = getDefaultFieldName();
-		String field = "identifier";
 		
-		AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
+		AqpANTLRNode subChild;
+		String field;
+		String input = null;
+		int start = 0;
+		int end = 0;
 		
-		String input = EscapeQuerySyntaxImpl.discardEscapeChar(subChild.getTokenInput()).toString();
-		int start = subChild.getTokenStart();
-		int end = subChild.getTokenEnd();
+		if (node.getChildren().size() == 1) {
+			field = "identifier";
+			subChild = (AqpANTLRNode) node.getChildren().get(0);
+		}
+		else {
+			field = ((AqpANTLRNode) node.getChildren().get(0)).getTokenLabel();
+			QueryNode sc = node.getChildren().get(1);
+			if (sc instanceof AqpANTLRNode) {
+				input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) sc).getTokenInput()).toString();
+				start = ((AqpANTLRNode) sc).getTokenStart();
+				end = ((AqpANTLRNode) sc).getTokenEnd();
+			}
+			else {
+				input = ((FieldQueryNode) sc).getTextAsString();
+				start = ((FieldQueryNode) sc).getBegin();
+				end = ((FieldQueryNode) sc).getEnd();
+			}
+		}
+		
+		
+		
 		
 		if (input.contains(":")) {
 			String[] vals = input.split("\\:", 2);
