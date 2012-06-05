@@ -37,6 +37,9 @@ public final class TestBibstemFacetFilter extends BaseTokenTestCase {
 		    BibstemFilterFactory factory = new BibstemFilterFactory();
 		    
 		    TokenStream stream = factory.create(tokenizer);
-		    assertTokenStreamContents(stream, new String[] { "ApJ", "AJ", "NYASA", "abe..conf", "asme.proc"} );
+		    assertTokenStreamContents(stream, new String[] { "ApJ", "ApJ...389",
+		    		"AJ", "AJ....118", "NYASA", "NYASA.688", 
+		    		"abe", "abe..conf", 
+		    		"asme", "asme.proc"} );
 	  }
 }
