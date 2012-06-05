@@ -116,19 +116,19 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	public void testIdentifiers() throws Exception {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		Query q = null;
-		assertQueryEquals("arXiv:1012.5859", wsa, "arxiv:1012.5859");
+		assertQueryEquals("arXiv:1012.5859", wsa, "identifier:arxiv:1012.5859");
 		assertQueryEquals("xfield:10.1086/345794", wsa, "xfield:10.1086/345794");
 		
-		assertQueryEquals("arXiv:astro-ph/0601223", wsa, "arxiv:astro-ph/0601223");
+		assertQueryEquals("arXiv:astro-ph/0601223", wsa, "identifier:arxiv:astro-ph/0601223");
 		q = assertQueryEquals("xfield:arXiv:0711.2886", wsa, "xfield:arxiv:0711.2886");
 		
 		assertQueryEquals("foo AND bar AND 2003AJ....125..525J", wsa, "+foo +bar +2003aj....125..525j");
 		
 		assertQueryEquals("2003AJ….125..525J", wsa, "2003aj....125..525j");
 		
-		assertQueryEquals("one x:doi:word/word doi:word/123", wsa, "one x:doi:word/word doi:word/123");
-		assertQueryEquals("doi:hey/156-8569", wsa, "doi:hey/156-8569");
-		q = assertQueryEquals("doi:10.1000/182", wsa, "doi:10.1000/182");
+		assertQueryEquals("one x:doi:word/word doi:word/123", wsa, "one x:doi:word/word doi:doi:word/123");
+		assertQueryEquals("doi:hey/156-8569", wsa, "doi:doi:hey/156-8569");
+		q = assertQueryEquals("doi:10.1000/182", wsa, "doi:doi:10.1000/182");
 		
 		// pretend we are sending bibcode (this should be handled as a normal token)
 		assertQueryEquals("200xAJ....125..525J", wsa, "200xAJ....125..525J");

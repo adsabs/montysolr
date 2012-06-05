@@ -49,11 +49,9 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 			String f = vals[0].toLowerCase();
 			if (f.equals("doi")) {
 				field = "doi";
-				input = vals[1];
 			}
 			else if (f.equals("identifier")) {
 				field = "identifier";
-				input = vals[1];
 			}
 			
 		}
