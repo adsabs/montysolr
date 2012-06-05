@@ -204,18 +204,27 @@
       </analyzer>
     </fieldType>
 
+    
+    <fieldType name="bibstem_facet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+        <analyzer type="index">
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="org.adsabs.solr.analysis.BibstemFilterFactory" facetMode="true"/>
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
+        </analyzer>
+    </fieldType>
+    
     <fieldType name="bibstem" class="solr.TextField" sortMissingLast="true" omitNorms="true">
         <analyzer type="index">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-            <filter class="org.adsabs.solr.analysis.BibstemFilterFactory"/>
+            <filter class="org.adsabs.solr.analysis.BibstemFilterFactory" facetMode="false"/>
 	        <filter class="solr.LowerCaseFilterFactory"/>
         </analyzer>
         <analyzer type="query">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-            <!-- 
-            why is this necessary?
 	        <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
-	        -->
 	        <filter class="solr.LowerCaseFilterFactory"/>
 	        <!-- note: do not use BibstemFFF in the query phase, we cannot assume the input has bibcode form -->
         </analyzer>
@@ -249,7 +258,7 @@
    <field name="identifier" type="normalized_string_ascii" indexed="true" stored="true" required="false" multiValued="true"/>
    
    <field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}" />
-   <field name="bibstem_facet" type="bibstem" indexed="true" stored="${storeAll:false}" />
+   <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="${storeAll:false}" />
    
    
    <field name="pub" type="normalized_text_ascii" indexed="true" stored="true" omitNorms="true"/>
