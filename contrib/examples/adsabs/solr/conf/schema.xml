@@ -224,7 +224,7 @@
         </analyzer>
         <analyzer type="query">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-	        <filter class="solr.PatternReplaceFilterFactory" pattern="^(\.*)(.*?)(\.*)$" replacement="$2"/>
+         <filter class="solr.PatternReplaceFilterFactory" pattern="^(.*?)(\.*)$" replacement="$1"/> 
 	        <filter class="solr.LowerCaseFilterFactory"/>
 	        <!-- note: do not use BibstemFFF in the query phase, we cannot assume the input has bibcode form -->
         </analyzer>
@@ -302,7 +302,7 @@
    
    <field name="topic" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
    
-   <field name="attribute" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
+   <field name="property" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
    <field name="database" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
    <field name="bibgroup" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
    
