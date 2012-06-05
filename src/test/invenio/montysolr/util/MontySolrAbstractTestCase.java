@@ -33,6 +33,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	 * @throws Exception
 	 */
 	public static void envInit() throws Exception {
+		System.setProperty("storeAll", "true");
 		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
 				MontySolrSetup.getMontySolrHome() + "/src/python");
 	}

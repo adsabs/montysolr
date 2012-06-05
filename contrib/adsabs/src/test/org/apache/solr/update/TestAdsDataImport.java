@@ -39,6 +39,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
+		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
 		envInit();
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/invenio/src/python");
@@ -169,15 +170,18 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		 * are lowercased)
 		 * 
 		 */
-		assertQ(req("q", "bibstem:YCAT"), "//*[@numFound='4']");
-		assertQ(req("q", "bibstem:yCat"), "//*[@numFound='4']");
+		//System.out.println(direct.request("/select?q=*:*&fl=bibcode,bibstem,recid,title", null).replace("</", "\n</"));
+		assertQ(req("q", "bibstem:YCAT"), "//*[@numFound='5']");
+		assertQ(req("q", "bibstem:yCat"), "//*[@numFound='5']");
+		assertQ(req("q", "bibstem:ycat"), "//*[@numFound='5']");
+
 		assertQ(req("q", "bibstem:yCat..35a"), "//*[@numFound='1']");
-		assertQ(req("q", "bibstem:ycat"), "//*[@numFound='4']");
+		assertQ(req("q", "bibstem:yCat..35*"), "//*[@numFound='3']");
+		assertQ(req("q", "bibstem:yCat..35?"), "//*[@numFound='3']");
 		
 		
-		// this works because we use the solr analyzer when available
-		// (not the default action which is to lowercase wildcards)
-		assertQ(req("q", "bibstem:yCat..*"), "//*[@numFound='1']");
+		assertQ(req("q", "bibstem:yCat..*"), "//*[@numFound='4']");
+		assertQ(req("q", "bibstem:yCat.*"), "//*[@numFound='5']");
 		assertQ(req("q", "bibstem:yCat*"), "//*[@numFound='5']");
 		assertQ(req("q", "bibstem:stat.conf"), "//*[@numFound='1']");
 		assertQ(req("q", "bibstem:STAT.CONF"), "//*[@numFound='1']");
@@ -209,7 +213,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		//TODO (must fix QINDENTIFIER first)
 		//assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\"", "debugQuery", "true"), "//*[@numFound='2']");
 		
-		//System.out.println(direct.request("/select?q=*:*&fl=bibcode,recid,title", null).replace("</", "\n</"));
+		
 	}
 	
 	

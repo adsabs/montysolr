@@ -79,14 +79,14 @@ public final class BibstemFilter extends TokenFilter {
 			throw new IOException("Input was not a bibcode!: " + origTerm);
 		}
 		
-		this.current = this.captureState();
+		termAtt.setEmpty();
 		
 		if (facetMode) {
-			this.stack.add(extractBibstem(origTerm));
-			
+			termAtt.append(extractBibstem(origTerm));
 		}
 		else { // emit both
-			this.stack.add(origTerm.substring(4,9).replace(".", ""));
+			this.current = this.captureState();
+			termAtt.append(origTerm.substring(4,9).replace(".", ""));
 			this.stack.add(trimDots(origTerm.substring(4,13)));
 		}
 		return true;
@@ -111,7 +111,7 @@ public final class BibstemFilter extends TokenFilter {
 				break;
 			}
 		}
-		return value.substring(s, e);
+		return value.substring(s, e+1);
 	}
 
 }

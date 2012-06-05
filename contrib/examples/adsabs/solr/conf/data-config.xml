@@ -188,9 +188,10 @@
         
         <!--  this is not a timestamp, but st like a signature of a records extracted
               from ADS (maybe can be useful for comparing imports) -->
+        <!--  switching it off until needed, it is very technical data
         <field column="stamp"        
             xpath="/collection/record/datafield[@tag='995']/subfield[@code='a']" />
-            
+         -->
         
         <!--  for indexing, we put all field inside the reference index, and also build a special index for 
               the individual subfields -->

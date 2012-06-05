@@ -224,7 +224,7 @@
         </analyzer>
         <analyzer type="query">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-	        <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
+	        <filter class="solr.PatternReplaceFilterFactory" pattern="^(\.*)(.*?)(\.*)$" replacement="$2"/>
 	        <filter class="solr.LowerCaseFilterFactory"/>
 	        <!-- note: do not use BibstemFFF in the query phase, we cannot assume the input has bibcode form -->
         </analyzer>
