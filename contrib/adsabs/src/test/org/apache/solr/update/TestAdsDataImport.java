@@ -140,7 +140,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		 * These aren't working as of yet, possibly due to the data import
 		 * not supporting the xpath syntax being used in data-config.xml for these fields
 		 */
-		assertQ(req("q", "database:astronomy"), "//*[@numFound='6']");
+		assertQ(req("q", "database:astronomy"), "//*[@numFound='7']");
 		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
 		
 		
@@ -212,6 +212,16 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
 		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
 		
+		/*
+		 * keywords
+		 */
+		assertQ(req("q", "keyword:\"classical statistical mechanics\""), "//*[@numFound='1']");
+		assertQ(req("q", "keyword:\"WORLD WIDE WEB\""), "//*[@numFound='1']");
+		assertQ(req("q", "keyword:HYDRODYNAMICS"), "//*[@numFound='1']");
+		assertQ(req("q", "keyword_norm:HYDRODYNAMICS"), "//*[@numFound='1']");
+		assertQ(req("q", "keyword_norm:\"methods numerical\""), "//*[@numFound='1']");
+		assertQ(req("q", "keyword_facet:\"World Wide Web\""), "//*[@numFound='1']");
+		assertQ(req("q", "keyword_facet:\"world wide web\""), "//*[@numFound='0']");
 		
 	}
 	

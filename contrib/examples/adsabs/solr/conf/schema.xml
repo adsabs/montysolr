@@ -260,7 +260,6 @@
    <field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}" />
    <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="${storeAll:false}" />
    
-   
    <field name="pub" type="normalized_text_ascii" indexed="true" stored="true" omitNorms="true"/>
    <field name="pub_raw" type="normalized_text_ascii" indexed="true" stored="${storeAll:false}" omitNorms="true" multiValued="true"/>
    
@@ -300,7 +299,9 @@
    <field name="aff" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
    <field name="email" type="first_string" indexed="true" stored="true" multiValued="true"/>
    
-   <field name="topic" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
+   <field name="keyword" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
+   <field name="keyword_norm" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
+   <field name="keyword_facet" type="string" indexed="true" stored="true" multiValued="true"/>
    
    <field name="property" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
    <field name="database" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
@@ -355,6 +356,7 @@
    <copyField source="bibcode" dest="bibstem_facet"/>
    
    <copyField source="pubdate" dest="pubdate_sort"/>
+   <copyField source="keyword" dest="keyword_facet"/>
    
    <copyField source="first_author" dest="author"/>
    <copyField source="first_author_norm" dest="author_norm"/>

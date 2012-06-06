@@ -712,4 +712,386 @@
     <subfield code="9">AST</subfield>
   </datafield>
 </record>
+<record>
+  <controlfield tag="001">161084</controlfield>
+  <controlfield tag="005">20120425194826.0</controlfield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">PHYSICS</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">OPENACCESS</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">REFEREED</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">ARTICLE</subfield>
+  </datafield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP...74...47A</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP...74...47A</subfield>
+    <subfield code="2">ADS bibcode</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="y">2001cond.mat..6096A</subfield>
+    <subfield code="2">eprint bibcode</subfield>
+  </datafield>
+  <datafield tag="024" ind1="7" ind2=" ">
+    <subfield code="a">10.1103/RevModPhys.74.47</subfield>
+    <subfield code="2">DOI</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">cond-mat/0106096</subfield>
+    <subfield code="2">arXiv</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Statistical mechanics of complex networks</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Albert, Réka</subfield>
+    <subfield code="b">Albert, R</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Department of Physics, University of Notre Dame, Notre Dame, Indiana 46556</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Barabási, Albert-László</subfield>
+    <subfield code="b">Barabási, A</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Department of Physics, University of Notre Dame, Notre Dame, Indiana 46556</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="p">Reviews of Modern Physics</subfield>
+    <subfield code="v">74</subfield>
+    <subfield code="c">47-97</subfield>
+    <subfield code="n">1</subfield>
+    <subfield code="y">2002</subfield>
+    <subfield code="z">Reviews of Modern Physics, vol. 74, Issue 1, pp. 47-97</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2002-01-00</subfield>
+    <subfield code="t">date-published</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">05.20.-y</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS Codes</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">89.20.Hh</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS Codes</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">05.40.-a</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS Codes</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">01.30.Vv</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS Codes</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">02.10.-v</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS Codes</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">02.40.Pc</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS Codes</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">02.50.-r</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS Codes</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">82.20.Wt</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS Codes</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Classical statistical mechanics</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">World Wide Web</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Internet</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Fluctuation phenomena</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">random processes</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">noise</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">and Brownian motion</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Book reviews</subfield>
+    <subfield code="b">book reviews</subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Logic</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">set theory</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">and algebra</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">General topology</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Probability theory</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">stochastic processes</subfield>
+    <subfield code="b">stochastic processes</subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">and statistics</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Computational modeling; simulation</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="9">PACS</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">Complex networks describe a wide range of systems in nature and society. Frequently cited examples include the cell, a network of chemicals linked by chemical reactions, and the Internet, a network of routers and computers connected by physical links. While traditionally these systems have been modeled as random graphs, it is increasingly recognized that the topology and evolution of real networks are governed by robust organizing principles. This article reviews the recent advances in the field of complex networks, focusing on the statistical mechanics of network topology and dynamics. After reviewing the empirical data that motivated the recent interest in networks, the authors discuss the main models and analytical tools, covering random graphs, small-world and scale-free networks, the emerging theory of evolving networks, and the interplay between topology and the network's robustness against failures and attacks.</subfield>
+    <subfield code="y">en</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2002RvMP...74...47A&amp;link_type=PREPRINT</subfield>
+    <subfield code="y">arXiv e-print</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=2002RvMP...74...47A&amp;link_type=EJOURNAL</subfield>
+    <subfield code="y">Electronic On-line Article (HTML)</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="o">[178]</subfield>
+    <subfield code="e">0</subfield>
+    <subfield code="f">APS</subfield>
+    <subfield code="b">&lt;ref citid="C201">&lt;misc>Watts, D. J., 2000, Santa Fe Working Paper No. 00-12-062.&lt;/misc>&lt;/ref></subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="o">[179]</subfield>
+    <subfield code="i">1998Natur.393..440W</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">APS</subfield>
+    <subfield code="b">&lt;ref citid="C202">&lt;article>&lt;refauth>Watts, D. J.&lt;/refauth>, and &lt;refauth>S. H. Strogatz&lt;/refauth>, &lt;date>1998&lt;/date>, &lt;journal>Nature (London)&lt;/journal>&lt;volume>393&lt;/volume>, &lt;pages>440&lt;/pages>.&lt;/article>&lt;/ref></subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="o">[180]</subfield>
+    <subfield code="e">0</subfield>
+    <subfield code="f">APS</subfield>
+    <subfield code="b">&lt;ref citid="C208">&lt;misc>Wilf, H. S., 1990, &lt;i>Generating Functionology&lt;/i> (Academic, Boston).&lt;/misc>&lt;/ref></subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="o">[181]</subfield>
+    <subfield code="e">5</subfield>
+    <subfield code="f">APS</subfield>
+    <subfield code="b">&lt;ref citid="C209">&lt;misc>Williams, R. J., N. D. Martinez, E. L. Berlow, J. A. Dunne, and A.-L. Barab__amp__aacute;si, 2000, Santa Fe Institute Working Paper 01-07-036.&lt;/misc>&lt;/ref></subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="o">[182]</subfield>
+    <subfield code="i">2001cond.mat..7417Y</subfield>
+    <subfield code="r">arxiv: cond-mat/0107417</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">APS</subfield>
+    <subfield code="b">&lt;ref citid="C211">&lt;eprint>&lt;refauth>Yook, S.&lt;/refauth>, &lt;refauth>H. Jeong&lt;/refauth>, and &lt;refauth>A.-L. Barab__amp__aacute;si&lt;/refauth>, &lt;date>2001a&lt;/date>, preprint &lt;eprintid>cond-mat/0107417&lt;/eprintid>.&lt;/eprint>&lt;/ref></subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="o">[183]</subfield>
+    <subfield code="e">0</subfield>
+    <subfield code="f">APS</subfield>
+    <subfield code="b">&lt;ref citid="C212">&lt;misc>Yook, S., H. Jeong, and A.-L. Barab__amp__aacute;si, 2001b, unpublished.&lt;/misc>&lt;/ref></subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="o">[184]</subfield>
+    <subfield code="e">0</subfield>
+    <subfield code="f">APS</subfield>
+    <subfield code="b">&lt;ref citid="C214">&lt;misc>Zipf, G. K., 1949, &lt;i>Human Behavior and the Principle of Least Effort: An Introduction to Human Ecology&lt;/i> (Addison-Wesley, Cambridge, MA).&lt;/misc>&lt;/ref></subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="o">[185]</subfield>
+    <subfield code="i">2001gr.qc.....3002Z</subfield>
+    <subfield code="r">arxiv: gr-qc/0103002</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">APS</subfield>
+    <subfield code="b">&lt;ref citid="C215">&lt;eprint>&lt;refauth>Zizzi, P. A.&lt;/refauth>, &lt;date>2001&lt;/date>, preprint &lt;eprintid>gr-qc/0103002&lt;/eprintid>.&lt;/eprint>&lt;/ref></subfield>
+  </datafield>
+  <datafield tag="907" ind1=" " ind2=" ">
+    <subfield code="a">APS</subfield>
+  </datafield>
+  <datafield tag="995" ind1=" " ind2=" ">
+    <subfield code="a">{"abs":[{"p":"/proj/ads/abstracts/phy/text/J02/J02-21159.abs","t":"1274783853"}],"links":{"electr":[{"u":"http://link.aps.org/doi/10.1103/RevModPhys.74.47"}],"preprint":[{"u":"cond-mat/0106096"}]},"prop":["bibgroup: PhysEd","refereed"],"refs":[{"p":"/proj/ads/references/resolved/ISI/RvMP/RvMP0074.isi.pairs.result","t":1302281666},{"p":"/proj/ads/references/resolved/RvMP/0074/2002RvMP...74...47A.ref.xml.result","t":1199184428}]}</subfield>
+    <subfield code="9">PHY</subfield>
+  </datafield>
+</record>
+ <record>
+   <controlfield tag="001">161085</controlfield>
+  <controlfield tag="005">20120425194826.0</controlfield>
+    <datafield tag="980" ind1="" ind2="">
+      <subfield code="a">ASTRONOMY</subfield>
+    </datafield>
+    <datafield tag="980" ind1="" ind2="">
+      <subfield code="p">OPENACCESS</subfield>
+    </datafield>
+    <datafield tag="980" ind1="" ind2="">
+      <subfield code="p">REFEREED</subfield>
+    </datafield>
+    <datafield tag="980" ind1="" ind2="">
+      <subfield code="p">ARTICLE</subfield>
+    </datafield>
+    <datafield tag="970" ind1="" ind2="">
+      <subfield code="a">1992ARA&amp;A..30..543M</subfield>
+    </datafield>
+    <datafield tag="035" ind1="" ind2="">
+      <subfield code="a">1992ARA&amp;A..30..543M</subfield>
+      <subfield code="2">ADS bibcode</subfield>
+    </datafield>
+    <datafield tag="024" ind1="7" ind2="">
+      <subfield code="a">10.1146/annurev.aa.30.090192.002551</subfield>
+      <subfield code="2">DOI</subfield>
+    </datafield>
+    <datafield tag="245" ind1="" ind2="">
+      <subfield code="a">Smoothed particle hydrodynamics</subfield>
+    </datafield>
+    <datafield tag="100" ind1="" ind2="">
+      <subfield code="a">Monaghan, J. J.</subfield>
+      <subfield code="b">Monaghan, J</subfield>
+      <subfield code="e">regular</subfield>
+      <subfield code="u">Monash Univ., Clayton, Australia</subfield>
+    </datafield>
+    <datafield tag="773" ind1="" ind2="">
+      <subfield code="p">In: Annual review of astronomy and astrophysics. Vol. 30 (A93-25826 09-90)</subfield>
+      <subfield code="v">30</subfield>
+      <subfield code="c">543-574</subfield>
+      <subfield code="y">1992</subfield>
+      <subfield code="z">In: Annual review of astronomy and astrophysics. Vol. 30 (A93-25826 09-90), p. 543-574.</subfield>
+    </datafield>
+    <datafield tag="260" ind1="" ind2="">
+      <subfield code="c">1992-00-00</subfield>
+      <subfield code="t">date-published</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">COMPUTATIONAL FLUID DYNAMICS</subfield>
+      <subfield code="b">methods numerical</subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">FINITE DIFFERENCE THEORY</subfield>
+      <subfield code="b"></subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">HYDRODYNAMICS</subfield>
+      <subfield code="b">hydrodynamics</subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">KERNEL FUNCTIONS</subfield>
+      <subfield code="b"></subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">PARTICLE ENERGY</subfield>
+      <subfield code="b"></subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">PARTICLE MASS</subfield>
+      <subfield code="b"></subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">ANGULAR MOMENTUM</subfield>
+      <subfield code="b">angular momentum</subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">PARTIAL DIFFERENTIAL EQUATIONS</subfield>
+      <subfield code="b"></subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">PARTICLE IN CELL TECHNIQUE</subfield>
+      <subfield code="b"></subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">PRESSURE GRADIENTS</subfield>
+      <subfield code="b"></subfield>
+      <subfield code="9">NASA/STI</subfield>
+    </datafield>
+    <datafield tag="695" ind1="" ind2="">
+      <subfield code="a">Astrophysics</subfield>
+      <subfield code="b"></subfield>
+      <subfield code="9">STI category</subfield>
+    </datafield>
+    <datafield tag="520" ind1="" ind2="">
+      <subfield code="a"></subfield>
+      <subfield code="y">The fundamentals of the smoothed particle hydrodynamics (SPH) method and its applications in astrophysics are reviewed. The discussion covers equations of motion, viscosity amd thermal conduction, spatially varying resolution, kernels, magnetic fields, special relativity, and implementation. Applications of the SPH method are discussed with reference to gas dynamics, binary stars and stellar collisions, formation of the moon and impact problems, fragmentation and cloud collisions, and cosmological and galactic problems. Other applications discussed include disks and rings, radio jets, motion near black holes, supernovae, magnetic phenomena, and nearly incompressible flow.</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="">
+      <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1992ARA%26A..30..543M&amp;link_type=TOC</subfield>
+      <subfield code="y">Table of Contents</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="">
+      <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1992ARA%26A..30..543M&amp;link_type=GIF</subfield>
+      <subfield code="y">Scanned Article (GIF)</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="^">
+      <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1992ARA%26A..30..543M&amp;link_type=ARTICLE</subfield>
+      <subfield code="y">Full Printable Article (PDF/Postscript)</subfield>
+    </datafield>
+    <datafield tag="999" ind1="C" ind2="5">
+      <subfield code="e">0</subfield>
+      <subfield code="f">OCR</subfield>
+      <subfield code="b">Stellingwerf, R. F. 1990b. Low Intensity Laser Ablation. Albuquerque: Mission Res. Corp.</subfield>
+    </datafield>
+    <datafield tag="999" ind1="C" ind2="5">
+      <subfield code="e">0</subfield>
+      <subfield code="f">OCR</subfield>
+      <subfield code="b">Stellingwerf, R. F., Campbell, P. 1990. Hypervelocity Impact Modelling Using SPH. Albuquerque: Mission Res. Corp.</subfield>
+    </datafield>
+  </record>
 </collection>
