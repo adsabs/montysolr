@@ -40,10 +40,20 @@ def run(workdir, solrurl, user, passw, ):
    out[-1] = out[-1][0:-3] # remove milliseconds
    out.append(str(int(out[1])/int(out[2]))) # compute docs per sec
               
+   
+   if os.path.exists(os.path.join(workdir, 'GIT_COMMIT')):
+       git_commit = open(os.path.join(workdir, 'GIT_COMMIT'), 'r').read().strip()
+   else:
+       git_commit = 'unknown'
+   
+   out.append(git_commit)
+   
+   
    data.append('|'.join(out))
    data.append('')
    
-   cmd = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet ADSIndexingTest --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec --data "%s"''' \
+   
+   cmd = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet ADSIndexingTest --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
          % (sys.executable, ourdir, user, passw, ','.join(data))
    
    print cmd
