@@ -7,6 +7,9 @@
   <datafield tag="024" ind1=" " ind2=" ">
     <subfield code="a">doi:abcds/esdfs.123045</subfield>
   </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">arXiv:hep-ph/1234</subfield>
+  </datafield>
   
   <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="a">ASTRONOMY</subfield>
@@ -103,6 +106,9 @@
   </datafield>
   <datafield tag="024" ind1=" " ind2=" ">
     <subfield code="a">doi:ŽŠČŘĎŤŇ:123456789</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">ARXIV:1234.5678</subfield>
   </datafield>
 </record>
 <record>

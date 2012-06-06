@@ -1,8 +1,10 @@
 package org.apache.solr.search;
 
-import org.apache.lucene.analysis.Analyzer;
+import java.util.HashMap;
+
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.aqp.AqpQueryParser;
+import org.apache.lucene.queryParser.aqp.config.AqpFieldMapper;
 import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryParser.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryParser.core.QueryNodeException;
@@ -18,7 +20,6 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.schema.SchemaField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,13 +63,13 @@ public class AqpAdsabsQParser extends QParser {
 			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
 				"Configuration error, ads-config resource missing");
 		}
-		SolrParams xmlConfig = extra.getParams("queryParser");
+		SolrParams parserConfig = extra.getParams("queryParser");
 		
 		qParser.setAnalyzer(schema.getAnalyzer());
 
 		String defaultField = getParam(CommonParams.DF);
 		if (defaultField == null) {
-			defaultField = xmlConfig.get("defaultField", getReq().getSchema().getDefaultSearchFieldName());
+			defaultField = parserConfig.get("defaultField", getReq().getSchema().getDefaultSearchFieldName());
 		}
 		if (defaultField != null) {
 			DefaultFieldAttribute defFieldAttr = config
@@ -78,7 +79,7 @@ public class AqpAdsabsQParser extends QParser {
 
 		String opParam = getParam(QueryParsing.OP);
 		if (opParam == null) {
-			opParam = xmlConfig.get("defaultOperator", getReq().getSchema()
+			opParam = parserConfig.get("defaultOperator", getReq().getSchema()
 					.getSolrQueryParser(null).getDefaultOperator().toString());
 		}
 
@@ -88,6 +89,24 @@ public class AqpAdsabsQParser extends QParser {
 		} else {
 			throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
 			"The defaultOperator is set to null");
+		}
+		
+		if (parserConfig.get("fieldMap", null) != null) {
+			String[] fields = parserConfig.get("fieldMap").split(";");
+			HashMap<String, String> fieldMap = new HashMap<String, String>();
+			String ffs[];
+			for (String f: fields) {
+				ffs = f.split("\\s+");
+				if (ffs.length < 2) {
+					throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
+					"Configuration error inside " + adsConfigName + ", in the section: fieldMap.");
+				}
+				String target = ffs[ffs.length-1];
+				for (int i=0;i<ffs.length-1;i++) {
+					fieldMap.put(ffs[i], target);
+				}
+			}
+			config.getAttribute(AqpFieldMapper.class).setMap(fieldMap);
 		}
 		
 		AqpRequestParams reqAttr = config.getAttribute(AqpRequestParams.class);
@@ -119,6 +138,9 @@ public class AqpAdsabsQParser extends QParser {
 			return qParser.parse(getString(), null);
 		} catch (QueryNodeException e) {
 			throw new ParseException(e.getLocalizedMessage());
+		}
+		catch (SolrException e1) {
+			throw new ParseException(e1.getLocalizedMessage());
 		}
 	}
 

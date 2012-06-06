@@ -320,6 +320,7 @@ identifier
 	|'arxiv:' -> QNORMAL["arxiv"]
 	|'arXiv:'  -> QNORMAL["arxiv"])
 	(TERM_NORMAL -> $identifier TERM_NORMAL
+	| PHRASE_ANYTHING  -> $identifier ^(QPHRASETRUNC PHRASE_ANYTHING)
 	| PHRASE -> $identifier ^(QPHRASE PHRASE)
 	| NUMBER  -> $identifier NUMBER)
 	;

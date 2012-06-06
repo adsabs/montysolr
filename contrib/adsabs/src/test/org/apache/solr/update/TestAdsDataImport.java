@@ -39,7 +39,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
+		System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
 		envInit();
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/invenio/src/python");
@@ -223,6 +223,19 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "keyword_facet:\"World Wide Web\""), "//*[@numFound='1']");
 		assertQ(req("q", "keyword_facet:\"world wide web\""), "//*[@numFound='0']");
 		
+		/*
+		 * identifier
+		 * should be translated into the correct field (currently, the grammar 
+		 * understands only arxiv: and doi: (and doi gets handled separately)
+		 */
+		assertQ(req("q", "arxiv:1234.5678"), "//*[@numFound='1']");
+		assertQ(req("q", "arxiv:\"arXiv:1234.5678\""), "//*[@numFound='1']");
+		assertQ(req("q", "arXiv:1234.5678"), "//*[@numFound='1']");
+		assertQ(req("q", "identifier:1234.5678"), "//*[@numFound='1']");
+		assertQ(req("q", "arXiv:hep-ph/1234"), "//*[@numFound='1']");
+		assertQ(req("q", "arxiv:\"ARXIV:hep-ph/1234\""), "//*[@numFound='1']");
+		assertQ(req("q", "arxiv:hep-ph/1234"), "//*[@numFound='1']");
+		assertQ(req("q", "identifier:hep-ph/1234"), "//*[@numFound='1']");
 	}
 	
 	

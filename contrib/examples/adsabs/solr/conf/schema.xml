@@ -81,6 +81,24 @@
       </analyzer>
     </fieldType>
     
+    <!--  as opposed to doi_string, identifier is only ascii -->
+    <fieldType name="identifier_normalized_string_ascii" class="solr.TextField">
+      <analyzer type="index">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:)" replacement="" replace="all"/>
+        <filter class="solr.TrimFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:)" replacement="" replace="all"/>
+        <filter class="solr.TrimFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    
     
     <fieldType name="first_string" class="solr.TextField">
       <analyzer type="index">
@@ -121,6 +139,8 @@
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
+    
+    
     
     
     <fieldType name="normalized_string_ascii" class="solr.TextField">
@@ -255,7 +275,7 @@
    
    
    <field name="doi" type="doi_string" indexed="true" stored="true" required="false" multiValued="true"/>
-   <field name="identifier" type="normalized_string_ascii" indexed="true" stored="true" required="false" multiValued="true"/>
+   <field name="identifier" type="identifier_normalized_string_ascii" indexed="true" stored="true" required="false" multiValued="true"/>
    
    <field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}" />
    <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="${storeAll:false}" />
