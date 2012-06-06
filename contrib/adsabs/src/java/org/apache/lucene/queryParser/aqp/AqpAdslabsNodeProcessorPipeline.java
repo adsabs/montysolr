@@ -12,6 +12,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpCOMMAProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpDEFOPProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFIELDProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFUZZYProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpFieldMapperProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpGroupQueryOptimizerProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpLowercaseExpandedTermsQueryNodeProcessor;
@@ -102,6 +103,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		
 		add(new AqpAdslabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
 		
+		add(new AqpFieldMapperProcessor());
 		add(new AqpAdslabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
 		add(new PhraseSlopQueryNodeProcessor());
 	
@@ -116,6 +118,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 	
 		add(new AqpGroupQueryOptimizerProcessor());
 		add(new AqpOptimizationProcessor());
+		
 		
 	}
 

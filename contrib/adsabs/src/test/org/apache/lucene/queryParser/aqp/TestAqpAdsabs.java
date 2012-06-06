@@ -116,8 +116,10 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	public void testIdentifiers() throws Exception {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		Query q = null;
-		assertQueryEquals("arXiv:1012.5859", wsa, "identifier:arxiv:1012.5859");
+		setDebug(true);
+		assertQueryEquals("arXiv:1012.5859", wsa, "arxiv:1012.5859");
 		assertQueryEquals("xfield:10.1086/345794", wsa, "xfield:10.1086/345794");
+		assertQueryEquals("xfield:doi:10.1086/345794", wsa, "xfield:10.1086/345794");
 		
 		assertQueryEquals("arXiv:astro-ph/0601223", wsa, "identifier:arxiv:astro-ph/0601223");
 		q = assertQueryEquals("xfield:arXiv:0711.2886", wsa, "xfield:arxiv:0711.2886");

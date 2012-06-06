@@ -310,7 +310,7 @@ mainQ:
 "doi:\"doi:whatever:ever\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi (QPHRASE \"doi:whatever:ever\"))))))"		
 "doi:1023:3456"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi 1023)))))"		
 "doi:\"doi.nature:foo\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi (QPHRASE \"doi.nature:foo\"))))))"		
-"doi:\"doi.nature?foo\""	->	""		
+"doi:\"doi.nature?foo\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QIDENTIFIER doi (QPHRASETRUNC \"doi.nature?foo\"))))))"		
 				
 				
 				

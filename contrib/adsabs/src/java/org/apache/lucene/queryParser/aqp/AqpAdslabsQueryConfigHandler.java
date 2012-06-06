@@ -5,6 +5,7 @@ import org.apache.lucene.queryParser.aqp.builders.AqpAdslabsSubSueryProvider;
 import org.apache.lucene.queryParser.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryParser.aqp.config.AqpAdslabsLoggingHandler;
 import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
+import org.apache.lucene.queryParser.aqp.config.AqpFieldMapper;
 import org.apache.lucene.queryParser.aqp.config.AqpFunctionQueryBuilderConfig;
 import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryParser.aqp.config.DefaultDateRangeField;
@@ -61,6 +62,7 @@ public class AqpAdslabsQueryConfigHandler extends QueryConfigHandler {
 		addAttribute(DefaultDateRangeField.class);
 		addAttribute(AqpFunctionQueryBuilderConfig.class);
 		addAttribute(AqpRequestParams.class);
+		addAttribute(AqpFieldMapper.class);
 		
 		addAttribute(AqpFeedback.class); // to collect/work with exceptions
 		addAttribute(AqpFeedback.class).registerEventHandler(new AqpAdslabsLoggingHandler());

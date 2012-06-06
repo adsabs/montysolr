@@ -113,9 +113,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		// if we use the solr analyzer to parse the query, all is configured to remove stopwords 
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but"), 
 				"(+((all:dog) (all:cat))) title:bat", BooleanQuery.class);
-		// but topic is normalized_string with a different analyzer and should retain 'but'
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat OR topic:but"), 
-				"(+((all:dog) (all:cat))) title:bat topic:but", BooleanQuery.class);
+		
+		// but pub is normalized_string with a different analyzer and should retain 'but'
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but"), 
+				"(+((all:dog) (all:cat))) title:bat pub:but", BooleanQuery.class);
+		
+		
+		
+		
+		
+		// field map is set to translate arxiv->identifier
+		assertQueryEquals(req("qt", "aqp", "q", "arxiv:1002.1524"), 
+				"identifier:1002.1524", TermQuery.class);
+		assertQueryParseException(req("qt", "aqp", "q", "arxivvvv:1002.1524"));
 	}
 	
 	
