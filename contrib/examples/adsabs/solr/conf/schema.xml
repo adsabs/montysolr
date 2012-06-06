@@ -277,14 +277,14 @@
    <field name="doi" type="doi_string" indexed="true" stored="true" required="false" multiValued="true"/>
    <field name="identifier" type="identifier_normalized_string_ascii" indexed="true" stored="true" required="false" multiValued="true"/>
    
-   <field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}" />
-   <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="${storeAll:false}" />
+   <field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}" multiValued="true"/>
+   <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="${storeAll:false}" multiValued="false"/>
    
-   <field name="pub" type="normalized_text_ascii" indexed="true" stored="true" omitNorms="true"/>
+   <field name="pub" type="normalized_text_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="pub_raw" type="normalized_text_ascii" indexed="true" stored="${storeAll:false}" omitNorms="true" multiValued="true"/>
    
-   <field name="page" type="first_string" indexed="true" stored="true" multiValued="true"/>
-   <field name="year" type="first_string" stored="true" indexed="true"/>
+   <field name="page" type="first_string" indexed="true" stored="true" multiValued="false"/> <!--  really? -->
+   <field name="year" type="first_string" stored="true" indexed="true" multiValued="false"/>
    <field name="volume" type="normalized_string_ascii" stored="true" indexed="true" multiValued="false"/>
    <field name="issue" type="normalized_string_ascii" stored="true" indexed="true" multiValued="false"/>
    
@@ -323,9 +323,9 @@
    <field name="keyword_norm" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
    <field name="keyword_facet" type="string" indexed="true" stored="true" multiValued="true"/>
    
-   <field name="property" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
-   <field name="database" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
-   <field name="bibgroup" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true"/>
+   <field name="property" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
+   <field name="database" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
+   <field name="bibgroup" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    
    <field name="thesis" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
    <field name="copyright" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>

@@ -21,6 +21,9 @@
     <subfield code="p">CATALOG</subfield>
   </datafield>
   <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">photos</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
     <subfield code="b">CfA</subfield>
   </datafield>
   <datafield tag="970" ind1=" " ind2=" ">
@@ -109,6 +112,27 @@
   </datafield>
   <datafield tag="035" ind1=" " ind2=" ">
     <subfield code="a">ARXIV:1234.5678</subfield>
+  </datafield>
+</record>
+<record>
+  <controlfield tag="001">3</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">9999XXXX..xxxxxxxx3</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">The title is not available</subfield>
+  </datafield>
+</record>
+<record>
+  <controlfield tag="001">4</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">9999XXXX..xxxxxxxx4</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">no-sky data survey with q'i values 5" 1025.456 degrees</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">no-sky data survey with q'i values 5" 1025.456 degrees is talking inside abstract</subfield>
   </datafield>
 </record>
 <record>
