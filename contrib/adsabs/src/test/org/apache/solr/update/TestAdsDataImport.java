@@ -135,13 +135,24 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "email:rcutri@example*"), "//*[@numFound='1']");
 		
 
-		
 		/*
-		 * These aren't working as of yet, possibly due to the data import
-		 * not supporting the xpath syntax being used in data-config.xml for these fields
+		 * database & bibgroup
 		 */
 		assertQ(req("q", "database:astronomy"), "//*[@numFound='7']");
+		assertQ(req("q", "database:Astronomy"), "//*[@numFound='7']");
+		assertQ(req("q", "database:ASTRONOMY"), "//*[@numFound='7']");
+		assertQ(req("q", "database:astronom*"), "//*[@numFound='7']");
+		assertQ(req("q", "database:astronom?"), "//*[@numFound='7']");
+		
 		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
+		assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='2']");
+		assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='2']");
+		assertQ(req("q", "bibgroup:?FA"), "//*[@numFound='2']");
+		
+		assertQ(req("q", "property:catalog AND property:photos"), "//*[@numFound='1']");
+		assertQ(req("q", "property:Catalog AND property:Photos"), "//*[@numFound='1']");
+		assertQ(req("q", "property:CATALOG AND property:photos"), "//*[@numFound='1']");
+		assertQ(req("q", "property:catalog AND property:PHOTOS"), "//*[@numFound='1']");
 		
 		
 		/*
@@ -236,6 +247,33 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "arxiv:\"ARXIV:hep-ph/1234\""), "//*[@numFound='1']");
 		assertQ(req("q", "arxiv:hep-ph/1234"), "//*[@numFound='1']");
 		assertQ(req("q", "identifier:hep-ph/1234"), "//*[@numFound='1']");
+		
+		/*
+		 * title
+		 * 
+		 * TODO: I feel we need to enrich this suite with more tests
+		 * but we need more examples and my head is quite tired to think
+		 * of something comprehensive 
+		 */
+		assertQ(req("q", "title:\"title is not available\""), "//*[@numFound='1']"); // everything besides title is stopword
+		assertQ(req("q", "title:no-sky"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
+		assertQ(req("q", "title:nosky"), "//*[@numFound='1']");
+		assertQ(req("q", "title:q\\'i"), "//*[@numFound='2']");
+		
+		
+		/*
+		 * abstract
+		 * 
+		 */
+		assertQ(req("q", "abstract:abstract"), "//*[@numFound='1']"); // everything besides title is stopword
+		assertQ(req("q", "abstract:No-SKy"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
+		assertQ(req("q", "abstract:nosky"), "//*[@numFound='1']");
+		
+		//becomes: abstract:q'i abstract:q abstract:i abstract:qi
+		assertQ(req("q", "abstract:q\\'i", "fl", "recid,abstract,title"), "//*[@numFound='4']");
+		
+		
+		assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
 	}
 	
 	
