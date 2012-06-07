@@ -4,6 +4,7 @@ import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsAnalyzerProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsMODIFIERProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsQPOSITIONProcessor;
+import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsRegexNodeProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpAdslabsSynonymNodeProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryParser.aqp.processors.AqpBibcodeProcessor;
@@ -102,6 +103,7 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AllowLeadingWildcardProcessor());
 		
 		add(new AqpAdslabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
+		add(new AqpAdslabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		
 		add(new AqpFieldMapperProcessor());
 		add(new AqpAdslabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
