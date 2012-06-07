@@ -378,14 +378,15 @@
    <copyField source="pubdate" dest="pubdate_sort"/>
    <copyField source="keyword" dest="keyword_facet"/>
    
+   <copyField source="author" dest="author_surname"/>
    <copyField source="first_author" dest="author"/>
-   <copyField source="first_author_norm" dest="author_norm"/>
+   <copyField source="first_author" dest="author_surname"/>
    <copyField source="first_author" dest="first_author_surname"/>
    <copyField source="first_author_norm" dest="author_facet"/>
+   <copyField source="first_author_norm" dest="author_norm"/>
    <copyField source="author_norm" dest="author_facet"/>
    
    <copyField source="pub" dest="pub_raw"/>
-   <copyField source="author" dest="author_surname"/>
 
  <similarity class="org.adsabs.solr.SweetSpotSimilarityFactory">
     <str name="min">1000</str>
