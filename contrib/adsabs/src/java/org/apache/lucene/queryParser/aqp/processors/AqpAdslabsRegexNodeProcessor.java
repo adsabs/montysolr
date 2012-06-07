@@ -2,10 +2,7 @@ package org.apache.lucene.queryParser.aqp.processors;
 
 import java.util.List;
 
-<<<<<<< HEAD
 import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsRegexQueryNode;
-=======
->>>>>>> d3589f4... initial commit with new processor and builder classes
 import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsSynonymQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;

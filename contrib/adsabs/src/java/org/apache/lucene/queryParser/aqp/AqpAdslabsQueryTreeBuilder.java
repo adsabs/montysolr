@@ -52,7 +52,6 @@ public class AqpAdslabsQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
 		setBuilder(AqpAdslabsIdentifierNode.class, new AqpAdslabsIdentifierNodeBuilder());
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(AqpAdslabsRegexQueryNode.class, new AqpFieldQueryNodeRegexBuilder());
-		setBuilder(RegexQueryNode.class, new AqpFieldQueryNodeRegexBuilder());
 		setBuilder(AqpNonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(InvenioQueryNode.class, new InvenioQueryNodeBuilder(this));
 		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
