@@ -56,7 +56,8 @@ def run(workdir, solrurl, user, passw, ):
    cmd = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet ADSIndexingTest --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
          % (sys.executable, ourdir, user, passw, ','.join(data))
    
-   print cmd
+   print '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet ADSIndexingTest --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
+         % (sys.executable, ourdir, user, '<passw>', ','.join(data))
    os.system(cmd)
 
 
