@@ -10,6 +10,7 @@ import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryParser.standard.nodes.PrefixWildcardQueryNode;
 
 public class AqpAdslabsRegexNodeProcessor extends QueryNodeProcessorImpl implements
 	QueryNodeProcessor  {
@@ -29,18 +30,19 @@ public class AqpAdslabsRegexNodeProcessor extends QueryNodeProcessorImpl impleme
 			if (input == null) {
 				return node;
 			}
-			if (hasRegexSyntax(input)) {
+			
+			// TODO: should we consider using something more explicit, 
+			// e.g. creating author tokens like "/Kurtz, M.*/" ?
+			if (input.contains("\\b") || input.contains("\\w")) {
 				return new AqpAdslabsRegexQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
+			} else if (!(node instanceof PrefixWildcardQueryNode) && input.endsWith(".*")) {
+				input = input.substring(0, input.length() - 2) + "*";
+				return new PrefixWildcardQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
 			}
 		}
 		return node;
 	}
 	
-	protected boolean hasRegexSyntax(String input) {
-		// TODO: match other regex syntax variations that will be present
-		return input.endsWith(".*");
-	}
-
 	@Override
 	protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
 			throws QueryNodeException {

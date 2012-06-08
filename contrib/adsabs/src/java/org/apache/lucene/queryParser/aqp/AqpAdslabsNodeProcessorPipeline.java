@@ -103,10 +103,10 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AllowLeadingWildcardProcessor());
 		
 		add(new AqpAdslabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
-		add(new AqpAdslabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		
 		add(new AqpFieldMapperProcessor());
 		add(new AqpAdslabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
+		add(new AqpAdslabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		add(new PhraseSlopQueryNodeProcessor());
 	
 		// add(new GroupQueryNodeProcessor());

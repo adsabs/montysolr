@@ -112,6 +112,20 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
 		
+		assertQ(req("q", "author:\"Albert, R\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Albert, Reeka\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Barabási, A\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Barabaesi, A\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Barabási, Albert-László\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Barabasi, Albert-Laszlo\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:Sellgren"), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Dwek, E P\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Dwek, E.\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Dwek, Edgar\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Dwek, E. P.\""), "//*[@numFound='1']");
+		
+		assertQ(req("q", "aff:46556"), "//*[@numFound='1']");
+		assertQ(req("q", "aff:\"Notre Dame\""), "//*[@numFound='1']");
 		
 		assertQ(req("q", "page:2056 AND recid:9106451"), "//*[@numFound='1']");
 		assertQ(req("q", "page:2056-2059 AND recid:9106451"), "//*[@numFound='1']");

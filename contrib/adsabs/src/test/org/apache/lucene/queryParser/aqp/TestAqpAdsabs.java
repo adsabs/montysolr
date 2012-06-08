@@ -12,6 +12,7 @@ import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.regex.RegexQuery;
 import org.apache.lucene.util.Version;
 import org.apache.solr.search.function.FunctionQuery;
 
@@ -57,6 +58,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("author:\"huchra, j\"", wsa, "author:\"huchra, j\"");
 		assertQueryEquals("author:\"huchra, j\"", null, "author:\"huchra j\"");
 		assertQueryEquals("=author:\"huchra, j\"", wsa, "author:huchra, j", TermQuery.class);
+		assertQueryEquals("author:\"huchra, j.*\"", wsa, "author:huchra, j.*", PrefixQuery.class);
 		
 	}
 	
