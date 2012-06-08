@@ -262,7 +262,10 @@
 		   <antcall target="common.test" inheritall="true" inheritrefs="true"/>
 	</target>
 
-
+    
+	<target name="test-all" depends="test,test-contrib" description="Run tests for core and contrib"/>
+    
+	
 	<!-- writes into a simple format various config variables, they can be used by unittests/java -->
 	<target name="write-properties" depends="config">
 		   <echo file="${build.dir}/build.properties">
@@ -435,10 +438,24 @@ lucene.version=${lucene.version}
     	  	<include name="**/invenio/build.xml"/>
     	  	<include name="**/newseman/build.xml"/>
     	  	<include name="**/adsabs/build.xml"/>
+    	  	<include name="**/examples/build.xml"/>
 	  	  </fileset>
     	</apply>
     </target>
 	
+	<target name="test-contrib" >
+        <apply executable="ant" parallel="false" failonerror="true">
+          <arg line="test"/>
+          <arg value="-f"/>
+          <fileset dir="${common.dir}/contrib">
+            <include name="**/anlrqueryparser/build.xml"/>
+            <include name="**/invenio/build.xml"/>
+            <include name="**/newseman/build.xml"/>
+            <include name="**/adsabs/build.xml"/>
+          	<include name="**/examples/build.xml"/>
+          </fileset>
+        </apply>
+    </target>
 
 	<target name="compile-solr-egg" depends="config-build">
 		<mkdir dir="${build.dir}" />

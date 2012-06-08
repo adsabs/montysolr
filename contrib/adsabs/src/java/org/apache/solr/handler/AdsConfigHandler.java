@@ -20,6 +20,7 @@ public class AdsConfigHandler extends RequestHandlerBase {
 	private Map<String, SolrParams> components = new HashMap<String, SolrParams>();
 	private SolrParams emptyParams = null; 
 	
+	@SuppressWarnings("rawtypes")
 	public void init(NamedList args) {
 		super.init(args);
 		for (int i=0; i<args.size();i++) {

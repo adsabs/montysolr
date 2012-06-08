@@ -89,8 +89,8 @@ atom
 	| 
 	lmodifier? field? value rmodifier? 
 	-> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
-	| lmodifier? (STAR COLON)? STAR 
-	-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
+	//| lmodifier? (STAR COLON)? STAR 
+	//-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
 	
 	;
    
@@ -98,6 +98,7 @@ atom
 field	
 	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
+	| STAR COLON -> STAR["*"]
 	;
 
 value  
@@ -113,6 +114,7 @@ value
 	| DATE_RANGE -> ^(QDATE DATE_RANGE)
 	| AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
 	| QMARK -> ^(QTRUNCATED QMARK)
+	| STAR -> ^(QANYTHING STAR)
 	//| COMMA -> ^(QCOMMA COMMA)
   	;
 
