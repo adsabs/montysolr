@@ -20,6 +20,7 @@
   <fieldType name="string" class="solr.StrField"/>
  </types>
  <fields>
-   <dynamicField name="*" type="string" indexed="true" stored="true" />
+   <field name="id" type="string" indexed="true" stored="true" unique="true"/>
+   <dynamicField name="*" type="string" indexed="true" stored="true" multiValued="true"/>
  </fields>
 </schema>

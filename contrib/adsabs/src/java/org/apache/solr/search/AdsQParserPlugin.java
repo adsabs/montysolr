@@ -40,7 +40,7 @@ public class AdsQParserPlugin extends QParserPlugin {
 	public static String NAME = "aqp";
 	
 	public void init(NamedList args) {
-		System.out.println(args);
+		//System.out.println(args);
 	}
 
 	

@@ -42,8 +42,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + "/src/python");
+		envInit();
 		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");

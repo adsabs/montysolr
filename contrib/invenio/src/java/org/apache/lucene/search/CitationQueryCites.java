@@ -1,8 +1,7 @@
-package org.apache.solr.search;
+package org.apache.lucene.search;
 
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Explanation;
-import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.Searcher;
@@ -10,49 +9,27 @@ import org.apache.lucene.search.Similarity;
 import org.apache.lucene.search.Weight;
 import org.apache.lucene.util.ToStringUtils;
 
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.jni.MontySolrVM;
-
 import java.io.IOException;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.BitSet;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.request.SolrQueryRequest;
-import org.apache.lucene.search.DictionaryRecIdCache;
 
 
 
-public class CitationQuery extends Query {
+public class CitationQueryCites extends Query {
+	private static final long serialVersionUID = 5816756548145074263L;
 	private float boost = 1.0f; // query boost factor
-	Query query;
-	SolrParams localParams;
-	SolrQueryRequest req;
-	String idField = "id"; //TODO: make it configurable
-	String dictName = null;
+	Query query = null;
+	Map<Integer, int[]> citationMap = null;
 
 
-	public CitationQuery (Query query, SolrQueryRequest req, SolrParams localParams) {
+	public CitationQueryCites (Query query, Map<Integer, int[]> citationMap) {
 		this.query = query;
-		this.localParams = localParams;
-		this.req = req;
-
-		String type = localParams.get("rel");
-		if (type.contains("refersto")) {
-			dictName = "citationdict";
-		}
-		else if (type.contains("citedby")) {
-			dictName = "reversedict";
-		}
-		else {
-			dictName = "reversedict";
-		}
+		this.citationMap = citationMap;
     }
 
 	/**
@@ -72,128 +49,6 @@ public class CitationQuery extends Query {
 	public float getBoost() {
 		return boost + query.getBoost();
 	}
-
-	public Map<Integer, int[]> getDictCache() throws IOException {
-		try {
-			return getDictCache(this.dictName);
-		} catch (IOException e) {
-			e.printStackTrace();
-			// return empty map, that is ok because it will affect only
-			// this query, the next will get a new cache
-			return new HashMap<Integer, int[]>();
-		}
-	}
-
-	public Map<Integer, int[]> getDictCache(String dictname) throws IOException {
-
-
-		Map<Integer, int[]> cache = DictionaryRecIdCache.INSTANCE.getCache(dictname);
-
-
-		if (cache == null) {
-
-
-
-			// Get mapping lucene_id->invenio_recid
-			// The simplest would be to load the field with a cache (but the
-			// field should be integer - and it is not now). The other reason
-			// for doint this is that we don't create unnecessary cache
-
-			/**
-
-			TermDocs td = reader.termDocs(); //FIXME: .termDocs(new Term(idField)) works not?!
-			String[] li =  {idField};
-			MapFieldSelector fieldSelector = new MapFieldSelector(li);
-			**/
-
-			SolrIndexSearcher searcher = req.getSearcher();
-			SolrIndexReader reader = searcher.getReader();
-		    int[] idMapping = FieldCache.DEFAULT.getInts(reader, idField);
-
-			Map<Integer, Integer> fromValueToDocid = new HashMap<Integer, Integer>(idMapping.length);
-			int i = 0;
-			for (int value: idMapping) {
-				fromValueToDocid.put(value, i);
-				i++;
-			}
-
-			/**
-			//OpenBitSet bitSet = new OpenBitSet(reader.maxDoc());
-			int i;
-			while (td.next()) {
-				i = td.doc();
-				// not needed when term is null
-				//if (reader.isDeleted(i)) {
-				//	continue;
-				//}
-				Document doc = reader.document(i);
-
-				try {
-					//bitSet.set(Integer.parseInt(doc.get(idField)));
-					idMap.put(i, Integer.parseInt(doc.get(idField)));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			**/
-
-			// now get the citation dictionary from Invenio
-			HashMap<Integer, int[]> hm = new HashMap<Integer, int[]>();
-
-			PythonMessage message = MontySolrVM.INSTANCE.createMessage("get_citation_dict")
-						.setSender("CitationQuery")
-						.setParam("dictname", dictName)
-						.setParam("result", hm);
-			MontySolrVM.INSTANCE.sendMessage(message);
-
-
-			Map<Integer, int[]> citationDict = new HashMap<Integer, int[]>(0);
-			if (message.containsKey("result")) {
-
-				@SuppressWarnings("unchecked")
-				Map<Integer, Object> result = (Map<Integer, Object>) message.getResults();
-				citationDict = new HashMap<Integer, int[]>(result.size());
-				for (Entry<Integer, Object> e: result.entrySet()) {
-					Integer recid = e.getKey();
-					if (fromValueToDocid.containsKey(recid)) {
-						// translate recids into lucene-ids
-
-			            int[] recIds = (int[]) e.getValue();
-			            int[] lucIds = new int[recIds.length];
-						for (int x=0;x<recIds.length;x++) {
-							if (fromValueToDocid.containsKey(recIds[x]))
-								lucIds[x] = fromValueToDocid.get(recIds[x]);
-						}
-						citationDict.put(recid, (int[]) e.getValue());
-					}
-				}
-			}
-
-			DictionaryRecIdCache.INSTANCE.setCache(dictname, citationDict);
-			return citationDict;
-		}
-		return cache;
-	}
-
-	public Map<Integer, BitSet> getDictCacheX() {
-    	HashMap<Integer, BitSet> hm = new HashMap<Integer, BitSet>();
-
-    	int Min = 1;
-    	int Max = 5000;
-    	int r;
-    	for (int i=0;i<5000; i++) {
-    		r = Min + (int)(Math.random() * ((Max - Min) + 1));
-    		BitSet bs = new BitSet(r);
-    		int ii = 0;
-    		while (ii < 20) {
-    			r = Min + (int)(Math.random() * ((Max - Min) + 1));
-    			bs.set(r);
-    			ii += 1;
-    		}
-    		hm.put(i, bs);
-    	}
-    	return hm;
-    }
 
 
 	/**
@@ -246,18 +101,16 @@ public class CitationQuery extends Query {
 	        	    //retrieve the documents that are most cited/referred, therefore
 	        	    //we have to search the whole space
 
-	        	    // get the respective dictionary
-	        	    Map<Integer, int[]> cache = getDictCache();
 	        	    BitSet aHitSet = new BitSet(reader.maxDoc());
 
-	        	    if (cache.size() == 0)
+	        	    if (citationMap.size() == 0)
 	        	    	return;
 
 	        	    // retrieve documents that matched the query and while we go
 	        	    // collect the documents referenced by/from those docs
 	        	    while ((doc = nextDoc()) != NO_MORE_DOCS) {
-	        	    	if (cache.containsKey(doc)) {
-	        	    		int[] v = cache.get(doc);
+	        	    	if (citationMap.containsKey(doc)) {
+	        	    		int[] v = citationMap.get(doc);
 	        	    		for (int i: v)
 	        	    			aHitSet.set(i);
 	        	    	}
@@ -317,7 +170,7 @@ public class CitationQuery extends Query {
 	      }
 
 	      // return this query
-	      public Query getQuery() { return CitationQuery.this; }
+	      public Query getQuery() { return CitationQueryCites.this; }
 
 	    }; //Weight
 	  }
@@ -344,7 +197,7 @@ public class CitationQuery extends Query {
 	public Query rewrite(IndexReader reader) throws IOException {
 	    Query rewritten = query.rewrite(reader);
 	    if (rewritten != query) {
-	      CitationQuery clone = (CitationQuery)this.clone();
+	      CitationQueryCites clone = (CitationQueryCites)this.clone();
 	      clone.query = rewritten;
 	      return clone;
 	    } else {
@@ -404,8 +257,8 @@ public class CitationQuery extends Query {
 
 	  /** Returns true iff <code>o</code> is equal to this. */
 	  public boolean equals(Object o) {
-	    if (o instanceof CitationRefersToQuery) {
-	    	CitationRefersToQuery fq = (CitationRefersToQuery) o;
+	    if (o instanceof CitationQueryCites) {
+	    	CitationQueryCites fq = (CitationQueryCites) o;
 	      return (query.equals(fq.query) && getBoost()==fq.getBoost());
 	    }
 	    return false;
