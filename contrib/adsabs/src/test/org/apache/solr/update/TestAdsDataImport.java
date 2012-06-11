@@ -123,6 +123,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "author:\"Dwek, E.\""), "//*[@numFound='1']");
 		assertQ(req("q", "author:\"Dwek, Edgar\""), "//*[@numFound='1']");
 		assertQ(req("q", "author:\"Dwek, E. P.\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:\"Rentzsch Holm, Inga\""), "//*[@numFound='1']");
 		
 		assertQ(req("q", "aff:46556"), "//*[@numFound='1']");
 		assertQ(req("q", "aff:\"Notre Dame\""), "//*[@numFound='1']");

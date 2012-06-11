@@ -134,7 +134,7 @@ public class ProcessCuratedAuthorSynonyms {
 			}
 		}
 		try {
-			synMap.persist();
+			synMap.persist(false);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

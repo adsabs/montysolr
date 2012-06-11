@@ -703,6 +703,11 @@
     <subfield code="b">Werner, M</subfield>
     <subfield code="e">regular</subfield>
   </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Kamp, I.</subfield>
+    <subfield code="b">Kamp, I</subfield>
+    <subfield code="e">regular</subfield>
+  </datafield>
   <datafield tag="773" ind1=" " ind2=" ">
     <subfield code="p">Astrophysical Journal</subfield>
     <subfield code="v">243</subfield>

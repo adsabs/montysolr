@@ -69,7 +69,11 @@ public class WriteableSynonymMap {
 	}
 	
 	public void persist() throws IOException {
-		Writer writer = getWriter();
+		persist(true);
+	}
+	
+	public void persist(boolean append) throws IOException {
+		Writer writer = getWriter(append);
 		if (writer == null) {
 			log.error("Cannot write synonyms, writer object is null.");
 			return;
@@ -80,7 +84,7 @@ public class WriteableSynonymMap {
 		writer.close();
 	}
 	
-	public Writer getWriter() {
+	public Writer getWriter(boolean append) {
 		if (outFile == null)
 			return null;
 		
@@ -89,7 +93,7 @@ public class WriteableSynonymMap {
 		
 		Charset UTF_8 = Charset.forName("UTF-8");
 		try {
-			w = new OutputStreamWriter(new FileOutputStream(this.outFile, true), UTF_8);
+			w = new OutputStreamWriter(new FileOutputStream(this.outFile, append), UTF_8);
 			//w = new BufferedWriter(w);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
