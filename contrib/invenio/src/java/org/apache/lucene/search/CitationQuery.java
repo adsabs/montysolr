@@ -7,7 +7,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.util.ToStringUtils;
 
-public class CitationQueryCitedBy extends Query {
+public class CitationQuery extends Query {
 
 	private static final long serialVersionUID = -5670377581753190942L;
 	Query query;
@@ -23,7 +23,7 @@ public class CitationQueryCitedBy extends Query {
 	 * @param filter
 	 *            Filter to apply to query results, cannot be <code>null</code>.
 	 */
-	public CitationQueryCitedBy(Query query, Filter filter) {
+	public CitationQuery(Query query, Filter filter) {
 		this.query = query;
 		this.filter = filter;
 	}
@@ -62,7 +62,7 @@ public class CitationQueryCitedBy extends Query {
 					inner.addDetail(new Explanation(getBoost(), "boost"));
 					inner.addDetail(preBoost);
 				}
-				Filter f = CitationQueryCitedBy.this.filter;
+				Filter f = CitationQuery.this.filter;
 				DocIdSet docIdSet = f.getDocIdSet(ir);
 				DocIdSetIterator docIdSetIterator = docIdSet == null ? DocIdSet.EMPTY_DOCIDSET
 						.iterator() : docIdSet.iterator();
@@ -81,7 +81,7 @@ public class CitationQueryCitedBy extends Query {
 
 			// return this query
 			public Query getQuery() {
-				return CitationQueryCitedBy.this;
+				return CitationQuery.this;
 			}
 
 			// return a filtering scorer
@@ -190,7 +190,7 @@ public class CitationQueryCitedBy extends Query {
 	public Query rewrite(IndexReader reader) throws IOException {
 		Query rewritten = query.rewrite(reader);
 		if (rewritten != query) {
-			CitationQueryCitedBy clone = (CitationQueryCitedBy) this.clone();
+			CitationQuery clone = (CitationQuery) this.clone();
 			clone.query = rewritten;
 			return clone;
 		} else {
@@ -224,8 +224,8 @@ public class CitationQueryCitedBy extends Query {
 
 	/** Returns true iff <code>o</code> is equal to this. */
 	public boolean equals(Object o) {
-		if (o instanceof CitationQueryCitedBy) {
-			CitationQueryCitedBy fq = (CitationQueryCitedBy) o;
+		if (o instanceof CitationQuery) {
+			CitationQuery fq = (CitationQuery) o;
 			return (query.equals(fq.query) && filter.equals(fq.filter) && getBoost() == fq
 					.getBoost());
 		}

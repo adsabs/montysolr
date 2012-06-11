@@ -10,6 +10,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.junit.BeforeClass;
 
@@ -39,12 +40,12 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		directory = newDirectory();
 		writer = new RandomIndexWriter(random, directory);
 
-		adoc("id", "A", "references", "B", "references", "C", "references", "D");
-		adoc("id", "B");
-		adoc("id", "C", "references", "E", "references", "F");
-		adoc("id", "D", "references", "B");
-		adoc("id", "E");
-		adoc("id", "F");
+		adoc("id", "1", "references", "2", "references", "3", "references", "4");
+		adoc("id", "2");
+		adoc("id", "3", "references", "5", "references", "6");
+		adoc("id", "4", "references", "2");
+		adoc("id", "5");
+		adoc("id", "6");
 
 		reader = writer.getReader();
 		searcher = newSearcher(reader);
@@ -69,8 +70,21 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 	}
 	
 	
-	public void testCitedBy() {
-		TermQuery q = new TermQuery(new Term("id", "C"));
+	public void testCitedBy() throws Exception {
+		TermQuery q1 = new TermQuery(new Term("id", "1"));
+		TermQuery q3 = new TermQuery(new Term("id", "3"));
+		BooleanQuery bq = new BooleanQuery();
+		bq.add(q1, Occur.SHOULD);
+		bq.add(q3, Occur.SHOULD);
+		
+		assertEquals(1, searcher.search(q1, 10).totalHits);
+		assertEquals(1, searcher.search(q3, 10).totalHits);
+		assertEquals(2, searcher.search(bq, 10).totalHits);
+		
+		
+		//filter = new Citation
+		//CitationQuery cq = new CitationQuery(bq, filter)
+		
 	}
 	
 	// Uniquely for Junit 3
