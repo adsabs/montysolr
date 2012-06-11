@@ -48,5 +48,9 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 		
 	}
 	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestSolrCitationQuery.class);
+    }
 
 }
