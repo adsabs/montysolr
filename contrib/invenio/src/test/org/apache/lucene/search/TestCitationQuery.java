@@ -72,4 +72,9 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 	public void testCitedBy() {
 		TermQuery q = new TermQuery(new Term("id", "C"));
 	}
+	
+	// Uniquely for Junit 3
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestCitationQuery.class);
+    }
 }
