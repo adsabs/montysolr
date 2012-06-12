@@ -547,11 +547,11 @@ lucene.version=${lucene.version}
 		<condition property="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr">
 			<and>
 				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/example/start.jar"/>
-				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/lib/commons-io-1.4.jar"/>
+				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/lib/README.committers.txt"/>
 			</and>
 		</condition>
 
-		<echo message="Did we find real solr? Path=${solr.real.location}" level="verbose" />
+		<echo message="Did we find solr location? Path=${solr.real.location}"/>
 	</target>
 
 
