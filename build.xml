@@ -540,7 +540,7 @@ lucene.version=${lucene.version}
 		<condition property="solr.real.location" value="${solr.home}">
 			<and>
 				<available file="${solr.home}/example/start.jar"/>
-				<available file="${solr.home}/lib/commons-io-1.4.jar"/>
+				<available file="${solr.home}/lib/README.committers.txt"/>
 			</and>
 		</condition>
 
