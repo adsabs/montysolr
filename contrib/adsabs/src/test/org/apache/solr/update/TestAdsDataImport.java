@@ -137,9 +137,11 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "volume:l219"), "//*[@numFound='1']");
 		assertQ(req("q", "volume:L219"), "//*[@numFound='1']");
 		assertQ(req("q", "issue:4"), "//*[@numFound='1']");
-		assertQ(req("q", "aff:nasa"), "//*[@numFound='1']");
-		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']");
-		assertQ(req("q", "aff:kavli"), "//*[@numFound='1']");
+		assertQ(req("q", "aff:nasa"), "//*[@numFound='1']"); // should find acronym...
+		assertQ(req("q", "aff:NASA"), "//*[@numFound='1']"); // regardless of case
+		assertQ(req("q", "aff:SPACE"), "//*[@numFound='0']"); // be case sensitive with uppercased query terms
+		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']"); // same here
+		assertQ(req("q", "aff:kavli"), "//*[@numFound='1']"); // otherwise case-insensitive
 		
 		
 		/*
@@ -242,12 +244,20 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		 * keywords
 		 */
 		assertQ(req("q", "keyword:\"classical statistical mechanics\""), "//*[@numFound='1']");
-		assertQ(req("q", "keyword:\"WORLD WIDE WEB\""), "//*[@numFound='1']");
-		assertQ(req("q", "keyword:HYDRODYNAMICS"), "//*[@numFound='1']");
-		assertQ(req("q", "keyword_norm:HYDRODYNAMICS"), "//*[@numFound='1']");
-		assertQ(req("q", "keyword_norm:\"methods numerical\""), "//*[@numFound='1']");
-		assertQ(req("q", "keyword_facet:\"World Wide Web\""), "//*[@numFound='1']");
-		assertQ(req("q", "keyword_facet:\"world wide web\""), "//*[@numFound='0']");
+		assertQ(req("q", "keyword:\"WORLD WIDE WEB\""), "//*[@numFound='1']"); // should be case-insensitive
+		assertQ(req("q", "keyword:\"fluid dynamics\""), "//*[@numFound='1']"); // should get both 695$a ...
+		assertQ(req("q", "keyword:\"methods numerical\""), "//*[@numFound='1']"); // ... and 695$b 
+		assertQ(req("q", "keyword:WISE"), "//*[@numFound='1']"); // ... and 653$a
+		assertQ(req("q", "keyword:\"planets and satellites\""), "//*[@numFound='1']"); // .. and 653$b
+		assertQ(req("q", "keyword:spectroscopy"), "//*[@numFound='1']");
+		assertQ(req("q", "keyword_norm:HYDRODYNAMICS"), "//*[@numFound='1']"); // case-insensitive
+		assertQ(req("q", "keyword_norm:Magnitudes"), "//*[@numFound='0']"); // should not get 695$a 
+		assertQ(req("q", "keyword_norm:WISE"), "//*[@numFound='0']"); // ... or 653$a 
+		assertQ(req("q", "keyword_norm:\"methods numerical\""), "//*[@numFound='1']"); // should get 695$b 
+		assertQ(req("q", "keyword_facet:\"world wide web\""), "//*[@numFound='0']"); // case-sensitive
+		assertQ(req("q", "keyword_facet:planets"), "//*[@numFound='0']"); // not tokenized
+		assertQ(req("q", "keyword_facet:\"planets and satellites\""), "//*[@numFound='1']"); // should get 653$b
+		assertQ(req("q", "keyword_facet:\"methods numerical\""), "//*[@numFound='1']"); // should get 695$b
 		
 		/*
 		 * identifier
@@ -274,6 +284,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "title:no-sky"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
 		assertQ(req("q", "title:nosky"), "//*[@numFound='1']");
 		assertQ(req("q", "title:q\\'i"), "//*[@numFound='2']");
+		assertQ(req("q", "title:KEPLER"), "//*[@numFound='0']"); // shouldn't lowercase all-caps (acronym) terms
 		
 		
 		/*
@@ -283,6 +294,9 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "abstract:abstract"), "//*[@numFound='1']"); // everything besides title is stopword
 		assertQ(req("q", "abstract:No-SKy"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
 		assertQ(req("q", "abstract:nosky"), "//*[@numFound='1']");
+		assertQ(req("q", "abstract:sph"), "//*[@numFound='1']");
+		assertQ(req("q", "abstract:SPH"), "//*[@numFound='1']");
+		assertQ(req("q", "abstract:PARTICLE"), "//*[@numFound='0']"); // acronyms shouldn't get lowercased
 		
 		//becomes: abstract:q'i abstract:q abstract:i abstract:qi
 		assertQ(req("q", "abstract:q\\'i", "fl", "recid,abstract,title"), "//*[@numFound='4']");

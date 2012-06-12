@@ -316,8 +316,8 @@
    <field name="aff" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
    <field name="email" type="first_string" indexed="true" stored="true" multiValued="true"/>
    
-   <field name="keyword" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
-   <field name="keyword_norm" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
+   <field name="keyword" type="normalized_text_ascii" indexed="true" stored="true" multiValued="true"/>
+   <field name="keyword_norm" type="normalized_text_ascii" indexed="true" stored="true" multiValued="true"/>
    <field name="keyword_facet" type="string" indexed="true" stored="true" multiValued="true"/>
    
    <field name="property" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
@@ -373,7 +373,8 @@
    <copyField source="bibcode" dest="bibstem_facet"/>
    
    <copyField source="pubdate" dest="pubdate_sort"/>
-   <copyField source="keyword" dest="keyword_facet"/>
+   <copyField source="keyword_norm" dest="keyword"/>
+   <copyField source="keyword_norm" dest="keyword_facet"/>
    
    <copyField source="author" dest="author_surname"/>
    <copyField source="first_author" dest="author"/>

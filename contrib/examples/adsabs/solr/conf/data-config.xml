@@ -112,17 +112,16 @@
         <field column="arxiv_class"        
             xpath="/collection/record/datafield[@tag='650']/subfield[@code='a']" />
         
-        <field column="tag"        
-            xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />  <!--  free-text version -->
-        
-        <field column="tag"        
-            xpath="/collection/record/datafield[@tag='653']/subfield[@code='b']" />  <!--  normalized version -->
-            
         <field column="facility"        
             xpath="/collection/record/datafield[@tag='693']/subfield[@code='f']" /> 
         
         <field column="telescope"        
             xpath="/collection/record/datafield[@tag='693']/subfield[@code='t']" />    
+            
+        <field column="keyword"        
+            xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />  <!--  free-text version -->
+        <field column="keyword_norm"        
+            xpath="/collection/record/datafield[@tag='653']/subfield[@code='b']" />  <!--  normalized version -->
             
         <field column="keyword"        
             xpath="/collection/record/datafield[@tag='695']/subfield[@code='a']" />
