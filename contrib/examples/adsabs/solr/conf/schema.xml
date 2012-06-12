@@ -47,7 +47,7 @@
     
     <fieldType name="reader_data" class="solr.MongoDataField" omitNorms="true" databaseName="solr4ads" collectionName="docs" mongoFieldName="readers" isPolyField="true" />
 
-     <fieldType name="ads_author" class="solr.TextField" positionIncrementGap="100">
+     <fieldType name="author" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
@@ -61,6 +61,36 @@
         <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true"/>
         <filter class="org.adsabs.solr.analysis.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
+      </analyzer>
+    </fieldType>
+    
+    <fieldType name="author_exact" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
+        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true"/>
+        <filter class="org.adsabs.solr.analysis.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
+      </analyzer>
+    </fieldType>
+    
+    <fieldType name="author_nosyn" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
+        <filter class="org.adsabs.solr.analysis.AuthorVariationFilterFactory"/>
+        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
+      </analyzer>
+    </fieldType>
+    
+     <fieldType name="author_exact_nosyn" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
+        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
       </analyzer>
     </fieldType>
     
@@ -272,12 +302,12 @@
    <field name="abstract" type="ads_text" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
    
    
-   <field name="author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
+   <field name="author" type="author" indexed="true" stored="true" multiValued="true"/>
    <field name="author_norm" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
    <field name="author_facet" type="string" indexed="true" stored="${storeAll:false}" multiValued="true"/>
    
    <!-- tmp fix for markus, should be handled with positional search -->
-   <field name="first_author" type="ads_author" indexed="true" stored="true" multiValued="true"/>
+   <field name="first_author" type="author" indexed="true" stored="true" multiValued="true"/>
    <field name="first_author_norm" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
    <field name="first_author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
    <field name="author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
