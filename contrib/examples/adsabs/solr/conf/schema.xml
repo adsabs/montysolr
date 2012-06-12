@@ -28,10 +28,9 @@
         <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="text.synonyms" ignoreCase="false" expand="false"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
+        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
       <analyzer type="query">
@@ -64,7 +63,6 @@
         <filter class="org.adsabs.solr.analysis.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
       </analyzer>
     </fieldType>
-    
     
     <fieldType name="doi_string" class="solr.TextField">
       <analyzer type="index">
@@ -99,7 +97,6 @@
       </analyzer>
     </fieldType>
     
-    
     <fieldType name="first_string" class="solr.TextField">
       <analyzer type="index">
         <tokenizer class="solr.PatternTokenizerFactory" pattern=";" group="-1" />
@@ -114,7 +111,6 @@
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
     </fieldType>
-    
     
     <fieldType name="normalized_text" class="solr.TextField">
       <analyzer type="index">
@@ -139,9 +135,6 @@
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
-    
-    
-    
     
     <fieldType name="normalized_string_ascii" class="solr.TextField">
       <analyzer type="index">
@@ -199,32 +192,6 @@
       </analyzer>
     </fieldType>
 
-    <fieldType name="ads_text_syn" class="solr.TextField" positionIncrementGap="100">
-      <analyzer type="index">
-        <tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
-        <filter class="solr.PatternReplaceFilterFactory" pattern="-?\s+-?" replacement="-" replace="all"/>
-        <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
-        <filter class="solr.ASCIIFoldingFilterFactory"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="text.synonyms" ignoreCase="false" expand="false"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
-        <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
-        <filter class="solr.TrimFilterFactory"/>
-      </analyzer>
-      <analyzer type="query">
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-        <filter class="solr.ASCIIFoldingFilterFactory"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="text.synonyms" ignoreCase="false" expand="false"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
-        <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
-        <filter class="solr.TrimFilterFactory"/>
-      </analyzer>
-    </fieldType>
-
-    
     <fieldType name="bibstem_facet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
         <analyzer type="index">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
