@@ -703,6 +703,11 @@
     <subfield code="b">Werner, M</subfield>
     <subfield code="e">regular</subfield>
   </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Kamp, I.</subfield>
+    <subfield code="b">Kamp, I</subfield>
+    <subfield code="e">regular</subfield>
+  </datafield>
   <datafield tag="773" ind1=" " ind2=" ">
     <subfield code="p">Astrophysical Journal</subfield>
     <subfield code="v">243</subfield>
@@ -1098,8 +1103,8 @@
       <subfield code="9">STI category</subfield>
     </datafield>
     <datafield tag="520" ind1="" ind2="">
-      <subfield code="a"></subfield>
-      <subfield code="y">The fundamentals of the smoothed particle hydrodynamics (SPH) method and its applications in astrophysics are reviewed. The discussion covers equations of motion, viscosity amd thermal conduction, spatially varying resolution, kernels, magnetic fields, special relativity, and implementation. Applications of the SPH method are discussed with reference to gas dynamics, binary stars and stellar collisions, formation of the moon and impact problems, fragmentation and cloud collisions, and cosmological and galactic problems. Other applications discussed include disks and rings, radio jets, motion near black holes, supernovae, magnetic phenomena, and nearly incompressible flow.</subfield>
+      <subfield code="a">The fundamentals of the smoothed particle hydrodynamics (SPH) method and its applications in astrophysics are reviewed. The discussion covers equations of motion, viscosity amd thermal conduction, spatially varying resolution, kernels, magnetic fields, special relativity, and implementation. Applications of the SPH method are discussed with reference to gas dynamics, binary stars and stellar collisions, formation of the moon and impact problems, fragmentation and cloud collisions, and cosmological and galactic problems. Other applications discussed include disks and rings, radio jets, motion near black holes, supernovae, magnetic phenomena, and nearly incompressible flow.</subfield>
+      <subfield code="y">en</subfield>
     </datafield>
     <datafield tag="856" ind1="4" ind2="">
       <subfield code="u">http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1992ARA%26A..30..543M&amp;link_type=TOC</subfield>
