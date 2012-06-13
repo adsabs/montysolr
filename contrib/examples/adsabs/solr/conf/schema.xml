@@ -327,6 +327,8 @@
    <field name="thesis" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
    <field name="copyright" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
    
+   <field name="reference" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true" />
+   
    <!--  this is just a fake field (for the moment) -->
    <field name="all" type="ads_text" indexed="true" stored="true" multiValued="false"/>
 
