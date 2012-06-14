@@ -1,0 +1,19 @@
+author:acco*
+title:acco*
+pub:apj
+pub:apj*
+first_author_surname:cutri
+author_facet:"Tenenbaum, P"
+page:2056 AND recid:9106451
+page:2056
+volume:21
+volume:2*
+database:astronomy
+database:astronomy OR database:a*
+bibstem:ycat
+doi:sfsfsfsdf
+arxiv:1002*
+title:what
+title:foo
+title:of
+title:and
