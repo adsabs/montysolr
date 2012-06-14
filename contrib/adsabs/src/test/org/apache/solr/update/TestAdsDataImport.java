@@ -304,6 +304,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
 		
+		assertQ(req("q", "reference:2001gr.qc.....3002Z"), "//*[@numFound='1']");
 		//assertQ(req("qt", "/admin/luke"), "//*[@numFound='0']");
 	}
 	
