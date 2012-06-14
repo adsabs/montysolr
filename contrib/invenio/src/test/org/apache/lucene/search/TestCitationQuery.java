@@ -1,6 +1,8 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
 import invenio.montysolr.util.MontySolrSetup;
@@ -82,8 +84,18 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(2, searcher.search(bq, 10).totalHits);
 		
 		
-		//filter = new Citation
-		//CitationQuery cq = new CitationQuery(bq, filter)
+//		collector = new CitationCollectorCites();
+//		CitationQuery cq = new CitationQuery(bq, null, collector);
+//		
+//		
+//		assertEquals(5, searcher.search(bq, 10).totalHits);
+//		ScoreDoc[] docs = searcher.search(bq, 10).scoreDocs;
+//		
+//		ArrayList<Integer> ar = new ArrayList<Integer>();
+//		for (ScoreDoc d: docs) {
+//			ar.add(d.doc);
+//		}
+//		assertTrue(ar.containsAll(Arrays.asList(new Integer[]{2,3,4,5,6})));
 		
 	}
 	

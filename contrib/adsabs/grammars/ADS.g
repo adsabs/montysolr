@@ -98,7 +98,7 @@ atom
 field	
 	:	
 	TERM_NORMAL COLON -> TERM_NORMAL
-	| STAR COLON -> STAR["*"]
+	//| STAR COLON -> STAR["*"]
 	;
 
 value  
@@ -114,7 +114,8 @@ value
 	| DATE_RANGE -> ^(QDATE DATE_RANGE)
 	| AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
 	| QMARK -> ^(QTRUNCATED QMARK)
-	| STAR -> ^(QANYTHING STAR)
+	| STAR COLON b=STAR -> ^(QANYTHING $b)
+	| STAR -> ^(QTRUNCATED STAR)
 	//| COMMA -> ^(QCOMMA COMMA)
   	;
 
@@ -324,7 +325,8 @@ identifier
 	(TERM_NORMAL -> $identifier TERM_NORMAL
 	| PHRASE_ANYTHING  -> $identifier ^(QPHRASETRUNC PHRASE_ANYTHING)
 	| PHRASE -> $identifier ^(QPHRASE PHRASE)
-	| NUMBER  -> $identifier NUMBER)
+	| NUMBER  -> $identifier NUMBER
+	| STAR -> $identifier STAR)
 	;
 	
 coordinate

@@ -394,7 +394,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("\"te??t phrase\"", null, "te??t phrase", WildcardQuery.class);
 		assertQueryEquals("\"te*?t phrase\"", null, "te*?t phrase", WildcardQuery.class);
 		
-		assertQueryEquals("*", null, "*:*", MatchAllDocsQuery.class);
+		
+		assertQueryEquals("*", null, "*", WildcardQuery.class);
 		assertQueryEquals("*:*", null, "*:*", MatchAllDocsQuery.class);
 		
 		assertQueryEquals("?", null, "?", WildcardQuery.class);
@@ -411,6 +412,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("*t*a\\?", null, "*t*a?", WildcardQuery.class);
 		assertQueryEquals("*t*\\a", null, "*t*a", WildcardQuery.class);
 		
+		assertQueryEquals("title:*", null, "title:*", WildcardQuery.class);
+		assertQueryEquals("doi:*", null, "doi:*", WildcardQuery.class);
 		
 	}
 	

@@ -244,6 +244,7 @@
 		<path id="montysolr.classpath">
 			<fileset dir="${build.dir}" includes="montysolr*.jar" />
 			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
+			<fileset dir="${solr.real.location}" includes="lib/**/*.jar" />
 			<fileset dir="${solr.real.location}" includes="example/lib/**/*.jar" />
 			<fileset dir="${webdist.home}" includes="lib/**/*.jar" />
 			<fileset dir="${lib.dir}" includes="**/*.jar" />

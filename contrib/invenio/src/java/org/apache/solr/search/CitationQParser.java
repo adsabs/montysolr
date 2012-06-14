@@ -11,9 +11,9 @@ import java.util.Map.Entry;
 
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.CitationQuery;
 import org.apache.lucene.search.CitationQueryCites;
 import org.apache.lucene.search.CitationQueryFilter;
+import org.apache.lucene.search.CollectorQuery;
 import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Filter;
@@ -76,7 +76,8 @@ public class CitationQParser extends QParser {
 		
 		if (rel.equals("citedby")) {
 			Filter qfilter = new CitationQueryFilter();
-			return new CitationQuery(mainq, qfilter);
+			//TODO: the collector class doesn't work
+			return new CollectorQuery(mainq, qfilter, null);
 		}
 		else if (rel.equals("cites")) {
 			try {
