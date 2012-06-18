@@ -3,19 +3,26 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 
-public class CitesCollector extends Collector {
+public class CitesCollector extends Collector implements SetCollector {
 
 	private Scorer scorer;
 	private IndexReader reader;
 	private int docBase;
 	private String indexField;
-	private HashMap<String, Integer> fieldCache;
-	private Set recids = new HashSet();
+	private Map<Integer, Integer> fieldCache;
+	private Set<Integer> recids = new HashSet();
+	
+	public CitesCollector(Map<Integer, Integer> cache, String field) {
+		super();
+		fieldCache = cache;
+		indexField = field;
+	}
 
 	@Override
 	public void setScorer(Scorer scorer) throws IOException {
@@ -27,9 +34,11 @@ public class CitesCollector extends Collector {
 	public void collect(int doc) throws IOException {
 		Document document = reader.document(docBase + doc);
 		String[] vals = document.getValues(indexField);
+		Integer va;
 		for (String v: vals) {
-			if (fieldCache.containsKey(v)) {
-				recids.add(fieldCache.get(v));
+			va = Integer.valueOf(v);
+			if (fieldCache.containsKey(va)) {
+				recids.add(fieldCache.get(va));
 			}
 		}
 
@@ -46,6 +55,10 @@ public class CitesCollector extends Collector {
 	@Override
 	public boolean acceptsDocsOutOfOrder() {
 		return true;
+	}
+	
+	public Set<Integer> getHits() {
+		return recids;
 	}
 
 }

@@ -33,11 +33,26 @@ public class CollectorQuery extends Query {
 		this.filter = filter;
 		this.collector = collector;
 	}
-
+	
+	public CollectorQuery(Query query, Collector collector) {
+		this.query = query;
+		this.filter = null;
+		this.collector = collector;
+	}
+	
 	/**
 	 * Returns a Weight that applies the filter to the enclosed query's Weight.
 	 * This is accomplished by overriding the Scorer returned by the Weight.
 	 */
+	public Weight createWeight(final Searcher searcher) throws IOException {
+		Weight weight = query.createWeight(searcher);
+		Similarity similarity = query.getSimilarity(searcher);
+		
+		Weight w = new CollectorWeight(weight, similarity, collector);
+		
+		return w;
+	}
+	
 //	public Weight createWeight(final Searcher searcher) throws IOException {
 //		final Weight weight = query.createWeight(searcher);
 //		final Similarity similarity = query.getSimilarity(searcher);
@@ -195,6 +210,10 @@ public class CollectorQuery extends Query {
 	public Filter getFilter() {
 		return filter;
 	}
+	
+	public Collector getCollector() {
+		return collector;
+	}
 
 	// inherit javadoc
 	public void extractTerms(Set<Term> terms) {
@@ -204,7 +223,7 @@ public class CollectorQuery extends Query {
 	/** Prints a user-readable version of this query. */
 	public String toString(String s) {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("filtered(");
+		buffer.append("CollectorQuery(");
 		buffer.append(query.toString(s));
 		buffer.append(")->");
 		buffer.append(filter);

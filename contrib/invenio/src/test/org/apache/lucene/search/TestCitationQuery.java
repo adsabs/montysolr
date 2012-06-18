@@ -3,6 +3,8 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
 import invenio.montysolr.util.MontySolrSetup;
@@ -83,19 +85,22 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(1, searcher.search(q3, 10).totalHits);
 		assertEquals(2, searcher.search(bq, 10).totalHits);
 		
+		Map<Integer, Integer> cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), "id");
 		
-//		collector = new CitationCollectorCites();
-//		CitationQuery cq = new CitationQuery(bq, null, collector);
-//		
-//		
-//		assertEquals(5, searcher.search(bq, 10).totalHits);
-//		ScoreDoc[] docs = searcher.search(bq, 10).scoreDocs;
-//		
-//		ArrayList<Integer> ar = new ArrayList<Integer>();
-//		for (ScoreDoc d: docs) {
-//			ar.add(d.doc);
-//		}
-//		assertTrue(ar.containsAll(Arrays.asList(new Integer[]{2,3,4,5,6})));
+		CitesCollector collector = new CitesCollector(cache, "references");
+		CollectorQuery cq = new CollectorQuery(bq, collector);
+		
+		
+		assertEquals(5, searcher.search(cq, 10).totalHits);
+		ScoreDoc[] docs = searcher.search(cq, 10).scoreDocs;
+		
+		ArrayList<Integer> ar = new ArrayList<Integer>();
+		for (ScoreDoc d: docs) {
+			Document doc = reader.document(d.doc);
+			ar.add(Integer.valueOf(doc.get("id")));
+		}
+		List<Integer> er = Arrays.asList(2,3,4,5,6);
+		assertTrue(ar.containsAll(er));
 		
 	}
 	
