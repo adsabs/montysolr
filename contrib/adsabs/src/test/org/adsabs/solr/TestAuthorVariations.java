@@ -89,7 +89,7 @@ public class TestAuthorVariations extends TestCase {
 		input.put("middle", "QUINTERO");
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("GOMEZ, H\\w* QUINTERO\\b.*");
-		expected.add("GOMEZ, H\\w* Q.*");
+		expected.add("GOMEZ, H\\w* Q\\b.*");
 		expected.add("GOMEZ, H\\w*");
 		expected.add("GOMEZ,");
 		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
@@ -105,15 +105,31 @@ public class TestAuthorVariations extends TestCase {
 		assertEquals(expected, actual);
 	}
 	
+	public void testgenerateNameVariations7() {
+		HashMap<String,String> input = new HashMap<String,String>() {{
+			put("last", "MILLAR");
+			put("first", "CAROL");
+			put("middle", "EVELYN");
+		}}; 
+		HashSet<String> expected = new HashSet<String>() {{
+			add("MILLAR, CAROL EVELYN\\b.*");
+		    add("MILLAR, CAROL E\\b.*");
+		    add("MILLAR, C E\\b.*");
+		    add("MILLAR, CAROL");
+		    add("MILLAR, C");
+		    add("MILLAR,");
+		}};
+		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
+		assertEquals(expected, actual);
+	}
+	
 	public void testGenerateSynonymVariations1() {
 		HashMap<String,String> input = new HashMap<String,String>();
 		input.put("first", "HECTOR");
 		input.put("last", "GOMEZ");
 		input.put("middle", "Q");
 		HashSet<String> expected = new HashSet<String>();
-		expected.add("GOMEZ, HECTOR Q.*");
 		expected.add("GOMEZ, HECTOR");
-		expected.add("GOMEZ, H Q.*");
 		expected.add("GOMEZ, H");
 		expected.add("GOMEZ,");
 		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
@@ -171,6 +187,23 @@ public class TestAuthorVariations extends TestCase {
 		input.put("last", "GOMEZ");
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("GOMEZ,.*");
+		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
+		assertEquals(expected, actual);
+	}
+	
+	public void testgenerateSynonymVariations7() {
+		HashMap<String,String> input = new HashMap<String,String>() {{
+			put("last", "MILLAR");
+			put("first", "CAROL");
+			put("middle", "EVELYN");
+		}}; 
+		HashSet<String> expected = new HashSet<String>() {{
+			add("MILLAR, CAROL EVELYN\\b.*");
+		    add("MILLAR, C E\\b.*");
+		    add("MILLAR, CAROL");
+		    add("MILLAR, C");
+		    add("MILLAR,");
+		}};
 		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
 		assertEquals(expected, actual);
 	}

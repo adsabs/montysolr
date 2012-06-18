@@ -31,14 +31,16 @@ public class AuthorVariations {
 	 *  HECTOR, G Q.*
      * 
      * It is essentially the same output as you get from getSynonymVariations except
-     * a few special cases (TODO: not clear to me)
+     * a few special cases. These special cases are variations needed for querying the 
+     * index of author names, but not needed or wanted for the process of transforming
+     * the curated synonyms
      * 
      * Example "h quintero gomez" will output:
      * 
      * GOMEZ, H\w* QUINTERO\b.*
 	 * GOMEZ,
   	 * GOMEZ, H\w*
-	 * GOMEZ, H\w* Q.*   <-- only this one is extra added
+	 * GOMEZ, H\w* Q\b.*   <-- only this one is extra added
      *  
      * @param authorString
      * @return
@@ -78,11 +80,14 @@ public class AuthorVariations {
 			if (middle != null) {
 				if (first.length() > 1) {
 					if (middle.length() > 1) {
-						variations.add(last + ", " + first + " " + middle.substring(0,1) + ".*");
+						variations.add(last + ", " + first + " " + middle.substring(0,1) + "\\b.*");
+					} else {
+						variations.add(last + ", " + first + " " + middle + ".*");
+						variations.add(last + ", " + first.substring(0,1) + " " + middle + ".*");
 					}
 				} else {
 					if (middle.length() > 1) {
-						variations.add(last + ", " + first + "\\w* " + middle.substring(0,1) + ".*");
+						variations.add(last + ", " + first + "\\w* " + middle.substring(0,1) + "\\b.*");
 					}
 				}
 			} else {
@@ -101,6 +106,11 @@ public class AuthorVariations {
 	/**
      * This method takes input string, e.g. "Hector, Gomez Q" and generates variations
      * of the author name PLUS enhances the variations with regular expression patterns.
+     * 
+     * The process that transforms the curated synonyms uses *only* the variations
+     * generated here. This limited set is also included in the variations used at query
+     * time but DON'T ADD THINGS HERE that are only necessary for the query phase--use
+     * getNameVariations for that
      * 
      *  HECTOR, GOMEZ
 	 *	HECTOR, G
@@ -153,8 +163,8 @@ public class AuthorVariations {
 						variations.add(last + ", " + first + " " + middle + "\\b.*");
 						variations.add(last + ", " + first.substring(0,1) + " " + middle.substring(0,1) + "\\b.*");
 					} else if (middle.length() == 1) {
-						variations.add(last + ", " + first.substring(0,1) + " " + middle + ".*");
-						variations.add(last + ", " + first + " " + middle + ".*");
+//						variations.add(last + ", " + first.substring(0,1) + " " + middle + ".*");
+//						variations.add(last + ", " + first + " " + middle + ".*");
 					}
 				} else {
 					variations.add(last + ", " + first + "\\w*");
