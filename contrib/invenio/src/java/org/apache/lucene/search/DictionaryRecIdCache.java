@@ -5,7 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermDocs;
+import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.IntParser;
+import org.apache.lucene.search.FieldCacheImpl.Cache;
+import org.apache.lucene.search.FieldCacheImpl.Entry;
+import org.apache.lucene.search.FieldCacheImpl.StopFillCacheException;
+import org.omg.CORBA.NO_MEMORY;
 
 /**
  * This class helps to translate from external source ids to lucene ids.
@@ -41,7 +49,9 @@ public enum DictionaryRecIdCache {
 		translation_cache_tracker = new HashMap<String, Integer>(2);
 		
 	public void setCache(String name, Map<Integer, int[]> value) {
-		cache.put(name, value);
+		synchronized(cache) {
+			cache.put(name, value);
+		}
 	}
 	
 	public Map<Integer, int[]> getCache(String name) {
@@ -83,11 +93,93 @@ public enum DictionaryRecIdCache {
 		if (translation_cache_tracker.containsKey(field))
 			old_hash = translation_cache_tracker.get(field);
 		if (!h.equals(old_hash)) {
+			synchronized(translation_cache_tracker) {
 				Map<Integer, Integer> translTable = buildCache(idMapping);
 				translation_cache.put(field, translTable);
 				translation_cache_tracker.put(field, h);
+			}
 		}
 		return translation_cache.get(field);
 	}
+	
+	
 
+	/**
+	 * Returns the lucene docids 
+	 * @param reader
+	 * @param field
+	 * @return
+	 * @throws IOException
+	 */
+	public int[][] getUnInvertedDocids(IndexReader reader, String field, String externalIds) throws IOException {
+		
+		final Map<Integer, Integer> idMapping = getTranslationCache(reader, externalIds);
+		
+		Object val = unInvertField(reader, new Entry(field, new FieldCache.IntParser() {
+		    public int parseInt(String value) {
+		        int v = Integer.parseInt(value);
+		        if (idMapping.containsKey(v)) {
+		        	return idMapping.get(v);
+		        }
+		        else {
+		        	return -1;
+		        }
+		      }
+		      protected Object readResolve() {
+		        return FieldCache.DEFAULT_INT_PARSER;
+		      }
+		      @Override
+		      public String toString() { 
+		        return FieldCache.class.getName()+".UNINVERTING_INT_PARSER"; 
+		      }
+		    }));
+		return (int[][]) val;
+		
+	}
+	
+	/*
+	 * A temporary hack to get uninverted values from the index
+	 * the solr-4.0 already has a solution for the problem of 
+	 * multivalued cache entries, see:
+	 * https://issues.apache.org/jira/browse/LUCENE-3354
+	 */
+	
+	protected Object unInvertField(IndexReader reader, Entry entryKey)
+	throws IOException {
+		Entry entry = entryKey;
+		String field = entry.field;
+		IntParser parser = (IntParser) entry.custom;
+
+		int[][] retArray = new int[reader.maxDoc()][];
+		TermDocs termDocs = reader.termDocs();
+		TermEnum termEnum = reader.terms (new Term (field));
+		try {
+			do {
+				Term term = termEnum.term();
+
+				if (term==null || term.field() != field) break;
+				int[] val = new int[termEnum.docFreq()];
+
+				int i = 0;
+				int luceneDocId = parser.parseInt(term.text());
+				
+				if (luceneDocId < 0) continue; // skip terms that are not mapped onto lucene ids
+				
+				termDocs.seek (termEnum);
+						while (termDocs.next()) {
+							
+							val[i] = termDocs.doc();
+							i++;
+						}
+						retArray[luceneDocId] = val;
+			} while (termEnum.next());
+		} catch (StopFillCacheException stop) {
+		} finally {
+			termDocs.close();
+			termEnum.close();
+		}
+		if (retArray == null) // no values
+			retArray = new int[reader.maxDoc()][];
+		return retArray;
+	}
 }

@@ -1,28 +1,31 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 
-public class CitesCollector extends Collector implements SetCollector {
+/**
+ * Implements the (x) --> X relation
+ * For the 'refersto' queries
+ * 
+ * @author rchyla
+ *
+ */
+public class CitedByCollector extends Collector implements SetCollector {
 
 	private Scorer scorer;
 	private IndexReader reader;
 	private int docBase;
 	private String indexField;
-	private Map<Integer, Integer> fieldCache;
-	private Set<Integer> recids;
+	private int[][] invertedCache;
+	private Set<Integer> recids = new HashSet<Integer>();
 	
-	public CitesCollector(Map<Integer, Integer> cache, String field) {
+	public CitedByCollector(int[][] cache, String field) {
 		super();
-		fieldCache = cache;
+		invertedCache = cache;
 		indexField = field;
-		recids = new HashSet<Integer>();
 	}
 
 	@Override
@@ -33,14 +36,9 @@ public class CitesCollector extends Collector implements SetCollector {
 
 	@Override
 	public void collect(int doc) throws IOException {
-		Document document = reader.document(docBase + doc);
-		String[] vals = document.getValues(indexField);
-		Integer va;
-		for (String v: vals) {
-			va = Integer.valueOf(v);
-			if (fieldCache.containsKey(va)) {
-				recids.add(fieldCache.get(va));
-			}
+		if (invertedCache[doc] == null) return;
+		for (int v: invertedCache[doc]) {
+			recids.add(v);
 		}
 
 	}

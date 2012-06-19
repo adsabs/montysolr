@@ -48,8 +48,11 @@ public class CollectorWeight extends Weight {
 		// in sequence
 		collector.setNextReader(reader, docBase);
 		docBase += reader.maxDoc();
-		return new CollectorScorer(similarity, innerWeight, 
-				innerWeight.scorer(reader, scoreDocsInOrder, topScorer), collector);
+		Scorer innerScorer = innerWeight.scorer(reader, scoreDocsInOrder, topScorer);
+		if (innerScorer == null) { //when there are no hits
+			return null;
+		}
+		return new CollectorScorer(similarity, innerWeight, innerScorer, collector);
 	}
 
 	@Override
