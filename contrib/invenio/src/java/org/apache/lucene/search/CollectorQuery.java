@@ -32,12 +32,20 @@ public class CollectorQuery extends Query {
 		this.query = query;
 		this.filter = filter;
 		this.collector = collector;
+		
+		if (collector == null) {
+			throw new IllegalStateException("Collector must not be null");
+		}
 	}
 	
 	public CollectorQuery(Query query, Collector collector) {
 		this.query = query;
 		this.filter = null;
 		this.collector = collector;
+		
+		if (collector == null) {
+			throw new IllegalStateException("Collector must not be null");
+		}
 	}
 	
 	/**
@@ -236,15 +244,22 @@ public class CollectorQuery extends Query {
 	public boolean equals(Object o) {
 		if (o instanceof CollectorQuery) {
 			CollectorQuery fq = (CollectorQuery) o;
-			return (query.equals(fq.query) && filter.equals(fq.filter) && getBoost() == fq
-					.getBoost());
+			return (query.equals(fq.query) 
+					&& (filter != null ? filter.equals(fq.filter) : true)
+					&& collector.equals(fq.collector)
+					&& getBoost() == fq.getBoost());
 		}
 		return false;
 	}
 
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return query.hashCode() ^ filter.hashCode()
+		if (filter != null) {
+			return query.hashCode() ^ filter.hashCode() ^ collector.hashCode()
+				+ Float.floatToRawIntBits(getBoost());
+		}
+		
+		return query.hashCode() ^ collector.hashCode()
 				+ Float.floatToRawIntBits(getBoost());
 	}
 }

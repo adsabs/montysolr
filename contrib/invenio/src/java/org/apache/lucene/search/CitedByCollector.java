@@ -64,5 +64,19 @@ public class CitedByCollector extends Collector implements SetCollector {
 	public String toString() {
 		return "refersto[using:" + indexField + "]";
 	}
+	
+	/** Returns a hash code value for this object. */
+	public int hashCode() {
+		return indexField.hashCode() ^ invertedCache.hashCode();
+	}
+	
+	/** Returns true iff <code>o</code> is equal to this. */
+	public boolean equals(Object o) {
+		if (o instanceof CitedByCollector) {
+			CitedByCollector fq = (CitedByCollector) o;
+			return hashCode() == fq.hashCode();
+		}
+		return false;
+	}
 
 }

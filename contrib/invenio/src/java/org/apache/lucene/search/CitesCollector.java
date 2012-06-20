@@ -66,5 +66,19 @@ public class CitesCollector extends Collector implements SetCollector {
 	public String toString() {
 		return "cites[using:" + indexField + "]";
 	}
+	
+	/** Returns a hash code value for this object. */
+	public int hashCode() {
+		return indexField.hashCode() ^ fieldCache.hashCode();
+	}
+	
+	/** Returns true iff <code>o</code> is equal to this. */
+	public boolean equals(Object o) {
+		if (o instanceof CitesCollector) {
+			CitesCollector fq = (CitesCollector) o;
+			return hashCode() == fq.hashCode();
+		}
+		return false;
+	}
 
 }

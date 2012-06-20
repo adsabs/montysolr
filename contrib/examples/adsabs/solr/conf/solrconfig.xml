@@ -130,7 +130,7 @@
       -->
     <!-- <maxBufferedDocs>1000</maxBufferedDocs> -->
 
-    <maxFieldLength>10000</maxFieldLength>
+    <maxFieldLength>100000</maxFieldLength>
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
 

@@ -292,7 +292,7 @@ def create_collection_bibrec(table_name, coll_name, step_size=10000):
         i = i + step_size
         sys.stderr.write("%s\n" % i)
         
-    sys.stderr.write("Total number of records: %s" % l)
+    sys.stderr.write("Total number of records: %s\n" % l)
     
 
 

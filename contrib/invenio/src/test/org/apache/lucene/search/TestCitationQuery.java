@@ -163,6 +163,16 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		er = Arrays.asList(3, 4,7);
 		assertTrue(ar.containsAll(er));
 		
+		
+		
+		CollectorQuery c1 = new CollectorQuery(bq15, new CitedByCollector(invCache, "references"));
+		CollectorQuery c2 = new CollectorQuery(bq15, new CitedByCollector(invCache, "references"));
+		assertTrue(c1.equals(c2));
+		
+		CollectorQuery c3 = new CollectorQuery(bq13, new CitesCollector(cache, "references"));
+		CollectorQuery c4 = new CollectorQuery(bq13, new CitesCollector(cache, "references"));
+		assertTrue(c3.equals(c4));
+		
 	}
 	
 	// Uniquely for Junit 3
