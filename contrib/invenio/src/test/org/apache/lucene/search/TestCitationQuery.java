@@ -114,6 +114,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		// now test of references ( X --> (x))
 		Map<Integer, Integer> cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), "id");
+		cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), "id");
+		cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), "id");
 		
 		assertEquals(3, searcher.search(new CollectorQuery(q1, new CitesCollector(cache, "references")), 10).totalHits);
 		assertEquals(0, searcher.search(new CollectorQuery(q2, new CitesCollector(cache, "references")), 10).totalHits);
@@ -136,6 +138,9 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		int[][] invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, "references", "id");
+		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, "references", "id");
+		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, "references", "id");
+		
 		assertEquals(1, searcher.search(new CollectorQuery(q1, new CitedByCollector(invCache, "references")), 10).totalHits);
 		assertEquals(2, searcher.search(new CollectorQuery(q2, new CitedByCollector(invCache, "references")), 10).totalHits);
 		assertEquals(1, searcher.search(new CollectorQuery(q3, new CitedByCollector(invCache, "references")), 10).totalHits);

@@ -1,17 +1,24 @@
 package org.apache.lucene.queryParser.aqp.builders;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.aqp.AqpSubqueryParser;
+import org.apache.lucene.queryParser.aqp.AqpSubqueryParserFull;
+import org.apache.lucene.queryParser.aqp.NestedParseException;
 import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.core.QueryNodeException;
 import org.apache.lucene.queryParser.core.builders.QueryBuilder;
 import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.search.CitedByCollector;
+import org.apache.lucene.search.CitesCollector;
+import org.apache.lucene.search.CollectorQuery;
+import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -31,6 +38,9 @@ import org.apache.solr.search.QParser;
 import org.apache.solr.search.RawQParserPlugin;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
+import org.apache.solr.search.ValueSourceParser;
+import org.apache.solr.search.function.PositionSearchFunction;
+import org.apache.solr.search.function.ValueSource;
 
 public class AqpAdslabsSubSueryProvider implements
 		AqpFunctionQueryBuilderProvider {
@@ -121,6 +131,45 @@ public class AqpAdslabsSubSueryProvider implements
 	    		  return q.getQuery();
 		      }
 		    });
+		parsers.put("refersto", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				Query innerQuery = fp.parseNestedQuery();
+				SolrQueryRequest req = fp.getReq();
+				
+				// TODO: make configurable
+				String refField = "references";
+				String idField = "id";
+				
+				int[][] invCache;
+				try {
+					invCache = DictionaryRecIdCache.INSTANCE.
+					getUnInvertedDocids(req.getSearcher().getIndexReader(), refField, idField);
+				} catch (IOException e) {
+					throw new ParseException(e.getLocalizedMessage());
+				}
+				return new CollectorQuery(innerQuery, new CitedByCollector(invCache, refField));
+		      }
+		    });
+		parsers.put("cites", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				Query innerQuery = fp.parseNestedQuery();
+				SolrQueryRequest req = fp.getReq();
+				
+				// TODO: make configurable
+				String refField = "references";
+				String idField = "id";
+				
+				Map<Integer, Integer> cache;
+				
+				try {
+					cache = DictionaryRecIdCache.INSTANCE.
+						getTranslationCache(req.getSearcher().getIndexReader(), idField);
+				} catch (IOException e) {
+					throw new ParseException(e.getLocalizedMessage());
+				}
+				return new CollectorQuery(innerQuery, new CitesCollector(cache, refField));
+		      }
+		    });
 	};
 
 	public QueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
@@ -153,6 +202,13 @@ public class AqpAdslabsSubSueryProvider implements
 		
 		AqpFunctionQParser parser = new AqpFunctionQParser(subQuery, reqAttr.getLocalParams(), 
 				reqAttr.getParams(), req);
+		
+		if (provider instanceof AqpSubqueryParserFull) {
+			AqpFunctionQueryTreeBuilder.removeFuncName(node);
+		}
+		else {
+			AqpFunctionQueryTreeBuilder.simplifyValueNode(node);
+		}
 		
 		return new AqpSubQueryTreeBuilder(provider, parser);
 				

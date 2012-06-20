@@ -225,9 +225,9 @@ public class CollectorQuery extends Query {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("CollectorQuery(");
 		buffer.append(query.toString(s));
-		buffer.append(")->");
-		buffer.append(filter);
-		buffer.append(collector);
+		buffer.append(", filter=" + (filter!=null ? filter.toString() : "null"));
+		buffer.append(", collector=" + (collector!=null ? collector.toString() : "null"));
+		buffer.append(")");
 		buffer.append(ToStringUtils.boost(getBoost()));
 		return buffer.toString();
 	}

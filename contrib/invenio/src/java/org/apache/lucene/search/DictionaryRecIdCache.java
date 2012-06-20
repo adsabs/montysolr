@@ -105,15 +105,57 @@ public enum DictionaryRecIdCache {
 	
 
 	/**
-	 * Returns the lucene docids 
+	 * Uninverts the lucene index, it grabs all the values from the index and discovers what 
+	 * documents they are used in. This can be used for references, citations etc. Example:
+	 * 
+	 * Documents:
+	 *    id=4, recid=90, references=91, references=92
+	 *    id=5, recid=91, references=92
+	 *    id=6, recid=92, references=999
+	 *    
+	 * Will result in an array of size x (maxdoc)
+	 * 
+	 *   [[...],
+	 *    ...,
+	 *    [5, 6],  <-- position #4
+	 *    [6],
+	 *    [],      <-- position #6, 999 could not be resolved to a valid lucene docid
+	 *    ....]
+	 *   
+	 *   
+	 *  TODO: in Solr4.0 there is a much better solution, see
+	 *  https://issues.apache.org/jira/browse/LUCENE-3354
+	 * 
+	 * 
 	 * @param reader
+	 *    - top-leve index reader
 	 * @param field
+	 *    - field to uninvert (we expect multiple values)
+	 * @param externalIds
+	 * 	  - name of the index that contains the external system ids (eg. recids)
 	 * @return
+	 *    
 	 * @throws IOException
 	 */
+	
+	private HashMap<String, Object>invertedCache = new HashMap<String, Object >(2);
+	
 	public int[][] getUnInvertedDocids(IndexReader reader, String field, String externalIds) throws IOException {
 		
+		// first check that the index wasn't updated
+		Integer old_hash = null;
+		if (translation_cache_tracker.containsKey(externalIds))
+			old_hash = translation_cache_tracker.get(externalIds);
+
+		boolean indexUnchanged = old_hash.equals(getLuceneCache(reader, externalIds).hashCode());
+		
+		if (invertedCache.containsKey(field) && indexUnchanged) {
+			return (int[][]) invertedCache.get(field);
+		}
+		
 		final Map<Integer, Integer> idMapping = getTranslationCache(reader, externalIds);
+		
+		
 		
 		Object val = unInvertField(reader, new Entry(field, new FieldCache.IntParser() {
 		    public int parseInt(String value) {
@@ -133,6 +175,7 @@ public enum DictionaryRecIdCache {
 		        return FieldCache.class.getName()+".UNINVERTING_INT_PARSER"; 
 		      }
 		    }));
+		invertedCache.put(field, val);
 		return (int[][]) val;
 		
 	}

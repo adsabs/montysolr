@@ -36,7 +36,9 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 	public AqpFunctionQueryNode(String name, QueryBuilder builder, QueryNode node) {
 		allocate();
 		setLeaf(false);
-		add(node.getChildren().get(1).getChildren()); // we keep only the values
+		//add(node.getChildren().get(1).getChildren()); // we keep only the values
+		//add(node.getChildren().get(1));
+		add(node.getChildren());
 		this.builder = builder;
 		this.name = name;
 	}

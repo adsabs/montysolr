@@ -61,5 +61,10 @@ public class CitesCollector extends Collector implements SetCollector {
 	public Set<Integer> getHits() {
 		return recids;
 	}
+	
+	@Override
+	public String toString() {
+		return "cites[using:" + indexField + "]";
+	}
 
 }

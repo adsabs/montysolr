@@ -62,6 +62,17 @@ public class AqpFunctionQueryTreeBuilder extends QueryTreeBuilder
 		//valueNode.set(children);
 	}
 	
+	public static void simplifyValueNode(QueryNode node) throws QueryNodeException {
+		List<QueryNode> children = node.getChildren();
+		List<QueryNode> valChildren = children.get(1).getChildren();
+		children.clear();
+		children.addAll(valChildren);
+	}
+	
+	public static void removeFuncName(QueryNode node) throws QueryNodeException {
+		List<QueryNode> children = node.getChildren();
+		children.remove(0);
+	}
 	
 	/**
 	 * get the raw input from the children, we do not go 

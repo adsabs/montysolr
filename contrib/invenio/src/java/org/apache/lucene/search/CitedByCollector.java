@@ -59,5 +59,10 @@ public class CitedByCollector extends Collector implements SetCollector {
 	public Set<Integer> getHits() {
 		return recids;
 	}
+	
+	@Override
+	public String toString() {
+		return "refersto[using:" + indexField + "]";
+	}
 
 }

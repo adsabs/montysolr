@@ -291,6 +291,8 @@ def create_collection_bibrec(table_name, coll_name, step_size=10000):
                              (dbquery.real_escape_string(table_name), ','.join(map(str, c[i:i+step_size]))))
         i = i + step_size
         sys.stderr.write("%s\n" % i)
+        
+    sys.stderr.write("Total number of records: %s" % l)
     
 
 
