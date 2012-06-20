@@ -105,7 +105,7 @@ public class MongoDataField extends TextField {
 		
 		BasicDBObject query = new BasicDBObject();
 		query.put(DEFAULT_QUERY_KEY, externalVal);
-		log.debug("query: " + query);
+		//log.debug("query: " + query);
 		
 		BasicDBObject wanted = new BasicDBObject();
 		wanted.put(fieldName, 1);

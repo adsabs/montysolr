@@ -23,11 +23,19 @@ import invenio.montysolr.util.MontySolrSetup;
 import org.adsabs.mongodb.MongoConnection;
 import org.apache.lucene.queryParser.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.dataimport.DataConfig;
+import org.apache.solr.handler.dataimport.DataImporter;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.TextField;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
+
+import java.lang.reflect.Field; 
+import java.lang.reflect.Method; 
 
 /**
  * Tests that the dataimport handler does really wait and does not
@@ -39,7 +47,8 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
-		System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
+		// to use filesystem instead of ram
+		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
 		envInit();
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/invenio/src/python");
@@ -72,12 +81,62 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		super.tearDown();
 	}
 	
+	public void mockHandler(SolrRequestHandler handler) throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException {
+		
+		DataConfig config = null;
+		
+		Field fields[] = handler.getClass().getDeclaredFields();
+		for (Field f: fields) {
+			if (f.toString().contains("importer")) {
+				f.setAccessible(true);
+				DataImporter importer = (DataImporter) f.get(handler);
+				
+				Field fields2[] = DataImporter.class.getDeclaredFields();
+				for (Field f2: fields2) {
+					if (f2.toString().endsWith("config")) {
+						f2.setAccessible(true);
+						config = (DataConfig) f2.get(importer);
+					}
+				
+				}
+			}
+		}
+		
+		config.dataSources.get(null).put("type", "InvenioDataSource");
+		
+		SchemaField full = config.lowerNameVsSchemaField.get("full");
+//		System.out.println(full);
+		
+		FieldType type = null;
+		Field fields3[] = full.getClass().getDeclaredFields();
+		for (Field f: fields3) {
+			if (f.toString().endsWith("type")) {
+				f.setAccessible(true);
+				type = (FieldType) f.get(full);
+			}
+		}
+		System.out.println(type.toString());
+		
+		//schema = h.getCore().getSchema();
+		TextField tf = new TextField();
+		//tf.init(h.getCore().getSchema(), null);
+		
+		TextField x = (TextField) type;
+		
+		config.lowerNameVsSchemaField.remove("full");
+		config.lowerNameVsSchemaField.remove("ack");
+		config.lowerNameVsSchemaField.remove("reader");
+		
+	}
+	
 	public void testImport() throws Exception {
 		
 		
 		String testDir = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/";
 		
 		SolrRequestHandler handler = h.getCore().getRequestHandler("/invenio/import");
+		
+		//mockHandler(handler);
 		
 		SolrCore core = h.getCore();
 		
