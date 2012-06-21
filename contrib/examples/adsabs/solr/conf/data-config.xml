@@ -114,10 +114,14 @@
         
         <field column="facility"        
             xpath="/collection/record/datafield[@tag='693']/subfield[@code='f']" /> 
-        
+        <field column="instrument"        
+            xpath="/collection/record/datafield[@tag='693']/subfield[@code='i']" /> 
         <field column="telescope"        
             xpath="/collection/record/datafield[@tag='693']/subfield[@code='t']" />    
             
+        <field column="object"        
+            xpath="/collection/record/datafield[@tag='694']/subfield[@code='a']" />
+        
         <field column="keyword"        
             xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />  <!--  free-text version -->
         <field column="keyword_norm"        
@@ -152,13 +156,6 @@
         <field column="year"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='y']" />    
                 
-        
-        <field column="instrument"        
-            xpath="/collection/record/datafield[@tag='908']/subfield[@code='a']" />
-            
-        <field column="object"        
-            xpath="/collection/record/datafield[@tag='909']/subfield[@code='a']" />
-        
         
         <!--  record date-stamps -->
         <field column="created"        
