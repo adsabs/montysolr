@@ -131,16 +131,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		
 		// new function queries, the 2nd order citation operators
 		assertQueryEquals(req("qt", "aqp", "q", "cites(author:muller)"), 
-				"CollectorQuery(author:muller, filter=null, collector=cites[using:references])", CollectorQuery.class);
+				"CollectorQuery(author:muller, filter=null, collector=cites[using:reference])", CollectorQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "x OR z cites(author:muller OR title:body)"), 
-				"(all:x all:z) CollectorQuery(author:muller title:body, filter=null, collector=cites[using:references])", BooleanQuery.class);
+				"(all:x all:z) CollectorQuery(author:muller title:body, filter=null, collector=cites[using:reference])", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "refersto(author:muller)"), 
-				"CollectorQuery(author:muller, filter=null, collector=refersto[using:references])", CollectorQuery.class);
+				"CollectorQuery(author:muller, filter=null, collector=refersto[using:reference])", CollectorQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "x OR z refersto(author:muller OR title:body)"), 
-				"(all:x all:z) CollectorQuery(author:muller title:body, filter=null, collector=refersto[using:references])", BooleanQuery.class);
+				"(all:x all:z) CollectorQuery(author:muller title:body, filter=null, collector=refersto[using:reference])", BooleanQuery.class);
 		
 		
 	}

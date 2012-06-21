@@ -137,7 +137,7 @@ public class AqpAdslabsSubSueryProvider implements
 				SolrQueryRequest req = fp.getReq();
 				
 				// TODO: make configurable
-				String refField = "references";
+				String refField = "reference";
 				String idField = "id";
 				
 				int[][] invCache;
@@ -156,7 +156,7 @@ public class AqpAdslabsSubSueryProvider implements
 				SolrQueryRequest req = fp.getReq();
 				
 				// TODO: make configurable
-				String refField = "references";
+				String refField = "reference";
 				String idField = "id";
 				
 				Map<Integer, Integer> cache;
