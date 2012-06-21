@@ -42,8 +42,8 @@ public enum DictionaryRecIdCache {
 	private HashMap<String, Map<Integer, int[]>> 
 		cache = new HashMap<String, Map<Integer, int[]>>(4);
 	
-	private HashMap<String, Map<Integer, Integer>>
-		translation_cache = new HashMap<String, Map<Integer, Integer>>(2);
+	private HashMap<String, Object>
+		translation_cache = new HashMap<String, Object>(2);
 	
 	private HashMap<String, Integer>
 		translation_cache_tracker = new HashMap<String, Integer>(2);
@@ -67,6 +67,17 @@ public enum DictionaryRecIdCache {
 		Map<Integer, Integer> fromFieldToLuceneId = new HashMap<Integer, Integer>(idMapping.length);
 		int i = 0;
 		for (int value: idMapping) {
+			fromFieldToLuceneId.put(value, i);
+			i++;
+		}
+		return fromFieldToLuceneId;
+	}
+	
+	public Map<String, Integer> buildCacheStr(String[] idMapping) throws IOException {
+		
+		Map<String, Integer> fromFieldToLuceneId = new HashMap<String, Integer>(idMapping.length);
+		int i = 0;
+		for (String value: idMapping) {
 			fromFieldToLuceneId.put(value, i);
 			i++;
 		}
@@ -97,11 +108,32 @@ public enum DictionaryRecIdCache {
 				Map<Integer, Integer> translTable = buildCache(idMapping);
 				translation_cache.put(field, translTable);
 				translation_cache_tracker.put(field, h);
+				return translTable;
 			}
 		}
-		return translation_cache.get(field);
+		return (Map<Integer, Integer>) translation_cache.get(field);
 	}
 	
+	
+	public Map<String, Integer> getTranslationCacheString(IndexReader reader, String idField, String refField) throws IOException {
+		int[] idMapping = getLuceneCache(reader, idField);
+		Integer h = idMapping.hashCode();
+		Integer old_hash = null;
+		String cacheKey = idField + refField;
+		
+		if (translation_cache_tracker.containsKey(cacheKey))
+			old_hash = translation_cache_tracker.get(cacheKey);
+		if (!h.equals(old_hash)) {
+			synchronized(translation_cache_tracker) {
+				String[] strCache = FieldCache.DEFAULT.getStrings(reader, refField);
+				Map<String, Integer> translTable = buildCacheStr(strCache);
+				translation_cache.put(cacheKey, translTable);
+				translation_cache_tracker.put(idField, h);
+				return translTable;
+			}
+		}
+		return (Map<String, Integer>) translation_cache.get(cacheKey);
+	}
 	
 
 	/**
@@ -179,6 +211,46 @@ public enum DictionaryRecIdCache {
 		return (int[][]) val;
 		
 	}
+	
+	public int[][] getUnInvertedDocidsStrField(IndexReader reader, String field, String externalIds) throws IOException {
+		
+		// first check that the index wasn't updated
+		Integer old_hash = null;
+		if (translation_cache_tracker.containsKey(externalIds))
+			old_hash = translation_cache_tracker.get(externalIds);
+
+		boolean indexUnchanged = old_hash.equals(getLuceneCache(reader, externalIds).hashCode());
+		
+		if (invertedCache.containsKey(field) && indexUnchanged) {
+			return (int[][]) invertedCache.get(field);
+		}
+		
+		final Map<Integer, Integer> idMapping = getTranslationCache(reader, externalIds);
+		
+		
+		
+		Object val = unInvertField(reader, new Entry(field, new FieldCache.IntParser() {
+		    public int parseInt(String value) {
+		        int v = Integer.parseInt(value);
+		        if (idMapping.containsKey(v)) {
+		        	return idMapping.get(v);
+		        }
+		        else {
+		        	return -1;
+		        }
+		      }
+		      protected Object readResolve() {
+		        return FieldCache.DEFAULT_INT_PARSER;
+		      }
+		      @Override
+		      public String toString() { 
+		        return FieldCache.class.getName()+".UNINVERTING_INT_PARSER"; 
+		      }
+		    }));
+		invertedCache.put(field, val);
+		return (int[][]) val;
+		
+	}	
 	
 	/*
 	 * A temporary hack to get uninverted values from the index

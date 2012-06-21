@@ -8,16 +8,16 @@ import java.util.Set;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 
-public class CitesCollector extends Collector implements SetCollector {
+public class CitesCollectorString extends Collector implements SetCollector {
 
 	protected Scorer scorer;
 	protected IndexReader reader;
 	protected int docBase;
 	protected String indexField;
-	protected Map<Integer, Integer> fieldCache = null;
+	protected Map<String, Integer> fieldCache = null;
 	protected Set<Integer> recids;
 	
-	public CitesCollector(Map<Integer, Integer> cache, String field) {
+	public CitesCollectorString(Map<String, Integer> cache, String field) {
 		super();
 		fieldCache = cache;
 		indexField = field;
@@ -38,9 +38,8 @@ public class CitesCollector extends Collector implements SetCollector {
 		String[] vals = document.getValues(indexField);
 		Integer va;
 		for (String v: vals) {
-			va = Integer.valueOf(v);
-			if (fieldCache.containsKey(va)) {
-				recids.add(fieldCache.get(va));
+			if (fieldCache.containsKey(v)) {
+				recids.add(fieldCache.get(v));
 			}
 		}
 
