@@ -1129,4 +1129,97 @@
       <subfield code="b">Stellingwerf, R. F., Campbell, P. 1990. Hypervelocity Impact Modelling Using SPH. Albuquerque: Mission Res. Corp.</subfield>
     </datafield>
   </record>
+  
+  <record>
+  <controlfield tag="001">10</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP....74...10</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Test of citation query - 10:11,12</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...11</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...12</subfield>
+  </datafield>
+  </record>
+  <record>
+  <controlfield tag="001">11</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP....74...11</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Test of citation query - 11:12</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...10</subfield>
+  </datafield>
+  </record>
+  <record>
+  <controlfield tag="001">12</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP....74...12</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Test of citation query - 12:</subfield>
+  </datafield>
+  </record>
+  <record>
+  <controlfield tag="001">13</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP....74...13</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Test of citation query - 13:12,14</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...12</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...14</subfield>
+  </datafield>
+  </record>
+  <record>
+  <controlfield tag="001">14</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP....74...14</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Test of citation query - 14:</subfield>
+  </datafield>
+  </record>
+  <record>
+  <controlfield tag="001">15</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP....74...15</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Test of citation query - 15:11,12,13</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...11</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...12</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...13</subfield>
+  </datafield>
+  </record>
+  <record>
+  <controlfield tag="001">16</controlfield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2002RvMP....74...16</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Test of citation query - 16:99</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002RvMP....74...99</subfield>
+  </datafield>
+  </record>
+  
+
 </collection>

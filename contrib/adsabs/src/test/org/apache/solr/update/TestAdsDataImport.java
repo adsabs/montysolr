@@ -365,6 +365,31 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		assertQ(req("q", "reference:2001gr.qc.....3002Z"), "//*[@numFound='1']");
 		//assertQ(req("qt", "/admin/luke"), "//*[@numFound='0']");
+		
+		
+		/*
+		 * Cites/refersto queries (use special dummy records, field 999i)
+		 */
+		assertQ(req("q", "recid:12"), "//*[@numFound='1']");
+		assertQ(req("q", "recid:16"), "//*[@numFound='1']");
+		assertQ(req("q", "id:12"), "//*[@numFound='1']");
+		assertQ(req("q", "id:16"), "//*[@numFound='1']");
+		assertQ(req("q", "refersto(id:12)"), "//*[@numFound='3']");
+		assertQ(req("q", "refersto(title:test)"), "//*[@numFound='4']");
+		
+		System.out.println(h.query(req("q", "cites(id:12)")));
+		System.out.println(h.query(req("q", "cites(title:test)")));
+		
+		assertQ(req("q", "cites(id:12)"), "//*[@numFound='0']");
+		assertQ(req("q", "cites(id:13)"), "//*[@numFound='2']");
+		assertQ(req("q", "cites(id:12 OR id:13)"), "//*[@numFound='2']");
+		assertQ(req("q", "cites(title:test)"), "//*[@numFound='5']");
+		
+		
+		//TODO - this query finds nothing (recid:12) but id:12 does
+		//the problem must be with the analyzer (because i see the TermQuery has the binary
+		// value of the integer, whilst cites() query uses the string
+		//assertQ(req("q", "refersto(recid:12)"), "//*[@numFound='1']", "debugQuery", "true");
 	}
 	
 	

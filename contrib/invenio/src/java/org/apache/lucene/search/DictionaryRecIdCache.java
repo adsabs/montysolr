@@ -141,6 +141,8 @@ public enum DictionaryRecIdCache {
 	 * bibcode contains unique value XYZ and this value (XYZ) 
 	 * corresponds to the lucene-id=5
 	 * 
+	 * WARNING: the keys come out processed! Ie. usually lowercased
+	 * 
 	 * @param reader
 	 * @param externalIdsField
 	 * @return

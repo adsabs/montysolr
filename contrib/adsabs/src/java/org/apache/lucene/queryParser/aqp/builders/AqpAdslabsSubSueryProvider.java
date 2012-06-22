@@ -137,9 +137,9 @@ public class AqpAdslabsSubSueryProvider implements
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
 				
-				// TODO: make configurable
+				// TODO: make configurable 
 				String refField = "reference";
-				String idField = "id";
+				String idField = "bibcode";
 				
 				int[][] invCache;
 				try {
@@ -158,13 +158,14 @@ public class AqpAdslabsSubSueryProvider implements
 				
 				// TODO: make configurable
 				String refField = "reference";
-				String idField = "id";
+				String idField = "bibcode";
 				
 				Map<String, Integer> cache;
 				
 				try {
 					cache = DictionaryRecIdCache.INSTANCE.
 						getTranslationCacheString(req.getSearcher().getIndexReader(), idField);
+					
 				} catch (IOException e) {
 					throw new ParseException(e.getLocalizedMessage());
 				}
