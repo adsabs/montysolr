@@ -133,8 +133,10 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		// now test of references ( X --> (x))
 		Map<Integer, Integer> cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), idField);
-		cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), idField);
-		cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), idField);
+		Map<Integer, Integer> cache2 = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), idField);
+		assertTrue(cache.hashCode() == cache2.hashCode());
+		assertTrue(cache == cache2);
+		
 		
 		assertEquals(3, searcher.search(new CollectorQuery(q1, new CitesCollector(cache, refField)), 10).totalHits);
 		assertEquals(0, searcher.search(new CollectorQuery(q2, new CitesCollector(cache, refField)), 10).totalHits);
@@ -156,9 +158,11 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(ar.containsAll(er));
 		
 		
-		int[][] invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, refField, idField);
-		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, refField, idField);
-		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, refField, idField);
+		int[][] invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, idField, refField);
+		int[][] invCache2 = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, idField, refField);
+		
+		assertTrue(invCache == invCache2);
+		assertTrue(invCache.hashCode() == invCache.hashCode());
 		
 		assertEquals(1, searcher.search(new CollectorQuery(q1, new CitedByCollector(invCache, refField)), 10).totalHits);
 		assertEquals(2, searcher.search(new CollectorQuery(q2, new CitedByCollector(invCache, refField)), 10).totalHits);
@@ -196,8 +200,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		// for the queries that use the String values
 		// ------------------------------------------
 		
-		refField = "references";
-		idField = "id";
+		refField = "breferences";
+		idField = "bibcode";
 		idPrefix = 10;
 		
 		q1 = new TermQuery(new Term("id", String.valueOf(idPrefix + 1)));
@@ -237,9 +241,11 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		// now test of references ( X --> (x))
-		Map<String, Integer> scache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher.getIndexReader(), idField, refField);
-		scache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher.getIndexReader(), idField, refField);
-		scache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher.getIndexReader(), idField, refField);
+		Map<String, Integer> scache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher.getIndexReader(), idField);
+		Map<String, Integer> scache2 = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher.getIndexReader(), idField);
+		assertTrue(scache.hashCode() == scache2.hashCode());
+		assertTrue(scache == scache2);
+		
 		
 		assertEquals(3, searcher.search(new CollectorQuery(q1, new CitesCollectorString(scache, refField)), 10).totalHits);
 		assertEquals(0, searcher.search(new CollectorQuery(q2, new CitesCollectorString(scache, refField)), 10).totalHits);
@@ -261,9 +267,12 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(ar.containsAll(er));
 		
 		
-		int[][] invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, refField, idField);
-		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, refField, idField);
-		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, refField, idField);
+		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(reader, idField, refField);
+		invCache2 = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(reader, idField, refField);
+		
+		assertTrue(invCache.equals(invCache2));
+		assertTrue(invCache == invCache2);
+		
 		
 		assertEquals(1, searcher.search(new CollectorQuery(q1, new CitedByCollector(invCache, refField)), 10).totalHits);
 		assertEquals(2, searcher.search(new CollectorQuery(q2, new CitedByCollector(invCache, refField)), 10).totalHits);
@@ -289,12 +298,12 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		
-		CollectorQuery c1 = new CollectorQuery(bq15, new CitedByCollector(invCache, refField));
-		CollectorQuery c2 = new CollectorQuery(bq15, new CitedByCollector(invCache, refField));
+		c1 = new CollectorQuery(bq15, new CitedByCollector(invCache, refField));
+		c2 = new CollectorQuery(bq15, new CitedByCollector(invCache, refField));
 		assertTrue(c1.equals(c2));
 		
-		CollectorQuery c3 = new CollectorQuery(bq13, new CitesCollector(cache, refField));
-		CollectorQuery c4 = new CollectorQuery(bq13, new CitesCollector(cache, refField));
+		c3 = new CollectorQuery(bq13, new CitesCollector(cache, refField));
+		c4 = new CollectorQuery(bq13, new CitesCollector(cache, refField));
 		assertTrue(c3.equals(c4));
 		
 		

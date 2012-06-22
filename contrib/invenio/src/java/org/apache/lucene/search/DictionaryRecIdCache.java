@@ -70,6 +70,7 @@ public enum DictionaryRecIdCache {
 			fromFieldToLuceneId.put(value, i);
 			i++;
 		}
+		if (fromFieldToLuceneId.containsKey(null))	fromFieldToLuceneId.remove(null);
 		return fromFieldToLuceneId;
 	}
 	
@@ -81,12 +82,33 @@ public enum DictionaryRecIdCache {
 			fromFieldToLuceneId.put(value, i);
 			i++;
 		}
+		if (fromFieldToLuceneId.containsKey(null))	fromFieldToLuceneId.remove(null);
 		return fromFieldToLuceneId;
+	}
+	
+	
+	private boolean indexUnchanged(IndexReader reader, String field, Boolean isString) throws IOException {
+		// first check that the index wasn't updated
+		Integer old_hash = null;
+		if (translation_cache_tracker.containsKey(field)) {
+			old_hash = translation_cache_tracker.get(field);
+		}
+		else {
+			return false;
+		}
+		if (isString) {
+			return old_hash.equals(FieldCache.DEFAULT.getStrings(reader, field).hashCode());
+		}
+		else {
+			return old_hash.equals(FieldCache.DEFAULT.getInts(reader, field).hashCode());
+		}
 	}
 	
 	/**
 	 * Provides the mapping <b>from</b> the external source ids <b>into</b>
-	 * lucene doc ids. This class is thread safe if you read data only.
+	 * lucene doc ids. This class is thread safe.
+	 * 
+	 * The externalIdsField must contain integers
 	 * 
 	 * The cache is always checked for the updates before the mapping is 
 	 * returned, so you are sure to obtain the latest stage at the moment
@@ -97,42 +119,45 @@ public enum DictionaryRecIdCache {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<Integer, Integer> getTranslationCache(IndexReader reader, String field) throws IOException {
-		int[] idMapping = getLuceneCache(reader, field);
-		Integer h = idMapping.hashCode();
-		Integer old_hash = null;
-		if (translation_cache_tracker.containsKey(field))
-			old_hash = translation_cache_tracker.get(field);
-		if (!h.equals(old_hash)) {
+	public Map<Integer, Integer> getTranslationCache(IndexReader reader, String externalIdsField) throws IOException {
+		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(reader, externalIdsField, false))) {
 			synchronized(translation_cache_tracker) {
+				int[] idMapping = FieldCache.DEFAULT.getInts(reader, externalIdsField);
 				Map<Integer, Integer> translTable = buildCache(idMapping);
-				translation_cache.put(field, translTable);
-				translation_cache_tracker.put(field, h);
+				translation_cache.put(externalIdsField, translTable);
+				translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
 				return translTable;
 			}
 		}
-		return (Map<Integer, Integer>) translation_cache.get(field);
+		return (Map<Integer, Integer>) translation_cache.get(externalIdsField);
 	}
 	
 	
-	public Map<String, Integer> getTranslationCacheString(IndexReader reader, String idField, String refField) throws IOException {
-		int[] idMapping = getLuceneCache(reader, idField);
-		Integer h = idMapping.hashCode();
-		Integer old_hash = null;
-		String cacheKey = idField + refField;
+	/**
+	 * Provides mapping from the string value (stored in refField) onto the 
+	 * lucene ids via idField. 
+	 * 
+	 * I.e. refField=bibcode
+	 * bibcode contains unique value XYZ and this value (XYZ) 
+	 * corresponds to the lucene-id=5
+	 * 
+	 * @param reader
+	 * @param externalIdsField
+	 * @return
+	 * @throws IOException
+	 */
+	public Map<String, Integer> getTranslationCacheString(IndexReader reader, String externalIdsField) throws IOException {
 		
-		if (translation_cache_tracker.containsKey(cacheKey))
-			old_hash = translation_cache_tracker.get(cacheKey);
-		if (!h.equals(old_hash)) {
+		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(reader, externalIdsField, true))) {
 			synchronized(translation_cache_tracker) {
-				String[] strCache = FieldCache.DEFAULT.getStrings(reader, refField);
-				Map<String, Integer> translTable = buildCacheStr(strCache);
-				translation_cache.put(cacheKey, translTable);
-				translation_cache_tracker.put(idField, h);
+				String[] idMapping = FieldCache.DEFAULT.getStrings(reader, externalIdsField);
+				Map<String, Integer> translTable = buildCacheStr(idMapping);
+				translation_cache.put(externalIdsField, translTable);
+				translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
 				return translTable;
 			}
 		}
-		return (Map<String, Integer>) translation_cache.get(cacheKey);
+		return (Map<String, Integer>) translation_cache.get(externalIdsField);
 	}
 	
 
@@ -161,10 +186,11 @@ public enum DictionaryRecIdCache {
 	 * 
 	 * @param reader
 	 *    - top-leve index reader
-	 * @param field
-	 *    - field to uninvert (we expect multiple values)
 	 * @param externalIds
 	 * 	  - name of the index that contains the external system ids (eg. recids)
+	 * @param refField
+	 *    - field to uninvert (we expect multiple values)
+
 	 * @return
 	 *    
 	 * @throws IOException
@@ -172,24 +198,18 @@ public enum DictionaryRecIdCache {
 	
 	private HashMap<String, Object>invertedCache = new HashMap<String, Object >(2);
 	
-	public int[][] getUnInvertedDocids(IndexReader reader, String field, String externalIds) throws IOException {
+	
+	
+	
+	public int[][] getUnInvertedDocids(IndexReader reader, String externalIds, String refField) throws IOException {
 		
-		// first check that the index wasn't updated
-		Integer old_hash = null;
-		if (translation_cache_tracker.containsKey(externalIds))
-			old_hash = translation_cache_tracker.get(externalIds);
-
-		boolean indexUnchanged = old_hash.equals(getLuceneCache(reader, externalIds).hashCode());
-		
-		if (invertedCache.containsKey(field) && indexUnchanged) {
-			return (int[][]) invertedCache.get(field);
+		if (invertedCache.containsKey(refField) && indexUnchanged(reader, externalIds, false)) {
+			return (int[][]) invertedCache.get(refField);
 		}
 		
-		final Map<Integer, Integer> idMapping = getTranslationCache(reader, externalIds);
+		final Map<?, Integer> idMapping = getTranslationCache(reader, externalIds);
 		
-		
-		
-		Object val = unInvertField(reader, new Entry(field, new FieldCache.IntParser() {
+		Object val = unInvertField(reader, new Entry(refField, new FieldCache.IntParser() {
 		    public int parseInt(String value) {
 		        int v = Integer.parseInt(value);
 		        if (idMapping.containsKey(v)) {
@@ -207,33 +227,26 @@ public enum DictionaryRecIdCache {
 		        return FieldCache.class.getName()+".UNINVERTING_INT_PARSER"; 
 		      }
 		    }));
-		invertedCache.put(field, val);
+		synchronized(invertedCache) {
+			invertedCache.put(refField, val);
+		}
+		
 		return (int[][]) val;
 		
 	}
 	
-	public int[][] getUnInvertedDocidsStrField(IndexReader reader, String field, String externalIds) throws IOException {
+	public int[][] getUnInvertedDocidsStrField(IndexReader reader, String externalIds, String refField) throws IOException {
 		
-		// first check that the index wasn't updated
-		Integer old_hash = null;
-		if (translation_cache_tracker.containsKey(externalIds))
-			old_hash = translation_cache_tracker.get(externalIds);
-
-		boolean indexUnchanged = old_hash.equals(getLuceneCache(reader, externalIds).hashCode());
-		
-		if (invertedCache.containsKey(field) && indexUnchanged) {
-			return (int[][]) invertedCache.get(field);
+		if (invertedCache.containsKey(refField) && indexUnchanged(reader, externalIds, true)) {
+			return (int[][]) invertedCache.get(refField);
 		}
 		
-		final Map<Integer, Integer> idMapping = getTranslationCache(reader, externalIds);
+		final Map<?, Integer> idMapping = getTranslationCacheString(reader, externalIds);
 		
-		
-		
-		Object val = unInvertField(reader, new Entry(field, new FieldCache.IntParser() {
+		Object val = unInvertField(reader, new Entry(refField, new FieldCache.IntParser() {
 		    public int parseInt(String value) {
-		        int v = Integer.parseInt(value);
-		        if (idMapping.containsKey(v)) {
-		        	return idMapping.get(v);
+		        if (idMapping.containsKey(value)) {
+		        	return idMapping.get(value);
 		        }
 		        else {
 		        	return -1;
@@ -247,7 +260,10 @@ public enum DictionaryRecIdCache {
 		        return FieldCache.class.getName()+".UNINVERTING_INT_PARSER"; 
 		      }
 		    }));
-		invertedCache.put(field, val);
+		
+		synchronized(invertedCache) {
+			invertedCache.put(refField, val);
+		}
 		return (int[][]) val;
 		
 	}	

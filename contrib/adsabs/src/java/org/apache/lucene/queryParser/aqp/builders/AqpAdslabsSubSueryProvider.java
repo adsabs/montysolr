@@ -17,6 +17,7 @@ import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
 import org.apache.lucene.queryParser.core.nodes.QueryNode;
 import org.apache.lucene.search.CitedByCollector;
 import org.apache.lucene.search.CitesCollector;
+import org.apache.lucene.search.CitesCollectorString;
 import org.apache.lucene.search.CollectorQuery;
 import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.Query;
@@ -143,7 +144,7 @@ public class AqpAdslabsSubSueryProvider implements
 				int[][] invCache;
 				try {
 					invCache = DictionaryRecIdCache.INSTANCE.
-					getUnInvertedDocids(req.getSearcher().getIndexReader(), refField, idField);
+					getUnInvertedDocidsStrField(req.getSearcher().getIndexReader(), idField, refField);
 				} catch (IOException e) {
 					throw new ParseException(e.getLocalizedMessage());
 				}
@@ -159,15 +160,15 @@ public class AqpAdslabsSubSueryProvider implements
 				String refField = "reference";
 				String idField = "id";
 				
-				Map<Integer, Integer> cache;
+				Map<String, Integer> cache;
 				
 				try {
 					cache = DictionaryRecIdCache.INSTANCE.
-						getTranslationCache(req.getSearcher().getIndexReader(), idField);
+						getTranslationCacheString(req.getSearcher().getIndexReader(), idField);
 				} catch (IOException e) {
 					throw new ParseException(e.getLocalizedMessage());
 				}
-				return new CollectorQuery(innerQuery, new CitesCollector(cache, refField));
+				return new CollectorQuery(innerQuery, new CitesCollectorString(cache, refField));
 		      }
 		    });
 	};
