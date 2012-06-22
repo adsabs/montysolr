@@ -22,6 +22,7 @@ public class CitesCollectorString extends Collector implements SetCollector {
 		fieldCache = cache;
 		indexField = field;
 		recids = new HashSet<Integer>();
+		docBase = 0;
 	}
 	
 	
@@ -34,13 +35,19 @@ public class CitesCollectorString extends Collector implements SetCollector {
 
 	@Override
 	public void collect(int doc) throws IOException {
-		Document document = reader.document(docBase + doc);
-		String[] vals = document.getValues(indexField); //TODO: optimize, read only one value
-		for (String v: vals) {
-			v = v.toLowerCase();
-			if (fieldCache.containsKey(v)) {
-				recids.add(fieldCache.get(v));
+		try {
+			Document document = reader.document(docBase + doc);
+			String[] vals = document.getValues(indexField); //TODO: optimize, read only one value
+			for (String v: vals) {
+				v = v.toLowerCase();
+				if (fieldCache.containsKey(v)) {
+					recids.add(fieldCache.get(v));
+				}
 			}
+		}
+		catch (IOException e) {
+			System.err.print("Error doc: " + doc + " docBase: " + docBase + " reader: " + reader.maxDoc() + ". ");
+			throw e;
 		}
 
 	}

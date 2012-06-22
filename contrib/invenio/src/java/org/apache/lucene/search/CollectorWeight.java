@@ -11,12 +11,14 @@ public class CollectorWeight extends Weight {
 	private final Similarity similarity;
 	private Collector collector;
 	private int docBase;
+	private int lastReaderId = 0;
 
 	public CollectorWeight(Weight weight,
 			Similarity similarity, Collector collector) throws IOException {
 		this.similarity = similarity;
 		this.innerWeight = weight;
 		this.collector = collector;
+		docBase = 0;
 		
 	}
 
@@ -47,7 +49,15 @@ public class CollectorWeight extends Weight {
 		// we relly on the fact that scorer is called with each reader
 		// in sequence
 		collector.setNextReader(reader, docBase);
-		docBase += reader.maxDoc();
+		//System.err.println(reader);
+		//System.err.println(collector);
+		if (lastReaderId != reader.hashCode()) {
+			lastReaderId  = reader.hashCode();
+			docBase += reader.maxDoc();
+		}
+		else {
+			System.err.println("wtf?!");
+		}
 		Scorer innerScorer = innerWeight.scorer(reader, scoreDocsInOrder, topScorer);
 		if (innerScorer == null) { //when there are no hits
 			return null;
