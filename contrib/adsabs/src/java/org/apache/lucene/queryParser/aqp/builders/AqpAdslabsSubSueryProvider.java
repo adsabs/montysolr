@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.aqp.AqpSubqueryParser;
 import org.apache.lucene.queryParser.aqp.AqpSubqueryParserFull;
@@ -37,6 +38,7 @@ import org.apache.solr.search.OldLuceneQParserPlugin;
 import org.apache.solr.search.PrefixQParserPlugin;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.RawQParserPlugin;
+import org.apache.solr.search.SolrIndexReader;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
 import org.apache.solr.search.ValueSourceParser;
@@ -148,13 +150,21 @@ public class AqpAdslabsSubSueryProvider implements
 				} catch (IOException e) {
 					throw new ParseException(e.getLocalizedMessage());
 				}
-				return new CollectorQuery(innerQuery, new CitedByCollector(invCache, refField));
+				//return new CollectorQuery(innerQuery, new CitedByCollector(invCache, refField));
+				try {
+					return new CollectorQuery(innerQuery, (IndexReader) req.getSearcher().getReader(),
+							CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
+				} catch (Exception e) {
+					req.getCore().log.error(e.toString());
+					throw new ParseException("Ouuups, our developers are lame mulas - server error!");
+				}
 		      }
 		    });
 		parsers.put("cites", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
+				
 				
 				// TODO: make configurable
 				String refField = "reference";
@@ -169,7 +179,14 @@ public class AqpAdslabsSubSueryProvider implements
 				} catch (IOException e) {
 					throw new ParseException(e.getLocalizedMessage());
 				}
-				return new CollectorQuery(innerQuery, new CitesCollectorString(cache, refField));
+				//return new CollectorQuery(innerQuery, new CitesCollectorString(cache, refField));
+				try {
+					return new CollectorQuery(innerQuery, (IndexReader) req.getSearcher().getReader(),
+							CollectorQuery.createCollector(CitesCollectorString.class, cache, refField));
+				} catch (Exception e) {
+					req.getCore().log.error(e.toString());
+					throw new ParseException("Ouuups, our developers are lame mulas - server error!");
+				}
 		      }
 		    });
 	};

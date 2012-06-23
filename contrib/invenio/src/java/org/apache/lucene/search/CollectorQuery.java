@@ -4,11 +4,19 @@ import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.CollectorQuery.CollectorCreator;
+import org.apache.lucene.util.ReaderUtil;
 import org.apache.lucene.util.ToStringUtils;
 
 public class CollectorQuery extends Query {
@@ -17,6 +25,8 @@ public class CollectorQuery extends Query {
 	Query query;
 	Filter filter = null;
 	Collector collector;
+	Map<Integer, Integer> docStarts;
+	private CollectorCreator creator;
 
 	/**
 	 * Constructs a new query which applies a filter to the results of the
@@ -37,8 +47,8 @@ public class CollectorQuery extends Query {
 			throw new IllegalStateException("Collector must not be null");
 		}
 	}
-	
-	public CollectorQuery(Query query, Collector collector) {
+	/*
+	public CollectorQuery(Query query, IndexReader reader, Collector collector) {
 		this.query = query;
 		this.filter = null;
 		this.collector = collector;
@@ -46,6 +56,27 @@ public class CollectorQuery extends Query {
 		if (collector == null) {
 			throw new IllegalStateException("Collector must not be null");
 		}
+		initDocStarts(reader);
+		
+	}
+	*/
+	
+	public CollectorQuery(Query query, IndexReader reader, CollectorCreator creator ) {
+		this.query = query;
+		this.creator = creator;
+		initDocStarts(reader);
+	}
+	
+	private void initDocStarts(IndexReader reader) {
+		List<IndexReader> subReadersList = new ArrayList<IndexReader>();
+	    ReaderUtil.gatherSubReaders(subReadersList, reader);
+	    IndexReader[] subReaders = subReadersList.toArray(new IndexReader[subReadersList.size()]);
+	    docStarts = new HashMap<Integer, Integer>(subReaders.length);
+	    int maxDoc = 0;
+	    for (int i = 0; i < subReaders.length; i++) {
+	      docStarts.put(subReaders[i].hashCode(), maxDoc);
+	      maxDoc += subReaders[i].maxDoc();
+	    }
 	}
 	
 	/**
@@ -55,8 +86,14 @@ public class CollectorQuery extends Query {
 	public Weight createWeight(final Searcher searcher) throws IOException {
 		Weight weight = query.createWeight(searcher);
 		Similarity similarity = query.getSimilarity(searcher);
-		
-		Weight w = new CollectorWeight(weight, similarity, collector);
+		//TODO: leave only the creator initialization
+		Weight w;
+		if (creator != null) {
+			w = new CollectorWeight(weight, similarity, creator, docStarts);
+		}
+		else {
+			w = new CollectorWeight(weight, similarity, collector, docStarts);
+		}
 		
 		return w;
 	}
@@ -234,7 +271,12 @@ public class CollectorQuery extends Query {
 		buffer.append("CollectorQuery(");
 		buffer.append(query.toString(s));
 		buffer.append(", filter=" + (filter!=null ? filter.toString() : "null"));
-		buffer.append(", collector=" + (collector!=null ? collector.toString() : "null"));
+		if (creator !=null ) {
+			buffer.append(", collector=" + (creator.toString()));
+		}
+		else {
+			buffer.append(", collector=" + (collector!=null ? collector.toString() : "null"));
+		}
 		buffer.append(")");
 		buffer.append(ToStringUtils.boost(getBoost()));
 		return buffer.toString();
@@ -261,5 +303,67 @@ public class CollectorQuery extends Query {
 		
 		return query.hashCode() ^ collector.hashCode()
 				+ Float.floatToRawIntBits(getBoost());
+	}
+	
+	
+	public static class CollectorCreator {
+		private Constructor<Collector> constructor;
+		private Object[] params;
+
+		public CollectorCreator(Constructor<Collector> constructor, Object...params) {
+			this.constructor = constructor;
+			this.params = params;
+		}
+		
+		public Collector create() throws IllegalArgumentException, InstantiationException, 
+			IllegalAccessException, InvocationTargetException {
+			return constructor.newInstance(params);
+		}
+		
+		@Override
+		public String toString() {
+			StringBuffer buffer = new StringBuffer();
+			buffer.append(constructor.getDeclaringClass().getSimpleName());
+			buffer.append("(");
+			int i = 0;
+			for (Object o: params) {
+				if (o instanceof String) {
+					buffer.append((String) o);
+				}
+				else {
+					o.getClass();
+				}
+				if (i>0) {
+					buffer.append(", ");
+				}
+				i++;
+			}
+			buffer.append(")");
+			return buffer.toString();
+		}
+		
+	}
+	
+	public static CollectorCreator createCollector(Class clazz, Object...params) throws SecurityException, NoSuchMethodException {
+		
+		Class[] parameterTypes = new Class[params.length];
+		int i = 0;
+		for (Object o: params) {
+			Class<? extends Object> cls = o.getClass();
+			if (o instanceof String) {
+				parameterTypes[i] = cls;
+			}
+			else if (cls.getInterfaces().length > 0) {
+				parameterTypes[i] = cls.getInterfaces()[0];
+			}
+			else {
+				parameterTypes[i] = cls;
+			}
+			i++;
+		}
+		
+		Constructor<Collector> constructor = clazz.getConstructor(parameterTypes);
+		return new CollectorQuery.CollectorCreator(constructor, params);
+		
 	}
 }

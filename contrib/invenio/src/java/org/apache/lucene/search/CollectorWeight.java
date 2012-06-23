@@ -1,8 +1,11 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.CollectorQuery.CollectorCreator;
 
 public class CollectorWeight extends Weight {
 
@@ -10,15 +13,25 @@ public class CollectorWeight extends Weight {
 	private final Weight innerWeight;
 	private final Similarity similarity;
 	private Collector collector;
-	private int docBase;
 	private int lastReaderId = 0;
+	private Map<Integer, Integer> docStarts;
+	private CollectorCreator creator;
 
 	public CollectorWeight(Weight weight,
-			Similarity similarity, Collector collector) throws IOException {
+			Similarity similarity, Collector collector, Map<Integer, Integer> docStarts) throws IOException {
 		this.similarity = similarity;
 		this.innerWeight = weight;
 		this.collector = collector;
-		docBase = 0;
+		this.docStarts = docStarts;
+		
+	}
+	
+	public CollectorWeight(Weight weight,
+			Similarity similarity, CollectorCreator creator, Map<Integer, Integer> docStarts) throws IOException {
+		this.similarity = similarity;
+		this.innerWeight = weight;
+		this.creator = creator;
+		this.docStarts = docStarts;
 		
 	}
 
@@ -45,23 +58,34 @@ public class CollectorWeight extends Weight {
 	@Override
 	public Scorer scorer(IndexReader reader, boolean scoreDocsInOrder,
 			boolean topScorer) throws IOException {
+		
 		// Because there is no way to get access to the docBase information
-		// we relly on the fact that scorer is called with each reader
-		// in sequence
-		collector.setNextReader(reader, docBase);
-		//System.err.println(reader);
-		//System.err.println(collector);
-		if (lastReaderId != reader.hashCode()) {
-			lastReaderId  = reader.hashCode();
-			docBase += reader.maxDoc();
-		}
-		else {
-			System.err.println("wtf?!");
-		}
+		// we require the CollectorQuery to be initialized with the reader
+		// instance. But since the IndexReader may have changed between the
+		// query creation and invocation, this could lead to inconsistency
+		// This check should prevent the problems (it will fail if other
+		// Index reader is used for searching
+		
+		assert docStarts.get(reader.hashCode()) != null;
+		
+
 		Scorer innerScorer = innerWeight.scorer(reader, scoreDocsInOrder, topScorer);
 		if (innerScorer == null) { //when there are no hits
 			return null;
 		}
+		
+		if (collector == null) {
+			try {
+				Collector c = creator.create();
+				c.setNextReader(reader, docStarts.get(reader.hashCode()));
+				return new CollectorScorer(similarity, innerWeight, innerScorer, c);
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
+			
+		}
+		
+		collector.setNextReader(reader, docStarts.get(reader.hashCode()));
 		return new CollectorScorer(similarity, innerWeight, innerScorer, collector);
 	}
 

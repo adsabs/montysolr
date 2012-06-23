@@ -162,7 +162,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		*/
 		
 		// without this, you should see errors in the CitesCollector (occassionally, not always)
-		writer.optimize(true);
+		//writer.optimize(true);
 		
 		reOpenSearcher();
 		
@@ -180,15 +180,19 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 				searcher.getIndexReader(), "breference");
 		
 		int maxHits = 10000;
-		ScoreDoc[] hits = searcher.search(new CollectorQuery(new TermQuery(new Term("id", String.valueOf(docId))), 
-				new CitesCollectorString(refCache, "breference")), maxHits).scoreDocs;
+		//new CitesCollectorString(refCache, "breference")), maxHits).scoreDocs;
+		ScoreDoc[] hits = searcher.search(new CollectorQuery(new TermQuery(new Term("id", String.valueOf(docId))),
+				reader,
+				CollectorQuery.createCollector(CitesCollectorString.class, refCache, "breference")), maxHits).scoreDocs; 
+		
 		
 		Map<Integer, Integer> histogram = new HashMap<Integer, Integer>();
 		
 		for (int i=0; i<9000; i++) {
 			//System.err.println("search: " + i + " ------");
-			hits = searcher.search(new CollectorQuery(new TermQuery(new Term("id", String.valueOf(i))), 
-					new CitesCollectorString(refCache, "breference")), maxHits).scoreDocs;
+			//new CitesCollectorString(refCache, "breference")
+			hits = searcher.search(new CollectorQuery(new TermQuery(new Term("id", String.valueOf(i))), reader, 
+					CollectorQuery.createCollector(CitesCollectorString.class, refCache, "breference")), maxHits).scoreDocs;
 			if (!histogram.containsKey(hits.length)) {
 				histogram.put(hits.length, 0);
 			}
