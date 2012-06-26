@@ -138,16 +138,16 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(cache == cache2);
 		
 		
-		assertEquals(3, searcher.search(new CollectorQuery(q1, new CitesCollector(cache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q2, new CitesCollector(cache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q3, new CitesCollector(cache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q4, new CitesCollector(cache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q5, new CitesCollector(cache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q6, new CitesCollector(cache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q99, new CitesCollector(cache, refField)), 10).totalHits);
-		assertEquals(5, searcher.search(new CollectorQuery(bq13, new CitesCollector(cache, refField)), 10).totalHits);
+		assertEquals(3, searcher.search(new CollectorQuery(q1, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q2, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(q3, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(q4, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q5, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q6, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q99, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
+		assertEquals(5, searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
 		
-		ScoreDoc[] docs = searcher.search(new CollectorQuery(bq13, new CitesCollector(cache, refField)), 10).scoreDocs;
+		ScoreDoc[] docs = searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).scoreDocs;
 		
 		ArrayList<Integer> ar = new ArrayList<Integer>();
 		for (ScoreDoc d: docs) {
@@ -164,22 +164,22 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(invCache == invCache2);
 		assertTrue(invCache.hashCode() == invCache.hashCode());
 		
-		assertEquals(1, searcher.search(new CollectorQuery(q1, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q2, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q3, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q4, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q5, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q6, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q99, new CitedByCollector(invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new CollectorQuery(q1, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(q2, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new CollectorQuery(q3, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new CollectorQuery(q4, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(q5, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new CollectorQuery(q6, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q99, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
 		
-		assertEquals(2, searcher.search(new CollectorQuery(bq13, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(bq123, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(bq1234, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(3, searcher.search(new CollectorQuery(bq15, new CitedByCollector(invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(bq123, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(bq1234, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(3, searcher.search(new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
 		
 		
 		ar = new ArrayList<Integer>();
-		for (ScoreDoc d: searcher.search(new CollectorQuery(bq15, new CitedByCollector(invCache, refField)), 10).scoreDocs) {
+		for (ScoreDoc d: searcher.search(new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).scoreDocs) {
 			Document doc = reader.document(d.doc);
 			ar.add(Integer.valueOf(doc.get("id")));
 		}
@@ -188,12 +188,12 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		
-		CollectorQuery c1 = new CollectorQuery(bq15, new CitedByCollector(invCache, refField));
-		CollectorQuery c2 = new CollectorQuery(bq15, new CitedByCollector(invCache, refField));
+		CollectorQuery c1 = new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
+		CollectorQuery c2 = new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
 		assertTrue(c1.equals(c2));
 		
-		CollectorQuery c3 = new CollectorQuery(bq13, new CitesCollector(cache, refField));
-		CollectorQuery c4 = new CollectorQuery(bq13, new CitesCollector(cache, refField));
+		CollectorQuery c3 = new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField));
+		CollectorQuery c4 = new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField));
 		assertTrue(c3.equals(c4));
 		
 		
@@ -247,16 +247,16 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(scache == scache2);
 		
 		
-		assertEquals(3, searcher.search(new CollectorQuery(q1, new CitesCollectorString(scache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q2, new CitesCollectorString(scache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q3, new CitesCollectorString(scache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q4, new CitesCollectorString(scache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q5, new CitesCollectorString(scache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q6, new CitesCollectorString(scache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q99, new CitesCollectorString(scache, refField)), 10).totalHits);
-		assertEquals(5, searcher.search(new CollectorQuery(bq13, new CitesCollectorString(scache, refField)), 10).totalHits);
+		assertEquals(3, searcher.search(new CollectorQuery(q1, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q2, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(q3, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(q4, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q5, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q6, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q99, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
+		assertEquals(5, searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
 		
-		docs = searcher.search(new CollectorQuery(bq13, new CitesCollectorString(scache, refField)), 10).scoreDocs;
+		docs = searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).scoreDocs;
 		
 		ar = new ArrayList<Integer>();
 		for (ScoreDoc d: docs) {
@@ -274,22 +274,22 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(invCache == invCache2);
 		
 		
-		assertEquals(1, searcher.search(new CollectorQuery(q1, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q2, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q3, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q4, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q5, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q6, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q99, new CitedByCollector(invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new CollectorQuery(q1, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(q2, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new CollectorQuery(q3, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new CollectorQuery(q4, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(q5, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new CollectorQuery(q6, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new CollectorQuery(q99, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
 		
-		assertEquals(2, searcher.search(new CollectorQuery(bq13, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(bq123, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(bq1234, new CitedByCollector(invCache, refField)), 10).totalHits);
-		assertEquals(3, searcher.search(new CollectorQuery(bq15, new CitedByCollector(invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(bq123, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new CollectorQuery(bq1234, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(3, searcher.search(new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
 		
 		
 		ar = new ArrayList<Integer>();
-		for (ScoreDoc d: searcher.search(new CollectorQuery(bq15, new CitedByCollector(invCache, refField)), 10).scoreDocs) {
+		for (ScoreDoc d: searcher.search(new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).scoreDocs) {
 			Document doc = reader.document(d.doc);
 			ar.add(Integer.valueOf(doc.get("id")));
 		}
@@ -298,12 +298,12 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		
-		c1 = new CollectorQuery(bq15, new CitedByCollector(invCache, refField));
-		c2 = new CollectorQuery(bq15, new CitedByCollector(invCache, refField));
+		c1 = new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
+		c2 = new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
 		assertTrue(c1.equals(c2));
 		
-		c3 = new CollectorQuery(bq13, new CitesCollector(cache, refField));
-		c4 = new CollectorQuery(bq13, new CitesCollector(cache, refField));
+		c3 = new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField));
+		c4 = new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField));
 		assertTrue(c3.equals(c4));
 		
 		

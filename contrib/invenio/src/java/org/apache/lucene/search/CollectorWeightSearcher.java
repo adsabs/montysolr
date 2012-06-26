@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.CollectorQuery.CollectorCreator;
 
-public class CollectorWeight extends Weight {
+public class CollectorWeightSearcher extends Weight {
 
 	private static final long serialVersionUID = 6340251541629951246L;
 	private final Weight innerWeight;
@@ -15,7 +15,7 @@ public class CollectorWeight extends Weight {
 	private Map<Integer, Integer> docStarts;
 	private CollectorCreator creator;
 
-	public CollectorWeight(Weight weight,
+	public CollectorWeightSearcher(Weight weight,
 			Similarity similarity, Collector collector, Map<Integer, Integer> docStarts) throws IOException {
 		this.similarity = similarity;
 		this.innerWeight = weight;
@@ -24,7 +24,7 @@ public class CollectorWeight extends Weight {
 		
 	}
 	
-	public CollectorWeight(Weight weight,
+	public CollectorWeightSearcher(Weight weight,
 			Similarity similarity, CollectorCreator creator, Map<Integer, Integer> docStarts) throws IOException {
 		this.similarity = similarity;
 		this.innerWeight = weight;

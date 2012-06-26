@@ -13,6 +13,7 @@ import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.CitationQueryCites;
 import org.apache.lucene.search.CitationQueryFilter;
+import org.apache.lucene.search.CitedByCollector;
 import org.apache.lucene.search.CollectorQuery;
 import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.FieldCache;
@@ -77,7 +78,12 @@ public class CitationQParser extends QParser {
 		if (rel.equals("citedby")) {
 			Filter qfilter = new CitationQueryFilter();
 			//TODO: the collector class doesn't work
-			return new CollectorQuery(mainq, qfilter, null);
+			try {
+				return new CollectorQuery(mainq, getReq().getSearcher().getReader(), 
+						CollectorQuery.createCollector(CitedByCollector.class, qfilter, null));
+			} catch (Exception e) {
+				throw new ParseException("Meeeek, server error, lazy coders!!!");
+			}
 		}
 		else if (rel.equals("cites")) {
 			try {

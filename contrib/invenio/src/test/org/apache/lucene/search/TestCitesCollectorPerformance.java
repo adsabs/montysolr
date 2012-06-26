@@ -162,7 +162,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		*/
 		
 		// without this, you should see errors in the CitesCollector (occassionally, not always)
-		//writer.optimize(true);
+		writer.optimize(true);
 		
 		reOpenSearcher();
 		

@@ -1,8 +1,5 @@
 package org.apache.lucene.search;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -11,22 +8,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.CollectorQuery.CollectorCreator;
 import org.apache.lucene.util.ReaderUtil;
 import org.apache.lucene.util.ToStringUtils;
 
+
+/**
+ * 
+ * This is a first attempt on the 2nd order operators, while it works, 
+ * it will work only for searching inside the boundaries of index
+ * segments.
+ * 
+ */
 public class CollectorQuery extends Query {
 
 	private static final long serialVersionUID = -5670377581753190942L;
 	Query query;
 	Filter filter = null;
-	Collector collector;
 	Map<Integer, Integer> docStarts;
-	private CollectorCreator creator;
+	private CollectorCreator collectorCreator;
 
 	/**
 	 * Constructs a new query which applies a filter to the results of the
@@ -38,6 +39,7 @@ public class CollectorQuery extends Query {
 	 * @param filter
 	 *            Filter to apply to query results, cannot be <code>null</code>.
 	 */
+	/*
 	public CollectorQuery(Query query, Filter filter, Collector collector) {
 		this.query = query;
 		this.filter = filter;
@@ -47,7 +49,7 @@ public class CollectorQuery extends Query {
 			throw new IllegalStateException("Collector must not be null");
 		}
 	}
-	/*
+	
 	public CollectorQuery(Query query, IndexReader reader, Collector collector) {
 		this.query = query;
 		this.filter = null;
@@ -63,20 +65,21 @@ public class CollectorQuery extends Query {
 	
 	public CollectorQuery(Query query, IndexReader reader, CollectorCreator creator ) {
 		this.query = query;
-		this.creator = creator;
-		initDocStarts(reader);
+		this.collectorCreator = creator;
+		docStarts = getDocStarts(reader);
 	}
 	
-	private void initDocStarts(IndexReader reader) {
+	private Map<Integer, Integer> getDocStarts(IndexReader reader) {
 		List<IndexReader> subReadersList = new ArrayList<IndexReader>();
 	    ReaderUtil.gatherSubReaders(subReadersList, reader);
 	    IndexReader[] subReaders = subReadersList.toArray(new IndexReader[subReadersList.size()]);
-	    docStarts = new HashMap<Integer, Integer>(subReaders.length);
+	    Map<Integer, Integer> docStarts = new HashMap<Integer, Integer>(subReaders.length);
 	    int maxDoc = 0;
 	    for (int i = 0; i < subReaders.length; i++) {
 	      docStarts.put(subReaders[i].hashCode(), maxDoc);
 	      maxDoc += subReaders[i].maxDoc();
 	    }
+	    return docStarts;
 	}
 	
 	/**
@@ -86,155 +89,9 @@ public class CollectorQuery extends Query {
 	public Weight createWeight(final Searcher searcher) throws IOException {
 		Weight weight = query.createWeight(searcher);
 		Similarity similarity = query.getSimilarity(searcher);
-		//TODO: leave only the creator initialization
-		Weight w;
-		if (creator != null) {
-			w = new CollectorWeight(weight, similarity, creator, docStarts);
-		}
-		else {
-			w = new CollectorWeight(weight, similarity, collector, docStarts);
-		}
-		
-		return w;
+		return new CollectorWeight(weight, similarity, collectorCreator, docStarts);
 	}
 	
-//	public Weight createWeight(final Searcher searcher) throws IOException {
-//		final Weight weight = query.createWeight(searcher);
-//		final Similarity similarity = query.getSimilarity(searcher);
-//		return new Weight() {
-//			private float value;
-//
-//			// pass these methods through to enclosed query's weight
-//			public float getValue() {
-//				return value;
-//			}
-//
-//			public float sumOfSquaredWeights() throws IOException {
-//				return weight.sumOfSquaredWeights() * getBoost() * getBoost();
-//			}
-//
-//			public void normalize(float v) {
-//				weight.normalize(v);
-//				value = weight.getValue() * getBoost();
-//			}
-//
-//			public Explanation explain(IndexReader ir, int i)
-//					throws IOException {
-//				Explanation inner = weight.explain(ir, i);
-//				if (getBoost() != 1) {
-//					Explanation preBoost = inner;
-//					inner = new Explanation(inner.getValue() * getBoost(),
-//							"product of:");
-//					inner.addDetail(new Explanation(getBoost(), "boost"));
-//					inner.addDetail(preBoost);
-//				}
-//				Filter f = CollectorQuery.this.filter;
-//				if (f != null) {
-//					DocIdSet docIdSet = f.getDocIdSet(ir);
-//					DocIdSetIterator docIdSetIterator = docIdSet == null ? DocIdSet.EMPTY_DOCIDSET
-//							.iterator() : docIdSet.iterator();
-//					if (docIdSetIterator == null) {
-//						docIdSetIterator = DocIdSet.EMPTY_DOCIDSET.iterator();
-//					}
-//					if (docIdSetIterator.advance(i) == i) {
-//						return inner;
-//					} else {
-//						Explanation result = new Explanation(0.0f,
-//								"failure to match filter: " + f.toString());
-//						result.addDetail(inner);
-//						return result;
-//					}
-//				}
-//				else {
-//					Explanation result = new Explanation(0.0f,
-//							"Filter is empty");
-//					result.addDetail(inner);
-//					return result;
-//				}
-//			}
-//
-//			// return this query
-//			public Query getQuery() {
-//				return CollectorQuery.this;
-//			}
-//
-//			int searcherCounter;
-//			Collector innerCollector = CollectorQuery.this.collector;
-//			
-//			
-//			public Scorer scorer(IndexReader indexReader, boolean scoreDocsInOrder,
-//					boolean topScorer) throws IOException {
-//				
-//				
-//				if (searcherCounter > 0) {
-//					return null;
-//				}
-//				searcherCounter++;
-//				
-//				
-//				// we override the Scorer for the InvenioQuery
-//				return new Scorer(similarity) {
-//
-//					private int doc = -1;
-//					private int[] recids = null;
-//					private int recids_counter = -1;
-//					private int max_counter = -1;
-//					private HashMap<String, Integer> recidToDocid;
-//
-//					public void score(Collector collector) throws IOException {
-//						collector.setScorer(this);
-//
-//						int d;
-//						while ((d = nextDoc()) != NO_MORE_DOCS) {
-//							innerCollector.collect(d);
-//						}
-//					}
-//
-//
-//					public int nextDoc() throws IOException {
-//						// this is called only once
-//						if (this.doc == -1) {
-//							//internalCollector. TODO
-//							if (recids == null || recids.length == 0) {
-//								return doc = NO_MORE_DOCS;
-//							}
-//						}
-//
-//						recids_counter += 1;
-//						if (recids_counter > max_counter) {
-//							return doc = NO_MORE_DOCS;
-//						}
-//
-//						try {
-//							doc = recidToDocid.get(recids[recids_counter]);
-//						}
-//						catch (NullPointerException e) {
-//							throw new IOException("Doc with recid=" + recids[recids_counter] + " is unknown to Lucene. You should reindex!");
-//						}
-//
-//						return doc;
-//					}
-//
-//					public int docID() {
-//						return doc;
-//					}
-//
-//					public int advance(int target) throws IOException {
-//						while ((doc = nextDoc()) < target) {
-//						}
-//						return doc;
-//					}
-//
-//					public float score() throws IOException {
-//						assert doc != -1;
-//						return CollectorQuery.this.getBoost() * 1.0f; // TODO: implementation of the
-//														// scoring algorithm
-//					}
-//				};// Scorer
-//			}// scorer
-//			}
-//		};
-//	}
 
 	/** Rewrites the wrapped query. */
 	public Query rewrite(IndexReader reader) throws IOException {
@@ -256,8 +113,8 @@ public class CollectorQuery extends Query {
 		return filter;
 	}
 	
-	public Collector getCollector() {
-		return collector;
+	public CollectorCreator getCollectorCreator() {
+		return collectorCreator;
 	}
 
 	// inherit javadoc
@@ -271,12 +128,7 @@ public class CollectorQuery extends Query {
 		buffer.append("CollectorQuery(");
 		buffer.append(query.toString(s));
 		buffer.append(", filter=" + (filter!=null ? filter.toString() : "null"));
-		if (creator !=null ) {
-			buffer.append(", collector=" + (creator.toString()));
-		}
-		else {
-			buffer.append(", collector=" + (collector!=null ? collector.toString() : "null"));
-		}
+		buffer.append(", collector=" + (collectorCreator!=null ? collectorCreator.toString() : "null"));
 		buffer.append(")");
 		buffer.append(ToStringUtils.boost(getBoost()));
 		return buffer.toString();
@@ -288,7 +140,7 @@ public class CollectorQuery extends Query {
 			CollectorQuery fq = (CollectorQuery) o;
 			return (query.equals(fq.query) 
 					&& (filter != null ? filter.equals(fq.filter) : true)
-					&& collector.equals(fq.collector)
+					&& collectorCreator.equals(fq.collectorCreator)
 					&& getBoost() == fq.getBoost());
 		}
 		return false;
@@ -297,11 +149,11 @@ public class CollectorQuery extends Query {
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
 		if (filter != null) {
-			return query.hashCode() ^ filter.hashCode() ^ collector.hashCode()
+			return query.hashCode() ^ filter.hashCode() ^ collectorCreator.hashCode()
 				+ Float.floatToRawIntBits(getBoost());
 		}
 		
-		return query.hashCode() ^ collector.hashCode()
+		return query.hashCode() ^ collectorCreator.hashCode()
 				+ Float.floatToRawIntBits(getBoost());
 	}
 	
@@ -320,6 +172,24 @@ public class CollectorQuery extends Query {
 			return constructor.newInstance(params);
 		}
 		
+		/** Returns a hash code value for this object. */
+		public int hashCode() {
+			int h = constructor.hashCode();
+			for (Object o: params) {
+				h = h ^ o.hashCode();
+			}
+			return h;
+		}
+		
+		/** Returns true iff <code>o</code> is equal to this. */
+		public boolean equals(Object o) {
+			if (o instanceof CollectorCreator) {
+				CollectorCreator fq = (CollectorCreator) o;
+				return hashCode() == fq.hashCode();
+			}
+			return false;
+		}
+		
 		@Override
 		public String toString() {
 			StringBuffer buffer = new StringBuffer();
@@ -327,15 +197,16 @@ public class CollectorQuery extends Query {
 			buffer.append("(");
 			int i = 0;
 			for (Object o: params) {
+				if (i>0) {
+					buffer.append(", ");
+				}
 				if (o instanceof String) {
 					buffer.append((String) o);
 				}
 				else {
-					o.getClass();
+					buffer.append(o.getClass().getSimpleName());
 				}
-				if (i>0) {
-					buffer.append(", ");
-				}
+				
 				i++;
 			}
 			buffer.append(")");
@@ -344,13 +215,15 @@ public class CollectorQuery extends Query {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static CollectorCreator createCollector(Class clazz, Object...params) throws SecurityException, NoSuchMethodException {
 		
+		@SuppressWarnings("rawtypes")
 		Class[] parameterTypes = new Class[params.length];
 		int i = 0;
 		for (Object o: params) {
 			Class<? extends Object> cls = o.getClass();
-			if (o instanceof String) {
+			if (o instanceof String || o instanceof int[][] || o instanceof int[]) {
 				parameterTypes[i] = cls;
 			}
 			else if (cls.getInterfaces().length > 0) {
