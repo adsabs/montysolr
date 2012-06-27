@@ -87,8 +87,24 @@ public class CollectorQuery extends Query {
 	 * This is accomplished by overriding the Scorer returned by the Weight.
 	 */
 	public Weight createWeight(final Searcher searcher) throws IOException {
+	    
+		/*
+		try {
+			Collector collector = collectorCreator.create();
+			searcher.search(query, collector);
+			Set<Integer> hits = ((SetCollector) collector).getHits();
+			System.out.println(hits.size());
+			Map<Integer, Integer> ds = getDocStarts(((IndexSearcher) searcher).getIndexReader());
+			System.out.println(ds);
+		} catch (Exception e) {
+			//pass
+		}
+		*/
+	    
 		Weight weight = query.createWeight(searcher);
 		Similarity similarity = query.getSimilarity(searcher);
+		
+		
 		return new CollectorWeight(weight, similarity, collectorCreator, docStarts);
 	}
 	

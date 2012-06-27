@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.lucene.index.IndexReader;
 
 public class CollectorScorer extends Scorer {
 	private Set<Integer> hits;
