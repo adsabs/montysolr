@@ -10,4 +10,5 @@ public interface SecondOrderCollector {
     public List<ScoreDoc> getSubReaderScoreDocs(IndexReader reader);
     public int hashCode();
     public boolean equals(Object o);
+    public int getSubReaderDocBase(IndexReader reader);
 }

@@ -36,7 +36,7 @@ public class CitesCollectorString extends Collector implements SetCollector {
 	@Override
 	public void collect(int doc) throws IOException {
 		try {
-			Document document = reader.document(docBase + doc);
+			Document document = reader.document(doc);
 			String[] vals = document.getValues(indexField); //TODO: optimize, read only one value
 			for (String v: vals) {
 				v = v.toLowerCase();

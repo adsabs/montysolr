@@ -10,11 +10,15 @@ public class ListOfScoreDocScorer extends Scorer {
 	private Iterator<ScoreDoc> iterator = null;
 	private int doc = -1;
 	private float score;
+	private int docBase = 0;
 
-    public ListOfScoreDocScorer(List<ScoreDoc> hits) throws IOException {
+    public ListOfScoreDocScorer(List<ScoreDoc> hits, int docBase) throws IOException {
       super(null, null);
-      iterator = hits.iterator();
-      
+      if (hits.size()>0) {
+    	  this.hits = hits;
+    	  iterator = hits.iterator();
+      }
+      this.docBase = docBase;
     }
 
     @Override
@@ -22,7 +26,7 @@ public class ListOfScoreDocScorer extends Scorer {
     	if (iterator != null && iterator.hasNext()) {
     		ScoreDoc hit = iterator.next();
     		score = hit.score;
-    		return doc = hit.doc;
+    		return doc = hit.doc - docBase;
     	}
     	else {
     		return doc = NO_MORE_DOCS;

@@ -137,6 +137,8 @@ public enum DictionaryRecIdCache {
 	 * Provides mapping from the string value (stored in refField) onto the 
 	 * lucene ids via idField. 
 	 * 
+	 * The externalIdsField must contain unique value! I.e. bibcode
+	 * 
 	 * I.e. refField=bibcode
 	 * bibcode contains unique value XYZ and this value (XYZ) 
 	 * corresponds to the lucene-id=5
@@ -199,9 +201,6 @@ public enum DictionaryRecIdCache {
 	 */
 	
 	private HashMap<String, Object>invertedCache = new HashMap<String, Object >(2);
-	
-	
-	
 	
 	public int[][] getUnInvertedDocids(IndexReader reader, String externalIds, String refField) throws IOException {
 		

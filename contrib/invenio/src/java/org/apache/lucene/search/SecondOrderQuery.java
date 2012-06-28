@@ -66,7 +66,7 @@ public class SecondOrderQuery extends Query {
 	*/
 	
 	
-	private int[][] getSubReaderRanges(IndexReader reader) {
+	public int[][] getSubReaderRanges(IndexReader reader) {
 		List<IndexReader> subReadersList = new ArrayList<IndexReader>();
 	    ReaderUtil.gatherSubReaders(subReadersList, reader);
 	    IndexReader[] subReaders = subReadersList.toArray(new IndexReader[subReadersList.size()]);
@@ -135,7 +135,7 @@ public class SecondOrderQuery extends Query {
 	/** Prints a user-readable version of this query. */
 	public String toString(String s) {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("CollectorQuery(");
+		buffer.append("SecondOrderQuery(");
 		buffer.append(firstOrderQuery.toString(s));
 		buffer.append(", filter=" + (filter!=null ? filter.toString() : "null"));
 		buffer.append(", collector=" + (secondOrderCollector!=null ? secondOrderCollector.toString() : "null"));

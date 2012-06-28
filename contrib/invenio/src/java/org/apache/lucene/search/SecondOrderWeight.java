@@ -1,52 +1,75 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.CollectorQuery.CollectorCreator;
 
 public class SecondOrderWeight extends Weight {
 
-	public SecondOrderWeight(Weight firstOrderWeight,
-			Similarity firstOrderSimilarity,
-			SecondOrderCollector secondOrderCollector) {
-		// TODO Auto-generated constructor stub
-	}
+	private static final long serialVersionUID = 1999318155593404879L;
+	private final Weight innerWeight;
+	private final Similarity similarity;
+	private SecondOrderCollector secondOrderCollector;
+	private Map<Integer, Integer> docStarts;
+	private CollectorCreator creator;
 
-	@Override
-	public Explanation explain(IndexReader reader, int doc) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public SecondOrderWeight(Weight weight,
+			Similarity similarity, SecondOrderCollector collector) throws IOException {
+		this.similarity = similarity;
+		this.innerWeight = weight;
+		this.secondOrderCollector = collector;
+		
+	}
+	
+	public SecondOrderWeight(Weight weight,
+			Similarity similarity, CollectorCreator creator, Map<Integer, Integer> docStarts) throws IOException {
+		this.similarity = similarity;
+		this.innerWeight = weight;
+		this.creator = creator;
+		this.docStarts = docStarts;
+		
 	}
 
 	@Override
 	public Query getQuery() {
-		// TODO Auto-generated method stub
-		return null;
+		return innerWeight.getQuery();
 	}
 
 	@Override
 	public float getValue() {
-		// TODO Auto-generated method stub
-		return 0;
+		return innerWeight.getValue();
+	}
+
+	@Override
+	public float sumOfSquaredWeights() throws IOException {
+		return innerWeight.sumOfSquaredWeights();
 	}
 
 	@Override
 	public void normalize(float norm) {
-		// TODO Auto-generated method stub
-
+		innerWeight.normalize(norm);
 	}
 
 	@Override
 	public Scorer scorer(IndexReader reader, boolean scoreDocsInOrder,
 			boolean topScorer) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		List<ScoreDoc> hits = secondOrderCollector.getSubReaderScoreDocs(reader);
+		if (hits.size() == 0) return null;
+		return new ListOfScoreDocScorer(hits, secondOrderCollector.getSubReaderDocBase(reader));
 	}
 
 	@Override
-	public float sumOfSquaredWeights() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+	public boolean scoresDocsOutOfOrder() {
+		return (innerWeight != null) ? innerWeight.scoresDocsOutOfOrder()
+				: false;
 	}
 
+	@Override
+	public Explanation explain(IndexReader reader, int doc) throws IOException {
+		return innerWeight.explain(reader, doc);
+	}
 }

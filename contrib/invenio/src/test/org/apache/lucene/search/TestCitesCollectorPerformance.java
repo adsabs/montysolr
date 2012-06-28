@@ -26,6 +26,9 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.store.NIOFSDirectory;
+import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.store.SimpleFSDirectory;
 import org.junit.BeforeClass;
 
 public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCase {
@@ -35,6 +38,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	private IndexReader reader;
 	private IndexSearcher searcher;
 	private IndexWriter writer;
+	private boolean debug = true;
 
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
@@ -51,7 +55,12 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		directory = newFSDirectory(new File(TEMP_DIR,"index-citations")); 
+		//directory = newFSDirectory(new File(TEMP_DIR,"index-citations"));
+		//directory = SimpleFSDirectory.open(new File(TEMP_DIR,"index-citations"));
+		
+		//directory = NIOFSDirectory.open(new File(TEMP_DIR,"index-citations"));
+		directory = new RAMDirectory();
+		
 		//directory = newDirectory();
 		//writer = new RandomIndexWriter(random, directory);
 		reOpenWriter(OpenMode.CREATE);
@@ -72,12 +81,12 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		super.tearDown();
 	}
 
-	public int[][] createRandomDocs(int start, int numDocs) throws IOException {
+	public HashMap<Integer, int[]> createRandomDocs(int start, int numDocs) throws IOException {
 		Random randomSeed = new Random();
 		
 		int[] randData = new int[numDocs/10];
 		for (int i=0; i<randData.length; i++) {
-			randData[i] = randomSeed.nextInt(numDocs) - start;
+			randData[i] = Math.abs(randomSeed.nextInt(numDocs) - start);
 		}
 		
 		int x = 0;
@@ -93,20 +102,29 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 			}
 		}
 		
+		HashMap<Integer, int[]> data = new HashMap<Integer, int[]>(randi.length);
 		Document doc;
 		for (int k=0;k<randi.length;k++) {
 			doc = new Document();
 			doc.add(newField("id",  String.valueOf(k+start), Field.Store.YES,	Field.Index.NOT_ANALYZED));
 			doc.add(newField("bibcode",  "b" + (k+start), Field.Store.YES,	Field.Index.NOT_ANALYZED));
+			int[] row = new int[randi[k].length];
+			x = 0;
 			for (int v: randi[k]) {
 				doc.add(newField("reference",  String.valueOf(v+start), Field.Store.YES,	Field.Index.NOT_ANALYZED));
 				doc.add(newField("breference",  "b" + (v+start), Field.Store.YES,	Field.Index.NOT_ANALYZED));
+				row[x] = v+start;
+				x++;
 			}
+			
+			writer.deleteDocuments(new TermQuery(new Term("id", String.valueOf(k+start))));
 			writer.addDocument(doc);
+			data.put(k+start, row);
 		}
 		
-		System.out.println("Created random docs: " + start + " - " + numDocs);
-		return randi;
+		if (debug) System.out.println("Created random docs: " + start + " - " + numDocs);
+		
+		return data;
 	}
 	
 	private void reOpenWriter(OpenMode mode) throws CorruptIndexException, LockObtainFailedException, IOException {
@@ -125,92 +143,178 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		searcher = newSearcher(reader);
 		
 	}
-	private void adoc(String... fields) throws IOException {
-		Document doc = new Document();
-		for (int i = 0; i < fields.length; i = i + 2) {
-			doc.add(newField(fields[i], fields[i + 1], Field.Store.YES,
-					Field.Index.NOT_ANALYZED));
-		}
-		writer.addDocument(doc);
-	}
 	
 	
 	public void testCitesCollector() throws Exception {
 		
 		
-		
-		int[][] data = createRandomDocs(0, 3000);
-		
-		
-		writer.commit();
-		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
-		createRandomDocs(4000, 7000);
+		int maxHits = 1000;
+		HashMap<Integer, int[]> cites = createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
 		
 		
 		writer.commit();
 		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
-		createRandomDocs(7000, 10000);
+		cites.putAll(createRandomDocs(new Float(maxHits * 0.3f).intValue(), new Float(maxHits * 0.7f).intValue()));
+		
+		
+		writer.commit();
+		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
+		cites.putAll(createRandomDocs(new Float(maxHits * 0.71f).intValue(), new Float(maxHits * 1.0f).intValue()));
 		
 		writer.commit();
 		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
 		
-		
-		/* this doesn't help
-		writer.commit();
-		reOpenWriter(OpenMode.APPEND);
-		Thread.sleep(1000);
-		*/
-		
-		// without this, you should see errors in the CitesCollector (occassionally, not always)
-		//writer.optimize(true);
 		
 		reOpenSearcher();
+		writer.close();
 		
-		int docId = 0;
-		int[] citesIds = null;
-		for (int i=0; i<data.length;i++) {
-			if (data[i].length > 2) {
-				docId = i;
-				citesIds = data[i];
-				break;
-			}
-		}
 		
 		Map<String, Integer> refCache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(
-				searcher.getIndexReader(), "breference");
+				reader, "bibcode");
 		
-		int maxHits = 10000;
-		//new CitesCollectorString(refCache, "breference")), maxHits).scoreDocs;
-		ScoreDoc[] hits = searcher.search(new CollectorQuery(new TermQuery(new Term("id", String.valueOf(docId))),
-				reader,
-				CollectorQuery.createCollector(CitesCollectorString.class, refCache, "breference")), maxHits).scoreDocs; 
+		
 		
 		
 		Map<Integer, Integer> histogram = new HashMap<Integer, Integer>();
 		
-		for (int i=0; i<9000; i++) {
+		SecondOrderCollectorCites coll = new SecondOrderCollectorCites(refCache, "breference");
+		SecondOrderQuery soq = new SecondOrderQuery(new MatchAllDocsQuery(), null, coll, false);
+		
+		List<ScoreDoc> h = coll.getHits();
+		
+		for (int[] x: soq.getSubReaderRanges(reader)) {
+			if (debug) System.err.println("reader: " + x[0] + " - docbase: " + x[1] );
+		}
+		
+		searcher.search(new MatchAllDocsQuery(), coll);
+		
+		
+		ScoreDoc[] hits;
+		int ei = 0;
+		for (int i=0; i<maxHits; i++) {
 			//System.err.println("search: " + i + " ------");
 			//new CitesCollectorString(refCache, "breference")
-			hits = searcher.search(new CollectorQuery(new TermQuery(new Term("id", String.valueOf(i))), reader, 
-					CollectorQuery.createCollector(CitesCollectorString.class, refCache, "breference")), maxHits).scoreDocs;
+			hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+					new SecondOrderCollectorCites(refCache, "breference"), false), maxHits).scoreDocs;
 			if (!histogram.containsKey(hits.length)) {
 				histogram.put(hits.length, 0);
 			}
 			histogram.put(hits.length, histogram.get(hits.length) + 1);
 			
-			if (i % 1000 == 0) {
-				System.out.println("Done: " + i);
+			if (i % 5000 == 0) {
+				if (debug) System.out.println("Done: " + i);
+			}
+			if (debug) {
+				if(!hitsEquals(cites.get(i), cites, hits)) {
+					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+					new SecondOrderCollectorCites(refCache, "breference"), false), maxHits).scoreDocs;
+					hitsEquals(cites.get(i), cites, hits);
+				}
+			}
+			else {
+				assertTrue(hitsEquals(cites.get(i), cites, hits));
+			}
+			
+			
+		}
+		
+		int sum = 0;
+		for ( Entry<Integer, Integer> x : histogram.entrySet()) {
+			if (debug) System.out.println(x.getKey() + " : " + x.getValue());
+			sum += x.getValue();
+		}
+		if (debug) System.out.println(sum);
+		
+		
+		HashMap<Integer, Integer> histogram2 = new HashMap<Integer, Integer>();
+		for (int i=0; i<maxHits; i++) {
+			//System.err.println("search: " + i + " ------");
+			//new CitesCollectorString(refCache, "breference")
+			hits = searcher.search(new CollectorQuery(new TermQuery(new Term("id", String.valueOf(i))), reader, 
+					CollectorQuery.createCollector(CitesCollectorString.class, refCache, "breference")), maxHits).scoreDocs;
+			if (!histogram2.containsKey(hits.length)) {
+				histogram2.put(hits.length, 0);
+			}
+			histogram2.put(hits.length, histogram.get(hits.length) + 1);
+			
+			if (i % 5000 == 0) {
+				if (debug) System.out.println("Done: " + i);
+			}
+			
+			if (debug) {
+				if(!hitsEquals(cites.get(i), cites, hits)) {
+					hits = searcher.search(new CollectorQuery(new TermQuery(new Term("id", String.valueOf(i))), reader, 
+							CollectorQuery.createCollector(CitesCollectorString.class, refCache, "breference")), maxHits).scoreDocs;
+					hitsEquals(cites.get(i), cites, hits);
+				}
+			}
+			else {
+				assertTrue(hitsEquals(cites.get(i), cites, hits));
 			}
 		}
 		
-		for ( Entry<Integer, Integer> x : histogram.entrySet()) {
-			System.out.println(x.getKey() + " : " + x.getValue());
+		sum = 0;
+		for ( Entry<Integer, Integer> x : histogram2.entrySet()) {
+			if (debug) System.out.println(x.getKey() + " : " + x.getValue());
+			sum += x.getValue();
+		}
+		if (debug) System.out.println(sum);
+		
+		for (Entry e: histogram.entrySet()) {
+			//assertTrue(e.getValue().equals(histogram2.get(e.getKey())));
 		}
 		
 		
 		
 	}
 	
+	private boolean hitsEquals(int[] thisDocCites, HashMap<Integer, int[]> cites, ScoreDoc[] hits) throws CorruptIndexException, IOException {
+		if (thisDocCites == null && hits.length == 0) return true;
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		for (ScoreDoc d: hits) {
+			try {
+				Document doc = reader.document(d.doc);
+				result.add(Integer.valueOf(doc.get("id")));
+			}
+			catch (IOException e) {
+				return false;
+			}
+		}
+		ArrayList<Integer> expected = new ArrayList<Integer>();
+		for (int r: thisDocCites) {
+			if (cites.containsKey(r)) {
+				expected.add(r);
+			}
+		}
+		if (!(result.containsAll(expected) && expected.containsAll(result))) {
+			System.err.println("expected: " + expected.toString() + " actual: " + result.toString());
+		}
+		return result.containsAll(expected) && expected.containsAll(result);
+	}
+
+	private void merge(HashMap<Integer, int[]> data,
+			HashMap<Integer, int[]> additionalData) {
+		for (Entry<Integer, int[]> e: additionalData.entrySet()) {
+			if (data.containsKey(e.getKey())) {
+				int[] row = new int[data.get(e.getKey()).length+ (e.getValue().length)];
+				int i = 0;
+				for (int r: data.get(e.getKey())) {
+					row[i] = r;
+					i++;
+				}
+				for (int r: e.getValue()) {
+					row[i] = r;
+					i++;
+				}
+				data.put(e.getKey(), row);
+			}
+			else {
+				data.put(e.getKey(), e.getValue());
+			}
+		}
+		
+	}
+
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestCitesCollectorPerformance.class);
