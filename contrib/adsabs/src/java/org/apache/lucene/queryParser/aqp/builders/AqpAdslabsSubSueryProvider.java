@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.aqp.AqpSubqueryParser;
 import org.apache.lucene.queryParser.aqp.AqpSubqueryParserFull;
@@ -22,6 +23,9 @@ import org.apache.lucene.search.CitesCollectorString;
 import org.apache.lucene.search.CollectorQuery;
 import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SecondOrderCollectorCites;
+import org.apache.lucene.search.SecondOrderQuery;
+import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.AqpFunctionQParser;
@@ -181,8 +185,9 @@ public class AqpAdslabsSubSueryProvider implements
 				}
 				//return new CollectorQuery(innerQuery, new CitesCollectorString(cache, refField));
 				try {
-					return new CollectorQuery(innerQuery, (IndexReader) req.getSearcher().getReader(),
-							CollectorQuery.createCollector(CitesCollectorString.class, cache, refField));
+					//return new CollectorQuery(innerQuery, (IndexReader) req.getSearcher().getReader(),
+					//		CollectorQuery.createCollector(CitesCollectorString.class, cache, refField));
+					return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCites(cache, refField), false);
 				} catch (Exception e) {
 					req.getCore().log.error(e.toString());
 					throw new ParseException("Ouuups, our developers are lame mulas - server error!");

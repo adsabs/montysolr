@@ -9,6 +9,7 @@ import org.apache.lucene.queryParser.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.CollectorQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
@@ -131,10 +132,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		
 		// new function queries, the 2nd order citation operators
 		assertQueryEquals(req("qt", "aqp", "q", "cites(author:muller)"), 
-				"CollectorQuery(author:muller, filter=null, collector=CitesCollectorString(HashMap, reference))", CollectorQuery.class);
+				"SecondOrderQuery(author:muller, filter=null, collector=cites[using:reference])", SecondOrderQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "x OR z cites(author:muller OR title:body)"), 
-				"(all:x all:z) CollectorQuery(author:muller title:body, filter=null, collector=CitesCollectorString(HashMap, reference))", BooleanQuery.class);
+				"(all:x all:z) SecondOrderQuery(author:muller title:body, filter=null, collector=cites[using:reference])", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "refersto(author:muller)"), 
 				"CollectorQuery(author:muller, filter=null, collector=CitedByCollector(int[][], reference))", CollectorQuery.class);
