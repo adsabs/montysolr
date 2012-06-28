@@ -66,18 +66,6 @@ public class SecondOrderQuery extends Query {
 	*/
 	
 	
-	public int[][] getSubReaderRanges(IndexReader reader) {
-		List<IndexReader> subReadersList = new ArrayList<IndexReader>();
-	    ReaderUtil.gatherSubReaders(subReadersList, reader);
-	    IndexReader[] subReaders = subReadersList.toArray(new IndexReader[subReadersList.size()]);
-	    int[][] docRanges = new int[subReaders.length][];
-	    int maxDoc = 0;
-	    for (int i = 0; i < subReaders.length; i++) {
-	    	docRanges[i] =  new int[]{subReaders[i].hashCode(), maxDoc};
-	        maxDoc += subReaders[i].maxDoc();
-	    }
-	    return docRanges;
-	}
 	
 	/**
 	 * Returns a Weight that applies the filter to the enclosed query's Weight.
@@ -93,8 +81,8 @@ public class SecondOrderQuery extends Query {
 			Weight firstOrderWeight = firstOrderQuery.createWeight(searcher);
 			Similarity firstOrderSimilarity = firstOrderQuery.getSimilarity(searcher);
 			
-			int[][] ranges = getSubReaderRanges(((IndexSearcher) searcher).getIndexReader());
-			secondOrderCollector.setSubReaderRanges(ranges);
+			secondOrderCollector.searcherInitialization(searcher);
+			
 			searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
 		    
 			return new SecondOrderWeight(firstOrderWeight, firstOrderSimilarity, 

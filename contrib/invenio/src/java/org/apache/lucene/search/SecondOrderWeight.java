@@ -57,7 +57,7 @@ public class SecondOrderWeight extends Weight {
 	public Scorer scorer(IndexReader reader, boolean scoreDocsInOrder,
 			boolean topScorer) throws IOException {
 		
-		List<ScoreDoc> hits = secondOrderCollector.getSubReaderScoreDocs(reader);
+		List<ScoreDoc> hits = secondOrderCollector.getSubReaderResults(reader);
 		if (hits.size() == 0) return null;
 		return new ListOfScoreDocScorer(hits, secondOrderCollector.getSubReaderDocBase(reader));
 	}

@@ -3,10 +3,7 @@ package org.apache.lucene.search;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -38,7 +35,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	private IndexReader reader;
 	private IndexSearcher searcher;
 	private IndexWriter writer;
-	private boolean debug = true;
+	private boolean debug = false;
 
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
@@ -180,9 +177,8 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		SecondOrderCollectorCites coll = new SecondOrderCollectorCites(refCache, "breference");
 		SecondOrderQuery soq = new SecondOrderQuery(new MatchAllDocsQuery(), null, coll, false);
 		
-		List<ScoreDoc> h = coll.getHits();
 		
-		for (int[] x: soq.getSubReaderRanges(reader)) {
+		for (int[] x: coll.getSubReaderRanges(reader)) {
 			if (debug) System.err.println("reader: " + x[0] + " - docbase: " + x[1] );
 		}
 		
@@ -226,6 +222,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		if (debug) System.out.println(sum);
 		
 		
+		/*
 		HashMap<Integer, Integer> histogram2 = new HashMap<Integer, Integer>();
 		for (int i=0; i<maxHits; i++) {
 			//System.err.println("search: " + i + " ------");
@@ -264,7 +261,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 			//assertTrue(e.getValue().equals(histogram2.get(e.getKey())));
 		}
 		
-		
+		*/
 		
 	}
 	

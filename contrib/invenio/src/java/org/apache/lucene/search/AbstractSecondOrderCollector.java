@@ -9,6 +9,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.util.ReaderUtil;
 
 public abstract class AbstractSecondOrderCollector 
 	extends Collector implements SecondOrderCollector {
@@ -17,7 +18,7 @@ public abstract class AbstractSecondOrderCollector
 	protected IndexReader reader;
 	protected int docBase;
 	protected String indexField;
-	protected Map<String, Integer> fieldCache = null;
+	protected Map<?, Integer> fieldCache = null;
 	protected List<ScoreDoc> hits;
 	protected int[][] subReaderRanges;
 	protected volatile boolean organized = false;
@@ -28,6 +29,25 @@ public abstract class AbstractSecondOrderCollector
 	public AbstractSecondOrderCollector() {
 		lock = new ReentrantLock();
 	}
+	
+	public void searcherInitialization(Searcher searcher) {
+		int[][] ranges = getSubReaderRanges(((IndexSearcher) searcher).getIndexReader());
+		setSubReaderRanges(ranges);
+	}
+	
+	public int[][] getSubReaderRanges(IndexReader reader) {
+		List<IndexReader> subReadersList = new ArrayList<IndexReader>();
+	    ReaderUtil.gatherSubReaders(subReadersList, reader);
+	    IndexReader[] subReaders = subReadersList.toArray(new IndexReader[subReadersList.size()]);
+	    int[][] docRanges = new int[subReaders.length][];
+	    int maxDoc = 0;
+	    for (int i = 0; i < subReaders.length; i++) {
+	    	docRanges[i] =  new int[]{subReaders[i].hashCode(), maxDoc};
+	        maxDoc += subReaders[i].maxDoc();
+	    }
+	    return docRanges;
+	}
+
 	
 	public void setSubReaderRanges(int[][] ranges) {
 		this.subReaderRanges = ranges;
@@ -49,7 +69,7 @@ public abstract class AbstractSecondOrderCollector
 		throw new IllegalStateException("There exists no reader: " + reader);
 	}
 
-	public List<ScoreDoc> getSubReaderScoreDocs(IndexReader reader) {
+	public List<ScoreDoc> getSubReaderResults(IndexReader reader) {
 		
 		lock.lock();
         try {
@@ -74,10 +94,6 @@ public abstract class AbstractSecondOrderCollector
 		throw new IllegalStateException("There are no hits for the reader: " + reader);
 	}
 	
-	public List<ScoreDoc> getHits() {
-		return hits;
-	}
-
 
 	private void extractRanges() {
 		
