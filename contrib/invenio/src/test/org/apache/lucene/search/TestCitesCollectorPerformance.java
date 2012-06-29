@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -52,14 +53,20 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		//directory = newFSDirectory(new File(TEMP_DIR,"index-citations"));
+		
+		if (debug) {
+			directory = newFSDirectory(new File(TEMP_DIR,"index-citations"));
+		}
+		else {
+			directory = new RAMDirectory();
+		}
+		
 		//directory = SimpleFSDirectory.open(new File(TEMP_DIR,"index-citations"));
-		
 		//directory = NIOFSDirectory.open(new File(TEMP_DIR,"index-citations"));
-		directory = new RAMDirectory();
-		
 		//directory = newDirectory();
 		//writer = new RandomIndexWriter(random, directory);
+		
+		
 		reOpenWriter(OpenMode.CREATE);
 		writer.deleteAll();
 		writer.commit();
@@ -166,44 +173,66 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		writer.close();
 		
 		
+		HashMap<Integer, int[]> citedBy = invert(cites);
+		
 		Map<String, Integer> refCache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(
 				reader, "bibcode");
+		
+		int[][] invertedCache = DictionaryRecIdCache.INSTANCE.
+				getUnInvertedDocidsStrField(((IndexSearcher) searcher).getIndexReader(), 
+				"bibcode", "breference");
+		
+		
+		
+		assertTrue(refCache.size() > maxHits/2);
+		assertTrue(invertedCache.length > maxHits/2);
 		
 		
 		
 		
 		Map<Integer, Integer> histogram = new HashMap<Integer, Integer>();
 		
-		SecondOrderCollectorCites coll = new SecondOrderCollectorCites(refCache, "breference");
-		SecondOrderQuery soq = new SecondOrderQuery(new MatchAllDocsQuery(), null, coll, false);
-		
+		SecondOrderCollectorCites coll = new SecondOrderCollectorCites(refCache, "bibcode", "breference");
+		searcher.search(new MatchAllDocsQuery(), coll); // run it through the whole index (no IO error should happen)
 		
 		for (int[] x: coll.getSubReaderRanges(reader)) {
 			if (debug) System.err.println("reader: " + x[0] + " - docbase: " + x[1] );
 		}
 		
-		searcher.search(new MatchAllDocsQuery(), coll);
+		
 		
 		
 		ScoreDoc[] hits;
-		int ei = 0;
 		for (int i=0; i<maxHits; i++) {
 			//System.err.println("search: " + i + " ------");
 			//new CitesCollectorString(refCache, "breference")
-			hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
-					new SecondOrderCollectorCites(refCache, "breference"), false), maxHits).scoreDocs;
+			
+			
+			// X->{papers}
+			// let's toggle implementataions
+			if (i % 3 == 0) {
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+					new SecondOrderCollectorCites(refCache, "bibcode", "breference"), false), maxHits).scoreDocs;
+			}
+			else if (i % 3 == 1) {
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+						new SecondOrderCollectorCites("bibcode", "breference"), false), maxHits).scoreDocs;
+			}
+			else {
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+						new SecondOrderCollectorCitesRAM("bibcode", "breference"), false), maxHits).scoreDocs;
+			}
+			
 			if (!histogram.containsKey(hits.length)) {
 				histogram.put(hits.length, 0);
 			}
 			histogram.put(hits.length, histogram.get(hits.length) + 1);
 			
-			if (i % 5000 == 0) {
-				if (debug) System.out.println("Done: " + i);
-			}
+			
 			if (debug) {
 				if(!hitsEquals(cites.get(i), cites, hits)) {
 					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
-					new SecondOrderCollectorCites(refCache, "breference"), false), maxHits).scoreDocs;
+					new SecondOrderCollectorCites(refCache, "bibcode", "breference"), false), maxHits).scoreDocs;
 					hitsEquals(cites.get(i), cites, hits);
 				}
 			}
@@ -212,7 +241,36 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 			}
 			
 			
+			// {papers} -> X
+			if (i % 2 == 0) {
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+					new SecondOrderCollectorCitedBy(invertedCache, "bibcode", "breference"), false), maxHits).scoreDocs;
+			}
+			else {
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+						new SecondOrderCollectorCitedBy("bibcode", "breference"), false), maxHits).scoreDocs;
+			}
+			
+			if (debug) {
+				if(!citedByEquals(citedBy.get(i), citedBy, hits)) {
+					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+					new SecondOrderCollectorCitedBy(invertedCache, "bibcode", "breference"), false), maxHits).scoreDocs;
+					citedByEquals(citedBy.get(i), citedBy, hits);
+				}
+			}
+			else {
+				assertTrue(citedByEquals(citedBy.get(i), citedBy, hits));
+			}
+			
+			
+			
+			
+			if (i % 5000 == 0 && debug) {
+				System.out.println("Done: " + i);
+			}
 		}
+		
+		
 		
 		int sum = 0;
 		for ( Entry<Integer, Integer> x : histogram.entrySet()) {
@@ -265,6 +323,27 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		
 	}
 	
+	private HashMap<Integer, int[]> invert(HashMap<Integer, int[]> cites) {
+		HashMap<Integer, List<Integer>> result = new HashMap<Integer, List<Integer>>(cites.size());
+		for (Entry<Integer, int[]> e: cites.entrySet()) {
+			for (int paperId: e.getValue()) {
+				if (!result.containsKey(paperId)) {
+					result.put(paperId, new ArrayList<Integer>());
+				}
+				result.get(paperId).add(e.getKey());
+			}
+		}
+		HashMap<Integer, int[]> out = new HashMap<Integer, int[]>();
+		for (Entry<Integer, List<Integer>> e: result.entrySet()) {
+			List<Integer> list = e.getValue();
+			int[] ret = new int[list.size()];
+			for(int i = 0;i < ret.length;i++)
+			    ret[i] = list.get(i);
+			out.put(e.getKey(), ret);
+		}
+		return out;
+	}
+
 	private boolean hitsEquals(int[] thisDocCites, HashMap<Integer, int[]> cites, ScoreDoc[] hits) throws CorruptIndexException, IOException {
 		if (thisDocCites == null && hits.length == 0) return true;
 		ArrayList<Integer> result = new ArrayList<Integer>();
@@ -282,6 +361,28 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 			if (cites.containsKey(r)) {
 				expected.add(r);
 			}
+		}
+		if (!(result.containsAll(expected) && expected.containsAll(result))) {
+			System.err.println("expected: " + expected.toString() + " actual: " + result.toString());
+		}
+		return result.containsAll(expected) && expected.containsAll(result);
+	}
+	
+	private boolean citedByEquals(int[] thisDocCites, HashMap<Integer, int[]> cites, ScoreDoc[] hits) throws CorruptIndexException, IOException {
+		if (thisDocCites == null && hits.length == 0) return true;
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		for (ScoreDoc d: hits) {
+			try {
+				Document doc = reader.document(d.doc);
+				result.add(Integer.valueOf(doc.get("id")));
+			}
+			catch (IOException e) {
+				return false;
+			}
+		}
+		ArrayList<Integer> expected = new ArrayList<Integer>();
+		for (int r: thisDocCites) {
+			expected.add(r);
 		}
 		if (!(result.containsAll(expected) && expected.containsAll(result))) {
 			System.err.println("expected: " + expected.toString() + " actual: " + result.toString());

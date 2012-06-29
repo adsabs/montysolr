@@ -1,5 +1,6 @@
 package org.apache.lucene.search;
 
+import java.io.IOException;
 import java.util.List;
 import org.apache.lucene.index.IndexReader;
 
@@ -12,8 +13,9 @@ public interface SecondOrderCollector {
      * subreaders and how they are partitioned
      * 
      * @param searcher
+     * @throws IOException 
      */
-    public void searcherInitialization(Searcher searcher);
+    public void searcherInitialization(Searcher searcher) throws IOException;
 
     
     /**
@@ -44,6 +46,7 @@ public interface SecondOrderCollector {
 	 * @return
 	 */
     public int hashCode();
+	
     public boolean equals(Object o);
 
 }

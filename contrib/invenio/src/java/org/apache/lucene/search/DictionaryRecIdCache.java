@@ -1,7 +1,9 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.index.IndexReader;
@@ -104,6 +106,13 @@ public enum DictionaryRecIdCache {
 		}
 	}
 	
+	
+	/*
+	 * TODO: several threads may be trying to get the data at once, there will be no clash,
+	 * but likely useless computation. I should add some lock to each of the main methods
+	 * (that gets separate cache type) 
+	 */
+	
 	/**
 	 * Provides the mapping <b>from</b> the external source ids <b>into</b>
 	 * lucene doc ids. This class is thread safe.
@@ -164,6 +173,47 @@ public enum DictionaryRecIdCache {
 		return (Map<String, Integer>) translation_cache.get(externalIdsField);
 	}
 	
+	
+	
+	/**
+	 * This cache alleviates the need to read the data from the index, we
+	 * basically load the field into memory (but because lucene-3 cache
+	 * cannot yet load the multiple values, we do it here manually, and we 
+	 * translate the values into docids as we proceed, just to be superfast
+	 * on the search side)
+	 */
+	private HashMap<String, Object>multiValuesCache = new HashMap<String, Object >(2);
+	
+	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(IndexReader reader, String externalIds, String refField) 
+		throws IOException {
+		
+		if (multiValuesCache.containsKey(refField) && indexUnchanged(reader, externalIds, true)) {
+			return (Map<Integer, List<Integer>>) multiValuesCache.get(refField);
+		}
+		
+		// since most likely this will be needed anyway, i don't bother with reading just the values from the index
+		int[][] invCache = getUnInvertedDocidsStrField(reader, externalIds, refField);
+		
+		HashMap<Integer, List<Integer>> docsPointingToDocId = new HashMap<Integer, List<Integer>>();
+		Integer i = -1;
+		for (int[] docIds: invCache) {
+			i++;
+			if (docIds == null) continue;
+			for (int docId: docIds) {
+				if (!docsPointingToDocId.containsKey(docId)) {
+					docsPointingToDocId.put(docId, new ArrayList<Integer>());
+				}
+				docsPointingToDocId.get(docId).add(i);
+			}
+			
+		}
+		
+		synchronized(multiValuesCache) {
+			multiValuesCache.put(refField, docsPointingToDocId);
+		}
+		return docsPointingToDocId;
+		
+	}
 
 	/**
 	 * Uninverts the lucene index, it grabs all the values from the index and discovers what 
@@ -266,8 +316,9 @@ public enum DictionaryRecIdCache {
 			invertedCache.put(refField, val);
 		}
 		return (int[][]) val;
-		
-	}	
+	}
+	
+	
 	
 	/*
 	 * A temporary hack to get uninverted values from the index

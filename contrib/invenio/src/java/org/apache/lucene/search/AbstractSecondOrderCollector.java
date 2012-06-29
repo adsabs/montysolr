@@ -1,5 +1,6 @@
 package org.apache.lucene.search;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,8 +18,6 @@ public abstract class AbstractSecondOrderCollector
 	protected Scorer scorer;
 	protected IndexReader reader;
 	protected int docBase;
-	protected String indexField;
-	protected Map<?, Integer> fieldCache = null;
 	protected List<ScoreDoc> hits;
 	protected int[][] subReaderRanges;
 	protected volatile boolean organized = false;
@@ -28,10 +27,15 @@ public abstract class AbstractSecondOrderCollector
 	
 	public AbstractSecondOrderCollector() {
 		lock = new ReentrantLock();
+		hits = new ArrayList<ScoreDoc>();
 	}
 	
-	public void searcherInitialization(Searcher searcher) {
-		int[][] ranges = getSubReaderRanges(((IndexSearcher) searcher).getIndexReader());
+	public void searcherInitialization(Searcher searcher) throws IOException {
+		
+	}
+	
+	public void initSubReaderRanges(IndexReader reader) {
+		int[][] ranges = getSubReaderRanges(reader);
 		setSubReaderRanges(ranges);
 	}
 	
@@ -156,11 +160,6 @@ public abstract class AbstractSecondOrderCollector
 		
 	}
 	
-	/** Returns a hash code value for this object. */
-	public int hashCode() {
-		return indexField.hashCode() ^ fieldCache.hashCode();
-	}
-	
 	/** Returns true iff <code>o</code> is equal to this. */
 	public boolean equals(Object o) {
 		if (o instanceof SecondOrderCollector) {
@@ -169,6 +168,6 @@ public abstract class AbstractSecondOrderCollector
 		}
 		return false;
 	}
-
+	
 	
 }

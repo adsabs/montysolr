@@ -23,7 +23,9 @@ import org.apache.lucene.search.CitesCollectorString;
 import org.apache.lucene.search.CollectorQuery;
 import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
+import org.apache.lucene.search.SecondOrderCollectorCitesRAM;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.SolrParams;
@@ -147,21 +149,8 @@ public class AqpAdslabsSubSueryProvider implements
 				String refField = "reference";
 				String idField = "bibcode";
 				
-				int[][] invCache;
-				try {
-					invCache = DictionaryRecIdCache.INSTANCE.
-					getUnInvertedDocidsStrField(req.getSearcher().getIndexReader(), idField, refField);
-				} catch (IOException e) {
-					throw new ParseException(e.getLocalizedMessage());
-				}
-				//return new CollectorQuery(innerQuery, new CitedByCollector(invCache, refField));
-				try {
-					return new CollectorQuery(innerQuery, (IndexReader) req.getSearcher().getReader(),
-							CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
-				} catch (Exception e) {
-					req.getCore().log.error(e.toString());
-					throw new ParseException("Ouuups, our developers are lame mulas - server error!");
-				}
+				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitedBy(idField, refField), false);
+				
 		      }
 		    });
 		parsers.put("cites", new AqpSubqueryParserFull() {
@@ -169,31 +158,27 @@ public class AqpAdslabsSubSueryProvider implements
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
 				
+				// TODO: make configurable
+				String refField = "reference";
+				String idField = "bibcode";
+				
+				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
+				
+			}
+		  });
+		parsers.put("citis", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				Query innerQuery = fp.parseNestedQuery();
+				SolrQueryRequest req = fp.getReq();
 				
 				// TODO: make configurable
 				String refField = "reference";
 				String idField = "bibcode";
 				
-				Map<String, Integer> cache;
+				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCites(idField, refField), false);
 				
-				try {
-					cache = DictionaryRecIdCache.INSTANCE.
-						getTranslationCacheString(req.getSearcher().getIndexReader(), idField);
-					
-				} catch (IOException e) {
-					throw new ParseException(e.getLocalizedMessage());
-				}
-				//return new CollectorQuery(innerQuery, new CitesCollectorString(cache, refField));
-				try {
-					//return new CollectorQuery(innerQuery, (IndexReader) req.getSearcher().getReader(),
-					//		CollectorQuery.createCollector(CitesCollectorString.class, cache, refField));
-					return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCites(cache, refField), false);
-				} catch (Exception e) {
-					req.getCore().log.error(e.toString());
-					throw new ParseException("Ouuups, our developers are lame mulas - server error!");
-				}
-		      }
-		    });
+			}
+		  });
 	};
 
 	public QueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
