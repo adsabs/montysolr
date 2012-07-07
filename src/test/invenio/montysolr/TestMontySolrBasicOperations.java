@@ -10,16 +10,21 @@ import org.apache.jcc.PythonException;
 import org.junit.BeforeClass;
 
 import invenio.montysolr.util.MontySolrSetup;
-import invenio.montysolr.util.MontySolrTestCaseJ4;
+import org.apache.solr.MontySolrTestCaseJ4;
+import org.apache.solr.common.util.NamedList;
+import org.apache.solr.response.SolrQueryResponse;
+
 import invenio.montysolr.util.MontySolrAbstractTestCase;
 
 public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 	
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
+	public static void beforeClass() throws Exception {
 		MontySolrSetup.init("montysolr.tests.basic.bridge.Bridge", 
 				MontySolrSetup.getMontySolrHome() + "/src/python");
+		MontySolrSetup.addTargetsToHandler("montysolr.tests.basic.targets");
+		
 	}
 	
 
@@ -140,6 +145,16 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		}
 		
 		assertTrue(caught);
+		
+		SolrQueryResponse rsp = new SolrQueryResponse();
+		message = MontySolrVM.INSTANCE.createMessage(
+		  "handle_request_body").setParam("rsp", rsp);
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		NamedList vls = rsp.getValues();
+		assertTrue("says hello!".equals(vls.get("python")));
+		
+		
 	}
 	
 	// Uniquely for Junit 3

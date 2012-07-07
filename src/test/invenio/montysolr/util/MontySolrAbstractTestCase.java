@@ -46,7 +46,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	}
 	
 	/** @see MontySolrTestCaseJ4#getFile */
-	public static File getFile(String name) throws IOException {
+	public static File getFile(String name) {
 		return MontySolrTestCaseJ4.getFile(name);
 	}
 	

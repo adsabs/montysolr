@@ -2,7 +2,7 @@
 from montysolr.initvm import montysolr_java as j
 from montysolr.utils import make_targets
 
-
+SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable 
 JArray_string = j.JArray_string #@UndefinedVariable
 
 def diagnostic_test(message):
@@ -30,7 +30,7 @@ def receive_text_array(message):
     
     
 def handle_request_body(message):
-    rsp = message.getSolrQueryResponse()
+    rsp = SolrQueryResponse.cast_(message.getParam("rsp"))
     rsp.add("python", 'says hello!')
 
 
@@ -44,4 +44,4 @@ def montysolr_targets():
     return make_targets(receive_text=receive_text,
                         receive_text_array=receive_text_array,
                         receive_field_value=receive_field_value,
-                        handleRequestBody=handle_request_body)
+                        handle_request_body=handle_request_body)

@@ -84,8 +84,7 @@
 		java.lang.Float
 		java.lang.System
 		java.lang.String
-		org.apache.solr.request.SolrQueryRequest
-		org.apache.solr.request.SolrQueryResponse" />
+		" />
 
 
 
@@ -311,7 +310,6 @@ lucene.version=${lucene.version}
 		<exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
 			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
-			<!--<arg value="${ddash}no-generics" />-->
 			<arg line="${jcc.build_also}" />
 			<arg line="${jcc.build}" />
 			<arg value="${ddash}python" />
@@ -488,10 +486,14 @@ lucene.version=${lucene.version}
 			<arg value="${app.solr.name}" />
 			<arg value="${ddash}build" />
 			<arg value="${ddash}bdist" />
+			<arg line="${ddash}files 5" />
 			<!-- We exclude the embedded classes because they are Jetty specific -->
 			<arg line="${ddash}exclude org.apache.solr.search.FunctionQParser
 				       ${ddash}exclude org.apache.solr.client.solrj.embedded.NoLog 
 				       ${ddash}exclude org.apache.solr.client.solrj.embedded.JettySolrRunner
+			           ${ddash}exclude org.apache.solr.update.processor.UniqFieldsUpdateProcessorFactory
+			           ${ddash}exclude org.apache.noggit.JSONParser
+				       ${ddash}exclude org.apache.solr.util.xslt.TransformerProvider
 			          " />
 		</exec>
 	</target>

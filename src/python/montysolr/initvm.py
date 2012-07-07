@@ -3,13 +3,13 @@ Created on Jan 13, 2011
 
 @author: rca
 '''
-
 #@PydevCodeAnalysisIgnore
 
 import os
 import sys
 
-print sys.stderr.write("""
+
+sys.stderr.write("""
 ###################################################
 MontySolr start (on the Python side):
 sys.executable=%s
@@ -33,6 +33,7 @@ except:
         sys.path.append(_d)
     import solr_java
     import montysolr_java
+
 
 from montysolr import config 
 
@@ -58,8 +59,9 @@ if _jvmargs:
     montysolr_java.initVM(os.pathsep.join([lucene.CLASSPATH, solr_java.CLASSPATH, montysolr_java.CLASSPATH, _classpath]), vmargs=_jvmargs)
 else:
     montysolr_java.initVM(os.pathsep.join([lucene.CLASSPATH, solr_java.CLASSPATH, montysolr_java.CLASSPATH, _classpath]))
+
 lucene.initVM()
-solr_java.initVM()
+#solr_java.initVM()
 
 # move the objects from lucene to montysolr, temporary workaround for different identity objects
 for name in dir(montysolr_java._montysolr_java):
@@ -67,3 +69,5 @@ for name in dir(montysolr_java._montysolr_java):
         setattr(montysolr_java, name, getattr(lucene._lucene, name))
 
 JAVA = montysolr_java
+
+sys.stderr.write('MontySolr loaded\n')

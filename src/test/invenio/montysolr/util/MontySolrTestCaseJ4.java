@@ -5,6 +5,7 @@ import org.apache.solr.JSONTestUtil;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.XML;
@@ -56,12 +57,12 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		log.info("###Starting " + getName()); // returns <unknown>???
+		log.info("###Starting " + getTestName()); // returns <unknown>???
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-		log.info("###Ending " + getName());
+		log.info("###Ending " + getTestName());
 		super.tearDown();
 	}
 
@@ -176,6 +177,10 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 	public static String getSolrConfigFile() {
 		return configString;
 	};
+	
+	public static String getSolrHome() {
+		return System.getProperty("solr.solr.home");
+	}
 
 	/**
 	 * The directory used to story the index managed by the TestHarness h
@@ -226,21 +231,27 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 
 		String configFile = getSolrConfigFile();
 		if (configFile != null) {
-
-			solrConfig = h.createConfig(getSolrConfigFile());
-			h = new TestHarness(dataDir.getAbsolutePath(), solrConfig,
-					getSchemaFile());
-			lrf = h.getRequestFactory("standard", 0, 20, "version", "2.2");
+			createCore();
+			
 		}
 		log.info("####initCore end");
 	}
+	
+	public static void createCore() {
+	    solrConfig = TestHarness.createConfig(getSolrHome(), getSolrConfigFile());
+	    h = new TestHarness( dataDir.getAbsolutePath(),
+	            solrConfig,
+	            getSchemaFile());
+	    lrf = h.getRequestFactory
+	            ("standard",0,20,CommonParams.VERSION,"2.2");
+	  }
 
 	/**
 	 * Subclasses that override setUp can optionally call this method to log the
 	 * fact that their setUp process has ended.
 	 */
 	public void postSetUp() {
-		log.info("####POSTSETUP " + getName());
+		log.info("####POSTSETUP " + getTestName());
 	}
 
 	/**
@@ -250,7 +261,7 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 	 * tearDown method.
 	 */
 	public void preTearDown() {
-		log.info("####PRETEARDOWN " + getName());
+		log.info("####PRETEARDOWN " + getTestName());
 	}
 
 	/**

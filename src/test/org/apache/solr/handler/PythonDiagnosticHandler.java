@@ -58,12 +58,6 @@ public class PythonDiagnosticHandler extends RequestHandlerBase {
 	}
 
 
-	@Override
-	public String getSourceId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
 	@Override
 	public String getSource() {
