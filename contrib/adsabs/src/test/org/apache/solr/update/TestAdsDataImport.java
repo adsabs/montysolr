@@ -21,7 +21,7 @@ import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
 import org.adsabs.mongodb.MongoConnection;
-import org.apache.lucene.queryParser.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.DataConfig;
 import org.apache.solr.handler.dataimport.DataImporter;

@@ -2,8 +2,10 @@ package org.apache.lucene.queryParser.aqp.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.lucene.queryParser.aqp.config.AqpFeedback.TYPE;
-import org.apache.lucene.queryParser.aqp.config.AqpFeedbackEvent;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackEvent;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackEventHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback.TYPE;
 
 public class AqpAdslabsLoggingHandler implements AqpFeedbackEventHandler {
 	

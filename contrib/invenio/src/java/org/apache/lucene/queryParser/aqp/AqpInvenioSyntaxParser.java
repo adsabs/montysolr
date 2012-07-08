@@ -6,20 +6,20 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
-import org.apache.lucene.messages.Message;
-import org.apache.lucene.messages.MessageImpl;
-import org.apache.lucene.queryParser.aqp.AqpCommonTree;
-import org.apache.lucene.queryParser.aqp.AqpCommonTreeAdaptor;
-import org.apache.lucene.queryParser.core.QueryNodeParseException;
-import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.messages.Message;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
+import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
-import org.apache.lucene.queryParser.aqp.AqpSyntaxParser;
-import org.apache.lucene.queryParser.aqp.AqpSyntaxParserAbstract;
 import org.apache.lucene.queryParser.aqp.parser.FixInvenioLexer;
 import org.apache.lucene.queryParser.aqp.parser.FixInvenioParser;
 import org.apache.lucene.queryParser.aqp.parser.InvenioLexer;
 import org.apache.lucene.queryParser.aqp.parser.InvenioParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTreeAdaptor;
+import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParserAbstract;
 
 /**
  * A modified version of the default parser, it uses two grammars.

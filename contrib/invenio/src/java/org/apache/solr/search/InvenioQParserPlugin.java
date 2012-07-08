@@ -1,6 +1,6 @@
 package org.apache.solr.search;
 
-import org.apache.lucene.queryParser.core.QueryNodeParseException;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;

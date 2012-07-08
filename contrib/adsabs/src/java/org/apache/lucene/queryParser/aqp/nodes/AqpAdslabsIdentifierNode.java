@@ -1,8 +1,8 @@
 package org.apache.lucene.queryParser.aqp.nodes;
 
-import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
-import org.apache.lucene.queryParser.core.nodes.QuotedFieldQueryNode;
-import org.apache.lucene.queryParser.core.parser.EscapeQuerySyntax;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 
 public class AqpAdslabsIdentifierNode extends FieldQueryNode {
 

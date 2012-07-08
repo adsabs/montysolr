@@ -6,19 +6,19 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CachingTokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
-import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
-import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
-import org.apache.lucene.queryParser.core.nodes.FuzzyQueryNode;
-import org.apache.lucene.queryParser.core.nodes.ParametricQueryNode;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.core.util.UnescapedCharSequence;
-import org.apache.lucene.queryParser.standard.config.AnalyzerAttribute;
-import org.apache.lucene.queryParser.standard.nodes.WildcardQueryNode;
-import org.apache.lucene.queryParser.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.ParametricQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.util.UnescapedCharSequence;
+import org.apache.lucene.queryparser.flexible.standard.config.AnalyzerAttribute;
+import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 
 public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
 		LowercaseExpandedTermsQueryNodeProcessor {

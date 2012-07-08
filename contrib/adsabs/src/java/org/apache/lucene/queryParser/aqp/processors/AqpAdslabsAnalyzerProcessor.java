@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.queryParser.aqp.nodes.AqpFunctionQueryNode;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.standard.processors.AnalyzerQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 
 /**
  * This processor prevents analysis to happen for nodes that are 

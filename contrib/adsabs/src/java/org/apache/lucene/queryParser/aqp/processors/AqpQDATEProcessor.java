@@ -1,18 +1,19 @@
 package org.apache.lucene.queryParser.aqp.processors;
 
-import org.apache.lucene.messages.MessageImpl;
-import org.apache.lucene.queryParser.aqp.config.AqpFeedback;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.config.DefaultDateRangeField;
-import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
-import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
-import org.apache.lucene.queryParser.core.nodes.ParametricQueryNode;
-import org.apache.lucene.queryParser.core.nodes.ParametricRangeQueryNode;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.core.nodes.QuotedFieldQueryNode;
-import org.apache.lucene.queryParser.core.nodes.ParametricQueryNode.CompareOperator;
-import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
+import org.apache.lucene.queryparser.flexible.core.nodes.ParametricQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.ParametricRangeQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.ParametricQueryNode.CompareOperator;
+import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
 
 public class AqpQDATEProcessor extends AqpQProcessorPost {
 

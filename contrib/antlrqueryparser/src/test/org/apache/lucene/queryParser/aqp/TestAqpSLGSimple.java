@@ -3,9 +3,10 @@ package org.apache.lucene.queryParser.aqp;
 import invenio.montysolr.TestMontySolrBasicOperations;
 
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.standard.StandardQueryParser;
-import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
+import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 

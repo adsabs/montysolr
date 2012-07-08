@@ -3,15 +3,17 @@ package org.apache.lucene.queryParser.aqp.processors;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.messages.MessageImpl;
-import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryParser.aqp.nodes.AqpAndQueryNode;
-import org.apache.lucene.queryParser.aqp.nodes.AqpNearQueryNode;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
-import org.apache.lucene.queryParser.core.nodes.GroupQueryNode;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
+import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOPERATORProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
 
 
 /**

@@ -1,9 +1,9 @@
 package org.apache.lucene.queryParser.aqp.nodes;
 
-import org.apache.lucene.queryParser.core.builders.QueryBuilder;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.core.nodes.QueryNodeImpl;
-import org.apache.lucene.queryParser.core.parser.EscapeQuerySyntax;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
+import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 
 /**
  * This QNode receives all the children of the QFUNC node, so typically

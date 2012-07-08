@@ -1,5 +1,7 @@
 package org.apache.lucene.queryParser.aqp;
 
+import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
+
 /**
  * Tests that invenio grammar is able to handle the 'strange'
  * cases.

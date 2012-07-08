@@ -3,19 +3,19 @@ package org.apache.lucene.queryParser.aqp.builders;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.messages.MessageImpl;
-import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.nodes.AqpFunctionQueryNode;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
-import org.apache.lucene.queryParser.core.nodes.OpaqueQueryNode;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.standard.parser.EscapeQuerySyntaxImpl;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.search.Query;
 import org.apache.solr.search.AqpFunctionQParser;
 import org.apache.solr.search.ValueSourceParser;
 import org.apache.solr.search.function.FunctionQuery;
 import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 
 public class AqpFunctionQueryTreeBuilder extends QueryTreeBuilder 
 	implements AqpFunctionQueryBuilder {

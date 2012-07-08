@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.apache.lucene.queryParser.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryParser.aqp.builders.AqpFunctionQueryBuilderProvider;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.builders.QueryBuilder;
-import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.util.AttributeImpl;
 
 public class AqpFunctionQueryBuilderConfigImpl extends AttributeImpl implements

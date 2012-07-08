@@ -28,8 +28,10 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpStandardLuceneParser;
 import org.apache.lucene.search.Query;
 
 /**

@@ -2,12 +2,14 @@ package org.apache.lucene.queryParser.aqp;
 
 import org.apache.lucene.queryParser.aqp.AqpAdslabsNodeProcessorPipeline;
 import org.apache.lucene.queryParser.aqp.AqpAdslabsQueryConfigHandler;
-import org.apache.lucene.queryParser.aqp.AqpQueryParser;
 import org.apache.lucene.queryParser.aqp.AqpAdslabsQueryTreeBuilder;
 import org.apache.lucene.queryParser.aqp.parser.ADSSyntaxParser;
-import org.apache.lucene.queryParser.core.builders.QueryTreeBuilder;
-import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
-import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorPipeline;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
+import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParserLoadableImpl;
 
 
 

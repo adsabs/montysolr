@@ -2,15 +2,15 @@ package org.apache.lucene.queryParser.aqp.processors;
 
 import java.util.List;
 
-import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsRegexQueryNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsSynonymQueryNode;
-import org.apache.lucene.queryParser.aqp.nodes.AqpNonAnalyzedQueryNode;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.nodes.FieldQueryNode;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
-import org.apache.lucene.queryParser.core.processors.QueryNodeProcessor;
-import org.apache.lucene.queryParser.core.processors.QueryNodeProcessorImpl;
-import org.apache.lucene.queryParser.standard.nodes.PrefixWildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsRegexQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 
 public class AqpAdslabsRegexNodeProcessor extends QueryNodeProcessorImpl implements
 	QueryNodeProcessor  {

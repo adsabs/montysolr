@@ -5,7 +5,7 @@ import org.antlr.runtime.tree.*;
 import org.antlr.stringtemplate.*;
 import java.lang.reflect.*;
 
-import org.apache.lucene.queryParser.aqp.parser.*;
+import org.apache.lucene.queryparser.flexible.aqp.parser.*;
 
 /**
  * A utility class for generating the dot/graph representations of the query
@@ -14,8 +14,8 @@ import org.apache.lucene.queryParser.aqp.parser.*;
  *
  */
 
-//import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarLexer;
-//import org.apache.lucene.queryParser.aqp.parser.StandardLuceneGrammarParser;
+//import org.apache.lucene.queryparser.flexible.aqp.parser.StandardLuceneGrammarLexer;
+//import org.apache.lucene.queryparser.flexible.aqp.parser.StandardLuceneGrammarParser;
 
 /*
  * Arguments:
@@ -66,8 +66,8 @@ public class BuildAST {
         
         
         // get the Classes
-        Class clsLexer = Class.forName("org.apache.lucene.queryParser.aqp.parser." + grammar + "Lexer");
-        Class clsParser = Class.forName("org.apache.lucene.queryParser.aqp.parser." + grammar + "Parser");
+        Class clsLexer = Class.forName("org.apache.lucene.queryparser.flexible.aqp.parser." + grammar + "Lexer");
+        Class clsParser = Class.forName("org.apache.lucene.queryparser.flexible.aqp.parser." + grammar + "Parser");
         
         
         

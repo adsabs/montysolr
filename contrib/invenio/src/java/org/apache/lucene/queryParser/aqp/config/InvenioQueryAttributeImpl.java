@@ -21,8 +21,8 @@ package org.apache.lucene.queryParser.aqp.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
-import org.apache.lucene.queryParser.aqp.processors.AqpQNORMALProcessor;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQNORMALProcessor;
 import org.apache.lucene.util.AttributeImpl;
 import org.apache.solr.common.SolrException;
 

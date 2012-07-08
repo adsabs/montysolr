@@ -17,8 +17,8 @@ package org.apache.lucene.queryParser.aqp.config;
  * limitations under the License.
  */
 
-import org.apache.lucene.queryParser.core.config.QueryConfigHandler;
-import org.apache.lucene.queryParser.aqp.processors.AqpQNORMALProcessor;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQNORMALProcessor;
 import org.apache.lucene.util.AttributeImpl;
 
 /**

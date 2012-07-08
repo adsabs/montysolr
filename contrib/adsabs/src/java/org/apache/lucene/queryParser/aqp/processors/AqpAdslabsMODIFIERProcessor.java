@@ -1,9 +1,10 @@
 package org.apache.lucene.queryParser.aqp.processors;
 
-import org.apache.lucene.queryParser.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryParser.aqp.nodes.AqpAdslabsSynonymQueryNode;
-import org.apache.lucene.queryParser.core.QueryNodeException;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpMODIFIERProcessor;
 
 public class AqpAdslabsMODIFIERProcessor extends AqpMODIFIERProcessor {
 	
