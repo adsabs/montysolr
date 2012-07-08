@@ -151,6 +151,7 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 		  "handle_request_body").setParam("rsp", rsp);
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
+		@SuppressWarnings("rawtypes")
 		NamedList vls = rsp.getValues();
 		assertTrue("says hello!".equals(vls.get("python")));
 		

@@ -2,8 +2,8 @@ package invenio.montysolr.jni;
 
 import org.apache.jcc.PythonException;
 import org.apache.jcc.PythonVM;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 
 
@@ -114,7 +114,7 @@ import java.util.concurrent.Semaphore;
 public enum MontySolrVM {
 	INSTANCE;
 	
-	public static final Logger log = LoggerFactory.getLogger(MontySolrVM.class);
+//	public static final Logger log = LoggerFactory.getLogger(MontySolrVM.class);
 	private PythonVM vm = null;
 	private int interrupted = 0;
 	private int workers = (System.getProperty("montysolr.max_workers") != null 
@@ -187,12 +187,13 @@ public enum MontySolrVM {
     	catch (InterruptedException e) {
     		interrupted++;
     		if (interrupted > workers) {
-    			log.error(e.getMessage());
-    			log.error("Warning, the thread calling the Python process was interrupted." +
+    			
+    			System.err.println(e.getMessage());
+    			System.err.println("Warning, the thread calling the Python process was interrupted." +
   					  "If you use multiprocessing on the Python side, this may result in " +
   					  "memory leaks (the process is not instantly terminated by Java;" +
   					  " is garbage collected by Python after it finished though)");
-    			log.error("Total number of interrupts so far: " + interrupted);
+    			System.err.println("Total number of interrupts so far: " + interrupted);
     		}
     	} finally {
     		semaphore.release();
@@ -217,12 +218,12 @@ public enum MontySolrVM {
 		catch (InterruptedException e) {
 	    		interrupted++;
 	    		if (interrupted > workers) {
-	    			log.error(e.getMessage());
-	    			log.error("Warning, the thread calling the Python process was interrupted." +
+	    			System.err.println(e.getMessage());
+	    			System.err.println("Warning, the thread calling the Python process was interrupted." +
 	    					  "If you use multiprocessing on the Python side, this may result in " +
 	    					  "memory leaks (the process is not instantly terminated by Java;" +
 	    					  " is garbage collected by Python after it finished though)");
-	    			log.error("Total number of interrupts so far: " + interrupted);
+	    			System.err.println("Total number of interrupts so far: " + interrupted);
 	    		}
     	} finally {
     		semaphore.release();
