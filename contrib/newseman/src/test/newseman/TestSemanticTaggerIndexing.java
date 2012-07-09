@@ -18,23 +18,33 @@ package newseman;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.TestAqpSLGStandardTest.QPTestFilter;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
+
 import newseman.SemanticTaggerTokenFilter;
 import newseman.SemanticTagger;
 import newseman.MontySolrBaseTokenStreamTestCase;
@@ -85,22 +95,20 @@ public class TestSemanticTaggerIndexing extends
 		String text = "velká světová revoluce byla velká říjnová revoluce "
 				+ "s velkou extra říjnovou revolucí";
 
-		Directory ramdir = newDirectory();
-		Analyzer analyzer = new SemanticAnalyzer();
+		Directory ramdir = new RAMDirectory();
+		Analyzer analyzer = new TestSemanticAnalyzer();
 		IndexWriter writer = new IndexWriter(ramdir, new IndexWriterConfig(
 				TEST_VERSION_CURRENT, analyzer));
 		Document doc = new Document();
-		Field field1 = newField("foo", text, Field.Store.YES,
-				Field.Index.ANALYZED);
-		Field field2 = newField("foox", text, Field.Store.YES,
-				Field.Index.ANALYZED);
+		Field field1 = newField("foo", text, TextField.TYPE_STORED);
+		Field field2 = newField("foox", text, TextField.TYPE_STORED);
 
 		doc.add(field1);
 		doc.add(field2);
 		writer.addDocument(doc);
 		writer.close();
 
-		IndexSearcher ram = new IndexSearcher(ramdir);
+		IndexSearcher ram = new IndexSearcher(DirectoryReader.open(ramdir));
 		QueryParser qp1 = new QueryParser(TEST_VERSION_CURRENT, "foo", analyzer);
 		QueryParser qp2 = new QueryParser(TEST_VERSION_CURRENT, "foox",
 				analyzer);
@@ -160,28 +168,33 @@ public class TestSemanticTaggerIndexing extends
 		hits = ram.search(qp2.parse(sem), 10);
 		assertTrue(hits.totalHits == 0);
 
-		ram.close();
 		ramdir.close();
 	}
 
-	private class SemanticAnalyzer extends Analyzer {
-		StandardAnalyzer stdAnalyzer = new StandardAnalyzer(
-				TEST_VERSION_CURRENT);
+	private class TestSemanticAnalyzer extends Analyzer {
 
-		public SemanticAnalyzer() {
+		public TestSemanticAnalyzer() {
 		}
 
-		@Override
-		public TokenStream tokenStream(String fieldName, Reader reader) {
-			if (fieldName.endsWith("x")) {
-				return stdAnalyzer.tokenStream(fieldName, reader);
-			}
-			SemanticTaggerTokenFilter stream = new SemanticTaggerTokenFilter(
-					new StopFilter(TEST_VERSION_CURRENT, new StandardTokenizer(
-							TEST_VERSION_CURRENT, reader), new HashSet(
-							Arrays.asList(new String[] { "s", "a" }))), tagger);
-			return stream;
-		}
+
+    @Override
+    protected TokenStreamComponents createComponents(String fieldName,
+        Reader reader) {
+      if (fieldName.endsWith("x")) {
+        return new TokenStreamComponents(new StandardTokenizer(TEST_VERSION_CURRENT, reader));
+      }
+      else {
+        Tokenizer source = new StandardTokenizer(TEST_VERSION_CURRENT, reader);
+        TokenStream result = new LowerCaseFilter(TEST_VERSION_CURRENT, source);
+        CharArraySet stopWords = new CharArraySet(TEST_VERSION_CURRENT, 2, false);
+        stopWords.add("s");
+        stopWords.add("a");
+        result = new StopFilter(TEST_VERSION_CURRENT, result, stopWords);
+        result = new SemanticTaggerTokenFilter(result, tagger);
+        return new TokenStreamComponents(source, result);
+      }
+      
+    }
 
 	}
 

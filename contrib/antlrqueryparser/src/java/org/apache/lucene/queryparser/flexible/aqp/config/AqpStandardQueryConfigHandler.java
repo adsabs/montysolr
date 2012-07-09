@@ -65,6 +65,11 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
 	     * 
 	     */
 	    final public static ConfigurationKey<Boolean> ALLOW_SLOW_FUZZY = ConfigurationKey.newInstance();
+	    
+	    /**
+	     * Here one can store AqpRequest object
+	     */
+	    final public static ConfigurationKey<Object> SOLR_REQUEST = ConfigurationKey.newInstance();
 	}
 	
 	
@@ -72,7 +77,7 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
 		super();
 		
 	    // Add listener that will build the FieldConfig attributes.
-		// None for now
+		  // None for now
 
 	    // Default Values (besides the standard ones)
 	    set(ConfigurationKeys.DEFAULT_FIELD, null);

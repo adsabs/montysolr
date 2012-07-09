@@ -17,7 +17,7 @@ package newseman;
  * limitations under the License.
  */
 
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.FlagsAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
@@ -25,20 +25,17 @@ import org.apache.lucene.analysis.tokenattributes.PayloadAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
-import org.apache.lucene.util.Version;
-
+import org.apache.lucene.analysis.util.CharArraySet;
 import newseman.SemanticTaggerTokenFilter;
 import newseman.SemanticTagger;
 import newseman.MontySolrBaseTokenStreamTestCase;
 
-import invenio.montysolr.TestMontySolrBasicOperations;
 import invenio.montysolr.jni.MontySolrVM;
 import invenio.montysolr.jni.PythonMessage;
 
 import java.io.StringReader;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashSet;
 
 public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestCase {
 	
@@ -70,14 +67,11 @@ public class TestSemanticTaggerTokenFilter extends MontySolrBaseTokenStreamTestC
 		String text = "velká světová revoluce byla velká říjnová revoluce " +
         "s velkou extra říjnovou revolucí";
     
-	
+	  CharArraySet stopWords = StopFilter.makeStopSet(TEST_VERSION_CURRENT, Arrays.asList(new String[] {"s", "a"}), false);
 		StringReader reader = new StringReader(text);
 		SemanticTaggerTokenFilter stream = 
 			new SemanticTaggerTokenFilter(
-				new StopFilter( TEST_VERSION_CURRENT,
-					new StandardTokenizer(TEST_VERSION_CURRENT, reader),
-					new HashSet(Arrays.asList(new String[] {"s", "a"}))
-				),
+				new StopFilter( TEST_VERSION_CURRENT,	new StandardTokenizer(TEST_VERSION_CURRENT, reader), stopWords),
 				tagger
 			);
 		

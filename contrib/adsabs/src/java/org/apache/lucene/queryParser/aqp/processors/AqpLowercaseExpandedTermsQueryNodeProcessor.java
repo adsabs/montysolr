@@ -8,15 +8,16 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.ParametricQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.util.UnescapedCharSequence;
-import org.apache.lucene.queryparser.flexible.standard.config.AnalyzerAttribute;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 
@@ -28,7 +29,7 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
 			throws QueryNodeException {
 
 		if (node instanceof WildcardQueryNode || node instanceof FuzzyQueryNode
-				|| node instanceof ParametricQueryNode) {
+				|| node instanceof TermRangeQueryNode) {
 
 			FieldQueryNode fieldNode = (FieldQueryNode) node;
 			
@@ -36,15 +37,22 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
 			// if we have the SOLR analyzer, we pass it to it 
 			// and get the analyzed value - otherwise we use the default
 			// lowercasing
+			
 			QueryConfigHandler config = this.getQueryConfigHandler();
-			if (config.hasAttribute(AqpRequestParams.class)
-					&& config.getAttribute(AqpRequestParams.class).getRequest() != null) {
-				Analyzer analyzer = config
-						.getAttribute(AnalyzerAttribute.class).getAnalyzer();
+			if (config.has(AqpStandardQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+					&& ((AqpRequestParams) config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)).getRequest() != null) {
+				Analyzer analyzer = config.get(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER);
 
-				TokenStream source = analyzer.tokenStream(fieldNode
-						.getFieldAsString(),
-						new StringReader(fieldNode.getTextAsString()));
+	      // TODO: the analyzer chain changed, so maybe we are not doing the right thing here
+				TokenStream source = null;
+        try {
+          source = analyzer.tokenStream(fieldNode.getFieldAsString(),
+          		new StringReader(fieldNode.getTextAsString()));
+        } catch (IOException e1) {
+          fieldNode.setText(UnescapedCharSequence.toLowerCase(fieldNode
+              .getText()));
+          return node;
+        }
 
 				CachingTokenFilter buffer = new CachingTokenFilter(source);
 
