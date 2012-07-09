@@ -1,4 +1,4 @@
-package org.apache.lucene.queryParser.aqp;
+package org.apache.lucene.queryparser.flexible.aqp;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more

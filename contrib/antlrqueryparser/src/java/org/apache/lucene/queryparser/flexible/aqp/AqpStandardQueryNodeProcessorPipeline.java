@@ -34,9 +34,12 @@ import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpan
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.ParametricRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.NumericQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.NumericRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.OpenRangeQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.TermRangeQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCLAUSEProcessor;
@@ -115,8 +118,11 @@ public class AqpStandardQueryNodeProcessorPipeline extends
     add(new MultiFieldQueryNodeProcessor());
     add(new FuzzyQueryNodeProcessor());
     add(new MatchAllDocsQueryNodeProcessor());
+    add(new OpenRangeQueryNodeProcessor());
+    add(new NumericQueryNodeProcessor());
+    add(new NumericRangeQueryNodeProcessor());
     add(new LowercaseExpandedTermsQueryNodeProcessor());
-    add(new ParametricRangeQueryNodeProcessor());
+    add(new TermRangeQueryNodeProcessor());
     add(new AllowLeadingWildcardProcessor());
     add(new AnalyzerQueryNodeProcessor());
     add(new PhraseSlopQueryNodeProcessor());

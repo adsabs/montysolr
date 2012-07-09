@@ -1,13 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
-import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.core.nodes.ParametricQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.ParametricQueryNode.CompareOperator;
-import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 
 /**
@@ -41,8 +34,8 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 public class AqpQRANGEEXProcessor extends AqpQRANGEINProcessor {
 
 	public AqpQRANGEEXProcessor() {
-		lowerComparator = CompareOperator.GT;
-		upperComparator = CompareOperator.LT;
+		lowerInclusive = false;
+		upperInclusive = false;
 	}
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {

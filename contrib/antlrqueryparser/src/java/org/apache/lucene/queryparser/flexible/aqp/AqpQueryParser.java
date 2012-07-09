@@ -34,6 +34,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryN
 import org.apache.lucene.queryparser.flexible.aqp.AqpDebuggingQueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.aqp.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.search.Query;
 
@@ -219,4 +220,45 @@ public class AqpQueryParser extends StandardQueryParser {
 	public void setDefaultField(String field) {
 		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, field);
 	}
+	
+	public Integer getDefaultProximity() {
+		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY);
+	}
+	
+	public void setDefaultProximity(Integer value) {
+		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY, value);
+	}
+	
+	public Float getImplicitBoost() {
+		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_BOOST);
+	}
+	
+	public void setImplicitBoost(Float value) {
+		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_BOOST, value);
+	}
+	
+	public AqpFeedback getFeedback() {
+		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK);
+	}
+	
+	public void setFeedback(AqpFeedback feedbackInstance) {
+		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK, feedbackInstance);
+	}
+	
+	public Float getImplicitFuzzy() {
+		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY);
+	}
+	
+	public void setImplicitFuzzy(Float value) {
+		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY, value);
+	}
+	
+	public Boolean getAllowSlowFuzzy() {
+		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY);
+	}
+	
+	public void setAllowSlowFuzzy(Boolean value) {
+		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY, value);
+	}
+	
 }

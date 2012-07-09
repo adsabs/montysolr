@@ -90,7 +90,7 @@ public class AqpBOOSTProcessor extends QueryNodeProcessorImpl implements
 			                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
 			                "Configuration error: IMPLICIT_BOOST value is missing"));
 				}
-				boost = queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY);
+				boost = queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_BOOST);
 			}
 			else {
 				boost = Float.valueOf(input.replace("^", ""));

@@ -1,4 +1,4 @@
-package org.apache.lucene.queryParser.aqp;
+package org.apache.lucene.queryparser.flexible.aqp;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -19,30 +19,28 @@ package org.apache.lucene.queryParser.aqp;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.text.Collator;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Collections;
-
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseTokenizer;
-import org.apache.lucene.analysis.StopAnalyzer;
-import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.MockAnalyzer;
+import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.StopAnalyzer;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
-import org.apache.lucene.document.DateField;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
@@ -55,7 +53,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
-import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.GroupQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
@@ -71,15 +69,21 @@ import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.util.automaton.BasicAutomata;
+import org.apache.lucene.util.automaton.CharacterRunAutomaton;
 
 /**
  * This test case is a copy of the core Lucene query parser test, it was adapted
  * to use new QueryParserHelper instead of the old query parser.
+ * 
+ * TODO: modify the QueryParserHelper so that we can extend it (it is not flexible
+ * in getting the parser, otherwise we could use the test methods there for most 
+ * part)
  * 
  * Tests QueryParser.
  */
@@ -128,10 +132,11 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public static final class QPTestAnalyzer extends Analyzer {
 
-    /** Filters LowerCaseTokenizer with StopFilter. */
+    /** Filters MockTokenizer with StopFilter. */
     @Override
-    public final TokenStream tokenStream(String fieldName, Reader reader) {
-      return new QPTestFilter(new LowerCaseTokenizer(TEST_VERSION_CURRENT, reader));
+    public final TokenStreamComponents createComponents(String fieldName, Reader reader) {
+      Tokenizer tokenizer = new MockTokenizer(reader, MockTokenizer.SIMPLE, true);
+      return new TokenStreamComponents(tokenizer, new QPTestFilter(tokenizer));
     }
   }
 
@@ -385,12 +390,12 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   public void testWildcard() throws Exception {
     assertQueryEquals("term*", null, "term*");
     assertQueryEquals("term*^2", null, "term*^2.0");
-    assertQueryEquals("term~", null, "term~0.5");
-    assertQueryEquals("term~0.7", null, "term~0.7");
+    assertQueryEquals("term~", null, "term~2");
+    assertQueryEquals("term~0.7", null, "term~1");
 
-    assertQueryEquals("term~^2", null, "term~0.5^2.0");
+    assertQueryEquals("term~^2", null, "term~2^2.0");
 
-    assertQueryEquals("term^2~", null, "term~0.5^2.0");
+    assertQueryEquals("term^2~", null, "term~2^2.0");
     assertQueryEquals("term*germ", null, "term*germ");
     assertQueryEquals("term*germ^3", null, "term*germ^3.0");
 
@@ -398,14 +403,23 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertTrue(getQuery("term*^2", null) instanceof PrefixQuery);
     assertTrue(getQuery("term~", null) instanceof FuzzyQuery);
     assertTrue(getQuery("term~0.7", null) instanceof FuzzyQuery);
+    
+    
     FuzzyQuery fq = (FuzzyQuery) getQuery("term~0.7", null);
-    assertEquals(0.7f, fq.getMinSimilarity(), 0.1f);
+    assertEquals(1, fq.getMaxEdits());
     assertEquals(FuzzyQuery.defaultPrefixLength, fq.getPrefixLength());
     fq = (FuzzyQuery) getQuery("term~", null);
-    assertEquals(0.5f, fq.getMinSimilarity(), 0.1f);
+    assertEquals(2, fq.getMaxEdits());
     assertEquals(FuzzyQuery.defaultPrefixLength, fq.getPrefixLength());
 
-    assertQueryNodeException("term~1.1"); // value > 1, throws exception
+    AqpQueryParser qp = getParser();
+    try {
+      qp.setAllowSlowFuzzy(true);
+      qp.parse("term~1.1", "term");
+      debugFail("value > 1, should throw exception");
+    } catch (QueryNodeException expected) {
+      // this is ok
+    }
 
     assertTrue(getQuery("term*germ", null) instanceof WildcardQuery);
 
@@ -438,9 +452,9 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertWildcardQueryEquals("TE?M", false, "TE?M");
     assertWildcardQueryEquals("Te?m*gerM", false, "Te?m*gerM");
     // Fuzzy queries:
-    assertWildcardQueryEquals("Term~", "term~0.5");
-    assertWildcardQueryEquals("Term~", true, "term~0.5");
-    assertWildcardQueryEquals("Term~", false, "Term~0.5");
+    assertWildcardQueryEquals("Term~", "term~2");
+    assertWildcardQueryEquals("Term~", true, "term~2");
+    assertWildcardQueryEquals("Term~", false, "Term~2");
     // Range queries:
 
     // TODO: implement this on QueryParser
@@ -533,6 +547,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
         "gack bar blar {a TO z}");
   }
 
+  /** removed in lucene-4.0
   public void testFarsiRangeCollating() throws Exception {
     Directory ramDir = newDirectory();
     IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)));
@@ -582,22 +597,8 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     ramDir.close();
   }
 
-  
+  */
 
-  /** for testing legacy DateField support */
-  public void testLegacyDateRange() throws Exception {
-    String startDate = getLocalizedDate(2002, 1, 1);
-    String endDate = getLocalizedDate(2002, 1, 4);
-    Calendar endDateExpected = new GregorianCalendar();
-    endDateExpected.clear();
-    endDateExpected.set(2002, 1, 4, 23, 59, 59);
-    endDateExpected.set(Calendar.MILLISECOND, 999);
-    assertQueryEquals("[ " + escapeDateString(startDate) + " TO " + escapeDateString(endDate) + "]", null, "["
-        + getLegacyDate(startDate) + " TO "
-        + DateField.dateToString(endDateExpected.getTime()) + "]");
-    assertQueryEquals("{  " + escapeDateString(startDate) + "    " + escapeDateString(endDate) + "   }", null, "{"
-        + getLegacyDate(startDate) + " TO " + getLegacyDate(endDate) + "}");
-  }
 
   public void testDateRange() throws Exception {
     String startDate = getLocalizedDate(2002, 1, 1);
@@ -611,19 +612,12 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     final String hourField = "hour";
     AqpQueryParser qp = getParser();
 
-    // Don't set any date resolution and verify if DateField is used
-    assertDateRangeQueryEquals(qp, defaultField, startDate, endDate,
-        endDateExpected.getTime(), null);
 
     Map<CharSequence, DateTools.Resolution> dateRes =  new HashMap<CharSequence, DateTools.Resolution>();
     
     // set a field specific date resolution    
     dateRes.put(monthField, DateTools.Resolution.MONTH);
     qp.setDateResolution(dateRes);
-
-    // DateField should still be used for defaultField
-    assertDateRangeQueryEquals(qp, defaultField, startDate, endDate,
-        endDateExpected.getTime(), null);
 
     // set default date resolution to MILLISECOND
     qp.setDateResolution(DateTools.Resolution.MILLISECOND);
@@ -697,10 +691,10 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     assertQueryEquals("a:b\\\\?c", a, "a:b\\?c");
 
-    assertQueryEquals("a:b\\-c~", a, "a:b-c~0.5");
-    assertQueryEquals("a:b\\+c~", a, "a:b+c~0.5");
-    assertQueryEquals("a:b\\:c~", a, "a:b:c~0.5");
-    assertQueryEquals("a:b\\\\c~", a, "a:b\\c~0.5");
+    assertQueryEquals("a:b\\-c~", a, "a:b-c~1");
+    assertQueryEquals("a:b\\+c~", a, "a:b+c~1");
+    assertQueryEquals("a:b\\:c~", a, "a:b:c~1");
+    assertQueryEquals("a:b\\\\c~", a, "a:b\\c~1");
 
     // TODO: implement Range queries on QueryParser
     assertQueryEquals("[ a\\- TO a\\+ ]", null, "[a- TO a+]");
@@ -820,7 +814,8 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public void testBoost() throws Exception {
-    StandardAnalyzer oneStopAnalyzer = new StandardAnalyzer(TEST_VERSION_CURRENT, Collections.singleton("on"));
+	CharacterRunAutomaton stopSet = new CharacterRunAutomaton(BasicAutomata.makeString("on"));
+	Analyzer oneStopAnalyzer = new MockAnalyzer(random(), MockTokenizer.SIMPLE, true, stopSet, true);
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(oneStopAnalyzer);
 
@@ -915,19 +910,19 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public void testLocalDateFormat() throws IOException, QueryNodeException {
-    Directory ramDir = newDirectory();
+    Directory ramDir = new RAMDirectory();
     IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)));
     addDateDoc("a", 2005, 12, 2, 10, 15, 33, iw);
     addDateDoc("b", 2005, 12, 4, 22, 15, 00, iw);
     iw.close();
-    IndexSearcher is = new IndexSearcher(ramDir, true);
-    assertHits(1, "[12/1/2005 TO 12/3/2005]", is);
+    IndexSearcher is = new IndexSearcher(DirectoryReader.open(ramDir));
+    
+    assertHits(1, "[12/1/05 TO 12/3/05]", is);
     assertHits(2, "[12/1/2005 TO 12/4/2005]", is);
     assertHits(1, "[12/3/2005 TO 12/4/2005]", is);
     assertHits(1, "{12/1/2005 TO 12/3/2005}", is);
     assertHits(1, "{12/1/2005 TO 12/4/2005}", is);
     assertHits(0, "{12/3/2005 TO 12/4/2005}", is);
-    is.close();
     ramDir.close();
   }
 
@@ -992,54 +987,64 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
 
-  private class CannedTokenStream extends TokenStream {
-    private int upto = 0;
-    final PositionIncrementAttribute posIncr = addAttribute(PositionIncrementAttribute.class);
-    final CharTermAttribute term = addAttribute(CharTermAttribute.class);
-    @Override
-    public boolean incrementToken() {
-      clearAttributes();
-      if (upto == 4) {
-        return false;
-      }
-      if (upto == 0) {
-        posIncr.setPositionIncrement(1);
-        term.setEmpty().append("a");
-      } else if (upto == 1) {
-        posIncr.setPositionIncrement(1);
-        term.setEmpty().append("b");
-      } else if (upto == 2) {
-        posIncr.setPositionIncrement(0);
-        term.setEmpty().append("c");
-      } else {
-        posIncr.setPositionIncrement(0);
-        term.setEmpty().append("d");
-      }
-      upto++;
-      return true;
-    }
-  }
+  private class CannedTokenizer extends Tokenizer {
+	    private int upto = 0;
+	    private final PositionIncrementAttribute posIncr = addAttribute(PositionIncrementAttribute.class);
+	    private final CharTermAttribute term = addAttribute(CharTermAttribute.class);
 
+	    public CannedTokenizer(Reader reader) {
+	      super(reader);
+	    }
+
+	    @Override
+	    public boolean incrementToken() {
+	      clearAttributes();
+	      if (upto == 4) {
+	        return false;
+	      }
+	      if (upto == 0) {
+	        posIncr.setPositionIncrement(1);
+	        term.setEmpty().append("a");
+	      } else if (upto == 1) {
+	        posIncr.setPositionIncrement(1);
+	        term.setEmpty().append("b");
+	      } else if (upto == 2) {
+	        posIncr.setPositionIncrement(0);
+	        term.setEmpty().append("c");
+	      } else {
+	        posIncr.setPositionIncrement(0);
+	        term.setEmpty().append("d");
+	      }
+	      upto++;
+	      return true;
+	    }
+
+	    @Override
+	    public void reset() throws IOException {
+	      super.reset();
+	      this.upto = 0;
+	    }
+	  }
   private class CannedAnalyzer extends Analyzer {
-    @Override
-    public TokenStream tokenStream(String ignored, Reader alsoIgnored) {
-      return new CannedTokenStream();
-    }
-  }
+	    @Override
+	    public TokenStreamComponents createComponents(String ignored, Reader alsoIgnored) {
+	      return new TokenStreamComponents(new CannedTokenizer(alsoIgnored));
+	    }
+	  }
 
   public void testMultiPhraseQuery() throws Exception {
     Directory dir = newDirectory();
     IndexWriter w = new IndexWriter(dir, newIndexWriterConfig(TEST_VERSION_CURRENT, new CannedAnalyzer()));
     Document doc = new Document();
-    doc.add(newField("field", "", Field.Store.NO, Field.Index.ANALYZED));
+    doc.add(newField("field", "", TextField.TYPE_NOT_STORED));
     w.addDocument(doc);
-    IndexReader r = IndexReader.open(w, true);
+    w.commit();
+    IndexReader r = DirectoryReader.open(w.getDirectory());
     IndexSearcher s = newSearcher(r);
     
     Query q = QPTestParser.init(new CannedAnalyzer()).parse("\"a\"", "field");
     assertTrue(q instanceof MultiPhraseQuery);
     assertEquals(1, s.search(q, 10).totalHits);
-    s.close();
     r.close();
     w.close();
     dir.close();

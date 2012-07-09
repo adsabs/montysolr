@@ -17,6 +17,7 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 
 /**
  * Rewrites the query node which is below the {@link AqpFuzzyModifierNode}
@@ -41,11 +42,13 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 			QueryNode child = ((AqpFuzzyModifierNode) node).getChild();
 			Float fuzzy = ((AqpFuzzyModifierNode) node).getFuzzyValue();
 			
+			QueryConfigHandler config = getQueryConfigHandler();
+			
 			if (child instanceof QuotedFieldQueryNode ||
 					child instanceof WildcardQueryNode) {
 				
 				if (fuzzy.intValue() < fuzzy) {
-					QueryConfigHandler config = getQueryConfigHandler();
+					
 					if (config.has(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK)) {
 						AqpFeedback feedback = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK);
 						feedback.sendEvent(feedback.createEvent(AqpFeedback.TYPE.WARN, 
@@ -58,16 +61,24 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 			}
 			else if (child instanceof FieldQueryNode) {
 				
-				if (fuzzy<0.0f || fuzzy>=1.0f) {
-					throw new QueryNodeException(new MessageImpl(
-						QueryParserMessages.INVALID_SYNTAX,
-						node.toString() + "\nSimilarity s must be 0.0 > s < 1.0"));
-				}
-				
 				FieldQueryNode fn = (FieldQueryNode) child;
 				
-				return new FuzzyQueryNode(fn.getFieldAsString(), fn.getTextAsString(), fuzzy,
+				if (config.has(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY) != false &&
+						config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY) == true) {
+					
+					if (fuzzy<0.0f || fuzzy>1.0f) {
+						throw new QueryNodeException(new MessageImpl(
+							QueryParserMessages.INVALID_SYNTAX,
+							node.toString() + "\nSimilarity s must be 0.0 > s < 1.0"));
+					}
+					
+					return new SlowFuzzyQueryNode(fn.getFieldAsString(), fn.getTextAsString(), fuzzy,
+							fn.getBegin(), fn.getEnd());
+				}
+				else {
+					return new FuzzyQueryNode(fn.getFieldAsString(), fn.getTextAsString(), fuzzy,
 						fn.getBegin(), fn.getEnd());
+				}
 			}
 			else  {
 				throw new QueryNodeException(new MessageImpl(

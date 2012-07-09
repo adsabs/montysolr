@@ -10,6 +10,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
 
@@ -89,12 +90,12 @@ public class AqpFUZZYProcessor extends QueryNodeProcessorImpl implements
 			
 			if (input.equals("~")) {
 				QueryConfigHandler queryConfig = getQueryConfigHandler();
-				if (queryConfig == null || !queryConfig.has(StandardQueryConfigHandler.ConfigurationKeys.FUZZY_CONFIG)) {
+				if (queryConfig == null || !queryConfig.has(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY)) {
 					throw new QueryNodeException(new MessageImpl(
 			                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-			                "Configuration error: " + StandardQueryConfigHandler.ConfigurationKeys.FUZZY_CONFIG.toString() + " is missing"));
+			                "Configuration error: " + AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY.toString() + " is missing"));
 				}
-				fuzzy = queryConfig.get((StandardQueryConfigHandler.ConfigurationKeys.FUZZY_CONFIG)).getMinSimilarity();
+				fuzzy = queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY);
 			}
 			else {
 				fuzzy = Float.valueOf(input.replace("~", ""));

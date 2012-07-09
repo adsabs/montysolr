@@ -1,4 +1,4 @@
-package org.apache.lucene.queryParser.aqp.parser;
+package org.apache.lucene.queryparser.flexible.aqp.parser;
 
 import org.antlr.runtime.*;
 import org.antlr.runtime.tree.*;

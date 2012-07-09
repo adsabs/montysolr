@@ -1,4 +1,4 @@
-package org.apache.lucene.queryParser.aqp;
+package org.apache.lucene.queryparser.flexible.aqp;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -25,12 +25,13 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Locale;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.SimpleAnalyzer;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
-import org.apache.lucene.document.DateField;
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryParserHelper;
@@ -39,7 +40,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
-import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpStandardLuceneParser;
@@ -223,11 +224,6 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 		}
 	}
 
-	/** for testing legacy DateField support */
-	public String getLegacyDate(String s) throws Exception {
-		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
-		return DateField.dateToString(df.parse(s));
-	}
 
 	/** for testing DateTools support */
 	private String getDate(String s, DateTools.Resolution resolution)
@@ -237,14 +233,10 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 	}
 
 	/** for testing DateTools support */
-	private String getDate(Date d, DateTools.Resolution resolution)
-			throws Exception {
-		if (resolution == null) {
-			return DateField.dateToString(d);
-		} else {
-			return DateTools.dateToString(d, resolution);
-		}
-	}
+	  private String getDate(Date d, DateTools.Resolution resolution) {
+	    return DateTools.dateToString(d, resolution);
+	  }
+	  
 
 	public String escapeDateString(String s) {
 		if (s.contains(" ")) {
@@ -296,6 +288,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 		}
 		qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
 		qp.setLocale(Locale.ENGLISH);
+		qp.setDateResolution(DateTools.Resolution.DAY);
 
 		Query q = qp.parse(query, "date");
 		ScoreDoc[] hits = is.search(q, null, 1000).scoreDocs;
@@ -315,11 +308,11 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 			int hour, int minute, int second, IndexWriter iw)
 			throws IOException {
 		Document d = new Document();
-		d.add(newField("f", content, Field.Store.YES, Field.Index.ANALYZED));
+		d.add(newField("f", content, TextField.TYPE_STORED));
 		Calendar cal = Calendar.getInstance(Locale.ENGLISH);
 		cal.set(year, month - 1, day, hour, minute, second);
-		d.add(newField("date", DateField.dateToString(cal.getTime()),
-				Field.Store.YES, Field.Index.NOT_ANALYZED));
+		d.add(newField("date", getDate(cal.getTime(), DateTools.Resolution.DAY),
+				StringField.TYPE_NOT_STORED));
 		iw.addDocument(d);
 	}
 

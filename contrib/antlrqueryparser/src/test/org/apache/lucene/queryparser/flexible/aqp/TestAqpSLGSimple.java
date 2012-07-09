@@ -1,11 +1,9 @@
-package org.apache.lucene.queryParser.aqp;
+package org.apache.lucene.queryparser.flexible.aqp;
 
-import invenio.montysolr.TestMontySolrBasicOperations;
-
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
-import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -100,8 +98,15 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 		assertQueryMatch(qp, "\\*", "field", 
         "field:*");
 		
-		assertQueryMatch(qp, "term~", "field", 
-        "field:term~0.5");
+		assertQueryMatch(qp, "term~", "field", "field:term~2");
+		assertQueryMatch(qp, "term~1", "field", "field:term~1");
+		assertQueryMatch(qp, "term~2", "field", "field:term~2");
+		
+		qp.setAllowSlowFuzzy(true);
+		assertQueryMatch(qp, "term~", "field", "field:term~0.5");
+		assertQueryMatch(qp, "term~0.1", "field", "field:term~0.1");
+		assertQueryMatch(qp, "term~0.2", "field", "field:term~0.2");
+		qp.setAllowSlowFuzzy(false);
 		
 		assertQueryMatch(qp, "something", "field", 
 				             "field:something");
@@ -139,6 +144,7 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 		assertQueryMatch(qp, "x:one NOT y:two -three^0.5", "field", 
                              "+(+x:one -y:two) -field:three^0.5");
 		
+		qp.setAllowSlowFuzzy(true);
 		assertQueryMatch(qp, "one NOT two -three~0.2", "field", 
         					"+(+field:one -field:two) -field:three~0.2");
 		
@@ -147,10 +153,22 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 
 		assertQueryMatch(qp, "one two^0.5 three~0.2", "field", 
         					"+field:one +field:two^0.5 +field:three~0.2");
-		System.out.println(qp.getDefaultOperator());
+		qp.setAllowSlowFuzzy(false);
+		
+		
+		assertQueryMatch(qp, "one NOT two -three~0.2", "field", 
+		"+(+field:one -field:two) -field:three~2");
+
+		assertQueryMatch(qp, "one NOT two NOT three~0.2", "field", 
+				"+field:one -field:two -field:three~2");
+		
+		assertQueryMatch(qp, "one two^0.5 three~0.2", "field", 
+				"+field:one +field:two^0.5 +field:three~2");
+		
+		
 		q = qp.parse("one (two three)^0.8", "field");
 		setDebug(true);
-		// I know where the problem is: I have change AqpBooleanNodes to
+		// I know where the problem is: I have changed AqpBooleanNodes to
 		// be not overwriting existing modifiers, but I should get the 
 		// order correct
 		qa = qp.parse("one (two three)^0.8", "field");

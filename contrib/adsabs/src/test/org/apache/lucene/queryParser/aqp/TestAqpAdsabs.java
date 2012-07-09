@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.PatternAnalyzer;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.MultiTermQuery;

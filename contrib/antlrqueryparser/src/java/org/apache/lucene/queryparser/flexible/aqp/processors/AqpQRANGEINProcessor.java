@@ -1,20 +1,12 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
-import java.util.List;
-
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.core.nodes.ParametricQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.ParametricRangeQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.ParametricQueryNode.CompareOperator;
-import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
-import org.apache.lucene.queryparser.flexible.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQRANGEINProcessor.NodeData;
 
 /**
  * Converts QRANGEIN node into @{link {@link ParametricQueryNode}. 
@@ -46,8 +38,8 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQRANGEINProcesso
  */
 public class AqpQRANGEINProcessor extends AqpQProcessor {
 	
-	protected CompareOperator lowerComparator = CompareOperator.GE;
-	protected CompareOperator upperComparator = CompareOperator.LE;
+	protected boolean lowerInclusive = true;
+	protected boolean upperInclusive = true;
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("QRANGEIN")) {
@@ -66,14 +58,14 @@ public class AqpQRANGEINProcessor extends AqpQProcessor {
 		NodeData lower = getTokenInput(lowerNode);
 		NodeData upper = getTokenInput(upperNode);
 		
-		ParametricQueryNode lowerBound = new ParametricQueryNode(field,
-				lowerComparator, EscapeQuerySyntaxImpl.discardEscapeChar(lower.value),
+		FieldQueryNode lowerBound = new FieldQueryNode(field,
+				EscapeQuerySyntaxImpl.discardEscapeChar(lower.value),
 				lower.start, lower.end);
-		ParametricQueryNode upperBound = new ParametricQueryNode(field,
-				upperComparator, EscapeQuerySyntaxImpl.discardEscapeChar(upper.value),
+		FieldQueryNode upperBound = new FieldQueryNode(field,
+				EscapeQuerySyntaxImpl.discardEscapeChar(upper.value),
 				upper.start, upper.end);
 		
-		return new ParametricRangeQueryNode(lowerBound, upperBound);
+		return new TermRangeQueryNode(lowerBound, upperBound, lowerInclusive, upperInclusive);
 		
 	}
 	
