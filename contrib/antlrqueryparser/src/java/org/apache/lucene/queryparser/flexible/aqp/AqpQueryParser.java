@@ -19,6 +19,13 @@ package org.apache.lucene.queryparser.flexible.aqp;
 
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TooManyListenersException;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryParserHelper;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
@@ -28,7 +35,11 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.standard.config.FuzzyConfig;
+import org.apache.lucene.queryparser.flexible.standard.config.NumericConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.parser.StandardSyntaxParser;
 import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.aqp.AqpDebuggingQueryNodeProcessorPipeline;
@@ -36,6 +47,8 @@ import org.apache.lucene.queryparser.flexible.aqp.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.search.FuzzyQuery;
+import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.Query;
 
 /**
@@ -109,14 +122,14 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryTreeBuilder
  * 
  * 
- * TODO: add the constructor to the SQP
+ * TODO: add the constructor to the SQP and remove the duplicated code
  * 
  * public StandardQueryParser(QueryConfigHandler config, SyntaxParser parser,
       QueryNodeProcessor processor, QueryBuilder builder) {
     super(config, parser,processor, builder);
   }
  */
-public class AqpQueryParser extends StandardQueryParser {
+public class AqpQueryParser extends QueryParserHelper {
 	
 	private boolean debugMode = false;
 	private String syntaxName = null;
@@ -261,4 +274,352 @@ public class AqpQueryParser extends StandardQueryParser {
 		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY, value);
 	}
 	
+	
+	/********************************************************************
+	 * Everything below is simpy copy of the StandardQueryParser        *
+	 *******************************************************************/
+	 
+	/**
+   * Gets implicit operator setting, which will be either {@link Operator#AND}
+   * or {@link Operator#OR}.
+   */
+  public StandardQueryConfigHandler.Operator getDefaultOperator() {
+    return getQueryConfigHandler().get(ConfigurationKeys.DEFAULT_OPERATOR);
+  }
+  
+  /**
+   * Sets the boolean operator of the QueryParser. In default mode (
+   * {@link Operator#OR}) terms without any modifiers are considered optional:
+   * for example <code>capital of Hungary</code> is equal to
+   * <code>capital OR of OR Hungary</code>.<br/>
+   * In {@link Operator#AND} mode terms are considered to be in conjunction: the
+   * above mentioned query is parsed as <code>capital AND of AND Hungary</code>
+   */
+  public void setDefaultOperator(StandardQueryConfigHandler.Operator operator) {
+    getQueryConfigHandler().set(ConfigurationKeys.DEFAULT_OPERATOR, operator);
+  }
+  
+  /**
+   * Set to <code>true</code> to allow leading wildcard characters.
+   * <p>
+   * When set, <code>*</code> or <code>?</code> are allowed as the first
+   * character of a PrefixQuery and WildcardQuery. Note that this can produce
+   * very slow queries on big indexes.
+   * <p>
+   * Default: false.
+   */
+  public void setLowercaseExpandedTerms(boolean lowercaseExpandedTerms) {
+    getQueryConfigHandler().set(ConfigurationKeys.LOWERCASE_EXPANDED_TERMS, lowercaseExpandedTerms);
+  }
+  
+  /**
+   * @see #setLowercaseExpandedTerms(boolean)
+   */
+  public boolean getLowercaseExpandedTerms() {
+    Boolean lowercaseExpandedTerms = getQueryConfigHandler().get(ConfigurationKeys.LOWERCASE_EXPANDED_TERMS);
+    
+    if (lowercaseExpandedTerms == null) {
+      return true;
+      
+    } else {
+      return lowercaseExpandedTerms;
+    }
+    
+  }
+  
+  /**
+   * Set to <code>true</code> to allow leading wildcard characters.
+   * <p>
+   * When set, <code>*</code> or <code>?</code> are allowed as the first
+   * character of a PrefixQuery and WildcardQuery. Note that this can produce
+   * very slow queries on big indexes.
+   * <p>
+   * Default: false.
+   */
+  public void setAllowLeadingWildcard(boolean allowLeadingWildcard) {
+    getQueryConfigHandler().set(ConfigurationKeys.ALLOW_LEADING_WILDCARD, allowLeadingWildcard);
+  }
+  
+  /**
+   * Set to <code>true</code> to enable position increments in result query.
+   * <p>
+   * When set, result phrase and multi-phrase queries will be aware of position
+   * increments. Useful when e.g. a StopFilter increases the position increment
+   * of the token that follows an omitted token.
+   * <p>
+   * Default: false.
+   */
+  public void setEnablePositionIncrements(boolean enabled) {
+    getQueryConfigHandler().set(ConfigurationKeys.ENABLE_POSITION_INCREMENTS, enabled);
+  }
+  
+  /**
+   * @see #setEnablePositionIncrements(boolean)
+   */
+  public boolean getEnablePositionIncrements() {
+    Boolean enablePositionsIncrements = getQueryConfigHandler().get(ConfigurationKeys.ENABLE_POSITION_INCREMENTS);
+    
+    if (enablePositionsIncrements == null) {
+       return false;
+       
+    } else {
+      return enablePositionsIncrements;
+    }
+    
+  }
+  
+  /**
+   * By default, it uses
+   * {@link MultiTermQuery#CONSTANT_SCORE_AUTO_REWRITE_DEFAULT} when creating a
+   * prefix, wildcard and range queries. This implementation is generally
+   * preferable because it a) Runs faster b) Does not have the scarcity of terms
+   * unduly influence score c) avoids any {@link TooManyListenersException}
+   * exception. However, if your application really needs to use the
+   * old-fashioned boolean queries expansion rewriting and the above points are
+   * not relevant then use this change the rewrite method.
+   */
+  public void setMultiTermRewriteMethod(MultiTermQuery.RewriteMethod method) {
+    getQueryConfigHandler().set(ConfigurationKeys.MULTI_TERM_REWRITE_METHOD, method);
+  }
+  
+  /**
+   * @see #setMultiTermRewriteMethod(org.apache.lucene.search.MultiTermQuery.RewriteMethod)
+   */
+  public MultiTermQuery.RewriteMethod getMultiTermRewriteMethod() {
+    return getQueryConfigHandler().get(ConfigurationKeys.MULTI_TERM_REWRITE_METHOD);
+  }
+  
+  /**
+   * Set the fields a query should be expanded to when the field is
+   * <code>null</code>
+   * 
+   * @param fields the fields used to expand the query
+   */
+  public void setMultiFields(CharSequence[] fields) {
+    
+    if (fields == null) {
+      fields = new CharSequence[0];
+    }
+
+    getQueryConfigHandler().set(ConfigurationKeys.MULTI_FIELDS, fields);
+    
+  }
+  
+  /**
+   * Returns the fields used to expand the query when the field for a
+   * certain query is <code>null</code>
+   * 
+   * @param fields the fields used to expand the query
+   */
+  public void getMultiFields(CharSequence[] fields) {
+    getQueryConfigHandler().get(ConfigurationKeys.MULTI_FIELDS);
+  }
+
+  /**
+   * Set the prefix length for fuzzy queries. Default is 0.
+   * 
+   * @param fuzzyPrefixLength
+   *          The fuzzyPrefixLength to set.
+   */
+  public void setFuzzyPrefixLength(int fuzzyPrefixLength) {
+    QueryConfigHandler config = getQueryConfigHandler();
+    FuzzyConfig fuzzyConfig = config.get(ConfigurationKeys.FUZZY_CONFIG);
+    
+    if (fuzzyConfig == null) {
+      fuzzyConfig = new FuzzyConfig();
+      config.set(ConfigurationKeys.FUZZY_CONFIG, fuzzyConfig);
+    }
+
+    fuzzyConfig.setPrefixLength(fuzzyPrefixLength);
+    
+  }
+  
+  public void setNumericConfigMap(Map<String,NumericConfig> numericConfigMap) {
+    getQueryConfigHandler().set(ConfigurationKeys.NUMERIC_CONFIG_MAP, numericConfigMap);
+  }
+  
+  public Map<String,NumericConfig> getNumericConfigMap() {
+    return getQueryConfigHandler().get(ConfigurationKeys.NUMERIC_CONFIG_MAP);
+  }
+  
+  /**
+   * Set locale used by date range parsing.
+   */
+  public void setLocale(Locale locale) {
+    getQueryConfigHandler().set(ConfigurationKeys.LOCALE, locale);
+  }
+  
+  /**
+   * Returns current locale, allowing access by subclasses.
+   */
+  public Locale getLocale() {
+    return getQueryConfigHandler().get(ConfigurationKeys.LOCALE);
+  }
+  
+  /**
+   * Sets the default slop for phrases. If zero, then exact phrase matches are
+   * required. Default value is zero.
+   * 
+   * @deprecated renamed to {@link #setPhraseSlop(int)}
+   */
+  @Deprecated
+  public void setDefaultPhraseSlop(int defaultPhraseSlop) {
+    getQueryConfigHandler().set(ConfigurationKeys.PHRASE_SLOP, defaultPhraseSlop);
+  }
+  
+  /**
+   * Sets the default slop for phrases. If zero, then exact phrase matches are
+   * required. Default value is zero.
+   */
+  public void setPhraseSlop(int defaultPhraseSlop) {
+    getQueryConfigHandler().set(ConfigurationKeys.PHRASE_SLOP, defaultPhraseSlop);
+  }
+
+  public void setAnalyzer(Analyzer analyzer) {
+    getQueryConfigHandler().set(ConfigurationKeys.ANALYZER, analyzer);
+  }
+  
+  public Analyzer getAnalyzer() {
+    return getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);       
+  }
+  
+  /**
+   * @see #setAllowLeadingWildcard(boolean)
+   */
+  public boolean getAllowLeadingWildcard() {
+    Boolean allowLeadingWildcard = getQueryConfigHandler().get(ConfigurationKeys.ALLOW_LEADING_WILDCARD);
+    
+    if (allowLeadingWildcard == null) {
+      return false;
+      
+    } else {
+      return allowLeadingWildcard;
+    }
+  }
+  
+  /**
+   * Get the minimal similarity for fuzzy queries.
+   */
+  public float getFuzzyMinSim() {
+    FuzzyConfig fuzzyConfig = getQueryConfigHandler().get(ConfigurationKeys.FUZZY_CONFIG);
+    
+    if (fuzzyConfig == null) {
+      return FuzzyQuery.defaultMinSimilarity;
+    } else {
+      return fuzzyConfig.getMinSimilarity();
+    }
+  }
+  
+  /**
+   * Get the prefix length for fuzzy queries.
+   * 
+   * @return Returns the fuzzyPrefixLength.
+   */
+  public int getFuzzyPrefixLength() {
+    FuzzyConfig fuzzyConfig = getQueryConfigHandler().get(ConfigurationKeys.FUZZY_CONFIG);
+    
+    if (fuzzyConfig == null) {
+      return FuzzyQuery.defaultPrefixLength;
+    } else {
+      return fuzzyConfig.getPrefixLength();
+    }
+  }
+  
+  /**
+   * Gets the default slop for phrases.
+   */
+  public int getPhraseSlop() {
+    Integer phraseSlop = getQueryConfigHandler().get(ConfigurationKeys.PHRASE_SLOP);
+    
+    if (phraseSlop == null) {
+      return 0;
+      
+    } else {
+      return phraseSlop;
+    }
+  }
+  
+  /**
+   * Set the minimum similarity for fuzzy queries. Default is defined on
+   * {@link FuzzyQuery#defaultMinSimilarity}.
+   */
+  public void setFuzzyMinSim(float fuzzyMinSim) {
+    QueryConfigHandler config = getQueryConfigHandler();
+    FuzzyConfig fuzzyConfig = config.get(ConfigurationKeys.FUZZY_CONFIG);
+    
+    if (fuzzyConfig == null) {
+      fuzzyConfig = new FuzzyConfig();
+      config.set(ConfigurationKeys.FUZZY_CONFIG, fuzzyConfig);
+    }
+
+    fuzzyConfig.setMinSimilarity(fuzzyMinSim);
+  }
+  
+  /**
+   * Sets the boost used for each field.
+   * 
+   * @param boosts a collection that maps a field to its boost 
+   */
+  public void setFieldsBoost(Map<String, Float> boosts) {
+    getQueryConfigHandler().set(ConfigurationKeys.FIELD_BOOST_MAP, boosts);
+  }
+  
+  /**
+   * Returns the field to boost map used to set boost for each field.
+   * 
+   * @return the field to boost map 
+   */
+  public Map<String, Float> getFieldsBoost() {
+    return getQueryConfigHandler().get(ConfigurationKeys.FIELD_BOOST_MAP);
+  }
+
+  /**
+   * Sets the default {@link Resolution} used for certain field when
+   * no {@link Resolution} is defined for this field.
+   * 
+   * @param dateResolution the default {@link Resolution}
+   */
+  public void setDateResolution(DateTools.Resolution dateResolution) {
+    getQueryConfigHandler().set(ConfigurationKeys.DATE_RESOLUTION, dateResolution);
+  }
+  
+  /**
+   * Returns the default {@link Resolution} used for certain field when
+   * no {@link Resolution} is defined for this field.
+   * 
+   * @return the default {@link Resolution}
+   */
+  public DateTools.Resolution getDateResolution() {
+    return getQueryConfigHandler().get(ConfigurationKeys.DATE_RESOLUTION);
+  }
+
+  /**
+   * Sets the {@link Resolution} used for each field
+   * 
+   * @param dateRes a collection that maps a field to its {@link Resolution}
+   * 
+   * @deprecated this method was renamed to {@link #setDateResolutionMap(Map)} 
+   */
+  @Deprecated
+  public void setDateResolution(Map<CharSequence, DateTools.Resolution> dateRes) {
+    setDateResolutionMap(dateRes);
+  }
+  
+  /**
+   * Returns the field to {@link Resolution} map used to normalize each date field.
+   * 
+   * @return the field to {@link Resolution} map
+   */
+  public Map<CharSequence, DateTools.Resolution> getDateResolutionMap() {
+    return getQueryConfigHandler().get(ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP);
+  }
+  
+  /**
+   * Sets the {@link Resolution} used for each field
+   * 
+   * @param dateRes a collection that maps a field to its {@link Resolution}
+   */
+  public void setDateResolutionMap(Map<CharSequence, DateTools.Resolution> dateRes) {
+    getQueryConfigHandler().set(ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP, dateRes);
+  }
 }

@@ -22,16 +22,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.EmptyTokenizer;
+import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Analyzer.PerFieldReuseStrategy;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.queryparser.flexible.standard.TestQPHelper;
-import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.IndexSearcher;
@@ -39,6 +45,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 
 /**
  * This test case is a copy of the core Lucene query parser test, it was adapted
@@ -82,7 +89,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
   public void testSimple() throws Exception {
     String[] fields = { "b", "t" };
-    StandardQueryParser mfqp = new StandardQueryParser();
+    AqpQueryParser mfqp = getParser();
     mfqp.setMultiFields(fields);
     mfqp.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
 
@@ -101,7 +108,8 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     q = mfqp.parse("one^2 two", null);
     assertEquals("((b:one t:one)^2.0) (b:two t:two)", q.toString());
-
+    
+    mfqp.setAllowSlowFuzzy(true);
     q = mfqp.parse("one~ two", null);
     assertEquals("(b:one~0.5 t:one~0.5) (b:two t:two)", q.toString());
 
@@ -314,18 +322,17 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     q = parser.parse("bla*", null);
     assertEquals("f1:bla* f2:bla* f3:bla*", q.toString());
     q = parser.parse("bla~", null);
-    assertEquals("f1:bla~0.5 f2:bla~0.5 f3:bla~0.5", q.toString());
+    assertEquals("f1:bla~2 f2:bla~2 f3:bla~2", q.toString());
     q = parser.parse("[a TO c]", null);
     assertEquals("f1:[a TO c] f2:[a TO c] f3:[a TO c]", q.toString());
   }
 
   public void testStopWordSearching() throws Exception {
     Analyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
-    Directory ramDir = newDirectory();
+    Directory ramDir = new RAMDirectory();
     IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(TEST_VERSION_CURRENT, analyzer));
     Document doc = new Document();
-    doc.add(newField("body", "blah the footest blah", Field.Store.NO,
-        Field.Index.ANALYZED));
+    doc.add(newField("body", "blah the footest blah", TextField.TYPE_NOT_STORED));
     iw.addDocument(doc);
     iw.close();
 
@@ -335,10 +342,9 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     mfqp.setAnalyzer(analyzer);
     mfqp.setDefaultOperator(Operator.AND);
     Query q = mfqp.parse("the footest", null);
-    IndexSearcher is = new IndexSearcher(ramDir, true);
+    IndexSearcher is = new IndexSearcher(DirectoryReader.open(ramDir));
     ScoreDoc[] hits = is.search(q, null, 1000).scoreDocs;
     assertEquals(1, hits.length);
-    is.close();
     ramDir.close();
   }
 
@@ -346,24 +352,18 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
    * Return empty tokens for field "f1".
    */
   private static final class AnalyzerReturningNull extends Analyzer {
-    StandardAnalyzer stdAnalyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
+    MockAnalyzer stdAnalyzer = new MockAnalyzer(random());
 
     public AnalyzerReturningNull() {
+      super(new PerFieldReuseStrategy());
     }
 
     @Override
-    public TokenStream tokenStream(String fieldName, Reader reader) {
+    public TokenStreamComponents createComponents(String fieldName, Reader reader) {
       if ("f1".equals(fieldName)) {
-        return new EmptyTokenStream();
+        return new TokenStreamComponents(new EmptyTokenizer(reader));
       } else {
-        return stdAnalyzer.tokenStream(fieldName, reader);
-      }
-    }
-
-    private static class EmptyTokenStream extends TokenStream {
-      @Override
-      public boolean incrementToken() {
-        return false;
+        return stdAnalyzer.createComponents(fieldName, reader);
       }
     }
   }

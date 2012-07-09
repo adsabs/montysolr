@@ -204,7 +204,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
       
 
   public void testConstantScoreAutoRewrite() throws Exception {
-    AqpQueryParser qp = AqpStandardLuceneParser.init(getGrammarName());
+    AqpQueryParser qp = getParser();
     qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
     
     Query q = qp.parse("foo*bar", "field");
@@ -830,7 +830,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     q = qp.parse("\"on\"^1.0", "field");
     assertNotNull(q);
 
-    AqpQueryParser qp2 = AqpStandardLuceneParser.init();
+    AqpQueryParser qp2 = getParser();
     qp2.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
 
     q = qp2.parse("the^3", "field");

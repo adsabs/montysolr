@@ -17,19 +17,20 @@ package org.apache.lucene.queryparser.flexible.aqp;
  * limitations under the License.
  */
 
+import java.io.IOException;
 import java.io.Reader;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
+import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpStandardLuceneParser;
 import org.apache.lucene.search.Query;
@@ -48,7 +49,7 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   public void testMultiAnalyzer() throws QueryNodeException, Exception {
 	  
 	
-    AqpQueryParser qp = AqpStandardLuceneParser.init();
+    AqpQueryParser qp = getParser();
     qp.setDefaultOperator(Operator.OR);
     qp.setAnalyzer(new MultiAnalyzer());
     
@@ -135,7 +136,7 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   // }
 
   public void testPosIncrementAnalyzer() throws QueryNodeException, Exception {
-    AqpQueryParser qp = AqpStandardLuceneParser.init();
+    AqpQueryParser qp = getParser();
     qp.setDefaultOperator(Operator.OR);
     
     qp.setAnalyzer(new PosIncrementAnalyzer());
@@ -155,15 +156,10 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
    */
   private class MultiAnalyzer extends Analyzer {
 
-    public MultiAnalyzer() {
-    }
-
     @Override
-    public TokenStream tokenStream(String fieldName, Reader reader) {
-      TokenStream result = new StandardTokenizer(TEST_VERSION_CURRENT, reader);
-      result = new TestFilter(result);
-      result = new LowerCaseFilter(TEST_VERSION_CURRENT, result);
-      return result;
+    public TokenStreamComponents createComponents(String fieldName, Reader reader) {
+      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE, true);
+      return new TokenStreamComponents(result, new TestFilter(result));
     }
   }
 
@@ -193,7 +189,7 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
         return true;
       } else {
         boolean next = input.incrementToken();
-        if (next == false) {
+        if (!next) {
           return false;
         }
         prevType = typeAtt.type();
@@ -212,6 +208,13 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
       }
     }
 
+    @Override
+    public void reset() throws IOException {
+      super.reset();
+      this.prevType = null;
+      this.prevStartOffset = 0;
+      this.prevEndOffset = 0;
+    }
   }
 
   /**
@@ -220,15 +223,10 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
    */
   private class PosIncrementAnalyzer extends Analyzer {
 
-    public PosIncrementAnalyzer() {
-    }
-
     @Override
-    public TokenStream tokenStream(String fieldName, Reader reader) {
-      TokenStream result = new StandardTokenizer(TEST_VERSION_CURRENT, reader);
-      result = new TestPosIncrementFilter(result);
-      result = new LowerCaseFilter(TEST_VERSION_CURRENT, result);
-      return result;
+    public TokenStreamComponents createComponents(String fieldName, Reader reader) {
+      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE, true);
+      return new TokenStreamComponents(result, new TestPosIncrementFilter(result));
     }
   }
 
@@ -257,11 +255,6 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
       return false;
     }
 
-  }
-  
-  //Uniquely for Junit 3
-  public static junit.framework.Test suite() {
-      return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiAnalyzer.class);
   }
 
 }

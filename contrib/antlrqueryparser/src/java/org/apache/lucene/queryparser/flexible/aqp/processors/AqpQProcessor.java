@@ -67,15 +67,13 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
 					.has(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD)) {
 				defaultField = queryConfig
 						.get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD);
-				return defaultField;
 			}
+			return defaultField;
 		}
 		throw new QueryNodeException(
 				new MessageImpl(
 						QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-						"Configuration error: "
-								+ AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD
-										.toString() + " is missing"));
+						"Configuration error: DEFAULT_FIELD is missing"));
 	}
 
 	public AqpFeedback getFeedbackAttr() throws QueryNodeException {

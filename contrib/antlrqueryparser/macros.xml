@@ -96,7 +96,7 @@
                     Rule: @{rule}       
                 </echo>
             <java classpathref="@{classpathref}"
-                    classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
+                    classname="org.apache.lucene.queryparser.flexible.aqp.parser.BuildAST"
                     output="@{output-file}"
                                 errorproperty="aqp.antlr-dot.error"
                                 failonerror="true"
@@ -121,7 +121,7 @@
                 Rule: @{rule}       
             </echo>
             <java classpathref="@{classpathref}"
-                classname="org.apache.lucene.queryParser.aqp.parser.BuildAST"
+                classname="org.apache.lucene.queryparser.flexible.aqp.parser.BuildAST"
                 >
                 <arg value="@{grammar-name}"/>
                 <arg value="@{query}"/>
@@ -179,7 +179,7 @@
         <sequential>
             <echo file="@{parser-dir}/@{grammar-name}SyntaxParser.java">
                 <![CDATA[
-package org.apache.lucene.queryParser.aqp.parser;
+package org.apache.lucene.queryparser.flexible.aqp.parser;
 
 
 /**
@@ -193,18 +193,18 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
-import org.apache.lucene.messages.Message;
-import org.apache.lucene.messages.MessageImpl;
-import org.apache.lucene.queryParser.aqp.AqpCommonTree;
-import org.apache.lucene.queryParser.aqp.AqpCommonTreeAdaptor;
-import org.apache.lucene.queryParser.core.QueryNodeParseException;
-import org.apache.lucene.queryParser.core.messages.QueryParserMessages;
-import org.apache.lucene.queryParser.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.messages.Message;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTreeAdaptor;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
+import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
-import org.apache.lucene.queryParser.aqp.AqpSyntaxParser;            	
-import org.apache.lucene.queryParser.aqp.AqpSyntaxParserAbstract;
-import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Lexer;
-import org.apache.lucene.queryParser.aqp.parser.@{grammar-name}Parser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;            	
+import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParserAbstract;
+import org.apache.lucene.queryparser.flexible.aqp.parser.@{grammar-name}Lexer;
+import org.apache.lucene.queryparser.flexible.aqp.parser.@{grammar-name}Parser;
 
 
 public class @{grammar-name}SyntaxParser extends AqpSyntaxParserAbstract {

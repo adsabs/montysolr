@@ -35,9 +35,9 @@
     <property name="aqp.grammardir" value="${grammardir}"/>
 
 	<property name="aqp.grammars.dir" location="${aqp.grammardir}" />
-	<property name="aqp.parser.dir" location="src/java/org/apache/lucene/queryParser/aqp/parser" />
+	<property name="aqp.parser.dir" location="src/java/org/apache/lucene/queryparser/flexible/aqp/parser" />
 	<property name="aqp.classes.dir" location="${build.dir}/classes/java" />
-	<property name="aqp.classes.parser.dir" location="${aqp.classes.dir}/org/apache/lucene/queryParser/aqp/parser" />
+	<property name="aqp.classes.parser.dir" location="${aqp.classes.dir}/org/apache/lucene/queryparser/flexible/aqp/parser" />
 	<property name="aqp.dotfile" location="${build.dir}/graph.dot" />
 	<property name="aqp.generate.py" location="${common.dir}/contrib/antlrqueryparser/src/python/generate_asts.py" />
 
