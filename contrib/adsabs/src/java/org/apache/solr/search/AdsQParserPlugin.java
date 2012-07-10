@@ -1,7 +1,7 @@
 package org.apache.solr.search;
 
-import org.apache.lucene.queryParser.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.SolrParams;

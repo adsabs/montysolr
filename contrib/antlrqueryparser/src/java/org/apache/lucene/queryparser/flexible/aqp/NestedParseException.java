@@ -1,6 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
-import org.apache.lucene.queryParser.aqp.AqpAdsabsQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 
 /**
  * This class is used explicitly (and only) for exceptions

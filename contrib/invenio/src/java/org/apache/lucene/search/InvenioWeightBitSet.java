@@ -33,7 +33,7 @@ public class InvenioWeightBitSet extends InvenioWeight {
 			boolean topScorer) throws IOException {
 
 		// we override the Scorer for the InvenioQuery
-		return new Scorer(similarity) {
+		return new Scorer(weight) {
 
 			private int doc = -1;
 			private int recid = -1;

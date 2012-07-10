@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Searcher;
+import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.search.spans.Spans;
@@ -68,7 +68,7 @@ public class PositionSearchFunction extends ValueSource {
 	}
 
 	@Override
-	public void createWeight(Map context, Searcher searcher) throws IOException {
+	public void createWeight(Map context, IndexSearcher searcher) throws IOException {
 		// collect the docs that match
 		subQueryHits = new HashMap<Integer, Float>(); // XXX: probably
 														// inefficient, should

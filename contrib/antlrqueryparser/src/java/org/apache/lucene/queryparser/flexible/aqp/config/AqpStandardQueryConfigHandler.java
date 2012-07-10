@@ -1,5 +1,8 @@
 package org.apache.lucene.queryparser.flexible.aqp.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
@@ -67,9 +70,11 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
 	    final public static ConfigurationKey<Boolean> ALLOW_SLOW_FUZZY = ConfigurationKey.newInstance();
 	    
 	    /**
-	     * Here one can store AqpRequest object
+	     * Translation mapping for index names
 	     */
-	    final public static ConfigurationKey<Object> SOLR_REQUEST = ConfigurationKey.newInstance();
+	    final public static ConfigurationKey<Map<String, String>> FIELD_MAPPER = ConfigurationKey.newInstance();
+	    
+	    
 	}
 	
 	
@@ -86,6 +91,7 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
 	    set(ConfigurationKeys.IMPLICIT_FUZZY, 0.5f);
 	    set(ConfigurationKeys.FEEDBACK, new AqpFeedbackImpl());
 	    set(ConfigurationKeys.ALLOW_SLOW_FUZZY, false);
+	    set(ConfigurationKeys.FIELD_MAPPER, new HashMap<String, String>());
 	    
 	  }
 

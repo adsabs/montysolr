@@ -1,0 +1,48 @@
+package org.apache.lucene.queryparser.flexible.aqp.builders;
+
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdslabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.AqpFunctionQParser;
+import org.apache.solr.search.ValueSourceParser;
+
+
+/**
+ * Returns a special FunctionQParser provider for the functions implemented
+ * by Solr: http://wiki.apache.org/solr/FunctionQuery
+ * 
+ * @author rchyla
+ *
+ */
+public class AqpSolrFunctionProvider implements AqpFunctionQueryBuilderProvider {
+
+	public QueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
+		throws QueryNodeException {
+		
+		AqpRequestParams reqAttr = config.get(AqpAdslabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+		
+		SolrQueryRequest req = reqAttr.getRequest();
+		if (req == null)
+			return null;
+		
+		ValueSourceParser provider = req.getCore().getValueSourceParser(funcName);
+		
+		if (provider == null)
+			return null;
+		
+			
+		AqpFunctionQParser fParser = new AqpFunctionQParser(null, reqAttr.getLocalParams(), 
+				reqAttr.getParams(), req);
+		
+		AqpFunctionQueryTreeBuilder.flattenChildren(node);
+		AqpFunctionQueryTreeBuilder.simplifyValueNode(node);
+		
+		return new AqpFunctionQueryTreeBuilder(provider, fParser);
+		
+	}
+
+}

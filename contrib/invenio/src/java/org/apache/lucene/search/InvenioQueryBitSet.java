@@ -24,7 +24,7 @@ public class InvenioQueryBitSet extends InvenioQuery {
 	 * <p>
 	 * Only implemented by primitive queries, which re-write to themselves.
 	 */
-	public Weight createWeight(Searcher searcher) throws IOException {
+	public Weight createWeight(IndexSearcher searcher) throws IOException {
 
 		InvenioWeightBitSet w = new InvenioWeightBitSet((IndexSearcher) searcher, this, this.idField);
 		if (pythonResponder != null) {

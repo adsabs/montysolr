@@ -1,12 +1,15 @@
 package org.apache.solr.search;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queries.function.FunctionQuery;
+import org.apache.lucene.queries.function.ValueSource;
+import org.apache.lucene.queries.function.valuesource.ConstValueSource;
+import org.apache.lucene.queries.function.valuesource.DoubleConstValueSource;
+import org.apache.lucene.queries.function.valuesource.LiteralValueSource;
+import org.apache.lucene.queries.function.valuesource.QueryValueSource;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -18,12 +21,6 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.FunctionQParser;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QueryParsing;
-import org.apache.solr.search.function.ConstValueSource;
-import org.apache.solr.search.function.DoubleConstValueSource;
-import org.apache.solr.search.function.FunctionQuery;
-import org.apache.solr.search.function.LiteralValueSource;
-import org.apache.solr.search.function.QueryValueSource;
-import org.apache.solr.search.function.ValueSource;
 
 
 public class AqpFunctionQParser extends FunctionQParser {

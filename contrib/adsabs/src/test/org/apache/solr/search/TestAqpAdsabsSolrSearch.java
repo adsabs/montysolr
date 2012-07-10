@@ -4,8 +4,8 @@ import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 
 import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.aqp.TestAqpAdsabs;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
+import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.CollectorQuery;
 import org.apache.lucene.search.Query;

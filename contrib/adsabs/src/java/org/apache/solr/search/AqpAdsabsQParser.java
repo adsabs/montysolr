@@ -3,14 +3,14 @@ package org.apache.solr.search;
 import java.util.HashMap;
 
 import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.aqp.config.AqpFieldMapper;
-import org.apache.lucene.queryParser.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.AnalyzerAttribute;
 import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFieldMapper;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.config.DefaultFieldAttribute;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;

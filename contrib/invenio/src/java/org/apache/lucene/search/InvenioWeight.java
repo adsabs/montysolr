@@ -6,13 +6,14 @@ import invenio.montysolr.jni.MontySolrVM;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
-import org.apache.lucene.search.Similarity;
 import org.apache.lucene.search.Weight;
+import org.apache.lucene.search.similarities.Similarity;
+import org.apache.lucene.util.Bits;
 
 
 public class InvenioWeight extends Weight {
@@ -36,7 +37,7 @@ public class InvenioWeight extends Weight {
 			throws IOException {
 		this.innerQuery = query.getInnerQuery();
 		this.weight = innerQuery.createWeight(searcher);
-		this.similarity = innerQuery.getSimilarity(searcher);
+		this.similarity = searcher.getSimilarity();
 		this.query = query;
 		this.recidToDocid = DictionaryRecIdCache.INSTANCE.getTranslationCache(
 				searcher.getIndexReader(), idField);
@@ -49,8 +50,8 @@ public class InvenioWeight extends Weight {
 		pythonFunctionName = functionName;
 	}
 	
-	public Scorer scorer(IndexReader indexReader, boolean scoreDocsInOrder,
-			boolean topScorer) throws IOException {
+	public Scorer scorer(AtomicReaderContext context, boolean scoreDocsInOrder,
+			boolean topScorer, Bits acceptDocs) throws IOException {
 
 		if (searcherCounter > 0) {
 			return null;
@@ -58,7 +59,7 @@ public class InvenioWeight extends Weight {
 		searcherCounter++;
 
 		// we override the Scorer for the InvenioQuery
-		return new Scorer(similarity) {
+		return new Scorer(weight) {
 
 			private int doc = -1;
 			private int[] recids = null;
@@ -130,44 +131,33 @@ public class InvenioWeight extends Weight {
 
 			public float score() throws IOException {
 				assert doc != -1;
-				return innerQuery.getBoost() * 1.0f; // TODO: implementation of the
+				return innerQuery.getBoost(); // TODO: implementation of the
 												// scoring algorithm
 			}
 		};// Scorer
 	}// scorer
 	
-	// pass these methods through to enclosed query's weight
-	public float getValue() {
-		return value;
-	}
 
-	public float sumOfSquaredWeights() throws IOException {
-		return weight.sumOfSquaredWeights() * innerQuery.getBoost()
-				* innerQuery.getBoost();
+	public float getValueForNormalization() throws IOException {
+		return weight.getValueForNormalization();
 	}
+	
+	@Override
+    public void normalize(float queryNorm, float topLevelBoost) {
+      weight.normalize(queryNorm, topLevelBoost);
+    }
+	
+	@Override
+    public Explanation explain(AtomicReaderContext context, int doc) throws IOException {
+		return weight.explain(context, doc);
+    }
 
-	public void normalize(float v) {
-		weight.normalize(v);
-		value = weight.getValue() * innerQuery.getBoost();
-	}
-
-	public Explanation explain(IndexReader ir, int i) throws IOException {
-		Explanation inner = weight.explain(ir, i);
-		if (innerQuery.getBoost() != 1) {
-			Explanation preBoost = inner;
-			inner = new Explanation(inner.getValue() * innerQuery.getBoost(),
-					"product of:");
-			inner.addDetail(new Explanation(innerQuery.getBoost(), "boost"));
-			inner.addDetail(preBoost);
-		}
-		inner.addDetail(new Explanation(0.0f, "TODO: add formula details"));
-		return inner;
-	}
 
 	// return this query
 	public Query getQuery() {
 		return query;
 	}
+
 
 }; // Weight
 
