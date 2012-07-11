@@ -9,7 +9,7 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.AqpAdslabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSubqueryParserFull;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
@@ -178,7 +178,7 @@ public class AqpAdslabsSubSueryProvider implements
 			
 		//AqpFunctionQueryTreeBuilder.flattenChildren(node);
 		
-		AqpRequestParams reqAttr = config.get(AqpAdslabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
 		
 		SolrQueryRequest req = reqAttr.getRequest();
 		if (req == null)

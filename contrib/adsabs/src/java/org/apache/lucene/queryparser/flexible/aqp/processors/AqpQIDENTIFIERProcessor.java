@@ -38,7 +38,6 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
 		//String field = getDefaultFieldName();
 		
-		AqpANTLRNode subChild;
 		String field;
 		String input = null;
 		int start = 0;
@@ -46,7 +45,17 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 		
 		if (node.getChildren().size() == 1) {
 			field = "identifier";
-			subChild = (AqpANTLRNode) node.getChildren().get(0);
+			QueryNode sc = node.getChildren().get(0);
+      if (sc instanceof AqpANTLRNode) {
+        input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) sc).getTokenInput()).toString();
+        start = ((AqpANTLRNode) sc).getTokenStart();
+        end = ((AqpANTLRNode) sc).getTokenEnd();
+      }
+      else {
+        input = ((FieldQueryNode) sc).getTextAsString();
+        start = ((FieldQueryNode) sc).getBegin();
+        end = ((FieldQueryNode) sc).getEnd();
+      }
 		}
 		else {
 			field = ((AqpANTLRNode) node.getChildren().get(0)).getTokenLabel();

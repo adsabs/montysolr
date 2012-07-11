@@ -8,7 +8,7 @@ import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.AqpAdslabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFunctionQueryBuilderConfig;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
@@ -53,13 +53,13 @@ public class AqpQFUNCProcessor extends AqpQProcessorPost {
 		
 		QueryConfigHandler config = getQueryConfigHandler();
 		
-		if (!config.has(AqpAdslabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)) {
+		if (!config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)) {
 			throw new QueryNodeException(new MessageImpl(
 					"Invalid configuration",
 					"Missing FunctionQueryBuilder provider"));
 		}
 		
-		QueryBuilder builder = config.get(AqpAdslabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
+		QueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
 										.getBuilder(funcName, (QueryNode) node, config);
 		
 		if (builder == null) {

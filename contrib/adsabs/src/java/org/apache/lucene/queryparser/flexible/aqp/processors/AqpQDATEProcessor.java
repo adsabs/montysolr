@@ -7,7 +7,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
-import org.apache.lucene.queryparser.flexible.aqp.AqpAdslabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
@@ -25,13 +25,13 @@ public class AqpQDATEProcessor extends AqpQProcessorPost {
 		
 		QueryConfigHandler queryConfig = getQueryConfigHandler();
 		
-		if (!queryConfig.has(AqpAdslabsQueryConfigHandler.ConfigurationKeys.DEFAULT_DATE_RANGE_FIELD)) {
+		if (!queryConfig.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DEFAULT_DATE_RANGE_FIELD)) {
 			throw new QueryNodeException(new MessageImpl(
 					"Configuration error",
 					"DefaultDateRangeField is missing from configuration"));
 		}
 		
-		String dateField = queryConfig.get(AqpAdslabsQueryConfigHandler.ConfigurationKeys.DEFAULT_DATE_RANGE_FIELD);
+		String dateField = queryConfig.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DEFAULT_DATE_RANGE_FIELD);
 		if (dateField == null) {
 			throw new QueryNodeException(new MessageImpl(
 					"Configuration error",

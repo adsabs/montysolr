@@ -32,10 +32,10 @@ tokens {
 }
 
 @header{
-   package org.apache.lucene.queryParser.aqp.parser;
+   package org.apache.lucene.queryparser.flexible.aqp.parser;
 }
 @lexer::header {
-   package org.apache.lucene.queryParser.aqp.parser;
+   package org.apache.lucene.queryparser.flexible.aqp.parser;
 }
 
 mainQ : 

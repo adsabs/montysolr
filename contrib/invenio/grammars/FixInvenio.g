@@ -28,12 +28,12 @@ tokens {
 }
 
 @header{
-   package org.apache.lucene.queryParser.aqp.parser;
+   package org.apache.lucene.queryparser.flexible.aqp.parser;
    import java.util.regex.Pattern;
    import java.util.regex.Matcher;
 }
 @lexer::header {
-   package org.apache.lucene.queryParser.aqp.parser;
+   package org.apache.lucene.queryparser.flexible.aqp.parser;
 }
 
 @members {

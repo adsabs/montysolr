@@ -30,7 +30,7 @@
     <property name="aqp.grammardir" location="${common.dir}/contrib/${ant.project.name}/grammars"/>
 	
 	<property name="ads.grammars.dir" location="./grammars" />
-    <property name="ads.parser.dir" location="src/java/org/apache/lucene/queryParser/aqp/parser" />
+    <property name="ads.parser.dir" location="src/java/org/apache/lucene/queryparser/flexible/aqp/parser" />
     
     <condition property="aqp.grammar" value="ADS">
         <not>
