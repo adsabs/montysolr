@@ -20,7 +20,7 @@ public class AdsConfigHandler extends RequestHandlerBase {
 	private Map<String, SolrParams> components = new HashMap<String, SolrParams>();
 	private SolrParams emptyParams = null; 
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void init(NamedList args) {
 		super.init(args);
 		for (int i=0; i<args.size();i++) {
@@ -78,11 +78,6 @@ public class AdsConfigHandler extends RequestHandlerBase {
 	    return sb.toString();
 	}
 
-
-	@Override
-	public String getSourceId() {
-		return "";
-	}
 
 
 	@Override

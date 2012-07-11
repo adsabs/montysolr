@@ -3,9 +3,12 @@ package org.apache.solr.search.function;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermContext;
+import org.apache.lucene.queries.function.FunctionValues;
 import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.spans.SpanTermQuery;
@@ -73,8 +76,16 @@ public class PositionSearchFunction extends ValueSource {
 		subQueryHits = new HashMap<Integer, Float>(); // XXX: probably
 														// inefficient, should
 														// do better
-		IndexReader reader = ((IndexSearcher) searcher).getIndexReader();
-		Spans spans = subQuery.getSpans(reader);
+		AtomicReaderContext ctx = (AtomicReaderContext) searcher.getTopReaderContext();
+		
+		Map<Term,TermContext> termContexts = new HashMap<Term,TermContext>();
+		TreeSet<Term> extractedTerms = new TreeSet<Term>();
+    subQuery.extractTerms(extractedTerms);
+    for (Term term : extractedTerms) {
+      termContexts.put(term, TermContext.build(ctx, term, true));
+    }
+    
+		Spans spans = subQuery.getSpans(ctx, ctx.reader().getLiveDocs(), null);
 		while (spans.next() == true) {
 			int s = spans.start();
 			int e = spans.end();
@@ -101,11 +112,10 @@ public class PositionSearchFunction extends ValueSource {
 	}
 
 	@Override
-	public DocValues getValues(Map context, IndexReader reader)
+	public FunctionValues getValues(Map context, AtomicReaderContext readerContext)
 			throws IOException {
-		return new DocValues() {
+		return new FunctionValues() {
 
-			@Override
 			public float floatVal(int doc) {
 				// XXX: is docBase already included in the doc? or shall we do
 				// st with context???
@@ -117,22 +127,18 @@ public class PositionSearchFunction extends ValueSource {
 				}
 			}
 
-			@Override
 			public int intVal(int doc) {
 				return (int) doubleVal(doc);
 			}
 
-			@Override
 			public long longVal(int doc) {
 				return (long) doubleVal(doc);
 			}
 
-			@Override
 			public double doubleVal(int doc) {
 				return (double) floatVal(doc);
 			}
 
-			@Override
 			public String toString(int doc) {
 				StringBuilder sb = new StringBuilder();
 				sb.append("author").append('(');
@@ -143,5 +149,6 @@ public class PositionSearchFunction extends ValueSource {
 			}
 		};
 	}
+
 
 }

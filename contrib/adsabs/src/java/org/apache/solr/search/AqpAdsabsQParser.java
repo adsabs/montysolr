@@ -1,17 +1,17 @@
 package org.apache.solr.search;
 
-import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.standard.config.AnalyzerAttribute;
-import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpFieldMapper;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
-import org.apache.lucene.queryparser.flexible.aqp.config.DefaultFieldAttribute;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -43,8 +43,6 @@ public class AqpAdsabsQParser extends QParser {
 					"The query is empty");
 		}
 
-		SolrParams solrParams = localParams == null ? params
-				: new DefaultSolrParams(localParams, params);
 
 		IndexSchema schema = req.getSchema();
 
@@ -72,15 +70,12 @@ public class AqpAdsabsQParser extends QParser {
 			defaultField = parserConfig.get("defaultField", getReq().getSchema().getDefaultSearchFieldName());
 		}
 		if (defaultField != null) {
-			DefaultFieldAttribute defFieldAttr = config
-					.getAttribute(DefaultFieldAttribute.class);
-			defFieldAttr.setDefaultField(defaultField);
+			config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, defaultField);
 		}
 
 		String opParam = getParam(QueryParsing.OP);
 		if (opParam == null) {
-			opParam = parserConfig.get("defaultOperator", getReq().getSchema()
-					.getSolrQueryParser(null).getDefaultOperator().toString());
+			opParam = parserConfig.get("defaultOperator", getReq().getSchema().getQueryParserDefaultOperator());
 		}
 
 		if (opParam != null) {
@@ -93,7 +88,7 @@ public class AqpAdsabsQParser extends QParser {
 		
 		if (parserConfig.get("fieldMap", null) != null) {
 			String[] fields = parserConfig.get("fieldMap").split(";");
-			HashMap<String, String> fieldMap = new HashMap<String, String>();
+			Map<String, String> fieldMap = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
 			String ffs[];
 			for (String f: fields) {
 				ffs = f.split("\\s+");
@@ -106,10 +101,9 @@ public class AqpAdsabsQParser extends QParser {
 					fieldMap.put(ffs[i], target);
 				}
 			}
-			config.getAttribute(AqpFieldMapper.class).setMap(fieldMap);
 		}
 		
-		AqpRequestParams reqAttr = config.getAttribute(AqpRequestParams.class);
+		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
 		reqAttr.setQueryString(getString());
 		reqAttr.setRequest(req);
 		reqAttr.setLocalParams(localParams);
@@ -117,7 +111,7 @@ public class AqpAdsabsQParser extends QParser {
 		
 		
 		// now add the special analyzer that knows to use solr token chains
-		config.getAttribute(AnalyzerAttribute.class).setAnalyzer(req.getSchema().getQueryAnalyzer());
+		config.set(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER, req.getSchema().getQueryAnalyzer());
 		
 		if (params.getBool("debugQuery", false) != false) {
 			try {
