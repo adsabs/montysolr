@@ -32,29 +32,29 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.AqpNearQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpStandardQueryTreeBuilder;
-import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdslabsIdentifierNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsIdentifierNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeRegexBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.IgnoreQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.InvenioQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsIdentifierNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsRegexQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.InvenioQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 
-public class AqpAdslabsQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
+public class AqpAdsabsQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
 
 	public void init() {
 		
 		setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
-		setBuilder(AqpAdslabsIdentifierNode.class, new AqpAdslabsIdentifierNodeBuilder());
+		setBuilder(AqpAdsabsIdentifierNode.class, new AqpAdsabsIdentifierNodeBuilder());
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
-		setBuilder(AqpAdslabsRegexQueryNode.class, new AqpFieldQueryNodeRegexBuilder());
+		setBuilder(AqpAdsabsRegexQueryNode.class, new AqpFieldQueryNodeRegexBuilder());
 		setBuilder(AqpNonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(InvenioQueryNode.class, new InvenioQueryNodeBuilder(this));
 		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());

@@ -155,7 +155,8 @@ public class AqpQueryParser extends QueryParserHelper {
 	/*
 	 * De/activates the debugging print of the processed query tree
 	 */
-	public void setDebug(boolean debug) throws InstantiationException, IllegalAccessException {
+	@SuppressWarnings("unchecked")
+  public void setDebug(boolean debug) throws InstantiationException, IllegalAccessException {
 		if (debug) {
 			QueryNodeProcessor qp = this.getQueryNodeProcessor();
 			AqpDebuggingQueryNodeProcessorPipeline np = new AqpDebuggingQueryNodeProcessorPipeline(
@@ -214,7 +215,6 @@ public class AqpQueryParser extends QueryParserHelper {
 			throws QueryNodeException {
 		
 		if(defaultField != null) {
-			QueryConfigHandler cfg = getQueryConfigHandler();
 			setDefaultField(defaultField);
 		}
 		try {

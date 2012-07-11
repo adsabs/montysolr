@@ -10,13 +10,13 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 
-public class AqpAdslabsSynonymQueryNode extends QueryNodeImpl implements QueryNode {
+public class AqpAdsabsSynonymQueryNode extends QueryNodeImpl implements QueryNode {
 
 	private static final long serialVersionUID = 6262993993478292390L;
 	private boolean allowed = false;
 	
 	
-	public AqpAdslabsSynonymQueryNode(QueryNode child, boolean activated) {
+	public AqpAdsabsSynonymQueryNode(QueryNode child, boolean activated) {
 		if (child == null) {
 			throw new QueryNodeError(new MessageImpl(
 					QueryParserMessages.PARAMETER_VALUE_NOT_SUPPORTED, "child",

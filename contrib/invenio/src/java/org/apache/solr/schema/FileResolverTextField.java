@@ -3,6 +3,7 @@
 package org.apache.solr.schema;
 
 import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexableField;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +20,15 @@ import java.io.FileNotFoundException;
 public class FileResolverTextField extends TextField {
 
 
-  public Field createField(SchemaField field, String externalVal, float boost) {
+  public IndexableField createField(SchemaField field, Object value, float boost) {
+    return super.createField(field, getValue(toInternal(value.toString())), boost);
+  }
+  
+  protected IndexableField createField(String name, String val, org.apache.lucene.document.FieldType type, float boost){
+    return super.createField(name, getValue(val), type, boost);
+  }
+  
+  private String getValue(String externalVal) {
 	  //System.out.println(externalVal);
 	  //String val = externalVal.toLowerCase() + " Hey!"; //null;
 	  String val = null;
@@ -85,6 +94,6 @@ public class FileResolverTextField extends TextField {
 		  }
 	  }// value has src_dir and arxiv_id
 
-	  return super.createField(field, val, boost);
+	  return val;
   }
 }

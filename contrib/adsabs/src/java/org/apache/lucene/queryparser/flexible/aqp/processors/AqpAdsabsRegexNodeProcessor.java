@@ -8,11 +8,11 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsRegexQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsSynonymQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 
-public class AqpAdslabsRegexNodeProcessor extends QueryNodeProcessorImpl implements
+public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implements
 	QueryNodeProcessor  {
 
 	@Override
@@ -34,7 +34,7 @@ public class AqpAdslabsRegexNodeProcessor extends QueryNodeProcessorImpl impleme
 			// TODO: should we consider using something more explicit, 
 			// e.g. creating author tokens like "/Kurtz, M.*/" ?
 			if (input.contains("\\b") || input.contains("\\w")) {
-				return new AqpAdslabsRegexQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
+				return new AqpAdsabsRegexQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
 			} else if (!(node instanceof PrefixWildcardQueryNode) && input.endsWith(".*")) {
 				input = input.substring(0, input.length() - 2) + "*";
 				return new PrefixWildcardQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());

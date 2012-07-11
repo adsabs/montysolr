@@ -1,6 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
-import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;

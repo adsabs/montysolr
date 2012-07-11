@@ -30,7 +30,9 @@ import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTreeAdaptor;
  */
 public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
 
+  @SuppressWarnings("rawtypes")
   private Class clsLexer;
+  @SuppressWarnings("rawtypes")
   private Class clsParser;
 
   private Object iLexer;
@@ -49,6 +51,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
     // empty constructor
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public AqpSyntaxParser initializeGrammar(String grammarName)
       throws QueryNodeParseException {
 
@@ -69,7 +72,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
       iLexer = ctLexer.newInstance(arglist);
 
       // instantiate parser using no parameters
-      ANTLRStringStream fakeInput = new ANTLRStringStream("none");
+      //ANTLRStringStream fakeInput = new ANTLRStringStream("none");
       CommonTokenStream fakeTokens = new CommonTokenStream(
           (TokenSource) clsLexer.cast(iLexer));
       Class partypes2[] = new Class[1];

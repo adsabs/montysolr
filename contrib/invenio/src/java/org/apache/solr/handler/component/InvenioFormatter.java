@@ -4,12 +4,9 @@ import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.lucene.search.Query;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -23,8 +20,6 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.DocListAndSet;
 import org.apache.solr.search.DocSlice;
-import org.apache.solr.search.QParserPlugin;
-import org.apache.solr.search.SolrIndexReader;
 import org.apache.solr.search.SortSpec;
 import org.apache.lucene.search.DictionaryRecIdCache;
 
@@ -93,7 +88,7 @@ public class InvenioFormatter extends SearchComponent
 			int[] recids = new int[dl.size()];
 			DocIterator it = dl.iterator();
 
-			SolrIndexReader reader = rb.req.getSearcher().getReader();
+			AtomicReader reader = rb.req.getSearcher().getAtomicReader();
 			int[] docidMap = DictionaryRecIdCache.INSTANCE.getLuceneCache(reader, getIdField(rb.req));
 
 			// translate into Invenio ID's
@@ -196,11 +191,6 @@ public class InvenioFormatter extends SearchComponent
 		return "Invenio result list formatter";
 	}
 
-	@Override
-	public String getSourceId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public String getSource() {

@@ -138,12 +138,12 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	public void testIdentifiers() throws Exception {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		Query q = null;
-		assertQueryEquals("arXiv:1012.5859", wsa, "identifier:arxiv:1012.5859");
+		assertQueryEquals("arXiv:1012.5859", wsa, "arxiv:1012.5859");
 		assertQueryEquals("xfield:10.1086/345794", wsa, "xfield:10.1086/345794");
-		assertQueryEquals("xfield:doi:10.1086/345794", wsa, "xfield:doi:10.1086/345794");
+		assertQueryEquals("xfield:doi:10.1086/345794", wsa, "xfield:10.1086/345794");
 		
-		assertQueryEquals("arXiv:astro-ph/0601223", wsa, "identifier:arxiv:astro-ph/0601223");
-		q = assertQueryEquals("xfield:arXiv:0711.2886", wsa, "xfield:arxiv:0711.2886");
+		assertQueryEquals("arXiv:astro-ph/0601223", wsa, "arxiv:astro-ph/0601223");
+		q = assertQueryEquals("xfield:arXiv:0711.2886", wsa, "xfield:0711.2886");
 		
 		assertQueryEquals("foo AND bar AND 2003AJ....125..525J", wsa, "+foo +bar +2003aj....125..525j");
 		
@@ -208,17 +208,16 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("title:[20020101 TO 20030101]^0.5", null, "title:[20020101 TO 20030101]^0.5");
 		assertQueryNodeException("title:[20020101 TO 20030101]^0.5~");
 		assertQueryNodeException("title:[20020101 TO 20030101]^0.5~");
-		setDebug(true);
-		assertQueryEquals("[* TO 20030101]", null, "[* TO 20030101]");
-		assertQueryEquals("[20020101 TO *]^0.5", null, "[20020101 TO *]^0.5");
+		assertQueryEquals("[* TO 20030101]", null, "[\\* TO 20030101]");
+		assertQueryEquals("[20020101 TO *]^0.5", null, "[20020101 TO \\*]^0.5");
 		assertQueryNodeException("[* 20030101]^0.5~");
 		assertQueryNodeException("[20020101 *]^0.5~");
 		assertQueryEquals("[this TO that]", null, "[this TO that]");
 		assertQueryEquals("[this that]", null, "[this TO that]");
-		assertQueryEquals("[this TO *]", null, "[this TO *]");
-		assertQueryEquals("[this]", null, "[this TO *]");
-		assertQueryEquals("[* this]", null, "[* TO this]");
-		assertQueryEquals("[* TO this]", null, "[* TO this]");
+		assertQueryEquals("[this TO *]", null, "[this TO \\*]");
+		assertQueryEquals("[this]", null, "[this TO \\*]");
+		assertQueryEquals("[* this]", null, "[\\* TO this]");
+		assertQueryEquals("[* TO this]", null, "[\\* TO this]");
 		assertQueryEquals("[\"this\" TO \"that*\"]", null, "[this TO that*]");
 		// TODO: verify this is correct (this phrase is not a phrase inside a range query)
 		assertQueryEquals("[\"this phrase\" TO \"that phrase*\"]", null, "[this phrase TO that phrase*]");
@@ -228,7 +227,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("+a:[this TO that]", null, "a:[this TO that]");
 		assertQueryEquals("+a:[   this TO that   ]", null, "a:[this TO that]");
 		
-		assertQueryEquals("year:[2000 TO *]", null, "year:[2000 TO *]");
+		assertQueryEquals("year:[2000 TO *]", null, "year:[2000 TO \\*]");
 		
 	}
 	
@@ -417,7 +416,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("\"te*?t phrase\"", null, "te*?t phrase", WildcardQuery.class);
 		
 		
-		assertQueryEquals("*", null, "*:*", MatchAllDocsQuery.class);
+		assertQueryEquals("*", null, "*", WildcardQuery.class);
 		assertQueryEquals("*:*", null, "*:*", MatchAllDocsQuery.class);
 		
 		assertQueryEquals("?", null, "?", WildcardQuery.class);

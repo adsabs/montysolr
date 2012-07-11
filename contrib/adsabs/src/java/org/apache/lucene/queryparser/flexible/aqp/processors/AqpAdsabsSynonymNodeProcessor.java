@@ -7,10 +7,10 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsSynonymQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 
-public class AqpAdslabsSynonymNodeProcessor extends QueryNodeProcessorImpl implements
+public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implements
 	QueryNodeProcessor  {
 
 	@Override
@@ -22,8 +22,8 @@ public class AqpAdslabsSynonymNodeProcessor extends QueryNodeProcessorImpl imple
 	@Override
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
-		if (node instanceof AqpAdslabsSynonymQueryNode) {
-			AqpAdslabsSynonymQueryNode synNode = (AqpAdslabsSynonymQueryNode) node;
+		if (node instanceof AqpAdsabsSynonymQueryNode) {
+			AqpAdsabsSynonymQueryNode synNode = (AqpAdsabsSynonymQueryNode) node;
 			if (synNode.isActivated()) { 
 				return expandSynonyms(synNode);
 				
@@ -56,7 +56,7 @@ public class AqpAdslabsSynonymNodeProcessor extends QueryNodeProcessorImpl imple
 		
 	}
 
-	protected QueryNode expandSynonyms(AqpAdslabsSynonymQueryNode synNode) {
+	protected QueryNode expandSynonyms(AqpAdsabsSynonymQueryNode synNode) {
 		// I believe it is the job of the analyzers to expand the node, but it may depend...
 		return synNode.getChild();
 	}

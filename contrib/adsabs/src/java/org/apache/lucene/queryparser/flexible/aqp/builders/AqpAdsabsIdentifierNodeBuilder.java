@@ -8,9 +8,9 @@ import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBui
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 
-public class AqpAdslabsIdentifierNodeBuilder implements StandardQueryBuilder {
+public class AqpAdsabsIdentifierNodeBuilder implements StandardQueryBuilder {
 	
-	public AqpAdslabsIdentifierNodeBuilder() {
+	public AqpAdsabsIdentifierNodeBuilder() {
 		// empty constructor
 	}
 

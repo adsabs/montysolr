@@ -6,15 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.DocTermOrds;
+import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
-import org.apache.lucene.index.TermEnum;
+import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.search.FieldCache.IntParser;
 import org.apache.lucene.search.FieldCacheImpl.Cache;
 import org.apache.lucene.search.FieldCacheImpl.Entry;
 import org.apache.lucene.search.FieldCacheImpl.StopFillCacheException;
+import org.apache.lucene.util.Bits;
+import org.apache.lucene.util.BytesRef;
 import org.omg.CORBA.NO_MEMORY;
 
 /**
@@ -60,8 +65,8 @@ public enum DictionaryRecIdCache {
 		return cache.get(name);
 	}
 	
-	public int[] getLuceneCache(IndexReader reader, String field) throws IOException {
-		return FieldCache.DEFAULT.getInts(reader, field);
+	public int[] getLuceneCache(AtomicReader reader, String field) throws IOException {
+		return FieldCache.DEFAULT.getInts(reader, field, false);
 	}
 	
 	public Map<Integer, Integer> buildCache(int[] idMapping) throws IOException {
@@ -76,12 +81,16 @@ public enum DictionaryRecIdCache {
 		return fromFieldToLuceneId;
 	}
 	
-	public Map<String, Integer> buildCacheStr(String[] idMapping) throws IOException {
+	public Map<String, Integer> buildCacheStr(DocTerms idMapping) throws IOException {
 		
-		Map<String, Integer> fromFieldToLuceneId = new HashMap<String, Integer>(idMapping.length);
+		Map<String, Integer> fromFieldToLuceneId = new HashMap<String, Integer>(idMapping.size());
 		int i = 0;
-		for (String value: idMapping) {
-			fromFieldToLuceneId.put(value, i);
+		BytesRef ret = new BytesRef();
+		while(i < idMapping.size()) {
+		  ret = idMapping.getTerm(i, ret);
+		  if (ret.length > 0) {
+		    fromFieldToLuceneId.put(ret.utf8ToString(), i);
+		  }
 			i++;
 		}
 		if (fromFieldToLuceneId.containsKey(null))	fromFieldToLuceneId.remove(null);
@@ -89,7 +98,7 @@ public enum DictionaryRecIdCache {
 	}
 	
 	
-	private boolean indexUnchanged(IndexReader reader, String field, Boolean isString) throws IOException {
+	private boolean indexUnchanged(AtomicReader reader, String field, Boolean isString) throws IOException {
 		// first check that the index wasn't updated
 		Integer old_hash = null;
 		if (translation_cache_tracker.containsKey(field)) {
@@ -99,10 +108,10 @@ public enum DictionaryRecIdCache {
 			return false;
 		}
 		if (isString) {
-			return old_hash.equals(FieldCache.DEFAULT.getStrings(reader, field).hashCode());
+			return old_hash.equals(FieldCache.DEFAULT.getTerms(reader, field).hashCode());
 		}
 		else {
-			return old_hash.equals(FieldCache.DEFAULT.getInts(reader, field).hashCode());
+			return old_hash.equals(FieldCache.DEFAULT.getInts(reader, field, false).hashCode());
 		}
 	}
 	
@@ -128,10 +137,10 @@ public enum DictionaryRecIdCache {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<Integer, Integer> getTranslationCache(IndexReader reader, String externalIdsField) throws IOException {
+	public Map<Integer, Integer> getTranslationCache(AtomicReader reader, String externalIdsField) throws IOException {
 		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(reader, externalIdsField, false))) {
 			synchronized(translation_cache_tracker) {
-				int[] idMapping = FieldCache.DEFAULT.getInts(reader, externalIdsField);
+				int[] idMapping = FieldCache.DEFAULT.getInts(reader, externalIdsField, false);
 				Map<Integer, Integer> translTable = buildCache(idMapping);
 				translation_cache.put(externalIdsField, translTable);
 				translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
@@ -159,11 +168,11 @@ public enum DictionaryRecIdCache {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<String, Integer> getTranslationCacheString(IndexReader reader, String externalIdsField) throws IOException {
+	public Map<String, Integer> getTranslationCacheString(AtomicReader reader, String externalIdsField) throws IOException {
 		
 		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(reader, externalIdsField, true))) {
 			synchronized(translation_cache_tracker) {
-				String[] idMapping = FieldCache.DEFAULT.getStrings(reader, externalIdsField);
+				DocTerms idMapping = FieldCache.DEFAULT.getTerms(reader, externalIdsField);
 				Map<String, Integer> translTable = buildCacheStr(idMapping);
 				translation_cache.put(externalIdsField, translTable);
 				translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
@@ -184,7 +193,7 @@ public enum DictionaryRecIdCache {
 	 */
 	private HashMap<String, Object>multiValuesCache = new HashMap<String, Object >(2);
 	
-	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(IndexReader reader, String externalIds, String refField) 
+	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(AtomicReader reader, String externalIds, String refField) 
 		throws IOException {
 		
 		if (multiValuesCache.containsKey(refField) && indexUnchanged(reader, externalIds, true)) {
@@ -252,7 +261,7 @@ public enum DictionaryRecIdCache {
 	
 	private HashMap<String, Object>invertedCache = new HashMap<String, Object >(2);
 	
-	public int[][] getUnInvertedDocids(IndexReader reader, String externalIds, String refField) throws IOException {
+	public int[][] getUnInvertedDocids(AtomicReader reader, String externalIds, String refField) throws IOException {
 		
 		if (invertedCache.containsKey(refField) && indexUnchanged(reader, externalIds, false)) {
 			return (int[][]) invertedCache.get(refField);
@@ -261,8 +270,8 @@ public enum DictionaryRecIdCache {
 		final Map<?, Integer> idMapping = getTranslationCache(reader, externalIds);
 		
 		Object val = unInvertField(reader, new Entry(refField, new FieldCache.IntParser() {
-		    public int parseInt(String value) {
-		        int v = Integer.parseInt(value);
+		    public int parseInt(BytesRef value) {
+		        int v = Integer.parseInt(value.utf8ToString());
 		        if (idMapping.containsKey(v)) {
 		        	return idMapping.get(v);
 		        }
@@ -286,7 +295,7 @@ public enum DictionaryRecIdCache {
 		
 	}
 	
-	public int[][] getUnInvertedDocidsStrField(IndexReader reader, String externalIds, String refField) throws IOException {
+	public int[][] getUnInvertedDocidsStrField(AtomicReader reader, String externalIds, String refField) throws IOException {
 		
 		if (invertedCache.containsKey(refField) && indexUnchanged(reader, externalIds, true)) {
 			return (int[][]) invertedCache.get(refField);
@@ -295,9 +304,9 @@ public enum DictionaryRecIdCache {
 		final Map<?, Integer> idMapping = getTranslationCacheString(reader, externalIds);
 		
 		Object val = unInvertField(reader, new Entry(refField, new FieldCache.IntParser() {
-		    public int parseInt(String value) {
-		        if (idMapping.containsKey(value)) {
-		        	return idMapping.get(value);
+		    public int parseInt(BytesRef value) {
+		        if (idMapping.containsKey(value.utf8ToString())) {
+		        	return idMapping.get(value.utf8ToString());
 		        }
 		        else {
 		        	return -1;
@@ -327,39 +336,41 @@ public enum DictionaryRecIdCache {
 	 * https://issues.apache.org/jira/browse/LUCENE-3354
 	 */
 	
-	protected Object unInvertField(IndexReader reader, Entry entryKey)
+	protected Object unInvertField(AtomicReader reader, Entry entryKey)
 	throws IOException {
 		Entry entry = entryKey;
 		String field = entry.field;
 		IntParser parser = (IntParser) entry.custom;
-
+		
+		DocTermOrds r = FieldCache.DEFAULT.getDocTermOrds(reader, field);
+		TermsEnum termEnum = r.getOrdTermsEnum(reader);
+		
+		
 		int[][] retArray = new int[reader.maxDoc()][];
-		TermDocs termDocs = reader.termDocs();
-		TermEnum termEnum = reader.terms (new Term (field));
+		//TermDocs termDocs = reader.termDocs();
+		//TermEnum termEnum = reader.terms (new Term (field));
 		try {
 			do {
-				Term term = termEnum.term();
+				BytesRef term = termEnum.term();
 
-				if (term==null || term.field() != field) break;
+				if (term==null) break;
 				int[] val = new int[termEnum.docFreq()];
 
 				int i = 0;
-				int luceneDocId = parser.parseInt(term.text());
+				int luceneDocId = parser.parseInt(term);
 				
 				if (luceneDocId < 0) continue; // skip terms that are not mapped onto lucene ids
 				
-				termDocs.seek (termEnum);
-						while (termDocs.next()) {
-							
-							val[i] = termDocs.doc();
-							i++;
-						}
-						retArray[luceneDocId] = val;
-			} while (termEnum.next());
+				DocsEnum docs = termEnum.docs(null, null, false);
+				docs.nextDoc();
+				while (docs.nextDoc() != -1) {
+					val[i] = docs.docID();
+					i++;
+				}
+				retArray[luceneDocId] = val;
+			} while (termEnum.next() != null);
 		} catch (StopFillCacheException stop) {
 		} finally {
-			termDocs.close();
-			termEnum.close();
 		}
 		if (retArray == null) // no values
 			retArray = new int[reader.maxDoc()][];

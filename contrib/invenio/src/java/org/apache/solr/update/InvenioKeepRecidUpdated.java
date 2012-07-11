@@ -493,7 +493,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		
 		if (params.getBool(PARAM_COMMIT, false)) {
 			setWorkerMessage("Phase 3/3. Writing index...");
-			CommitUpdateCommand updateCmd = new CommitUpdateCommand(true);
+			CommitUpdateCommand updateCmd = new CommitUpdateCommand(req, true);
 			req.getCore().getUpdateHandler().commit(updateCmd);
 		}
 	    
@@ -638,7 +638,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		String uniqField = schema.getUniqueKeyField().getName();
 		
-		AddUpdateCommand addCmd = new AddUpdateCommand();
+		AddUpdateCommand addCmd = new AddUpdateCommand(req);
 		addCmd.allowDups = false;
 		addCmd.overwriteCommitted = false;
 		addCmd.overwritePending = false;
@@ -660,7 +660,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		String uniqField = schema.getUniqueKeyField().getName();
 		
-		AddUpdateCommand addCmd = new AddUpdateCommand();
+		AddUpdateCommand addCmd = new AddUpdateCommand(req);
 		addCmd.allowDups = false;
 		addCmd.overwriteCommitted = false;
 		addCmd.overwritePending = false;
@@ -668,7 +668,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
         if (recids.length > 0) {
 			
 			Map<Integer, Integer> map = DictionaryRecIdCache.INSTANCE
-					.getTranslationCache(req.getSearcher().getReader(), 
+					.getTranslationCache(req.getSearcher().getAtomicReader(), 
 							uniqField);
 			SolrInputDocument doc = new SolrInputDocument();
 			
@@ -687,7 +687,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		
-		DeleteUpdateCommand delCmd = new DeleteUpdateCommand();
+		DeleteUpdateCommand delCmd = new DeleteUpdateCommand(req);
 		delCmd.fromCommitted = true;
         delCmd.fromPending = true;
 

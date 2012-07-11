@@ -15,7 +15,7 @@ import org.apache.solr.search.FunctionQParser;
 import org.apache.solr.search.ValueSourceParser;
 import org.apache.solr.search.function.PositionSearchFunction;
 
-public class AqpAdslabsFunctionProvider implements
+public class AqpAdsabsFunctionProvider implements
 		AqpFunctionQueryBuilderProvider {
 	
 	public static Map<String, ValueSourceParser> parsers = new HashMap<String, ValueSourceParser>();

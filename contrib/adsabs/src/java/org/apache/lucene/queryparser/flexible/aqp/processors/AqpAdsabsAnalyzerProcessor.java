@@ -17,7 +17,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
  * @author rchyla
  *
  */
-public class AqpAdslabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
+public class AqpAdsabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
 	
 	private boolean enteredCleanZone = false;
 	private int counter = 0;

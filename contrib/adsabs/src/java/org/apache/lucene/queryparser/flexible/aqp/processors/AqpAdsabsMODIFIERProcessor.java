@@ -3,10 +3,10 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsSynonymQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpMODIFIERProcessor;
 
-public class AqpAdslabsMODIFIERProcessor extends AqpMODIFIERProcessor {
+public class AqpAdsabsMODIFIERProcessor extends AqpMODIFIERProcessor {
 	
 	@Override
 	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
@@ -20,10 +20,10 @@ public class AqpAdslabsMODIFIERProcessor extends AqpMODIFIERProcessor {
 		String sign = subNode.getTokenLabel();
 		
 		if (sign.equals("=")) {
-			return new AqpAdslabsSynonymQueryNode(getValueNode(node), false);
+			return new AqpAdsabsSynonymQueryNode(getValueNode(node), false);
 		}
 		else if (sign.equals("#")) {
-			return new AqpAdslabsSynonymQueryNode(getValueNode(node), true);
+			return new AqpAdsabsSynonymQueryNode(getValueNode(node), true);
 		}
 		else {
 			return super.createQNode(node);

@@ -2,7 +2,7 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.List;
 
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsIdentifierNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -31,13 +31,13 @@ public class AqpBibcodeProcessor extends QueryNodeProcessorImpl implements
 			if (input.length() == 19) {
 				try {
 					Integer.parseInt(input.substring(0, 4));
-					return new AqpAdslabsIdentifierNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
+					return new AqpAdsabsIdentifierNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
 				} catch(NumberFormatException nfe) {
 					// pass
 				}
 			}
 			else if (input.contains("\u2026") && input.length() == 17) { //2003AJ….125..525J  -- bibcode with ellipsis
-				return new AqpAdslabsIdentifierNode(n.getFieldAsString(), input.replace("\u2026", "..."), n.getBegin(), n.getEnd());
+				return new AqpAdsabsIdentifierNode(n.getFieldAsString(), input.replace("\u2026", "..."), n.getBegin(), n.getEnd());
 			}
 		}
 		return node;

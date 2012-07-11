@@ -77,6 +77,9 @@
 			<include name="**/lucene-queryparser*.jar"/>
 			<include name="**/antlr-runtime*.jar"/>
 		</fileset>
+		<fileset dir="${prop.solr.home}">
+            <include name="lucene/build/sandbox/**.jar"/>
+        </fileset>
 	</path>
 
     <path id="compile.classpath">

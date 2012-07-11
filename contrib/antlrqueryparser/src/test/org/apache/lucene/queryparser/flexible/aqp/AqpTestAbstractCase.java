@@ -308,10 +308,10 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 			int hour, int minute, int second, IndexWriter iw)
 			throws IOException {
 		Document d = new Document();
-		d.add(newField("f", content, TextField.TYPE_STORED));
+		d.add(new Field("f", content, TextField.TYPE_STORED));
 		Calendar cal = Calendar.getInstance(Locale.ENGLISH);
 		cal.set(year, month - 1, day, hour, minute, second);
-		d.add(newField("date", getDate(cal.getTime(), DateTools.Resolution.DAY),
+		d.add(new Field("date", getDate(cal.getTime(), DateTools.Resolution.DAY),
 				StringField.TYPE_NOT_STORED));
 		iw.addDocument(d);
 	}

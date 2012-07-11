@@ -1,14 +1,14 @@
 package org.apache.solr.search;
 
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpInvenioQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
-import org.apache.lucene.queryparser.flexible.aqp.config.DefaultFieldAttribute;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpInvenioQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.InvenioDefaultIdFieldAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.config.InvenioQueryAttribute;
 import org.apache.lucene.search.Query;
@@ -48,11 +48,10 @@ public class InvenioQParser extends QParser {
 		// this is allowed to be only in the config (no locals possible)
 		QueryConfigHandler config = invParser.getQueryConfigHandler();
 
-		config.getAttribute(InvenioDefaultIdFieldAttribute.class).setDefaultIdField(
-				idField);
+		config.set(AqpInvenioQueryConfigHandler.ConfigurationKeys.INVENIO_DEFAULT_ID_FIELD, idField);
 
 		InvenioQueryAttribute iqAttr = config
-				.getAttribute(InvenioQueryAttribute.class);
+				.get(AqpInvenioQueryConfigHandler.ConfigurationKeys.INVENIO_QUERY);
 		iqAttr.setMode(solrParams.get("iq.mode"), schema.hasExplicitField("*"));
 		iqAttr.setChannel(solrParams.get("iq.channel", "default"));
 		iqAttr.setOverridenFields(solrParams.getParams("iq.xfields"));
@@ -64,8 +63,7 @@ public class InvenioQParser extends QParser {
 			defaultField = getReq().getSchema().getDefaultSearchFieldName();
 		}
 		if (defaultField != null) {
-			DefaultFieldAttribute defFieldAttr = config.getAttribute(DefaultFieldAttribute.class);
-			defFieldAttr.setDefaultField(defaultField);
+			config.set(AqpInvenioQueryConfigHandler.ConfigurationKeys.INVENIO_DEFAULT_ID_FIELD, defaultField);
 		}
 		
 
@@ -75,11 +73,10 @@ public class InvenioQParser extends QParser {
 			invParser.setDefaultOperator("AND".equals(opParam) ? Operator.AND
 					: Operator.OR);
 		} else {
-			// try to get default operator from schema
-			QueryParser.Operator operator = getReq().getSchema()
-					.getSolrQueryParser(null).getDefaultOperator();
-			invParser.setDefaultOperator(null == operator ? Operator.OR
-					: (operator == QueryParser.AND_OPERATOR ? Operator.AND
+		  QueryParser.Operator op = QueryParsing.getQueryParserDefaultOperator(getReq().getSchema(), 
+          getParam(QueryParsing.OP));
+			invParser.setDefaultOperator(null == op ? Operator.OR
+					: (op == QueryParser.AND_OPERATOR ? Operator.AND
 							: Operator.OR));
 		}
 	}

@@ -6,8 +6,9 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdslabsIdentifierNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
 
@@ -38,13 +39,12 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
 		//String field = getDefaultFieldName();
 		
-		String field;
+		String field = getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DEFAULT_IDENTIFIER_FIELD);
 		String input = null;
 		int start = 0;
 		int end = 0;
 		
 		if (node.getChildren().size() == 1) {
-			field = "identifier";
 			QueryNode sc = node.getChildren().get(0);
       if (sc instanceof AqpANTLRNode) {
         input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) sc).getTokenInput()).toString();
@@ -74,7 +74,7 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 		
 		
 		
-		
+		/*
 		if (input.contains(":")) {
 			String[] vals = input.split("\\:", 2);
 			String f = vals[0].toLowerCase();
@@ -86,8 +86,9 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 			}
 			
 		}
+		*/
 		
-		return new AqpAdslabsIdentifierNode(field, input, start, end);
+		return new AqpAdsabsIdentifierNode(field, input, start, end);
 		
 	}
 

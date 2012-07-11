@@ -1,14 +1,8 @@
 package org.apache.solr.schema;
 
-import java.io.IOException;
 import java.util.Map;
 
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.StopAnalyzer;
-import org.apache.lucene.document.Field;
-import org.apache.solr.common.ResourceLoader;
-import org.apache.solr.util.plugin.ResourceLoaderAware;
-
+import org.apache.lucene.index.IndexableField;
 import invenio.montysolr.jni.PythonMessage;
 import invenio.montysolr.jni.MontySolrVM;
 
@@ -33,24 +27,28 @@ public class PythonTextField extends TextField {
 	    super.init(schema, args);
 	}
 	
+	public IndexableField createField(SchemaField field, Object value, float boost) {
+	  return super.createField(field, getFieldValue(field.name, toInternal(value.toString())), boost);
+	}
 	
-	public Field createField(SchemaField field, String externalVal, float boost) {
+	protected IndexableField createField(String name, String val, org.apache.lucene.document.FieldType type, float boost){
+    return super.createField(name, getFieldValue(name, val), type, boost);
+  }
+	
+	private String getFieldValue(String field, String externalVal) {
 
 		PythonMessage message = MontySolrVM.INSTANCE
 				.createMessage(pythonFunctionName)
 				.setSender("PythonTextField")
 				.setParam("field", field)
-				.setParam("externalVal", externalVal)
-				.setParam("boost", boost);
+				.setParam("externalVal", externalVal);
 
 		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		Object res = message.getResults();
 		
 		if (res != null) {
-			String val = (String) res;
-			if (val != null)
-				return super.createField(field, val, boost);
+			return (String) res;
 		}
 
 		return null;

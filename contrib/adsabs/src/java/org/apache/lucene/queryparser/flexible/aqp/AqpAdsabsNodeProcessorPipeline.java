@@ -16,12 +16,12 @@ import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQuer
 import org.apache.lucene.queryparser.flexible.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.TermRangeQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdslabsAnalyzerProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdslabsFixQPOSITIONProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdslabsMODIFIERProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdslabsQPOSITIONProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdslabsRegexNodeProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdslabsSynonymNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQPOSITIONProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsRegexNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsSynonymNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCLAUSEProcessor;
@@ -50,20 +50,20 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTMODIFIERProcess
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTreeRewriteProcessor;
 
 
-public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
+public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 
-	public AqpAdslabsNodeProcessorPipeline(QueryConfigHandler queryConfig) {
+	public AqpAdsabsNodeProcessorPipeline(QueryConfigHandler queryConfig) {
 		super(queryConfig);
 	
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 		
-		add(new AqpAdslabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$
-		add(new AqpAdslabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
+		add(new AqpAdsabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$
+		add(new AqpAdsabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
 		add(new AqpQFUNCProcessor()); // prepares function node (may decide which implementation to call)
 		
 		add(new AqpCOMMAProcessor()); // extends with COMMA and SEMICOLON
-		add(new AqpAdslabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
+		add(new AqpAdsabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
 		add(new AqpOPERATORProcessor()); 
 		add(new AqpCLAUSEProcessor());
 		
@@ -101,11 +101,11 @@ public class AqpAdslabsNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new TermRangeQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());
 		
-		add(new AqpAdslabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
+		add(new AqpAdsabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
 		
 		add(new AqpFieldMapperProcessor());
-		add(new AqpAdslabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
-		add(new AqpAdslabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
+		add(new AqpAdsabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
+		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		add(new PhraseSlopQueryNodeProcessor());
 	
 		// add(new GroupQueryNodeProcessor());

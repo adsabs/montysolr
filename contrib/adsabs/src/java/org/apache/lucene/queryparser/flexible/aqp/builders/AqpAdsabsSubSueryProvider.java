@@ -9,9 +9,9 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSubqueryParserFull;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.search.Query;
@@ -37,7 +37,7 @@ import org.apache.solr.search.RawQParserPlugin;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
 
-public class AqpAdslabsSubSueryProvider implements
+public class AqpAdsabsSubSueryProvider implements
 		AqpFunctionQueryBuilderProvider {
 	
 	public static Map<String, AqpSubqueryParser> parsers = new HashMap<String, AqpSubqueryParser>();

@@ -9,8 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.search.CitationQueryCites;
 import org.apache.lucene.search.CitationQueryFilter;
 import org.apache.lucene.search.CitedByCollector;
@@ -51,10 +53,9 @@ public class CitationQParser extends QParser {
 					: QueryParser.Operator.OR);
 		} else {
 			// try to get default operator from schema
-			QueryParser.Operator operator = getReq().getSchema()
-					.getSolrQueryParser(null).getDefaultOperator();
-			lparser.setDefaultOperator(null == operator ? QueryParser.Operator.OR
-					: operator);
+		  QueryParser.Operator op = QueryParsing.getQueryParserDefaultOperator(getReq().getSchema(), 
+          getParam(QueryParsing.OP));
+      lparser.setDefaultOperator(op != null ? op : QueryParser.Operator.OR);
 		}
 
 		Query mainq = lparser.parse(qstr);
@@ -79,7 +80,7 @@ public class CitationQParser extends QParser {
 			Filter qfilter = new CitationQueryFilter();
 			//TODO: the collector class doesn't work
 			try {
-				return new CollectorQuery(mainq, getReq().getSearcher().getReader(), 
+				return new CollectorQuery(mainq, getReq().getSearcher().getAtomicReader(), 
 						CollectorQuery.createCollector(CitedByCollector.class, qfilter, null));
 			} catch (Exception e) {
 				throw new ParseException("Meeeek, server error, lazy coders!!!");
@@ -138,8 +139,8 @@ public class CitationQParser extends QParser {
 			**/
 
 			SolrIndexSearcher searcher = req.getSearcher();
-			SolrIndexReader reader = searcher.getReader();
-		    int[] idMapping = FieldCache.DEFAULT.getInts(reader, idField);
+			AtomicReader reader = searcher.getAtomicReader();
+		    int[] idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
 
 			Map<Integer, Integer> fromValueToDocid = new HashMap<Integer, Integer>(idMapping.length);
 			int i = 0;

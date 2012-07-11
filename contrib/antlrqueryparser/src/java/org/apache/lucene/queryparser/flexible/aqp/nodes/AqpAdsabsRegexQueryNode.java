@@ -2,14 +2,14 @@ package org.apache.lucene.queryparser.flexible.aqp.nodes;
 
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 
-public class AqpAdslabsRegexQueryNode extends AqpNonAnalyzedQueryNode {
+public class AqpAdsabsRegexQueryNode extends AqpNonAnalyzedQueryNode {
 
-	public AqpAdslabsRegexQueryNode(CharSequence field, CharSequence text,
+	public AqpAdsabsRegexQueryNode(CharSequence field, CharSequence text,
 			int begin, int end) {
 		super(field, text, begin, end);
 	}
 
-	public AqpAdslabsRegexQueryNode(FieldQueryNode fqn) {
+	public AqpAdsabsRegexQueryNode(FieldQueryNode fqn) {
 	    this(fqn.getField(), fqn.getText(), fqn.getBegin(), fqn.getEnd());
 	}
 
@@ -19,8 +19,8 @@ public class AqpAdslabsRegexQueryNode extends AqpNonAnalyzedQueryNode {
 	  }
 
 	  @Override
-	  public AqpAdslabsRegexQueryNode cloneTree() throws CloneNotSupportedException {
-	    AqpAdslabsRegexQueryNode clone = (AqpAdslabsRegexQueryNode) super.cloneTree();
+	  public AqpAdsabsRegexQueryNode cloneTree() throws CloneNotSupportedException {
+	    AqpAdsabsRegexQueryNode clone = (AqpAdsabsRegexQueryNode) super.cloneTree();
 
 	    // nothing to do here
 

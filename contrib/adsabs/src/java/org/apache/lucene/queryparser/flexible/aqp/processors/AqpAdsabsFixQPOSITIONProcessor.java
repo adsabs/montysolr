@@ -6,7 +6,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
 
-public class AqpAdslabsFixQPOSITIONProcessor extends AqpQProcessor {
+public class AqpAdsabsFixQPOSITIONProcessor extends AqpQProcessor {
 
 	@Override
 	public boolean nodeIsWanted(AqpANTLRNode node) {

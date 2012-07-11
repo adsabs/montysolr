@@ -4,7 +4,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 
-public class AqpAdslabsIdentifierNode extends FieldQueryNode {
+public class AqpAdsabsIdentifierNode extends FieldQueryNode {
 
 
 	private static final long serialVersionUID = 2818797741887759988L;
@@ -19,7 +19,7 @@ public class AqpAdslabsIdentifierNode extends FieldQueryNode {
 	   * @param end
 	   *          - position in the query string
 	   */
-	  public AqpAdslabsIdentifierNode(CharSequence field, CharSequence text, int begin,
+	  public AqpAdsabsIdentifierNode(CharSequence field, CharSequence text, int begin,
 	      int end) {
 	    super(field, text, begin, end);
 	  }

@@ -7,10 +7,10 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackEvent;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackEventHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback.TYPE;
 
-public class AqpAdslabsLoggingHandler implements AqpFeedbackEventHandler {
+public class AqpAdsabsLoggingHandler implements AqpFeedbackEventHandler {
 	
 	public static final Logger log = LoggerFactory
-		.getLogger(AqpAdslabsLoggingHandler.class); 
+		.getLogger(AqpAdsabsLoggingHandler.class); 
 	
 	public ACTION handle(AqpFeedbackEvent event) {
 		TYPE type = event.getType();
