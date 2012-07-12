@@ -43,6 +43,7 @@ import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.params.UpdateParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.InvenioRequestHandler;
@@ -637,18 +638,17 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		String uniqField = schema.getUniqueKeyField().getName();
+		SolrParams params = req.getParams();
 		
 		AddUpdateCommand addCmd = new AddUpdateCommand(req);
-		addCmd.allowDups = false;
-		addCmd.overwriteCommitted = false;
-		addCmd.overwritePending = false;
+		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
 		
 		if (recids.length > 0) {
 			SolrInputDocument doc = new SolrInputDocument();
 			for (int i = 0; i < recids.length; i++) {
 				doc.clear();
 				doc.addField(uniqField,	recids[i]);
-				addCmd.doc = DocumentBuilder.toDocument(doc, schema);
+				addCmd.solrDoc = doc;
 				updateHandler.addDoc(addCmd);
 			}
 		}
@@ -659,11 +659,11 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		String uniqField = schema.getUniqueKeyField().getName();
+		SolrParams params = req.getParams();
 		
 		AddUpdateCommand addCmd = new AddUpdateCommand(req);
-		addCmd.allowDups = false;
-		addCmd.overwriteCommitted = false;
-		addCmd.overwritePending = false;
+		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
+		
 
         if (recids.length > 0) {
 			
@@ -676,7 +676,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 				if (!map.containsKey(recids[i])) {
 					doc.clear();
 					doc.addField(uniqField,	recids[i]);
-					addCmd.doc = DocumentBuilder.toDocument(doc, schema);
+					addCmd.solrDoc = doc;
 					updateHandler.addDoc(addCmd);
 				}
 			}
@@ -686,12 +686,13 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	protected void runProcessingDeleted(int[] recids, SolrQueryRequest req) throws IOException {
 		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
+		SolrParams params = req.getParams();
 		
 		DeleteUpdateCommand delCmd = new DeleteUpdateCommand(req);
-		delCmd.fromCommitted = true;
-        delCmd.fromPending = true;
+		delCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
+		
 
-        if (recids.length > 0) {
+    if (recids.length > 0) {
 			
 			for (int i = 0; i < recids.length; i++) {
 				delCmd.id = Integer.toString(recids[i]);
@@ -724,13 +725,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			SolrQueryResponse rsp = new SolrQueryResponse();
 			req.getCore().execute(handler, localReq, rsp);
 			
-			// XXX: this is not very clean
-			if (handler instanceof WaitingDataImportHandler) {
-				while (((WaitingDataImportHandler) handler).isBusy()) {
-					Thread.sleep(20);
-				}
-			}
-			else if (queryParts.size() > 1) {
+			if (queryParts.size() > 1) {
 				log.warn("Warning, we have started the importer, but it runs in parallel!");
 				log.warn("And we will initiate another: " + (queryParts.size() - i));
 			}
