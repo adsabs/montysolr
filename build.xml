@@ -567,9 +567,9 @@ lucene.version=${lucene.version}
 		<!-- can't rely on the init target -->
 		<mkdir dir="${build.dir}/solr-download/"/>
 
-		<echo>Downloading Solr, please wait...</echo>
+		<echo>Downloading Solr, please wait... (but if it takes too long, then run me again and I'll use a different mirror)</echo>
 
-		<get src="${solr.mirror}/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" />
+		<get src="${solr.mirror}/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" verbose="true"/>
 		
 	    <antcall target="untar-solr" />
 		

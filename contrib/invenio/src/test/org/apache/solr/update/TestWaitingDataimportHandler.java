@@ -17,37 +17,26 @@
 
 package org.apache.solr.update;
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
 import invenio.montysolr.util.MontySolrSetup;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
-import org.junit.BeforeClass;
+import org.apache.solr.util.AbstractSolrTestCase;
 
 /**
  * Tests that the dataimport handler does really wait and does not
  * return immediately. Also, one of the fields is fetched by Python.
  * 
  */
-public class TestWaitingDataimportHandler extends MontySolrAbstractTestCase {
+public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 	
 	
-	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		envInit();
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-				+ "/contrib/invenio/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
-	}
-	
-	@Override
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
 		+ "/contrib/invenio/src/test-files/solr/conf/schema-invenio-keeprecid-updater.xml";
 	}
 
-	@Override
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
 		+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
