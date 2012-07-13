@@ -624,7 +624,7 @@ public final class MoreLikeThese {
   public Query like(int docNum) throws IOException {
     if (fieldNames == null) {
       // gather list of valid fields from lucene
-      Collection<String> fields = ReaderUtil.getIndexedFields(ir);
+      Collection<String> fields = ir.getFieldNames( IndexReader.FieldOption.INDEXED);
       fieldNames = fields.toArray(new String[fields.size()]);
     }
     
@@ -640,7 +640,7 @@ public final class MoreLikeThese {
   public Query like(File f) throws IOException {
     if (fieldNames == null) {
       // gather list of valid fields from lucene
-      Collection<String> fields = ReaderUtil.getIndexedFields(ir);
+      Collection<String> fields = ir.getFieldNames( IndexReader.FieldOption.INDEXED);
       fieldNames = fields.toArray(new String[fields.size()]);
     }
     

@@ -20,6 +20,7 @@ package org.apache.lucene.search.similar;
  * limitations under the License.
  */
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Set;
 
@@ -78,7 +79,7 @@ public class MoreLikeThisQuery extends Query {
     }
     mlt.setMaxQueryTerms(maxQueryTerms);
     mlt.setStopWords(stopWords);
-    BooleanQuery bq = (BooleanQuery) mlt.like(new StringReader(likeText), fieldName);
+    BooleanQuery bq= (BooleanQuery) mlt.like(new ByteArrayInputStream(likeText.getBytes()));        
     BooleanClause[] clauses = bq.getClauses();
     // make at least half the terms match
     bq.setMinimumNumberShouldMatch((int) (clauses.length * percentTermsToMatch));

@@ -712,6 +712,14 @@
        <int name="rows">10</int>
        <str name="defType">aqp</str>
      </lst>
+       <arr name="components">
+         <str>query</str>
+         <str>facet</str>
+         <str>mlthese</str>
+         <str>highlight</str>
+         <str>stats</str>
+         <str>debug</str>
+       </arr>
     <!-- In addition to defaults, "appends" params can be specified
          to identify values which should be appended to the list of
          multi-val params from the query (or the existing "defaults").
@@ -1027,6 +1035,7 @@
      </requestHandler>
     -->
 
+       <searchComponent name="mlthese"       class="solr.MoreLikeTheseComponent" />
   <!-- Search Components
 
        Search components are registered to SolrCore and used by 

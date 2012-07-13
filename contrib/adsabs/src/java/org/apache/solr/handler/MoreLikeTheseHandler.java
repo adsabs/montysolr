@@ -81,13 +81,13 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
     SolrIndexSearcher searcher = req.getSearcher();
     
     
-    MoreLikeTheseHelper mlt = new MoreLikeTheseHelper( params, searcher );
+    MoreLikeTheseHelper mlthese = new MoreLikeTheseHelper( params, searcher );
     List<Query> filters = SolrPluginUtils.parseFilterQueries(req);
     
     // Hold on to the interesting terms if relevant
     TermStyle termStyle = TermStyle.get( params.get( MoreLikeTheseParams.INTERESTING_TERMS ) );
     List<InterestingTerm> interesting = (termStyle == TermStyle.NONE )
-      ? null : new ArrayList<InterestingTerm>( mlt.mlt.getMaxQueryTerms() );
+      ? null : new ArrayList<InterestingTerm>( mlthese.mlthese.getMaxQueryTerms() );
     
     DocListAndSet mltDocs = null;
     String q = params.get( CommonParams.Q );
@@ -123,7 +123,7 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
       // Find documents MoreLikeThese - either with a reader or a query
       // --------------------------------------------------------------------------------
       if (reader != null) {
-        mltDocs = mlt.getMoreLikeThese(reader, start, rows, filters,
+        mltDocs = mlthese.getMoreLikeThese(reader, start, rows, filters,
             interesting, flags);
       } else if (q != null) {
         // Matching options
@@ -139,7 +139,7 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
           rsp.add("match", match);
         }
 
-        mltDocs = mlt.getMoreLikeThese(match, start, rows, filters, interesting, flags);
+        mltDocs = mlthese.getMoreLikeThese(match, start, rows, filters, interesting, flags);
         
       } else {
         throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
@@ -190,7 +190,7 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
     // Copied from StandardRequestHandler... perhaps it should be added to doStandardDebug?
     if (dbg) {
       try {
-        NamedList<Object> dbgInfo = SolrPluginUtils.doStandardDebug(req, q, mlt.getRawMLTQuery(), mltDocs.docList);
+        NamedList<Object> dbgInfo = SolrPluginUtils.doStandardDebug(req, q, mlthese.getRawMLTQuery(), mltDocs.docList);
         if (null != dbgInfo) {
           if (null != filters) {
             dbgInfo.add("filter_queries",req.getParams().getParams(CommonParams.FQ));
@@ -231,7 +231,7 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
   public static class MoreLikeTheseHelper 
   { 
     final SolrIndexSearcher searcher;
-    final MoreLikeThese mlt;
+    final MoreLikeThese mlthese;
     final IndexReader reader;
     final SchemaField uniqueKeyField;
     final boolean needDocSet;
@@ -251,18 +251,18 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
             "MoreLikeThese requires at least one similarity field: "+MoreLikeTheseParams.SIMILARITY_FIELDS );
       }
       
-      this.mlt = new MoreLikeThese( reader ); // TODO -- after LUCENE-896, we can use , searcher.getSimilarity() );
-      mlt.setFieldNames(fields);
-      mlt.setAnalyzer( searcher.getSchema().getAnalyzer() );
+      this.mlthese = new MoreLikeThese( reader ); // TODO -- after LUCENE-896, we can use , searcher.getSimilarity() );
+      mlthese.setFieldNames(fields);
+      mlthese.setAnalyzer( searcher.getSchema().getAnalyzer() );
       
       // configurable params
-      mlt.setMinTermFreq(       params.getInt(MoreLikeTheseParams.MIN_TERM_FREQ,         MoreLikeThese.DEFAULT_MIN_TERM_FREQ));
-      mlt.setMinDocFreq(        params.getInt(MoreLikeTheseParams.MIN_DOC_FREQ,          MoreLikeThese.DEFAULT_MIN_DOC_FREQ));
-      mlt.setMinWordLen(        params.getInt(MoreLikeTheseParams.MIN_WORD_LEN,          MoreLikeThese.DEFAULT_MIN_WORD_LENGTH));
-      mlt.setMaxWordLen(        params.getInt(MoreLikeTheseParams.MAX_WORD_LEN,          MoreLikeThese.DEFAULT_MAX_WORD_LENGTH));
-      mlt.setMaxQueryTerms(     params.getInt(MoreLikeTheseParams.MAX_QUERY_TERMS,       MoreLikeThese.DEFAULT_MAX_QUERY_TERMS));
-      mlt.setMaxNumTokensParsed(params.getInt(MoreLikeTheseParams.MAX_NUM_TOKENS_PARSED, MoreLikeThese.DEFAULT_MAX_NUM_TOKENS_PARSED));
-      mlt.setBoost(            params.getBool(MoreLikeTheseParams.BOOST, false ) );
+      mlthese.setMinTermFreq(       params.getInt(MoreLikeTheseParams.MIN_TERM_FREQ,         MoreLikeThese.DEFAULT_MIN_TERM_FREQ));
+      mlthese.setMinDocFreq(        params.getInt(MoreLikeTheseParams.MIN_DOC_FREQ,          MoreLikeThese.DEFAULT_MIN_DOC_FREQ));
+      mlthese.setMinWordLen(        params.getInt(MoreLikeTheseParams.MIN_WORD_LEN,          MoreLikeThese.DEFAULT_MIN_WORD_LENGTH));
+      mlthese.setMaxWordLen(        params.getInt(MoreLikeTheseParams.MAX_WORD_LEN,          MoreLikeThese.DEFAULT_MAX_WORD_LENGTH));
+      mlthese.setMaxQueryTerms(     params.getInt(MoreLikeTheseParams.MAX_QUERY_TERMS,       MoreLikeThese.DEFAULT_MAX_QUERY_TERMS));
+      mlthese.setMaxNumTokensParsed(params.getInt(MoreLikeTheseParams.MAX_NUM_TOKENS_PARSED, MoreLikeThese.DEFAULT_MAX_NUM_TOKENS_PARSED));
+      mlthese.setBoost(            params.getBool(MoreLikeTheseParams.BOOST, false ) );
       boostFields = SolrPluginUtils.parseFieldBoosts(params.getParams(MoreLikeTheseParams.QF));
     }
     
@@ -299,7 +299,7 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
     
     public DocListAndSet getMoreLikeThese( DocList docs, int start, int rows, List<Query> filters, List<InterestingTerm> terms, int flags ) throws IOException
     {
-      rawMLTQuery = mlt.like(docs);
+      rawMLTQuery = mlthese.like(docs);
       boostedMLTQuery = getBoostedQuery( rawMLTQuery );
       if( terms != null ) {
         fillInterestingTermsFromMLTQuery( rawMLTQuery, terms );
@@ -331,7 +331,7 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
     public DocListAndSet getMoreLikeThese( Reader reader, int start, int rows, List<Query> filters, List<InterestingTerm> terms, int flags ) throws IOException
     {
       // analyzing with the first field: previous (stupid) behavior
-      rawMLTQuery = mlt.like(reader, mlt.getFieldNames()[0]);
+      rawMLTQuery = mlthese.like(reader, mlthese.getFieldNames()[0]);
       boostedMLTQuery = getBoostedQuery( rawMLTQuery );
       if( terms != null ) {
         fillInterestingTermsFromMLTQuery( boostedMLTQuery, terms );
@@ -361,7 +361,7 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
     
     public MoreLikeThese getMoreLikeThese()
     {
-      return mlt;
+      return mlthese;
     }
   }
   

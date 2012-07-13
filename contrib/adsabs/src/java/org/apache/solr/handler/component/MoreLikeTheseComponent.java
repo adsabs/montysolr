@@ -51,6 +51,7 @@ public class MoreLikeTheseComponent extends SearchComponent
   public void process(ResponseBuilder rb) throws IOException
   {
     SolrParams p = rb.req.getParams();
+    boolean mlthese = p.getBool(MoreLikeTheseParams.MLT, false);
     if( p.getBool( MoreLikeTheseParams.MLT, false ) ) {
       SolrIndexSearcher searcher = rb.req.getSearcher();
       

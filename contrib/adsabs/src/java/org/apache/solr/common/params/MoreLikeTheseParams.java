@@ -25,9 +25,9 @@ import java.util.Locale;
 public interface MoreLikeTheseParams 
 {
   // enable more like this -- this only applies to 'StandardRequestHandler' maybe DismaxRequestHandler
-  public final static String MLT = "mlt";
+  public final static String MLT = "mlthese";
   
-  public final static String PREFIX = "mlt.";
+  public final static String PREFIX = "mlthese.";
   
   public final static String SIMILARITY_FIELDS     = PREFIX + "fl";
   public final static String MIN_TERM_FREQ         = PREFIX + "mintf";
@@ -37,7 +37,7 @@ public interface MoreLikeTheseParams
   public final static String MAX_QUERY_TERMS       = PREFIX + "maxqt";
   public final static String MAX_NUM_TOKENS_PARSED = PREFIX + "maxntp";
   public final static String BOOST                 = PREFIX + "boost"; // boost or not?
-  public final static String QF                    = PREFIX + "qf"; //boosting applied to mlt fields
+  public final static String QF                    = PREFIX + "qf"; //boosting applied to mlthese fields
 
   // the /mlt request handler uses 'rows'
   public final static String DOC_COUNT = PREFIX + "count";
