@@ -2,8 +2,6 @@ package org.apache.lucene.queryparser.flexible.aqp.util;
 
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.util.UnescapedCharSequence;
-import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 
 public class AqpUtils {
@@ -14,13 +12,6 @@ public class AqpUtils {
 		UNKNOWN;
 	}
 	
-	public enum Operator {
-		AND,
-		OR,
-		NOT,
-		WITH,
-		PARAGRAPH;
-	}
 	
 	public static String getFirstChildInputString(QueryNode node) {
 		return getFirstChildInputString((AqpANTLRNode) node);

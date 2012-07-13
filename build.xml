@@ -494,6 +494,8 @@ lucene.version=${lucene.version}
 			           ${ddash}exclude org.apache.solr.update.processor.UniqFieldsUpdateProcessorFactory
 			           ${ddash}exclude org.apache.noggit.JSONParser
 				       ${ddash}exclude org.apache.solr.util.xslt.TransformerProvider
+				       ${ddash}rename org.apache.lucene.util.fst%(name)s=SKIP
+				
 			          " />
 		</exec>
 	</target>
