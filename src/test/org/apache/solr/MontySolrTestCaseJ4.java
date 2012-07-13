@@ -2,10 +2,11 @@ package org.apache.solr;
 
 import java.io.File;
 
+import montysolr.util.MontySolrSetup;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import invenio.montysolr.util.MontySolrSetup;
 
 public class MontySolrTestCaseJ4 extends SolrTestCaseJ4 {
   

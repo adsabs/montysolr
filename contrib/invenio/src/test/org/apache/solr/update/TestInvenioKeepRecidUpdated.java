@@ -23,10 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;

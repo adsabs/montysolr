@@ -1,6 +1,7 @@
 package examples.invenio;
 
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrRequestHandler;

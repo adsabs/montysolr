@@ -17,8 +17,9 @@ package org.apache.solr.search;
  * limitations under the License.
  */
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;

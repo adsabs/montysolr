@@ -2,9 +2,10 @@ package org.apache.solr.schema;
 
 import java.util.Map;
 
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
+
 import org.apache.lucene.index.IndexableField;
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.jni.MontySolrVM;
 
 /**
  * <code>TextField</code> is the basic type for configurable text analysis.

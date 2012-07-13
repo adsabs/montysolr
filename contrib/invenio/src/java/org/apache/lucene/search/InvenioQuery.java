@@ -1,12 +1,13 @@
 package org.apache.lucene.search;
 
+import montysolr.jni.MontySolrVM;
+
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.Weight;
 import org.apache.lucene.util.BytesRef;
 
-import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.IOException;
 import java.util.List;

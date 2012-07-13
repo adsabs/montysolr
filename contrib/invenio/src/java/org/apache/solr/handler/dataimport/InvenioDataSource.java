@@ -1,8 +1,5 @@
 package org.apache.solr.handler.dataimport;
 
-import invenio.montysolr.PythonCall;
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -12,6 +9,10 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import montysolr.PythonCall;
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.util.WebUtils;

@@ -1,4 +1,4 @@
-package invenio.montysolr;
+package montysolr;
 
 public interface PythonCall {
 	

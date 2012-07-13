@@ -1,20 +1,21 @@
-package invenio.montysolr;
+package montysolr;
 
 import java.io.IOException;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonBridge;
-import invenio.montysolr.jni.PythonMessage;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonBridge;
+import montysolr.jni.PythonMessage;
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
 
 import org.apache.jcc.PythonException;
 import org.junit.BeforeClass;
 
-import invenio.montysolr.util.MontySolrSetup;
 import org.apache.solr.MontySolrTestCaseJ4;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.response.SolrQueryResponse;
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
 
 public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 	

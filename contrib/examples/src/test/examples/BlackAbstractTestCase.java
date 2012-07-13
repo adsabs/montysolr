@@ -2,8 +2,9 @@ package examples;
 
 import java.io.File;
 import javax.xml.xpath.XPathExpressionException;
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;

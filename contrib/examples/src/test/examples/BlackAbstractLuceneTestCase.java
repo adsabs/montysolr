@@ -2,8 +2,9 @@ package examples;
 
 import java.io.File;
 
-import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.util.MontySolrAbstractLuceneTestCase;
+import montysolr.util.MontySolrSetup;
 
 import org.junit.BeforeClass;
 

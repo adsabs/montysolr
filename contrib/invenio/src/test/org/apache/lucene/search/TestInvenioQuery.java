@@ -1,5 +1,10 @@
 package org.apache.lucene.search;
 
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
+import montysolr.util.MontySolrAbstractLuceneTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.junit.BeforeClass;
 
 import java.io.IOException;
@@ -19,10 +24,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 
 public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 	

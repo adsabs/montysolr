@@ -6,8 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.util.MontySolrAbstractLuceneTestCase;
+import montysolr.util.MontySolrSetup;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;

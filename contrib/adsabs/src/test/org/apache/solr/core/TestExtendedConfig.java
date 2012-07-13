@@ -17,10 +17,11 @@
 
 package org.apache.solr.core;
 
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 
 
 public class TestExtendedConfig extends MontySolrAbstractTestCase {

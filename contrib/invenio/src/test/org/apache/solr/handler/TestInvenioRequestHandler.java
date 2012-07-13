@@ -17,11 +17,12 @@
 
 package org.apache.solr.handler;
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MapSolrParams;

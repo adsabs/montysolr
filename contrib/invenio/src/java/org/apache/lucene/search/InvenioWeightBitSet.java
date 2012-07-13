@@ -1,12 +1,13 @@
 package org.apache.lucene.search;
 
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
 
 import org.ads.solr.InvenioBitSet;
 import org.apache.commons.io.IOUtils;

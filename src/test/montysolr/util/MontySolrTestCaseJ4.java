@@ -1,4 +1,6 @@
-package invenio.montysolr.util;
+package montysolr.util;
+
+import montysolr.jni.MontySolrVM;
 
 import org.apache.lucene.util.LuceneTestCase;
 import org.apache.solr.JSONTestUtil;
@@ -20,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import invenio.montysolr.jni.MontySolrVM;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;

@@ -17,7 +17,8 @@ package org.apache.solr.search.function;
  * limitations under the License.
  */
 
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.util.MontySolrSetup;
 
 import org.apache.solr.util.AbstractSolrTestCase;
 

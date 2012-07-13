@@ -1,4 +1,4 @@
-package invenio.montysolr.jni;
+package montysolr.jni;
 
 import org.apache.jcc.PythonException;
 import org.apache.jcc.PythonVM;

@@ -2,7 +2,8 @@ package examples.adsabs;
 
 import java.io.File;
 
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.response.SolrQueryResponse;

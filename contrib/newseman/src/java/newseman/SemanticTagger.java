@@ -1,9 +1,10 @@
 package newseman;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
 
 import java.io.IOException;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
 
 
 /**

@@ -1,13 +1,14 @@
 package org.apache.solr.search;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
 
 import java.io.IOException;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
 
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.queryparser.classic.ParseException;

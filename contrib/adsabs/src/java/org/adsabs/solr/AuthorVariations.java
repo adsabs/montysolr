@@ -1,7 +1,7 @@
 package org.adsabs.solr;
 
-//import invenio.montysolr.jni.MontySolrVM;
-//import invenio.montysolr.jni.PythonMessage;
+//import montysolr.jni.MontySolrVM;
+//import montysolr.jni.PythonMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;

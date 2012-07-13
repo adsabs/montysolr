@@ -1,4 +1,4 @@
-package invenio.montysolr.util;
+package montysolr.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +6,8 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import invenio.montysolr.util.MontySolrTestCaseJ4;
+
+import montysolr.util.MontySolrTestCaseJ4;
 
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrResourceLoader;

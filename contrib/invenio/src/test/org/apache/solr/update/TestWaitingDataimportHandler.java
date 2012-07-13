@@ -17,7 +17,8 @@
 
 package org.apache.solr.update;
 
-import invenio.montysolr.util.MontySolrSetup;
+import montysolr.util.MontySolrSetup;
+
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;

@@ -1,4 +1,4 @@
-package invenio.montysolr.util;
+package montysolr.util;
 
 import java.io.BufferedReader;
 import java.io.File;

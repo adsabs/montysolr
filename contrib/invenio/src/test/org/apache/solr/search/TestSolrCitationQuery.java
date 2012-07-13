@@ -1,9 +1,10 @@
 package org.apache.solr.search;
 
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.junit.BeforeClass;
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 
 public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 	

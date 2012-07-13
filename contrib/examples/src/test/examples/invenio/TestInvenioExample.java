@@ -1,12 +1,13 @@
 package examples.invenio;
 
-import invenio.montysolr.JettyRunnerPythonVM;
-import invenio.montysolr.util.MontySolrSetup;
-import invenio.montysolr.util.ProcessUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import junit.framework.Assert;
+
+import montysolr.JettyRunnerPythonVM;
+import montysolr.util.MontySolrSetup;
+import montysolr.util.ProcessUtils;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;

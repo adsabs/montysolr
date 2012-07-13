@@ -17,8 +17,9 @@
 
 package org.apache.solr.update;
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
 
 import org.adsabs.mongodb.MongoConnection;
 import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;

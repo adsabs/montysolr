@@ -17,10 +17,11 @@ package org.adsabs.solr;
  * limitations under the License.
  */
 
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.apache.solr.schema.IndexSchema;
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 
 
 public class TestSolrAuthorFilter extends MontySolrAbstractTestCase {

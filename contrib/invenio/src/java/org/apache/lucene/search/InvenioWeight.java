@@ -1,10 +1,11 @@
 package org.apache.lucene.search;
 
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.IOException;
 import java.util.Map;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
 
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.Collector;

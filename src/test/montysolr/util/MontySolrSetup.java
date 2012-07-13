@@ -1,6 +1,6 @@
-package invenio.montysolr.util;
+package montysolr.util;
 
-import invenio.montysolr.jni.MontySolrVM;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
+import montysolr.jni.MontySolrVM;
+
 
 /**
  * Automatic setup for Test classes, do not use this in a production
- * classes!
+ * environment! (unless you are really too lazy ;))
  * 
  * @author rchyla
  *

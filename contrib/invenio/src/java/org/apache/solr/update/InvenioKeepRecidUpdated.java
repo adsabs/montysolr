@@ -17,9 +17,6 @@ package org.apache.solr.update;
  * limitations under the License.
  */
 
-import invenio.montysolr.PythonCall;
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import montysolr.PythonCall;
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.search.DictionaryRecIdCache;

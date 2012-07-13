@@ -17,10 +17,11 @@
 
 package org.apache.solr.schema;
 
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.junit.BeforeClass;
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 
 /**
  * Tests if the document is made of values fetched by Python

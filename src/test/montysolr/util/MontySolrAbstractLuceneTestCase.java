@@ -1,4 +1,5 @@
-package invenio.montysolr.util;
+package montysolr.util;
+
 
 import org.apache.lucene.util.LuceneTestCase;
 import org.junit.AfterClass;

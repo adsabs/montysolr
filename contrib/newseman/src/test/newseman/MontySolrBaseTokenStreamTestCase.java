@@ -1,9 +1,10 @@
 package newseman;
 
+import montysolr.util.MontySolrAbstractLuceneTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.junit.BeforeClass;
 
-import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 
 
 public class MontySolrBaseTokenStreamTestCase extends MontySolrAbstractLuceneTestCase {

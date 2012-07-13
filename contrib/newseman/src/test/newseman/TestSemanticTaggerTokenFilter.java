@@ -26,12 +26,13 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
 import newseman.SemanticTaggerTokenFilter;
 import newseman.SemanticTagger;
 import newseman.MontySolrBaseTokenStreamTestCase;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
 
 import java.io.StringReader;
 import java.io.IOException;

@@ -45,12 +45,12 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
 import newseman.SemanticTaggerTokenFilter;
 import newseman.SemanticTagger;
 import newseman.MontySolrBaseTokenStreamTestCase;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
 
 import java.io.Reader;
 import java.io.IOException;

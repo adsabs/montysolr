@@ -1,9 +1,11 @@
 package org.apache.solr.handler;
 
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.jni.MontySolrVM;
 
 import java.io.IOException;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
+
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;

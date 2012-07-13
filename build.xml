@@ -245,6 +245,7 @@
 			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
 			<fileset dir="${solr.real.location}" includes="lib/**/*.jar" />
 			<fileset dir="${solr.real.location}" includes="example/lib/**/*.jar" />
+			<fileset dir="${solr.real.location}" includes="example/start.jar" />
 			<fileset dir="${webdist.home}" includes="lib/**/*.jar" />
 			<fileset dir="${lib.dir}" includes="**/*.jar" />
 		</path>
@@ -494,8 +495,7 @@ lucene.version=${lucene.version}
 			           ${ddash}exclude org.apache.solr.update.processor.UniqFieldsUpdateProcessorFactory
 			           ${ddash}exclude org.apache.noggit.JSONParser
 				       ${ddash}exclude org.apache.solr.util.xslt.TransformerProvider
-				       ${ddash}rename org.apache.lucene.util.fst%(name)s=SKIP
-				
+				       ${ddash}rename org.apache.solr.handler.loader.ContentStreamLoader=LoaderContentStreamLoader
 			          " />
 		</exec>
 	</target>

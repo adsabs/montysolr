@@ -22,10 +22,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrTestCaseJ4;
-import invenio.montysolr.util.ProcessUtils;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrTestCaseJ4;
+import montysolr.util.ProcessUtils;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;

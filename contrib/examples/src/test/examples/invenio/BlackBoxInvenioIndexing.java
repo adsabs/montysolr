@@ -2,9 +2,10 @@ package examples.invenio;
 
 import java.io.File;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.util.MontySolrSetup;
+
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
+import montysolr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.response.SolrQueryResponse;

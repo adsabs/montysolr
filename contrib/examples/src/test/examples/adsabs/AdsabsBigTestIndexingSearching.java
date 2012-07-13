@@ -19,6 +19,9 @@ package examples.adsabs;
 
 import java.util.List;
 
+import montysolr.util.MontySolrAbstractTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.schema.CopyField;
 import org.apache.solr.schema.IndexSchema;
@@ -27,8 +30,6 @@ import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.servlet.DirectSolrConnection;
 
 
-import invenio.montysolr.util.MontySolrAbstractTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 import examples.adsabs.AdsConfig;
 
 /**

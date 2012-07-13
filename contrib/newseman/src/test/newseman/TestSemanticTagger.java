@@ -7,12 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import montysolr.jni.MontySolrVM;
+import montysolr.jni.PythonMessage;
+import montysolr.util.MontySolrAbstractLuceneTestCase;
+import montysolr.util.MontySolrSetup;
+
 import org.junit.BeforeClass;
 
-import invenio.montysolr.jni.MontySolrVM;
-import invenio.montysolr.jni.PythonMessage;
-import invenio.montysolr.util.MontySolrAbstractLuceneTestCase;
-import invenio.montysolr.util.MontySolrSetup;
 
 public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 	
