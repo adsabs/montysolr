@@ -1,10 +1,7 @@
 package montysolr.jni;
 
 
-
 import org.apache.jcc.PythonVM;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 
@@ -20,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 public class MontySolrBridge implements PythonBridge {
 	
-	public static final Logger log = LoggerFactory.getLogger(MontySolrBridge.class);
 	
 	private long pythonObject;
 	

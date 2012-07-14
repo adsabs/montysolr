@@ -2,8 +2,6 @@ package montysolr.jni;
 
 import org.apache.jcc.PythonException;
 import org.apache.jcc.PythonVM;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 
 

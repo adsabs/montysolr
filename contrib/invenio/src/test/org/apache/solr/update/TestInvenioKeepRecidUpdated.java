@@ -43,14 +43,13 @@ import org.junit.BeforeClass;
  */
 public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
-	private String importurl = "http://localhost:8983/solr/import-dataimport";
+	private String importurl = "python://localhost:8983/solr/import-dataimport";
 	private String updateurl = "http://localhost:8983/solr/update-dataimport&dirs=x";
 	private String deleteurl = "http://localhost:8983/solr/delete-dataimport";
-	private String inveniourl = "http://inspirebeta.net/search";
+	private String inveniourl = "python://inspirebeta.net/search";
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		envInit();
+	public static void beforeTestInvenioKeepRecidUpdated() throws Exception {
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.fake_import");

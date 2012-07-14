@@ -21,6 +21,7 @@ PYTHONPATH=%s
 """ % (sys.executable, os.getcwd(), os.getenv('PYTHONHOME'), '\n    '.join(sys.path)))
 
 import lucene
+import time
 
 try:
     import solr_java
@@ -53,15 +54,18 @@ _classpath=''
 if os.path.exists(_cp):
     _classpath = open(_cp, 'r').read()
 
+_jvmargs = None
+
 # order of calls important - first we initialize MontySolr
 # then the rest
 if _jvmargs:
     montysolr_java.initVM(os.pathsep.join([lucene.CLASSPATH, solr_java.CLASSPATH, montysolr_java.CLASSPATH, _classpath]), vmargs=_jvmargs)
 else:
-    montysolr_java.initVM(os.pathsep.join([lucene.CLASSPATH, solr_java.CLASSPATH, montysolr_java.CLASSPATH, _classpath]))
+    montysolr_java.initVM(os.pathsep.join([lucene.CLASSPATH, solr_java.CLASSPATH, montysolr_java.CLASSPATH, _classpath]), )
 
-lucene.initVM()
+
 #solr_java.initVM()
+#lucene.initVM()
 
 # move the objects from lucene to montysolr, temporary workaround for different identity objects
 for name in dir(montysolr_java._montysolr_java):
