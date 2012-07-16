@@ -22,10 +22,9 @@ import montysolr.util.MontySolrAbstractTestCase;
 import montysolr.util.MontySolrSetup;
 
 import org.adsabs.mongodb.MongoConnection;
-import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.handler.dataimport.DataConfig;
 import org.apache.solr.handler.dataimport.DataImporter;
+import org.apache.solr.handler.dataimport.config.DIHConfiguration;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
@@ -36,7 +35,7 @@ import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 
 import java.lang.reflect.Field; 
-import java.lang.reflect.Method; 
+import java.util.Map;
 
 /**
  * Tests that the dataimport handler does really wait and does not
@@ -54,6 +53,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
+		
 	}
 	
 	@Override
@@ -72,10 +72,6 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		+ "/contrib/examples/adsabs/solr/conf/solrconfig.xml";
 	}
 
-	public String getSolrHome() {
-		return MontySolrSetup.getSolrHome() + "/example/solr";
-	}
-	
 
 	public void tearDown() throws Exception {
 		MongoConnection.INSTANCE.close();
@@ -84,7 +80,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	
 	public void mockHandler(SolrRequestHandler handler) throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException {
 		
-		DataConfig config = null;
+		DIHConfiguration config = null;
 		
 		Field fields[] = handler.getClass().getDeclaredFields();
 		for (Field f: fields) {
@@ -96,16 +92,23 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 				for (Field f2: fields2) {
 					if (f2.toString().endsWith("config")) {
 						f2.setAccessible(true);
-						config = (DataConfig) f2.get(importer);
+						config = (DIHConfiguration) f2.get(importer);
 					}
 				
 				}
 			}
 		}
 		
-		config.dataSources.get(null).put("type", "InvenioDataSource");
+		config.getDataSources().get(null).put("type", "InvenioDataSource");
 		
-		SchemaField full = config.lowerNameVsSchemaField.get("full");
+		
+		// HACK to prevent DIH from running mongoDB types
+		Field schema = config.getClass().getDeclaredField("lowerNameVsSchemaField");
+		schema.setAccessible(true);
+		Map<String, SchemaField> lowerNameVsSchemaField = (Map<String, SchemaField>) schema.get(config);
+		
+		
+		SchemaField full = lowerNameVsSchemaField.get("full");
 //		System.out.println(full);
 		
 		FieldType type = null;
@@ -124,9 +127,9 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		TextField x = (TextField) type;
 		
-		config.lowerNameVsSchemaField.remove("full");
-		config.lowerNameVsSchemaField.remove("ack");
-		config.lowerNameVsSchemaField.remove("reader");
+		lowerNameVsSchemaField.remove("full");
+		lowerNameVsSchemaField.remove("ack");
+		lowerNameVsSchemaField.remove("reader");
 		
 	}
 	

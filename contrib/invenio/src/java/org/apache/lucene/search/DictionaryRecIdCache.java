@@ -10,17 +10,14 @@ import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.DocTermOrds;
 import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
+import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.search.FieldCache.IntParser;
-import org.apache.lucene.search.FieldCacheImpl.Cache;
 import org.apache.lucene.search.FieldCacheImpl.Entry;
 import org.apache.lucene.search.FieldCacheImpl.StopFillCacheException;
-import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
-import org.omg.CORBA.NO_MEMORY;
 
 /**
  * This class helps to translate from external source ids to lucene ids.
@@ -137,10 +134,12 @@ public enum DictionaryRecIdCache {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<Integer, Integer> getTranslationCache(AtomicReader reader, String externalIdsField) throws IOException {
-		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(reader, externalIdsField, false))) {
+	public Map<Integer, Integer> getTranslationCache(IndexReader reader, String externalIdsField) throws IOException {
+		AtomicReader atomReader = getAtomicReader(reader);
+		
+		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(atomReader, externalIdsField, false))) {
 			synchronized(translation_cache_tracker) {
-				int[] idMapping = FieldCache.DEFAULT.getInts(reader, externalIdsField, false);
+				int[] idMapping = FieldCache.DEFAULT.getInts(atomReader, externalIdsField, false);
 				Map<Integer, Integer> translTable = buildCache(idMapping);
 				translation_cache.put(externalIdsField, translTable);
 				translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
@@ -261,9 +260,11 @@ public enum DictionaryRecIdCache {
 	
 	private HashMap<String, Object>invertedCache = new HashMap<String, Object >(2);
 	
-	public int[][] getUnInvertedDocids(AtomicReader reader, String externalIds, String refField) throws IOException {
+	public int[][] getUnInvertedDocids(IndexReader reader, String externalIds, String refField) throws IOException {
 		
-		if (invertedCache.containsKey(refField) && indexUnchanged(reader, externalIds, false)) {
+		AtomicReader atomReader = getAtomicReader(reader);
+		
+		if (invertedCache.containsKey(refField) && indexUnchanged(atomReader, externalIds, false)) {
 			return (int[][]) invertedCache.get(refField);
 		}
 		
@@ -295,6 +296,21 @@ public enum DictionaryRecIdCache {
 		
 	}
 	
+	private AtomicReader _atom;
+	private Integer _readerHashCode = 0;
+	private AtomicReader getAtomicReader(IndexReader reader) throws IOException {
+		synchronized (_readerHashCode) {
+			if (_readerHashCode.equals(reader.hashCode())) {
+				return _atom;
+			}
+			AtomicReader atomReader = SlowCompositeReaderWrapper.wrap(reader);
+			_atom = atomReader;
+			_readerHashCode = reader.hashCode();
+		}
+		
+		return _atom;
+	}
+
 	public int[][] getUnInvertedDocidsStrField(AtomicReader reader, String externalIds, String refField) throws IOException {
 		
 		if (invertedCache.containsKey(refField) && indexUnchanged(reader, externalIds, true)) {
@@ -336,14 +352,15 @@ public enum DictionaryRecIdCache {
 	 * https://issues.apache.org/jira/browse/LUCENE-3354
 	 */
 	
-	protected Object unInvertField(AtomicReader reader, Entry entryKey)
+	protected Object unInvertField(IndexReader reader, Entry entryKey)
 	throws IOException {
+		AtomicReader atom = getAtomicReader(reader);
 		Entry entry = entryKey;
 		String field = entry.field;
 		IntParser parser = (IntParser) entry.custom;
 		
-		DocTermOrds r = FieldCache.DEFAULT.getDocTermOrds(reader, field);
-		TermsEnum termEnum = r.getOrdTermsEnum(reader);
+		DocTermOrds r = FieldCache.DEFAULT.getDocTermOrds(atom, field);
+		TermsEnum termEnum = r.getOrdTermsEnum(atom);
 		
 		
 		int[][] retArray = new int[reader.maxDoc()][];

@@ -7,6 +7,7 @@ import java.util.Map;
 import montysolr.jni.MontySolrVM;
 import montysolr.jni.PythonMessage;
 
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Explanation;

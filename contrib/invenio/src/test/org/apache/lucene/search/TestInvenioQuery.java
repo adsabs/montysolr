@@ -6,6 +6,7 @@ import montysolr.util.MontySolrAbstractLuceneTestCase;
 import montysolr.util.MontySolrSetup;
 
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,9 +16,11 @@ import java.util.Set;
 
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
@@ -30,8 +33,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 	protected String idField;
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		envInit();
+	public static void beforeTestInvenioQuery() throws Exception {
 		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/python");
@@ -66,13 +68,13 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 	    for (Integer r: recids) {
 	    	ArrayList<String> vals = ds.get(r);
 	    	Document doc = new Document();
-		    Field field1 = newField("recid", r.toString(), Field.Store.YES, Field.Index.ANALYZED);
+		    Field field1 = newField("recid", r.toString(), TextField.TYPE_STORED);
 		    StringBuffer sb = new StringBuffer();
 		    for (String v: vals) {
 		    	sb.append(v);
 		    	sb.append(" ");
 		    }
-		    Field field2 = newField("text", sb.toString(), Field.Store.YES, Field.Index.ANALYZED);
+		    Field field2 = newField("text", sb.toString(), TextField.TYPE_STORED);
 		    doc.add(field1);
 		    doc.add(field2);
 		    writer.addDocument(doc);
@@ -85,7 +87,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		
 		IndexedDocs iDocs = indexDocsPython(10);
 		Directory ramdir = indexDocsLucene(iDocs);
-		IndexSearcher searcher = new IndexSearcher(ramdir);
+		IndexSearcher searcher = new IndexSearcher(DirectoryReader.open(ramdir));
 		
 		String[] words = iDocs.words;
 		HashMap<String, ArrayList<String>> index = iDocs.index;
@@ -104,8 +106,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 			assertTrue(hits.totalHits == hits2.totalHits);
 		}
 		
-		searcher.close();
-		ramdir.close();
+		//ramdir.close();
 	}
 
 	
