@@ -10,7 +10,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.util.ReaderUtil;
+import org.apache.lucene.index.ReaderUtil;
 
 public abstract class AbstractSecondOrderCollector 
 	extends Collector implements SecondOrderCollector {

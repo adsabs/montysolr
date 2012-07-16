@@ -13,12 +13,15 @@ import java.util.Random;
 import montysolr.util.MontySolrAbstractLuceneTestCase;
 import montysolr.util.MontySolrSetup;
 
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.MockIndexWriter;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
@@ -36,7 +39,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	private Directory directory;
 	private IndexReader reader;
 	private IndexSearcher searcher;
-	private IndexWriter writer;
+	private MockIndexWriter writer;
 	private boolean debug = false;
 
 	@BeforeClass
@@ -81,7 +84,6 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	@Override
 	public void tearDown() throws Exception {
 		writer.close();
-		searcher.close();
 		reader.close();
 		directory.close();
 		super.tearDown();
@@ -112,13 +114,13 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		Document doc;
 		for (int k=0;k<randi.length;k++) {
 			doc = new Document();
-			doc.add(newField("id",  String.valueOf(k+start), Field.Store.YES,	Field.Index.NOT_ANALYZED));
-			doc.add(newField("bibcode",  "b" + (k+start), Field.Store.YES,	Field.Index.NOT_ANALYZED));
+			doc.add(newField("id",  String.valueOf(k+start), StringField.TYPE_STORED));
+			doc.add(newField("bibcode",  "b" + (k+start), StringField.TYPE_STORED));
 			int[] row = new int[randi[k].length];
 			x = 0;
 			for (int v: randi[k]) {
-				doc.add(newField("reference",  String.valueOf(v+start), Field.Store.YES,	Field.Index.NOT_ANALYZED));
-				doc.add(newField("breference",  "b" + (v+start), Field.Store.YES,	Field.Index.NOT_ANALYZED));
+				doc.add(newField("reference",  String.valueOf(v+start), StringField.TYPE_STORED));
+				doc.add(newField("breference",  "b" + (v+start), StringField.TYPE_STORED));
 				row[x] = v+start;
 				x++;
 			}
@@ -133,9 +135,10 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		return data;
 	}
 	
+	
 	private void reOpenWriter(OpenMode mode) throws CorruptIndexException, LockObtainFailedException, IOException {
 		if (writer != null) writer.close();
-		writer = new IndexWriter(directory, newIndexWriterConfig(TEST_VERSION_CURRENT, 
+		writer = new MockIndexWriter(directory, newIndexWriterConfig(TEST_VERSION_CURRENT, 
 				new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).setOpenMode(mode)
 				//.setRAMBufferSizeMB(0.1f)
 				//.setMaxBufferedDocs(500)
@@ -143,7 +146,6 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	}
 	
 	private void reOpenSearcher() throws IOException {
-		searcher.close();
 		reader.close();
 		reader = writer.getReader();
 		searcher = newSearcher(reader);

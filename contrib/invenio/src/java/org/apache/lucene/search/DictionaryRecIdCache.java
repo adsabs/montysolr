@@ -167,11 +167,13 @@ public enum DictionaryRecIdCache {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<String, Integer> getTranslationCacheString(AtomicReader reader, String externalIdsField) throws IOException {
+	public Map<String, Integer> getTranslationCacheString(IndexReader reader, String externalIdsField) throws IOException {
 		
-		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(reader, externalIdsField, true))) {
+	  AtomicReader atomReader = getAtomicReader(reader);
+	  
+		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(atomReader, externalIdsField, true))) {
 			synchronized(translation_cache_tracker) {
-				DocTerms idMapping = FieldCache.DEFAULT.getTerms(reader, externalIdsField);
+				DocTerms idMapping = FieldCache.DEFAULT.getTerms(atomReader, externalIdsField);
 				Map<String, Integer> translTable = buildCacheStr(idMapping);
 				translation_cache.put(externalIdsField, translTable);
 				translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
@@ -192,15 +194,17 @@ public enum DictionaryRecIdCache {
 	 */
 	private HashMap<String, Object>multiValuesCache = new HashMap<String, Object >(2);
 	
-	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(AtomicReader reader, String externalIds, String refField) 
+	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(IndexReader reader, String externalIds, String refField) 
 		throws IOException {
+	  
+	  AtomicReader atomReader = getAtomicReader(reader);
 		
-		if (multiValuesCache.containsKey(refField) && indexUnchanged(reader, externalIds, true)) {
+		if (multiValuesCache.containsKey(refField) && indexUnchanged(atomReader, externalIds, true)) {
 			return (Map<Integer, List<Integer>>) multiValuesCache.get(refField);
 		}
 		
 		// since most likely this will be needed anyway, i don't bother with reading just the values from the index
-		int[][] invCache = getUnInvertedDocidsStrField(reader, externalIds, refField);
+		int[][] invCache = getUnInvertedDocidsStrField(atomReader, externalIds, refField);
 		
 		HashMap<Integer, List<Integer>> docsPointingToDocId = new HashMap<Integer, List<Integer>>();
 		Integer i = -1;
@@ -298,7 +302,7 @@ public enum DictionaryRecIdCache {
 	
 	private AtomicReader _atom;
 	private Integer _readerHashCode = 0;
-	private AtomicReader getAtomicReader(IndexReader reader) throws IOException {
+	public AtomicReader getAtomicReader(IndexReader reader) throws IOException {
 		synchronized (_readerHashCode) {
 			if (_readerHashCode.equals(reader.hashCode())) {
 				return _atom;
@@ -311,9 +315,11 @@ public enum DictionaryRecIdCache {
 		return _atom;
 	}
 
-	public int[][] getUnInvertedDocidsStrField(AtomicReader reader, String externalIds, String refField) throws IOException {
+	public int[][] getUnInvertedDocidsStrField(IndexReader reader, String externalIds, String refField) throws IOException {
 		
-		if (invertedCache.containsKey(refField) && indexUnchanged(reader, externalIds, true)) {
+	  AtomicReader atomReader = getAtomicReader(reader);
+	  
+		if (invertedCache.containsKey(refField) && indexUnchanged(atomReader, externalIds, true)) {
 			return (int[][]) invertedCache.get(refField);
 		}
 		
