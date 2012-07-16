@@ -30,8 +30,7 @@ import org.junit.BeforeClass;
 public class TestPythonField extends MontySolrAbstractTestCase {
 
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		envInit();
+	public static void beforeTestPythonField() throws Exception {
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
@@ -40,7 +39,7 @@ public class TestPythonField extends MontySolrAbstractTestCase {
 	@Override
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/invenio/src/test-files/solr/conf/"
+				+ "/contrib/invenio/src/test-files/solr/collection1/conf/"
 				+ "schema-python-field.xml";
 	}
 
@@ -48,8 +47,8 @@ public class TestPythonField extends MontySolrAbstractTestCase {
 	public String getSolrConfigFile() {
 
 		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/invenio/src/test-files/solr/conf/"
-				+ "solrconfig.xml";
+				+ "/contrib/invenio/src/test-files/solr/collection1/conf/"
+				+ "solrconfig-basic.xml";
 
 	}
 

@@ -26,9 +26,11 @@ import montysolr.util.MontySolrSetup;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MapSolrParams;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocSlice;
 
@@ -42,13 +44,13 @@ public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 	@Override
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/invenio/src/test-files/solr/conf/schema-minimal.xml";
+		+ "/contrib/invenio/src/test-files/solr/collection1/conf/schema-minimal.xml";
 	}
 
 	@Override
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-handler.xml";
+				+ "/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-invenio-handler.xml";
 	}
 
 	@Override
@@ -84,13 +86,13 @@ public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 				new MapSolrParams(args));
 
 		rsp = h.queryAndResponse("invenio", req);
-		assertTrue(((DocSlice) rsp.getValues().get("response")).matches() == 3);
+		assertTrue(((ResultContext) rsp.getValues().get("response")).docs.matches() == 3);
 		context = req.getContext();
 		assertTrue(context.containsKey("inv.params"));
 		assertTrue(context.get("inv.params").toString().equals("{}"));
 
 		rsp = h.queryAndResponse("invenio.lazy", req);
-		assertTrue(((DocSlice) rsp.getValues().get("response")).matches() == 3);
+		assertTrue(((ResultContext) rsp.getValues().get("response")).docs.matches() == 3);
 		context = req.getContext();
 		assertTrue(context.containsKey("inv.params"));
 		assertTrue(!context.get("inv.params").toString().equals("{}"));
@@ -100,7 +102,7 @@ public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 		args.put("inv.params", "test1=val1&test2=val2");
 		req = new LocalSolrQueryRequest(core, new MapSolrParams(args));
 		rsp = h.queryAndResponse("invenio", req);
-		assertTrue(((DocSlice) rsp.getValues().get("response")).matches() == 3);
+		assertTrue(((ResultContext) rsp.getValues().get("response")).docs.matches() == 3);
 		context = req.getContext();
 		assertTrue(((HashMap<String, String>) context.get("inv.params")).get(
 				"test1").equals("val1"));
@@ -110,7 +112,7 @@ public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 		args.put("inv.params", "test1=val1&test2=val2");
 		req = new LocalSolrQueryRequest(core, new MapSolrParams(args));
 		rsp = h.queryAndResponse("invenio.lazy", req);
-		assertTrue(((DocSlice) rsp.getValues().get("response")).matches() == 3);
+		assertTrue(((ResultContext) rsp.getValues().get("response")).docs.matches() == 3);
 		context = req.getContext();
 		assertTrue(((HashMap<String, String>) context.get("inv.params")).get(
 				"test1").equals("val1"));

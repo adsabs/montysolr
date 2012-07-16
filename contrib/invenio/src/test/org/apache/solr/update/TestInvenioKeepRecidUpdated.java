@@ -58,16 +58,17 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	@Override
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/invenio/src/test-files/solr/conf/schema-invenio-keeprecid-updater.xml";
+		+ "/contrib/invenio/src/test-files/solr/collection1/conf/schema-invenio-keeprecid-updater.xml";
 	}
 
 	@Override
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
+		+ "/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-invenio-keeprecid-updater.xml";
 	}
 
 	public String getSolrHome() {
+		System.clearProperty("solr.solr.home"); //always force field re-computation
 		return MontySolrSetup.getSolrHome() + "/example/solr";
 	}
 	

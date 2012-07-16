@@ -51,13 +51,13 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 	
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome() + 
-		"/contrib/invenio/src/test-files/solr/conf/schema-minimal.xml";
+		"/contrib/invenio/src/test-files/solr/collection1/conf/schema-minimal.xml";
 	}
 
 	
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome() + 
-		"/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-query-parser.xml";
+		"/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-invenio-query-parser.xml";
 	}
 
 
@@ -90,6 +90,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 	public AqpQueryParser getParser() throws Exception {
 		AqpQueryParser qp = AqpInvenioQueryParser.init();
 		qp.setDebug(true);
+		qp.setMultiFields(new CharSequence[]{"field"});
 		return qp;
 	}
 
@@ -105,6 +106,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 			throws Exception {
 		SolrParams params = req.getParams();
 		String query = params.get(CommonParams.Q);
+		
 		QParser qParser = QParser.getParser(query, "iq", req);
 		
 		if (qParser instanceof InvenioQParser) {
@@ -113,6 +115,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 			if (a != null) {
 				p.setAnalyzer(a);
 			}
+			p.setMultiFields(new CharSequence[]{"field"});
 		}
 		
 		Query q = qParser.parse();

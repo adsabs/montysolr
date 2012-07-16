@@ -34,7 +34,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	 * @throws Exception
 	 */
 	public static void envInit() throws Exception {
-		System.setProperty("storeAll", "true");
+		//System.setProperty("storeAll", "true");
 		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
 				MontySolrSetup.getMontySolrHome() + "/src/python");
 	}
@@ -43,6 +43,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	// but BlackBox tests should override the method and return only
 	// the solr home
 	public String getSolrHome() {
+		System.clearProperty("solr.solr.home"); // always force recomputing the solr.home
 		return MontySolrSetup.getSolrHome() + "/example/solr";
 	}
 	

@@ -187,7 +187,7 @@ public class MontySolrSetup {
 
 		if (solr_home == null || !(new File(solr_home).exists())) {
 			throw new IllegalStateException(
-					"Your montysolr build.properties file has incorrect value for solr.home: "
+					"solr.home is not accessible - you should run ant write-properties: "
 							+ solr_home);
 		}
 

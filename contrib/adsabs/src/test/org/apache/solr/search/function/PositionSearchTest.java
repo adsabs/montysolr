@@ -30,12 +30,12 @@ public class PositionSearchTest extends AbstractSolrTestCase {
 
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/invenio/src/test-files/solr/conf/schema-fieldpos.xml";
+				+ "/contrib/invenio/src/test-files/solr/collection1/conf/schema-fieldpos.xml";
 	}
 
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-fieldpos.xml";
+				+ "/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-fieldpos.xml";
 	}
 
 	public void test() throws Exception {

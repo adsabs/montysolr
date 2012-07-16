@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
+
+
+  
+  <!-- test query parameter defaults -->
+  <requestHandler name="invenio" class="solr.InvenioRequestHandler">
+  </requestHandler>
+   
+  <requestHandler name="invenio.lazy" class="solr.InvenioRequestHandler" startup="lazy">
+    <lst name="defaults">
+      <str name="inv.params">test1=default&amp;test3=val3</str>
+    </lst>
+  </requestHandler>
+  
+</config>

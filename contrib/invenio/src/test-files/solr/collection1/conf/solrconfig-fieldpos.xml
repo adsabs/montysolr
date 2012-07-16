@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
+
+  <!-- test ValueSourceParser plugins -->
+  <valueSourceParser name="pos" class="org.apache.solr.search.function.PositionSearchParser">
+  </valueSourceParser>
+
+  <valueSourceParser name="nvl" class="org.apache.solr.search.function.NvlValueSourceParser">
+    <float name="nvlFloatValue">0.0</float>
+  </valueSourceParser>
+
+</config>

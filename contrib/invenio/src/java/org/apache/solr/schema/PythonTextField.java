@@ -17,37 +17,35 @@ import org.apache.lucene.index.IndexableField;
  */
 public class PythonTextField extends TextField {
 	private String pythonFunctionName = "get_field_value";
-	
+
 	@Override
-	protected void init(IndexSchema schema, Map<String,String> args) {
+	protected void init(IndexSchema schema, Map<String, String> args) {
 		String pythonImpl = args.get("pythonFunctionName");
-	    if (pythonImpl != null) {
-	      pythonFunctionName = pythonImpl;
-	    }
-	    args.remove("pythonFunctionName");
-	    super.init(schema, args);
+		if (pythonImpl != null) {
+			pythonFunctionName = pythonImpl;
+		}
+		args.remove("pythonFunctionName");
+		super.init(schema, args);
 	}
-	
-	public IndexableField createField(SchemaField field, Object value, float boost) {
-	  return super.createField(field, getFieldValue(field.name, toInternal(value.toString())), boost);
+
+	public IndexableField createField(SchemaField field, Object value,
+			float boost) {
+		value = getFieldValue(field.name, toInternal(value.toString()));
+		if (value == null)
+			return null;
+		return super.createField(field, value, boost);
 	}
-	
-	protected IndexableField createField(String name, String val, org.apache.lucene.document.FieldType type, float boost){
-    return super.createField(name, getFieldValue(name, val), type, boost);
-  }
-	
+
 	private String getFieldValue(String field, String externalVal) {
 
 		PythonMessage message = MontySolrVM.INSTANCE
-				.createMessage(pythonFunctionName)
-				.setSender("PythonTextField")
-				.setParam("field", field)
-				.setParam("externalVal", externalVal);
+				.createMessage(pythonFunctionName).setSender("PythonTextField")
+				.setParam("field", field).setParam("externalVal", externalVal);
 
 		MontySolrVM.INSTANCE.sendMessage(message);
-		
+
 		Object res = message.getResults();
-		
+
 		if (res != null) {
 			return (String) res;
 		}

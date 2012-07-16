@@ -2,10 +2,13 @@ package org.apache.solr.search.function;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.IndexReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermContext;
 import org.apache.lucene.queries.function.FunctionValues;
@@ -14,10 +17,9 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.search.spans.Spans;
 
-
 public class PositionSearchFunction extends ValueSource {
 	private static final long serialVersionUID = -998231529379681734L;
-	
+
 	protected String field;
 	protected String value;
 	protected int start = 0;
@@ -71,28 +73,34 @@ public class PositionSearchFunction extends ValueSource {
 	}
 
 	@Override
-	public void createWeight(Map context, IndexSearcher searcher) throws IOException {
+	public void createWeight(Map context, IndexSearcher searcher)
+			throws IOException {
 		// collect the docs that match
 		subQueryHits = new HashMap<Integer, Float>(); // XXX: probably
 														// inefficient, should
 														// do better
-		AtomicReaderContext ctx = (AtomicReaderContext) searcher.getTopReaderContext();
-		
-		Map<Term,TermContext> termContexts = new HashMap<Term,TermContext>();
+		IndexReaderContext ctx = searcher.getTopReaderContext();
+
+		Map<Term, TermContext> termContexts = new HashMap<Term, TermContext>();
 		TreeSet<Term> extractedTerms = new TreeSet<Term>();
-    subQuery.extractTerms(extractedTerms);
-    for (Term term : extractedTerms) {
-      termContexts.put(term, TermContext.build(ctx, term, true));
-    }
-    
-		Spans spans = subQuery.getSpans(ctx, ctx.reader().getLiveDocs(), null);
-		while (spans.next() == true) {
-			int s = spans.start();
-			int e = spans.end();
-			if (s >= this.start && e <= this.end) { // all inclusive, shall it
-													// be overlap?
-				subQueryHits.put(spans.doc(), (float) s);
-				// spans.skipTo(spans.doc());
+		subQuery.extractTerms(extractedTerms);
+		for (Term term : extractedTerms) {
+			termContexts.put(term, TermContext.build(ctx, term, true));
+		}
+
+		List<AtomicReaderContext> leaves = ctx.leaves();
+		for (AtomicReaderContext leave : leaves) {
+			Spans spans = subQuery.getSpans(leave,
+					leave.reader().getLiveDocs(), termContexts);
+			while (spans.next() == true) {
+				int s = spans.start();
+				int e = spans.end();
+				if (s >= this.start && e <= this.end) { // all inclusive, shall
+														// it
+														// be overlap?
+					subQueryHits.put(spans.doc(), (float) s);
+					// spans.skipTo(spans.doc());
+				}
 			}
 		}
 
@@ -112,8 +120,8 @@ public class PositionSearchFunction extends ValueSource {
 	}
 
 	@Override
-	public FunctionValues getValues(Map context, AtomicReaderContext readerContext)
-			throws IOException {
+	public FunctionValues getValues(Map context,
+			AtomicReaderContext readerContext) throws IOException {
 		return new FunctionValues() {
 
 			public float floatVal(int doc) {
@@ -149,6 +157,5 @@ public class PositionSearchFunction extends ValueSource {
 			}
 		};
 	}
-
 
 }

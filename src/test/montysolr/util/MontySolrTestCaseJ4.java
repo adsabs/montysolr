@@ -712,7 +712,7 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 			.getAbsolutePath();
 	public static String EXAMPLE_MULTICORE_HOME = new File(SOLR_HOME,
 			"example/multicore").getAbsolutePath();
-	public static String EXAMPLE_SCHEMA = EXAMPLE_HOME + "/conf/schema.xml";
-	public static String EXAMPLE_CONFIG = EXAMPLE_HOME + "/conf/solrconfig.xml";
+	public static String EXAMPLE_SCHEMA = EXAMPLE_HOME + "/collection1/conf/schema.xml";
+	public static String EXAMPLE_CONFIG = EXAMPLE_HOME + "/collection1/conf/solrconfig.xml";
 
 }

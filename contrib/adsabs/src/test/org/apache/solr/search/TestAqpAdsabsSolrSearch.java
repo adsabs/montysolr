@@ -4,7 +4,7 @@ package org.apache.solr.search;
 import montysolr.util.MontySolrAbstractTestCase;
 import montysolr.util.MontySolrSetup;
 
-import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;

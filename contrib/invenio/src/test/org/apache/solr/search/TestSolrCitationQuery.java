@@ -9,8 +9,7 @@ import org.junit.BeforeClass;
 public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		envInit();
+	public static void beforeTestSolrCitationQuery() throws Exception {
 		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
@@ -18,13 +17,13 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 	
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome() + 
-		"/contrib/invenio/src/test-files/solr/conf/schema-minimal.xml";
+		"/contrib/invenio/src/test-files/solr/collection1/conf/schema-citation-query.xml";
 	}
 
 	
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome() + 
-		"/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-query-parser.xml";
+		"/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-invenio-query-parser.xml";
 	}
 	
 	
@@ -36,7 +35,7 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 		assertU(adoc("id", "D", "references", "B"));
 		assertU(adoc("id", "E"));
 		assertU(adoc("id", "F"));
-		assertU(commit("waitFlush", "true"));
+		assertU(commit());
 		
 		assertQ(req("q", "*:*"),
 				"//*[@numFound='6']"
