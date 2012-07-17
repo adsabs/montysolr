@@ -2,18 +2,22 @@ package org.apache.lucene.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.FieldSelector;
-import org.apache.lucene.document.FieldSelectorResult;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 
 public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
-	protected FieldSelector fldSel;
+  Set<String> fieldsToLoad;
 	protected Map<String, Integer> valueToDocidCache;
 	protected String referenceField;
 	protected String uniqueIdField;
+	private AtomicReaderContext context;
+	private IndexReader reader;
 	
 	public SecondOrderCollectorCites(Map<String, Integer> cache, String uniqueIdField, String referenceField) {
 		super();
@@ -34,24 +38,17 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	}
 	
 	private void initFldSelector() {
-		fldSel = new FieldSelector() {
-		      public FieldSelectorResult accept(String fieldName) {
-		        return fieldName.equals(referenceField) ? 
-		            FieldSelectorResult.LOAD:
-		              FieldSelectorResult.NO_LOAD;
-		      }
-		    };
+	  fieldsToLoad = new HashSet<String>();
+    fieldsToLoad.add(referenceField);
 	}
 	
 	
 	@Override
-	public void searcherInitialization(Searcher searcher) throws IOException {
+	public void searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (valueToDocidCache == null) {
 			valueToDocidCache = DictionaryRecIdCache.INSTANCE.
 				getTranslationCacheString(((IndexSearcher) searcher).getIndexReader(), uniqueIdField);
-			
 		}
-		initSubReaderRanges(((IndexSearcher) searcher).getIndexReader());
 	}
 	
 
@@ -65,7 +62,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	public void collect(int doc) throws IOException {
 		//if (reader.isDeleted(doc)) return;
 		
-		Document document = reader.document(doc, fldSel);
+		Document document = reader.document(doc, fieldsToLoad);
 		
 		float s = scorer.score();
 		
@@ -79,10 +76,11 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	}
 
 	@Override
-	public void setNextReader(IndexReader reader, int docBase)
+	public void setNextReader(AtomicReaderContext context)
 			throws IOException {
-		this.reader = reader;
-		this.docBase = docBase;
+		this.context = context;
+		this.reader = context.reader();
+		this.docBase = context.docBase;
 
 	}
 

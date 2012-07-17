@@ -3,6 +3,9 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 
 public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
@@ -10,6 +13,8 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	protected Map<Integer, List<Integer>> docToDocidsCache;
 	protected String referenceField;
 	protected String uniqueIdField;
+  private AtomicReaderContext context;
+  private AtomicReader reader;
 	
 	public SecondOrderCollectorCitesRAM(Map<Integer, List<Integer>> cache, String uniqueIdField, String referenceField) {
 		super();
@@ -30,14 +35,13 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	
 	
 	@Override
-	public void searcherInitialization(Searcher searcher) throws IOException {
+	public void searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (docToDocidsCache == null) {
 			docToDocidsCache = DictionaryRecIdCache.INSTANCE.
 				getCacheTranslatedMultiValuesString(((IndexSearcher) searcher).getIndexReader(), 
 				uniqueIdField, referenceField);
 			
 		}
-		initSubReaderRanges(((IndexSearcher) searcher).getIndexReader());
 	}
 	
 
@@ -59,12 +63,13 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	}
 
 	@Override
-	public void setNextReader(IndexReader reader, int docBase)
-			throws IOException {
-		this.reader = reader;
-		this.docBase = docBase;
+  public void setNextReader(AtomicReaderContext context)
+      throws IOException {
+    this.context = context;
+    this.reader = context.reader();
+    this.docBase = context.docBase;
 
-	}
+  }
 
 	@Override
 	public boolean acceptsDocsOutOfOrder() {

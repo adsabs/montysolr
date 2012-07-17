@@ -4,29 +4,27 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.CollectorQuery.CollectorCreator;
+import org.apache.lucene.util.Bits;
 
 public class SecondOrderWeight extends Weight {
 
 	private static final long serialVersionUID = 1999318155593404879L;
 	private final Weight innerWeight;
-	private final Similarity similarity;
 	private SecondOrderCollector secondOrderCollector;
 	private Map<Integer, Integer> docStarts;
 	private CollectorCreator creator;
 
 	public SecondOrderWeight(Weight weight,
-			Similarity similarity, SecondOrderCollector collector) throws IOException {
-		this.similarity = similarity;
+			SecondOrderCollector collector) throws IOException {
 		this.innerWeight = weight;
 		this.secondOrderCollector = collector;
 		
 	}
 	
 	public SecondOrderWeight(Weight weight,
-			Similarity similarity, CollectorCreator creator, Map<Integer, Integer> docStarts) throws IOException {
-		this.similarity = similarity;
+			CollectorCreator creator, Map<Integer, Integer> docStarts) throws IOException {
 		this.innerWeight = weight;
 		this.creator = creator;
 		this.docStarts = docStarts;
@@ -38,28 +36,27 @@ public class SecondOrderWeight extends Weight {
 		return innerWeight.getQuery();
 	}
 
+
 	@Override
-	public float getValue() {
-		return innerWeight.getValue();
+	public float getValueForNormalization() throws IOException {
+		return innerWeight.getValueForNormalization();
 	}
 
 	@Override
-	public float sumOfSquaredWeights() throws IOException {
-		return innerWeight.sumOfSquaredWeights();
+	public void normalize(float norm, float topLevelBoost) {
+		innerWeight.normalize(norm, topLevelBoost);
 	}
 
 	@Override
-	public void normalize(float norm) {
-		innerWeight.normalize(norm);
-	}
-
-	@Override
-	public Scorer scorer(IndexReader reader, boolean scoreDocsInOrder,
-			boolean topScorer) throws IOException {
-		
-		List<ScoreDoc> hits = secondOrderCollector.getSubReaderResults(reader);
+	public Scorer scorer(AtomicReaderContext context, boolean scoreDocsInOrder,
+      boolean topScorer, Bits acceptDocs) throws IOException {
+	  int docBase = context.docBase;
+	  int maxRange = docBase + context.reader().maxDoc();
+	  List<ScoreDoc> hits = secondOrderCollector.getSubReaderResults(docBase, maxRange);
 		if (hits.size() == 0) return null;
-		return new ListOfScoreDocScorer(hits, secondOrderCollector.getSubReaderDocBase(reader));
+		
+		
+		return new SecondOrderListOfDocsScorer(innerWeight, hits, docBase);
 	}
 
 	@Override
@@ -69,7 +66,8 @@ public class SecondOrderWeight extends Weight {
 	}
 
 	@Override
-	public Explanation explain(IndexReader reader, int doc) throws IOException {
-		return innerWeight.explain(reader, doc);
+	public Explanation explain(AtomicReaderContext context, int doc) throws IOException {
+	  //TODO: modify
+		return innerWeight.explain(context, doc);
 	}
 }

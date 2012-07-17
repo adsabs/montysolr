@@ -2,6 +2,8 @@ package org.apache.lucene.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 
 public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
@@ -10,6 +12,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	private int[][] invertedIndex;
 	private String referenceField;
 	private String uniqueIdField;
+  private AtomicReaderContext context;
 
 
 	public SecondOrderCollectorCitedBy(int[][] invertedIndex, String uniqueIdField, String referenceField) {
@@ -41,13 +44,12 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	}
 	
 	@Override
-	public void searcherInitialization(Searcher searcher) throws IOException {
+	public void searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (invertedIndex == null) {
 			invertedIndex = DictionaryRecIdCache.INSTANCE.
 				getUnInvertedDocidsStrField(((IndexSearcher) searcher).getIndexReader(), 
 				uniqueIdField, referenceField);
 		}
-		initSubReaderRanges(((IndexSearcher) searcher).getIndexReader());
 	}
 	
 
@@ -67,13 +69,6 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 		
 	}
 
-	@Override
-	public void setNextReader(IndexReader reader, int docBase)
-			throws IOException {
-		this.reader = reader;
-		this.docBase = docBase;
-
-	}
 
 	@Override
 	public boolean acceptsDocsOutOfOrder() {
@@ -100,6 +95,12 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 		}
 		return false;
 	}
+
+  @Override
+  public void setNextReader(AtomicReaderContext context) throws IOException {
+     this.context = context;
+     this.docBase = context.docBase;
+  }
 	
 	
 }

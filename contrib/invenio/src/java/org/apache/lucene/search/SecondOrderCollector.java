@@ -15,15 +15,9 @@ public interface SecondOrderCollector {
      * @param searcher
      * @throws IOException 
      */
-    public void searcherInitialization(Searcher searcher) throws IOException;
+    public void searcherInitialization(IndexSearcher searcher) throws IOException;
 
     
-    /**
-	 * Given the reader instance, returns the docBase from which this
-	 * reader starts.
-	 * 
-	 */
-    public int getSubReaderDocBase(IndexReader reader);
     
     
 	/**
@@ -35,7 +29,7 @@ public interface SecondOrderCollector {
 	 * @param reader
 	 * @return
 	 */
-	public List<ScoreDoc> getSubReaderResults(IndexReader reader);
+	public List<ScoreDoc> getSubReaderResults(int docBase, int docBaseEnd);
 	
 	
 

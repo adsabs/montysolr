@@ -17,6 +17,8 @@ import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -43,8 +45,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	private boolean debug = false;
 
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		envInit();
+	public static void beforeTestCitesCollectorPerformance() throws Exception {
 		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/python");
@@ -200,8 +201,10 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		SecondOrderCollectorCites coll = new SecondOrderCollectorCites(refCache, "bibcode", "breference");
 		searcher.search(new MatchAllDocsQuery(), coll); // run it through the whole index (no IO error should happen)
 		
-		for (int[] x: coll.getSubReaderRanges(reader)) {
-			if (debug) System.err.println("reader: " + x[0] + " - docbase: " + x[1] );
+		List<AtomicReaderContext> leaves = searcher.getTopReaderContext().leaves();
+		for (AtomicReaderContext ctx: leaves) {
+		  AtomicReader r = ctx.reader();
+			if (debug) System.err.println("reader: " + r + " - docbase: " + ctx.docBase );
 		}
 		
 		

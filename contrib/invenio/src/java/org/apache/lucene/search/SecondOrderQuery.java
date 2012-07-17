@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.util.ReaderUtil;
 import org.apache.lucene.util.ToStringUtils;
 
 
@@ -71,7 +70,7 @@ public class SecondOrderQuery extends Query {
 	 * Returns a Weight that applies the filter to the enclosed query's Weight.
 	 * This is accomplished by overriding the Scorer returned by the Weight.
 	 */
-	public Weight createWeight(final Searcher searcher) throws IOException {
+	public Weight createWeight(final IndexSearcher searcher) throws IOException {
 	    
 		if (threaded) {
 			return null;
@@ -79,14 +78,12 @@ public class SecondOrderQuery extends Query {
 		else {
 			
 			Weight firstOrderWeight = firstOrderQuery.createWeight(searcher);
-			Similarity firstOrderSimilarity = firstOrderQuery.getSimilarity(searcher);
 			
 			secondOrderCollector.searcherInitialization(searcher);
 			
 			searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
 		    
-			return new SecondOrderWeight(firstOrderWeight, firstOrderSimilarity, 
-					secondOrderCollector);
+			return new SecondOrderWeight(firstOrderWeight, secondOrderCollector);
 		}
 	}
 	

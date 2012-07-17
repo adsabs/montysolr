@@ -5,15 +5,15 @@ import java.util.Iterator;
 import java.util.List;
 
 
-public class ListOfScoreDocScorer extends Scorer {
+public class SecondOrderListOfDocsScorer extends Scorer {
 	private List<ScoreDoc> hits;
 	private Iterator<ScoreDoc> iterator = null;
 	private int doc = -1;
 	private float score;
 	private int docBase = 0;
 
-    public ListOfScoreDocScorer(List<ScoreDoc> hits, int docBase) throws IOException {
-      super(null, null);
+    public SecondOrderListOfDocsScorer(Weight weight, List<ScoreDoc> hits, int docBase) throws IOException {
+      super(weight);
       if (hits.size()>0) {
     	  this.hits = hits;
     	  iterator = hits.iterator();
