@@ -8,15 +8,19 @@ import java.util.Map;
 
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.DocTermOrds;
+import org.apache.lucene.index.DocsAndPositionsEnum;
 import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.index.SlowCompositeReaderWrapper;
+import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.search.FieldCache.IntParser;
 import org.apache.lucene.search.FieldCacheImpl.Entry;
 import org.apache.lucene.search.FieldCacheImpl.StopFillCacheException;
+import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 
 /**
@@ -365,38 +369,38 @@ public enum DictionaryRecIdCache {
 		String field = entry.field;
 		IntParser parser = (IntParser) entry.custom;
 		
-		DocTermOrds r = FieldCache.DEFAULT.getDocTermOrds(atom, field);
-		TermsEnum termEnum = r.getOrdTermsEnum(atom);
 		
 		
 		int[][] retArray = new int[reader.maxDoc()][];
-		//TermDocs termDocs = reader.termDocs();
-		//TermEnum termEnum = reader.terms (new Term (field));
-		try {
-			do {
-				BytesRef term = termEnum.term();
+		
+		final Terms terms = MultiFields.getTerms(reader, field);
+	    if (terms == null) {
+	      return retArray;
+	    }
+	    final TermsEnum termsEnum = terms.iterator(null);
+	    Bits liveDocs = atom.getLiveDocs();
+	    DocsEnum reuse = null;
+	    
+	    
+	    while (termsEnum.next() != null) {
+			BytesRef term = termsEnum.term();
 
-				if (term==null) break;
-				int[] val = new int[termEnum.docFreq()];
+			if (term==null) break;
 
-				int i = 0;
-				int luceneDocId = parser.parseInt(term);
-				
-				if (luceneDocId < 0) continue; // skip terms that are not mapped onto lucene ids
-				
-				DocsEnum docs = termEnum.docs(null, null, false);
-				docs.nextDoc();
-				while (docs.nextDoc() != -1) {
-					val[i] = docs.docID();
-					i++;
-				}
-				retArray[luceneDocId] = val;
-			} while (termEnum.next() != null);
-		} catch (StopFillCacheException stop) {
-		} finally {
-		}
-		if (retArray == null) // no values
-			retArray = new int[reader.maxDoc()][];
+			int luceneDocId = parser.parseInt(term);
+			if (luceneDocId < 0) continue; // skip terms that are not mapped onto lucene ids
+			
+			int i = 0;
+			int[] val = new int[termsEnum.docFreq()];
+			DocsEnum docs = termsEnum.docs(liveDocs, reuse, false);
+			docs.nextDoc();
+			while (docs.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
+				val[i] = docs.docID();
+				i++;
+			}
+			retArray[luceneDocId] = val;
+		};
+			
 		return retArray;
 	}
 }

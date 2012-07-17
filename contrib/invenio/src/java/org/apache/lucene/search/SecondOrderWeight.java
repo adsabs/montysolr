@@ -53,7 +53,7 @@ public class SecondOrderWeight extends Weight {
 	  int docBase = context.docBase;
 	  int maxRange = docBase + context.reader().maxDoc();
 	  List<ScoreDoc> hits = secondOrderCollector.getSubReaderResults(docBase, maxRange);
-		if (hits.size() == 0) return null;
+		if (hits == null || hits.size() == 0) return null;
 		
 		
 		return new SecondOrderListOfDocsScorer(innerWeight, hits, docBase);

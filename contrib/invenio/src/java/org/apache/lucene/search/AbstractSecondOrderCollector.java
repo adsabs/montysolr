@@ -32,9 +32,11 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
   }
 
   public List<ScoreDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
-
-    Integer i = null;
-    Integer e = null;
+	  
+	if (hits.size() == 0)
+		return null;
+	
+    int i = -1;
     
     lock.lock();
     try {
@@ -42,22 +44,44 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
         organizeResults();
         organized = true;
       }
-      Integer[] data = findRange(rangeStart, rangeEnd);
-      i = data[0];
-      e = data[1];
+      i = findClosestIndex(rangeStart, rangeEnd, 0, hits.size()-1);
+      if (i == -1 || i+1 > hits.size())
+    	  return null;
       
     } finally {
       lock.unlock();
     }
     
     
-    ArrayList<ScoreDoc> results = new ArrayList<ScoreDoc>(e-i);
-    while (i < e) {
-      results.add(hits.get(i++));
+    ArrayList<ScoreDoc> results = new ArrayList<ScoreDoc>();
+    for (;i<hits.size() && hits.get(i).doc < rangeEnd;i++) {
+    	results.add(hits.get(i));
     }
     return results;
     
+  }
+  
+  private int findClosestIndex(int rangeStart, int rangeEnd, int low, int high) {
+	  
+	  int latest = 0;
+    while (low <= high) {
+        int mid = (low + high) >>> 1;
+        int midVal = hits.get(mid).doc;
+  
+        if (midVal < rangeStart) {
+            low = mid + 1;
+            latest = high;
+        } else if (midVal > rangeStart) {
+            high = mid - 1;
+            latest = low;
+        } else {
+            return mid; // key found
+        }
+    }
+    if (hits.get(latest).doc >= rangeStart && hits.get(latest).doc <= rangeEnd)
+    	return latest;
     
+    return -1;  // key not found
   }
 
   // a very naive implementation (TODO: search faster)

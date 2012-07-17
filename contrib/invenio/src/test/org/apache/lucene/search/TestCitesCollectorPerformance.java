@@ -42,7 +42,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	private IndexReader reader;
 	private IndexSearcher searcher;
 	private MockIndexWriter writer;
-	private boolean debug = false;
+	private boolean debug = true;
 
 	@BeforeClass
 	public static void beforeTestCitesCollectorPerformance() throws Exception {

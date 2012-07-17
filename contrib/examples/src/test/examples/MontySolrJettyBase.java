@@ -31,7 +31,7 @@ import montysolr.util.ProcessUtils;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.junit.AfterClass;
 
 abstract public class MontySolrJettyBase extends MontySolrTestCaseJ4
@@ -55,7 +55,8 @@ abstract public class MontySolrJettyBase extends MontySolrTestCaseJ4
 
     context = context==null ? "/solr" : context;
     MontySolrJettyBase.context = context;
-    jetty = new JettySolrRunner( context, 0, configFile );
+    jetty = new JettySolrRunner(getSolrHome(), context, 0, 
+    		MontySolrTestCaseJ4.getSolrConfigFile() );
 
     jetty.start();
     port = jetty.getLocalPort();
@@ -64,6 +65,9 @@ abstract public class MontySolrJettyBase extends MontySolrTestCaseJ4
   }
 
   
+  public String getSolrHome() {
+	  return "";
+  }
 
   @AfterClass
   public static void afterSolrJettyTestBase() throws Exception {
@@ -95,7 +99,7 @@ abstract public class MontySolrJettyBase extends MontySolrTestCaseJ4
       try {
         // setup the server...
         String url = "http://localhost:"+port+context;
-        CommonsHttpSolrServer s = new CommonsHttpSolrServer( url );
+        HttpSolrServer s = new HttpSolrServer( url );
         s.setConnectionTimeout(100); // 1/10th sec
         s.setDefaultMaxConnectionsPerHost(100);
         s.setMaxTotalConnections(100);
