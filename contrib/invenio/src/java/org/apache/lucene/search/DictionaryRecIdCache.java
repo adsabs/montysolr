@@ -2,6 +2,7 @@ package org.apache.lucene.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -354,6 +355,50 @@ public enum DictionaryRecIdCache {
 	}
 	
 	
+	// XXX: should go away and be replaced by a smarter subclass of DocTermOrds
+	// which can read the terms on-the-fly
+	protected Object unInvertField(IndexReader reader, Entry entry)
+		throws IOException {
+		AtomicReader atom = getAtomicReader(reader);
+		IntParser parser = (IntParser) entry.custom;
+		Bits liveDocs = atom.getLiveDocs();
+		
+		DocTermOrds unInvertedIndex = new DocTermOrds(atom, entry.field);
+		TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(atom);
+		int[][] retArray = new int[reader.maxDoc()][];
+		DocsEnum docs = null;
+		
+		ArrayList<Integer> docIds = new ArrayList<Integer>();
+		for (;;) {
+			BytesRef term = termsEnum.next();
+			if (term == null)
+				break;
+			
+			int luceneDocId = parser.parseInt(term);
+			if (luceneDocId < 0) continue; // skip terms that are not mapped onto lucene ids
+			
+			int i = 0;
+			//int[] val = new int[termsEnum.docFreq()]; // also contains deleted documents
+			docIds.clear();
+			docs = termsEnum.docs(liveDocs, docs, false);
+			for (;;) {
+				int d = docs.nextDoc();
+				if (d == DocIdSetIterator.NO_MORE_DOCS) {
+					break;
+				}
+				//val[i] = d;
+				docIds.add(d);
+				//i++;
+			}
+			int[] val = new int[docIds.size()];
+			for (int x: docIds) {
+				val[i] = x;
+				i++;
+			}
+			retArray[luceneDocId] = val;
+		}
+		return retArray;
+	}
 	
 	/*
 	 * A temporary hack to get uninverted values from the index
@@ -362,7 +407,7 @@ public enum DictionaryRecIdCache {
 	 * https://issues.apache.org/jira/browse/LUCENE-3354
 	 */
 	
-	protected Object unInvertField(IndexReader reader, Entry entryKey)
+	protected Object unInvertFieldx(IndexReader reader, Entry entryKey)
 	throws IOException {
 		AtomicReader atom = getAtomicReader(reader);
 		Entry entry = entryKey;

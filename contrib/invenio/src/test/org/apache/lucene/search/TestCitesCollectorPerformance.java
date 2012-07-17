@@ -42,7 +42,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	private IndexReader reader;
 	private IndexSearcher searcher;
 	private MockIndexWriter writer;
-	private boolean debug = true;
+	private boolean debug = false;
 
 	@BeforeClass
 	public static void beforeTestCitesCollectorPerformance() throws Exception {
@@ -158,7 +158,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		
 		
 		int maxHits = 1000;
-		int maxHitsFound = 300;
+		int maxHitsFound = new Float(maxHits * 0.3f).intValue();
 		HashMap<Integer, int[]> cites = createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
 		
 		
