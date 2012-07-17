@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Random;
 
 import org.antlr.runtime.BitSet;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 
@@ -31,7 +33,8 @@ public class TestInvenioQueryBitSet extends TestInvenioQuery {
 		
 		IndexedDocs iDocs = indexDocsPython(10);
 		Directory ramdir = indexDocsLucene(iDocs);
-		IndexSearcher searcher = new IndexSearcher(ramdir);
+		IndexReader reader = DirectoryReader.open(ramdir);
+		IndexSearcher searcher = new IndexSearcher(reader);
 		
 		String[] words = iDocs.words;
 		HashMap<String, ArrayList<String>> index = iDocs.index;
@@ -57,7 +60,7 @@ public class TestInvenioQueryBitSet extends TestInvenioQuery {
 		}
 		
 		assertTrue(moreThanOne > 0);
-		searcher.close();
+		reader.close();
 		ramdir.close();
 	}
 	

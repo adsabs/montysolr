@@ -3,13 +3,16 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.Random;
 
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.MockIndexWriter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
@@ -21,7 +24,7 @@ public class TestCollector extends LuceneTestCase {
 	private Directory directory;
 	private IndexReader reader;
 	private IndexSearcher searcher;
-	private IndexWriter writer;
+	private MockIndexWriter writer;
 
 	@Override
 	public void setUp() throws Exception {
@@ -46,7 +49,6 @@ public class TestCollector extends LuceneTestCase {
 	@Override
 	public void tearDown() throws Exception {
 		writer.close();
-		searcher.close();
 		reader.close();
 		directory.close();
 		super.tearDown();
@@ -56,13 +58,12 @@ public class TestCollector extends LuceneTestCase {
 			LockObtainFailedException, IOException {
 		if (writer != null)
 			writer.close();
-		writer = new IndexWriter(directory, newIndexWriterConfig(
+		writer = new MockIndexWriter(directory, newIndexWriterConfig(
 				TEST_VERSION_CURRENT,
 				new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).setOpenMode(mode));
 	}
 
 	private void reOpenSearcher() throws IOException {
-		searcher.close();
 		reader.close();
 		reader = writer.getReader();
 		searcher = newSearcher(reader);
@@ -93,15 +94,15 @@ public class TestCollector extends LuceneTestCase {
 		Document doc;
 		for (int k = 0; k < randi.length; k++) {
 			doc = new Document();
-			doc.add(newField("id", String.valueOf(k + start), Field.Store.YES,
-					Field.Index.NOT_ANALYZED));
-			doc.add(newField("text_id", "x" + (k + start), Field.Store.YES,
-					Field.Index.NOT_ANALYZED));
+			doc.add(newField("id", String.valueOf(k + start),
+					StringField.TYPE_STORED));
+			doc.add(newField("text_id", "x" + (k + start),
+			    StringField.TYPE_STORED));
 			for (int v : randi[k]) {
 				doc.add(newField("reference", String.valueOf(v + start),
-						Field.Store.YES, Field.Index.NOT_ANALYZED));
+				    StringField.TYPE_STORED));
 				doc.add(newField("text_reference", "x" + (v + start),
-						Field.Store.YES, Field.Index.NOT_ANALYZED));
+				    StringField.TYPE_STORED));
 			}
 			writer.addDocument(doc);
 		}
@@ -158,10 +159,10 @@ public class TestCollector extends LuceneTestCase {
 			}
 
 			@Override
-			public void setNextReader(IndexReader reader, int docBase)
+			public void setNextReader(AtomicReaderContext context)
 					throws IOException {
-				this.reader = reader;
-				this.docBase = docBase;
+				this.reader = context.reader();
+				this.docBase = context.docBase;
 			}
 
 			@Override
