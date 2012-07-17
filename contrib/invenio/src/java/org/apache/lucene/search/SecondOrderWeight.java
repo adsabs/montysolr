@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.search.CollectorQuery.CollectorCreator;
 import org.apache.lucene.util.Bits;
 
 public class SecondOrderWeight extends Weight {
@@ -14,7 +13,6 @@ public class SecondOrderWeight extends Weight {
 	private final Weight innerWeight;
 	private SecondOrderCollector secondOrderCollector;
 	private Map<Integer, Integer> docStarts;
-	private CollectorCreator creator;
 
 	public SecondOrderWeight(Weight weight,
 			SecondOrderCollector collector) throws IOException {
@@ -23,13 +21,6 @@ public class SecondOrderWeight extends Weight {
 		
 	}
 	
-	public SecondOrderWeight(Weight weight,
-			CollectorCreator creator, Map<Integer, Integer> docStarts) throws IOException {
-		this.innerWeight = weight;
-		this.creator = creator;
-		this.docStarts = docStarts;
-		
-	}
 
 	@Override
 	public Query getQuery() {
