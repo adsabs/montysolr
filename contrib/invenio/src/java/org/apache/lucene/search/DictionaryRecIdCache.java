@@ -379,6 +379,7 @@ public enum DictionaryRecIdCache {
 			
 			int i = 0;
 			//int[] val = new int[termsEnum.docFreq()]; // also contains deleted documents
+			//System.out.println(term.utf8ToString() + " docFreq: " + termsEnum.docFreq() + " totalTermFreq: " + termsEnum.totalTermFreq());
 			docIds.clear();
 			docs = termsEnum.docs(liveDocs, docs, false);
 			for (;;) {

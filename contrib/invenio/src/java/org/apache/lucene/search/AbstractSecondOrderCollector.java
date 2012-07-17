@@ -63,23 +63,26 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
   
   private int findClosestIndex(int rangeStart, int rangeEnd, int low, int high) {
 	  
-	  int latest = 0;
+	  int latest = -1;
     while (low <= high) {
         int mid = (low + high) >>> 1;
         int midVal = hits.get(mid).doc;
   
         if (midVal < rangeStart) {
             low = mid + 1;
-            latest = high;
+            if (midVal >= rangeStart && midVal <= rangeEnd)
+              latest = mid;
         } else if (midVal > rangeStart) {
             high = mid - 1;
-            latest = low;
+            if (midVal >= rangeStart && midVal <= rangeEnd)
+              latest = mid;
         } else {
             return mid; // key found
         }
     }
-    if (hits.get(latest).doc >= rangeStart && hits.get(latest).doc <= rangeEnd)
-    	return latest;
+    //if (low > 0 && low < hits.size() && hits.get(low).doc >= rangeStart && hits.get(low).doc <= rangeEnd)
+    //	return low;
+    if (latest > -1) return latest;
     
     return -1;  // key not found
   }
