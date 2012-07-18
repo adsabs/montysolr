@@ -20,15 +20,17 @@ package org.apache.solr.handler.component;
 import java.io.IOException;
 import java.net.URL;
 
+import org.apache.lucene.search.similar.MoreLikeThese;
 import org.apache.solr.common.params.MoreLikeTheseParams;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.handler.MoreLikeTheseHandler;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.DocListAndSet;
+import org.apache.solr.search.DocSet;
+import org.apache.solr.search.DocSlice;
 import org.apache.solr.search.SolrIndexSearcher;
 
 /**
@@ -40,11 +42,15 @@ import org.apache.solr.search.SolrIndexSearcher;
 public class MoreLikeTheseComponent extends SearchComponent
 {
   public static final String COMPONENT_NAME = "mlthese";
+  public static final int DOC_COUNT_DEFAULT = 5;
+  public static final int INPUT_DOC_LIMIT_DEFAULT = 100;
   
   @Override
   public void prepare(ResponseBuilder rb) throws IOException
   {
-    
+    if (rb.req.getParams().getBool(MoreLikeTheseParams.MLT,false)) {
+      rb.setNeedDocSet( true );
+    }
   }
 
   @Override
@@ -55,8 +61,13 @@ public class MoreLikeTheseComponent extends SearchComponent
     if( p.getBool( MoreLikeTheseParams.MLT, false ) ) {
       SolrIndexSearcher searcher = rb.req.getSearcher();
       
+      /*
+       * unlike the standard MLT component we pass the full result docSet
+       * rather than the already truncated docList
+       */
+      DocListAndSet dlas = rb.getResults();
       DocList sim = getMoreLikeThese( rb, searcher,
-          rb.getResults().docList, rb.getFieldFlags() );
+          rb.getResults().docSet, rb.getFieldFlags() );
 
       // TODO ???? add this directly to the response?
       rb.rsp.add( "moreLikeThese", sim );
@@ -64,7 +75,7 @@ public class MoreLikeTheseComponent extends SearchComponent
   }
 
   DocList getMoreLikeThese( ResponseBuilder rb, SolrIndexSearcher searcher,
-      DocList docs, int flags ) throws IOException {
+      DocSet docSet, int flags ) throws IOException {
     SolrParams p = rb.req.getParams();
     IndexSchema schema = searcher.getSchema();
     MoreLikeTheseHandler.MoreLikeTheseHelper mltHelper 
@@ -75,8 +86,19 @@ public class MoreLikeTheseComponent extends SearchComponent
       dbg = new SimpleOrderedMap<Object>();
     }
 
-    int rows = p.getInt( MoreLikeTheseParams.DOC_COUNT, 5 );
-    int truncate = p.getInt( MoreLikeTheseParams.INPUT_DOC_LIMIT, 10 );
+    int rows = p.getInt( MoreLikeTheseParams.DOC_COUNT, MoreLikeThese.DEFAULT_MAX_RETURN_DOC );
+    int docLimit = p.getInt( MoreLikeTheseParams.INPUT_DOC_LIMIT, MoreLikeThese.DEFAULT_MAX_INPUT_DOC );
+    
+    int inputLength = docSet.size() > docLimit ? docLimit : docSet.size();
+    int[] ids = new int[inputLength];
+    float[] scores = new float[inputLength];
+    final DocIterator itr = docSet.iterator();
+    for (int i = 0; i < inputLength; i++) {
+    	ids[i] = itr.nextDoc();
+    	scores[i] = itr.score(); 
+    }
+    DocList docs = new DocSlice(0, inputLength, ids, scores, docSet.size(), 0);
+    
     DocListAndSet sim = mltHelper.getMoreLikeThese( docs, 0, rows, null, null, flags );
     
     if( dbg != null ){

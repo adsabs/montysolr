@@ -1644,5 +1644,12 @@
        <str name="idfield">recid</str>
     </lst>
   </queryParser>
-
+  
+ <requestHandler name="/mlthese" class="solr.MoreLikeTheseHandler">
+    <lst name="defaults">
+        <str name="mlthese.fl">reader</str>
+        <str name="mlthese.mintf">0</str>
+        <str name="mlthese.mindf">0</str>
+    </lst>
+  </requestHandler>
 </config>

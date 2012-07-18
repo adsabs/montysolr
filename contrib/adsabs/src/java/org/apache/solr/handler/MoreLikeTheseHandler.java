@@ -55,6 +55,8 @@ import org.apache.solr.search.DocList;
 import org.apache.solr.search.DocListAndSet;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SolrIndexSearcher.QueryCommand;
+import org.apache.solr.search.SolrIndexSearcher.QueryResult;
 import org.apache.solr.util.SolrPluginUtils;
 
 /**
@@ -130,16 +132,24 @@ public class MoreLikeTheseHandler extends RequestHandlerBase
         boolean includeMatch = params.getBool(MoreLikeTheseParams.MATCH_INCLUDE,
             true);
         int matchOffset = params.getInt(MoreLikeTheseParams.MATCH_OFFSET, 0);
-        // Find the base match
+        int docLimit = params.getInt( MoreLikeTheseParams.INPUT_DOC_LIMIT, MoreLikeThese.DEFAULT_MAX_INPUT_DOC );
         Query query = QueryParsing.parseQuery(q, params.get(CommonParams.DF),
             params, req.getSchema());
-        DocList match = searcher.getDocList(query, null, null, matchOffset, 1,
-            flags); // only get the first one...
+        QueryCommand qc = new QueryCommand();
+        qc.setQuery(query)
+          .setOffset(matchOffset)
+          .setLen(docLimit)
+          .setFlags(flags)
+          .setNeedDocSet(true);
+        QueryResult results = new QueryResult();
+        searcher.search(results,qc);
+        DocList docList = results.getDocList();
+//        DocListAndSet results = searcher.getDocListAndSet(query, filter, null, matchOffset, 0, flags);
         if (includeMatch) {
-          rsp.add("match", match);
+          rsp.add("matches", docList);
         }
 
-        mltDocs = mlthese.getMoreLikeThese(match, start, rows, filters, interesting, flags);
+        mltDocs = mlthese.getMoreLikeThese(docList, start, rows, filters, interesting, flags);
         
       } else {
         throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,

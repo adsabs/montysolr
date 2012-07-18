@@ -49,7 +49,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.PriorityQueue;
-import org.apache.lucene.util.ReaderUtil;
 import org.apache.lucene.util.Version;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
@@ -248,6 +247,17 @@ public final class MoreLikeThese {
    * @see #setMaxQueryTerms
    */
   public static final int DEFAULT_MAX_QUERY_TERMS = 25;
+  
+  /**
+   * Use no more than this many docs from the query result
+   * to generate the MLThese query
+   */
+  public static final int DEFAULT_MAX_INPUT_DOC = 100;
+  
+  /**
+   * Return this many "recommendations" in the response
+   */
+  public static final int DEFAULT_MAX_RETURN_DOC = 5;
   
   /**
    * Analyzer that will be used to parse the doc.
@@ -720,11 +730,11 @@ public final class MoreLikeThese {
             for (int i = 0; i < fieldNames.length; i++) {
                 String fieldName = fieldNames[i];
 				TermFreqVector vector = ir.getTermFreqVector(id, fieldName);
-				System.out.println(vector.toString());
-				addTermFrequencies(termFreqMap, vector);
+				if (vector != null) {
+					addTermFrequencies(termFreqMap, vector);
+				}
             }
     	}
-    	System.out.println(termFreqMap.toString());
     	return createQuery(createQueue(termFreqMap));
 	}
 	
