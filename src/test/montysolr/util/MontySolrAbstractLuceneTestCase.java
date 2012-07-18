@@ -15,6 +15,11 @@ public abstract class MontySolrAbstractLuceneTestCase extends LuceneTestCase {
 
 	@AfterClass
 	public static void afterClassMontySolrTestCase() throws Exception {
+	  System.clearProperty("montysolr.bridge");
+	  System.clearProperty("montysolr.home");
+	  System.clearProperty("montysolr.modulepath");
+	  System.clearProperty("solr.test.sys.prop1");
+	  System.clearProperty("solr.test.sys.prop2");
 	}
 	
 	/**

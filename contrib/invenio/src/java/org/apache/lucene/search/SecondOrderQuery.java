@@ -50,6 +50,17 @@ public class SecondOrderQuery extends Query {
 		}
 	}
 	
+	public SecondOrderQuery(Query query, Filter filter, SecondOrderCollector collector) {
+    this.firstOrderQuery = query;
+    this.filter = filter;
+    this.secondOrderCollector = collector;
+    this.threaded = false;
+    
+    if (collector == null) {
+      throw new IllegalStateException("Collector must not be null");
+    }
+  }
+	
 	/*
 	public CollectorQuery(Query query, IndexReader reader, Collector collector) {
 		this.query = query;
