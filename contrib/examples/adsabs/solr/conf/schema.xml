@@ -327,7 +327,7 @@
    <field name="thesis" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
    <field name="copyright" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
    
-   <field name="reference" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true" />
+   <field name="reference" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true" termVectors="true" />
    
    <!--  this is just a fake field (for the moment) -->
    <field name="all" type="ads_text" indexed="true" stored="true" multiValued="false"/>
@@ -344,7 +344,7 @@
    <!-- MontySolr: Fields where value is fetched from Mongo text -->
    <field name="full" type="fulltext" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
    <field name="ack" type="fulltext" indexed="true" stored="true" />
-   <field name="reader" type="reader_data" indexed="true" stored="true" multiValued="true" />
+   <field name="reader" type="reader_data" indexed="true" stored="true" multiValued="true" termVectors="true" />
 
    <!-- Uncommenting the following will create a "timestamp" field using
         a default value of "NOW" to indicate when each document was indexed.
