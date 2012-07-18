@@ -12,6 +12,7 @@ import montysolr.util.MontySolrSetup;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
@@ -43,7 +44,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		directory = newDirectory();
-		writer = new RandomIndexWriter(random, directory);
+		writer = new RandomIndexWriter(random(), directory);
 
 		adoc("id", "1", "references", "2", "references", "3", "references", "4");
 		adoc("id", "2");
@@ -70,7 +71,6 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		searcher.close();
 		reader.close();
 		directory.close();
 		super.tearDown();
@@ -79,8 +79,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 	private void adoc(String... fields) throws IOException {
 		Document doc = new Document();
 		for (int i = 0; i < fields.length; i = i + 2) {
-			doc.add(newField(fields[i], fields[i + 1], Field.Store.YES,
-					Field.Index.NOT_ANALYZED));
+			doc.add(newField(fields[i], fields[i + 1], StringField.TYPE_STORED));
 		}
 		writer.addDocument(doc);
 	}
@@ -139,16 +138,16 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(cache == cache2);
 		
 		
-		assertEquals(3, searcher.search(new CollectorQuery(q1, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q2, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q3, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q4, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q5, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q6, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q99, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
-		assertEquals(5, searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).totalHits);
+		assertEquals(3, searcher.search(new SecondOrderQuery(q1, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q2, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(q3, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(q4, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q5, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q6, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q99, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(5, searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
 		
-		ScoreDoc[] docs = searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField)), 10).scoreDocs;
+		ScoreDoc[] docs = searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField)), 10).scoreDocs;
 		
 		ArrayList<Integer> ar = new ArrayList<Integer>();
 		for (ScoreDoc d: docs) {
@@ -165,22 +164,22 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(invCache == invCache2);
 		assertTrue(invCache.hashCode() == invCache.hashCode());
 		
-		assertEquals(1, searcher.search(new CollectorQuery(q1, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q2, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q3, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q4, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q5, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q6, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q99, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new SecondOrderQuery(q1, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(q2, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new SecondOrderQuery(q3, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new SecondOrderQuery(q4, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(q5, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new SecondOrderQuery(q6, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q99, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		
-		assertEquals(2, searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(bq123, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(bq1234, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(3, searcher.search(new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(bq123, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(bq1234, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(3, searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		
 		
 		ar = new ArrayList<Integer>();
-		for (ScoreDoc d: searcher.search(new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).scoreDocs) {
+		for (ScoreDoc d: searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).scoreDocs) {
 			Document doc = reader.document(d.doc);
 			ar.add(Integer.valueOf(doc.get("id")));
 		}
@@ -189,12 +188,12 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		
-		CollectorQuery c1 = new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
-		CollectorQuery c2 = new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
+		SecondOrderQuery c1 = new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField));
+		SecondOrderQuery c2 = new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField));
 		assertTrue(c1.equals(c2));
 		
-		CollectorQuery c3 = new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField));
-		CollectorQuery c4 = new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField));
+		SecondOrderQuery c3 = new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField));
+		SecondOrderQuery c4 = new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField));
 		assertTrue(c3.equals(c4));
 		
 		
@@ -248,16 +247,16 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(scache == scache2);
 		
 		
-		assertEquals(3, searcher.search(new CollectorQuery(q1, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q2, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q3, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q4, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q5, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q6, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q99, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
-		assertEquals(5, searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).totalHits);
+		assertEquals(3, searcher.search(new SecondOrderQuery(q1, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q2, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(q3, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(q4, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q5, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q6, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q99, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(5, searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
 		
-		docs = searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollectorString.class, scache, refField)), 10).scoreDocs;
+		docs = searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField)), 10).scoreDocs;
 		
 		ar = new ArrayList<Integer>();
 		for (ScoreDoc d: docs) {
@@ -275,22 +274,22 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(invCache == invCache2);
 		
 		
-		assertEquals(1, searcher.search(new CollectorQuery(q1, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q2, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q3, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q4, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(q5, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(1, searcher.search(new CollectorQuery(q6, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(0, searcher.search(new CollectorQuery(q99, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new SecondOrderQuery(q1, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(q2, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new SecondOrderQuery(q3, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new SecondOrderQuery(q4, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(q5, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(1, searcher.search(new SecondOrderQuery(q6, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(0, searcher.search(new SecondOrderQuery(q99, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		
-		assertEquals(2, searcher.search(new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(bq123, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(2, searcher.search(new CollectorQuery(bq1234, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
-		assertEquals(3, searcher.search(new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(bq123, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(bq1234, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(3, searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		
 		
 		ar = new ArrayList<Integer>();
-		for (ScoreDoc d: searcher.search(new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField)), 10).scoreDocs) {
+		for (ScoreDoc d: searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).scoreDocs) {
 			Document doc = reader.document(d.doc);
 			ar.add(Integer.valueOf(doc.get("id")));
 		}
@@ -299,12 +298,12 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		
-		c1 = new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
-		c2 = new CollectorQuery(bq15, reader, CollectorQuery.createCollector(CitedByCollector.class, invCache, refField));
+		c1 = new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField));
+		c2 = new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField));
 		assertTrue(c1.equals(c2));
 		
-		c3 = new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField));
-		c4 = new CollectorQuery(bq13, reader, CollectorQuery.createCollector(CitesCollector.class, cache, refField));
+		c3 = new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField));
+		c4 = new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField));
 		assertTrue(c3.equals(c4));
 		
 		

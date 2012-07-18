@@ -4,24 +4,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.IndexReader;
 
 public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
 	
-	private int[][] invertedIndex;
-	private String referenceField;
-	private String uniqueIdField;
+	private int[][] invertedIndex = null;
+	private String referenceField = null;
+	private String uniqueIdField = null;
   private AtomicReaderContext context;
+  private CacheGetter cacheGetter;
 
 
-	public SecondOrderCollectorCitedBy(int[][] invertedIndex, String uniqueIdField, String referenceField) {
+	public SecondOrderCollectorCitedBy(CacheGetter getter) {
 		super();
-		this.invertedIndex = invertedIndex;
-		this.uniqueIdField = uniqueIdField;
 		hits = new ArrayList<ScoreDoc>();
-		docBase = 0;
-		this.referenceField = referenceField;
+		assert getter != null;
+		cacheGetter = getter;
 	}
 	
 	/**
@@ -36,19 +34,23 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	 */
 	public SecondOrderCollectorCitedBy(String uniqueIdField, String referenceField) {
 		super();
-		this.invertedIndex = null;
+		this.referenceField = referenceField;
 		this.uniqueIdField = uniqueIdField;
 		hits = new ArrayList<ScoreDoc>();
-		docBase = 0;
-		this.referenceField = referenceField;
+		assert this.referenceField != null && this.uniqueIdField != null;
 	}
 	
 	@Override
 	public void searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (invertedIndex == null) {
+		  if (cacheGetter != null) {
+		    invertedIndex = (int[][]) cacheGetter.getCache();
+		  }
+		  else {
 			invertedIndex = DictionaryRecIdCache.INSTANCE.
 				getUnInvertedDocidsStrField(((IndexSearcher) searcher).getIndexReader(), 
 				uniqueIdField, referenceField);
+		  }
 		}
 	}
 	

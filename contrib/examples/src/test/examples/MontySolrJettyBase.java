@@ -1,6 +1,5 @@
 package examples;
 
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,99 +17,23 @@ package examples;
  * limitations under the License.
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Properties;
+import montysolr.util.MontySolrAbstractLuceneTestCase;
+import org.junit.BeforeClass;
+import org.apache.solr.SolrJettyTestBase;
 
+abstract public class MontySolrJettyBase extends SolrJettyTestBase {
 
-import montysolr.jni.MontySolrVM;
-import montysolr.util.MontySolrAbstractTestCase;
-import montysolr.util.MontySolrTestCaseJ4;
-import montysolr.util.ProcessUtils;
-
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.client.solrj.embedded.JettySolrRunner;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
-import org.junit.AfterClass;
-
-abstract public class MontySolrJettyBase extends MontySolrTestCaseJ4
-{
-  // Try not introduce a dependency on the example schema or config unless you need to.
-  // using configs in the test directory allows more flexibility to change "example"
-  // without breaking configs.
-
-	
-
-  public static JettySolrRunner jetty;
-  public static int port;
-  public static SolrServer server;
-  public static String context;
-
-  
-  public static JettySolrRunner createJetty(String solrHome, String configFile, String context) throws Exception {
-
-    ignoreException("maxWarmingSearchers");
-
-
-    context = context==null ? "/solr" : context;
-    MontySolrJettyBase.context = context;
-    jetty = new JettySolrRunner(getSolrHome(), context, 0, 
-    		MontySolrTestCaseJ4.getSolrConfigFile() );
-
-    jetty.start();
-    port = jetty.getLocalPort();
-    log.info("Jetty Assigned Port#" + port);
-    return jetty;
+  @BeforeClass
+  public static void beforeMontySolrJettyBase() throws Exception {
+    MontySolrAbstractLuceneTestCase.envInit();
   }
 
-  
+  public static String getSolrConfigFile() {
+    throw new IllegalAccessError("This method must be overriden in the test");
+  }
+
   public String getSolrHome() {
-	  return "";
+    throw new IllegalAccessError("This method must be overriden in the test");
   }
 
-  @AfterClass
-  public static void afterSolrJettyTestBase() throws Exception {
-    if (jetty != null) {
-      jetty.stop();
-      jetty = null;
-    }
-    server = null;
-  }
-
-
-  public SolrServer getSolrServer() {
-    {
-      if (server == null) {
-        server = createNewSolrServer();
-      }
-      return server;
-    }
-  }
-
-  /**
-   * Create a new solr server.
-   * If createJetty was called, an http implementation will be created,
-   * otherwise an embedded implementation will be created.
-   * Subclasses should override for other options.
-   */
-  public SolrServer createNewSolrServer() {
-    if (jetty != null) {
-      try {
-        // setup the server...
-        String url = "http://localhost:"+port+context;
-        HttpSolrServer s = new HttpSolrServer( url );
-        s.setConnectionTimeout(100); // 1/10th sec
-        s.setDefaultMaxConnectionsPerHost(100);
-        s.setMaxTotalConnections(100);
-        return s;
-      }
-      catch( Exception ex ) {
-        throw new RuntimeException( ex );
-      }
-    } else {
-      return new EmbeddedSolrServer( h.getCoreContainer(), "" );
-    }
-  }
 }
-

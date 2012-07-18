@@ -15,24 +15,17 @@ import montysolr.util.MontySolrSetup;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.MockIndexWriter;
-import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
-import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.store.SimpleFSDirectory;
 import org.junit.BeforeClass;
 
 public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCase {
@@ -157,7 +150,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 	public void testCitesCollector() throws Exception {
 		
 		
-		int maxHits = 10000;
+		int maxHits = 1000;
 		int maxHitsFound = new Float(maxHits * 0.3f).intValue();
 		HashMap<Integer, int[]> cites = createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
 		
@@ -181,10 +174,10 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		
 		HashMap<Integer, int[]> citedBy = invert(cites);
 		
-		Map<String, Integer> refCache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(
+		final Map<String, Integer> refCache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(
 				reader, "bibcode");
 		
-		int[][] invertedCache = DictionaryRecIdCache.INSTANCE.
+		final int[][] invertedCache = DictionaryRecIdCache.INSTANCE.
 				getUnInvertedDocidsStrField(((IndexSearcher) searcher).getIndexReader(), 
 				"bibcode", "breference");
 		
@@ -198,7 +191,9 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		
 		Map<Integer, Integer> histogram = new HashMap<Integer, Integer>();
 		
-		SecondOrderCollectorCites coll = new SecondOrderCollectorCites(refCache, "bibcode", "breference");
+		SecondOrderCollectorCites coll = new SecondOrderCollectorCites("bibcode", "breference");
+		coll.searcherInitialization(searcher);
+		
 		searcher.search(new MatchAllDocsQuery(), coll); // run it through the whole index (no IO error should happen)
 		
 		List<AtomicReaderContext> leaves = searcher.getTopReaderContext().leaves();
@@ -220,11 +215,16 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 			// let's toggle implementataions
 			if (i % 3 == 0) {
 				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
-					new SecondOrderCollectorCites(refCache, "bibcode", "breference"), false), maxHitsFound).scoreDocs;
+					new SecondOrderCollectorCites("bibcode", "breference"), false), maxHitsFound).scoreDocs;
 			}
 			else if (i % 3 == 1) {
 				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
-						new SecondOrderCollectorCites("bibcode", "breference"), false), maxHitsFound).scoreDocs;
+						new SecondOrderCollectorCites(new CacheGetter() {
+						  @Override
+						  public Object getCache() {
+						    return refCache;
+						  }
+						}, "breference"), false), maxHitsFound).scoreDocs;
 			}
 			else {
 				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
@@ -240,7 +240,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 			if (debug) {
 				if(!hitsEquals(cites.get(i), cites, hits)) {
 					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
-					new SecondOrderCollectorCites(refCache, "bibcode", "breference"), false), maxHitsFound).scoreDocs;
+					new SecondOrderCollectorCites("bibcode", "breference"), false), maxHitsFound).scoreDocs;
 					hitsEquals(cites.get(i), cites, hits);
 				}
 			}
@@ -252,7 +252,11 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 			// {papers} -> X
 			if (i % 2 == 0) {
 				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
-					new SecondOrderCollectorCitedBy(invertedCache, "bibcode", "breference"), false), maxHitsFound).scoreDocs;
+					new SecondOrderCollectorCitedBy(new CacheGetter() {
+					  public Object getCache() {
+					    return invertedCache;
+					  }
+					}), false), maxHitsFound).scoreDocs;
 			}
 			else {
 				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
@@ -262,7 +266,8 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 			if (debug) {
 				if(!citedByEquals(citedBy.get(i), citedBy, hits)) {
 					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
-					new SecondOrderCollectorCitedBy(invertedCache, "bibcode", "breference"), false), maxHitsFound).scoreDocs;
+					    new SecondOrderCollectorCitedBy("bibcode", "breference"), false), maxHitsFound).scoreDocs;
+					
 					citedByEquals(citedBy.get(i), citedBy, hits);
 				}
 			}

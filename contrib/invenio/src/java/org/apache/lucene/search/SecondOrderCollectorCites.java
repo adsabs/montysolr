@@ -13,27 +13,27 @@ import org.apache.lucene.index.IndexReader;
 public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
   Set<String> fieldsToLoad;
-	protected Map<String, Integer> valueToDocidCache;
+	protected Map<String, Integer> valueToDocidCache = null;
 	protected String referenceField;
 	protected String uniqueIdField;
 	private AtomicReaderContext context;
 	private IndexReader reader;
+	private CacheGetter cacheGetter;
 	
-	public SecondOrderCollectorCites(Map<String, Integer> cache, String uniqueIdField, String referenceField) {
+	public SecondOrderCollectorCites(CacheGetter getter, String referenceField) {
 		super();
-		valueToDocidCache = cache;
-		this.uniqueIdField = uniqueIdField;
+		initFldSelector();
+		cacheGetter = getter;
 		this.referenceField = referenceField;
-		docBase = 0;
+		assert referenceField != null;
 		initFldSelector();
 	}
 	
-	public SecondOrderCollectorCites(String uniqueIdField, final String referenceField) {
+	public SecondOrderCollectorCites(String uniqueIdField, String referenceField) {
 		super();
 		valueToDocidCache = null;
 		this.uniqueIdField = uniqueIdField;
 		this.referenceField = referenceField;
-		docBase = 0;
 		initFldSelector();
 	}
 	
@@ -46,8 +46,13 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	@Override
 	public void searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (valueToDocidCache == null) {
-			valueToDocidCache = DictionaryRecIdCache.INSTANCE.
-				getTranslationCacheString(((IndexSearcher) searcher).getIndexReader(), uniqueIdField);
+		  if (cacheGetter != null) {
+		    valueToDocidCache = (Map<String, Integer>) cacheGetter.getCache();
+		  }
+		  else {
+  			valueToDocidCache = DictionaryRecIdCache.INSTANCE.
+  				getTranslationCacheString(((IndexSearcher) searcher).getIndexReader(), uniqueIdField);
+		  }
 		}
 	}
 	
