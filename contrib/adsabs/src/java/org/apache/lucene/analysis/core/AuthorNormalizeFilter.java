@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.IOException;
 

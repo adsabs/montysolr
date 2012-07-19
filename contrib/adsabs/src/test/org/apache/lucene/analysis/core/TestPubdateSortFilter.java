@@ -1,15 +1,16 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.util.Version;
-import org.apache.solr.analysis.BaseTokenTestCase;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.solr.analysis.PubdateSortFilterFactory;
 
-public final class TestPubdateSortFilter extends BaseTokenTestCase {
+public final class TestPubdateSortFilter extends BaseTokenStreamTestCase {
 	
 	  public void testFilter() throws Exception {
 		  	Reader reader = new StringReader("2005-11-00 2010-00-00 1998-01-05");

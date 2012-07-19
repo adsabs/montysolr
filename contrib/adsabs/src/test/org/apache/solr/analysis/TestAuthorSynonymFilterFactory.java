@@ -1,9 +1,10 @@
-package org.adsabs.solr.analysis;
+package org.apache.solr.analysis;
 
 import static org.junit.Assert.*;
 
 import java.util.*;
 
+import org.apache.solr.analysis.WriteableSynonymMap;
 import org.junit.Test;
 
 public class TestAuthorSynonymFilterFactory {
@@ -19,7 +20,6 @@ public class TestAuthorSynonymFilterFactory {
 		}
 		
 	    WriteableSynonymMap synMap = new WriteableSynonymMap(null);
-	    AuthorSynonymFilterFactory asff = new AuthorSynonymFilterFactory();
 	    synMap.parseRules(rules);
 	    List<String> expected = new ArrayList<String>();
 	    expected.add("MILLER, B");

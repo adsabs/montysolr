@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +14,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeSource;
+import org.apache.solr.analysis.WriteableSynonymMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

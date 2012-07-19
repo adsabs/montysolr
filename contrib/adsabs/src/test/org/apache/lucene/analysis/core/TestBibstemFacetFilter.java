@@ -1,16 +1,17 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.util.Version;
-import org.apache.solr.analysis.BaseTokenTestCase;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.solr.analysis.BibstemFilterFactory;
 
 
-public final class TestBibstemFacetFilter extends BaseTokenTestCase {
+public final class TestBibstemFacetFilter extends BaseTokenStreamTestCase {
 
 	public void testHasVolume() {
 		assertTrue(BibstemFilter.hasVolume("1992ApJ...389..510D"));
@@ -33,7 +34,7 @@ public final class TestBibstemFacetFilter extends BaseTokenTestCase {
 	
 	  public void testBibcodeWithVolume() throws Exception {
 		  	Reader reader = new StringReader("1992ApJ...389..510D 1999AJ....118.1131W 1993NYASA.688..184M 1991abe..conf.1276H 1989asme.proc..289C");
-		  	Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_31, reader);
+		  	Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_40, reader);
 		    BibstemFilterFactory factory = new BibstemFilterFactory();
 		    
 		    TokenStream stream = factory.create(tokenizer);

@@ -1,8 +1,6 @@
 package org.adsabs.solr.analysis;
 
 import static org.junit.Assert.*;
-import org.apache.commons.lang.StringUtils;
-
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;

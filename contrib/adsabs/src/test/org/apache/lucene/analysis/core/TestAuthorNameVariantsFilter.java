@@ -1,13 +1,15 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.Reader;
 import java.io.StringReader;
-import org.apache.lucene.analysis.KeywordTokenizer;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.BaseTokenTestCase;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.solr.analysis.AuthorNameVariantsFilterFactory;
 
-public class TestAuthorNameVariantsFilterFactory extends BaseTokenTestCase {
+
+public class TestAuthorNameVariantsFilter extends BaseTokenStreamTestCase {
 	public void testAuthorSynonyms() throws Exception {
 		Reader reader = new StringReader("Müller, Bill");
 		Tokenizer tokenizer = new KeywordTokenizer(reader);

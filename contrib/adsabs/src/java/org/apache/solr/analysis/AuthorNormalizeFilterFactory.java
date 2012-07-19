@@ -1,16 +1,17 @@
 /**
  * 
  */
-package org.adsabs.solr.analysis;
+package org.apache.solr.analysis;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.BaseTokenFilterFactory;
+import org.apache.lucene.analysis.core.AuthorNormalizeFilter;
+import org.apache.lucene.analysis.util.TokenFilterFactory;
 
 /**
  * @author jluker
  *
  */
-public class AuthorNormalizeFilterFactory extends BaseTokenFilterFactory {
+public class AuthorNormalizeFilterFactory extends TokenFilterFactory {
 
 	/* (non-Javadoc)
 	 * @see org.apache.solr.analysis.TokenFilterFactory#create(org.apache.lucene.analysis.TokenStream)

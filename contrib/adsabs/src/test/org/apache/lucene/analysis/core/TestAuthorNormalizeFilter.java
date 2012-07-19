@@ -1,13 +1,14 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.Reader;
 import java.io.StringReader;
-import org.apache.lucene.analysis.KeywordTokenizer;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.BaseTokenTestCase;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.solr.analysis.AuthorNormalizeFilterFactory;
 
-public class TestAuthorNormalizeFilter extends BaseTokenTestCase {
+public class TestAuthorNormalizeFilter extends BaseTokenStreamTestCase {
 
 	  public void testUppercase() throws Exception {
 		  	Reader reader = new StringReader("Gómez, Hector Q");

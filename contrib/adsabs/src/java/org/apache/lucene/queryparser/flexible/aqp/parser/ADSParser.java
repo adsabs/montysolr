@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g 2012-07-10 20:21:04
+// $ANTLR 3.4 /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g 2012-07-18 12:55:14
 
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 
@@ -115,7 +115,7 @@ public TreeAdaptor getTreeAdaptor() {
     return adaptor;
 }
     public String[] getTokenNames() { return ADSParser.tokenNames; }
-    public String getGrammarFileName() { return "/dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g"; }
+    public String getGrammarFileName() { return "/home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g"; }
 
 
     public static class mainQ_return extends ParserRuleReturnScope {
@@ -125,7 +125,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "mainQ"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:41:1: mainQ : ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:41:1: mainQ : ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ;
     public final ADSParser.mainQ_return mainQ() throws RecognitionException {
         ADSParser.mainQ_return retval = new ADSParser.mainQ_return();
         retval.start = input.LT(1);
@@ -138,10 +138,10 @@ public TreeAdaptor getTreeAdaptor() {
 
         RewriteRuleSubtreeStream stream_clauseOr=new RewriteRuleSubtreeStream(adaptor,"rule clauseOr");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:41:7: ( ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:42:2: ( clauseOr )+
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:41:7: ( ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:42:2: ( clauseOr )+
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:42:2: ( clauseOr )+
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:42:2: ( clauseOr )+
             int cnt1=0;
             loop1:
             do {
@@ -155,7 +155,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt1) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:42:2: clauseOr
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:42:2: clauseOr
             	    {
             	    pushFollow(FOLLOW_clauseOr_in_mainQ168);
             	    clauseOr1=clauseOr();
@@ -193,7 +193,7 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (Object)adaptor.nil();
             // 42:12: -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
             {
-                // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:42:15: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+                // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:42:15: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
@@ -251,7 +251,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseOr"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:46:1: clauseOr : (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )* ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:46:1: clauseOr : (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )* ;
     public final ADSParser.clauseOr_return clauseOr() throws RecognitionException {
         ADSParser.clauseOr_return retval = new ADSParser.clauseOr_return();
         retval.start = input.LT(1);
@@ -269,11 +269,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_clauseAnd=new RewriteRuleSubtreeStream(adaptor,"rule clauseAnd");
         RewriteRuleSubtreeStream stream_or=new RewriteRuleSubtreeStream(adaptor,"rule or");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:47:3: ( (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )* )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:47:5: (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:47:3: ( (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )* )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:47:5: (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )*
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:47:5: (first= clauseAnd -> $first)
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:47:6: first= clauseAnd
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:47:5: (first= clauseAnd -> $first)
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:47:6: first= clauseAnd
             {
             pushFollow(FOLLOW_clauseAnd_in_clauseOr201);
             first=clauseAnd();
@@ -309,7 +309,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:47:33: ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:47:33: ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )*
             loop2:
             do {
                 int alt2=2;
@@ -322,7 +322,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt2) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:47:34: or others= clauseAnd
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:47:34: or others= clauseAnd
             	    {
             	    pushFollow(FOLLOW_or_in_clauseOr210);
             	    or2=or();
@@ -353,7 +353,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    root_0 = (Object)adaptor.nil();
             	    // 47:54: -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ )
             	    {
-            	        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:47:57: ^( OPERATOR[\"OR\"] ( clauseAnd )+ )
+            	        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:47:57: ^( OPERATOR[\"OR\"] ( clauseAnd )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
@@ -420,7 +420,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseAnd"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:51:1: clauseAnd : (first= clauseSemicolon -> $first) ( and others= clauseSemicolon -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ ) )* ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:51:1: clauseAnd : (first= clauseSemicolon -> $first) ( and others= clauseSemicolon -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ ) )* ;
     public final ADSParser.clauseAnd_return clauseAnd() throws RecognitionException {
         ADSParser.clauseAnd_return retval = new ADSParser.clauseAnd_return();
         retval.start = input.LT(1);
@@ -438,11 +438,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_clauseSemicolon=new RewriteRuleSubtreeStream(adaptor,"rule clauseSemicolon");
         RewriteRuleSubtreeStream stream_and=new RewriteRuleSubtreeStream(adaptor,"rule and");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:52:3: ( (first= clauseSemicolon -> $first) ( and others= clauseSemicolon -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ ) )* )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:52:5: (first= clauseSemicolon -> $first) ( and others= clauseSemicolon -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:52:3: ( (first= clauseSemicolon -> $first) ( and others= clauseSemicolon -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ ) )* )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:52:5: (first= clauseSemicolon -> $first) ( and others= clauseSemicolon -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ ) )*
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:52:5: (first= clauseSemicolon -> $first)
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:52:6: first= clauseSemicolon
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:52:5: (first= clauseSemicolon -> $first)
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:52:6: first= clauseSemicolon
             {
             pushFollow(FOLLOW_clauseSemicolon_in_clauseAnd244);
             first=clauseSemicolon();
@@ -478,7 +478,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:52:40: ( and others= clauseSemicolon -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:52:40: ( and others= clauseSemicolon -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ ) )*
             loop3:
             do {
                 int alt3=2;
@@ -491,7 +491,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt3) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:52:41: and others= clauseSemicolon
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:52:41: and others= clauseSemicolon
             	    {
             	    pushFollow(FOLLOW_and_in_clauseAnd254);
             	    and3=and();
@@ -522,7 +522,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    root_0 = (Object)adaptor.nil();
             	    // 52:68: -> ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ )
             	    {
-            	        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:52:71: ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ )
+            	        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:52:71: ^( OPERATOR[\"AND\"] ( clauseSemicolon )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
@@ -589,7 +589,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseSemicolon"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:55:1: clauseSemicolon : (first= clauseComma -> $first) ( semicolon others= clauseComma -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ ) )* ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:55:1: clauseSemicolon : (first= clauseComma -> $first) ( semicolon others= clauseComma -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ ) )* ;
     public final ADSParser.clauseSemicolon_return clauseSemicolon() throws RecognitionException {
         ADSParser.clauseSemicolon_return retval = new ADSParser.clauseSemicolon_return();
         retval.start = input.LT(1);
@@ -607,11 +607,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_clauseComma=new RewriteRuleSubtreeStream(adaptor,"rule clauseComma");
         RewriteRuleSubtreeStream stream_semicolon=new RewriteRuleSubtreeStream(adaptor,"rule semicolon");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:56:3: ( (first= clauseComma -> $first) ( semicolon others= clauseComma -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ ) )* )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:56:5: (first= clauseComma -> $first) ( semicolon others= clauseComma -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:56:3: ( (first= clauseComma -> $first) ( semicolon others= clauseComma -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ ) )* )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:56:5: (first= clauseComma -> $first) ( semicolon others= clauseComma -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ ) )*
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:56:5: (first= clauseComma -> $first)
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:56:6: first= clauseComma
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:56:5: (first= clauseComma -> $first)
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:56:6: first= clauseComma
             {
             pushFollow(FOLLOW_clauseComma_in_clauseSemicolon287);
             first=clauseComma();
@@ -647,7 +647,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:56:36: ( semicolon others= clauseComma -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:56:36: ( semicolon others= clauseComma -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ ) )*
             loop4:
             do {
                 int alt4=2;
@@ -660,7 +660,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt4) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:56:37: semicolon others= clauseComma
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:56:37: semicolon others= clauseComma
             	    {
             	    pushFollow(FOLLOW_semicolon_in_clauseSemicolon297);
             	    semicolon4=semicolon();
@@ -691,7 +691,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    root_0 = (Object)adaptor.nil();
             	    // 56:66: -> ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ )
             	    {
-            	        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:56:69: ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ )
+            	        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:56:69: ^( OPERATOR[\"SEMICOLON\"] ( clauseComma )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
@@ -758,7 +758,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseComma"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:59:1: clauseComma : (first= clauseNot -> $first) ( comma others= clauseNot -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ ) )* ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:59:1: clauseComma : (first= clauseNot -> $first) ( comma others= clauseNot -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ ) )* ;
     public final ADSParser.clauseComma_return clauseComma() throws RecognitionException {
         ADSParser.clauseComma_return retval = new ADSParser.clauseComma_return();
         retval.start = input.LT(1);
@@ -776,11 +776,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_comma=new RewriteRuleSubtreeStream(adaptor,"rule comma");
         RewriteRuleSubtreeStream stream_clauseNot=new RewriteRuleSubtreeStream(adaptor,"rule clauseNot");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:60:3: ( (first= clauseNot -> $first) ( comma others= clauseNot -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ ) )* )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:60:5: (first= clauseNot -> $first) ( comma others= clauseNot -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:60:3: ( (first= clauseNot -> $first) ( comma others= clauseNot -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ ) )* )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:60:5: (first= clauseNot -> $first) ( comma others= clauseNot -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ ) )*
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:60:5: (first= clauseNot -> $first)
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:60:6: first= clauseNot
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:60:5: (first= clauseNot -> $first)
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:60:6: first= clauseNot
             {
             pushFollow(FOLLOW_clauseNot_in_clauseComma330);
             first=clauseNot();
@@ -816,7 +816,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:60:34: ( comma others= clauseNot -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:60:34: ( comma others= clauseNot -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ ) )*
             loop5:
             do {
                 int alt5=2;
@@ -829,7 +829,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt5) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:60:35: comma others= clauseNot
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:60:35: comma others= clauseNot
             	    {
             	    pushFollow(FOLLOW_comma_in_clauseComma340);
             	    comma5=comma();
@@ -860,7 +860,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    root_0 = (Object)adaptor.nil();
             	    // 60:58: -> ^( OPERATOR[\"COMMA\"] ( clauseNot )+ )
             	    {
-            	        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:60:61: ^( OPERATOR[\"COMMA\"] ( clauseNot )+ )
+            	        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:60:61: ^( OPERATOR[\"COMMA\"] ( clauseNot )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
@@ -927,7 +927,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseNot"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:63:1: clauseNot : (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )* ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:63:1: clauseNot : (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )* ;
     public final ADSParser.clauseNot_return clauseNot() throws RecognitionException {
         ADSParser.clauseNot_return retval = new ADSParser.clauseNot_return();
         retval.start = input.LT(1);
@@ -945,11 +945,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_not=new RewriteRuleSubtreeStream(adaptor,"rule not");
         RewriteRuleSubtreeStream stream_clauseNear=new RewriteRuleSubtreeStream(adaptor,"rule clauseNear");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:64:3: ( (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )* )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:64:5: (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:64:3: ( (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )* )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:64:5: (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )*
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:64:5: (first= clauseNear -> $first)
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:64:6: first= clauseNear
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:64:5: (first= clauseNear -> $first)
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:64:6: first= clauseNear
             {
             pushFollow(FOLLOW_clauseNear_in_clauseNot377);
             first=clauseNear();
@@ -985,7 +985,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:64:34: ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:64:34: ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )*
             loop6:
             do {
                 int alt6=2;
@@ -1007,7 +1007,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt6) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:64:35: not others= clauseNear
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:64:35: not others= clauseNear
             	    {
             	    pushFollow(FOLLOW_not_in_clauseNot386);
             	    not6=not();
@@ -1038,7 +1038,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    root_0 = (Object)adaptor.nil();
             	    // 64:57: -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ )
             	    {
-            	        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:64:60: ^( OPERATOR[\"NOT\"] ( clauseNear )+ )
+            	        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:64:60: ^( OPERATOR[\"NOT\"] ( clauseNear )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(
@@ -1105,7 +1105,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseNear"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:67:1: clauseNear : (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )* ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:67:1: clauseNear : (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )* ;
     public final ADSParser.clauseNear_return clauseNear() throws RecognitionException {
         ADSParser.clauseNear_return retval = new ADSParser.clauseNear_return();
         retval.start = input.LT(1);
@@ -1123,11 +1123,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_clauseBasic=new RewriteRuleSubtreeStream(adaptor,"rule clauseBasic");
         RewriteRuleSubtreeStream stream_near=new RewriteRuleSubtreeStream(adaptor,"rule near");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:68:3: ( (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )* )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:68:5: (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:68:3: ( (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )* )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:68:5: (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )*
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:68:5: (first= clauseBasic -> $first)
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:68:6: first= clauseBasic
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:68:5: (first= clauseBasic -> $first)
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:68:6: first= clauseBasic
             {
             pushFollow(FOLLOW_clauseBasic_in_clauseNear421);
             first=clauseBasic();
@@ -1163,7 +1163,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:68:35: ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )*
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:68:35: ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )*
             loop7:
             do {
                 int alt7=2;
@@ -1176,7 +1176,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt7) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:68:36: near others= clauseBasic
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:68:36: near others= clauseBasic
             	    {
             	    pushFollow(FOLLOW_near_in_clauseNear430);
             	    near7=near();
@@ -1193,7 +1193,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    if ( state.backtracking==0 ) stream_clauseBasic.add(others.getTree());
 
             	    // AST REWRITE
-            	    // elements: near, clauseBasic
+            	    // elements: clauseBasic, near
             	    // token labels: 
             	    // rule labels: retval
             	    // token list labels: 
@@ -1207,7 +1207,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    root_0 = (Object)adaptor.nil();
             	    // 68:60: -> ^( near ( clauseBasic )+ )
             	    {
-            	        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:68:63: ^( near ( clauseBasic )+ )
+            	        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:68:63: ^( near ( clauseBasic )+ )
             	        {
             	        Object root_1 = (Object)adaptor.nil();
             	        root_1 = (Object)adaptor.becomeRoot(stream_near.nextNode(), root_1);
@@ -1272,7 +1272,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "clauseBasic"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:71:1: clauseBasic : ( ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) ) | ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN -> ( clauseOr )+ | atom );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:71:1: clauseBasic : ( ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) ) | ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN -> ( clauseOr )+ | atom );
     public final ADSParser.clauseBasic_return clauseBasic() throws RecognitionException {
         ADSParser.clauseBasic_return retval = new ADSParser.clauseBasic_return();
         retval.start = input.LT(1);
@@ -1326,7 +1326,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_rmodifier=new RewriteRuleSubtreeStream(adaptor,"rule rmodifier");
         RewriteRuleSubtreeStream stream_clauseOr=new RewriteRuleSubtreeStream(adaptor,"rule clauseOr");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:72:2: ( ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) ) | ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN -> ( clauseOr )+ | atom )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:72:2: ( ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) ) | ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN -> ( clauseOr )+ | atom )
             int alt18=5;
             int LA18_0 = input.LA(1);
 
@@ -1463,9 +1463,9 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt18) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:3: ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:3: ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )?
                     {
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:29: ( lmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:29: ( lmodifier )?
                     int alt8=2;
                     int LA8_0 = input.LA(1);
 
@@ -1474,7 +1474,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt8) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:29: lmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:29: lmodifier
                             {
                             pushFollow(FOLLOW_lmodifier_in_clauseBasic473);
                             lmodifier8=lmodifier();
@@ -1496,7 +1496,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_func_name.add(func_name9.getTree());
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:50: ( clauseOr )+
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:50: ( clauseOr )+
                     int cnt9=0;
                     loop9:
                     do {
@@ -1510,7 +1510,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt9) {
                     	case 1 :
-                    	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:50: clauseOr
+                    	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:50: clauseOr
                     	    {
                     	    pushFollow(FOLLOW_clauseOr_in_clauseBasic478);
                     	    clauseOr10=clauseOr();
@@ -1537,7 +1537,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN11);
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:68: ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:68: ( rmodifier )?
                     int alt10=2;
                     int LA10_0 = input.LA(1);
 
@@ -1546,7 +1546,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt10) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:68: rmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:68: rmodifier
                             {
                             pushFollow(FOLLOW_rmodifier_in_clauseBasic484);
                             rmodifier12=rmodifier();
@@ -1562,7 +1562,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: clauseOr, rmodifier, lmodifier, func_name
+                    // elements: rmodifier, lmodifier, clauseOr, func_name
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1576,42 +1576,42 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 74:3: -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:74:6: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:74:6: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(CLAUSE, "CLAUSE")
                         , root_1);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:74:15: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:74:15: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_2);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:74:26: ( lmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:74:26: ( lmodifier )?
                         if ( stream_lmodifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_lmodifier.nextTree());
 
                         }
                         stream_lmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:74:37: ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:74:37: ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
                         {
                         Object root_3 = (Object)adaptor.nil();
                         root_3 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                         , root_3);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:74:49: ( rmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:74:49: ( rmodifier )?
                         if ( stream_rmodifier.hasNext() ) {
                             adaptor.addChild(root_3, stream_rmodifier.nextTree());
 
                         }
                         stream_rmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:74:60: ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:74:60: ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
                         {
                         Object root_4 = (Object)adaptor.nil();
                         root_4 = (Object)adaptor.becomeRoot(
@@ -1620,7 +1620,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                         adaptor.addChild(root_4, stream_func_name.nextTree());
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:74:78: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:74:78: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
                         {
                         Object root_5 = (Object)adaptor.nil();
                         root_5 = (Object)adaptor.becomeRoot(
@@ -1660,9 +1660,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:4: ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:4: ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )?
                     {
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:43: ( lmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:43: ( lmodifier )?
                     int alt11=2;
                     int LA11_0 = input.LA(1);
 
@@ -1671,7 +1671,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt11) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:43: lmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:43: lmodifier
                             {
                             pushFollow(FOLLOW_lmodifier_in_clauseBasic539);
                             lmodifier13=lmodifier();
@@ -1690,7 +1690,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN14);
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:61: ( clauseOr )+
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:61: ( clauseOr )+
                     int cnt12=0;
                     loop12:
                     do {
@@ -1704,7 +1704,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt12) {
                     	case 1 :
-                    	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:61: clauseOr
+                    	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:61: clauseOr
                     	    {
                     	    pushFollow(FOLLOW_clauseOr_in_clauseBasic544);
                     	    clauseOr15=clauseOr();
@@ -1731,7 +1731,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN16);
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:78: ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:78: ( rmodifier )?
                     int alt13=2;
                     int LA13_0 = input.LA(1);
 
@@ -1740,7 +1740,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt13) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:78: rmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:78: rmodifier
                             {
                             pushFollow(FOLLOW_rmodifier_in_clauseBasic549);
                             rmodifier17=rmodifier();
@@ -1756,7 +1756,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: clauseOr, rmodifier, lmodifier
+                    // elements: rmodifier, lmodifier, clauseOr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1770,42 +1770,42 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 76:3: -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:76:6: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:76:6: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(CLAUSE, "CLAUSE")
                         , root_1);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:76:15: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:76:15: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_2);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:76:26: ( lmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:76:26: ( lmodifier )?
                         if ( stream_lmodifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_lmodifier.nextTree());
 
                         }
                         stream_lmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:76:37: ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:76:37: ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
                         {
                         Object root_3 = (Object)adaptor.nil();
                         root_3 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                         , root_3);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:76:49: ( rmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:76:49: ( rmodifier )?
                         if ( stream_rmodifier.hasNext() ) {
                             adaptor.addChild(root_3, stream_rmodifier.nextTree());
 
                         }
                         stream_rmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:76:60: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:76:60: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
                         {
                         Object root_4 = (Object)adaptor.nil();
                         root_4 = (Object)adaptor.becomeRoot(
@@ -1842,9 +1842,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:4: ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:4: ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )?
                     {
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:42: ( lmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:42: ( lmodifier )?
                     int alt14=2;
                     int LA14_0 = input.LA(1);
 
@@ -1853,7 +1853,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt14) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:42: lmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:42: lmodifier
                             {
                             pushFollow(FOLLOW_lmodifier_in_clauseBasic599);
                             lmodifier18=lmodifier();
@@ -1872,7 +1872,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN19);
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:60: ( clauseOr )+
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:60: ( clauseOr )+
                     int cnt15=0;
                     loop15:
                     do {
@@ -1886,7 +1886,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt15) {
                     	case 1 :
-                    	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:60: clauseOr
+                    	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:60: clauseOr
                     	    {
                     	    pushFollow(FOLLOW_clauseOr_in_clauseBasic604);
                     	    clauseOr20=clauseOr();
@@ -1913,7 +1913,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN21);
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:77: ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:77: ( rmodifier )?
                     int alt16=2;
                     int LA16_0 = input.LA(1);
 
@@ -1922,7 +1922,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt16) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:77: rmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:77: rmodifier
                             {
                             pushFollow(FOLLOW_rmodifier_in_clauseBasic609);
                             rmodifier22=rmodifier();
@@ -1938,7 +1938,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: rmodifier, lmodifier, clauseOr
+                    // elements: lmodifier, rmodifier, clauseOr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1952,42 +1952,42 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 78:3: -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:78:6: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:78:6: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(CLAUSE, "CLAUSE")
                         , root_1);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:78:15: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:78:15: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_2);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:78:26: ( lmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:78:26: ( lmodifier )?
                         if ( stream_lmodifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_lmodifier.nextTree());
 
                         }
                         stream_lmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:78:37: ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:78:37: ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
                         {
                         Object root_3 = (Object)adaptor.nil();
                         root_3 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                         , root_3);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:78:49: ( rmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:78:49: ( rmodifier )?
                         if ( stream_rmodifier.hasNext() ) {
                             adaptor.addChild(root_3, stream_rmodifier.nextTree());
 
                         }
                         stream_rmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:78:60: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:78:60: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
                         {
                         Object root_4 = (Object)adaptor.nil();
                         root_4 = (Object)adaptor.becomeRoot(
@@ -2024,13 +2024,13 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:79:4: ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:79:4: ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN
                     {
                     LPAREN23=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_clauseBasic653); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN23);
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:79:23: ( clauseOr )+
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:79:23: ( clauseOr )+
                     int cnt17=0;
                     loop17:
                     do {
@@ -2044,7 +2044,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                         switch (alt17) {
                     	case 1 :
-                    	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:79:23: clauseOr
+                    	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:79:23: clauseOr
                     	    {
                     	    pushFollow(FOLLOW_clauseOr_in_clauseBasic655);
                     	    clauseOr24=clauseOr();
@@ -2104,7 +2104,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 5 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:81:4: atom
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:81:4: atom
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -2151,7 +2151,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "atom"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:85:1: atom : ( ( lmodifier )? field multi_value ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) ) | ( lmodifier )? ( field )? value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) ) );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:85:1: atom : ( ( lmodifier )? field multi_value ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) ) | ( lmodifier )? ( field )? value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) ) );
     public final ADSParser.atom_return atom() throws RecognitionException {
         ADSParser.atom_return retval = new ADSParser.atom_return();
         retval.start = input.LT(1);
@@ -2182,7 +2182,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_multi_value=new RewriteRuleSubtreeStream(adaptor,"rule multi_value");
         RewriteRuleSubtreeStream stream_rmodifier=new RewriteRuleSubtreeStream(adaptor,"rule rmodifier");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:86:2: ( ( lmodifier )? field multi_value ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) ) | ( lmodifier )? ( field )? value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:86:2: ( ( lmodifier )? field multi_value ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) ) | ( lmodifier )? ( field )? value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) ) )
             int alt24=2;
             switch ( input.LA(1) ) {
             case PLUS:
@@ -2452,9 +2452,9 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt24) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:87:2: ( lmodifier )? field multi_value ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:87:2: ( lmodifier )? field multi_value ( rmodifier )?
                     {
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:87:2: ( lmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:87:2: ( lmodifier )?
                     int alt19=2;
                     int LA19_0 = input.LA(1);
 
@@ -2463,7 +2463,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt19) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:87:2: lmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:87:2: lmodifier
                             {
                             pushFollow(FOLLOW_lmodifier_in_atom691);
                             lmodifier27=lmodifier();
@@ -2492,7 +2492,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_multi_value.add(multi_value29.getTree());
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:87:31: ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:87:31: ( rmodifier )?
                     int alt20=2;
                     int LA20_0 = input.LA(1);
 
@@ -2501,7 +2501,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt20) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:87:31: rmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:87:31: rmodifier
                             {
                             pushFollow(FOLLOW_rmodifier_in_atom698);
                             rmodifier30=rmodifier();
@@ -2517,7 +2517,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: rmodifier, lmodifier, field, multi_value
+                    // elements: lmodifier, field, rmodifier, multi_value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2531,42 +2531,42 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 88:3: -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:88:6: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:88:6: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(CLAUSE, "CLAUSE")
                         , root_1);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:88:15: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:88:15: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_2);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:88:26: ( lmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:88:26: ( lmodifier )?
                         if ( stream_lmodifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_lmodifier.nextTree());
 
                         }
                         stream_lmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:88:37: ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:88:37: ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) )
                         {
                         Object root_3 = (Object)adaptor.nil();
                         root_3 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                         , root_3);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:88:49: ( rmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:88:49: ( rmodifier )?
                         if ( stream_rmodifier.hasNext() ) {
                             adaptor.addChild(root_3, stream_rmodifier.nextTree());
 
                         }
                         stream_rmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:88:60: ^( FIELD field multi_value )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:88:60: ^( FIELD field multi_value )
                         {
                         Object root_4 = (Object)adaptor.nil();
                         root_4 = (Object)adaptor.becomeRoot(
@@ -2598,9 +2598,9 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:90:2: ( lmodifier )? ( field )? value ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:90:2: ( lmodifier )? ( field )? value ( rmodifier )?
                     {
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:90:2: ( lmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:90:2: ( lmodifier )?
                     int alt21=2;
                     int LA21_0 = input.LA(1);
 
@@ -2609,7 +2609,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt21) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:90:2: lmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:90:2: lmodifier
                             {
                             pushFollow(FOLLOW_lmodifier_in_atom736);
                             lmodifier31=lmodifier();
@@ -2624,7 +2624,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:90:13: ( field )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:90:13: ( field )?
                     int alt22=2;
                     int LA22_0 = input.LA(1);
 
@@ -2637,7 +2637,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt22) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:90:13: field
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:90:13: field
                             {
                             pushFollow(FOLLOW_field_in_atom739);
                             field32=field();
@@ -2659,7 +2659,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_value.add(value33.getTree());
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:90:26: ( rmodifier )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:90:26: ( rmodifier )?
                     int alt23=2;
                     int LA23_0 = input.LA(1);
 
@@ -2668,7 +2668,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt23) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:90:26: rmodifier
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:90:26: rmodifier
                             {
                             pushFollow(FOLLOW_rmodifier_in_atom744);
                             rmodifier34=rmodifier();
@@ -2684,7 +2684,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: field, rmodifier, lmodifier, value
+                    // elements: rmodifier, field, lmodifier, value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2698,42 +2698,42 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 91:2: -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:91:5: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:91:5: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(MODIFIER, "MODIFIER")
                         , root_1);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:91:16: ( lmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:91:16: ( lmodifier )?
                         if ( stream_lmodifier.hasNext() ) {
                             adaptor.addChild(root_1, stream_lmodifier.nextTree());
 
                         }
                         stream_lmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:91:27: ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:91:27: ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) )
                         {
                         Object root_2 = (Object)adaptor.nil();
                         root_2 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(TMODIFIER, "TMODIFIER")
                         , root_2);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:91:39: ( rmodifier )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:91:39: ( rmodifier )?
                         if ( stream_rmodifier.hasNext() ) {
                             adaptor.addChild(root_2, stream_rmodifier.nextTree());
 
                         }
                         stream_rmodifier.reset();
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:91:50: ^( FIELD ( field )? value )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:91:50: ^( FIELD ( field )? value )
                         {
                         Object root_3 = (Object)adaptor.nil();
                         root_3 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(FIELD, "FIELD")
                         , root_3);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:91:58: ( field )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:91:58: ( field )?
                         if ( stream_field.hasNext() ) {
                             adaptor.addChild(root_3, stream_field.nextTree());
 
@@ -2792,7 +2792,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "field"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:98:1: field : TERM_NORMAL COLON -> TERM_NORMAL ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:98:1: field : TERM_NORMAL COLON -> TERM_NORMAL ;
     public final ADSParser.field_return field() throws RecognitionException {
         ADSParser.field_return retval = new ADSParser.field_return();
         retval.start = input.LT(1);
@@ -2809,8 +2809,8 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_TERM_NORMAL=new RewriteRuleTokenStream(adaptor,"token TERM_NORMAL");
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:99:2: ( TERM_NORMAL COLON -> TERM_NORMAL )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:100:2: TERM_NORMAL COLON
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:99:2: ( TERM_NORMAL COLON -> TERM_NORMAL )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:100:2: TERM_NORMAL COLON
             {
             TERM_NORMAL35=(Token)match(input,TERM_NORMAL,FOLLOW_TERM_NORMAL_in_field796); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_TERM_NORMAL.add(TERM_NORMAL35);
@@ -2878,7 +2878,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "value"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:104:1: value : ( range_term_in -> ^( QRANGEIN range_term_in ) | identifier -> ^( QIDENTIFIER identifier ) | coordinate -> ^( QCOORDINATE coordinate ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | DATE_RANGE -> ^( QDATE DATE_RANGE ) | AUTHOR_SEARCH -> ^( QPOSITION AUTHOR_SEARCH ) | QMARK -> ^( QTRUNCATED QMARK ) | STAR COLON b= STAR -> ^( QANYTHING $b) | STAR -> ^( QTRUNCATED STAR ) );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:104:1: value : ( range_term_in -> ^( QRANGEIN range_term_in ) | identifier -> ^( QIDENTIFIER identifier ) | coordinate -> ^( QCOORDINATE coordinate ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | DATE_RANGE -> ^( QDATE DATE_RANGE ) | AUTHOR_SEARCH -> ^( QPOSITION AUTHOR_SEARCH ) | QMARK -> ^( QTRUNCATED QMARK ) | STAR COLON b= STAR -> ^( QANYTHING $b) | STAR -> ^( QTRUNCATED STAR ) );
     public final ADSParser.value_return value() throws RecognitionException {
         ADSParser.value_return retval = new ADSParser.value_return();
         retval.start = input.LT(1);
@@ -2928,7 +2928,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_range_term_in=new RewriteRuleSubtreeStream(adaptor,"rule range_term_in");
         RewriteRuleSubtreeStream stream_identifier=new RewriteRuleSubtreeStream(adaptor,"rule identifier");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:105:2: ( range_term_in -> ^( QRANGEIN range_term_in ) | identifier -> ^( QIDENTIFIER identifier ) | coordinate -> ^( QCOORDINATE coordinate ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | DATE_RANGE -> ^( QDATE DATE_RANGE ) | AUTHOR_SEARCH -> ^( QPOSITION AUTHOR_SEARCH ) | QMARK -> ^( QTRUNCATED QMARK ) | STAR COLON b= STAR -> ^( QANYTHING $b) | STAR -> ^( QTRUNCATED STAR ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:105:2: ( range_term_in -> ^( QRANGEIN range_term_in ) | identifier -> ^( QIDENTIFIER identifier ) | coordinate -> ^( QCOORDINATE coordinate ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | DATE_RANGE -> ^( QDATE DATE_RANGE ) | AUTHOR_SEARCH -> ^( QPOSITION AUTHOR_SEARCH ) | QMARK -> ^( QTRUNCATED QMARK ) | STAR COLON b= STAR -> ^( QANYTHING $b) | STAR -> ^( QTRUNCATED STAR ) )
             int alt25=12;
             switch ( input.LA(1) ) {
             case LBRACK:
@@ -3019,7 +3019,7 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt25) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:106:2: range_term_in
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:106:2: range_term_in
                     {
                     pushFollow(FOLLOW_range_term_in_in_value819);
                     range_term_in37=range_term_in();
@@ -3043,7 +3043,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 106:16: -> ^( QRANGEIN range_term_in )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:106:19: ^( QRANGEIN range_term_in )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:106:19: ^( QRANGEIN range_term_in )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3064,7 +3064,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:108:4: identifier
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:108:4: identifier
                     {
                     pushFollow(FOLLOW_identifier_in_value833);
                     identifier38=identifier();
@@ -3088,7 +3088,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 108:15: -> ^( QIDENTIFIER identifier )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:108:18: ^( QIDENTIFIER identifier )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:108:18: ^( QIDENTIFIER identifier )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3109,7 +3109,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:109:4: coordinate
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:109:4: coordinate
                     {
                     pushFollow(FOLLOW_coordinate_in_value846);
                     coordinate39=coordinate();
@@ -3133,7 +3133,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 109:15: -> ^( QCOORDINATE coordinate )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:109:18: ^( QCOORDINATE coordinate )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:109:18: ^( QCOORDINATE coordinate )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3154,7 +3154,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:110:4: normal
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:110:4: normal
                     {
                     pushFollow(FOLLOW_normal_in_value859);
                     normal40=normal();
@@ -3178,7 +3178,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 110:11: -> ^( QNORMAL normal )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:110:14: ^( QNORMAL normal )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:110:14: ^( QNORMAL normal )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3199,7 +3199,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 5 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:111:4: truncated
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:111:4: truncated
                     {
                     pushFollow(FOLLOW_truncated_in_value873);
                     truncated41=truncated();
@@ -3223,7 +3223,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 111:14: -> ^( QTRUNCATED truncated )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:111:17: ^( QTRUNCATED truncated )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:111:17: ^( QTRUNCATED truncated )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3244,7 +3244,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 6 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:112:4: quoted
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:112:4: quoted
                     {
                     pushFollow(FOLLOW_quoted_in_value887);
                     quoted42=quoted();
@@ -3268,7 +3268,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 112:11: -> ^( QPHRASE quoted )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:112:14: ^( QPHRASE quoted )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:112:14: ^( QPHRASE quoted )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3289,7 +3289,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 7 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:113:4: quoted_truncated
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:113:4: quoted_truncated
                     {
                     pushFollow(FOLLOW_quoted_truncated_in_value900);
                     quoted_truncated43=quoted_truncated();
@@ -3313,7 +3313,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 113:21: -> ^( QPHRASETRUNC quoted_truncated )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:113:24: ^( QPHRASETRUNC quoted_truncated )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:113:24: ^( QPHRASETRUNC quoted_truncated )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3334,7 +3334,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 8 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:114:4: DATE_RANGE
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:114:4: DATE_RANGE
                     {
                     DATE_RANGE44=(Token)match(input,DATE_RANGE,FOLLOW_DATE_RANGE_in_value913); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DATE_RANGE.add(DATE_RANGE44);
@@ -3355,7 +3355,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 114:15: -> ^( QDATE DATE_RANGE )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:114:18: ^( QDATE DATE_RANGE )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:114:18: ^( QDATE DATE_RANGE )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3378,7 +3378,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 9 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:115:4: AUTHOR_SEARCH
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:115:4: AUTHOR_SEARCH
                     {
                     AUTHOR_SEARCH45=(Token)match(input,AUTHOR_SEARCH,FOLLOW_AUTHOR_SEARCH_in_value926); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AUTHOR_SEARCH.add(AUTHOR_SEARCH45);
@@ -3399,7 +3399,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 115:18: -> ^( QPOSITION AUTHOR_SEARCH )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:115:21: ^( QPOSITION AUTHOR_SEARCH )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:115:21: ^( QPOSITION AUTHOR_SEARCH )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3422,7 +3422,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 10 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:116:4: QMARK
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:116:4: QMARK
                     {
                     QMARK46=(Token)match(input,QMARK,FOLLOW_QMARK_in_value939); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_QMARK.add(QMARK46);
@@ -3443,7 +3443,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 116:10: -> ^( QTRUNCATED QMARK )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:116:13: ^( QTRUNCATED QMARK )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:116:13: ^( QTRUNCATED QMARK )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3466,7 +3466,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 11 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:117:4: STAR COLON b= STAR
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:117:4: STAR COLON b= STAR
                     {
                     STAR47=(Token)match(input,STAR,FOLLOW_STAR_in_value952); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STAR.add(STAR47);
@@ -3496,7 +3496,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 117:22: -> ^( QANYTHING $b)
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:117:25: ^( QANYTHING $b)
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:117:25: ^( QANYTHING $b)
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3517,7 +3517,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 12 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:118:4: STAR
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:118:4: STAR
                     {
                     STAR49=(Token)match(input,STAR,FOLLOW_STAR_in_value972); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STAR.add(STAR49);
@@ -3538,7 +3538,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 118:9: -> ^( QTRUNCATED STAR )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:118:12: ^( QTRUNCATED STAR )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:118:12: ^( QTRUNCATED STAR )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3593,7 +3593,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "range_term_in"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:124:1: range_term_in options {greedy=true; } : LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:124:1: range_term_in options {greedy=true; } : LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK ;
     public final ADSParser.range_term_in_return range_term_in() throws RecognitionException {
         ADSParser.range_term_in_return retval = new ADSParser.range_term_in_return();
         retval.start = input.LT(1);
@@ -3617,15 +3617,15 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_TO=new RewriteRuleTokenStream(adaptor,"token TO");
         RewriteRuleSubtreeStream stream_range_value=new RewriteRuleSubtreeStream(adaptor,"rule range_value");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:126:2: ( LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:127:8: LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:126:2: ( LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:127:8: LBRACK (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK
             {
             LBRACK50=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_range_term_in1021); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LBRACK.add(LBRACK50);
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:128:8: (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:128:9: a= range_value
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:128:8: (a= range_value -> range_value ^( QANYTHING QANYTHING[\"*\"] ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:128:9: a= range_value
             {
             pushFollow(FOLLOW_range_value_in_range_term_in1033);
             a=range_value();
@@ -3651,7 +3651,7 @@ public TreeAdaptor getTreeAdaptor() {
             {
                 adaptor.addChild(root_0, stream_range_value.nextTree());
 
-                // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:128:38: ^( QANYTHING QANYTHING[\"*\"] )
+                // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:128:38: ^( QANYTHING QANYTHING[\"*\"] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
@@ -3674,7 +3674,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:129:8: ( ( TO )? b= range_value -> $a ( $b)? )?
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:129:8: ( ( TO )? b= range_value -> $a ( $b)? )?
             int alt27=2;
             int LA27_0 = input.LA(1);
 
@@ -3683,9 +3683,9 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt27) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:129:9: ( TO )? b= range_value
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:129:9: ( TO )? b= range_value
                     {
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:129:9: ( TO )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:129:9: ( TO )?
                     int alt26=2;
                     int LA26_0 = input.LA(1);
 
@@ -3698,7 +3698,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt26) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:129:9: TO
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:129:9: TO
                             {
                             TO51=(Token)match(input,TO,FOLLOW_TO_in_range_term_in1055); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_TO.add(TO51);
@@ -3718,7 +3718,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 
                     // AST REWRITE
-                    // elements: b, a
+                    // elements: a, b
                     // token labels: 
                     // rule labels: retval, b, a
                     // token list labels: 
@@ -3736,7 +3736,7 @@ public TreeAdaptor getTreeAdaptor() {
                     {
                         adaptor.addChild(root_0, stream_a.nextTree());
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:129:35: ( $b)?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:129:35: ( $b)?
                         if ( stream_b.hasNext() ) {
                             adaptor.addChild(root_0, stream_b.nextTree());
 
@@ -3792,7 +3792,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "range_value"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:145:1: range_value : ( truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | date -> ^( QNORMAL date ) | normal -> ^( QNORMAL normal ) | STAR -> ^( QANYTHING STAR ) );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:145:1: range_value : ( truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | date -> ^( QNORMAL date ) | normal -> ^( QNORMAL normal ) | STAR -> ^( QANYTHING STAR ) );
     public final ADSParser.range_value_return range_value() throws RecognitionException {
         ADSParser.range_value_return retval = new ADSParser.range_value_return();
         retval.start = input.LT(1);
@@ -3820,7 +3820,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleSubtreeStream stream_truncated=new RewriteRuleSubtreeStream(adaptor,"rule truncated");
         RewriteRuleSubtreeStream stream_date=new RewriteRuleSubtreeStream(adaptor,"rule date");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:146:2: ( truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | date -> ^( QNORMAL date ) | normal -> ^( QNORMAL normal ) | STAR -> ^( QANYTHING STAR ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:146:2: ( truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | date -> ^( QNORMAL date ) | normal -> ^( QNORMAL normal ) | STAR -> ^( QANYTHING STAR ) )
             int alt28=6;
             switch ( input.LA(1) ) {
             case TERM_TRUNCATED:
@@ -3866,7 +3866,7 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt28) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:147:2: truncated
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:147:2: truncated
                     {
                     pushFollow(FOLLOW_truncated_in_range_value1098);
                     truncated53=truncated();
@@ -3890,7 +3890,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 147:12: -> ^( QTRUNCATED truncated )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:147:15: ^( QTRUNCATED truncated )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:147:15: ^( QTRUNCATED truncated )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3911,7 +3911,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:148:4: quoted
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:148:4: quoted
                     {
                     pushFollow(FOLLOW_quoted_in_range_value1111);
                     quoted54=quoted();
@@ -3935,7 +3935,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 148:11: -> ^( QPHRASE quoted )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:148:14: ^( QPHRASE quoted )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:148:14: ^( QPHRASE quoted )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -3956,7 +3956,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:149:4: quoted_truncated
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:149:4: quoted_truncated
                     {
                     pushFollow(FOLLOW_quoted_truncated_in_range_value1124);
                     quoted_truncated55=quoted_truncated();
@@ -3980,7 +3980,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 149:21: -> ^( QPHRASETRUNC quoted_truncated )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:149:24: ^( QPHRASETRUNC quoted_truncated )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:149:24: ^( QPHRASETRUNC quoted_truncated )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -4001,7 +4001,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:150:4: date
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:150:4: date
                     {
                     pushFollow(FOLLOW_date_in_range_value1137);
                     date56=date();
@@ -4025,7 +4025,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 150:9: -> ^( QNORMAL date )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:150:12: ^( QNORMAL date )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:150:12: ^( QNORMAL date )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -4046,7 +4046,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 5 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:151:4: normal
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:151:4: normal
                     {
                     pushFollow(FOLLOW_normal_in_range_value1150);
                     normal57=normal();
@@ -4070,7 +4070,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 151:11: -> ^( QNORMAL normal )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:151:14: ^( QNORMAL normal )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:151:14: ^( QNORMAL normal )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -4091,7 +4091,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 6 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:152:4: STAR
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:152:4: STAR
                     {
                     STAR58=(Token)match(input,STAR,FOLLOW_STAR_in_range_value1164); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STAR.add(STAR58);
@@ -4112,7 +4112,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 152:9: -> ^( QANYTHING STAR )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:152:12: ^( QANYTHING STAR )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:152:12: ^( QANYTHING STAR )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -4167,7 +4167,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "func_name"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:155:1: func_name : FUNC_NAME ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:155:1: func_name : FUNC_NAME ;
     public final ADSParser.func_name_return func_name() throws RecognitionException {
         ADSParser.func_name_return retval = new ADSParser.func_name_return();
         retval.start = input.LT(1);
@@ -4180,8 +4180,8 @@ public TreeAdaptor getTreeAdaptor() {
         Object FUNC_NAME59_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:156:2: ( FUNC_NAME )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:157:2: FUNC_NAME
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:156:2: ( FUNC_NAME )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:157:2: FUNC_NAME
             {
             root_0 = (Object)adaptor.nil();
 
@@ -4227,7 +4227,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "multi_value"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:162:1: multi_value : LPAREN multiClause RPAREN -> multiClause ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:162:1: multi_value : LPAREN multiClause RPAREN -> multiClause ;
     public final ADSParser.multi_value_return multi_value() throws RecognitionException {
         ADSParser.multi_value_return retval = new ADSParser.multi_value_return();
         retval.start = input.LT(1);
@@ -4246,8 +4246,8 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_LPAREN=new RewriteRuleTokenStream(adaptor,"token LPAREN");
         RewriteRuleSubtreeStream stream_multiClause=new RewriteRuleSubtreeStream(adaptor,"rule multiClause");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:163:2: ( LPAREN multiClause RPAREN -> multiClause )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:164:2: LPAREN multiClause RPAREN
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:163:2: ( LPAREN multiClause RPAREN -> multiClause )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:164:2: LPAREN multiClause RPAREN
             {
             LPAREN60=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_multi_value1200); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN60);
@@ -4320,7 +4320,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "multiClause"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:169:1: multiClause : ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:169:1: multiClause : ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ;
     public final ADSParser.multiClause_return multiClause() throws RecognitionException {
         ADSParser.multiClause_return retval = new ADSParser.multiClause_return();
         retval.start = input.LT(1);
@@ -4333,10 +4333,10 @@ public TreeAdaptor getTreeAdaptor() {
 
         RewriteRuleSubtreeStream stream_clauseOr=new RewriteRuleSubtreeStream(adaptor,"rule clauseOr");
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:170:2: ( ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:175:2: ( clauseOr )+
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:170:2: ( ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:175:2: ( clauseOr )+
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:175:2: ( clauseOr )+
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:175:2: ( clauseOr )+
             int cnt29=0;
             loop29:
             do {
@@ -4350,7 +4350,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt29) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:175:2: clauseOr
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:175:2: clauseOr
             	    {
             	    pushFollow(FOLLOW_clauseOr_in_multiClause1231);
             	    clauseOr63=clauseOr();
@@ -4388,7 +4388,7 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (Object)adaptor.nil();
             // 175:12: -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
             {
-                // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:175:15: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+                // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:175:15: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
@@ -4446,7 +4446,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "normal"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:236:1: normal : ( TERM_NORMAL | NUMBER | TO );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:236:1: normal : ( TERM_NORMAL | NUMBER | TO );
     public final ADSParser.normal_return normal() throws RecognitionException {
         ADSParser.normal_return retval = new ADSParser.normal_return();
         retval.start = input.LT(1);
@@ -4459,8 +4459,8 @@ public TreeAdaptor getTreeAdaptor() {
         Object set64_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:237:2: ( TERM_NORMAL | NUMBER | TO )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:237:2: ( TERM_NORMAL | NUMBER | TO )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:
             {
             root_0 = (Object)adaptor.nil();
 
@@ -4515,7 +4515,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "truncated"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:246:1: truncated : TERM_TRUNCATED ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:246:1: truncated : TERM_TRUNCATED ;
     public final ADSParser.truncated_return truncated() throws RecognitionException {
         ADSParser.truncated_return retval = new ADSParser.truncated_return();
         retval.start = input.LT(1);
@@ -4528,8 +4528,8 @@ public TreeAdaptor getTreeAdaptor() {
         Object TERM_TRUNCATED65_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:247:2: ( TERM_TRUNCATED )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:248:2: TERM_TRUNCATED
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:247:2: ( TERM_TRUNCATED )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:248:2: TERM_TRUNCATED
             {
             root_0 = (Object)adaptor.nil();
 
@@ -4575,7 +4575,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "quoted_truncated"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:252:1: quoted_truncated : PHRASE_ANYTHING ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:252:1: quoted_truncated : PHRASE_ANYTHING ;
     public final ADSParser.quoted_truncated_return quoted_truncated() throws RecognitionException {
         ADSParser.quoted_truncated_return retval = new ADSParser.quoted_truncated_return();
         retval.start = input.LT(1);
@@ -4588,8 +4588,8 @@ public TreeAdaptor getTreeAdaptor() {
         Object PHRASE_ANYTHING66_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:253:2: ( PHRASE_ANYTHING )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:254:2: PHRASE_ANYTHING
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:253:2: ( PHRASE_ANYTHING )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:254:2: PHRASE_ANYTHING
             {
             root_0 = (Object)adaptor.nil();
 
@@ -4635,7 +4635,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "quoted"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:257:1: quoted : PHRASE ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:257:1: quoted : PHRASE ;
     public final ADSParser.quoted_return quoted() throws RecognitionException {
         ADSParser.quoted_return retval = new ADSParser.quoted_return();
         retval.start = input.LT(1);
@@ -4648,8 +4648,8 @@ public TreeAdaptor getTreeAdaptor() {
         Object PHRASE67_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:257:8: ( PHRASE )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:258:2: PHRASE
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:257:8: ( PHRASE )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:258:2: PHRASE
             {
             root_0 = (Object)adaptor.nil();
 
@@ -4695,7 +4695,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "lmodifier"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:262:1: lmodifier : ( PLUS -> PLUS[\"+\"] | MINUS -> MINUS[\"-\"] | '=' -> EQUAL[\"=\"] | '#' -> HASH[\"#\"] );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:262:1: lmodifier : ( PLUS -> PLUS[\"+\"] | MINUS -> MINUS[\"-\"] | '=' -> EQUAL[\"=\"] | '#' -> HASH[\"#\"] );
     public final ADSParser.lmodifier_return lmodifier() throws RecognitionException {
         ADSParser.lmodifier_return retval = new ADSParser.lmodifier_return();
         retval.start = input.LT(1);
@@ -4718,7 +4718,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_70=new RewriteRuleTokenStream(adaptor,"token 70");
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:262:10: ( PLUS -> PLUS[\"+\"] | MINUS -> MINUS[\"-\"] | '=' -> EQUAL[\"=\"] | '#' -> HASH[\"#\"] )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:262:10: ( PLUS -> PLUS[\"+\"] | MINUS -> MINUS[\"-\"] | '=' -> EQUAL[\"=\"] | '#' -> HASH[\"#\"] )
             int alt30=4;
             switch ( input.LA(1) ) {
             case PLUS:
@@ -4752,7 +4752,7 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt30) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:263:2: PLUS
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:263:2: PLUS
                     {
                     PLUS68=(Token)match(input,PLUS,FOLLOW_PLUS_in_lmodifier1349); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_PLUS.add(PLUS68);
@@ -4786,7 +4786,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:264:4: MINUS
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:264:4: MINUS
                     {
                     MINUS69=(Token)match(input,MINUS,FOLLOW_MINUS_in_lmodifier1359); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_MINUS.add(MINUS69);
@@ -4820,7 +4820,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:265:4: '='
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:265:4: '='
                     {
                     char_literal70=(Token)match(input,70,FOLLOW_70_in_lmodifier1369); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_70.add(char_literal70);
@@ -4854,7 +4854,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:266:4: '#'
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:266:4: '#'
                     {
                     char_literal71=(Token)match(input,67,FOLLOW_67_in_lmodifier1379); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_67.add(char_literal71);
@@ -4920,7 +4920,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "rmodifier"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:271:1: rmodifier : ( TILDE ( CARAT )? -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE ) | CARAT ( TILDE )? -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? ) );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:271:1: rmodifier : ( TILDE ( CARAT )? -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE ) | CARAT ( TILDE )? -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? ) );
     public final ADSParser.rmodifier_return rmodifier() throws RecognitionException {
         ADSParser.rmodifier_return retval = new ADSParser.rmodifier_return();
         retval.start = input.LT(1);
@@ -4941,7 +4941,7 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_TILDE=new RewriteRuleTokenStream(adaptor,"token TILDE");
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:271:11: ( TILDE ( CARAT )? -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE ) | CARAT ( TILDE )? -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:271:11: ( TILDE ( CARAT )? -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE ) | CARAT ( TILDE )? -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? ) )
             int alt33=2;
             int LA33_0 = input.LA(1);
 
@@ -4961,13 +4961,13 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt33) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:272:2: TILDE ( CARAT )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:272:2: TILDE ( CARAT )?
                     {
                     TILDE72=(Token)match(input,TILDE,FOLLOW_TILDE_in_rmodifier1398); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TILDE.add(TILDE72);
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:272:8: ( CARAT )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:272:8: ( CARAT )?
                     int alt31=2;
                     int LA31_0 = input.LA(1);
 
@@ -4976,7 +4976,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt31) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:272:8: CARAT
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:272:8: CARAT
                             {
                             CARAT73=(Token)match(input,CARAT,FOLLOW_CARAT_in_rmodifier1400); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_CARAT.add(CARAT73);
@@ -4989,7 +4989,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: TILDE, CARAT
+                    // elements: CARAT, TILDE
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5003,14 +5003,14 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 272:15: -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:272:18: ^( BOOST ( CARAT )? )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:272:18: ^( BOOST ( CARAT )? )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(BOOST, "BOOST")
                         , root_1);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:272:26: ( CARAT )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:272:26: ( CARAT )?
                         if ( stream_CARAT.hasNext() ) {
                             adaptor.addChild(root_1, 
                             stream_CARAT.nextNode()
@@ -5022,7 +5022,7 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_0, root_1);
                         }
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:272:34: ^( FUZZY TILDE )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:272:34: ^( FUZZY TILDE )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -5045,13 +5045,13 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:273:4: CARAT ( TILDE )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:273:4: CARAT ( TILDE )?
                     {
                     CARAT74=(Token)match(input,CARAT,FOLLOW_CARAT_in_rmodifier1422); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_CARAT.add(CARAT74);
 
 
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:273:10: ( TILDE )?
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:273:10: ( TILDE )?
                     int alt32=2;
                     int LA32_0 = input.LA(1);
 
@@ -5060,7 +5060,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     switch (alt32) {
                         case 1 :
-                            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:273:10: TILDE
+                            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:273:10: TILDE
                             {
                             TILDE75=(Token)match(input,TILDE,FOLLOW_TILDE_in_rmodifier1424); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_TILDE.add(TILDE75);
@@ -5087,7 +5087,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 273:17: -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:273:20: ^( BOOST CARAT )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:273:20: ^( BOOST CARAT )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -5101,14 +5101,14 @@ public TreeAdaptor getTreeAdaptor() {
                         adaptor.addChild(root_0, root_1);
                         }
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:273:35: ^( FUZZY ( TILDE )? )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:273:35: ^( FUZZY ( TILDE )? )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
                         (Object)adaptor.create(FUZZY, "FUZZY")
                         , root_1);
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:273:43: ( TILDE )?
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:273:43: ( TILDE )?
                         if ( stream_TILDE.hasNext() ) {
                             adaptor.addChild(root_1, 
                             stream_TILDE.nextNode()
@@ -5161,7 +5161,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "boost"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:277:1: boost : ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )? ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:277:1: boost : ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )? ;
     public final ADSParser.boost_return boost() throws RecognitionException {
         ADSParser.boost_return retval = new ADSParser.boost_return();
         retval.start = input.LT(1);
@@ -5178,11 +5178,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_NUMBER=new RewriteRuleTokenStream(adaptor,"token NUMBER");
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:277:7: ( ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )? )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:278:2: ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )?
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:277:7: ( ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )? )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:278:2: ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )?
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:278:2: ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:278:3: CARAT
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:278:2: ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:278:3: CARAT
             {
             CARAT76=(Token)match(input,CARAT,FOLLOW_CARAT_in_boost1453); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_CARAT.add(CARAT76);
@@ -5203,7 +5203,7 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (Object)adaptor.nil();
             // 278:9: -> ^( BOOST NUMBER[\"DEF\"] )
             {
-                // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:278:12: ^( BOOST NUMBER[\"DEF\"] )
+                // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:278:12: ^( BOOST NUMBER[\"DEF\"] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
@@ -5226,7 +5226,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:279:2: ( NUMBER -> ^( BOOST NUMBER ) )?
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:279:2: ( NUMBER -> ^( BOOST NUMBER ) )?
             int alt34=2;
             int LA34_0 = input.LA(1);
 
@@ -5235,7 +5235,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt34) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:279:3: NUMBER
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:279:3: NUMBER
                     {
                     NUMBER77=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_boost1468); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUMBER.add(NUMBER77);
@@ -5256,7 +5256,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 279:10: -> ^( BOOST NUMBER )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:279:13: ^( BOOST NUMBER )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:279:13: ^( BOOST NUMBER )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -5315,7 +5315,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "fuzzy"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:282:1: fuzzy : ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )? ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:282:1: fuzzy : ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )? ;
     public final ADSParser.fuzzy_return fuzzy() throws RecognitionException {
         ADSParser.fuzzy_return retval = new ADSParser.fuzzy_return();
         retval.start = input.LT(1);
@@ -5332,11 +5332,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_NUMBER=new RewriteRuleTokenStream(adaptor,"token NUMBER");
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:282:7: ( ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )? )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:283:2: ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )?
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:282:7: ( ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )? )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:283:2: ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )?
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:283:2: ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:283:3: TILDE
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:283:2: ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:283:3: TILDE
             {
             TILDE78=(Token)match(input,TILDE,FOLLOW_TILDE_in_fuzzy1491); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_TILDE.add(TILDE78);
@@ -5357,7 +5357,7 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (Object)adaptor.nil();
             // 283:9: -> ^( FUZZY NUMBER[\"DEF\"] )
             {
-                // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:283:12: ^( FUZZY NUMBER[\"DEF\"] )
+                // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:283:12: ^( FUZZY NUMBER[\"DEF\"] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
@@ -5380,7 +5380,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:284:2: ( NUMBER -> ^( FUZZY NUMBER ) )?
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:284:2: ( NUMBER -> ^( FUZZY NUMBER ) )?
             int alt35=2;
             int LA35_0 = input.LA(1);
 
@@ -5389,7 +5389,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt35) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:284:3: NUMBER
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:284:3: NUMBER
                     {
                     NUMBER79=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_fuzzy1506); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUMBER.add(NUMBER79);
@@ -5410,7 +5410,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 284:10: -> ^( FUZZY NUMBER )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:284:13: ^( FUZZY NUMBER )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:284:13: ^( FUZZY NUMBER )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -5469,7 +5469,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "not"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:287:1: not : ( ( AND NOT )=> AND NOT | NOT );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:287:1: not : ( ( AND NOT )=> AND NOT | NOT );
     public final ADSParser.not_return not() throws RecognitionException {
         ADSParser.not_return retval = new ADSParser.not_return();
         retval.start = input.LT(1);
@@ -5486,7 +5486,7 @@ public TreeAdaptor getTreeAdaptor() {
         Object NOT82_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:287:5: ( ( AND NOT )=> AND NOT | NOT )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:287:5: ( ( AND NOT )=> AND NOT | NOT )
             int alt36=2;
             int LA36_0 = input.LA(1);
 
@@ -5506,7 +5506,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt36) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:288:2: ( AND NOT )=> AND NOT
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:288:2: ( AND NOT )=> AND NOT
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -5530,7 +5530,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:289:4: NOT
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:289:4: NOT
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -5578,7 +5578,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "and"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:292:1: and : AND ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:292:1: and : AND ;
     public final ADSParser.and_return and() throws RecognitionException {
         ADSParser.and_return retval = new ADSParser.and_return();
         retval.start = input.LT(1);
@@ -5591,8 +5591,8 @@ public TreeAdaptor getTreeAdaptor() {
         Object AND83_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:292:6: ( AND )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:293:2: AND
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:292:6: ( AND )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:293:2: AND
             {
             root_0 = (Object)adaptor.nil();
 
@@ -5638,7 +5638,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "or"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:296:1: or : OR ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:296:1: or : OR ;
     public final ADSParser.or_return or() throws RecognitionException {
         ADSParser.or_return retval = new ADSParser.or_return();
         retval.start = input.LT(1);
@@ -5651,8 +5651,8 @@ public TreeAdaptor getTreeAdaptor() {
         Object OR84_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:296:5: ( OR )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:297:2: OR
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:296:5: ( OR )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:297:2: OR
             {
             root_0 = (Object)adaptor.nil();
 
@@ -5698,7 +5698,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "near"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:300:1: near : ( NEAR -> ^( OPERATOR[\"NEAR\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR:\" + $b.getText()] ) )? ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:300:1: near : ( NEAR -> ^( OPERATOR[\"NEAR\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR:\" + $b.getText()] ) )? ;
     public final ADSParser.near_return near() throws RecognitionException {
         ADSParser.near_return retval = new ADSParser.near_return();
         retval.start = input.LT(1);
@@ -5718,11 +5718,11 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_NUMBER=new RewriteRuleTokenStream(adaptor,"token NUMBER");
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:300:6: ( ( NEAR -> ^( OPERATOR[\"NEAR\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR:\" + $b.getText()] ) )? )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:301:2: ( NEAR -> ^( OPERATOR[\"NEAR\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR:\" + $b.getText()] ) )?
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:300:6: ( ( NEAR -> ^( OPERATOR[\"NEAR\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR:\" + $b.getText()] ) )? )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:301:2: ( NEAR -> ^( OPERATOR[\"NEAR\"] ) ) ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR:\" + $b.getText()] ) )?
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:301:2: ( NEAR -> ^( OPERATOR[\"NEAR\"] ) )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:301:3: NEAR
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:301:2: ( NEAR -> ^( OPERATOR[\"NEAR\"] ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:301:3: NEAR
             {
             NEAR85=(Token)match(input,NEAR,FOLLOW_NEAR_in_near1586); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_NEAR.add(NEAR85);
@@ -5743,7 +5743,7 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (Object)adaptor.nil();
             // 301:8: -> ^( OPERATOR[\"NEAR\"] )
             {
-                // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:301:11: ^( OPERATOR[\"NEAR\"] )
+                // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:301:11: ^( OPERATOR[\"NEAR\"] )
                 {
                 Object root_1 = (Object)adaptor.nil();
                 root_1 = (Object)adaptor.becomeRoot(
@@ -5762,7 +5762,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:302:2: ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR:\" + $b.getText()] ) )?
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:302:2: ( '/' b= NUMBER -> ^( OPERATOR[\"NEAR:\" + $b.getText()] ) )?
             int alt37=2;
             int LA37_0 = input.LA(1);
 
@@ -5771,7 +5771,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
             switch (alt37) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:302:3: '/' b= NUMBER
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:302:3: '/' b= NUMBER
                     {
                     char_literal86=(Token)match(input,68,FOLLOW_68_in_near1599); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_68.add(char_literal86);
@@ -5796,7 +5796,7 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (Object)adaptor.nil();
                     // 302:16: -> ^( OPERATOR[\"NEAR:\" + $b.getText()] )
                     {
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:302:19: ^( OPERATOR[\"NEAR:\" + $b.getText()] )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:302:19: ^( OPERATOR[\"NEAR:\" + $b.getText()] )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -5851,7 +5851,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "comma"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:305:1: comma : ( COMMA )+ ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:305:1: comma : ( COMMA )+ ;
     public final ADSParser.comma_return comma() throws RecognitionException {
         ADSParser.comma_return retval = new ADSParser.comma_return();
         retval.start = input.LT(1);
@@ -5864,13 +5864,13 @@ public TreeAdaptor getTreeAdaptor() {
         Object COMMA87_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:305:7: ( ( COMMA )+ )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:306:2: ( COMMA )+
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:305:7: ( ( COMMA )+ )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:306:2: ( COMMA )+
             {
             root_0 = (Object)adaptor.nil();
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:306:2: ( COMMA )+
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:306:2: ( COMMA )+
             int cnt38=0;
             loop38:
             do {
@@ -5884,7 +5884,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt38) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:306:2: COMMA
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:306:2: COMMA
             	    {
             	    COMMA87=(Token)match(input,COMMA,FOLLOW_COMMA_in_comma1625); if (state.failed) return retval;
             	    if ( state.backtracking==0 ) {
@@ -5941,7 +5941,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "semicolon"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:309:1: semicolon : ( SEMICOLON )+ ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:309:1: semicolon : ( SEMICOLON )+ ;
     public final ADSParser.semicolon_return semicolon() throws RecognitionException {
         ADSParser.semicolon_return retval = new ADSParser.semicolon_return();
         retval.start = input.LT(1);
@@ -5954,13 +5954,13 @@ public TreeAdaptor getTreeAdaptor() {
         Object SEMICOLON88_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:310:2: ( ( SEMICOLON )+ )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:311:2: ( SEMICOLON )+
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:310:2: ( ( SEMICOLON )+ )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:311:2: ( SEMICOLON )+
             {
             root_0 = (Object)adaptor.nil();
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:311:2: ( SEMICOLON )+
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:311:2: ( SEMICOLON )+
             int cnt39=0;
             loop39:
             do {
@@ -5974,7 +5974,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 switch (alt39) {
             	case 1 :
-            	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:311:2: SEMICOLON
+            	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:311:2: SEMICOLON
             	    {
             	    SEMICOLON88=(Token)match(input,SEMICOLON,FOLLOW_SEMICOLON_in_semicolon1639); if (state.failed) return retval;
             	    if ( state.backtracking==0 ) {
@@ -6031,7 +6031,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "date"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:314:1: date : DATE_TOKEN ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:314:1: date : DATE_TOKEN ;
     public final ADSParser.date_return date() throws RecognitionException {
         ADSParser.date_return retval = new ADSParser.date_return();
         retval.start = input.LT(1);
@@ -6044,8 +6044,8 @@ public TreeAdaptor getTreeAdaptor() {
         Object DATE_TOKEN89_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:314:6: ( DATE_TOKEN )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:316:2: DATE_TOKEN
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:314:6: ( DATE_TOKEN )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:316:2: DATE_TOKEN
             {
             root_0 = (Object)adaptor.nil();
 
@@ -6091,7 +6091,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "identifier"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:319:1: identifier : ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier STAR ) ;
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:319:1: identifier : ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier STAR ) ;
     public final ADSParser.identifier_return identifier() throws RecognitionException {
         ADSParser.identifier_return retval = new ADSParser.identifier_return();
         retval.start = input.LT(1);
@@ -6126,10 +6126,10 @@ public TreeAdaptor getTreeAdaptor() {
         RewriteRuleTokenStream stream_NUMBER=new RewriteRuleTokenStream(adaptor,"token NUMBER");
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:320:2: ( ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier STAR ) )
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:322:2: ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier STAR )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:320:2: ( ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier STAR ) )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:322:2: ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier STAR )
             {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:322:2: ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:322:2: ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] )
             int alt40=3;
             switch ( input.LA(1) ) {
             case 73:
@@ -6158,7 +6158,7 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt40) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:322:3: 'doi:'
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:322:3: 'doi:'
                     {
                     string_literal90=(Token)match(input,73,FOLLOW_73_in_identifier1671); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_73.add(string_literal90);
@@ -6192,7 +6192,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:323:3: 'arxiv:'
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:323:3: 'arxiv:'
                     {
                     string_literal91=(Token)match(input,72,FOLLOW_72_in_identifier1680); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_72.add(string_literal91);
@@ -6226,7 +6226,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:324:3: 'arXiv:'
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:324:3: 'arXiv:'
                     {
                     string_literal92=(Token)match(input,71,FOLLOW_71_in_identifier1689); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_71.add(string_literal92);
@@ -6263,7 +6263,7 @@ public TreeAdaptor getTreeAdaptor() {
             }
 
 
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:325:2: ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier STAR )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:325:2: ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier STAR )
             int alt41=5;
             switch ( input.LA(1) ) {
             case TERM_NORMAL:
@@ -6302,14 +6302,14 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt41) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:325:3: TERM_NORMAL
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:325:3: TERM_NORMAL
                     {
                     TERM_NORMAL93=(Token)match(input,TERM_NORMAL,FOLLOW_TERM_NORMAL_in_identifier1700); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TERM_NORMAL.add(TERM_NORMAL93);
 
 
                     // AST REWRITE
-                    // elements: identifier, TERM_NORMAL
+                    // elements: TERM_NORMAL, identifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6338,14 +6338,14 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:326:4: PHRASE_ANYTHING
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:326:4: PHRASE_ANYTHING
                     {
                     PHRASE_ANYTHING94=(Token)match(input,PHRASE_ANYTHING,FOLLOW_PHRASE_ANYTHING_in_identifier1712); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_PHRASE_ANYTHING.add(PHRASE_ANYTHING94);
 
 
                     // AST REWRITE
-                    // elements: PHRASE_ANYTHING, identifier
+                    // elements: identifier, PHRASE_ANYTHING
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6361,7 +6361,7 @@ public TreeAdaptor getTreeAdaptor() {
                     {
                         adaptor.addChild(root_0, stream_retval.nextTree());
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:326:36: ^( QPHRASETRUNC PHRASE_ANYTHING )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:326:36: ^( QPHRASETRUNC PHRASE_ANYTHING )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -6384,14 +6384,14 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:327:4: PHRASE
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:327:4: PHRASE
                     {
                     PHRASE95=(Token)match(input,PHRASE,FOLLOW_PHRASE_in_identifier1729); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_PHRASE.add(PHRASE95);
 
 
                     // AST REWRITE
-                    // elements: identifier, PHRASE
+                    // elements: PHRASE, identifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6407,7 +6407,7 @@ public TreeAdaptor getTreeAdaptor() {
                     {
                         adaptor.addChild(root_0, stream_retval.nextTree());
 
-                        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:327:26: ^( QPHRASE PHRASE )
+                        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:327:26: ^( QPHRASE PHRASE )
                         {
                         Object root_1 = (Object)adaptor.nil();
                         root_1 = (Object)adaptor.becomeRoot(
@@ -6430,7 +6430,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:328:4: NUMBER
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:328:4: NUMBER
                     {
                     NUMBER96=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_identifier1745); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUMBER.add(NUMBER96);
@@ -6466,7 +6466,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 5 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:329:4: STAR
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:329:4: STAR
                     {
                     STAR97=(Token)match(input,STAR,FOLLOW_STAR_in_identifier1758); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STAR.add(STAR97);
@@ -6538,7 +6538,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "coordinate"
-    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:332:1: coordinate : ( HOUR | H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER | H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER | D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER | H_NUMBER ( PLUS | MINUS ) D_NUMBER | '<=>' );
+    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:332:1: coordinate : ( HOUR | H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER | H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER | D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER | H_NUMBER ( PLUS | MINUS ) D_NUMBER | '<=>' );
     public final ADSParser.coordinate_return coordinate() throws RecognitionException {
         ADSParser.coordinate_return retval = new ADSParser.coordinate_return();
         retval.start = input.LT(1);
@@ -6593,7 +6593,7 @@ public TreeAdaptor getTreeAdaptor() {
         Object string_literal119_tree=null;
 
         try {
-            // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:333:2: ( HOUR | H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER | H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER | D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER | H_NUMBER ( PLUS | MINUS ) D_NUMBER | '<=>' )
+            // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:333:2: ( HOUR | H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER | H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER | D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER | H_NUMBER ( PLUS | MINUS ) D_NUMBER | '<=>' )
             int alt42=6;
             switch ( input.LA(1) ) {
             case HOUR:
@@ -6652,7 +6652,7 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt42) {
                 case 1 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:337:2: HOUR
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:337:2: HOUR
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -6668,7 +6668,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 2 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:339:2: H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:339:2: H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -6725,7 +6725,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 3 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:341:2: H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:341:2: H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -6782,7 +6782,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 4 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:343:2: D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:343:2: D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -6855,7 +6855,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 5 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:345:2: H_NUMBER ( PLUS | MINUS ) D_NUMBER
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:345:2: H_NUMBER ( PLUS | MINUS ) D_NUMBER
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -6896,7 +6896,7 @@ public TreeAdaptor getTreeAdaptor() {
                     }
                     break;
                 case 6 :
-                    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:347:2: '<=>'
+                    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:347:2: '<=>'
                     {
                     root_0 = (Object)adaptor.nil();
 
@@ -6938,10 +6938,10 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred1_ADS
     public final void synpred1_ADS_fragment() throws RecognitionException {
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:3: ( ( lmodifier )? func_name )
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:4: ( lmodifier )? func_name
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:3: ( ( lmodifier )? func_name )
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:4: ( lmodifier )? func_name
         {
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:4: ( lmodifier )?
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:4: ( lmodifier )?
         int alt43=2;
         int LA43_0 = input.LA(1);
 
@@ -6950,7 +6950,7 @@ public TreeAdaptor getTreeAdaptor() {
         }
         switch (alt43) {
             case 1 :
-                // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:73:4: lmodifier
+                // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:73:4: lmodifier
                 {
                 pushFollow(FOLLOW_lmodifier_in_synpred1_ADS465);
                 lmodifier();
@@ -6977,8 +6977,8 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred2_ADS
     public final void synpred2_ADS_fragment() throws RecognitionException {
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:4: ( lmodifier LPAREN ( clauseOr )+ RPAREN )
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:5: lmodifier LPAREN ( clauseOr )+ RPAREN
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:4: ( lmodifier LPAREN ( clauseOr )+ RPAREN )
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:5: lmodifier LPAREN ( clauseOr )+ RPAREN
         {
         pushFollow(FOLLOW_lmodifier_in_synpred2_ADS527);
         lmodifier();
@@ -6988,7 +6988,7 @@ public TreeAdaptor getTreeAdaptor() {
 
         match(input,LPAREN,FOLLOW_LPAREN_in_synpred2_ADS529); if (state.failed) return ;
 
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:22: ( clauseOr )+
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:22: ( clauseOr )+
         int cnt44=0;
         loop44:
         do {
@@ -7002,7 +7002,7 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt44) {
         	case 1 :
-        	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:75:22: clauseOr
+        	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:75:22: clauseOr
         	    {
         	    pushFollow(FOLLOW_clauseOr_in_synpred2_ADS531);
         	    clauseOr();
@@ -7033,12 +7033,12 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred3_ADS
     public final void synpred3_ADS_fragment() throws RecognitionException {
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:4: ( LPAREN ( clauseOr )+ RPAREN rmodifier )
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:5: LPAREN ( clauseOr )+ RPAREN rmodifier
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:4: ( LPAREN ( clauseOr )+ RPAREN rmodifier )
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:5: LPAREN ( clauseOr )+ RPAREN rmodifier
         {
         match(input,LPAREN,FOLLOW_LPAREN_in_synpred3_ADS588); if (state.failed) return ;
 
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:12: ( clauseOr )+
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:12: ( clauseOr )+
         int cnt45=0;
         loop45:
         do {
@@ -7052,7 +7052,7 @@ public TreeAdaptor getTreeAdaptor() {
 
             switch (alt45) {
         	case 1 :
-        	    // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:77:12: clauseOr
+        	    // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:77:12: clauseOr
         	    {
         	    pushFollow(FOLLOW_clauseOr_in_synpred3_ADS590);
         	    clauseOr();
@@ -7089,8 +7089,8 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred4_ADS
     public final void synpred4_ADS_fragment() throws RecognitionException {
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:79:4: ( LPAREN )
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:79:5: LPAREN
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:79:4: ( LPAREN )
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:79:5: LPAREN
         {
         match(input,LPAREN,FOLLOW_LPAREN_in_synpred4_ADS648); if (state.failed) return ;
 
@@ -7101,8 +7101,8 @@ public TreeAdaptor getTreeAdaptor() {
 
     // $ANTLR start synpred5_ADS
     public final void synpred5_ADS_fragment() throws RecognitionException {
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:288:2: ( AND NOT )
-        // /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g:288:3: AND NOT
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:288:2: ( AND NOT )
+        // /home/jluker/workspace/montysolr_trunk/contrib/adsabs/grammars/ADS.g:288:3: AND NOT
         {
         match(input,AND,FOLLOW_AND_in_synpred5_ADS1530); if (state.failed) return ;
 

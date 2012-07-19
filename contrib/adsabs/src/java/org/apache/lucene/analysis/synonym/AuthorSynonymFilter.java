@@ -1,4 +1,4 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.synonym;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +11,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeSource;
+import org.apache.solr.analysis.WriteableSynonymMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public final class AuthorSynonymFilter extends TokenFilter {
     public static final String TOKEN_TYPE_AUTHOR_CURATED_SYN = "AUTHOR_CURATED_SYN";
     private final WriteableSynonymMap synMap;  
     
-	protected AuthorSynonymFilter(TokenStream input, WriteableSynonymMap synMap) {
+	public AuthorSynonymFilter(TokenStream input, WriteableSynonymMap synMap) {
 		super(input);
 		if (synMap == null)
 			throw new IllegalArgumentException("map is required");

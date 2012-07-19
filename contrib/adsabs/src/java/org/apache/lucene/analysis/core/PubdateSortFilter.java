@@ -1,4 +1,4 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ public final class PubdateSortFilter extends TokenFilter {
 
     public static final Logger log = LoggerFactory.getLogger(PubdateSortFilter.class);
     
-	protected PubdateSortFilter(TokenStream input) {
+	public PubdateSortFilter(TokenStream input) {
 		super(input);
 	}
 	

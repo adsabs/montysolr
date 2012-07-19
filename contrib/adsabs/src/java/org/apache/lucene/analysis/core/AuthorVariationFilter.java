@@ -1,4 +1,4 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -19,7 +19,7 @@ public final class AuthorVariationFilter extends TokenFilter {
     public static final Logger log = LoggerFactory.getLogger(AuthorVariationFilter.class);
     public static final String TOKEN_TYPE_AUTHOR_VARIATION = "AUTHOR_VARIATION";
     
-    protected AuthorVariationFilter(TokenStream input) {
+    public AuthorVariationFilter(TokenStream input) {
 		super(input);
 		this.termAtt = addAttribute(CharTermAttribute.class);
 		this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);

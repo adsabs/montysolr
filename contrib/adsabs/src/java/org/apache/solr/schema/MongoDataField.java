@@ -94,7 +94,7 @@ public class MongoDataField extends TextField {
 			}
 		}
 		
-		return new Field[0];
+		return new IndexableField[0];
 	}
 		
 	public DBObject executeMongoQuery(String externalVal, String fieldName) {

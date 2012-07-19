@@ -1,17 +1,19 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.synonym;
 
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.KeywordTokenizer;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.solr.analysis.BaseTokenTestCase;
-import org.apache.solr.analysis.PatternTokenizer;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.lucene.analysis.pattern.PatternTokenizer;
+import org.apache.solr.analysis.AuthorSynonymFilterFactory;
+import org.apache.solr.analysis.WriteableSynonymMap;
 
-public class TestAuthorSynonymFilter extends BaseTokenTestCase {
+public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	public void testAuthorSynonyms1() throws Exception {
 		Reader reader = new StringReader("MILLER, BILL");
 		Tokenizer tokenizer = new KeywordTokenizer(reader);

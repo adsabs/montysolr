@@ -3,18 +3,20 @@
  * and open the template in the editor.
  */
 
-package org.adsabs.solr.analysis;
+package org.apache.solr.analysis;
 
 import java.util.Map;
 
-import org.apache.solr.analysis.BaseTokenFilterFactory;
+import org.apache.lucene.analysis.util.TokenFilterFactory;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.util.Version;
+import org.apache.lucene.analysis.core.AcronymTokenFilter;
 
 /**
  *
  * @author jluker
  */
-public class AcronymTokenFilterFactory extends BaseTokenFilterFactory {
+public class AcronymTokenFilterFactory extends TokenFilterFactory {
 
     private boolean emitBoth;
     private boolean lowercaseAcronyms;

@@ -1,14 +1,16 @@
-package org.adsabs.solr.analysis;
+package org.apache.solr.analysis;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.solr.analysis.BaseTokenTestCase;
-import org.apache.solr.analysis.PatternTokenizer;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.lucene.analysis.core.AuthorNameVariantsFilter;
+import org.apache.lucene.analysis.pattern.PatternTokenizer;
+import org.apache.solr.analysis.AuthorNameVariantsFilterFactory;
 
-public class TestWriteableSynonymMap extends BaseTokenTestCase {
+public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	
 	public void testMap() throws IOException, InterruptedException {
 		// create the set of synonyms to write

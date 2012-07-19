@@ -1,11 +1,12 @@
-package org.adsabs.solr.analysis;
+package org.apache.solr.analysis;
 
 import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.BaseTokenFilterFactory;
+import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.core.AuthorVariationFilter;
 
-public class AuthorVariationFilterFactory extends BaseTokenFilterFactory {
+public class AuthorVariationFilterFactory extends TokenFilterFactory {
 
     @Override
     public void init(Map<String,String> args) {

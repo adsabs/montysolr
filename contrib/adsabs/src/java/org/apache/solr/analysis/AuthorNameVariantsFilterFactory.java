@@ -1,12 +1,13 @@
 /**
  * 
  */
-package org.adsabs.solr.analysis;
+package org.apache.solr.analysis;
 
 import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.WriteableTokenFilterFactory;
+import org.apache.lucene.analysis.core.AuthorNameVariantsFilter;
+import org.apache.lucene.analysis.synonym.WriteableTokenFilterFactory;
 
 /**
  * @author jluker

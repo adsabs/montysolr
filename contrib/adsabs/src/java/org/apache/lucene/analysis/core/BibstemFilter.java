@@ -1,4 +1,4 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.IOException;
 import java.util.Stack;
@@ -33,7 +33,7 @@ public final class BibstemFilter extends TokenFilter {
     private Stack<String> stack;
     private AttributeSource.State current;
     
-	protected BibstemFilter(TokenStream input, boolean facetMode) {
+	public BibstemFilter(TokenStream input, boolean facetMode) {
 		super(input);
 		this.facetMode = facetMode;
 		this.stack = new Stack<String>();

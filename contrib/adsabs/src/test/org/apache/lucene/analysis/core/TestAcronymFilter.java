@@ -1,4 +1,4 @@
-package org.adsabs.solr.analysis;
+package org.apache.lucene.analysis.core;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -6,18 +6,19 @@ import java.util.HashMap;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.util.Version;
-import org.apache.solr.analysis.BaseTokenTestCase;
+import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.solr.analysis.AcronymTokenFilterFactory;
 
-public class TestAcronymFilter extends BaseTokenTestCase {
+public class TestAcronymFilter extends BaseTokenStreamTestCase {
 	
 	  public void testIndexing() throws Exception {
 		  	Reader reader = new StringReader("mit MIT");
-		  	Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_31, reader);
+		  	Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_40, reader);
 		    AcronymTokenFilterFactory factory = new AcronymTokenFilterFactory();
+		    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
 		    factory.init(new HashMap<String,String>() {{
-		    	put("luceneMatchVersion", "LUCENE_31");
 		    	put("emitBoth", "true");
 		    	put("lowercaseAcronyms", "true");
 		    }});
@@ -31,10 +32,10 @@ public class TestAcronymFilter extends BaseTokenTestCase {
 	  
 	  public void testQuerying() throws Exception {
 		  	Reader reader = new StringReader("MIT");
-		  	Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_31, reader);
+		  	Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_40, reader);
 		    AcronymTokenFilterFactory factory = new AcronymTokenFilterFactory();
+		    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
 		    factory.init(new HashMap<String,String>() {{
-		    	put("luceneMatchVersion", "LUCENE_31");
 		    	put("emitBoth", "false");
 		    	put("lowercaseAcronyms", "false");
 		    }});
@@ -45,10 +46,10 @@ public class TestAcronymFilter extends BaseTokenTestCase {
 	  
 	  public void testAcronymLength() throws Exception {
 		  	Reader reader = new StringReader("M MIT");
-		  	Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_31, reader);
+		  	Tokenizer tokenizer = new WhitespaceTokenizer(Version.LUCENE_40, reader);
 		    AcronymTokenFilterFactory factory = new AcronymTokenFilterFactory();
+		    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
 		    factory.init(new HashMap<String,String>() {{
-		    	put("luceneMatchVersion", "LUCENE_31");
 		    	put("emitBoth", "true");
 		    	put("lowercaseAcronyms", "true");
 		    }});

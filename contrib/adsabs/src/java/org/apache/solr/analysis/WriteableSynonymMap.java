@@ -1,4 +1,4 @@
-package org.adsabs.solr.analysis;
+package org.apache.solr.analysis;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

@@ -1,6 +1,6 @@
-package org.apache.solr.analysis;
+package org.apache.lucene.analysis.synonym;
 
-import org.adsabs.solr.analysis.WriteableSynonymMap;
+import org.apache.solr.analysis.WriteableSynonymMap;
 
 public interface SynonymMapFilter {
 	public SynonymMap getSynonymMap();
