@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.Fieldable;
+import org.apache.lucene.index.IndexableField;
 
 import org.adsabs.mongodb.MongoConnection;
 import com.mongodb.Mongo;
@@ -54,7 +54,7 @@ public class MongoDataField extends TextField {
 		return this.polyField;
 	}
 	  
-	public Field createField(SchemaField field, String externalVal, float boost) {
+	public IndexableField createField(SchemaField field, String externalVal, float boost) {
 
 		String fieldName = this.mongoFieldName != null
 			? this.mongoFieldName
@@ -72,7 +72,7 @@ public class MongoDataField extends TextField {
 		return null;
 	}
 	
-	public Fieldable[] createFields(SchemaField field, String externalVal, float boost) {
+	public IndexableField[] createFields(SchemaField field, String externalVal, float boost) {
 
 		String fieldName = this.mongoFieldName != null
 			? this.mongoFieldName
@@ -84,7 +84,7 @@ public class MongoDataField extends TextField {
 			ArrayList<String> data = (ArrayList<String>) doc.get(fieldName);
 			
 			if (data != null) {
-				Field[] fields = new Field[data.size()];
+			  IndexableField[] fields = new Field[data.size()];
 				
 				for (int i = 0; i < data.size(); i++) {
 					fields[i] = super.createField(field, data.get(i), boost);
