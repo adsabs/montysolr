@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.analysis.WriteableSynonymMap;
 
 import org.adsabs.solr.AuthorUtils;
 import org.adsabs.solr.AuthorVariations;
