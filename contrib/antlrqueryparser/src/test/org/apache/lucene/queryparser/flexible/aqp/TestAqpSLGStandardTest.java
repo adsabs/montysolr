@@ -412,14 +412,6 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertEquals(2, fq.getMaxEdits());
     assertEquals(FuzzyQuery.defaultPrefixLength, fq.getPrefixLength());
 
-    AqpQueryParser qp = getParser();
-    try {
-      qp.setAllowSlowFuzzy(true);
-      qp.parse("term~1.1", "term");
-      debugFail("value > 1, should throw exception");
-    } catch (QueryNodeException expected) {
-      // this is ok
-    }
 
     assertTrue(getQuery("term*germ", null) instanceof WildcardQuery);
 

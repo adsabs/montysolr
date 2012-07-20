@@ -17,6 +17,7 @@
     limitations under the License.
  -->
 
+	
 <project name="examples" default="default">
 
 	<description>
@@ -79,7 +80,13 @@
 	<property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
 	<property name="env.PYTHONPATH" value="${common.dir}/build/dist${path.separator}${common.dir}/src/python${path.separator}"/>
 
-	
+	<target name="init">
+		<exec executable="${python}" failonerror="true" outputproperty="example.webapp" logerror="true">
+            <arg value="-c"/>
+            <arg value="import os;d='${basedir}/${example.name}';print os.path.exists(d+'/webapps/solr.war') and d+'/webapps/solr.war' or d+'/webapps'" />
+        </exec>
+	</target>
+		
 	<target name="populate-classpath">
     	<path id="examples.classpath">
     		<!-- 

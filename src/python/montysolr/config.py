@@ -1,6 +1,6 @@
 
 ## Show error messages and log prints
-MONTYSOLR_BUGDEBUG = True
+MONTYSOLR_BUGDEBUG = False
 
 ## Reload handler code on every invocation
 MONTYSOLR_KILLLOAD = False

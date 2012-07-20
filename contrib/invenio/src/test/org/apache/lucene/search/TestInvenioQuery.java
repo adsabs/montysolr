@@ -79,6 +79,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		    doc.add(field2);
 		    writer.addDocument(doc);
 	    }
+	    writer.commit();
 	    writer.close();
 	    return ramdir;
 	}
@@ -87,7 +88,8 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		
 		IndexedDocs iDocs = indexDocsPython(10);
 		Directory ramdir = indexDocsLucene(iDocs);
-		IndexSearcher searcher = new IndexSearcher(DirectoryReader.open(ramdir));
+		DirectoryReader reader = DirectoryReader.open(ramdir);
+		IndexSearcher searcher = new IndexSearcher(reader);
 		
 		String[] words = iDocs.words;
 		HashMap<String, ArrayList<String>> index = iDocs.index;
@@ -106,7 +108,8 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 			assertTrue(hits.totalHits == hits2.totalHits);
 		}
 		
-		//ramdir.close();
+		reader.close();
+		ramdir.close();
 	}
 
 	

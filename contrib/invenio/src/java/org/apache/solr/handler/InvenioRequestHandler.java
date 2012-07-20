@@ -14,7 +14,16 @@ import org.slf4j.LoggerFactory;
 import org.apache.solr.util.WebUtils;
 
 
-
+/**
+ * The following handler simply takes the arguments inside inv.params
+ * and puts them into the request object, so that they can be retrieved
+ * inside the response paramater later on. This is needed for communication
+ * with Invenio and also it may be needed by the processors that format
+ * the query output.
+ * 
+ * @author rchyla
+ *
+ */
 public class InvenioRequestHandler extends SearchHandler {
 
 	public static final Logger log = LoggerFactory

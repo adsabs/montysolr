@@ -53,16 +53,10 @@ public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 				+ "/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-invenio-handler.xml";
 	}
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		lrf = h.getRequestFactory("standard", 0, 20);
-	}
 
 	@SuppressWarnings({ "unchecked" })
 	public void testSorting() throws Exception {
 		SolrCore core = h.getCore();
-
 
 		assertU(adoc("id", "10", "title", "test", "val_s1", "aaa"));
 		assertU(adoc("id", "11", "title", "test", "val_s1", "bbb"));
@@ -120,7 +114,8 @@ public class TestInvenioRequestHandler extends MontySolrAbstractTestCase {
 				"test2").equals("val2"));
 		assertTrue(!((HashMap<String, String>) context.get("inv.params"))
 				.containsKey("test3"));
-
+		
+		assertU(commit());
 	}
 	
 	// Uniquely for Junit 3

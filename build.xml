@@ -20,41 +20,18 @@
 	<property file="build.properties" />
 
 
-	<!-- these are now defined in the properties file
-    <property name="jcc"           value="jcc.__main__" />
-    <property name="solr_home"     value="/x/dev/workspace/apache-solr-1.4.1"/>
-    <property name="python"        value="python"/>
-    //-->
-
-	<property name="solr.home" location="${solr_home}"/>
+	<property name="solr.home" location="${build.dir}/solr-download/apache-solr-${solr.version}"/>
 	<property name="webdist.home" location="${webdist}" />
 	<property name="lib.dir" value="lib" />
 	<property name="app.name" value="montysolr_java" />
-	<property name="app.version" value="0.1" />
+    <property name="app.solr.name" value="solr_java" />	
+	<property name="app.version" value="${montysolr.version}" />
 	<property name="jar.suffix" value="${app.name}-${app.version}.jar" />
-	<property name="app.solr.name" value="solr_java" />
-	<property name="app.solr.version" value="0.1" />
 	<property name="ddash" value="--" />
 
-
-	<!-- standard arguments for running the Solr -->
-	<property name="run.solr.jvmargs" value="-d64 -Xmx1024m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200" />
-	<property name="run.solr.args" value="" />
-
-	<!-- these will be used when running tests and command line montysolr
-	     you can set them as:
-	     export MONTYSOLR_JVMARGS=-Djava.util.logging.config.file=./example/etc/test.logging.properties
-
-	     If you are using python c-extensions, make sure they are compatible with the
-	     java - if your java starts in 64bit mode, also the extensions must be available in 64bit
-     //-->
-	<property environment="env"/>
-	<property name="subant.jvmargs" value="" />
-	<property name="subant.args" value="" />
-	<property name="subant.newenvironment" value="true" />
-	<property name="env.MONTYSOLR_JVMARGS" value="${subant.jvmargs}"/>
-	<property name="env.MONTYSOLR_ARGS" value="${subant.args}"/>
-	<property name="env.MONTYSOLR_NEWENVIRONMENT" value="${subant.newenvironment}"/>
+    
+	<!--set default PYTHONPATH if the environemnt is empty -->
+	<property environment="env" />
 	<property name="env.PYTHONPATH" value="${dist.dir}${path.separator}${src.dir.python}${path.separator}"/>
 
 	<!--
@@ -68,10 +45,9 @@
 		montysolr.jni.PythonMessage
 		" />
 	<property name="jcc.build" value="${montysolr.classes}" />
-	<property name="jcc.packages" value="
-	--package ch.cern.invenio.utils
-	"/>
+	<property name="jcc.packages" value=""/>
 
+	<property name="solr.svn" value="http://svn.apache.org/repos/asf/lucene/dev/trunk" />	
 
 	<!--
     _build variables are there to add extra classes to the wrapper - some packages (either in lucene or for montysolr)
@@ -80,7 +56,6 @@
     java.util.ArrayList
     -->
 	<property name="jcc.build_also" value="
-		
 		java.lang.Float
 		java.lang.System
 		java.lang.String
@@ -103,14 +78,14 @@
 
 	<!--
       ==================================================================
-         Initialization & maintenance stuff
+         Initialization & maintenance
       ==================================================================
       -->
 
 	<target name="compile-test" depends="compile,common.compile-test" />
 
 	<target name="config" depends="init">
-		<property name="my.montysolr.jar" value="${build.dir}/${final.name}.jar" />
+		<property name="montysolr.jar" value="${build.dir}/${final.name}.jar" />
 
 	</target>
 
@@ -144,7 +119,7 @@
 
 		<exec executable="${python}" failonerror="false" errorproperty="test_import_errors" >
 			<arg value="-c"/>
-			<arg value="import jcc; import lucene" />
+			<arg value="import jcc; import lucene; lucene.initVM()" />
 		</exec>
 
 		<condition property="import_ok">
@@ -153,11 +128,6 @@
 
 		<fail unless="import_ok" message="${test_import_errors}${line.separator}Please install the required Python modules first (jcc, lucene)" />
 
-
-		<exec executable="${python}" failonerror="true" outputproperty="webdist.webapp" logerror="true">
-			<arg value="-c"/>
-			<arg value="import os;d='${webdist.home}';print os.path.exists(d+'/webapps/solr.war') and d+'/webapps/solr.war' or d+'/webapps'" />
-		</exec>
 
 		<!-- retrieves the location of the jcc and stores in inside jcc_egg -->
 	    <exec executable="${python}" failonerror="true" outputproperty="jcc_egg" logerror="true">
@@ -171,10 +141,10 @@
 	<target name="check_properties">
 		<condition property="propertiesOK">
 			<and>
-				<isset property="solr_home" />
-				<isset property="webdist" />
 				<isset property="python" />
 				<isset property="jcc" />
+				<isset property="montysolr.version" />
+				<isset property="solr.version" />
 			</and>
 		</condition>
 	</target>
@@ -192,9 +162,8 @@
 		<mkdir dir="${classes.dir}"/>
 	</target>
 
-	<target name="default">
+	<target name="default" depends="usage" />
 
-	</target>
 
 	<!--
       ==================================================================
@@ -210,17 +179,17 @@
 
 	<target name="set-jar-paths">
 		<!--
-                      The part below will discover all the paths inside the directory (for the
-                      given pattern) and the property with .path end element will look like
-                      path1 [dash][dash]jar path2 [dash][dash]jar path3....
+              The part below will discover all the paths inside the directory (for the
+              given pattern) and the property with .path end element will look like
+              path1 [dash][dash]jar path2 [dash][dash]jar path3....
 
-                      However, this is suboptimal for cases, when there are two versions of the
-                      jar file in the folder, for example:
-                       solr-core-1.4.1.jar
-                       solr-core-1.4.2-dev.jar
+              However, this is suboptimal for cases, when there are two versions of the
+              jar file in the folder, for example:
+               solr-core-1.4.1.jar
+               solr-core-1.4.2-dev.jar
 
-                  We include them all. TODO: pick the newest file only
-                  -->
+          We include them all. TODO: pick the newest file only
+          -->
 		<path id="solr.core.path">
 			<fileset dir="${solr.real.location}/dist" id="solr.core.jar" >
 				<filename name="*solr-core-*.jar"/>
@@ -239,14 +208,12 @@
 			<path refid="solr.sorlj.path" />
 		</pathconvert>
 
-
 		<path id="montysolr.classpath">
 			<fileset dir="${build.dir}" includes="montysolr*.jar" />
 			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
 			<fileset dir="${solr.real.location}" includes="lib/**/*.jar" />
 			<fileset dir="${solr.real.location}" includes="example/lib/**/*.jar" />
 			<fileset dir="${solr.real.location}" includes="example/start.jar" />
-			<fileset dir="${webdist.home}" includes="lib/**/*.jar" />
 			<fileset dir="${lib.dir}" includes="**/*.jar" />
 		</path>
 	</target>
@@ -271,60 +238,17 @@
 	<target name="write-properties" depends="config">
 		   <echo file="${build.dir}/build.properties">
 message=Automatically generated by ant during compilation of MontySolr, do not change!
-solr_home=${solr_home}
 solr.home=${solr.home}
 solr.real.location=${solr.real.location}
 jcc=${jcc}
 jcc_egg=${jcc_egg}
-webdist=${webdist}
-webdist.home=${webdist.home}
 python=${python}
 solr.version=${solr.version}    
-lucene.version=${lucene.version}
+montysolr.version=${montysolr.version}		   	
 		   </echo>
 	</target>
 
 
-	<!--
-  ==================================================================
-     Jetty (JavaVM) embedded in Python - this becomes obsolete, but
-     does not need be. The same code works in Python (and in fact,
-     is used when we run python unittests). But I do concentrate on
-     the Python-inside-Java mode now.
-  ==================================================================
-  -->
-
-	<!-- Builds jar and also compile Java-Pyhon wrapper - this is all you need to run Solr inside Python; cleans everything before starting -->
-	<target name="montysolr-jetty-build-clean"
-		depends="clean,montysolr-jetty-build"/>
-
-	<!-- Builds jar and also compile Java-Pyhon wrapper - this is all you need to run Solr inside Python -->
-	<target name="montysolr-jetty-build"
-		depends="config-build,jar,montysolr-jetty-egg-compilation,unzip-egg">
-	</target>
-
-
-	<target name="montysolr-jetty-egg-compilation" depends="jar">
-		<mkdir dir="${build.dir}" />
-		<delete dir="${build.dir}/build" failonerror="no" />
-
-		<exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
-			<arg line="${jcc}" />
-			<arg value="${ddash}shared" />
-			<arg line="${jcc.build_also}" />
-			<arg line="${jcc.build}" />
-			<arg value="${ddash}python" />
-			<arg value="${app.name}" />
-			<arg value="${ddash}build" />
-			<arg value="${ddash}classpath" />
-			<arg value="${toString:montysolr.classpath}${path.separator}../${my.montysolr.jar}" />
-			<arg value="${ddash}include" />
-			<arg value="../${my.montysolr.jar}" />
-			<arg value="${ddash}bdist" />
-			<arg value="${ddash}version" />
-			<arg value="${app.version}" />
-		</exec>
-	</target>
 
 
 	<!--
@@ -365,19 +289,62 @@ lucene.version=${lucene.version}
 
 	<!--
 	==================================================================
-     Embedding Python VM in Java VM
+     Embedding PythonVM in JavaVM
     ==================================================================
     -->
 
-	<target name="build-all" depends="example,build-solr,build,build-contrib"
-		description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
+	<!-- build solr for python -->
+	<target name="build-solr" depends="config-build,compile-solr-egg,unzip-solr-egg"
+	               description="Build separately the Python egg of Solr"/>
+    <target name="compile-solr-egg" depends="config-build">
+        <mkdir dir="${build.dir}" />
+        <delete dir="${build.dir}/build" failonerror="no" />
 
+        <echo message="You can watch Monty Python, this takes a while..." />
+
+        <exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
+            <env key="PYTHONPATH" value="${src.dir.python}${path.separator}${env.PYTHONPATH}" />
+
+            <!-- this is mac specific, i will yet have to find out how to make it os-specific,
+                 but it makes no problems to Ubuntu/SLC linux os'es so far -->
+            <env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
+
+
+            <arg line="${jcc}" />
+            <arg value="${ddash}shared" />
+            <arg value="${ddash}version" />
+            <arg value="${app.version}" />
+            <arg value="${ddash}import"/>
+            <arg value="lucene" />
+            <arg line="${ddash}jar ${solr.core.jar.string}" />
+            <arg line="${ddash}jar ${solr.solrj.jar.string}" />
+            <arg value="${ddash}classpath" />
+            <arg value="${toString:montysolr.classpath}${path.separator}${jcc_egg}/jcc/classes/" />
+            <arg value="${ddash}package" />
+            <arg value="java.lang" />
+            <arg value="${ddash}python" />
+            <arg value="${app.solr.name}" />
+            <arg value="${ddash}build" />
+            <arg value="${ddash}bdist" />
+            <arg line="${ddash}files 5" />
+            <!-- We exclude the embedded classes because they are Jetty specific -->
+            <arg line="${ddash}exclude org.apache.solr.search.FunctionQParser
+                       ${ddash}exclude org.apache.solr.client.solrj.embedded.NoLog 
+                       ${ddash}exclude org.apache.solr.client.solrj.embedded.JettySolrRunner
+                       ${ddash}exclude org.apache.solr.update.processor.UniqFieldsUpdateProcessorFactory
+                       ${ddash}exclude org.apache.noggit.JSONParser
+                       ${ddash}exclude org.apache.solr.util.xslt.TransformerProvider
+                       ${ddash}rename org.apache.solr.handler.loader.ContentStreamLoader=LoaderContentStreamLoader
+                      " />
+        </exec>
+    </target>
+	
+	
+	<!-- Build MontySolr for Python -->
 	<target name="build" depends="config-build,compile-montysolr-egg,unzip-egg"
 		   description="Build MontySolr separately"/>
 
-
-
-	<!-- Compile egg for embedding into Java VM -->
+	
 	<target name="compile-montysolr-egg" depends="compile,jar">
 		<mkdir dir="${build.dir}" />
 		<delete dir="${build.dir}/build" failonerror="no" />
@@ -399,18 +366,13 @@ lucene.version=${lucene.version}
 			<arg value="${ddash}import" />
 			<arg value="${app.solr.name}" />
 
-			<!--
-			<arg value="${ddash}jar" />
-            <arg value="../${my.montysolr.jar}" />
-			-->
 			<arg line="${jcc.packages}" />
 			<arg value="${ddash}package" />
-			<!--<arg line="org.apache.solr.request ${ddash}package java.lang" />-->
 			<arg line="org.apache.solr.request" />
 			<arg value="${ddash}classpath" />
-			<arg value="${toString:montysolr.classpath}${path.separator}../${my.montysolr.jar}:${path.separator}${jcc_egg}/jcc/classes/" />
+			<arg value="${toString:montysolr.classpath}${path.separator}../${montysolr.jar}:${path.separator}${jcc_egg}/jcc/classes/" />
 			<arg value="${ddash}include" />
-			<arg value="${my.montysolr.jar}" />
+			<arg value="${montysolr.jar}" />
 			<arg value="${ddash}python" />
 			<arg value="${app.name}" />
 			<arg value="${ddash}build" />
@@ -425,12 +387,18 @@ lucene.version=${lucene.version}
 	</target>
 
 
-
-	<target name="build-solr" depends="config-build,compile-solr-egg,unzip-solr"
-	           description="Build separately the Python egg of Solr"/>
+    <!--
+    ==================================================================
+     Commands for a lazy developer
+    ==================================================================
+    -->
+	
+	<target name="build-all" depends="get-solr,build-solr,build,build-contrib"
+	        description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
+	    
     
     <target name="build-contrib" >
-    	<apply executable="ant" parallel="false" failonerror="true">
+    	<apply executable="ant" parallel="false" failonerror="true" failifexecutionfails="true">
     	  <arg line="build-all"/>
     	  <arg value="-f"/>
     	  <fileset dir="${common.dir}/contrib">
@@ -457,71 +425,7 @@ lucene.version=${lucene.version}
         </apply>
     </target>
 
-	<target name="compile-solr-egg" depends="config-build">
-		<mkdir dir="${build.dir}" />
-		<delete dir="${build.dir}/build" failonerror="no" />
-
-		<echo message="You can watch Monty Python, this takes a while..." />
-
-		<exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
-			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}${env.PYTHONPATH}" />
-
-			<!-- this is mac specific, i will yet have to find out how to make it os-specific,
-			     but it makes no problems to Ubuntu/SLC linux os'es so far -->
-			<env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
-
-
-			<arg line="${jcc}" />
-			<arg value="${ddash}shared" />
-			<arg value="${ddash}version" />
-			<arg value="${app.solr.version}" />
-			<arg value="${ddash}import"/>
-			<arg value="lucene" />
-			<arg line="${ddash}jar ${solr.core.jar.string}" />
-			<arg line="${ddash}jar ${solr.solrj.jar.string}" />
-			<arg value="${ddash}classpath" />
-			<arg value="${toString:montysolr.classpath}${path.separator}${jcc_egg}/jcc/classes/" />
-			<arg value="${ddash}package" />
-			<arg value="java.lang" />
-			<arg value="${ddash}python" />
-			<arg value="${app.solr.name}" />
-			<arg value="${ddash}build" />
-			<arg value="${ddash}bdist" />
-			<arg line="${ddash}files 5" />
-			<!-- We exclude the embedded classes because they are Jetty specific -->
-			<arg line="${ddash}exclude org.apache.solr.search.FunctionQParser
-				       ${ddash}exclude org.apache.solr.client.solrj.embedded.NoLog 
-				       ${ddash}exclude org.apache.solr.client.solrj.embedded.JettySolrRunner
-			           ${ddash}exclude org.apache.solr.update.processor.UniqFieldsUpdateProcessorFactory
-			           ${ddash}exclude org.apache.noggit.JSONParser
-				       ${ddash}exclude org.apache.solr.util.xslt.TransformerProvider
-				       ${ddash}rename org.apache.solr.handler.loader.ContentStreamLoader=LoaderContentStreamLoader
-			          " />
-		</exec>
-	</target>
-
-
-	<target name="unzip-solr">
-		<!-- retrieves the location of the jcc -->
-		<exec executable="${python}" failonerror="true" outputproperty="_tmp_solr_err" dir="${build.dir}/dist" logerror="true">
-			<arg value="-c"/>
-			<arg value="import os,glob; print os.path.abspath(glob.glob('./${app.solr.name}*.egg')[0])" />
-		</exec>
-
-		<delete dir="${dist.dir}/${app.solr.name}.egg-info" failonerror="no" />
-		<delete dir="${dist.dir}/${app.solr.name}" failonerror="no" />
-
-		<unzip dest="${dist.dir}" overwrite="yes">
-			<fileset dir="${dist.dir}">
-				<include name="${app.solr.name}*.egg" />
-			</fileset>
-		</unzip>
-		<move file="${dist.dir}/EGG-INFO" tofile="${dist.dir}/${app.solr.name}.egg-info" />
-	</target>
-
-
-
-
+	
 
 
 
@@ -530,13 +434,24 @@ lucene.version=${lucene.version}
                    Installation goodies
     ====================================================================
     -->
-
+    
 	
-	<target name="example"
-          depends="check-solr-location,download-solr,build-solr-example">
+	<target name="get-solr"
+          depends="get-solr-usign-svn,check-solr-location,download-solr,build-solr-example">
 	</target>
 
 	
+	
+	<!-- this is for development purposes - especially when lucene/solr stable releases are not yet there -->
+	<target name="get-solr-usign-svn">
+		<mkdir dir="${solr.home}"/>
+		
+		<exec executable="${python}" failifexecutionfails="true" dir="${solr.home}">
+			<arg value="-c"/>
+			<arg value="import os;'${solr.version}'.lower().__contains__('svn') and (os.path.isdir('.svn') and os.system('svn update --force') or os.system('svn checkout ${solr.svn} .'))"/>
+		</exec>
+		
+	</target>
 
 	<!-- this target sets the location of the solr, if not present, we'll assume build/solr-download/apache-solr-${solr.version}/solr
 	   The property may also be set by a download-solr task
@@ -544,14 +459,14 @@ lucene.version=${lucene.version}
 	<target name="check-solr-location" >
 		<condition property="solr.real.location" value="${solr.home}">
 			<and>
-				<available file="${solr.home}/example/start.jar"/>
+				<available file="${solr.home}/example/README.txt"/>
 				<available file="${solr.home}/lib/README.committers.txt"/>
 			</and>
 		</condition>
 
 		<condition property="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr">
 			<and>
-				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/example/start.jar"/>
+				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/example/README.txt"/>
 				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/lib/README.committers.txt"/>
 			</and>
 		</condition>
@@ -601,6 +516,27 @@ lucene.version=${lucene.version}
 	</target>
 
 
+	
+	
+    <target name="unzip-solr-egg">
+        <!-- retrieves the location of the jcc -->
+        <exec executable="${python}" failonerror="true" outputproperty="_tmp_solr_err" dir="${build.dir}/dist" logerror="true">
+            <arg value="-c"/>
+            <arg value="import os,glob; print os.path.abspath(glob.glob('./${app.solr.name}*.egg')[0])" />
+        </exec>
+
+        <delete dir="${dist.dir}/${app.solr.name}.egg-info" failonerror="no" />
+        <delete dir="${dist.dir}/${app.solr.name}" failonerror="no" />
+
+        <unzip dest="${dist.dir}" overwrite="yes">
+            <fileset dir="${dist.dir}">
+                <include name="${app.solr.name}*.egg" />
+            </fileset>
+        </unzip>
+        <move file="${dist.dir}/EGG-INFO" tofile="${dist.dir}/${app.solr.name}.egg-info" />
+    </target>
+
+	
 	<target name="try-lucene-jars" depends="check-solr-location" >
 		<!-- since on old ant we cannot ignore it -->
 		<mkdir dir="${solr.real.location}/dist" />
@@ -744,10 +680,9 @@ lucene.version=${lucene.version}
 
 	</target>
 
-       <target name="get-solr-home" >
-        <echo>@${solr_home}@</echo>
-       </target>
+
 	
+	<!-- poorman's way to run the python tests from inside ./src/python -->
 	<target name="test-python">
 	   <run-python-unittests python="${python}" python-path="${env.PYTHONPATH}${path.separator}${dist.dir}${path.separator}${src.dir.python}"
 	    srcdir="${common.dir}/src/python"
