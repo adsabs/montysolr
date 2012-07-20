@@ -74,9 +74,6 @@
 	</path>
 
 	<path id="common.test.classpath">
-		<dirset dir="${common.dir}/build/solr-download">
-			<include name = "**/solr/src/test-files"/>
-		</dirset>
 
 		<path refid="common.classpath"/>
 		<path refid="junit-path"/>
@@ -85,16 +82,14 @@
 
 		<!-- these classes cannot be found in solr/lucene jars, they are needed
 	      	     for proper compilation of unittests -->
+		
 		<dirset dir="${common.dir}/build/solr-download">
-			<include name = "**/lucene/build/classes/test"/>
-		</dirset>
-		<dirset dir="${common.dir}/build/solr-download">
-			<include name = "**/lucene/build/classes/test-framework"/>
-		</dirset>
+            <include name = "*${solr.version}/**/solr/build/test-framework/classes/java"/>
+        </dirset>
 
 		<dirset dir="${common.dir}/build/solr-download">
-			<include name = "**/solr/build/tests"/>
-		</dirset>
+            <include name = "*${solr.version}/**/lucene/build/solr-test-framework/classes/java"/>
+        </dirset>
 
 
 	</path>
