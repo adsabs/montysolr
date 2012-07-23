@@ -73,11 +73,11 @@
 	<path id="classpath">
 		<path refid="base.classpath"/>
 		<pathelement location="${build.dir}/classes/java"/>
-		<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
-			<include name="**/lucene-queryparser*.jar"/>
+		<fileset dir="${common.dir}/build/solr-download">
 			<include name="**/antlr-runtime*.jar"/>
 		</fileset>
 		<fileset dir="${prop.solr.home}">
+			<include name="solr/dist/**/lucene-queryparser*.jar"/>
             <include name="lucene/build/sandbox/**.jar"/>
         </fileset>
 	</path>
@@ -95,10 +95,11 @@
 		<path refid="test.base.classpath"/>
 		<path refid="common.test.classpath"/>
 		<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
-			<include name="**/*test*.jar"/>
+			<include name="**/antlr-runtime*.jar"/>
 		</fileset>
 	</path>
 
+	<path id="additional.classpath" />
 
 
 
@@ -148,6 +149,23 @@
 			<compilerarg line="-Xlint:-deprecation" />
         </compile>
 	</target>
+	
+    <target name="compile-prerequisites" depends="">
+        
+        <!-- we are using some classes from the parser test framework
+             so we must compile them ourselves (not to depend on luck)
+             
+             But we'll put them into test so that it is not included
+             inside generated jars
+        --> 
+        <compile srcdir="${prop.solr.home}/lucene/queryparser/src/test" 
+            destdir="${build.dir}/classes/test">
+            <classpath refid="test.classpath"/>
+            <classpath refid="additional.classpath"/>
+            <include name="**/flexible/standard/**.java"/>
+        </compile>
+        
+    </target>
 
 
 	<target name="dot" depends="">
@@ -195,7 +213,7 @@
 	</target>
 
 	
-    <target name="test" depends="default,compile-all" >
+    <target name="test" depends="default,compile-all,compile-prerequisites" >
         <antcall target="common.test" inheritRefs="true"/>
     </target>
 

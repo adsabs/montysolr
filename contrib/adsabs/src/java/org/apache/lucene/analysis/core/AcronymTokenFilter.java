@@ -44,7 +44,7 @@ public final class AcronymTokenFilter extends TokenFilter {
 
     public AcronymTokenFilter(TokenStream in, boolean emitBoth, boolean lowercaseAcronyms) {
         super(in);
-        this.charUtils = CharacterUtils.getInstance(Version.LUCENE_30);
+        this.charUtils = CharacterUtils.getInstance(Version.LUCENE_40);
         this.acronym = new StringBuffer();
         this.emitBoth = emitBoth;
         this.lowercaseAcronyms = lowercaseAcronyms;
