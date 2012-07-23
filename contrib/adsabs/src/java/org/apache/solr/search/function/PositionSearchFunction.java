@@ -47,8 +47,8 @@ public class PositionSearchFunction extends ValueSource {
 			return false;
 
 		PositionSearchFunction that = (PositionSearchFunction) o;
-		if (this.hashCode() != that.hashCode())
-			return false;
+		if (this.hashCode() == that.hashCode())
+			return true;
 
 		return false;
 	}
