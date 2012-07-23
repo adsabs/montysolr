@@ -29,7 +29,8 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	
 	
 	
-	@Override
+	@SuppressWarnings("unchecked")
+  @Override
 	public void searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (docToDocidsCache == null) {
 		  if (cacheGetter != null) {
@@ -37,7 +38,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 		  }
 		  else {
   			docToDocidsCache = DictionaryRecIdCache.INSTANCE.
-  				getCacheTranslatedMultiValuesString(((IndexSearcher) searcher).getIndexReader(), 
+  				getCacheTranslatedMultiValuesString(searcher.getIndexReader(), 
   				uniqueIdField, referenceField);
 		  }
 		}
@@ -54,8 +55,9 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	public void collect(int doc) throws IOException {
 		if (docToDocidsCache.containsKey(doc+docBase)) {
 			float s = scorer.score();
+			float freq = docToDocidsCache.get(doc+docBase).size();
 			for (int i: docToDocidsCache.get(doc+docBase)) {
-				hits.add(new ScoreDoc(i, s));
+				hits.add(new CollectorDoc(i, s, -1, freq));
 			}
 		}
 		

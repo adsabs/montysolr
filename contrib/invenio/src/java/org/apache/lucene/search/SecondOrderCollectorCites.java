@@ -1,7 +1,6 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +42,8 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	}
 	
 	
-	@Override
+	@SuppressWarnings("unchecked")
+  @Override
 	public void searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (valueToDocidCache == null) {
 		  if (cacheGetter != null) {
@@ -51,7 +51,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		  }
 		  else {
   			valueToDocidCache = DictionaryRecIdCache.INSTANCE.
-  				getTranslationCacheString(((IndexSearcher) searcher).getIndexReader(), uniqueIdField);
+  				getTranslationCacheString(searcher.getIndexReader(), uniqueIdField);
 		  }
 		}
 	}
@@ -75,7 +75,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		for (String v: vals) {
 			v = v.toLowerCase();
 			if (valueToDocidCache.containsKey(v)) {
-				hits.add(new ScoreDoc((Integer)valueToDocidCache.get(v), s));
+				hits.add(new CollectorDoc(valueToDocidCache.get(v), s, -1, vals.length));
 			}
 		}
 	}

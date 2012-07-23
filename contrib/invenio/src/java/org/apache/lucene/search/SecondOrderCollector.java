@@ -2,7 +2,6 @@ package org.apache.lucene.search;
 
 import java.io.IOException;
 import java.util.List;
-import org.apache.lucene.index.IndexReader;
 
 public interface SecondOrderCollector {
 
@@ -29,7 +28,7 @@ public interface SecondOrderCollector {
 	 * @param reader
 	 * @return
 	 */
-	public List<ScoreDoc> getSubReaderResults(int docBase, int docBaseEnd);
+	public List<CollectorDoc> getSubReaderResults(int docBase, int docBaseEnd);
 	
 	
 

@@ -6,13 +6,13 @@ import java.util.List;
 
 
 public class SecondOrderListOfDocsScorer extends Scorer {
-	private List<ScoreDoc> hits;
-	private Iterator<ScoreDoc> iterator = null;
+	private List<CollectorDoc> hits;
+	private Iterator<CollectorDoc> iterator = null;
 	private int doc = -1;
 	private float score;
 	private int docBase = 0;
 
-    public SecondOrderListOfDocsScorer(Weight weight, List<ScoreDoc> hits, int docBase) throws IOException {
+    public SecondOrderListOfDocsScorer(Weight weight, List<CollectorDoc> hits, int docBase) throws IOException {
       super(weight);
       if (hits.size()>0) {
     	  this.hits = hits;
@@ -51,6 +51,9 @@ public class SecondOrderListOfDocsScorer extends Scorer {
 		return doc;
     }
     
-    
+    @Override
+    public float freq() throws IOException {
+      return 1.0f;
+    }
     
   }

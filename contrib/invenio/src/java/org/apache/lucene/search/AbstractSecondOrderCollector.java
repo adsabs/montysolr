@@ -5,33 +5,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.IndexReader;
 
 public abstract class AbstractSecondOrderCollector extends Collector implements
     SecondOrderCollector {
 
   protected Scorer scorer;
   protected int docBase;
-  protected List<ScoreDoc> hits;
+  protected List<CollectorDoc> hits;
   protected volatile boolean organized = false;
   protected Lock lock = null;
   private Integer lastPos = null;
 
   public AbstractSecondOrderCollector() {
     lock = new ReentrantLock();
-    hits = new ArrayList<ScoreDoc>();
+    hits = new ArrayList<CollectorDoc>();
   }
 
   public void searcherInitialization(IndexSearcher searcher) throws IOException {
 
   }
 
-  public List<ScoreDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
+  public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
 	  
 	if (hits.size() == 0)
 		return null;
@@ -53,7 +50,7 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
     }
     
     
-    ArrayList<ScoreDoc> results = new ArrayList<ScoreDoc>();
+    ArrayList<CollectorDoc> results = new ArrayList<CollectorDoc>();
     for (;i<hits.size() && hits.get(i).doc < rangeEnd;i++) {
     	results.add(hits.get(i));
     }
@@ -161,14 +158,14 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
   }
 
   private void compactHits() {
-    ArrayList<ScoreDoc> newHits = new ArrayList<ScoreDoc>(new Float(
+    ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
         (hits.size() * 0.75f)).intValue());
 
-    ScoreDoc currDoc = null;
+    CollectorDoc currDoc = null;
     int seenTimes = 0;
     float score = 0.0f;
 
-    for (ScoreDoc d : hits) {
+    for (CollectorDoc d : hits) {
       if (currDoc == null || d.doc == currDoc.doc) {
         score += d.score;
         seenTimes += 1;

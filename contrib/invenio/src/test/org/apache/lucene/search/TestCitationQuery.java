@@ -29,8 +29,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 	private RandomIndexWriter writer;
 
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		envInit();
+	public static void beforeTestCitationQuery() throws Exception {
 		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/python");

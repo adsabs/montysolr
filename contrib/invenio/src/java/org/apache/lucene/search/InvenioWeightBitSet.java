@@ -112,6 +112,12 @@ public class InvenioWeightBitSet extends InvenioWeight {
 				return query.getBoost() * 1.0f; // TODO: implementation of the
 												// scoring algorithm
 			}
+
+			@Override
+      public float freq() throws IOException {
+        return 1.0f; // because Invenio doesn't know this info, we stick to 1
+      }
+			
 		};// Scorer
 	}// scorer
 

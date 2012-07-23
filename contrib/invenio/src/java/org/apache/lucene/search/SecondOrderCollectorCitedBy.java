@@ -17,7 +17,6 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
 	public SecondOrderCollectorCitedBy(CacheGetter getter) {
 		super();
-		hits = new ArrayList<ScoreDoc>();
 		assert getter != null;
 		cacheGetter = getter;
 	}
@@ -36,7 +35,6 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 		super();
 		this.referenceField = referenceField;
 		this.uniqueIdField = uniqueIdField;
-		hits = new ArrayList<ScoreDoc>();
 		assert this.referenceField != null && this.uniqueIdField != null;
 	}
 	
@@ -65,8 +63,9 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	public void collect(int doc) throws IOException {
 		if (invertedIndex[doc+docBase] == null) return;
 		float s = scorer.score();
+		float freq = (float) invertedIndex[doc+docBase].length;
 		for (int v: invertedIndex[doc+docBase]) {
-			hits.add(new ScoreDoc(v, s));
+			hits.add(new CollectorDoc(v, s, -1, freq));
 		}
 		
 	}

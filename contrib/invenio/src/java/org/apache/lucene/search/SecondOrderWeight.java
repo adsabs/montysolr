@@ -43,7 +43,7 @@ public class SecondOrderWeight extends Weight {
       boolean topScorer, Bits acceptDocs) throws IOException {
 	  int docBase = context.docBase;
 	  int maxRange = docBase + context.reader().maxDoc();
-	  List<ScoreDoc> hits = secondOrderCollector.getSubReaderResults(docBase, maxRange);
+	  List<CollectorDoc> hits = secondOrderCollector.getSubReaderResults(docBase, maxRange);
 		if (hits == null || hits.size() == 0) return null;
 		
 		

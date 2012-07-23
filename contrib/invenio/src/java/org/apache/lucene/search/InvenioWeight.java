@@ -136,6 +136,11 @@ public class InvenioWeight extends Weight {
 				return innerQuery.getBoost(); // TODO: implementation of the
 												// scoring algorithm
 			}
+
+      @Override
+      public float freq() throws IOException {
+        return 1.0f; // because Invenio doesn't know this info, we stick to 1
+      }
 		};// Scorer
 	}// scorer
 	

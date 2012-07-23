@@ -127,6 +127,13 @@
             <include name="**/Build*.java"/>
 			<include name="**/*Abstract*.java"/>
         </compile>
+		
+		<compile srcdir="${prop.solr.home}/solr/contrib/dataimporthandler/src/test" 
+            destdir="${build.dir}/classes/test">
+            <classpath refid="compile.classpath"/>
+            <classpath refid="test.classpath"/>
+            <include name="**/Abstract*.java"/>
+        </compile>
 	</target>
 	
 	<target name="build-all"  depends="clean,invenio-build-grammar">
