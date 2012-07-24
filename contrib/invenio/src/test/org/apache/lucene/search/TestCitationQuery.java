@@ -305,7 +305,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		c4 = new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField));
 		assertTrue(c3.equals(c4));
 		
-		
+		FieldCache.DEFAULT.purgeAllCaches();
 	}
 	
 	// Uniquely for Junit 3

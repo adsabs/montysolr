@@ -11,9 +11,11 @@ import montysolr.jni.PythonMessage;
 
 import org.ads.solr.InvenioBitSet;
 import org.apache.commons.io.IOUtils;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Scorer;
+import org.apache.lucene.util.Bits;
 
 
 import com.jcraft.jzlib.ZInputStream;
@@ -30,8 +32,8 @@ public class InvenioWeightBitSet extends InvenioWeight {
 
 	}
 
-	public Scorer scorer(IndexReader indexReader, boolean scoreDocsInOrder,
-			boolean topScorer) throws IOException {
+	public Scorer scorer(AtomicReaderContext context, boolean scoreDocsInOrder,
+			boolean topScorer, Bits acceptDocs) throws IOException {
 
 		// we override the Scorer for the InvenioQuery
 		return new Scorer(weight) {

@@ -52,8 +52,7 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 	private String inveniourl = "http://inspirebeta.net/search";
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		envInit();
+	public static void beforeBlackBoxKeepRecidUpdated() throws Exception {
 		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/invenio/src/python");
