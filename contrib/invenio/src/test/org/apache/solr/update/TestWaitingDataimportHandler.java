@@ -35,12 +35,12 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 	
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/invenio/src/test-files/solr/conf/schema-invenio-keeprecid-updater.xml";
+		+ "/contrib/invenio/src/test-files/solr/collection1/conf/schema-invenio-keeprecid-updater.xml";
 	}
 
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/invenio/src/test-files/solr/conf/solrconfig-invenio-keeprecid-updater.xml";
+		+ "/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-invenio-keeprecid-updater.xml";
 	}
 
 	public String getSolrHome() {

@@ -37,7 +37,7 @@
       slighlty customized versions of the standard handlers  -->
   <requestHandler name="/dataimport" class="org.apache.solr.handler.dataimport.DataImportHandler">
     <lst name="defaults">
-      <str name="config">${montysolr.home:.}/contrib/invenio/src/test-files/solr/conf/data-config-invenio-keeprecid-updater.xml</str>
+      <str name="config">${montysolr.home:.}/contrib/invenio/src/test-files/solr/collection1/conf/data-config-invenio-keeprecid-updater.xml</str>
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
     </lst>
@@ -45,7 +45,7 @@
   
   <requestHandler name="/waiting-dataimport" class="org.apache.solr.handler.dataimport.WaitingDataImportHandler">
     <lst name="defaults">
-      <str name="config">${montysolr.home:.}/contrib/invenio/src/test-files/solr/conf/data-config-invenio-keeprecid-updater.xml</str>
+      <str name="config">${montysolr.home:.}/contrib/invenio/src/test-files/solr/collection1/conf/data-config-invenio-keeprecid-updater.xml</str>
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
       <bool name="synchronous">true</bool>
