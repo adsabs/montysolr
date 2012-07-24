@@ -21,7 +21,7 @@ public class TestSemanticTagger extends MontySolrAbstractLuceneTestCase {
 	private SemanticTagger tagger;
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
+	public static void beforeTestSemanticTagger() throws Exception {
 		MontySolrAbstractLuceneTestCase.beforeClassMontySolrTestCase();
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/contrib/newseman/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_newseman.targets", "monty_newseman.tests.targets");
