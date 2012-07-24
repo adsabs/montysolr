@@ -5,7 +5,7 @@ package org.apache.lucene.queryparser.flexible.aqp.parser;
 
 /**
  * Automatically generated SyntaxParser wrapper built by ant
- * from the grammar source: /dvt/workspace/montysolr/contrib/invenio/src/java/org/apache/lucene/queryParser/aqp/parser/FixInvenio.g
+ * from the grammar source: /dvt/workspace/montysolr/contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/FixInvenio.g
  * 
  * YOUR CHANGES WILL BE OVERWRITTEN AUTOMATICALLY!
  */
@@ -16,13 +16,13 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.apache.lucene.queryparser.flexible.messages.Message;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTreeAdaptor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
-import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
-import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTreeAdaptor;
-import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;            	
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParserAbstract;
 import org.apache.lucene.queryparser.flexible.aqp.parser.FixInvenioLexer;
 import org.apache.lucene.queryparser.flexible.aqp.parser.FixInvenioParser;
