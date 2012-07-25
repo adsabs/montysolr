@@ -25,10 +25,11 @@ import org.apache.solr.response.SolrQueryResponse;
  * Just a small class to make sure the request is always in a synchronized mode
  * and also that we use the NoRollbackWriter.
  *
+ * If the SOLR-3671 is accepted, we can subclass DataImportHandler
  */
-public class WaitingDataImportHandler extends DataImportHandler {
-
-
+ 
+public class WaitingDataImportHandler extends FixedDataImportHandler {
+  
 
   @Override
   @SuppressWarnings("unchecked")
@@ -44,6 +45,5 @@ public class WaitingDataImportHandler extends DataImportHandler {
     super.handleRequestBody(req, rsp);        
     
   }
-
-
+  
 }

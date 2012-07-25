@@ -153,7 +153,7 @@ def get_recids_changes(message):
                                         mod_date=mod_date, table=table)
     if results:
         data, last_recid, mod_date = results
-        out = HashMap().of_(String, JArray_int)
+        out = HashMap() #.of_(String, JArray_int)
         for k,v in data.items():
             out.put(k, JArray_int(v))
         message.setResults(out)

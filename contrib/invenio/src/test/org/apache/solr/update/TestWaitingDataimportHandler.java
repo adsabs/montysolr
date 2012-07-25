@@ -24,6 +24,8 @@ import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.util.AbstractSolrTestCase;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 /**
  * Tests that the dataimport handler does really wait and does not
@@ -33,9 +35,19 @@ import org.apache.solr.util.AbstractSolrTestCase;
 public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 	
 	
+  @BeforeClass
+  public static void beforeTestWaitingDataimportHandler() throws Exception {
+    System.setProperty("montysolr.home", MontySolrSetup.getMontySolrHome());
+  }
+  
+  @AfterClass
+  public static void afterTestWaitingDataimportHandler() throws Exception {
+    System.clearProperty("montysolr.home");
+  }
+  
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/invenio/src/test-files/solr/collection1/conf/schema-invenio-keeprecid-updater.xml";
+		+ "/contrib/invenio/src/test-files/solr/collection1/conf/schema-minimal.xml";
 	}
 
 	public String getSolrConfigFile() {
@@ -44,12 +56,13 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 	}
 
 	public String getSolrHome() {
+	  System.clearProperty("solr.solr.home"); //always force field re-computation
 		return MontySolrSetup.getSolrHome() + "/example/solr";
 	}
 	
 
 	
-	public void testImport() throws InterruptedException {
+	public void testImport() throws Exception {
 		
 		
 		String testDir = MontySolrSetup.getMontySolrHome() + "/src/test-files/data/";
@@ -67,15 +80,18 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 		
 		core.execute(handler, req, rsp);
 		
-		commit("waitFlush", "true", "waitSearcher", "true");
+		assertU(commit());
+		//commit("waitFlush", "true", "waitSearcher", "true");
 		
-		assertQ(req("q", "recid:53"), "//*[@numFound='1']");
-		assertQ(req("q", "recid:54"), "//*[@numFound='1']");
-		assertQ(req("q", "recid:55"), "//*[@numFound='1']");
-		assertQ(req("q", "title:\"ALEPH experiment\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:feldhaus"), "//*[@numFound='1']");
 		
-		assertQ(req("q", "recid:100"), "//*[@numFound='1']");
+		assertQ(req("q", "*:*"), "//*[@numFound='104']");
+		assertQ(req("q", "id:53"), "//*[@numFound='1']");
+		assertQ(req("q", "id:54"), "//*[@numFound='1']");
+		assertQ(req("q", "id:55"), "//*[@numFound='1']");
+		assertQ(req("q", "abstract:\"Higgs boson\""), "//*[@numFound='1']");
+		assertQ(req("q", "author:photolab"), "//*[@numFound='1']");
+		
+		assertQ(req("q", "id:100"), "//*[@numFound='1']");
 		
 		
 		

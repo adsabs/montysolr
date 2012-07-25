@@ -4,8 +4,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.UpdateParams;
+import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
+import org.apache.solr.update.processor.UpdateRequestProcessorChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,6 +92,12 @@ public class NoRollbackWriter extends SolrWriter {
   }
 
   public void init(Context context) {
+    
+//    UpdateRequestProcessorChain processorChain =
+//      req.getCore().getUpdateProcessingChain(params.get(UpdateParams.UPDATE_CHAIN));
+//    UpdateRequestProcessor processor = processorChain.createProcessor(req, rsp);
+//    SolrResourceLoader loader = req.getCore().getResourceLoader();
+    
     if (this.equals(writer)) {
       super.init(context);
     }

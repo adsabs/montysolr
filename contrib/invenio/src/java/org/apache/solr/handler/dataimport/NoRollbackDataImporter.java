@@ -9,8 +9,8 @@ public class NoRollbackDataImporter extends DataImporter {
 	  super.runCmd(reqParams, w);
   }
   
-  /* only if the DIH used its own interface
-   * 
+  /* only if the DIH uses its own interface
+   */
   public void runCmd(RequestInfo reqParams, DIHWriter sw) {
 //    Map<String, Object> params = reqParams.getRawParams();
 //    params.put("writerImpl", NoRollbackWriter.class.getName());
@@ -20,5 +20,5 @@ public class NoRollbackDataImporter extends DataImporter {
     w.setWriter(sw);
     super.runCmd(reqParams, w);
   }
-  */
+  
 }

@@ -68,10 +68,10 @@ else:
 #lucene.initVM()
 
 # move the objects from lucene to montysolr, temporary workaround for different identity objects
-for name in dir(montysolr_java._montysolr_java):
-    if 'JArray' in name or 'JObject' in name:
-        setattr(montysolr_java, name, getattr(lucene._lucene, name))
+#for name in dir(montysolr_java._montysolr_java):
+#    if 'JArray' in name or 'JObject' in name:
+#        setattr(montysolr_java, name, getattr(lucene._lucene, name))
 
 JAVA = montysolr_java
 
-sys.stderr.write('MontySolr loaded\n')
+sys.stderr.write(' *** MontySolr loaded *** \n')

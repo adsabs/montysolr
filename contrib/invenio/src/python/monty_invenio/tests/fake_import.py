@@ -36,7 +36,7 @@ def set_changed_recids_mock(message):
         
 
 def get_changed_recids_mock(message):
-    out = HashMap().of_(String, JArray_int)
+    out = HashMap() #.of_(String, JArray_int)
     for k,v in _CACHE['recids'].items():
         out.put(k, JArray_int(v))
     message.setResults(out)

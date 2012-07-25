@@ -666,7 +666,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
 		
 
-        if (recids.length > 0) {
+      if (recids.length > 0) {
 			
 			Map<Integer, Integer> map = DictionaryRecIdCache.INSTANCE
 					.getTranslationCache(req.getSearcher().getAtomicReader(), 

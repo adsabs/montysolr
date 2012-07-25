@@ -73,6 +73,7 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 	}
 	
 	public String getSolrHome() {
+	  System.clearProperty("solr.solr.home"); //always force field re-computation
 		return MontySolrSetup.getSolrHome() + "/example/solr"; 
 		
 	}
@@ -293,7 +294,7 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 		assertTrue(added.length == 1);
 		assertTrue(updated.length == 9);
 		assertTrue(deleted.length == 1);
-		assertTrue(handler.lastUpdatedRecId.equals(firstAdded));
+		assertTrue(handler.lastUpdatedRecId.equals(firstAdded));  
 		assertTrue(handler.added != null); // these are there only when processing runs
 		
 		assertQ(req("q", "*:*"), "//*[@numFound='10']");

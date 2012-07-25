@@ -68,7 +68,7 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 	}
 
 	public String getSolrHome() {
-		System.clearProperty("solr.solr.home"); //always force field re-computation
+	  System.clearProperty("solr.solr.home"); //always force field re-computation
 		return MontySolrSetup.getSolrHome() + "/example/solr";
 	}
 	
