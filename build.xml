@@ -312,6 +312,7 @@ montysolr.version=${montysolr.version}
 
             <arg line="${jcc}" />
             <arg value="${ddash}shared" />
+        	<arg value="${ddash}use_full_names" />
             <arg value="${ddash}version" />
             <arg value="${app.version}" />
             <arg value="${ddash}import"/>
@@ -357,6 +358,7 @@ montysolr.version=${montysolr.version}
 
 			<arg line="${jcc}" />
 			<arg value="${ddash}shared" />
+			<arg value="${ddash}use_full_names" />
 			<arg value="${ddash}version" />
 			<arg value="${app.version}" />
 			<arg line="${jcc.build}" />
