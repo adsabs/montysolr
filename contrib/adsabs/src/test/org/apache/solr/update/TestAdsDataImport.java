@@ -46,10 +46,9 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
+	public static void beforeTestAdsDataImport() throws Exception {
 		// to use filesystem instead of ram
 		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
-		envInit();
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/invenio/src/python");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
@@ -59,17 +58,17 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	@Override
 	public String getSchemaFile() {
 		makeResourcesVisible(this.solrConfig.getResourceLoader(),
-	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/conf",
-	    				      MontySolrSetup.getSolrHome() + "/example/solr/conf"
+	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
 	    	});
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/examples/adsabs/solr/conf/schema.xml";
+		+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
 	}
 
 	@Override
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/examples/adsabs/solr/conf/solrconfig.xml";
+		+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
 	}
 
 

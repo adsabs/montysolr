@@ -149,9 +149,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		assertQueryEquals("2003AJ….125..525J", wsa, "2003aj....125..525j");
 		
-		assertQueryEquals("one x:doi:word/word doi:word/123", wsa, "one x:doi:word/word doi:doi:word/123");
-		assertQueryEquals("doi:hey/156-8569", wsa, "doi:doi:hey/156-8569");
-		q = assertQueryEquals("doi:10.1000/182", wsa, "doi:doi:10.1000/182");
+		assertQueryEquals("one x:doi:word/word doi:word/123", wsa, "one x:word/word doi:word/123");
+		assertQueryEquals("doi:hey/156-8569", wsa, "doi:hey/156-8569");
+		q = assertQueryEquals("doi:10.1000/182", wsa, "doi:10.1000/182");
 		
 		// pretend we are sending bibcode (this should be handled as a normal token)
 		assertQueryEquals("200xAJ....125..525J", wsa, "200xAJ....125..525J");

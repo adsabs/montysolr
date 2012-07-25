@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<schema name="adsabs" version="1.3">
+<schema name="adsabs" version="1.5">
 
   <types>
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
@@ -30,14 +30,14 @@
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory"/>
+        <filter class="solr.AcronymTokenFilterFactory"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
+        <filter class="solr.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
         <filter class="solr.SynonymFilterFactory" synonyms="text.synonyms" ignoreCase="false" expand="false"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
@@ -50,37 +50,37 @@
      <fieldType name="author" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory" outFile="author_indexed.variants" />
+        <filter class="solr.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.AuthorNameVariantsFilterFactory" outFile="author_indexed.variants" />
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorVariationFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory"/>
+        <filter class="solr.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.AuthorVariationFilterFactory"/>
+        <filter class="solr.AuthorNameVariantsFilterFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true"/>
-        <filter class="org.adsabs.solr.analysis.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
+        <filter class="solr.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
       </analyzer>
     </fieldType>
     
     <fieldType name="author_exact" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory"/>
+        <filter class="solr.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.AuthorNameVariantsFilterFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true"/>
-        <filter class="org.adsabs.solr.analysis.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
+        <filter class="solr.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
       </analyzer>
     </fieldType>
     
     <fieldType name="author_nosyn" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorVariationFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory"/>
+        <filter class="solr.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.AuthorVariationFilterFactory"/>
+        <filter class="solr.AuthorNameVariantsFilterFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
       </analyzer>
     </fieldType>
@@ -88,8 +88,8 @@
      <fieldType name="author_exact_nosyn" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNormalizeFilterFactory"/>
-        <filter class="org.adsabs.solr.analysis.AuthorNameVariantsFilterFactory"/>
+        <filter class="solr.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.AuthorNameVariantsFilterFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author_indexed.variants" ignoreCase="true" expand="true"/>
       </analyzer>
     </fieldType>
@@ -187,14 +187,14 @@
         <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory"/>
+        <filter class="solr.AcronymTokenFilterFactory"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
+        <filter class="solr.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
     </fieldType>
@@ -208,7 +208,7 @@
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory"/>
+        <filter class="solr.AcronymTokenFilterFactory"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
       <analyzer type="query">
@@ -217,7 +217,7 @@
         <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
-        <filter class="org.adsabs.solr.analysis.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
+        <filter class="solr.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
     </fieldType>
@@ -225,7 +225,7 @@
     <fieldType name="bibstem_facet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
         <analyzer type="index">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-            <filter class="org.adsabs.solr.analysis.BibstemFilterFactory" facetMode="true"/>
+            <filter class="solr.BibstemFilterFactory" facetMode="true"/>
         </analyzer>
         <analyzer type="query">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -236,7 +236,7 @@
     <fieldType name="bibstem" class="solr.TextField" sortMissingLast="true" omitNorms="true">
         <analyzer type="index">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-            <filter class="org.adsabs.solr.analysis.BibstemFilterFactory" facetMode="false"/>
+            <filter class="solr.BibstemFilterFactory" facetMode="false"/>
 	        <filter class="solr.LowerCaseFilterFactory"/>
         </analyzer>
         <analyzer type="query">
@@ -250,7 +250,7 @@
     <fieldType name="pubdate_sort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
     <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="org.adsabs.solr.analysis.PubdateSortFilterFactory"/>
+        <filter class="solr.PubdateSortFilterFactory"/>
     </analyzer>
     </fieldType>
     
@@ -388,7 +388,7 @@
    
    <copyField source="pub" dest="pub_raw"/>
 
- <similarity class="org.adsabs.solr.SweetSpotSimilarityFactory">
+ <similarity class="org.apache.solr.search.similarities.SweetSpotSimilarityFactory">
     <str name="min">1000</str>
     <str name="max">20000</str>
     <str name="steepness">0.5</str>

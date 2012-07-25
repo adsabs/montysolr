@@ -42,7 +42,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 
 		// Default Values
 		set(AqpInvenioQueryConfigHandler.ConfigurationKeys.INVENIO_QUERY, new InvenioQueryAttributeImpl());
-		set(ConfigurationKeys.SOLR_REQUEST, null);
+		set(ConfigurationKeys.SOLR_REQUEST, new AqpRequestParamsImpl());
 		set(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG, new AqpFunctionQueryBuilderConfigImpl());
 		
 		get(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK).registerEventHandler(new AqpAdsabsLoggingHandler());
