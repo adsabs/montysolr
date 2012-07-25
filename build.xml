@@ -486,13 +486,30 @@ montysolr.version=${montysolr.version}
 
 		<echo>Downloading Solr, please wait... (but if it takes too long, then run me again and I'll use a different mirror)</echo>
 
-		<get src="${solr.mirror}/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" verbose="true"/>
+		<get src="${solr.mirror}/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" 
+			verbose="true" ignoreerrors="true"/>
+		
+		<condition property="_download.using.apache.mirror" value="true">
+            <not>
+                <available file="${build.dir}/solr-download/${solr.version}-src.tgz"/>
+            </not>
+        </condition>
+        
+        <antcall target="download-using-apache-mirror" />
 		
 	    <antcall target="untar-solr" />
 		
 		<!-- set the property, it may be used by other targets (see check-solr-location target) -->
 		<property name="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr"/>
 	</target>
+	
+	
+	<target name="download-using-apache-mirror" if="_download.using.apache.mirror">
+            <echo>This is used only when the download using mirror site fails</echo>
+            <get src="http://archive.apache.org/dist/lucene/solr/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" 
+                        verbose="true" ignoreerrors="false"/>
+            
+    </target>
 
 	<target name="untar-solr" >
 		<untar dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}-src.tgz" compression="gzip"/>
