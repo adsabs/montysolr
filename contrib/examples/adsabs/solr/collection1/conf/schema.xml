@@ -43,6 +43,11 @@
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
+       <similarity class="org.apache.solr.search.similarities.SweetSpotSimilarityFactory">
+        <str name="min">1000</str>
+        <str name="max">20000</str>
+        <str name="steepness">0.5</str>
+      </similarity>
     </fieldType>
     
     <fieldType name="reader_data" class="solr.MongoDataField" omitNorms="true" databaseName="solr4ads" collectionName="docs" mongoFieldName="readers" isPolyField="true" />
@@ -387,12 +392,5 @@
    <copyField source="author_norm" dest="author_facet"/>
    
    <copyField source="pub" dest="pub_raw"/>
-
- <similarity class="org.apache.solr.search.similarities.SweetSpotSimilarityFactory">
-    <str name="min">1000</str>
-    <str name="max">20000</str>
-    <str name="steepness">0.5</str>
- </similarity>
-	
 
 </schema>
