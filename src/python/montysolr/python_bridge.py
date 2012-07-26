@@ -57,7 +57,8 @@ class JVMBridge(object):
     
     def createMessage(self, receiver):
         self.getObjMontySolr().getVMEnv().attachCurrentThread()
-        return self.getObjMontySolr().PythonMessage(receiver)
+        from monty.solr.jni import PythonMessage
+        return PythonMessage(receiver)
     
     def getObjMontySolr(self):
         return initvm.JAVA

@@ -17,16 +17,22 @@ import monty_invenio.multiprocess_api_calls as multi_api_calls
 import monty_invenio.api_calls as api_calls
 import time
 
+from org.apache.solr.response import SolrQueryResponse
+from org.apache.solr.request import SolrQueryRequest
+from org.apache.solr.client.solrj.request import QueryRequest
+from java.lang import Integer, String
+from java.util import HashMap, List, ArrayList
+
 JArray_string = j.JArray_string #@UndefinedVariable
 JArray_int = j.JArray_int #@UndefinedVariable
 JArray_byte = j.JArray_byte #@UndefinedVariable
-QueryRequest = j.QueryRequest #@UndefinedVariable
-SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
-Integer = j.Integer #@UndefinedVariable
-HashMap = j.HashMap #@UndefinedVariable
-List = j.List #@UndefinedVariable
-String = j.String #@UndefinedVariable
-ArrayList = j.ArrayList #@UndefinedVariable
+#QueryRequest = j.QueryRequest #@UndefinedVariable
+#SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+#Integer = j.Integer #@UndefinedVariable
+#HashMap = j.HashMap #@UndefinedVariable
+#List = j.List #@UndefinedVariable
+#String = j.String #@UndefinedVariable
+#ArrayList = j.ArrayList #@UndefinedVariable
 
 
 def format_search_results(message):
@@ -68,7 +74,7 @@ def invenio_search(message):
     if params is None:
         return
     
-    params = HashMap.cast_(params).of_(String, List)
+    params = HashMap.cast_(params) #.of_(String, List)
     kwargs = {}
     
     kset = params.keySet().toArray()
@@ -76,7 +82,7 @@ def invenio_search(message):
     max_size = len(vset)
     i = 0
     while i < max_size:
-        v = list(ArrayList(vset[i]).of_(String))
+        v = list(ArrayList(vset[i])) #.of_(String))
         if len(v) == 1:
             kwargs[str(kset[i])] = v[0]
         else:

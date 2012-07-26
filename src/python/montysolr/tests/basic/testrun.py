@@ -1,11 +1,12 @@
 
 
-from montysolr.tests.montysolr_testcase import MontySolrTestCase, sj
+from montysolr.tests.montysolr_testcase import MontySolrTestCase, JAVA
 from montysolr.tests.basic import bridge, handler
 
+from monty.solr.jni import PythonMessage
 
-PythonMessage = sj.PythonMessage #@UndefinedVariable
-JArray_string = sj.JArray_string #@UndefinedVariable
+#PythonMessage = sj.PythonMessage #@UndefinedVariable
+JArray_string = JAVA.JArray_string #@UndefinedVariable
 
 class Test(MontySolrTestCase):
 

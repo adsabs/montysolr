@@ -6,11 +6,18 @@ Created on Feb 4, 2011
 #@PydevCodeAnalysisIgnore
 
 import unittest
-from montysolr.tests.montysolr_testcase import sj
+
 from monty_invenio.tests.invenio_demotestcase import InvenioDemoTestCaseLucene
 
 import os
 from invenio import intbitset
+
+
+from org.apache.solr.response import SolrQueryResponse
+from org.apache.solr.request import SolrQueryRequest
+from java.lang import Integer, String
+from java.util import HashMap, List, ArrayList
+
 
 '''
 Tests for the main Invenio API targets - we expect to run 
@@ -47,13 +54,13 @@ class Test(InvenioDemoTestCaseLucene):
 
     def test_format_search_results(self):
         '''Returns the citation summary for the given recids'''
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('format_search_results') \
                     .setSender('InvenioFormatter') \
                     .setParam('response', rsp) \
-                    .setParam('recids', sj.JArray_int(range(0, 93)))
+                    .setParam('recids', JArray_int(range(0, 93)))
         self.bridge.sendMessage(message)
 
         result = unicode(rsp.getValues())
@@ -65,8 +72,8 @@ class Test(InvenioDemoTestCaseLucene):
 
     def test_perform_request_search_ints(self):
         '''Basic search for ellis - commucating with ints'''
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('perform_request_search_ints') \
                     .setSender('InvenioQuery') \
@@ -75,15 +82,15 @@ class Test(InvenioDemoTestCaseLucene):
         self.bridge.sendMessage(message)
 
         results = message.getResults()
-        out = list(sj.JArray_int.cast_(results))
+        out = list(JArray_int.cast_(results))
         assert len(out) > 1
         assert sorted(out) == [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 47]
 
 
     def test_perform_request_search_bitset(self):
         '''Basic search for ellis - commucating with bitset'''
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
         message = self.bridge.createMessage('perform_request_search_bitset') \
                     .setSender('InvenioQuery') \
@@ -92,18 +99,18 @@ class Test(InvenioDemoTestCaseLucene):
         self.bridge.sendMessage(message)
 
         results = message.getResults()
-        out = sj.JArray_byte.cast_(results)
-        bs = sj.JArray_byte(intbitset.intbitset([8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 47]).fastdump())
+        out = JArray_byte.cast_(results)
+        bs = JArray_byte(intbitset.intbitset([8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 47]).fastdump())
         assert bs == out
         
 
     def test_citation_summary(self):
         '''Generate citation summary'''
         
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
-        kwargs = sj.HashMap()
+        kwargs = HashMap()
         kwargs.put("of", "hcs")
         #kwargs.put("sf", "year") #sort by year
         kwargs.put('colls_to_search', """['Articles & Preprints', 'Multimedia & Arts', 'Books & Reports']""")
@@ -111,7 +118,7 @@ class Test(InvenioDemoTestCaseLucene):
         message = self.bridge.createMessage('sort_and_format') \
                     .setSender('InvenioFormatter') \
                     .setParam('response', rsp) \
-                    .setParam('recids', sj.JArray_int(range(0, 93))) \
+                    .setParam('recids', JArray_int(range(0, 93))) \
                     .setParam("kwargs", kwargs)
 
         self.bridge.sendMessage(message)
@@ -122,10 +129,10 @@ class Test(InvenioDemoTestCaseLucene):
 
     def test_sorting(self):
         '''Sort results by year'''
-        req = sj.QueryRequest()
-        rsp = sj.SolrQueryResponse()
+        req = QueryRequest()
+        rsp = SolrQueryResponse()
 
-        kwargs = sj.HashMap()
+        kwargs = HashMap()
         #kwargs.put("of", "hcs")
         kwargs.put("sf", "year") #sort by year
         kwargs.put('colls_to_search', """['Articles & Preprints', 'Multimedia & Arts', 'Books & Reports']""")
@@ -133,21 +140,21 @@ class Test(InvenioDemoTestCaseLucene):
         message = self.bridge.createMessage('sort_and_format') \
                     .setSender('InvenioFormatter') \
                     .setParam('response', rsp) \
-                    .setParam('recids', sj.JArray_int(range(0, 93))) \
+                    .setParam('recids', JArray_int(range(0, 93))) \
                     .setParam("kwargs", kwargs)
 
         self.bridge.sendMessage(message)
 
-        result = sj.JArray_int.cast_(message.getResults())
+        result = JArray_int.cast_(message.getResults())
         assert len(result) > 3
         assert result[0] == 77
 
 
     def test_invenio_search(self):
-        kws = sj.HashMap().of_(sj.String, sj.List)
-        p = sj.ArrayList().of_(sj.String)
-        of = sj.ArrayList().of_(sj.String)
-        rg = sj.ArrayList().of_(sj.String)
+        kws = HashMap() #.of_(String, List)
+        p = ArrayList() #.of_(String)
+        of = ArrayList() #.of_(String)
+        rg = ArrayList() #.of_(String)
         
         p.add('recid:94')
         of.add('xm')
@@ -159,7 +166,7 @@ class Test(InvenioDemoTestCaseLucene):
                     .setParam('kwargs', kws)
 
         self.bridge.sendMessage(message)
-        result = str(sj.String.cast_(message.getResults()))
+        result = str(String.cast_(message.getResults()))
         assert '<controlfield tag="001">94</controlfield>' in result
         
         
@@ -169,8 +176,9 @@ class Test(InvenioDemoTestCaseLucene):
         message = self.bridge.createMessage('invenio_search') \
                     .setParam('kwargs', kws)
         self.bridge.sendMessage(message)
-        result = str(sj.String.cast_(message.getResults()))
+        result = str(String.cast_(message.getResults()))
         
+        print result
         assert 'Search-Engine-Total-Number-Of-Results: 42' in result
         assert len(result) > 1000
         assert result.count('<record>') == 10
@@ -181,7 +189,7 @@ class Test(InvenioDemoTestCaseLucene):
         message = self.bridge.createMessage('invenio_search') \
                     .setParam('kwargs', kws)
         self.bridge.sendMessage(message)
-        result = str(sj.String.cast_(message.getResults()))
+        result = str(String.cast_(message.getResults()))
         
         assert 'Search-Engine-Total-Number-Of-Results: 42' in result
         assert len(result) > 1000

@@ -9,13 +9,14 @@ import sys
 import tempfile
 import sys
 
+from montysolr import initvm, java_bridge, handler
 from montysolr.python_bridge import JVMBridge
 
 # "-Djava.util.logging.config.file=/x/dev/workspace/sandbox/montysolr/example/etc/test.logging.properties"
 os.environ['MONTYSOLR_JVMARGS_PYTHON'] = ""
 
 import unittest
-from montysolr import initvm, java_bridge, handler
+
 
 from java.lang import System
 from org.apache.solr.core import SolrCore, CoreContainer
