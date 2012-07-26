@@ -12,8 +12,8 @@
 # lucene.version=2.9.3
 # solr.version=1.4
 
-solr.version=3.1.0
-lucene.version=3.1.0
+solr.version=4.0.0-ALPHA
+montysolr.version=4.0.0-ALPHA
 
 
 # Python executable
@@ -34,18 +34,4 @@ python=python
 //-->
 
 jcc=-m jcc.__main__
-
-
-# The path where your Solr installation lives - note that
-# MontySolr can automatically download the Solr binary distribution
-# and use it for compilation. If you want this behaviour use:
-# solr_home=./build/solr-download/apache-solr-${solr.version}
-
-solr_home=./build/solr-download/apache-solr-${solr.version}
-
-
-# The path to the Solr configuration
-
-webdist=./contrib/examples/invenio
-
 
