@@ -3,9 +3,9 @@ package montysolr;
 import java.io.IOException;
 
 
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonBridge;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonBridge;
+import monty.solr.jni.PythonMessage;
 import montysolr.util.MontySolrAbstractTestCase;
 import montysolr.util.MontySolrSetup;
 

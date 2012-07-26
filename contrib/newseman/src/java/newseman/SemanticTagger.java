@@ -3,8 +3,8 @@ package newseman;
 
 import java.io.IOException;
 
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonMessage;
 
 
 /**

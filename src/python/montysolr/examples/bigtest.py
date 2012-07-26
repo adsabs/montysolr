@@ -11,17 +11,21 @@ from montysolr.utils import make_targets
 import random
 import time
 
+from org.apache.solr.response import SolrQueryResponse
+from org.apache.solr.request import SolrQueryRequest
+from java.lang import Integer, String
+from java.util import HashMap, List, ArrayList
 
 JArray_string = j.JArray_string #@UndefinedVariable
 JArray_int = j.JArray_int #@UndefinedVariable
 JArray_byte = j.JArray_byte #@UndefinedVariable
-SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
-SolrQueryRequest = j.SolrQueryRequest #@UndefinedVariable
-Integer = j.Integer #@UndefinedVariable
-HashMap = j.HashMap #@UndefinedVariable
-List = j.List #@UndefinedVariable
-String = j.String #@UndefinedVariable
-ArrayList = j.ArrayList #@UndefinedVariable
+#SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+#SolrQueryRequest = j.SolrQueryRequest #@UndefinedVariable
+#Integer = j.Integer #@UndefinedVariable
+#HashMap = j.HashMap #@UndefinedVariable
+#List = j.List #@UndefinedVariable
+#String = j.String #@UndefinedVariable
+#ArrayList = j.ArrayList #@UndefinedVariable
 
 
 def bigtest(message):

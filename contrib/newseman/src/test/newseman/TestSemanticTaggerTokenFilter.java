@@ -27,8 +27,8 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.analysis.util.CharArraySet;
 
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonMessage;
 import newseman.SemanticTaggerTokenFilter;
 import newseman.SemanticTagger;
 import newseman.MontySolrBaseTokenStreamTestCase;

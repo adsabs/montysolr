@@ -35,9 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import montysolr.PythonCall;
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonCall;
+import monty.solr.jni.PythonMessage;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.search.DictionaryRecIdCache;

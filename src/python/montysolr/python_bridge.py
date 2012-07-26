@@ -63,10 +63,10 @@ class JVMBridge(object):
         return initvm.JAVA
     
     def getObjLucene(self):
-        return initvm.lucene
+        return initvm.lucene  #obsolete!
     
     def getObjSolr(self):
-        return initvm.solr_java
+        return initvm.solr_java #obsolete!
     
     def setObj(self, name, value):
         self._store[name] = value

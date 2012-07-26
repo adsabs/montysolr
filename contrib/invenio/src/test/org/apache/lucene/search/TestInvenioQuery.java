@@ -1,7 +1,7 @@
 package org.apache.lucene.search;
 
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonMessage;
 import montysolr.util.MontySolrAbstractLuceneTestCase;
 import montysolr.util.MontySolrSetup;
 

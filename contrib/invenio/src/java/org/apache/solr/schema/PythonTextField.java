@@ -2,8 +2,8 @@ package org.apache.solr.schema;
 
 import java.util.Map;
 
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonMessage;
 
 import org.apache.lucene.index.IndexableField;
 

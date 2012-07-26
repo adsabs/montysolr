@@ -17,8 +17,8 @@ os.environ['MONTYSOLR_JVMARGS_PYTHON'] = ""
 import unittest
 from montysolr import initvm, java_bridge, handler
 
-sj = initvm.montysolr_java
-
+from java.lang import System
+from org.apache.solr.core import SolrCore, CoreContainer
 
 class MontySolrTestCase(unittest.TestCase):
     """use this to test Solr related code"""
@@ -33,24 +33,25 @@ class MontySolrTestCase(unittest.TestCase):
 
     def setUp(self):
         self.old_home = self.old_data_dir = None
-        self.old_home = sj.System.getProperty('solr.solr.home', '')
-        self.old_data_dir = sj.System.getProperty('solr.data.dir', '')
+        self.old_home = System.getProperty('solr.solr.home', '')
+        self.old_data_dir = System.getProperty('solr.data.dir', '')
         
         self.data_dir = self.makeDataDir()
         
-        sj.System.setProperty('solr.solr.home', self.getSolrHome())
-        sj.System.setProperty('solr.data.dir', self.data_dir)
+        System.setProperty('solr.solr.home', self.getSolrHome())
+        System.setProperty('solr.data.dir', self.data_dir)
         
         self.bridge = JVMBridge
         
         #if self.getHandler():
         #    self.bridge = java_bridge.SimpleBridge(self.getHandler())
 
-        #self.initializer = sj.CoreContainer.Initializer()
-        #self.core_container = self.initializer.initialize()
+        self.initializer = CoreContainer.Initializer()
+        self.core_container = self.initializer.initialize()
         #self.server = sj.EmbeddedSolrServer(self.core_container, "")
 
-        self.core = sj.SolrCore.getSolrCore()
+        #self.core = SolrCore.getSolrCore()
+        self.core = self.core_container.getSolrCore("collection1")
 
     def tearDown(self):
         #self.core_container.shutdown()
@@ -59,9 +60,9 @@ class MontySolrTestCase(unittest.TestCase):
             self.data_dir = None
             
         if self.old_home != None:
-            sj.System.setProperty('solr.solr.home', self.old_home)
+            System.setProperty('solr.solr.home', self.old_home)
         if self.old_data_dir != None:
-            sj.System.setProperty('solr.data.dir', self.old_data_dir)
+            System.setProperty('solr.data.dir', self.old_data_dir)
 
 
     def getBaseDir(self):

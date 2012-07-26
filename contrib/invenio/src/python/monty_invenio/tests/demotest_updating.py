@@ -13,6 +13,8 @@ import sys
 import time
 import unittest
 
+from org.apache.solr.response import SolrQueryResponse
+
 JArray_string = j.JArray_string #@UndefinedVariable
 JArray_int = j.JArray_int #@UndefinedVariable
 JArray_byte = j.JArray_byte #@UndefinedVariable

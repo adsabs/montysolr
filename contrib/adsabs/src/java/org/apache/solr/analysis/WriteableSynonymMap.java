@@ -1,7 +1,6 @@
 package org.apache.solr.analysis;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,7 +14,6 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.*;
 
-import org.apache.solr.analysis.SynonymFilterFactory;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.StrUtils;
 import org.slf4j.Logger;

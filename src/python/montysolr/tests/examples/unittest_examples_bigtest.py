@@ -17,15 +17,21 @@ import os
 import time
 import sys
 
+from org.apache.solr.response import SolrQueryResponse
+from org.apache.solr.request import LocalSolrQueryRequest
+from org.apache.solr.common.params import MapSolrParams
+from java.lang import Integer, String
+from java.util import HashMap, List, ArrayList
+
 JArray_string = j.JArray_string #@UndefinedVariable
 JArray_int = j.JArray_int #@UndefinedVariable
 JArray_byte = j.JArray_byte #@UndefinedVariable
-Integer = j.Integer #@UndefinedVariable
-HashMap = j.HashMap #@UndefinedVariable
-String = j.String #@UndefinedVariable
-MapSolrParams = j.MapSolrParams #@UndefinedVariable
-SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
-LocalSolrQueryRequest = j.LocalSolrQueryRequest #@UndefinedVariable
+#Integer = j.Integer #@UndefinedVariable
+#HashMap = j.HashMap #@UndefinedVariable
+#String = j.String #@UndefinedVariable
+#MapSolrParams = j.MapSolrParams #@UndefinedVariable
+#SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+#LocalSolrQueryRequest = j.LocalSolrQueryRequest #@UndefinedVariable
 
 class Test(LuceneTestCase):
 

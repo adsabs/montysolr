@@ -1,6 +1,6 @@
 
 from montysolr import config
-from montysolr.initvm import montysolr_java as sj
+from montysolr.initvm import monty
 
 import time
 
@@ -23,7 +23,7 @@ Created on Jan 13, 2011
 '''
 
 
-class SimpleBridge(sj.MontySolrBridge): #@UndefinedVariable
+class SimpleBridge(monty.solr.jni.MontySolrBridge): #@UndefinedVariable
 
     def __init__(self, handler=None):
         if not handler:

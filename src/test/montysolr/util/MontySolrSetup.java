@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 
-import montysolr.jni.MontySolrVM;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.util.ProcessUtils;
 
 
 /**

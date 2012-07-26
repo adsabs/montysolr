@@ -74,4 +74,7 @@ else:
 
 JAVA = montysolr_java
 
+import monty
+
+
 sys.stderr.write(' *** MontySolr loaded *** \n')

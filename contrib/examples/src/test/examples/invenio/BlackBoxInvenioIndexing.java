@@ -3,8 +3,8 @@ package examples.invenio;
 import java.io.File;
 
 
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonMessage;
 import montysolr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;

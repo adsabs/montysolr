@@ -1,6 +1,6 @@
 package montysolr.util;
 
-import montysolr.jni.MontySolrVM;
+import monty.solr.jni.MontySolrVM;
 
 import org.apache.lucene.util.LuceneTestCase;
 import org.apache.solr.JSONTestUtil;

@@ -39,10 +39,10 @@
     They will be made visible to Python, but are also used for generation of the jars.
      -->
 	<property name="montysolr.classes" value="
-		montysolr.jni.MontySolrBridge
-		montysolr.jni.MontySolrVM
-		montysolr.jni.PythonBridge
-		montysolr.jni.PythonMessage
+		monty.solr.jni.MontySolrBridge
+		monty.solr.jni.MontySolrVM
+		monty.solr.jni.PythonBridge
+		monty.solr.jni.PythonMessage
 		" />
 	<property name="jcc.build" value="${montysolr.classes}" />
 	<property name="jcc.packages" value=""/>

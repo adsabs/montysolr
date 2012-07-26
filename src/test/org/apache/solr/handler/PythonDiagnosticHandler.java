@@ -3,8 +3,8 @@ package org.apache.solr.handler;
 
 import java.io.IOException;
 
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonMessage;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;

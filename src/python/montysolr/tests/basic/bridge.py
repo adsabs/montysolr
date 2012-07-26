@@ -1,5 +1,5 @@
 
-from montysolr.initvm import montysolr_java as sj
+from montysolr.initvm import monty
 import handler
 
 import time
@@ -9,7 +9,7 @@ This class is used for unittests
 '''
 
 
-class Bridge(sj.MontySolrBridge): #@UndefinedVariable
+class Bridge(monty.solr.jni.MontySolrBridge): #@UndefinedVariable
 
     def __init__(self):
         super(Bridge, self).__init__()

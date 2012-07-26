@@ -1,6 +1,6 @@
 package org.apache.lucene.search;
 
-import montysolr.jni.MontySolrVM;
+import monty.solr.jni.MontySolrVM;
 
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.IndexSearcher;

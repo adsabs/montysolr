@@ -1,8 +1,11 @@
 
-from montysolr.initvm import montysolr_java as j
+from montysolr.initvm import JAVA as j
 from montysolr.utils import make_targets
 
-SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable 
+from org.apache.solr.response import SolrQueryResponse
+from org.apache.solr.request import SolrQueryRequest
+
+#SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable 
 JArray_string = j.JArray_string #@UndefinedVariable
 
 def diagnostic_test(message):

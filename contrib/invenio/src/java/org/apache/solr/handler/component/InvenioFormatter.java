@@ -4,8 +4,8 @@ package org.apache.solr.handler.component;
 import java.io.IOException;
 import java.util.Map;
 
-import montysolr.jni.MontySolrVM;
-import montysolr.jni.PythonMessage;
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonMessage;
 
 import org.apache.lucene.index.AtomicReader;
 import org.apache.solr.common.SolrException;
