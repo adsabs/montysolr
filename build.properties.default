@@ -8,10 +8,6 @@
 # the lucene version and that one must match with the version of lucene used
 # inside solr.
 
-# For the old solr 1.4, the following works
-# lucene.version=2.9.3
-# solr.version=1.4
-
 solr.version=4.0.0-ALPHA
 montysolr.version=4.0.0-ALPHA
 
@@ -23,15 +19,14 @@ python=python
 
 # based on the installed version of JCC, you have to select the
 # correct invocation
-<!--
-  * python 2.7: python -m jcc
-  * python 2.6: python -m jcc.__main__
-  * python 2.5: python -m jcc
-  * python 2.4:
-    o no setuptools: python site-packages/jcc/__init__.py
-    o with setuptools: python site-packages/jcc egg directory/jcc/__init__.py
-  * python 2.3: python site-packages/jcc egg directory/jcc/__init__.py
-//-->
+#
+#  * python 2.7: python -m jcc
+#  * python 2.6: python -m jcc.__main__
+#  * python 2.5: python -m jcc
+#  * python 2.4:
+#    o no setuptools: python site-packages/jcc/__init__.py
+#    o with setuptools: python site-packages/jcc egg directory/jcc/__init__.py
+#  * python 2.3: python site-packages/jcc egg directory/jcc/__init__.py
 
 jcc=-m jcc.__main__
 
