@@ -145,6 +145,7 @@
 				<isset property="jcc" />
 				<isset property="montysolr.version" />
 				<isset property="solr.version" />
+				<isset property="ant" />
 			</and>
 		</condition>
 	</target>
@@ -244,7 +245,8 @@ jcc=${jcc}
 jcc_egg=${jcc_egg}
 python=${python}
 solr.version=${solr.version}    
-montysolr.version=${montysolr.version}		   	
+montysolr.version=${montysolr.version}
+ant=${ant}
 		   </echo>
 	</target>
 
@@ -400,7 +402,7 @@ montysolr.version=${montysolr.version}
 	    
     
     <target name="build-contrib" >
-    	<apply executable="ant" parallel="false" failonerror="true" failifexecutionfails="true">
+    	<apply executable="${ant}" parallel="false" failonerror="true" failifexecutionfails="true">
     	  <arg line="build-all"/>
     	  <arg value="-f"/>
     	  <fileset dir="${common.dir}/contrib">
@@ -414,7 +416,7 @@ montysolr.version=${montysolr.version}
     </target>
 	
 	<target name="test-contrib" >
-        <apply executable="ant" parallel="false" failonerror="true">
+        <apply executable="${ant}" parallel="false" failonerror="true">
           <arg line="test"/>
           <arg value="-f"/>
           <fileset dir="${common.dir}/contrib">
@@ -528,7 +530,7 @@ montysolr.version=${montysolr.version}
         />
         -->
 
-		<exec executable="ant" dir="${solr.real.location}" logerror="true">
+		<exec executable="${ant}" dir="${solr.real.location}" logerror="true">
 			<env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
 			<arg value="example" />
 		</exec>
@@ -596,7 +598,7 @@ montysolr.version=${montysolr.version}
 	   description="Assembles Invenio example and starts MontySolr (don't forget to do build-all first)"
 	   depends="">
 
-		<exec executable="ant" dir="${common.dir}/contrib/examples" logerror="true" 
+		<exec executable="${ant}" dir="${common.dir}/contrib/examples" logerror="true" 
 			newenvironment="true">
             <arg line="build-one run-configured -Dename=invenio -Dprofile=normal.profile" />
         </exec>
