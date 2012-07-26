@@ -33,7 +33,7 @@ def run(grammar_name, basedir='',
     tmp_file = os.path.join(basedir, 'ast-tree.dot')
     index_file = os.path.join(basedir, '%s.html' % grammar_name)
     gunit_file = os.path.join(thisdir, grammar_name + '.gunit')
-    generate_ast_command = '%s -cp %s org.apache.lucene.queryParser.aqp.parser.BuildAST %s "%%s"' % (java_executable, cp, grammar_name)
+    generate_ast_command = '%s -cp %s org.apache.lucene.queryparser.flexible.aqp.parser.BuildAST %s "%%s"' % (java_executable, cp, grammar_name)
     
     
     generate_svg_command = '%s -Tsvg %s' % (dot_executable, tmp_file)
