@@ -29,15 +29,15 @@ public class TestExtendedConfig extends MontySolrAbstractTestCase {
 	public String getSchemaFile() {
 		
 	    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/conf",
-	    				      MontySolrSetup.getSolrHome() + "/example/solr/conf"
+	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",
+	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
 	    	});
 		
 		return "schema.xml";
 	}
 
 	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/conf/" + 
+		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
 		"extended-solrconfig.xml";
 	}
 

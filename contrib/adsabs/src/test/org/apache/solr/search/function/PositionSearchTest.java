@@ -29,14 +29,20 @@ import org.apache.solr.util.AbstractSolrTestCase;
 public class PositionSearchTest extends AbstractSolrTestCase {
 
 	public String getSchemaFile() {
+	  
 		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/invenio/src/test-files/solr/collection1/conf/schema-fieldpos.xml";
+				+ "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-fieldpos.xml";
 	}
 
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-fieldpos.xml";
+				+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-fieldpos.xml";
 	}
+	
+	public String getSolrHome() {
+    System.clearProperty("solr.solr.home"); // always force recomputing the solr.home
+    return MontySolrSetup.getSolrHome() + "/example/solr";
+  }
 
 	public void test() throws Exception {
 		assertU(adoc("id", "1", "author_ws",

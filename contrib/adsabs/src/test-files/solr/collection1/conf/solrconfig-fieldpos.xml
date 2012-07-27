@@ -10,8 +10,4 @@
   <valueSourceParser name="pos" class="org.apache.solr.search.function.PositionSearchParser">
   </valueSourceParser>
 
-  <valueSourceParser name="nvl" class="org.apache.solr.search.function.NvlValueSourceParser">
-    <float name="nvlFloatValue">0.0</float>
-  </valueSourceParser>
-
 </config>
