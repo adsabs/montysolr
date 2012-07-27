@@ -591,22 +591,17 @@
 			<property name="tests.iters" value="" />
 
 			<!-- Pick the random seed now (unless already set). -->
-			<junit4:pickseed property="tests.seed" />
+	        <junit4:pickseed property="tests.seed" />
 
-			<!-- Pick file.encoding based on the random seed. -->
-			<junit4:pickfromlist property="tests.file.encoding" allowundefined="false" seed="${tests.seed}">
-				<!-- Guaranteed support on any JVM. -->
-				<value>US-ASCII</value>
-				<!-- single byte length -->
-				<value>ISO-8859-1</value>
-				<!-- single byte length -->
-				<value>UTF-8</value>
-				<!-- variable byte length -->
-				<value>
-					<!-- empty/ default encoding. -->
-				</value>
+	        <!-- Pick file.encoding based on the random seed. -->
+	        <junit4:pickfromlist property="tests.file.encoding" allowundefined="false" seed="${tests.seed}">
+	            <!-- Guaranteed support on any JVM. -->
+	            <value>US-ASCII</value>   <!-- single byte length -->
+	            <value>ISO-8859-1</value> <!-- single byte length -->
+	            <value>UTF-8</value>      <!-- variable byte length -->
+	            <value><!-- empty/ default encoding. --></value>
 
-				<!--
+	            <!--
 	            Disabled because of Java 1.7 bug on Linux/ Unix:
 	            http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7181721
 
@@ -614,7 +609,7 @@
 	            <value>UTF-16LE</value>   
 	            <value>UTF-16BE</value>
 	            -->
-			</junit4:pickfromlist>
+	        </junit4:pickfromlist>
 
 			<junit4:junit4
 	            dir="@{tempDir}"
