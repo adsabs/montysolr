@@ -465,14 +465,21 @@ ant=${ant}
 		<condition property="solr.real.location" value="${solr.home}">
 			<and>
 				<available file="${solr.home}/example/README.txt"/>
-				<available file="${solr.home}/lib/README.committers.txt"/>
+				<available file="${solr.home}/contrib/contrib-build.xml"/>
 			</and>
 		</condition>
+		
+		<condition property="solr.real.location" value="${solr.home}/solr">
+            <and>
+                <available file="${solr.home}/solr/example/README.txt"/>
+                <available file="${solr.home}/solr/contrib/contrib-build.xml"/>
+            </and>
+        </condition>
 
 		<condition property="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr">
 			<and>
 				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/example/README.txt"/>
-				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/lib/README.committers.txt"/>
+				<available file="${build.dir}/solr-download/apache-solr-${solr.version}/solr/contrib/contrib-build.xml"/>
 			</and>
 		</condition>
 
