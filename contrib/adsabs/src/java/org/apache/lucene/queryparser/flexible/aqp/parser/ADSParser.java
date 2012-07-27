@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g 2012-07-27 14:26:38
+// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g 2012-07-27 14:41:20
 
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 
@@ -1562,7 +1562,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: func_name, rmodifier, lmodifier, clauseOr
+                    // elements: func_name, lmodifier, clauseOr, rmodifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1756,7 +1756,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: clauseOr, rmodifier, lmodifier
+                    // elements: rmodifier, clauseOr, lmodifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1938,7 +1938,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: clauseOr, rmodifier, lmodifier
+                    // elements: lmodifier, rmodifier, clauseOr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2517,7 +2517,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: multi_value, lmodifier, field, rmodifier
+                    // elements: multi_value, rmodifier, lmodifier, field
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2684,7 +2684,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: lmodifier, field, value, rmodifier
+                    // elements: lmodifier, field, rmodifier, value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3718,7 +3718,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 
                     // AST REWRITE
-                    // elements: b, a
+                    // elements: a, b
                     // token labels: 
                     // rule labels: retval, b, a
                     // token list labels: 
@@ -4989,7 +4989,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: TILDE, CARAT
+                    // elements: CARAT, TILDE
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6309,7 +6309,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: TERM_NORMAL, identifier
+                    // elements: identifier, TERM_NORMAL
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -6345,7 +6345,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: identifier, PHRASE_ANYTHING
+                    // elements: PHRASE_ANYTHING, identifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
