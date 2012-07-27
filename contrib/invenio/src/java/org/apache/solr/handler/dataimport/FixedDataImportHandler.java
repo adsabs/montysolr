@@ -33,6 +33,7 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.handler.RequestHandlerUtils;
 import org.apache.solr.response.RawResponseWriter;
+import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.request.SolrRequestHandler;
@@ -128,7 +129,7 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
       }
     }
     SolrParams params = req.getParams();
-    RequestInfo requestParams = new RequestInfo(getParamsMap(params), contentStream);
+    RequestInfo requestParams = new RequestInfo(getParamsMap(fixWI(params)), contentStream);
     String command = requestParams.getCommand();
    
     
@@ -268,7 +269,19 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
       position++;
     }
   }
+  
+  // DIH is awful, awful.... this can be removed if the SOLR-3671 is accepted
+  private SolrParams fixWI(SolrParams params) {
+    if(params!=null && params.get(PARAM_WRITER_IMPL) != null) {
+      ModifiableSolrParams mParams = new ModifiableSolrParams(params);
+      mParams.set(PARAM_WRITER_IMPL, null);
+      return mParams;
+    }
+    else {
+      return params;
+    }
 
+  }
   @SuppressWarnings("unchecked")
   protected DIHWriter getSolrWriter(final UpdateRequestProcessor processor,
                                    SolrQueryRequest req) {
@@ -281,6 +294,7 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
     
     DIHWriter writer;
     if(writerClassStr != null && !writerClassStr.equals(DEFAULT_WRITER_NAME) && !writerClassStr.equals(DocBuilder.class.getPackage().getName() + "." + DEFAULT_WRITER_NAME)) {
+      
       try {
         Class<DIHWriter> writerClass = loadClass(writerClassStr, req.getCore());
         Constructor<DIHWriter> cnstr = writerClass.getConstructor(new Class[]{UpdateRequestProcessor.class, SolrQueryRequest.class});

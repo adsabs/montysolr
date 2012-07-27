@@ -52,7 +52,7 @@ public class TestNoRollbackWriter extends AbstractDataImportHandlerTestCase {
 
   @Test
   public void testNoRollbackWriter_full() {
-    DataImporter di = new NoRollbackDataImporter();
+    DataImporter di = new DataImporter();
     di.loadAndInit(dc_singleEntity);
     DIHConfiguration cfg = di.getConfig();
     Entity ent = cfg.getEntities().get(0);
@@ -67,9 +67,9 @@ public class TestNoRollbackWriter extends AbstractDataImportHandlerTestCase {
     SolrWriterImpl swi = new SolrWriterImpl();
     di.runCmd(rp, swi);
     assertEquals(Boolean.TRUE, swi.deleteAllCalled);
-    assertEquals(Boolean.TRUE, swi.commitCalled);
+    assertEquals(Boolean.FALSE, swi.commitCalled);
     assertEquals(Boolean.TRUE, swi.finishCalled);
-    assertEquals(Boolean.FALSE, swi.rollbackCalled);
+    assertEquals(Boolean.TRUE, swi.rollbackCalled);
     
     assertEquals(2, swi.docs.size());
     assertEquals(1, di.getDocBuilder().importStatistics.queryCount.get());
@@ -79,7 +79,7 @@ public class TestNoRollbackWriter extends AbstractDataImportHandlerTestCase {
 
   @Test
   public void testNoRollbackWriter_import() {
-    DataImporter di = new NoRollbackDataImporter();
+    DataImporter di = new DataImporter();
     di.loadAndInit(dc_singleEntity);
     DIHConfiguration cfg = di.getConfig();
     Entity ent = cfg.getEntities().get(0);
@@ -94,9 +94,9 @@ public class TestNoRollbackWriter extends AbstractDataImportHandlerTestCase {
     SolrWriterImpl swi = new SolrWriterImpl();
     di.runCmd(rp, swi);
     assertEquals(Boolean.FALSE, swi.deleteAllCalled);
-    assertEquals(Boolean.TRUE, swi.commitCalled);
+    assertEquals(Boolean.FALSE, swi.commitCalled);
     assertEquals(Boolean.TRUE, swi.finishCalled);
-    assertEquals(Boolean.FALSE, swi.rollbackCalled);
+    assertEquals(Boolean.TRUE, swi.rollbackCalled);
     
     assertEquals(2, swi.docs.size());
     assertEquals(1, di.getDocBuilder().importStatistics.queryCount.get());

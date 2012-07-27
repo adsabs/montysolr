@@ -71,6 +71,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 		
 		SolrCore core = h.getCore();
 		
+		//System.err.println(MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml");
+		
 		SolrQueryRequest req = req("command", "full-import",
 				"dirs", testDir,
 				"commit", "true",
@@ -80,9 +82,10 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 		
 		core.execute(handler, req, rsp);
 		
+		//System.err.println(" ======= Calling commit ========");
+		
 		assertU(commit());
 		//commit("waitFlush", "true", "waitSearcher", "true");
-		
 		
 		assertQ(req("q", "*:*"), "//*[@numFound='104']");
 		assertQ(req("q", "id:53"), "//*[@numFound='1']");
