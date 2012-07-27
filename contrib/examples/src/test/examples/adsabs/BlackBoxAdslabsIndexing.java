@@ -16,7 +16,7 @@ import examples.BlackAbstractTestCase;
 public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
+	public static void beforeBlackBoxAdslabsIndexing() throws Exception {
 		setEName("adsabs");
 		exampleInit();
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
@@ -54,11 +54,13 @@ public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 		}
 		
 		core.execute(uHandler, req("last_recid", "-1", "inveniourl", "python://search",
-				"importurl", "/invenio-importer?command=full-import&amp;dirs=",
-				"updateurl", "/invenio-importer?command=full-import&amp;dirs=",
+				"importurl", "/invenio/import?command=full-import&amp;dirs=",
+				"updateurl", "/invenio/import?command=full-import&amp;dirs=",
 				"deleteurl", "blankrecords",
 				"maximport", "200"
 				), rsp);
+		
+		assertTrue(rsp.getException() == null);
 		
 		embedded.commit(true, true);
 				

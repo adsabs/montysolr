@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/antlrqueryparser/grammars/StandardLuceneGrammar.g 2012-07-26 11:28:20
+// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/antlrqueryparser/grammars/StandardLuceneGrammar.g 2012-07-27 14:20:03
 
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 
@@ -835,7 +835,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    if ( state.backtracking==0 ) stream_clauseBasic.add(others.getTree());
 
             	    // AST REWRITE
-            	    // elements: clauseBasic, near
+            	    // elements: near, clauseBasic
             	    // token labels: 
             	    // rule labels: retval
             	    // token list labels: 
@@ -1149,7 +1149,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: clauseOr, term_modifier, modifier
+                    // elements: clauseOr, modifier, term_modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2012,7 +2012,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: field, value, term_modifier, modifier
+                    // elements: field, term_modifier, modifier, value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 

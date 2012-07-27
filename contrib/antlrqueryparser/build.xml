@@ -237,7 +237,7 @@
 			  />
 	</target>
 
-	<target name="build-all"  depends="clean,default,compile-all" />
+	<target name="build-all"  depends="clean,default,compile-all,jar" />
 	
 
 	<!--

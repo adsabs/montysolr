@@ -22,10 +22,6 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 	private String factoryPropShadow;
 	
 	
-	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		exampleInit();
-	}
 	
 	public String getSolrHome() {
 		return getExampleHome() + "/solr";
@@ -123,12 +119,12 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 	}
 	
 	public String getSchemaFile() {
-		return getConf("solr/conf/schema.xml");
+		return getConf("solr/collection1/conf/schema.xml");
 	}
 
 	
 	public String getSolrConfigFile() {
-		return getConf("solr/conf/solrconfig.xml");
+		return getConf("solr/collection1/conf/solrconfig.xml");
 	}
 	
 	public void assertQDirect(String query, String body, String expected) {

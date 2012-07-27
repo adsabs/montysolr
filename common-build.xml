@@ -56,7 +56,7 @@
 	<property name="version" value="${dev.version}"/>
 	<property name="spec.version" value="${version}"/>
 	<property name="year" value="2000-${current.year}"/>
-	<property name="final.name" value="lucene-${name}-${version}"/>
+	<property name="final.name" value="montysolr-${name}-${version}"/>
 
 	<property name="common.classpath.excludes" value="**/*.txt,**/*.template,**/*.sha1" />
 
@@ -285,6 +285,15 @@
 		<pathelement location="${common.dir}/build/classes/java"/>
 		<pathelement path="${java.class.path}"/>
 	</path>
+	
+	<!-- if testcase is specified let the family be empty (to include all) -->
+	<condition property="tests.family" value="">
+        <isset property="testcase" />
+    </condition>
+	<condition property="tests.family" value="${testfamily}">
+        <isset property="testfamily" />
+    </condition>
+	<property name="tests.family" value="Test" />
 
 	<!--
 	======================================================================
@@ -610,7 +619,7 @@
 	            <value>UTF-16BE</value>
 	            -->
 	        </junit4:pickfromlist>
-
+			
 			<junit4:junit4
 	            dir="@{tempDir}"
 	            tempdir="@{tempDir}"
@@ -773,7 +782,7 @@
 					<junit4:report-ant-xml dir="@{junit.output.dir}" />
 					<junit4:report-json file="@{junit.output.dir}/tests-report-${ant.project.name}/index.html" />
 				</listeners>
-
+			    
 				<!-- Input test classes. -->
 				<fileset dir="@{testsDir}">
 					<include name="**/@{testId}*.class" />
@@ -804,17 +813,8 @@
 		description="Runs unit tests">
 		<mkdir dir="${junit.output.dir}"/>
 		<mkdir dir="${common.dir}/build/junit4"/>
-		<test-macro threadNum="${tests.jvms}" />
+		<test-macro threadNum="${tests.jvms}" testId="${tests.family}"/>
 	</target>
-
-	<target name="blackbox-test" depends="compile-test,install-junit4-taskdef" 
-		description="Runs BlackBox tests">
-		<mkdir dir="${junit.output.dir}"/>
-		<mkdir dir="${common.dir}/build/junit4"/>
-		<test-macro testId="BlackBox"/>
-	</target>
-
-
 
 
 	<target name="generate-test-reports" description="Generates test reports">

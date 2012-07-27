@@ -137,7 +137,7 @@
         </compile>
 	</target>
 	
-	<target name="build-all"  depends="clean,invenio-build-grammar">
+	<target name="build-all"  depends="clean,invenio-build-grammar,jar">
 	    
     </target>
 	

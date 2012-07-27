@@ -95,8 +95,8 @@
     		   else -->
     		
     		<!-- example libs -->
-            <fileset dir="${build.dir}/${example.name}/lib">
-                <include name="**/*.jar"/>
+            <fileset dir="${basedir}/${example.name}">
+                <include name="lib/**/*.jar"/>
             </fileset>
     		
     		<!-- location of JCC classes -->

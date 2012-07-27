@@ -397,7 +397,7 @@ ant=${ant}
     ==================================================================
     -->
 	
-	<target name="build-all" depends="get-solr,build-solr,build,build-contrib"
+	<target name="build-all" depends="get-solr,build-solr,build,jar,build-contrib"
 	        description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
 	    
     
@@ -406,7 +406,7 @@ ant=${ant}
     	  <arg line="build-all"/>
     	  <arg value="-f"/>
     	  <fileset dir="${common.dir}/contrib">
-    	  	<include name="**/anlrqueryparser/build.xml"/>
+    	  	<include name="**/antlrqueryparser/build.xml"/>
     	  	<include name="**/invenio/build.xml"/>
     	  	<include name="**/newseman/build.xml"/>
     	  	<include name="**/adsabs/build.xml"/>
@@ -420,7 +420,7 @@ ant=${ant}
           <arg line="test"/>
           <arg value="-f"/>
           <fileset dir="${common.dir}/contrib">
-            <include name="**/anlrqueryparser/build.xml"/>
+            <include name="**/antlrqueryparser/build.xml"/>
             <include name="**/invenio/build.xml"/>
             <include name="**/newseman/build.xml"/>
             <include name="**/adsabs/build.xml"/>
@@ -455,6 +455,7 @@ ant=${ant}
 			<arg value="import os;'${solr.version}'.lower().__contains__('svn') and (os.path.isdir('.svn') and os.system('svn update --force') or os.system('svn checkout ${solr.svn} .'))"/>
 		</exec>
 		
+		<antcall target="check-solr-location" />
 	</target>
 
 	<!-- this target sets the location of the solr, if not present, we'll assume build/solr-download/apache-solr-${solr.version}/solr
