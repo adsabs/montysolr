@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -155,38 +158,41 @@ public class ProcessUtils {
 		usrPathsField.setAccessible(true);
 		
 		//get array of paths
-	    final String[] paths = (String[])usrPathsField.get(null);
+	  final String[] paths = (String[])usrPathsField.get(null);
 	    
-	    //check if the path to add is already present
-	    for(String path : paths) {
-	        if( (new File(path + "/libjcc.so")).canRead() ||  (new File(path + "/libjcc.a")).canRead()
-	        		|| (new File(path + "/jcc.dll")).canRead()) {
-	            return;
-	        }
-	    }
+    //check if the path to add is already present
+    for(String path : paths) {
+        if( (new File(path + "/libjcc.so")).canRead() ||  (new File(path + "/libjcc.a")).canRead()
+        		|| (new File(path + "/jcc.dll")).canRead()) {
+            return;
+        }
+    }
 	    
 	    
 	    
-	    String jlp = System.getProperty("java.library.path.ignore.montysolr");
-	    if (jlp == null || jlp.trim().equals("")) {
-	    	System.err.println("Warning: MontySolr thinks that JCC is not available. You should set -Djava.library.path");
-	    	System.err.println("Warning: MontySolr will try to find JCC and add it to java.library.path");
-	    	System.err.println("Warning: This is not guaranteed to work (we execute default 'python')");
-	    	System.err.println("Warning: Alternatively, you can deactivate this by setting -Djava.library.path.ignore.montysolr=1");
-	    	
-	    	String jPath = getJCCPath(pythonExec);
-	    	if (jPath != null && jPath.length() > 0) {
-	    		System.err.println("Warning: Adding java.library.path=" + jPath);
-	    		addLibraryPath(jPath.trim());
-	    	}
-	    	else {
-	    		System.err.println("Warning: We were not successful in finding JCC. To help you debug...\n\n");
-	    		System.err.println(pythonExec + " -c \"import sys;print sys.path\"");
-	    		System.err.println(execCommand((pythonExec + "|-c|import sys;print \'\\n\'.join(sys.path)").split("\\|")));
-	    		System.err.println(pythonExec + " -c \"import os;print os.environ\"");
-	    		System.err.println(execCommand((pythonExec + "|-c|import os;print str(os.environ).replace(',',',\\n')").split("\\|")));
-	    	}
-	    }
+    String jlp = System.getProperty("java.library.path.ignore.montysolr");
+    if (jlp == null || jlp.trim().equals("")) {
+    	System.err.println("Warning: MontySolr thinks that JCC is not available. You should set -Djava.library.path");
+    	System.err.println("Warning: MontySolr will try to find JCC and add it to java.library.path");
+    	System.err.println("Warning: This is not guaranteed to work (we execute default 'python')");
+    	System.err.println("Warning: Alternatively, you can deactivate this by setting -Djava.library.path.ignore.montysolr=1");
+    	
+    	String jPath = getJCCPath(pythonExec);
+    	if (jPath != null && jPath.length() > 0) {
+    		System.err.println("Warning: Adding java.library.path=" + jPath.trim());
+    		addLibraryPath(jPath.trim());
+    		System.err.println("Warning: adding to classpath: " + jPath.trim() + "/jcc/classes");
+    		addPathToClassLoader(new File(jPath.trim() + "/jcc/classes").toURI().toURL());
+    		System.err.println("");
+    	}
+    	else {
+    		System.err.println("Warning: We were not successful in finding JCC. To help you debug...\n\n");
+    		System.err.println(pythonExec + " -c \"import sys;print sys.path\"");
+    		System.err.println(execCommand((pythonExec + "|-c|import sys;print \'\\n\'.join(sys.path)").split("\\|")));
+    		System.err.println(pythonExec + " -c \"import os;print os.environ\"");
+    		System.err.println(execCommand((pythonExec + "|-c|import os;print str(os.environ).replace(',',',\\n')").split("\\|")));
+    	}
+    }
 		
 	}
 	
@@ -240,5 +246,17 @@ public class ProcessUtils {
 			throw e;
 		}
 		return out.toString();
+	}
+	
+	
+	public static void addPathToClassLoader(URL url) throws Exception {
+	  URLClassLoader classLoader
+	         = (URLClassLoader) ClassLoader.getSystemClassLoader();
+	  Class clazz= URLClassLoader.class;
+
+	  // Use reflection
+	  Method method= clazz.getDeclaredMethod("addURL", new Class[] { URL.class });
+	  method.setAccessible(true);
+	  method.invoke(classLoader, new Object[] { url });
 	}
 }

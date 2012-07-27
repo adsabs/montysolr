@@ -95,7 +95,7 @@
     		   else -->
     		
     		<!-- example libs -->
-            <fileset dir="${basedir}/${example.name}">
+            <fileset dir="${build.dir}/${example.name}">
                 <include name="lib/**/*.jar"/>
             </fileset>
     		
@@ -258,6 +258,15 @@
         </copy>
 		
 		<antcall target="populate-classpath" />
+		
+		<jar destfile="${build.dir}/${example.name}/monty.jar">
+		  <zipgroupfileset dir="${build.dir}/${example.name}" includes="start.jar" />
+		  <zipgroupfileset dir="${build.dir}/${example.name}/lib" includes="montysolr-montysolr*.jar" />	
+		  
+		  <manifest>
+		    <attribute name="Main-Class" value="monty.solr.Start" />
+		  </manifest>
+		</jar>
 		
 	</target>
 	

@@ -23,10 +23,11 @@ public class Start {
 
 		for (int i = 0; i < params.length; i++) {
 			String t = params[i];
-			if (t.contains("--monty-discover-jcc")) {
+			if (t.contains("--discover-jcc")) {
+			  
 				i++;
-				if (i>params.length) {
-					throw new IllegalStateException("Usage: java -jar monty_start.jar --monty-discover-jcc <python-executable>");
+				if (i>=params.length) {
+					throw new IllegalStateException("Usage: java -jar monty_start.jar --discover-jcc <python-executable>");
 				}
 				String python = params[i];
 				if ((new File(python)).canExecute() == false) {
