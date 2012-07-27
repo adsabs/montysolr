@@ -1,5 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.config;
 
+import java.util.Map;
+
 import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.standard.config.FieldBoostMapFCListener;
 import org.apache.lucene.queryparser.flexible.standard.config.FieldDateResolutionFCListener;
@@ -30,6 +32,8 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 	    final public static ConfigurationKey<String> DEFAULT_DATE_RANGE_FIELD = ConfigurationKey.newInstance();
 	    
 	    final public static ConfigurationKey<String> DEFAULT_IDENTIFIER_FIELD = ConfigurationKey.newInstance();
+	    
+	    final public static ConfigurationKey<Logger> SOLR_LOGGER = ConfigurationKey.newInstance();
 	}
 	
 	public AqpAdsabsQueryConfigHandler() {
@@ -43,6 +47,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		// Default Values
 		set(AqpInvenioQueryConfigHandler.ConfigurationKeys.INVENIO_QUERY, new InvenioQueryAttributeImpl());
 		set(ConfigurationKeys.SOLR_REQUEST, new AqpRequestParamsImpl());
+		set(ConfigurationKeys.SOLR_LOGGER, log);
 		set(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG, new AqpFunctionQueryBuilderConfigImpl());
 		
 		get(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK).registerEventHandler(new AqpAdsabsLoggingHandler());
@@ -61,5 +66,9 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		
 		set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY, true);
 		set(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY, 2.0f);
+		
+		// Now inside the solrconfig.xml
+		//Map<String, String> fieldMap = get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
+		//fieldMap.put("arxiv", "identifier");
 	}
 }

@@ -2,10 +2,12 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.LinkedList;
 import java.util.Locale;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CachingTokenFilter;
+import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
@@ -16,9 +18,11 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
+import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.RangeQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TextableQueryNode;
@@ -67,15 +71,14 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
       CharSequence text = txtNode.getText();
       CharSequence field = fieldNode.getField();
 
-      Analyzer analyzer = config
-          .get(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER);
-
-      // TODO: the analyzer chain changed, so maybe we are not doing the right
-      // thing here
+      Analyzer analyzer = config.get(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER);
+      
+      // TODO: the analyzer chain changed, so maybe we are not doing the right thing here
       TokenStream source = null;
       try {
         source = analyzer.tokenStream(field.toString(),
             new StringReader(text.toString()));
+        source.reset();
       } catch (IOException e1) {
         txtNode.setText(text != null ? UnescapedCharSequence.toLowerCase(text,
             locale) : null);
@@ -104,7 +107,7 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
         // ignore
       }
 
-      CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
+      
       if (numTokens == 0) {
         // do nothing, change nothing
       } else if (numTokens == 1) {
@@ -114,13 +117,17 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
           // TODO Auto-generated catch block
           e.printStackTrace();
         }
-        txtNode.setText(termAtt.toString());
+        if (buffer.hasAttribute(CharTermAttribute.class)) {
+          CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
+          txtNode.setText(termAtt.toString());
+        }
+        else {
+          NumericTermAttribute numAtt = buffer.getAttribute(NumericTermAttribute.class);
+          txtNode.setText(new Long(numAtt.getRawValue()).toString());
+        }
 
       } else {
-        throw new QueryNodeException(new MessageImpl(
-            QueryParserMessages.PARAMETER_VALUE_NOT_SUPPORTED,
-            "The solr analyzer returned more than one value when processing "
-                + field + ":" + text));
+        return expandNode(node, field, text, buffer);
       }
 
     } else {
@@ -130,4 +137,59 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
     return node;
 
   }
+  
+
+  protected QueryNode expandNode(QueryNode node, CharSequence field, 
+      CharSequence text, CachingTokenFilter buffer) throws QueryNodeException {
+
+    FieldableNode fieldNode = (FieldableNode) node;
+
+    
+    LinkedList<QueryNode> children = new LinkedList<QueryNode>();
+    children.add(fieldNode);
+    
+    buffer.reset();
+    CharTermAttribute termAtt;
+    NumericTermAttribute numAtt;
+    
+    try {
+      while (buffer.incrementToken()) {
+        fieldNode = (FieldableNode) fieldNode.cloneTree();
+        
+        if (buffer.hasAttribute(CharTermAttribute.class)) {
+          termAtt = buffer.getAttribute(CharTermAttribute.class);
+          ((TextableQueryNode) fieldNode).setText(termAtt);
+        }
+        else {
+          numAtt = buffer.getAttribute(NumericTermAttribute.class);
+          ((TextableQueryNode) fieldNode).setText(new Long(numAtt.getRawValue()).toString());
+        }
+        
+        children.add(fieldNode);
+      }
+    } catch (IOException e) {
+      getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());
+    } catch (CloneNotSupportedException e) {
+      getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());
+    }
+    
+
+        
+    if (children.size() < 1) {
+      throw new QueryNodeException(new MessageImpl(
+          QueryParserMessages.PARAMETER_VALUE_NOT_SUPPORTED,
+          "The solr analyzer returned more than one value when processing "
+              + field + ":" + text + ". However, all in vain"));
+    }
+    
+
+    /*
+     * TODO: add a flexible factory that knows how to handle the 
+     * children or raise error
+     */
+    
+    return new GroupQueryNode(new BooleanQueryNode(children));
+    
+  }
+  
 }

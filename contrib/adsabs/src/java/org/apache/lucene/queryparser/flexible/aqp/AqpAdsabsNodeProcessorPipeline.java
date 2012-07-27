@@ -97,13 +97,14 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new FuzzyQueryNodeProcessor());
 		add(new MatchAllDocsQueryNodeProcessor());
 		
+		add(new AqpFieldMapperProcessor()); // translate the field name before we try to find the tokenizer chain
 		add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
 		add(new TermRangeQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());
 		
 		add(new AqpAdsabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
 		
-		add(new AqpFieldMapperProcessor());
+		
 		add(new AqpAdsabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		add(new PhraseSlopQueryNodeProcessor());
