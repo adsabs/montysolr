@@ -3,10 +3,13 @@ package org.apache.solr.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +27,10 @@ import org.apache.solr.util.WebUtils;
  * @author rchyla
  *
  */
-public class InvenioRequestHandler extends SearchHandler {
-
+public class InvenioRequestHandler extends RequestHandlerBase {
+  
+  private String parentHandler = "standard";
+  
 	public static final Logger log = LoggerFactory
 			.getLogger(InvenioRequestHandler.class);
 
@@ -48,9 +53,29 @@ public class InvenioRequestHandler extends SearchHandler {
 		Map<Object, Object> context = req.getContext();
 		context.put("inv.params", qs);
 
-
-		super.handleRequestBody(req, rsp);
+		SolrRequestHandler stdh = getParentHandler(req);
+		stdh.handleRequest(req, rsp);
+		
 	}
 
+
+  @Override
+  public String getDescription() {
+    return "InvenioRequestHandler makes sure inv.params are set and forward the request to: " + parentHandler;
+  }
+
+
+  @Override
+  public String getSource() {
+    return "$URL: http://github.com/romanchyla/montysolr/contrib/invenio/src/java/org/apache/solr/handler/InvenioRequestHandler.java $";
+  }
+  
+  private SolrRequestHandler getParentHandler(SolrQueryRequest req) {
+    SolrRequestHandler stdh = req.getCore().getRequestHandler(parentHandler);
+    if (stdh == null) {
+      throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Wrong configuration, the handler with name: " + parentHandler + " is missing");
+    }
+    return stdh;
+  }
 
 }

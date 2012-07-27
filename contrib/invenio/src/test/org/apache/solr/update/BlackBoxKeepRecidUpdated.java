@@ -53,6 +53,7 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
 	public static void beforeBlackBoxKeepRecidUpdated() throws Exception {
+	  System.setProperty("storeAll", "true");
 		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/invenio/src/python");
@@ -80,6 +81,7 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
 
 	@Override
 	public void setUp() throws Exception {
+	  System.setProperty("solr.directoryFactory", "StandardDirectoryFactory");
 		super.setUp();
 		
 		PythonMessage message = MontySolrVM.INSTANCE.createMessage("reset_records");

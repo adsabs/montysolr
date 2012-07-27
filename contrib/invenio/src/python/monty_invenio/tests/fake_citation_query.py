@@ -9,9 +9,9 @@ from montysolr.utils import make_targets
 This mocks up the import 
 '''
 
-HashMap = j.HashMap #@UndefinedVariable
-String = j.String #@UndefinedVariable
-ArrayList = j.ArrayList #@UndefinedVariable
+from java.util import HashMap, ArrayList
+from java.lang import String 
+
 JArray_int = j.JArray_int #@UndefinedVariable
 
 _CACHE = {'recids':{}} 

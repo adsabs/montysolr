@@ -495,7 +495,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		
 		if (params.getBool(PARAM_COMMIT, false)) {
 			setWorkerMessage("Phase 3/3. Writing index...");
-			CommitUpdateCommand updateCmd = new CommitUpdateCommand(req, true);
+			CommitUpdateCommand updateCmd = new CommitUpdateCommand(req, false);
 			req.getCore().getUpdateHandler().commit(updateCmd);
 		}
 	    
@@ -642,7 +642,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		SolrParams params = req.getParams();
 		
 		AddUpdateCommand addCmd = new AddUpdateCommand(req);
-		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
+		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, 1000000);
+		addCmd.setFlags(UpdateCommand.IGNORE_AUTOCOMMIT);
 		
 		if (recids.length > 0) {
 			SolrInputDocument doc = new SolrInputDocument();
@@ -663,7 +664,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		SolrParams params = req.getParams();
 		
 		AddUpdateCommand addCmd = new AddUpdateCommand(req);
-		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
+		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, 1000000);
+		addCmd.setFlags(UpdateCommand.IGNORE_AUTOCOMMIT);
 		
 
       if (recids.length > 0) {
@@ -690,7 +692,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		SolrParams params = req.getParams();
 		
 		DeleteUpdateCommand delCmd = new DeleteUpdateCommand(req);
-		delCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
+		delCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, 1000000);
+		delCmd.setFlags(UpdateCommand.IGNORE_AUTOCOMMIT);
 		
 
     if (recids.length > 0) {

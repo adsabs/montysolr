@@ -3,6 +3,7 @@ from montysolr import config
 from montysolr.initvm import monty
 
 import time
+import sys
 
 '''
 This class is always instantiated by the Java VM when a message 
@@ -47,7 +48,12 @@ class SimpleBridge(monty.solr.jni.MontySolrBridge): #@UndefinedVariable
     
     
     def eval_command(self, message):
-        exec(message, globals(), locals())
+        try:
+            exec(message, globals(), locals())
+        except Exception, e:
+            #sys.stderr.write(message + "\n")
+            e.message = "%s (%s)" % (e.message, message)
+            raise e
 
 
     def set_handler(self, handler):

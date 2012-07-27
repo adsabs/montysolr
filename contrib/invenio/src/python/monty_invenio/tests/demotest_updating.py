@@ -14,14 +14,17 @@ import time
 import unittest
 
 from org.apache.solr.response import SolrQueryResponse
+from org.apache.solr.client.solrj.request import QueryRequest
+from java.lang import Integer
+from java.util import HashMap
 
 JArray_string = j.JArray_string #@UndefinedVariable
 JArray_int = j.JArray_int #@UndefinedVariable
 JArray_byte = j.JArray_byte #@UndefinedVariable
-QueryRequest = j.QueryRequest #@UndefinedVariable
-SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
-Integer = j.Integer #@UndefinedVariable
-HashMap = j.HashMap #@UndefinedVariable
+#QueryRequest = j.QueryRequest #@UndefinedVariable
+#SolrQueryResponse = j.SolrQueryResponse #@UndefinedVariable
+#Integer = j.Integer #@UndefinedVariable
+#HashMap = j.HashMap #@UndefinedVariable
 
 
 '''Tests the Python side of the InvenioKeepRecidUpdated - 
