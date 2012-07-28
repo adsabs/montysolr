@@ -979,7 +979,7 @@
 	<attribute name="solr-data-dir" />
 	<attribute name="jcc-classpath" default="${prop.jcc_egg}"/>
 	<attribute name="ignore-environment" default="true" />
-	<attribute name="montysolr-class" default="invenio.montysolr.JettyRunnerPythonVM" />
+	<attribute name="montysolr-class" default="monty.solr.Start" />
 	<attribute name="pythonpath" default=""/>
 	<attribute name="basedir" default="${basedir}"/>
 	<sequential>
@@ -1008,8 +1008,6 @@
 	                -Djava.library.path=@{jcc-classpath} \
 	                @{jvmargs} \
 	                @{montysolr-class} \
-	                --webroot @{webroot} \
-	                --context @{context} \
 	                @{arguments}   &amp;
 
 	pid=$!
@@ -1094,5 +1092,39 @@
 	</sequential>
 </macrodef>
 
+	<macrodef name="get-lucene-solr-package">
+	    <attribute name="package"/>
+		<attribute name="ant" default="${prop.ant}"/>
+		<attribute name="ant-target" default="jar"/>
+		<attribute name="pattern" default="*.jar"/>
+		<attribute name="into" default="${build.dir}/lib"/>
+		
+		
+		<sequential>
+	        
+	        <mkdir dir="@{into}"/>
+			
+
+	        <!-- cal the ant -->
+			<apply executable="@{ant}" parallel="false" failonerror="true" failifexecutionfails="true">
+	          <arg line="@{ant-target}"/>
+	          <arg value="-f"/>
+	          <fileset dir="${prop.solr.home}">
+	            <include name="lucene/@{package}/build.xml"/>
+	          	<include name="solr/contrib/@{package}/build.xml"/>
+	          </fileset>
+	        </apply>
+	
+
+	        <!-- then copy the result -->
+	        <copy todir="@{into}" overwrite="true" verbose="true" flatten="true">
+	            <fileset dir="${prop.solr.home}">
+	                <include name="lucene/build/@{package}/@{pattern}" />
+	            	<include name="solr/build/contrib/solr-@{package}/@{pattern}" />
+	            </fileset>
+	        </copy>
+
+	    </sequential>
+	</macrodef>
 
 </project>

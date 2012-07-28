@@ -192,7 +192,8 @@
 
 	<target name="build-one">
 		<assemble-example example-name="${example.name}" montysolr-example="${basedir}/${example.name}" solr-example="${prop.solr.real.location}/example" />
-
+	    
+		
 		<!-- put core jar into example/lib -->
 		<copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true" verbose="yes">
 			<fileset dir="${common.dir}/build">
@@ -245,23 +246,22 @@
 			</fileset>
 		</chmod>
 
-		<!-- TODO: to remove this after we stop using MontySolrJettyRunner -->
-		<mkdir dir="${build.dir}/${example.name}/lib/solr-extracted" />
-		<copy todir="${build.dir}/${example.name}/lib/solr-extracted" overwrite="false" flatten="true">
-			<fileset dir="${common.dir}/build/solr-download">
-				<include name="apache-solr*/solr/dist/montysolr-extracted/*.jar" />
-			</fileset>
-		</copy>
+	    
+		<!-- get external dependencies from solr -->
+        <get-lucene-solr-package package="dataimporthandler" into="${build.dir}/${example.name}/lib"/>
+        <get-lucene-solr-package package="sandbox" into="${build.dir}/${example.name}/lib"/>
 
 		<antcall target="populate-classpath" />
 
-		<jar destfile="${build.dir}/${example.name}/monty.jar">
-			<zipgroupfileset dir="${build.dir}/${example.name}" includes="start.jar" />
+		<jar destfile="${build.dir}/${example.name}/monty.jar" filesetmanifest="merge" >
+			
 			<zipgroupfileset dir="${build.dir}/${example.name}/lib" includes="montysolr-montysolr*.jar" />
-
-			<manifest>
-				<attribute name="Main-Class" value="monty.solr.Start" />
+			<zipgroupfileset dir="${build.dir}/${example.name}" includes="start.jar" />
+		    
+			<manifest >
+                <attribute name="Main-Class" value="monty.solr.Start" />
 			</manifest>
+			
 		</jar>
 
 	</target>

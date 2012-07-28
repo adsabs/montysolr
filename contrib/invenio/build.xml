@@ -135,12 +135,12 @@
             <classpath refid="test.classpath"/>
             <include name="**/Abstract*.java"/>
         </compile>
+		
 	</target>
 	
 	<target name="build-all"  depends="clean,invenio-build-grammar,jar">
 	    
     </target>
-	
 	
 
 </project>
