@@ -4,7 +4,7 @@ import sys
 import os
 import time
 
-def run(workdir, solrurl, user, passw, ):
+def run(workdir, solrurl, user, passw, spreadsheet):
    
    ourdir = os.path.dirname(sys.argv[0]) or '.'
    
@@ -53,11 +53,11 @@ def run(workdir, solrurl, user, passw, ):
    data.append('')
    
    
-   cmd = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet ADSIndexingTest --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
-         % (sys.executable, ourdir, user, passw, ','.join(data))
+   cmd = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet %s --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
+         % (sys.executable, ourdir, user, passw, spreadsheet, ','.join(data))
    
-   print '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet ADSIndexingTest --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
-         % (sys.executable, ourdir, user, '<passw>', ','.join(data))
+   print '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet %s --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
+         % (sys.executable, ourdir, user, '<passw>', spreadsheet, ','.join(data))
    os.system(cmd)
 
 
@@ -66,7 +66,7 @@ def run(workdir, solrurl, user, passw, ):
 def main():
     
     if (len(sys.argv) == 1):
-        sys.argv[1:] = '.|http://adsate:8984/solr|montysolr|<pass>'.split('|')
+        sys.argv[1:] = '.|http://adsate:8984/solr|montysolr|<pass>|AdsIndexingTest'.split('|')
     run(*sys.argv[1:])
 
 
