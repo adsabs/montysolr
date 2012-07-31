@@ -3,6 +3,8 @@
 import sys 
 import os
 import time
+import urllib
+import simplejson
 
 def run(workdir, solrurl, user, passw, spreadsheet):
    
@@ -15,26 +17,26 @@ def run(workdir, solrurl, user, passw, spreadsheet):
    user=%s
    ''' % (ourdir, workdir, solrurl, user)
    
-   os.system('wget -O %s/stats.xml %s/admin/stats.jsp' % (workdir, solrurl))
    
-   cmd = '''%s %s/extract_values.py '//entry/name[contains(string(.),"/invenio/import\\n")]/..//stat' --input %s/stats.xml > %s/extracted.txt''' \
-         % (sys.executable, ourdir, workdir, workdir)
-   print cmd
+   jsonpage = urllib.urlopen('%s/admin/mbeans?stats=true\&wt=json' % solrurl)
+   jsondata = simplejson.load(jsonpage)
    
-   x = os.system(cmd)
-   if x != 0:
-       print 'error, so i am giving up...'
+   stats = jsondata['solr-mbeans'][3]['/invenio/import']['stats']
    
-   sf = ('@name=Total Documents Processed', '@name=totalTime')
    
-   fi = open('%s/extracted.txt' % workdir, 'r')
+   
+   sf = ('Total Documents Processed', 'totalTime')
+   
    out = [time.strftime('%m/%d/%y %H:%M')]
    
    data = []
-   for line in fi:
-       vals = line.strip().split("\t")
-       if vals[0] in sf:
-           out.append(vals[1])
+   i = 0
+   while i < len(stats):
+       key = stats[i]
+       value = str(stats[i+1])
+       if key in sf:
+           out.append(value.split(':')[-1])
+       i += 2
    
    
    out[-1] = out[-1][0:-3] # remove milliseconds

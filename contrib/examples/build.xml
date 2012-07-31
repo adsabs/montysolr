@@ -185,7 +185,7 @@
 		</exec>
 	</target>
 
-	<target name="build-all" depends="">
+	<target name="build-all" depends="jar">
 		<echo>
     	    Does nothing, because build-all is called from the main build and at that time we don't have all jars for contribs yet.
     	    Call build-all-examples instead 
