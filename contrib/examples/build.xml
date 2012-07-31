@@ -26,7 +26,7 @@
 
 	<import file="../contrib-build.xml" />
 
-	<condition property="example.name" value="invenio">
+	<condition property="example.name" value="adsabs">
 		<not>
 			<isset property="ename" />
 		</not>
@@ -48,7 +48,7 @@
 	</condition>
 	<property name="example.jvmargs" value="${jvmargs}" />
 
-	<condition property="example.config" value="default.properties">
+	<condition property="example.config" value="normal.properties">
 		<not>
 			<isset property="profile" />
 		</not>
@@ -171,7 +171,7 @@
 	</target>
 
 
-	<target name="default" depends="build-all-examples">
+	<target name="default" depends="jar,build-all-examples">
 
 	</target>
 
@@ -361,7 +361,8 @@
 	</target>
 
 	<target name="test" depends="populate-classpath,common.test" />
-	<target name="compile" depends="populate-classpath,common.compile" />
+	<target name="compile-core" depends="populate-classpath,common.compile-core"/>
+	
 
 
 	<macrodef name="create-run.sh">
