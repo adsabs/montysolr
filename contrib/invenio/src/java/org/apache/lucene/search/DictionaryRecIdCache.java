@@ -381,7 +381,7 @@ public enum DictionaryRecIdCache {
 			//int[] val = new int[termsEnum.docFreq()]; // also contains deleted documents
 			//System.out.println(term.utf8ToString() + " docFreq: " + termsEnum.docFreq() + " totalTermFreq: " + termsEnum.totalTermFreq());
 			docIds.clear();
-			docs = termsEnum.docs(liveDocs, docs, false);
+			docs = termsEnum.docs(liveDocs, docs, 0); // we don't need docFreq
 			for (;;) {
 				int d = docs.nextDoc();
 				if (d == DocIdSetIterator.NO_MORE_DOCS) {
@@ -438,7 +438,7 @@ public enum DictionaryRecIdCache {
 			
 			int i = 0;
 			int[] val = new int[termsEnum.docFreq()];
-			DocsEnum docs = termsEnum.docs(liveDocs, reuse, false);
+			DocsEnum docs = termsEnum.docs(liveDocs, reuse, 0); // we do not need docFreq
 			docs.nextDoc();
 			while (docs.nextDoc() != DocIdSetIterator.NO_MORE_DOCS) {
 				val[i] = docs.docID();
