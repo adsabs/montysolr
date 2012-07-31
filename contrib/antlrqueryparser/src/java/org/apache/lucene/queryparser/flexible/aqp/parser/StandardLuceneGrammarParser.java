@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/antlrqueryparser/grammars/StandardLuceneGrammar.g 2012-07-27 14:41:32
+// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/antlrqueryparser/grammars/StandardLuceneGrammar.g 2012-07-30 21:36:59
 
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 
@@ -1149,7 +1149,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: term_modifier, clauseOr, modifier
+                    // elements: clauseOr, term_modifier, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1331,7 +1331,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: term_modifier, modifier, clauseOr
+                    // elements: clauseOr, modifier, term_modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1845,7 +1845,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: multi_value, term_modifier, modifier, field
+                    // elements: modifier, field, term_modifier, multi_value
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2012,7 +2012,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: value, modifier, field, term_modifier
+                    // elements: term_modifier, value, field, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2148,7 +2148,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: modifier, STAR
+                    // elements: STAR, modifier
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2868,7 +2868,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 
                     // AST REWRITE
-                    // elements: a, b
+                    // elements: b, a
                     // token labels: 
                     // rule labels: retval, b, a
                     // token list labels: 
@@ -3063,7 +3063,7 @@ public TreeAdaptor getTreeAdaptor() {
                     if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 
                     // AST REWRITE
-                    // elements: a, b
+                    // elements: b, a
                     // token labels: 
                     // rule labels: retval, b, a
                     // token list labels: 
@@ -4460,7 +4460,7 @@ public TreeAdaptor getTreeAdaptor() {
             	    if ( state.backtracking==0 ) stream_multiBasic.add(others.getTree());
 
             	    // AST REWRITE
-            	    // elements: multiBasic, near
+            	    // elements: near, multiBasic
             	    // token labels: 
             	    // rule labels: retval
             	    // token list labels: 
@@ -4649,7 +4649,7 @@ public TreeAdaptor getTreeAdaptor() {
             if ( state.backtracking==0 ) stream_value.add(value64.getTree());
 
             // AST REWRITE
-            // elements: modifier, value
+            // elements: value, modifier
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -5408,7 +5408,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: TILDE, CARAT
+                    // elements: CARAT, TILDE
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -5492,7 +5492,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
                     // AST REWRITE
-                    // elements: TILDE, CARAT
+                    // elements: CARAT, TILDE
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 

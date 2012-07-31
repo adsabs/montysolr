@@ -5,7 +5,7 @@ import java.io.File;
 
 import monty.solr.jni.MontySolrVM;
 import monty.solr.jni.PythonMessage;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.response.SolrQueryResponse;

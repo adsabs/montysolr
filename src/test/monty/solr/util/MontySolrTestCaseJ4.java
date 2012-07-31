@@ -1,4 +1,4 @@
-package montysolr.util;
+package monty.solr.util;
 
 import monty.solr.jni.MontySolrVM;
 

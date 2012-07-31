@@ -1,4 +1,4 @@
-// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g 2012-07-27 14:41:21
+// $ANTLR 3.4 /dvt/workspace/montysolr/contrib/adsabs/grammars/ADS.g 2012-07-30 21:36:48
 
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 

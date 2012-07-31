@@ -7,8 +7,8 @@ import java.util.Set;
 
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * PythonMessage represents the core communication mechanism between
@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 public class PythonMessage extends HashMap<String, Object>{
 
 	private static final long serialVersionUID = -3744935985066647405L;
-	public static final Logger log = LoggerFactory.getLogger(PythonMessage.class);
+//	public static final Logger log = LoggerFactory.getLogger(PythonMessage.class);
 	
 	public static final String RECEIVER = "receiver";
 	public static final String SENDER = "sender";
@@ -301,7 +301,8 @@ public class PythonMessage extends HashMap<String, Object>{
 	 * 	- the message you want to print
 	 */
 	public void threadInfo(String s) {
-		log.info("[Python] " + s + this.getInfo());
+//		log.info("[Python] " + s + this.getInfo());
+	  System.err.println("[Python] " + s + this.getInfo());
 	}
 
 	private String getInfo() {

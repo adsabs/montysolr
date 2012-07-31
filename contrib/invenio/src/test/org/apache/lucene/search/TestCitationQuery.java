@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 
-import montysolr.util.MontySolrAbstractLuceneTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractLuceneTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;

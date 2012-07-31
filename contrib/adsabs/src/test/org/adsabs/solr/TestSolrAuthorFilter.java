@@ -17,8 +17,8 @@ package org.adsabs.solr;
  * limitations under the License.
  */
 
-import montysolr.util.MontySolrAbstractTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.schema.IndexSchema;
 

@@ -20,8 +20,8 @@ package org.apache.solr.handler;
 import java.util.HashMap;
 import java.util.Map;
 
-import montysolr.util.MontySolrAbstractTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MapSolrParams;

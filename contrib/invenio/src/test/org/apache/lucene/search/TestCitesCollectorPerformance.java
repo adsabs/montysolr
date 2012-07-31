@@ -10,8 +10,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 
-import montysolr.util.MontySolrAbstractLuceneTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractLuceneTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;

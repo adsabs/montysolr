@@ -48,9 +48,10 @@
        If a "./lib" directory exists in your instanceDir, all files
        found in it are included as if you had used the following
        syntax...
-       
-              <lib dir="./lib" />
-    -->
+    -->       
+  
+  <lib dir="../../lib" />
+
 
   <!-- A 'dir' option by itself adds any files found in the directory 
        to the classpath, this is useful for including all jars in a

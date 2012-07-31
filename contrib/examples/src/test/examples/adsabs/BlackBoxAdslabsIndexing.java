@@ -3,7 +3,7 @@ package examples.adsabs;
 import java.io.File;
 
 
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.response.SolrQueryResponse;

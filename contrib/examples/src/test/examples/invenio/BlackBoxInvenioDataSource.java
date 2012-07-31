@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URLEncoder;
 
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.handler.dataimport.InvenioDataSource;
 import org.junit.BeforeClass;

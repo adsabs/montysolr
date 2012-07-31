@@ -26,8 +26,8 @@ import java.util.Properties;
 
 import monty.solr.jni.MontySolrVM;
 import monty.solr.jni.PythonMessage;
-import montysolr.util.MontySolrAbstractTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;

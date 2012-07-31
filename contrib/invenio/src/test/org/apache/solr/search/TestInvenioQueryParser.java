@@ -18,8 +18,8 @@ package org.apache.solr.search;
  */
 
 
-import montysolr.util.MontySolrAbstractTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;

@@ -1,4 +1,4 @@
-package montysolr.util;
+package monty.solr.util;
 
 
 
@@ -168,7 +168,7 @@ public class MontySolrSetup {
 		
 		String home = System.getProperty("solr.solr.home");
 		if (home!= null ) {
-			if ((new File(home)).exists()) {
+			if ((new File(home)).exists() && System.getProperty("montysolr.ignore.home") != null) {
 				System.err.println("MontySolrSetup: solr.solr.home is set to \'" + home + "\'\n" +
 						           "...ignoring the test setup");
 				return home;

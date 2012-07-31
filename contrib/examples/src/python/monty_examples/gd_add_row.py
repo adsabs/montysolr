@@ -41,8 +41,7 @@ def run(user=None, password=None, spreadsheet=None, keys=[], data=[], verbose=No
     
     datasheet = get_spreadsheet(client, spreadsheet)
     if datasheet is None:
-        log.error("Error obtaining a spreadsheet with name: " + spreadsheet + ". You should create it manually first!")
-        raise()
+        raise Exception("Error obtaining a spreadsheet with name: " + spreadsheet + ". You should create it manually first!")
     
     update(client, datasheet, keys, vals)
     

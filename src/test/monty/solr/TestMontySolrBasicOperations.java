@@ -1,4 +1,4 @@
-package montysolr;
+package monty.solr;
 
 import java.io.IOException;
 
@@ -6,8 +6,8 @@ import java.io.IOException;
 import monty.solr.jni.MontySolrVM;
 import monty.solr.jni.PythonBridge;
 import monty.solr.jni.PythonMessage;
-import montysolr.util.MontySolrAbstractTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.jcc.PythonException;
 import org.junit.BeforeClass;
