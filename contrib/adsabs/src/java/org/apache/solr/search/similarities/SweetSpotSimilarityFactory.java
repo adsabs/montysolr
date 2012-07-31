@@ -6,6 +6,8 @@
 package org.apache.solr.search.similarities;
 
 import org.apache.lucene.search.similarities.Similarity;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.SchemaAware;
 import org.apache.solr.schema.SimilarityFactory;
 import org.apache.lucene.misc.SweetSpotSimilarity;
 import org.apache.solr.core.SolrResourceLoader;
@@ -17,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author jluker
  */
 //public class CustomSimilarityFactory extends SimilarityFactory {
-public class SweetSpotSimilarityFactory extends SimilarityFactory {
+public class SweetSpotSimilarityFactory extends SimilarityFactory implements SchemaAware {
 
     public static final Logger log = LoggerFactory.getLogger(SolrResourceLoader.class);
 
@@ -37,5 +39,10 @@ public class SweetSpotSimilarityFactory extends SimilarityFactory {
         sim.setLengthNormFactors(min, max, steepness, true);
         return sim;
     }
+
+	@Override
+	public void inform(IndexSchema schema) {
+		// do nothing
+	}
 
 }
