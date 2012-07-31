@@ -200,7 +200,7 @@
 		<fail />
 	</target>
 
-	<target name="build-one">
+	<target name="build-one" depends="jar">
 		<assemble-example example-name="${example.name}" montysolr-example="${basedir}/${example.name}" 
 			solr-example="${prop.solr.real.location}/example" />
 	    
