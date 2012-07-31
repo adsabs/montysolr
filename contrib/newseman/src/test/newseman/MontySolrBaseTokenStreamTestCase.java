@@ -1,7 +1,7 @@
 package newseman;
 
-import montysolr.util.MontySolrAbstractLuceneTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractLuceneTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.junit.BeforeClass;
 

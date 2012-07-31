@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import junit.framework.Assert;
 
-import montysolr.util.MontySolrSetup;
-import montysolr.util.MontySolrTestCaseJ4;
+import monty.solr.util.MontySolrSetup;
+import monty.solr.util.MontySolrTestCaseJ4;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;

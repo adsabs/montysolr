@@ -18,7 +18,7 @@ package org.apache.solr.search.function;
  */
 
 
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.util.AbstractSolrTestCase;
 

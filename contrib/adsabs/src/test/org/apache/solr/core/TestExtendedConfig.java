@@ -17,8 +17,8 @@
 
 package org.apache.solr.core;
 
-import montysolr.util.MontySolrAbstractTestCase;
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;

@@ -17,7 +17,7 @@
 
 package org.apache.solr.update;
 
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;

@@ -9,7 +9,6 @@ import monty.solr.jni.PythonMessage;
 import monty.solr.util.ProcessUtils;
 
 import org.eclipse.jetty.start.Main;
-//import org.eclipse.jetty.webapp.WebAppContext;
 
 /*
  * A simple wrapper for the default Solr start.jar
@@ -20,8 +19,6 @@ public class Start {
 	
 	public static void main(String[] params) throws Exception {
 		
-	  //WebAppContext.setSystemClasses(new String[]{"monty."}); 
-	  
 		List<String> jettyParams = new ArrayList<String>();
 		
 		boolean jccStarted = false;

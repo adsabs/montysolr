@@ -1,4 +1,4 @@
-package montysolr.util;
+package monty.solr.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 
-import montysolr.util.MontySolrTestCaseJ4;
+import monty.solr.util.MontySolrTestCaseJ4;
 
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrResourceLoader;

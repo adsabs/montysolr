@@ -17,7 +17,8 @@ package examples;
  * limitations under the License.
  */
 
-import montysolr.util.MontySolrAbstractLuceneTestCase;
+import monty.solr.util.MontySolrAbstractLuceneTestCase;
+
 import org.junit.BeforeClass;
 import org.apache.solr.SolrJettyTestBase;
 

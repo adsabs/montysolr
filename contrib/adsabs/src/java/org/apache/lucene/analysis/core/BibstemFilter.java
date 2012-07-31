@@ -70,9 +70,9 @@ public final class BibstemFilter extends TokenFilter {
 			return true;
 		}
 		
-        if (!input.incrementToken()) {                           
-            return false;
-        }
+    if (!input.incrementToken()) {                           
+        return false;
+    }
         
 		String origTerm = termAtt.toString();
 		if (!isBibcode(origTerm)) {

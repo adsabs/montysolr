@@ -2,7 +2,7 @@ package org.apache.solr;
 
 import java.io.File;
 
-import montysolr.util.MontySolrSetup;
+import monty.solr.util.MontySolrSetup;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
