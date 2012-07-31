@@ -159,7 +159,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     boosts.put("b", Float.valueOf(5));
     boosts.put("t", Float.valueOf(10));
     String[] fields = { "b", "t" };
-    StandardQueryParser mfqp = new StandardQueryParser();
+    AqpQueryParser mfqp = getParser();
     mfqp.setMultiFields(fields);
     mfqp.setFieldsBoost(boosts);
     mfqp.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
@@ -187,27 +187,29 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
         q.toString());
   }
 
-  public void testStaticMethod1() throws QueryNodeException {
+  public void testStaticMethod1() throws Exception {
     String[] fields = { "b", "t" };
     String[] queries = { "one", "two" };
-    Query q = QueryParserUtil.parse(queries, fields, new StandardAnalyzer(TEST_VERSION_CURRENT));
+    AqpQueryParser qp = getParser();
+    qp.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
+    Query q = AqpQueryParserUtil.parse(qp, queries, fields);
+    assertEquals("b:one t:two", q.toString());
+    
+    String[] queries2 = { "+one", "+two" };
+    q = AqpQueryParserUtil.parse(qp, queries2, fields);
     assertEquals("b:one t:two", q.toString());
 
-    String[] queries2 = { "+one", "+two" };
-    q = QueryParserUtil.parse(queries2, fields, new StandardAnalyzer(TEST_VERSION_CURRENT));
-    assertEquals("(+b:one) (+t:two)", q.toString());
-
     String[] queries3 = { "one", "+two" };
-    q = QueryParserUtil.parse(queries3, fields, new StandardAnalyzer(TEST_VERSION_CURRENT));
-    assertEquals("b:one (+t:two)", q.toString());
+    q = AqpQueryParserUtil.parse(qp, queries3, fields);
+    assertEquals("b:one t:two", q.toString());
 
     String[] queries4 = { "one +more", "+two" };
-    q = QueryParserUtil.parse(queries4, fields, new StandardAnalyzer(TEST_VERSION_CURRENT));
-    assertEquals("(b:one +b:more) (+t:two)", q.toString());
+    q = AqpQueryParserUtil.parse(qp, queries4, fields);
+    assertEquals("(b:one +b:more) t:two", q.toString());
 
     String[] queries5 = { "blah" };
     try {
-      q = QueryParserUtil.parse(queries5, fields, new StandardAnalyzer(TEST_VERSION_CURRENT));
+      q = AqpQueryParserUtil.parse(qp, queries5, fields);
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -215,14 +217,18 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     // check also with stop words for this static form (qtxts[], fields[]).
     TestQPHelper.QPTestAnalyzer stopA = new TestQPHelper.QPTestAnalyzer();
-
+    qp.setAnalyzer(stopA);
+    
     String[] queries6 = { "((+stop))", "+((stop))" };
-    q = QueryParserUtil.parse(queries6, fields, stopA);
+    q = AqpQueryParserUtil.parse(qp, queries6, fields);
     assertEquals("", q.toString());
 
     String[] queries7 = { "one ((+stop)) +more", "+((stop)) +two" };
-    q = QueryParserUtil.parse(queries7, fields, stopA);
-    assertEquals("(b:one +b:more) (+t:two)", q.toString());
+    q = AqpQueryParserUtil.parse(qp, queries7, fields);
+    // well, aqp is better in removing the parens from top-level, 
+    // so this is the correct result (the AqpQueryUtils has fundamental flaw anyway)
+    // original was: (b:one +b:more) (+t:two)
+    assertEquals("(b:one +b:more) t:two", q.toString()); 
 
   }
 
@@ -246,11 +252,11 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     }
   }
 
-  public void testStaticMethod2Old() throws QueryNodeException {
+  public void testStaticMethod2Old() throws Exception {
     String[] fields = { "b", "t" };
     BooleanClause.Occur[] flags = { BooleanClause.Occur.MUST,
         BooleanClause.Occur.MUST_NOT };
-    StandardQueryParser parser = new StandardQueryParser();
+    AqpQueryParser parser = getParser();
     parser.setMultiFields(fields);
     parser.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
 
@@ -309,9 +315,9 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     }
   }
 
-  public void testAnalyzerReturningNull() throws QueryNodeException {
+  public void testAnalyzerReturningNull() throws Exception {
     String[] fields = new String[] { "f1", "f2", "f3" };
-    StandardQueryParser parser = new StandardQueryParser();
+    AqpQueryParser parser = getParser();
     parser.setMultiFields(fields);
     parser.setAnalyzer(new AnalyzerReturningNull());
 
@@ -322,7 +328,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     q = parser.parse("bla*", null);
     assertEquals("f1:bla* f2:bla* f3:bla*", q.toString());
     q = parser.parse("bla~", null);
-    assertEquals("f1:bla~2 f2:bla~2 f3:bla~2", q.toString());
+    assertEquals("f1:bla~1 f2:bla~1 f3:bla~1", q.toString());
     q = parser.parse("[a TO c]", null);
     assertEquals("f1:[a TO c] f2:[a TO c] f3:[a TO c]", q.toString());
   }
@@ -336,7 +342,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     iw.addDocument(doc);
     iw.close();
 
-    StandardQueryParser mfqp = new StandardQueryParser();
+    AqpQueryParser mfqp = getParser();
 
     mfqp.setMultiFields(new String[] { "body" });
     mfqp.setAnalyzer(analyzer);
