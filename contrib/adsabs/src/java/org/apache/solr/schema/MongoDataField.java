@@ -54,13 +54,14 @@ public class MongoDataField extends TextField {
 		return this.polyField;
 	}
 	  
-	public IndexableField createField(SchemaField field, String externalVal, float boost) {
+	@Override
+	public IndexableField createField(SchemaField field, Object externalVal, float boost) {
 
 		String fieldName = this.mongoFieldName != null
 			? this.mongoFieldName
 			: field.name;
 		
-		DBObject doc = this.executeMongoQuery(externalVal, fieldName);
+		DBObject doc = this.executeMongoQuery((String)externalVal, fieldName);
 		
 		if (doc != null) {
 			String val = (String) doc.get(fieldName);
@@ -72,13 +73,14 @@ public class MongoDataField extends TextField {
 		return null;
 	}
 	
-	public IndexableField[] createFields(SchemaField field, String externalVal, float boost) {
+	@Override
+	public IndexableField[] createFields(SchemaField field, Object externalVal, float boost) {
 
 		String fieldName = this.mongoFieldName != null
 			? this.mongoFieldName
 			: field.name;
 			
-		DBObject doc = this.executeMongoQuery(externalVal, fieldName);
+		DBObject doc = this.executeMongoQuery((String)externalVal, fieldName);
 		
 		if (doc != null) {
 			ArrayList<String> data = (ArrayList<String>) doc.get(fieldName);
