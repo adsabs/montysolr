@@ -232,10 +232,11 @@
     <fieldType name="bibstem_facet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
         <analyzer type="index">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-            <filter class="solr.BibstemFilterFactory" facetMode="true"/>
+            <filter class="solr.TrimFilterFactory"/>
         </analyzer>
         <analyzer type="query">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.TrimFilterFactory"/>
             <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
         </analyzer>
     </fieldType>
@@ -243,22 +244,18 @@
     <fieldType name="bibstem" class="solr.TextField" sortMissingLast="true" omitNorms="true">
         <analyzer type="index">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-            <filter class="solr.BibstemFilterFactory" facetMode="false"/>
+            <filter class="solr.ASCIIFoldingFilterFactory"/>
 	        <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.TrimFilterFactory"/>
         </analyzer>
         <analyzer type="query">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
-         <filter class="solr.PatternReplaceFilterFactory" pattern="^(.*?)(\.*)$" replacement="$1"/> 
+            <filter class="solr.ASCIIFoldingFilterFactory"/>
 	        <filter class="solr.LowerCaseFilterFactory"/>
-	        <!-- note: do not use BibstemFFF in the query phase, we cannot assume the input has bibcode form -->
+            <filter class="solr.TrimFilterFactory"/>
+            <filter class="solr.PatternReplaceFilterFactory" pattern="^(.*?)(\.*)$" replacement="$1"/> 
+	        <!-- note: do not use BibstemFF in the query phase, we cannot assume the input has bibcode form -->
         </analyzer>
-    </fieldType>
-    
-    <fieldType name="pubdate_sort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
-    <analyzer type="index">
-        <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.PubdateSortFilterFactory"/>
-    </analyzer>
     </fieldType>
     
 </types>
@@ -277,12 +274,11 @@
    <field name="recid" type="int" indexed="true" stored="true" required="true" />
    <field name="bibcode" type="normalized_string_ascii" indexed="true" stored="true" required="true" />
    
-   
    <field name="doi" type="doi_string" indexed="true" stored="true" required="false" multiValued="true"/>
    <field name="identifier" type="identifier_normalized_string_ascii" indexed="true" stored="true" required="false" multiValued="true"/>
    
    <field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}" multiValued="true"/>
-   <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="${storeAll:false}" multiValued="false"/>
+   <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="${storeAll:false}"/>
    
    <field name="pub" type="normalized_text_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="pub_raw" type="normalized_text_ascii" indexed="true" stored="${storeAll:false}" omitNorms="true" multiValued="true"/>
@@ -300,9 +296,8 @@
        
    <!-- using temporary type of "string". 
         pubdate should be date field that allows e.g. "00" for month or day values - but that requires more work -->
-   <field name="pubdate" type="string" stored="true" indexed="true"/>
-   <field name="pubdate_sort" type="pubdate_sort" stored="${storeAll:false}" indexed="true"/>
-
+   <field name="pubdate" type="string" stored="true" indexed="true" />
+   <field name="pubdate_sort" type="int" stored="${storeAll:false}" indexed="true"/>
 
    <field name="title" type="ads_text" indexed="true" stored="true" multiValued="true"/>
    
@@ -378,10 +373,7 @@
  <solrQueryParser defaultOperator="AND"/>
 
    <copyField source="id" dest="recid"/>
-   <copyField source="bibcode" dest="bibstem"/>
-   <copyField source="bibcode" dest="bibstem_facet"/>
    
-   <copyField source="pubdate" dest="pubdate_sort"/>
    <copyField source="keyword_norm" dest="keyword"/>
    <copyField source="keyword_norm" dest="keyword_facet"/>
    

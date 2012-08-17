@@ -5,11 +5,11 @@
             pk="bibcode"
             url="${dataimporter.request.url}"
             processor="XPathEntityProcessor"
-            transformer="TemplateTransformer,DateFormatTransformer"
+            transformer="TemplateTransformer,RegexTransformer,BibstemTransformer"
             forEach="/collection/record"
             flatten="false"
+            xsl="/home/jluker/workspace/montysolr_trunk/contrib/examples/adsabs/solr/collection1/conf/data-import.xsl"
             >
-        
         
         <field column="bibcode" 
             xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
@@ -30,16 +30,13 @@
         <field column="lang" 
             xpath="/collection/record/datafield[@tag='041']/subfield[@code='a']" />
         
-
         <field column="author"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='a']" />
         <field column="author"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='a']" />
         
-        
         <field column="first_author"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='a']" />
-            
             
         <!--  normalized author names -->
         <field column="author_norm"        
@@ -69,21 +66,15 @@
         <field column="email"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='m']" />       
 
-    
         <!--  245 is the original title, 242 is translation -->
         <field column="title"        
             xpath="/collection/record/datafield[@tag='245']/subfield[@code='a']" />
         <field column="title"        
             xpath="/collection/record/datafield[@tag='242']/subfield[@code='a']" />
             
-        <!--  the date should be precomputed for us by bib-export    
-        <field column="pubdate"        
-            xpath="/collection/record/datafield[@tag='260']/subfield[@code='a']" />    
-        -->
-        
         <field column="pubdate" 
-            xpath="/collection/record/datafield[@tag='260' and subfield[@code='t']='main-date']/subfield[@code='c']" />
-            
+            xpath="/collection/record/datafield[@tag='260']/subfield[@code='c']" />
+        <field column="pubdate_sort" regex="-" replaceWith="" sourceColName="pubdate"/>
         
         <field column="abstract"        
             xpath="/collection/record/datafield[@tag='520']/subfield[@code='a']" />
@@ -95,7 +86,6 @@
          -->
         <field column="copyright"        
             xpath="/collection/record/datafield[@tag='542']/subfield" /> 
-            
         
         <!--  for theses we also index all subfield
             $b: Degree type (NR)
@@ -104,7 +94,6 @@
          -->
         <field column="thesis"        
             xpath="/collection/record/datafield[@tag='502']/subfield" />
-                     
         
         <!-- we do not distinguist primary/secondary here, if we are to, 
             the xpath will have to test for indicator: 1=Primary, 7=Secondary 
@@ -135,9 +124,6 @@
         <field column="collaboration"        
             xpath="/collection/record/datafield[@tag='710']/subfield[@code='t']" />
 
-        
-        
-            
         <!--  journal info -->
         <field column="pub"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='p']" />
@@ -155,7 +141,6 @@
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='v']" />
         <field column="year"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='y']" />    
-                
         
         <!--  record date-stamps -->
         <field column="created"        
@@ -164,8 +149,6 @@
         <field column="modified"        
             xpath="/collection/record/datafield[@tag='961']/subfield[@code='c']" />
         
-        
-            
         <field column="property"
             xpath="/collection/record/datafield[@tag='980']/subfield[@code='p']"/>
             
@@ -174,7 +157,6 @@
             
         <field column="bibgroup"
             xpath="/collection/record/datafield[@tag='980']/subfield[@code='b']"/>
-            
         
         <!--  this is not a timestamp, but st like a signature of a records extracted
               from ADS (maybe can be useful for comparing imports) -->
