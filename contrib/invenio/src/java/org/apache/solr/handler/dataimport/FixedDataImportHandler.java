@@ -67,8 +67,6 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
 
   private String myName = "dataimport";
 
-  private Map<String , Object> coreScopeSession = new HashMap<String, Object>();
-  
   private static final String PARAM_WRITER_IMPL = "writerImpl";
   private static final String DEFAULT_WRITER_NAME = "SolrWriter";
 
@@ -102,8 +100,7 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
           processConfiguration(defaults);
           final InputSource is = new InputSource(core.getResourceLoader().openResource(configLoc));
           is.setSystemId(SystemIdResolver.createSystemIdFromResourceName(configLoc));
-          importer = new DataImporter(is, core,
-                  dataSources, coreScopeSession, myName);
+          importer = new DataImporter(core, myName);
         }
       }
     } catch (Throwable e) {
@@ -158,8 +155,7 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
       if (requestParams.getDataConfig() != null) {
         try {
           processConfiguration((NamedList) initArgs.get("defaults"));
-          importer = new DataImporter(new InputSource(new StringReader(requestParams.getDataConfig())), req.getCore()
-                  , dataSources, coreScopeSession, myName);
+          importer = new DataImporter(req.getCore(), myName);
         } catch (RuntimeException e) {
           rsp.add("exception", DebugLogger.getStacktraceString(e));
           importer = null;
