@@ -104,6 +104,8 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		// HACK to prevent DIH from running mongoDB types
 		Field schema = config.getClass().getDeclaredField("lowerNameVsSchemaField");
 		schema.setAccessible(true);
+		
+		@SuppressWarnings("unchecked")
 		Map<String, SchemaField> lowerNameVsSchemaField = (Map<String, SchemaField>) schema.get(config);
 		
 		
