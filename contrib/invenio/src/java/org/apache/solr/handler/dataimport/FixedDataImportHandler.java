@@ -126,6 +126,7 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
       }
     }
     SolrParams params = req.getParams();
+    NamedList defaultParams = (NamedList) initArgs.get("defaults");
     RequestInfo requestParams = new RequestInfo(getParamsMap(fixWI(params)), contentStream);
     String command = requestParams.getCommand();
    
@@ -181,6 +182,8 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
       if (DataImporter.FULL_IMPORT_CMD.equals(command)
               || DataImporter.DELTA_IMPORT_CMD.equals(command) ||
               IMPORT_CMD.equals(command)) {
+    	  
+        importer.maybeReloadConfiguration(requestParams, defaultParams);
 
         UpdateRequestProcessorChain processorChain =
                 req.getCore().getUpdateProcessingChain(params.get(UpdateParams.UPDATE_CHAIN));
@@ -208,9 +211,11 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
           }
         }
       } else if (DataImporter.RELOAD_CONF_CMD.equals(command)) {
-        importer = null;
-        inform(req.getCore());
-        message = DataImporter.MSG.CONFIG_RELOADED;
+          if(importer.maybeReloadConfiguration(requestParams, defaultParams)) {
+              message = DataImporter.MSG.CONFIG_RELOADED;
+            } else {
+              message = DataImporter.MSG.CONFIG_NOT_RELOADED;
+            }
       }
     }
     rsp.add("status", importer.isBusy() ? "busy" : "idle");

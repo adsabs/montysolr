@@ -362,6 +362,10 @@
         unknown fields indexed and/or stored by default --> 
    <!--dynamicField name="*" type="ignored" multiValued="true" /-->
    
+
+    <field name="_version_" type="long" indexed="true" stored="true"/>
+
+   
  </fields>
 
  <uniqueKey>id</uniqueKey>
