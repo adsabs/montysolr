@@ -8,7 +8,7 @@
             transformer="TemplateTransformer,RegexTransformer,BibstemTransformer"
             forEach="/collection/record"
             flatten="false"
-            xsl="/home/jluker/workspace/montysolr_trunk/contrib/examples/adsabs/solr/collection1/conf/data-import.xsl"
+            xsl="data-import.xsl"
             >
         
         <field column="bibcode" 
