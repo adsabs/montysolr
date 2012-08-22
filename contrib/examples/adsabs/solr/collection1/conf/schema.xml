@@ -21,7 +21,7 @@
     <fieldtype name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" />
 
     <!--  MontySolr special Python fields -->
-    <fieldType name="fulltext" class="solr.MongoDataField" positionIncrementGap="100" databaseName="solr4ads" collectionName="docs">
+    <fieldType name="fulltext" class="solr.TextField" positionIncrementGap="100">
        <analyzer type="index">
         <tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
         <filter class="solr.PatternReplaceFilterFactory" pattern="-?\s+-?" replacement="-" replace="all"/>
@@ -52,8 +52,6 @@
       -->
     </fieldType>
     
-    <fieldType name="reader_data" class="solr.MongoDataField" omitNorms="true" databaseName="solr4ads" collectionName="docs" mongoFieldName="readers" isPolyField="true" />
-
      <fieldType name="author" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -346,7 +344,7 @@
    <!-- MontySolr: Fields where value is fetched from Mongo text -->
    <field name="full" type="fulltext" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
    <field name="ack" type="fulltext" indexed="true" stored="true" />
-   <field name="reader" type="reader_data" indexed="true" stored="true" multiValued="true" />
+   <field name="reader" type="string" indexed="true" stored="true" multiValued="true" />
 
    <!-- Uncommenting the following will create a "timestamp" field using
         a default value of "NOW" to indicate when each document was indexed.

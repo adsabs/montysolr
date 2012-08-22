@@ -1,11 +1,17 @@
 <dataConfig>
-    <dataSource type="AdsDataSource" mongoHost="adszee" mongoPort="27017" jdbcConfig="" />
+    <dataSource type="AdsDataSource" 
+        mongoHost="adszee" 
+        mongoPort="27017" 
+        mongoDocIdField="bibcode" 
+        mongoDBName="solr4ads"
+        mongoCollectionName="docs"
+        jdbcConfig="" />
     <document>
         <entity name="adsabs"
             pk="bibcode"
             url="${dataimporter.request.url}"
             processor="XPathEntityProcessor"
-            transformer="TemplateTransformer,RegexTransformer,BibstemTransformer"
+            transformer="TemplateTransformer,RegexTransformer,BibstemTransformer,MongoTransformer"
             forEach="/collection/record"
             flatten="false"
             xsl="data-import.xsl"
@@ -192,11 +198,11 @@
         <!-- field column="entdate" xpath="" / -->
         <!-- field column="bibgroup" xpath="" / -->
             
-        <field column="full" template="${adsabs.bibcode}"/>
+        <field column="full" mongoField="true" template="${adsabs.bibcode}"/>
         
-        <field column="ack" template="${adsabs.bibcode}" />
+        <field column="ack" mongoField="true" template="${adsabs.bibcode}" />
         
-        <field column="reader" template="${adsabs.bibcode}" />
+        <field column="reader" mongoField="true" mongoFieldName="readers" template="${adsabs.bibcode}" />
 
         </entity>
         
