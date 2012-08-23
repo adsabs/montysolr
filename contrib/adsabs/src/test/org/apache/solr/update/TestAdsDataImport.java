@@ -21,7 +21,6 @@ package org.apache.solr.update;
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.adsabs.mongodb.MongoConnection;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.DataImporter;
 import org.apache.solr.handler.dataimport.config.DIHConfiguration;
@@ -72,11 +71,6 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 	}
 
 
-	public void tearDown() throws Exception {
-		MongoConnection.INSTANCE.close();
-		super.tearDown();
-	}
-	
 	public void mockHandler(SolrRequestHandler handler) throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException {
 		
 		DIHConfiguration config = null;
