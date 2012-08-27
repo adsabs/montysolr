@@ -198,12 +198,16 @@
         <!-- field column="entdate" xpath="" / -->
         <!-- field column="bibgroup" xpath="" / -->
             
-        <field column="full" mongoField="true" template="${adsabs.bibcode}"/>
+        <field column="full" mongoField="true"/>
         
-        <field column="ack" mongoField="true" template="${adsabs.bibcode}" />
+        <field column="ack" mongoField="true"/>
         
-        <field column="reader" mongoField="true" mongoFieldName="readers" template="${adsabs.bibcode}" />
+        <field column="reader" mongoField="true" mongoFieldName="readers"/>
 
+        <field column="cite_read_boost" mongoField="true" />
+        <field column="citation_count" mongoField="true" />
+        <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
+        
         </entity>
         
     </document>

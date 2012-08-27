@@ -1220,6 +1220,133 @@
     <subfield code="i">2002RvMP....74...99</subfield>
   </datafield>
   </record>
-  
+  <record>
+  <controlfield tag="001">1810902</controlfield>
+  <controlfield tag="005">20120808022411.0</controlfield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">1976NASSP.389..293M</subfield>
+    <subfield code="2">ADS bibcode</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Maran, S. P.</subfield>
+    <subfield code="b">Maran, S</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="7">ARI</subfield>
+    <subfield code="u">National Aeronautics and Space Administration. Goddard Space Flight Center, Greenbelt, MD.</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">The transient X-ray source A 0620-00 (nova Monocerotis 1975).</subfield>
+    <subfield code="7">ARI</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">1976-00-00</subfield>
+    <subfield code="t">date-published</subfield>
+    <subfield code="7">ARI</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">1976-00-00</subfield>
+    <subfield code="t">main-date</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">A&amp;AA ID. AAA018.142.246</subfield>
+    <subfield code="7">STI</subfield>
+    <subfield code="9">ADS</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">A0620-00 is the first of the so-called X-ray novae to be identified with an optical object. Emission in the ultraviolet, infrared, and radio wavelength regions was observed from this source. From the observed properties of the optical radiation, it is suggested that the source is a recurrent nova.</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">NOVAE</subfield>
+    <subfield code="b">stars novae;cataclysmic variables</subfield>
+    <subfield code="2">NASA/STI</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">RADIO SOURCES (ASTRONOMY)</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="2">NASA/STI</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">X RAY SOURCES</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="2">NASA/STI</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">BINARY STARS</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="2">NASA/STI</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">INFRARED RADIATION</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="2">NASA/STI</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">ULTRAVIOLET RADIATION</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="2">NASA/STI</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">X RAY SPECTRA</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="2">NASA/STI</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Astronomy</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="2">STI category</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="p">NASA Special Publication</subfield>
+    <subfield code="v">389</subfield>
+    <subfield code="c">293</subfield>
+    <subfield code="y">1976</subfield>
+    <subfield code="z">In its X-ray Binaries  p 293-309 (SEE N76-26056 16-90)</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="775" ind1=" " ind2=" ">
+    <subfield code="p">X-ray Binaries</subfield>
+    <subfield code="v">389</subfield>
+    <subfield code="c">293</subfield>
+    <subfield code="y">1976</subfield>
+    <subfield code="z">In its X-ray Binaries  p 293-309 (SEE N76-26056 16-90)</subfield>
+    <subfield code="7">STI</subfield>
+  </datafield>
+  <datafield tag="961" ind1=" " ind2=" ">
+    <subfield code="c">2011-05-04T11:32:41</subfield>
+    <subfield code="x">2012-01-23T05:20:00</subfield>
+    <subfield code="7">ARI</subfield>
+  </datafield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">1976NASSP.389..293M</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ASTRONOMY</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">OPENACCESS</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">INBOOK</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="995" ind1=" " ind2=" ">
+    <subfield code="a">{"abs":[{"p":"/proj/ads/abstracts/ast/text/N76/N76-26081.abs","primary":1,"t":"1304523161"},{"p":"/proj/ads/abstracts/ast/text/O76/O76-26081.abs","t":"1298453665"},{"a":"1976xrbi.nasa..293M","p":"/proj/ads/abstracts/ast/text/T76/T76-26081.abs","t":"1298454172"}],"full":[{"p":"/proj/ads/fulltext/extracted/19/76/NA/SS/P,/38/9,/,2/93/M//fulltext.txt","t":1329864056}],"prop":["article"]}</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+</record>
 
 </collection>

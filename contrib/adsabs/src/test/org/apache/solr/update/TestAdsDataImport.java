@@ -213,11 +213,11 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		/*
 		 * database & bibgroup
 		 */
-		assertQ(req("q", "database:astronomy"), "//*[@numFound='7']");
-		assertQ(req("q", "database:Astronomy"), "//*[@numFound='7']");
-		assertQ(req("q", "database:ASTRONOMY"), "//*[@numFound='7']");
-		assertQ(req("q", "database:astronom*"), "//*[@numFound='7']");
-		assertQ(req("q", "database:astronom?"), "//*[@numFound='7']");
+		assertQ(req("q", "database:astronomy"), "//*[@numFound='8']");
+		assertQ(req("q", "database:Astronomy"), "//*[@numFound='8']");
+		assertQ(req("q", "database:ASTRONOMY"), "//*[@numFound='8']");
+		assertQ(req("q", "database:astronom*"), "//*[@numFound='8']");
+		assertQ(req("q", "database:astronom?"), "//*[@numFound='8']");
 		
 		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
 		assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='2']");
@@ -403,7 +403,10 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		//TODO - this query finds nothing (recid:12) but id:12 does
 		//the problem must be with the analyzer (because i see the TermQuery has the binary
 		// value of the integer, whilst cites() query uses the string
-		//assertQ(req("q", "refersto(recid:12)"), "//*[@numFound='1']", "debugQuery", "true");
+		//assertQ(req("q", "refersto(recid:12)"), "//*[@numFound='1']", "debugQuery", "true");cite_read_boost
+		
+		
+		assertQ(req("q", "read_count:1 AND bibcode:1976NASSP.389..293M"), "//*[@numFound='1']");
 	}
 	
 	
