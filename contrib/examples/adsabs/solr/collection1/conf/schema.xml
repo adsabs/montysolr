@@ -27,7 +27,7 @@
         <filter class="solr.PatternReplaceFilterFactory" pattern="-?\s+-?" replacement="-" replace="all"/>
         <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"         splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
         <filter class="solr.AcronymTokenFilterFactory"/>
@@ -36,7 +36,7 @@
       <analyzer type="query">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="0" catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"         splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="1"/>
         <filter class="solr.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
         <filter class="solr.SynonymFilterFactory" synonyms="text.synonyms" ignoreCase="false" expand="false"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
@@ -210,7 +210,7 @@
         <filter class="solr.PatternReplaceFilterFactory" pattern="-?\s+-?" replacement="-" replace="all"/>
         <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"         splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
         <filter class="solr.AcronymTokenFilterFactory"/>
@@ -219,7 +219,7 @@
       <analyzer type="query">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
-        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="1" splitOnCaseChange="0" splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1"/>
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="0" generateNumberParts="0" catenateWords="0" catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"         splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="1"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
         <filter class="solr.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
@@ -393,3 +393,4 @@
    <copyField source="pub" dest="pub_raw"/>
 
 </schema>
+
