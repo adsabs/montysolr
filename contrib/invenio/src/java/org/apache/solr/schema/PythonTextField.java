@@ -6,6 +6,7 @@ import monty.solr.jni.MontySolrVM;
 import monty.solr.jni.PythonMessage;
 
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.StorableField;
 
 /**
  * <code>TextField</code> is the basic type for configurable text analysis.
@@ -28,7 +29,7 @@ public class PythonTextField extends TextField {
 		super.init(schema, args);
 	}
 
-	public IndexableField createField(SchemaField field, Object value,
+	public StorableField createField(SchemaField field, Object value,
 			float boost) {
 		value = getFieldValue(field.name, toInternal(value.toString()));
 		if (value == null)

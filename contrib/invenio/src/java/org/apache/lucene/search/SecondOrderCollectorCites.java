@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.StoredDocument;
 
 public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
@@ -67,7 +68,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	public void collect(int doc) throws IOException {
 		//if (reader.isDeleted(doc)) return;
 		
-		Document document = reader.document(doc, fieldsToLoad);
+		StoredDocument document = reader.document(doc, fieldsToLoad);
 		
 		float s = scorer.score();
 		

@@ -4,6 +4,7 @@ package org.apache.solr.schema;
 
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.index.StorableField;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,16 +16,16 @@ import java.io.FileNotFoundException;
 /** <code>TextField</code> is the basic type for configurable text analysis.
  * Analyzers for field types using this implementation should be defined in the schema.
  * 
- * This implementation just compares java against puthon.
+ * This implementation just compares java against python.
  */
 public class FileResolverTextField extends TextField {
 
 
-  public IndexableField createField(SchemaField field, Object value, float boost) {
+  public StorableField createField(SchemaField field, Object value, float boost) {
     return super.createField(field, getValue(toInternal(value.toString())), boost);
   }
   
-  protected IndexableField createField(String name, String val, org.apache.lucene.document.FieldType type, float boost){
+  protected StorableField createField(String name, String val, org.apache.lucene.document.FieldType type, float boost){
     return super.createField(name, getValue(val), type, boost);
   }
   
