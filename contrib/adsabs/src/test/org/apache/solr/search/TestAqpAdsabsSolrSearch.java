@@ -88,7 +88,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 	
 	public void test() throws Exception {
 		
-//		tp.setDebug(true);
+		tp.setDebug(true);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)"), 
 				"+((all:dog) (all:cat))", BooleanQuery.class);
