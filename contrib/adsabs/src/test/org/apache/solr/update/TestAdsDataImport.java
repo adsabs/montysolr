@@ -186,8 +186,8 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "aff:46556"), "//*[@numFound='1']");
 		assertQ(req("q", "aff:\"Notre Dame\""), "//*[@numFound='1']");
 		
-		assertQ(req("q", "page:2056 AND recid:9106451"), "//*[@numFound='1']");
-		assertQ(req("q", "page:2056-2059 AND recid:9106451"), "//*[@numFound='1']");
+		assertQ(req("q", "page:2056 AND recid:9218920"), "//*[@numFound='1']");
+		assertQ(req("q", "page:2056-2059 AND recid:9218920"), "//*[@numFound='1']");
 		assertQ(req("q", "page:a056"), "//*[@numFound='1']");
 		assertQ(req("q", "page:a056-"), "//*[@numFound='1']");
 		assertQ(req("q", "page:a056-2059 AND recid:2"), "//*[@numFound='1']");
@@ -224,10 +224,10 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='2']");
 		assertQ(req("q", "bibgroup:?FA"), "//*[@numFound='2']");
 		
-		assertQ(req("q", "property:catalog AND property:photos"), "//*[@numFound='1']");
-		assertQ(req("q", "property:Catalog AND property:Photos"), "//*[@numFound='1']");
-		assertQ(req("q", "property:CATALOG AND property:photos"), "//*[@numFound='1']");
-		assertQ(req("q", "property:catalog AND property:PHOTOS"), "//*[@numFound='1']");
+		assertQ(req("q", "property:catalog AND property:nonarticle"), "//*[@numFound='4']");
+		assertQ(req("q", "property:Catalog AND property:Nonarticle"), "//*[@numFound='4']");
+		assertQ(req("q", "property:CATALOG AND property:nonarticle"), "//*[@numFound='4']");
+		assertQ(req("q", "property:catalog AND property:NONARTICLE"), "//*[@numFound='4']");
 		
 		
 		/*
@@ -279,7 +279,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		 */
 		
 		assertQ(req("q", "id:2"), "//*[@numFound='1']");
-    assertQ(req("q", "id:9106442"), "//*[@numFound='1']");
+    assertQ(req("q", "id:9218605"), "//*[@numFound='1']");
     assertQ(req("q", "id:002"), "//*[@numFound='0']");
     
     
@@ -377,7 +377,8 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
 		
-		assertQ(req("q", "reference:2001gr.qc.....3002Z"), "//*[@numFound='1']");
+		assertQ(req("q", "reference:2001nlin......4016H"), "//*[@numFound='1']");
+		//assertQ(req("q", "reference:1998Sci...280...98L"), "//*[@numFound='0']");
 		//assertQ(req("qt", "/admin/luke"), "//*[@numFound='0']");
 		
 		
