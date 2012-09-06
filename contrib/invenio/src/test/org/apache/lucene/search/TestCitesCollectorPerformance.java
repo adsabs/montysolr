@@ -21,6 +21,7 @@ import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MockIndexWriter;
+import org.apache.lucene.index.StoredDocument;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
@@ -362,7 +363,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		for (ScoreDoc d: hits) {
 			try {
-				Document doc = reader.document(d.doc);
+				StoredDocument doc = reader.document(d.doc);
 				result.add(Integer.valueOf(doc.get("id")));
 			}
 			catch (IOException e) {
@@ -386,7 +387,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		for (ScoreDoc d: hits) {
 			try {
-				Document doc = reader.document(d.doc);
+				StoredDocument doc = reader.document(d.doc);
 				result.add(Integer.valueOf(doc.get("id")));
 			}
 			catch (IOException e) {

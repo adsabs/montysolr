@@ -13,6 +13,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.MockIndexWriter;
+import org.apache.lucene.index.StoredDocument;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
@@ -154,7 +155,7 @@ public class TestCollector extends LuceneTestCase {
 			public void collect(int doc) throws IOException {
 				visited++;
 				float score = scorer.score();
-				Document d = reader.document(doc);
+				StoredDocument d = reader.document(doc);
 				// d.getValues("text_reference");
 			}
 

@@ -276,6 +276,7 @@
 		</dirset>
 
 		<dirset dir="${common.dir}/build/solr-download">
+			<include name = "**/lucene/build/codecs/classes/java"/>
 			<include name = "**/lucene/build/test-framework/classes/java"/>
 		</dirset>
 	</path>
@@ -608,6 +609,7 @@
 			<!-- 50% of suites -->
 			<property name="tests.haltonfailure" value="true" />
 			<property name="tests.iters" value="" />
+			<property name="tests.dups"  value="1" />
 
 			<!-- Pick the random seed now (unless already set). -->
 	        <junit4:pickseed property="tests.seed" />
@@ -647,6 +649,7 @@
 	            seed="${tests.seed}"
 
 	            heartbeat="${tests.heartbeat}"
+				uniqueSuiteNames="false"
 	        >
 				<!-- Classpaths. -->
 				<classpath refid="@{junit.classpath}"/>
@@ -799,11 +802,13 @@
 				</listeners>
 			    
 				<!-- Input test classes. -->
-				<fileset dir="@{testsDir}">
-					<include name="**/@{testId}*.class" />
-					<include name="**/*@{testId}.class" />
-					<exclude name="**/*$*" />
-				</fileset>
+	            <junit4:duplicate times="${tests.dups}">
+	              <fileset dir="@{testsDir}">
+	                <include name="**/Test*.class" />
+	                <include name="**/*Test.class" />
+	                <exclude name="**/*$*" />
+	              </fileset>
+	            </junit4:duplicate>
 			</junit4:junit4>
 
 			<!-- Report the 5 slowest tests from this run to the console. -->
