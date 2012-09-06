@@ -75,7 +75,7 @@
         <!--  245 is the original title, 242 is translation -->
         <field column="title"        
             xpath="/collection/record/datafield[@tag='245']/subfield[@code='a']" />
-        <field column="title"        
+        <field column="alternate_title"        
             xpath="/collection/record/datafield[@tag='242']/subfield[@code='a']" />
             
         <field column="pubdate" 

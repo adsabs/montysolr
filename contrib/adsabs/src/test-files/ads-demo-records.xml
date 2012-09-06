@@ -186,6 +186,10 @@
 			<subfield code="a">Oscillations of red giants observed by Kepler (Mosser+, 2012)</subfield>
 			<subfield code="7">SIMBAD</subfield>
 		</datafield>
+		<datafield ind1=" " ind2=" " tag="242">
+			<subfield code="a">Probing red giants observed by Kepler (Mosser+, 2012)</subfield>
+			<subfield code="7">SIMBAD</subfield>
+		</datafield>
 		<datafield ind1=" " ind2=" " tag="260">
 			<subfield code="c">2012-04-00</subfield>
 			<subfield code="t">date-published</subfield>

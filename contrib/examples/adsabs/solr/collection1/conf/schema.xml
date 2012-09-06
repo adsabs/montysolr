@@ -289,8 +289,8 @@
    <field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}" multiValued="true"/>
    <field name="bibstem_facet" type="bibstem_facet" indexed="true" stored="${storeAll:false}"/>
    
-   <field name="pub" type="normalized_text_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
-   <field name="pub_raw" type="normalized_text_ascii" indexed="true" stored="${storeAll:false}" omitNorms="true" multiValued="true"/>
+   <field name="pub" type="normalized_text_ascii" indexed="true" stored="true" omitNorms="true" />
+   <field name="pub_raw" type="normalized_text_ascii" indexed="true" stored="${storeAll:false}" omitNorms="true" />
    
    <field name="page" type="first_string" indexed="true" stored="true" multiValued="false"/> <!--  really? -->
    <field name="year" type="first_string" stored="true" indexed="true" multiValued="false"/>
@@ -308,7 +308,8 @@
    <field name="pubdate" type="string" stored="true" indexed="true" />
    <field name="pubdate_sort" type="int" stored="${storeAll:false}" indexed="true"/>
 
-   <field name="title" type="ads_text" indexed="true" stored="true" multiValued="true"/>
+   <field name="title" type="ads_text" indexed="true" stored="true"/>
+   <field name="alternate_title" type="ads_text" indexed="true" stored="true" multiValued="true"/>
    
    <field name="abstract" type="ads_text" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
    
@@ -318,9 +319,9 @@
    <field name="author_facet" type="string" indexed="true" stored="${storeAll:false}" multiValued="true"/>
    
    <!-- tmp fix for markus, should be handled with positional search -->
-   <field name="first_author" type="author" indexed="true" stored="true" multiValued="true"/>
-   <field name="first_author_norm" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
-   <field name="first_author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
+   <field name="first_author" type="author" indexed="true" stored="true"/>
+   <field name="first_author_norm" type="normalized_string_ascii" indexed="true" stored="true"/>
+   <field name="first_author_surname" type="first_string" indexed="true" stored="true" />
    <field name="author_surname" type="first_string" indexed="true" stored="true" multiValued="true"/>
 
    
@@ -335,8 +336,8 @@
    <field name="database" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="bibgroup" type="normalized_string_ascii" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    
-   <field name="thesis" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
-   <field name="copyright" type="affiliation_text" indexed="true" stored="true" multiValued="true"/>
+   <field name="thesis" type="affiliation_text" indexed="true" stored="true"/>
+   <field name="copyright" type="affiliation_text" indexed="true" stored="true"/>
    
    <field name="reference" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true" />
    
@@ -401,7 +402,5 @@
    <copyField source="first_author_norm" dest="author_norm"/>
    <copyField source="author_norm" dest="author_facet"/>
    
-   <copyField source="pub" dest="pub_raw"/>
-
 </schema>
 
