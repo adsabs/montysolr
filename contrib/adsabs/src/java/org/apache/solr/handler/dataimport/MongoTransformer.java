@@ -12,10 +12,23 @@ import com.mongodb.MongoException;
 
 public class MongoTransformer extends Transformer {
 
+//	private Mongo mongo = null;
+	
 	@Override
 	public Object transformRow(Map<String, Object> row, Context context) {
 		
 		AdsDataSource ds = (AdsDataSource) context.getDataSource();
+		
+//		if (mongo == null) {
+//			try {
+//				mongo = ds.getMongoURI().connect();
+//			} catch (MongoException e) {
+//				e.printStackTrace();
+//			} catch (UnknownHostException e) {
+//				e.printStackTrace();
+//			}
+//		}
+		
 		BasicDBObject mongoFields = ds.getMongoFields();				// the fields we want to selectively fetch
 		Map<String,String> fieldColumnMap = ds.getFieldColumnMap();		// mapping mongo field names -> solr schema names
 		
@@ -27,7 +40,7 @@ public class MongoTransformer extends Transformer {
 			 * coming down the mongo dev pipe eventually: https://jira.mongodb.org/browse/JAVA-595
 			 * (assuming that's actually related to the issue I'm seeing)
 			 */
-			Mongo mongo = (new Mongo.Holder()).connect(ds.getMongoURI());
+			Mongo mongo = ds.getMongoURI().connect();
 			DB db = mongo.getDB(ds.getMongoDBName());
 			DBCollection collection = db.getCollection(ds.getMongoCollectionName());
 			

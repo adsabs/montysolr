@@ -358,6 +358,8 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "title:nosky"), "//*[@numFound='1']");
 		assertQ(req("q", "title:q\\'i"), "//*[@numFound='2']");
 		assertQ(req("q", "title:KEPLER"), "//*[@numFound='0']"); // shouldn't lowercase all-caps (acronym) terms
+		assertQ(req("q", "title:probing"), "//*[@numFound='0']"); // alternate titles shouldn't go in main title field
+		assertQ(req("q", "alternate_title:probing"), "//*[@numFound='1']"); // they should go in the alternate_title field
 		
 		
 		/*
