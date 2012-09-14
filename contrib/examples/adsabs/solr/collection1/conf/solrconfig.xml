@@ -1622,6 +1622,12 @@
      </updateRequestProcessorChain>
     -->
  
+    <updateRequestProcessorChain name="blanketyblank">
+        <processor class="solr.RemoveBlankFieldUpdateProcessorFactory"/>
+        <processor class="solr.LogUpdateProcessorFactory" />
+        <processor class="solr.RunUpdateProcessorFactory" />
+    </updateRequestProcessorChain>
+ 
   <!-- Response Writers
 
        http://wiki.apache.org/solr/QueryResponseWriter
@@ -1797,6 +1803,7 @@
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
+      <str name="update.chain">blanketyblank</str>
     </lst>
   </requestHandler>
 
@@ -1805,6 +1812,7 @@
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
+      <str name="update.chain">blanketyblank</str>
     </lst>
   </requestHandler>
   
