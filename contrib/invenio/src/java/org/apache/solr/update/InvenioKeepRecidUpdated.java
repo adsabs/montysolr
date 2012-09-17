@@ -374,6 +374,12 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		final Map<String, Object> dataToProcess = dictData;
 		final SolrQueryRequest request = req;
 		
+		log.info("=============================================================================");
+		log.info(dataToProcess.toString());
+		log.info(req.toString());
+		log.info(req.getParamString());
+		log.info("=============================================================================");
+		
 		new Thread(new Runnable() {
 			
 			public void run() {
@@ -381,8 +387,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	                runSynchronously(dataToProcess, request);
                 } catch (IOException e) {
                 	log.error(e.getLocalizedMessage());
+                	log.error(e.getStackTrace().toString());
                 } catch (InterruptedException e) {
                 	log.error(e.getLocalizedMessage());
+                	log.error(e.getStackTrace().toString());
 				} finally {
                 	setBusy(false);
                 	request.close();
@@ -434,6 +442,12 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			SolrQueryRequest req) 
 			throws MalformedURLException, IOException, InterruptedException {
 		
+		
+		log.info("=============================================================================");
+		log.info(data.toString());
+		log.info(req.toString());
+		log.info(req.getParamString());
+		log.info("=============================================================================");
 		
 		SolrParams params = req.getParams();
 		SolrCore core = req.getCore();
