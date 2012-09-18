@@ -383,6 +383,13 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		//assertQ(req("q", "reference:1998Sci...280...98L"), "//*[@numFound='0']");
 		//assertQ(req("qt", "/admin/luke"), "//*[@numFound='0']");
 		
+		/*
+		 * all
+		 */
+		assertQ(req("q", "No-Sky"), "//*[@numFound='4']"); // abstract copied to all
+		assertQ(req("q", "hydrodynamics"), "//*[@numFound='1']"); // keywords copied to all
+		assertQ(req("q", "Barabási"), "//*[@numFound='1']"); // author copied to all
+		assertQ(req("q", "NASA"), "//*[@numFound='3']"); // affiliations copied to all
 		
 		/*
 		 * Cites/refersto queries (use special dummy records, field 999i)

@@ -342,7 +342,7 @@
    <field name="reference" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true" />
    
    <!--  this is just a fake field (for the moment) -->
-   <field name="all" type="ads_text" indexed="true" stored="true" multiValued="false"/>
+   <field name="all" type="ads_text" indexed="true" stored="false" multiValued="true"/>
 
    
    <!-- MontySolr: needed when InvneioParser is used in maxinv mode
@@ -402,5 +402,14 @@
    <copyField source="first_author_norm" dest="author_norm"/>
    <copyField source="author_norm" dest="author_facet"/>
    
+   <copyField source="author" dest="all"/>
+   <copyField source="author_norm" dest="all"/>
+   <copyField source="keyword" dest="all"/>
+   <copyField source="keyword_norm" dest="all"/>
+   <copyField source="full" dest="all"/>
+   <copyField source="abstract" dest="all"/>
+   <copyField source="title" dest="all"/>
+   <copyField source="alternate_title" dest="all"/>
+   <copyField source="aff" dest="all"/>
 </schema>
 
