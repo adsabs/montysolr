@@ -17,6 +17,7 @@ def req(url, **kwargs):
     params = urllib.urlencode(kwargs)
     page = ''
     try:
+        log.info("url: %s, params: %s" % (url, str(params)))
         conn = urllib.urlopen(url, params)
         page = conn.read()
         rsp = simplejson.loads(page)
@@ -24,7 +25,6 @@ def req(url, **kwargs):
         return rsp
     except Exception, e:
         log.error(str(e))
-        log.error("url: %s, params: %s" % (url, str(params)))
         log.error(page)
         raise e
     
