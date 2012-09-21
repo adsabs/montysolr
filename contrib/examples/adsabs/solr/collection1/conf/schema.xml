@@ -406,10 +406,8 @@
    <copyField source="author_norm" dest="all"/>
    <copyField source="keyword" dest="all"/>
    <copyField source="keyword_norm" dest="all"/>
-   <copyField source="full" dest="all"/>
    <copyField source="abstract" dest="all"/>
    <copyField source="title" dest="all"/>
    <copyField source="alternate_title" dest="all"/>
-   <copyField source="aff" dest="all"/>
 </schema>
 
