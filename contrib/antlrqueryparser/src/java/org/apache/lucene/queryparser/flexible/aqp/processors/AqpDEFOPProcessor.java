@@ -135,7 +135,7 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 		return children;
 	}
 
-	private StandardQueryConfigHandler.Operator getDefaultOperator()
+	protected StandardQueryConfigHandler.Operator getDefaultOperator()
 			throws QueryNodeException {
 		QueryConfigHandler queryConfig = getQueryConfigHandler();
 

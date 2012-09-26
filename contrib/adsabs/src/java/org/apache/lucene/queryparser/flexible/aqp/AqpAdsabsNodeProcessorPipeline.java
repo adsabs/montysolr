@@ -26,7 +26,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCLAUSEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCOMMAProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsDEFOPProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFIELDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFUZZYProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFieldMapperProcessor;
@@ -55,7 +55,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 	public AqpAdsabsNodeProcessorPipeline(QueryConfigHandler queryConfig) {
 		super(queryConfig);
 	
-		add(new AqpDEFOPProcessor());
+		add(new AqpAdsabsDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 		
 		add(new AqpAdsabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$

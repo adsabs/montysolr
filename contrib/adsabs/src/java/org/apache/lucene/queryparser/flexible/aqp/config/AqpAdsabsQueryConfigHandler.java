@@ -34,6 +34,8 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 	    final public static ConfigurationKey<String> DEFAULT_IDENTIFIER_FIELD = ConfigurationKey.newInstance();
 	    
 	    final public static ConfigurationKey<Logger> SOLR_LOGGER = ConfigurationKey.newInstance();
+	    
+        final public static ConfigurationKey<Operator> DEFAULT_OPERATOR = ConfigurationKey.newInstance();
 	}
 	
 	public AqpAdsabsQueryConfigHandler() {
@@ -70,5 +72,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		// Now inside the solrconfig.xml
 		//Map<String, String> fieldMap = get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
 		//fieldMap.put("arxiv", "identifier");
+		
+	    set(ConfigurationKeys.DEFAULT_OPERATOR, Operator.AND);
 	}
 }
