@@ -279,8 +279,8 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		 */
 		
 		assertQ(req("q", "id:2"), "//*[@numFound='1']");
-    assertQ(req("q", "id:9218605"), "//*[@numFound='1']");
-    assertQ(req("q", "id:002"), "//*[@numFound='0']");
+		assertQ(req("q", "id:9218605"), "//*[@numFound='1']");
+	    assertQ(req("q", "id:002"), "//*[@numFound='0']");
     
     
 		/*
@@ -374,7 +374,7 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		assertQ(req("q", "abstract:PARTICLE"), "//*[@numFound='0']"); // acronyms shouldn't get lowercased
 		
 		//becomes: abstract:q'i abstract:q abstract:i abstract:qi
-		assertQ(req("q", "abstract:q\\'i", "fl", "recid,abstract,title"), "//*[@numFound='4']");
+		assertQ(req("q", "abstract:q\\'i", "fl", "recid,abstract,title"), "//*[@numFound='3']");
 		
 		
 		assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
