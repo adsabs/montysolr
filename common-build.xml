@@ -113,6 +113,10 @@
 
 	<property name="tests.tempDir" value="${build.dir}/test"/>
 
+    <condition property="tests.remoteDebug" value="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y" else="" >
+        <isset property="remoteDebug"/>
+    </condition>
+    <echo message="remote debug: ${tests.remoteDebug}"/>
 	
 	<property name="tests.cachefile" location="${common.dir}/build/junit4/cached-timehints.txt" />
 	<property name="tests.cachefilehistory" value="20" />
@@ -667,6 +671,9 @@
 				<!-- JVM arguments and system properties. -->
 				<jvmarg line="${args}"/>
 				<jvmarg line="${tests.clover.args}"/>
+
+                <!-- For remote debugging from Eclipse -->
+                <jvmarg line="${tests.remoteDebug}" />
 
 				<!-- set the number of times tests should run -->
 				<sysproperty key="tests.iters" value="${tests.iters}"/>
