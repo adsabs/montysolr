@@ -445,5 +445,8 @@
    <copyField source="abstract" dest="all"/>
    <copyField source="title" dest="all"/>
    <copyField source="alternate_title" dest="all"/>
+   <copyField source="bibcode" dest="all"/>
+   <copyField source="doi" dest="all"/>
+   <copyField source="identifier" dest="all"/>
 </schema>
 
