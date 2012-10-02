@@ -4,7 +4,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 
-public class AqpAdsabsIdentifierNode extends QuotedFieldQueryNode {
+public class AqpAdsabsIdentifierNode extends FieldQueryNode {
 
 
 	private static final long serialVersionUID = 2818797741887759988L;
