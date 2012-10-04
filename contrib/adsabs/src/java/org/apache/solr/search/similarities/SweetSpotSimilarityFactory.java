@@ -40,7 +40,6 @@ public class SweetSpotSimilarityFactory extends SimilarityFactory implements Sch
         return sim;
     }
 
-	@Override
 	public void inform(IndexSchema schema) {
 		// do nothing
 	}
