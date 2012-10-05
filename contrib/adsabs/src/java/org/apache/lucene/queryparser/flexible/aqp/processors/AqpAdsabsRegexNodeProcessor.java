@@ -8,6 +8,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
@@ -16,13 +17,13 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 	QueryNodeProcessor  {
 
 	@Override
-	protected QueryNode preProcessNode(QueryNode node)
+	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 		return node;
 	}
 
 	@Override
-	protected QueryNode postProcessNode(QueryNode node)
+	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
 		if (node instanceof FieldQueryNode) {
 			FieldQueryNode n = (FieldQueryNode) node;
@@ -38,6 +39,10 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 			} else if (!(node instanceof PrefixWildcardQueryNode) && input.endsWith(".*")) {
 				input = input.substring(0, input.length() - 2) + "*";
 				return new PrefixWildcardQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
+			}
+			else if (input.contains(".*")) { // TODO: this is not fail-proof
+				return new WildcardQueryNode(n.getFieldAsString(), input.replace(".*", "*").replace(".?", "?"),
+						n.getBegin(), n.getEnd());
 			}
 		}
 		return node;

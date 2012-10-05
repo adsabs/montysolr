@@ -12,10 +12,12 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -137,7 +139,7 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
 
     
     LinkedList<QueryNode> children = new LinkedList<QueryNode>();
-    children.add(fieldNode);
+    children.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) fieldNode));
     
     buffer.reset();
     CharTermAttribute termAtt;
@@ -156,7 +158,7 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
           ((TextableQueryNode) newNode).setText(new Long(numAtt.getRawValue()).toString());
         }
         
-        children.add(newNode);
+        children.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) newNode));
       }
     } catch (IOException e) {
       getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());

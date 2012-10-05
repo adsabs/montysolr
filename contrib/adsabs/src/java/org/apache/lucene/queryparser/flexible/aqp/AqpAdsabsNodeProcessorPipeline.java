@@ -103,8 +103,9 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpAdsabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
 		
 		
-		add(new AqpAdsabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
+		add(new AqpAdsabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
+		
 		add(new PhraseSlopQueryNodeProcessor());
 	
 		// add(new GroupQueryNodeProcessor());

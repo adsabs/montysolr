@@ -90,7 +90,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 		
 		//tp.setDebug(true); //enabling debug deactives assertions (thus tests pass, even if they fail)
 		
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "debugQuery", "true"), 
+		assertQueryEquals(req("qt", "aqp", "q", "author:\"Kurtz, Michael\"", "debugQuery", "true"), 
+				"", BooleanQuery.class);
+		
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)"), 
 				"+((all:dog) (all:cat))", BooleanQuery.class);
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat)"), 
 				"+(+(all:dog) +(all:cat))", BooleanQuery.class);
@@ -145,11 +148,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 				"(all:x all:z) SecondOrderQuery((author:muller author:MULLER,* author:MULLER,*) title:body, filter=null, collector=citedby[using:reference<bibcode>])", BooleanQuery.class);
 		
 		
-		assertQueryEquals(req("qt", "aqp", "q", "author:\"Kurtz, Michael\""), 
-				"", BooleanQuery.class);
-		
-		assertQueryEquals(req("qt", "aqp", "q", "author:\"Kurtz, Michael\""), 
-				"", BooleanQuery.class);
 		
 	}
 	
