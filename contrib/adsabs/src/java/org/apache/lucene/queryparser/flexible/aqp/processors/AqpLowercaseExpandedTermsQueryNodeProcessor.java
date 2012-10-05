@@ -12,26 +12,17 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.RangeQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TextableQueryNode;
 import org.apache.lucene.queryparser.flexible.core.util.UnescapedCharSequence;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
-import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 
 /**
@@ -49,7 +40,7 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
 
     QueryConfigHandler config = this.getQueryConfigHandler();
 
-    // if we have the SOLR analyzer, we pass it to it
+    // if we have the SOLR analyzer, we pass the query to it
     // and get the analyzed value - otherwise we use the default
     // lowercasing
     if (node instanceof FieldableNode
@@ -154,18 +145,18 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
     
     try {
       while (buffer.incrementToken()) {
-        fieldNode = (FieldableNode) fieldNode.cloneTree();
+        FieldableNode newNode = (FieldableNode) fieldNode.cloneTree();
         
         if (buffer.hasAttribute(CharTermAttribute.class)) {
           termAtt = buffer.getAttribute(CharTermAttribute.class);
-          ((TextableQueryNode) fieldNode).setText(termAtt);
+          ((TextableQueryNode) newNode).setText(termAtt.toString());
         }
         else {
           numAtt = buffer.getAttribute(NumericTermAttribute.class);
-          ((TextableQueryNode) fieldNode).setText(new Long(numAtt.getRawValue()).toString());
+          ((TextableQueryNode) newNode).setText(new Long(numAtt.getRawValue()).toString());
         }
         
-        children.add(fieldNode);
+        children.add(newNode);
       }
     } catch (IOException e) {
       getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());

@@ -98,7 +98,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new MatchAllDocsQueryNodeProcessor());
 		
 		add(new AqpFieldMapperProcessor()); // translate the field name before we try to find the tokenizer chain
-		add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
+		add(new AqpLowercaseExpandedTermsQueryNodeProcessor()); // use a specific tokenizer chain to modify the terms
 		add(new TermRangeQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());
 		
