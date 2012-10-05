@@ -37,6 +37,7 @@ import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.spans.SpanMultiTermQueryWrapper;
 import org.apache.lucene.search.spans.SpanNearPayloadCheckQuery;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanQuery;
@@ -54,45 +55,51 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private int numQueries = 1000;
 	private boolean store = false;
 	private ArrayList<ArrayList<Object>> timerStack = new ArrayList<ArrayList<Object>>();
-	
+
 	private String[] names = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "x",
 			"john", "jay", "giovanni", "alberto", "edwin", "michael"};
-	
+
 	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
 		reader.close();
 		dir.close();
-		
+
 		assertTrue(timerStack.size()==0);
 	}
 
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		
+
 		startTimer("Buiding index of " + numDocs + " docs");
-		
+
 		dir = newDirectory();
 		RandomIndexWriter writer = new RandomIndexWriter(random(), dir,
 				newIndexWriterConfig(TEST_VERSION_CURRENT, new MultiFieldAnalyzer())
 				.setMaxBufferedDocs(_TestUtil.nextInt(random(), 50, 1000)));
 
 		Document doc = new Document();
-		FieldType customType = new FieldType(TextField.TYPE_STORED);
-		customType.setOmitNorms(true);
-		
+		FieldType customType = new FieldType(store ? TextField.TYPE_STORED : TextField.TYPE_NOT_STORED);
+		customType.setIndexed(true);
+		customType.setStoreTermVectors(true);
+		customType.setStoreTermVectorOffsets(true);
+		customType.setStoreTermVectorPayloads(true);
+		customType.setStoreTermVectorPositions(true);
+
 		Field id = newField("id", "", store ? StringField.TYPE_STORED : StringField.TYPE_NOT_STORED);
 		Field original = newField("original", "", StringField.TYPE_STORED);
 		Field regex = newField("regex", "", store ? StringField.TYPE_STORED : StringField.TYPE_NOT_STORED);
 		Field wildcard = newField("wildcard", "", store ? StringField.TYPE_STORED : StringField.TYPE_NOT_STORED);
-		Field payload = newField("payload", "", store ? TextField.TYPE_STORED : TextField.TYPE_NOT_STORED);
+		Field payload = newField("vectrfield", "", customType);
 		Field n0 = newField("n0", "", store ? StringField.TYPE_STORED : StringField.TYPE_NOT_STORED);
 		Field n1 = newField("n1", "", store ? StringField.TYPE_STORED : StringField.TYPE_NOT_STORED);
 		Field n2 = newField("n2", "", store ? StringField.TYPE_STORED : StringField.TYPE_NOT_STORED);
 		Field n3 = newField("n3", "", store ? StringField.TYPE_STORED : StringField.TYPE_NOT_STORED);
 		Field n4 = newField("n4", "", store ? StringField.TYPE_STORED : StringField.TYPE_NOT_STORED);
-
+		
+		
+		
 		doc.add(id);
 		doc.add(original);
 		doc.add(regex);
@@ -103,75 +110,75 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		doc.add(n2);
 		doc.add(n3);
 		doc.add(n4);
-		
+
 		Field[] nFields = {n0, n1, n2, n3, n4};
 		Field[] myFields = {id,original, regex, wildcard, payload, n0, n1, n2, n3, n4};
 		String surname;
-		
+
 		for (int i = 0; i < numDocs; i++) {
 			for (Field f: myFields) {
 				f.setStringValue("");
 			}
-			
+
 			StringBuilder name = new StringBuilder();
 			StringBuilder wild = new StringBuilder();
-			
-		  //surname
-		  do {
-	      surname = _TestUtil.randomSimpleString(random()).toLowerCase().replace(",", "").trim();
-		  } while (surname.length() == 0);
-		  
-	      name.append(surname);
-	      name.append(", ");
-	      wild.append(surname);
-	      wild.append(", ");
-	      n0.setStringValue(surname);
-	      
-	      //#initials
-	      int noi = _TestUtil.nextInt(random(), 0, 4);
-	      for (int j = 0; j < noi; j++) {
-	    	  String namePart = names[_TestUtil.nextInt(random(), 0, names.length-1)];
-	    	  name.append(namePart);
-	    	  name.append(" ");
-	    	  wild.append(namePart);
-	    	  wild.append(j+1);
-	    	  wild.append(" ");
-	    	  nFields[j+1].setStringValue(namePart);
-	      }
-	      
-	      original.setStringValue(name.toString());
-	      regex.setStringValue(name.toString());
-	      wildcard.setStringValue(wild.toString());
-	      payload.setStringValue(name.toString());
-	      id.setStringValue(Integer.toString(i));
-	      
-	      writer.addDocument(doc);
-	    }
-	
+
+			//surname
+			do {
+				surname = _TestUtil.randomSimpleString(random()).toLowerCase().replace(",", "").trim();
+			} while (surname.length() == 0);
+
+			name.append(surname);
+			name.append(", ");
+			wild.append(surname);
+			wild.append(", ");
+			n0.setStringValue(surname);
+
+			//#initials
+			int noi = _TestUtil.nextInt(random(), 0, 4);
+			for (int j = 0; j < noi; j++) {
+				String namePart = names[_TestUtil.nextInt(random(), 0, names.length-1)];
+				name.append(namePart);
+				name.append(" ");
+				wild.append(namePart);
+				wild.append(j+1);
+				wild.append(" ");
+				nFields[j+1].setStringValue(namePart);
+			}
+
+			original.setStringValue(name.toString());
+			regex.setStringValue(name.toString());
+			wildcard.setStringValue(wild.toString());
+			payload.setStringValue(name.toString());
+			id.setStringValue(Integer.toString(i));
+
+			writer.addDocument(doc);
+		}
+
 
 		reader = writer.getReader();
 		writer.close();
 		searcher = newSearcher(reader);
-		
+
 		stopTimer();
 	}
 
-	
+
 	private void startTimer(String message) {
 		ArrayList<Object> l = new ArrayList<Object>();
 		l.add(System.currentTimeMillis());
 		l.add(message);
 		timerStack.add(l);
 	}
-	
+
 	private long stopTimer() {
 		ArrayList<Object> l = timerStack.remove(timerStack.size()-1);
 		long endTime = System.currentTimeMillis();
 		long startTime = (Long) l.get(0);
 		String msg = (String) l.get(1);
-		
+
 		long resTime = endTime - startTime;
-		
+
 		StringBuilder out = new StringBuilder();
 		for (int i=0;i<timerStack.size();i++) {
 			out.append("  ");
@@ -179,157 +186,211 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		out.append(resTime);
 		out.append("ms.  " + msg);
 		System.out.println(out.toString());
-		
+
 		return resTime;
 	}
-	
-    /**
-     * This Analyzer uses an WhitespaceTokenizer and PayloadFilter, OR KeywordTokenizer for
-     * other queries
-     */
-    private static class MultiFieldAnalyzer extends Analyzer {
 
-        public MultiFieldAnalyzer() {
-          super(new PerFieldReuseStrategy());
-        }
-        
-        public MultiFieldAnalyzer(String field, byte[] data, int offset, int length) {
-            super(new PerFieldReuseStrategy());
-        }
+	/**
+	 * This Analyzer uses an WhitespaceTokenizer and PayloadFilter, OR KeywordTokenizer for
+	 * other queries
+	 */
+	private static class MultiFieldAnalyzer extends Analyzer {
 
-        
-        @Override
-        public TokenStreamComponents createComponents(String fieldName, Reader reader) {
-        	
-        	if (fieldName.contains("payload")){
-				Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE, true);
+		public MultiFieldAnalyzer() {
+			super(new PerFieldReuseStrategy());
+		}
+
+		public MultiFieldAnalyzer(String field, byte[] data, int offset, int length) {
+			super(new PerFieldReuseStrategy());
+		}
+
+
+		@Override
+		public TokenStreamComponents createComponents(String fieldName, Reader reader) {
+
+			if (fieldName.contains("vectrfield")){
+				Tokenizer result = new MockTokenizer(reader, MockTokenizer.SIMPLE, true);
 				return new TokenStreamComponents(result, new SimplePayloadFilter(result));
 			}
-        	
-        	Tokenizer result = new MockTokenizer(reader, MockTokenizer.KEYWORD, true);
+
+			Tokenizer result = new MockTokenizer(reader, MockTokenizer.KEYWORD, true);
 			return new TokenStreamComponents(result, result);
-        	
-        }
-        
-    }
 
-    
-    /**
-     * This Filter adds payloads to the tokens.
-     */
-    static final class SimplePayloadFilter extends TokenFilter {
-        int pos;
-        final PayloadAttribute payloadAttr;
-        final CharTermAttribute termAttr;
+		}
 
-        public SimplePayloadFilter(TokenStream input) {
-          super(input);
-          pos = 0;
-          payloadAttr = input.addAttribute(PayloadAttribute.class);
-          termAttr = input.addAttribute(CharTermAttribute.class);
-        }
+	}
 
-        @Override
-        public boolean incrementToken() throws IOException {
-          if (input.incrementToken()) {
-        	  if (pos == 0 && termAttr.toString().endsWith(",")) {
-        		  termAttr.setEmpty().append(input.toString().replace(",", ""));
-        	  }
-            payloadAttr.setPayload(new BytesRef(("pos: " + pos).getBytes("UTF-8")));
-            pos++;
-            return true;
-          } else {
-            return false;
-          }
-        }
 
-        @Override
-        public void reset() throws IOException {
-          super.reset();
-          pos = 0;
-        }
-      }
-    
-    public void testBenchMarkAll() throws IOException {
-    	
-    	
-    	int[] randomIds = getRandomIds(100);
-    	
-    	startTimer("Verifying data integrity with " + randomIds.length + " docs");
-    	verifySearch(randomIds);
-    	stopTimer();
-    	
-    	startTimer("Preparing " + numQueries + " random queries");
-    	randomIds = getRandomIds(numQueries);
-    	List<TestCase> testCases = getIndexData(randomIds);
-    	stopTimer();
-    	
-    	ArrayList<Integer> totals = new ArrayList<Integer>();
-    	
-    	startTimer("Regex queries");
-    	totals.add(runRegexQueries(testCases));
-    	stopTimer();
-    	
-    	startTimer("Regexp queries (new style)");
-    	totals.add(runRegexQueries(testCases));
-    	stopTimer();
-    	
-    	startTimer("Wildcard queries");
-    	totals.add(runWildcardQueries(testCases));
-    	stopTimer();
-    	
-    	startTimer("Boolean queries");
-    	totals.add(runBooleanQueries(testCases));
-    	stopTimer();
-    	
-    	
-    	System.out.println("Totals: " + totals);
-    }
-    
-    private int runRegexQueries(List<TestCase> testCases) throws IOException {
-    	int total = 0;
+	/**
+	 * This Filter adds payloads to the tokens.
+	 */
+	static final class SimplePayloadFilter extends TokenFilter {
+		int pos;
+		final PayloadAttribute payloadAttr;
+		final CharTermAttribute termAttr;
+
+		public SimplePayloadFilter(TokenStream input) {
+			super(input);
+			pos = 0;
+			payloadAttr = input.addAttribute(PayloadAttribute.class);
+			termAttr = input.addAttribute(CharTermAttribute.class);
+		}
+
+		@Override
+		public boolean incrementToken() throws IOException {
+			if (input.incrementToken()) {
+				payloadAttr.setPayload(new BytesRef((Integer.toString(pos)).getBytes("UTF-8")));  //save the position 0 = surname,1,2,3,4....
+				pos++;
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public void reset() throws IOException {
+			super.reset();
+			pos = 0;
+		}
+	}
+
+	public void testBenchMarkAll() throws Exception {
+
+
+		int[] randomIds = getRandomIds(100);
+
+		startTimer("Verifying data integrity with " + randomIds.length + " docs");
+		verifySearch(randomIds);
+		stopTimer();
+
+		startTimer("Preparing " + numQueries + " random queries");
+		randomIds = getRandomIds(numQueries);
+		List<TestCase> testCases = getIndexData(randomIds);
+		stopTimer();
+
+		ArrayList<Integer> totals = new ArrayList<Integer>();
+
+		System.out.println("\nExamples of queries:\n--------------------");
+		int e = 0;
+		int oldLen = 0;
+		for (int ii = 0; ii<10;ii++) {
+			if (testCases.get(ii).parts.length > oldLen) {
+				e = ii;
+				oldLen = testCases.get(ii).parts.length;
+			}
+		}
+		for (Query q: buildQueries(testCases.get(e).parts)) {
+			System.out.println(q);
+		}
+		System.out.println("");
+
+
+		startTimer("Regex queries");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getRegexQuery(t.parts, t.howMany, t.truncate);
+			}
+		}));
+		stopTimer();
+
+		startTimer("Regexp queries (new style)");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getRegexpQuery(t.parts, t.howMany, t.truncate);
+			}
+		}));
+		stopTimer();
+
+		startTimer("Wildcard queries");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getWildcardQuery(t.parts, t.howMany, t.truncate);
+			}
+		}));
+		stopTimer();
+
+		startTimer("Boolean queries");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getBooleanQuery(t.parts, t.howMany, t.truncate);
+			}
+		}));
+		stopTimer();
+		
+		startTimer("Boolean queries (truncated)");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getBooleanQuery(t.parts, t.howMany, true);
+			}
+		}));
+		stopTimer();
+		
+		startTimer("Span queries - kurtz, michael j");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getSpanQuery(t.parts, t.howMany, false);
+			}
+		}));
+		stopTimer();
+		
+		startTimer("Span queries (truncated: \"kurtz, m* j*\")");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getSpanQuery(t.parts, t.howMany, true);
+			}
+		}));
+		stopTimer();
+		
+		
+		startTimer("Payload queries");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getPayloadQuery(t.parts, t.howMany, false);
+			}
+		}));
+		stopTimer();
+
+		startTimer("Payload queries (truncated: \"kurtz, m* j*\")");
+		totals.add(runQueries(testCases, new QueryBuilder() {
+			public Query getQuery(TestCase t) throws Exception {
+				return getPayloadQuery(t.parts, t.howMany, true);
+			}
+		}));
+		stopTimer();
+
+		System.out.println("Totals: " + totals);
+	}
+
+	class QueryBuilder {
+		public Query getQuery(TestCase t) throws Exception {
+			return new TermQuery(new Term("original", t.original));
+		}
+	}
+	
+	
+	private int runQueries(List<TestCase> testCases, QueryBuilder builder) throws Exception {
+		int total = 0;
 		for (TestCase t: testCases) {
-			total  += searcher.search(getRegexQuery(t.parts, t.howMany, t.truncate), 1).totalHits;
+			total  += searcher.search(builder.getQuery(t), 1).totalHits;
 		}
 		return total;
 	}
-    
-    private int runRegexpQueries(List<TestCase> testCases) throws IOException {
-    	int total = 0;
-		for (TestCase t: testCases) {
-			total  += searcher.search(getRegexpQuery(t.parts, t.howMany, t.truncate), 1).totalHits;
-		}
-		return total;
-	}
+	
 
-    private int runWildcardQueries(List<TestCase> testCases) throws IOException {
-    	int total = 0;
-		for (TestCase t: testCases) {
-			total  += searcher.search(getWildcardQuery(t.parts, t.howMany, t.truncate), 1).totalHits;
-		}
-		return total;
-	}
-    
-    private int runBooleanQueries(List<TestCase> testCases) throws IOException {
-    	int total = 0;
-		for (TestCase t: testCases) {
-			total  += searcher.search(getBooleanQuery(t.parts, t.howMany, t.truncate), 1).totalHits;
-		}
-		return total;
-	}
-    
 	class TestCase {
-    	public String original;
-    	public String[] parts;
-    	public int howMany;
-    	public boolean truncate = false;
+		public String original;
+		public String[] parts;
+		public int howMany;
+		public boolean truncate = false;
 
 		TestCase(String original, String[] parts, int howMany) {
-    		this.original = original;
-    		this.parts = parts;
-    		this.howMany = howMany;
-    	}
-    }
+			this.original = original;
+			this.parts = parts;
+			this.howMany = howMany;
+		}
+	}
+	
+	
 	private List<TestCase> getIndexData(int[] randomIds) throws IOException {
 		ArrayList<TestCase> data = new ArrayList<TestCase>(randomIds.length);
 		for (int i = 0; i < randomIds.length; i++) {
@@ -364,7 +425,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 							if (store == true) {
 								System.out.println("wildcard: \"" + doc.getField("wildcard").stringValue()  + "\"");
 								System.out.println("regex: \"" + doc.getField("regex").stringValue() + "\"");
-								System.out.println("payload: \"" + doc.getField("payload").stringValue() + "\"");
+								System.out.println("vectrfield: \"" + doc.getField("vectrfield").stringValue() + "\"");
 								System.out.println("n0: \"" + doc.getField("n0").stringValue() + "\"");
 								System.out.println("n1: \"" + doc.getField("n1").stringValue() + "\"");
 								System.out.println("n2: \"" + doc.getField("n2").stringValue() + "\"");
@@ -377,32 +438,57 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 				}
 			}
 		}
-		
+
 	}
 
 	private Query[] buildQueries(String[] parts) throws UnsupportedEncodingException {
 		int howMany = _TestUtil.nextInt(random(), 0, parts.length-1); // how many initials
-		Query[] queries = new Query[5];
+		Query[] queries = new Query[9];
 		queries[0] = getRegexQuery(parts, howMany, false);
 		queries[1] = getRegexpQuery(parts, howMany, false);
 		queries[2] = getWildcardQuery(parts, howMany, false);
 		queries[3] = getBooleanQuery(parts, howMany, false);
-		//queries[4] = getPayloadQuery(parts, howMany, false);
+		queries[4] = getBooleanQuery(parts, howMany, true);
+		
+		queries[5] = getSpanQuery(parts, howMany, false);
+		queries[6] = getSpanQuery(parts, howMany, true);
+		queries[7] = getPayloadQuery(parts, howMany, false);
+		queries[8] = getPayloadQuery(parts, howMany, true);
 		
 		return queries;
 	}
-
+	
+	
+	private Query getSpanQuery(String[] parts, int howMany, boolean truncate) throws UnsupportedEncodingException {
+		SpanQuery[] clauses = new SpanQuery[howMany+1];
+		clauses[0] = new SpanTermQuery(new Term("vectrfield", parts[0])); // surname
+		for (int i = 0; i < howMany; i++) {
+			if (truncate) {
+				clauses[i+1] = new SpanMultiTermQueryWrapper<WildcardQuery>(new WildcardQuery(new Term("vectrfield", parts[i+1].substring(0, 1) + "*")));
+			}
+			else {
+				clauses[i+1] = new SpanTermQuery(new Term("vectrfield", parts[i+1]));
+			}
+		}
+		SpanNearQuery sq = new SpanNearQuery(clauses, 0, true); // match in order
+		return sq;
+	}
+	
 	private Query getPayloadQuery(String[] parts, int howMany, boolean truncate) throws UnsupportedEncodingException {
 		Collection<byte[]> payloads = new ArrayList<byte[]>(howMany+1);
-	    BytesRef pay = new BytesRef(("pos: " + 0).getBytes("UTF-8"));
-	    payloads.add(pay.bytes);
-	    
+		BytesRef pay = new BytesRef((Integer.toString(0)).getBytes("UTF-8"));
+		payloads.add(pay.bytes);
+
 		SpanQuery[] clauses = new SpanQuery[howMany+1];
-		clauses[0] = new SpanTermQuery(new Term("payload", parts[0])); // surname
-		for (int i = 1; i < howMany; i++) {
-			clauses[i] = new SpanTermQuery(new Term("payload", parts[i])); // TODO: make it search for prefix
-			pay = new BytesRef(("pos: " + i).getBytes("UTF-8"));
-			payloads.add(pay.bytes);
+		clauses[0] = new SpanTermQuery(new Term("vectrfield", parts[0])); // surname
+		for (int i = 0; i < howMany; i++) {
+			if (truncate) {
+				clauses[i+1] = new SpanMultiTermQueryWrapper<WildcardQuery>(new WildcardQuery(new Term("vectrfield", parts[i+1].substring(0, 1) + "*")));
+			}
+			else {
+				clauses[i+1] = new SpanTermQuery(new Term("vectrfield", parts[i+1]));
+			}
+			payloads.add(new BytesRef((Integer.toString(i+1)).getBytes("UTF-8")).bytes);
 		}
 		SpanNearQuery sq = new SpanNearQuery(clauses, 1, true); // match in order
 		return new SpanNearPayloadCheckQuery(sq, payloads);
@@ -412,7 +498,12 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		BooleanQuery bq = new BooleanQuery();
 		bq.add(new TermQuery(new Term("n0", parts[0])), BooleanClause.Occur.MUST);
 		for (int i = 1; i < howMany+1; i++) {
-			bq.add(new TermQuery(new Term("n"+i, parts[i])), BooleanClause.Occur.MUST);
+			if (truncate) {
+				bq.add(new WildcardQuery(new Term("n"+i, parts[i].substring(0,1) + "*")), BooleanClause.Occur.MUST);
+			}
+			else {
+				bq.add(new TermQuery(new Term("n"+i, parts[i])), BooleanClause.Occur.MUST);
+			}
 		}
 		return bq;
 	}
@@ -420,7 +511,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private Query getWildcardQuery(String[] parts, int howMany, boolean truncate) {
 		return new WildcardQuery(new Term("wildcard", getWildcardQueryString(parts, howMany, truncate)));
 	}
-	
+
 	private String getWildcardQueryString(String[] parts, int howMany, boolean truncate) {
 		StringBuilder p = new StringBuilder();
 		p.append(parts[0]);
@@ -439,11 +530,11 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private Query getRegexQuery(String[] parts, int howMany, boolean truncate) {
 		return new RegexQuery(new Term("regex", getRegexQueryString(parts, howMany, truncate)));
 	}
-	
+
 	private Query getRegexpQuery(String[] parts, int howMany, boolean truncate) {
 		return new RegexpQuery(new Term("regex", getRegexQueryString(parts, howMany, truncate)));
 	}
-	
+
 	private String getRegexQueryString(String[] parts, int howMany, boolean truncate) {
 		StringBuilder p = new StringBuilder();
 		p.append(parts[0]);
@@ -462,10 +553,10 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private int[] getRandomIds(int i) {
 		int[] randomIds = new int[Math.min(numDocs, i)];
 		for (int j = 0; j < randomIds.length; j++) {
-			randomIds[j] = _TestUtil.nextInt(random(), 0, numDocs);
+			randomIds[j] = _TestUtil.nextInt(random(), 0, numDocs-1);
 		}
 		return randomIds;
 	}
-    
-    
+
+
 }
