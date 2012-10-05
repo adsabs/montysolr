@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.MockTokenizer;
@@ -54,6 +55,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private int numDocs = 100000;
 	private int numQueries = 1000;
 	private boolean store = false;
+	private long maxTime = 60*1000; // max time benchmark is allowed to run
 	private ArrayList<ArrayList<Object>> timerStack = new ArrayList<ArrayList<Object>>();
 
 	private String[] names = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "x",
@@ -181,7 +183,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 
 		StringBuilder out = new StringBuilder();
 		for (int i=0;i<timerStack.size();i++) {
-			out.append("  ");
+			out.append("\t");
 		}
 		out.append(resTime);
 		out.append("ms.  " + msg);
@@ -189,7 +191,11 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 
 		return resTime;
 	}
-
+	
+	private void appendToTimer(String msg) {
+		timerStack.get(timerStack.size()-1).set(1, (timerStack.get(timerStack.size()-1).get(1) + " -- " + msg));
+	}
+	
 	/**
 	 * This Analyzer uses an WhitespaceTokenizer and PayloadFilter, OR KeywordTokenizer for
 	 * other queries
@@ -325,7 +331,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		}));
 		stopTimer();
 		
-		startTimer("Span queries - kurtz, michael j");
+		startTimer("Span queries");
 		totals.add(runQueries(testCases, new QueryBuilder() {
 			public Query getQuery(TestCase t) throws Exception {
 				return getSpanQuery(t.parts, t.howMany, false);
@@ -333,7 +339,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		}));
 		stopTimer();
 		
-		startTimer("Span queries (truncated: \"kurtz, m* j*\")");
+		startTimer("Span queries (truncated)");
 		totals.add(runQueries(testCases, new QueryBuilder() {
 			public Query getQuery(TestCase t) throws Exception {
 				return getSpanQuery(t.parts, t.howMany, true);
@@ -350,7 +356,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		}));
 		stopTimer();
 
-		startTimer("Payload queries (truncated: \"kurtz, m* j*\")");
+		startTimer("Payload queries (truncated)");
 		totals.add(runQueries(testCases, new QueryBuilder() {
 			public Query getQuery(TestCase t) throws Exception {
 				return getPayloadQuery(t.parts, t.howMany, true);
@@ -369,9 +375,18 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	
 	
 	private int runQueries(List<TestCase> testCases, QueryBuilder builder) throws Exception {
+		
+		long start = System.currentTimeMillis(); // TODO: make smarter
+		     
 		int total = 0;
+		int rounds = 0;
 		for (TestCase t: testCases) {
 			total  += searcher.search(builder.getQuery(t), 1).totalHits;
+			rounds++;
+			if (rounds % 50 == 0 && (System.currentTimeMillis() - start) > maxTime) {
+				appendToTimer("Stopping execution, # queries finished: " + rounds);
+				return total;
+			}
 		}
 		return total;
 	}
@@ -483,7 +498,8 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		clauses[0] = new SpanTermQuery(new Term("vectrfield", parts[0])); // surname
 		for (int i = 0; i < howMany; i++) {
 			if (truncate) {
-				clauses[i+1] = new SpanMultiTermQueryWrapper<WildcardQuery>(new WildcardQuery(new Term("vectrfield", parts[i+1].substring(0, 1) + "*")));
+				//clauses[i+1] = new SpanMultiTermQueryWrapper<WildcardQuery>(new WildcardQuery(new Term("vectrfield", parts[i+1].substring(0, 1) + "*")));
+				clauses[i+1] = new SpanMultiTermQueryWrapper<PrefixQuery>(new PrefixQuery(new Term("vectrfield", parts[i+1].substring(0, 1))));
 			}
 			else {
 				clauses[i+1] = new SpanTermQuery(new Term("vectrfield", parts[i+1]));
