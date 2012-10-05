@@ -214,7 +214,7 @@
         stemEnglishPossessive="1" 
         preserveOriginal="0"/>
         <filter class="solr.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="text.synonyms" ignoreCase="false" expand="false"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="ads_text.synonyms" ignoreCase="false" expand="false"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
         <filter class="solr.TrimFilterFactory"/>
@@ -267,7 +267,7 @@
         stemEnglishPossessive="1" 
         preserveOriginal="0"/>
         <filter class="solr.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="text.synonyms" ignoreCase="false" expand="true"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="ads_text.synonyms" ignoreCase="false" expand="true"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
         <filter class="solr.TrimFilterFactory"/>

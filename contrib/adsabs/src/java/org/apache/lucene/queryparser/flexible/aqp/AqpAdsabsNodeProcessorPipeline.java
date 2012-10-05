@@ -74,15 +74,13 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpFUZZYProcessor());
 	
 		add(new AqpQRANGEINProcessor());
-		//add(new AqpQRANGEEXProcessor());
+		//add(new AqpQRANGEEXProcessor());  // exclusive ranges not used by ADS
 		
 		add(new AqpQDATEProcessor());
 		add(new AqpQPHRASEProcessor());
 		add(new AqpQNORMALProcessor());
 		add(new AqpQPHRASETRUNCProcessor());
 		add(new AqpQTRUNCATEDProcessor());
-		add(new AqpQRANGEINProcessor());
-		add(new AqpQRANGEEXProcessor());
 		add(new AqpQANYTHINGProcessor());
 		add(new AqpQIDENTIFIERProcessor());
 		add(new AqpFIELDProcessor());
