@@ -90,7 +90,6 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 			a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
 		AqpQueryParser qp = getParser();
 		qp.setAnalyzer(a);
-		qp.setDefaultOperator(Operator.OR);
 		return qp;
 
 	}

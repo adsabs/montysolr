@@ -89,7 +89,7 @@ public class TestInvenioQueryParser extends MontySolrAbstractTestCase {
 
 	public AqpQueryParser getParser() throws Exception {
 		AqpQueryParser qp = AqpInvenioQueryParser.init();
-		qp.setDebug(true);
+		//qp.setDebug(true);
 		qp.setMultiFields(new CharSequence[]{"field"});
 		return qp;
 	}

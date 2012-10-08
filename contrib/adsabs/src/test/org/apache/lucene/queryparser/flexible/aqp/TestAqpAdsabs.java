@@ -222,6 +222,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// TODO: verify this is correct (this phrase is not a phrase inside a range query)
 		assertQueryEquals("[\"this phrase\" TO \"that phrase*\"]", null, "[this phrase TO that phrase*]");
 		
+		//setDebug(true);
 		assertQueryEquals("[\"#$%^&\" TO \"&*()\"]", wsa, "[#$%^& TO &*()]");
 		
 		assertQueryEquals("+a:[this TO that]", null, "a:[this TO that]");

@@ -3,6 +3,7 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
@@ -45,7 +46,14 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 					return new WildcardQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
 				}
 				
-				return new AqpAdsabsRegexQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
+				try {
+					Pattern.compile(input);
+					return new AqpAdsabsRegexQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
+				}
+				catch (PatternSyntaxException e) {
+					return node;
+				}
+				
 			}
 			
 			

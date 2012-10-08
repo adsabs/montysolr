@@ -6,6 +6,8 @@ import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.standard.config.FieldBoostMapFCListener;
 import org.apache.lucene.queryparser.flexible.standard.config.FieldDateResolutionFCListener;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubSueryProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSolrFunctionProvider;
@@ -35,7 +37,6 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 	    
 	    final public static ConfigurationKey<Logger> SOLR_LOGGER = ConfigurationKey.newInstance();
 	    
-        final public static ConfigurationKey<Operator> DEFAULT_OPERATOR = ConfigurationKey.newInstance();
 	}
 	
 	public AqpAdsabsQueryConfigHandler() {
@@ -73,6 +74,6 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		//Map<String, String> fieldMap = get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
 		//fieldMap.put("arxiv", "identifier");
 		
-	    set(ConfigurationKeys.DEFAULT_OPERATOR, Operator.AND);
+	    set(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR, Operator.AND);
 	}
 }
