@@ -78,7 +78,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("author:\"huchra, j\"", wsa, "author:\"huchra, j\"");
 		assertQueryEquals("author:\"huchra, j\"", null, "author:\"huchra j\"");
 		assertQueryEquals("=author:\"huchra, j\"", wsa, "author:huchra, j", TermQuery.class);
-		assertQueryEquals("author:\"huchra, j.*\"", wsa, "author:huchra, j.*", PrefixQuery.class);
+		assertQueryEquals("author:\"huchra, j.*\"", wsa, "author:huchra, j*", PrefixQuery.class);
 		
 	}
 	

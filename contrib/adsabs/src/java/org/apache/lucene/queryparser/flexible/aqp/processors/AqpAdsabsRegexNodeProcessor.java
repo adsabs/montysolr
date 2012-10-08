@@ -1,6 +1,8 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
@@ -28,22 +30,25 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 		if (node instanceof FieldQueryNode) {
 			FieldQueryNode n = (FieldQueryNode) node;
 			String input = n.getTextAsString();
+			
 			if (input == null) {
 				return node;
 			}
 			
-			// TODO: should we consider using something more explicit, 
-			// e.g. creating author tokens like "/Kurtz, M.*/" ?
-			if (input.contains("\\b") || input.contains("\\w")) {
+			// try to detect if we have special regex characters inside the string
+			if (isRegex(input) && true) {
+				if (!isRegex(input.replace(".?", "").replace(".*", ""))) { // detect simple wildcard cases
+					input = input.replace(".*", "*").replace(".?", "?");
+					if (input.endsWith("*") && !input.contains("?")) {
+						return new PrefixWildcardQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
+					}
+					return new WildcardQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
+				}
+				
 				return new AqpAdsabsRegexQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
-			} else if (!(node instanceof PrefixWildcardQueryNode) && input.endsWith(".*")) {
-				input = input.substring(0, input.length() - 2) + "*";
-				return new PrefixWildcardQueryNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());
 			}
-			else if (input.contains(".*")) { // TODO: this is not fail-proof
-				return new WildcardQueryNode(n.getFieldAsString(), input.replace(".*", "*").replace(".?", "?"),
-						n.getBegin(), n.getEnd());
-			}
+			
+			
 		}
 		return node;
 	}
@@ -54,5 +59,33 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 		return children;
 	}
 
-
+	/*
+	 * Very simple way to look for regular expression class characters inside the
+	 * string, we ignore java 'characters' (ie. not translate the string into a
+	 * string literal and look for the value). So if somebody searches for \n
+	 * we don't consider that to be a regular expression (if the parser is configured
+	 * correctly, such characters are expanded before they get here - so there should
+	 * be no \n). But it depends... anywayw, searching for \n,\r,\f etc is very strange
+	 * with ADS search engine
+	 */
+	String  regexMarker =
+		"(?<!\\\\)" + // negative lookbehind
+		"(" +
+			"(\\[|\\^|\\&|\\||\\{)" + // characters whose presence means regex
+			"|" + "(\\\\b|\\\\B|\\\\A|\\\\G|\\\\Z|\\\\z)" +
+			"|" + "(\\\\d|\\\\D|\\\\s|\\\\S|\\\\w|\\\\W)" + // predefined char classes
+			"|" + "\\\\p\\{" + // character classes
+			"|" + "\\.(\\?|\\*|\\{)" +
+		")";
+	
+	Pattern regexTest = Pattern.compile(regexMarker);
+	
+	private boolean isRegex(String input) {
+		Matcher matcher = regexTest.matcher(input);
+		if (matcher.find()) {
+			return true;
+		}
+		return false;
+		
+	}
 }

@@ -52,8 +52,8 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private IndexSearcher searcher;
 	private IndexReader reader;
 	private Directory dir;
-	private int numDocs = 100000;
-	private int numQueries = 1000;
+	private int numDocs = 10000;
+	private int numQueries = 100;
 	private boolean store = false;
 	private long maxTime = 60*1000; // max time benchmark is allowed to run
 	private ArrayList<ArrayList<Object>> timerStack = new ArrayList<ArrayList<Object>>();
