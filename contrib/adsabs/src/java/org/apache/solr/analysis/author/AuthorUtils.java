@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.adsabs.solr;
+package org.apache.solr.analysis.author;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,8 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.*;
 
@@ -22,7 +20,11 @@ import java.text.*;
  */
 public class AuthorUtils {
 	
-	public static final Logger log = LoggerFactory.getLogger(AuthorUtils.class);
+	public static final String TOKEN_TYPE_QUERY_VARIANT = "AUTHOR_QUERY_VARIANT";
+	public static final String TOKEN_TYPE_AUTHOR = "AUTHOR_INPUT";
+	public static final String TOKEN_TYPE_AUTHOR_GENERATED_VARIANT = "AUTHOR_GENERATED_VARIANT";
+	
+	
 	
 	public static String normalizeAuthor(String a) {
 		a = a.replaceAll("(?<=\\b\\p{L})\\.(?=\\s*\\b)", " ");
@@ -60,22 +62,22 @@ public class AuthorUtils {
 		return parsed;
 	}
 	
-	public static ArrayList<String> genSynonyms(String a) {
+	public static ArrayList<String> getAsciiTransliteratedVariants(String a) {
 		HashSet<String> synonyms = new HashSet<String>();
 		
 		// include original
-		synonyms.add(a);
+		// synonyms.add(a);
 		
 		// downgrade to ascii
 		String downgraded = foldToAscii(a);
 		synonyms.add(downgraded);
 		
 		// transliterate accents
-		String transAcc = translitAccents(a);
+		String transAcc = transliterateAccents(a);
 		synonyms.add(transAcc);
 		
 		// handle russian name stuff
-		HashSet<String> transRus = translitRussianNames(new String[] {a, downgraded, transAcc});
+		HashSet<String> transRus = transliterateRussianNames(new String[] {a, downgraded, transAcc});
 		synonyms.addAll(transRus);
 		
 		// remove the original input from the set
@@ -83,14 +85,14 @@ public class AuthorUtils {
 		return new ArrayList<String>(synonyms);
 	}
 	
-	public static String foldToAscii(String a) {
+	private static String foldToAscii(String a) {
 		char[] in = a.toCharArray();
 		char[] out = new char[in.length * 4];
 		int outPos = ASCIIFoldingFilter.foldToASCII(in, 0, out, 0, in.length);
 		return String.copyValueOf(out).trim();
 	}
 	
-	public static String translitAccents(String a) {
+	private static String transliterateAccents(String a) {
 		String decomposed = Normalizer.normalize(a, Normalizer.Form.NFD);
 		char[] in = decomposed.toCharArray();
 		char[] out = new char[in.length * 4];
@@ -129,7 +131,10 @@ public class AuthorUtils {
 		return String.copyValueOf(out).trim();
 	}
 	
-	public static HashSet<String> translitRussianNames(String[] in) {
+	
+	// XXX: this doesn't look right to me, the fifth step gets (possibly)
+	// 5 times more items than the first step
+	public static HashSet<String> transliterateRussianNames(String[] in) {
 		HashSet<String> synonyms = new HashSet<String>();
 		for (String s : in) {
 			HashSet<String> syn = new HashSet<String>();
@@ -152,18 +157,19 @@ public class AuthorUtils {
      * note that we do not index 'E since the search
      * engine simply strips all apostrophes
      */
-	public static HashSet<String> translitRussianApostrophes(Iterator<String> itr) {
+	static Pattern p0 = Pattern.compile("(?<=\\w{2})'(?=[Ee])");
+	static HashSet<String> translitRussianApostrophes(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
-		Pattern p = Pattern.compile("(?<=\\w{2})'(?=[Ee])");
+		
 		while (itr.hasNext()) {
-			Matcher m = p.matcher(itr.next());
+			Matcher m = p0.matcher(itr.next());
 			if (m.find()) {
 				syn.add(m.replaceAll("I"));
 				syn.add(m.replaceAll("Y"));
 				syn.add(m.replaceAll(""));
 			}
 		}
-		log.debug("apostrophes: " + syn);
+		//log.debug("apostrophes: " + syn);
 		return syn;
 	}
 		
@@ -171,71 +177,73 @@ public class AuthorUtils {
      * [^IJY]EV$ == IEV$ == YEV$ == JEV$ 
      * [^IJY]EVA$ == IEVA$ == YEVA$ == JEVA$ 
      */
-	public static HashSet<String> translitRussianLastNames1(Iterator<String> itr) {
+	static Pattern p1 = Pattern.compile("(?<![IJY])EV(?=A?,)");
+	static HashSet<String> translitRussianLastNames1(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
-		Pattern p = Pattern.compile("(?<![IJY])EV(?=A?,)");
 		while (itr.hasNext()) {
-			Matcher m = p.matcher(itr.next());
+			Matcher m = p1.matcher(itr.next());
 			if (m.find()) {
 				syn.add(m.replaceAll("IEV"));
 				syn.add(m.replaceAll("YEV"));
 				syn.add(m.replaceAll("JEV"));
 			}
 		}
-		log.debug("last names I: " + syn);
+		//log.debug("last names I: " + syn);
 		return syn;
      }
 		
     /* russian last names II:
      * ([NRBO])IA$ == $1IIA$ == $1IYA$
      */
-	public static HashSet<String> translitRussianLastNames2(Iterator<String> itr) {
+	static Pattern p2 = Pattern.compile("(?<=[NRBO])I(?=A,)");
+	static HashSet<String> translitRussianLastNames2(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
-		Pattern p = Pattern.compile("(?<=[NRBO])I(?=A,)");
 		while (itr.hasNext()) {
-			Matcher m = p.matcher(itr.next());
+			Matcher m = p2.matcher(itr.next());
 			if (m.find()) {
 				syn.add(m.replaceAll("II"));
 				syn.add(m.replaceAll("IY"));
 			}
 		}
-		log.debug("last names II: " + syn);
+		//log.debug("last names II: " + syn);
 		return syn;
 	}
 
     /* russian last names III:
      * ([DHKLMNPSZ])IAN$ == $1YAN$ == $1JAN$ 
      */
-	public static HashSet<String> translitRussianLastNames3(Iterator<String> itr) {
+	static Pattern p3 = Pattern.compile("(?<=[DHKLMNPSZ])[IJY](?=AN,)");
+	static HashSet<String> translitRussianLastNames3(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
-		Pattern p = Pattern.compile("(?<=[DHKLMNPSZ])[IJY](?=AN,)");
+		
 		while (itr.hasNext()) {
-			Matcher m = p.matcher(itr.next());
+			Matcher m = p3.matcher(itr.next());
 			if (m.find()) {
 				syn.add(m.replaceAll("I"));
 				syn.add(m.replaceAll("J"));
 				syn.add(m.replaceAll("Y"));
 			}
 		}
-		log.debug("last names III: " + syn);
+		//log.debug("last names III: " + syn);
 		return syn;
 	}
 		
     /* russian last names IV:
      * AIA$ == AYA$ == AJA$ 
      */
-	public static HashSet<String> translitRussianLastNames4(Iterator<String> itr) {
+	static Pattern p4 = Pattern.compile("(?<=[KNV]A)[IJY](?=A,)");
+	static HashSet<String> translitRussianLastNames4(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
-		Pattern p = Pattern.compile("(?<=[KNV]A)[IJY](?=A,)");
+		
 		while (itr.hasNext()) {
-			Matcher m = p.matcher(itr.next());
+			Matcher m = p4.matcher(itr.next());
 			if (m.find()) {
 				syn.add(m.replaceAll("I"));
 				syn.add(m.replaceAll("J"));
 				syn.add(m.replaceAll("Y"));
 			}
 		}
-		log.debug("last names IV: " + syn);
+		//log.debug("last names IV: " + syn);
 		return syn;
 	}
 		
@@ -244,11 +252,12 @@ public class AuthorUtils {
      * VI$ == VII$ == VIJ$ == VIY$ = VYI$
      * first transform [KVH]I into [KVH]II
      */
-	public static HashSet<String> translitRussianLastNames5(Iterator<String> itr) {
+	static Pattern p5 = Pattern.compile("(?<=[KV])I(?=,)");
+	static HashSet<String> translitRussianLastNames5(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
-		Pattern p = Pattern.compile("(?<=[KV])I(?=,)");
+		
 		while (itr.hasNext()) {
-			Matcher m = p.matcher(itr.next());
+			Matcher m = p5.matcher(itr.next());
 			if (m.find()) {
 				syn.add(m.replaceAll("I"));
 				syn.add(m.replaceAll("Y"));
@@ -258,7 +267,7 @@ public class AuthorUtils {
 				syn.add(m.replaceAll("II"));
 			}
 		}
-		log.debug("last names V: " + syn);
+		//log.debug("last names V: " + syn);
 		return syn;
 	}
 		
@@ -266,17 +275,18 @@ public class AuthorUtils {
 	 * ^IU == ^YU
 	 * ^IA == ^YA
 	 */
-	public static HashSet<String> translitRussianFirstNames(Iterator<String> itr) {
+	static Pattern p6 = Pattern.compile("(?<=, )[YI](?=[AU])");
+	static HashSet<String> translitRussianFirstNames(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
-		Pattern p = Pattern.compile("(?<=, )[YI](?=[AU])");
+		
 		while (itr.hasNext()) {
-			Matcher m = p.matcher(itr.next());
+			Matcher m = p6.matcher(itr.next());
 			if (m.find()) {
 				syn.add(m.replaceAll("I"));
 				syn.add(m.replaceAll("Y"));
 			}
 		}
-		log.debug("first names: " + syn);
+		//log.debug("first names: " + syn);
 		return syn;
 	}
 		

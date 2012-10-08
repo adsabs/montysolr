@@ -10,8 +10,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
-import org.apache.solr.analysis.AuthorSynonymFilterFactory;
 import org.apache.solr.analysis.WriteableSynonymMap;
+import org.apache.solr.analysis.author.AuthorSynonymFilterFactory;
 
 public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	public void testAuthorSynonyms1() throws Exception {

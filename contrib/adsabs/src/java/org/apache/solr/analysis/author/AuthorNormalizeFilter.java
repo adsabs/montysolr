@@ -1,14 +1,14 @@
 /**
  * 
  */
-package org.apache.lucene.analysis.core;
+package org.apache.solr.analysis.author;
 
 import java.io.IOException;
 
-import org.adsabs.solr.AuthorUtils;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 /**
  * @author jluker
@@ -17,7 +17,8 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 public final class AuthorNormalizeFilter extends TokenFilter {
 
 	private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
-
+	private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+	
 	/**
 	 * @param input
 	 */
@@ -33,6 +34,7 @@ public final class AuthorNormalizeFilter extends TokenFilter {
 	    if (!input.incrementToken()) return false;
 	    String normalized = AuthorUtils.normalizeAuthor(termAtt.toString());
 	    termAtt.setEmpty().append(normalized);
+	    typeAtt.setType(AuthorUtils.TOKEN_TYPE_AUTHOR);
         return true;
 	}
 }

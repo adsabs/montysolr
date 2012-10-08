@@ -19,16 +19,19 @@ import org.apache.solr.common.util.StrUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+// XXX: make this class thread-safe
+
 public class WriteableSynonymMap {
 	
     public static final Logger log = LoggerFactory.getLogger(WriteableSynonymMap.class);
 	
-    private HashMap<String, List<String>> map;
+    private HashMap<String, Set<String>> map;
 	private int numUpdates = 0;
 	private String outFile = null;
 	
 	public WriteableSynonymMap(String outFile) {
-		this.map = new HashMap<String, List<String>>();
+		this.map = new HashMap<String, Set<String>>();
 		this.outFile = outFile;
 	}
 	
@@ -36,17 +39,17 @@ public class WriteableSynonymMap {
 		this.outFile = out;
 	}
 	
-	public List<String> put(String k, List<String> v) {
-		log.trace("setting " + k + " to " + v);
+	public Set<String> put(String k, Set<String> v) {
+		//log.trace("setting " + k + " to " + v);
 		numUpdates++;
 		return this.map.put(k, v);
 	}
 	
-	public List<String> get(String k) {
+	public Set<String> get(String k) {
 		return this.map.get(k);
 	}
 	
-	public List<String> get(Pattern p) {
+	public Set<String> get(Pattern p) {
 		for (String k : this.map.keySet()) {
 			Matcher m = p.matcher(k);
 			if (m.matches()) {
@@ -101,11 +104,11 @@ public class WriteableSynonymMap {
 	}
 	
 	
-	public void writeSynonyms(Map<String, List<String>> map, Writer writer) {
+	public void writeSynonyms(Map<String, Set<String>> map, Writer writer) {
 		StringBuffer out = new StringBuffer();
 		int max = 1000;
 		int i = 0;
-		for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+		for (Map.Entry<String, Set<String>> entry : map.entrySet()) {
 			/*
 			for (String s : entry.getValue()) { // escape the entry
 				out.append(s.replace(",", "\\,").replace(" ", "\\ "));
@@ -169,13 +172,13 @@ public class WriteableSynonymMap {
 		    if (mapping.size() != 2) 
 		    	log.error("Invalid Synonym Rule:" + rule);
 		    String key = mapping.get(0).trim();
-		    List<String> values = getSynList(mapping.get(1));
+		    Set<String> values = getSynList(mapping.get(1));
 		    this.map.put(key.replace("\\,", ",").replace("\\ ", " "), values);
 		}
 	}
 	
-	private List<String> getSynList(String synonyms) {
-		List<String> list = new ArrayList<String>();
+	private Set<String> getSynList(String synonyms) {
+		Set<String> list = new HashSet<String>();
 		for (String s : StrUtils.splitSmart(synonyms, ",", false)) {
 			list.add(s.trim().replace("\\,", ",").replace("\\ ", " "));
 		}

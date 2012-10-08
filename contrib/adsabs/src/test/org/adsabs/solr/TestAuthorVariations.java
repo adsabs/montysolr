@@ -3,31 +3,33 @@ package org.adsabs.solr;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.solr.analysis.author.AuthorQueryVariations;
+
 import junit.framework.TestCase;
 
 public class TestAuthorVariations extends TestCase {
 	
 	public void xtestgetNameVariations() {
-		HashSet<String> name = AuthorVariations.getNameVariations("Hector, Gomez Q");
+		HashSet<String> name = AuthorQueryVariations.getQueryVariationsInclRegex("Hector, Gomez Q");
 		for (String n: name) {
 			System.out.println(n);
 		}
 		
 		System.out.println("-------------");
-		name = AuthorVariations.getSynonymVariations("Hector, Gomez Q");
+		name = AuthorQueryVariations.getQueryVariations("Hector, Gomez Q");
 		for (String n: name) {
 			System.out.println(n);
 		}
 		
 		System.out.println("-------------");
 		
-		name = AuthorVariations.getNameVariations("H quintero gomez");
+		name = AuthorQueryVariations.getQueryVariationsInclRegex("H quintero gomez");
 		for (String n: name) {
 			System.out.println(n);
 		}
 		
 		System.out.println("-------------");
-		name = AuthorVariations.getSynonymVariations("H quintero gomez");
+		name = AuthorQueryVariations.getQueryVariations("H quintero gomez");
 		for (String n: name) {
 			System.out.println(n);
 		}
@@ -44,7 +46,7 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H Q.*");
 		expected.add("GOMEZ, H");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	public void testgenerateNameVariations2() {
@@ -56,7 +58,7 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H\\b.*");
 		expected.add("GOMEZ, H");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	public void testgenerateNameVariations3() {
@@ -66,7 +68,7 @@ public class TestAuthorVariations extends TestCase {
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("GOMEZ, H.*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	public void testgenerateNameVariations4() {
@@ -78,7 +80,7 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H\\w* Q.*");
 		expected.add("GOMEZ, H\\w*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	
@@ -92,7 +94,7 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H\\w* Q\\b.*");
 		expected.add("GOMEZ, H\\w*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	
@@ -101,7 +103,7 @@ public class TestAuthorVariations extends TestCase {
 		input.put("last", "GOMEZ");
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("GOMEZ,.*");
-		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	
@@ -119,7 +121,7 @@ public class TestAuthorVariations extends TestCase {
 		    add("MILLAR, C");
 		    add("MILLAR,");
 		}};
-		HashSet<String> actual = AuthorVariations.generateNameVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateNameVariations(input);
 		assertEquals(expected, actual);
 	}
 	
@@ -132,7 +134,7 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, HECTOR");
 		expected.add("GOMEZ, H");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateSynonymVariations(input);
 		assertEquals(expected, actual);
 	}
 	public void testGenerateSynonymVariations2() {
@@ -143,7 +145,7 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, HECTOR\\b.*");
 		expected.add("GOMEZ, H");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateSynonymVariations(input);
 		assertEquals(expected, actual);
 	}
 	public void testGenerateSynonymVariations3() {
@@ -153,7 +155,7 @@ public class TestAuthorVariations extends TestCase {
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("GOMEZ, H.*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateSynonymVariations(input);
 		assertEquals(expected, actual);
 	}
 	public void testGenerateSynonymVariations4() {
@@ -165,7 +167,7 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H\\w* Q.*");
 		expected.add("GOMEZ, H\\w*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateSynonymVariations(input);
 		assertEquals(expected, actual);
 	}
 	
@@ -178,7 +180,7 @@ public class TestAuthorVariations extends TestCase {
 		expected.add("GOMEZ, H\\w* QUINTERO\\b.*");
 		expected.add("GOMEZ, H\\w*");
 		expected.add("GOMEZ,");
-		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateSynonymVariations(input);
 		assertEquals(expected, actual);
 	}
 	
@@ -187,7 +189,7 @@ public class TestAuthorVariations extends TestCase {
 		input.put("last", "GOMEZ");
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("GOMEZ,.*");
-		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateSynonymVariations(input);
 		assertEquals(expected, actual);
 	}
 	
@@ -204,7 +206,7 @@ public class TestAuthorVariations extends TestCase {
 		    add("MILLAR, C");
 		    add("MILLAR,");
 		}};
-		HashSet<String> actual = AuthorVariations.generateSynonymVariations(input);
+		HashSet<String> actual = AuthorQueryVariations.generateSynonymVariations(input);
 		assertEquals(expected, actual);
 	}
 //	public void testParseAuthor() {

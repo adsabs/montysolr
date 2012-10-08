@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.adsabs.solr.AuthorUtils;
+import org.apache.solr.analysis.author.AuthorUtils;
 
 import junit.framework.TestCase;
 
-public class TestAuthorUtils extends TestCase {
+// TODO: fix the errors, these methods should not be part of public API 
+// they are confusing when public 
 
+public class TestAuthorUtils extends TestCase {
+	
 	public void testNormalizeAuthor() {
 		assertEquals("KURTZ, MICHAEL", AuthorUtils.normalizeAuthor("Kurtz, Michael"));
 		assertEquals("HUCHRA, J", AuthorUtils.normalizeAuthor("Huchra, J."));
@@ -31,12 +34,12 @@ public class TestAuthorUtils extends TestCase {
 		HashSet<String> expected = new HashSet<String>();
 		expected.add("MULLER, BILL");
 		expected.add("MUELLER, BILL");
-		ArrayList<String> actual = AuthorUtils.genSynonyms("MÜLLER, BILL");
+		ArrayList<String> actual = AuthorUtils.getAsciiTransliteratedVariants("MÜLLER, BILL");
 		assertEquals(expected, new HashSet<String>(actual));
 		expected.clear();
 		expected.add("GOMEZ, HECTOR Q");
 		expected.add("GOEMEZ, HECTOR Q");
-		actual = AuthorUtils.genSynonyms("GÓMEZ, HECTOR Q");
+		actual = AuthorUtils.getAsciiTransliteratedVariants("GÓMEZ, HECTOR Q");
 		assertEquals(expected, new HashSet<String>(actual));
 	}
 	
@@ -47,7 +50,7 @@ public class TestAuthorUtils extends TestCase {
 		testMap.put("č", "ch");
 		for (String k : testMap.keySet()) {
 			String expected = testMap.get(k);
-			String actual = AuthorUtils.translitAccents(k);
+			String actual = AuthorUtils.transliterateAccents(k);
 			assertEquals(expected, actual);
 		}
 	}
@@ -156,7 +159,7 @@ public class TestAuthorUtils extends TestCase {
 		expected.add("FOOVI, IURI");
 		expected.add("FOOVII, IURI");
 		expected.add("FOOVII, YURI");
-		HashSet<String> actual = AuthorUtils.translitRussianNames(new String[] {"FOOVI, YURI"});
+		HashSet<String> actual = AuthorUtils.transliterateRussianNames(new String[] {"FOOVI, YURI"});
 		assertEquals(expected, actual);
 	}
 	
@@ -173,7 +176,7 @@ public class TestAuthorUtils extends TestCase {
 		expected.add("FOOIEYE, BAER");
 		expected.add("FOOYEYE, BAER");
 		expected.add("FOOEYE, BAER");
-		HashSet<String> actual = new HashSet<String>(AuthorUtils.genSynonyms("FOO'EYE, BÄR"));
+		HashSet<String> actual = new HashSet<String>(AuthorUtils.getAsciiTransliteratedVariants("FOO'EYE, BÄR"));
 		assertEquals(expected, actual);
 	}
 }

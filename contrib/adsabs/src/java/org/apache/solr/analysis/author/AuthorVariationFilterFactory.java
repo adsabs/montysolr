@@ -1,10 +1,9 @@
-package org.apache.solr.analysis;
+package org.apache.solr.analysis.author;
 
 import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
-import org.apache.lucene.analysis.core.AuthorVariationFilter;
 
 public class AuthorVariationFilterFactory extends TokenFilterFactory {
 
@@ -14,7 +13,7 @@ public class AuthorVariationFilterFactory extends TokenFilterFactory {
     }
     
 	public TokenStream create(TokenStream input) {
-		return new AuthorVariationFilter(input);
+		return new AuthorQueryVariationsFilter(input);
 	}
 
 }

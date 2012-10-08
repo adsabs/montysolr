@@ -14,8 +14,6 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeSource;
 import org.apache.lucene.analysis.util.CharacterUtils;
 import org.apache.lucene.util.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,7 +23,6 @@ import org.slf4j.LoggerFactory;
  * adds the full name after the term (depends on the value of emitBoth)
  */
 public final class AcronymTokenFilter extends TokenFilter {
-    public static final Logger log = LoggerFactory.getLogger(AcronymTokenFilter.class);
     public static final String TOKEN_TYPE_ACRONYM = "ACRONYM";
     public static final int ACRONYM_MIN_LENGTH = 2;
 

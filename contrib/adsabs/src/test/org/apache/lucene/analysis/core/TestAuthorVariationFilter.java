@@ -6,7 +6,7 @@ import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
-import org.apache.solr.analysis.AuthorVariationFilterFactory;
+import org.apache.solr.analysis.author.AuthorVariationFilterFactory;
 
 public class TestAuthorVariationFilter extends BaseTokenStreamTestCase {
 	public void testAuthorVariations() throws Exception {

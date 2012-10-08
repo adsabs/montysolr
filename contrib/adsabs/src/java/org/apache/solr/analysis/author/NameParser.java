@@ -1,4 +1,4 @@
-package org.adsabs.solr;
+package org.apache.solr.analysis.author;
 
 //Thanks to Robert Cooper for this!
 //package com.totsp.bookworm.util;
@@ -9,8 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
 *
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 */
 public class NameParser {
 	
-    public static final Logger log = LoggerFactory.getLogger(NameParser.class);
     
 	private static final Set<String> TITLES = new HashSet<String>();
 	private static final Set<String> SUFFIXES = new HashSet<String>();

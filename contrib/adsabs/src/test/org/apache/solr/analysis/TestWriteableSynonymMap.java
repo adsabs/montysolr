@@ -7,9 +7,9 @@ import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
-import org.apache.lucene.analysis.core.AuthorNameVariantsFilter;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
-import org.apache.solr.analysis.AuthorNameVariantsFilterFactory;
+import org.apache.solr.analysis.author.AuthorNameVariantsCollectorFactory;
+import org.apache.solr.analysis.author.AuthorNameVariantsCollectorFilter;
 
 public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	
@@ -22,12 +22,12 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 
 		// create the synonym writer for the test
 	  	Tokenizer tokenizer = new PatternTokenizer(new StringReader("MÜLLER, BILL"), Pattern.compile(";"), -1);
-	  	AuthorNameVariantsFilterFactory factory = new AuthorNameVariantsFilterFactory();
+	  	AuthorNameVariantsCollectorFactory factory = new AuthorNameVariantsCollectorFactory();
 	  	
 	  	File tmpFile = File.createTempFile("variants", ".tmp");
 	  	
 	  	
-	    AuthorNameVariantsFilter filter = factory.create(tokenizer);
+	    AuthorNameVariantsCollectorFilter filter = factory.create(tokenizer);
 	    
 	    while (filter.incrementToken() != false) {
 	    	//pass
@@ -79,7 +79,7 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	    checkOutput(tmpFile, "MÜller\\,\\ Bill=>MUEller\\,\\ Bill,MUller\\,\\ Bill,\nMÜLLER\\,\\ BILL=>MUELLER\\,\\ BILL,MULLER\\,\\ BILL,\n");
 	    
 	    // now load the factory and check the synonyms were loaded properly
-	    factory = new AuthorNameVariantsFilterFactory();
+	    factory = new AuthorNameVariantsCollectorFactory();
 	    synMap = factory.getSynonymMap();
 	    synMap.parseRules(synMap.getLines(tmpFile.getAbsolutePath()));
 	    

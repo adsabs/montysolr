@@ -1,13 +1,12 @@
 /**
  * 
  */
-package org.apache.solr.analysis;
+package org.apache.solr.analysis.author;
 
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.synonym.WriteableTokenFilterFactory;
-import org.apache.lucene.analysis.synonym.AuthorSynonymFilter;
+import org.apache.solr.analysis.WriteableTokenFilterFactory;
 import org.apache.solr.common.SolrException;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;

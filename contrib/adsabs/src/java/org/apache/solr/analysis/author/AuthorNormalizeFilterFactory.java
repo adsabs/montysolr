@@ -1,10 +1,9 @@
 /**
  * 
  */
-package org.apache.solr.analysis;
+package org.apache.solr.analysis.author;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.AuthorNormalizeFilter;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
 
 /**

@@ -8,9 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.analysis.WriteableSynonymMap;
+import org.apache.solr.analysis.author.AuthorQueryVariations;
 
 import org.adsabs.solr.AuthorUtils;
-import org.adsabs.solr.AuthorVariations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +68,7 @@ public class ProcessCuratedAuthorSynonyms {
 		// expanded list with all auto-generated synonym possibilities
 		final List<String> withAutoSynonyms = new ArrayList<String>() {{
 			for (String s : normalized) {
-				addAll(AuthorUtils.genSynonyms(s));
+				addAll(AuthorUtils.getAsciiTransliteratedVariants(s));
 				add(s);
 			}
 		}};
@@ -86,7 +86,7 @@ public class ProcessCuratedAuthorSynonyms {
 				continue;
 			}
 				
-			variationsMap.put(s, AuthorVariations.generateSynonymVariations(parsedAuthor));
+			variationsMap.put(s, AuthorQueryVariations.generateSynonymVariations(parsedAuthor));
 		}
 		
 		log.debug("variations: " + variationsMap.toString());

@@ -26,7 +26,6 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCLAUSEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCOMMAProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsDEFOPProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFIELDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFUZZYProcessor;
@@ -63,7 +62,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpAdsabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
 		add(new AqpQFUNCProcessor()); // prepares function node (may decide which implementation to call)
 		
-		add(new AqpCOMMAProcessor()); // extends with COMMA and SEMICOLON
+		add(new AqpCOMMAProcessor()); // extends operators with COMMA and SEMICOLON
 		add(new AqpAdsabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
 		add(new AqpOPERATORProcessor()); 
 		add(new AqpCLAUSEProcessor());

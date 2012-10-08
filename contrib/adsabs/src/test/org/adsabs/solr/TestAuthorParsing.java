@@ -2,6 +2,8 @@ package org.adsabs.solr;
 
 import java.util.HashMap;
 
+import org.apache.solr.analysis.author.AuthorUtils;
+
 import junit.framework.TestCase;
 
 public class TestAuthorParsing extends TestCase {

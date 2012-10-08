@@ -1,4 +1,4 @@
-package org.adsabs.solr;
+package org.apache.solr.analysis.author;
 
 //import montysolr.jni.MontySolrVM;
 //import montysolr.jni.PythonMessage;
@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
  * @author jluker
  *
  */
-public class AuthorVariations {
+public class AuthorQueryVariations {
 
-    public static final Logger log = LoggerFactory.getLogger(AuthorVariations.class);
+    public static final Logger log = LoggerFactory.getLogger(AuthorQueryVariations.class);
 
     /**
      * This method takes input string, e.g. "Hector, Gomez Q" and generates variations
@@ -45,7 +45,7 @@ public class AuthorVariations {
      * @param authorString
      * @return
      */
-	public static HashSet<String> getNameVariations(String authorString) {
+	public static HashSet<String> getQueryVariationsInclRegex(String authorString) {
 		
 		HashMap<String,String> parsedAuthor = null;
 		parsedAuthor = AuthorUtils.parseAuthor(authorString);
@@ -64,7 +64,7 @@ public class AuthorVariations {
 		return generateNameVariations(parsedAuthor, variations);
 	}
 	
-	public static HashSet<String> generateNameVariations(
+	protected static HashSet<String> generateNameVariations(
 			HashMap<String,String> parsedAuthor,
 			HashSet<String> variations) {
 		
@@ -122,7 +122,7 @@ public class AuthorVariations {
      * @param authorString
      * @return
      */
-	public static HashSet<String> getSynonymVariations(String authorString) {
+	public static HashSet<String> getQueryVariations(String authorString) {
 		
 		HashMap<String,String> parsedAuthor = null;
 		parsedAuthor = AuthorUtils.parseAuthor(authorString);
@@ -140,7 +140,7 @@ public class AuthorVariations {
 		return generateSynonymVariations(parsedAuthor, variations);
 	}
 	
-	public static HashSet<String> generateSynonymVariations(
+	protected static HashSet<String> generateSynonymVariations(
 			HashMap<String,String> parsedAuthor,
 			HashSet<String> variations) {
 		
