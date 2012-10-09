@@ -43,19 +43,19 @@
      <fieldType name="author" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.AuthorNormalizeFilterFactory"/>
-        <filter class="solr.AuthorTransliterationFactory"/>
-        <filter class="solr.AuthorNameVariantsCollectorFactory" outFile="author_generated.variants" />
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
+        <filter class="solr.analysis.author.AuthorNameVariantsCollectorFactory" outFile="author_generated.variants" />
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.AuthorNormalizeFilterFactory"/>
-        <filter class="solr.AuthorTransliterationFactory"/>
-        <filter class="solr.AuthorQueryVariationFilterFactory"/>
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
+        <filter class="solr.analysis.author.AuthorQueryVariationsFilterFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author_generated.variants" ignoreCase="true" expand="true"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true"/>
-        <filter class="solr.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
+        <filter class="solr.analysis.author.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
@@ -63,11 +63,11 @@
     <fieldType name="author_exact" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.AuthorNormalizeFilterFactory"/>
-        <filter class="solr.AuthorTransliterationFactory"/>
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author_generated.variants" ignoreCase="true" expand="true"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true"/>
-        <filter class="solr.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
+        <filter class="solr.analysis.author.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
@@ -75,9 +75,9 @@
     <fieldType name="author_nosyn" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.AuthorNormalizeFilterFactory"/>
-        <filter class="solr.AuthorTransliterationFactory"/>
-        <filter class="solr.AuthorQueryVariationFilterFactory"/>
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
+        <filter class="solr.analysis.author.AuthorQueryVariationsFilterFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author_generated.variants" ignoreCase="true" expand="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
@@ -86,8 +86,8 @@
      <fieldType name="author_exact_nosyn" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.AuthorNormalizeFilterFactory"/>
-        <filter class="solr.AuthorTransliterationFactory"/>
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author_generated.variants" ignoreCase="true" expand="true"/>
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>

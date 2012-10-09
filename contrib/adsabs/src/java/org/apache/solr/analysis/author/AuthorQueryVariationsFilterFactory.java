@@ -5,7 +5,7 @@ import java.util.Map;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
 
-public class AuthorVariationFilterFactory extends TokenFilterFactory {
+public class AuthorQueryVariationsFilterFactory extends TokenFilterFactory {
 
     @Override
     public void init(Map<String,String> args) {

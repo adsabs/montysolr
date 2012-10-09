@@ -1,4 +1,4 @@
-package org.adsabs.solr;
+package org.apache.solr.analysis.author;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more

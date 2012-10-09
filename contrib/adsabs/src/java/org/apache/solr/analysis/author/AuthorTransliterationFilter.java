@@ -61,7 +61,7 @@ public final class AuthorTransliterationFilter extends TokenFilter {
 		
 	    if (!input.incrementToken()) return false;
 	    
-	    if (typeAtt.equals(AuthorUtils.TOKEN_TYPE_AUTHOR) && this.genVariants()) {
+	    if (typeAtt.type().equals(AuthorUtils.TOKEN_TYPE_AUTHOR) && this.genVariants()) {
 	    	this.current = this.captureState();
 	    }
 	    
@@ -70,13 +70,11 @@ public final class AuthorTransliterationFilter extends TokenFilter {
 	
 	private boolean genVariants() {
 	    String authorName = termAtt.toString();
-    	log.debug("generating name variants for: " + authorName);
+    	//log.debug("generating name variants for: " + authorName);
 	    ArrayList<String> synonyms = AuthorUtils.getAsciiTransliteratedVariants(authorName);
 	    if (synonyms.size() > 0) {
-		    log.debug("variants: " + synonyms);
-		    for (String s : synonyms) {
-		    	synonymStack.push(s);
-		    }
+		    //log.debug("variants: " + synonyms);
+	    	synonymStack.addAll(synonyms);
 	        return true;
 	    }
 	    

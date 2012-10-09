@@ -85,14 +85,14 @@ public class AuthorUtils {
 		return new ArrayList<String>(synonyms);
 	}
 	
-	private static String foldToAscii(String a) {
+	static String foldToAscii(String a) {
 		char[] in = a.toCharArray();
 		char[] out = new char[in.length * 4];
 		int outPos = ASCIIFoldingFilter.foldToASCII(in, 0, out, 0, in.length);
 		return String.copyValueOf(out).trim();
 	}
 	
-	private static String transliterateAccents(String a) {
+	static String transliterateAccents(String a) {
 		String decomposed = Normalizer.normalize(a, Normalizer.Form.NFD);
 		char[] in = decomposed.toCharArray();
 		char[] out = new char[in.length * 4];

@@ -35,6 +35,10 @@ public class WriteableSynonymMap {
 		this.outFile = outFile;
 	}
 	
+	public void clear() {
+		this.map = new HashMap<String, Set<String>>();
+	}
+	
 	public void setOutput(String out) {
 		this.outFile = out;
 	}

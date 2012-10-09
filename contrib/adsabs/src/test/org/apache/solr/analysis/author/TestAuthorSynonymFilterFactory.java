@@ -1,4 +1,4 @@
-package org.apache.solr.analysis;
+package org.apache.solr.analysis.author;
 
 import static org.junit.Assert.*;
 

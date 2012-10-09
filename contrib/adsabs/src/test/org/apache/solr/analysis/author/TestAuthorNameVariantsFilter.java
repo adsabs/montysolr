@@ -1,4 +1,4 @@
-package org.apache.lucene.analysis.core;
+package org.apache.solr.analysis.author;
 
 import java.io.Reader;
 import java.io.StringReader;

@@ -41,6 +41,7 @@ public final class AuthorNameVariantsCollectorFilter extends TokenFilter {
 		termAtt = addAttribute(CharTermAttribute.class);
 		typeAtt = addAttribute(TypeAttribute.class);
 		current = null;
+		this.synMap = synMap;
 	}
 	
 	
@@ -58,7 +59,7 @@ public final class AuthorNameVariantsCollectorFilter extends TokenFilter {
 		
 	    if (!input.incrementToken()) return false;
 	    
-	    if (typeAtt.equals(AuthorUtils.TOKEN_TYPE_AUTHOR)) {
+	    if (typeAtt.type().equals(AuthorUtils.TOKEN_TYPE_AUTHOR)) {
 	    	current = captureState();
 	    	String authorName = termAtt.toString();
 	    	Set<String> nameVariants;
@@ -70,7 +71,7 @@ public final class AuthorNameVariantsCollectorFilter extends TokenFilter {
 	    		synMap.put(authorName, nameVariants);
 	    	}
 	    	while (input.incrementToken()) {
-	    		if (typeAtt.equals(AuthorUtils.TOKEN_TYPE_AUTHOR_GENERATED_VARIANT)) {
+	    		if (typeAtt.type().equals(AuthorUtils.TOKEN_TYPE_AUTHOR_GENERATED_VARIANT)) {
 	    			nameVariants.add(termAtt.toString());
 	    		}
 	    		else {

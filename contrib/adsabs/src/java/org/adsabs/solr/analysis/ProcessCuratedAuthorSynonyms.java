@@ -9,8 +9,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.analysis.WriteableSynonymMap;
 import org.apache.solr.analysis.author.AuthorQueryVariations;
+import org.apache.solr.analysis.author.AuthorUtils;
 
-import org.adsabs.solr.AuthorUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +131,7 @@ public class ProcessCuratedAuthorSynonyms {
 			HashMap<String,HashSet<String>> transformed = transformGroup(group);
 			
 			for (String key : transformed.keySet()) {
-				synMap.put(key, new ArrayList<String>(transformed.get(key)));
+				synMap.put(key, transformed.get(key));
 			}
 		}
 		try {
