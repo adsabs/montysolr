@@ -21,13 +21,13 @@ public class TestAuthorSynonymFilterFactory {
 		
 	    WriteableSynonymMap synMap = new WriteableSynonymMap(null);
 	    synMap.parseRules(rules);
-	    List<String> expected = new ArrayList<String>();
+	    Set<String> expected = new HashSet<String>();
 	    expected.add("MILLER, B");
 	    expected.add("MILLER, BILL");
 	    expected.add("MILLER,");
 	    expected.add("MILLER, BILL\\b.*");
 	    assertEquals(expected, synMap.get("MILLER, WILLIAM"));
-	    expected = new ArrayList<String>();
+	    expected = new HashSet<String>();
 	    expected.add("MILLER, WILLIAM");
 	    expected.add("MILLER, WILLIAM\\b.*");
 	    expected.add("MILLER,");

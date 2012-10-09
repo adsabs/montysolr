@@ -20,23 +20,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-// XXX: make this class thread-safe
 
 public class WriteableSynonymMap {
 	
     public static final Logger log = LoggerFactory.getLogger(WriteableSynonymMap.class);
 	
-    private HashMap<String, Set<String>> map;
+    private Map<String, Set<String>> map;
+    private Map<String, String> regexMap;
 	private int numUpdates = 0;
 	private String outFile = null;
 	
 	public WriteableSynonymMap(String outFile) {
-		this.map = new HashMap<String, Set<String>>();
+		
+		this.map = Collections.synchronizedMap(new HashMap<String, Set<String>>());
+		this.regexMap = Collections.synchronizedMap(new HashMap<String, String>());
 		this.outFile = outFile;
 	}
 	
 	public void clear() {
 		this.map = new HashMap<String, Set<String>>();
+		this.regexMap = new HashMap<String, String>();
 	}
 	
 	public void setOutput(String out) {
@@ -54,12 +57,20 @@ public class WriteableSynonymMap {
 	}
 	
 	public Set<String> get(Pattern p) {
+		
+		String key = p.toString();
+		if (regexMap.containsKey(key)) {
+			return this.map.get(regexMap.get(key));
+		}
+		
 		for (String k : this.map.keySet()) {
 			Matcher m = p.matcher(k);
 			if (m.matches()) {
+				regexMap.put(key, k);
 				return this.map.get(k);
 			}
 		}
+		regexMap.put(key, null);
 		return null;
 	}
 	

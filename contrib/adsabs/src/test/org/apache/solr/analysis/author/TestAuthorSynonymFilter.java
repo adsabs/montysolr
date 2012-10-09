@@ -15,8 +15,8 @@ import org.apache.solr.analysis.author.AuthorSynonymFilterFactory;
 
 public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	public void testAuthorSynonyms1() throws Exception {
-		Reader reader = new StringReader("MILLER, BILL");
-		Tokenizer tokenizer = new KeywordTokenizer(reader);
+		
+		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
 		WriteableSynonymMap map = new WriteableSynonymMap(null);
 		List<String> rules = new ArrayList<String>();
@@ -28,13 +28,30 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		}
 		map.parseRules(rules);
 		factory.setSynonymMap(map);
+		
+		Set orderedMap = new LinkedHashSet();
+		for (String s: new String[]{"MILLER, B", "MILLER, BILL", "MILLER,", "MILLER, BILL\\b.*"}) {
+			orderedMap.add(s);
+		}
+		assertEquals(map.get("MILLER, WILLIAM"), orderedMap);
+		map.put("MILLER, WILLIAM", orderedMap);
+		
+		// 2nd row
+		orderedMap = new LinkedHashSet();
+		for (String s: new String[]{"MILLER, WILLIAM", "MILLER, WILLIAM\\b.*", "MILLER,", "MILLER, W"}) {
+			orderedMap.add(s);
+		}
+		assertEquals(map.get("MILLER, BILL"), orderedMap);
+		map.put("MILLER, BILL", orderedMap);
+		
+		Reader reader = new StringReader("MILLER, BILL");
+		Tokenizer tokenizer = new KeywordTokenizer(reader);
 		TokenStream stream = factory.create(tokenizer);
-		String[] expected = { "MILLER, BILL", "MILLER, W", "MILLER,", "MILLER, WILLIAM\\b.*", "MILLER, WILLIAM" };
+		String[] expected = { "MILLER, BILL", "MILLER, WILLIAM", "MILLER, WILLIAM\\b.*", "MILLER,", "MILLER, W" };
 		assertTokenStreamContents(stream, expected);
 	}
 	public void testAuthorSynonyms2() throws Exception {
-		Reader reader = new StringReader("GRANT, CAROLYN S;GRANT,;GRANT, C\b.*;GRANT, CAROLYN\b.*;GRANT, C");
-		PatternTokenizer tokenizer = new PatternTokenizer(reader, Pattern.compile(";"), -1);
+		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
 		WriteableSynonymMap map = new WriteableSynonymMap(null);
 		List<String> rules = new ArrayList<String>();
@@ -44,60 +61,43 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		// it doesn't expand the pattern to match all possible names
 		// example: "GRANT, CAROLYN;GRANT,;GRANT, C\b.*;GRANT, CAROLYN\b.*;GRANT, C"
 		
-		rules.add("GRANT, CAROLYN S=>STERN, CAROLYN P;STERN, C P.*;STERN, CAROLYN P.*;STERN GRANT, CAROLYN\b.*;STERN GRANT, C;STERN GRANT, CAROLYN;STERN, CAROLYN;STERN,;STERN GRANT,;STERN, C");
-		rules.add("STERN GRANT, CAROLYN=>STERN, CAROLYN P;GRANT, C;GRANT, CAROLYN S;STERN, C P.*;GRANT, CAROLYN;STERN, CAROLYN P.*;GRANT, C S.*;GRANT, CAROLYN S.*;STERN, CAROLYN;STERN,;GRANT,; STERN, C");
-		rules.add("STERN, CAROLYN P=>GRANT, C;GRANT, CAROLYN S;GRANT, CAROLYN;GRANT, C S.*;STERN GRANT, CAROLYN\b.*;STERN GRANT, C;STERN GRANT, CAROLYN;GRANT, CAROLYN S.*;GRANT,;STERN GRANT,");
+		String[] lines = {
+		 "GRANT, CAROLYN S=>STERN, CAROLYN P;STERN, C P.*;STERN, CAROLYN P.*;STERN, C",
+		 "STERN GRANT, CAROLYN=>STERN, CAROLYN P;GRANT, C",
+		 "STERN, CAROLYN P=>GRANT, C;GRANT, CAROLYN S;GRANT, CAROLYN;GRANT, C S.*"
+		};
+		for (String l: lines ) {
+			rules.add(l);
+		}
 		
 		for (int i=0; i<rules.size();i++) {
 			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
 		}
 		map.parseRules(rules);
 		
+		for (String r: lines) {
+			LinkedHashSet orderedMap = new LinkedHashSet();
+			String[] dd = r.split("=>");
+			for (String x: dd[1].split(";")) {
+				orderedMap.add(x);
+			}
+			map.put(dd[0], orderedMap);
+		}
+			
+		Reader reader = new StringReader("GRANT, CAROLYN S;GRANT,;GRANT, C\\b.*;GRANT, CAROLYN\\b.*;GRANT, C");
+		PatternTokenizer tokenizer = new PatternTokenizer(reader, Pattern.compile(";"), -1);
+		
 		factory.setSynonymMap(map);
 		TokenStream stream = factory.create(tokenizer);
 		String[] expected = {
-				"GRANT, CAROLYN S", 
-				"STERN, C", 
-				"STERN GRANT,", 
-				"STERN,", 
-				"STERN, CAROLYN", 
-				"STERN GRANT, CAROLYN", 
-				"STERN GRANT, C", 
-				"STERN GRANT, CAROLYN\b.*",
-				"STERN, CAROLYN P.*", 
-				"STERN, C P.*", 
-				"STERN, CAROLYN P",
+				"GRANT, CAROLYN S",
+				"STERN, CAROLYN P", "STERN, C P.*", "STERN, CAROLYN P.*", "STERN, C",
 				"GRANT,",
-				"GRANT, C\b.*", 
-				"GRANT, CAROLYN\b.*", 
-				"GRANT, C" 
+				"GRANT, C\\b.*",
+				"GRANT, CAROLYN\\b.*", 
+				"STERN, CAROLYN P", "STERN, C P.*", "STERN, CAROLYN P.*", "STERN, C",
+				"GRANT, C",
 		};
 		assertTokenStreamContents(stream, expected);
-		
-		
-		// according to jay this is not supposed to work this way
-		/*
-		reader = new StringReader("STERN, C");
-		tokenizer = new PatternTokenizer(reader, Pattern.compile(";"), -1);
-		stream = factory.create(tokenizer);
-		String[] expected2 = {
-				"STERN, C", 
-				"STERN, C", 
-				"STERN GRANT,", 
-				"STERN,", 
-				"STERN, CAROLYN", 
-				"STERN GRANT, CAROLYN", 
-				"STERN GRANT, C", 
-				"STERN GRANT, CAROLYN\b.*",
-				"STERN, CAROLYN P.*", 
-				"STERN, C P.*", 
-				"STERN, CAROLYN P",
-				"GRANT,",
-				"GRANT, C\b.*", 
-				"GRANT, CAROLYN\b.*", 
-				"GRANT, C" 
-		};
-		assertTokenStreamContents(stream, expected2);
-		*/
 	}
 }

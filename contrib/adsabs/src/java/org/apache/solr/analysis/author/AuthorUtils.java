@@ -23,7 +23,7 @@ public class AuthorUtils {
 	public static final String TOKEN_TYPE_QUERY_VARIANT = "AUTHOR_QUERY_VARIANT";
 	public static final String TOKEN_TYPE_AUTHOR = "AUTHOR_INPUT";
 	public static final String TOKEN_TYPE_AUTHOR_GENERATED_VARIANT = "AUTHOR_GENERATED_VARIANT";
-	
+	public static final String TOKEN_TYPE_AUTHOR_CURATED_SYN = "AUTHOR_CURATED_SYN";
 	
 	
 	public static String normalizeAuthor(String a) {

@@ -1,6 +1,8 @@
 package org.apache.solr.analysis.author;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -18,7 +20,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This filter checks if the token has its translation inside the SynonymMap
- * and if yes, it adds the variants of the name into the token stream.
+ * and if yes, it adds the variants of the name into the token stream. It is
+ * able to find keys also using a regular expressions (but this is somewhat
+ * slower - but not by much)
  * 
  * @author jluker
  *
@@ -27,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public final class AuthorSynonymFilter extends TokenFilter {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorSynonymFilter.class);
-    public static final String TOKEN_TYPE_AUTHOR_CURATED_SYN = "AUTHOR_CURATED_SYN";
+    
     private final WriteableSynonymMap synMap;  
     
 	public AuthorSynonymFilter(TokenStream input, WriteableSynonymMap synMap) {
@@ -38,11 +42,11 @@ public final class AuthorSynonymFilter extends TokenFilter {
 	    // just ensuring these attributes exist...
 		this.termAtt = addAttribute(CharTermAttribute.class);
 		this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
-		this.synonymStack = new Stack<String>();
+		this.synonymStack = new ArrayList<String>();
 		this.typeAtt = addAttribute(TypeAttribute.class);
 	}
 
-	private Stack<String> synonymStack;
+	private List<String> synonymStack;
 	private AttributeSource.State current;
 	
 	private final CharTermAttribute termAtt;
@@ -52,13 +56,12 @@ public final class AuthorSynonymFilter extends TokenFilter {
 	@Override
 	public boolean incrementToken() throws IOException {
 		if (this.synonymStack.size() > 0) {
-			String syn = this.synonymStack.pop();
-			log.debug("indexing synonym: " + syn);
+			String syn = this.synonymStack.remove(0);
 			this.restoreState(this.current);
 			this.termAtt.setEmpty();
 			this.termAtt.append(syn);
 			this.posIncrAtt.setPositionIncrement(0);
-			this.typeAtt.setType(TOKEN_TYPE_AUTHOR_CURATED_SYN);
+			this.typeAtt.setType(AuthorUtils.TOKEN_TYPE_AUTHOR_CURATED_SYN);
 			return true;
 		}
 		
@@ -73,7 +76,7 @@ public final class AuthorSynonymFilter extends TokenFilter {
 	
 	private boolean getSynonyms() {
 	    String authorTok = termAtt.toString();
-	    log.debug("looking for synonyms for " + authorTok);
+	    //log.debug("looking for synonyms for " + authorTok);
 	    
 	    Set<String> synonyms;
 	    if (authorTok.contains("*") || authorTok.contains("\\")) {
@@ -85,10 +88,7 @@ public final class AuthorSynonymFilter extends TokenFilter {
 	    }
 	    
 	    if (synonyms != null && synonyms.size() > 0) {
-		    log.debug("synonyms: " + synonyms);
-		    for (String s : synonyms) {
-		    	synonymStack.push(s);
-		    }
+	    	synonymStack.addAll(synonyms);
 	        return true;
 	    }
 	    return false;
