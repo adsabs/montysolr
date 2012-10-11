@@ -32,11 +32,11 @@ public final class AuthorTransliterationFilter extends TokenFilter {
 		super(input);
 		this.termAtt = addAttribute(CharTermAttribute.class);
 		this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
-		this.synonymStack = new Stack<String>();
+		this.transliterationStack = new Stack<String>();
 		this.typeAtt = addAttribute(TypeAttribute.class);
 	}
 	
-	private Stack<String> synonymStack;
+	private Stack<String> transliterationStack;
 	private AttributeSource.State current;
 	
 	private final CharTermAttribute termAtt;
@@ -49,8 +49,8 @@ public final class AuthorTransliterationFilter extends TokenFilter {
 	@Override
 	public boolean incrementToken() throws IOException {
 		
-		if (this.synonymStack.size() > 0) {
-			String syn = this.synonymStack.pop();
+		if (this.transliterationStack.size() > 0) {
+			String syn = this.transliterationStack.pop();
 			this.restoreState(this.current);
 			this.termAtt.setEmpty();
 			this.termAtt.append(syn);
@@ -69,16 +69,21 @@ public final class AuthorTransliterationFilter extends TokenFilter {
 	}
 	
 	private boolean genVariants() {
-	    String authorName = termAtt.toString();
     	//log.debug("generating name variants for: " + authorName);
-	    ArrayList<String> synonyms = AuthorUtils.getAsciiTransliteratedVariants(authorName);
+	    ArrayList<String> synonyms = AuthorUtils.getAsciiTransliteratedVariants(termAtt.toString());
 	    if (synonyms.size() > 0) {
 		    //log.debug("variants: " + synonyms);
-	    	synonymStack.addAll(synonyms);
+	    	transliterationStack.addAll(synonyms);
 	        return true;
 	    }
 	    
 	    return false;
 	}
-
+	
+	@Override
+	  public void reset() throws IOException {
+		super.reset();
+		transliterationStack.clear();
+		current = null;
+	}
 }

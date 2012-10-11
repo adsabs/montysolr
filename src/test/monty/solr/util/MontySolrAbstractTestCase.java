@@ -1,20 +1,27 @@
 package monty.solr.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 import monty.solr.util.MontySolrTestCaseJ4;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.apache.solr.util.AbstractSolrTestCase;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
 
 public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 
@@ -25,6 +32,22 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 
 	@AfterClass
 	public static void afterClassMontySolrTestCase() throws Exception {
+	}
+	
+	protected List<File> tempFiles;
+	
+	@Override
+	  public void setUp() throws Exception {
+		super.setUp();
+		tempFiles = new ArrayList<File>();
+	}
+	
+	@Override
+	  public void tearDown() throws Exception {
+		super.tearDown();
+		for (File f: tempFiles) {
+			recurseDelete(f);
+		}
 	}
 	
 	/**
@@ -95,4 +118,42 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	public DirectSolrConnection getDirectServer() {
 		return new DirectSolrConnection(h.getCore());
 	}
+	
+	public File createTempFile(String...lines) throws IOException {
+		File tmpFile = File.createTempFile("montySolr-unittest", null);
+		if (lines.length > 0) {
+			FileOutputStream fi = FileUtils.openOutputStream(tmpFile);
+			StringBuffer out = new StringBuffer();
+			for (String l: lines) {
+				out.append(l + "\n");
+			}
+			FileUtils.writeStringToFile(tmpFile, out.toString());
+		}
+		return tmpFile;
+	}
+	
+	public File duplicateFile(File origFile) throws IOException {
+		File tmpFile = createTempFile();
+		FileUtils.copyFile(origFile, tmpFile);
+		return tmpFile;
+	}
+	
+	public int replaceInFile(File target, String toFind, String replacement) throws IOException {
+		return replaceInFile(target, Pattern.compile(toFind), replacement);
+	}
+
+	public int replaceInFile(File target, Pattern toFind, String replacement) throws IOException {
+		int matches = 0;
+		String contents = FileUtils.readFileToString(target);
+		Matcher matcher = toFind.matcher(contents);
+		while (matcher.find()) {
+			matches++;
+		}
+		matcher.reset();
+		contents = matcher.replaceAll(replacement);
+		FileUtils.writeStringToFile(target, contents);
+		return matches;
+	}
+	
+
 }

@@ -139,7 +139,7 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
 
     
     LinkedList<QueryNode> children = new LinkedList<QueryNode>();
-    children.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) fieldNode));
+    // children.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) fieldNode)); // original input
     
     buffer.reset();
     CharTermAttribute termAtt;

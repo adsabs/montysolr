@@ -93,4 +93,11 @@ public final class AuthorSynonymFilter extends TokenFilter {
 	    }
 	    return false;
 	}
+	
+	@Override
+	public void reset() throws IOException {
+		super.reset();
+		synonymStack.clear();
+		current = null;
+	}
 }

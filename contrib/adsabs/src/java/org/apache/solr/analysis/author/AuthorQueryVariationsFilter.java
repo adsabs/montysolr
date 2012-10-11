@@ -35,7 +35,7 @@ public final class AuthorQueryVariationsFilter extends TokenFilter {
 	@Override
 	public boolean incrementToken() throws IOException {
 		if (this.variationStack.size() > 0) {
-			String syn = this.variationStack.pop();
+			String syn = this.variationStack.remove(0);
 			this.restoreState(this.current);
 			this.termAtt.setEmpty();
 			this.termAtt.append(syn);
@@ -65,5 +65,12 @@ public final class AuthorQueryVariationsFilter extends TokenFilter {
 	        return true;
 	    }
 	    return false;
+	}
+	
+	@Override
+	  public void reset() throws IOException {
+		super.reset();
+		variationStack.clear();
+		current = null;
 	}
 }

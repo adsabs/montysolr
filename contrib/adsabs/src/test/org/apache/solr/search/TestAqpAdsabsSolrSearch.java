@@ -1,19 +1,13 @@
 package org.apache.solr.search;
 
 
-import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
-import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.request.SolrQueryRequest;
 
 
 /**
@@ -37,7 +31,7 @@ import org.apache.solr.request.SolrQueryRequest;
  * Let's do it pragmatically (not as code puritans)
  *
  */
-public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
+public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public String getSchemaFile() {
 		makeResourcesVisible(this.solrConfig.getResourceLoader(),
@@ -53,37 +47,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 				+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
 	}
 	
-	private AqpTestAbstractCase tp = null;
-	
-	public void setUp() throws Exception {
-		super.setUp();
-		
-		final TestAqpAdsabsSolrSearch that = this;
-		
-		tp = new AqpTestAbstractCase() {
-			
-			@Override
-			public void setUp() throws Exception {
-				super.setUp();
-			}
-			
-			@Override
-			public void tearDown() throws Exception {
-				super.tearDown();
-			}
-			
-			
-		};
-		tp.setUp();
-	}
-	
-	public void tearDown() throws Exception {
-		super.tearDown();
-		
-		tp.tearDown();
-		tp = null;
-		
-	}
+
 	
 	
 	public void test() throws Exception {
@@ -152,47 +116,5 @@ public class TestAqpAdsabsSolrSearch extends MontySolrAbstractTestCase {
 	}
 	
 	
-	public QParser getParser(SolrQueryRequest req) throws ParseException, InstantiationException, IllegalAccessException {
-		SolrParams params = req.getParams();
-		String query = params.get(CommonParams.Q);
-		String qt = params.get(CommonParams.QT);
-		QParser qParser = QParser.getParser(query, qt, req);
-		
-		if (qParser instanceof AqpAdsabsQParser) {
-			((AqpAdsabsQParser) qParser).getParser().setDebug(tp.debugParser);
-		}
-		return qParser;
-		
-	}
-	
-	public Query assertQueryEquals(SolrQueryRequest req, String result, Class<?> clazz)
-		throws Exception {
-		
-		QParser qParser = getParser(req);
-		
-		Query q = qParser.parse();
-		
-		String s = q.toString("field");
-		if (!s.equals(result)) {
-			tp.debugFail(q.toString(), result, s);
-		}
-		
-		if (clazz != null) {
-			if (!q.getClass().isAssignableFrom(clazz)) {
-				tp.debugFail(q.toString(), result, "Query is not: " + clazz + " but: " + q.getClass());
-			}
-		}
-		
-		return q;
-	}
-	
-	public void assertQueryParseException(SolrQueryRequest req) throws Exception {
-		try {
-			getParser(req).parse();
-		} catch (ParseException expected) {
-			return;
-		}
-		tp.debugFail("ParseException expected, not thrown");
-	} 
 	
 }
