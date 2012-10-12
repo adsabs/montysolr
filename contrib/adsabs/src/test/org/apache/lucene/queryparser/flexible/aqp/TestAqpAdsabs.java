@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
 import org.apache.lucene.queries.function.FunctionQuery;
@@ -576,6 +577,25 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		//assertQueryEquals("\"func(*) AND that\"", wsa, "\"func(*) AND that\"");
 		
 		assertQueryEquals("CO2+", wsa, "CO2+", TermQuery.class);
-
 	}
+	
+	
+	public void testMultiToken() throws Exception{
+			
+			KeywordAnalyzer a = new KeywordAnalyzer();
+			setDebug(true);
+			assertQueryEquals("weak lensing", null, "weak lensing");
+			assertQueryEquals("all:weak lensing", null, "all:weak lensing");
+			assertQueryEquals("weak all:lensing", null, "weak all:lensing");
+			
+			// the grammar parses this as: A B D -E (which is actually correct)
+			assertQueryEquals("A B (D -E)", null, "A B (D -E)");
+			
+			assertQueryEquals("A B +(D -E)", null, "A B (D -E)");
+			
+			assertQueryEquals("weak lensing", null, "+weak lensing");
+			assertQueryEquals("weak lensing", null, "+weak lensing");
+			assertQueryEquals("weak lensing", null, "+weak lensing");
+	}
+	
 }

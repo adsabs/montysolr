@@ -1,6 +1,9 @@
 package org.apache.solr.search;
 
 
+import java.io.File;
+import java.io.IOException;
+
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
@@ -33,13 +36,39 @@ import org.apache.lucene.search.TermQuery;
  */
 public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
+	@Override
 	public String getSchemaFile() {
 		makeResourcesVisible(this.solrConfig.getResourceLoader(),
 	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
 	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
 	    	});
-		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+		
+		/*
+		 * For purposes of the test, we make a copy of the schema.xml,
+		 * and create our own synonym files
+		 */
+		
+		String configFile = MontySolrSetup.getMontySolrHome()
+			+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+		
+		File newConfig;
+		try {
+			
+			newConfig = duplicateFile(new File(configFile));
+			
+			File synonymsFile = createTempFile(new String[]{
+					"Hst, Hubble Space Telescope, HST",
+			});
+			replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+			
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalStateException(e.getMessage());
+		}
+		
+		return newConfig.getAbsolutePath();
 	}
 
 	public String getSolrConfigFile() {
@@ -52,10 +81,18 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 		
-		//tp.setDebug(true); //enabling debug deactives assertions (thus tests pass, even if they fail)
+		setDebug(true);
 		
-		assertQueryEquals(req("qt", "aqp", "q", "author:\"Kurtz, Michael\"", "debugQuery", "true"), 
-				"", BooleanQuery.class);
+		assertQueryEquals(req("q", "(A B) not C and (D -E) ", "qt", "aqp"), 
+				"all:hst", TermQuery.class);
+		
+		// test multitoken translation
+		assertQueryEquals(req("q", "hst", "qt", "aqp"), 
+				"all:hst", TermQuery.class);
+		assertQueryEquals(req("q", "Hst", "qt", "aqp"), 
+				"all:Hst all:Hubble space telescope all:HST", BooleanQuery.class);
+		
+		
 		
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)"), 
 				"+((all:dog) (all:cat))", BooleanQuery.class);

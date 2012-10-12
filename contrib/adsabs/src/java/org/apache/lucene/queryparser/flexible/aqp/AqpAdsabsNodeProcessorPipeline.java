@@ -55,6 +55,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 	public AqpAdsabsNodeProcessorPipeline(QueryConfigHandler queryConfig) {
 		super(queryConfig);
 	
+		//add(new AqpDEFOPChildrenCatenator());
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 		

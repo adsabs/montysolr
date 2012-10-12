@@ -99,10 +99,20 @@ public class AqpCommonTree extends CommonTree {
     
     public int getStartIndex() {
     	return ((CommonToken)token).getStartIndex();
+      //return startIndex;
     }
     
     public int getStopIndex() {
+      //return stopIndex;
     	return ((CommonToken)token).getStopIndex();
+    }
+    
+    public void setStartIndex(int start) {
+    	((CommonToken)token).setStartIndex(start);
+    }
+    
+    public void setStopIndex(int end) {
+    	((CommonToken)token).setStopIndex(end);
     }
     
     public void setTypeToNameMap(Map<Integer, String> typeMap) {
