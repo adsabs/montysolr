@@ -125,7 +125,7 @@ public class TestAdsAuthorParsing extends MontySolrQueryTestCase {
 		assertU(adoc(FID, "3", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Adamčuk, Kolja"));
 		assertU(commit());
 		
-		//setDebug(true);
+		setDebug(true);
 		
 		// 1. transliteration: adamčuk, k --> adamchuk, k
 		// 2. synonym expansion: adamchuk, k --> adamchuk, k; adamczuk, k

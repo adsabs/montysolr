@@ -597,4 +597,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 			assertQueryEquals("weak lensing", null, "+weak lensing");
 	}
 	
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestAqpAdsabs.class);
+    }
+	
 }

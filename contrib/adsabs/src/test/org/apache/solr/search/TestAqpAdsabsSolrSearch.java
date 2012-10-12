@@ -83,14 +83,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		setDebug(true);
 		
-		assertQueryEquals(req("q", "(A B) not C and (D -E) ", "qt", "aqp"), 
-				"all:hst", TermQuery.class);
+		assertQueryEquals(req("q", "Hubble space telescope", "qt", "aqp"), 
+				"all:Hst all:Hubble space telescope all:HST", BooleanQuery.class);
+		
+		assertQueryEquals(req("q", "HST", "qt", "aqp"), 
+				"all:HST all:Hubble Space Telescope", TermQuery.class);
 		
 		// test multitoken translation
 		assertQueryEquals(req("q", "hst", "qt", "aqp"), 
 				"all:hst", TermQuery.class);
-		assertQueryEquals(req("q", "Hst", "qt", "aqp"), 
-				"all:Hst all:Hubble space telescope all:HST", BooleanQuery.class);
+		
 		
 		
 		
@@ -152,6 +154,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 	}
 	
+	public static junit.framework.Test suite() {
+        return new junit.framework.JUnit4TestAdapter(TestAqpAdsabsSolrSearch.class);
+    }
 	
 	
 }

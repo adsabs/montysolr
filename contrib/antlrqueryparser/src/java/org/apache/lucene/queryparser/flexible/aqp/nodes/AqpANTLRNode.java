@@ -50,7 +50,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
 	
 	public CharSequence toQueryString(EscapeQuerySyntax escaper) {
 		if (getTokenInput() != null) {
-			return "(" + getTokenLabel() + getTokenInput() + ")";
+			return "(" + getTokenLabel() + ":" + getTokenInput() + ")";
 		} else {
 			return getTokenLabel();
 		}

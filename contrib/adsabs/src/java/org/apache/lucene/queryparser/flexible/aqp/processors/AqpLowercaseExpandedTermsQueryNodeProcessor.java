@@ -36,7 +36,23 @@ import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpan
  */
 public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
     LowercaseExpandedTermsQueryNodeProcessor {
+	  
+	private boolean solrReady = false;
+	
+	@Override
+	  public QueryNode process(QueryNode queryTree) throws QueryNodeException {
+		QueryConfigHandler config = this.getQueryConfigHandler();
 
+	    if (config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+	        && config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+	                .getRequest() != null) {
+	    	solrReady = true;
+	    }
+
+	    return super.process(queryTree);
+
+	  }
+	
   @Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
 
@@ -45,7 +61,7 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
     // if we have the SOLR analyzer, we pass the query to it
     // and get the analyzed value - otherwise we use the default
     // lowercasing
-    if (node instanceof FieldableNode
+    if (solrReady && node instanceof FieldableNode
         && node instanceof TextableQueryNode
         && config
             .has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
@@ -66,7 +82,6 @@ public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
 
       Analyzer analyzer = config.get(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER);
       
-      // TODO: the analyzer chain changed, so maybe we are not doing the right thing here
       TokenStream source = null;
       try {
         source = analyzer.tokenStream(field.toString(),

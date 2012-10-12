@@ -63,7 +63,7 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
-
+		
 		if (node instanceof AqpANTLRNode
 				&& ((AqpANTLRNode) node).getTokenLabel().equals("DEFOP")) {
 
@@ -72,6 +72,10 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 				return node.getChildren().get(0);
 			}
 
+			/*
+			 * This used to be here to modify the AST tree, but is 
+			 * now handled by the AqpOptimizationProcessor
+			 * 
 			AqpANTLRNode thisNode = (AqpANTLRNode) node;
 			StandardQueryConfigHandler.Operator op = getDefaultOperator();
 
@@ -119,6 +123,7 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 					thisNode.set(childrenList);
 				}
 			}
+			*/
 		}
 		return node;
 	}

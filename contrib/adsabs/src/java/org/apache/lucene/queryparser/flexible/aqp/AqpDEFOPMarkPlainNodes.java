@@ -1,15 +1,17 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
 /**
- * Joins the nodes below DEFOP QN so that 'weak lensing' becomes
- * one string "weak lensing"
+ * Looks at the nodes below DEFOP QN and marks the nodes
+ * that can be concatenated during analysis, eg. weak lensing
+ * can be used as one token
+ * 
  * 
  *                     DEFOP
  *                        |
@@ -24,19 +26,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  *               /        |
  *            weak      lensing
  *            
- * becomes:
- *                   DEFOP
- *                        |
- *                     /     \
- *            MODIFIER      CLAUSE 
- *                   /          \
- *           TMODIFIER       MODIFIER
- *                  /             \
- *             FIELD             .....
- *                /       
- *           QNORMAL   
- *               /        
- *            weak lensing                
  *                    
  * 
  * Care is taken not to join when the fields are different and 
@@ -46,8 +35,12 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  *
  */
 
-public class AqpDEFOPChildrenCatenator extends AqpQProcessor {
-
+public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
+	
+	public static String NODE_TYPE = "PLAIN_TOKEN";
+	public static String TOKEN_SEPARATOR = " ";
+	public static String TOKEN_CONCATENATED = "PLAIN_TOKENS_CONCATENATED";
+	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("DEFOP")) {
 			return true;
@@ -63,31 +56,49 @@ public class AqpDEFOPChildrenCatenator extends AqpQProcessor {
 		}
 		
 		List<QueryNode> children = node.getChildren();
+		List<QueryNode> forMarking = new ArrayList<QueryNode>();
 		
-		Integer previous = null;
+		Integer previous = -1;
 		for (int i=0;i<children.size();i++) {
 			if (isBareNode(children.get(i))) {
-				if (previous == null) {
+				if (forMarking.size() == 0) {
 					previous = i;
+					forMarking.add(children.get(i));
 				}
 				else if (previous+1 == i) {
-					joinChildren(children.get(previous), children.get(i));
-					children.remove(i);
-					i--;
+					forMarking.add(children.get(i));
+					previous = i;
 					continue;
 					
 				}
 				else {
-					previous = i;
+					previous = -1;
+					tagPlainNodes(forMarking);
 					continue;
 				}
-				
 			}
 		}
 		
+		if (forMarking.size() > 0)
+			tagPlainNodes(forMarking);
 		
 		return node;
 	}
+	
+	private void tagPlainNodes(List<QueryNode> forMarking) {
+		if (forMarking.size() > 1) {
+			StringBuffer concatenated = new StringBuffer();
+			for (int i=0;i<forMarking.size();i++) {
+				concatenated.append(markChild(forMarking.get(i)));
+				if (i+1 != forMarking.size())
+					concatenated.append(TOKEN_SEPARATOR);
+			}
+			QueryNode terminal = getTerminalNode(forMarking.get(0));
+			terminal.setTag(TOKEN_CONCATENATED, concatenated.toString());
+		}
+		forMarking.clear();
+	}
+	
 	
 	private boolean isBareNode(QueryNode node) {
 		StringBuffer sb = new StringBuffer();
@@ -111,14 +122,10 @@ public class AqpDEFOPChildrenCatenator extends AqpQProcessor {
 		}
 	}
 	
-	private QueryNode joinChildren(QueryNode first, QueryNode second) {
-		AqpANTLRNode firstValueNode = (AqpANTLRNode) getTerminalNode(first);
-		AqpANTLRNode secondValueNode = (AqpANTLRNode) getTerminalNode(second);
-		
-		
-		firstValueNode.setTokenInput(firstValueNode.getTokenInput() + " " + secondValueNode.getTokenInput());
-		firstValueNode.getTree().setTokenStopIndex(secondValueNode.getTokenEnd());
-		return first;
+	private String markChild(QueryNode node) {
+		AqpANTLRNode terminal = (AqpANTLRNode) getTerminalNode(node);
+		terminal.setTag(NODE_TYPE, true);
+		return terminal.getTokenInput();
 	}
 
 	private QueryNode getTerminalNode(QueryNode node) {

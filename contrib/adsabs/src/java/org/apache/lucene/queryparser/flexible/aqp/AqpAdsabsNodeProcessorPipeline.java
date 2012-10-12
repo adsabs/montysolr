@@ -19,6 +19,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryN
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQNORMALProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsRegexNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsSynonymNodeProcessor;
@@ -33,6 +34,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFieldMapperProce
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpGroupQueryOptimizerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpLowercaseExpandedTermsQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpMultiWordProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpNullDefaultFieldProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOptimizationProcessor;
@@ -40,10 +42,8 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQANYTHINGProcess
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQDATEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQFUNCProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQIDENTIFIERProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQNORMALProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASETRUNCProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQRANGEEXProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQRANGEINProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQTRUNCATEDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTMODIFIERProcessor;
@@ -55,7 +55,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 	public AqpAdsabsNodeProcessorPipeline(QueryConfigHandler queryConfig) {
 		super(queryConfig);
 	
-		//add(new AqpDEFOPChildrenCatenator());
+		add(new AqpDEFOPMarkPlainNodes());
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 		
@@ -79,7 +79,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		add(new AqpQDATEProcessor());
 		add(new AqpQPHRASEProcessor());
-		add(new AqpQNORMALProcessor());
+		add(new AqpAdsabsQNORMALProcessor()); // keeps the tag information
 		add(new AqpQPHRASETRUNCProcessor());
 		add(new AqpQTRUNCATEDProcessor());
 		add(new AqpQANYTHINGProcessor());
@@ -97,6 +97,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new MatchAllDocsQueryNodeProcessor());
 		
 		add(new AqpFieldMapperProcessor()); // translate the field name before we try to find the tokenizer chain
+		
+		add(new AqpMultiWordProcessor()); // multi-word analyzer
 		add(new AqpLowercaseExpandedTermsQueryNodeProcessor()); // use a specific tokenizer chain to modify the terms
 		add(new TermRangeQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());

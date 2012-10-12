@@ -101,5 +101,12 @@ public class AqpBooleanQueryNode extends BooleanQueryNode {
 	public void setOverrideModifiers(boolean val) {
 		this.overrideModifiers = val;
 	}
-
+	
+	public void setOperator(String op) {
+		operator = op;
+	}
+	
+	public String getOperator() {
+		return operator;
+	}
 }
