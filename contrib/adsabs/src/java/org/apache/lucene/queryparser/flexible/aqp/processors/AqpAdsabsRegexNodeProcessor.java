@@ -11,6 +11,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
@@ -28,7 +29,7 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
-		if (node instanceof FieldQueryNode) {
+		if (node instanceof FieldQueryNode && !(node.getParent() instanceof TermRangeQueryNode)) {
 			FieldQueryNode n = (FieldQueryNode) node;
 			String input = n.getTextAsString();
 			
@@ -37,7 +38,7 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 			}
 			
 			// try to detect if we have special regex characters inside the string
-			if (isRegex(input) && true) {
+			if (isRegex(input)) {
 				if (!isRegex(input.replace(".?", "").replace(".*", ""))) { // detect simple wildcard cases
 					input = input.replace(".*", "*").replace(".?", "?");
 					if (input.endsWith("*") && !input.contains("?")) {

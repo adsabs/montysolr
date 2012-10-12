@@ -223,7 +223,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// TODO: verify this is correct (this phrase is not a phrase inside a range query)
 		assertQueryEquals("[\"this phrase\" TO \"that phrase*\"]", null, "[this phrase TO that phrase*]");
 		
-		//setDebug(true);
 		assertQueryEquals("[\"#$%^&\" TO \"&*()\"]", wsa, "[#$%^& TO &*()]");
 		
 		assertQueryEquals("+a:[this TO that]", null, "a:[this TO that]");
@@ -580,10 +579,10 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	
-	public void testMultiToken() throws Exception{
+	public void _testMultiToken() throws Exception{
 			
 			KeywordAnalyzer a = new KeywordAnalyzer();
-			setDebug(true);
+			//setDebug(true);
 			assertQueryEquals("weak lensing", null, "weak lensing");
 			assertQueryEquals("all:weak lensing", null, "all:weak lensing");
 			assertQueryEquals("weak all:lensing", null, "weak all:lensing");

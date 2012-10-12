@@ -67,7 +67,7 @@ public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
 		if (node instanceof AqpANTLRNode
 				&& ((AqpANTLRNode) node).getTokenLabel().equals("DEFOP")) {
 
-			// only one child, we'll simplify
+			// only one child, we'll simplify the tree
 			if (node.getChildren().size() == 1) {
 				return node.getChildren().get(0);
 			}

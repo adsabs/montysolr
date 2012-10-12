@@ -43,9 +43,9 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		MontySolrSetup.addBuildProperties("contrib/invenio");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
 				+ "/contrib/invenio/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
-		MontySolrSetup
-				.addTargetsToHandler("monty_invenio.tests.fake_citation_query");
+		//MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
+		//MontySolrSetup
+		//		.addTargetsToHandler("monty_invenio.tests.fake_citation_query");
 
 	}
 
