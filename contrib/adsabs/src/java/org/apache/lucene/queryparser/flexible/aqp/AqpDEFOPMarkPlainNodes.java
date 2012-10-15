@@ -37,9 +37,9 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
 public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	
-	public static String NODE_TYPE = "PLAIN_TOKEN";
-	public static String TOKEN_SEPARATOR = " ";
-	public static String TOKEN_CONCATENATED = "PLAIN_TOKENS_CONCATENATED";
+	public static String PLAIN_TOKEN = "PLAIN_TOKEN";
+	public static String PLAIN_TOKEN_SEPARATOR = " ";
+	public static String PLAIN_TOKEN_CONCATENATED = "PLAIN_TOKEN_CONCATENATED";
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("DEFOP")) {
@@ -86,15 +86,17 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	}
 	
 	private void tagPlainNodes(List<QueryNode> forMarking) {
+		
 		if (forMarking.size() > 1) {
 			StringBuffer concatenated = new StringBuffer();
+			int tag = concatenated.hashCode();
 			for (int i=0;i<forMarking.size();i++) {
-				concatenated.append(markChild(forMarking.get(i)));
+				concatenated.append(markChild(tag, forMarking.get(i)));
 				if (i+1 != forMarking.size())
-					concatenated.append(TOKEN_SEPARATOR);
+					concatenated.append(PLAIN_TOKEN_SEPARATOR);
 			}
 			QueryNode terminal = getTerminalNode(forMarking.get(0));
-			terminal.setTag(TOKEN_CONCATENATED, concatenated.toString());
+			terminal.setTag(PLAIN_TOKEN_CONCATENATED, concatenated.toString());
 		}
 		forMarking.clear();
 	}
@@ -122,9 +124,9 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 		}
 	}
 	
-	private String markChild(QueryNode node) {
+	private String markChild(int tag, QueryNode node) {
 		AqpANTLRNode terminal = (AqpANTLRNode) getTerminalNode(node);
-		terminal.setTag(NODE_TYPE, true);
+		terminal.setTag(PLAIN_TOKEN, tag);
 		return terminal.getTokenInput();
 	}
 

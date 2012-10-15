@@ -67,21 +67,21 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		
 	}
 	
-	public Query assertQueryEquals(SolrQueryRequest req, String result, Class<?> clazz)
+	public Query assertQueryEquals(SolrQueryRequest req, String expected, Class<?> clazz)
 		throws Exception {
 		
 		QParser qParser = getParser(req);
-		
+		String query = req.getParams().get(CommonParams.Q);
 		Query q = qParser.parse();
 		
-		String s = q.toString("field");
-		if (!s.equals(result)) {
-			tp.debugFail(q.toString(), result, s);
+		String actual = q.toString("field");
+		if (!actual.equals(expected)) {
+			tp.debugFail(query, expected, actual);
 		}
 		
 		if (clazz != null) {
 			if (!q.getClass().isAssignableFrom(clazz)) {
-				tp.debugFail(q.toString(), result, "Query is not: " + clazz + " but: " + q.getClass());
+				tp.debugFail("Query is not: " + clazz + " but: " + q.getClass(), expected, "-->" + q.toString());
 			}
 		}
 		

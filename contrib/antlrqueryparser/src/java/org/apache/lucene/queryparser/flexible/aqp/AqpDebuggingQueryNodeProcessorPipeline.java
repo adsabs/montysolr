@@ -49,7 +49,7 @@ QueryNodeProcessorPipeline {
 			newMap = harvestTagMap(queryTree);
 			System.out.println("     Tree changed: " + (newVal.equals(oldVal) ? "NO" : "YES"));
 
-			if (true || !newMap.equals(oldMap)) {
+			if (!newMap.equals(oldMap)) {
 				System.out.println("     Tags changed: YES");
 				System.out.println("     -----------------");
 				System.out.println(newMap);
@@ -77,7 +77,7 @@ QueryNodeProcessorPipeline {
 	private String harvestTagMap(QueryNode queryTree) {
 		StringBuffer output = new StringBuffer();
 		harvestTagMapDesc(queryTree, output, 0);
-		return output.toString();
+		return output.toString().trim();
 	}
 
 	private void harvestTagMapDesc(QueryNode queryTree, StringBuffer output, int level) {

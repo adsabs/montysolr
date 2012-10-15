@@ -11,11 +11,15 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CachingTokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
+import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.AqpDEFOPMarkPlainNodes;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpDefopQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
@@ -34,9 +38,13 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 
 public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 
-
+	private CachingTokenFilter buffer;
+	private CharTermAttribute termAtt;
+	private NumericTermAttribute numAtt;
+	private TypeAttribute typeAtt;
+	
 	public AqpMultiWordProcessor() {
-		// empty constructor
+		// empty
 	}
 
 	@Override
@@ -53,93 +61,118 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 	}
 
 	@Override
-	protected QueryNode preProcessNode(QueryNode node)
+	protected QueryNode postProcessNode(QueryNode node)
 	throws QueryNodeException {
-		if (node instanceof FieldQueryNode) {
-			if (!node.containsTag(AqpDEFOPMarkPlainNodes.NODE_TYPE)) {
-				return node;
-			}
-
-			String multiToken = (String) node.getTag(AqpDEFOPMarkPlainNodes.TOKEN_CONCATENATED);
-			if (multiToken == null)
-				return node;
-
-			QueryConfigHandler config = this.getQueryConfigHandler();
-
-			Locale locale = getQueryConfigHandler().get(ConfigurationKeys.LOCALE);
-			if (locale == null) {
-				locale = Locale.getDefault();
-			}
-
-			FieldableNode fieldNode = (FieldableNode) node;
-			TextableQueryNode txtNode = (TextableQueryNode) node;
-
-			CharSequence text = txtNode.getText();
-			CharSequence field = fieldNode.getField();
-
-			Analyzer analyzer = config.get(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER);
-
-			TokenStream source = null;
-			try {
-				source = analyzer.tokenStream(field.toString(),
-						new StringReader(multiToken));
-				source.reset();
-			} catch (IOException e1) {
-				txtNode.setText(text != null ? UnescapedCharSequence.toLowerCase(text,
-						locale) : null);
-				return node;
-			}
-
-			CachingTokenFilter buffer = new CachingTokenFilter(source);
-
-			int numTokens = 0;
-
-			try {
-				while (buffer.incrementToken()) {
-					numTokens++;
+		
+		if (node instanceof AqpDefopQueryNode) {
+			LinkedList<QueryNode> newChildren = new LinkedList<QueryNode>();
+			List<QueryNode> children = node.getChildren();
+			
+			String multiToken;
+			Integer groupId;
+			Integer grpReplaced = -1;
+			
+			for (QueryNode child: children) {
+				QueryNode terminalNode = getTerminalNode(child);
+				
+				if (terminalNode == null) {
+					newChildren.add(child);
+					continue;
 				}
-			} catch (IOException e) {
-				// pass
-			}
-
-			try {
-				// rewind the buffer stream
-				buffer.reset();
-
-				// close original stream - all tokens buffered
-				source.close();
-			} catch (IOException e) {
-				// ignore
-			}
-
-
-			if (numTokens == 0) {
-				// do nothing, change nothing
-			} else if (numTokens == 1) {
-				try {
-					buffer.incrementToken();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				
+				groupId = (Integer) terminalNode.getTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN);
+				
+				if (groupId.equals(grpReplaced)) {
+					continue;
 				}
-				if (buffer.hasAttribute(CharTermAttribute.class)) {
-					CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
-					txtNode.setText(termAtt.toString());
+				
+				multiToken = (String) terminalNode.getTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN_CONCATENATED);
+				if (multiToken != null) {
+					
+					if (analyzeMultiToken(((FieldableNode) terminalNode).getField(), multiToken) > 0) {
+						newChildren.add(expandMultiToken(terminalNode));
+						grpReplaced = groupId;
+					}
+					else {
+						newChildren.add(child);
+					}
+					
 				}
 				else {
-					NumericTermAttribute numAtt = buffer.getAttribute(NumericTermAttribute.class);
-					txtNode.setText(new Long(numAtt.getRawValue()).toString());
+					newChildren.add(child);
 				}
-
-			} else {
-				return expandNode(node, field, text, buffer);
 			}
+			node.set(newChildren);
 		}
 		return node;
+		
+	}
+
+
+	private QueryNode getTerminalNode(QueryNode node) {
+		if (node.isLeaf()) {
+			return null;
+		}
+		for (QueryNode child: node.getChildren()) {
+			if (child.containsTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN)) {
+				return child;
+			}
+			QueryNode nn = getTerminalNode(child);
+			if (nn != null) 
+				return nn;
+		}
+		return null;
+	}
+	
+	private int analyzeMultiToken(CharSequence field, String multiToken) {
+			
+
+		QueryConfigHandler config = this.getQueryConfigHandler();
+
+		Locale locale = getQueryConfigHandler().get(ConfigurationKeys.LOCALE);
+		if (locale == null) {
+			locale = Locale.getDefault();
+		}
+		Analyzer analyzer = config.get(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER);
+
+		TokenStream source = null;
+		try {
+			source = analyzer.tokenStream(field.toString(),
+					new StringReader(multiToken));
+			source.reset();
+		} catch (IOException e1) {
+			return -1;
+		}
+
+		buffer = new CachingTokenFilter(source);
+		int numSynonyms = 0;
+
+		try {
+			while (buffer.incrementToken()) {
+				typeAtt = buffer.getAttribute(TypeAttribute.class);
+				if (typeAtt.type().equals(SynonymFilter.TYPE_SYNONYM)) {
+					numSynonyms++;
+				}
+			}
+		} catch (IOException e) {
+			// pass
+		}
+
+		try {
+			// rewind the buffer stream
+			buffer.reset();
+
+			// close original stream - all tokens buffered
+			source.close();
+		} catch (IOException e) {
+			// ignore
+		}
+		
+		return numSynonyms;
 	}
 
 	@Override
-	protected QueryNode postProcessNode(QueryNode node)
+	protected QueryNode preProcessNode(QueryNode node)
 	throws QueryNodeException {
 		return node;
 	}
@@ -150,23 +183,27 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 		return children;
 	}
 
-	protected QueryNode expandNode(QueryNode node, CharSequence field, 
-			CharSequence text, CachingTokenFilter buffer) throws QueryNodeException {
+	protected QueryNode expandMultiToken(QueryNode node) throws QueryNodeException {
 
 		FieldableNode fieldNode = (FieldableNode) node;
 
 
 		LinkedList<QueryNode> children = new LinkedList<QueryNode>();
-		children.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) fieldNode)); // original input
+		//children.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) fieldNode)); // original input
 
 		buffer.reset();
-		CharTermAttribute termAtt;
-		NumericTermAttribute numAtt;
+		
 
 		try {
 			while (buffer.incrementToken()) {
+				
+				typeAtt = buffer.getAttribute(TypeAttribute.class);
+				if (!typeAtt.type().equals(SynonymFilter.TYPE_SYNONYM)) {
+					continue;
+				}
+				
 				FieldableNode newNode = (FieldableNode) fieldNode.cloneTree();
-
+				
 				if (buffer.hasAttribute(CharTermAttribute.class)) {
 					termAtt = buffer.getAttribute(CharTermAttribute.class);
 					((TextableQueryNode) newNode).setText(termAtt.toString());
@@ -184,22 +221,14 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 			getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());
 		}
 
-
-
 		if (children.size() < 1) {
 			throw new QueryNodeException(new MessageImpl(
 					QueryParserMessages.PARAMETER_VALUE_NOT_SUPPORTED,
-					"The solr analyzer returned more than one value when processing "
-					+ field + ":" + text + ". However, all in vain"));
+					"This should never hapeeeeennnn! Error expanding synonyms for: "
+					+ node.toString() + ""));
 		}
 
-
-		/*
-		 * TODO: add a flexible factory that knows how to handle the 
-		 * children or raise error
-		 */
-
-		return new GroupQueryNode(new BooleanQueryNode(children));
+		return new GroupQueryNode(new AqpOrQueryNode(children));
 
 	}
 }

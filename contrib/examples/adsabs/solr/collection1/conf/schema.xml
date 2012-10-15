@@ -286,7 +286,7 @@
         <filter class="solr.TrimFilterFactory"/>
       </analyzer>
       <analyzer type="query">
-        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.ASCIIFoldingFilterFactory"/>
         <filter class="solr.WordDelimiterFilterFactory" 
         generateWordParts="1" 
@@ -297,9 +297,10 @@
         splitOnCaseChange="0" 
         splitOnNumerics="0" 
         stemEnglishPossessive="1" 
-        preserveOriginal="0"/>
+        preserveOriginal="1"
+        />
         <filter class="solr.AcronymTokenFilterFactory" emitBoth="false" lowercaseAcronyms="false"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="ads_text.synonyms" ignoreCase="false" expand="true"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="ads_text.synonyms" ignoreCase="false" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
         <filter class="solr.StopFilterFactory" ignoreCase="false" words="text.kill_sens" enablePositionIncrements="true" />
         <filter class="solr.TrimFilterFactory"/>

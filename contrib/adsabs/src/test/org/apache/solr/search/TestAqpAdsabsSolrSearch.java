@@ -57,7 +57,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			newConfig = duplicateFile(new File(configFile));
 			
 			File synonymsFile = createTempFile(new String[]{
-					"Hst, Hubble Space Telescope, HST",
+					"Hst, hubble\\ space\\ telescope, HST",
 			});
 			replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
@@ -83,14 +83,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		setDebug(true);
 		
-		assertQueryEquals(req("q", "Hubble space telescope", "qt", "aqp"), 
+		assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp"), 
+				"all:Hst all:Hubble space telescope all:HST", BooleanQuery.class);
+		assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp"), 
 				"all:Hst all:Hubble space telescope all:HST", BooleanQuery.class);
 		
 		assertQueryEquals(req("q", "HST", "qt", "aqp"), 
 				"all:HST all:Hubble Space Telescope", TermQuery.class);
 		
 		// test multitoken translation
-		assertQueryEquals(req("q", "hst", "qt", "aqp"), 
+		assertQueryEquals(req("q", "HST", "qt", "aqp"), 
 				"all:hst", TermQuery.class);
 		
 		
