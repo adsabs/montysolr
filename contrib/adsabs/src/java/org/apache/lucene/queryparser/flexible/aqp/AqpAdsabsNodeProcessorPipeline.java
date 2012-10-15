@@ -9,6 +9,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.BooleanSingleC
 import org.apache.lucene.queryparser.flexible.standard.processors.BoostQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.DefaultPhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.FuzzyQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
@@ -16,6 +17,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQuer
 import org.apache.lucene.queryparser.flexible.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.TermRangeQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
@@ -23,6 +25,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQNORMALPro
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsRegexNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsSynonymNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalysisQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCLAUSEProcessor;
@@ -54,6 +57,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 
 	public AqpAdsabsNodeProcessorPipeline(QueryConfigHandler queryConfig) {
 		super(queryConfig);
+		
+		QueryConfigHandler config = getQueryConfigHandler();
 	
 		add(new AqpDEFOPMarkPlainNodes());
 		add(new AqpDEFOPProcessor());
@@ -69,8 +74,6 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpCLAUSEProcessor());
 		
 		add(new AqpTMODIFIERProcessor()); // changes AST to more manageable form
-		
-		
 		add(new AqpBOOSTProcessor());
 		add(new AqpFUZZYProcessor());
 	
@@ -85,32 +88,37 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpQANYTHINGProcessor());
 		add(new AqpQIDENTIFIERProcessor());
 		add(new AqpFIELDProcessor());
-		
+		add(new AqpBibcodeProcessor()); // finds bibcode and converts to AqpAdslabsIdentifier		
 	
 		add(new AqpFuzzyModifierProcessor());
-	
-		add(new AqpBibcodeProcessor()); // finds bibcode and converts to AqpAdslabsIdentifier
 		add(new WildcardQueryNodeProcessor());
 		add(new MultiFieldQueryNodeProcessor()); // expands to multiple fields if field=null
 		add(new AqpNullDefaultFieldProcessor());
 		add(new FuzzyQueryNodeProcessor());
 		add(new MatchAllDocsQueryNodeProcessor());
 		
+		
+		// Analysis block: here we use the Solr/Lucene analyzers
+		
 		add(new AqpFieldMapperProcessor()); // translate the field name before we try to find the tokenizer chain
-		
 		add(new AqpMultiWordProcessor()); // find synonyms if we have 'plain word token group'
-		add(new AqpLowercaseExpandedTermsQueryNodeProcessor()); // use a specific tokenizer chain to modify the terms
+		
+		if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY) == true) {
+			add(new AqpAnalysisQueryNodeProcessor());
+		}
+		else {
+			add(new LowercaseExpandedTermsQueryNodeProcessor());
+		}
+		
 		add(new TermRangeQueryNodeProcessor());
-		add(new AllowLeadingWildcardProcessor());
-		
-		add(new AqpAdsabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
-		
-		
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
+		add(new AqpAdsabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
 		add(new AqpAdsabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
+				
+		
 		
 		add(new PhraseSlopQueryNodeProcessor());
-	
+		add(new AllowLeadingWildcardProcessor());
 		// add(new GroupQueryNodeProcessor());
 		add(new NoChildOptimizationQueryNodeProcessor());
 		add(new RemoveDeletedQueryNodesProcessor());

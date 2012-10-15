@@ -15,19 +15,20 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.ADSSyntaxParser;
 
 
 public class AqpAdsabsQueryParser extends AqpQueryParser {
-
-
+	
 	public static AqpQueryParser init() throws Exception {
-		return new AqpAdsabsQueryParser(new AqpAdsabsQueryConfigHandler(), 
+		AqpAdsabsQueryConfigHandler c = new AqpAdsabsQueryConfigHandler();
+		return new AqpAdsabsQueryParser(c, 
 				  new ADSSyntaxParser(),
-				  new AqpAdsabsNodeProcessorPipeline(null),
+				  new AqpAdsabsNodeProcessorPipeline(c),
 				  new AqpAdsabsQueryTreeBuilder());
 	}
 
 	public static AqpQueryParser init(String grammarName) throws Exception {
-		return new AqpAdsabsQueryParser(new AqpAdsabsQueryConfigHandler(), 
+		AqpAdsabsQueryConfigHandler c = new AqpAdsabsQueryConfigHandler();
+		return new AqpAdsabsQueryParser(c, 
 				new AqpSyntaxParserLoadableImpl().initializeGrammar(grammarName),
-				  new AqpAdsabsNodeProcessorPipeline(null),
+				  new AqpAdsabsNodeProcessorPipeline(c),
 				  new AqpAdsabsQueryTreeBuilder());
 	}
 	

@@ -81,22 +81,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 		
-		setDebug(true);
-		
-		assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp"), 
-				"all:Hst all:Hubble space telescope all:HST", BooleanQuery.class);
-		assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp"), 
-				"all:Hst all:Hubble space telescope all:HST", BooleanQuery.class);
-		
-		assertQueryEquals(req("q", "HST", "qt", "aqp"), 
-				"all:HST all:Hubble Space Telescope", TermQuery.class);
-		
-		// test multitoken translation
-		assertQueryEquals(req("q", "HST", "qt", "aqp"), 
-				"all:hst", TermQuery.class);
-		
-		
-		
 		
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)"), 
 				"+((all:dog) (all:cat))", BooleanQuery.class);
@@ -141,16 +125,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		// new function queries, the 2nd order citation operators
 		
 		assertQueryEquals(req("qt", "aqp", "q", "x OR z cites(author:muller OR title:body)"), 
-				"(all:x all:z) SecondOrderQuery((author:muller author:MULLER,* author:MULLER,*) title:body, filter=null, collector=cites[using_cache:reference])", BooleanQuery.class);
+				"(all:x all:z) SecondOrderQuery((author:muller author:muller,*) title:body, filter=null, collector=cites[using_cache:reference])", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "cites(author:muller)"), 
-        "SecondOrderQuery(author:muller author:MULLER,* author:MULLER,*, filter=null, collector=cites[using_cache:reference])", SecondOrderQuery.class);
+        "SecondOrderQuery(author:muller author:muller,*, filter=null, collector=cites[using_cache:reference])", SecondOrderQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "refersto(author:muller)"), 
-				"SecondOrderQuery(author:muller author:MULLER,* author:MULLER,*, filter=null, collector=citedby[using:reference<bibcode>])", SecondOrderQuery.class);
+				"SecondOrderQuery(author:muller author:muller,*, filter=null, collector=citedby[using:reference<bibcode>])", SecondOrderQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "x OR z refersto(author:muller OR title:body)"), 
-				"(all:x all:z) SecondOrderQuery((author:muller author:MULLER,* author:MULLER,*) title:body, filter=null, collector=citedby[using:reference<bibcode>])", BooleanQuery.class);
+				"(all:x all:z) SecondOrderQuery((author:muller author:muller,*) title:body, filter=null, collector=citedby[using:reference<bibcode>])", BooleanQuery.class);
 		
 		
 		

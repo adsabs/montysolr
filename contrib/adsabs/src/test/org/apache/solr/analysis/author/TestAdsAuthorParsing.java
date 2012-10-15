@@ -18,13 +18,10 @@
 package org.apache.solr.analysis.author;
 
 
-import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.schema.SchemaField;
 import org.junit.BeforeClass;
 
 import java.io.File;
@@ -125,7 +122,7 @@ public class TestAdsAuthorParsing extends MontySolrQueryTestCase {
 		assertU(adoc(FID, "3", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Adamčuk, Kolja"));
 		assertU(commit());
 		
-		setDebug(true);
+		//setDebug(true);
 		
 		// 1. transliteration: adamčuk, k --> adamchuk, k
 		// 2. synonym expansion: adamchuk, k --> adamchuk, k; adamczuk, k

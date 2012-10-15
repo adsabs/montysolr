@@ -12,6 +12,7 @@ import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.sandbox.queries.SlowFuzzyQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
@@ -32,7 +33,16 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	public AqpQueryParser getParser() throws Exception {
-		AqpQueryParser qp = AqpAdsabsQueryParser.init(getGrammarName());
+		
+		//AqpQueryParser qp = AqpAdsabsQueryParser.init(getGrammarName());
+		
+		AqpAdsabsQueryConfigHandler config = new AqpAdsabsQueryConfigHandler();
+		config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, false);
+		AqpSyntaxParser parser = new AqpSyntaxParserLoadableImpl().initializeGrammar(grammarName);
+		AqpAdsabsNodeProcessorPipeline processor = new AqpAdsabsNodeProcessorPipeline(config);
+	    AqpAdsabsQueryTreeBuilder builder = new AqpAdsabsQueryTreeBuilder();
+	    
+	    AqpQueryParser qp = new AqpAdsabsQueryParser(config, parser, processor, builder);
 		qp.setDebug(this.debugParser);
 		return qp;
 	}

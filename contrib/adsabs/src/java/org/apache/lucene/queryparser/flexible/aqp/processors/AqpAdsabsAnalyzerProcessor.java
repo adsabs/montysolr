@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
@@ -27,7 +28,7 @@ public class AqpAdsabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
 		if (enteredCleanZone == true) {
 			counter++;
 		}
-		else if (node instanceof AqpFunctionQueryNode) {
+		else if (node instanceof AqpFunctionQueryNode || node instanceof AqpNonAnalyzedQueryNode) {
 			enteredCleanZone = true;
 			counter++;
 		}

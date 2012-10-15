@@ -8,10 +8,14 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubSueryProvider;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -112,6 +116,12 @@ public class AqpAdsabsQParser extends QParser {
 		
 		// now add the special analyzer that knows to use solr token chains
 		config.set(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER, req.getSchema().getQueryAnalyzer());
+		
+		config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
+		
+		// special analyzers
+		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpSolrFunctionProvider());
+		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpAdsabsSubSueryProvider());
 		
 		if (params.getBool("debugQuery", false) != false) {
 			try {
