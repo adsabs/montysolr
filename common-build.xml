@@ -270,7 +270,6 @@
 
 	<path id="common.test.classpath">
 
-		<path refid="common.classpath"/>
 		<path refid="junit-path"/>
 		<path refid="ant-path"/>
 		<pathelement location="${common.dir}/build/classes/test"/>
@@ -286,6 +285,7 @@
 			<include name = "**/lucene/build/codecs/classes/java"/>
 			<include name = "**/lucene/build/test-framework/classes/java"/>
 		</dirset>
+		<path refid="common.classpath"/>
 	</path>
 
 	<path id="common.junit.classpath">
