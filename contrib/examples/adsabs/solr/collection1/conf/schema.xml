@@ -269,7 +269,7 @@
         <tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
         <filter class="solr.PatternReplaceFilterFactory" pattern="-?\s+-?" replacement="-" replace="all"/>
         <filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2"/>
-        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.ASCIIDuplicatingFilterFactory"/>
         <filter class="solr.WordDelimiterFilterFactory" 
         generateWordParts="1" 
         generateNumberParts="1" 
@@ -287,7 +287,7 @@
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.ASCIIFoldingFilterFactory"/>
+        <filter class="solr.ASCIIDuplicatingFilterFactory"/>
         <filter class="solr.WordDelimiterFilterFactory" 
         generateWordParts="1" 
         generateNumberParts="1" 

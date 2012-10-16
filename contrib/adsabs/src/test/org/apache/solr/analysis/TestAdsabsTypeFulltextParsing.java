@@ -28,6 +28,8 @@ import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
 
+import org.adsabs.solr.AdsConfig.F;
+
 /**
  * Tests that the fulltext is parsed properly, the ads_text type
  * is not as simple as it seems
@@ -77,6 +79,18 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
 	
 	public void test() throws Exception {
+		
+		assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "Bílá kobyla skočila přes čtyřista"));
+		assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "třicet-tři stříbrných střech"));
+		assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "A ještě TřistaTřicetTři stříbrných křepeliček"));
+		assertU(commit());
+		
+		
+		// the ascii folding filter emits both unicode and the ascii version
+		assertQ(req("q", F.ADS_TEXT_TYPE + ":Bílá"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+		assertQ(req("q", F.ADS_TEXT_TYPE + ":Bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+		assertQ(req("q", F.ADS_TEXT_TYPE + ":bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+		
 		
 		//setDebug(true);
 		
