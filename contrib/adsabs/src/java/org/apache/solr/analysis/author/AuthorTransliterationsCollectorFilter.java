@@ -27,16 +27,16 @@ import org.slf4j.LoggerFactory;
  * should revert it.
  *
  */
-public final class AuthorNameVariantsCollectorFilter extends TokenFilter {
+public final class AuthorTransliterationsCollectorFilter extends TokenFilter {
 
-    public static final Logger log = LoggerFactory.getLogger(AuthorNameVariantsCollectorFilter.class);
+    public static final Logger log = LoggerFactory.getLogger(AuthorTransliterationsCollectorFilter.class);
 	private WriteableSynonymMap synMap;
 	
 	private final CharTermAttribute termAtt;
     private final TypeAttribute typeAtt;
     private AttributeSource.State current;
     
-	public AuthorNameVariantsCollectorFilter(TokenStream input, WriteableSynonymMap synMap) {
+	public AuthorTransliterationsCollectorFilter(TokenStream input, WriteableSynonymMap synMap) {
 		super(input);
 		termAtt = addAttribute(CharTermAttribute.class);
 		typeAtt = addAttribute(TypeAttribute.class);
@@ -71,7 +71,7 @@ public final class AuthorNameVariantsCollectorFilter extends TokenFilter {
 	    		synMap.put(authorName, nameVariants);
 	    	}
 	    	while (input.incrementToken()) {
-	    		if (typeAtt.type().equals(AuthorUtils.TOKEN_TYPE_AUTHOR_GENERATED_VARIANT)) {
+	    		if (typeAtt.type().equals(AuthorUtils.TOKEN_TYPE_AUTHOR_GENERATED_TRANSLITERATION)) {
 	    			nameVariants.add(termAtt.toString());
 	    		}
 	    		else {

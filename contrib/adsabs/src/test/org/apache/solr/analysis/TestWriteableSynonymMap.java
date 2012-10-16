@@ -11,8 +11,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
-import org.apache.solr.analysis.author.AuthorNameVariantsCollectorFactory;
-import org.apache.solr.analysis.author.AuthorNameVariantsCollectorFilter;
+import org.apache.solr.analysis.author.AuthorTransliterationsCollectorFactory;
+import org.apache.solr.analysis.author.AuthorTransliterationsCollectorFilter;
 import org.apache.solr.analysis.author.AuthorNormalizeFilterFactory;
 import org.apache.solr.analysis.author.AuthorTransliterationFactory;
 
@@ -29,12 +29,12 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	  	TokenStream stream = new PatternTokenizer(new StringReader("MÜLLER, BILL"), Pattern.compile(";"), -1);
 	  	
 	  	AuthorNormalizeFilterFactory normFactory = new AuthorNormalizeFilterFactory();
-	  	AuthorNameVariantsCollectorFactory collectorFactory = new AuthorNameVariantsCollectorFactory();
+	  	AuthorTransliterationsCollectorFactory collectorFactory = new AuthorTransliterationsCollectorFactory();
 	  	AuthorTransliterationFactory transliteratorFactory = new AuthorTransliterationFactory();
 	  	
 	  	File tmpFile = File.createTempFile("variants", ".tmp");
 	  	
-	    AuthorNameVariantsCollectorFilter filter = collectorFactory.create(transliteratorFactory.create(normFactory.create(stream)));
+	    AuthorTransliterationsCollectorFilter filter = collectorFactory.create(transliteratorFactory.create(normFactory.create(stream)));
 	    
 	    filter.reset();
 	    while (filter.incrementToken() != false) {
@@ -91,7 +91,7 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	    checkOutput(tmpFile, "MÜLLER\\,\\ BILL=>MUELLER\\,\\ BILL,MULLER\\,\\ BILL,\n");
 	    
 	    // now load the factory and check the synonyms were loaded properly
-	    collectorFactory = new AuthorNameVariantsCollectorFactory();
+	    collectorFactory = new AuthorTransliterationsCollectorFactory();
 	    synMap = collectorFactory.getSynonymMap();
 	    synMap.clear();
 	    synMap.parseRules(synMap.getLines(tmpFile.getAbsolutePath()));
@@ -100,6 +100,20 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	    assertTrue(synMap.containsKey("MÜLLER, BILL"));
 	    assertEquals(expected, synMap.get("MÜLLER, BILL"));
 	    
+	}
+	
+	public void testBidirectionalMap() throws IOException, InterruptedException {
+		
+	  	File tmpFile = File.createTempFile("variants", ".tmp");
+	  	
+		// create a synonym map
+		WriteableSynonymMap synMap = new WriteableSynonymMap(tmpFile.getAbsolutePath(), true);
+		
+		// add some synonyms
+		synMap.put("Foo, Bär", new HashSet<String>() {{ add("Foo, Bar"); add("Foo, Baer"); }});
+		synMap.persist();
+		
+	    checkOutput(tmpFile, "Foo\\,\\ Bär,Foo\\,\\ Bar,Foo\\,\\ Baer,\n");
 	}
 	
 	private void checkOutput(File tmpFile, String expected) throws IOException {

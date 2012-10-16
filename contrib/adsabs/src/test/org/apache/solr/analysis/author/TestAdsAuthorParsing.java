@@ -93,8 +93,8 @@ public class TestAdsAuthorParsing extends MontySolrQueryTestCase {
 					//"ADAMČUK\\,\\ K=>ADAMCUK\\,\\ K,ADAMCHUK\\,\\ K,"
 					}
 			);
-			replaceInFile(newConfig, "synonyms=\"author_generated.variants\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
-			replaceInFile(newConfig, "outFile=\"author_generated.variants\"", "outFile=\"" + synonymsFile.getAbsolutePath() + "\"");
+			replaceInFile(newConfig, "synonyms=\"author_generated.translit\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+			replaceInFile(newConfig, "outFile=\"author_generated.translit\"", "outFile=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
 			
 		} catch (IOException e) {
@@ -120,6 +120,7 @@ public class TestAdsAuthorParsing extends MontySolrQueryTestCase {
 		assertU(adoc(FID, "1", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Adamčuk, K"));
 		assertU(adoc(FID, "2", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Adamčuk, Karel"));
 		assertU(adoc(FID, "3", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Adamčuk, Kolja"));
+		assertU(adoc(FID, "4", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Müller, William"));
 		assertU(commit());
 		
 		//setDebug(true);

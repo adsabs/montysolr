@@ -12,7 +12,7 @@ import org.apache.solr.analysis.WriteableTokenFilterFactory;
  * @author jluker
  *
  */
-public class AuthorNameVariantsCollectorFactory extends WriteableTokenFilterFactory {
+public class AuthorTransliterationsCollectorFactory extends WriteableTokenFilterFactory {
 
     public void init(Map<String, String> args) {
 	    super.init(args);
@@ -21,8 +21,8 @@ public class AuthorNameVariantsCollectorFactory extends WriteableTokenFilterFact
 	/* (non-Javadoc)
 	 * @see org.apache.solr.analysis.TokenFilterFactory#create(org.apache.lucene.analysis.TokenStream)
 	 */
-	public AuthorNameVariantsCollectorFilter create(TokenStream input) {
-		return new AuthorNameVariantsCollectorFilter(input, getSynonymMap());
+	public AuthorTransliterationsCollectorFilter create(TokenStream input) {
+		return new AuthorTransliterationsCollectorFilter(input, getSynonymMap());
 	}
 
 }

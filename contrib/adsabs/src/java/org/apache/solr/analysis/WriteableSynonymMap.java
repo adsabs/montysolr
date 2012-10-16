@@ -29,12 +29,18 @@ public class WriteableSynonymMap {
     private Map<String, String> regexMap;
 	private int numUpdates = 0;
 	private String outFile = null;
-	
+	private boolean bidirectional;
+
 	public WriteableSynonymMap(String outFile) {
+		this(outFile, false);
+	}
+	
+	public WriteableSynonymMap(String outFile, boolean bidirectional) {
 		
 		this.map = Collections.synchronizedMap(new HashMap<String, Set<String>>());
 		this.regexMap = Collections.synchronizedMap(new HashMap<String, String>());
 		this.outFile = outFile;
+		this.bidirectional = bidirectional;
 	}
 	
 	public void clear() {
@@ -46,6 +52,14 @@ public class WriteableSynonymMap {
 		this.outFile = out;
 	}
 	
+	public boolean isBidirectional() {
+		return bidirectional;
+	}
+
+	public void setBidirectional(boolean bidirectional) {
+		this.bidirectional = bidirectional;
+	}
+
 	public Set<String> put(String k, Set<String> v) {
 		//log.trace("setting " + k + " to " + v);
 		numUpdates++;
@@ -137,7 +151,7 @@ public class WriteableSynonymMap {
 			// let's be compliant...
 			
 			out.append(entry.getKey().replace(",", "\\,").replace(" ", "\\ "));
-			out.append("=>");
+			out.append(bidirectional ? "," : "=>");
 			for (String s : entry.getValue()) {
 				out.append(s.replace(",", "\\,").replace(" ", "\\ "));
 				out.append(",");

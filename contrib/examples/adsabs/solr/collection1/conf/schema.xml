@@ -45,7 +45,7 @@
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.analysis.author.AuthorNameVariantsCollectorFactory" outFile="author_generated.variants" />
+        <filter class="solr.analysis.author.AuthorTransliterationsCollectorFactory" outFile="author_generated.translit" />
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
       <analyzer type="query">

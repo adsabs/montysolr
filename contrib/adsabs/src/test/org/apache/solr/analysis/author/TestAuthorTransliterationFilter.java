@@ -9,7 +9,7 @@ import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
-import org.apache.solr.analysis.author.AuthorNameVariantsCollectorFactory;
+import org.apache.solr.analysis.author.AuthorTransliterationsCollectorFactory;
 
 
 public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {

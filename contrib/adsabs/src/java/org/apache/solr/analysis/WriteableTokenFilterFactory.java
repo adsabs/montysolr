@@ -24,6 +24,8 @@ public abstract class WriteableTokenFilterFactory extends TokenFilterFactory
 	
 	public void inform(ResourceLoader loader) {
     	
+		boolean bidirectional = Boolean.parseBoolean(args.get("bidirectional"));
+		
   		String outFile = args.get("outFile");
 	    if (outFile != null) {
 	    	args.remove("outFile");
@@ -42,7 +44,7 @@ public abstract class WriteableTokenFilterFactory extends TokenFilterFactory
 			}
 		    outFile = outFilePath.getAbsolutePath();
 		    args.put("outFile", outFile);
-		    synMap = new WriteableSynonymMap(args.get("outFile"));
+		    synMap = new WriteableSynonymMap(args.get("outFile"), bidirectional);
 	    }
 	    else {
 	    	log.warn("Missing required argument 'outFile' at: " + this.getClass().getName() 

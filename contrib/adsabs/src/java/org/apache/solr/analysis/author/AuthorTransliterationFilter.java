@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class AuthorTransliterationFilter extends TokenFilter {
 
-    public static final Logger log = LoggerFactory.getLogger(AuthorNameVariantsCollectorFilter.class);
+    public static final Logger log = LoggerFactory.getLogger(AuthorTransliterationsCollectorFilter.class);
     
 	public AuthorTransliterationFilter(TokenStream input) {
 		super(input);
@@ -55,7 +55,7 @@ public final class AuthorTransliterationFilter extends TokenFilter {
 			this.termAtt.setEmpty();
 			this.termAtt.append(syn);
 			this.posIncrAtt.setPositionIncrement(0);
-			this.typeAtt.setType(AuthorUtils.TOKEN_TYPE_AUTHOR_GENERATED_VARIANT);
+			this.typeAtt.setType(AuthorUtils.TOKEN_TYPE_AUTHOR_GENERATED_TRANSLITERATION);
 			return true;
 		}
 		
