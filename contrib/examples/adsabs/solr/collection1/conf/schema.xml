@@ -45,17 +45,18 @@
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.analysis.author.AuthorTransliterationsCollectorFactory" outFile="author_generated.translit" />
+        <filter class="solr.analysis.author.AuthorTransliterationsCollectorFactory" outFile="author_generated.translit" syntax="equivalent"/>
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.variants" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorQueryVariationsFilterFactory"/>
-        <filter class="solr.analysis.author.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
+        <filter class="solr.analysis.author.AuthorSynonymFilterFactory" synonyms="author_generated.translit" syntax="equivalent"/>
+        <!-- this should not be necessary as the goal is to have the "curated" list be comprehensive -->
+        <!-- filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/ -->
+        <filter class="solr.analysis.author.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" syntax="explicit"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
       </analyzer>

@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.*;
 
+import org.apache.solr.analysis.WriteableExplicitSynonymMap;
 import org.apache.solr.analysis.WriteableSynonymMap;
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ public class TestAuthorSynonymFilterFactory {
 			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
 		}
 		
-	    WriteableSynonymMap synMap = new WriteableSynonymMap(null);
+	    WriteableSynonymMap synMap = new WriteableExplicitSynonymMap(null);
 	    synMap.parseRules(rules);
 	    Set<String> expected = new HashSet<String>();
 	    expected.add("MILLER, B");
