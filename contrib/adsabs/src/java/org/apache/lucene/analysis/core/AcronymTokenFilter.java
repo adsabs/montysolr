@@ -11,9 +11,6 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
-import org.apache.lucene.util.AttributeSource;
-import org.apache.lucene.analysis.util.CharacterUtils;
-import org.apache.lucene.util.Version;
 
 /**
  *
@@ -25,35 +22,30 @@ import org.apache.lucene.util.Version;
 public final class AcronymTokenFilter extends TokenFilter {
     public static final String TOKEN_TYPE_ACRONYM = "ACRONYM";
     public static final int ACRONYM_MIN_LENGTH = 2;
-
-    // stores our disocvered acronyms
-    private StringBuffer acronym;
-
+    public static final String ACRONYM_PREFIX = "acr::";
+    
     // controls index-time vs. query-time behavior
     private boolean emitBoth;
-    private boolean lowercaseAcronyms;
 
-    private AttributeSource.State current = null;
-    private final CharacterUtils charUtils;
     private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+    private State currentState = null;
 
     public AcronymTokenFilter(TokenStream in, boolean emitBoth, boolean lowercaseAcronyms) {
         super(in);
-        this.charUtils = CharacterUtils.getInstance(Version.LUCENE_40);
-        this.acronym = new StringBuffer();
         this.emitBoth = emitBoth;
-        this.lowercaseAcronyms = lowercaseAcronyms;
     }
 
     @Override
     public boolean incrementToken() throws IOException {
         // check if we got an acronym
-        if (this.acronym.length() > 0) {
-            createToken(this.acronym.toString(), this.current);
-            acronym.setLength(0);
-            return true;
+        if (this.currentState != null) {
+          restoreState(currentState);
+          typeAtt.setType(TOKEN_TYPE_ACRONYM);
+          posIncrAtt.setPositionIncrement(0);
+          currentState=null;
+          return true;
         }
 
         if (!input.incrementToken()) {                           
@@ -61,41 +53,31 @@ public final class AcronymTokenFilter extends TokenFilter {
         }
 
         String origTerm = termAtt.toString();
-        boolean termIsAcronym = termIsAcronym(origTerm);
-        typeAtt.setType(TypeAttribute.DEFAULT_TYPE);
-
-        final char[] buffer = termAtt.buffer();
-        if (lowercaseAcronyms || !termIsAcronym) {
-            final int length = termAtt.length();
-            for (int i = 0; i < length;) {
-                i += Character.toChars(
-                    Character.toLowerCase(
-                        charUtils.codePointAt(buffer, i)), buffer, i);
-            }
-        } else if (termIsAcronym) {
+        if (termIsAcronym(origTerm)) {
+          termAtt.setEmpty().append(ACRONYM_PREFIX+origTerm);
+          
+          if (!emitBoth) {
             typeAtt.setType(TOKEN_TYPE_ACRONYM);
-        }
-
-        if (termIsAcronym && emitBoth) {                              
-            current = captureState();                            
-            this.acronym.append(origTerm);
+            return true;
+          }
+          currentState = captureState();
+          termAtt.setEmpty().append(origTerm);
+           
         }
 
         return true;
     }
 
-    protected boolean createToken(String acronym, AttributeSource.State current) {
-        restoreState(current);
-        termAtt.setEmpty().append(acronym);
-        typeAtt.setType(TOKEN_TYPE_ACRONYM);
-        posIncrAtt.setPositionIncrement(0);
-        return true;
-  }
     private boolean termIsAcronym(String term) {
         if (term.length() < ACRONYM_MIN_LENGTH || !term.equals(term.toUpperCase())) {
             return false;
         }
         return true;
+    }
+    
+    public void reset() throws IOException {
+      super.reset();
+      currentState=null;
     }
 
 }

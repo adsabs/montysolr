@@ -1,5 +1,16 @@
 package monty.solr.util;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import monty.solr.util.DocReconstructor.GrowableStringArray;
+import monty.solr.util.DocReconstructor.Reconstructed;
+
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.StorableField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
 import org.apache.lucene.search.Query;
@@ -8,6 +19,8 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.AqpAdsabsQParser;
 import org.apache.solr.search.QParser;
+
+import com.mongodb.util.Hash;
 
 
 public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
@@ -99,6 +112,96 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 	
 	public void setDebug(boolean v) {
 		tp.setDebug(v);
+	}
+	
+	/*
+	 * This is only for printing/debugging, DO NOT use this for testing!!!
+	 * This method can go away
+	 */
+	public void dumpDoc(Integer docId, String...fields) throws Exception {
+		//DirectoryReader reader = h.getCore().getSearcher().get().getIndexReader();
+		SolrQueryRequest sr = req();
+		
+		
+		//IndexReader reader = req.getSearcher().getIndexReader();
+		IndexReader reader = sr.getSearcher().getTopReaderContext().reader();
+		
+		int[] docs;
+		if (docId == null) {
+			docs = new int[reader.numDocs()];
+			for (int i=0;i<docs.length;i++) {
+				docs[i] = i;
+			}
+		}
+		else {
+			docs = new int[]{docId};
+		}
+		
+		DocReconstructor reconstructor = new DocReconstructor(reader);
+		Reconstructed d;
+		
+		for (Integer dd: docs) {
+			d = reconstructor.reconstruct(dd);
+			
+			Set<String> fldMap = new HashSet<String>();
+			for (String f: fields) {
+				fldMap.add(f);
+			}
+			
+			System.out.println("INDEXED FIELDS:");
+			Map<String, GrowableStringArray> rf = d.getReconstructedFields();
+			for (Entry<String, GrowableStringArray> es : rf.entrySet()) {
+				String fld = es.getKey();
+				if (fldMap.size() > 0 && !fldMap.contains(fld)) {
+					continue;
+				}
+				System.out.println(fld);
+				System.out.println(docToString(es.getValue(), "\n"));
+				
+			}
+			
+			if (true) continue;
+			
+			System.out.println("STORED FIELDS:");
+			Map<String, StorableField[]> sf = d.getStoredFields();
+			for (Entry<String, StorableField[]> es : sf.entrySet()) {
+				String fld = es.getKey();
+				if (fldMap.size() > 0 && !fldMap.contains(fld)) {
+					continue;
+				}
+				System.out.println(fld);
+				StorableField[] val = es.getValue();
+				int j=0;
+				for (StorableField v : val) {
+					System.out.println(" " + j + "\t: " + v.stringValue());
+					j++;
+				}
+			}
+		}
+		sr.close();
+	}
+	
+	private String docToString(GrowableStringArray doc, String separator) {
+		StringBuffer sb = new StringBuffer();
+		String sNull = "null";
+		int k = 0, m = 0;
+		for (int j = 0; j < doc.size(); j++) {
+			if (doc.get(j) == null)
+				k++;
+			else {
+				if (sb.length() > 0) sb.append(separator);
+				if (m > 0 && m % 5 == 0) sb.append('\n');
+				if (k > 0) {
+					sb.append(sNull + "_" + k + separator);
+					k = 0;
+					m++;
+				}
+				sb.append(j + "\t:");
+				sb.append(doc.get(j));
+				m++;
+			}
+		}
+		return sb.toString();
 	}
 
 }
