@@ -34,6 +34,7 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	  	
 	  	File tmpFile = File.createTempFile("variants", ".tmp");
 	  	
+	  	collectorFactory.setSynonymMap(new WriteableExplicitSynonymMap(null));
 	    AuthorTransliterationsCollectorFilter filter = collectorFactory.create(transliteratorFactory.create(normFactory.create(stream)));
 	    
 	    filter.reset();
@@ -92,6 +93,7 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	    
 	    // now load the factory and check the synonyms were loaded properly
 	    collectorFactory = new AuthorTransliterationsCollectorFactory();
+	    collectorFactory.setSynonymMap(new WriteableExplicitSynonymMap(null));
 	    synMap = collectorFactory.getSynonymMap();
 	    synMap.clear();
 	    synMap.parseRules(synMap.getLines(tmpFile.getAbsolutePath()));
@@ -102,18 +104,23 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 	    
 	}
 	
-	public void testBidirectionalMap() throws IOException, InterruptedException {
+	public void testEquivalentMap() throws IOException, InterruptedException {
 		
 	  	File tmpFile = File.createTempFile("variants", ".tmp");
 	  	
 		// create a synonym map
-		WriteableSynonymMap synMap = new WriteableSynonymMap(tmpFile.getAbsolutePath(), true);
+		WriteableSynonymMap synMap = new WriteableEquivalentSynonymMap(tmpFile.getAbsolutePath());
 		
 		// add some synonyms
 		synMap.put("Foo, Bär", new HashSet<String>() {{ add("Foo, Bar"); add("Foo, Baer"); }});
 		synMap.persist();
 		
-	    checkOutput(tmpFile, "Foo\\,\\ Bär,Foo\\,\\ Bar,Foo\\,\\ Baer,\n");
+	    String expected = "Foo\\,\\ Bar,Foo\\,\\ Baer,Foo\\,\\ Bär,\n"
+	    		        + "Foo\\,\\ Baer,Foo\\,\\ Bar,Foo\\,\\ Bär,\n"
+	    		        + "Foo\\,\\ Bär,Foo\\,\\ Bar,Foo\\,\\ Baer,\n";
+
+	    checkOutput(tmpFile, expected);
+	    
 	}
 	
 	private void checkOutput(File tmpFile, String expected) throws IOException {

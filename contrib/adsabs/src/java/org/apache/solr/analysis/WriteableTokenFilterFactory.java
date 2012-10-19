@@ -18,14 +18,15 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
 public abstract class WriteableTokenFilterFactory extends TokenFilterFactory 
     implements ResourceLoaderAware {
 	
+	public static final String SYNTAX_TYPE = "syntax";
+	public static final String SYNTAX_TYPE_DEFAULT = WriteableSynonymMap.SYNTAX_TYPE_EXPLICIT;
+	
     public static final Logger log = LoggerFactory.getLogger(WriteableTokenFilterFactory.class);
 
-	private WriteableSynonymMap synMap = new WriteableSynonymMap(null);
+	private WriteableSynonymMap synMap = null;
 	
 	public void inform(ResourceLoader loader) {
     	
-		boolean bidirectional = Boolean.parseBoolean(args.get("bidirectional"));
-		
   		String outFile = args.get("outFile");
 	    if (outFile != null) {
 	    	args.remove("outFile");
@@ -44,7 +45,7 @@ public abstract class WriteableTokenFilterFactory extends TokenFilterFactory
 			}
 		    outFile = outFilePath.getAbsolutePath();
 		    args.put("outFile", outFile);
-		    synMap = new WriteableSynonymMap(args.get("outFile"), bidirectional);
+		    synMap.setOutput(args.get("outFile"));
 	    }
 	    else {
 	    	log.warn("Missing required argument 'outFile' at: " + this.getClass().getName() 
@@ -57,24 +58,49 @@ public abstract class WriteableTokenFilterFactory extends TokenFilterFactory
 		    if (outFilePath.isAbsolute() == false) {
 		    	List<String> files = StrUtils.splitFileNames(synonyms);
 		        for (String file : files) {
-		        	try {
-		        		log.info("Loading: " + file);
-						getSynonymMap().parseRules(((SolrResourceLoader) loader).getLines(file));
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-		        	
+		        	loadFile(loader, file);
 		        }
+		    } else {
+	        	loadFile(loader, synonyms);
 		    }
 	    }
 	}
 	
+	private void loadFile(ResourceLoader loader, String filepath) {
+    	try {
+    		log.info("Loading: " + filepath);
+			getSynonymMap().parseRules(((SolrResourceLoader) loader).getLines(filepath));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public void init(Map<String, String> args) {
 		super.init(args);
+		initSynMap();
+	}
+	
+	private void initSynMap() {
+		String syntax = args.get(SYNTAX_TYPE);
+		
+		if (syntax == null) {
+			syntax = SYNTAX_TYPE_DEFAULT;
+		}
+		
+		if (syntax.equals(WriteableSynonymMap.SYNTAX_TYPE_EQUIVALENT)) {
+			this.synMap = new WriteableEquivalentSynonymMap(null);
+		} else if (syntax.equals(WriteableSynonymMap.SYNTAX_TYPE_EXPLICIT)) {
+			this.synMap = new WriteableExplicitSynonymMap(null);
+		} else {
+			throw new RuntimeException("Unknown syntax type specified for WriteableSynonymMap");
+		}
 	}
 	
 	
 	public WriteableSynonymMap getSynonymMap() {
+		if (synMap == null) {
+			initSynMap();
+		}
 		return synMap;
 	}
 	

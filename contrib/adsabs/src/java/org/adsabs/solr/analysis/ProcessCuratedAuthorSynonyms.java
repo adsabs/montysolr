@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.analysis.WriteableExplicitSynonymMap;
 import org.apache.solr.analysis.WriteableSynonymMap;
 import org.apache.solr.analysis.author.AuthorQueryVariations;
 import org.apache.solr.analysis.author.AuthorUtils;
@@ -125,7 +126,7 @@ public class ProcessCuratedAuthorSynonyms {
 	}
 
 	public static void processSynonyms(BufferedReader in, String outFile) {
-		WriteableSynonymMap synMap = new WriteableSynonymMap(outFile);
+		WriteableSynonymMap synMap = new WriteableExplicitSynonymMap(outFile);
 		ArrayList<List<String>> groups = parseGroups(in);
 		for (List<String> group : groups) {
 			HashMap<String,HashSet<String>> transformed = transformGroup(group);

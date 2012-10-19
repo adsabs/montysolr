@@ -10,6 +10,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
+import org.apache.solr.analysis.WriteableEquivalentSynonymMap;
+import org.apache.solr.analysis.WriteableExplicitSynonymMap;
 import org.apache.solr.analysis.WriteableSynonymMap;
 import org.apache.solr.analysis.author.AuthorSynonymFilterFactory;
 
@@ -18,7 +20,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		
 		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
-		WriteableSynonymMap map = new WriteableSynonymMap(null);
+		WriteableSynonymMap map = new WriteableExplicitSynonymMap(null);
 		List<String> rules = new ArrayList<String>();
 		rules.add("MILLER, WILLIAM=>MILLER, B;MILLER, BILL;MILLER,;MILLER, BILL\\b.*");
 		rules.add("MILLER, BILL=>MILLER, WILLIAM;MILLER, WILLIAM\\b.*;MILLER,;MILLER, W");
@@ -53,7 +55,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	public void testAuthorSynonyms2() throws Exception {
 		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
-		WriteableSynonymMap map = new WriteableSynonymMap(null);
+		WriteableSynonymMap map = new WriteableExplicitSynonymMap(null);
 		List<String> rules = new ArrayList<String>();
 		
 		//XXX: there is a problem with the matcher, it doesn't find
@@ -75,6 +77,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		}
 		map.parseRules(rules);
 		
+		// ???: I'm thinking this must necessary to control the order of the returned synonyms
 		for (String r: lines) {
 			LinkedHashSet orderedMap = new LinkedHashSet();
 			String[] dd = r.split("=>");
@@ -94,9 +97,39 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 				"STERN, CAROLYN P", "STERN, C P.*", "STERN, CAROLYN P.*", "STERN, C",
 				"GRANT,",
 				"GRANT, C\\b.*",
-				"GRANT, CAROLYN\\b.*", 
-				"STERN, CAROLYN P", "STERN, C P.*", "STERN, CAROLYN P.*", "STERN, C",
+				"GRANT, CAROLYN\\b.*",
+				"STERN, C", "STERN, CAROLYN P", "STERN, C P.*", "GRANT, CAROLYN S", "STERN, CAROLYN P.*", 
 				"GRANT, C",
+		};
+		assertTokenStreamContents(stream, expected);
+	}
+	
+	public void testAuthorEquivSynonymMap() throws Exception {
+		
+		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
+		WriteableSynonymMap map = new WriteableEquivalentSynonymMap(null);
+		List<String> rules = new ArrayList<String>(){{
+			add("ADAMČUK\\,\\ K,ADAMCUK\\,\\ K,ADAMCHUK\\,\\ K,");
+			add("ADAMČUK\\,\\ KAREL,ADAMCUK\\,\\ KAREL,ADAMCHUK\\,\\ KAREL,");
+			add("ADAMČUK\\,\\ KOLJA,ADAMCUK\\,\\ KOLJA,ADAMCHUK\\,\\ KOLJA,");
+		}};
+		
+//		for (int i=0; i<rules.size();i++) {
+//			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
+//		}
+		map.parseRules(rules);
+		
+		Reader reader = new StringReader("ADAMČUK, KAREL\\b.*;ADAMČUK, K\\b.*;ADAMČUK, KAREL;ADAMČUK, K;ADAMČUK,");
+		PatternTokenizer tokenizer = new PatternTokenizer(reader, Pattern.compile(";"), -1);
+		
+		factory.setSynonymMap(map);
+		TokenStream stream = factory.create(tokenizer);
+		String[] expected = {
+			"ADAMČUK, KAREL\\b.*", "ADAMCHUK, KAREL", "ADAMČUK, KAREL", "ADAMCUK, KAREL",
+			"ADAMČUK, K\\b.*", "ADAMCUK, K", "ADAMCHUK, K", "ADAMČUK, K",
+			"ADAMČUK, KAREL", "ADAMCHUK, KAREL", "ADAMCUK, KAREL",
+			"ADAMČUK, K", "ADAMCUK, K", "ADAMCHUK, K",
+			"ADAMČUK,",
 		};
 		assertTokenStreamContents(stream, expected);
 	}
