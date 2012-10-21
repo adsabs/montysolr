@@ -13,6 +13,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
 import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.AqpDEFOPMarkPlainNodes;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
@@ -27,6 +29,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TextableQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
@@ -42,6 +45,8 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 	private CharTermAttribute termAtt;
 	private NumericTermAttribute numAtt;
 	private TypeAttribute typeAtt;
+  private PositionIncrementAttribute posAtt;
+  private OffsetAttribute offsetAtt;
 	
 	public AqpMultiWordProcessor() {
 		// empty
@@ -69,34 +74,14 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 			List<QueryNode> children = node.getChildren();
 			
 			String multiToken;
-			Integer groupId;
-			Integer grpReplaced = -1;
 			
-			for (QueryNode child: children) {
+			for (int i=0;i<children.size();i++) {
+			  QueryNode child = children.get(i);
 				QueryNode terminalNode = getTerminalNode(child);
 				
-				if (terminalNode == null) {
-					newChildren.add(child);
-					continue;
-				}
-				
-				groupId = (Integer) terminalNode.getTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN);
-				
-				if (groupId.equals(grpReplaced)) {
-					continue;
-				}
-				
 				multiToken = (String) terminalNode.getTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN_CONCATENATED);
-				if (multiToken != null) {
-					
-					if (analyzeMultiToken(((FieldableNode) terminalNode).getField(), multiToken) > 0) {
-						newChildren.add(expandMultiToken(terminalNode));
-						grpReplaced = groupId;
-					}
-					else {
-						newChildren.add(child);
-					}
-					
+				if (multiToken != null && analyzeMultiToken(((FieldableNode) terminalNode).getField(), multiToken) > 0) {
+					  i = expandWithSynonyms(children, newChildren, terminalNode, i, ((ModifierQueryNode) child).getModifier());
 				}
 				else {
 					newChildren.add(child);
@@ -109,17 +94,107 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 	}
 
 
-	private QueryNode getTerminalNode(QueryNode node) {
+	private int expandWithSynonyms(List<QueryNode> children,
+      LinkedList<QueryNode> newChildren, QueryNode terminalNode, 
+      Integer i, ModifierQueryNode.Modifier modifier) {
+    
+	  FieldableNode fieldNode = (FieldableNode) terminalNode;
+	  int startingPosition = ((FieldQueryNode) fieldNode).getBegin();
+	  int maxOffset = ((String) terminalNode.getTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN_CONCATENATED)).length() + startingPosition;
+	  
+    buffer.reset();
+    Integer startOffset = 0;
+    Integer endOffset = 0;
+    
+    LinkedList<QueryNode> synChildren = new LinkedList<QueryNode>();
+    
+    // The difficulty here is that we are looking into two streams of tokens
+    // the buffer shows us synonyms, but we must find their source-tokens
+    // inside chilren[]
+    try {
+      while (buffer.incrementToken()) {
+          
+        typeAtt = buffer.getAttribute(TypeAttribute.class);
+        offsetAtt = buffer.getAttribute(OffsetAttribute.class);
+        
+        // seek until we find the first synonym
+        if (!typeAtt.type().equals(SynonymFilter.TYPE_SYNONYM)) {
+          if (synChildren.size()>0) {
+            // we already have synonyms from the previous run            
+            newChildren.add(new ModifierQueryNode(new AqpOrQueryNode(synChildren), 
+                          modifier));
+            synChildren = new LinkedList<QueryNode>();
+            
+            // find tokens that are *after* the syn-tokens (but not exceeding offset of the current buffer)
+            for (int j=i;j<children.size();j++) {
+              FieldQueryNode tn = (FieldQueryNode) getTerminalNode(children.get(j));
+              if (tn.getBegin() >= startOffset+startingPosition && tn.getEnd() <= endOffset+startingPosition) { // token which is inside the synonym
+                i++;
+              }
+              else if(tn.getEnd() <= maxOffset) {
+                newChildren.add(children.get(j));
+                i++;
+              }
+              else {
+                break;
+              }
+              
+            }
+          }
+          startOffset = endOffset = 0;
+          continue;
+        }
+        
+        // discover offsets (the longest range) for synonyms
+        startOffset = offsetAtt.startOffset();
+        endOffset = offsetAtt.endOffset() > endOffset ? offsetAtt.endOffset() : endOffset;
+        
+        // find tokens that are *before* the syn-tokens
+        for (int j=i;j<children.size();j++) {
+          FieldQueryNode tn = (FieldQueryNode) getTerminalNode(children.get(j));
+          if (tn.getBegin() >= startOffset+startingPosition && tn.getEnd() <= endOffset+startingPosition) { // token which is inside the synonym
+            fieldNode = (FieldableNode) tn; //mark the current synonym source (its first token)
+            break;
+          }
+          newChildren.add(children.get(j));
+          i++;
+        }
+        
+        // add synonym (it is already analyzed, so we wrap it into AqpNonAnalyzedQN)
+        FieldableNode newNode = (FieldableNode) fieldNode.cloneTree();
+        if (buffer.hasAttribute(CharTermAttribute.class)) {
+          termAtt = buffer.getAttribute(CharTermAttribute.class);
+          ((TextableQueryNode) newNode).setText(termAtt.toString());
+        }
+        else {
+          numAtt = buffer.getAttribute(NumericTermAttribute.class);
+          ((TextableQueryNode) newNode).setText(new Long(numAtt.getRawValue()).toString());
+        }
+        synChildren.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) newNode));
+      }
+    } catch (IOException e) {
+      getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());
+    } catch (CloneNotSupportedException e) {
+      getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());
+    }
+    
+    if (synChildren.size()>0) {
+      newChildren.add(new GroupQueryNode(new AqpOrQueryNode(synChildren)));
+      synChildren = new LinkedList<QueryNode>();
+    }
+    
+    return i;
+  }
+
+  private QueryNode getTerminalNode(QueryNode node) {
 		if (node.isLeaf()) {
-			return null;
+			return node;
 		}
 		for (QueryNode child: node.getChildren()) {
 			if (child.containsTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN)) {
 				return child;
 			}
-			QueryNode nn = getTerminalNode(child);
-			if (nn != null) 
-				return nn;
+			return getTerminalNode(child);
 		}
 		return null;
 	}
@@ -184,7 +259,9 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 	}
 
 	protected QueryNode expandMultiToken(QueryNode node) throws QueryNodeException {
-
+	  
+	  
+    
 		FieldableNode fieldNode = (FieldableNode) node;
 
 
@@ -192,11 +269,12 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 		//children.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) fieldNode)); // original input
 
 		buffer.reset();
-		
+		Integer previousPos = null;
 
 		try {
 			while (buffer.incrementToken()) {
 				
+			  posAtt = buffer.getAttribute(PositionIncrementAttribute.class);
 				typeAtt = buffer.getAttribute(TypeAttribute.class);
 				if (!typeAtt.type().equals(SynonymFilter.TYPE_SYNONYM)) {
 					continue;

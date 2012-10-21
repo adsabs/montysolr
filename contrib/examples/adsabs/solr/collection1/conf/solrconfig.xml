@@ -1850,7 +1850,7 @@
      
      <lst name="queryParser">
       <str name="defaultField">all</str>
-      <str name="defaultOperator">OR</str>
+      <str name="defaultOperator">AND</str>
       <str name="fieldMap">arxiv identifier;</str>
     </lst>
   </requestHandler>

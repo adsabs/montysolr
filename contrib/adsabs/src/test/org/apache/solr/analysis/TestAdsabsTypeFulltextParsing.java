@@ -65,7 +65,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 			newConfig = duplicateFile(new File(configFile));
 			
 			File synonymsFile = createTempFile(new String[]{
-					"hubble\0space\0telescope, HST",
+					"hubble\0space\0telescope, HST\n" +
+					"Massachusets\0Institute\0of\0Technology, MIT"
 			});
 			replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
@@ -93,7 +94,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 	   * 
 	   *   Mirrors of the hubble space telescope
 	   *   
-	   * We want to do different things during indexing and querying
+	   * We must do different things during indexing and querying
 	   * 
 	   *  indexing: mirrors,hubble|hubble space telescope|hst,space,telescope
 	   *  querying: +mirrors +(hubble space telescope | hst)
@@ -106,56 +107,117 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 	   * 
 	   * The default solr synonym filter is configured for indexing, but it has the ability
 	   * to do what we want. Unfortunately, the public API does not allow us to configure
-	   * its behaviour.
+	   * its behaviour (so I made a custom factory, hopefully that can go away).
+	   * 
+	   * 
+	   * ACRONYMS:
+	   *   Acronyms are identified IFF they were all UPPERCASE and were present in the 
+	   *   source text. Acronym is indexed in the original form, as well as with prefix 'acr::'
+	   *   
+	   *   Example: MIT
+	   *   Indexed: mit|acr::mit
+	   *   
+	   *   But if the source text contains:
+	   *   
+	   *     Massachusets Institute of Technology
+	   *     
+	   *   It is expanded into:
+	   *     0: masschusets|mit|massachusets institute of technology
+	   *     1: institute
+	   *     2: (null, removed by the stop filter)
+	   *     3: technology
+	   *     
+	   *   Because the synonym filters IGNORE case, the synonym MIT is emitted as 'mit'
+	   *   Therefore it cannot be recognized by the Acronym filter (even it it sits after the
+	   *   synonym filter)
+	   *   
+	   *   This has the effect that 'acr::*' will find only documents where the acronym 
+	   *   was in the source (as opposed to synonym expansion)
+	   *   
+	   *   
+	   *   TODO: maybe we can make the FST search with ignoreCase=true, but emit UpperCase
+	   *   TODO: the analyzer for the synonyms must use the same StopFilters as the query chain
 	   * 
 	   */
-		assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "Bílá kobyla skočila přes čtyřista"));
-		assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "třicet-tři stříbrných střech"));
-		assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "A ještě TřistaTřicetTři stříbrných křepeliček"));
-		assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "Mirrors of the hubble space telescope first"));
-		assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "Mirrors of the HST second"));
-		assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "Mirrors of the Hst third"));
-		assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxxx", F.ADS_TEXT_TYPE, "Mirrors of the HubbleSpaceTelescope fourth"));
+		assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", F.ADS_TEXT_TYPE, "Bílá kobyla skočila přes čtyřista"));
+		assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", F.ADS_TEXT_TYPE, "třicet-tři stříbrných střech"));
+		assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", F.ADS_TEXT_TYPE, "A ještě TřistaTřicetTři stříbrných křepeliček"));
+		assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", F.ADS_TEXT_TYPE, "Mirrors of the hubble space telescope first"));
+		assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxx5", F.ADS_TEXT_TYPE, "Mirrors of the HST second"));
+		assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxx6", F.ADS_TEXT_TYPE, "Mirrors of the Hst third"));
+		assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", F.ADS_TEXT_TYPE, "Mirrors of the HubbleSpaceTelescope fourth"));
+		assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxx8", F.ADS_TEXT_TYPE, "Take Massachusets Institute of Technology (MIT)"));
+		assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxx9", F.ADS_TEXT_TYPE, "MIT developed new network protocols"));
 		
 		assertU(commit());
 		
-		dumpDoc(null, F.ID, F.ADS_TEXT_TYPE);
 		
-		
-		// the ascii folding filter emits both unicode and the ascii version
-		assertQ(req("q", F.ADS_TEXT_TYPE + ":Bílá"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
-		assertQ(req("q", F.ADS_TEXT_TYPE + ":Bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
-		assertQ(req("q", F.ADS_TEXT_TYPE + ":bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
-		
-		
-		//setDebug(true);
 		
 		/*
 		 * Test multi-token translation, the chain is set to recognize
 		 * synonyms. So even if the query string is split into 3 tokens,
 		 * we are able to join them and find their synonym (HST)
 		 */
+		
+		// simple case
 		assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp"), 
-				"all:Hst all:hubble space telescope all:HST", BooleanQuery.class);
-		
+				"all:hubble space telescope all:hst", BooleanQuery.class);
+		// followed by something
+		assertQueryEquals(req("q", "hubble space telescope goes home", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
+		// preceded by something
+		assertQueryEquals(req("q", "mirrors hubble space telescope start home", "qt", "aqp"), 
+        "+all:mirrors +(all:hubble space telescope all:hst) +all:start +all:home", BooleanQuery.class);
+		// surrounded by something
+		assertQueryEquals(req("q", "mirrors of the hubble space telescope start home", "qt", "aqp"), 
+        "+all:mirrors +(all:hubble space telescope all:hst) +all:start +all:home", BooleanQuery.class);
+		// surrounded by stop words
+		assertQueryEquals(req("q", "mirrors of the hubble space telescope the start home", "qt", "aqp"), 
+        "+all:mirrors +(all:hubble space telescope all:hst) +all:start +all:home", BooleanQuery.class);
+		// surrounded - change default operator
+		assertQueryEquals(req("q", "mirrors of the hubble space telescope start home", "qt", "aqp", "q.op", "OR"), 
+        "all:mirrors (all:hubble space telescope all:hst) all:start all:home", BooleanQuery.class);
+		// different modifier (synonym must not be found)
 		assertQueryEquals(req("q", "hubble space -telescope", "qt", "aqp"), 
-				"all:hubble all:space -all:telescope", BooleanQuery.class);
-		
+				"+all:hubble +all:space -all:telescope", BooleanQuery.class);
+		// different field
 		assertQueryEquals(req("q", "hubble space title:telescope", "qt", "aqp"), 
-				"all:hubble all:space title:telescope", BooleanQuery.class);
+				"+all:hubble +all:space +title:telescope", BooleanQuery.class);
+		
+		assertQueryEquals(req("q", "hubble space telescope +star", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +all:star", BooleanQuery.class);
 		
 		/*
 		 * Synonym expansion 1token->many
 		 */
 		
 		assertQueryEquals(req("q", "HST", "qt", "aqp"), 
-				"all:Hst all:hubble space telescope all:HST", BooleanQuery.class);
+				"all:hubble space telescope all:hst all:acr::hst", BooleanQuery.class);
+		
+		// XXX: note the acronym is not present (that is because the synonym processor
+		// outputs only tokens type=SYNONYM, but if we catch all tokens with posIncr=0
+		// it could work)
+		// +(all:hubble space telescope all:hst all:acr::hst) +all:goes +all:home
+		assertQueryEquals(req("q", "HST goes home", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
+		
+		
+    //setDebug(true);
+		
+		// XXX: todo crazy cases
+		//assertQueryEquals(req("q", "HST at MIT ", "qt", "aqp"), 
+    //    "", BooleanQuery.class);
+		//assertQueryEquals(req("q", "HubbleSpaceTelescope bum MIT BX", "qt", "aqp"), 
+    //    "+(all:hubblespacetelescope all:hubble all:space all:telescope all:hubblespacetelescope) +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)", 
+    //    BooleanQuery.class);
+		//assertQueryEquals(req("q", "HubbleSpaceTelescope -bum MIT BX", "qt", "aqp"), 
+    //    "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
+		
+		
 		
 		/*
-		 * But right now, synonym expansion is case sensitive, so these will
-		 * fail (even if 'Hst' is in the synonym list). The Acronym filter
-		 * causes this behaviour. We should change that (everything must be 
-		 * indexed/searched lowercase)
+		 * But right now, *QUERY* synonym expansion is case sensitive, so these will
+		 * not find (even if 'Hst' was in the synonym list). 
 		 */
 		assertQueryEquals(req("q", "Hst", "qt", "aqp"), 
 				"all:hst", TermQuery.class);
@@ -164,14 +226,17 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 				"all:hst", TermQuery.class);
 		
 		assertQueryEquals(req("q", "HST OR Hst", "qt", "aqp"), 
-				"(all:Hst all:hubble space telescope all:HST) all:hst", BooleanQuery.class);
+				"(all:hubble space telescope all:hst all:acr::hst) all:hst", BooleanQuery.class);
 		
 		
+		//TODO: add the corresponding searches, but this shows we are indexing  properly
+	  dumpDoc(null, F.ID, F.ADS_TEXT_TYPE);
 		
-		
-		// TODO
-		//assertQueryEquals(req("q", "hubble space telescope +star", "qt", "aqp"), 
-		//		"(all:Hst all:hubble space telescope all:HST) +star", BooleanQuery.class);
+    
+    // the ascii folding filter emits both unicode and the ascii version
+    assertQ(req("q", F.ADS_TEXT_TYPE + ":Bílá"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+    assertQ(req("q", F.ADS_TEXT_TYPE + ":Bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+    assertQ(req("q", F.ADS_TEXT_TYPE + ":bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
 	}
 	
 	

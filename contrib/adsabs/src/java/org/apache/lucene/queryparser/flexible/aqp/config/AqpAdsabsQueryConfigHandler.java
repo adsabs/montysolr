@@ -72,8 +72,12 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		//Map<String, String> fieldMap = get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
 		//fieldMap.put("arxiv", "identifier");
 		
-	    set(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR, Operator.AND);
-	    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
+		/*
+		 * Warning: some of these values can be set also inside solrconfig.xml
+		 * Check the ads-config section (applies to solr QParsers only)
+		 */
+    set(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR, Operator.AND);
+    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
 	    
 	}
 }

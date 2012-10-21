@@ -8,11 +8,12 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
 /**
+ * 
  * Looks at the nodes below DEFOP QN and marks the nodes
  * that can be concatenated during analysis, eg. weak lensing
  * can be used as one token
  * 
- * 
+ * <pre>
  *                     DEFOP
  *                        |
  *                     /  |     \
@@ -25,9 +26,9 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  *           QNORMAL   QNORMAL
  *               /        |
  *            weak      lensing
- *            
+ * </pre>           
  *                    
- * 
+ * <p>
  * Care is taken not to join when the fields are different and 
  * when there is operator/clause/modifier inbetween
  * 
