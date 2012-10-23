@@ -35,6 +35,7 @@ import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.synonym.SynonymMap;
 import org.apache.lucene.analysis.util.*;
+import org.apache.lucene.util.CharsRef;
 import org.apache.lucene.util.Version;
 
 /**
@@ -90,7 +91,14 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   }
   
   
-  public static class SynonymBuilderFactory extends AbstractAnalysisFactory implements ResourceLoaderAware {
+  public static class SynonymBuilderFactory extends TokenizerFactory implements ResourceLoaderAware {
+    
+    @Override
+    public Tokenizer create(Reader input) {
+      // TODO : this could be used to parse the source data (right now Solr and WordNet synonym
+      // parser do it
+      throw new IllegalAccessError("Not implemented");
+    }
     
     public SynonymMap create(ResourceLoader loader) throws IOException, ParseException {
       
@@ -167,6 +175,8 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     public void inform(ResourceLoader loader) throws IOException {
       // do nothing
     }
+
+
   }
   
   private SynonymBuilderFactory loadBuilderFactory(ResourceLoader loader, String cname) throws IOException {
@@ -177,5 +187,138 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       ((ResourceLoaderAware) builderFactory).inform(loader);
     }
     return builderFactory;
+  }
+  
+  
+  /*
+   * Various configuration options - some of the are useful for indexing, others for
+   * querying only 
+   */
+  
+  
+  /*
+   * Always include the source token before the synonym (this is the default, 
+   * lucene behaviour)
+   * 
+   * "hubble space telescope was..." will be 
+   * indexed as
+   * 
+   * 0: hubble|HST
+   * 1: space
+   * 2: telescope
+   */
+  public static class AlwaysIncludeOriginal extends SynonymBuilderFactory {
+    protected SynonymParser getParser(Analyzer analyzer) {
+      return new NewSolrSynonymParser(true, true, analyzer) {
+        @Override
+        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
+          super.add(input, output, true);
+        }
+      };
+    }
+  }
+  
+  /*
+   * This parser is useful if you want to index multi-token synonyms (as one token)
+   * as well as their components. Ie. "hubble space telescope was..." will be 
+   * indexed as
+   * 
+   * 0: hubble|hubble space telescope
+   * 1: space
+   * 2: telescope
+   * 
+   * You need this behaviour for index-time synonym expansion, if you want to 
+   * retain proximity queries and phrases.
+   */
+  public static class BestEffort extends SynonymBuilderFactory {
+    protected SynonymParser getParser(Analyzer analyzer) {
+      return new NewSolrSynonymParser(true, true, analyzer) {
+        @Override
+        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
+          super.add(input, replaceNulls(output), countWords(input) > 1 ? true : false);
+        }
+      };
+    }
+  }
+  
+  /*
+   * This parser is useful if you want to index multi-token synonyms (as one token)
+   * AND NOT their components. 
+   * 
+   * Recognize "multi\0word\0synonyms" (null bytes in the input string) 
+   * but emit "multi word synonyms" in the output
+   * 
+   * Ie 'hubble\0space\0telescope' will be indexed as:
+   * 
+   * 0: hubble space telescope|hst
+   * 1-3: null
+   * 4: was
+   */
+  public static class MultiTokenReplaceNulls extends SynonymBuilderFactory {
+    protected SynonymParser getParser(Analyzer analyzer) {
+      return new NewSolrSynonymParser(true, true, analyzer) {
+        @Override
+        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
+          super.add(input, replaceNulls(output), includeOrig);
+        }
+      };
+    }
+  }
+  
+  /*
+   * This is a custom configuration for multi-token query-time synonym expansion.
+   * 
+   * The parser searches for synonyms ignoring case, but in the output returns
+   * the Original String (important for more complex tokenizer chains, ie. 
+   * when synonyms should be found first, then acronyms detected)
+   * 
+   * The parser also returns source tokens for the multi-token group, but
+   * 'eats' the source token when single-token synonym is there. 
+   * 
+   */
+  public static class BestEffortIgnoreCase extends SynonymBuilderFactory {
+    public void inform(ResourceLoader loader) throws IOException {
+      args.put("ignoreCase", "false");
+    }
+    protected SynonymParser getParser(Analyzer analyzer) {
+      return new NewSolrSynonymParser(true, true, analyzer) {
+        @Override
+        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
+          super.add(lowercase(input), replaceNulls(output), countWords(input) > 1 ? true : false);
+        }
+        private CharsRef lowercase(CharsRef chars) {
+          chars = CharsRef.deepCopyOf(chars);
+          final int limit = chars.offset + chars.length;
+          for (int i=chars.offset;i<limit;i++) {
+            chars.chars[i] = Character.toLowerCase(chars.chars[i]); // maybe not correct
+          }
+          return chars;
+        }
+      };
+      
+    }
+  }
+  
+  public static int countWords(CharsRef chars) {
+    int wordCount = 1;
+    int upto = chars.offset;
+    final int limit = chars.offset + chars.length;
+    while(upto < limit) {
+      if (chars.chars[upto++] == SynonymMap.WORD_SEPARATOR) {
+        wordCount++;
+      }
+    }
+    return wordCount;
+  }
+  
+  public static CharsRef replaceNulls(CharsRef charsRef) {
+    CharsRef sanChar = CharsRef.deepCopyOf(charsRef);
+    final int end = sanChar.offset + sanChar.length;
+    for(int idx=sanChar.offset+1;idx<end;idx++) {
+      if (sanChar.chars[idx] == SynonymMap.WORD_SEPARATOR) {
+        sanChar.chars[idx] = ' ';
+      }
+    }
+    return sanChar;
   }
 }

@@ -43,46 +43,8 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         "foo\0baz,fu ba");
   }
   
-  /*
-   * Always include the source token before the synonym
-   */
-  public static class TestParserInclOrig extends NewSynonymFilterFactory.SynonymBuilderFactory {
-    protected SynonymParser getParser(Analyzer analyzer) {
-      return new NewSolrSynonymParser(true, true, analyzer) {
-        @Override
-        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
-          super.add(input, output, true);
-        }
-      };
-    }
-  }
   
   
-  /*
-   * Recognize "multi\0word\0synonyms" (null bytes in the input string) 
-   * but emit "multi word synonyms" in the output
-   */
-  public static class TestParserReplaceNulls extends NewSynonymFilterFactory.SynonymBuilderFactory {
-    protected SynonymParser getParser(Analyzer analyzer) {
-      return new NewSolrSynonymParser(true, true, analyzer) {
-        @Override
-        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
-          super.add(input, replaceNulls(output), includeOrig);
-        }
-      };
-    }
-  }
-  
-  public static CharsRef replaceNulls(CharsRef charsRef) {
-    CharsRef sanChar = CharsRef.deepCopyOf(charsRef);
-    final int end = sanChar.offset + sanChar.length;
-    for(int idx=sanChar.offset+1;idx<end;idx++) {
-      if (sanChar.chars[idx] == SynonymMap.WORD_SEPARATOR) {
-        sanChar.chars[idx] = ' ';
-      }
-    }
-    return sanChar;
-  }
   
   /*
    * This parser is useful if you want to index multi-token synonyms (as one token)
@@ -97,7 +59,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
         public void add(CharsRef input, CharsRef output, boolean includeOrig) {
-          super.add(input, replaceNulls(output), true);
+          super.add(input, NewSynonymFilterFactory.replaceNulls(output), true);
         }
       };
     }
@@ -118,50 +80,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     assertTokenStreamContents(ts, new String[] { "a", "e" });
   }
   
-  /*
-   * This is the best configuration for multi-token query-time synonym expansion.
-   * 
-   * The parser searches for synonyms ignoring case, but in the output returns
-   * the Original String (important for more complex tokenizer chains, ie. 
-   * when synonyms should be found first, then acronyms detected)
-   * 
-   * The parser also returns source tokens for the multi-token group, but
-   * 'eats' the source token when single-token synonym is there. 
-   * 
-   */
-  public static class TestParserReplaceNullsCustomInclOrigAnalyzer extends NewSynonymFilterFactory.SynonymBuilderFactory {
-    public void inform(ResourceLoader loader) throws IOException {
-      args.put("ignoreCase", "false");
-    }
-    protected SynonymParser getParser(Analyzer analyzer) {
-      return new NewSolrSynonymParser(true, true, analyzer) {
-        @Override
-        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
-          super.add(lowercase(input), replaceNulls(output), countWords(input) > 1 ? true : false);
-        }
-        private int countWords(CharsRef chars) {
-          int wordCount = 1;
-          int upto = chars.offset;
-          final int limit = chars.offset + chars.length;
-          while(upto < limit) {
-            if (chars.chars[upto++] == SynonymMap.WORD_SEPARATOR) {
-              wordCount++;
-            }
-          }
-          return wordCount;
-        }
-        private CharsRef lowercase(CharsRef chars) {
-          chars = CharsRef.deepCopyOf(chars);
-          final int limit = chars.offset + chars.length;
-          for (int i=chars.offset;i<limit;i++) {
-            chars.chars[i] = Character.toLowerCase(chars.chars[i]); // maybe not correct
-          }
-          return chars;
-        }
-      };
-      
-    }
-  }
+
   
   public void testMultiWordSynonymsReplaceNullsCustomInclOrigAnalyzer() throws IOException {
     String O = TypeAttribute.DEFAULT_TYPE;
@@ -171,7 +90,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
-    args.put("builderFactory", TestParserReplaceNullsCustomInclOrigAnalyzer.class.getName());
+    args.put("builderFactory", NewSynonymFilterFactory.BestEffortIgnoreCase.class.getName());
     
     factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
     factory.init(args);
@@ -274,7 +193,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("synonyms", "synonyms.txt");
     args.put("ignoreCase", "false");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
-    args.put("builderFactory", TestParserReplaceNulls.class.getName());
+    args.put("builderFactory", NewSynonymFilterFactory.MultiTokenReplaceNulls.class.getName());
     
     factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
     factory.init(args);
@@ -380,7 +299,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("synonyms", "synonyms.txt");
     args.put("ignoreCase", "true");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
-    args.put("builderFactory", TestParserInclOrig.class.getName());
+    args.put("builderFactory", NewSynonymFilterFactory.AlwaysIncludeOriginal.class.getName());
     
     factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
     factory.init(args);

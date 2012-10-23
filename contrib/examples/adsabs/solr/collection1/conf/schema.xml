@@ -287,11 +287,12 @@
 	        splitOnNumerics="1" 
 	        stemEnglishPossessive="1" 
 	        preserveOriginal="0"/>
-        <filter class="org.apache.lucene.analysis.synonym.CustomSynonymFilterFactory" 
+        <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
             synonyms="ads_text.synonyms" 
             ignoreCase="true" 
             expand="true" 
-            tokenizerFactory="solr.KeywordTokenizerFactory" 
+            tokenizerFactory="solr.KeywordTokenizerFactory"
+            builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCase"
             sanitizeOutput="true" 
             inclOrig="true"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="text.kill" enablePositionIncrements="true" />
@@ -314,11 +315,12 @@
 	        stemEnglishPossessive="1" 
 	        preserveOriginal="0"
         />
-        <filter class="org.apache.lucene.analysis.synonym.CustomSynonymFilterFactory" 
+        <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
             synonyms="ads_text.synonyms" 
             ignoreCase="false" 
             expand="true" 
-            tokenizerFactory="solr.KeywordTokenizerFactory" 
+            tokenizerFactory="solr.KeywordTokenizerFactory"
+            builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffort" 
             sanitizeOutput="true" 
             inclOrig="false"/>
         <filter class="solr.AcronymTokenFilterFactory" emitBoth="true"/>
