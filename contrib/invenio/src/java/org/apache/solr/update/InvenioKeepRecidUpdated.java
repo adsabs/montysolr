@@ -111,7 +111,7 @@ import org.slf4j.LoggerFactory;
  *    last_recid: 90
  *    inveniourl: http://invenio-server/search
  *    updateurl: http://localhost:8983/solr/update-dataimport?command=full-import&dirs=/proj/fulltext/extracted    
- *    importurl: http://localhost:8983/solr/waiting-dataimport?command=full-import&arg1=val1&arg2=val2
+ *    importurl: http://localhost:8983/solr/import-dataimport?command=full-import&arg1=val1&arg2=val2
  *    deleteurl: http://localhost:8983/solr/delete-dataimport?command=full-import
  *    maximport: 200
  *  
@@ -127,7 +127,7 @@ import org.slf4j.LoggerFactory;
  *  1. http://localhost:8983/solr/update-dataimport?command=full-import&dirs=/proj/fulltext/extracted
  *     &url=http://invenio-server/search?p=recid:53->55 OR recid:100&rg=200&of=xm
  *     
- *  2. http://localhost:8983/solr/waiting-dataimport?command=full-import&arg1=val1&arg2=val2
+ *  2. http://localhost:8983/solr/import-dataimport?command=full-import&arg1=val1&arg2=val2
  *     &url=http://invenio-server/search?p=recid:101 OR recid:103&rg=200&of=xm
  *  
  *  3. http://localhost:8983/solr/delete-dataimport?command=full-import
@@ -373,12 +373,6 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		
 		final Map<String, Object> dataToProcess = dictData;
 		final SolrQueryRequest request = req;
-		
-		log.info("=============================================================================");
-		log.info(dataToProcess.toString());
-		log.info(req.toString());
-		log.info(req.getParamString());
-		log.info("=============================================================================");
 		
 		new Thread(new Runnable() {
 			

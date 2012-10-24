@@ -38,11 +38,11 @@ public class WaitingDataImportHandler extends FixedDataImportHandler {
     
     SolrParams params = req.getParams();
     ModifiableSolrParams newParams = new ModifiableSolrParams(params);
-    newParams.set("writerImpl", NoRollbackWriter.class.getName());
+    newParams.set("writerImpl", newParams.get("writerImpl", NoRollbackWriter.class.getName()));
     newParams.set("synchronous", true);
     req.setParams(newParams);
     
-    super.handleRequestBody(req, rsp);        
+    super.handleRequestBody(req, rsp);      
     
   }
   

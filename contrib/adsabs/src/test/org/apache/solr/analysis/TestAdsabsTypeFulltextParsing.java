@@ -202,16 +202,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
 
 
-    //setDebug(true);
+    setDebug(true);
 
     // XXX: todo crazy cases
-    //assertQueryEquals(req("q", "HST at MIT ", "qt", "aqp"), 
-    //    "", BooleanQuery.class);
-    //assertQueryEquals(req("q", "HubbleSpaceTelescope bum MIT BX", "qt", "aqp"), 
-    //    "+(all:hubblespacetelescope all:hubble all:space all:telescope all:hubblespacetelescope) +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)", 
-    //    BooleanQuery.class);
-    //assertQueryEquals(req("q", "HubbleSpaceTelescope -bum MIT BX", "qt", "aqp"), 
-    //    "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
+    assertQueryEquals(req("q", "HST at MIT ", "qt", "aqp"), 
+        "", BooleanQuery.class);
+    assertQueryEquals(req("q", "HubbleSpaceTelescope bum MIT BX", "qt", "aqp"), 
+        "+(all:hubblespacetelescope all:hubble all:space all:telescope all:hubblespacetelescope) +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)", 
+        BooleanQuery.class);
+    assertQueryEquals(req("q", "HubbleSpaceTelescope -bum MIT BX", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
 
 
 
