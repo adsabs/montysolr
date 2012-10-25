@@ -41,10 +41,13 @@ def recreate_index(solr_url,
                    inveniourl='python://search',
                    importurl='/invenio/import?command=full-import&amp;dirs=',
                    updateurl='/invenio/import?command=full-import&amp;dirs=',
-                   deleteurl='blankrecords', 
+                   deleteurl='blankrecords',
+                   doctor_handler='/invenio-doctor'
                    ):
     
     up_url = solr_url + handler_name
+    doctor_url = solr_url + doctor_handler
+    
     delay = int(delay)
     max_time=int(max_time)
     batchsize=int(batchsize)
@@ -64,14 +67,18 @@ def recreate_index(solr_url,
     updateurl=%s
     deleteurl=%s
     startfrom=%s
+    doctor_handler=%s
     """ % (solr_url, max_time, delay, handler_name, maximport, batchsize, inveniourl, importurl, updateurl,
-           deleteurl, startfrom))
+           deleteurl, startfrom, doctor_handler))
     
     params = dict(maximport=maximport, batchsize=batchsize,
                   inveniourl=inveniourl, importurl=importurl,
                   updateurl=updateurl, deleteurl=deleteurl)
     
+    
     rsp = req(up_url, last_recid=startfrom, **params)
+    
+    req(doctor_url, command="start")
     
     round = 0
     recs = 0
@@ -107,7 +114,11 @@ def recreate_index(solr_url,
         
     log.info('Stopped at round: %s, total time: %s' % (round, time.time() - start))
     
+    req(doctor_url, command="stop")
+    time.sleep(delay)
+    rsp = req(doctor_url, command="info")
     
+    log.info(repr(rsp))
     
     
 

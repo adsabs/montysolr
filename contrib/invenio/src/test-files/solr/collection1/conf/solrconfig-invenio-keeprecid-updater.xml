@@ -53,7 +53,7 @@
     </lst>
   </requestHandler>
   
-  <requestHandler name="/invenio-failed-import" class="org.apache.solr.update.InvenioImportBackup">
+  <requestHandler name="/invenio-doctor" class="org.apache.solr.update.InvenioImportBackup">
     <lst name="defaults">
       <str name="handler">/waiting-dataimport</str>
     </lst>

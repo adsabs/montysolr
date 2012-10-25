@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
   private static final Logger log = LoggerFactory.getLogger(FailSafeInvenioNoRollbackWriter.class);
   private static final String INVENIO_ID = "id";
-  private static final String BACKUP_HANDLER = "/invenio-failed-import";
+  private static final String BACKUP_HANDLER = "/invenio-doctor";
   private List<String> processedIds = new ArrayList<String>();
   
   public FailSafeInvenioNoRollbackWriter(UpdateRequestProcessor processor, SolrQueryRequest req) {

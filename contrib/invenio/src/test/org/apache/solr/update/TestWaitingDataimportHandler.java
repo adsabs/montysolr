@@ -126,7 +126,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     core.execute(handler, req, rsp);
     
     
-    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='2']",
         "//str[@name='failedRecs'][.='0']",
         "//str[@name='failedBatches'][.='0']",
@@ -136,7 +136,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='docsToCheck'][.='94']",
         "//str[@name='status'][.='idle']"
         );
-    assertQ(req("qt", "/invenio-failed-import", "command", "detailed-info"), 
+    assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
         "//str[@name='queueSize'][.='2']",
         "//str[@name='failedRecs'][.='0']",
         "//str[@name='failedBatches'][.='0']",
@@ -150,7 +150,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         );
     
     
-    InvenioImportBackup controller = (InvenioImportBackup) h.getCore().getRequestHandler("/invenio-failed-import");
+    InvenioImportBackup controller = (InvenioImportBackup) h.getCore().getRequestHandler("/invenio-doctor");
     req = req("command", "start");
     rsp = new SolrQueryResponse();
     core.execute(controller, req, rsp);
@@ -158,13 +158,13 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     while (controller.isBusy()) {
       Thread.sleep(300);
       if (controller.isBusy()) {
-        assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+        assertQ(req("qt", "/invenio-doctor", "command", "info"), 
             "//str[@name='status'][.='busy']"
             );
       }
     }
     
-    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='status'][.='idle']"
         );
     
@@ -180,11 +180,11 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
       assertTrue(e.getValue() < 4);
     }
     
-    String response = h.query("/invenio-failed-import", req("qt", "/invenio-failed-import", "command", "detailed-info"));
+    String response = h.query("/invenio-doctor", req("qt", "/invenio-doctor", "command", "detailed-info"));
     
     System.out.println(response);
     
-    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",
         "//str[@name='failedRecs'][.='11']",
         "//str[@name='failedBatches'][.='0']",
@@ -212,7 +212,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     while (controller.isBusy()) {
       Thread.sleep(300);
       if (controller.isBusy()) {
-        assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+        assertQ(req("qt", "/invenio-doctor", "command", "info"), 
             "//str[@name='status'][.='busy']"
             );
       }
@@ -220,7 +220,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 		
     // One problem with our approach is that we cannot recognize a batch
     // that is completely wrong
-    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",
         "//str[@name='failedRecs'][.='16']",
         "//str[@name='failedBatches'][.='0']",
@@ -231,9 +231,9 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='status'][.='idle']"
         );
     
-    assertQ(req("qt", "/invenio-failed-import", "command", "reset"));
+    assertQ(req("qt", "/invenio-doctor", "command", "reset"));
     
-    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",
         "//str[@name='failedRecs'][.='0']",
         "//str[@name='failedBatches'][.='0']",
