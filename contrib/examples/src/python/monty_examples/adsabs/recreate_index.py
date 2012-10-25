@@ -78,7 +78,6 @@ def recreate_index(solr_url,
     
     rsp = req(up_url, last_recid=startfrom, **params)
     
-    req(doctor_url, command="start")
     
     round = 0
     recs = 0
@@ -110,13 +109,14 @@ def recreate_index(solr_url,
                  % (round, recs, time.time() - last_round, (time.time()-start) / 1000))
         
         last_round = time.time()
+        req(doctor_url, command="start") # just make sure the doctor is running
             
         
     log.info('Stopped at round: %s, total time: %s' % (round, time.time() - start))
     
     req(doctor_url, command="stop")
     time.sleep(delay)
-    rsp = req(doctor_url, command="info")
+    rsp = req(doctor_url, command="detailed-info")
     
     log.info(repr(rsp))
     
