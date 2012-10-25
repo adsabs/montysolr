@@ -3,12 +3,14 @@ package org.apache.solr.handler.dataimport;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.SolrLogFormatter;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.NamedList.NamedListEntry;
@@ -58,44 +60,70 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     ParsedArgs pargs = new ParsedArgs(params);
     SolrQueryResponse rsp = new SolrQueryResponse();
     
-    if (processedIds.size()==0 && pargs.ids.size() == 1) { // we didn't even get past the first document
-      // we can report failed-document
-      core.execute(backupHandler, req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString()), rsp);
-    }
-    else { // we have to call indexing again
-      List<Integer> docIds = pargs.ids;
-      for (String docid: processedIds) {
-        int d = Integer.parseInt(docid);
-        assert docIds.contains(d);
-        docIds.remove((int) docIds.indexOf(d));
-      }
-      if (docIds.size()==0) {
-        core.execute(backupHandler, req("command", "register-failed-batch", "recid", pargs.origUrl), rsp);
-      }
-      else if (docIds.size()==1) {
-        core.execute(backupHandler, req("command", "register-failed-doc", "recid", docIds.get(0).toString()), rsp);
+    if (processedIds.size()==0 ) { // we didn't even get past the first document
+      if (pargs.ids.size() == 1) {
+        // we'll report only if the recid contains one doc
+        core.execute(backupHandler, req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString()), rsp);
       }
       else {
-        int half = docIds.size()/2;
-        int[] ids = new int[half];
-        for (int i=0;i<half;i++) {
-          ids[i] = docIds.get(i);
-        }
+        // but likely, the first failed is erroneous, so let's create three batches
         core.execute(backupHandler, req("command", "register-new-batch", 
-            "url", pargs.getUrl(ids)), rsp);
-        
-        ids = new int[docIds.size()-half];
-        int j = 0;
-        for (int i=half;i<docIds.size();i++,j++) {
-          ids[j] = docIds.get(i);
-        }
-        core.execute(backupHandler, req("command", "register-new-batch", 
-            "url", pargs.getUrl(ids)), rsp);
+            "url", pargs.getUrl(new int[]{pargs.ids.get(0)})), rsp);
+        pargs.ids.remove(0);
+        callProcessingAgain(pargs);
+      }
+    }
+    else { // we have to call indexing again
+      removeProcessed(pargs.ids);
+      if (pargs.ids.size()==0) {
+        core.execute(backupHandler, req("command", "register-failed-batch", "recid", pargs.origUrl), rsp);
+      }
+      else if (pargs.ids.size()==1) {
+        core.execute(backupHandler, req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString()), rsp);
+      }
+      else {
+        callProcessingAgain(pargs);
       }
     }
     
     log.warn("Rollback was called (and not heeded)!");
     commit(false);
+  }
+  
+  protected SolrQueryRequest getReq() {
+    return req;
+  }
+  
+  private void removeProcessed(List<Integer> docIds) {
+    for (String docid: processedIds) {
+      int d = Integer.parseInt(docid);
+      assert docIds.contains(d);
+      docIds.remove((int) docIds.indexOf(d));
+    }
+  }
+  
+  private void callProcessingAgain(ParsedArgs pargs) {
+    SolrCore core = req.getCore();
+    SolrRequestHandler backupHandler = req.getCore().getRequestHandler(BACKUP_HANDLER);
+    SolrQueryResponse rsp = new SolrQueryResponse();
+    
+    List<Integer> docIds = pargs.ids;
+    
+    int half = docIds.size()/2;
+    int[] ids = new int[half];
+    for (int i=0;i<half;i++) {
+      ids[i] = docIds.get(i);
+    }
+    core.execute(backupHandler, req("command", "register-new-batch", 
+        "url", pargs.getUrl(ids)), rsp);
+    
+    ids = new int[docIds.size()-half];
+    int j = 0;
+    for (int i=half;i<docIds.size();i++,j++) {
+      ids[j] = docIds.get(i);
+    }
+    core.execute(backupHandler, req("command", "register-new-batch", 
+        "url", pargs.getUrl(ids)), rsp);
   }
 
   class ParsedArgs {
@@ -104,39 +132,42 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     private String tmpl;
     
     public ParsedArgs(SolrParams params) {
-      origUrl = (String) params.get("url");
       ids = new ArrayList<Integer>();
-      processUrl(origUrl);
+      processUrl(params);
     }
     public String getUrl(int[] ids) {
       List<String> parts = InvenioKeepRecidUpdated.getQueryIds(ids.length, ids);
-      return String.format(tmpl, parts.get(0));
+      return tmpl.replace("_____", parts.get(0));
     }
     
-    private void processUrl(String url) {
-      Map<String, List<String>> params = new HashMap<String, List<String>>();
-      String[] urlParts = url.split("\\?");
-      StringBuffer out = new StringBuffer();
-      out.append(urlParts[0]);
-      out.append("?");
+    private void processUrl(SolrParams params) {
       
-      if (urlParts.length > 1) {
-        for (String param : urlParts[1].split("&")) {
-          String pair[] = param.split("=");
-          if (pair[0].equals("p")) {
-            out.append("p=%s");
-            extractIds(pair[1]);
-          }
-          else {
-            out.append(param);
+      ModifiableSolrParams modPar = new ModifiableSolrParams(params);
+      origUrl = modPar.toString();
+      
+      StringBuilder template = new StringBuilder();
+      
+      String[] pair = params.get("url").split("\\?");
+      if (pair.length>1) {
+        template.append(pair[0] + "?");
+        boolean first=true;
+        for (String pp: pair[1].split("&")) {
+          if (!first) template.append("&");
+          first=false;
+          String[] vals = pp.split("=");
+          if (vals[0].equals("p")) {
+            template.append("p=_____");
+            extractIds(vals[1]);
           }
         }
       }
       else {
-        out.append("p=%s");
+        template.append(pair[0] + "&p=%s");
       }
-      tmpl = out.toString();
+      modPar.set("url", template.toString());
+      this.tmpl = modPar.toString();
     }
+    
     private void extractIds(String pValue) {
       String[] orClauses = pValue.split(" OR ");
       for (String s: orClauses) {

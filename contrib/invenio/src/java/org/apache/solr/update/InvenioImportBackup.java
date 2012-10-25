@@ -18,7 +18,9 @@ package org.apache.solr.update;
  */
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +30,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.NamedList.NamedListEntry;
@@ -37,7 +41,7 @@ import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.update.InvenioImportBackup.RequestData;
+import org.apache.solr.servlet.SolrRequestParsers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Collections;
@@ -61,29 +65,52 @@ public class InvenioImportBackup extends RequestHandlerBase {
     public int count;
 
     public RequestData(String url) {
-      this.url = url;
+      this.url = url; // the URL is UTF-8 encoded
       this.count = countIds(url);
     }
     
     private int countIds(String url) {
       int count = 0;
-      String[] urlParts = url.split("\\?");
-      for (String param : urlParts[1].split("&")) {
-        String[] pair = param.split("=");
-        if (pair[0].equals("p")) {
-          for (String s: pair[1].split(" OR ")) {
-            s = s.replace("recid:", "");
-            if (s.indexOf("->") > -1) {
-              String[] range = s.split("->");
-              count = count + (Integer.parseInt(range[1]) - Integer.parseInt(range[0])); 
-            }
-            else {
-              count++;
+      
+      for (String arg: url.split("&")) {
+      
+        String[] kv = arg.split("=");
+        if (!kv[0].equals("url")) continue;
+        
+        String invenioUrl;
+        try {
+          invenioUrl = URLDecoder.decode( kv[1], "UTF-8" );
+        } catch (UnsupportedEncodingException e) {
+          throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
+        }
+        
+        String[] urlParts = invenioUrl.split("\\?");
+        for (String param : urlParts[1].split("&")) {
+          String[] pair = param.split("=");
+          if (pair[0].equals("p")) {
+            for (String s: pair[1].split(" OR ")) {
+              System.out.println(s);
+              s = s.replace("recid:", "");
+              if (s.indexOf("->") > -1) {
+                String[] range = s.split("->");
+                count = count + (Integer.parseInt(range[1]) - Integer.parseInt(range[0])); 
+              }
+              else {
+                count++;
+              }
             }
           }
-        }
-      }     
+        }     
+      }
       return count;
+    }
+
+    public SolrParams getReqParams() {
+      return SolrRequestParsers.parseQueryString(this.url);
+    }
+    
+    public String toString() {
+      return "(" + count + ") " + url;
     }
   }
 
@@ -92,11 +119,14 @@ public class InvenioImportBackup extends RequestHandlerBase {
     Map<String, RequestData>tbdQueue = Collections.synchronizedMap(new LinkedHashMap<String, RequestData>());
     Set<String> failedIds = Collections.synchronizedSet(new HashSet<String>());
     Map<String, RequestData>failedQueue = Collections.synchronizedMap(new LinkedHashMap<String, RequestData>());
+    Integer queuedIn = 0;
+    Integer queuedOut = 0;
     
     private volatile boolean stopped;
 
     public RequestData pop() {
       for (Entry e: tbdQueue.entrySet()) {
+        queuedOut++;
         return tbdQueue.remove(e.getKey());
       }
       return null;
@@ -114,6 +144,7 @@ public class InvenioImportBackup extends RequestHandlerBase {
 
     public void registerNewBatch(String url) {
       if (!tbdQueue.containsKey(url)) {
+        queuedIn++;
         tbdQueue.put(url, new RequestData(url));
       }
     }
@@ -134,8 +165,18 @@ public class InvenioImportBackup extends RequestHandlerBase {
       tbdQueue.clear();
       failedQueue.clear();
       failedIds.clear();
+      queuedIn = 0;
+      queuedOut = 0;
     }
-
+    
+    public int countDocs (Map<String, RequestData> theQueue) {
+      int i =0;
+      for (RequestData rd: theQueue.values()) {
+        i += rd.count;
+      }
+      return i;
+    }
+    
   }
 
 
@@ -171,24 +212,77 @@ public class InvenioImportBackup extends RequestHandlerBase {
     else if(command.equals("reset")) {
       queue.reset();
     }
+    else if(command.equals("info")) {
+      printInfo(rsp);
+    }
+    else if(command.equals("detailed-info")) {
+      printDetailedInfo(rsp);
+    }
     else if(command.equals("start")) {
       if (isBusy()) {
         rsp.add("message", "Import is already running...");
-        rsp.add("importStatus", "busy");
+        rsp.add("status", "busy");
         return;
       }
       setBusy(true);
-      runAsynchronously(req);
+      if (isAsynchronous()) {
+        runAsynchronously(req);
+      }
+      else {
+        runSynchronously(queue, req);
+        setBusy(false);
+      }
     }
     else {
       rsp.add("message", "Unknown command: " + command);
+      rsp.add("message", "Allowed: start,stop,reset,info,detailed-info");
     }
     
 
-    rsp.add("importStatus", isBusy() ? "busy" : "idle");
-    //getMessage(rsp);
-    setToken("");
+    rsp.add("status", isBusy() ? "busy" : "idle");
+    //setToken("");
 
+  }
+
+  private void printInfo(SolrQueryResponse rsp) {
+    Map<String, String> rows = new LinkedHashMap<String, String>();
+    
+    rows.put("queueSize", Integer.toString(queue.tbdQueue.size()));
+    rows.put("failedRecs", Integer.toString(queue.failedIds.size()));
+    rows.put("failedBatches", Integer.toString(queue.failedQueue.size()));
+    rows.put("failedTotal", Integer.toString(queue.countDocs(queue.failedQueue) + queue.failedIds.size()));
+    
+    rows.put("registeredRequests", Integer.toString(queue.queuedIn));
+    rows.put("restartedRequests", Integer.toString(queue.queuedOut));
+    rows.put("docsToCheck", Integer.toString(queue.countDocs(queue.tbdQueue)));
+    
+    if (isBusy()) {
+      rsp.add("workerMessage", getWorkerMessage());
+    }
+    
+    rsp.add("info", rows);
+  }
+  
+
+  private void printDetailedInfo(SolrQueryResponse rsp) {
+    printInfo(rsp);
+    
+    
+    List<String> tbd = new ArrayList<String>();
+    rsp.add("toBeDone", tbd);
+    for (RequestData rd: queue.tbdQueue.values()) {
+      tbd.add(rd.toString());
+    }
+    
+    
+    rsp.add("failedRecs", queue.failedIds);
+    
+    List<String> fb = new ArrayList<String>();
+    rsp.add("failedBatches", fb);
+    for (RequestData rd: queue.failedQueue.values()) {
+      fb.add(rd.toString());
+    }
+    
   }
 
   private void setToken(String string) {
@@ -204,18 +298,21 @@ public class InvenioImportBackup extends RequestHandlerBase {
 
     final SolrQueryRequest request = req;
 
-
     new Thread(new Runnable() {
 
       public void run() {
+        setWorkerMessage("I am idle");
         try {
           while (queue.hasMore()) {
+            setWorkerMessage("Running in the background...");
             runSynchronously(queue, request);
           }
         } catch (IOException e) {
+          setWorkerMessage("Worker error..." + e.getLocalizedMessage());
           log.error(e.getLocalizedMessage());
           log.error(e.getStackTrace().toString());
         } catch (InterruptedException e) {
+          setWorkerMessage("Worker error..." + e.getLocalizedMessage());
           log.error(e.getLocalizedMessage());
           log.error(e.getStackTrace().toString());
         } finally {
@@ -265,14 +362,17 @@ public class InvenioImportBackup extends RequestHandlerBase {
   private void runSynchronously(RequestQueue queue, SolrQueryRequest req)
   throws MalformedURLException, IOException, InterruptedException {
 
-
     SolrCore core = req.getCore();
 
     SolrRequestHandler handler = req.getCore().getRequestHandler(handlerName);
     SolrQueryResponse rsp = new SolrQueryResponse();
-
+    
+    
     RequestData data = queue.pop();
-    core.execute(handler, req(req, "url", data.url), rsp);
+    
+    LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), data.getReqParams());
+    
+    core.execute(handler, locReq, rsp);
 
   }
 

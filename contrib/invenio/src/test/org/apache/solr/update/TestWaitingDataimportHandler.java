@@ -18,6 +18,11 @@
 package org.apache.solr.update;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import monty.solr.util.MontySolrSetup;
 
@@ -30,6 +35,7 @@ import org.apache.solr.handler.dataimport.NoRollbackWriter;
 import org.apache.solr.handler.dataimport.SolrWriter;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.apache.solr.util.AbstractSolrTestCase;
@@ -120,12 +126,85 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     core.execute(handler, req, rsp);
     
     
-    System.out.println(rsp.toString());
+    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+        "//str[@name='queueSize'][.='2']",
+        "//str[@name='failedRecs'][.='0']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='0']",
+        "//str[@name='registeredRequests'][.='2']",
+        "//str[@name='restartedRequests'][.='0']",
+        "//str[@name='docsToCheck'][.='94']",
+        "//str[@name='status'][.='idle']"
+        );
+    assertQ(req("qt", "/invenio-failed-import", "command", "detailed-info"), 
+        "//str[@name='queueSize'][.='2']",
+        "//str[@name='failedRecs'][.='0']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='0']",
+        "//str[@name='registeredRequests'][.='2']",
+        "//str[@name='restartedRequests'][.='0']",
+        "//str[@name='docsToCheck'][.='94']",
+        "//str[@name='status'][.='idle']",
+        "*[count(//arr[@name='toBeDone']/str)=2]",
+        "*[count(//arr[@name='failedBatches']/str)=0]"
+        );
+    
+    
+    InvenioImportBackup controller = (InvenioImportBackup) h.getCore().getRequestHandler("/invenio-failed-import");
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(controller, req, rsp);
+    
+    while (controller.isBusy()) {
+      Thread.sleep(300);
+      if (controller.isBusy()) {
+        assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+            "//str[@name='status'][.='busy']"
+            );
+      }
+    }
+    
+    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+        "//str[@name='status'][.='idle']"
+        );
+    
+    assertQ(req("q", "*:*"), "//*[@numFound='84']");
+    for (int i=1;i<=104;i++) {
+      String v = Integer.toString(i);
+      if (v.contains("9")) {
+        assertQ(req("q", "id:"+v), "//*[@numFound='0']");
+      }
+    }
+    
+    for (Entry<String, Integer> e: alreadyFailed.entrySet()) {
+      assertTrue(e.getValue() < 4);
+    }
+    
+    String response = h.query("/invenio-failed-import", req("qt", "/invenio-failed-import", "command", "detailed-info"));
+    
+    System.out.println(response);
+    
+    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='11']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='11']",
+        "//str[@name='registeredRequests'][.='50']",
+        "//str[@name='restartedRequests'][.='50']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']"
+        );
 		
 	}
 	
+	
+	public static final Map<String, Boolean> alreadyProcessed = new HashMap<String, Boolean>();
+	public static final Map<String, Integer> alreadyFailed = new HashMap<String, Integer>();
+	
 	public static class TestFailingWriter extends FailSafeInvenioNoRollbackWriter {
-
+	  
+	  List<Integer> allowedIds = null;
+	  
     public TestFailingWriter(UpdateRequestProcessor processor,
         SolrQueryRequest req) {
       super(processor, req);
@@ -139,12 +218,47 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     @Override
     public boolean upload(SolrInputDocument d) {
       SolrInputField f = d.getField("id");
-      if (((String) f.getFirstValue()).contains("9")) {
-        throw new IllegalStateException("Causing rollback to be called!");
+      String val = (String) f.getFirstValue();
+      
+      if (!getRange().contains((int) Integer.parseInt(val))) return false;
+      
+      if (alreadyProcessed.containsKey(val)) {
+        return false;
       }
+      if (val.contains("9")) {
+        if (!alreadyFailed.containsKey(val)) {
+          alreadyFailed.put(val, 0);
+        }
+        alreadyFailed.put(val, alreadyFailed.get(val)+1);
+        if (alreadyFailed.get(val) > 2) return false; // we fail only twice for each "9", then we skip
+        throw new IllegalStateException("Causing rollback to be called! Id: " + val);
+      }
+      alreadyProcessed.put(val, true);
       return super.upload(d);
     }
-	  
+    
+    private List<Integer> getRange() {
+      if (allowedIds!= null) return allowedIds;
+      
+      SolrQueryRequest r = getReq();
+      String v = r.getParams().get("url").split("p=")[1];
+      ArrayList<Integer> out = new ArrayList<Integer>();
+      for (String s: v.split(" OR ")) {
+        s = s.replace("recid:", "");
+        if (s.indexOf("->") > -1) {
+          String[] range = s.split("->");
+          int max = Integer.parseInt(range[1]);
+          for (int i=Integer.parseInt(range[0]);i<=max;i++ ) {
+            out.add(i);
+          }
+        }
+        else {
+          out.add(Integer.parseInt(s));
+        }
+      }
+      allowedIds = out;
+      return out;
+    }
 	}
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
