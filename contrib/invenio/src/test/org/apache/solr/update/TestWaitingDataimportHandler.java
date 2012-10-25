@@ -194,7 +194,55 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
+    
+    
+    req = req("command", "full-import",
+        "dirs", testDir,
+        "commit", "true",
+        "writerImpl", TestFailingWriter.class.getName(),
+        "url", "file:///demo-site-non-existing.xml?p=recid:105->110"
+        );
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(controller, req, rsp);
+    
+    while (controller.isBusy()) {
+      Thread.sleep(300);
+      if (controller.isBusy()) {
+        assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+            "//str[@name='status'][.='busy']"
+            );
+      }
+    }
 		
+    // One problem with our approach is that we cannot recognize a batch
+    // that is completely wrong
+    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='16']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='16']",
+        "//str[@name='registeredRequests'][.='57']",
+        "//str[@name='restartedRequests'][.='57']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']"
+        );
+    
+    assertQ(req("qt", "/invenio-failed-import", "command", "reset"));
+    
+    assertQ(req("qt", "/invenio-failed-import", "command", "info"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='0']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='0']",
+        "//str[@name='registeredRequests'][.='0']",
+        "//str[@name='restartedRequests'][.='0']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']"
+        );
 	}
 	
 	
