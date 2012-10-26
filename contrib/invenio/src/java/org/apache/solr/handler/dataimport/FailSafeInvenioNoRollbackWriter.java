@@ -84,8 +84,8 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       }
     }
     
-    log.error("Rollback was called (but we ignore it and commit)!");
-    commit(false);
+    log.error("Rollback was called (but we ignore it, but we do not commit)!");
+    //commit(false);
   }
   
   protected SolrQueryRequest getReq() {

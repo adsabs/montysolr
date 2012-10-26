@@ -258,9 +258,7 @@ public class InvenioImportBackup extends RequestHandlerBase {
     rows.put("restartedRequests", Integer.toString(queue.queuedOut));
     rows.put("docsToCheck", Integer.toString(queue.countDocs(queue.tbdQueue)));
     
-    if (isBusy()) {
-      rsp.add("workerMessage", getWorkerMessage());
-    }
+    rsp.add("lastWorkerMessage", getWorkerMessage());
     
     rsp.add("info", rows);
   }
@@ -376,8 +374,10 @@ public class InvenioImportBackup extends RequestHandlerBase {
     
     // TODO: if the handler is already busy, it will ignore our request
     // we should do something
+    log.warn("Executing :" + handlerName + " with params: " + locReq.getParamString());
     core.execute(handler, locReq, rsp);
-
+    
+    setWorkerMessage("Executed :" + handlerName + " with params: " + locReq.getParamString() + "\n" + rsp.getValues().toString());
   }
 
   public SolrQueryRequest req(SolrQueryRequest req, String ... q) {
