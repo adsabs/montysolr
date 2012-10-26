@@ -107,7 +107,7 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     
     List<Integer> docIds = pargs.ids;
     
-    int half = docIds.size()/2;
+    int half = Math.max(docIds.size()/2, 1);
     int[] ids = new int[half];
     for (int i=0;i<half;i++) {
       ids[i] = docIds.get(i);
@@ -116,6 +116,9 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
         "url", pargs.getUrl(ids)), rsp);
     
     ids = new int[docIds.size()-half];
+    
+    if (ids.length < 1) return;
+    
     int j = 0;
     for (int i=half;i<docIds.size();i++,j++) {
       ids[j] = docIds.get(i);

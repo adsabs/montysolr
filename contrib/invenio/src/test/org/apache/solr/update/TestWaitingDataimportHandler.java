@@ -134,7 +134,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='failedTotal'][.='0']",
         "//str[@name='registeredRequests'][.='2']",
         "//str[@name='restartedRequests'][.='0']",
-        "//str[@name='docsToCheck'][.='94']",
+        "//str[@name='docsToCheck'][.='96']",
         "//str[@name='status'][.='idle']"
         );
     assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
@@ -144,7 +144,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='failedTotal'][.='0']",
         "//str[@name='registeredRequests'][.='2']",
         "//str[@name='restartedRequests'][.='0']",
-        "//str[@name='docsToCheck'][.='94']",
+        "//str[@name='docsToCheck'][.='96']",
         "//str[@name='status'][.='idle']",
         "*[count(//arr[@name='toBeDone']/str)=2]",
         "*[count(//arr[@name='failedBatches']/str)=0]"
@@ -169,7 +169,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='status'][.='idle']"
         );
     
-    assertQ(req("q", "*:*"), "//*[@numFound='84']");
+    assertQ(req("q", "*:*"), "//*[@numFound='85']");
     for (int i=1;i<=104;i++) {
       String v = Integer.toString(i);
       if (v.contains("9")) {
@@ -183,15 +183,15 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     
     String response = h.query("/invenio-doctor", req("qt", "/invenio-doctor", "command", "detailed-info"));
     
-    System.out.println(response);
+    //System.out.println(response);
     
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",
-        "//str[@name='failedRecs'][.='11']",
+        "//str[@name='failedRecs'][.='12']",
         "//str[@name='failedBatches'][.='0']",
-        "//str[@name='failedTotal'][.='11']",
-        "//str[@name='registeredRequests'][.='50']",
-        "//str[@name='restartedRequests'][.='50']",
+        "//str[@name='failedTotal'][.='12']",
+        "//str[@name='registeredRequests'][.='52']",
+        "//str[@name='restartedRequests'][.='52']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
@@ -223,11 +223,11 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     // that is completely wrong
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",
-        "//str[@name='failedRecs'][.='16']",
+        "//str[@name='failedRecs'][.='18']",
         "//str[@name='failedBatches'][.='0']",
-        "//str[@name='failedTotal'][.='16']",
-        "//str[@name='registeredRequests'][.='57']",
-        "//str[@name='restartedRequests'][.='57']",
+        "//str[@name='failedTotal'][.='18']",
+        "//str[@name='registeredRequests'][.='60']",
+        "//str[@name='restartedRequests'][.='60']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
@@ -279,7 +279,54 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
+
     
+    
+    // reset and try new
+    alreadyProcessed.clear();
+    alreadyFailed.clear();
+    
+    req = req("command", "full-import",
+        "dirs", testDir,
+        "commit", "true",
+        "writerImpl", TestFailingWriter.class.getName(),
+        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=recid:9 OR recid:99"
+        );
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    
+    req = req("command", "full-import",
+        "dirs", testDir,
+        "commit", "true",
+        "writerImpl", TestFailingWriter.class.getName(),
+        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=recid:8 OR recid:99"
+        );
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(controller, req, rsp);
+    
+    while (controller.isBusy()) {
+      Thread.sleep(300);
+      if (controller.isBusy()) {
+        assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+            "//str[@name='status'][.='busy']"
+            );
+      }
+    }
+    
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='2']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='2']",
+        "//str[@name='registeredRequests'][.='2']",
+        "//str[@name='restartedRequests'][.='2']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']"
+        );
 	}
 	
 	
