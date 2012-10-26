@@ -17,7 +17,6 @@ def req(url, **kwargs):
     params = urllib.urlencode(kwargs)
     page = ''
     try:
-        log.info("url: %s, params: %s" % (url, str(params)))
         conn = urllib.urlopen(url, params)
         page = conn.read()
         rsp = simplejson.loads(page)
@@ -104,7 +103,7 @@ def recreate_index(solr_url,
         round = round + 1
         
         recs = recs + batchsize
-         
+        
         log.info('Indexing (round/recs/last-round-ms/total-s): %s./%s/%s/%ss' 
                  % (round, recs, time.time() - last_round, (time.time()-start) / 1000))
         
