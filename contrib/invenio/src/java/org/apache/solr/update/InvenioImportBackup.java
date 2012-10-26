@@ -58,6 +58,8 @@ public class InvenioImportBackup extends RequestHandlerBase {
   private volatile String workerMessage = "";
   private volatile String tokenMessage = "";
 
+  private long sleepTime = 300;
+
   public static String handlerName = "/import";
 
   class RequestData {
@@ -189,6 +191,10 @@ public class InvenioImportBackup extends RequestHandlerBase {
     NamedList defs = (NamedList) args.get("defaults");
     if (defs.get("handler") != null) {
       handlerName  = (String) defs.get("handler");
+    }
+    
+    if (defs.get("sleepTime") != null) {
+      sleepTime  = Long.parseLong((String) defs.get("sleepTime"));
     }
   }
 
@@ -365,17 +371,25 @@ public class InvenioImportBackup extends RequestHandlerBase {
     SolrCore core = req.getCore();
 
     SolrRequestHandler handler = req.getCore().getRequestHandler(handlerName);
-    SolrQueryResponse rsp = new SolrQueryResponse();
-    
-    
     RequestData data = queue.pop();
     
     LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), data.getReqParams());
     
-    // TODO: if the handler is already busy, it will ignore our request
-    // we should do something
-    log.warn("Executing :" + handlerName + " with params: " + locReq.getParamString());
-    core.execute(handler, locReq, rsp);
+    setWorkerMessage("Executing :" + handlerName + " with params: " + locReq.getParamString());
+    
+    SolrQueryResponse rsp;
+    
+    boolean repeat = false;
+    do {
+      rsp = new SolrQueryResponse();
+      core.execute(handler, locReq, rsp);
+      String is = (String) rsp.getValues().get("status");
+      if (is.equals("busy")) {
+        repeat = true;
+        Thread.sleep(sleepTime );
+        setWorkerMessage("Waiting for handler to be idle: " + handlerName);
+      }
+    } while (repeat);
     
     setWorkerMessage("Executed :" + handlerName + " with params: " + locReq.getParamString() + "\n" + rsp.getValues().toString());
   }
