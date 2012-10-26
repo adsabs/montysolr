@@ -1812,7 +1812,7 @@
   
   <requestHandler name="/invenio-doctor" class="org.apache.solr.update.InvenioImportBackup">
     <lst name="defaults">
-      <str name="handler">/invenio/update</str>
+      <str name="handler">/invenio/update2</str>
     </lst>
   </requestHandler>
   

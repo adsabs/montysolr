@@ -37,6 +37,7 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.NamedList.NamedListEntry;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.RequestHandlerBase;
+import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
@@ -246,6 +247,8 @@ public class InvenioImportBackup extends RequestHandlerBase {
   private void printInfo(SolrQueryResponse rsp) {
     Map<String, String> rows = new LinkedHashMap<String, String>();
     
+    rows.put("handlerToCall", handlerName);
+    
     rows.put("queueSize", Integer.toString(queue.tbdQueue.size()));
     rows.put("failedRecs", Integer.toString(queue.failedIds.size()));
     rows.put("failedBatches", Integer.toString(queue.failedQueue.size()));
@@ -371,6 +374,8 @@ public class InvenioImportBackup extends RequestHandlerBase {
     
     LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), data.getReqParams());
     
+    // TODO: if the handler is already busy, it will ignore our request
+    // we should do something
     core.execute(handler, locReq, rsp);
 
   }
