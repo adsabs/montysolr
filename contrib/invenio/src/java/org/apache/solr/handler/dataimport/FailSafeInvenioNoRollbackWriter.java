@@ -1,13 +1,9 @@
 package org.apache.solr.handler.dataimport;
 
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.solr.SolrLogFormatter;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -21,8 +17,6 @@ import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.update.InvenioKeepRecidUpdated;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
-import org.apache.solr.util.TestHarness;
-import org.apache.solr.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +80,7 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       }
     }
     
-    log.warn("Rollback was called (and not heeded)!");
+    log.error("Rollback was called (but we ignore it and commit)!");
     commit(false);
   }
   
@@ -186,11 +180,12 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     }
   }
   
+  @SuppressWarnings("unchecked")
   public SolrQueryRequest req(String ... q) {
     if (q.length%2 != 0) { 
       throw new RuntimeException("The length of the string array (query arguments) needs to be even");
     }
-    Map.Entry<String, String> [] entries = new NamedListEntry[q.length / 2];
+    Map.Entry<String, String>[] entries = new NamedListEntry[q.length / 2];
     for (int i = 0; i < q.length; i += 2) {
       entries[i/2] = new NamedListEntry<String>(q[i], q[i+1]);
     }

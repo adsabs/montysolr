@@ -18,6 +18,7 @@ package org.apache.solr.handler.dataimport;
 
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 
@@ -30,7 +31,25 @@ import org.apache.solr.response.SolrQueryResponse;
  
 public class WaitingDataImportHandler extends FixedDataImportHandler {
   
-
+  private String writerImpl;
+  
+  @Override
+  @SuppressWarnings("unchecked")
+  public void init(NamedList args) {
+    super.init(args);
+    
+    writerImpl = NoRollbackWriter.class.getName();
+    
+    if (args.get("defaults") == null) {
+      return;
+    }
+    NamedList defs = (NamedList) args.get("defaults");
+    if (defs.get("writerImpl") != null) {
+      writerImpl = (String) defs.get("writerImpl");
+    }
+    
+  }
+  
   @Override
   @SuppressWarnings("unchecked")
   public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
@@ -38,7 +57,7 @@ public class WaitingDataImportHandler extends FixedDataImportHandler {
     
     SolrParams params = req.getParams();
     ModifiableSolrParams newParams = new ModifiableSolrParams(params);
-    newParams.set("writerImpl", newParams.get("writerImpl", NoRollbackWriter.class.getName()));
+    newParams.set("writerImpl", newParams.get("writerImpl", writerImpl));
     newParams.set("synchronous", true);
     req.setParams(newParams);
     

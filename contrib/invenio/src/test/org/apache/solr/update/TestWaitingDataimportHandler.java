@@ -243,6 +243,42 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
+    
+    // now check that if the writerImpl is not set (and it is not inside solrconfig.xml)
+    // the the logging writer has no effect
+    
+    req = req("command", "full-import",
+        "dirs", testDir,
+        "commit", "true",
+        "url", "file:///demo-site-non-existing.xml?p=recid:105->110"
+        );
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(controller, req, rsp);
+    
+    while (controller.isBusy()) {
+      Thread.sleep(300);
+      if (controller.isBusy()) {
+        assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+            "//str[@name='status'][.='busy']"
+            );
+      }
+    }
+    
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='0']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='0']",
+        "//str[@name='registeredRequests'][.='0']",
+        "//str[@name='restartedRequests'][.='0']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']"
+        );
+    
 	}
 	
 	

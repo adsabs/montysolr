@@ -15,7 +15,7 @@ public class NoRollbackWriter extends SolrWriter {
   
   
   public void rollback() {
-    log.warn("Rollback was called (and not heeded)!");
+    log.error("Rollback was called (but we ignore it and commit)!");
     commit(false);
   }
 

@@ -183,7 +183,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	private int max_batchsize = 50000;
 	
 	
-	
+	@Override
 	public void init(NamedList args) {
 		
 		super.init(args);

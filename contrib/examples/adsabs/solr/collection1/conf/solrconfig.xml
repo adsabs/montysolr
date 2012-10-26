@@ -1791,8 +1791,6 @@
        <str name="updateurl">/invenio/import?command=full-import&amp;dirs=</str>
        <str name="deleteurl">blankrecords</str>
        <str name="pythonFunctionName">get_recids_changes</str>
-       <!-- this parameter activates the logging/restart of failed batches -->
-       <str name="writerImpl">org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter</str>
      </lst>
   </requestHandler>
   
@@ -1824,6 +1822,8 @@
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
       <str name="update.chain">blanketyblank</str>
+      <!-- this parameter activates the logging/restart of failed imports -->
+      <str name="writerImpl">org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter</str>
     </lst>
   </requestHandler>
 
@@ -1833,6 +1833,8 @@
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
       <str name="update.chain">blanketyblank</str>
+      <!-- this parameter activates the logging/restart of failed batches -->
+      <str name="writerImpl">org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter</str>
     </lst>
   </requestHandler>
   
