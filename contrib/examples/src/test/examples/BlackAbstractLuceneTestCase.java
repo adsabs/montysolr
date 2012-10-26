@@ -15,8 +15,8 @@ public abstract class BlackAbstractLuceneTestCase extends MontySolrAbstractLucen
 	static String path = "/build/contrib/examples/";
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		exampleInit();
+	public static void beforeBlackAbstractLuceneTestCase() throws Exception {
+		//exampleInit();
 	}
 	
 	public void setUp() throws Exception {

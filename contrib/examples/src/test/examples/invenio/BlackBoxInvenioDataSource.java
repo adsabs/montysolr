@@ -15,7 +15,7 @@ import examples.BlackAbstractLuceneTestCase;
 public class BlackBoxInvenioDataSource extends BlackAbstractLuceneTestCase {
 	
 	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
+	public static void beforeBlackBoxInvenioDataSource() throws Exception {
 		setEName("invenio");
 		exampleInit();
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
@@ -42,6 +42,18 @@ public class BlackBoxInvenioDataSource extends BlackAbstractLuceneTestCase {
 		assert result.split("<record>").length > 50;
 		assert result.contains("<controlfield tag=\"001\">94</controlfield>");
 		assert result.contains("<controlfield tag=\"001\">95</controlfield>");
+		
+		// the query must be URLEncoded (double, if you look at it from the web)
+		r = handler.getData("python://whatever.here/there?p=" + java.net.URLEncoder.encode("recid:1744593->1745994", "UTF-8"));
+		result = convertToString(r);
+		assert !result.contains("<controlfield tag=\"001\">");
+		assert result.contains("</collection>");
+		
+		r = handler.getData("python://whatever.here/there?p=" + java.net.URLEncoder.encode("recid:1744593->1745994 OR recid:56->58", "UTF-8"));
+    result = convertToString(r);
+    assert result.contains("<controlfield tag=\"001\">56</controlfield>");
+    
+    System.out.println(URLEncoder.encode("python://whatever.here/there?p=" + java.net.URLEncoder.encode("recid:1744593->1745994", "UTF-8")));
 	}
 	
 	
