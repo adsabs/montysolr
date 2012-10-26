@@ -18,6 +18,7 @@
 package org.apache.solr.update;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,7 +121,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "dirs", testDir,
         "commit", "true",
         "writerImpl", TestFailingWriter.class.getName(),
-        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=recid:1->104"
+        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=recid:1->60 OR recid:61->104"
         );
     rsp = new SolrQueryResponse();
     core.execute(handler, req, rsp);

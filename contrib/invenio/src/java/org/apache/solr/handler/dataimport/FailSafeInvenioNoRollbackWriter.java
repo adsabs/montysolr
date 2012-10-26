@@ -1,9 +1,13 @@
 package org.apache.solr.handler.dataimport;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -131,33 +135,53 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     }
     public String getUrl(int[] ids) {
       List<String> parts = InvenioKeepRecidUpdated.getQueryIds(ids.length, ids);
-      return tmpl.replace("_____", parts.get(0));
+      try {
+        String recids = URLEncoder.encode( parts.get(0), "UTF-8" );
+        return tmpl.replace("_____", recids);
+      } catch (UnsupportedEncodingException e) {
+        throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
+      }
     }
     
     private void processUrl(SolrParams params) {
       
       ModifiableSolrParams modPar = new ModifiableSolrParams(params);
       origUrl = modPar.toString();
-      
       StringBuilder template = new StringBuilder();
       
-      String[] pair = params.get("url").split("\\?");
-      if (pair.length>1) {
-        template.append(pair[0] + "?");
-        boolean first=true;
-        for (String pp: pair[1].split("&")) {
-          if (!first) template.append("&");
-          first=false;
-          String[] vals = pp.split("=");
-          if (vals[0].equals("p")) {
-            template.append("p=_____");
-            extractIds(vals[1]);
+      String urlCommand = modPar.get("url", null);
+      if (urlCommand == null) {
+        return;
+      }
+      
+      if (!urlCommand.contains("?")) {
+        template.append(origUrl + "&p=_____");
+        tmpl = template.toString();
+        return;
+      }
+      
+      
+      String[] pair = urlCommand.split("\\?");
+      template.append(pair[0] + "?");
+      boolean first=true;
+      for (String pp: pair[1].split("&")) {
+        if (!first) template.append("&");
+        first=false;
+        String[] vals = pp.split("=");
+        if (vals[0].equals("p")) {
+          template.append("p=_____");
+          try {
+            vals[1] = URLDecoder.decode( vals[1], "UTF-8" );
+          } catch (UnsupportedEncodingException e) {
+            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
           }
+          extractIds(vals[1]);
+        }
+        else {
+          template.append(pp);
         }
       }
-      else {
-        template.append(pair[0] + "&p=%s");
-      }
+      
       modPar.set("url", template.toString());
       this.tmpl = modPar.toString();
     }

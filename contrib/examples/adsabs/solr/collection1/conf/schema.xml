@@ -67,7 +67,7 @@
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.variants" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
         <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
         <filter class="solr.LowerCaseFilterFactory"/>
@@ -81,7 +81,7 @@
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
         <filter class="solr.analysis.author.AuthorQueryVariationsFilterFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.variants" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
       </analyzer>
@@ -92,7 +92,7 @@
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.variants" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
       </analyzer>

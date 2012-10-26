@@ -141,7 +141,7 @@ import org.slf4j.LoggerFactory;
  *  Also, if you want to try the update handler manually, you must encode the parameters, eg:
  *  
  *  <code>
- *  http://localhost:8983/solr/invenio_update?last_recid=100&index=true
+ *  http://localhost:8983/solr/invenio_updater?last_recid=100&index=true
  *    &inveniourl=http%3A%2F%2Finvenio-server%2Fsearch
  *    &importurl=http%3A%2F%2Flocalhost%3A8983%2Fsolr%2Fwaiting-dataimport%3Fcommand%3Dfull-import%26dirs%3D%2Fproj%2Fadsx%2Ffulltext%2Fextracted
  *  </code>   

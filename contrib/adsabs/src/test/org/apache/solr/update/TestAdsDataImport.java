@@ -152,6 +152,27 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		commit("waitFlush", "true", "waitSearcher", "true");
 		
+		
+		
+		req = req("command", "full-import",
+        "dirs", testDir,
+        "commit", "true",
+        "url", "file:///non-existing-file?p=recid:500->505 OR recid:508&foo=bar"
+        );
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    
+    assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
+        "//str[@name='queueSize'][.='3']",
+        "//str[@name='failedRecs'][.='0']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='0']",
+        "//str[@name='registeredRequests'][.='3']",
+        "//str[@name='restartedRequests'][.='0']",
+        "//str[@name='docsToCheck'][.='7']",
+        "//str[@name='status'][.='idle']"
+        );
+		
 		DirectSolrConnection direct = getDirectServer();
 		
 		
@@ -417,6 +438,9 @@ public class TestAdsDataImport extends MontySolrAbstractTestCase {
 		
 		
 		assertQ(req("q", "read_count:1 AND bibcode:1976NASSP.389..293M"), "//*[@numFound='1']");
+		
+		
+    
 	}
 	
 	

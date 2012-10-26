@@ -89,11 +89,10 @@ public class InvenioImportBackup extends RequestHandlerBase {
           String[] pair = param.split("=");
           if (pair[0].equals("p")) {
             for (String s: pair[1].split(" OR ")) {
-              System.out.println(s);
               s = s.replace("recid:", "");
               if (s.indexOf("->") > -1) {
                 String[] range = s.split("->");
-                count = count + (Integer.parseInt(range[1]) - Integer.parseInt(range[0])); 
+                count = count + (Integer.parseInt(range[1]) - Integer.parseInt(range[0])) + 1; 
               }
               else {
                 count++;
@@ -196,7 +195,7 @@ public class InvenioImportBackup extends RequestHandlerBase {
   throws IOException, InterruptedException {
     
     SolrParams params = req.getParams();
-    String command = params.get("command");
+    String command = params.get("command","info");
     if (command.equals("register-failed-doc")) {
       queue.registerFailedDoc(params.get("recid"));
     }

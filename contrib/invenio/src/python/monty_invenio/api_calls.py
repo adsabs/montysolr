@@ -285,12 +285,12 @@ def create_collection_bibrec(table_name, coll_name, step_size=10000):
     c = list(c)
     l = len(c)
     i = 0
-    sys.stderr.write("Copying bibrec data\n")
+    sys.stderr.write("Copying bibrec data, patience please...\n")
     while i < l:
         dbquery.run_sql("INSERT INTO `%s` SELECT * FROM `bibrec` WHERE bibrec.id IN (%s)" % 
                              (dbquery.real_escape_string(table_name), ','.join(map(str, c[i:i+step_size]))))
         i = i + step_size
-        sys.stderr.write("%s\n" % i)
+        #sys.stderr.write("%s\n" % i)
         
     sys.stderr.write("Total number of records: %s\n" % l)
     
