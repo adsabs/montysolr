@@ -1784,7 +1784,7 @@
    -->
   <requestHandler name="/invenio/update" class="solr.InvenioKeepRecidUpdated" default="false">
      <lst name="defaults">
-       <str name="inveniourl">${solr.inveniourl:http://adsx/search}</str>
+       <str name="inveniourl">${solr.inveniourl:python://adsx/search}</str>
        <!-- str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
        <!--  <str name="inveniourl">http://inspirehep.net/search</str> -->
        <str name="importurl">/invenio/import?command=full-import&amp;dirs=</str>
@@ -1796,7 +1796,7 @@
   
   <requestHandler name="/invenio/update2" class="solr.InvenioKeepRecidUpdated" default="false">
      <lst name="defaults">
-       <str name="inveniourl">${solr.inveniourl:http://adsx/search}</str>
+       <str name="inveniourl">${solr.inveniourl:python://adsx/search}</str>
        <!-- str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
        <!--  <str name="inveniourl">http://inspirehep.net/search</str> -->
        <str name="importurl">/invenio/import2?command=full-import&amp;dirs=</str>
