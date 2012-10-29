@@ -80,7 +80,6 @@
 			<include name="solr/dist/**/lucene-queryparser*.jar"/>
             <include name="lucene/build/sandbox/**.jar"/>
         </fileset>
-		<path refid="importing.project.classpath"/>
 	</path>
 
     <path id="compile.classpath">
@@ -89,7 +88,6 @@
     	<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
             <include name="**/antlr*complete*.jar"/>
         </fileset>
-    	<path refid="importing.project.classpath"/>
     </path>
         	
 	<path id="test.classpath">
@@ -99,7 +97,6 @@
 		<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
 			<include name="**/antlr-runtime*.jar"/>
 		</fileset>
-		<path refid="importing.project.classpath"/>
 	</path>
 
 	<path id="additional.classpath" />

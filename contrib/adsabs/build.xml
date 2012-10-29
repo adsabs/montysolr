@@ -39,17 +39,25 @@
     </condition>
     <property name="aqp.grammar" value="${grammar}"/>
 
-	<path id="importing.project.classpath">
-        <fileset dir="lib">
-            <include name="**/luke*.jar"/>
-        </fileset>
-    </path>
 
     <import file="../antlrqueryparser/build.xml" />
     
     
     <!-- don't overrdie run.classpath, compile.classpath and test.classpath
          they are defined inside contrib/antlrqueryparser -->
+	
+	<!-- oh well... i have to override it to include my own jars...-->
+	<path id="test.classpath">
+		<path refid="test.base.classpath"/>
+        <path refid="common.test.classpath"/>
+        <path refid="classpath"/>
+        <fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
+            <include name="**/antlr-runtime*.jar"/>
+        </fileset>
+		<fileset dir="lib">
+            <include name="**/luke*.jar"/>
+        </fileset>
+	</path>
     
     <path id="additional.classpath">
         <path refid="test.classpath"/>
