@@ -11,11 +11,9 @@ import monty.solr.util.MontySolrAbstractLuceneTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.RandomIndexWriter;
-import org.apache.lucene.index.StoredDocument;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
@@ -151,7 +149,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		ArrayList<Integer> ar = new ArrayList<Integer>();
 		for (ScoreDoc d: docs) {
-			StoredDocument doc = reader.document(d.doc);
+		  Document doc = reader.document(d.doc);
 			ar.add(Integer.valueOf(doc.get("id")));
 		}
 		List<Integer> er = Arrays.asList(idPrefix + 2, idPrefix + 3, idPrefix + 4, idPrefix + 5, idPrefix + 6);
@@ -180,7 +178,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		ar = new ArrayList<Integer>();
 		for (ScoreDoc d: searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).scoreDocs) {
-			StoredDocument doc = reader.document(d.doc);
+		  Document doc = reader.document(d.doc);
 			ar.add(Integer.valueOf(doc.get("id")));
 		}
 		er = Arrays.asList(idPrefix + 3, idPrefix + 4, idPrefix + 7);
@@ -260,7 +258,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		ar = new ArrayList<Integer>();
 		for (ScoreDoc d: docs) {
-			StoredDocument doc = reader.document(d.doc);
+			Document doc = reader.document(d.doc);
 			ar.add(Integer.valueOf(doc.get("id")));
 		}
 		er = Arrays.asList(idPrefix + 2, idPrefix + 3, idPrefix + 4, idPrefix + 5, idPrefix + 6);
@@ -290,7 +288,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		ar = new ArrayList<Integer>();
 		for (ScoreDoc d: searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).scoreDocs) {
-			StoredDocument doc = reader.document(d.doc);
+			Document doc = reader.document(d.doc);
 			ar.add(Integer.valueOf(doc.get("id")));
 		}
 		er = Arrays.asList(idPrefix + 3, idPrefix + 4, idPrefix + 7);

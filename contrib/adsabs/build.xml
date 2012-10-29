@@ -39,6 +39,12 @@
     </condition>
     <property name="aqp.grammar" value="${grammar}"/>
 
+	<path id="importing.project.classpath">
+        <fileset dir="lib">
+            <include name="**/luke*.jar"/>
+        </fileset>
+    </path>
+
     <import file="../antlrqueryparser/build.xml" />
     
     
@@ -57,6 +63,7 @@
         <path refid="common.junit.classpath"/>
         <path refid="additional.classpath"/>
     </path>
+    
 
     <target name="clean">
         <delete dir="${build.dir}" />
@@ -66,7 +73,7 @@
 
     <target name="compile-core" depends="compile,common.compile-core"/>
 
-    <target name="compile" depends="compile-prerequisites" >
+    <target name="compile" depends="compile-prerequisites" unless="adsabs-grammar-done" >
     	<antcall target="generate-antlr" />
         <compile srcdir="src/java" 
             destdir="${build.dir}/classes/java">
@@ -74,6 +81,7 @@
             <classpath refid="additional.classpath"/>
             <include name="**/**.java"/>
         </compile>
+    	<property name="adsabs-grammar-done" value="true"/>
     </target>
     
     
@@ -110,6 +118,14 @@
             <classpath refid="test.classpath"/>
     		<classpath refid="additional.classpath"/>
             <include name="**/**.java"/>
+        </compile>
+    	
+    	<compile srcdir="${prop.solr.home}/lucene/analysis/common/src/test" 
+            destdir="${build.dir}/classes/test">
+            <classpath refid="test.classpath"/>
+            <classpath refid="additional.classpath"/>
+    		<exclude name="**/Test*.java"/>
+    		<include name="**/util/**.java"/>
         </compile>
     </target>
     

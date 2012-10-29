@@ -5,15 +5,12 @@ import java.util.Random;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.MockIndexWriter;
-import org.apache.lucene.index.StoredDocument;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
@@ -155,7 +152,7 @@ public class TestCollector extends LuceneTestCase {
 			public void collect(int doc) throws IOException {
 				visited++;
 				float score = scorer.score();
-				StoredDocument d = reader.document(doc);
+				Document d = reader.document(doc);
 				// d.getValues("text_reference");
 			}
 

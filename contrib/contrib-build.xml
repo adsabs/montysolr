@@ -41,10 +41,10 @@
 	<path id="classpath" refid="base.classpath"/>
 
 	<path id="test.base.classpath">
-		<path refid="classpath"/>
+        <pathelement location="${prop.solr.home}/lucene/build/test-framework/classes/java"/>
 		<path refid="common.test.classpath" />
 		<pathelement location="${build.dir}/classes/java"/>
-		<pathelement location="${prop.solr.home}/lucene/build/test-framework/classes/java"/>
+        <path refid="classpath"/>		
 	</path>
 
 	<path id="test.classpath" refid="test.base.classpath"/>

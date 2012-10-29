@@ -137,8 +137,8 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       return new Analyzer() {
         @Override
         protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-          Tokenizer tokenizer = factory == null ? new WhitespaceTokenizer(Version.LUCENE_50, reader) : factory.create(reader);
-          TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_50, tokenizer) : tokenizer;
+          Tokenizer tokenizer = factory == null ? new WhitespaceTokenizer(Version.LUCENE_40, reader) : factory.create(reader);
+          TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_40, tokenizer) : tokenizer;
           return new TokenStreamComponents(tokenizer, stream);
         }
       };

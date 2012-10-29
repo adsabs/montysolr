@@ -95,7 +95,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat) AND bat"), 
 				"+(+(+(all:dog) +(all:cat))) +all:bat", BooleanQuery.class);
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(frank bank) bat"), 
-				"(+(((all:frank) (all:bank))~2)) all:bat", BooleanQuery.class);
+				"+(+(((all:frank) (all:bank))~2)) +all:bat", BooleanQuery.class);
 		
 		//  {!raw f=myfield}Foo Bar creates TermQuery(Term("myfield","Foo Bar"))
 		assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=myfield}Foo Bar)"), "myfield:Foo Bar", TermQuery.class);

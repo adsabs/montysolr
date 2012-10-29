@@ -46,8 +46,15 @@
 		" />
 	<property name="jcc.build" value="${montysolr.classes}" />
 	<property name="jcc.packages" value=""/>
-
-	<property name="solr.svn" value="http://svn.apache.org/repos/asf/lucene/dev/trunk" />	
+    
+    <!--
+    trunk (future 5) = http://svn.apache.org/repos/asf/lucene/dev/trunk
+    4.x (future 4.1 etc) = http://svn.apache.org/repos/asf/lucene/dev/branches/branch_4x
+    4.0 = http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0
+    
+    29/11/12 - tracking 4.0 (before it was trunk)
+    //-->
+	<property name="solr.svn" value="http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0" />	
 
 	<!--
     _build variables are there to add extra classes to the wrapper - some packages (either in lucene or for montysolr)

@@ -5,12 +5,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import monty.solr.util.DocReconstructor.GrowableStringArray;
-import monty.solr.util.DocReconstructor.Reconstructed;
 
-import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.StorableField;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
 import org.apache.lucene.search.Query;
@@ -19,8 +16,9 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.AqpAdsabsQParser;
 import org.apache.solr.search.QParser;
-
-import com.mongodb.util.Hash;
+import org.getopt.luke.DocReconstructor;
+import org.getopt.luke.DocReconstructor.Reconstructed;
+import org.getopt.luke.GrowableStringArray;
 
 
 public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
@@ -163,16 +161,16 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 			if (true) continue;
 			
 			System.out.println("STORED FIELDS:");
-			Map<String, StorableField[]> sf = d.getStoredFields();
-			for (Entry<String, StorableField[]> es : sf.entrySet()) {
+			Map<String, IndexableField[]> sf = d.getStoredFields();
+			for (Entry<String, IndexableField[]> es : sf.entrySet()) {
 				String fld = es.getKey();
 				if (fldMap.size() > 0 && !fldMap.contains(fld)) {
 					continue;
 				}
 				System.out.println(fld);
-				StorableField[] val = es.getValue();
+				IndexableField[] val = es.getValue();
 				int j=0;
-				for (StorableField v : val) {
+				for (IndexableField v : val) {
 					System.out.println(" " + j + "\t: " + v.stringValue());
 					j++;
 				}

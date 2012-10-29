@@ -4,7 +4,6 @@ package org.apache.solr.schema;
 
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.index.StorableField;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,11 +20,11 @@ import java.io.FileNotFoundException;
 public class FileResolverTextField extends TextField {
 
 
-  public StorableField createField(SchemaField field, Object value, float boost) {
+  public IndexableField createField(SchemaField field, Object value, float boost) {
     return super.createField(field, getValue(toInternal(value.toString())), boost);
   }
   
-  protected StorableField createField(String name, String val, org.apache.lucene.document.FieldType type, float boost){
+  protected IndexableField createField(String name, String val, org.apache.lucene.document.FieldType type, float boost){
     return super.createField(name, getValue(val), type, boost);
   }
   

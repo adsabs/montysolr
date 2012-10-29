@@ -18,23 +18,13 @@
 package org.apache.solr.analysis;
 
 
-import monty.solr.util.DocReconstructor;
-import monty.solr.util.DocReconstructor.GrowableStringArray;
-import monty.solr.util.DocReconstructor.Reconstructed;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.TermQuery;
-import org.junit.BeforeClass;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.adsabs.solr.AdsConfig.F;
 
 /**
@@ -202,9 +192,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
 
 
-    setDebug(true);
+    //setDebug(true);
 
     // XXX: todo crazy cases
+    /*
     assertQueryEquals(req("q", "HST at MIT ", "qt", "aqp"), 
         "", BooleanQuery.class);
     assertQueryEquals(req("q", "HubbleSpaceTelescope bum MIT BX", "qt", "aqp"), 
@@ -212,7 +203,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         BooleanQuery.class);
     assertQueryEquals(req("q", "HubbleSpaceTelescope -bum MIT BX", "qt", "aqp"), 
         "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
-
+  */
 
 
     /*
@@ -230,7 +221,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
 
     //TODO: add the corresponding searches, but this shows we are indexing  properly
-    dumpDoc(null, F.ID, F.ADS_TEXT_TYPE);
+    //dumpDoc(null, F.ID, F.ADS_TEXT_TYPE);
 
 
     // the ascii folding filter emits both unicode and the ascii version

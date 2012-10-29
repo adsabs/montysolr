@@ -5,11 +5,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenFilter;
@@ -24,8 +20,6 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.RandomIndexWriter;
-import org.apache.lucene.index.StorableField;
-import org.apache.lucene.index.StoredDocument;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.sandbox.queries.regex.RegexQuery;
 import org.apache.lucene.search.BooleanClause;
@@ -410,7 +404,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		ArrayList<TestCase> data = new ArrayList<TestCase>(randomIds.length);
 		for (int i = 0; i < randomIds.length; i++) {
 			TopDocs docs = searcher.search(new TermQuery(new Term("id", Integer.toString(randomIds[i]))), 1);
-			StoredDocument doc = reader.document(docs.scoreDocs[0].doc);
+			Document doc = reader.document(docs.scoreDocs[0].doc);
 			String original = doc.get("original").toString();
 			String[] parts = original.split("\\,? ");
 			int howMany = _TestUtil.nextInt(random(), 0, parts.length-1); // how many initials
@@ -423,7 +417,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		for (int i = 0; i < randomIds.length; i++) {
 			TopDocs docs = searcher.search(new TermQuery(new Term("id", Integer.toString(randomIds[i]))), 1);
 			if (docs.totalHits == 1) {
-				StoredDocument doc = reader.document(docs.scoreDocs[0].doc);
+				Document doc = reader.document(docs.scoreDocs[0].doc);
 				String original = doc.getField("original").stringValue();
 				String[] parts = original.split("\\,? ");
 				Query[] queries = buildQueries(parts);
