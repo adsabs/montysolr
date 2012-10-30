@@ -47,6 +47,7 @@ public class AdsDataSource extends InvenioDataSource {
 	private BasicDBObject mongoFields;
 	private Map<String,String> fieldColumnMap;
 	
+	@Override
 	public void init(Context context, Properties initProps) {
 		super.init(context, initProps);
 		
@@ -74,6 +75,15 @@ public class AdsDataSource extends InvenioDataSource {
 			}
 		}
 	}
+	
+  public void destroy() {
+    System.out.println("destroy" + Thread.currentThread());
+  }
+	
+	@Override
+  public void close() {
+    super.close();
+  }
 	
 	public Map<String, String> getFieldColumnMap() {
 		return fieldColumnMap;

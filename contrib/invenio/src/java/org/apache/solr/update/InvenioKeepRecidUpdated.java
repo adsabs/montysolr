@@ -502,7 +502,6 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		
 		
 		if (params.getBool(PARAM_COMMIT, false)) {
-		  System.err.println("------ committing");
 			setWorkerMessage("Phase 3/3. Writing index...");
 			CommitUpdateCommand updateCmd = new CommitUpdateCommand(req, false);
 			req.getCore().getUpdateHandler().commit(updateCmd);
@@ -648,18 +647,16 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		String uniqField = schema.getUniqueKeyField().getName();
-		SolrParams params = req.getParams();
 		
 		AddUpdateCommand addCmd = new AddUpdateCommand(req);
-		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
-		addCmd.setFlags(UpdateCommand.IGNORE_AUTOCOMMIT);
+		//addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
+		//addCmd.setFlags(UpdateCommand.BUFFERING);
 		
 		if (recids.length > 0) {
-			SolrInputDocument doc = new SolrInputDocument();
 			for (int i = 0; i < recids.length; i++) {
-				doc.clear();
-				doc.addField(uniqField,	recids[i]);
-				addCmd.solrDoc = doc;
+			  addCmd.clear();
+			  addCmd.solrDoc = new SolrInputDocument();
+			  addCmd.solrDoc.addField(uniqField,	recids[i]);
 				updateHandler.addDoc(addCmd);
 			}
 		}
@@ -670,44 +667,43 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		String uniqField = schema.getUniqueKeyField().getName();
-		SolrParams params = req.getParams();
 		
 		AddUpdateCommand addCmd = new AddUpdateCommand(req);
-		addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
-		addCmd.setFlags(UpdateCommand.IGNORE_AUTOCOMMIT);
+		//addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
+		//addCmd.setFlags(UpdateCommand.BUFFERING);
 		
 
       if (recids.length > 0) {
 			
-			Map<Integer, Integer> map = DictionaryRecIdCache.INSTANCE
-					.getTranslationCache(req.getSearcher().getAtomicReader(), 
-							uniqField);
-			SolrInputDocument doc = new SolrInputDocument();
+//			Map<Integer, Integer> map = DictionaryRecIdCache.INSTANCE
+//					.getTranslationCache(req.getSearcher().getAtomicReader(), 
+//							uniqField);
 			
 			for (int i = 0; i < recids.length; i++) {
-				if (!map.containsKey(recids[i])) {
-					doc.clear();
-					doc.addField(uniqField,	recids[i]);
-					addCmd.solrDoc = doc;
+//				if (!map.containsKey(recids[i])) {
+					addCmd.clear();
+					addCmd.solrDoc = new SolrInputDocument();
+					addCmd.solrDoc.addField(uniqField,	recids[i]);
 					updateHandler.addDoc(addCmd);
-				}
+//				}
+//				else {
+//				  log.error("Trying to update a record which doesn't have recid! recid=" + recids[i]);
+//				}
 			}
 		}
 	}
 	
 	protected void runProcessingDeleted(int[] recids, SolrQueryRequest req) throws IOException {
-		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
-		SolrParams params = req.getParams();
 		
 		DeleteUpdateCommand delCmd = new DeleteUpdateCommand(req);
-		delCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
-		delCmd.setFlags(UpdateCommand.IGNORE_AUTOCOMMIT);
+		//delCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
+		//delCmd.setFlags(UpdateCommand.BUFFERING);
 		
 
     if (recids.length > 0) {
-			
 			for (int i = 0; i < recids.length; i++) {
+			  delCmd.clear();
 				delCmd.id = Integer.toString(recids[i]);
 				updateHandler.delete(delCmd);
 			}

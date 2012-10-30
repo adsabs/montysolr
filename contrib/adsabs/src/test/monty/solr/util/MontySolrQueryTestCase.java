@@ -135,7 +135,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 			docs = new int[]{docId};
 		}
 		
-		DocReconstructor reconstructor = new DocReconstructor(reader);
+		DocReconstructor reconstructor = new DocReconstructor(reader, fields, 10);
 		Reconstructed d;
 		
 		for (Integer dd: docs) {
@@ -146,7 +146,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 				fldMap.add(f);
 			}
 			
-			System.out.println("INDEXED FIELDS:");
+			System.out.println("INDEXED FIELDS: " + dd);
 			Map<String, GrowableStringArray> rf = d.getReconstructedFields();
 			for (Entry<String, GrowableStringArray> es : rf.entrySet()) {
 				String fld = es.getKey();
@@ -160,7 +160,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 			
 			if (true) continue;
 			
-			System.out.println("STORED FIELDS:");
+			System.out.println("STORED FIELDS: " + dd);
 			Map<String, IndexableField[]> sf = d.getStoredFields();
 			for (Entry<String, IndexableField[]> es : sf.entrySet()) {
 				String fld = es.getKey();
