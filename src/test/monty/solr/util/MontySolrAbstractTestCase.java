@@ -127,7 +127,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 			for (String l: lines) {
 				out.append(l + "\n");
 			}
-			FileUtils.writeStringToFile(tmpFile, out.toString());
+			FileUtils.writeStringToFile(tmpFile, out.toString(), "UTF-8");
 		}
 		return tmpFile;
 	}
