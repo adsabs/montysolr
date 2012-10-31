@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.solr.update;
+package examples.adsabs;
 
 import java.io.File;
 import java.net.URLEncoder;
@@ -34,6 +34,7 @@ import org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.update.InvenioImportBackup;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.junit.BeforeClass;
 
