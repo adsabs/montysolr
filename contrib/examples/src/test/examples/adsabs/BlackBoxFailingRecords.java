@@ -111,25 +111,25 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 
 
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
-        "//str[@name='queueSize'][.='2']",
+        "//str[@name='queueSize'][.='3']",
         "//str[@name='failedRecs'][.='0']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='0']",
-        "//str[@name='registeredRequests'][.='2']",
+        "//str[@name='registeredRequests'][.='3']",
         "//str[@name='restartedRequests'][.='0']",
         "//str[@name='docsToCheck'][.='103']",
         "//str[@name='status'][.='idle']"
     );
     assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
-        "//str[@name='queueSize'][.='2']",
+        "//str[@name='queueSize'][.='3']",
         "//str[@name='failedRecs'][.='0']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='0']",
-        "//str[@name='registeredRequests'][.='2']",
+        "//str[@name='registeredRequests'][.='3']",
         "//str[@name='restartedRequests'][.='0']",
         "//str[@name='docsToCheck'][.='103']",
         "//str[@name='status'][.='idle']",
-        "*[count(//arr[@name='toBeDone']/str)=2]",
+        "*[count(//arr[@name='toBeDone']/str)=3]",
         "*[count(//arr[@name='failedBatches']/str)=0]"
     );
 
@@ -152,8 +152,12 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 
     assertQ(req("q", "*:*"), "//*[@numFound='20']");
     assertQ(req("q", "id:84"), "//*[@numFound='0']");
-    assertQ(req("q", "id:78"), "//*[@numFound='0']");
+    assertQ(req("q", "id:83"), "//*[@numFound='1']");
+    assertQ(req("q", "id:85"), "//*[@numFound='1']");
     
+    assertQ(req("q", "id:78"), "//*[@numFound='0']");
+    assertQ(req("q", "id:77"), "//*[@numFound='1']");
+    assertQ(req("q", "id:79"), "//*[@numFound='1']");
     
 
     String response = h.query("/invenio-doctor", req("qt", "/invenio-doctor", "command", "detailed-info"));
@@ -165,8 +169,8 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
         "//str[@name='failedRecs'][.='2']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='2']",
-        "//str[@name='registeredRequests'][.='22']",
-        "//str[@name='restartedRequests'][.='22']",
+        "//str[@name='registeredRequests'][.='21']",
+        "//str[@name='restartedRequests'][.='21']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
     );
@@ -187,11 +191,11 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
     core.execute(handler, req, rsp);
     
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
-        "//str[@name='queueSize'][.='2']",
+        "//str[@name='queueSize'][.='3']",
         "//str[@name='failedRecs'][.='0']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='0']",
-        "//str[@name='registeredRequests'][.='2']",
+        "//str[@name='registeredRequests'][.='3']",
         "//str[@name='restartedRequests'][.='0']",
         "//str[@name='docsToCheck'][.='3']",
         "//str[@name='status'][.='idle']"
@@ -210,8 +214,8 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
         "//str[@name='failedRecs'][.='1']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='1']",
-        "//str[@name='registeredRequests'][.='2']",
-        "//str[@name='restartedRequests'][.='2']",
+        "//str[@name='registeredRequests'][.='3']",
+        "//str[@name='restartedRequests'][.='3']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
     );

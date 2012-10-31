@@ -67,9 +67,9 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       }
       else {
         // but likely, the first failed is erroneous, so let's create three batches
-        //core.execute(backupHandler, req("command", "register-new-batch", 
-        //    "url", pargs.getUrl(new int[]{pargs.ids.get(0)})), rsp);
-        //.ids.remove(0);
+        core.execute(backupHandler, req("command", "register-new-batch", 
+            "url", pargs.getUrl(new int[]{pargs.ids.get(0)})), rsp);
+        pargs.ids.remove(0);
         callProcessingAgain(pargs);
       }
     }
@@ -82,6 +82,10 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
         core.execute(backupHandler, req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString()), rsp);
       }
       else {
+        // but likely, the first failed is erroneous, so let's create three batches
+        core.execute(backupHandler, req("command", "register-new-batch", 
+            "url", pargs.getUrl(new int[]{pargs.ids.get(0)})), rsp);
+        pargs.ids.remove(0);
         callProcessingAgain(pargs);
       }
     }

@@ -136,25 +136,25 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     
     
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
-        "//str[@name='queueSize'][.='2']",
+        "//str[@name='queueSize'][.='3']",
         "//str[@name='failedRecs'][.='0']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='0']",
-        "//str[@name='registeredRequests'][.='2']",
+        "//str[@name='registeredRequests'][.='3']",
         "//str[@name='restartedRequests'][.='0']",
         "//str[@name='docsToCheck'][.='96']",
         "//str[@name='status'][.='idle']"
         );
     assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
-        "//str[@name='queueSize'][.='2']",
+        "//str[@name='queueSize'][.='3']",
         "//str[@name='failedRecs'][.='0']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='0']",
-        "//str[@name='registeredRequests'][.='2']",
+        "//str[@name='registeredRequests'][.='3']",
         "//str[@name='restartedRequests'][.='0']",
         "//str[@name='docsToCheck'][.='96']",
         "//str[@name='status'][.='idle']",
-        "*[count(//arr[@name='toBeDone']/str)=2]",
+        "*[count(//arr[@name='toBeDone']/str)=3]",
         "*[count(//arr[@name='failedBatches']/str)=0]"
         );
     
@@ -194,8 +194,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='failedRecs'][.='5']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='5']",
-        "//str[@name='registeredRequests'][.='26']",
-        "//str[@name='restartedRequests'][.='26']",
+        "//str[@name='registeredRequests'][.='12']",
+        "//str[@name='restartedRequests'][.='12']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
@@ -226,8 +226,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='failedRecs'][.='11']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='11']",
-        "//str[@name='registeredRequests'][.='36']",
-        "//str[@name='restartedRequests'][.='36']",
+        "//str[@name='registeredRequests'][.='20']",
+        "//str[@name='restartedRequests'][.='20']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
@@ -355,8 +355,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "//str[@name='failedRecs'][.='4']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='4']",
-        "//str[@name='registeredRequests'][.='37']",
-        "//str[@name='restartedRequests'][.='37']",
+        "//str[@name='registeredRequests'][.='15']",
+        "//str[@name='restartedRequests'][.='15']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
