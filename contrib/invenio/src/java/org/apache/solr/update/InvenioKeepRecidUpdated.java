@@ -762,11 +762,16 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	 */
 	protected void runUpload(List<String> urlsToFetch) throws MalformedURLException, IOException,
 			InterruptedException {
+	  int i = 0;
 		while (urlsToFetch.size() > 0) {
 			String url = urlsToFetch.remove(0);
 			String html = IOUtils.toString(new URL(url).openStream());
 			while (html.contains("busy")) {
 				Thread.sleep(200);
+			}
+			i++;
+			if (i> 20) {
+			  throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, "The remote url is constantly busy: " + url);
 			}
 		}
 

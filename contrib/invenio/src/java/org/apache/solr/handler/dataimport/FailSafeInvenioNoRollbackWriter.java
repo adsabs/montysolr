@@ -11,6 +11,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.NamedList.NamedListEntry;
@@ -19,6 +20,7 @@ import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.update.InvenioKeepRecidUpdated;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.slf4j.Logger;
@@ -65,9 +67,9 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       }
       else {
         // but likely, the first failed is erroneous, so let's create three batches
-        core.execute(backupHandler, req("command", "register-new-batch", 
-            "url", pargs.getUrl(new int[]{pargs.ids.get(0)})), rsp);
-        pargs.ids.remove(0);
+        //core.execute(backupHandler, req("command", "register-new-batch", 
+        //    "url", pargs.getUrl(new int[]{pargs.ids.get(0)})), rsp);
+        //.ids.remove(0);
         callProcessingAgain(pargs);
       }
     }
@@ -76,7 +78,7 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       if (pargs.ids.size()==0) {
         core.execute(backupHandler, req("command", "register-failed-batch", "recid", pargs.origUrl), rsp);
       }
-      else if (pargs.ids.size()==1) {
+      else if (pargs.ids.size()==1) { // the last doc is erroneous
         core.execute(backupHandler, req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString()), rsp);
       }
       else {
@@ -85,7 +87,7 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     }
     
     log.error("Rollback was called (but we ignore it and commit)!");
-    commit(false); //if we don't commit, recs are lost
+    commit(false); // anything bad happens if we don't call commit?
   }
   
   protected SolrQueryRequest getReq() {
@@ -131,6 +133,7 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     public List<Integer> ids;
     public String origUrl;
     private String tmpl;
+    private String queryParams;
     
     public ParsedArgs(SolrParams params) {
       ids = new ArrayList<Integer>();
@@ -140,53 +143,30 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       List<String> parts = InvenioKeepRecidUpdated.getQueryIds(ids.length, ids);
       try {
         String recids = URLEncoder.encode( parts.get(0), "UTF-8" );
-        return tmpl.replace("_____", recids);
+        return tmpl.replace("_____", URLEncoder.encode(queryParams.replace("_____", recids), "UTF-8"));
+        //return URLEncoder.encode(url, "UTF-8");
       } catch (UnsupportedEncodingException e) {
         throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
       }
     }
     
     private void processUrl(SolrParams params) {
-      
       ModifiableSolrParams modPar = new ModifiableSolrParams(params);
+      
+      assert modPar.get("url", null) != null;
+      assert modPar.get("url", "").contains("?");
+      
+      String[] pair = modPar.get("url").split("\\?");
+      ModifiableSolrParams q = new ModifiableSolrParams(SolrRequestParsers.parseQueryString(pair[1]));
+      if (q.get("p", null) != null) {
+        extractIds(q.get("p"));
+        q.set("p", "_____");
+      }
+      
       origUrl = modPar.toString();
-      StringBuilder template = new StringBuilder();
-      
-      String urlCommand = modPar.get("url", null);
-      if (urlCommand == null) {
-        return;
-      }
-      
-      if (!urlCommand.contains("?")) {
-        template.append(origUrl + "&p=_____");
-        tmpl = template.toString();
-        return;
-      }
-      
-      
-      String[] pair = urlCommand.split("\\?");
-      template.append(pair[0] + "?");
-      boolean first=true;
-      for (String pp: pair[1].split("&")) {
-        if (!first) template.append("&");
-        first=false;
-        String[] vals = pp.split("=");
-        if (vals[0].equals("p")) {
-          template.append("p=_____");
-          try {
-            vals[1] = URLDecoder.decode( vals[1], "UTF-8" );
-          } catch (UnsupportedEncodingException e) {
-            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
-          }
-          extractIds(vals[1]);
-        }
-        else {
-          template.append(pp);
-        }
-      }
-      
-      modPar.set("url", template.toString());
+      modPar.set("url", "_____");
       this.tmpl = modPar.toString();
+      this.queryParams = pair[0] + "?" + q.toString();
     }
     
     private void extractIds(String pValue) {

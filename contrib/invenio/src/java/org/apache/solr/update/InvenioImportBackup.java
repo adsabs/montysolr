@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,6 +33,7 @@ import java.util.Set;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.NamedList.NamedListEntry;
@@ -43,6 +45,7 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.servlet.SolrRequestParsers;
+import org.apache.solr.update.InvenioImportBackup.RequestData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Collections;
@@ -66,53 +69,65 @@ public class InvenioImportBackup extends RequestHandlerBase {
 
     public String url;
     public int count;
+    private MultiMapSolrParams params;
 
-    public RequestData(String url) {
-      this.url = url; // the URL is UTF-8 encoded
-      this.count = countIds(url);
+    public RequestData(String url) throws UnsupportedEncodingException {
+      this.url = url;
+      this.params = SolrRequestParsers.parseQueryString(this.url);
+      this.count = countIds(params.get("url"));
     }
     
     private int countIds(String url) {
       int count = 0;
-      
-      for (String arg: url.split("&")) {
-      
-        String[] kv = arg.split("=");
-        if (!kv[0].equals("url")) continue;
-        
-        String invenioUrl;
-        try {
-          invenioUrl = URLDecoder.decode( kv[1], "UTF-8" );
-        } catch (UnsupportedEncodingException e) {
-          throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
-        }
-        
-        String[] urlParts = invenioUrl.split("\\?");
-        for (String param : urlParts[1].split("&")) {
-          String[] pair = param.split("=");
-          if (pair[0].equals("p")) {
-            for (String s: pair[1].split(" OR ")) {
-              s = s.replace("recid:", "");
-              if (s.indexOf("->") > -1) {
-                String[] range = s.split("->");
-                count = count + (Integer.parseInt(range[1]) - Integer.parseInt(range[0])) + 1; 
-              }
-              else {
-                count++;
-              }
+      String[] urlParts = url.split("\\?");
+      if (urlParts.length>1) {
+        MultiMapSolrParams q = SolrRequestParsers.parseQueryString(urlParts[1]);
+        if (q.get("p", null) != null) {
+          String s = q.get("p");
+          for (String t: s.split(" OR ")) {
+            t = t.replace("recid:", "");
+            if (t.indexOf("->") > -1) {
+              String[] range = t.split("->");
+              count = count + (Integer.parseInt(range[1]) - Integer.parseInt(range[0])) + 1; 
+            }
+            else {
+              count++;
             }
           }
-        }     
+        }
       }
       return count;
     }
 
     public SolrParams getReqParams() {
-      return SolrRequestParsers.parseQueryString(this.url);
+      return this.params;
     }
     
     public String toString() {
       return "(" + count + ") " + url;
+    }
+    
+    /*
+     * we cannot use: SolrRequestParsers.parseQueryString(this.url);
+     * because it will unencode the params, which is bad for us
+     */
+    private MultiMapSolrParams parseQueryString(String queryString) 
+    {
+      Map<String,String[]> map = new HashMap<String, String[]>();
+      if( queryString != null && queryString.length() > 0 ) {
+        for( String kv : queryString.split( "&" ) ) {
+          int idx = kv.indexOf( '=' );
+          if( idx > 0 ) {
+            String name = kv.substring( 0, idx );
+            String value = kv.substring( idx+1 );
+            MultiMapSolrParams.addParam( name, value, map );
+          }
+          else {
+            MultiMapSolrParams.addParam( kv, "", map );
+          }
+        }
+      }
+      return new MultiMapSolrParams( map );
     }
   }
 
@@ -138,16 +153,18 @@ public class InvenioImportBackup extends RequestHandlerBase {
       failedIds.add(recid);
     }
 
-    public void registerFailedBatch(String url) {
-      if (!failedQueue.containsKey(url)) {
-        failedQueue.put(url, new RequestData(url));
+    public void registerFailedBatch(String url) throws UnsupportedEncodingException {
+      RequestData rd = new RequestData(url);
+      if (!failedQueue.containsKey(rd.url)) {
+        failedQueue.put(rd.url, rd);
       }
     }
 
-    public void registerNewBatch(String url) {
-      if (!tbdQueue.containsKey(url)) {
+    public void registerNewBatch(String url) throws UnsupportedEncodingException {
+      RequestData rd = new RequestData(url);
+      if (!tbdQueue.containsKey(rd.url)) {
         queuedIn++;
-        tbdQueue.put(url, new RequestData(url));
+        tbdQueue.put(rd.url, rd);
       }
     }
 
@@ -242,9 +259,10 @@ public class InvenioImportBackup extends RequestHandlerBase {
     else {
       rsp.add("message", "Unknown command: " + command);
       rsp.add("message", "Allowed: start,stop,reset,info,detailed-info");
+      printInfo(rsp);
     }
     
-
+    
     rsp.add("status", isBusy() ? "busy" : "idle");
     //setToken("");
 

@@ -32,6 +32,9 @@ public class MongoTransformer extends Transformer {
 		BasicDBObject mongoFields = ds.getMongoFields();				// the fields we want to selectively fetch
 		Map<String,String> fieldColumnMap = ds.getFieldColumnMap();		// mapping mongo field names -> solr schema names
 		
+		// do not bother if there are no mongo fields requested
+		if (fieldColumnMap.size()==0) return row;
+		
 		DBObject doc = null;
 		try {
 			/*

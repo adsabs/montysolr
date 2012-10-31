@@ -118,11 +118,13 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		base = path + ename;
 	}
 	
+	@Override
 	public String getSchemaFile() {
 		return getConf("solr/collection1/conf/schema.xml");
 	}
 
 	
+	@Override
 	public String getSolrConfigFile() {
 		return getConf("solr/collection1/conf/solrconfig.xml");
 	}

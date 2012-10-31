@@ -18,7 +18,10 @@
 package org.apache.solr.update;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,14 +106,18 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 		assertU(commit());
 		
 		assertQ(req("q", "*:*"), "//*[@numFound='104']");
-		assertQ(req("q", "id:53"), "//*[@numFound='1']");
-		assertQ(req("q", "id:54"), "//*[@numFound='1']");
-		assertQ(req("q", "id:55"), "//*[@numFound='1']");
-		assertQ(req("q", "abstract:\"Higgs boson\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:photolab"), "//*[@numFound='1']");
+		assertQ(req("q", "id:9"), "//*[@numFound='1']");
+		assertQ(req("q", "id:19"), "//*[@numFound='1']");
+		assertQ(req("q", "id:29"), "//*[@numFound='1']");
+		assertQ(req("q", "id:104"), "//*[@numFound='1']");
+		assertQ(req("q", "id:80"), "//*[@numFound='1']");
 		
-		assertQ(req("q", "id:100"), "//*[@numFound='1']");
 		
+		failThis.put("9", true);
+    failThis.put("19", true);
+    failThis.put("29", true);
+    failThis.put("104", true);
+    failThis.put("80", true);
 		
 		// clean the slate
 		assertU(delQ("*:*"));
@@ -121,7 +128,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "dirs", testDir,
         "commit", "true",
         "writerImpl", TestFailingWriter.class.getName(),
-        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=recid:1->60 OR recid:61->104"
+        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=" 
+          + URLEncoder.encode("recid:1->60 OR recid:61->104", "UTF-8")
         );
     rsp = new SolrQueryResponse();
     core.execute(handler, req, rsp);
@@ -158,40 +166,36 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     
     while (controller.isBusy()) {
       Thread.sleep(300);
-      if (controller.isBusy()) {
-        assertQ(req("qt", "/invenio-doctor", "command", "info"), 
-            "//str[@name='status'][.='busy']"
-            );
-      }
     }
     
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='status'][.='idle']"
         );
     
-    assertQ(req("q", "*:*"), "//*[@numFound='85']");
-    for (int i=1;i<=104;i++) {
-      String v = Integer.toString(i);
-      if (v.contains("9")) {
-        assertQ(req("q", "id:"+v), "//*[@numFound='0']");
-      }
-    }
+    assertQ(req("q", "*:*"), "//*[@numFound='99']");
+    assertQ(req("q", "id:9"), "//*[@numFound='0']");
+    assertQ(req("q", "id:19"), "//*[@numFound='0']");
+    assertQ(req("q", "id:29"), "//*[@numFound='0']");
+    assertQ(req("q", "id:104"), "//*[@numFound='0']");
+    assertQ(req("q", "id:80"), "//*[@numFound='0']");
+    assertQ(req("q", "id:10"), "//*[@numFound='1']");
+    assertQ(req("q", "id:20"), "//*[@numFound='1']");
+    assertQ(req("q", "id:30"), "//*[@numFound='1']");
+    assertQ(req("q", "id:103"), "//*[@numFound='1']");
+    assertQ(req("q", "id:81"), "//*[@numFound='1']");
     
-    for (Entry<String, Integer> e: alreadyFailed.entrySet()) {
-      assertTrue(e.getValue() < 4);
-    }
     
     String response = h.query("/invenio-doctor", req("qt", "/invenio-doctor", "command", "detailed-info"));
     
     //System.out.println(response);
     
-    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+    assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
         "//str[@name='queueSize'][.='0']",
-        "//str[@name='failedRecs'][.='12']",
+        "//str[@name='failedRecs'][.='5']",
         "//str[@name='failedBatches'][.='0']",
-        "//str[@name='failedTotal'][.='12']",
-        "//str[@name='registeredRequests'][.='52']",
-        "//str[@name='restartedRequests'][.='52']",
+        "//str[@name='failedTotal'][.='5']",
+        "//str[@name='registeredRequests'][.='26']",
+        "//str[@name='restartedRequests'][.='26']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
@@ -201,7 +205,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "dirs", testDir,
         "commit", "true",
         "writerImpl", TestFailingWriter.class.getName(),
-        "url", "file:///demo-site-non-existing.xml?p=recid:105->110"
+        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/non-existing-demo-site.xml?p="
+            + URLEncoder.encode("recid:105->110", "UTF-8")
         );
     rsp = new SolrQueryResponse();
     core.execute(handler, req, rsp);
@@ -212,22 +217,17 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     
     while (controller.isBusy()) {
       Thread.sleep(300);
-      if (controller.isBusy()) {
-        assertQ(req("qt", "/invenio-doctor", "command", "info"), 
-            "//str[@name='status'][.='busy']"
-            );
-      }
     }
 		
     // One problem with our approach is that we cannot recognize a batch
     // that is completely wrong
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",
-        "//str[@name='failedRecs'][.='18']",
+        "//str[@name='failedRecs'][.='11']",
         "//str[@name='failedBatches'][.='0']",
-        "//str[@name='failedTotal'][.='18']",
-        "//str[@name='registeredRequests'][.='60']",
-        "//str[@name='restartedRequests'][.='60']",
+        "//str[@name='failedTotal'][.='11']",
+        "//str[@name='registeredRequests'][.='36']",
+        "//str[@name='restartedRequests'][.='36']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
@@ -251,7 +251,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     req = req("command", "full-import",
         "dirs", testDir,
         "commit", "true",
-        "url", "file:///demo-site-non-existing.xml?p=recid:105->110"
+        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/non-existing-demo-site.xml?p="
+           + URLEncoder.encode("recid:105->110", "UTF-8")
         );
     rsp = new SolrQueryResponse();
     core.execute(handler, req, rsp);
@@ -262,11 +263,6 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     
     while (controller.isBusy()) {
       Thread.sleep(300);
-      if (controller.isBusy()) {
-        assertQ(req("qt", "/invenio-doctor", "command", "info"), 
-            "//str[@name='status'][.='busy']"
-            );
-      }
     }
     
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
@@ -290,7 +286,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "dirs", testDir,
         "commit", "true",
         "writerImpl", TestFailingWriter.class.getName(),
-        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=recid:9 OR recid:99"
+        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=" 
+        + URLEncoder.encode("recid:9 OR recid:99", "UTF-8")
         );
     rsp = new SolrQueryResponse();
     core.execute(handler, req, rsp);
@@ -299,7 +296,8 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         "dirs", testDir,
         "commit", "true",
         "writerImpl", TestFailingWriter.class.getName(),
-        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=recid:8 OR recid:99"
+        "url", "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/invenio/src/test-files/data/demo-site.xml?p=" 
+        + URLEncoder.encode("recid:9 OR recid:19", "UTF-8")
         );
     rsp = new SolrQueryResponse();
     core.execute(handler, req, rsp);
@@ -309,21 +307,56 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
     core.execute(controller, req, rsp);
     
     while (controller.isBusy()) {
+      assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+          "//str[@name='status'][.='busy']"
+          );
       Thread.sleep(300);
-      if (controller.isBusy()) {
-        assertQ(req("qt", "/invenio-doctor", "command", "info"), 
-            "//str[@name='status'][.='busy']"
-            );
-      }
     }
     
+    // three requests because one part is common to both queries
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",
         "//str[@name='failedRecs'][.='2']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='2']",
-        "//str[@name='registeredRequests'][.='2']",
-        "//str[@name='restartedRequests'][.='2']",
+        "//str[@name='registeredRequests'][.='3']",
+        "//str[@name='restartedRequests'][.='3']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']"
+        );
+    
+    
+    // reset and try new with url-encoded params
+    alreadyProcessed.clear();
+    alreadyFailed.clear();
+    
+    req = req("command", "full-import",
+        "dirs", testDir,
+        "commit", "true",
+        "writerImpl", TestFailingWriter.class.getName(),
+        "url", "file://" + MontySolrSetup.getMontySolrHome() 
+                + "/contrib/invenio/src/test-files/data/demo-site.xml?p=" 
+                + URLEncoder.encode("recid:9->50 OR recid:60->99", "UTF-8")
+        );
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    
+    
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(controller, req, rsp);
+    
+    while (controller.isBusy()) {
+      Thread.sleep(300);
+    }
+    // docs are counted unique
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='4']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='4']",
+        "//str[@name='registeredRequests'][.='37']",
+        "//str[@name='restartedRequests'][.='37']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
         );
@@ -332,6 +365,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 	
 	public static final Map<String, Boolean> alreadyProcessed = new HashMap<String, Boolean>();
 	public static final Map<String, Integer> alreadyFailed = new HashMap<String, Integer>();
+	public static final Map<String, Boolean> failThis = new HashMap<String, Boolean>();
 	
 	public static class TestFailingWriter extends FailSafeInvenioNoRollbackWriter {
 	  
@@ -344,6 +378,14 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
 	  
     @Override
     public void rollback() {
+      // hack, to make the testing possible (failed recs that are out of the current range, should be removed)
+//      List<Integer> range = getRange();
+//      for (Entry<String, Integer> e: alreadyFailed.entrySet()) {
+//        int v = Integer.parseInt(e.getKey());
+//        if (!(range.indexOf(v) > -1) && this.processedIds.contains(e.getKey())) {
+//          this.processedIds.remove((int) this.processedIds.indexOf(e.getKey()));
+//        }
+//      }
       super.rollback();
     }
     
@@ -357,12 +399,12 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
       if (alreadyProcessed.containsKey(val)) {
         return false;
       }
-      if (val.contains("9")) {
+      if (failThis.containsKey(val)) {
         if (!alreadyFailed.containsKey(val)) {
           alreadyFailed.put(val, 0);
         }
         alreadyFailed.put(val, alreadyFailed.get(val)+1);
-        if (alreadyFailed.get(val) > 2) return false; // we fail only twice for each "9", then we skip
+        //if (alreadyFailed.get(val) > 2) return false; // we fail only twice, then we skip
         throw new IllegalStateException("Causing rollback to be called! Id: " + val);
       }
       alreadyProcessed.put(val, true);
@@ -374,6 +416,11 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
       
       SolrQueryRequest r = getReq();
       String v = r.getParams().get("url").split("p=")[1];
+      try {
+        v = URLDecoder.decode(v, "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        throw new IllegalSelectorException();
+      }
       ArrayList<Integer> out = new ArrayList<Integer>();
       for (String s: v.split(" OR ")) {
         s = s.replace("recid:", "");

@@ -155,5 +155,19 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		return matches;
 	}
 	
-
+	public File duplicateModify(File sourceFile, String...searchReplace) {
+	  assert searchReplace.length%2==0;
+    File newFile;
+    try {
+      newFile = duplicateFile(sourceFile);
+      for (int i=0;i<searchReplace.length;i=i+2) {
+        replaceInFile(newFile, searchReplace[i], searchReplace[i+1]);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalStateException(e.getMessage());
+    }
+    return newFile;
+	}
+	
 }

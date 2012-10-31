@@ -11,7 +11,7 @@ import org.junit.BeforeClass;
 import examples.BlackAbstractTestCase;
 
 
-public class BlackBoxDataimportIndexing extends BlackAbstractTestCase{
+public class BlackBoxDataimportIndexing extends BlackAbstractTestCase {
 	
 	String mainUrl = "http://inspirebeta.net/search";
 	
