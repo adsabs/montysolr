@@ -20,13 +20,13 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 public class AqpFunctionQueryTreeBuilder extends QueryTreeBuilder 
 	implements AqpFunctionQueryBuilder {
 	
-	private ValueSourceParser vs;
-	private AqpFunctionQParser fp;
+	private ValueSourceParser valueSourceProvider;
+	private AqpFunctionQParser functionQueryParser;
 	
 	public AqpFunctionQueryTreeBuilder(ValueSourceParser provider,
-			AqpFunctionQParser fParser) {
-		vs = provider;
-		fp = fParser;
+			AqpFunctionQParser queryParser) {
+		valueSourceProvider = provider;
+		functionQueryParser = queryParser;
 	}
 
 	public Query build(QueryNode node) throws QueryNodeException {
@@ -110,15 +110,19 @@ public class AqpFunctionQueryTreeBuilder extends QueryTreeBuilder
 		
 	}
 
-	public AqpFunctionQParser getParser(QueryNode node) {
-		fp.setQueryNode(node);
-		return fp;
+	private AqpFunctionQParser getParser(QueryNode node) {
+		functionQueryParser.setQueryNode(node);
+		return functionQueryParser;
 	}
 
 
-	public ValueSourceParser getValueSourceParser() {
-		return vs;
+	private ValueSourceParser getValueSourceParser() {
+		return valueSourceProvider;
 	}
+
+  public boolean canBeAnalyzed() {
+    return false;
+  }
 
 
 }

@@ -1,5 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp.nodes;
 
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
@@ -30,10 +31,10 @@ import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 
 	private static final long serialVersionUID = 751068795564006998L;
-	private QueryBuilder builder = null;
+	private AqpFunctionQueryBuilder builder = null;
 	private String name = null;
 	
-	public AqpFunctionQueryNode(String name, QueryBuilder builder, QueryNode node) {
+	public AqpFunctionQueryNode(String name, AqpFunctionQueryBuilder builder, QueryNode node) {
 		allocate();
 		setLeaf(false);
 		//add(node.getChildren().get(1).getChildren()); // we keep only the values
@@ -72,4 +73,7 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		return name;
 	}
 	
+	public Boolean canBeAnalyzed() {
+	  return builder.canBeAnalyzed();
+	}
 }

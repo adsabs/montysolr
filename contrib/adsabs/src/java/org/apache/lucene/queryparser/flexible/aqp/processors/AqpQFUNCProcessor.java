@@ -59,7 +59,7 @@ public class AqpQFUNCProcessor extends AqpQProcessorPost {
 					"Missing FunctionQueryBuilder provider"));
 		}
 		
-		QueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
+		AqpFunctionQueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
 										.getBuilder(funcName, (QueryNode) node, config);
 		
 		if (builder == null) {

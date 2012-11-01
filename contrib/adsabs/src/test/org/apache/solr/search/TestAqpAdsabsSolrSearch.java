@@ -123,7 +123,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		
 		// new function queries, the 2nd order citation operators
-		
 		assertQueryEquals(req("qt", "aqp", "q", "x OR z cites(author:muller OR title:body)"), 
 				"+(all:x all:z) +SecondOrderQuery((author:muller author:muller,*) title:body, filter=null, collector=cites[using_cache:reference])", BooleanQuery.class);
 		

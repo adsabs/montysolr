@@ -28,9 +28,13 @@ public class AqpAdsabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
 		if (enteredCleanZone == true) {
 			counter++;
 		}
-		else if (node instanceof AqpFunctionQueryNode || node instanceof AqpNonAnalyzedQueryNode) {
+		else if (node instanceof AqpNonAnalyzedQueryNode) {
 			enteredCleanZone = true;
 			counter++;
+		}
+		else if (node instanceof AqpFunctionQueryNode && ((AqpFunctionQueryNode) node).canBeAnalyzed() == false) {
+		  enteredCleanZone = true;
+      counter++;
 		}
 		
 		return super.preProcessNode(node);

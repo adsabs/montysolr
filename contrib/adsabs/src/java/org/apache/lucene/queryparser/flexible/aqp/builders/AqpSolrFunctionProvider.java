@@ -20,7 +20,7 @@ import org.apache.solr.search.ValueSourceParser;
  */
 public class AqpSolrFunctionProvider implements AqpFunctionQueryBuilderProvider {
 
-	public QueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
+	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
 		throws QueryNodeException {
 		
 		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);

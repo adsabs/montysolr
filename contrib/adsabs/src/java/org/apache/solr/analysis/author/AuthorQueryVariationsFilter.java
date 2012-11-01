@@ -13,6 +13,12 @@ import org.apache.lucene.util.AttributeSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*
+ * rchyla: I have decided to make all the author search use wildcards instead
+ * of regexes (WHENEVER it is possible), therefore this filter will
+ * translate the regex into wildcards (where possible).
+ * 
+ */
 public final class AuthorQueryVariationsFilter extends TokenFilter {
 	
     public static final Logger log = LoggerFactory.getLogger(AuthorQueryVariationsFilter.class);
@@ -60,6 +66,9 @@ public final class AuthorQueryVariationsFilter extends TokenFilter {
 	    if (variations.size() > 0) {
 		    //log.debug("variations: " + variations);
 		    for (String s : variations) {
+		      if (s.endsWith(".*") && !s.substring(0,s.length()-2).contains("\\b")) {
+		        s = s.replace(".*", "*");
+		      }
 		    	variationStack.push(s);
 		    }
 	        return true;

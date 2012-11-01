@@ -9,22 +9,31 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.Query;
 import org.apache.solr.search.AqpFunctionQParser;
 
-public class AqpSubQueryTreeBuilder extends QueryTreeBuilder {
+public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
+  implements AqpFunctionQueryBuilder {
 	
-	private AqpSubqueryParser vs;
-	private AqpFunctionQParser fp;
+	private AqpSubqueryParser aqpValueSourceParser;
+	private AqpFunctionQParser functionQueryParser;
 	
 	public AqpSubQueryTreeBuilder(AqpSubqueryParser provider, AqpFunctionQParser parser) {
-		vs = provider;
-		fp = parser;
+		aqpValueSourceParser = provider;
+		functionQueryParser = parser;
 	}
 	
 	public Query build(QueryNode node) throws QueryNodeException {
 		try {
-			fp.setQueryNode(node);
-			return vs.parse(fp);
+			functionQueryParser.setQueryNode(node);
+			return aqpValueSourceParser.parse(functionQueryParser);
 		} catch (ParseException e) {
 			throw new QueryNodeException(new MessageImpl(e.getLocalizedMessage()));
 		}
 	}
+
+  public boolean canBeAnalyzed() {
+    if (aqpValueSourceParser instanceof AqpSubqueryParser) {
+      return ((AqpSubqueryParser) aqpValueSourceParser).canBeAnalyzed();
+    }
+    return false;
+  }
+
 }

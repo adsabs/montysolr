@@ -139,20 +139,17 @@ public class AqpAdsabsSubSueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitedBy(idField, refField), false);
 				
 		      }
-		    });
-		parsers.put("cites", new AqpSubqueryParserFull() {
+		    }.configure(true));
+		parsers.put("cites", new AqpSubqueryParserFull() { // this function values can be analyzed
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
-				
 				// TODO: make configurable
 				String refField = "reference";
 				String idField = "bibcode";
-				
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
-				
 			}
-		  });
+		  }.configure(true));
 		parsers.put("citis", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
@@ -165,10 +162,10 @@ public class AqpAdsabsSubSueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCites(idField, refField), false);
 				
 			}
-		  });
+		  }.configure(true));
 	};
 
-	public QueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
+	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
 		throws QueryNodeException {
 		
 		

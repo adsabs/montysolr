@@ -21,7 +21,10 @@
     <fieldtype name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" />
 
 
-    <!--  For ADS there are these rules:
+    <!--  
+    Test: TestAdsAuthorParsing
+    
+    For ADS there are these rules:
         What gets indexed: Normalized author name (always lowercase!)
         What gets searched: By default, the author name is
             
@@ -159,6 +162,8 @@
       </analyzer>
     </fieldType>
     
+    
+    <!-- test: TestAdsabsTypeNormalizedTextAscii -->
     <fieldType name="normalized_text_ascii" class="solr.TextField">
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>

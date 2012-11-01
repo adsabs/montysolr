@@ -104,7 +104,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpMultiWordProcessor()); // find synonyms if we have 'plain word token group'
 		
 		if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY) == true) {
-			add(new AqpAnalysisQueryNodeProcessor());
+			//add(new AqpAnalysisQueryNodeProcessor());
 		}
 		else {
 			add(new LowercaseExpandedTermsQueryNodeProcessor());

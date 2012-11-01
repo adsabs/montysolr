@@ -36,6 +36,8 @@ import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpan
  * 
  * @author rchyla
  * 
+ * XXX: this processor is obsolete and I should delete it!!!
+ * 
  */
 public class AqpAnalysisQueryNodeProcessor extends
 QueryNodeProcessorImpl {

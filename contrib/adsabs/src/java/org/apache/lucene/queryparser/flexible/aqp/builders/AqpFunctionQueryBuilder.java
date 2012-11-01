@@ -9,9 +9,9 @@ import org.apache.solr.search.ValueSourceParser;
 public interface AqpFunctionQueryBuilder extends QueryBuilder {
 	
 	
-	public AqpFunctionQParser getParser(QueryNode node);
+	//public AqpFunctionQParser getParser(QueryNode node);
 	
-	public ValueSourceParser getValueSourceParser();
+	//public ValueSourceParser getValueSourceParser();
 	
-	
+	public boolean canBeAnalyzed();
 }

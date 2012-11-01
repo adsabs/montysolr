@@ -130,15 +130,15 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      *   TODO: the analyzer for the synonyms must use the same StopFilters as the query chain
      * 
      */
-    assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", F.ADS_TEXT_TYPE, "Bílá kobyla skočila přes čtyřista"));
-    assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", F.ADS_TEXT_TYPE, "třicet-tři stříbrných střech"));
-    assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", F.ADS_TEXT_TYPE, "A ještě TřistaTřicetTři stříbrných křepeliček"));
-    assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", F.ADS_TEXT_TYPE, "Mirrors of the hubble space telescope first"));
-    assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxx5", F.ADS_TEXT_TYPE, "Mirrors of the HST second"));
-    assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxx6", F.ADS_TEXT_TYPE, "Mirrors of the Hst third"));
-    assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", F.ADS_TEXT_TYPE, "Mirrors of the HubbleSpaceTelescope fourth"));
-    assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxx8", F.ADS_TEXT_TYPE, "Take Massachusets Institute of Technology (MIT)"));
-    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxx9", F.ADS_TEXT_TYPE, "MIT developed new network protocols"));
+    assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", F.TYPE_ADS_TEXT, "Bílá kobyla skočila přes čtyřista"));
+    assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", F.TYPE_ADS_TEXT, "třicet-tři stříbrných střech"));
+    assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", F.TYPE_ADS_TEXT, "A ještě TřistaTřicetTři stříbrných křepeliček"));
+    assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", F.TYPE_ADS_TEXT, "Mirrors of the hubble space telescope first"));
+    assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxx5", F.TYPE_ADS_TEXT, "Mirrors of the HST second"));
+    assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxx6", F.TYPE_ADS_TEXT, "Mirrors of the Hst third"));
+    assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", F.TYPE_ADS_TEXT, "Mirrors of the HubbleSpaceTelescope fourth"));
+    assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxx8", F.TYPE_ADS_TEXT, "Take Massachusets Institute of Technology (MIT)"));
+    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxx9", F.TYPE_ADS_TEXT, "MIT developed new network protocols"));
 
     assertU(commit());
 
@@ -299,9 +299,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
 
     // the ascii folding filter emits both unicode and the ascii version
-    assertQ(req("q", F.ADS_TEXT_TYPE + ":Bílá"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
-    assertQ(req("q", F.ADS_TEXT_TYPE + ":Bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
-    assertQ(req("q", F.ADS_TEXT_TYPE + ":bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":Bílá"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":Bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
   }
 
 

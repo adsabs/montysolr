@@ -19,7 +19,7 @@ public class AqpFunctionQueryBuilderConfigImpl extends AttributeImpl implements
 	private static final long serialVersionUID = 1919178907275699596L;
 	
 	List<AqpFunctionQueryBuilderProvider> providers = new ArrayList<AqpFunctionQueryBuilderProvider>();
-	Map<String, QueryBuilder> builders = new HashMap<String, QueryBuilder>();
+	Map<String, AqpFunctionQueryBuilder> builders = new HashMap<String, AqpFunctionQueryBuilder>();
 	
 	public void addProvider(AqpFunctionQueryBuilderProvider provider) {
 		if (!providers.contains(provider)) {
@@ -28,7 +28,7 @@ public class AqpFunctionQueryBuilderConfigImpl extends AttributeImpl implements
 
 	}
 
-	public void setBuilder(String funcName, QueryBuilder builder) {
+	public void setBuilder(String funcName, AqpFunctionQueryBuilder builder) {
 		builders.put(funcName, builder);
 	}
 
@@ -38,14 +38,14 @@ public class AqpFunctionQueryBuilderConfigImpl extends AttributeImpl implements
 	 * do this
 	 * @throws QueryNodeException 
 	 */
-	public QueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
+	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
 		throws QueryNodeException {
 		
 		if (builders.containsKey(funcName)) {
 			return builders.get(funcName);
 		}
 		for (AqpFunctionQueryBuilderProvider provider: providers) {
-			QueryBuilder builder = provider.getBuilder(funcName, node, config);
+		  AqpFunctionQueryBuilder builder = provider.getBuilder(funcName, node, config);
 			if (builder != null) {
 				return builder;
 			}
