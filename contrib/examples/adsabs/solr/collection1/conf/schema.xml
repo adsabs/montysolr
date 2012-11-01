@@ -264,7 +264,7 @@
 
     <!--
     Be careful, this chain is very 'delicate'! 
-    run unittest: TestAdsabsTypeFulltext
+    unittest: TestAdsabsTypeFulltext
      -->
     <!--  the tokenizing part needs more work, probably using synonyms to match patterns? -->
     <fieldType name="ads_text" class="solr.TextField">

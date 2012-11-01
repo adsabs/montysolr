@@ -96,15 +96,14 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 
 	private int expandWithSynonyms(List<QueryNode> children,
       LinkedList<QueryNode> newChildren, QueryNode terminalNode, 
-      Integer i, ModifierQueryNode.Modifier modifier) {
+      int i, ModifierQueryNode.Modifier modifier) {
     
 	  FieldableNode fieldNode = (FieldableNode) terminalNode;
 	  int startingPosition = ((FieldQueryNode) fieldNode).getBegin();
 	  int maxOffset = ((String) terminalNode.getTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN_CONCATENATED)).length() + startingPosition;
-	  
     buffer.reset();
-    Integer startOffset = 0;
-    Integer endOffset = 0;
+    int startOffset = 0;
+    int endOffset = 0;
     
     LinkedList<QueryNode> synChildren = new LinkedList<QueryNode>();
     
@@ -113,35 +112,35 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
     // inside chilren[]
     try {
       while (buffer.incrementToken()) {
-          
         typeAtt = buffer.getAttribute(TypeAttribute.class);
         offsetAtt = buffer.getAttribute(OffsetAttribute.class);
+        posAtt = buffer.getAttribute(PositionIncrementAttribute.class);
+        termAtt = buffer.getAttribute(CharTermAttribute.class);
+        //System.out.println(termAtt.toString() + "; type=" + typeAtt.type());
         
         // seek until we find the first synonym
         if (!typeAtt.type().equals(SynonymFilter.TYPE_SYNONYM)) {
-          if (synChildren.size()>0) {
-            // we already have synonyms from the previous run            
-            newChildren.add(new ModifierQueryNode(new AqpOrQueryNode(synChildren), 
-                          modifier));
-            synChildren = new LinkedList<QueryNode>();
+          if (posAtt.getPositionIncrement()==0 && synChildren.size()>0) {
+            // add acronyms and other stuff (it is already analyzed, so we wrap it into AqpNonAnalyzedQN)
+            //synChildren.add(new AqpNonAnalyzedQueryNode(getNewNode((FieldQueryNode) fieldNode)));
+          }
+          if (synChildren.size()>0) { // we already have synonyms from the previous run
             
-            // find tokens that are *after* the syn-tokens (but not exceeding offset of the current buffer)
+            // move the pointer to exclude tokens *before* the syn-tokens
             for (int j=i;j<children.size();j++) {
               FieldQueryNode tn = (FieldQueryNode) getTerminalNode(children.get(j));
               if (tn.getBegin() >= startOffset+startingPosition && tn.getEnd() <= endOffset+startingPosition) { // token which is inside the synonym
-                i++;
-              }
-              else if(tn.getEnd() <= maxOffset) {
-                newChildren.add(children.get(j));
+                fieldNode = (FieldableNode) tn; //mark the current synonym source (its first token)
                 i++;
               }
               else {
                 break;
               }
-              
             }
+            newChildren.add(new ModifierQueryNode(new AqpOrQueryNode(synChildren), 
+                          modifier));
+            synChildren = new LinkedList<QueryNode>();
           }
-          startOffset = endOffset = 0;
           continue;
         }
         
@@ -161,16 +160,7 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
         }
         
         // add synonym (it is already analyzed, so we wrap it into AqpNonAnalyzedQN)
-        FieldableNode newNode = (FieldableNode) fieldNode.cloneTree();
-        if (buffer.hasAttribute(CharTermAttribute.class)) {
-          termAtt = buffer.getAttribute(CharTermAttribute.class);
-          ((TextableQueryNode) newNode).setText(termAtt.toString());
-        }
-        else {
-          numAtt = buffer.getAttribute(NumericTermAttribute.class);
-          ((TextableQueryNode) newNode).setText(new Long(numAtt.getRawValue()).toString());
-        }
-        synChildren.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) newNode));
+        synChildren.add(new AqpNonAnalyzedQueryNode(getNewNode((FieldQueryNode) fieldNode)));
       }
     } catch (IOException e) {
       getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());
@@ -178,6 +168,22 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
       getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_LOGGER).error(e.getLocalizedMessage());
     }
     
+    // find tokens that are *after* the last syn-tokens (but not exceeding offset of the current buffer)
+    for (int j=i;j<children.size();j++) {
+      FieldQueryNode tn = (FieldQueryNode) getTerminalNode(children.get(j));
+      if (tn.getBegin() >= startOffset+startingPosition && tn.getEnd() <= endOffset+startingPosition) { // token which is inside the synonym
+        i++;
+      }
+      else if(tn.getEnd() <= maxOffset) {
+        newChildren.add(children.get(j));
+        i++;
+      }
+      else {
+        break;
+      }
+    }
+
+    // if there was a synonym at the end, it will be here
     if (synChildren.size()>0) {
       newChildren.add(new GroupQueryNode(new AqpOrQueryNode(synChildren)));
       synChildren = new LinkedList<QueryNode>();
@@ -185,7 +191,21 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
     
     return i;
   }
-
+	
+	
+	private FieldQueryNode getNewNode(FieldQueryNode master) throws CloneNotSupportedException {
+	  FieldableNode newNode = (FieldableNode) master.cloneTree();
+    if (buffer.hasAttribute(CharTermAttribute.class)) {
+      termAtt = buffer.getAttribute(CharTermAttribute.class);
+      ((TextableQueryNode) newNode).setText(termAtt.toString());
+    }
+    else {
+      numAtt = buffer.getAttribute(NumericTermAttribute.class);
+      ((TextableQueryNode) newNode).setText(new Long(numAtt.getRawValue()).toString());
+    }
+    return (FieldQueryNode) newNode;
+	}
+	
   private QueryNode getTerminalNode(QueryNode node) {
 		if (node.isLeaf()) {
 			return node;

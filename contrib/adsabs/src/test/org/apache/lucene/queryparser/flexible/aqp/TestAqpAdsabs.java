@@ -474,11 +474,13 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		
+		assertQueryEquals("keyword:\"planets and satellites\"", wsa, "keyword:\"planets and satellites\"", PhraseQuery.class);
+		
 		assertQueryEquals("weak lensing", null, "+weak +lensing");
 		assertQueryEquals("+contact +binaries -eclipsing", null, "+contact +binaries -eclipsing");
 		assertQueryEquals("+contact +xfield:binaries -eclipsing", null, "+contact +xfield:binaries -eclipsing");
 		assertQueryEquals("intitle:\"yellow symbiotic\"", null, "intitle:\"yellow symbiotic\"");
-		assertQueryEquals("\"galactic rotation\"", null, "\"galactic rotation\"");
+		assertQueryEquals("\"galactic rotation\"", null, "\"galactic rotation\"", PhraseQuery.class);
 		assertQueryEquals("title:\"X x\" AND text:go title:\"x y\" AND A", null, "+title:\"x x\" +text:go +title:\"x y\" +a");
 		assertQueryEquals("title:\"X x\" OR text:go title:\"x y\" OR A", null, "+(title:\"x x\" text:go) +(title:\"x y\" a)");
 		assertQueryEquals("title:X Y Z", null, "+title:x +y +z"); // effectively --> title:x field:y field:z
@@ -586,6 +588,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		//assertQueryEquals("\"func(*) AND that\"", wsa, "\"func(*) AND that\"");
 		
 		assertQueryEquals("CO2+", wsa, "CO2+", TermQuery.class);
+		
+		 
 	}
 	
 	

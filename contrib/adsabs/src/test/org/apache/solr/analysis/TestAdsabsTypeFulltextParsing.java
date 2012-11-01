@@ -56,7 +56,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
       File synonymsFile = createTempFile(new String[]{
           "hubble\0space\0telescope, HST\n" +
-          "Massachusets\0Institute\0of\0Technology, MIT"
+          "Massachusets\0Institute\0of\0Technology, MIT\n" +
+          "Hubble\0Space\0Microscope, HSM"
       });
       replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 
@@ -191,24 +192,97 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQueryEquals(req("q", "HST goes home", "qt", "aqp"), 
         "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
 
-
+    
+    // MIT 
+    assertQueryEquals(req("q", "Massachusets Institute of Technology", "qt", "aqp"), 
+        "all:massachusets institute of technology all:mit", BooleanQuery.class);
+    // XXX: make ignore case for multi-tokens
+    //assertQueryEquals(req("q", "massachusets institute of technology", "qt", "aqp"), 
+    //    "all:massachusets institute of technology all:mit", BooleanQuery.class);
+    //assertQueryEquals(req("q", "Massachusets Institute Technology", "qt", "aqp"), 
+    //    "all:massachusets institute of technology all:mit", BooleanQuery.class);
+    
     //setDebug(true);
 
-    // XXX: todo crazy cases
+    
     /*
-    assertQueryEquals(req("q", "HST at MIT ", "qt", "aqp"), 
-        "", BooleanQuery.class);
-    assertQueryEquals(req("q", "HubbleSpaceTelescope bum MIT BX", "qt", "aqp"), 
-        "+(all:hubblespacetelescope all:hubble all:space all:telescope all:hubblespacetelescope) +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)", 
+     * alternation of synonym groups:
+     * =============================
+     */
+    
+    
+    //synonym at extremities (end-end):
+    
+    //one-token stopword one-token
+    assertQueryEquals(req("q", "HST at MIT", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+    //one-token word one-token
+    assertQueryEquals(req("q", "HST bum MIT", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+    //one-token stopword multi-token
+    assertQueryEquals(req("q", "HST at Massachusets Institute of Technology", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+    //one-token word multi-token
+    assertQueryEquals(req("q", "HST bum Massachusets Institute of Technology", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+    //multi-token stopword single-token
+    assertQueryEquals(req("q", "hubble space telescope at MIT", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+    //multi-token word single-token
+    assertQueryEquals(req("q", "hubble space telescope bum MIT", "qt", "aqp"), 
+        "+(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+    
+    
+    // synonyms hidden inside other words:
+    
+    //word one-token stopword one-token word
+    assertQueryEquals(req("q", "foo HST at MIT bar", "qt", "aqp"), 
+        "+all:foo +(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+    //word one-token word one-token word
+    assertQueryEquals(req("q", "foo HST bum MIT bar", "qt", "aqp"), 
+        "+all:foo +(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+    //word one-token stopword multi-token word
+    assertQueryEquals(req("q", "foo HST at Massachusets Institute of Technology bar", "qt", "aqp"), 
+        "+all:foo +(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+    //word one-token word multi-token word
+    assertQueryEquals(req("q", "foo HST bum Massachusets Institute of Technology bar", "qt", "aqp"), 
+        "+all:foo +(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+    //word multi-token stopword single-token word
+    assertQueryEquals(req("q", "foo hubble space telescope at MIT bar", "qt", "aqp"), 
+        "+all:foo +(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+    //word multi-token word single-token word
+    assertQueryEquals(req("q", "foo hubble space telescope bum MIT bar", "qt", "aqp"), 
+        "+all:foo +(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+    
+    
+    /**
+     * WordDelimiterFactory + synonym expansion craziness
+     */
+    
+    /*
+     * Example of the CamelCase - because the WordDelimiterFactory is before the synonym filter
+     * these token are first split and then matched. HOWEVER, the case is important!!
+     * 
+     * So, HubbleSpaceMicroscope is split into: Hubble, Space, Microscope
+     * 
+     * Which will be found only if the synonym file contains the same case (OR: if we enable the
+     * case insensitive search, which is on my TODO list)
+     * 
+     */
+    assertQueryEquals(req("q", "HubbleSpaceMicroscope bum MIT BX", "qt", "aqp"), 
+        "+(all:hubble space microscope all:hsm) +all:bum +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)", 
         BooleanQuery.class);
-    assertQueryEquals(req("q", "HubbleSpaceTelescope -bum MIT BX", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
-  */
+    assertQueryEquals(req("q", "HubbleSpaceMicroscope -bum MIT BX", "qt", "aqp"), 
+        "+(all:hubble space microscope all:hsm) -all:bum +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)",
+        BooleanQuery.class);
 
-
+    assertQueryEquals(req("q", "Hubble-Space-Microscope bum MIT BX", "qt", "aqp"), 
+        "+(all:hubble space microscope all:hsm) +all:bum +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)", 
+        BooleanQuery.class);
+    
     /*
      * But right now, *QUERY* synonym expansion is case sensitive, so these will
-     * not find (even if 'Hst' was in the synonym list). 
+     * not find anything (even if 'Hst' was in the synonym list). 
      */
     assertQueryEquals(req("q", "Hst", "qt", "aqp"), 
         "all:hst", TermQuery.class);
