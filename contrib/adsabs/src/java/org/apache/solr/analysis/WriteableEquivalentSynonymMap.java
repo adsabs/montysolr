@@ -1,33 +1,47 @@
 package org.apache.solr.analysis;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WriteableEquivalentSynonymMap extends WriteableExplicitSynonymMap {
+public class WriteableEquivalentSynonymMap extends WriteableSynonymMap {
 	
-	private static final String OUTPUT_KEY_SEPARATOR = ",";
+  private HashSet<Integer> alreadySeen;
 
-	public WriteableEquivalentSynonymMap(String outfile) {
+
+  public WriteableEquivalentSynonymMap(String outfile) {
 		super(outfile);
+		alreadySeen = new HashSet<Integer>();
 	}
 	
 	@Override
-	public void put(String key, Set<String> synonyms) {
-		//log.trace("setting " + k + " to " + v);
-		numUpdates++;
-		synonyms.add(key);
-		for (String syn : synonyms) {
-			Set<String> values = new HashSet<String>(synonyms);
-			values.remove(syn);
-			this.map.put(syn, values);
-		}
+	public void add(String key, Set<String> values) {
+		Set<String> masterSet = null;
+    if (containsKey(key)) {
+      masterSet = get(key);
+    }
+    else {
+      for (String k: values) {
+        if (containsKey(k)) {
+          masterSet = get(k);
+          break;
+        }
+      }
+      if (masterSet==null) {
+        masterSet = new LinkedHashSet<String>();
+      }
+    }
+    masterSet.add(key);
+    masterSet.addAll(values);
+    
+    for (String redo: masterSet) {
+      put(redo, masterSet);
+    }
 	}
 	
-	@Override
-	protected String getOutputKeySeparator() {
-		return OUTPUT_KEY_SEPARATOR;
-	}
 	
 	/*
 	 * this parses the non-explicit mapping syntax:
@@ -35,14 +49,44 @@ public class WriteableEquivalentSynonymMap extends WriteableExplicitSynonymMap {
 	 * tokena, tokenb, tokenc
 	 */
 	@Override
-	public void parseRules(List<String> rules) {
+	public void populateMap(List<String> rules) {
 		for (String rule : rules) {
-			Set<String> tokens = getSynList(rule);
-			for (String key : tokens) {
-				Set<String> values = new HashSet<String>(tokens);
-				values.remove(key);
-			    this.map.put(key.replace("\\,", ",").replace("\\ ", " "), values);
+			Set<String> tokens = splitValues(rule);
+			for (String t: tokens) {
+			  add(t, tokens);
+			  break; // we can skip the rest
 			}
 		}
+	}
+
+	
+	@Override
+  public String formatEntry(String key, Set<String> values) {
+	  if (alreadySeen.contains(values.hashCode())) {
+	    return "";
+	  }
+	  alreadySeen.add(values.hashCode());
+	  
+    StringBuffer out = new StringBuffer();
+    boolean notFirst = false;
+    for (String s : values) {
+      if (notFirst) out.append(","); 
+      out.append(s.replace(",", "\\,").replace(" ", "\\ "));
+      notFirst=true;
+    }
+    out.append("\n");
+    return out.toString();
+  }
+	
+	@Override
+	public void clear() {
+	  alreadySeen.clear();
+	  super.clear();
+	}
+	
+	@Override
+	public boolean persist(boolean append) throws IOException {
+	  if (append == false) alreadySeen.clear();
+	  return super.persist(append);
 	}
 }

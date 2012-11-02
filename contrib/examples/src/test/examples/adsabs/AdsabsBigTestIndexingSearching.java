@@ -17,20 +17,18 @@ package examples.adsabs;
  * limitations under the License.
  */
 
-import java.util.List;
 
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.schema.CopyField;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.servlet.DirectSolrConnection;
+import org.adsabs.solr.AdsConfig.F;
+import org.adsabs.solr.AdsConfig;
 
-
-import examples.adsabs.AdsConfig;
 
 /**
  * This test encompassess both indexing and searching, as configured
@@ -68,30 +66,30 @@ public class AdsabsBigTestIndexingSearching extends MontySolrAbstractTestCase {
 		IndexSchema schema = h.getCore().getSchema();
 		
 		
-		SchemaField field = schema.getField(AdsConfig.FIELD_ID);
+		SchemaField field = schema.getField(F.ID);
 		assertTrue(field.indexed() == true && field.stored() == true && field.isRequired() == true
 				&& field.multiValued() == false);
 		
 		field = schema.getUniqueKeyField();
-		field.getName().equals(AdsConfig.FIELD_ID);
+		field.getName().equals(F.ID);
 		
-		field = schema.getField(AdsConfig.FIELD_BIBCODE);
+		field = schema.getField(F.BIBCODE);
 		assertTrue(field.indexed() == true && field.stored() == true && field.isRequired() == true 
 				&& field.multiValued() == false);
 		field.checkSortability();
 		
-		field = schema.getField(AdsConfig.FIELD_RECID);
+		field = schema.getField(F.RECID);
 		assertTrue(field.indexed() == true && field.stored() == true && field.isRequired() == true 
 				&& field.multiValued() == false);
 		field.checkSortability();
 		assertTrue(field.getType().getClass().isAssignableFrom(TrieIntField.class));
 		
 		// check field ID is copied to field RECID
-//		List<CopyField> copyFields = schema.getCopyFieldsList(AdsConfig.FIELD_ID);
+//		List<CopyField> copyFields = schema.getCopyFieldsList(F.ID);
 //		assertTrue(copyFields.size() == 1);
 //		CopyField cField = copyFields.get(0);
-//		cField.getSource().getName().equals(AdsConfig.FIELD_ID);
-//		cField.getDestination().getName().equals(AdsConfig.FIELD_RECID);
+//		cField.getSource().getName().equals(F.ID);
+//		cField.getDestination().getName().equals(F.RECID);
 //		field = cField.getDestination();
 		
 		
@@ -99,25 +97,25 @@ public class AdsabsBigTestIndexingSearching extends MontySolrAbstractTestCase {
 		
 		
 		// check authors are correctly indexed/searched
-		adoc(AdsConfig.FIELD_ID, "0", AdsConfig.FIELD_AUTHOR, "Antonella Dall'oglio; P'ING-TZU KAO; A VAN DER KAMP");
-		adoc(AdsConfig.FIELD_ID, "1", AdsConfig.FIELD_AUTHOR, "VAN DER KAMP, A; Von Accomazzi, Alberto, III, Dr.;Kao, P'ing-Tzu");
-		adoc(AdsConfig.FIELD_ID, "2", AdsConfig.FIELD_AUTHOR, "Paul S O; Last, Furst Middle;'t Hooft, Furst Middle");
-		adoc(AdsConfig.FIELD_ID, "3", AdsConfig.FIELD_AUTHOR, "O, Paul S.; Last, Furst Middle More");
-		adoc(AdsConfig.FIELD_ID, "4", AdsConfig.FIELD_AUTHOR, "O, Paul S.", AdsConfig.FIELD_AUTHOR, "Last, Furst Middle More");
-		adoc(AdsConfig.FIELD_ID, "5", AdsConfig.FIELD_AUTHOR, "van Tiggelen, Bart A., Jr.");
-		adoc(AdsConfig.FIELD_ID, "6", AdsConfig.FIELD_AUTHOR, "Łuczak, Andrzej;John Doe Jr;Mac Low, Furst Middle;'t Hooft, Furst Middle");
-		adoc(AdsConfig.FIELD_ID, "7", AdsConfig.FIELD_AUTHOR, "Łuczak, Andrzej", AdsConfig.FIELD_AUTHOR, "John Doe Jr", 
-				AdsConfig.FIELD_AUTHOR, "Mac Low, Furst Middle", AdsConfig.FIELD_AUTHOR, "'t Hooft, Furst Middle");
+		adoc(F.ID, "0", F.AUTHOR, "Antonella Dall'oglio; P'ING-TZU KAO; A VAN DER KAMP");
+		adoc(F.ID, "1", F.AUTHOR, "VAN DER KAMP, A; Von Accomazzi, Alberto, III, Dr.;Kao, P'ing-Tzu");
+		adoc(F.ID, "2", F.AUTHOR, "Paul S O; Last, Furst Middle;'t Hooft, Furst Middle");
+		adoc(F.ID, "3", F.AUTHOR, "O, Paul S.; Last, Furst Middle More");
+		adoc(F.ID, "4", F.AUTHOR, "O, Paul S.", F.AUTHOR, "Last, Furst Middle More");
+		adoc(F.ID, "5", F.AUTHOR, "van Tiggelen, Bart A., Jr.");
+		adoc(F.ID, "6", F.AUTHOR, "Łuczak, Andrzej;John Doe Jr;Mac Low, Furst Middle;'t Hooft, Furst Middle");
+		adoc(F.ID, "7", F.AUTHOR, "Łuczak, Andrzej", F.AUTHOR, "John Doe Jr", 
+				F.AUTHOR, "Mac Low, Furst Middle", F.AUTHOR, "'t Hooft, Furst Middle");
 		
 		//TODO: this should not succeed, cause BIBCODE is missing
 		
 		assertU(commit());
 		
 		assertQ("should find one", req("defType", AdsConfig.DEF_TYPE, 
-				"q", AdsConfig.FIELD_AUTHOR + ":Antonella") ,"//result[@numFound=1]" );
+				"q", F.AUTHOR + ":Antonella") ,"//result[@numFound=1]" );
 		
 		assertQ("should find one", req("defType", AdsConfig.DEF_TYPE, 
-				"q", AdsConfig.FIELD_AUTHOR + ":Antonella") ,"//result[@numFound=1]" );
+				"q", F.AUTHOR + ":Antonella") ,"//result[@numFound=1]" );
 		
 	}
 }

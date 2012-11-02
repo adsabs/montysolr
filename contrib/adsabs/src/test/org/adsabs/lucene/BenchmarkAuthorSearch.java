@@ -41,7 +41,9 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.LuceneTestCase;
 import org.apache.lucene.util._TestUtil;
+import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 
+@SuppressCodecs("Lucene3x")
 public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private IndexSearcher searcher;
 	private IndexReader reader;
@@ -253,7 +255,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 			pos = 0;
 		}
 	}
-
+  
 	public void testBenchMarkAll() throws Exception {
 
 

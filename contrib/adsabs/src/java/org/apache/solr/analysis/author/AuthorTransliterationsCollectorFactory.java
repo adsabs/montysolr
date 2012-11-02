@@ -6,13 +6,13 @@ package org.apache.solr.analysis.author;
 import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.WriteableTokenFilterFactory;
+import org.apache.solr.analysis.PersistingMapTokenFilterFactory;
 
 /**
  * @author jluker
  *
  */
-public class AuthorTransliterationsCollectorFactory extends WriteableTokenFilterFactory {
+public class AuthorTransliterationsCollectorFactory extends PersistingMapTokenFilterFactory {
 
     public void init(Map<String, String> args) {
 	    super.init(args);

@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
@@ -96,7 +97,7 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
     collectorFactory.setSynonymMap(new WriteableExplicitSynonymMap(null));
     synMap = collectorFactory.getSynonymMap();
     synMap.clear();
-    synMap.parseRules(synMap.getLines(tmpFile.getAbsolutePath()));
+    synMap.populateMap(synMap.getLines(tmpFile.getAbsolutePath()));
 
 
     assertTrue(synMap.containsKey("MÜLLER, BILL"));
@@ -106,25 +107,59 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
 
   public void testEquivalentMap() throws IOException, InterruptedException {
 
-    File tmpFile = File.createTempFile("variants", ".tmp");
-
+    String expected = "Foo\\,\\ Bär,Foo\\,\\ Bar,Foo\\,\\ Baer\n" +
+    "Boo\\,\\ Bär,Boo\\,\\ Bar,Boo\\,\\ Baer";
+    
+    File tmpFile = createTempFile(expected);
+    
     // create a synonym map
     WriteableSynonymMap synMap = new WriteableEquivalentSynonymMap(tmpFile.getAbsolutePath());
-
-    // add some synonyms
-    synMap.put("Foo, Bär", new HashSet<String>() {{ add("Foo, Bar"); add("Foo, Baer"); }});
+    synMap.populateMap(synMap.getLines(tmpFile.getAbsolutePath()));
+    
+    
+    
+    // values are stored inside the same set
+    assertTrue(synMap.containsKey("Foo, Bär"));
+    assertEquals(synMap.get("Foo, Bär"), synMap.get("Foo, Bar"));
+    assertEquals(synMap.get("Foo, Bär"), synMap.get("Foo, Baer"));
+    assertSame(synMap.get("Foo, Bär"), synMap.get("Foo, Bar"));
+    assertSame(synMap.get("Foo, Bär"), synMap.get("Foo, Baer"));
+    assertSame(synMap.get("Foo, Bar"), synMap.get("Foo, Baer"));
+    
+    assertTrue(synMap.containsKey("Boo, Bär"));
+    assertEquals(synMap.get("Boo, Bär"), synMap.get("Boo, Bar"));
+    assertEquals(synMap.get("Boo, Bär"), synMap.get("Boo, Baer"));
+    assertSame(synMap.get("Boo, Bär"), synMap.get("Boo, Bar"));
+    assertSame(synMap.get("Boo, Bar"), synMap.get("Boo, Baer"));
+    
     synMap.persist();
+    String fc = readFile(tmpFile);
+    
+    assertTrue(fc.contains("Foo\\,\\ Bär,Foo\\,\\ Bar,Foo\\,\\ Baer\n"));
+    assertTrue(fc.contains("Boo\\,\\ Bär,Boo\\,\\ Bar,Boo\\,\\ Baer"));
+    
+    
+    // add some synonyms
+    synMap.add("Foo, Bär", new HashSet<String>() {{ add("Fuu, Bar"); add("Foo, Baer"); }});
+    
+    assertTrue(synMap.containsKey("Fuu, Bar"));
+    assertEquals(synMap.get("Fuu, Bar"), synMap.get("Foo, Bär"));
+    assertEquals(synMap.get("Fuu, Bar"), synMap.get("Foo, Bar"));
+    assertEquals(synMap.get("Fuu, Bar"), synMap.get("Foo, Baer"));
+    assertSame(synMap.get("Fuu, Bar"), synMap.get("Foo, Bär"));
+    assertSame(synMap.get("Fuu, Bar"), synMap.get("Foo, Bar"));
+    assertSame(synMap.get("Fuu, Bar"), synMap.get("Foo, Baer"));
+    
+    synMap.persist();
+    fc = readFile(tmpFile);
 
-    String expected = "Foo\\,\\ Bar,Foo\\,\\ Baer,Foo\\,\\ Bär,\n"
-      + "Foo\\,\\ Baer,Foo\\,\\ Bar,Foo\\,\\ Bär,\n"
-      + "Foo\\,\\ Bär,Foo\\,\\ Bar,Foo\\,\\ Baer,\n";
-
-    checkOutput(tmpFile, expected);
+    assertTrue(fc.contains("Foo\\,\\ Bär,Foo\\,\\ Bar,Foo\\,\\ Baer,Fuu\\,\\ Bar\n"));
+    assertTrue(fc.contains("Boo\\,\\ Bär,Boo\\,\\ Bar,Boo\\,\\ Baer"));
+    
 
   }
 
-  private void checkOutput(File tmpFile, String expected) throws IOException {
-
+  private String readFile(File tmpFile) throws IOException {
     FileInputStream in = new FileInputStream(tmpFile);
     BufferedReader fi = new BufferedReader(new InputStreamReader(new DataInputStream(in), "UTF-8"));
     StringBuffer out = new StringBuffer();
@@ -133,8 +168,24 @@ public class TestWriteableSynonymMap extends BaseTokenStreamTestCase {
       out.append(strLine);
       out.append("\n");
     }
+    return out.toString();
+  }
+  private void checkOutput(File tmpFile, String expected) throws IOException {
 
-    assertEquals(expected, out.toString());
+    assertEquals(expected, readFile(tmpFile));
+  }
+  
+  private File createTempFile(String...lines) throws IOException {
+    File tmpFile = File.createTempFile("montySolr-unittest", null);
+    if (lines.length > 0) {
+      FileOutputStream fi = FileUtils.openOutputStream(tmpFile);
+      StringBuffer out = new StringBuffer();
+      for (String l: lines) {
+        out.append(l + "\n");
+      }
+      FileUtils.writeStringToFile(tmpFile, out.toString(), "UTF-8");
+    }
+    return tmpFile;
   }
 
 }

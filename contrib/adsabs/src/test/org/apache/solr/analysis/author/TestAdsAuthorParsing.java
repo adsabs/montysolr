@@ -20,24 +20,21 @@ package org.apache.solr.analysis.author;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
-
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.solr.analysis.WriteableExplicitSynonymMap;
 import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.adsabs.solr.AdsConfig.F;
+
 /**
- * Tests that the dataimport handler does really wait and does not
- * return immediately. Also, one of the fields is fetched by Python.
+ * 
+ * Tests for all the author_ types defined in schema.xml
  * 
  */
 public class TestAdsAuthorParsing extends MontySolrQueryTestCase {
 	
-	String FID = "id";
-	String FBIBCODE = "bibcode";
-	String FAUTHOR = "author";
 	
 	@BeforeClass
 	public static void beforeTestAdsDataImport() throws Exception {
@@ -57,59 +54,81 @@ public class TestAdsAuthorParsing extends MontySolrQueryTestCase {
 	    	});
 		
 		/*
-		 * For purposes of the test, we make a copy of the schema.xml,
-		 * and create our own synonym files
+		 * Make a copy of the schema.xml, and create our own synonym translation rules
 		 */
 		
-		String configFile = MontySolrSetup.getMontySolrHome()
+		String schemaConfig = MontySolrSetup.getMontySolrHome()
 			+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
 		
 		File newConfig;
 		try {
 			
+		  // hand-curated synonyms
+			File curatedSynonyms = createTempFile(formatSynonyms(new String[]{
+			    "ABBOT, CHARLES GREELEY;ABBOTT, CHARLES GREELEY",
+			    "ABDEL AZIZ BAKRY, A;BAKRY, A",
+			    "ACHUTBHAN, P;ACHUTHAN, P",
+			    "ADAMUT, I A;ADAMUTI, I A",
+			    "ADJABSCHIRZADEH, A;ADJABSHIRZADEH, A",
+			    "AGARWAL, S;AGGARWAL, S",
+			    "AGUILAR CHIU, L A;AGUILAR, L A",
+			    "AITMUHAMBETOV, A A;AITMUKHAMBETOV, A A",
+			    "AL MLEAKY, Y M;ALMLEAKY, Y M",
+			    "ALEXEENKO, V V;ALEXEYENKO, V V",
+			    "ALFONSO, JULIA;ALFONSO-GARZON, JULIA",
+			    "ALLEN, LYNNE;ALLEN, R LYNNE;JONES, LYNNE;JONES, R LYNNE", // until here copied from: /proj/ads/abstracts/config/author.syn.new
+			    "ARAGON SALAMANCA, A;ARAGON-SALAMANCA, A;ARAGON, A;SALAMANCA, A" // copied from: /proj/ads/abstracts/config/author.syn
+					}));
 			
-			newConfig = duplicateFile(new File(configFile));
-//			File synonymsFile = createTempFile(new String[]{
-//					"ADAMUT\\, I, ADAMUTI\\, I",
-//					"ADAMCHUK\\, K, ADAMCZUK\\, K",
-//				    "ADJABSCHIRZADEH\\, A, ADJABSHIRZADEH\\, A",
-//				    "KUEHN\\, J, KUHN\\, J",
-//				    "KUEHN\\, M, KUHN\\, M",
-//				    "KUEHNEL\\, W, KUHNEL\\, W",
-//			});
-//			replaceInFile(newConfig, "synonyms=\"author.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+			// automatically harvested variations of author names (collected during indexing)
+			// it will be enriched by the indexing
+			File generatedTransliterations = createTempFile(formatSynonyms(new String[]{
+          "ADAMCHUK, K => ADAMČUK, K",
+          "ADAMCUK, K => ADAMČUK, K",
+          "ADAMCZUK, K => ADAMČUK, K",
+          "ADAMCHUK, KOLJA => ADAMČUK, KOLJA",
+          "ADAMCUK, KOLJA => ADAMČUK, KOLJA",
+          "ADAMCZUK, KOLJA => ADAMČUK, KOLJA",
+          "MULLER, WILLIAM => MÜLLER, WILLIAM",
+          "MUELLER, WILLIAM => MÜLLER, WILLIAM",
+          }
+      ));
 			
 			
-			
-			File synonymsFile = createTempFile(new String[]{
-					"ZELENYI\\,\\ L\\ M=>ZELENY\\,,ZELENY\\,\\ L\\w*\\ M.*,ZELENY\\,\\ L\\ M,ZELENY\\,\\ L\\w*,",
-					"TELNIUK\\ ADAMCHUK\\,\\ V\\ V=>TELNYUK\\ ADAMCHUK\\,,TELNYUK\\ ADAMCHUK\\,\\ V\\ V,TELNYUK\\ ADAMCHUK\\,\\ V\\w*\\ V.*,TELNYUK\\ ADAMCHUK\\,\\ V\\w*,",
-					"GORKAVII\\,\\ N\\ N=>GORKAVYY\\,\\ N\\w*,GORKAVYY\\,,GORKAVYY\\,\\ N\\ N,GORKAVYY\\,\\ N\\w*\\ N.*,",
-					});
-			replaceInFile(newConfig, "synonyms=\"author_curated.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
-			
-			
-			
-			synonymsFile = createTempFile(new String[]{
-					"ADAMČUK\\,\\ K,ADAMCUK\\,\\ K,ADAMCHUK\\,\\ K,",
-					"ADAMČUK\\,\\ KAREL,ADAMCUK\\,\\ KAREL,ADAMCHUK\\,\\ KAREL,",
-					"ADAMČUK\\,\\ KOLJA,ADAMCUK\\,\\ KOLJA,ADAMCHUK\\,\\ KOLJA,",
-					"MÜLLER\\,\\ WILLIAM,MULLER\\,\\ WILLIAM,MUELLER\\,\\ WILLIAM",
-					}
-			);
-			replaceInFile(newConfig, "synonyms=\"author_generated.translit\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
-			replaceInFile(newConfig, "outFile=\"author_generated.translit\"", "outFile=\"" + synonymsFile.getAbsolutePath() + "\"");
-			
+			File newSchema = duplicateModify(new File(schemaConfig), 
+			    "synonyms=\"author_curated.synonyms\"", "synonyms=\"" + curatedSynonyms.getAbsolutePath() + "\"",
+			    "synonyms=\"author_generated.translit\"", "synonyms=\"" + generatedTransliterations.getAbsolutePath() + "\"",
+			    "outFile=\"author_generated.translit\"", "outFile=\"" + generatedTransliterations.getAbsolutePath() + "\""
+			    );
+			return newSchema.getAbsolutePath();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new IllegalStateException(e.getMessage());
 		}
 		
-		return newConfig.getAbsolutePath();
 	}
 
-	@Override
+	private String[] formatSynonyms(String[] strings) {
+    String[] newLines = new String[strings.length];
+    int nl = 0;
+    for (String line : strings) {
+      StringBuilder out = new StringBuilder();
+      String[] kv = line.split("=>");
+      for (int i=0;i<kv.length;i++) {
+        if (i>0) out.append("=>");
+        String[] names = kv[i].split(";");
+        for (int j=0;j<names.length;j++) {
+          if (j>0) out.append(",");
+          out.append(names[j].trim().replace(" ", "\\ ").replace(",", "\\,"));
+        }
+      }
+      newLines[nl++] = out.toString();
+    }
+    return newLines;
+  }
+
+  @Override
 	public String getSolrConfigFile() {
 		
 		return MontySolrSetup.getMontySolrHome()
@@ -119,13 +138,39 @@ public class TestAdsAuthorParsing extends MontySolrQueryTestCase {
 
 	public void testAuthorParsing() throws Exception {
 
-		assertU(adoc(FID, "1", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Adamčuk, K"));
-		assertU(adoc(FID, "2", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Adamčuk, Karel"));
-		assertU(adoc(FID, "3", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Adamčuk, Kolja"));
+	  /*
+	   * For ADS there are these rules:
+     *   What gets indexed: Normalized author name (always lowercase!)
+     *   What gets searched: By default, the author name is
+     *       
+     *       example: Štaufčik, Piotr
+     *       
+     *       1. normalized (sztaufczik, piotr)
+     *         2. enriched with name variants (sztaufczik, pjotr)
+     *           3. enriched with synonyms (konrad, pjotr)
+     *           
+     *   The different tokenizer chains serve for situations, when we want
+     *   to search for the author name but DE-activate some of the steps
+     *   above. The NORMALIZATION happens ALWAYS (because we index things
+     *   that way)
+     *   
+     *     author_exact = 1 + 3
+     *     author_nosyn = 1 + 2
+     *     author_exact_nosyn = 1  
+     */
+	  
+	  
+		assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, K"));
+		assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel"));
+		assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Kolja"));
 		
-		assertU(adoc(FID, "4", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Müller, William"));
-		assertU(adoc(FID, "5", FBIBCODE, "xxxxxxxxxxxxx", FAUTHOR, "Mueller, William"));
+		assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Müller, William"));
+		assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Mueller, William"));
 		assertU(commit());
+
+    // TODO: persist the transliteration map, restart the core (or call the synonym filter somehow)
+    // to reload synonym chain harvested during indexing
+
 		
 		//setDebug(true);
 		

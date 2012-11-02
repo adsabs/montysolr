@@ -6,7 +6,7 @@ package org.apache.solr.analysis.author;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.solr.analysis.WriteableTokenFilterFactory;
+import org.apache.solr.analysis.PersistingMapTokenFilterFactory;
 import org.apache.solr.common.SolrException;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * @author jluker
  *
  */
-public class AuthorSynonymFilterFactory extends WriteableTokenFilterFactory implements ResourceLoaderAware {
+public class AuthorSynonymFilterFactory extends PersistingMapTokenFilterFactory implements ResourceLoaderAware {
 
     public static final Logger log = LoggerFactory.getLogger(AuthorSynonymFilter.class);
     
