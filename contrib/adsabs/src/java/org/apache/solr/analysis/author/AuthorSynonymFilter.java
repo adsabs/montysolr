@@ -61,7 +61,7 @@ public final class AuthorSynonymFilter extends TokenFilter {
 			this.termAtt.setEmpty();
 			this.termAtt.append(syn);
 			this.posIncrAtt.setPositionIncrement(0);
-			this.typeAtt.setType(AuthorUtils.TOKEN_TYPE_AUTHOR_CURATED_SYN);
+			this.typeAtt.setType(AuthorUtils.AUTHOR_CURATED_SYN);
 			return true;
 		}
 		

@@ -26,64 +26,64 @@ import org.slf4j.LoggerFactory;
  */
 public final class AuthorTransliterationFilter extends TokenFilter {
 
-    public static final Logger log = LoggerFactory.getLogger(AuthorTransliterationsCollectorFilter.class);
-    
-	public AuthorTransliterationFilter(TokenStream input) {
-		super(input);
-		this.termAtt = addAttribute(CharTermAttribute.class);
-		this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
-		this.transliterationStack = new Stack<String>();
-		this.typeAtt = addAttribute(TypeAttribute.class);
-	}
-	
-	private Stack<String> transliterationStack;
-	private AttributeSource.State current;
-	
-	private final CharTermAttribute termAtt;
-	private final PositionIncrementAttribute posIncrAtt;
-    private final TypeAttribute typeAtt;
-	
-	/* (non-Javadoc)
-	 * @see org.apache.lucene.analysis.TokenStream#incrementToken()
-	 */
-	@Override
-	public boolean incrementToken() throws IOException {
-		
-		if (this.transliterationStack.size() > 0) {
-			String syn = this.transliterationStack.pop();
-			this.restoreState(this.current);
-			this.termAtt.setEmpty();
-			this.termAtt.append(syn);
-			this.posIncrAtt.setPositionIncrement(0);
-			this.typeAtt.setType(AuthorUtils.TOKEN_TYPE_AUTHOR_GENERATED_TRANSLITERATION);
-			return true;
-		}
-		
-	    if (!input.incrementToken()) return false;
-	    
-	    if (typeAtt.type().equals(AuthorUtils.TOKEN_TYPE_AUTHOR) && this.genVariants()) {
-	    	this.current = this.captureState();
-	    }
-	    
-    	return true;
-	}
-	
-	private boolean genVariants() {
-    	//log.debug("generating name variants for: " + authorName);
-	    ArrayList<String> synonyms = AuthorUtils.getAsciiTransliteratedVariants(termAtt.toString());
-	    if (synonyms.size() > 0) {
-		    //log.debug("variants: " + synonyms);
-	    	transliterationStack.addAll(synonyms);
-	        return true;
-	    }
-	    
-	    return false;
-	}
-	
-	@Override
-	  public void reset() throws IOException {
-		super.reset();
-		transliterationStack.clear();
-		current = null;
-	}
+  public static final Logger log = LoggerFactory.getLogger(AuthorTransliterationFilter.class);
+
+  public AuthorTransliterationFilter(TokenStream input) {
+    super(input);
+    this.termAtt = addAttribute(CharTermAttribute.class);
+    this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
+    this.transliterationStack = new Stack<String>();
+    this.typeAtt = addAttribute(TypeAttribute.class);
+  }
+
+  private Stack<String> transliterationStack;
+  private AttributeSource.State current;
+
+  private final CharTermAttribute termAtt;
+  private final PositionIncrementAttribute posIncrAtt;
+  private final TypeAttribute typeAtt;
+
+  /* (non-Javadoc)
+   * @see org.apache.lucene.analysis.TokenStream#incrementToken()
+   */
+  @Override
+  public boolean incrementToken() throws IOException {
+
+    if (this.transliterationStack.size() > 0) {
+      String syn = this.transliterationStack.pop();
+      this.restoreState(this.current);
+      this.termAtt.setEmpty();
+      this.termAtt.append(syn);
+      this.posIncrAtt.setPositionIncrement(0);
+      this.typeAtt.setType(AuthorUtils.AUTHOR_TRANSLITERATED);
+      return true;
+    }
+
+    if (!input.incrementToken()) return false;
+
+    if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT) && this.genVariants()) {
+      this.current = this.captureState();
+    }
+
+    return true;
+  }
+
+  private boolean genVariants() {
+    //log.debug("generating name variants for: " + authorName);
+    ArrayList<String> synonyms = AuthorUtils.getAsciiTransliteratedVariants(termAtt.toString());
+    if (synonyms.size() > 0) {
+      //log.debug("variants: " + synonyms);
+      transliterationStack.addAll(synonyms);
+      return true;
+    }
+
+    return false;
+  }
+
+  @Override
+  public void reset() throws IOException {
+    super.reset();
+    transliterationStack.clear();
+    current = null;
+  }
 }

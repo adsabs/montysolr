@@ -30,7 +30,10 @@
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.analysis.author.AuthorTransliterationsCollectorFactory" outFile="author_generated.translit" syntax="equivalent"/>
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            outFile="author_generated.translit" 
+            tokenTypes="AUTHOR_TRANSLITERATED"
+            emitToken="false"/>
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
       <analyzer type="query">

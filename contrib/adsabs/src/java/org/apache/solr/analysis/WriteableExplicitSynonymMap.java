@@ -1,7 +1,6 @@
 package org.apache.solr.analysis;
 
 import java.util.*;
-import java.util.regex.*;
 
 import org.apache.solr.common.util.StrUtils;
 
@@ -9,9 +8,6 @@ import org.apache.solr.common.util.StrUtils;
 
 public class WriteableExplicitSynonymMap extends WriteableSynonymMap {
 
-  public WriteableExplicitSynonymMap(String outFile) {
-    super(outFile);
-  }
   
   @Override
   public void add(String key, Set<String> values) {
@@ -40,7 +36,7 @@ public class WriteableExplicitSynonymMap extends WriteableSynonymMap {
         log.error("Invalid Synonym Rule:" + rule);
         continue;
       }
-      String key = mapping.get(0).trim();
+      String key = mapping.get(0).trim().replace("\\,", ",").replace("\\ ", " ");
       Set<String> values = splitValues(mapping.get(1));
       add(key, values);
     }

@@ -40,12 +40,11 @@ public abstract class WriteableSynonymMap {
   protected int numUpdates = 0;
   protected String outFile = null;
 
-  public WriteableSynonymMap(String outFile) {
+  public WriteableSynonymMap() {
     this.map = Collections.synchronizedMap(new HashMap<String, Set<String>>());
     this.regexMap = Collections.synchronizedMap(new HashMap<String, Set<String>>());
-    this.outFile = outFile;
   }
-
+  
   public void clear() {
     this.map = new HashMap<String, Set<String>>();
     this.regexMap = new HashMap<String, Set<String>>();

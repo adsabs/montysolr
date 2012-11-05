@@ -34,7 +34,7 @@ public final class AuthorNormalizeFilter extends TokenFilter {
 	    if (!input.incrementToken()) return false;
 	    String normalized = AuthorUtils.normalizeAuthor(termAtt.toString());
 	    termAtt.setEmpty().append(normalized);
-	    typeAtt.setType(AuthorUtils.TOKEN_TYPE_AUTHOR);
+	    typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
         return true;
 	}
 }

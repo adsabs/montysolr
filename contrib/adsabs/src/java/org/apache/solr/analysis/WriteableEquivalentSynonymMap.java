@@ -1,7 +1,6 @@
 package org.apache.solr.analysis;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,8 +11,8 @@ public class WriteableEquivalentSynonymMap extends WriteableSynonymMap {
   private HashSet<Integer> alreadySeen;
 
 
-  public WriteableEquivalentSynonymMap(String outfile) {
-		super(outfile);
+  public WriteableEquivalentSynonymMap() {
+		super();
 		alreadySeen = new HashSet<Integer>();
 	}
 	

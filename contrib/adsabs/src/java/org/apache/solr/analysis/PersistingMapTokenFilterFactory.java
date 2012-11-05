@@ -74,9 +74,9 @@ implements ResourceLoaderAware {
     }
 
     if (syntax.equals("equivalent")) {
-      return new WriteableEquivalentSynonymMap(null);
+      return new WriteableEquivalentSynonymMap();
     } else if (syntax.equals("explicit")) {
-      return new WriteableExplicitSynonymMap(null);
+      return new WriteableExplicitSynonymMap();
     } else {
       throw new RuntimeException("Unknown syntax type specified for WriteableSynonymMap");
     }

@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
-import org.apache.solr.analysis.PersistingMapTokenFilterFactory;
 
 /**
  * @author jluker

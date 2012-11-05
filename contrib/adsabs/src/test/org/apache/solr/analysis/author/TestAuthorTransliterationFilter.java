@@ -9,7 +9,6 @@ import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
-import org.apache.solr.analysis.author.AuthorTransliterationsCollectorFactory;
 
 
 public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
@@ -21,7 +20,7 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 		}
 		public boolean incrementToken() throws IOException {
 		    if (!input.incrementToken()) return false;
-		    typeAtt.setType(AuthorUtils.TOKEN_TYPE_AUTHOR);
+		    typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
 	        return true;
 		}
 	}

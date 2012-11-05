@@ -20,8 +20,8 @@ public class TestAuthorSynonymFilterFactory {
 			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
 		}
 		
-	    WriteableSynonymMap synMap = new WriteableExplicitSynonymMap(null);
-	    synMap.parseRules(rules);
+	    WriteableSynonymMap synMap = new WriteableExplicitSynonymMap();
+	    synMap.populateMap(rules);
 	    Set<String> expected = new HashSet<String>();
 	    expected.add("MILLER, B");
 	    expected.add("MILLER, BILL");
