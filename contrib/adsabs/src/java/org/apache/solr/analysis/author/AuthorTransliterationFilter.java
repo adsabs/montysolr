@@ -27,13 +27,15 @@ import org.slf4j.LoggerFactory;
 public final class AuthorTransliterationFilter extends TokenFilter {
 
   public static final Logger log = LoggerFactory.getLogger(AuthorTransliterationFilter.class);
+  private String tokenType;
 
-  public AuthorTransliterationFilter(TokenStream input) {
+  public AuthorTransliterationFilter(TokenStream input, String tokenType) {
     super(input);
     this.termAtt = addAttribute(CharTermAttribute.class);
     this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     this.transliterationStack = new Stack<String>();
     this.typeAtt = addAttribute(TypeAttribute.class);
+    this.tokenType = tokenType;
   }
 
   private Stack<String> transliterationStack;
@@ -42,6 +44,7 @@ public final class AuthorTransliterationFilter extends TokenFilter {
   private final CharTermAttribute termAtt;
   private final PositionIncrementAttribute posIncrAtt;
   private final TypeAttribute typeAtt;
+  
 
   /* (non-Javadoc)
    * @see org.apache.lucene.analysis.TokenStream#incrementToken()
@@ -61,7 +64,10 @@ public final class AuthorTransliterationFilter extends TokenFilter {
 
     if (!input.incrementToken()) return false;
 
-    if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT) && this.genVariants()) {
+    if (tokenType == null && this.genVariants()) { // null means process all tokens
+      this.current = captureState();
+    }
+    else if (typeAtt.type().equals(tokenType) && this.genVariants()) {
       this.current = this.captureState();
     }
 

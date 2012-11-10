@@ -23,7 +23,7 @@ import org.getopt.luke.GrowableStringArray;
 
 public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 
-	private AqpTestAbstractCase tp = null;
+	protected AqpTestAbstractCase tp = null;
 	
 	@Override
 	public String getSchemaFile() {

@@ -4,6 +4,7 @@
 package org.apache.solr.analysis.author;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,45 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
   @Override
   public WriteableSynonymMap createSynonymMap() {
     return new WriteableExplicitSynonymMap() { // no configuration allowed!
+      /*
+       * This synonym map has ascii forms as a key
+       * and the upgraded utf8 values are values, 
+       * when it is persisted, it will generate the
+       * variation of the names. I.e. 
+       * MÜLLER, BILL
+       * 
+       * will become
+       * 
+       *    MULLER, BILL=>MÜLLER, BILL
+       *    MUELLER, BILL=>MÜLLER, BILL
+       *    MULLER, B => MÜLLER, B
+       *    MUELLER, B => MÜLLER, B
+       *    MULLER, => MÜLLER,
+       * 
+       * (non-Javadoc)
+       * @see org.apache.solr.analysis.WriteableExplicitSynonymMap#add(java.lang.String, java.util.Set)
+       */
+      
+      @Override
+      public void populateMap(List<String> rules) {
+        HashSet<String> hs = new HashSet<String>();
+        for (String rule : rules) {
+          List<String> mapping = StrUtils.splitSmart(rule, "=>", false);
+          if (mapping.size() != 2) {
+            log.error("Invalid Synonym Rule:" + rule);
+            continue;
+          }
+          String key = mapping.get(0).trim().replace("\\,", ",").replace("\\ ", " ");
+          hs.clear();
+          hs.add(key);
+          for (String val: splitValues(mapping.get(1))) {
+            add(val, hs);
+          }
+          
+        }
+      }
+
+      
       @Override
       public void add(String origName, Set<String> values) {
         // key = the original author input (possibly with utf8 characters)
@@ -86,8 +126,10 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
             otherNames[n++] = name.split(" ");
             otherNames[n-1][0] = otherNames[n-1][0].replace(",", "\\,"); 
           }
+          int cycle=0;
           do {
             for (n=0;n<nameParts.length;n++) {
+              if (cycle>0 && n==0) continue;
               out.append(join(nameParts, n));
               out.append("=>");
               boolean notFirst = false;
@@ -98,6 +140,7 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
               }
               out.append("\n");
             }
+            cycle++;
           } while (shortened(nameParts, otherNames));
         }
         return out.toString();

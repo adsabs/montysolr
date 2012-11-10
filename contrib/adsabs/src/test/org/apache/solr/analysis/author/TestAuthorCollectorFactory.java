@@ -66,7 +66,9 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
         "MULLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
         "MULLER\\,\\ B=>MÜLLER\\,\\ B",
         "MUELLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MUELLER\\,\\ B=>MÜLLER\\,\\ B"
+        "MUELLER\\,\\ B=>MÜLLER\\,\\ B",
+        "MUELLER\\,=>MÜLLER\\,",
+        "MULLER\\,=>MÜLLER\\,"
         );
     
 
@@ -96,7 +98,9 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
         "MULLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
         "MULLER\\,\\ B=>MÜLLER\\,\\ B",
         "MUELLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MUELLER\\,\\ B=>MÜLLER\\,\\ B"
+        "MUELLER\\,\\ B=>MÜLLER\\,\\ B",
+        "MUELLER\\,=>MÜLLER\\,",
+        "MULLER\\,=>MÜLLER\\,"
         );
 
     
@@ -122,7 +126,9 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
         "MULLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
         "MULLER\\,\\ B=>MÜLLER\\,\\ B",
         "MUELLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MUELLER\\,\\ B=>MÜLLER\\,\\ B"
+        "MUELLER\\,\\ B=>MÜLLER\\,\\ B",
+        "MUELLER\\,=>MÜLLER\\,",
+        "MULLER\\,=>MÜLLER\\,"
         );
     
     // now load the factory and check the synonyms were loaded properly
@@ -135,15 +141,20 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     synMap.populateMap(Arrays.asList(readFile(tmpFile).split("\n")));
     assertTrue(synMap.containsKey("MULLER, BILL"));
     assertTrue(synMap.containsKey("MUELLER, BILL"));
+    assertTrue(synMap.containsKey("MUELLER, B"));
+    assertTrue(synMap.containsKey("MUELLER, B"));
     assertEquals(synMap.get("MULLER, BILL"), new LinkedHashSet(){{add("MÜLLER, BILL");}});
     assertEquals(synMap.get("MUELLER, BILL"), new LinkedHashSet(){{add("MÜLLER, BILL");}});
-
+    assertEquals(synMap.get("MULLER,"), new LinkedHashSet(){{add("MÜLLER,");}});
+    
+    assertSame(synMap.get("MUELLER, BILL"), synMap.get("MULLER, BILL"));
+    assertSame(synMap.get("MUELLER,"), synMap.get("MUELLER,"));
   }
   
   private void checkOutput(File tmpFile, String... expected) throws IOException {
     String fc = readFile(tmpFile);
     for (String t: expected) {
-      assertTrue(fc.contains(t));
+      assertTrue("Missing: " + t, fc.contains(t));
     }
   }
   private String readFile(File tmpFile) throws IOException {

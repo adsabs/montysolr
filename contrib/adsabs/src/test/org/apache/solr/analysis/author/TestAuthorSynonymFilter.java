@@ -20,7 +20,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		
 		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
-		WriteableSynonymMap map = new WriteableExplicitSynonymMap(null);
+		WriteableSynonymMap map = new WriteableExplicitSynonymMap();
 		List<String> rules = new ArrayList<String>();
 		rules.add("MILLER, WILLIAM=>MILLER, B;MILLER, BILL;MILLER,;MILLER, BILL\\b.*");
 		rules.add("MILLER, BILL=>MILLER, WILLIAM;MILLER, WILLIAM\\b.*;MILLER,;MILLER, W");
@@ -28,7 +28,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		for (int i=0; i<rules.size();i++) {
 			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
 		}
-		map.parseRules(rules);
+		map.populateMap(rules);
 		factory.setSynonymMap(map);
 		
 		Set orderedMap = new LinkedHashSet();
@@ -55,7 +55,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	public void testAuthorSynonyms2() throws Exception {
 		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
-		WriteableSynonymMap map = new WriteableExplicitSynonymMap(null);
+		WriteableSynonymMap map = new WriteableExplicitSynonymMap();
 		List<String> rules = new ArrayList<String>();
 		
 		//XXX: there is a problem with the matcher, it doesn't find
@@ -75,7 +75,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		for (int i=0; i<rules.size();i++) {
 			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
 		}
-		map.parseRules(rules);
+		map.populateMap(rules);
 		
 		// ???: I'm thinking this must necessary to control the order of the returned synonyms
 		for (String r: lines) {
@@ -107,7 +107,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	public void testAuthorEquivSynonymMap() throws Exception {
 		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
-		WriteableSynonymMap map = new WriteableEquivalentSynonymMap(null);
+		WriteableSynonymMap map = new WriteableEquivalentSynonymMap();
 		List<String> rules = new ArrayList<String>(){{
 			add("ADAMČUK\\,\\ K,ADAMCUK\\,\\ K,ADAMCHUK\\,\\ K,");
 			add("ADAMČUK\\,\\ KAREL,ADAMCUK\\,\\ KAREL,ADAMCHUK\\,\\ KAREL,");
@@ -117,7 +117,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 //		for (int i=0; i<rules.size();i++) {
 //			rules.set(i, rules.get(i).replace(",", "\\,").replace(" ", "\\ ").replace(";", ","));
 //		}
-		map.parseRules(rules);
+		map.populateMap(rules);
 		
 		Reader reader = new StringReader("ADAMČUK, KAREL\\b.*;ADAMČUK, K\\b.*;ADAMČUK, KAREL;ADAMČUK, K;ADAMČUK,");
 		PatternTokenizer tokenizer = new PatternTokenizer(reader, Pattern.compile(";"), -1);
@@ -127,8 +127,8 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		String[] expected = {
 			"ADAMČUK, KAREL\\b.*", "ADAMCHUK, KAREL", "ADAMČUK, KAREL", "ADAMCUK, KAREL",
 			"ADAMČUK, K\\b.*", "ADAMCUK, K", "ADAMCHUK, K", "ADAMČUK, K",
-			"ADAMČUK, KAREL", "ADAMCHUK, KAREL", "ADAMCUK, KAREL",
-			"ADAMČUK, K", "ADAMCUK, K", "ADAMCHUK, K",
+			"ADAMČUK, KAREL", "ADAMČUK, KAREL", "ADAMCUK, KAREL", "ADAMCHUK, KAREL",
+			"ADAMČUK, K", "ADAMČUK, K", "ADAMCUK, K", "ADAMCHUK, K",
 			"ADAMČUK,",
 		};
 		assertTokenStreamContents(stream, expected);

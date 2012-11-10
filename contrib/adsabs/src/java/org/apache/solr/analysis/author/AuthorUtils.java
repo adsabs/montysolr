@@ -30,7 +30,9 @@ public class AuthorUtils {
 		a = a.replaceAll("(?<=\\b\\p{L})\\.(?=\\s*\\b)", " ");
 		a = a.replaceAll("[^\\w\\s\'\\p{L}\\p{Digit},_-]", "");
 		a = a.trim().replaceAll("\\s+", " ");
-		a = a.toUpperCase();
+		//a = a.toUpperCase();
+		if (!(a.contains(",") || a.contains(" ")))
+		  a = a + ",";
 		return a;
 	}
 	
