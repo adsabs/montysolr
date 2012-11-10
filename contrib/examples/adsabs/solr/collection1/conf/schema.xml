@@ -23,7 +23,7 @@
 
     <!--  
 	    Attention, all author_ types are very delicate!
-	    Always verify changes with: TestAdsTypeAuthor
+	    Always verify changes with: TestAdsabsTypeAuthorParsing
      -->
      <fieldType name="author" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
@@ -38,25 +38,36 @@
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," -->
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
-        <!-- upgrade to UTF-8 form -->
+        <!-- replace with UTF-8 variant(s): "adamčuk," -->
         <filter class="solr.SynonymFilterFactory" 
             synonyms="author_generated.translit"
             ignoreCase="true" 
             expand="true" 
             tokenizerFactory="solr.KeywordTokenizerFactory"/>
+        <!-- downgrade back to ascii (we now will have both upgraded and downgraded forms)-->
         <filter class="solr.analysis.author.AuthorTransliterationFactory"
             inputType="null"/>
+        <!-- using any of the forms, find the synonyms, eg: "adamšuk," -->
         <filter class="solr.SynonymFilterFactory" 
             synonyms="author_curated.synonyms" 
             ignoreCase="true" 
             expand="true" 
             tokenizerFactory="solr.KeywordTokenizerFactory"/>
+        <!-- optionally: downgrade the newly found synonyms, "adamšuk," gets a companion "adamshuk," -->
         <filter class="solr.analysis.author.AuthorTransliterationFactory"
             inputType="SYNONYM"/>
+        <!-- lowercase to deal with synonym lists -->
         <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- deal with multiple occurences of the same (can happen because of the overlapping synonyms) -->
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-        <!-- <filter class="solr.analysis.author.AuthorQueryVariationsFilterFactory"/> -->
+        <!-- generate ADS style extra search clauses: "adamcuk, piotr" in the old records can 
+            be simply: "adamcuk," or "adamcuk, p" -->
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="true"
+            plainSurname="true"
+            />
       </analyzer>
     </fieldType>
     

@@ -20,12 +20,17 @@ package org.apache.solr.analysis.author;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.SchemaField;
 import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -168,6 +173,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      *     author_nosyn = 1 + 2
      *     author_exact_nosyn = 1  
      *     
+     *     
+     *   As a general rule, the ADS is trying to get more rather than less.
+     *   Here are the examples:
+     *     
      * <pre>
      *   query:                  expanded into:
      *   ===============================================================
@@ -195,11 +204,25 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Mueller, William"));
     assertU(commit());
 
-    // TODO: persist the transliteration map, restart the core (or call the synonym filter somehow)
-    // to reload synonym chain harvested during indexing
+    // persist the transliteration map after new docs were indexed
+    // and reload synonym chain harvested during indexing
+    Analyzer iAnalyzer = h.getCore().getSchema().getAnalyzer();
+    Analyzer qAnalyzer = h.getCore().getSchema().getQueryAnalyzer();
+    
+    TokenStream iAuthor = iAnalyzer.tokenStream("author", new StringReader(""));
+    TokenStream qAuthor = qAnalyzer.tokenStream("author", new StringReader(""));
+    
+    iAuthor.reset();
+    iAuthor.reset();
+    iAuthor.reset();
+    
+    qAuthor.reset();
+    qAuthor.reset();
+    qAuthor.reset();
+    
 
 
-    setDebug(true);
+    //setDebug(true);
     //fail("Author parsing needs attention!");
 
     /*
@@ -225,14 +248,16 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
        <surname>, <2> <3>
 
 
-		 - transliteration: adamčuk, k --> adamchuk, k;adamczuk, k;adamcuk, k
-     - synonym expansion for: ADAMŠUK, K;ADAMGUK, K;ADAMCZUK, K
+		 - transliteration: adamčuk, k --> adamchuk, k;adamcuk, k
+     - synonym expansion for: ADAMŠUK, K;ADAMGUK, K;ADAMČUK, K
 
      */
 
-
+    String expected;
+    
     //<surname>
     // upgraded && transliterated 
+    // synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
     testAuthorQuery(
         "adamčuk", "author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
         "adamcuk", "author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
@@ -245,6 +270,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     //<surname>,
     // upgraded && transliterated 
+    // synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
     testAuthorQuery(
         "\"adamčuk,\"", "author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
         "\"adamcuk,\"", "author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
@@ -257,24 +283,63 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     //<surname>, <1>
     // expanded && upgraded && transliterated && expanded
+    // synonym adamšuk IS FOUND because there is entry for "adamčuk, k" the syn list, notice that
+    // this works even if we type "adamchuk, k" or "adamcuk, k"
+    //
+    // question: the chain correctly finds the synonym "adamšuk, k", and this synonym is
+    // then transliterated: adamshuk, k;adamsuk, k (is this desirable?) I think yes.
+    expected = "author:adamšuk, k author:adamšuk, author:adamsuk, k author:adamsuk, " + 
+               "author:adamshuk, k author:adamshuk, author:adamguk, k author:adamguk, " + 
+               "author:adamčuk, k author:adamčuk, author:adamchuk, k author:adamchuk, " + 
+               "author:adamcuk, k author:adamcuk,";
+    
     testAuthorQuery(
-        "\"adamčuk, k\"", "author:adamšuk, k author:adamsuk, k author:adamshuk, k author:adamguk, k author:adamčuk, k author:adamchuk, k author:adamcuk, k", "//*[@numFound='']",
-        "\"adamcuk, k\"", "author:adamšuk, k author:adamsuk, k author:adamshuk, k author:adamguk, k author:adamčuk, k author:adamchuk, k author:adamcuk, k", "//*[@numFound='']",
-        "\"adamchuk, k\"", "author:adamšuk, k author:adamsuk, k author:adamshuk, k author:adamguk, k author:adamčuk, k author:adamchuk, k author:adamcuk, k", "//*[@numFound='']",
-        "\"adamczuk, k\"", "author:adamšuk, k author:adamsuk, k author:adamshuk, k author:adamguk, k author:adamčuk, k author:adamchuk, k author:adamcuk, k", "//*[@numFound='']",
-        "\"adamšuk, k\"", "author:adamšuk, k author:adamsuk, k author:adamshuk, k author:adamguk, k author:adamčuk, k author:adamchuk, k author:adamcuk, k", "//*[@numFound='']",
-        "\"adamguk, k\"", "author:adamšuk, k author:adamsuk, k author:adamshuk, k author:adamguk, k author:adamčuk, k author:adamchuk, k author:adamcuk, k", "//*[@numFound='']"
+        "\"adamčuk, k\"", expected, "//*[@numFound='']",
+        "\"adamcuk, k\"", expected, "//*[@numFound='']",
+        "\"adamchuk, k\"", expected, "//*[@numFound='']",
+        "\"adamczuk, k\"", expected, "//*[@numFound='']",
+        "\"adamšuk, k\"", expected, "//*[@numFound='']",
+        "\"adamguk, k\"", expected, "//*[@numFound='']"
     );
 
 
-    //<surname>, <1name> 
+    //<surname>, <1name>
+    // upgraded && transliterated && expanded
+    // synonym adamšuk IS NOT FOUND because there is no entry for "adamčuk, kolja" the syn list
+    //
+    // question: we could find "adamšuk, k" entry from the query variation "adamčuk, k", that means
+    // place synonym expansion after the QueryExpansion as a last step. Do we want to do that?
+    expected = "author:adamčuk, kolja author:adamčuk, k author:adamčuk, " + //? +  "author:adamšuk, k author:adamguk, k"
+               "author:adamcuk, kolja author:adamcuk, k author:adamcuk, " + 
+               "author:adamchuk, kolja author:adamchuk, k author:adamchuk,";
+
     testAuthorQuery(
-        "\"adamčuk, kolja\"", "author:adamčuk, kolja author:adamcuk, kolja author:adamchuk, kolja", "//*[@numFound='']",
-        "\"adamcuk, kolja\"", "author:adamčuk, k author:adamcuk, k author:adamchuk, k author:adamčuk, k* author:adamchuk, k* author:adamchuk, k* author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
-        "\"adamchuk, kolja\"", "author:adamčuk, k author:adamcuk, k author:adamchuk, k author:adamčuk, k* author:adamchuk, k* author:adamchuk, k* author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
-        "\"adamczuk, kolja\"", "author:adamčuk, k author:adamcuk, k author:adamchuk, k author:adamčuk, k* author:adamchuk, k* author:adamchuk, k* author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
-        "\"adamšuk, kolja\"", "author:adamčuk, k author:adamcuk, k author:adamchuk, k author:adamčuk, k* author:adamchuk, k* author:adamchuk, k* author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
-        "\"adamguk, kolja\"", "author:adamčuk, k author:adamcuk, k author:adamchuk, k author:adamčuk, k* author:adamchuk, k* author:adamchuk, k* author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']"
+        "\"adamčuk, kolja\"", expected, "//*[@numFound='']",
+        "\"adamcuk, kolja\"", expected, "//*[@numFound='']",
+        "\"adamchuk, kolja\"", expected, "//*[@numFound='']",
+        "\"adamczuk, kolja\"", expected, "//*[@numFound='']",
+        "\"adamšuk, kolja\"", expected, "//*[@numFound='']",
+        "\"adamguk, kolja\"", expected, "//*[@numFound='']"
+    );
+    
+    
+    //<surname>, <1name> <2>
+    // upgraded && transliterated && expanded
+    // synonym adamšuk IS NOT FOUND because there is no entry for "adamčuk, kolja" the syn list
+    //
+    // question: we could find "adamšuk, k" entry from the query variation "adamčuk, k", that means
+    // place synonym expansion after the QueryExpansion as a last step. Do we want to do that?
+    expected = "author:adamčuk, kolja k author:adamčuk, k k author:adamčuk, " + //? +  "author:adamšuk, k author:adamguk, k"
+               "author:adamcuk, kolja k author:adamcuk, k k author:adamcuk, " + 
+               "author:adamchuk, kolja k author:adamchuk, k k author:adamchuk,";
+    
+    testAuthorQuery(
+        "\"adamčuk, kolja k\"", expected, "//*[@numFound='']",
+        "\"adamcuk, kolja k\"", expected, "//*[@numFound='']",
+        "\"adamchuk, kolja k\"", expected, "//*[@numFound='']",
+        "\"adamczuk, kolja k\"", expected, "//*[@numFound='']",
+        "\"adamšuk, kolja k\"", expected, "//*[@numFound='']",
+        "\"adamguk, kolja k\"", expected, "//*[@numFound='']"
     );
 
 
@@ -334,7 +399,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       assertQueryEquals(req("qt", "aqp", "q", String.format("author:%s", vals[i])),
           vals[i+1],
           null);
-      assertQ(req("q", String.format("author:%s", vals[i])), vals[i+2].split(";"));
+      //assertQ(req("q", String.format("author:%s", vals[i])), vals[i+2].split(";"));
     }
 
   }

@@ -126,7 +126,8 @@ public class ProcessCuratedAuthorSynonyms {
 	}
 
 	public static void processSynonyms(BufferedReader in, String outFile) {
-		WriteableSynonymMap synMap = new WriteableExplicitSynonymMap(outFile);
+		WriteableSynonymMap synMap = new WriteableExplicitSynonymMap();
+		synMap.setOutput(outFile);
 		ArrayList<List<String>> groups = parseGroups(in);
 		for (List<String> group : groups) {
 			HashMap<String,HashSet<String>> transformed = transformGroup(group);
