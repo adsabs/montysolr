@@ -46,9 +46,15 @@
             ignoreCase="true" 
             expand="true" 
             tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <!-- downgrade back to ascii (we now will have both upgraded and downgraded forms)-->
+        <!-- downgrade everything back to ascii (we now will have both upgraded and downgraded forms)-->
         <filter class="solr.analysis.author.AuthorTransliterationFactory"
             inputType="null"/>
+        <!-- generate ADS style extra search clauses: "adamcuk, piotr" in the old records can 
+            be simply: "adamcuk," or "adamcuk, p" -->
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="true"
+            plainSurname="true"
+            />
         <!-- using any of the forms, find the synonyms, eg: "adamšuk," -->
         <filter class="solr.SynonymFilterFactory" 
             synonyms="author_curated.synonyms" 
@@ -60,14 +66,13 @@
             inputType="SYNONYM"/>
         <!-- lowercase to deal with synonym lists -->
         <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- reset posIncrement - as double synonym expansion causes position bump in some cases -->
+        <filter class="solr.analysis.ResetFilterFactory"
+            posIncrement="0"
+            range="1,100"/>
         <!-- deal with multiple occurences of the same (can happen because of the overlapping synonyms) -->
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-        <!-- generate ADS style extra search clauses: "adamcuk, piotr" in the old records can 
-            be simply: "adamcuk," or "adamcuk, p" -->
-        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-            acronymVariations="true"
-            plainSurname="true"
-            />
+                
       </analyzer>
     </fieldType>
     

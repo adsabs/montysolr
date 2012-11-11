@@ -222,7 +222,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
 
 
-    //setDebug(true);
+    setDebug(true);
     //fail("Author parsing needs attention!");
 
     /*
