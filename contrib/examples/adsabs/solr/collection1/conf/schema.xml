@@ -38,41 +38,59 @@
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," -->
+        <!-- normalize order and surname form: eg. 
+            "adamcuk" becomes "adamcuk," and 
+            "adamczuk,   k" becomes "adamczuk, k"-->
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
-        <!-- replace with UTF-8 variant(s): "adamčuk," -->
+        <!-- replace with UTF-8 variant(s): "adamčuk, k" -->
         <filter class="solr.SynonymFilterFactory" 
             synonyms="author_generated.translit"
             ignoreCase="true" 
             expand="true" 
             tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <!-- downgrade everything back to ascii (we now will have both upgraded and downgraded forms)-->
+        <!-- downgrade everything back to ascii (we now will have both ASCII and UTF8 forms)-->
         <filter class="solr.analysis.author.AuthorTransliterationFactory"
             inputType="null"/>
-        <!-- generate ADS style extra search clauses: "adamcuk, piotr" in the old records can 
-            be simply: "adamcuk," or "adamcuk, p" -->
+        <!-- generate ADS style extra search clauses (they will be used to find synonyms): 
+            "adamcuk, piotr" is extended with:
+            "adamcuk, p" and "adamcuk," -->
         <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
             acronymVariations="true"
             plainSurname="true"
             />
-        <!-- using any of the forms, find the synonyms, eg: "adamšuk," -->
+        <!-- using any of the forms, find the synonyms, eg: 
+            "adamšuk, k", "adamčuk, k", "adamguk, k" -->
         <filter class="solr.SynonymFilterFactory" 
             synonyms="author_curated.synonyms" 
             ignoreCase="true" 
             expand="true" 
             tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <!-- optionally: downgrade the newly found synonyms, "adamšuk," gets a companion "adamshuk," -->
+        <!-- now remove the query variants, they were used only to discover synonyms -->    
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            tokenTypes="AUTHOR_QUERY_VARIANT"
+            emitToken="false"/>
+        <!-- optionally: downgrade the newly found synonyms, so:
+            "adamšuk, k" is extended with"
+            "adamshuk, k", "adamsuk, k" -->
         <filter class="solr.analysis.author.AuthorTransliterationFactory"
             inputType="SYNONYM"/>
-        <!-- lowercase to deal with synonym lists -->
+        <!-- lowercase normalize everything -->
         <filter class="solr.LowerCaseFilterFactory"/>
-        <!-- reset posIncrement - as double synonym expansion causes position bump in some cases -->
+        <!-- reset posIncrement - somtimes synonym expansion causes position bumps
+             but make sure we skip the first token -->
         <filter class="solr.analysis.ResetFilterFactory"
             posIncrement="0"
             range="1,100"/>
+        <!-- generate ADS style extra search clauses: 
+            "adamcuk, piotr" is extended with:
+            "adamcuk, p" and "adamcuk," --> 
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="true"
+            plainSurname="true"
+            />
         <!-- deal with multiple occurences of the same (can happen because of the overlapping synonyms) -->
-        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-                
+        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />    
+            
       </analyzer>
     </fieldType>
     

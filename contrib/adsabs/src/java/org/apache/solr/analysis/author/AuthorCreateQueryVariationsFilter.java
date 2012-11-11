@@ -30,7 +30,9 @@ import org.apache.lucene.util.AttributeSource;
  */
 public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
 
-  public AuthorCreateQueryVariationsFilter(TokenStream input, boolean surname, boolean variate) {
+  private final String tokenType;
+
+  public AuthorCreateQueryVariationsFilter(TokenStream input, String tokenType, boolean surname, boolean variate) {
     super(input);
     this.termAtt = addAttribute(CharTermAttribute.class);
     this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
@@ -38,6 +40,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
     this.typeAtt = addAttribute(TypeAttribute.class);
     this.createVariations = variate;
     this.plainSurname = surname;
+    this.tokenType = tokenType;
   }
 
   private Stack<String> variationStack;
@@ -64,7 +67,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
 
     if (!input.incrementToken()) return false;
 
-    if (this.genVariations()) {
+    if ((tokenType==null || typeAtt.type().equals(tokenType)) && this.genVariations()) {
       this.current = this.captureState();
     }
 

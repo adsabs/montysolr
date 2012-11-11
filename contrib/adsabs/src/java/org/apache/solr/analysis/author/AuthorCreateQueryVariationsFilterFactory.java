@@ -9,13 +9,15 @@ public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory
 
   private boolean plainSurname;
   private boolean acronymVariations;
+  private String tokenType;
 
   @Override
   public void init(Map<String,String> args) {
     super.init(args);
     acronymVariations = false;
     plainSurname = false;
-
+    tokenType = null;
+    
     if (args.containsKey("acronymVariations")) {
       acronymVariations = args.get("acronymVariations").equals("true");
     }
@@ -23,10 +25,15 @@ public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory
     if (args.containsKey("plainSurname")) {
       plainSurname = args.get("plainSurname").equals("true");
     }
+    
+    if (args.containsKey("tokenType")) {
+      tokenType = args.get("tokenType");
+      if (tokenType.equals("null")) tokenType = null;
+    }
   }
 
   public TokenStream create(TokenStream input) {
-    return new AuthorCreateQueryVariationsFilter(input, plainSurname, acronymVariations);
+    return new AuthorCreateQueryVariationsFilter(input, tokenType, plainSurname, acronymVariations);
   }
 
 }
