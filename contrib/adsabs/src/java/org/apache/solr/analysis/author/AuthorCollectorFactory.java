@@ -158,23 +158,16 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
       }
       
       private boolean shortened(String[]nameParts, String[][] otherNames) {
-        boolean toBeModified = false;
-        for (int i=1;i<nameParts.length;i++) {
-          if (nameParts[i].length() > 1) {
-            toBeModified = true;
-            break;
-          }
-        }
-        if (!toBeModified) return false;
-        for (int i=1;i<nameParts.length;i++) {
+        for (int i=nameParts.length-1;i>=0;i--) {
           if (nameParts[i].length() > 1) {
             nameParts[i] = nameParts[i].substring(0, 1);
             for (String[] other: otherNames) {
               other[i] = other[i].substring(0, 1);
             }
+            return true;
           }
         }
-        return true;
+        return false;
       }
     };
   }

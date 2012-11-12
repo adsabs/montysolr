@@ -25,7 +25,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.schema.SchemaField;
 import org.junit.BeforeClass;
 
 import java.io.File;
@@ -89,7 +88,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "ALFONSO, JULIA;ALFONSO-GARZON, JULIA",
           "ALLEN, LYNNE;ALLEN, R LYNNE;JONES, LYNNE;JONES, R LYNNE", // until here copied from: /proj/ads/abstracts/config/author.syn.new
           "ARAGON SALAMANCA, A;ARAGON-SALAMANCA, A;ARAGON, A;SALAMANCA, A", // copied from: /proj/ads/abstracts/config/author.syn
-          "ADAMŠUK, K;ADAMGUK, K;ADAMČUK, K"  // hand-made additions
+          "ADAMŠUK, K;ADAMGUK, K;ADAMČUK, K",  // hand-made additions
+          "MÜLLER, A WILLIAM;MÜLLER, A BILL",
       }));
 
       // automatically harvested variations of author names (collected during indexing)
@@ -220,8 +220,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     qAuthor.reset();
     qAuthor.reset();
     
-
-
+    // TODO: force reload of the synonym map
+    //h.getCoreContainer().reload("collection1");
     
     /*
 		 Each test case has two branches, one representing the full utf-8 form (with ascii chars),
@@ -255,9 +255,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     expected = "author:adamčuk, author:adamchuk, author:adamcuk,";
     
-    //<surname>
-    // upgraded && transliterated 
-    // synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
+    
+    /**
+     * <surname>
+     * 
+     * upgraded && transliterated 
+     * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
+     */
     testAuthorQuery(
         "adamčuk", expected, "//*[@numFound='']",
         "adamcuk", expected, "//*[@numFound='']",
@@ -268,9 +272,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     );
 
     
-    //<surname>,
-    // upgraded && transliterated 
-    // synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
+    /**
+     * <surname>,
+     * 
+     * upgraded && transliterated 
+     * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
+     */
     testAuthorQuery(
         "\"adamčuk,\"", "author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
         "\"adamcuk,\"", "author:adamčuk, author:adamchuk, author:adamcuk,", "//*[@numFound='']",
@@ -281,13 +288,16 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     );
 
 
-    //<surname>, <1>
-    // expanded && upgraded && transliterated && expanded
-    // synonym adamšuk IS FOUND because there is entry for "adamčuk, k" the syn list, notice that
-    // this works even if we type "adamchuk, k" or "adamcuk, k"
-    //
-    // question: the chain correctly finds the synonym "adamšuk, k", and this synonym is
-    // then transliterated: adamshuk, k;adamsuk, k (is this desirable?) I think yes.
+    /**
+     * <surname>, <1>
+     * 
+     *  expanded && upgraded && transliterated && expanded
+     *  synonym adamšuk IS FOUND because there is entry for "adamčuk, k" the syn list, notice that
+     *  this works even if we type "adamchuk, k" or "adamcuk, k"
+     * 
+     *  question: the chain correctly finds the synonym "adamšuk, k", and this synonym is
+     *  then transliterated: adamshuk, k;adamsuk, k (is this desirable?) I think yes.
+     */
     expected = "author:adamšuk, k author:adamšuk, author:adamsuk, k " + 
                "author:adamsuk, author:adamshuk, k author:adamshuk, author:adamguk, k " + 
                "author:adamguk, author:adamčuk, k author:adamčuk, author:adamchuk, k " + 
@@ -308,10 +318,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     );
 
 
-    //setDebug(true);
-    //<surname>, <1name>
-    // upgraded && transliterated && expanded
-    // synonym "adamšuk, k" IS FOUND because of the query variation for "adamčuk, k" the syn list
+    /**
+     * <surname>, <1name>
+     * 
+     *  upgraded && transliterated && expanded
+     *  synonym "adamšuk, k" IS FOUND because of the query variation for "adamčuk, k" the syn list
+     */
     expected = "author:adamčuk, kolja author:adamčuk, k author:adamčuk, " +
     		       "author:adamcuk, kolja author:adamcuk, k author:adamcuk, " +
     		       "author:adamchuk, kolja author:adamchuk, k author:adamchuk, " +
@@ -334,9 +346,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "\"adamcuk, kolja\"", expected, "//*[@numFound='']",
         "\"adamchuk, kolja\"", expected, "//*[@numFound='']",
         "\"adamczuk, kolja\"", expected, "//*[@numFound='']",
-        // the same number as expected (17), but diff is there:
+        // the same number as expected (17), but diff:
         // "adamčuk, kolja" is not there (and cannot be, because it is not in
-        // synonym map, but "adamšuk, k" is found correctly)
+        // synonym map, but synonym "adamšuk, k" is found correctly)
         "\"adamšuk, kolja\"", "author:adamšuk, kolja author:adamšuk, k author:adamšuk, " +
         		                  "author:adamsuk, k author:adamsuk, " +
         		                  "author:adamshuk, k author:adamshuk, " +
@@ -359,16 +371,21 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     );
     
     
-    //<surname>, <1name> <2>
-    // upgraded && transliterated && expanded
-    // synonym adamšuk IS NOT FOUND because there is no entry for "adamčuk, kolja k" nor 
-    // there is any "adamčuk, k k" in the syn list
-    //
-    // NOTE: if you think that "adamšuk" should be found in our model, then you are wrong
-    // because "adamcuk, k k" is a different name than "adamcuk, k"
-    // We are not goign to do any magic to find the surname mapping, in other words:
-    // we are not going to replace defficient synonym file. The correct translation CAN
-    // WORK if the synonym list has both "adamcuk, k k" and "adamcuk, k"
+    
+    /**
+     * <surname>, <1name> <2>
+     * 
+     * upgraded && transliterated && expanded
+     * synonym adamšuk IS NOT FOUND because there is no entry for "adamčuk, kolja k" nor 
+     * there is any "adamčuk, k k" in the syn list
+     * 
+     * NOTE: if you think that "adamšuk" should be found in our model, then you are wrong
+     * because "adamcuk, k k" is a different name than "adamcuk, k"
+     * We are not goign to do any magic to find the surname mapping, in other words:
+     * we are not going to replace defficient synonym file. Because the correct translation 
+     * CAN WORK if "adamcuk, k k" and "adamcuk, k" are named as synonymous (see the example
+     * case of "adamczuk, k k k")
+     */
     expected = "author:adamčuk, kolja k author:adamčuk, k k author:adamčuk, " +
                "author:adamcuk, kolja k author:adamcuk, k k author:adamcuk, " + 
                "author:adamchuk, kolja k author:adamchuk, k k author:adamchuk,";
@@ -383,13 +400,35 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		                    "author:adamshuk, kolja k author:adamshuk, k k author:adamshuk,", "//*[@numFound='']",
         "\"adamguk, kolja k\"", "author:adamguk, kolja k author:adamguk, k k author:adamguk,", "//*[@numFound='']"
     );
-
     
+    
+    fail("Hey!!! We have move great chunk of road forward! Yet author parsing still needs attention");
+    
+    /**
+     * <surname>, <1name> <2name>
+     * 
+     * 
+     */
+    
+    expected = "author:adamčuk, kolja karel author:adamčuk, kolja karel author:adamčuk, kolja karel " +
+               "author:adamcuk, kolja k author:adamcuk, k k author:adamcuk, " + 
+               "author:adamchuk, kolja k author:adamchuk, k k author:adamchuk,";
+
+    testAuthorQuery(
+      "\"adamčuk, kolja karel\"", expected, "//*[@numFound='']",
+      "\"adamcuk, kolja karel\"", "author:adamcuk, kolja k author:adamcuk, k k author:adamcuk,", "//*[@numFound='']",
+      "\"adamchuk, kolja karel\"", "author:adamchuk, kolja k author:adamchuk, k k author:adamchuk,", "//*[@numFound='']",
+      "\"adamczuk, kolja karel\"", "author:adamczuk, kolja k author:adamczuk, k k author:adamczuk,", "//*[@numFound='']",
+      "\"adamšuk, kolja karel\"", "author:adamšuk, kolja k author:adamšuk, k k author:adamšuk, " +
+                           "author:adamsuk, kolja k author:adamsuk, k k author:adamsuk, " +
+                           "author:adamshuk, kolja k author:adamshuk, k k author:adamshuk,", "//*[@numFound='']",
+      "\"adamguk, kolja karel\"", "author:adamguk, kolja k author:adamguk, k k author:adamguk,", "//*[@numFound='']"
+    );
+
     //TODO: show that the translation works properly when the synonym is in the synonym list
     // ie "adamčuk, k k;adamšuk, k k"
     
     
-    fail("Hey!!! We have move great chunk of road forward! Yet author parsing still needs attention");
     
     // wildcard searches are expanded only for synonyms
     assertQueryEquals(req("qt", "aqp", "q", "author:\"adamčuk, kol*\""), 

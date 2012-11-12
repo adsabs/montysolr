@@ -72,23 +72,25 @@ public final class AuthorCollectorFilter extends TokenFilter {
         if (emitTokens) {
           return true;
         }
-        
+        // we'll eat the tokens
         while (input.incrementToken()) {
           if (tokenTypes.contains(typeAtt.type())) {
             tokenBuffer.add(termAtt.toString());
           }
           else {
-            addTokensToSynMap();
+            if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
+              addTokensToSynMap();
+              authorInput = termAtt.toString();
+              tokenBuffer.clear();
+            }
             return true;
           }
         }
-        
       }
     }
     
     if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
       authorInput = termAtt.toString();
-      return true;
     }
     return true;
   }

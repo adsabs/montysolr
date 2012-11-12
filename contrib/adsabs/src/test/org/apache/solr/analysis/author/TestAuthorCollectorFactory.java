@@ -73,7 +73,7 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     
 
     // call it again
-    // the tokens should be normalized by another filter
+    // the tokens should not be normalized by our filter
     stream = new PatternTokenizer(new StringReader("MÜller, Bill"), Pattern.compile(";"), -1);
     ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     
@@ -88,9 +88,18 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
 
     assertFalse(synMap.containsKey("MÜLLER, BILL"));
     assertFalse(synMap.containsKey("MÜller, Bill"));
-    assertFalse(synMap.containsKey("MUEller, Bill"));
-    assertFalse(synMap.containsKey("MUller, Bill"));
-
+    assertTrue(synMap.containsKey("MUEller, Bill"));
+    assertTrue(synMap.containsKey("MUller, Bill"));
+    
+    
+    //clean and redo
+    synMap.clear();
+    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜLLER, WILLIAM BILL;ASCII, NAME"), Pattern.compile(";"), -1);
+    ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
+    ts.reset();
+    while (ts.incrementToken() != false) {
+      //pass
+    }
 
     // now test the map is correctly written to disk
     synMap.persist();
@@ -100,7 +109,17 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
         "MUELLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
         "MUELLER\\,\\ B=>MÜLLER\\,\\ B",
         "MUELLER\\,=>MÜLLER\\,",
-        "MULLER\\,=>MÜLLER\\,"
+        "MULLER\\,=>MÜLLER\\,",
+        "MUELLER\\,\\ WILLIAM=>MÜLLER\\,\\ WILLIAM",
+        "MULLER\\,\\ WILLIAM=>MÜLLER\\,\\ WILLIAM",
+        "MUELLER\\,\\ WILLIAM\\ BILL=>MÜLLER\\,\\ WILLIAM\\ BILL",
+        "MUELLER\\,\\ WILLIAM\\ B=>MÜLLER\\,\\ WILLIAM\\ B",
+        "MUELLER\\,\\ W\\ B=>MÜLLER\\,\\ W\\ B",
+        "MULLER\\,\\ WILLIAM\\ BILL=>MÜLLER\\,\\ WILLIAM\\ BILL",
+        "MULLER\\,\\ WILLIAM\\ B=>MÜLLER\\,\\ WILLIAM\\ B",
+        "MULLER\\,\\ W\\ B=>MÜLLER\\,\\ W\\ B",
+        "MULLER\\,\\ WILLIAM=>MÜLLER\\,\\ WILLIAM",
+        "!ASCII"
         );
 
     
@@ -139,6 +158,8 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     
     synMap = factory.getSynonymMap();
     synMap.populateMap(Arrays.asList(readFile(tmpFile).split("\n")));
+    assertTrue(synMap.containsKey("MULLER, WILLIAM BILL"));
+    assertTrue(synMap.containsKey("MULLER, WILLIAM"));
     assertTrue(synMap.containsKey("MULLER, BILL"));
     assertTrue(synMap.containsKey("MUELLER, BILL"));
     assertTrue(synMap.containsKey("MUELLER, B"));
@@ -154,7 +175,12 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
   private void checkOutput(File tmpFile, String... expected) throws IOException {
     String fc = readFile(tmpFile);
     for (String t: expected) {
-      assertTrue("Missing: " + t, fc.contains(t));
+      if (t.substring(0,1).equals("!")) {
+        assertFalse("Present: " + t, fc.contains(t.substring(1)));
+      }
+      else {
+        assertTrue("Missing: " + t, fc.contains(t));
+      }
     }
   }
   private String readFile(File tmpFile) throws IOException {
