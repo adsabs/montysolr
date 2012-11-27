@@ -42,6 +42,10 @@
             "adamcuk" becomes "adamcuk," and 
             "adamczuk,   k" becomes "adamczuk, k"-->
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <!-- remember the original user input and set some important info
+             that may influence query expansion (especially from synonyms)
+              -->
+        <filter class="solr.analysis.author.AuthorSetPayload"/>
         <!-- replace with UTF-8 variant(s): "adamčuk, k" -->
         <filter class="solr.SynonymFilterFactory" 
             synonyms="author_generated.translit"
@@ -52,11 +56,14 @@
         <filter class="solr.analysis.author.AuthorTransliterationFactory"
             inputType="null"/>
         <!-- generate ADS style extra search clauses (they will be used to find synonyms): 
-            "adamcuk, piotr" is extended with:
-            "adamcuk, p" and "adamcuk," -->
+            "adamcuk, piotr kolja" is expanded with:
+            "adamcuk, piotr k"
+            "adamcuk, p kolja"
+            "adamcuk, p k"
+            "adamcuk," (if plainSurname=true) -->
         <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
             acronymVariations="true"
-            plainSurname="true"
+            plainSurname="false"
             />
         <!-- using any of the forms, find the synonyms, eg: 
             "adamšuk, k", "adamčuk, k", "adamguk, k" -->
@@ -82,11 +89,19 @@
             posIncrement="0"
             range="1,100"/>
         <!-- generate ADS style extra search clauses: 
-            "adamcuk, piotr" is extended with:
-            "adamcuk, p" and "adamcuk," --> 
+            "adamcuk, piotr kolja" is extended with:
+            "adamcuk, piotr k"
+            "adamcuk, p kolja"
+            "adamcuk, p k"
+            "adamcuk, p k *"
+            "adamcuk, piotr k *"
+            "adamcuk, p kolja *"
+            "adamcuk," --> 
         <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
             acronymVariations="true"
             plainSurname="true"
+            addShortenedMultiName="true"
+            addWildcards="true"
             />
         <!-- deal with multiple occurences of the same (can happen because of the overlapping synonyms) -->
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />    

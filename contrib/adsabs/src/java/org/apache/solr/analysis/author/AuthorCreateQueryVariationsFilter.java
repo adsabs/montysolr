@@ -32,7 +32,9 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
 
   private final String tokenType;
 
-  public AuthorCreateQueryVariationsFilter(TokenStream input, String tokenType, boolean surname, boolean variate) {
+  public AuthorCreateQueryVariationsFilter(TokenStream input, String tokenType, 
+      boolean surname, boolean variate, boolean addWildcards, boolean shortenMultiname) {
+    
     super(input);
     this.termAtt = addAttribute(CharTermAttribute.class);
     this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
@@ -41,6 +43,8 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
     this.createVariations = variate;
     this.plainSurname = surname;
     this.tokenType = tokenType;
+    this.addWildcards = addWildcards;
+    this.shortenMultiname = shortenMultiname;
   }
 
   private Stack<String> variationStack;
@@ -49,9 +53,11 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
   private final CharTermAttribute termAtt;
   private final PositionIncrementAttribute posIncrAtt;
   private final TypeAttribute typeAtt;
-  private int maxNumberOfNames = 6;
-  private boolean plainSurname = true;
-  private boolean createVariations = true;
+  private int maxNumberOfNames = 6; // safety precaution, we are pretty efficient but one should be careful...
+  private boolean plainSurname;
+  private boolean createVariations;
+  private boolean addWildcards;
+  private boolean shortenMultiname;
 
   @Override
   public boolean incrementToken() throws IOException {
@@ -77,9 +83,16 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
   private boolean genVariations() {
     String authorName = termAtt.toString();
 
-    if (!authorName.contains(",") || authorName.endsWith(",")) return false;
+    if (!authorName.contains(",")) return false;
+    
+    if (authorName.endsWith(",") && addWildcards) {
+      variationStack.push(authorName + "*");
+      return true;
+    }
     
     String[] parts = authorName.split(" ", maxNumberOfNames );
+    
+    boolean lastPartWasAcronym = parts[parts.length-1].length() == 1;
     
     if (createVariations) {
       List<Integer> ids = new ArrayList<Integer>();
@@ -89,7 +102,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
       
       StringBuilder output = new StringBuilder();
       
-      if (ids.size()>0) {
+      if (ids.size()>0) { // number of to-be-shortened name parts
         int[] idx = new int[ids.size()];
         for (int i=0;i<idx.length;i++) {
           idx[i] = ids.get(i);
@@ -107,8 +120,36 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
             output.append(newParts[i]);
             notFirst=true;
           }
-          variationStack.push(output.toString().trim());
+          if (lastPartWasAcronym) {
+            if (addWildcards) {
+              variationStack.push(output.toString() + "*"); // prefix search
+            }
+            else {
+              variationStack.push(output.toString());
+            }
+          }
+          else {
+            if (addWildcards) {
+              variationStack.push(output.toString());
+              variationStack.push(output.toString() + " *");
+            }
+            else {
+              variationStack.push(output.toString());
+            }
+          }
         }
+      }
+      else {
+        if (addWildcards) {
+          variationStack.push(authorName + (lastPartWasAcronym ? "*" : " *"));
+        }
+      }
+    }
+    
+    if (shortenMultiname && parts.length > 2) {
+      variationStack.push(parts[0] + " " + parts[1]);
+      if (parts[1].length()>1) {
+        variationStack.push(parts[0] + " " + parts[1].substring(0,1));
       }
     }
     

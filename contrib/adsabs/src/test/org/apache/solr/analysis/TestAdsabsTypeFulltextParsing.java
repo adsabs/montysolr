@@ -113,7 +113,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      *     Massachusets Institute of Technology
      *     
      *   It is expanded into:
-     *     0: masschusets|mit|massachusets institute of technology
+     *     0: massachusets|mit|massachusets institute of technology
      *     1: institute
      *     2: (null, removed by the stop filter)
      *     3: technology
@@ -184,7 +184,13 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
     assertQueryEquals(req("q", "HST", "qt", "aqp"), 
         "all:hubble space telescope all:hst all:acr::hst", BooleanQuery.class);
-
+    
+    // TODO:
+    // "hst"  -> all:hst OR all:acr:hst OR all:hubble space telescope
+    // "HST" -> all:HST OR all:acr:hst OR all:hubble space telescope
+    // Hubble Space Telecscope -> acr:hst OR hubble space telescope (no "hst")
+    
+    
     // XXX: note the acronym is not present (that is because the synonym processor
     // outputs only tokens type=SYNONYM, but if we catch all tokens with posIncr=0
     // it could work)
