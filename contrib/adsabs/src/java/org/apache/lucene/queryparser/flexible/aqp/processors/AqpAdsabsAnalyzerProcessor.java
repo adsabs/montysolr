@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 
@@ -19,40 +20,52 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
  *
  */
 public class AqpAdsabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
-	
-	private boolean enteredCleanZone = false;
-	private int counter = 0;
-	
-	@Override
-	protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
-		if (enteredCleanZone == true) {
-			counter++;
-		}
-		else if (node instanceof AqpNonAnalyzedQueryNode) {
-			enteredCleanZone = true;
-			counter++;
-		}
-		else if (node instanceof AqpFunctionQueryNode && ((AqpFunctionQueryNode) node).canBeAnalyzed() == false) {
-		  enteredCleanZone = true;
+
+  private boolean enteredCleanZone = false;
+  private int counter = 0;
+  public final static String ORIGINAL_VALUE = "ORIGINAL_ANALYZED_VALUE";
+
+  @Override
+  protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
+    if (enteredCleanZone == true) {
       counter++;
-		}
-		
-		return super.preProcessNode(node);
-	}
-	
-	@Override
-	protected QueryNode postProcessNode(QueryNode node)
-			throws QueryNodeException {
-		if (enteredCleanZone == true) {
-			counter--;
-			if (counter == 0) {
-				enteredCleanZone = false;
-			}
-			return node;
-		}
-		
-		return super.postProcessNode(node);
-	}
+    }
+    else if (node instanceof AqpNonAnalyzedQueryNode) {
+      enteredCleanZone = true;
+      counter++;
+    }
+    else if (node instanceof AqpFunctionQueryNode && ((AqpFunctionQueryNode) node).canBeAnalyzed() == false) {
+      enteredCleanZone = true;
+      counter++;
+    }
+
+    return super.preProcessNode(node);
+  }
+
+  @Override
+  protected QueryNode postProcessNode(QueryNode node)
+  throws QueryNodeException {
+    if (enteredCleanZone == true) {
+      counter--;
+      if (counter == 0) {
+        enteredCleanZone = false;
+      }
+      return node;
+    }
+
+    String fv = null;
+    if (node instanceof FieldQueryNode) {
+      fv = ((FieldQueryNode) node).getTextAsString();
+    }
+    
+    QueryNode rn = super.postProcessNode(node);
+    if (rn != node || node instanceof FieldQueryNode && !((FieldQueryNode)node).getTextAsString().equals(fv)) {
+      rn.setTag(ORIGINAL_VALUE, fv);
+    }
+    
+    return rn;
+
+  }
 
 
 }

@@ -135,6 +135,8 @@ public class AqpAdsabsQParser extends QParser {
 			}
 		}
 		
+		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put("author", new int[0]);
+		
 	}
 
 	public Query parse() throws ParseException {

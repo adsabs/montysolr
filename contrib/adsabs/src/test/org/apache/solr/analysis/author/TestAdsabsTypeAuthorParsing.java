@@ -284,11 +284,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     String expected;
     
     expected = "author:adamčuk, author:adamchuk, author:adamcuk,"; //version without query variants
-    expected = "author:adamčuk, author:adamčuk,* " +
-    		       "author:adamchuk, author:adamchuk,* " +
-    		       "author:adamcuk, author:adamcuk,*";
+    expected = "author:adamčuk, author:adamčuk, * " + // when it is done by the tokenizer chain
+    		       "author:adamchuk, author:adamchuk, * " +
+    		       "author:adamcuk, author:adamcuk, *";
+    expected = "author:adamčuk, author:adamchuk, author:adamcuk, " +
+    		       "author:adamčuk, * author:adamchuk, * author:adamcuk, *";
     
-    
+    //setDebug(true);
     /**
      * <surname>
      * 
@@ -300,10 +302,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "adamcuk", expected, "//*[@numFound='']",
         "adamchuk", expected, "//*[@numFound='']",
         "adamczuk", expected, "//*[@numFound='']",
-        "adamšuk", "author:adamšuk, author:adamšuk,* " +
-        		       "author:adamshuk, author:adamshuk,* " +
-                   "author:adamsuk, author:adamsuk,*", "//*[@numFound='']",
-        "adamguk", "author:adamguk, author:adamguk,*", "//*[@numFound='']"
+        "adamšuk", "author:adamšuk, author:adamšuk, * " +
+        		       "author:adamshuk, author:adamshuk, * " +
+                   "author:adamsuk, author:adamsuk, *", "//*[@numFound='']",
+        "adamguk", "author:adamguk, author:adamguk, *", "//*[@numFound='']"
     );
 
     
@@ -318,10 +320,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "\"adamcuk,\"", expected, "//*[@numFound='']",
         "\"adamchuk,\"", expected, "//*[@numFound='']",
         "\"adamczuk,\"", expected, "//*[@numFound='']",
-        "\"adamšuk,\"", "author:adamšuk, author:adamšuk,* " +
-                        "author:adamshuk, author:adamshuk,* " +
-                        "author:adamsuk, author:adamsuk,*", "//*[@numFound='']",
-        "\"adamguk,\"", "author:adamguk, author:adamguk,*", "//*[@numFound='']"
+        "\"adamšuk,\"", "author:adamšuk, author:adamšuk, * " +
+                        "author:adamshuk, author:adamshuk, * " +
+                        "author:adamsuk, author:adamsuk, *", "//*[@numFound='']",
+        "\"adamguk,\"", "author:adamguk, author:adamguk, *", "//*[@numFound='']"
     );
 
 
@@ -371,15 +373,17 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      *  upgraded && transliterated && expanded
      *  synonym "adamšuk, k" IS FOUND because of the query variation for "adamčuk, k" the syn list
      */
-    /*
-    expected = "author:adamčuk, kolja author:adamčuk, k author:adamčuk, " +
-    		       "author:adamcuk, kolja author:adamcuk, k author:adamcuk, " +
-    		       "author:adamchuk, kolja author:adamchuk, k author:adamchuk, " +
+    expected = "author:adamčuk, kolja " +
+    		       "author:adamčuk, k author:adamčuk, " +
+    		       "author:adamcuk, kolja " +
+    		       "author:adamcuk, k author:adamcuk, " +
+    		       "author:adamchuk, kolja " +
+    		       "author:adamchuk, k author:adamchuk, " +
                "author:adamšuk, k author:adamšuk, " +
                "author:adamsuk, k author:adamsuk, " +
                "author:adamshuk, k author:adamshuk, " +
                "author:adamguk, k author:adamguk,";
-    */
+    
     expected = "author:adamčuk, kolja " +
     		       "author:adamčuk, k author:adamčuk, k * author:adamčuk, " +
     		       "author:adamšuk, k author:adamšuk, k * author:adamšuk, " +
@@ -392,24 +396,28 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     		       "author:adamcuk, kolja author:adamcuk, k * " +
     		       "author:adamchuk, kolja author:adamchuk, k *";
     
+    
     testAuthorQuery(
-        // exactly the same as expected (17), but in diff order
+        // exactly the same as expected, but in diff order
         // the order is such because input does't need to be upgraded before processing
-        "\"adamčuk, kolja\"", "author:adamčuk, kolja author:adamčuk, k author:adamčuk, " +
-        		                  "author:adamšuk, k author:adamšuk, " +
-        		                  "author:adamsuk, k author:adamsuk, " +
-        		                  "author:adamshuk, k author:adamshuk, " +
-        		                  "author:adamguk, k author:adamguk, " +
-        		                  "author:adamchuk, k author:adamchuk, " +
-        		                  "author:adamcuk, k author:adamcuk, " +
-        		                  "author:adamcuk, kolja author:adamchuk, kolja", "//*[@numFound='']",
+        "\"adamčuk, kolja\"", "author:adamčuk, kolja " +
+        		                  "author:adamčuk, k author:adamčuk, k * author:adamčuk, " +
+        		                  "author:adamšuk, k author:adamšuk, k * author:adamšuk, " +
+        		                  "author:adamsuk, k author:adamsuk, k * author:adamsuk, " +
+        		                  "author:adamshuk, k author:adamshuk, k * author:adamshuk, " +
+        		                  "author:adamguk, k author:adamguk, k * author:adamguk, " +
+        		                  "author:adamchuk, k author:adamchuk, k * author:adamchuk, " +
+        		                  "author:adamcuk, k author:adamcuk, k * author:adamcuk, " +
+        		                  "author:adamcuk, kolja " +
+        		                  "author:adamchuk, kolja", "//*[@numFound='']",
         "\"adamcuk, kolja\"", expected, "//*[@numFound='']",
         "\"adamchuk, kolja\"", expected, "//*[@numFound='']",
         "\"adamczuk, kolja\"", expected, "//*[@numFound='']",
         // the same number as expected (17), but diff:
         // "adamčuk, kolja" is not there (and cannot be, because it is not in
         // synonym map, but synonym "adamšuk, k" is found correctly)
-        "\"adamšuk, kolja\"", "author:adamšuk, kolja author:adamšuk, k author:adamšuk, " +
+        "\"adamšuk, kolja\"", "author:adamšuk, kolja " +
+        		                  "author:adamšuk, k author:adamšuk, k * author:adamšuk, " +
         		                  "author:adamsuk, k author:adamsuk, " +
         		                  "author:adamshuk, k author:adamshuk, " +
         		                  "author:adamguk, k author:adamguk, " +
@@ -545,7 +553,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   private void testAuthorQuery(String...vals) throws Exception {
     assert vals.length%3==0;
     for (int i=0;i<vals.length;i=i+3) {
-      System.out.println(String.format("author:%s", vals[i]));
+      System.out.println("Running test for " + String.format("author:%s", vals[i]));
       assertQueryEquals(req("qt", "aqp", "q", String.format("author:%s", vals[i])),
           vals[i+1],
           null);

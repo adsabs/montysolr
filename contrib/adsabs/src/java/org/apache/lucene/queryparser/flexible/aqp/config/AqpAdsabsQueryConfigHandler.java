@@ -1,17 +1,13 @@
 package org.apache.lucene.queryparser.flexible.aqp.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.standard.config.FieldBoostMapFCListener;
 import org.apache.lucene.queryparser.flexible.standard.config.FieldDateResolutionFCListener;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
-import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
-import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
-import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubSueryProvider;
-import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpInvenioQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.InvenioQueryAttributeImpl;
@@ -39,6 +35,8 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 	    final public static ConfigurationKey<Logger> SOLR_LOGGER = ConfigurationKey.newInstance();
 	    
 	    final public static ConfigurationKey<Boolean> SOLR_READY = ConfigurationKey.newInstance();
+	    
+	    final public static ConfigurationKey<Map<String, int[]>> AUTHOR_FIELDS = ConfigurationKey.newInstance();
 	    
 	}
 	
@@ -78,6 +76,8 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		 */
     set(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR, Operator.AND);
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
+    
+    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS, new HashMap<String, int[]>());
 	    
 	}
 }

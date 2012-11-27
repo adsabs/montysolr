@@ -42,10 +42,6 @@
             "adamcuk" becomes "adamcuk," and 
             "adamczuk,   k" becomes "adamczuk, k"-->
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
-        <!-- remember the original user input and set some important info
-             that may influence query expansion (especially from synonyms)
-              -->
-        <filter class="solr.analysis.author.AuthorSetPayload"/>
         <!-- replace with UTF-8 variant(s): "adamčuk, k" -->
         <filter class="solr.SynonymFilterFactory" 
             synonyms="author_generated.translit"
@@ -101,7 +97,8 @@
             acronymVariations="true"
             plainSurname="true"
             addShortenedMultiName="true"
-            addWildcards="true"
+            addWildcards="false"
+            lookAtPayloadForOrigAuthor="false"
             />
         <!-- deal with multiple occurences of the same (can happen because of the overlapping synonyms) -->
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />    

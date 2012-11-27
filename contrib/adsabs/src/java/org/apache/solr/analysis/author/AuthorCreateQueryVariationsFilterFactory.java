@@ -7,20 +7,16 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
 
 public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory {
 
-  private boolean plainSurname;
-  private boolean acronymVariations;
-  private String tokenType;
-  private boolean addWildcards;
-  private boolean shortenMultiname;
+  private boolean plainSurname = false;
+  private boolean acronymVariations = false;
+  private String tokenType = null;
+  private boolean addWildcards = false;
+  private boolean shortenMultiname = false;
+  private boolean lookAtPayloadForOrigAuthor = false;
 
   @Override
   public void init(Map<String,String> args) {
     super.init(args);
-    acronymVariations = false;
-    plainSurname = false;
-    addWildcards = false;
-    shortenMultiname = false;
-    tokenType = null;
     
     if (args.containsKey("acronymVariations")) {
       acronymVariations = args.get("acronymVariations").equals("true");
@@ -38,6 +34,10 @@ public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory
       shortenMultiname = args.get("addShortenedMultiName").equals("true");
     }
     
+    if (args.containsKey("lookAtPayloadForOrigAuthor")) {
+      lookAtPayloadForOrigAuthor = args.get("lookAtPayloadForOrigAuthor").equals("true");
+    }
+    
     if (args.containsKey("tokenType")) {
       tokenType = args.get("tokenType");
       if (tokenType.equals("null")) tokenType = null;
@@ -46,7 +46,8 @@ public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory
 
   public TokenStream create(TokenStream input) {
     return new AuthorCreateQueryVariationsFilter(input, tokenType, 
-        plainSurname, acronymVariations, addWildcards, shortenMultiname);
+        plainSurname, acronymVariations, addWildcards, 
+        shortenMultiname, lookAtPayloadForOrigAuthor);
   }
 
 }

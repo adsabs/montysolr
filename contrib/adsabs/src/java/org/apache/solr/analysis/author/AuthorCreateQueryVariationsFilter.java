@@ -3,13 +3,13 @@ package org.apache.solr.analysis.author;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.PayloadAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.AttributeSource;
@@ -31,36 +31,41 @@ import org.apache.lucene.util.AttributeSource;
 public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
 
   private final String tokenType;
+  
+  private final PayloadAttribute payloadAtt = addAttribute(PayloadAttribute.class);
+  private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
+  private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
+  private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
 
-  public AuthorCreateQueryVariationsFilter(TokenStream input, String tokenType, 
-      boolean surname, boolean variate, boolean addWildcards, boolean shortenMultiname) {
-    
-    super(input);
-    this.termAtt = addAttribute(CharTermAttribute.class);
-    this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
-    this.variationStack = new Stack<String>();
-    this.typeAtt = addAttribute(TypeAttribute.class);
-    this.createVariations = variate;
-    this.plainSurname = surname;
-    this.tokenType = tokenType;
-    this.addWildcards = addWildcards;
-    this.shortenMultiname = shortenMultiname;
-  }
-
-  private Stack<String> variationStack;
-  private AttributeSource.State current;
-
-  private final CharTermAttribute termAtt;
-  private final PositionIncrementAttribute posIncrAtt;
-  private final TypeAttribute typeAtt;
+  private boolean lookAtPayloadForOrigAuthor;
   private int maxNumberOfNames = 6; // safety precaution, we are pretty efficient but one should be careful...
   private boolean plainSurname;
   private boolean createVariations;
   private boolean addWildcards;
   private boolean shortenMultiname;
+  
+  public AuthorCreateQueryVariationsFilter(TokenStream input, String tokenType, 
+      boolean surname, boolean variate, boolean addWildcards, 
+      boolean shortenMultiname, boolean lookAtPayloadForOrigAuthor) {
+    
+    super(input);
+    this.variationStack = new Stack<String>();
+    this.createVariations = variate;
+    this.plainSurname = surname;
+    this.tokenType = tokenType;
+    this.addWildcards = addWildcards;
+    this.shortenMultiname = shortenMultiname;
+    this.lookAtPayloadForOrigAuthor = lookAtPayloadForOrigAuthor;
+  }
+
+  private Stack<String> variationStack;
+  private AttributeSource.State current;
+  private String origAuthorName = null;
+  
 
   @Override
   public boolean incrementToken() throws IOException {
+    
     if (this.variationStack.size() > 0) {
       String syn = this.variationStack.remove(0);
       this.restoreState(this.current);
@@ -70,8 +75,15 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
       this.typeAtt.setType(AuthorUtils.AUTHOR_QUERY_VARIANT);
       return true;
     }
-
+    
     if (!input.incrementToken()) return false;
+    
+    // sort of hack, we want to know what the original input was
+    // but it can't be done otherwise because the SynonynFilter
+    // is resetting all attributes!!! This will work only for the
+    // first author in the token list, but since we use the filter
+    // only for the query, it should be fine
+    if (origAuthorName==null) origAuthorName=termAtt.toString();
 
     if ((tokenType==null || typeAtt.type().equals(tokenType)) && this.genVariations()) {
       this.current = this.captureState();
@@ -82,17 +94,26 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
 
   private boolean genVariations() {
     String authorName = termAtt.toString();
+    
+    if (lookAtPayloadForOrigAuthor && payloadAtt.getPayload() != null) {
+      origAuthorName = payloadAtt.getPayload().utf8ToString();
+    }
 
     if (!authorName.contains(",")) return false;
     
     if (authorName.endsWith(",") && addWildcards) {
-      variationStack.push(authorName + "*");
+      variationStack.push(authorName + " *");
       return true;
     }
     
     String[] parts = authorName.split(" ", maxNumberOfNames );
+    String[] origParts = origAuthorName.split(" ", maxNumberOfNames );
     
-    boolean lastPartWasAcronym = parts[parts.length-1].length() == 1;
+    // this is an important indicator that influences how the wildcard variant
+    // is generated (if there is only acronym in the input, we do prefix search,
+    // if there is more than 2 characters, we append a space - ie. "kurtz, mi *"
+    // as opposed to "kurtz, m*"
+    boolean lastPartWasAcronym = origParts[origParts.length-1].length() == 1;
     
     if (createVariations) {
       List<Integer> ids = new ArrayList<Integer>();
@@ -165,6 +186,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
     super.reset();
     variationStack.clear();
     current = null;
+    origAuthorName=null;
   }
 
   private List<int[]> comb(int... items) {
