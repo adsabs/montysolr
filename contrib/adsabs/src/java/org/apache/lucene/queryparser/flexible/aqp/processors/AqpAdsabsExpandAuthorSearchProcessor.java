@@ -9,12 +9,15 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TextableQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.solr.analysis.author.AuthorUtils;
 
 /**
  * Looks at the QueryNode(s) and translates the field name if we have a mapping
@@ -53,7 +56,12 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     throws QueryNodeException {
     
     if (node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE) != null) {
-      return expandNodes(node, (String) node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE));
+      String origValue = (String) node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE);
+      String normalized = AuthorUtils.normalizeAuthor(origValue);
+      
+      NameInfo nameInfo = new NameInfo(normalized);
+      
+      return expandNodes(node, nameInfo);
     }
     return node;
   }
@@ -64,48 +72,111 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     return children;
   }
   
-  private QueryNode expandNodes(QueryNode node, String origValue) {
+  private QueryNode expandNodes(QueryNode node, NameInfo origNameInfo) {
     if (!node.isLeaf()) {
       ArrayList<QueryNode> pl = new ArrayList<QueryNode>();
       List<QueryNode> children = node.getChildren();
-      for (QueryNode child: children) {
-        doExpansion(origValue, child, pl);
+      for (int i=0;i<children.size();i++) {
+        doExpansion(origNameInfo, children.get(i), pl);
+        children.addAll(i+1, pl);
+        i += pl.size();
+        pl.clear();
       }
-      children.addAll(pl);
+      //children.addAll(pl);
     }
     else {
       // now expand the parent
       ArrayList<QueryNode> pl = new ArrayList<QueryNode>();
-      doExpansion(origValue, node, pl);
+      doExpansion(origNameInfo, node, pl);
       if (pl.size()>0) {
         pl.add(0, node);
+        return new GroupQueryNode(new BooleanQueryNode(pl));
       }
-      return new GroupQueryNode(new BooleanQueryNode(pl));
     }
     return node;
   }
   
-  private void doExpansion(String origValue, QueryNode node, List<QueryNode> parentChildren) {
-    if (node instanceof TextableQueryNode) {
+  private void doExpansion(NameInfo origNameInfo, QueryNode node, List<QueryNode> parentChildren) {
+    
+    if (node instanceof TextableQueryNode ) {
+      
+      if (node instanceof FuzzyQueryNode || node instanceof RegexpQueryNode 
+          || node instanceof WildcardQueryNode) {
+        return;
+      }
+      
+      
       FieldQueryNode fqn = ((FieldQueryNode) node);
       if (fields.containsKey(fqn.getFieldAsString())) {
         String v = fqn.getTextAsString();
-        if (v.endsWith(",")) {
-          parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), fqn.getValue() + " *", fqn.getBegin(), fqn.getEnd()));
-          return;
+        String[] nameParts = fqn.getTextAsString().split(" ");
+        
+        /*
+        if (node instanceof WildcardQueryNode) { // only "kurtz, m*" cases are tolerated
+          if (nameParts[nameParts.length-1].length() > 1) return;
+          nameParts[nameParts.length-1] = nameParts[nameParts.length-1].replace("*", "").trim();
         }
-        String[] origParts = origValue.split(" ");
-        boolean lastPartWasAcronym = origParts[origParts.length-1].length() == 1;
-        if (lastPartWasAcronym) {
-          parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), fqn.getValue() + "*", fqn.getBegin(), fqn.getEnd()));
+        */
+        
+        if (nameParts.length == 1) { // the new name is just surname
+          
+          if (nameParts.length < origNameInfo.noOfParts ) return; // do nothing
+          
+          if (origNameInfo.containsOnlySurname) { // orig was lone surname
+            parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + "*", fqn.getBegin(), fqn.getEnd()));
+          }
+          else {
+            // do nothing
+          }
         }
-        else {
-          parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), fqn.getValue() + " *", fqn.getBegin(), fqn.getEnd()));
+        else { // new name has several parts
+          if (nameParts.length < origNameInfo.noOfParts ) return; // do nothing
+          
+          if (origNameInfo.containsOnlySurname) { // orig was lone surname
+            // we could extract the surname and search for "surname, *" but i have decided against it
+            // the surname probably comes from the synonym expansion and if it was there, it can contain initials
+            parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + " *", fqn.getBegin(), fqn.getEnd()));
+          }
+          else {
+            if (origNameInfo.lastPartWasAcronym) { // orig name had only initial at the end
+              if (nameParts[nameParts.length-1].length() == 1) { // allow broader search only if the expanded form also has initial
+                parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + "*", fqn.getBegin(), fqn.getEnd()));
+              }
+              else {
+                parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + " *", fqn.getBegin(), fqn.getEnd()));
+              }
+            }
+            else {
+              parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + " *", fqn.getBegin(), fqn.getEnd()));
+            }
+          }
         }
+        
         return;
       }
     }
-    expandNodes(node, origValue);
+    expandNodes(node, origNameInfo);
+  }
+  
+  class NameInfo {
+    public String origName;
+    public boolean lastPartWasAcronym;
+    public int noOfParts;
+    public String[] parts;
+    public boolean containsOnlySurname = false;
+    
+    public NameInfo(String name) {
+      // lone surnames get always expanded
+      if (name.endsWith(",") || !name.contains(",")) containsOnlySurname = true;
+      
+      // whether to add a space, ie. Kurtz, Michael J -> Kurtz, Michael J*
+      // but Kurtz, Michael Julian -> Kurtz, Michael Julian *
+      parts = name.split(" ");
+      lastPartWasAcronym = parts[parts.length-1].length() == 1;
+      
+      noOfParts = parts.length;
+      origName = name;
+    }
   }
 
 }

@@ -38,17 +38,28 @@
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <!-- normalize order and surname form: eg. 
+            <!-- normalize order and surname form: eg. 
             "adamcuk" becomes "adamcuk," and 
             "adamczuk,   k" becomes "adamczuk, k"-->
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
-        <!-- replace with UTF-8 variant(s): "adamčuk, k" -->
+            <!-- generate combinations to find their upgraded form -->
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="3"
+            />
+            <!-- replace with UTF-8 variant(s): "adamčuk, k" -->
         <filter class="solr.SynonymFilterFactory" 
             synonyms="author_generated.translit"
             ignoreCase="true" 
             expand="true" 
             tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <!-- downgrade everything back to ascii (we now will have both ASCII and UTF8 forms)-->
+            <!-- now remove the query variants, they were used only to discover upgraded forms -->    
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            tokenTypes="AUTHOR_QUERY_VARIANT"
+            emitToken="false"/>
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="1"
+            />
+            <!-- downgrade everything back to ascii (we now will have both ASCII and UTF8 forms)-->
         <filter class="solr.analysis.author.AuthorTransliterationFactory"
             inputType="null"/>
         <!-- generate ADS style extra search clauses (they will be used to find synonyms): 
@@ -58,8 +69,7 @@
             "adamcuk, p k"
             "adamcuk," (if plainSurname=true) -->
         <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-            acronymVariations="true"
-            plainSurname="false"
+            acronymVariations="1"
             />
         <!-- using any of the forms, find the synonyms, eg: 
             "adamšuk, k", "adamčuk, k", "adamguk, k" -->
@@ -94,7 +104,7 @@
             "adamcuk, p kolja *"
             "adamcuk," --> 
         <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-            acronymVariations="true"
+            acronymVariations="1"
             plainSurname="true"
             addShortenedMultiName="true"
             addWildcards="false"

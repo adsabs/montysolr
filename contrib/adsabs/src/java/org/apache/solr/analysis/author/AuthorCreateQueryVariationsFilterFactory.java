@@ -8,7 +8,7 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
 public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory {
 
   private boolean plainSurname = false;
-  private boolean acronymVariations = false;
+  private int acronymVariations = 0;
   private String tokenType = null;
   private boolean addWildcards = false;
   private boolean shortenMultiname = false;
@@ -19,7 +19,7 @@ public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory
     super.init(args);
     
     if (args.containsKey("acronymVariations")) {
-      acronymVariations = args.get("acronymVariations").equals("true");
+      acronymVariations = Integer.parseInt(args.get("acronymVariations"));
     }
 
     if (args.containsKey("plainSurname")) {

@@ -40,12 +40,12 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
   private boolean lookAtPayloadForOrigAuthor;
   private int maxNumberOfNames = 6; // safety precaution, we are pretty efficient but one should be careful...
   private boolean plainSurname;
-  private boolean createVariations;
+  private int createVariations;
   private boolean addWildcards;
   private boolean shortenMultiname;
   
   public AuthorCreateQueryVariationsFilter(TokenStream input, String tokenType, 
-      boolean surname, boolean variate, boolean addWildcards, 
+      boolean surname, int variate, boolean addWildcards, 
       boolean shortenMultiname, boolean lookAtPayloadForOrigAuthor) {
     
     super(input);
@@ -115,7 +115,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
     // as opposed to "kurtz, m*"
     boolean lastPartWasAcronym = origParts[origParts.length-1].length() == 1;
     
-    if (createVariations) {
+    if (createVariations > 0 && parts.length >= createVariations) {
       List<Integer> ids = new ArrayList<Integer>();
       for (int i=1;i<parts.length;i++) {
         if (parts[i].length()>1) ids.add(i);

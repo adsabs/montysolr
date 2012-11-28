@@ -24,12 +24,16 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.QParser;
 import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -90,6 +94,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "ARAGON SALAMANCA, A;ARAGON-SALAMANCA, A;ARAGON, A;SALAMANCA, A", // copied from: /proj/ads/abstracts/config/author.syn
           "ADAMŠUK, K;ADAMGUK, K;ADAMČUK, K",  // hand-made additions
           "MÜLLER, A WILLIAM;MÜLLER, A BILL",
+          "MÜLLER, WILLIAM;MÜLLER, BILL",
       }));
 
       // automatically harvested variations of author names (collected during indexing)
@@ -101,6 +106,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "ADAMCHUK, KOLJA => ADAMČUK, KOLJA",
           "ADAMCUK, KOLJA => ADAMČUK, KOLJA",
           "ADAMCZUK, KOLJA => ADAMČUK, KOLJA",
+          "ADAMCHUK, KOLJA K=> ADAMČUK, KOLJA K",
+          "ADAMCUK, KOLJA K=> ADAMČUK, KOLJA K",
+          "ADAMCZUK, KOLJA K=> ADAMČUK, KOLJA K",
           "ADAMCHUK, => ADAMČUK,",
           "ADAMCUK,=> ADAMČUK,",
           "ADAMCZUK, => ADAMČUK,", // this one is added by hand (no automated transliteration)
@@ -238,21 +246,21 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // and reload synonym chain harvested during indexing
     Analyzer iAnalyzer = h.getCore().getSchema().getAnalyzer();
     Analyzer qAnalyzer = h.getCore().getSchema().getQueryAnalyzer();
-    
+
     TokenStream iAuthor = iAnalyzer.tokenStream("author", new StringReader(""));
     TokenStream qAuthor = qAnalyzer.tokenStream("author", new StringReader(""));
-    
+
     iAuthor.reset();
     iAuthor.reset();
     iAuthor.reset();
-    
+
     qAuthor.reset();
     qAuthor.reset();
     qAuthor.reset();
-    
+
     // TODO: force reload of the synonym map
     //h.getCoreContainer().reload("collection1");
-    
+
     /*
 		 Each test case has two branches, one representing the full utf-8 form (with ascii chars),
 		 the other the ascii downgraded form. No matter which, the query must be expanded in both
@@ -282,15 +290,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      */
 
     String expected;
-    
-    expected = "author:adamčuk, author:adamchuk, author:adamcuk,"; //version without query variants
-    expected = "author:adamčuk, author:adamčuk, * " + // when it is done by the tokenizer chain
-    		       "author:adamchuk, author:adamchuk, * " +
-    		       "author:adamcuk, author:adamcuk, *";
-    expected = "author:adamčuk, author:adamchuk, author:adamcuk, " +
-    		       "author:adamčuk, * author:adamchuk, * author:adamcuk, *";
-    
-    //setDebug(true);
+    String expected0;
+
+    expected = "author:adamčuk, author:adamčuk,* " + // query variants added by parser
+               "author:adamchuk, author:adamchuk,* " +
+               "author:adamcuk, author:adamcuk,*";
+
+
     /**
      * <surname>
      * 
@@ -302,13 +308,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "adamcuk", expected, "//*[@numFound='']",
         "adamchuk", expected, "//*[@numFound='']",
         "adamczuk", expected, "//*[@numFound='']",
-        "adamšuk", "author:adamšuk, author:adamšuk, * " +
-        		       "author:adamshuk, author:adamshuk, * " +
-                   "author:adamsuk, author:adamsuk, *", "//*[@numFound='']",
-        "adamguk", "author:adamguk, author:adamguk, *", "//*[@numFound='']"
+        "adamšuk", "author:adamšuk, author:adamšuk,* " +
+                   "author:adamshuk, author:adamshuk,* " +
+                   "author:adamsuk, author:adamsuk,*", "//*[@numFound='']",
+        "adamguk", "author:adamguk, author:adamguk,*", "//*[@numFound='']"
     );
 
-    
+    //setDebug(true);
     /**
      * <surname>,
      * 
@@ -320,10 +326,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "\"adamcuk,\"", expected, "//*[@numFound='']",
         "\"adamchuk,\"", expected, "//*[@numFound='']",
         "\"adamczuk,\"", expected, "//*[@numFound='']",
-        "\"adamšuk,\"", "author:adamšuk, author:adamšuk, * " +
-                        "author:adamshuk, author:adamshuk, * " +
-                        "author:adamsuk, author:adamsuk, *", "//*[@numFound='']",
-        "\"adamguk,\"", "author:adamguk, author:adamguk, *", "//*[@numFound='']"
+        "\"adamšuk,\"", "author:adamšuk, author:adamšuk,* " +
+                        "author:adamshuk, author:adamshuk,* " +
+                        "author:adamsuk, author:adamsuk,*", "//*[@numFound='']",
+        "\"adamguk,\"", "author:adamguk, author:adamguk,*", "//*[@numFound='']"
     );
 
 
@@ -337,22 +343,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      *  question: the chain correctly finds the synonym "adamšuk, k", and this synonym is
      *  then transliterated: adamshuk, k;adamsuk, k (is this desirable?) I think yes.
      */
-    //version addWildcards=false
-    expected = "author:adamšuk, k author:adamšuk, " +
-    		       "author:adamsuk, k author:adamsuk, " +
-    		       "author:adamshuk, k author:adamshuk, " +
-    		       "author:adamguk, k author:adamguk, " +
-    		       "author:adamčuk, k author:adamčuk, " +
-    		       "author:adamchuk, k author:adamchuk, " +
-    		       "author:adamcuk, k author:adamcuk,";
     expected = "author:adamšuk, k author:adamšuk, k* author:adamšuk, " +
-    		       "author:adamsuk, k author:adamsuk, k* author:adamsuk, " +
-    		       "author:adamshuk, k author:adamshuk, k* author:adamshuk, " +
-    		       "author:adamguk, k author:adamguk, k* author:adamguk, " +
-    		       "author:adamčuk, k author:adamčuk, k* author:adamčuk, " +
-    		       "author:adamchuk, k author:adamchuk, k* author:adamchuk, " +
-    		       "author:adamcuk, k author:adamcuk, k* author:adamcuk,";
-    
+                "author:adamsuk, k author:adamsuk, k* author:adamsuk, " +
+                "author:adamshuk, k author:adamshuk, k* author:adamshuk, " +
+                "author:adamguk, k author:adamguk, k* author:adamguk, " +
+                "author:adamčuk, k author:adamčuk, k* author:adamčuk, " +
+                "author:adamchuk, k author:adamchuk, k* author:adamchuk, " +
+                "author:adamcuk, k author:adamcuk, k* author:adamcuk,";
+
     testAuthorQuery(
         "\"adamčuk, k\"", expected, "//*[@numFound='']",
         "\"adamcuk, k\"", expected, "//*[@numFound='']",
@@ -360,7 +358,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "\"adamczuk, k\"", expected, "//*[@numFound='']",
         "\"adamšuk, k\"", expected, "//*[@numFound='']",
         "\"adamguk, k\"", expected, "//*[@numFound='']",
-        
+
         "\"AdAmČuk, K\"", expected, "//*[@numFound='']", // just for fun
         "\"ADAMČUK, k\"", expected, "//*[@numFound='']",
         "\"AdAmCHuk, K\"", expected, "//*[@numFound='']"
@@ -373,73 +371,47 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      *  upgraded && transliterated && expanded
      *  synonym "adamšuk, k" IS FOUND because of the query variation for "adamčuk, k" the syn list
      */
-    expected = "author:adamčuk, kolja " +
-    		       "author:adamčuk, k author:adamčuk, " +
-    		       "author:adamcuk, kolja " +
-    		       "author:adamcuk, k author:adamcuk, " +
-    		       "author:adamchuk, kolja " +
-    		       "author:adamchuk, k author:adamchuk, " +
-               "author:adamšuk, k author:adamšuk, " +
-               "author:adamsuk, k author:adamsuk, " +
-               "author:adamshuk, k author:adamshuk, " +
-               "author:adamguk, k author:adamguk,";
     
-    expected = "author:adamčuk, kolja " +
+    // base part, must be present in all
+    expected0 = 
     		       "author:adamčuk, k author:adamčuk, k * author:adamčuk, " +
+    		       "author:adamcuk, k author:adamcuk, k * author:adamcuk, " +
+    		       "author:adamchuk, k author:adamchuk, k * author:adamchuk, " +
     		       "author:adamšuk, k author:adamšuk, k * author:adamšuk, " +
     		       "author:adamsuk, k author:adamsuk, k * author:adamsuk, " +
     		       "author:adamshuk, k author:adamshuk, k * author:adamshuk, " +
-    		       "author:adamguk, k author:adamguk, k * author:adamguk, " +
-    		       "author:adamčuk, k * " +
-    		       "author:adamchuk, k author:adamchuk, k * author:adamchuk, " +
-    		       "author:adamcuk, k author:adamcuk, k * author:adamcuk, " +
-    		       "author:adamcuk, kolja author:adamcuk, k * " +
-    		       "author:adamchuk, kolja author:adamchuk, k *";
+    		       "author:adamguk, k author:adamguk, k * author:adamguk, ";
+
+    expected = expected0 +
+               "author:adamčuk, kolja author:adamčuk, kolja * " +
+               "author:adamchuk, kolja author:adamchuk, kolja * " +
+               "author:adamcuk, kolja author:adamcuk, kolja *"
+               ;
     
     
     testAuthorQuery(
-        // exactly the same as expected, but in diff order
-        // the order is such because input does't need to be upgraded before processing
-        "\"adamčuk, kolja\"", "author:adamčuk, kolja " +
-        		                  "author:adamčuk, k author:adamčuk, k * author:adamčuk, " +
-        		                  "author:adamšuk, k author:adamšuk, k * author:adamšuk, " +
-        		                  "author:adamsuk, k author:adamsuk, k * author:adamsuk, " +
-        		                  "author:adamshuk, k author:adamshuk, k * author:adamshuk, " +
-        		                  "author:adamguk, k author:adamguk, k * author:adamguk, " +
-        		                  "author:adamchuk, k author:adamchuk, k * author:adamchuk, " +
-        		                  "author:adamcuk, k author:adamcuk, k * author:adamcuk, " +
-        		                  "author:adamcuk, kolja " +
-        		                  "author:adamchuk, kolja", "//*[@numFound='']",
+        "\"adamčuk, kolja\"", expected, "//*[@numFound='']",
         "\"adamcuk, kolja\"", expected, "//*[@numFound='']",
         "\"adamchuk, kolja\"", expected, "//*[@numFound='']",
         "\"adamczuk, kolja\"", expected, "//*[@numFound='']",
-        // the same number as expected (17), but diff:
         // "adamčuk, kolja" is not there (and cannot be, because it is not in
         // synonym map, but synonym "adamšuk, k" is found correctly)
-        "\"adamšuk, kolja\"", "author:adamšuk, kolja " +
-        		                  "author:adamšuk, k author:adamšuk, k * author:adamšuk, " +
-        		                  "author:adamsuk, k author:adamsuk, " +
-        		                  "author:adamshuk, k author:adamshuk, " +
-        		                  "author:adamguk, k author:adamguk, " +
-        		                  "author:adamčuk, k author:adamčuk, " +
-        		                  "author:adamchuk, k author:adamchuk, " +
-        		                  "author:adamcuk, k author:adamcuk, " +
-        		                  "author:adamshuk, kolja author:adamsuk, kolja", "//*[@numFound='']",
-        // shorter by two variants (15), because "adamguk, kolja" is already ascii form
+        "\"adamšuk, kolja\"", expected0 +
+                              "author:adamšuk, kolja author:adamšuk, kolja * " +
+                              "author:adamshuk, kolja author:adamshuk, kolja * " +
+                              "author:adamsuk, kolja author:adamsuk, kolja *", 
+                              "//*[@numFound='']",
+        // shorter by two variants, because "adamguk, kolja" is already ascii form
         // it doesn't generate: "author:adamshuk, kolja author:adamsuk, kolja"
         // that is correct, because "adamšuk, k" is found and transliterated
         // "adamšuk, kolja" simply isn't in any synonym list and we tehrefore cannot have it 
-        "\"adamguk, kolja\"", "author:adamguk, kolja author:adamguk, k author:adamguk, " +
-        		                  "author:adamšuk, k author:adamšuk, " +
-        		                  "author:adamsuk, k author:adamsuk, " +
-        		                  "author:adamshuk, k author:adamshuk, " +
-        		                  "author:adamčuk, k author:adamčuk, " +
-        		                  "author:adamchuk, k author:adamchuk, " +
-        		                  "author:adamcuk, k author:adamcuk,", "//*[@numFound='']"
+        "\"adamguk, kolja\"", expected0 +
+                              "author:adamguk, kolja author:adamguk, kolja *",
+                              "//*[@numFound='']"
     );
-    
-    
-    
+
+
+
     /**
      * <surname>, <1name> <2>
      * 
@@ -454,55 +426,204 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * CAN WORK if "adamcuk, k k" and "adamcuk, k" are named as synonymous (see the example
      * case of "adamczuk, k k k")
      */
-    expected = "author:adamčuk, kolja k author:adamčuk, k k author:adamčuk, " +
-               "author:adamcuk, kolja k author:adamcuk, k k author:adamcuk, " + 
-               "author:adamchuk, kolja k author:adamchuk, k k author:adamchuk,";
     
+    expected = "author:adamčuk, kolja k author:adamčuk, kolja k* " +
+    		       "author:adamčuk, k k author:adamčuk, k k* " +
+    		       "author:adamčuk, kolja " + // ! author:adamčuk, kolja *
+    		       "author:adamčuk, k " + // ! author:adamčuk, k*
+    		       "author:adamčuk, " +
+    		       "author:adamcuk, kolja k author:adamcuk, kolja k* " +
+    		       "author:adamcuk, k k author:adamcuk, k k* " +
+    		       "author:adamcuk, kolja " + // ! author:adamcuk, kolja * 
+    		       "author:adamcuk, k " + // ! author:adamcuk, k* 
+    		       "author:adamcuk, " +
+    		       "author:adamchuk, kolja k author:adamchuk, kolja k* " +
+    		       "author:adamchuk, k k author:adamchuk, k k* " +
+    		       "author:adamchuk, kolja " + // ! author:adamchuk, kolja * 
+    		       "author:adamchuk, k " + // ! author:adamchuk, k*
+    		       "author:adamchuk,";
+      
+
     testAuthorQuery(
         "\"adamčuk, kolja k\"", expected, "//*[@numFound='']",
-        "\"adamcuk, kolja k\"", "author:adamcuk, kolja k author:adamcuk, k k author:adamcuk,", "//*[@numFound='']",
-        "\"adamchuk, kolja k\"", "author:adamchuk, kolja k author:adamchuk, k k author:adamchuk,", "//*[@numFound='']",
-        "\"adamczuk, kolja k\"", "author:adamczuk, kolja k author:adamczuk, k k author:adamczuk,", "//*[@numFound='']",
-        "\"adamšuk, kolja k\"", "author:adamšuk, kolja k author:adamšuk, k k author:adamšuk, " +
-        		                    "author:adamsuk, kolja k author:adamsuk, k k author:adamsuk, " +
-        		                    "author:adamshuk, kolja k author:adamshuk, k k author:adamshuk,", "//*[@numFound='']",
-        "\"adamguk, kolja k\"", "author:adamguk, kolja k author:adamguk, k k author:adamguk,", "//*[@numFound='']"
+        "\"adamcuk, kolja k\"", expected, "//*[@numFound='']",
+        "\"adamchuk, kolja k\"", expected, "//*[@numFound='']",
+        // this contains 4 more entries because by default, the
+        // transliteration produces only adam(c|ch)uk
+        "\"adamczuk, kolja k\"", expected + 
+                          " author:adamczuk, k k author:adamczuk, k k* author:adamczuk, k author:adamczuk,", 
+                          "//*[@numFound='']",
+        "\"adamšuk, kolja k\"", 
+            "author:adamšuk, kolja k author:adamšuk, kolja k* " +
+            "author:adamšuk, k k author:adamšuk, k k* " +
+            "author:adamšuk, kolja " +
+            "author:adamšuk, k " +
+            "author:adamšuk, " +
+            "author:adamsuk, kolja k author:adamsuk, kolja k* " +
+            "author:adamsuk, k k author:adamsuk, k k* " +
+            "author:adamsuk, kolja " +
+            "author:adamsuk, k " +
+            "author:adamsuk, " +
+            "author:adamshuk, kolja k author:adamshuk, kolja k* " +
+            "author:adamshuk, k k author:adamshuk, k k* " +
+            "author:adamshuk, kolja " +
+            "author:adamshuk, k " +
+            "author:adamshuk,", 
+              "//*[@numFound='']",
+        "\"adamguk, kolja k\"", 
+            "author:adamguk, kolja k author:adamguk, kolja k* " +
+            "author:adamguk, k k author:adamguk, k k* " +
+            "author:adamguk, kolja " +
+            "author:adamguk, k " +
+            "author:adamguk,", 
+            "//*[@numFound='']"
     );
-    
-    
-    //fail("Hey!!! We have move great chunk of road forward! Yet author parsing still needs attention");
-    
+
+
+
     /**
      * <surname>, <1name> <2name>
      * 
+     * It works as above with the addition that the VARIATIONS of the initials/full names
+     * are produced, ie. Aaaa B Ccccc will produce
+     *    Aaaa B C
+     *    A B C, A B Cccc
+     *    Aaaa B Cccc
+     *    
+     * And through these variations, we find the upgraded form "adamčuk, kolja k"
+     * 
+     * This has the benefit of us finding the combination of name/initials even if 
+     * we didn't encounter them during indexing. HOWEVER, to avoid false hits these
+     * combinations are found only for names that have certain number of parts,
+     * default >= 3 
+     */
+
+    // we expect the same results as above (the difference is in the "..., k k *")
+    // plus whathever comes out of the original input transliteration/combination
+    expected0 = "author:adamčuk, kolja k author:adamčuk, kolja k * " +
+                "author:adamčuk, k k author:adamčuk, k k * " +
+                "author:adamčuk, kolja " + 
+                "author:adamčuk, k " + 
+                "author:adamčuk, " +
+                "author:adamcuk, kolja k author:adamcuk, kolja k * " +
+                "author:adamcuk, k k author:adamcuk, k k * " +
+                "author:adamcuk, kolja " +  
+                "author:adamcuk, k " +  
+                "author:adamcuk, " +
+                "author:adamchuk, kolja k author:adamchuk, kolja k * " +
+                "author:adamchuk, k k author:adamchuk, k k * " +
+                "author:adamchuk, kolja " +  
+                "author:adamchuk, k " + 
+                "author:adamchuk,";
+    
+    
+    testAuthorQuery(
+        "\"adamčuk, kolja karel\"", expected0 + " " + 
+                                    "author:adamčuk, kolja karel author:adamčuk, kolja karel * " +
+                                    "author:adamčuk, k karel author:adamčuk, k karel * " +
+                                    "author:adamchuk, kolja karel author:adamchuk, kolja karel * " +
+                                    "author:adamchuk, k karel author:adamchuk, k karel * " +
+                                    "author:adamcuk, kolja karel author:adamcuk, kolja karel * " +
+                                    "author:adamcuk, k karel author:adamcuk, k karel *", 
+                                    "//*[@numFound='']",
+        "\"adamcuk, kolja karel\"", expected0 + " " + 
+                                    "author:adamcuk, kolja karel author:adamcuk, kolja karel * " +
+                                    "author:adamcuk, k karel author:adamcuk, k karel *",
+                                    "//*[@numFound='']",
+        "\"adamchuk, kolja karel\"", expected0 + " " + 
+                                    "author:adamchuk, kolja karel author:adamchuk, kolja karel * " +
+                                    "author:adamchuk, k karel author:adamchuk, k karel *",
+                                    "//*[@numFound='']",
+        "\"adamczuk, kolja karel\"", expected0 + " " + 
+                                    "author:adamczuk, kolja karel author:adamczuk, kolja karel * " +
+                                    "author:adamczuk, k karel author:adamczuk, k karel * " +
+                                    "author:adamczuk, kolja k author:adamczuk, kolja k * " +
+                                    "author:adamczuk, k k author:adamczuk, k k * " +
+                                    "author:adamczuk, kolja author:adamczuk, k " +
+                                    "author:adamczuk,",
+                                    "//*[@numFound='']",
+        // almost exactly the same as above, the only difference must be the space before *
+        "\"adamšuk, kolja karel\"", "author:adamšuk, kolja k author:adamšuk, kolja k * " +
+                                    "author:adamšuk, k k author:adamšuk, k k * " +
+                                    "author:adamšuk, kolja " +
+                                    "author:adamšuk, k " +
+                                    "author:adamšuk, " +
+                                    "author:adamsuk, kolja k author:adamsuk, kolja k * " +
+                                    "author:adamsuk, k k author:adamsuk, k k * " +
+                                    "author:adamsuk, kolja " +
+                                    "author:adamsuk, k " +
+                                    "author:adamsuk, " +
+                                    "author:adamshuk, kolja k author:adamshuk, kolja k * " +
+                                    "author:adamshuk, k k author:adamshuk, k k * " +
+                                    "author:adamshuk, kolja " +
+                                    "author:adamshuk, k " +
+                                    "author:adamshuk, " + 
+                                    // plus variants with karel
+                                    "author:adamšuk, kolja karel author:adamšuk, kolja karel * " +
+                                    "author:adamšuk, k karel author:adamšuk, k karel * " + 
+                                    "author:adamshuk, kolja karel author:adamshuk, kolja karel * " +
+                                    "author:adamshuk, k karel author:adamshuk, k karel * " +
+                                    "author:adamsuk, kolja karel author:adamsuk, kolja karel * " +
+                                    "author:adamsuk, k karel author:adamsuk, k karel *",
+                                    "//*[@numFound='']",
+        "\"adamguk, kolja karel\"", "author:adamguk, kolja k author:adamguk, kolja k * " +
+                                    "author:adamguk, k k author:adamguk, k k * " +
+                                    "author:adamguk, kolja " +
+                                    "author:adamguk, k " +
+                                    "author:adamguk, " + 
+                                    // plus variants with karel
+                                    "author:adamguk, kolja karel author:adamguk, kolja karel * " +
+                                    "author:adamguk, k karel author:adamguk, k karel *",
+                                    "//*[@numFound='']"
+        
+    );
+    
+    
+    /*
+     * TODO:
+     * 
+     * Also make sure we test that the expanding algorithm doesn't have unwanted consequences
+     * and doesn't include too much, ie. that search for "adamčuk, kos" doesn't get
+     * transformed into "adam(c|ch)uk, k"
+     */
+    
+    //TODO: show that the translation works properly when the synonym is in the synonym list
+    // ie "adamčuk, k k;adamšuk, k k"
+
+    
+    /**
+     * <surname>, <part*>
+     * 
+     * No expansion should happen if the <part*> has more than 2 characters, otherwise
+     * it should work as if <surname>, <1> was specified
      * 
      */
     
-    expected = "author:adamčuk, kolja karel author:adamčuk, kolja karel author:adamčuk, kolja karel " +
-               "author:adamcuk, kolja k author:adamcuk, k k author:adamcuk, " + 
-               "author:adamchuk, kolja k author:adamchuk, k k author:adamchuk,";
-
+    expected = "author:adamšuk, k author:adamšuk, k* author:adamšuk, " +
+              "author:adamsuk, k author:adamsuk, k* author:adamsuk, " +
+              "author:adamshuk, k author:adamshuk, k* author:adamshuk, " +
+              "author:adamguk, k author:adamguk, k* author:adamguk, " +
+              "author:adamčuk, k author:adamčuk, k* author:adamčuk, " +
+              "author:adamchuk, k author:adamchuk, k* author:adamchuk, " +
+              "author:adamcuk, k author:adamcuk, k* author:adamcuk,";
+    
+    //setDebug(true);
     testAuthorQuery(
-      "\"adamčuk, kolja karel\"", expected, "//*[@numFound='']",
-      "\"adamcuk, kolja karel\"", "author:adamcuk, kolja k author:adamcuk, k k author:adamcuk,", "//*[@numFound='']",
-      "\"adamchuk, kolja karel\"", "author:adamchuk, kolja k author:adamchuk, k k author:adamchuk,", "//*[@numFound='']",
-      "\"adamczuk, kolja karel\"", "author:adamczuk, kolja k author:adamczuk, k k author:adamczuk,", "//*[@numFound='']",
-      "\"adamšuk, kolja karel\"", "author:adamšuk, kolja k author:adamšuk, k k author:adamšuk, " +
-                           "author:adamsuk, kolja k author:adamsuk, k k author:adamsuk, " +
-                           "author:adamshuk, kolja k author:adamshuk, k k author:adamshuk,", "//*[@numFound='']",
-      "\"adamguk, kolja karel\"", "author:adamguk, kolja k author:adamguk, k k author:adamguk,", "//*[@numFound='']"
+            "\"adamčuk, k*\"", expected, "//*[@numFound='']",
+            "\"adamcuk, k*\"", expected, "//*[@numFound='']",
+            "\"adamchuk, k*\"", expected, "//*[@numFound='']",
+            "\"adamczuk, k*\"", expected, "//*[@numFound='']",
+            "\"adamšuk, k*\"", expected, "//*[@numFound='']",
+            "\"adamguk, k*\"", expected, "//*[@numFound='']",
+            
+            "\"adamčuk, ko*\"", "author:adamčuk, ko*", "//*[@numFound='']",
+            "\"adamcuk, ko*\"", "author:adamcuk, ko*", "//*[@numFound='']",
+            "\"adamchuk, ko*\"", "author:adamchuk, ko*", "//*[@numFound='']",
+            "\"adamczuk, ko*\"", "author:adamczuk, ko*", "//*[@numFound='']",
+            "\"adamšuk, ko*\"", "author:adamšuk, ko*", "//*[@numFound='']",
+            "\"adamguk, ko*\"", "author:adamguk, ko*", "//*[@numFound='']"
     );
 
-    //TODO: show that the translation works properly when the synonym is in the synonym list
-    // ie "adamčuk, k k;adamšuk, k k"
-    
-    
-    
-    // wildcard searches are expanded only for synonyms
-    assertQueryEquals(req("qt", "aqp", "q", "author:\"adamčuk, kol*\""), 
-        //"author:adamčuk, k author:adamcuk, k author:adamchuk, k author:adamčuk, author:adamčuk, k* author:adamchuk, karel author:adamčuk, karel author:adamcuk, kolja author:adamcuk, karel author:adamčuk, kolja author:adamchuk, kolja author:adamchuk, k* author:adamchuk, author:adamcuk, author:adamcuk, k*",
-        "author:adamčuk, kol*",
-        BooleanQuery.class);
 
 
     /**
@@ -521,20 +642,33 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         //"author:adamchuk, k author:adamcuk, k author:adamčuk, k author:adamchuk, k* author:adamchuk, karel author:adamčuk, karel author:adamcuk, kolja author:adamcuk, karel author:adamchuk, kolja author:adamčuk, kolja author:adamchuk,",
         "author:adamchuk, k author:adamcuk, k author:adamčuk, k author:adamchuk, k* author:adamchuk,",
         BooleanQuery.class);
-    **/
-    
-    //assertQueryEquals(req("qt", "aqp", "q", "author:\"adamčuk, kolja\""), 
-    //    "author:adamčuk, kolja author:adamcuk, kolja author:adamchuk, kolja author:/adamčuk, kolja\\b.*/ author:adamčuk, author:/adamčuk, k\\b.*/ author:adamcuk, k author:adamchuk, k author:adamčuk, k author:/adamchuk, k\\b.*/ author:/adamchuk, kolja\\b.*/ author:adamchuk, author:/adamcuk, k\\b.*/ author:adamcuk, author:/adamcuk, kolja\\b.*/",
-    //    BooleanQuery.class);
-    
-    assertQueryEquals(req("qt", "aqp", "q", "author:\"Muller, W\""),
-        "author:muller, w author:muller, w* author:muller, william author:müller, william author:mueller, william author:muller,",
+     **/
+
+
+    assertQueryEquals(req("qt", "aqp", "q", "author:\"Muller, William\""),
+        // this was the old-style result, note "muller, w*"
+        //"author:muller, w author:muller, w* author:muller, william author:müller, william author:mueller, william author:muller,",
+        "author:müller, william author:müller, william * " +
+        "author:müller, w author:müller, w * " +
+        "author:müller, " +
+        "author:muller, william author:muller, william * " +
+        "author:muller, w author:muller, w * " +
+        "author:muller, " +
+        "author:mueller, william author:mueller, william * " +
+        "author:mueller, w author:mueller, w * " +
+        "author:mueller, " +
+        "author:müller, bill author:müller, bill * " +
+        "author:müller, b author:müller, b * " +
+        "author:mueller, bill author:mueller, bill * " +
+        "author:mueller, b author:mueller, b * " +
+        "author:muller, bill author:muller, bill * " +
+        "author:muller, b author:muller, b *",
         BooleanQuery.class);
 
-    assertQueryEquals(req("qt", "aqp", "q", "author:\"Müller, William\""),
-        "author:müller, william author:muller, william author:mueller, william author:müller, w author:/müller, w\\b.*/ author:müller, author:/müller, william\\b.*/ author:/mueller, w\\b.*/ author:/mueller, william\\b.*/ author:mueller, w author:mueller, author:/muller, w\\b.*/ author:muller, w author:/muller, william\\b.*/ author:muller,",
-        BooleanQuery.class);
-
+    
+    /*
+     * 
+    TODO: 
     assertQ(req("q", "author:\"ADAMČUK, K\""), "//*[@numFound='3']");
     assertQ(req("q", "author:\"adamčuk, k\""), "//*[@numFound='3']");
     assertQ(req("q", "author:\"adamchuk, k\""), "//*[@numFound='3']");
@@ -544,6 +678,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertQ(req("q", "author:\"mueller, w\""), "//*[@numFound='2']");
     assertQ(req("q", "author:\"muller, w\""), "//*[@numFound='2']");
 
+    */
+    
     // not working because: adamczuk, k is  not in synonym file
     //assertQ(req("q", "author:\"adamczuk, k\""), "//*[@numFound='3']");
 
@@ -566,7 +702,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   public static junit.framework.Test suite() {
     return new junit.framework.JUnit4TestAdapter(TestAdsabsTypeAuthorParsing.class);
   }
-  
+
   /** Validates a query matches some XPath test expressions and closes the query */
   public void assertQ(String message, SolrQueryRequest req, String... tests) {
     try {
@@ -575,13 +711,49 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       String results = h.validateXPath(response, tests);
       if (null != results) {
         tp.debugFail(m + "query failed XPath: " + results +
-             "\n xml response was: " + response +
-             "\n request was: " + req.getParamString());
+            "\n xml response was: " + response +
+            "\n request was: " + req.getParamString());
       }
     } catch (XPathExpressionException e1) {
       throw new RuntimeException("XPath is invalid", e1);
     } catch (Exception e2) {
       throw new RuntimeException("Exception during query", e2);
     }
+  }
+
+  public Query assertQueryEquals(SolrQueryRequest req, String expected, Class<?> clazz)
+  throws Exception {
+
+    QParser qParser = getParser(req);
+    String query = req.getParams().get(CommonParams.Q);
+    Query q = qParser.parse();
+
+    String actual = q.toString("field");
+    
+    String[] ex = expected.split("\\s*[a-z]+:");
+    Arrays.sort(ex);
+    String[] ac = actual.split("\\s*[a-z]+:");
+    Arrays.sort(ac);
+    StringBuffer exs = new StringBuffer();
+    for (String s: ex) {
+      exs.append(s.trim());
+    }
+    StringBuffer acs = new StringBuffer();
+    for (String s: ac) {
+      acs.append(s.trim());
+    }
+    
+    if (!acs.toString().equals(exs.toString())) {
+      //assertArrayEquals(ac, ex);
+      tp.debugFail(query, expected, actual);
+    }
+
+    if (clazz != null) {
+      if (!q.getClass().isAssignableFrom(clazz)) {
+        tp.debugFail("Query is not: " + clazz + " but: " + q.getClass(), expected, "-->" + q.toString());
+      }
+    }
+
+    return q;
   }
 }

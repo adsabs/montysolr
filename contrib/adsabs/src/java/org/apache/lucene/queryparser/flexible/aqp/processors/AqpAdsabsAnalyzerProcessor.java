@@ -59,7 +59,9 @@ public class AqpAdsabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
     }
     
     QueryNode rn = super.postProcessNode(node);
-    if (rn != node || node instanceof FieldQueryNode && !((FieldQueryNode)node).getTextAsString().equals(fv)) {
+    if (rn != node || node instanceof FieldQueryNode 
+        //&& !((FieldQueryNode)node).getTextAsString().equals(fv)
+        ) {
       rn.setTag(ORIGINAL_VALUE, fv);
     }
     

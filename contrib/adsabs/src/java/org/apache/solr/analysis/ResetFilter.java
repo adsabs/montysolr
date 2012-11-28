@@ -55,14 +55,14 @@ public final class ResetFilter extends TokenFilter {
     
     if (numTokens >= lowEnd && numTokens <= highEnd) {
     
-      System.out.println(termAtt.toString() + " pos=" + posIncrAtt.getPositionIncrement() + " type=" + typeAtt.type());
+      //System.out.println(termAtt.toString() + " pos=" + posIncrAtt.getPositionIncrement() + " type=" + typeAtt.type());
       if (incomingType == null) { // null means process all tokens
         resetAttributes();
       }
       else if (typeAtt.type().equals(incomingType)) {
         resetAttributes();
       }
-      System.out.println("   " + termAtt.toString() + " pos=" + posIncrAtt.getPositionIncrement() + " type=" + typeAtt.type());
+      //System.out.println("   " + termAtt.toString() + " pos=" + posIncrAtt.getPositionIncrement() + " type=" + typeAtt.type());
 
     }
     

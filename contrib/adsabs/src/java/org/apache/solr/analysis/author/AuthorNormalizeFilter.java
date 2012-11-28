@@ -20,7 +20,6 @@ public final class AuthorNormalizeFilter extends TokenFilter {
 
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
-  private final PayloadAttribute payloadAtt = addAttribute(PayloadAttribute.class);
   //private boolean setIntoPayload = true;
 
   /**
