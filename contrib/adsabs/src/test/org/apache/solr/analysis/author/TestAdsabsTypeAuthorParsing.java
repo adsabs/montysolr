@@ -103,6 +103,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "ADAMCHUK, K => ADAMČUK, K",
           "ADAMCUK, K => ADAMČUK, K",
           "ADAMCZUK, K => ADAMČUK, K",
+          //"ADAMCHUK, K K=> ADAMČUK, K K",  => deactivated for test purposes, see <surname>, <1> <2> use case
+          //"ADAMCUK, K K=> ADAMČUK, K K", => deactivated for test purposes, see <surname>, <1> <2> use case
+          "ADAMCUK, A B=> ADAMČUK, A B",
+          "ADAMCHUK, A B=> ADAMČUK, A B",
+          "ADAMCZUK, A B=> ADAMČUK, A B",
           "ADAMCHUK, KOLJA => ADAMČUK, KOLJA",
           "ADAMCUK, KOLJA => ADAMČUK, KOLJA",
           "ADAMCZUK, KOLJA => ADAMČUK, KOLJA",
@@ -622,7 +627,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * 
      */
 
-    expected0 = "author:adamčuk, k karel author:adamčuk, k karel * " +
+    expected = "author:adamčuk, k karel author:adamčuk, k karel * " +
                 "author:adamčuk, k k author:adamčuk, k k * " +
                 "author:adamčuk, k " + 
                 "author:adamčuk, " +
@@ -651,7 +656,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     //setDebug(true);
     testAuthorQuery(
-        "\"adamčuk, k karel\"", expected0 ,
+        "\"adamčuk, k karel\"", expected ,
                                     "//*[@numFound='']",
         "\"adamcuk, k karel\"", "author:adamcuk, k karel author:adamcuk, k karel * " +
                                 "author:/adamcuk,k\\w* karel/ author:/adamcuk,k\\w* karel .*/ " +
@@ -698,6 +703,74 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                 "//*[@numFound='']"
         
     );
+    
+    
+    
+    /**
+     * <surname>, <1> <2>
+     * 
+     * Speciality of this patter is that we want to search for regular
+     * expression
+     * 
+     *    <surname>, <1>\w* <2>
+     * 
+     * The following expansion will not find the synonyms and will not find 
+     * the upgrade. I am listing this example here specifically to show what
+     * happens when the synonym list is missing some values (in real life,
+     * the correct mapping will be generated IFF we encounter one of these
+     * during indexing:
+     *   
+     *    adamčuk, k karel
+     *    adamčuk, kxxxx karel
+     * 
+     * 
+     */
+
+    expected = "author:adamčuk, a b author:adamčuk, a b* " +
+    		        "author:/adamčuk,a\\w* b/ author:/adamčuk,a\\w* b .*/ " +
+    		        "author:adamčuk, a " +
+    		        "author:adamčuk, " +
+    		        "author:adamchuk, a b author:adamchuk, a b* " +
+    		        "author:/adamchuk,a\\w* b/ author:/adamchuk,a\\w* b .*/ " +
+    		        "author:adamchuk, a " +
+    		        "author:adamchuk, " +
+    		        "author:adamcuk, a b author:adamcuk, a b* " +
+    		        "author:/adamcuk,a\\w* b/ author:/adamcuk,a\\w* b .*/ " +
+    		        "author:adamcuk, a " +
+    		        "author:adamcuk,"
+                ;
+    
+    
+    testAuthorQuery(
+        "\"adamčuk, a b\"", expected ,
+                            "//*[@numFound='']",
+        "\"adamcuk, a b\"", expected ,
+                            "//*[@numFound='']",
+        "\"adamchuk, a b\"", expected ,
+                            "//*[@numFound='']",
+        "\"adamczuk, a b\"", expected ,
+                             "//*[@numFound='']",
+        "\"adamšuk, k k\"", "author:adamšuk, k k author:adamšuk, k k* " +
+        		                "author:/adamšuk,k\\w* k/ author:/adamšuk,k\\w* k .*/ " +
+        		                "author:adamšuk, k " +
+        		                "author:adamšuk, " +
+        		                "author:adamshuk, k k author:adamshuk, k k* " +
+        		                "author:/adamshuk,k\\w* k/ author:/adamshuk,k\\w* k .*/ " +
+        		                "author:adamshuk, k " +
+        		                "author:adamshuk, " +
+        		                "author:adamsuk, k k author:adamsuk, k k* " +
+        		                "author:/adamsuk,k\\w* k/ author:/adamsuk,k\\w* k .*/ " +
+        		                "author:adamsuk, k " +
+        		                "author:adamsuk,",
+                            "//*[@numFound='']",
+        "\"adamguk, k k\"", "author:adamguk, k k author:adamguk, k k* " +
+        		                "author:/adamguk,k\\w* k/ author:/adamguk,k\\w* k .*/ " +
+        		                "author:adamguk, k " +
+        		                "author:adamguk," ,
+                            "//*[@numFound='']"
+        
+    );
+    
     
     /**
      * <surname>, <part*>
