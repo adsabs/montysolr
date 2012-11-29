@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
@@ -150,6 +151,25 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
               parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + " *", fqn.getBegin(), fqn.getEnd()));
             }
           }
+          
+          // special regular expression cases, only happens if the new name and the original 
+          // have initial somewhere in the middle (and both at the same position)
+          if (regexIsPossible(nameParts, origNameInfo.parts)) {
+            StringBuffer nn = new StringBuffer();
+            nn.append(nameParts[0]);
+            for (int i=1;i<nameParts.length-1;i++) {
+              if (nameParts[i].length()==1 && origNameInfo.parts[i].length()==1) {
+                nn.append(nameParts[i] + "\\w* ");
+              }
+              else {
+                nn.append(nameParts[i] + " ");
+              }
+            }
+            nn.append(nameParts[nameParts.length-1]);
+            parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString(), fqn.getBegin(), fqn.getEnd()));
+            parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString() + " .*", fqn.getBegin(), fqn.getEnd()));
+          }
+          
         }
         
         return;
@@ -157,6 +177,15 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     }
     
     if (!node.isLeaf()) expandNodes(node, origNameInfo);
+  }
+  
+  private boolean regexIsPossible(String[] orig, String[] newName) {
+    for (int i=1;i<orig.length-1 && i<newName.length;i++) {
+      if (orig[i].length()==1 && newName[i].length()==1 && i+1<newName.length) {
+        return true;
+      }
+    }
+    return false;
   }
   
   class NameInfo {
