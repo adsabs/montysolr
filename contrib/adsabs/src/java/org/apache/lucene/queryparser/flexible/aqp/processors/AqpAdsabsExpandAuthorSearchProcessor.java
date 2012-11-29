@@ -155,7 +155,8 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
         return;
       }
     }
-    expandNodes(node, origNameInfo);
+    
+    if (!node.isLeaf()) expandNodes(node, origNameInfo);
   }
   
   class NameInfo {
