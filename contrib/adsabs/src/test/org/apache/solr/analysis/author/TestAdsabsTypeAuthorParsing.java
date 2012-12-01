@@ -46,6 +46,8 @@ import org.adsabs.solr.AdsConfig.F;
  * http://labs.adsabs.harvard.edu/trac/ads-invenio/ticket/131
  * http://labs.adsabs.harvard.edu/trac/ads-invenio/ticket/156
  * 
+ * I would like to see a token processing which is crazier...
+ * 
  */
 public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
@@ -288,10 +290,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 		   <surname>, <1> <2>
 		   <surname>, <2>
        <surname>, <2name>
-       <surname>, <2name> <3>
-       <surname>, <2name> <3name>
-       <surname>, <2> <3name>
-       <surname>, <2> <3>
+       <surname>, <2name> <1>
+       <surname>, <2name> <1name>
+       <surname>, <2> <1name>
+       <surname>, <2> <1>
        
        <surname>, <1n*>
        <surname>, <1*>
@@ -772,6 +774,294 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         
     );
     
+    
+    /**
+     * <surname>, <2>
+     * 
+     * No expansion, because of the gap. Only transliteration
+     * 
+     */
+    
+    
+    testAuthorQuery(
+            "\"adamčuk, k\"", "author:adamčuk, k author:adamčuk, k* author:adamčuk, " +
+                               "author:adamchuk, k author:adamchuk, k* author:adamchuk, " +
+                               "author:adamcuk, k author:adamcuk, k* author:adamcuk,", 
+                               "//*[@numFound='']",
+            "\"adamcuk, k\"", "author:adamcuk, k author:adamcuk, k* author:adamcuk,", 
+                               "//*[@numFound='']",
+            "\"adamchuk, k\"", "author:adamchuk, k author:adamchuk, k* author:adamchuk,", 
+                                "//*[@numFound='']",
+            "\"adamczuk, k\"", "author:adamczuk, k author:adamczuk, k* author:adamczuk,", 
+                                "//*[@numFound='']",
+            "\"adamšuk, k\"", "author:adamšuk, k author:adamšuk, k* author:adamšuk, " +
+                               "author:adamsuk, k author:adamsuk, k* author:adamsuk, " +
+                               "author:adamshuk, k author:adamshuk, k* author:adamshuk,", 
+                               "//*[@numFound='']",
+            "\"adamguk, k\"", "author:adamguk, k author:adamguk, k* author:adamguk,", 
+                               "//*[@numFound='']"
+    );
+    
+    
+    /**
+     * <surname>, <2name>
+     * 
+     * No expansion, because of the gap. Only transliteration
+     * 
+     */
+    
+    
+    testAuthorQuery(
+            "\"adamčuk, karel\"", "author:adamčuk, karel author:adamčuk, karel * " +
+            		                  "author:adamčuk, k author:adamčuk, k * author:adamčuk, " +
+            		                  "author:adamcuk, karel author:adamcuk, karel * " +
+            		                  "author:adamcuk, k author:adamcuk, k * author:adamcuk, " +
+            		                  "author:adamchuk, karel author:adamchuk, karel * " +
+            		                  "author:adamchuk, k author:adamchuk, k * author:adamchuk,", 
+                               "//*[@numFound='']",
+            "\"adamcuk, karel\"", "author:adamcuk, karel author:adamcuk, karel * " +
+                                  "author:adamcuk, k author:adamcuk, k * author:adamcuk,",
+                               "//*[@numFound='']",
+            "\"adamchuk, karel\"", "author:adamchuk, karel author:adamchuk, karel * " +
+                                   "author:adamchuk, k author:adamchuk, k * author:adamchuk,", 
+                                "//*[@numFound='']",
+            "\"adamczuk, karel\"", "author:adamczuk, karel author:adamczuk, karel * " +
+                                   "author:adamczuk, k author:adamczuk, k * author:adamczuk,", 
+                                "//*[@numFound='']",
+            "\"adamšuk, karel\"", "author:adamšuk, karel author:adamšuk, karel * " +
+            		                  "author:adamšuk, k author:adamšuk, k * author:adamšuk, " +
+            		                  "author:adamshuk, karel author:adamshuk, karel * " +
+            		                  "author:adamshuk, k author:adamshuk, k * author:adamshuk, " +
+            		                  "author:adamsuk, karel author:adamsuk, karel * " +
+            		                  "author:adamsuk, k author:adamsuk, k * author:adamsuk,", 
+                               "//*[@numFound='']",
+            "\"adamguk, karel\"", "author:adamguk, karel author:adamguk, karel * " +
+                                  "author:adamguk, k author:adamguk, k * author:adamguk,", 
+                               "//*[@numFound='']"
+    );
+    
+    
+    /**
+     * <surname>, <2name> <1>
+     * 
+     * The order is not correct, therefore no expansion. Only transliteration
+     * 
+     */
+    
+    
+    testAuthorQuery(
+            "\"adamčuk, karel m\"", "author:adamčuk, karel m author:adamčuk, karel m* " +
+                                		"author:adamčuk, k m author:adamčuk, k m* author:adamčuk, karel " +
+                                		"author:adamčuk, k author:adamčuk, author:adamchuk, karel m " +
+                                		"author:adamchuk, karel m* author:adamchuk, k m " +
+                                		"author:adamchuk, k m* author:adamchuk, karel author:adamchuk, k " +
+                                		"author:adamchuk, author:adamcuk, karel m author:adamcuk, karel m* " +
+                                		"author:adamcuk, k m author:adamcuk, k m* author:adamcuk, karel " +
+                                		"author:adamcuk, k author:adamcuk,", 
+                               "//*[@numFound='']",
+            "\"adamcuk, karel m\"", "author:adamcuk, karel m author:adamcuk, karel m* author:adamcuk, k m " +
+            		                    "author:adamcuk, k m* author:adamcuk, karel author:adamcuk, k author:adamcuk,",
+                               "//*[@numFound='']",
+            "\"adamchuk, karel m\"", 
+                                    "author:adamchuk, karel m author:adamchuk, karel m* author:adamchuk, k m " +
+                                    "author:adamchuk, k m* author:adamchuk, karel author:adamchuk, k author:adamchuk,", 
+                                "//*[@numFound='']",
+            "\"adamczuk, karel m\"", 
+                                    "author:adamczuk, karel m author:adamczuk, karel m* author:adamczuk, k m " +
+                                    "author:adamczuk, k m* author:adamczuk, karel author:adamczuk, k author:adamczuk,", 
+                                "//*[@numFound='']",
+            "\"adamšuk, karel m\"", "author:adamšuk, karel m author:adamšuk, karel m* author:adamšuk, k m " +
+            		                    "author:adamšuk, k m* author:adamšuk, karel author:adamšuk, k author:adamšuk, " +
+            		                    "author:adamsuk, karel m author:adamsuk, karel m* author:adamsuk, k m " +
+            		                    "author:adamsuk, k m* author:adamsuk, karel author:adamsuk, k author:adamsuk, " +
+            		                    "author:adamshuk, karel m author:adamshuk, karel m* author:adamshuk, k m " +
+            		                    "author:adamshuk, k m* author:adamshuk, karel author:adamshuk, k " +
+            		                    "author:adamshuk,", 
+                               "//*[@numFound='']",
+            "\"adamguk, karel m\"", "author:adamguk, karel m author:adamguk, karel m* author:adamguk, k m " +
+            		                    "author:adamguk, k m* author:adamguk, karel author:adamguk, k author:adamguk,", 
+                               "//*[@numFound='']"
+    );
+    
+    
+    /**
+     * <surname>, <2name> <1name>
+     * 
+     * The order is not correct. Only transliteration
+     * 
+     */
+    
+    
+    testAuthorQuery(
+            "\"adamčuk, karel molja\"", "author:adamčuk, karel molja author:adamčuk, karel molja * " +
+            		                        "author:adamčuk, k molja author:adamčuk, k molja * author:adamčuk, karel m " +
+            		                        "author:adamčuk, karel m * author:adamčuk, k m author:adamčuk, k m * " +
+            		                        "author:adamčuk, karel author:adamčuk, k author:adamčuk, " +
+            		                        "author:adamcuk, karel molja author:adamcuk, karel molja * " +
+            		                        "author:adamcuk, k molja author:adamcuk, k molja * author:adamcuk, karel m " +
+            		                        "author:adamcuk, karel m * author:adamcuk, k m author:adamcuk, k m * " +
+            		                        "author:adamcuk, karel author:adamcuk, k author:adamcuk, " +
+            		                        "author:adamchuk, karel molja author:adamchuk, karel molja * " +
+            		                        "author:adamchuk, k molja author:adamchuk, k molja * " +
+            		                        "author:adamchuk, karel m author:adamchuk, karel m * " +
+            		                        "author:adamchuk, k m author:adamchuk, k m * " +
+            		                        "author:adamchuk, karel author:adamchuk, k author:adamchuk,", 
+                               "//*[@numFound='']",
+            "\"adamcuk, karel molja\"", "author:adamcuk, karel molja author:adamcuk, karel molja * " +
+            		                        "author:adamcuk, k molja author:adamcuk, k molja * " +
+            		                        "author:adamcuk, karel m author:adamcuk, karel m * " +
+            		                        "author:adamcuk, k m author:adamcuk, k m * author:adamcuk, karel " +
+            		                        "author:adamcuk, k author:adamcuk,",
+                               "//*[@numFound='']",
+            "\"adamchuk, karel molja\"", "author:adamchuk, karel molja author:adamchuk, karel molja * " +
+            		                         "author:adamchuk, k molja author:adamchuk, k molja * " +
+            		                         "author:adamchuk, karel m author:adamchuk, karel m * " +
+            		                         "author:adamchuk, k m author:adamchuk, k m * author:adamchuk, karel " +
+            		                         "author:adamchuk, k author:adamchuk,", 
+                                "//*[@numFound='']",
+            "\"adamczuk, karel molja\"", "author:adamczuk, karel molja author:adamczuk, karel molja * " +
+            		                         "author:adamczuk, k molja author:adamczuk, k molja * " +
+            		                         "author:adamczuk, karel m author:adamczuk, karel m * " +
+            		                         "author:adamczuk, k m author:adamczuk, k m * " +
+            		                         "author:adamczuk, karel author:adamczuk, k author:adamczuk,", 
+                                "//*[@numFound='']",
+            "\"adamšuk, karel molja\"", "author:adamšuk, karel molja author:adamšuk, karel molja * " +
+            		                        "author:adamšuk, k molja author:adamšuk, k molja * " +
+            		                        "author:adamšuk, karel m author:adamšuk, karel m * " +
+            		                        "author:adamšuk, k m author:adamšuk, k m * " +
+            		                        "author:adamšuk, karel author:adamšuk, k author:adamšuk, " +
+            		                        "author:adamsuk, karel molja author:adamsuk, karel molja * " +
+            		                        "author:adamsuk, k molja author:adamsuk, k molja * " +
+            		                        "author:adamsuk, karel m author:adamsuk, karel m * " +
+            		                        "author:adamsuk, k m author:adamsuk, k m * author:adamsuk, karel " +
+            		                        "author:adamsuk, k author:adamsuk, author:adamshuk, karel molja " +
+            		                        "author:adamshuk, karel molja * author:adamshuk, k molja " +
+            		                        "author:adamshuk, k molja * author:adamshuk, karel m " +
+            		                        "author:adamshuk, karel m * author:adamshuk, k m " +
+            		                        "author:adamshuk, k m * author:adamshuk, karel " +
+            		                        "author:adamshuk, k author:adamshuk,", 
+                               "//*[@numFound='']",
+            "\"adamguk, karel molja\"", "author:adamguk, karel molja author:adamguk, karel molja * " +
+            		                        "author:adamguk, k molja author:adamguk, k molja * " +
+            		                        "author:adamguk, karel m author:adamguk, karel m * " +
+            		                        "author:adamguk, k m author:adamguk, k m * " +
+            		                        "author:adamguk, karel author:adamguk, k " +
+            		                        "author:adamguk,", 
+                               "//*[@numFound='']"
+    );
+    
+    
+    /**
+     * <surname>, <2> <1>
+     * 
+     * The order is not correct, therefore no expansion. Only transliteration
+     * 
+     */
+    
+    
+    testAuthorQuery(
+            "\"adamčuk, k m\"", "author:adamčuk, k m author:adamčuk, k m* " +
+            		                "author:/adamčuk, k\\w* m/ author:/adamčuk, k\\w* m .*/ " +
+            		                "author:adamčuk, k author:adamčuk, author:adamchuk, k m " +
+            		                "author:adamchuk, k m* author:/adamchuk, k\\w* m/ " +
+            		                "author:/adamchuk, k\\w* m .*/ author:adamchuk, k " +
+            		                "author:adamchuk, author:adamcuk, k m author:adamcuk, k m* " +
+            		                "author:/adamcuk, k\\w* m/ author:/adamcuk, k\\w* m .*/ " +
+            		                "author:adamcuk, k author:adamcuk,", 
+                               "//*[@numFound='']",
+            "\"adamcuk, k m\"", "author:adamcuk, k m author:adamcuk, k m* " +
+            		                "author:/adamcuk, k\\w* m/ author:/adamcuk, k\\w* m .*/ " +
+                                "author:adamcuk, k author:adamcuk,", 
+                               "//*[@numFound='']",
+            "\"adamchuk, k m\"", "author:adamchuk, k m author:adamchuk, k m* " +
+            		                 "author:/adamchuk, k\\w* m/ author:/adamchuk, k\\w* m .*/ " +
+                                 "author:adamchuk, k author:adamchuk,", 
+                                "//*[@numFound='']",
+            "\"adamczuk, k m\"", "author:adamczuk, k m author:adamczuk, k m* " +
+            		                 "author:/adamczuk, k\\w* m/ author:/adamczuk, k\\w* m .*/ " +
+                                 "author:adamczuk, k author:adamczuk,", 
+                                 "//*[@numFound='']",
+            "\"adamšuk, k m\"", "author:adamšuk, k m author:adamšuk, k m* " +
+            		                "author:/adamšuk, k\\w* m/ author:/adamšuk, k\\w* m .*/ " +
+            		                "author:adamšuk, k author:adamšuk, " +
+            		                "author:adamshuk, k m author:adamshuk, k m* " +
+            		                "author:/adamshuk, k\\w* m/ author:/adamshuk, k\\w* m .*/ " +
+            		                "author:adamshuk, k author:adamshuk, " +
+            		                "author:adamsuk, k m author:adamsuk, k m* " +
+            		                "author:/adamsuk, k\\w* m/ author:/adamsuk, k\\w* m .*/ " +
+            		                "author:adamsuk, k author:adamsuk,", 
+                               "//*[@numFound='']",
+            "\"adamguk, k m\"", "author:adamguk, k m author:adamguk, k m* " +
+                                "author:/adamguk, k\\w* m/ author:/adamguk, k\\w* m .*/ " +
+                                "author:adamguk, k author:adamguk,", 
+                               "//*[@numFound='']"
+    );
+    
+    
+    /**
+     * <surname>, <2> <1name>
+     * 
+     * The order is not correct, therefore no expansion. Only transliteration
+     * 
+     */
+    
+    
+    testAuthorQuery(
+            "\"adamčuk, k molja\"", "author:adamčuk, k molja author:adamčuk, k molja * " +
+                                		"author:/adamčuk, k\\w* molja/ author:/adamčuk, k\\w* molja .*/ " +
+                                		"author:adamčuk, k m author:adamčuk, k m * " +
+                                		"author:/adamčuk, k\\w* m/ author:/adamčuk, k\\w* m .*/ " +
+                                		"author:adamčuk, k author:adamčuk, " +
+                                		"author:adamcuk, k molja author:adamcuk, k molja * " +
+                                		"author:/adamcuk, k\\w* molja/ author:/adamcuk, k\\w* molja .*/ " +
+                                		"author:adamcuk, k m author:adamcuk, k m * " +
+                                		"author:/adamcuk, k\\w* m/ author:/adamcuk, k\\w* m .*/ " +
+                                		"author:adamcuk, k author:adamcuk, " +
+                                		"author:adamchuk, k molja author:adamchuk, k molja * " +
+                                		"author:/adamchuk, k\\w* molja/ author:/adamchuk, k\\w* molja .*/ " +
+                                		"author:adamchuk, k m author:adamchuk, k m * " +
+                                		"author:/adamchuk, k\\w* m/ author:/adamchuk, k\\w* m .*/ " +
+                                		"author:adamchuk, k author:adamchuk,", 
+                               "//*[@numFound='']",
+            "\"adamcuk, k molja\"", 
+                                    "author:adamcuk, k molja author:adamcuk, k molja * " +
+                                    "author:/adamcuk, k\\w* molja/ author:/adamcuk, k\\w* molja .*/ " +
+                                    "author:adamcuk, k m author:adamcuk, k m * " +
+                                    "author:/adamcuk, k\\w* m/ author:/adamcuk, k\\w* m .*/ " +
+                                    "author:adamcuk, k author:adamcuk,", 
+                               "//*[@numFound='']",
+            "\"adamchuk, k molja\"", "author:adamchuk, k molja author:adamchuk, k molja * " +
+                                    "author:/adamchuk, k\\w* molja/ author:/adamchuk, k\\w* molja .*/ " +
+                                    "author:adamchuk, k m author:adamchuk, k m * " +
+                                    "author:/adamchuk, k\\w* m/ author:/adamchuk, k\\w* m .*/ " +
+                                    "author:adamchuk, k author:adamchuk,", 
+                                "//*[@numFound='']",
+            "\"adamczuk, k molja\"", "author:adamczuk, k molja author:adamczuk, k molja * " +
+                                    "author:/adamczuk, k\\w* molja/ author:/adamczuk, k\\w* molja .*/ " +
+                                    "author:adamczuk, k m author:adamczuk, k m * " +
+                                    "author:/adamczuk, k\\w* m/ author:/adamczuk, k\\w* m .*/ " +
+                                    "author:adamczuk, k author:adamczuk,", 
+                                 "//*[@numFound='']",
+            "\"adamšuk, k molja\"", "author:adamšuk, k molja author:adamšuk, k molja * " +
+                                		"author:/adamšuk, k\\w* molja/ author:/adamšuk, k\\w* molja .*/ " +
+                                		"author:adamšuk, k m author:adamšuk, k m * author:/adamšuk, k\\w* m/ " +
+                                		"author:/adamšuk, k\\w* m .*/ author:adamšuk, k author:adamšuk, " +
+                                		"author:adamsuk, k molja author:adamsuk, k molja * " +
+                                		"author:/adamsuk, k\\w* molja/ author:/adamsuk, k\\w* molja .*/ " +
+                                		"author:adamsuk, k m author:adamsuk, k m * author:/adamsuk, k\\w* m/ " +
+                                		"author:/adamsuk, k\\w* m .*/ author:adamsuk, k author:adamsuk, " +
+                                		"author:adamshuk, k molja author:adamshuk, k molja * " +
+                                		"author:/adamshuk, k\\w* molja/ author:/adamshuk, k\\w* molja .*/ " +
+                                		"author:adamshuk, k m author:adamshuk, k m * author:/adamshuk, k\\w* m/ " +
+                                		"author:/adamshuk, k\\w* m .*/ author:adamshuk, k author:adamshuk,", 
+                               "//*[@numFound='']",
+            "\"adamguk, k molja\"", "author:adamguk, k molja author:adamguk, k molja * " +
+                                		"author:/adamguk, k\\w* molja/ author:/adamguk, k\\w* molja .*/ " +
+                                		"author:adamguk, k m author:adamguk, k m * " +
+                                		"author:/adamguk, k\\w* m/ author:/adamguk, k\\w* m .*/ " +
+                                		"author:adamguk, k author:adamguk,", 
+                               "//*[@numFound='']"
+    );
     
     /**
      * <surname>, <1*>
