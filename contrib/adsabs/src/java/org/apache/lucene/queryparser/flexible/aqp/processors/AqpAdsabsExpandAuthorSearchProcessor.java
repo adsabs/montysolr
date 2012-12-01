@@ -1,9 +1,14 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -15,6 +20,8 @@ import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TextableQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
@@ -61,8 +68,8 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
       String normalized = AuthorUtils.normalizeAuthor(origValue);
       
       NameInfo nameInfo = new NameInfo(normalized);
-      
-      return expandNodes(node, nameInfo);
+      int[] level = new int[]{0}; //ugly, ugly
+      return expandNodes(node, nameInfo, level);
     }
     return node;
   }
@@ -73,12 +80,14 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     return children;
   }
   
-  private QueryNode expandNodes(QueryNode node, NameInfo origNameInfo) {
+  private QueryNode expandNodes(QueryNode node, NameInfo origNameInfo, int[] level) throws QueryNodeException {
+    
+    ArrayList<QueryNode> pl = new ArrayList<QueryNode>();
+    
     if (!node.isLeaf()) {
-      ArrayList<QueryNode> pl = new ArrayList<QueryNode>();
       List<QueryNode> children = node.getChildren();
       for (int i=0;i<children.size();i++) {
-        doExpansion(origNameInfo, children.get(i), pl);
+        doExpansion(origNameInfo, children.get(i), pl, level);
         children.addAll(i+1, pl);
         i += pl.size();
         pl.clear();
@@ -87,19 +96,24 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     }
     else {
       // now expand the parent
-      ArrayList<QueryNode> pl = new ArrayList<QueryNode>();
-      doExpansion(origNameInfo, node, pl);
-      if (pl.size()>0) {
-        pl.add(0, node);
-        return new GroupQueryNode(new BooleanQueryNode(pl));
-      }
+      doExpansion(origNameInfo, node, pl, level);
     }
+    
+
+    if (pl.size()>0) {
+      pl.add(0, node);
+      return new GroupQueryNode(new BooleanQueryNode(pl));
+    }
+    
     return node;
   }
   
-  private void doExpansion(NameInfo origNameInfo, QueryNode node, List<QueryNode> parentChildren) {
+  private void doExpansion(NameInfo origNameInfo, QueryNode node, List<QueryNode> parentChildren, int[] level) 
+  throws QueryNodeException {
     
     if (node instanceof TextableQueryNode ) {
+      
+      level[0] = level[0]+1; // marker to tell us not to expand synonyms any more
       
       if (node instanceof FuzzyQueryNode || node instanceof RegexpQueryNode 
           || node instanceof WildcardQueryNode) {
@@ -109,6 +123,21 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
       
       FieldQueryNode fqn = ((FieldQueryNode) node);
       if (fields.containsKey(fqn.getFieldAsString())) {
+        
+        // 'name upgrade'
+        if (level[0] == 1 && !isLongForm(origNameInfo.origName)) {
+          try {
+            String[] synonyms = getSynonyms(origNameInfo.origName);
+            if (synonyms != null) {
+              for (String syn: synonyms) {
+                parentChildren.add(new FieldQueryNode(fqn.getField(), syn, fqn.getBegin(), fqn.getEnd()));
+              }
+            }
+          } catch (IOException e) {
+            throw new QueryNodeException(new MessageImpl("Wonky, wonky, bong, bong - synonym expansion failed..." + e.getMessage()));
+          }
+        }
+        
         String v = fqn.getTextAsString();
         String[] nameParts = fqn.getTextAsString().split(" ");
         
@@ -159,13 +188,13 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
             nn.append(nameParts[0]);
             for (int i=1;i<nameParts.length-1;i++) {
               if (nameParts[i].length()==1 && origNameInfo.parts[i].length()==1) {
-                nn.append(nameParts[i] + "\\w* ");
+                nn.append(" " + nameParts[i] + "\\w*");
               }
               else {
-                nn.append(nameParts[i] + " ");
+                nn.append(" " + nameParts[i]);
               }
             }
-            nn.append(nameParts[nameParts.length-1]);
+            nn.append(" " + nameParts[nameParts.length-1]);
             parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString(), fqn.getBegin(), fqn.getEnd()));
             parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString() + " .*", fqn.getBegin(), fqn.getEnd()));
           }
@@ -176,7 +205,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
       }
     }
     
-    if (!node.isLeaf()) expandNodes(node, origNameInfo);
+    if (!node.isLeaf()) expandNodes(node, origNameInfo, level);
   }
   
   private boolean regexIsPossible(String[] orig, String[] newName) {
@@ -186,6 +215,40 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
       }
     }
     return false;
+  }
+  
+  private String[] getSynonyms(String origInput) throws IOException {
+    Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
+    TokenStream source;
+    try {
+      source = analyzer.tokenStream("author_short_name_rage", new StringReader(origInput));
+      source.reset();
+    } catch (IOException e1) {
+      throw new RuntimeException(e1);
+    }
+    
+    CharTermAttribute termAtt = source.getAttribute(CharTermAttribute.class);
+    
+    List<String> synonyms = new ArrayList<String>();
+    while (source.incrementToken()) {
+      synonyms.add(termAtt.toString());
+    }
+    
+    if (synonyms.size()<2) { // the first one is the original
+      return null;
+    }
+    synonyms.remove(0);
+    return synonyms.toArray(new String[synonyms.size()]);
+  }
+  
+  private boolean isLongForm(String name) {
+    String[] parts = name.split(" ");
+    boolean res = false;
+    for (int i=1;i<parts.length;i++) {
+      if (parts[i].length() > 1)
+        return true;
+    }
+    return res;
   }
   
   class NameInfo {

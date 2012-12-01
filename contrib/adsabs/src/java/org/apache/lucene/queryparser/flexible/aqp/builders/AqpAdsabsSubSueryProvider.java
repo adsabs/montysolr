@@ -127,7 +127,7 @@ public class AqpAdsabsSubSueryProvider implements
 	    		  return q.getQuery();
 		      }
 		    });
-		parsers.put("refersto", new AqpSubqueryParserFull() {
+		parsers.put("citedby", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
@@ -140,7 +140,8 @@ public class AqpAdsabsSubSueryProvider implements
 				
 		      }
 		    }.configure(true));
-		parsers.put("cites", new AqpSubqueryParserFull() { // this function values can be analyzed
+	  // cites === refersto
+		parsers.put("refersto", new AqpSubqueryParserFull() { // this function values can be analyzed
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
@@ -150,6 +151,17 @@ public class AqpAdsabsSubSueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
 			}
 		  }.configure(true));
+		// cites === refersto
+		parsers.put("cites", new AqpSubqueryParserFull() { // this function values can be analyzed
+      public Query parse(FunctionQParser fp) throws ParseException {          
+        Query innerQuery = fp.parseNestedQuery();
+        SolrQueryRequest req = fp.getReq();
+        // TODO: make configurable
+        String refField = "reference";
+        String idField = "bibcode";
+        return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
+      }
+      }.configure(true));
 		parsers.put("citis", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();

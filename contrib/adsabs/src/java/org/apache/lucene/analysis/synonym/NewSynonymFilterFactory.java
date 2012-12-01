@@ -290,7 +290,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
           chars = CharsRef.deepCopyOf(chars);
           final int limit = chars.offset + chars.length;
           for (int i=chars.offset;i<limit;i++) {
-            chars.chars[i] = Character.toLowerCase(chars.chars[i]); // maybe not correct
+            chars.chars[i] = Character.toLowerCase(chars.chars[i]); // maybe not be always correct (?)
           }
           return chars;
         }

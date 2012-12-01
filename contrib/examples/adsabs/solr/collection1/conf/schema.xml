@@ -116,6 +116,33 @@
       </analyzer>
     </fieldType>
     
+    
+    <!--  the following type is not used by any field, but it is used by the query parser to upgrade
+          the short author name "jones, c" into its long form synonym "forman, christine"
+          Believe me, you don't want to read about reasons for doing it this way.
+           -->
+    <fieldType name="author_short_name_rage" class="solr.TextField">
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <!--  we will use the standard synonym file (as used by the author type above)
+              but import it in a special way -->
+        <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
+            synonyms="author_curated.synonyms" 
+            ignoreCase="true" 
+            expand="true" 
+            tokenizerFactory="solr.KeywordTokenizerFactory"
+            builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$SynonymBuilderFactory"
+            sanitizeOutput="true" 
+            inclOrig="true"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+      </analyzer>
+    </fieldType>
+    
+    
+    
+    
     <fieldType name="author_exact" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -540,7 +567,9 @@
    
 
     <field name="_version_" type="long" indexed="true" stored="true"/>
-
+    
+    <!-- field used for very special synonym expansion -->
+    <field name="author_short_name_rage" type="author_short_name_rage" indexed="false" stored="false"/>
    
  </fields>
 
