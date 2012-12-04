@@ -16,9 +16,10 @@ sys.executable=%s
 workdir=%s
 PYTHONHOME=%s
 PYTHONPATH=%s
+PATH=%s
 ###################################################
 
-""" % (sys.executable, os.getcwd(), os.getenv('PYTHONHOME'), '\n    '.join(sys.path)))
+""" % (sys.executable, os.getcwd(), os.getenv('PYTHONHOME'), '\n    '.join(sys.path), os.getenv('PATH')))
 
 import lucene
 import time
