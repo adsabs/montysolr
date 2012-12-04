@@ -33,6 +33,7 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
+import org.adsabs.solr.AdsConfig.F;
 
 import java.lang.reflect.Field; 
 import java.util.Map;
@@ -192,18 +193,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
 		
-		assertQ(req("q", "author:\"Albert, R\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Albert, Reeka\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Barabási, A\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Barabaesi, A\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Barabási, Albert-László\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Barabasi, Albert-Laszlo\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:Sellgren"), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Dwek, E P\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Dwek, E.\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Dwek, Edgar\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Dwek, E. P.\""), "//*[@numFound='1']");
-		assertQ(req("q", "author:\"Rentzsch Holm, Inga\""), "//*[@numFound='1']");
+		
 		
 		assertQ(req("q", "aff:46556"), "//*[@numFound='1']");
 		assertQ(req("q", "aff:\"Notre Dame\""), "//*[@numFound='1']");
@@ -239,11 +229,15 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "database:astronomy"), "//*[@numFound='8']");
 		assertQ(req("q", "database:Astronomy"), "//*[@numFound='8']");
 		assertQ(req("q", "database:ASTRONOMY"), "//*[@numFound='8']");
+		assertQ(req("q", "database:ASTRONOM*"), "//*[@numFound='8']");
+		assertQ(req("q", "database:ASTRONOM?"), "//*[@numFound='8']");
 		assertQ(req("q", "database:astronom*"), "//*[@numFound='8']");
 		assertQ(req("q", "database:astronom?"), "//*[@numFound='8']");
 		
 		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
 		assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='2']");
+		
+		assertQ(req("q", "bibgroup:cf*"), "//*[@numFound='2']");
 		assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='2']");
 		assertQ(req("q", "bibgroup:?FA"), "//*[@numFound='2']");
 		
@@ -279,6 +273,9 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		 * are lowercased)
 		 * 
 		 */
+		
+    //dumpDoc(null, F.ID, "bibcode", "bibstem");
+		
 		//System.out.println(direct.request("/select?q=*:*&fl=bibcode,bibstem,recid,title", null).replace("</", "\n</"));
 		assertQ(req("q", "bibstem:YCAT"), "//*[@numFound='5']");
 		assertQ(req("q", "bibstem:yCat"), "//*[@numFound='5']");
@@ -329,13 +326,14 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		 * char
 		 */
 		
+		//dumpDoc(null, F.ID, "bibcode", "doi");
 		assertQ(req("q", "doi:abcds/esdfs.123045"), "//*[@numFound='1']");
 		assertQ(req("q", "doi:doi\\:abcds/esdfs.123045"), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ.123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:žščřďťň.123456789\""), "//*[@numFound='1']");
-		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
+		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ?123456789\""), "//*[@numFound='2']");
 		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
 		
 		//dumpDoc(null, "recid", "title", "keyword");

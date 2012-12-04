@@ -24,10 +24,6 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TermQuery;
-import org.apache.solr.util.AbstractSolrTestCase.Doc;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 

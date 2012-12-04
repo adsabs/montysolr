@@ -35,8 +35,8 @@ public class TestProcessCuratedAuthorSynonyms {
 	@Test
 	public void testTransformGroup1() {
 		List<String> group = new ArrayList<String>() {{
-			add("Stern, Carolyn");
-			add("Grant, Carolyn");
+			add("STERN, CAROLYN");
+			add("GRANT, CAROLYN");
 		}};
 		HashMap<String,HashSet<String>> transformed = ProcessCuratedAuthorSynonyms.transformGroup(group);
 		HashMap<String,HashSet<String>> expected = new HashMap<String,HashSet<String>>() {{
@@ -53,8 +53,8 @@ public class TestProcessCuratedAuthorSynonyms {
 	@Test
 	public void testTransformGroup2() {
 		List<String> group = new ArrayList<String>() {{
-			add("Müller, William");
-			add("Müller, Bill");
+			add("MÜLLER, WILLIAM");
+			add("MÜLLER, BILL");
 		}};
 		HashMap<String,HashSet<String>> transformed = ProcessCuratedAuthorSynonyms.transformGroup(group);
 		HashMap<String,HashSet<String>> expected = new HashMap<String,HashSet<String>>() {{

@@ -14,18 +14,18 @@ import junit.framework.TestCase;
 public class TestAuthorUtils extends TestCase {
 	
 	public void testNormalizeAuthor() {
-		assertEquals("KURTZ, MICHAEL", AuthorUtils.normalizeAuthor("Kurtz, Michael"));
-		assertEquals("HUCHRA, J", AuthorUtils.normalizeAuthor("Huchra, J."));
-		assertEquals("GOMEZ, HECTOR Q", AuthorUtils.normalizeAuthor(" Gomez,   Hector Q  "));
-		assertEquals("GÓMEZ, HECTOR Q", AuthorUtils.normalizeAuthor("Gómez, Hector Q"));
-		assertEquals("FOO'EYE, BAR", AuthorUtils.normalizeAuthor("Foo'Eye, Bar"));
-		assertEquals("RADIO, F M", AuthorUtils.normalizeAuthor("Radio, F.M."));
+		assertEquals("Kurtz, Michael", AuthorUtils.normalizeAuthor("Kurtz,   Michael"));
+		assertEquals("Huchra, J", AuthorUtils.normalizeAuthor("Huchra,    J."));
+		assertEquals("Gomez, Hector Q", AuthorUtils.normalizeAuthor(" Gomez,   Hector Q  "));
+		assertEquals("Gómez, Hector Q", AuthorUtils.normalizeAuthor("Gómez, Hector Q"));
+		assertEquals("Foo'Eye, Bar", AuthorUtils.normalizeAuthor("Foo'Eye, Bar"));
+		assertEquals("Radio, F M", AuthorUtils.normalizeAuthor("Radio, F.M."));
 	}
 
 	public void testParseAuthor() throws Exception {
 		HashMap<String,String> expected = new HashMap<String,String>();
-		expected.put("last", "HOOVER");
-		expected.put("first", "HERBERT");
+		expected.put("last", "Hoover");
+		expected.put("first", "Herbert");
 		expected.put("middle", "C");
 		assertEquals(expected, AuthorUtils.parseAuthor("Hoover, Herbert C."));
 	}

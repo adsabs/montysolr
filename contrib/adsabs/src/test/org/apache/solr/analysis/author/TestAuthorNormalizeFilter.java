@@ -15,20 +15,20 @@ public class TestAuthorNormalizeFilter extends BaseTokenStreamTestCase {
 		  	Tokenizer tokenizer = new KeywordTokenizer(reader);
 		    AuthorNormalizeFilterFactory factory = new AuthorNormalizeFilterFactory();
 		    TokenStream stream = factory.create(tokenizer);
-		    assertTokenStreamContents(stream, new String[] { "GÓMEZ, HECTOR Q" });
+		    assertTokenStreamContents(stream, new String[] { "Gómez, Hector Q" });
 	  }
 	  public void testWhitespace() throws Exception {
 		  	Reader reader = new StringReader("  Gómez,\n Hector    Q ");
 		  	Tokenizer tokenizer = new KeywordTokenizer(reader);
 		    AuthorNormalizeFilterFactory factory = new AuthorNormalizeFilterFactory();
 		    TokenStream stream = factory.create(tokenizer);
-		    assertTokenStreamContents(stream, new String[] { "GÓMEZ, HECTOR Q" });
+		    assertTokenStreamContents(stream, new String[] { "Gómez, Hector Q" });
 	  }
 	  public void testPuncuation() throws Exception {
 		  	Reader reader = new StringReader("%$Gómez_Foo, He-ctor;  29Q.");
 		  	Tokenizer tokenizer = new KeywordTokenizer(reader);
 		    AuthorNormalizeFilterFactory factory = new AuthorNormalizeFilterFactory();
 		    TokenStream stream = factory.create(tokenizer);
-		    assertTokenStreamContents(stream, new String[] { "GÓMEZ_FOO, HE-CTOR 29Q" });
+		    assertTokenStreamContents(stream, new String[] { "Gómez_Foo, He-ctor 29Q" });
 	  }
 }

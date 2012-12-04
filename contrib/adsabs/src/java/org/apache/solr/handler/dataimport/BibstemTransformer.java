@@ -23,7 +23,7 @@ public class BibstemTransformer extends Transformer {
   public Object transformRow(Map<String, Object> row, Context context) {
     String bibcode = (String) row.get("bibcode");
     
-    if (bibcode == null || bibcode.length() != 13) return row;
+    if (bibcode == null || bibcode.length() != 19) return row;
     
     String[] bibstems = new String[2];
     bibstems[0] = bibcode.substring(4,9).replace(".", "");

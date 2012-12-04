@@ -20,6 +20,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryN
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCarefulAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExpandAuthorSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
@@ -117,17 +118,17 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY) == true) {
 			//add(new AqpAnalysisQueryNodeProcessor());
 		}
-		else {
-			add(new LowercaseExpandedTermsQueryNodeProcessor());
-		}
+
 		
 		add(new TermRangeQueryNodeProcessor());
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
-		add(new AqpAdsabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
+		add(new AqpAdsabsSynonymNodeProcessor()); //XXX: to remove? -- simply wraps into non-analyzed node 
 		
 		
 		add(new AqpAdsabsAuthorPreProcessor()); // must happen before analysis
-		add(new AqpAdsabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
+		add(new AqpAdsabsAnalyzerProcessor()); // the main analysis happens here (but not for wildcard nodes and co)
+		add(new LowercaseExpandedTermsQueryNodeProcessor()); // lowercase ASTRO* -> astro* (we index everything lowercase)
+		add(new AqpAdsabsCarefulAnalyzerProcessor()); //XXX should we remove LowercaseExpandedTermsQueryNodeProcessor? -- massages wildcard, regex, fuzzy fields 
 		add(new AqpAdsabsExpandAuthorSearchProcessor()); // kurtz, michael +> "kurtz, michael *" and stuff... 
 				
 		

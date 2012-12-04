@@ -367,6 +367,8 @@
     
     <!-- Author parsing section madness (STOP) -->
     
+    
+    
     <fieldType name="doi_string" class="solr.TextField">
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -601,16 +603,6 @@
     </fieldType>
 
 
-    <fieldType name="romca_test" class="solr.TextField" sortMissingLast="true" omitNorms="true">
-        <analyzer type="index">
-            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-            <filter class="solr.SynonymFilterFactory" synonyms="ads_text.synonyms" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        </analyzer>
-        <analyzer type="query">
-            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
-            <filter class="solr.SynonymFilterFactory" synonyms="ads_text.synonyms" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        </analyzer>
-    </fieldType>
 
 
     <fieldType name="bibstem_facet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
@@ -628,14 +620,14 @@
     <fieldType name="bibstem" class="solr.TextField" sortMissingLast="true" omitNorms="true">
         <analyzer type="index">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
             <filter class="solr.ASCIIFoldingFilterFactory"/>
-	        <filter class="solr.LowerCaseFilterFactory"/>
             <filter class="solr.TrimFilterFactory"/>
         </analyzer>
         <analyzer type="query">
             <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
             <filter class="solr.ASCIIFoldingFilterFactory"/>
-	        <filter class="solr.LowerCaseFilterFactory"/>
             <filter class="solr.TrimFilterFactory"/>
             <filter class="solr.PatternReplaceFilterFactory" pattern="^(.*?)(\.*)$" replacement="$1"/> 
 	        <!-- note: do not use BibstemFF in the query phase, we cannot assume the input has bibcode form -->
@@ -659,6 +651,8 @@
    <field name="bibcode" type="normalized_string_ascii" indexed="true" stored="true" required="true" />
    
    <field name="doi" type="doi_string" indexed="true" stored="true" required="false" multiValued="true"/>
+   <field name="doi_wildcard" type="doi_string" indexed="false" stored="false" required="false" multiValued="true"/>
+   
    <field name="identifier" type="identifier_normalized_string_ascii" indexed="true" stored="true" required="false" multiValued="true"/>
    
    <field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}" multiValued="true"/>
@@ -719,7 +713,6 @@
    <!--  this is just a fake field (for the moment) -->
    <field name="all" type="ads_text" indexed="true" stored="false" multiValued="true"/>
 
-  <field name="romca_test" type="romca_test" indexed="true" stored="true" multiValued="true"/>
    
    <!-- MontySolr: needed when InvneioParser is used in maxinv mode
         but now we don't use InvenioParser in that mode

@@ -78,6 +78,26 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		
 	}
 	
+	public SolrQueryRequest req(String... q) {
+	  boolean clean = true;
+	  for (String x: q) {
+	    if (q.equals("debugQuery")) {
+	      clean = false;
+	    }
+	  }
+	  if (clean) {
+	    String[] nq = new String[q.length+2];
+	    int i =0;
+	    for (;i<q.length;i++) {
+	      nq[i] = q[i];
+	    }
+	    nq[i++] = "debugQuery";
+	    nq[i++] = tp.debugParser ? "true" : "false";
+	    q = nq;
+	  }
+    return super.req(q);
+  }
+	
 	public Query assertQueryEquals(SolrQueryRequest req, String expected, Class<?> clazz)
 		throws Exception {
 		
