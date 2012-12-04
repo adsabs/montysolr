@@ -81,27 +81,110 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 		
+		/*
+		 * Unfielded search should be expanded automatically by edismax
+		 * 
+		 * However, edismax is not smart enough to deal properly with boolean clauses
+		 * and default operators, so I have decided to use the edismax on the "value"
+		 * level only. First, we parse the query, then we let the edismax 
+		 * expand it (actually, edismax will use the correct tokenizer chain
+		 * to process authors for example) XXX: verify, it does use all the 
+		 * elements of the processing chain - see forman, c => forman, christine
+		 * For that, the synonym translation must be set up correctly
+		 */
+	  
+	  // first the individual elements explicitly
+	  assertQueryEquals(req("qt", "aqp", "q", "edismax(MÜLLER)", 
+	      "qf", "author^2.3 title abstract^0.4"), 
+        "+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
+        "| (title:müller title:muller title:acr::müller title:acr::muller))", BooleanQuery.class);
+	  assertQueryEquals(req("qt", "aqp", "q", "edismax(\"forman, c\")", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
+	  
+	  // unfielded search should produce the same results
+	  assertQueryEquals(req("qt", "aqp", "q", "MÜLLER", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
+        "| (title:müller title:muller title:acr::müller title:acr::muller))", BooleanQuery.class);
+    assertQueryEquals(req("qt", "aqp", "q", "\"forman, c\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
+	  
+    // now add a normal element
+    assertQueryEquals(req("qt", "aqp", "q", "title:foo or edismax(MÜLLER)", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "title:foo (+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
+        "| (title:müller title:muller title:acr::müller title:acr::muller)))", BooleanQuery.class);
+    assertQueryEquals(req("qt", "aqp", "q", "title:foo or edismax(\"forman, c\")", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "title:foo (+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\"))", BooleanQuery.class);
+    
+    
+    // unfielded search should produce the same results
+    assertQueryEquals(req("qt", "aqp", "q", "title:foo or MÜLLER", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "title:foo (+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
+        "| (title:müller title:muller title:acr::müller title:acr::muller)))", BooleanQuery.class);
+    assertQueryEquals(req("qt", "aqp", "q", "title:foo or \"forman, c\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "title:foo (+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\"))", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "title:foo or MÜLLER", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "title:foo (+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
+        "| (title:müller title:muller title:acr::müller title:acr::muller)))", BooleanQuery.class);
+    assertQueryEquals(req("qt", "aqp", "q", "title:foo or \"forman, c\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "title:foo (+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\"))", BooleanQuery.class);
+    
+    /*
+     * It is different if Aqp handles the boolean operations or if 
+     * edismax() does it. 
+     * 
+     * Aqp has more control, see: https://issues.apache.org/jira/browse/SOLR-4141
+     */
+    
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax 
+				"+((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))", BooleanQuery.class);
 		
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)"), 
-				"+((all:dog) (all:cat))", BooleanQuery.class);
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat)"), 
-				"+(+(all:dog) +(all:cat))", BooleanQuery.class);
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(frank bank)"), 
-				"+(((all:frank) (all:bank))~2)", BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"),          //aqp
+        "(+(abstract:dog^0.5 | title:dog)) (+(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
 		
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR bat"), 
-				"(+((all:dog) (all:cat))) all:bat", BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat)", "qf", "title^1 abstract^0.5"), //edismax
+				"+(+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
 		
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat) AND bat"), 
-				"+(+(+(all:dog) +(all:cat))) +all:bat", BooleanQuery.class);
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(frank bank) bat"), 
-				"+(+(((all:frank) (all:bank))~2)) +all:bat", BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "dog AND cat", "qf", "title^1 abstract^0.5"), //aqp
+        "+(+(abstract:dog^0.5 | title:dog)) +(+(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
 		
-		//  {!raw f=myfield}Foo Bar creates TermQuery(Term("myfield","Foo Bar"))
-		assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=myfield}Foo Bar)"), "myfield:Foo Bar", TermQuery.class);
-		assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=x}\"Foo Bar\")"), "x:\"Foo Bar\"", TermQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax
+				"+((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))", BooleanQuery.class);
 		
-		assertQueryParseException(req("qt", "aqp", "f", "myfield", "q", "raw(Foo Bar)"));
+		assertQueryEquals(req("qt", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"), //aqp
+        "(+(abstract:dog^0.5 | title:dog)) (+(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+		
+    assertQueryEquals(req("qt", "aqp", "q", "edismax(dog cat)", "qf", "title^1 abstract^0.5"), //edismax (thinks it is a phrase?)
+        "+(((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))~2)", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
+        "+(+(abstract:dog^0.5 | title:dog)) +(+(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+		
+		
+    /*
+     * raw() function operator
+     */
+		
+    //  {!raw f=myfield}Foo Bar creates TermQuery(Term("myfield","Foo Bar"))
+    assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=myfield}Foo Bar)"), "myfield:Foo Bar", TermQuery.class);
+    assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=x}\"Foo Bar\")"), "x:\"Foo Bar\"", TermQuery.class);
+    
+    assertQueryParseException(req("qt", "aqp", "f", "myfield", "q", "raw(Foo Bar)"));
+		
 		
 		
 		// if we use the solr analyzer to parse the query, all is configured to remove stopwords 
@@ -114,6 +197,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		
 		
+		/*
+		 * translation of the fields (on the fly)
+		 */
 		
 		
 		// field map is set to translate arxiv->identifier
@@ -122,18 +208,34 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		assertQueryParseException(req("qt", "aqp", "q", "arxivvvv:1002.1524"));
 		
 		
-		// new function queries, the 2nd order citation operators
-		assertQueryEquals(req("qt", "aqp", "q", "x OR z cites(author:muller OR title:body)"), 
-				"+(all:x all:z) +SecondOrderQuery((author:muller author:muller,*) title:body, filter=null, collector=cites[using_cache:reference])", BooleanQuery.class);
+		/**
+		 *  new function queries, the 2nd order citation operators
+		 */
 		
+		// cites()
 		assertQueryEquals(req("qt", "aqp", "q", "cites(author:muller)"), 
-        "SecondOrderQuery(author:muller author:muller,*, filter=null, collector=cites[using_cache:reference])", SecondOrderQuery.class);
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=cites[using_cache:reference])", SecondOrderQuery.class);
 		
-		assertQueryEquals(req("qt", "aqp", "q", "refersto(author:muller)"), 
-				"SecondOrderQuery(author:muller author:muller,*, filter=null, collector=citedby[using:reference<bibcode>])", SecondOrderQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "all:x OR all:z cites(author:muller OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=cites[using_cache:reference])", BooleanQuery.class);
 		
-		assertQueryEquals(req("qt", "aqp", "q", "x OR z refersto(author:muller OR title:body)"), 
-				"+(all:x all:z) +SecondOrderQuery((author:muller author:muller,*) title:body, filter=null, collector=citedby[using:reference<bibcode>])", BooleanQuery.class);
+		
+		
+		// cites() == refersto()
+    assertQueryEquals(req("qt", "aqp", "q", "refersto(author:muller)"), 
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=cites[using_cache:reference])", SecondOrderQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "all:(x OR z) refersto(author:muller OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=cites[using_cache:reference])", BooleanQuery.class);
+    
+    
+    
+		// citedby()
+		assertQueryEquals(req("qt", "aqp", "q", "citedby(author:muller)"), 
+				"SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citedby[using:reference<bibcode>])", SecondOrderQuery.class);
+		
+		assertQueryEquals(req("qt", "aqp", "q", "all:(x OR z) citedby(author:muller OR title:body)"), 
+				"+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citedby[using:reference<bibcode>])", BooleanQuery.class);
 		
 		
 		

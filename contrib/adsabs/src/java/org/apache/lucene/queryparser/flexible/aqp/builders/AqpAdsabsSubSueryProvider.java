@@ -19,6 +19,7 @@ import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
 import org.apache.lucene.search.SecondOrderCollectorCitesRAM;
 import org.apache.lucene.search.SecondOrderQuery;
+import org.apache.lucene.search.TermQuery;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.AqpFunctionQParser;
 import org.apache.solr.search.BoostQParserPlugin;
@@ -36,6 +37,11 @@ import org.apache.solr.search.QParser;
 import org.apache.solr.search.RawQParserPlugin;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
+
+/*
+ * I know this is confusing. This is called in the building phase,
+ * by that time all the parsing was already done.
+ */
 
 public class AqpAdsabsSubSueryProvider implements
 		AqpFunctionQueryBuilderProvider {
@@ -139,7 +145,7 @@ public class AqpAdsabsSubSueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitedBy(idField, refField), false);
 				
 		      }
-		    }.configure(true));
+		    }.configure(true)); // true=canBeAnalyzed
 	  // cites === refersto
 		parsers.put("refersto", new AqpSubqueryParserFull() { // this function values can be analyzed
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
@@ -150,7 +156,7 @@ public class AqpAdsabsSubSueryProvider implements
 				String idField = "bibcode";
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
 			}
-		  }.configure(true));
+		  }.configure(true)); // true=canBeAnalyzed
 		// cites === refersto
 		parsers.put("cites", new AqpSubqueryParserFull() { // this function values can be analyzed
       public Query parse(FunctionQParser fp) throws ParseException {          
@@ -161,7 +167,7 @@ public class AqpAdsabsSubSueryProvider implements
         String idField = "bibcode";
         return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
       }
-      }.configure(true));
+      }.configure(true)); // true=canBeAnalyzed
 		parsers.put("citis", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
@@ -174,7 +180,22 @@ public class AqpAdsabsSubSueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCites(idField, refField), false);
 				
 			}
-		  }.configure(true));
+		  }.configure(true)); // true=canBeAnalyzed
+		parsers.put("aqp", new AqpSubqueryParserFull() {
+      public Query parse(FunctionQParser fp) throws ParseException {          
+        QParser q = fp.subQuery(fp.getString(), "aqp");
+        return q.getQuery();
+      }
+    }.configure(false)); // not analyzed
+		
+		parsers.put("aqp_edismax", new AqpSubqueryParserFull() {
+      public Query parse(FunctionQParser fp) throws ParseException {        
+        QParser ep = fp.subQuery(fp.getString(), ExtendedDismaxQParserPlugin.NAME);
+        Query q = ep.getQuery();
+        QParser ap = fp.subQuery(fp.getString(), "aqp");
+        return reParse(q, ap, TermQuery.class);
+      }
+    }.configure(false)); // not analyzed
 	};
 
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
@@ -193,26 +214,38 @@ public class AqpAdsabsSubSueryProvider implements
 		if (req == null)
 			return null;
 		
-		String qStr = reqAttr.getQueryString();
+		// need better way to get the input string
+		//if (node instanceof AqpANTLRNode)
 		
-		Integer[] start_span = new Integer[]{0,0};
-		Integer[] end_span = new Integer[]{qStr.length(),0};
+		String subQuery = "";
 		
-		
-		swimDeep(node.getChildren().get(0), start_span);
-		swimDeep(node.getChildren().get(node.getChildren().size()-1), end_span);
-		
-		String subQuery = qStr.substring(start_span[1]+1, end_span[1]+1);
-		
+		if (node.isLeaf()) {
+		  subQuery = (String) node.getTag("subQuery");
+		  assert subQuery != null;
+		}
+		else {
+  		String qStr = reqAttr.getQueryString();
+  		
+  		Integer[] start_span = new Integer[]{0,0};
+  		Integer[] end_span = new Integer[]{qStr.length(),0};
+  		
+  		
+  		swimDeep(node.getChildren().get(0), start_span);
+  		swimDeep(node.getChildren().get(node.getChildren().size()-1), end_span);
+  		
+  		subQuery = qStr.substring(start_span[1]+1, end_span[1]+1);
+		}
 		
 		AqpFunctionQParser parser = new AqpFunctionQParser(subQuery, reqAttr.getLocalParams(), 
 				reqAttr.getParams(), req);
 		
-		if (provider instanceof AqpSubqueryParserFull) {
-			AqpFunctionQueryTreeBuilder.removeFuncName(node);
-		}
-		else {
-			AqpFunctionQueryTreeBuilder.simplifyValueNode(node);
+		if (!node.isLeaf()) {
+  		if (provider instanceof AqpSubqueryParserFull) {
+  			AqpFunctionQueryTreeBuilder.removeFuncName(node);
+  		}
+  		else {
+  			AqpFunctionQueryTreeBuilder.simplifyValueNode(node);
+  		}
 		}
 		
 		return new AqpSubQueryTreeBuilder(provider, parser);

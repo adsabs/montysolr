@@ -20,10 +20,21 @@
     
     <fieldtype name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" />
 
-
+    
+    <!-- Author parsing section madness (START) -->
+    
     <!--  
 	    Attention, all author_ types are very delicate!
 	    Always verify changes with: TestAdsabsTypeAuthorParsing
+	    
+	    we have the following types:
+	    
+	    author
+	    author_notrans_nosyn (public name: author_exact)
+	    author_notrans
+	    author_nosyn
+	    author_short_name_rage (used only by query parser)
+	    
      -->
      <fieldType name="author" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
@@ -117,6 +128,220 @@
     </fieldType>
     
     
+    
+    
+    <!-- 
+        Author: transliteration NO, Synonym expansion YES
+     -->
+     
+     <fieldType name="author_notrans" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <!-- normalize order and surname form: eg. 
+            "adamcuk" becomes "adamcuk," and 
+            "adamczuk,   k" becomes "adamczuk, k"-->
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <!-- generate ADS style extra search clauses (they will be used to find synonyms): 
+            "adamcuk, piotr kolja" is expanded with:
+            "adamcuk, piotr k"
+            "adamcuk, p kolja"
+            "adamcuk, p k"
+            "adamcuk," (if plainSurname=true) -->
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="1"
+            />
+        <!-- using any of the forms, find the synonyms, eg: 
+            "adamšuk, k", "adamčuk, k", "adamguk, k" -->
+        <filter class="solr.SynonymFilterFactory" 
+            synonyms="author_curated.synonyms" 
+            ignoreCase="true" 
+            expand="true" 
+            tokenizerFactory="solr.KeywordTokenizerFactory"/>
+        <!-- now remove the query variants, they were used only to discover synonyms -->    
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            tokenTypes="AUTHOR_QUERY_VARIANT"
+            emitToken="false"/>
+        <!-- lowercase normalize everything -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- reset posIncrement - somtimes synonym expansion causes position bumps
+             but make sure we skip the first token -->
+        <filter class="solr.analysis.ResetFilterFactory"
+            posIncrement="0"
+            range="1,100"/>
+        <!-- generate ADS style extra search clauses: 
+            "adamcuk, piotr kolja" is extended with:
+            "adamcuk, piotr k"
+            "adamcuk, p kolja"
+            "adamcuk, p k"
+            "adamcuk, p k *"
+            "adamcuk, piotr k *"
+            "adamcuk, p kolja *"
+            "adamcuk," --> 
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="1"
+            plainSurname="true"
+            addShortenedMultiName="true"
+            addWildcards="false"
+            lookAtPayloadForOrigAuthor="false"
+            />
+        <!-- deal with multiple occurences of the same (can happen because of the overlapping synonyms) -->
+        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />    
+            
+      </analyzer>
+    </fieldType>
+    
+    
+    <!--  Author: Transliteration YES, Synonym Expansion NO -->
+    
+    <fieldType name="author_nosyn" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <!-- normalize order and surname form: eg. 
+            "adamcuk" becomes "adamcuk," and 
+            "adamczuk,   k" becomes "adamczuk, k"-->
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+            <!-- generate combinations to find their upgraded form -->
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="3"
+            />
+            <!-- replace with UTF-8 variant(s): "adamčuk, k" -->
+        <filter class="solr.SynonymFilterFactory" 
+            synonyms="author_generated.translit"
+            ignoreCase="true" 
+            expand="true" 
+            tokenizerFactory="solr.KeywordTokenizerFactory"/>
+            <!-- now remove the query variants, they were used only to discover upgraded forms -->    
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            tokenTypes="AUTHOR_QUERY_VARIANT"
+            emitToken="false"/>
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="1"
+            />
+            <!-- downgrade everything back to ascii (we now will have both ASCII and UTF8 forms)-->
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"
+            inputType="null"/>
+        <!-- lowercase normalize everything -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- reset posIncrement - somtimes synonym expansion causes position bumps
+             but make sure we skip the first token -->
+        <filter class="solr.analysis.ResetFilterFactory"
+            posIncrement="0"
+            range="1,100"/>
+        <!-- generate ADS style extra search clauses: 
+            "adamcuk, piotr kolja" is extended with:
+            "adamcuk, piotr k"
+            "adamcuk, p kolja"
+            "adamcuk, p k"
+            "adamcuk, p k *"
+            "adamcuk, piotr k *"
+            "adamcuk, p kolja *"
+            "adamcuk," --> 
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="1"
+            plainSurname="true"
+            addShortenedMultiName="true"
+            addWildcards="false"
+            lookAtPayloadForOrigAuthor="false"
+            />
+        <!-- deal with multiple occurences of the same (can happen because of the overlapping synonyms) -->
+        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />    
+      </analyzer>
+    </fieldType>
+    
+    
+    <!-- Author: Transliteration NO, Synonym expansion NO -->
+    
+    <fieldType name="author_notrans_nosyn" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            outFile="author_generated.translit" 
+            tokenTypes="AUTHOR_TRANSLITERATED"
+            emitToken="false"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+            <!-- normalize order and surname form: eg. 
+            "adamcuk" becomes "adamcuk," and 
+            "adamczuk,   k" becomes "adamczuk, k"-->
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+            <!-- generate combinations to find their upgraded form -->
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="3"
+            />
+            <!-- replace with UTF-8 variant(s): "adamčuk, k" -->
+        <filter class="solr.SynonymFilterFactory" 
+            synonyms="author_generated.translit"
+            ignoreCase="true" 
+            expand="true" 
+            tokenizerFactory="solr.KeywordTokenizerFactory"/>
+            <!-- now remove the query variants, they were used only to discover upgraded forms -->    
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            tokenTypes="AUTHOR_QUERY_VARIANT"
+            emitToken="false"/>
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="1"
+            />
+            <!-- downgrade everything back to ascii (we now will have both ASCII and UTF8 forms)-->
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"
+            inputType="null"/>
+        <!-- generate ADS style extra search clauses (they will be used to find synonyms): 
+            "adamcuk, piotr kolja" is expanded with:
+            "adamcuk, piotr k"
+            "adamcuk, p kolja"
+            "adamcuk, p k"
+            "adamcuk," (if plainSurname=true) -->
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="1"
+            />
+        <!-- using any of the forms, find the synonyms, eg: 
+            "adamšuk, k", "adamčuk, k", "adamguk, k" -->
+        <filter class="solr.SynonymFilterFactory" 
+            synonyms="author_curated.synonyms" 
+            ignoreCase="true" 
+            expand="true" 
+            tokenizerFactory="solr.KeywordTokenizerFactory"/>
+        <!-- now remove the query variants, they were used only to discover synonyms -->    
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            tokenTypes="AUTHOR_QUERY_VARIANT"
+            emitToken="false"/>
+        <!-- optionally: downgrade the newly found synonyms, so:
+            "adamšuk, k" is extended with"
+            "adamshuk, k", "adamsuk, k" -->
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"
+            inputType="SYNONYM"/>
+        <!-- lowercase normalize everything -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <!-- reset posIncrement - somtimes synonym expansion causes position bumps
+             but make sure we skip the first token -->
+        <filter class="solr.analysis.ResetFilterFactory"
+            posIncrement="0"
+            range="1,100"/>
+        <!-- generate ADS style extra search clauses: 
+            "adamcuk, piotr kolja" is extended with:
+            "adamcuk, piotr k"
+            "adamcuk, p kolja"
+            "adamcuk, p k"
+            "adamcuk, p k *"
+            "adamcuk, piotr k *"
+            "adamcuk, p kolja *"
+            "adamcuk," --> 
+        <filter class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
+            acronymVariations="1"
+            plainSurname="true"
+            addShortenedMultiName="true"
+            addWildcards="false"
+            lookAtPayloadForOrigAuthor="false"
+            />
+        <!-- deal with multiple occurences of the same (can happen because of the overlapping synonyms) -->
+        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />    
+            
+      </analyzer>
+    </fieldType>
+    
     <!--  the following type is not used by any field, but it is used by the query parser to upgrade
           the short author name "jones, c" into its long form synonym "forman, christine"
           Believe me, you don't want to read about reasons for doing it this way.
@@ -140,46 +365,7 @@
       </analyzer>
     </fieldType>
     
-    
-    
-    
-    <fieldType name="author_exact" class="solr.TextField" positionIncrementGap="100">
-      <analyzer type="query">
-        <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
-        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author.synonyms" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.analysis.author.AuthorSynonymFilterFactory" synonyms="author_curated.synonyms" />
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-      </analyzer>
-    </fieldType>
-    
-    <fieldType name="author_nosyn" class="solr.TextField" positionIncrementGap="100">
-      <analyzer type="query">
-        <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
-        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.analysis.author.AuthorQueryVariationsFilterFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-      </analyzer>
-    </fieldType>
-    
-     <fieldType name="author_exact_nosyn" class="solr.TextField" positionIncrementGap="100">
-      <analyzer type="query">
-        <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
-        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
-        <filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit" ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-      </analyzer>
-    </fieldType>
-    
-    
+    <!-- Author parsing section madness (STOP) -->
     
     <fieldType name="doi_string" class="solr.TextField">
       <analyzer type="index">
@@ -568,7 +754,10 @@
 
     <field name="_version_" type="long" indexed="true" stored="true"/>
     
-    <!-- field used for very special synonym expansion -->
+    <!-- fields used for special purposes by query parser -->
+    <field name="author_notrans" type="author_short_name_rage" indexed="false" stored="false"/>
+    <field name="author_nosyn" type="author_short_name_rage" indexed="false" stored="false"/>
+    <field name="author_notrans_nosyn" type="author_short_name_rage" indexed="false" stored="false"/>
     <field name="author_short_name_rage" type="author_short_name_rage" indexed="false" stored="false"/>
    
  </fields>

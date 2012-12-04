@@ -71,7 +71,8 @@ public class AqpAdsabsQParser extends QParser {
 
 		String defaultField = getParam(CommonParams.DF);
 		if (defaultField == null) {
-			defaultField = parserConfig.get("defaultField", getReq().getSchema().getDefaultSearchFieldName());
+			//defaultField = parserConfig.get("defaultField", getReq().getSchema().getDefaultSearchFieldName());
+		  config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, null);
 		}
 		if (defaultField != null) {
 			config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, defaultField);
@@ -123,6 +124,9 @@ public class AqpAdsabsQParser extends QParser {
 		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpSolrFunctionProvider());
 		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpAdsabsSubSueryProvider());
 		
+		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put("author", new int[0]);
+		
+		
 		if (params.getBool("debugQuery", false) != false) {
 			try {
 				qParser.setDebug(true);
@@ -135,7 +139,7 @@ public class AqpAdsabsQParser extends QParser {
 			}
 		}
 		
-		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put("author", new int[0]);
+		
 		
 	}
 

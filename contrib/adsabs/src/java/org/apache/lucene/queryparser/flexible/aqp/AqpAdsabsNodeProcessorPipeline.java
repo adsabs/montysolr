@@ -23,6 +23,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreP
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExpandAuthorSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpUnfieldedSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQNORMALProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsRegexNodeProcessor;
@@ -94,7 +95,15 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 	
 		add(new AqpFuzzyModifierProcessor());
 		add(new WildcardQueryNodeProcessor());
-		add(new MultiFieldQueryNodeProcessor()); // expands to multiple fields if field=null
+		
+		if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY) == true) {
+		  add(new AqpUnfieldedSearchProcessor()); // use edismax to wrap unfielded searches
+		}
+		else {
+		  add(new MultiFieldQueryNodeProcessor()); // expands to multiple fields if field=null
+	    
+		}
+		
 		add(new AqpNullDefaultFieldProcessor());
 		add(new FuzzyQueryNodeProcessor());
 		add(new MatchAllDocsQueryNodeProcessor());
@@ -115,6 +124,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new TermRangeQueryNodeProcessor());
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		add(new AqpAdsabsSynonymNodeProcessor()); //simply wraps the non-synonym QN into NonAnalyzedQueryNode
+		
 		
 		add(new AqpAdsabsAuthorPreProcessor()); // must happen before analysis
 		add(new AqpAdsabsAnalyzerProcessor()); // we prevent analysis to happen inside QFUNC
