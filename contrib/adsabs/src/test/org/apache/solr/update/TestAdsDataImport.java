@@ -344,7 +344,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "keyword:\"classical statistical mechanics\""), "//*[@numFound='1']");
 		assertQ(req("q", "keyword:\"WORLD WIDE WEB\""), "//*[@numFound='1']"); // should be case-insensitive
 		assertQ(req("q", "keyword:\"fluid dynamics\""), "//*[@numFound='1']"); // should get both 695$a ...
-		assertQ(req("q", "keyword:\"methods numerical\"", "debugQuery", "true"), "//*[@numFound='1']"); // ... and 695$b 
+		assertQ(req("q", "keyword:\"methods numerical\""), "//*[@numFound='1']"); // ... and 695$b 
 		assertQ(req("q", "keyword:WISE"), "//*[@numFound='1']"); // ... and 653$a
 		
 		// XXX: the phrases are not working here
@@ -383,11 +383,12 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "title:\"title is not available\""), "//*[@numFound='1']"); // everything besides title is stopword
 		assertQ(req("q", "title:no-sky"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
 		assertQ(req("q", "title:nosky"), "//*[@numFound='1']");
-		assertQ(req("q", "title:q\\'i"), "//*[@numFound='2']");
-		assertQ(req("q", "title:KEPLER"), "//*[@numFound='0']"); // shouldn't lowercase all-caps (acronym) terms
+		assertQ(req("q", "title:KEPLER"), "//*[@numFound='0']"); // should search only for acronym acr::kepler
+		assertQ(req("q", "title:kepler"), "//*[@numFound='2']"); // normal search
 		assertQ(req("q", "title:probing"), "//*[@numFound='0']"); // alternate titles shouldn't go in main title field
 		assertQ(req("q", "alternate_title:probing"), "//*[@numFound='1']"); // they should go in the alternate_title field
-		
+		assertQ(req("q", "title:(KEPLER) alternate_title:probing"), "//*[@numFound='0']");
+		assertQ(req("q", "title:(kepler) alternate_title:probing"), "//*[@numFound='1']");
 		
 		/*
 		 * abstract
@@ -398,11 +399,15 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "abstract:nosky"), "//*[@numFound='1']");
 		assertQ(req("q", "abstract:sph"), "//*[@numFound='1']");
 		assertQ(req("q", "abstract:SPH"), "//*[@numFound='1']");
-		assertQ(req("q", "abstract:PARTICLE"), "//*[@numFound='0']"); // acronyms shouldn't get lowercased
+		assertQ(req("q", "abstract:PARTICLE"), "//*[@numFound='0']"); // acronyms = acr::particle
 		
+		//dumpDoc(null, "bibdoc", "abstract");
+		
+		// XXX: this nees more thinking; possibly the solution is to mark the token as 'constant'
+		// or some such (in the same way as acronyms)
 		//becomes: abstract:q'i abstract:q abstract:i abstract:qi
-		assertQ(req("q", "abstract:q\\'i", "fl", "recid,abstract,title"), "//*[@numFound='3']");
-		
+		assertQ(req("q", "abstract:q\\'i", "fl", "recid,abstract,title"), "//*[@numFound='4']");
+		assertQ(req("q", "title:q\\'i"), "//*[@numFound='2']");
 		
 		assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
 		
@@ -425,8 +430,8 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 //		assertQ(req("q", "recid:16"), "//*[@numFound='1']");
 		assertQ(req("q", "id:12"), "//*[@numFound='1']");
 		assertQ(req("q", "id:16"), "//*[@numFound='1']");
-		assertQ(req("q", "refersto(id:12)"), "//*[@numFound='3']");
-		assertQ(req("q", "refersto(title:test)"), "//*[@numFound='4']");
+		assertQ(req("q", "citedby(id:12)"), "//*[@numFound='3']");
+		assertQ(req("q", "citedby(title:test)"), "//*[@numFound='4']");
 		
 //		System.out.println(h.query(req("q", "cites(id:12)")));
 //		System.out.println(h.query(req("q", "cites(title:test)")));
