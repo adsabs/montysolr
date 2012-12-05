@@ -18,6 +18,23 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
   private QParser parser;
   private Class<?>[] qtypes;
 
+  
+  
+  public Query simplify(Query query) {
+    if (query instanceof BooleanQuery) {
+      List<BooleanClause>clauses = ((BooleanQuery) query).clauses();
+      if (clauses.size()==1 && ((BooleanQuery) query).getBoost() == 1.0) {
+        Query q = clauses.get(0).getQuery();
+        if (q.toString().toString().equals("")) return null;
+        if (q instanceof DisjunctionMaxQuery && ((DisjunctionMaxQuery) q).getDisjuncts().size()==1) {
+          return ((DisjunctionMaxQuery) q).getDisjuncts().get(0);
+        }
+        return q;
+      }
+    }
+    return query;
+  }
+  
   public Query reParse(Query query, QParser qp, Class<?>...types) throws ParseException {
     parser = qp;
     qtypes = types;

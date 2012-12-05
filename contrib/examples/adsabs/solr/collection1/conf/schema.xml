@@ -587,12 +587,13 @@
 	        stemEnglishPossessive="1" 
 	        preserveOriginal="0"
         />
+        <filter class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory"/>
         <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
             synonyms="ads_text.synonyms" 
             ignoreCase="false" 
             expand="true" 
             tokenizerFactory="solr.KeywordTokenizerFactory"
-            builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffort" 
+            builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively" 
             sanitizeOutput="true" 
             inclOrig="false"/>
         <filter class="solr.AcronymTokenFilterFactory" emitBoth="false"/>
@@ -754,6 +755,10 @@
     <field name="author_notrans_nosyn" type="author_short_name_rage" indexed="false" stored="false"/>
     <field name="author_short_name_rage" type="author_short_name_rage" indexed="false" stored="false"/>
    
+    <!-- a field holding tokenizer chain for the unfield search (very important to have if you
+      require multi-word token expansion and unfielded search expansion at the same time  -->
+    <field name="unfielded_search" type="ads_text" indexed="false" stored="false" multiValued="true"/>
+      
  </fields>
 
  <uniqueKey>id</uniqueKey>

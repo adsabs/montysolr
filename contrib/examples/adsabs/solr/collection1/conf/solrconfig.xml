@@ -1871,7 +1871,7 @@
   <requestHandler name="ads-config" class="solr.AdsConfigHandler" default="false">
      
      <lst name="queryParser">
-      <str name="defaultField">all</str>
+      <str name="defaultField">unfielded_search</str>
       <str name="defaultOperator">AND</str>
       <str name="fieldMap">arxiv identifier;</str>
     </lst>

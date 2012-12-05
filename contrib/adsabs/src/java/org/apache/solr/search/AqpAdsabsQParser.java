@@ -71,9 +71,9 @@ public class AqpAdsabsQParser extends QParser {
 
 		String defaultField = getParam(CommonParams.DF);
 		if (defaultField == null) {
-			//defaultField = parserConfig.get("defaultField", getReq().getSchema().getDefaultSearchFieldName());
-		  config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, null);
+			defaultField = parserConfig.get("defaultField", getReq().getSchema().getDefaultSearchFieldName());
 		}
+		
 		if (defaultField != null) {
 			config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, defaultField);
 		}

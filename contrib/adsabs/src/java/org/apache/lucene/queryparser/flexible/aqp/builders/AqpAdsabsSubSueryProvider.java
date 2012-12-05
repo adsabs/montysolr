@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
@@ -14,6 +15,7 @@ import org.apache.lucene.queryparser.flexible.aqp.AqpSubqueryParserFull;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.surround.parser.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
@@ -37,6 +39,8 @@ import org.apache.solr.search.QParser;
 import org.apache.solr.search.RawQParserPlugin;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
+
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 /*
  * I know this is confusing. This is called in the building phase,
@@ -86,12 +90,12 @@ public class AqpAdsabsSubSueryProvider implements
 	    		  return q.getQuery();
 		      }
 		    });
-		parsers.put(ExtendedDismaxQParserPlugin.NAME, new AqpSubqueryParser() {
+		parsers.put(ExtendedDismaxQParserPlugin.NAME, new AqpSubqueryParserFull() {
 		      public Query parse(FunctionQParser fp) throws ParseException {    		  
 	    		  QParser q = fp.subQuery(fp.getString(), ExtendedDismaxQParserPlugin.NAME);
-	    		  return q.getQuery();
+	    		  return simplify(q.getQuery());
 		      }
-		    });
+		    }.configure(false)); // not analyzed
 		parsers.put(FieldQParserPlugin.NAME, new AqpSubqueryParser() {
 		      public Query parse(FunctionQParser fp) throws ParseException {    		  
 	    		  QParser q = fp.subQuery(fp.getString(), FieldQParserPlugin.NAME);
@@ -188,12 +192,19 @@ public class AqpAdsabsSubSueryProvider implements
       }
     }.configure(false)); // not analyzed
 		
-		parsers.put("aqp_edismax", new AqpSubqueryParserFull() {
-      public Query parse(FunctionQParser fp) throws ParseException {        
-        QParser ep = fp.subQuery(fp.getString(), ExtendedDismaxQParserPlugin.NAME);
+		parsers.put("edismax_nonanalyzed", new AqpSubqueryParserFull() {
+      public Query parse(FunctionQParser fp) throws ParseException {
+        final String original = fp.getString();
+        QParser ep = fp.subQuery("xxx", ExtendedDismaxQParserPlugin.NAME);
         Query q = ep.getQuery();
-        QParser ap = fp.subQuery(fp.getString(), "aqp");
-        return reParse(q, ap, TermQuery.class);
+        QParser fakeParser = new QParser(original, null, null, null) {
+          @Override
+          public Query parse() throws ParseException {
+            String[] parts = getString().split(":");
+            return new TermQuery(new Term(parts[0], original));
+          }
+        };
+        return simplify(reParse(q, fakeParser, TermQuery.class));
       }
     }.configure(false)); // not analyzed
 	};

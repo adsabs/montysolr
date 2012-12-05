@@ -8,6 +8,7 @@ import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuild
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
@@ -40,11 +41,13 @@ import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQuer
  */
 public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
-
+  
+  final String unfieldSearchField = "unfielded_search";
+  
 	@Override
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
-	  if (node instanceof FieldQueryNode && ((FieldQueryNode) node).getField() == null) {
+	  if (node instanceof FieldQueryNode && ((FieldQueryNode) node).getField().equals(unfieldSearchField)) {
 		  QueryConfigHandler config = getQueryConfigHandler();
 	    
 	    if (!config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)) {
@@ -53,28 +56,35 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	          "Missing FunctionQueryBuilder provider"));
 	    }
 	    
+	    String funcName = "edismax";
 	    String subQuery = ((FieldQueryNode) node).getTextAsString();
-	    if (subQuery.contains(" ")) {
-	      subQuery = "\"" + subQuery + "\"";
+	    
+	    if (node instanceof AqpNonAnalyzedQueryNode) {
+	      funcName = "edismax_nonanalyzed";
+	    }
+	    else {
+  	    if (subQuery.contains(" ")) {
+  	      subQuery = "\"" + subQuery + "\"";
+  	    }
 	    }
 	    node.setTag("subQuery", subQuery);
 	    
 	    AqpFunctionQueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
-	                    .getBuilder("edismax", (QueryNode) node, config);
+	                    .getBuilder(funcName, (QueryNode) node, config);
 	    
 	    if (builder == null) {
 	      throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
-	          "Unknown function \"edismax\"" ));
+	          "Unknown function \"" + funcName +"\"" ));
 	    }
 	    
 	    
 	    ArrayList<QueryNode> children = new ArrayList<QueryNode>();
-	    children.add(new OpaqueQueryNode("func", "edismax"));
+	    children.add(new OpaqueQueryNode("func", funcName));
 	    children.add(new OpaqueQueryNode("unfielded", subQuery));
 	    
 	    QueryNode fNode = new BooleanQueryNode(children);
 	    
-	    return new AqpFunctionQueryNode("edismax", builder, fNode);
+	    return new AqpFunctionQueryNode(funcName, builder, fNode);
 		}
 		return node;
 	}

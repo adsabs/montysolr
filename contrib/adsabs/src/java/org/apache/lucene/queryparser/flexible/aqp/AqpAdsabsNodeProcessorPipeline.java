@@ -97,13 +97,9 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpFuzzyModifierProcessor());
 		add(new WildcardQueryNodeProcessor());
 		
-		if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY) == true) {
-		  add(new AqpUnfieldedSearchProcessor()); // use edismax to wrap unfielded searches
-		}
-		else {
-		  add(new MultiFieldQueryNodeProcessor()); // expands to multiple fields if field=null
+		
+	  add(new MultiFieldQueryNodeProcessor()); // expands to multiple fields if field=null
 	    
-		}
 		
 		add(new AqpNullDefaultFieldProcessor());
 		add(new FuzzyQueryNodeProcessor());
@@ -116,9 +112,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpMultiWordProcessor()); // find synonyms if we have 'plain word token group'
 		
 		if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY) == true) {
-			//add(new AqpAnalysisQueryNodeProcessor());
-		}
-
+      add(new AqpUnfieldedSearchProcessor()); // use edismax to wrap unfielded searches
+    }
 		
 		add(new TermRangeQueryNodeProcessor());
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode

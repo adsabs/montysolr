@@ -112,7 +112,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		
 		if (clazz != null) {
 			if (!q.getClass().isAssignableFrom(clazz)) {
-				tp.debugFail("Query is not: " + clazz + " but: " + q.getClass(), expected, "-->" + q.toString());
+				tp.debugFail(actual, expected, "Query is not: " + clazz + " but: " + q.getClass() + q.toString());
 			}
 		}
 		

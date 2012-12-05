@@ -148,26 +148,28 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      * Test multi-token translation, the chain is set to recognize
      * synonyms. So even if the query string is split into 3 tokens,
      * we are able to join them and find their synonym (HST)
+     * 
      */
-
+    
+    //setDebug(true);
     // simple case
     assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp"), 
-        "all:hubble space telescope all:hst", BooleanQuery.class);
+        "all:hubble space telescope all:acr::hst", BooleanQuery.class);
     // followed by something
     assertQueryEquals(req("q", "hubble space telescope goes home", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +all:goes +all:home", BooleanQuery.class);
     // preceded by something
     assertQueryEquals(req("q", "mirrors hubble space telescope start home", "qt", "aqp"), 
-        "+all:mirrors +(all:hubble space telescope all:hst) +all:start +all:home", BooleanQuery.class);
+        "+all:mirrors +(all:hubble space telescope all:acr::hst) +all:start +all:home", BooleanQuery.class);
     // surrounded by something
     assertQueryEquals(req("q", "mirrors of the hubble space telescope start home", "qt", "aqp"), 
-        "+all:mirrors +(all:hubble space telescope all:hst) +all:start +all:home", BooleanQuery.class);
+        "+all:mirrors +(all:hubble space telescope all:acr::hst) +all:start +all:home", BooleanQuery.class);
     // surrounded by stop words
     assertQueryEquals(req("q", "mirrors of the hubble space telescope the start home", "qt", "aqp"), 
-        "+all:mirrors +(all:hubble space telescope all:hst) +all:start +all:home", BooleanQuery.class);
+        "+all:mirrors +(all:hubble space telescope all:acr::hst) +all:start +all:home", BooleanQuery.class);
     // surrounded - change default operator
     assertQueryEquals(req("q", "mirrors of the hubble space telescope start home", "qt", "aqp", "q.op", "OR"), 
-        "all:mirrors (all:hubble space telescope all:hst) all:start all:home", BooleanQuery.class);
+        "all:mirrors (all:hubble space telescope all:acr::hst) all:start all:home", BooleanQuery.class);
     // different modifier (synonym must not be found)
     assertQueryEquals(req("q", "hubble space -telescope", "qt", "aqp"), 
         "+all:hubble +all:space -all:telescope", BooleanQuery.class);
@@ -176,37 +178,37 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "+all:hubble +all:space +title:telescope", BooleanQuery.class);
 
     assertQueryEquals(req("q", "hubble space telescope +star", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +all:star", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +all:star", BooleanQuery.class);
 
     /*
      * Synonym expansion 1token->many
      */
 
     assertQueryEquals(req("q", "HST", "qt", "aqp"), 
-        "all:hubble space telescope all:hst all:acr::hst", BooleanQuery.class);
+        "all:hubble space telescope all:acr::hst", BooleanQuery.class);
     
     // TODO:
-    // "hst"  -> all:hst OR all:acr:hst OR all:hubble space telescope
-    // "HST" -> all:HST OR all:acr:hst OR all:hubble space telescope
+    // "hst"  -> all:acr::hst OR all:acr:hst OR all:hubble space telescope
+    // "HST" -> all:acr::hst OR all:acr:hst OR all:hubble space telescope
     // Hubble Space Telecscope -> acr:hst OR hubble space telescope (no "hst")
     
     
     // XXX: note the acronym is not present (that is because the synonym processor
     // outputs only tokens type=SYNONYM, but if we catch all tokens with posIncr=0
     // it could work)
-    // +(all:hubble space telescope all:hst all:acr::hst) +all:goes +all:home
+    // +(all:hubble space telescope all:acr::hst all:acr::hst) +all:goes +all:home
     assertQueryEquals(req("q", "HST goes home", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +all:goes +all:home", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +all:goes +all:home", BooleanQuery.class);
 
     
     // MIT 
     assertQueryEquals(req("q", "Massachusets Institute of Technology", "qt", "aqp"), 
-        "all:massachusets institute of technology all:mit", BooleanQuery.class);
+        "all:massachusets institute of technology all:acr::mit", BooleanQuery.class);
     // XXX: make ignore case for multi-tokens
     //assertQueryEquals(req("q", "massachusets institute of technology", "qt", "aqp"), 
-    //    "all:massachusets institute of technology all:mit", BooleanQuery.class);
+    //    "all:massachusets institute of technology all:acr::mit", BooleanQuery.class);
     //assertQueryEquals(req("q", "Massachusets Institute Technology", "qt", "aqp"), 
-    //    "all:massachusets institute of technology all:mit", BooleanQuery.class);
+    //    "all:massachusets institute of technology all:acr::mit", BooleanQuery.class);
     
     //setDebug(true);
 
@@ -221,44 +223,44 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     //one-token stopword one-token
     assertQueryEquals(req("q", "HST at MIT", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +(all:massachusets institute of technology all:acr::mit)", BooleanQuery.class);
     //one-token word one-token
     assertQueryEquals(req("q", "HST bum MIT", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +all:bum +(all:massachusets institute of technology all:acr::mit)", BooleanQuery.class);
     //one-token stopword multi-token
     assertQueryEquals(req("q", "HST at Massachusets Institute of Technology", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +(all:massachusets institute of technology all:acr::mit)", BooleanQuery.class);
     //one-token word multi-token
     assertQueryEquals(req("q", "HST bum Massachusets Institute of Technology", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +all:bum +(all:massachusets institute of technology all:acr::mit)", BooleanQuery.class);
     //multi-token stopword single-token
     assertQueryEquals(req("q", "hubble space telescope at MIT", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +(all:massachusets institute of technology all:acr::mit)", BooleanQuery.class);
     //multi-token word single-token
     assertQueryEquals(req("q", "hubble space telescope bum MIT", "qt", "aqp"), 
-        "+(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit)", BooleanQuery.class);
+        "+(all:hubble space telescope all:acr::hst) +all:bum +(all:massachusets institute of technology all:acr::mit)", BooleanQuery.class);
     
     
     // synonyms hidden inside other words:
     
     //word one-token stopword one-token word
     assertQueryEquals(req("q", "foo HST at MIT bar", "qt", "aqp"), 
-        "+all:foo +(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+        "+all:foo +(all:hubble space telescope all:acr::hst) +(all:massachusets institute of technology all:acr::mit) +all:bar", BooleanQuery.class);
     //word one-token word one-token word
     assertQueryEquals(req("q", "foo HST bum MIT bar", "qt", "aqp"), 
-        "+all:foo +(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+        "+all:foo +(all:hubble space telescope all:acr::hst) +all:bum +(all:massachusets institute of technology all:acr::mit) +all:bar", BooleanQuery.class);
     //word one-token stopword multi-token word
     assertQueryEquals(req("q", "foo HST at Massachusets Institute of Technology bar", "qt", "aqp"), 
-        "+all:foo +(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+        "+all:foo +(all:hubble space telescope all:acr::hst) +(all:massachusets institute of technology all:acr::mit) +all:bar", BooleanQuery.class);
     //word one-token word multi-token word
     assertQueryEquals(req("q", "foo HST bum Massachusets Institute of Technology bar", "qt", "aqp"), 
-        "+all:foo +(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+        "+all:foo +(all:hubble space telescope all:acr::hst) +all:bum +(all:massachusets institute of technology all:acr::mit) +all:bar", BooleanQuery.class);
     //word multi-token stopword single-token word
     assertQueryEquals(req("q", "foo hubble space telescope at MIT bar", "qt", "aqp"), 
-        "+all:foo +(all:hubble space telescope all:hst) +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+        "+all:foo +(all:hubble space telescope all:acr::hst) +(all:massachusets institute of technology all:acr::mit) +all:bar", BooleanQuery.class);
     //word multi-token word single-token word
     assertQueryEquals(req("q", "foo hubble space telescope bum MIT bar", "qt", "aqp"), 
-        "+all:foo +(all:hubble space telescope all:hst) +all:bum +(all:massachusets institute of technology all:mit) +all:bar", BooleanQuery.class);
+        "+all:foo +(all:hubble space telescope all:acr::hst) +all:bum +(all:massachusets institute of technology all:acr::mit) +all:bar", BooleanQuery.class);
     
     
     /**
@@ -276,19 +278,19 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      * 
      */
     assertQueryEquals(req("q", "HubbleSpaceMicroscope bum MIT BX", "qt", "aqp"), 
-        "+(all:hubble space microscope all:hsm) +all:bum +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)", 
+        "+(all:hubble space microscope all:acr::hsm) +all:bum +(all:massachusets institute of technology all:acr::mit) +all:acr::bx", 
         BooleanQuery.class);
     assertQueryEquals(req("q", "HubbleSpaceMicroscope -bum MIT BX", "qt", "aqp"), 
-        "+(all:hubble space microscope all:hsm) -all:bum +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)",
+        "+(all:hubble space microscope all:acr::hsm) -all:bum +(all:massachusets institute of technology all:acr::mit) +all:acr::bx",
         BooleanQuery.class);
 
     assertQueryEquals(req("q", "Hubble-Space-Microscope bum MIT BX", "qt", "aqp"), 
-        "+(all:hubble space microscope all:hsm) +all:bum +(all:massachusets institute of technology all:mit) +(all:bx all:acr::bx)", 
+        "+(all:hubble space microscope all:acr::hsm) +all:bum +(all:massachusets institute of technology all:acr::mit) +all:acr::bx", 
         BooleanQuery.class);
     
     /*
-     * But right now, *QUERY* synonym expansion is case sensitive, so these will
-     * not find anything (even if 'Hst' was in the synonym list). 
+     * *QUERY* synonym expansion is case sensitive for single tokens,
+     * but case-insensitive for multi-tokens (yes, the developer went through some extreme pain ;)))
      */
     assertQueryEquals(req("q", "Hst", "qt", "aqp"), 
         "all:hst", TermQuery.class);
@@ -297,7 +299,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "all:hst", TermQuery.class);
 
     assertQueryEquals(req("q", "HST OR Hst", "qt", "aqp"), 
-        "(all:hubble space telescope all:hst all:acr::hst) all:hst", BooleanQuery.class);
+        "(all:hubble space telescope all:acr::hst) all:hst", BooleanQuery.class);
 
 
     //TODO: add the corresponding searches, but this shows we are indexing  properly

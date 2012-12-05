@@ -299,6 +299,42 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     }
   }
   
+  
+  /*
+   * This is a custom configuration for multi-token query-time synonym expansion.
+   * 
+   * Multi-tokens are searched case insentively and original parts are returned
+   * 
+   * Single tokens are searched case *sensitively*
+   * 
+   * The parser also returns source tokens for the multi-token group, but
+   * 'eats' the source token when single-token synonym is there. 
+   * 
+   */
+  public static class BestEffortIgnoreCaseSelectively extends SynonymBuilderFactory {
+    public void inform(ResourceLoader loader) throws IOException {
+      args.put("ignoreCase", "false");
+    }
+    protected SynonymParser getParser(Analyzer analyzer) {
+      return new NewSolrSynonymParser(true, true, analyzer) {
+        @Override
+        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
+          int count = countWords(input);
+          super.add(count > 1 ? lowercase(input) : input, replaceNulls(output), count > 1 ? true : false);
+        }
+        private CharsRef lowercase(CharsRef chars) {
+          chars = CharsRef.deepCopyOf(chars);
+          final int limit = chars.offset + chars.length;
+          for (int i=chars.offset;i<limit;i++) {
+            chars.chars[i] = Character.toLowerCase(chars.chars[i]); // maybe not be always correct (?)
+          }
+          return chars;
+        }
+      };
+      
+    }
+  }
+  
   public static int countWords(CharsRef chars) {
     int wordCount = 1;
     int upto = chars.offset;

@@ -9,6 +9,7 @@ import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 
@@ -96,52 +97,52 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	  // first the individual elements explicitly
 	  assertQueryEquals(req("qt", "aqp", "q", "edismax(MÜLLER)", 
 	      "qf", "author^2.3 title abstract^0.4"), 
-        "+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "(((abstract:acr::müller abstract:acr::muller)^0.4) " +
         "| ((author:müller, author:mueller, author:muller,)^2.3) " +
-        "| (title:müller title:muller title:acr::müller title:acr::muller))", BooleanQuery.class);
+        "| (title:acr::müller title:acr::muller))", DisjunctionMaxQuery.class);
 	  assertQueryEquals(req("qt", "aqp", "q", "edismax(\"forman, c\")", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
-	  
+        "(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", DisjunctionMaxQuery.class);
+
 	  // unfielded search should produce the same results
 	  assertQueryEquals(req("qt", "aqp", "q", "MÜLLER", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "(((abstract:acr::müller abstract:acr::muller)^0.4) " +
         "| ((author:müller, author:mueller, author:muller,)^2.3) " +
-        "| (title:müller title:muller title:acr::müller title:acr::muller))", BooleanQuery.class);
+        "| (title:acr::müller title:acr::muller))", DisjunctionMaxQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "\"forman, c\"", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
+        "(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", DisjunctionMaxQuery.class);
 	  
     // now add a normal element
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or edismax(MÜLLER)", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "title:foo (((abstract:acr::müller abstract:acr::muller)^0.4) " +
         "| ((author:müller, author:mueller, author:muller,)^2.3) " +
-        "| (title:müller title:muller title:acr::müller title:acr::muller)))", BooleanQuery.class);
+        "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or edismax(\"forman, c\")", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\"))", BooleanQuery.class);
+        "title:foo (abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
     
     
     // unfielded search should produce the same results
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or MÜLLER", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "title:foo (((abstract:acr::müller abstract:acr::muller)^0.4) " +
         "| ((author:müller, author:mueller, author:muller,)^2.3) " +
-        "| (title:müller title:muller title:acr::müller title:acr::muller)))", BooleanQuery.class);
+        "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or \"forman, c\"", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\"))", BooleanQuery.class);
+        "title:foo (abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or MÜLLER", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (+(((abstract:müller abstract:muller abstract:acr::müller abstract:acr::muller)^0.4) " +
+        "title:foo (((abstract:acr::müller abstract:acr::muller)^0.4) " +
         "| ((author:müller, author:mueller, author:muller,)^2.3) " +
-        "| (title:müller title:muller title:acr::müller title:acr::muller)))", BooleanQuery.class);
+        "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or \"forman, c\"", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (+(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\"))", BooleanQuery.class);
+        "title:foo (abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
     
     /*
      * It is different if Aqp handles the boolean operations or if 
@@ -151,28 +152,28 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
      */
     
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax 
-				"+((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+				"(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"),          //aqp
-        "(+(abstract:dog^0.5 | title:dog)) (+(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat)", "qf", "title^1 abstract^0.5"), //edismax
-				"+(+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+				"+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "dog AND cat", "qf", "title^1 abstract^0.5"), //aqp
-        "+(+(abstract:dog^0.5 | title:dog)) +(+(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax
-				"+((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+				"(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"), //aqp
-        "(+(abstract:dog^0.5 | title:dog)) (+(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
 		
     assertQueryEquals(req("qt", "aqp", "q", "edismax(dog cat)", "qf", "title^1 abstract^0.5"), //edismax (thinks it is a phrase?)
-        "+(((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))~2)", BooleanQuery.class);
+        "((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))~2", BooleanQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
-        "+(+(abstract:dog^0.5 | title:dog)) +(+(abstract:cat^0.5 | title:cat))", BooleanQuery.class);
+        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
 		
 		
     /*
@@ -189,11 +190,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		// if we use the solr analyzer to parse the query, all is configured to remove stopwords 
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but"), 
-				"(+((all:dog) (all:cat))) title:bat", BooleanQuery.class);
+				"((all:dog) (all:cat)) title:bat", BooleanQuery.class);
 		
 		// but pub is normalized_string with a different analyzer and should retain 'but'
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but"), 
-				"(+((all:dog) (all:cat))) title:bat pub:but", BooleanQuery.class);
+				"((all:dog) (all:cat)) title:bat pub:but", BooleanQuery.class);
 		
 		
 		

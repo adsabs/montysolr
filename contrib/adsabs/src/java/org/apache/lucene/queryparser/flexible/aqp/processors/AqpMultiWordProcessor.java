@@ -10,6 +10,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CachingTokenFilter;
 import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.core.AcronymTokenFilter;
 import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
@@ -117,7 +118,7 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
         if (!typeAtt.type().equals(SynonymFilter.TYPE_SYNONYM)) {
           if (posAtt.getPositionIncrement()==0 && synChildren.size()>0) {
             // add acronyms and other stuff (it is already analyzed, so we wrap it into AqpNonAnalyzedQN)
-            //synChildren.add(new AqpNonAnalyzedQueryNode(getNewNode((FieldQueryNode) fieldNode)));
+            synChildren.add(new AqpNonAnalyzedQueryNode(getNewNode((FieldQueryNode) fieldNode)));
           }
           if (synChildren.size()>0) { // we already have synonyms from the previous run
             
