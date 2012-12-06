@@ -56,7 +56,7 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	          "Missing FunctionQueryBuilder provider"));
 	    }
 	    
-	    String funcName = "edismax";
+	    String funcName = "edismax_combined_aqp";
 	    String subQuery = ((FieldQueryNode) node).getTextAsString();
 	    
 	    if (node instanceof AqpNonAnalyzedQueryNode) {

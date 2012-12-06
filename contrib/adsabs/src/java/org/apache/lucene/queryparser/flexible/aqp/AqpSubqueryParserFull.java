@@ -15,8 +15,8 @@ import org.apache.solr.search.QParser;
 public class AqpSubqueryParserFull extends AqpSubqueryParser {
   
   
-  private QParser parser;
-  private Class<?>[] qtypes;
+  private QParser parser = null;
+  private Class<?>[] qtypes = null;
 
   
   
@@ -42,7 +42,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     return query;
   }
   
-  private boolean isWanted(Query query) {
+  protected boolean isWanted(Query query) {
     for (Class<?>type : qtypes) {
       if (type.isInstance(query)) {
         return true;
@@ -51,24 +51,27 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     return false;
   }
 
-  private Query swimDeep(TermQuery query) throws ParseException {
-    if (isWanted(query)) {
+  protected Query swimDeep(TermQuery query) throws ParseException {
+    if (parser != null && qtypes != null && isWanted(query)) {
       parser.setString(query.toString());
-      return parser.parse();
+      Query newQ = parser.parse();
+      newQ.setBoost(query.getBoost());
+      return newQ;
     }
     return query;
   }
   
-  private Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
+  protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
     ArrayList<Query> parts = query.getDisjuncts();
     for (int i=0;i<parts.size();i++) {
-      parts.set(i, swimDeep(parts.get(i)));
+      Query oldQ = parts.get(i);
+      parts.set(i, swimDeep(oldQ));
     }
     return query;
     
   }
   
-  private Query swimDeep(BooleanQuery query) throws ParseException {
+  protected Query swimDeep(BooleanQuery query) throws ParseException {
     List<BooleanClause>clauses = query.clauses();
     for (int i=0;i<clauses.size();i++) {
       BooleanClause c = clauses.get(i);
@@ -78,7 +81,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     return query;
   }
 
-  private Query swimDeep(Query query) throws ParseException {
+  protected Query swimDeep(Query query) throws ParseException {
     if (query instanceof BooleanQuery) {
       return swimDeep((BooleanQuery) query);
     }

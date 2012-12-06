@@ -16,6 +16,9 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.surround.parser.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
@@ -192,7 +195,7 @@ public class AqpAdsabsSubSueryProvider implements
       }
     }.configure(false)); // not analyzed
 		
-		parsers.put("edismax_nonanalyzed", new AqpSubqueryParserFull() {
+		parsers.put("edismax_nonanalyzed", new AqpSubqueryParserFull() { // used for nodes that were already analyzed
       public Query parse(FunctionQParser fp) throws ParseException {
         final String original = fp.getString();
         QParser ep = fp.subQuery("xxx", ExtendedDismaxQParserPlugin.NAME);
@@ -205,6 +208,29 @@ public class AqpAdsabsSubSueryProvider implements
           }
         };
         return simplify(reParse(q, fakeParser, TermQuery.class));
+      }
+    }.configure(false)); // not analyzed
+		parsers.put("edismax_combined_aqp", new AqpSubqueryParserFull() { // will decide whether new aqp() parse is needed
+		  private FunctionQParser fParser;
+      public Query parse(FunctionQParser fp) throws ParseException {
+        final String original = fp.getString();
+        QParser eqp = fp.subQuery(original, ExtendedDismaxQParserPlugin.NAME);
+        Query q = eqp.getQuery();
+        fParser = fp;
+        return simplify(swimDeep(q));
+      }
+      protected Query swimDeep(BooleanQuery query) throws ParseException {
+        List<BooleanClause>clauses = query.clauses();
+        if (clauses.size()>0) {
+          Query firstQuery = clauses.get(0).getQuery();
+          if (firstQuery instanceof TermQuery && ((TermQuery) firstQuery).getTerm().field().equals("author")) {
+            QParser aqp = fParser.subQuery("author:"+fParser.getString(), "aqp");
+            Query q = aqp.getQuery();
+            q.setBoost(query.getBoost());
+            return q;
+        }
+        }
+        return super.swimDeep(query);
       }
     }.configure(false)); // not analyzed
 	};

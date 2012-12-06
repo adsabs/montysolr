@@ -62,7 +62,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			});
 			replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
-			
+		  // hand-curated synonyms
+      File curatedSynonyms = createTempFile(new String[]{
+          "JONES\\,\\ CHRISTINE,FORMAN\\,\\ CHRISTINE" // the famous post-synonym expansion
+      });
+      replaceInFile(newConfig, "synonyms=\"author_curated.synonyms\"", "synonyms=\"" + curatedSynonyms.getAbsolutePath() + "\"");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -102,17 +106,21 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "| (title:acr::müller title:acr::muller))", DisjunctionMaxQuery.class);
 	  assertQueryEquals(req("qt", "aqp", "q", "edismax(\"forman, c\")", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", DisjunctionMaxQuery.class);
+        "(abstract:\"forman c\"^0.4 " +
+        "| ((author:forman, c author:forman,)^2.3) " +
+        "| title:\"forman c\")", DisjunctionMaxQuery.class);
 
-	  // unfielded search should produce the same results
+	  // unfielded search should produce the same structure (the parser for author is aqp-type)
 	  assertQueryEquals(req("qt", "aqp", "q", "MÜLLER", 
         "qf", "author^2.3 title abstract^0.4"), 
         "(((abstract:acr::müller abstract:acr::muller)^0.4) " +
-        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
+        "| ((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*)^2.3) " +
         "| (title:acr::müller title:acr::muller))", DisjunctionMaxQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "\"forman, c\"", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "(abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", DisjunctionMaxQuery.class);
+        "(abstract:\"forman c\"^0.4 " +
+        "| ((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,)^2.3) " +
+        "| title:\"forman c\")", DisjunctionMaxQuery.class);
 	  
     // now add a normal element
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or edismax(MÜLLER)", 
@@ -122,27 +130,33 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or edismax(\"forman, c\")", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
+        "title:foo (abstract:\"forman c\"^0.4 " +
+        "| ((author:forman, c author:forman,)^2.3) " +
+        "| title:\"forman c\")", BooleanQuery.class);
     
     
     // unfielded search should produce the same results
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or MÜLLER", 
         "qf", "author^2.3 title abstract^0.4"), 
         "title:foo (((abstract:acr::müller abstract:acr::muller)^0.4) " +
-        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
+        "| ((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*)^2.3) " +
         "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or \"forman, c\"", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
+        "title:foo (abstract:\"forman c\"^0.4 " +
+        "| ((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,)^2.3) " +
+        "| title:\"forman c\")", BooleanQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or MÜLLER", 
         "qf", "author^2.3 title abstract^0.4"), 
         "title:foo (((abstract:acr::müller abstract:acr::muller)^0.4) " +
-        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
+        "| ((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*)^2.3) " +
         "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "title:foo or \"forman, c\"", 
         "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (abstract:\"forman c\"^0.4 | ((author:forman, c author:forman,)^2.3) | title:\"forman c\")", BooleanQuery.class);
+        "title:foo (abstract:\"forman c\"^0.4 " +
+        "| ((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,)^2.3) " +
+        "| title:\"forman c\")", BooleanQuery.class);
     
     /*
      * It is different if Aqp handles the boolean operations or if 

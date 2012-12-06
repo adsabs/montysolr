@@ -155,6 +155,11 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // simple case
     assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp"), 
         "all:hubble space telescope all:acr::hst", BooleanQuery.class);
+    
+    // make sure the unfielded search is expanded properly (by edismax) - we use it just here
+    assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp", "qf", "title^2.0 keyword^1.5"), 
+        "(title:hubble space telescope^2.0 | keyword:hubble space telescope^1.5) (title:acr::hst^2.0 | keyword:acr::hst^1.5)", BooleanQuery.class);
+    
     // followed by something
     assertQueryEquals(req("q", "hubble space telescope goes home", "qt", "aqp"), 
         "+(all:hubble space telescope all:acr::hst) +all:goes +all:home", BooleanQuery.class);
