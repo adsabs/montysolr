@@ -51,7 +51,7 @@ public final class AuthorCollectorFilter extends TokenFilter {
     this.synMap = synMap;
     resetCounter = 0;
   }
-  
+
 
   /* (non-Javadoc)
    * @see org.apache.lucene.analysis.TokenStream#incrementToken()
@@ -59,43 +59,40 @@ public final class AuthorCollectorFilter extends TokenFilter {
   @Override
   public boolean incrementToken() throws IOException {
     resetCounter = 0;
-    
+
     if (!input.incrementToken()) {
-      addTokensToSynMap();
       return false;
     }
-    
-    if (authorInput!=null) {
-      if (tokenTypes.contains(typeAtt.type())) {
-        tokenBuffer.add(termAtt.toString());
-      
-        if (emitTokens) {
+
+    if (authorInput!=null && tokenTypes.contains(typeAtt.type())) {
+      tokenBuffer.add(termAtt.toString());
+
+      if (emitTokens) {
+        return true;
+      }
+      // we'll eat the tokens
+      while (input.incrementToken()) {
+        if (tokenTypes.contains(typeAtt.type())) {
+          tokenBuffer.add(termAtt.toString());
+        }
+        else {
+          if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
+            addTokensToSynMap();
+            authorInput = termAtt.toString();
+          }
           return true;
         }
-        // we'll eat the tokens
-        while (input.incrementToken()) {
-          if (tokenTypes.contains(typeAtt.type())) {
-            tokenBuffer.add(termAtt.toString());
-          }
-          else {
-            if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
-              addTokensToSynMap();
-              authorInput = termAtt.toString();
-              tokenBuffer.clear();
-            }
-            return true;
-          }
-        }
       }
+      return false;
     }
-    
+
     if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
       authorInput = termAtt.toString();
     }
     return true;
   }
-      
-    
+
+
   private void addTokensToSynMap() {
     if (tokenBuffer.size()>0) {
       synMap.add(authorInput, tokenBuffer);
@@ -108,8 +105,7 @@ public final class AuthorCollectorFilter extends TokenFilter {
   @Override
   public void reset() throws IOException {
     super.reset();
-    tokenBuffer.clear();
-    authorInput = null;
+    addTokensToSynMap();
     resetCounter++;
     if (resetCounter > 2) {
       synMap.persist();

@@ -44,7 +44,7 @@
         <filter class="solr.analysis.author.AuthorCollectorFactory" 
             outFile="author_generated.translit" 
             tokenTypes="AUTHOR_TRANSLITERATED"
-            emitToken="false"/>
+            emitTokens="false"/>
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
       <analyzer type="query">

@@ -34,6 +34,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -246,12 +249,68 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      */
 
 
-    assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, m"));
-    assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, marel"));
-    assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, molja"));
+    assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk,"));
+    assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M."));
+    assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Marel"));
+    assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja"));
+    assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja Karel"));
+    assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M Karel"));
+    assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja K"));
+    assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M K"));
+    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel Molja"));
+    assertU(adoc(F.ID, "10", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel M"));
+    assertU(adoc(F.ID, "11", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, K Molja"));
+    
+    assertU(adoc(F.ID, "20", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk,"));
+    assertU(adoc(F.ID, "21", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, M."));
+    assertU(adoc(F.ID, "22", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, Marel"));
+    assertU(adoc(F.ID, "23", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, Molja"));
+    assertU(adoc(F.ID, "24", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, Molja Karel"));
+    assertU(adoc(F.ID, "25", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, M Karel"));
+    assertU(adoc(F.ID, "26", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, Molja K"));
+    assertU(adoc(F.ID, "27", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, M K"));
+    assertU(adoc(F.ID, "28", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, Karel Molja"));
+    assertU(adoc(F.ID, "29", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, Karel M"));
+    assertU(adoc(F.ID, "30", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamcuk, K Molja"));
+    
+    assertU(adoc(F.ID, "40", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk,"));
+    assertU(adoc(F.ID, "41", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, M."));
+    assertU(adoc(F.ID, "42", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, Marel"));
+    assertU(adoc(F.ID, "43", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, Molja"));
+    assertU(adoc(F.ID, "44", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, Molja Karel"));
+    assertU(adoc(F.ID, "45", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, M Karel"));
+    assertU(adoc(F.ID, "46", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, Molja K"));
+    assertU(adoc(F.ID, "47", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, M K"));
+    assertU(adoc(F.ID, "48", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, Karel Molja"));
+    assertU(adoc(F.ID, "49", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, Karel M"));
+    assertU(adoc(F.ID, "50", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamchuk, K Molja"));
+    
+    assertU(adoc(F.ID, "60", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk,"));
+    assertU(adoc(F.ID, "61", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, M."));
+    assertU(adoc(F.ID, "62", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, Marel"));
+    assertU(adoc(F.ID, "63", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, Molja"));
+    assertU(adoc(F.ID, "64", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, Molja Karel"));
+    assertU(adoc(F.ID, "65", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, M Karel"));
+    assertU(adoc(F.ID, "66", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, Molja K"));
+    assertU(adoc(F.ID, "67", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, M K"));
+    assertU(adoc(F.ID, "68", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, Karel Molja"));
+    assertU(adoc(F.ID, "69", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, Karel M"));
+    assertU(adoc(F.ID, "70", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamguk, K Molja"));
+    
+    assertU(adoc(F.ID, "80", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk,"));
+    assertU(adoc(F.ID, "81", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, M."));
+    assertU(adoc(F.ID, "82", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, Marel"));
+    assertU(adoc(F.ID, "83", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, Molja"));
+    assertU(adoc(F.ID, "84", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, Molja Karel"));
+    assertU(adoc(F.ID, "85", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, M Karel"));
+    assertU(adoc(F.ID, "86", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, Molja K"));
+    assertU(adoc(F.ID, "87", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, M K"));
+    assertU(adoc(F.ID, "88", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, Karel Molja"));
+    assertU(adoc(F.ID, "89", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, Karel M"));
+    assertU(adoc(F.ID, "90", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamshuk, K Molja"));
 
-    assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Müller, William"));
-    assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Mueller, William"));
+    assertU(adoc(F.ID, "100", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Müller, William"));
+    assertU(adoc(F.ID, "101", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Mueller, William"));
     assertU(commit());
 
     // persist the transliteration map after new docs were indexed
@@ -322,14 +381,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
      */
     testAuthorQuery(
-        "adamčuk", expected, "//*[@numFound='']",
-        "adamcuk", expected, "//*[@numFound='']",
-        "adamchuk", expected, "//*[@numFound='']",
-        "adamczuk", expected, "//*[@numFound='']",
+        "adamčuk", expected, "//*[@numFound='33']",
+        "adamcuk", expected, "//*[@numFound='33']",
+        "adamchuk", expected, "//*[@numFound='33']",
+        "adamczuk", expected, "//*[@numFound='33']",
         "adamšuk", "author:adamšuk, author:adamšuk,* " +
                    "author:adamshuk, author:adamshuk,* " +
-                   "author:adamsuk, author:adamsuk,*", "//*[@numFound='']",
-        "adamguk", "author:adamguk, author:adamguk,*", "//*[@numFound='']"
+                   "author:adamsuk, author:adamsuk,*", "//*[@numFound='11']",
+        "adamguk", "author:adamguk, author:adamguk,*", "//*[@numFound='11']"
     );
 
     //setDebug(true);
@@ -340,14 +399,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
      */
     testAuthorQuery(
-        "\"adamčuk,\"", expected, "//*[@numFound='']",
-        "\"adamcuk,\"", expected, "//*[@numFound='']",
-        "\"adamchuk,\"", expected, "//*[@numFound='']",
-        "\"adamczuk,\"", expected, "//*[@numFound='']",
+        "\"adamčuk,\"", expected, "//*[@numFound='33']",
+        "\"adamcuk,\"", expected, "//*[@numFound='33']",
+        "\"adamchuk,\"", expected, "//*[@numFound='33']",
+        "\"adamczuk,\"", expected, "//*[@numFound='33']",
         "\"adamšuk,\"", "author:adamšuk, author:adamšuk,* " +
                         "author:adamshuk, author:adamshuk,* " +
-                        "author:adamsuk, author:adamsuk,*", "//*[@numFound='']",
-        "\"adamguk,\"", "author:adamguk, author:adamguk,*", "//*[@numFound='']"
+                        "author:adamsuk, author:adamsuk,*", "//*[@numFound='11']",
+        "\"adamguk,\"", "author:adamguk, author:adamguk,*", "//*[@numFound='11']"
     );
 
 
@@ -370,16 +429,16 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                 "author:adamcuk, m author:adamcuk, m* author:adamcuk,";
 
     testAuthorQuery(
-        "\"adamčuk, m\"", expected, "//*[@numFound='']",
-        "\"adamcuk, m\"", expected, "//*[@numFound='']",
-        "\"adamchuk, m\"", expected, "//*[@numFound='']",
-        "\"adamczuk, m\"", expected, "//*[@numFound='']",
-        "\"adamšuk, m\"", expected, "//*[@numFound='']",
-        "\"adamguk, m\"", expected, "//*[@numFound='']",
+        "\"adamčuk, m\"", expected, "//*[@numFound='40']",
+        "\"adamcuk, m\"", expected, "//*[@numFound='40']",
+        "\"adamchuk, m\"", expected, "//*[@numFound='40']",
+        "\"adamczuk, m\"", expected, "//*[@numFound='40']",
+        "\"adamšuk, m\"", expected, "//*[@numFound='40']",
+        "\"adamguk, m\"", expected, "//*[@numFound='40']",
 
-        "\"AdAmČuk, m\"", expected, "//*[@numFound='']", // just for fun
-        "\"ADAMČuk, m\"", expected, "//*[@numFound='']",
-        "\"AdAmCHuk, m\"", expected, "//*[@numFound='']"
+        "\"AdAmČuk, m\"", expected, "//*[@numFound='40']", // just for fun
+        "\"ADAMČuk, m\"", expected, "//*[@numFound='40']",
+        "\"AdAmCHuk, m\"", expected, "//*[@numFound='40']"
     );
 
 
@@ -408,24 +467,24 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     
     testAuthorQuery(
-        "\"adamčuk, molja\"", expected, "//*[@numFound='']",
-        "\"adamcuk, molja\"", expected, "//*[@numFound='']",
-        "\"adamchuk, molja\"", expected, "//*[@numFound='']",
-        "\"adamczuk, molja\"", expected, "//*[@numFound='']",
+        "\"adamčuk, molja\"", expected, "//*[@numFound='29']",
+        "\"adamcuk, molja\"", expected, "//*[@numFound='29']",
+        "\"adamchuk, molja\"", expected, "//*[@numFound='29']",
+        "\"adamczuk, molja\"", expected, "//*[@numFound='29']",
         // "adamčuk, molja" is not there (and cannot be, because it is not in
         // synonym map, but synonym "adamšuk, m" is found correctly)
         "\"adamšuk, molja\"", expected0 +
                               "author:adamšuk, molja author:adamšuk, molja * " +
                               "author:adamshuk, molja author:adamshuk, molja * " +
                               "author:adamsuk, molja author:adamsuk, molja *", 
-                              "//*[@numFound='']",
+                              "//*[@numFound='23']",
         // shorter by two variants, because "adamguk, molja" is already ascii form
         // it doesn't generate: "author:adamshuk, molja author:adamsuk, molja"
         // that is correct, because "adamšuk, m" is found and transliterated
         // "adamšuk, molja" simply isn't in any synonym list and we tehrefore cannot have it 
         "\"adamguk, molja\"", expected0 +
                               "author:adamguk, molja author:adamguk, molja *",
-                              "//*[@numFound='']"
+                              "//*[@numFound='23']"
     );
 
 
@@ -463,14 +522,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       
 
     testAuthorQuery(
-        "\"adamčuk, molja k\"", expected, "//*[@numFound='']",
-        "\"adamcuk, molja k\"", expected, "//*[@numFound='']",
-        "\"adamchuk, molja k\"", expected, "//*[@numFound='']",
+        "\"adamčuk, molja k\"", expected, "//*[@numFound='21']",
+        "\"adamcuk, molja k\"", expected, "//*[@numFound='21']",
+        "\"adamchuk, molja k\"", expected, "//*[@numFound='21']",
         // this contains 4 more entries because by default, the
         // transliteration produces only adam(c|ch)uk
         "\"adamczuk, molja k\"", expected + 
                           " author:adamczuk, m k author:adamczuk, m k* author:adamczuk, m author:adamczuk,", 
-                          "//*[@numFound='']",
+                          "//*[@numFound='21']",
         "\"adamšuk, molja k\"", 
             "author:adamšuk, molja k author:adamšuk, molja k* " +
             "author:adamšuk, m k author:adamšuk, m k* " +
@@ -487,14 +546,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             "author:adamshuk, molja " +
             "author:adamshuk, m " +
             "author:adamshuk,", 
-              "//*[@numFound='']",
+              "//*[@numFound='7']",
         "\"adamguk, molja k\"", 
             "author:adamguk, molja k author:adamguk, molja k* " +
             "author:adamguk, m k author:adamguk, m k* " +
             "author:adamguk, molja " +
             "author:adamguk, m " +
             "author:adamguk,", 
-            "//*[@numFound='']"
+            "//*[@numFound='7']"
     );
 
 
@@ -520,20 +579,21 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // plus whathever comes out of the original input transliteration/combination
     expected0 = "author:adamčuk, molja k author:adamčuk, molja k * " +
                 "author:adamčuk, m k author:adamčuk, m k * " +
-                "author:adamčuk, molja " + 
+                "author:adamčuk, molja " + // <- in my opinion this is wrong (too much recall), but it was requested
                 "author:adamčuk, m " + 
                 "author:adamčuk, " +
                 "author:adamcuk, molja k author:adamcuk, molja k * " +
                 "author:adamcuk, m k author:adamcuk, m k * " +
-                "author:adamcuk, molja " +  
+                "author:adamcuk, molja " +  // dtto
                 "author:adamcuk, m " +  
                 "author:adamcuk, " +
                 "author:adamchuk, molja k author:adamchuk, molja k * " +
                 "author:adamchuk, m k author:adamchuk, m k * " +
-                "author:adamchuk, molja " +  
+                "author:adamchuk, molja " +  //dtto
                 "author:adamchuk, m " + 
                 "author:adamchuk,";
     
+    //dumpDoc(null, "id", "author");
     
     testAuthorQuery(
         "\"adamčuk, molja karel\"", expected0 + " " + 
@@ -543,15 +603,15 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                     "author:adamchuk, m karel author:adamchuk, m karel * " +
                                     "author:adamcuk, molja karel author:adamcuk, molja karel * " +
                                     "author:adamcuk, m karel author:adamcuk, m karel *", 
-                                    "//*[@numFound='']",
+                                    "//*[@numFound='21']",
         "\"adamcuk, molja karel\"", expected0 + " " + 
                                     "author:adamcuk, molja karel author:adamcuk, molja karel * " +
                                     "author:adamcuk, m karel author:adamcuk, m karel *",
-                                    "//*[@numFound='']",
+                                    "//*[@numFound='17']", // because adamcuk, m\w* k\w* is not searched
         "\"adamchuk, molja karel\"", expected0 + " " + 
                                     "author:adamchuk, molja karel author:adamchuk, molja karel * " +
                                     "author:adamchuk, m karel author:adamchuk, m karel *",
-                                    "//*[@numFound='']",
+                                    "//*[@numFound='17']",
         "\"adamczuk, molja karel\"", expected0 + " " + 
                                     "author:adamczuk, molja karel author:adamczuk, molja karel * " +
                                     "author:adamczuk, m karel author:adamczuk, m karel * " +
@@ -559,7 +619,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                     "author:adamczuk, m k author:adamczuk, m k * " +
                                     "author:adamczuk, molja author:adamczuk, m " +
                                     "author:adamczuk,",
-                                    "//*[@numFound='']",
+                                    "//*[@numFound='15']",//-3 because "č"->"cz" normally doesn't exist
         // almost exactly the same as above, the only difference must be the space before *
         "\"adamšuk, molja karel\"", "author:adamšuk, molja k author:adamšuk, molja k * " +
                                     "author:adamšuk, m k author:adamšuk, m k * " +
@@ -583,7 +643,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                     "author:adamshuk, m karel author:adamshuk, m karel * " +
                                     "author:adamsuk, molja karel author:adamsuk, molja karel * " +
                                     "author:adamsuk, m karel author:adamsuk, m karel *",
-                                    "//*[@numFound='']",
+                                    "//*[@numFound='7']",
         "\"adamguk, molja karel\"", "author:adamguk, molja k author:adamguk, molja k * " +
                                     "author:adamguk, m k author:adamguk, m k * " +
                                     "author:adamguk, molja " +
@@ -592,7 +652,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                     // plus variants with karel
                                     "author:adamguk, molja karel author:adamguk, molja karel * " +
                                     "author:adamguk, m karel author:adamguk, m karel *",
-                                    "//*[@numFound='']"
+                                    "//*[@numFound='7']"
         
     );
     
@@ -630,80 +690,78 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * 
      */
 
-    expected = "author:adamčuk, m karel author:adamčuk, m karel * " +
-                "author:adamčuk, m k author:adamčuk, m k * " +
-                "author:adamčuk, m " + 
-                "author:adamčuk, " +
-                "author:adamcuk, m karel author:adamcuk, m karel * " +
-                "author:adamcuk, m k author:adamcuk, m k * " +
-                "author:adamcuk, m " +  
-                "author:adamcuk, " +
-                "author:adamchuk, m karel author:adamchuk, m karel * " +
-                "author:adamchuk, m k author:adamchuk, m k * " +
-                "author:adamchuk, m " + 
-                "author:adamchuk, " +
-                "author:/adamčuk, m\\w* karel/ " +
-                "author:/adamčuk, m\\w* karel .*/ " +
-                "author:/adamčuk, m\\w* k/ " +
-                "author:/adamčuk, m\\w* k .*/ " +
-                "author:/adamcuk, m\\w* karel/ " +
-                "author:/adamcuk, m\\w* karel .*/ " +
-                "author:/adamcuk, m\\w* k/ " +
-                "author:/adamcuk, m\\w* k .*/ " +
-                "author:/adamchuk, m\\w* karel/ " +
-                "author:/adamchuk, m\\w* karel .*/ " +
-                "author:/adamchuk, m\\w* k/ " +
-                "author:/adamchuk, m\\w* k .*/"
-                ;
     
-    
+    dumpDoc(null, "id", "author");
     //setDebug(true);
     testAuthorQuery(
-        "\"adamčuk, m karel\"", expected ,
-                                    "//*[@numFound='']",
-        "\"adamcuk, m karel\"", "author:adamcuk, m karel author:adamcuk, m karel * " +
-                                "author:/adamcuk, m\\w* karel/ author:/adamcuk, m\\w* karel .*/ " +
+        "\"adamčuk, m karel\"", "author:adamčuk, m karel author:adamčuk, m karel * " +
+                                "author:adamčuk, m k author:adamčuk, m k * " +
+                                "author:adamčuk, m " + 
+                                "author:adamčuk, " +
+                                "author:adamcuk, m karel author:adamcuk, m karel * " +
                                 "author:adamcuk, m k author:adamcuk, m k * " +
-                                "author:/adamcuk, m\\w* k/ author:/adamcuk, m\\w* k .*/ " +
+                                "author:adamcuk, m " +  
+                                "author:adamcuk, " +
+                                "author:adamchuk, m karel author:adamchuk, m karel * " +
+                                "author:adamchuk, m k author:adamchuk, m k * " +
+                                "author:adamchuk, m " + 
+                                "author:adamchuk, " +
+                                "author:/adamčuk, m[^ ]+ karel/ " +
+                                "author:/adamčuk, m[^ ]+ karel .*/ " +
+                                "author:/adamčuk, m[^ ]+ k/ " +
+                                "author:/adamčuk, m[^ ]+ k .*/ " +
+                                "author:/adamcuk, m[^ ]+ karel/ " +
+                                "author:/adamcuk, m[^ ]+ karel .*/ " +
+                                "author:/adamcuk, m[^ ]+ k/ " +
+                                "author:/adamcuk, m[^ ]+ k .*/ " +
+                                "author:/adamchuk, m[^ ]+ karel/ " +
+                                "author:/adamchuk, m[^ ]+ karel .*/ " +
+                                "author:/adamchuk, m[^ ]+ k/ " +
+                                "author:/adamchuk, m[^ ]+ k .*/" ,
+                                 "//*[@numFound='18']",
+        "\"adamcuk, m karel\"", "author:adamcuk, m karel author:adamcuk, m karel * " +
+                                "author:/adamcuk, m[^ ]+ karel/ author:/adamcuk, m[^ ]+ karel .*/ " +
+                                "author:adamcuk, m k author:adamcuk, m k * " +
+                                "author:/adamcuk, m[^ ]+ k/ author:/adamcuk, m[^ ]+ k .*/ " +
                                 "author:adamcuk, m author:adamcuk," ,
-                                "//*[@numFound='']",
+                                "//*[@numFound='6']",
         "\"adamchuk, m karel\"", "author:adamchuk, m karel author:adamchuk, m karel * " +
-                                 "author:/adamchuk, m\\w* karel/ author:/adamchuk, m\\w* karel .*/ " +
+                                 "author:/adamchuk, m[^ ]+ karel/ author:/adamchuk, m[^ ]+ karel .*/ " +
                                  "author:adamchuk, m k author:adamchuk, m k * " +
-                                 "author:/adamchuk, m\\w* k/ author:/adamchuk, m\\w* k .*/ " +
+                                 "author:/adamchuk, m[^ ]+ k/ author:/adamchuk, m[^ ]+ k .*/ " +
                                  "author:adamchuk, m author:adamchuk," ,
-                                 "//*[@numFound='']",
+                                 "//*[@numFound='6']",
         "\"adamczuk, m karel\"", "author:adamczuk, m karel author:adamczuk, m karel * " +
-                                 "author:/adamczuk, m\\w* karel/ author:/adamczuk, m\\w* karel .*/ " +
+                                 "author:/adamczuk, m[^ ]+ karel/ author:/adamczuk, m[^ ]+ karel .*/ " +
                                  "author:adamczuk, m k author:adamczuk, m k * " +
-                                 "author:/adamczuk, m\\w* k/ author:/adamczuk, m\\w* k .*/ " +
+                                 "author:/adamczuk, m[^ ]+ k/ author:/adamczuk, m[^ ]+ k .*/ " +
                                  "author:adamczuk, m author:adamczuk," ,
-                                 "//*[@numFound='']",
+                                 "//*[@numFound='0']",
         "\"adamšuk, m karel\"", "author:adamšuk, m karel author:adamšuk, m karel * " +
-        		                    "author:/adamšuk, m\\w* karel/ author:/adamšuk, m\\w* karel .*/ " +
+        		                    "author:/adamšuk, m[^ ]+ karel/ author:/adamšuk, m[^ ]+ karel .*/ " +
         		                    "author:adamšuk, m k author:adamšuk, m k * " +
-        		                    "author:/adamšuk, m\\w* k/ author:/adamšuk, m\\w* k .*/ " +
+        		                    "author:/adamšuk, m[^ ]+ k/ author:/adamšuk, m[^ ]+ k .*/ " +
         		                    "author:adamšuk, m " +
         		                    "author:adamšuk, " +
         		                    "author:adamsuk, m karel author:adamsuk, m karel * " +
-        		                    "author:/adamsuk, m\\w* karel/ author:/adamsuk, m\\w* karel .*/ " +
+        		                    "author:/adamsuk, m[^ ]+ karel/ author:/adamsuk, m[^ ]+ karel .*/ " +
         		                    "author:adamsuk, m k author:adamsuk, m k * " +
-        		                    "author:/adamsuk, m\\w* k/ author:/adamsuk, m\\w* k .*/ " +
+        		                    "author:/adamsuk, m[^ ]+ k/ author:/adamsuk, m[^ ]+ k .*/ " +
         		                    "author:adamsuk, m " +
         		                    "author:adamsuk, " +
         		                    "author:adamshuk, m karel author:adamshuk, m karel * " +
-        		                    "author:/adamshuk, m\\w* karel/ author:/adamshuk, m\\w* karel .*/ " +
+        		                    "author:/adamshuk, m[^ ]+ karel/ author:/adamshuk, m[^ ]+ karel .*/ " +
         		                    "author:adamshuk, m k author:adamshuk, m k * " +
-        		                    "author:/adamshuk, m\\w* k/ author:/adamshuk, m\\w* k .*/ " +
+        		                    "author:/adamshuk, m[^ ]+ k/ author:/adamshuk, m[^ ]+ k .*/ " +
         		                    "author:adamshuk, m " +
         		                    "author:adamshuk,",
-                                "//*[@numFound='']",
+                                "//*[@numFound='6']",
         "\"adamguk, m karel\"", "author:adamguk, m karel author:adamguk, m karel * " +
-                                "author:/adamguk, m\\w* karel/ author:/adamguk, m\\w* karel .*/ " +
+                                "author:/adamguk, m[^ ]+ karel/ author:/adamguk, m[^ ]+ karel .*/ " +
                                 "author:adamguk, m k author:adamguk, m k * " +
-                                "author:/adamguk, m\\w* k/ author:/adamguk, m\\w* k .*/ " +
+                                "author:/adamguk, m[^ ]+ k/ author:/adamguk, m[^ ]+ k .*/ " +
                                 "author:adamguk, m author:adamguk," ,
-                                "//*[@numFound='']"
+                                "//*[@numFound='6']"
         
     );
     
@@ -730,47 +788,64 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      */
 
     expected = "author:adamčuk, a b author:adamčuk, a b* " +
-    		        "author:/adamčuk, a\\w* b/ author:/adamčuk, a\\w* b .*/ " +
+    		        "author:/adamčuk, a[^ ]+ b/ author:/adamčuk, a[^ ]+ b .*/ " +
     		        "author:adamčuk, a " +
     		        "author:adamčuk, " +
     		        "author:adamchuk, a b author:adamchuk, a b* " +
-    		        "author:/adamchuk, a\\w* b/ author:/adamchuk, a\\w* b .*/ " +
+    		        "author:/adamchuk, a[^ ]+ b/ author:/adamchuk, a[^ ]+ b .*/ " +
     		        "author:adamchuk, a " +
     		        "author:adamchuk, " +
     		        "author:adamcuk, a b author:adamcuk, a b* " +
-    		        "author:/adamcuk, a\\w* b/ author:/adamcuk, a\\w* b .*/ " +
+    		        "author:/adamcuk, a[^ ]+ b/ author:/adamcuk, a[^ ]+ b .*/ " +
     		        "author:adamcuk, a " +
     		        "author:adamcuk,"
                 ;
     
     
     testAuthorQuery(
+         // 1  Adamčuk,
+         // 20  Adamcuk,
+         // 40  Adamchuk,
         "\"adamčuk, a b\"", expected ,
-                            "//*[@numFound='']",
+                            "//*[@numFound='3']",
+                            
         "\"adamcuk, a b\"", expected ,
-                            "//*[@numFound='']",
+                            "//*[@numFound='3']",
         "\"adamchuk, a b\"", expected ,
-                            "//*[@numFound='']",
+                            "//*[@numFound='3']",
         "\"adamczuk, a b\"", expected ,
-                             "//*[@numFound='']",
+                             "//*[@numFound='3']",
+                             
         "\"adamšuk, m k\"", "author:adamšuk, m k author:adamšuk, m k* " +
-        		                "author:/adamšuk, m\\w* k/ author:/adamšuk, m\\w* k .*/ " +
+        		                "author:/adamšuk, m[^ ]+ k/ author:/adamšuk, m[^ ]+ k .*/ " +
         		                "author:adamšuk, m " +
         		                "author:adamšuk, " +
         		                "author:adamshuk, m k author:adamshuk, m k* " +
-        		                "author:/adamshuk, m\\w* k/ author:/adamshuk, m\\w* k .*/ " +
+        		                "author:/adamshuk, m[^ ]+ k/ author:/adamshuk, m[^ ]+ k .*/ " +
         		                "author:adamshuk, m " +
         		                "author:adamshuk, " +
         		                "author:adamsuk, m k author:adamsuk, m k* " +
-        		                "author:/adamsuk, m\\w* k/ author:/adamsuk, m\\w* k .*/ " +
+        		                "author:/adamsuk, m[^ ]+ k/ author:/adamsuk, m[^ ]+ k .*/ " +
         		                "author:adamsuk, m " +
         		                "author:adamsuk,",
-                            "//*[@numFound='']",
+                            "//*[@numFound='5']"
+            		             // 87  Adamshuk, M K
+            		             // 80  Adamshuk,
+            		             // 81  Adamshuk, M.
+            		             // 85  Adamshuk, M Karel
+            		             // 86  Adamshuk, Molja K
+
+        		                ,
         "\"adamguk, m k\"", "author:adamguk, m k author:adamguk, m k* " +
-        		                "author:/adamguk, m\\w* k/ author:/adamguk, m\\w* k .*/ " +
+        		                "author:/adamguk, m[^ ]+ k/ author:/adamguk, m[^ ]+ k .*/ " +
         		                "author:adamguk, m " +
         		                "author:adamguk," ,
-                            "//*[@numFound='']"
+                            "//*[@numFound='5']"
+            		             // 67  Adamguk, M K
+            		             // 60  Adamguk,
+            		             // 61  Adamguk, M.
+            		             // 65  Adamguk, M Karel
+            		             // 66  Adamguk, Molja K
         
     );
     
@@ -787,19 +862,52 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             "\"adamčuk, k\"", "author:adamčuk, k author:adamčuk, k* author:adamčuk, " +
                                "author:adamchuk, k author:adamchuk, k* author:adamchuk, " +
                                "author:adamcuk, k author:adamcuk, k* author:adamcuk,", 
-                               "//*[@numFound='']",
+                               "//*[@numFound='12']"
+                            // 1  Adamčuk,
+                            // 20  Adamcuk,
+                            // 40  Adamchuk,
+                            // 9  Adamčuk, Karel Molja
+                            // 10  Adamčuk, Karel M
+                            // 11  Adamčuk, K Molja
+                            // 28  Adamcuk, Karel Molja
+                            // 29  Adamcuk, Karel M
+                            // 30  Adamcuk, K Molja
+                            // 48  Adamchuk, Karel Molja
+                            // 49  Adamchuk, Karel M
+                            // 50  Adamchuk, K Molja
+                               ,
             "\"adamcuk, k\"", "author:adamcuk, k author:adamcuk, k* author:adamcuk,", 
-                               "//*[@numFound='']",
+                               "//*[@numFound='4']"
+                           // 20  Adamcuk,
+                           // 28  Adamcuk, Karel Molja
+                           // 29  Adamcuk, Karel M
+                           // 30  Adamcuk, K Molja
+                              ,
             "\"adamchuk, k\"", "author:adamchuk, k author:adamchuk, k* author:adamchuk,", 
-                                "//*[@numFound='']",
+                                "//*[@numFound='4']"
+                           // 40  Adamchuk,
+                           // 48  Adamchuk, Karel Molja
+                           // 49  Adamchuk, Karel M
+                           // 50  Adamchuk, K Molja
+                             ,
             "\"adamczuk, k\"", "author:adamczuk, k author:adamczuk, k* author:adamczuk,", 
-                                "//*[@numFound='']",
+                                "//*[@numFound='0']"
+                              ,
             "\"adamšuk, k\"", "author:adamšuk, k author:adamšuk, k* author:adamšuk, " +
                                "author:adamsuk, k author:adamsuk, k* author:adamsuk, " +
                                "author:adamshuk, k author:adamshuk, k* author:adamshuk,", 
-                               "//*[@numFound='']",
+                               "//*[@numFound='4']"
+                               // 80  Adamshuk,
+                               // 88  Adamshuk, Karel Molja
+                               // 89  Adamshuk, Karel M
+                               // 90  Adamshuk, K Molja
+                               ,
             "\"adamguk, k\"", "author:adamguk, k author:adamguk, k* author:adamguk,", 
-                               "//*[@numFound='']"
+                               "//*[@numFound='4']"
+                               // 60  Adamguk,
+                               // 68  Adamguk, Karel Molja
+                               // 69  Adamguk, Karel M
+                               // 70  Adamguk, K Molja
     );
     
     
@@ -818,7 +926,20 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             		                  "author:adamcuk, k author:adamcuk, k * author:adamcuk, " +
             		                  "author:adamchuk, karel author:adamchuk, karel * " +
             		                  "author:adamchuk, k author:adamchuk, k * author:adamchuk,", 
-                               "//*[@numFound='']",
+                               "//*[@numFound='12']"
+            		               // 1  Adamčuk,
+            		               // 20  Adamcuk,
+            		               // 40  Adamchuk,
+            		               // 9  Adamčuk, Karel Molja
+            		               // 10  Adamčuk, Karel M
+            		               // 11  Adamčuk, K Molja
+            		               // 28  Adamcuk, Karel Molja
+            		               // 29  Adamcuk, Karel M
+            		               // 30  Adamcuk, K Molja
+            		               // 48  Adamchuk, Karel Molja
+            		               // 49  Adamchuk, Karel M
+            		               // 50  Adamchuk, K Molja
+            		                  ,
             "\"adamcuk, karel\"", "author:adamcuk, karel author:adamcuk, karel * " +
                                   "author:adamcuk, k author:adamcuk, k * author:adamcuk,",
                                "//*[@numFound='']",
@@ -961,38 +1082,38 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     testAuthorQuery(
             "\"adamčuk, k m\"", "author:adamčuk, k m author:adamčuk, k m* " +
-            		                "author:/adamčuk, k\\w* m/ author:/adamčuk, k\\w* m .*/ " +
+            		                "author:/adamčuk, k[^ ]+ m/ author:/adamčuk, k[^ ]+ m .*/ " +
             		                "author:adamčuk, k author:adamčuk, author:adamchuk, k m " +
-            		                "author:adamchuk, k m* author:/adamchuk, k\\w* m/ " +
-            		                "author:/adamchuk, k\\w* m .*/ author:adamchuk, k " +
+            		                "author:adamchuk, k m* author:/adamchuk, k[^ ]+ m/ " +
+            		                "author:/adamchuk, k[^ ]+ m .*/ author:adamchuk, k " +
             		                "author:adamchuk, author:adamcuk, k m author:adamcuk, k m* " +
-            		                "author:/adamcuk, k\\w* m/ author:/adamcuk, k\\w* m .*/ " +
+            		                "author:/adamcuk, k[^ ]+ m/ author:/adamcuk, k[^ ]+ m .*/ " +
             		                "author:adamcuk, k author:adamcuk,", 
                                "//*[@numFound='']",
             "\"adamcuk, k m\"", "author:adamcuk, k m author:adamcuk, k m* " +
-            		                "author:/adamcuk, k\\w* m/ author:/adamcuk, k\\w* m .*/ " +
+            		                "author:/adamcuk, k[^ ]+ m/ author:/adamcuk, k[^ ]+ m .*/ " +
                                 "author:adamcuk, k author:adamcuk,", 
                                "//*[@numFound='']",
             "\"adamchuk, k m\"", "author:adamchuk, k m author:adamchuk, k m* " +
-            		                 "author:/adamchuk, k\\w* m/ author:/adamchuk, k\\w* m .*/ " +
+            		                 "author:/adamchuk, k[^ ]+ m/ author:/adamchuk, k[^ ]+ m .*/ " +
                                  "author:adamchuk, k author:adamchuk,", 
                                 "//*[@numFound='']",
             "\"adamczuk, k m\"", "author:adamczuk, k m author:adamczuk, k m* " +
-            		                 "author:/adamczuk, k\\w* m/ author:/adamczuk, k\\w* m .*/ " +
+            		                 "author:/adamczuk, k[^ ]+ m/ author:/adamczuk, k[^ ]+ m .*/ " +
                                  "author:adamczuk, k author:adamczuk,", 
                                  "//*[@numFound='']",
             "\"adamšuk, k m\"", "author:adamšuk, k m author:adamšuk, k m* " +
-            		                "author:/adamšuk, k\\w* m/ author:/adamšuk, k\\w* m .*/ " +
+            		                "author:/adamšuk, k[^ ]+ m/ author:/adamšuk, k[^ ]+ m .*/ " +
             		                "author:adamšuk, k author:adamšuk, " +
             		                "author:adamshuk, k m author:adamshuk, k m* " +
-            		                "author:/adamshuk, k\\w* m/ author:/adamshuk, k\\w* m .*/ " +
+            		                "author:/adamshuk, k[^ ]+ m/ author:/adamshuk, k[^ ]+ m .*/ " +
             		                "author:adamshuk, k author:adamshuk, " +
             		                "author:adamsuk, k m author:adamsuk, k m* " +
-            		                "author:/adamsuk, k\\w* m/ author:/adamsuk, k\\w* m .*/ " +
+            		                "author:/adamsuk, k[^ ]+ m/ author:/adamsuk, k[^ ]+ m .*/ " +
             		                "author:adamsuk, k author:adamsuk,", 
                                "//*[@numFound='']",
             "\"adamguk, k m\"", "author:adamguk, k m author:adamguk, k m* " +
-                                "author:/adamguk, k\\w* m/ author:/adamguk, k\\w* m .*/ " +
+                                "author:/adamguk, k[^ ]+ m/ author:/adamguk, k[^ ]+ m .*/ " +
                                 "author:adamguk, k author:adamguk,", 
                                "//*[@numFound='']"
     );
@@ -1008,57 +1129,57 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     testAuthorQuery(
             "\"adamčuk, k molja\"", "author:adamčuk, k molja author:adamčuk, k molja * " +
-                                		"author:/adamčuk, k\\w* molja/ author:/adamčuk, k\\w* molja .*/ " +
+                                		"author:/adamčuk, k[^ ]+ molja/ author:/adamčuk, k[^ ]+ molja .*/ " +
                                 		"author:adamčuk, k m author:adamčuk, k m * " +
-                                		"author:/adamčuk, k\\w* m/ author:/adamčuk, k\\w* m .*/ " +
+                                		"author:/adamčuk, k[^ ]+ m/ author:/adamčuk, k[^ ]+ m .*/ " +
                                 		"author:adamčuk, k author:adamčuk, " +
                                 		"author:adamcuk, k molja author:adamcuk, k molja * " +
-                                		"author:/adamcuk, k\\w* molja/ author:/adamcuk, k\\w* molja .*/ " +
+                                		"author:/adamcuk, k[^ ]+ molja/ author:/adamcuk, k[^ ]+ molja .*/ " +
                                 		"author:adamcuk, k m author:adamcuk, k m * " +
-                                		"author:/adamcuk, k\\w* m/ author:/adamcuk, k\\w* m .*/ " +
+                                		"author:/adamcuk, k[^ ]+ m/ author:/adamcuk, k[^ ]+ m .*/ " +
                                 		"author:adamcuk, k author:adamcuk, " +
                                 		"author:adamchuk, k molja author:adamchuk, k molja * " +
-                                		"author:/adamchuk, k\\w* molja/ author:/adamchuk, k\\w* molja .*/ " +
+                                		"author:/adamchuk, k[^ ]+ molja/ author:/adamchuk, k[^ ]+ molja .*/ " +
                                 		"author:adamchuk, k m author:adamchuk, k m * " +
-                                		"author:/adamchuk, k\\w* m/ author:/adamchuk, k\\w* m .*/ " +
+                                		"author:/adamchuk, k[^ ]+ m/ author:/adamchuk, k[^ ]+ m .*/ " +
                                 		"author:adamchuk, k author:adamchuk,", 
                                "//*[@numFound='']",
             "\"adamcuk, k molja\"", 
                                     "author:adamcuk, k molja author:adamcuk, k molja * " +
-                                    "author:/adamcuk, k\\w* molja/ author:/adamcuk, k\\w* molja .*/ " +
+                                    "author:/adamcuk, k[^ ]+ molja/ author:/adamcuk, k[^ ]+ molja .*/ " +
                                     "author:adamcuk, k m author:adamcuk, k m * " +
-                                    "author:/adamcuk, k\\w* m/ author:/adamcuk, k\\w* m .*/ " +
+                                    "author:/adamcuk, k[^ ]+ m/ author:/adamcuk, k[^ ]+ m .*/ " +
                                     "author:adamcuk, k author:adamcuk,", 
                                "//*[@numFound='']",
             "\"adamchuk, k molja\"", "author:adamchuk, k molja author:adamchuk, k molja * " +
-                                    "author:/adamchuk, k\\w* molja/ author:/adamchuk, k\\w* molja .*/ " +
+                                    "author:/adamchuk, k[^ ]+ molja/ author:/adamchuk, k[^ ]+ molja .*/ " +
                                     "author:adamchuk, k m author:adamchuk, k m * " +
-                                    "author:/adamchuk, k\\w* m/ author:/adamchuk, k\\w* m .*/ " +
+                                    "author:/adamchuk, k[^ ]+ m/ author:/adamchuk, k[^ ]+ m .*/ " +
                                     "author:adamchuk, k author:adamchuk,", 
                                 "//*[@numFound='']",
             "\"adamczuk, k molja\"", "author:adamczuk, k molja author:adamczuk, k molja * " +
-                                    "author:/adamczuk, k\\w* molja/ author:/adamczuk, k\\w* molja .*/ " +
+                                    "author:/adamczuk, k[^ ]+ molja/ author:/adamczuk, k[^ ]+ molja .*/ " +
                                     "author:adamczuk, k m author:adamczuk, k m * " +
-                                    "author:/adamczuk, k\\w* m/ author:/adamczuk, k\\w* m .*/ " +
+                                    "author:/adamczuk, k[^ ]+ m/ author:/adamczuk, k[^ ]+ m .*/ " +
                                     "author:adamczuk, k author:adamczuk,", 
                                  "//*[@numFound='']",
             "\"adamšuk, k molja\"", "author:adamšuk, k molja author:adamšuk, k molja * " +
-                                		"author:/adamšuk, k\\w* molja/ author:/adamšuk, k\\w* molja .*/ " +
-                                		"author:adamšuk, k m author:adamšuk, k m * author:/adamšuk, k\\w* m/ " +
-                                		"author:/adamšuk, k\\w* m .*/ author:adamšuk, k author:adamšuk, " +
+                                		"author:/adamšuk, k[^ ]+ molja/ author:/adamšuk, k[^ ]+ molja .*/ " +
+                                		"author:adamšuk, k m author:adamšuk, k m * author:/adamšuk, k[^ ]+ m/ " +
+                                		"author:/adamšuk, k[^ ]+ m .*/ author:adamšuk, k author:adamšuk, " +
                                 		"author:adamsuk, k molja author:adamsuk, k molja * " +
-                                		"author:/adamsuk, k\\w* molja/ author:/adamsuk, k\\w* molja .*/ " +
-                                		"author:adamsuk, k m author:adamsuk, k m * author:/adamsuk, k\\w* m/ " +
-                                		"author:/adamsuk, k\\w* m .*/ author:adamsuk, k author:adamsuk, " +
+                                		"author:/adamsuk, k[^ ]+ molja/ author:/adamsuk, k[^ ]+ molja .*/ " +
+                                		"author:adamsuk, k m author:adamsuk, k m * author:/adamsuk, k[^ ]+ m/ " +
+                                		"author:/adamsuk, k[^ ]+ m .*/ author:adamsuk, k author:adamsuk, " +
                                 		"author:adamshuk, k molja author:adamshuk, k molja * " +
-                                		"author:/adamshuk, k\\w* molja/ author:/adamshuk, k\\w* molja .*/ " +
-                                		"author:adamshuk, k m author:adamshuk, k m * author:/adamshuk, k\\w* m/ " +
-                                		"author:/adamshuk, k\\w* m .*/ author:adamshuk, k author:adamshuk,", 
+                                		"author:/adamshuk, k[^ ]+ molja/ author:/adamshuk, k[^ ]+ molja .*/ " +
+                                		"author:adamshuk, k m author:adamshuk, k m * author:/adamshuk, k[^ ]+ m/ " +
+                                		"author:/adamshuk, k[^ ]+ m .*/ author:adamshuk, k author:adamshuk,", 
                                "//*[@numFound='']",
             "\"adamguk, k molja\"", "author:adamguk, k molja author:adamguk, k molja * " +
-                                		"author:/adamguk, k\\w* molja/ author:/adamguk, k\\w* molja .*/ " +
+                                		"author:/adamguk, k[^ ]+ molja/ author:/adamguk, k[^ ]+ molja .*/ " +
                                 		"author:adamguk, k m author:adamguk, k m * " +
-                                		"author:/adamguk, k\\w* m/ author:/adamguk, k\\w* m .*/ " +
+                                		"author:/adamguk, k[^ ]+ m/ author:/adamguk, k[^ ]+ m .*/ " +
                                 		"author:adamguk, k author:adamguk,", 
                                "//*[@numFound='']"
     );
@@ -1249,10 +1370,22 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assert vals.length%3==0;
     for (int i=0;i<vals.length;i=i+3) {
       System.out.println("Running test for " + String.format("author:%s", vals[i]));
+      String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("author:%s", vals[i])));
+      
+      StringBuffer out = new StringBuffer();
+      Matcher m = Pattern.compile("numFound=\\\"(\\d+)").matcher(response);
+      Matcher m2 = Pattern.compile("<doc><str name=\\\"id\\\">(\\d+)</str><arr name=\\\"author\\\"><str>([^<]*)</str></arr></doc>").matcher(response);
+      m.find();
+      out.append("numFound " + m.group(1) + "\n");
+      while (m2.find()) {
+        out.append("// " + m2.group(1) + "\t" + m2.group(2) + "\n");
+      }
+      System.out.println(out.toString());
+      
       assertQueryEquals(req("qt", "aqp", "q", String.format("author:%s", vals[i])),
           vals[i+1],
           null);
-      //assertQ(req("q", String.format("author:%s", vals[i])), vals[i+2].split(";"));
+      assertQ(req("fl", "id,author", "rows", "100", "q", String.format("author:%s", vals[i])), vals[i+2].split(";"));
     }
 
   }
