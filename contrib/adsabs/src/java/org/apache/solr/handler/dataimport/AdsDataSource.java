@@ -1,10 +1,13 @@
 package org.apache.solr.handler.dataimport;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.solr.schema.IndexSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +40,19 @@ public class AdsDataSource extends InvenioDataSource {
 	private final static String MONGO_FIELD_NAME_ATTR = "mongoFieldName";
 	private final static String MONGO_FIELD_ATTR = "mongoField";
 	
+	private final static String FACET_HIERARCHY_FIELD_ATTR = "facetHierarchyField";
+	private final static String FACET_HIERARCHY_FIELD_NAMES_ATTR = "fields";
+	private final static String FACET_HIERARCHY_FIELD_MULTIVALUE_ATTR = "multiValuedSource";
+	private final static String FACET_HIERARCHIES_PROP = "facetHierarchies";
+	
 	private String mongoDBName;
 	private String mongoCollectionName;
 	private String mongoDocIdField;
 	private String mongoHost;
 	private String mongoPort;
+	
+	private String facetHierarchiesProp;
+	private List<FacetHierarchy> facetHierarchies;
 	
 	private JdbcDataSource jdbc;
 	private BasicDBObject mongoFields;
@@ -50,7 +61,11 @@ public class AdsDataSource extends InvenioDataSource {
 	@Override
 	public void init(Context context, Properties initProps) {
 		super.init(context, initProps);
-		
+		initMongoFields(context, initProps);
+		initFacetHierarchies(context, initProps);
+	}
+	
+	private void initMongoFields(Context context, Properties initProps) {
 		mongoDocIdField = initProps.getProperty(MONGO_DOC_ID);
 		mongoHost = initProps.getProperty(MONGO_HOST);
 		mongoPort = initProps.getProperty(MONGO_PORT);
@@ -76,6 +91,43 @@ public class AdsDataSource extends InvenioDataSource {
 		}
 	}
 	
+	private void initFacetHierarchies(Context context, Properties initProps) {
+		
+		List<Map<String, String>> allFields = context.getAllEntityFields();
+		facetHierarchies = new ArrayList<FacetHierarchy>();
+		
+		for (Map<String, String> fieldDef : allFields) {
+			if ("true".equals(fieldDef.get(FACET_HIERARCHY_FIELD_ATTR))) {
+				String columnName = fieldDef.get(FIELD_COLUMN_ATTR);
+				String hierarchyFields = fieldDef.get(FACET_HIERARCHY_FIELD_NAMES_ATTR);
+				boolean multiValueSource = "true".equals(fieldDef.get(FACET_HIERARCHY_FIELD_MULTIVALUE_ATTR));
+				
+				String[] sourceFields = fieldDef.get(FACET_HIERARCHY_FIELD_NAMES_ATTR).split(",");
+				if (sourceFields.length < 2) {
+					throw new RuntimeException("Facet hierarchy requires > 1 field");
+				}
+				
+				FacetHierarchy facetHierarchy = new FacetHierarchy(columnName, sourceFields, multiValueSource);
+				facetHierarchies.add(facetHierarchy);
+			}
+		}
+		
+//		facetHierarchiesProp = initProps.getProperty(FACET_HIERARCHIES_PROP, null);
+//		if (facetHierarchiesProp == null) return;
+//		
+//		facetHierarchies = new ArrayList<FacetHierarchy>();
+//		IndexSchema schema = context.getSolrCore().getSchema();
+//		
+//		for (String s : facetHierarchiesProp.split(",")) {
+//			String[] fields = s.split(":");
+//			if (fields.length < 2) {
+//				throw new RuntimeException("Facet hierarchy requires > 1 field");
+//			}
+//			FacetHierarchy facetHierarchy = new FacetHierarchy(fields, schema);
+//			facetHierarchies.add(facetHierarchy);
+//		}
+	}
+	
   public void destroy() {
     System.out.println("destroy" + Thread.currentThread());
   }
@@ -84,6 +136,10 @@ public class AdsDataSource extends InvenioDataSource {
   public void close() {
     super.close();
   }
+	
+	public List<FacetHierarchy> getFacetHierarchies() {
+		return facetHierarchies;
+	}
 	
 	public Map<String, String> getFieldColumnMap() {
 		return fieldColumnMap;
@@ -108,5 +164,5 @@ public class AdsDataSource extends InvenioDataSource {
 	public String getMongoDocIdField() {
 		return mongoDocIdField;
 	}
-
+	
 }
