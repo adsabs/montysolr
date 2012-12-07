@@ -323,6 +323,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "116", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Forman, Christopher"));
     assertU(adoc(F.ID, "117", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Forman, C"));
     
+    
+    assertU(adoc(F.ID, "130", F.BIBCODE, "xxxxxxxxxxxxx", 
+        F.AUTHOR, "Author, A",
+        F.AUTHOR, "Author, B",
+        F.AUTHOR, "Author, C"
+    ));
+    
+    
     assertU(commit());
 
     // persist the transliteration map after new docs were indexed
@@ -344,6 +352,15 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // TODO: force reload of the synonym map
     //h.getCoreContainer().reload("collection1");
 
+    
+    // test proper order of authors
+    //System.out.println(h.query(req("q", String.format("%s:130", F.ID))));
+    assertQ(req("q", String.format("%s:130", F.ID)), "//*[@numFound='1']");
+    assert h.query(req("q", String.format("%s:130", F.ID)))
+      .contains("<arr name=\"author\"><str>Author, A</str><str>Author, B</str><str>Author, C</str></arr>");
+    
+    
+    
     /*
 		 Each test case has two branches, one representing the full utf-8 form (with ascii chars),
 		 the other the ascii downgraded form. No matter which, the query must be expanded in both

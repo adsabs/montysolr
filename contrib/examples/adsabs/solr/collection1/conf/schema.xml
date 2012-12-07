@@ -46,6 +46,7 @@
             tokenTypes="AUTHOR_TRANSLITERATED"
             emitTokens="false"/>
         <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
