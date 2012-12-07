@@ -46,7 +46,7 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     while (ts.incrementToken() != false) {
       //pass
     }
-    
+    ts.reset();
 
     WriteableSynonymMap synMap = factory.getSynonymMap();
     assertTrue(synMap.containsKey("MULLER, BILL"));
@@ -85,6 +85,7 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     while (ts.incrementToken() != false) {
       //pass
     }
+    ts.reset();
 
     assertFalse(synMap.containsKey("MÜLLER, BILL"));
     assertFalse(synMap.containsKey("MÜller, Bill"));
