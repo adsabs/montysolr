@@ -11,7 +11,7 @@
             pk="bibcode"
             url="${dataimporter.request.url}"
             processor="XPathEntityProcessor"
-            transformer="TemplateTransformer,RegexTransformer,BibstemTransformer,MongoTransformer"
+	        transformer="TemplateTransformer,RegexTransformer,BibstemTransformer,MongoTransformer,FacetHierarchyTransformer"
             forEach="/collection/record"
             flatten="false"
             xsl="data-import.xsl"
@@ -164,6 +164,12 @@
         <field column="bibgroup"
             xpath="/collection/record/datafield[@tag='980']/subfield[@code='b']"/>
         
+        <field column="data"
+            xpath="/collection/record/datafield[@tag='980']/subfield[@code='s']"/>
+        
+        <field column="vizier"
+            xpath="/collection/record/datafield[@tag='980']/subfield[@code='v']"/>
+        
         <!--  this is not a timestamp, but st like a signature of a records extracted
               from ADS (maybe can be useful for comparing imports) -->
         <!--  switching it off until needed, it is very technical data
@@ -207,6 +213,17 @@
         <field column="cite_read_boost" mongoField="true" />
         <field column="citation_count" mongoField="true" />
         <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
+        
+        <!-- 
+            Fields marked as facetHierarchyField will be processed by the FacetHierarchyTransformer.
+            "column" indicates the new column that will be created based on the values in "fields".
+            the hierarchy will be constructed in the order the "fields" are listed.
+            multiValuedSource="true" is necessary if the source "fields" are multiValued.
+            Because the transformer inserts an array of values for the hierarchical facet,
+            the "column" must be configured as multiValued="true" in schema.xml
+         -->
+        <field facetHierarchyField="true" column="author_facet_hier" fields="author_norm,author" multiValuedSource="true" />
+        <field facetHierarchyField="true" column="first_author_facet_hier" fields="first_author_norm,first_author" multiValuedSource="false" />
         
         </entity>
         

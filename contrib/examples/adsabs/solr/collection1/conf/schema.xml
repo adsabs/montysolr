@@ -689,6 +689,8 @@
    <field name="author" type="author" indexed="true" stored="true" multiValued="true"/>
    <field name="author_norm" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
    <field name="author_facet" type="string" indexed="true" stored="${storeAll:false}" multiValued="true"/>
+   <field name="author_facet_hier" type="string" indexed="true" stored="${storeAll:false}" multiValued="true"/>
+   <field name="first_author_facet_hier" type="string" indexed="true" stored="${storeAll:false}" multiValued="true"/>
    
    <!-- tmp fix for markus, should be handled with positional search -->
    <field name="first_author" type="author" indexed="true" stored="true"/>
