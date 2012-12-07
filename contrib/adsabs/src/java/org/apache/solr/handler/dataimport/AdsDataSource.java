@@ -43,7 +43,6 @@ public class AdsDataSource extends InvenioDataSource {
 	private final static String FACET_HIERARCHY_FIELD_ATTR = "facetHierarchyField";
 	private final static String FACET_HIERARCHY_FIELD_NAMES_ATTR = "fields";
 	private final static String FACET_HIERARCHY_FIELD_MULTIVALUE_ATTR = "multiValuedSource";
-	private final static String FACET_HIERARCHIES_PROP = "facetHierarchies";
 	
 	private String mongoDBName;
 	private String mongoCollectionName;
@@ -51,7 +50,6 @@ public class AdsDataSource extends InvenioDataSource {
 	private String mongoHost;
 	private String mongoPort;
 	
-	private String facetHierarchiesProp;
 	private List<FacetHierarchy> facetHierarchies;
 	
 	private JdbcDataSource jdbc;
@@ -111,21 +109,6 @@ public class AdsDataSource extends InvenioDataSource {
 				facetHierarchies.add(facetHierarchy);
 			}
 		}
-		
-//		facetHierarchiesProp = initProps.getProperty(FACET_HIERARCHIES_PROP, null);
-//		if (facetHierarchiesProp == null) return;
-//		
-//		facetHierarchies = new ArrayList<FacetHierarchy>();
-//		IndexSchema schema = context.getSolrCore().getSchema();
-//		
-//		for (String s : facetHierarchiesProp.split(",")) {
-//			String[] fields = s.split(":");
-//			if (fields.length < 2) {
-//				throw new RuntimeException("Facet hierarchy requires > 1 field");
-//			}
-//			FacetHierarchy facetHierarchy = new FacetHierarchy(fields, schema);
-//			facetHierarchies.add(facetHierarchy);
-//		}
 	}
 	
   public void destroy() {
