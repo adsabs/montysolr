@@ -36,22 +36,21 @@
         <field column="lang" 
             xpath="/collection/record/datafield[@tag='041']/subfield[@code='a']" />
         
-        <field column="author"        
+        <!-- note, setting the column="author" would result in duplication, DIH
+             creates two separate fields with the same name and they get merged
+             into one field (duplication happens) - use copyField instead -->
+        <field column="a_100"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='a']" />
-        <field column="author"        
+        <field column="a_700"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='a']" />
         
-        <field column="first_author"        
-            xpath="/collection/record/datafield[@tag='100']/subfield[@code='a']" />
-            
+        
         <!--  normalized author names -->
-        <field column="author_norm"        
+        <field column="a_100_norm"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='b']" />
-        <field column="author_norm"        
+        <field column="a_700_norm"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='b']" />
             
-        <field column="first_author_norm"        
-            xpath="/collection/record/datafield[@tag='100']/subfield[@code='b']" />
             
         <!-- affiliation, I think should be connected with the author, not separated
             (but we can do some magic in the search) 
@@ -222,8 +221,8 @@
             Because the transformer inserts an array of values for the hierarchical facet,
             the "column" must be configured as multiValued="true" in schema.xml
          -->
-        <field facetHierarchyField="true" column="author_facet_hier" fields="author_norm,author" multiValuedSource="true" />
-        <field facetHierarchyField="true" column="first_author_facet_hier" fields="first_author_norm,first_author" multiValuedSource="false" />
+        <field facetHierarchyField="true" column="author_facet_hier" fields="a_100_norm,a_100,a_700_norm,a_700" multiValuedSource="true" />
+        <field facetHierarchyField="true" column="first_author_facet_hier" fields="a_100_norm,a_100" multiValuedSource="true" />
         
         </entity>
         

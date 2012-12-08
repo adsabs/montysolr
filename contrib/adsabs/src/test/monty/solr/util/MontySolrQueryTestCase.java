@@ -159,6 +159,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		Reconstructed d;
 		
 		for (Integer dd: docs) {
+		  System.out.println("===========================");
 			d = reconstructor.reconstruct(dd);
 			
 			Set<String> fldMap = new HashSet<String>();
@@ -178,7 +179,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 				
 			}
 			
-			if (true) continue;
+			//if (true) continue;
 			
 			System.out.println("STORED FIELDS: " + dd);
 			Map<String, IndexableField[]> sf = d.getStoredFields();

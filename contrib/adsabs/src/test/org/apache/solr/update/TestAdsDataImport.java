@@ -177,7 +177,58 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		
 		DirectSolrConnection direct = getDirectServer();
 		
+		//dumpDoc(null, "bibdoc", "author", "author_norm", "first_author", "first_author_norm", "author_facet", "author_surname", "first_author_surname", "author_facet_hier", "first_author_facet_hier");
 		
+		/*
+     * author 
+     * 
+     * here we really test only the import mechanism, the order of authors
+     * and duplication. The parsing logic has its own unittest
+     */
+    //9218605
+    assertQ(req("q", "author:\"Mosser, B\""), "//*[@numFound='1']");
+    assertQ(req("q", "author:\"Mosser, B\" AND author:\"Goupil, M\""), "//*[@numFound='1']");
+    //System.out.println(h.query(req("q", "author:\"Mosser, B\"")));
+		assert h.query(req("q", "author:\"Mosser, B\""))
+		            .contains("<arr name=\"author_norm\">" +
+		            		      "<str>Mosser, B</str>" + 
+                          "<str>Goupil, M</str>" + 
+                          "<str>Belkacem, K</str>" + 
+                          "<str>Stello, D</str>" + 
+                          "<str>Marques, J</str>" + 
+                          "<str>Elsworth, Y</str>" + 
+                          "<str>Barban, C</str>" + 
+                          "<str>Beck, P</str>" + 
+                          "<str>Bedding, T</str>" + 
+                          "<str>De Ridder, J</str>" + 
+                          "<str>Garcia, R</str>" + 
+                          "<str>Hekker, S</str>" + 
+                          "<str>Kallinger, T</str>" + 
+                          "<str>Samadi, R</str>" + 
+                          "<str>Stumpe, M</str>" + 
+                          "<str>Barclay, T</str>" + 
+                          "<str>Burke, C</str></arr>");
+		assert h.query(req("q", "author:\"Mosser, B\""))
+                .contains("<arr name=\"author\">" + 
+                          "<str>Mosser, B.</str>" + 
+                          "<str>Goupil, M. J.</str>" + 
+                          "<str>Belkacem, K.</str>" + 
+                          "<str>Stello, D.</str>" + 
+                          "<str>Marques, J. P.</str>" + 
+                          "<str>Elsworth, Y.</str>" + 
+                          "<str>Barban, C.</str>" + 
+                          "<str>Beck, P. G.</str>" + 
+                          "<str>Bedding, T. R.</str>" + 
+                          "<str>De Ridder, J.</str><" + 
+                          "str>Garcia, R. A.</str>" + 
+                          "<str>Hekker, S.</str>" + 
+                          "<str>Kallinger, T.</str>" + 
+                          "<str>Samadi, R.</str>" + 
+                          "<str>Stumpe, M. C.</str>" + 
+                          "<str>Barclay, T.</str>" + 
+                          "<str>Burke, C. J.</str>" + 
+                          "</arr>");
+    
 		/*
 		 * For the reference resolver, the field which contains only the last
 		 * name of the first author 
@@ -188,10 +239,13 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "first_author_surname:\"Cutri,\""), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:\"Cutri,R\""), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:\"CUTRI\""), "//*[@numFound='1']");
+		
+		assertQ(req("q", "fist_author:\"tenenbaum, p\""), "//*[@numFound='1']");
+		assertQ(req("q", "fist_author:\"Tenenbaum, P\""), "//*[@numFound='1']");
+		assertQ(req("q", "fist_author:\"Tenenbaum, P.\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_norm:\"tenenbaum, p\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_norm:\"mosser, b\""), "//*[@numFound='1']");
-		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
-		assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
+		
 		
 		
 		
@@ -416,11 +470,11 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		//assertQ(req("qt", "/admin/luke"), "//*[@numFound='0']");
 		
 		/*
-		 * all
+		 * unfielded search
 		 */
 		assertQ(req("q", "No-Sky"), "//*[@numFound='2']"); // abstract copied to all
 		assertQ(req("q", "hydrodynamics"), "//*[@numFound='1']"); // keywords copied to all
-		assertQ(req("q", "Barabási"), "//*[@numFound='1']"); // author copied to all
+		assertQ(req("q", "Barabási"), "//*[@numFound='1']"); // unfielded search goes to "author"
 		assertQ(req("q", "NASA"), "//*[@numFound='1']"); // affiliations copied to all
 		
 		/*
@@ -450,7 +504,15 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		
 		assertQ(req("q", "read_count:1 AND bibcode:1976NASSP.389..293M"), "//*[@numFound='1']");
 		
-	    
+	  
+		
+		/*
+		 * author facets
+		 */
+		
+		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
+    assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
+    
 		/*
 		 * testing the hierarchical facet generation
 		 */
@@ -459,7 +521,9 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "author_facet_hier:\"0/Stumpe, M\""), "//*[@numFound='2']");
 		assertQ(req("q", "author_facet_hier:\"1/Stumpe, M/Stumpe, M. C.\""), "//*[@numFound='2']");
 		assertQ(req("q", "author_facet_hier:\"1//et al.\""), "//*[@numFound='0']");
-    
+		
+		
+		
 	}
 	
 	

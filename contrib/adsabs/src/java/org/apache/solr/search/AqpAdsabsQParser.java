@@ -20,6 +20,7 @@ import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DefaultSolrParams;
+import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;
 import org.apache.solr.request.SolrQueryRequest;
@@ -77,7 +78,8 @@ public class AqpAdsabsQParser extends QParser {
 		if (defaultField != null) {
 			config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, defaultField);
 		}
-
+		
+		
 		String opParam = getParam(QueryParsing.OP);
 		if (opParam == null) {
 			opParam = parserConfig.get("defaultOperator", getReq().getSchema().getQueryParserDefaultOperator());
