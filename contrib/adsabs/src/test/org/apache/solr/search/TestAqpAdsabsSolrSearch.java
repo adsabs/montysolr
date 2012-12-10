@@ -10,6 +10,7 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 
@@ -189,6 +190,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     assertQueryEquals(req("qt", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
         "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
 		
+    
+    // make sure the *:* query is not parsed by edismax
+    assertQueryEquals(req("qt", "aqp", "q", "*", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "*:*", MatchAllDocsQuery.class);
+    assertQueryEquals(req("qt", "aqp", "q", "*:*", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "*:*", MatchAllDocsQuery.class);
 		
     /*
      * raw() function operator

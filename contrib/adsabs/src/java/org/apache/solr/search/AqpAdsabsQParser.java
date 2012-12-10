@@ -79,6 +79,8 @@ public class AqpAdsabsQParser extends QParser {
 			config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, defaultField);
 		}
 		
+		// if defaultField was set, this will be useless
+		config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, "unfielded_search");
 		
 		String opParam = getParam(QueryParsing.OP);
 		if (opParam == null) {

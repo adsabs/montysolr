@@ -38,6 +38,8 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 	    
 	    final public static ConfigurationKey<Map<String, int[]>> AUTHOR_FIELDS = ConfigurationKey.newInstance();
 	    
+	    final public static ConfigurationKey<String> UNFIELDED_SEARCH_FIELD = ConfigurationKey.newInstance();
+	    
 	}
 	
 	public AqpAdsabsQueryConfigHandler() {
@@ -78,6 +80,6 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
     
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS, new HashMap<String, int[]>());
-	    
+    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, "#$@&@nonexisting");  
 	}
 }

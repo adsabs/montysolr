@@ -177,6 +177,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		
 		DirectSolrConnection direct = getDirectServer();
 		
+		
 		//dumpDoc(null, "bibdoc", "author", "author_norm", "first_author", "first_author_norm", "author_facet", "author_surname", "first_author_surname", "author_facet_hier", "first_author_facet_hier");
 		
 		/*

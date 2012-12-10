@@ -42,13 +42,18 @@ import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQuer
 public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
   
-  final String unfieldSearchField = "unfielded_search";
   
 	@Override
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
-	  if (node instanceof FieldQueryNode && ((FieldQueryNode) node).getField().equals(unfieldSearchField)) {
+	  if (node instanceof FieldQueryNode) {
+	    
 		  QueryConfigHandler config = getQueryConfigHandler();
+		  
+		  if (!((FieldQueryNode) node).getField().equals(
+		      config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD))) {
+		    return node;
+		  }
 	    
 	    if (!config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)) {
 	      throw new QueryNodeException(new MessageImpl(
