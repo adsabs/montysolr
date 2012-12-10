@@ -221,7 +221,7 @@
             Because the transformer inserts an array of values for the hierarchical facet,
             the "column" must be configured as multiValued="true" in schema.xml
          -->
-        <field facetHierarchyField="true" column="author_facet_hier" fields="a_100_norm,a_100,a_700_norm,a_700" multiValuedSource="true" />
+        <field facetHierarchyField="true" column="author_facet_hier" fields="a_100_norm+a_700_norm,a_100+a_700" multiValuedSource="true" />
         <field facetHierarchyField="true" column="first_author_facet_hier" fields="a_100_norm,a_100" multiValuedSource="true" />
         
         </entity>

@@ -240,9 +240,9 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "first_author_surname:\"Cutri,R\""), "//*[@numFound='1']");
 		assertQ(req("q", "first_author_surname:\"CUTRI\""), "//*[@numFound='1']");
 		
-		assertQ(req("q", "fist_author:\"tenenbaum, p\""), "//*[@numFound='1']");
-		assertQ(req("q", "fist_author:\"Tenenbaum, P\""), "//*[@numFound='1']");
-		assertQ(req("q", "fist_author:\"Tenenbaum, P.\""), "//*[@numFound='1']");
+		assertQ(req("q", "first_author:\"tenenbaum, p\""), "//*[@numFound='1']");
+		assertQ(req("q", "first_author:\"Tenenbaum, P\""), "//*[@numFound='1']");
+		assertQ(req("q", "first_author:\"Tenenbaum, P.\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_norm:\"tenenbaum, p\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_norm:\"mosser, b\""), "//*[@numFound='1']");
 		
@@ -513,17 +513,6 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
     assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
     
-		/*
-		 * testing the hierarchical facet generation
-		 */
-		assertQ(req("q", "first_author_facet_hier:\"0/Cutri, R\""), "//*[@numFound='1']");
-		assertQ(req("q", "first_author_facet_hier:\"1/Cutri, R/Cutri, R. M.\""), "//*[@numFound='1']");
-		assertQ(req("q", "author_facet_hier:\"0/Stumpe, M\""), "//*[@numFound='2']");
-		assertQ(req("q", "author_facet_hier:\"1/Stumpe, M/Stumpe, M. C.\""), "//*[@numFound='2']");
-		assertQ(req("q", "author_facet_hier:\"1//et al.\""), "//*[@numFound='0']");
-		
-		
-		
 	}
 	
 	

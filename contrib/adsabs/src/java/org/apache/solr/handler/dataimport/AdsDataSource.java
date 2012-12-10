@@ -105,8 +105,13 @@ public class AdsDataSource extends InvenioDataSource {
 					throw new RuntimeException("Facet hierarchy requires > 1 field");
 				}
 				
-				FacetHierarchy facetHierarchy = new FacetHierarchy(columnName, sourceFields, multiValueSource);
-				facetHierarchies.add(facetHierarchy);
+				FacetHierarchy fh = null;
+				if (multiValueSource) {
+					fh = new FacetHierarchyMV(columnName, sourceFields);
+				} else {
+					fh = new FacetHierarchy(columnName, sourceFields);
+				}
+				facetHierarchies.add(fh);
 			}
 		}
 	}

@@ -21,44 +21,37 @@ public class FacetHierarchy {
 	Logger log = LoggerFactory.getLogger(FacetHierarchy.class);
 	
 	String columnName;
-	String[] fields;
-	boolean multiValueSource = false;
+	List<List<String>> sourceFields;
 	
-	public FacetHierarchy(String columnName, String[] fields, boolean multiValueSource) {
+	public FacetHierarchy(String columnName, String[] source) {
 		this.columnName = columnName;
-		this.fields = fields;
-		this.multiValueSource = multiValueSource;
+		this.sourceFields = new ArrayList<List<String>>();
+		
+		for (String s : source) {
+			List<String> fieldNames = new ArrayList<String>();
+			if (s.contains("+")) {
+				fieldNames.addAll(Arrays.asList(s.split("\\+")));
+			} else {
+				fieldNames.add(s);
+			}
+			sourceFields.add(fieldNames);
+		}
 	}
 	
 	public void addFacets(Map<String, Object> row) {
 		
 		List<String> newFacets = new ArrayList<String>();
-		List<Object> sourceValues = new ArrayList<Object>();
-		for (String f : fields) {
-			Object source = row.get(f);
-			if (source == null) {
-				throw new RuntimeException("source was null");
-			}
-			sourceValues.add(row.get(f));
-		}
+		List<String> sourceValues = new ArrayList<String>();
 		
-		if (multiValueSource) {
-			int expectedSourceLength = -1;
-			for (int i = 0; i < sourceValues.size(); i++) {
-				List<String> sv = (List<String>) sourceValues.get(i);
-				int len = sv.size();
-				if (expectedSourceLength == -1) {
-					expectedSourceLength = len;
-				} else if (len != expectedSourceLength) {
-					throw new RuntimeException("source value arrays have inconsistent length");
-				}
-				if (sv.contains("")) {
+		for (List<String> fields : sourceFields) {
+			for (String sourceField : fields) {
+				String sourceValue = (String) row.get(sourceField);
+				if (sourceValue == null) {
+					throw new RuntimeException("source was null");
+				} else if (sourceValue == "") {
 					throw new RuntimeException("source value array contains empty strings");
 				}
-			}
-		} else {
-			if (sourceValues.contains("")) {
-				throw new RuntimeException("source value array contains empty strings");
+				sourceValues.add(sourceValue);
 			}
 		}
 		
@@ -79,36 +72,19 @@ public class FacetHierarchy {
 	 * 
 	 * See: http://wiki.apache.org/solr/HierarchicalFaceting#A.27facet.prefix.27__Based_Drill_Down
 	 */
-	private void generateFacets(List<Object> sourceValues, List<String> newFacets) {
+	private void generateFacets(List<String> sourceValues, List<String> newFacets) {
 		
-		for (int depth = 0; depth < fields.length; depth++) {
+		for (int depth = 0; depth < sourceFields.size(); depth++) {
 			
-			String[] newFacetArray;
-			if (multiValueSource) {
-				int len = ((List<String>) sourceValues.get(0)).size();
-				newFacetArray = new String[len];
-			} else {
-				newFacetArray = new String[1];
-			}
+			String newFacet = null;
 			
 			for (int i = 0; i <= depth; i++) {
-				if (multiValueSource) {
-					List<String> sv = (List<String>) sourceValues.get(i);
-					for (int j = 0; j < sv.size(); j++) {
-						if (newFacetArray[j] == null) {
-							newFacetArray[j] = String.format("%d", depth);
-						}
-						newFacetArray[j] += String.format("/%s", sv.get(j));
-					}
-					
-				} else {
-					if (newFacetArray[0] == null) {
-						newFacetArray[0] = String.format("%d", depth);
-					}
-					newFacetArray[0] += String.format("/%s", (String) sourceValues.get(i));
+				if (newFacet == null) {
+					newFacet = String.format("%d", depth);
 				}
+				newFacet += String.format("/%s", (String) sourceValues.get(i));
 			}
-			newFacets.addAll(Arrays.asList(newFacetArray));
+			newFacets.add(newFacet);
 		}
 	}
 }

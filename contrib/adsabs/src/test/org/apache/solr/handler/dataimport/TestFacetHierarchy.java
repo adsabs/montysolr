@@ -58,7 +58,7 @@ public class TestFacetHierarchy {
 	@Test
 	public void testFacetGenerationMultiValued() {
 		
-		FacetHierarchy fh = new FacetHierarchy("a_hier", new String[] {"a", "aa"}, true);
+		FacetHierarchy fh = new FacetHierarchyMV("a_hier", new String[] {"a", "aa"});
 		fh.addFacets(testRow);
 		List<String> newFacets = (List<String>) testRow.get("a_hier");
 		assertArrayEquals(
@@ -68,7 +68,7 @@ public class TestFacetHierarchy {
 	
 	@Test
 	public void testFacetGenerationSingleValued() {
-		FacetHierarchy fh = new FacetHierarchy("b_hier", new String[] {"b", "bb"}, false);
+		FacetHierarchy fh = new FacetHierarchy("b_hier", new String[] {"b", "bb"});
 		fh.addFacets(testRow);
 		List<String> newFacets = (List<String>) testRow.get("b_hier");
 		assertArrayEquals(
@@ -78,13 +78,13 @@ public class TestFacetHierarchy {
 	
 	@Test(expected=ClassCastException.class)
 	public void testFacetGenerationMixedMultiSingleValued() {
-		FacetHierarchy fh = new FacetHierarchy("ab_hier", new String[] {"b", "aa"}, false);
+		FacetHierarchy fh = new FacetHierarchy("ab_hier", new String[] {"b", "aa"});
 		fh.addFacets(testRow);
 	}
 	
 	@Test
 	public void testFacetGenerationAuthors() {
-		FacetHierarchy fh = new FacetHierarchy("c_hier", new String[] {"c", "cc"}, true);
+		FacetHierarchy fh = new FacetHierarchyMV("c_hier", new String[] {"c", "cc"});
 		fh.addFacets(testRow);
 		List<String> newFacets = (List<String>) testRow.get("c_hier");
 		assertArrayEquals(
@@ -95,7 +95,7 @@ public class TestFacetHierarchy {
 	@Test
 	public void testFacetGenerationBadInput() {
 		
-		FacetHierarchy fh = new FacetHierarchy("d_hier", new String[] {"d", "dd"}, true);
+		FacetHierarchy fh = new FacetHierarchyMV("d_hier", new String[] {"d", "dd"});
 		try {
 			fh.addFacets(testRow);
 		} catch (RuntimeException e) {
@@ -105,7 +105,7 @@ public class TestFacetHierarchy {
 	
 	@Test
 	public void testFacetGenerationBadInput2() {
-		FacetHierarchy fh = new FacetHierarchy("n_hier", new String[] {"n", "nn"}, true);
+		FacetHierarchy fh = new FacetHierarchyMV("n_hier", new String[] {"n", "nn"});
 		try {
 			fh.addFacets(testRow);
 		} catch (RuntimeException e) {
@@ -115,7 +115,7 @@ public class TestFacetHierarchy {
 	
 	@Test
 	public void testFacetGenerationBadInput3() {
-		FacetHierarchy fh = new FacetHierarchy("e_hier", new String[] {"e", "ee"}, true);
+		FacetHierarchy fh = new FacetHierarchyMV("e_hier", new String[] {"e", "ee"});
 		try {
 			fh.addFacets(testRow);
 		} catch (RuntimeException e) {
@@ -125,7 +125,7 @@ public class TestFacetHierarchy {
 	
 	@Test
 	public void testFacetGenerationBadInput4() {
-		FacetHierarchy fh = new FacetHierarchy("e_hier", new String[] {"f", "ff"}, false);
+		FacetHierarchy fh = new FacetHierarchy("e_hier", new String[] {"f", "ff"});
 		try {
 			fh.addFacets(testRow);
 		} catch (RuntimeException e) {
