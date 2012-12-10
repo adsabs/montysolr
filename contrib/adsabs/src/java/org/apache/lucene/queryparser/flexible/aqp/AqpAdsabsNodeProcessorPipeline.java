@@ -24,6 +24,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCarefulAna
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExpandAuthorSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQTRUNCATEDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpUnfieldedSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQNORMALProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQPOSITIONProcessor;
@@ -88,7 +89,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpQPHRASEProcessor());
 		add(new AqpAdsabsQNORMALProcessor()); // keeps the tag information
 		add(new AqpQPHRASETRUNCProcessor());
-		add(new AqpQTRUNCATEDProcessor());
+		add(new AqpAdsabsQTRUNCATEDProcessor());
 		add(new AqpQANYTHINGProcessor());
 		add(new AqpQIDENTIFIERProcessor());
 		add(new AqpFIELDProcessor());
