@@ -790,14 +790,15 @@
    <copyField source="a_100_norm" dest="author_norm"/>
    <copyField source="a_700_norm" dest="author_norm"/>
     
-   <copyField source="author_norm" dest="author_facet"/>
+   <copyField source="a_100_norm" dest="author_facet"/>
+   <copyField source="a_700_norm" dest="author_facet"/>
    
    <!--  all these author fields are useful only
          to Markus' resolver -->    
    <copyField source="a_100" dest="first_author"/>
    <copyField source="a_100_norm" dest="first_author_norm"/>
    <copyField source="a_100" dest="first_author_surname"/>   
-   <copyField source="author" dest="author_surname"/>   
+   <copyField source="a_700" dest="author_surname"/>   
    
    
    <copyField source="author_norm" dest="all"/>
