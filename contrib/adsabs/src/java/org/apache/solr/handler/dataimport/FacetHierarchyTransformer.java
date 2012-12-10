@@ -23,11 +23,10 @@ public class FacetHierarchyTransformer extends Transformer {
 			} catch (RuntimeException e) {
 				IndexSchema schema = context.getSolrCore().getSchema();
 				String idFieldName = schema.getUniqueKeyField().getName();
-				log.warn(
-					String.format(
-						"There was a problem generating hierarchical facets for record %s: %s",
+				log.debug(
+						"There was a problem generating hierarchical facets for record {}: {}",
 						row.get(idFieldName),
-						e.getMessage())
+						e.getMessage()
 					);
 			}
 		}
