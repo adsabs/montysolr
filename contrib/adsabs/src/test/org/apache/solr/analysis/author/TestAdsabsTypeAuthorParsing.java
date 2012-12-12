@@ -53,6 +53,20 @@ import org.adsabs.solr.AdsConfig.F;
  * 
  * I would like to see a token processing which is crazier...
  * 
+ * IMPORTANT: this unittest was reviewed on 11-12-2012 by Alberto
+ * and he found 1 (in words "ONE") problem, everything else was
+ * fine. The problem is easily fixable, right now the 
+ * "synonym-upgrade" considers only names with initials for
+ * expansion. Ie. 
+ *  
+ *  "jones, c" => jones, christine; forman, c; forman, christine
+ *  
+ *  But Alberto wants that any short form produces the same effect,
+ *  ie. 
+ *  
+ *  "jones," => jones, christine; forman, c; forman, christine
+ *  "jones, c" => jones, christine; forman, c; forman, christine
+ * 
  */
 public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 

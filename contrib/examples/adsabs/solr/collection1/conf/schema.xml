@@ -351,6 +351,8 @@
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
+        <!--  if necessary, we will transliterate in order to match more synonyms -->
+        <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
         <!--  we will use the standard synonym file (as used by the author type above)
               but import it in a special way -->
         <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
@@ -358,9 +360,15 @@
             ignoreCase="true" 
             expand="true" 
             tokenizerFactory="solr.KeywordTokenizerFactory"
-            builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$SynonymBuilderFactory"
+            builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$MakeAllShortNames"
             sanitizeOutput="true" 
             inclOrig="true"/>
+        <!-- remove the transliterated variants, they were used only to discover
+             synonyms -->
+        <filter class="solr.analysis.author.AuthorCollectorFactory" 
+            outFile="author_generated.translit" 
+            tokenTypes="AUTHOR_TRANSLITERATED"
+            emitToken="false"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
       </analyzer>

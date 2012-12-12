@@ -141,6 +141,7 @@
             </echo>
             <java classpathref="@{classpathref}"
                 classname="org.antlr.gunit.Interp"
+            	failonerror="true"
                 >
                 <arg value="@{grammar-dir}/@{grammar-name}.gunit"/>
             </java>
