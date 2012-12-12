@@ -31,7 +31,7 @@ public class AuthorUtils {
 	public static String normalizeAuthor(String a) {
 	  a = n0.matcher(a).replaceAll(" ");
 		a = n1.matcher(a).replaceAll("");
-		a = n2.matcher(a).replaceAll(" ");
+		a = n2.matcher(a.trim()).replaceAll(" ");
 		//a = a.toUpperCase();
 		if (!(a.contains(",") || a.contains(" ")))
 		  a = a + ",";
