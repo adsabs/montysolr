@@ -1990,7 +1990,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   private void testAuthorQuery(String...vals) throws Exception {
     assert vals.length%3==0;
     for (int i=0;i<vals.length;i=i+3) {
-      if (true || tp.debugParser) {
+      if (tp.debugParser) {
       System.out.println("Running test for " + String.format("author:%s", vals[i]));
       String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("author:%s", vals[i])));
       
