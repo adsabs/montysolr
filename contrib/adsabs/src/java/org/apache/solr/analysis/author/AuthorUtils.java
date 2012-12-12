@@ -25,11 +25,13 @@ public class AuthorUtils {
 	public static final String AUTHOR_TRANSLITERATED = "AUTHOR_TRANSLITERATED";
 	public static final String AUTHOR_CURATED_SYN = "AUTHOR_CURATED_SYN";
 	
-	
+	static Pattern n0 = Pattern.compile("(?<=\\b\\p{L})\\.(?=\\s*\\b)");
+	static Pattern n1 = Pattern.compile("[^\\w\\s\'\\p{L}\\p{Digit},_-]");
+	static Pattern n2 = Pattern.compile("\\s+");
 	public static String normalizeAuthor(String a) {
-		a = a.replaceAll("(?<=\\b\\p{L})\\.(?=\\s*\\b)", " ");
-		a = a.replaceAll("[^\\w\\s\'\\p{L}\\p{Digit},_-]", "");
-		a = a.trim().replaceAll("\\s+", " ");
+	  a = n0.matcher(a).replaceAll(" ");
+		a = n1.matcher(a).replaceAll("");
+		a = n2.matcher(a).replaceAll(" ");
 		//a = a.toUpperCase();
 		if (!(a.contains(",") || a.contains(" ")))
 		  a = a + ",";

@@ -66,7 +66,6 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     if (node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE) != null) {
       String origValue = (String) node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE);
       String normalized = AuthorUtils.normalizeAuthor(origValue);
-      
       NameInfo nameInfo = new NameInfo(normalized);
       int[] level = new int[]{0}; //ugly, ugly
       return expandNodes(node, nameInfo, level);
@@ -243,12 +242,12 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
   
   private boolean isLongForm(String name) {
     String[] parts = name.split(" ");
-    boolean res = false;
+    int longParts = 0;
     for (int i=1;i<parts.length;i++) {
       if (parts[i].length() > 1)
-        return true;
+        longParts++;
     }
-    return res;
+    return parts.length==longParts;
   }
   
   class NameInfo {
