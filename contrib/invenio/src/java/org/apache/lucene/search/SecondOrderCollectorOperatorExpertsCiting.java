@@ -9,7 +9,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 
-public class SecondOrderCollectorOperatorUseful extends AbstractSecondOrderCollector {
+public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrderCollector {
 
   Set<String> fieldsToLoad;
 	protected Map<String, Integer> valueToDocidCache = null;
@@ -20,7 +20,7 @@ public class SecondOrderCollectorOperatorUseful extends AbstractSecondOrderColle
 	private IndexReader reader;
 	private CacheGetter cacheGetter;
 	
-	public SecondOrderCollectorOperatorUseful(CacheGetter getter, String referenceField) {
+	public SecondOrderCollectorOperatorExpertsCiting(CacheGetter getter, String referenceField) {
 		super();
 		initFldSelector();
 		cacheGetter = getter;
@@ -29,7 +29,7 @@ public class SecondOrderCollectorOperatorUseful extends AbstractSecondOrderColle
 		initFldSelector();
 	}
 	
-	public SecondOrderCollectorOperatorUseful(String uniqueIdField, String referenceField, String boostField) {
+	public SecondOrderCollectorOperatorExpertsCiting(String uniqueIdField, String referenceField, String boostField) {
 		super();
 		valueToDocidCache = null;
 		this.uniqueIdField = uniqueIdField;
@@ -77,11 +77,12 @@ public class SecondOrderCollectorOperatorUseful extends AbstractSecondOrderColle
 		// naive implementation (probably slow)
 		Number citeBoost = document.getField(boostField).numericValue();
     if (citeBoost != null) {
-      s = s * citeBoost.floatValue() + 0.000001f;
+      s = s + (s * citeBoost.floatValue());
     }
 		
     // find documents that are cited by our doc (references)
-		String[] vals = document.getValues(referenceField); 
+		String[] vals = document.getValues(referenceField);
+		//s = s / (vals.length + 100); // this would contribute only a part of the score to each citation
 		for (String v: vals) {
 			v = v.toLowerCase();
 			if (valueToDocidCache.containsKey(v)) {

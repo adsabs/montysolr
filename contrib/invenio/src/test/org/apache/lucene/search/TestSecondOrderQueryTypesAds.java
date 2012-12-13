@@ -48,16 +48,16 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 		writer = new RandomIndexWriter(random(), directory);
 
 		int i=0;
-		adoc("id", "1", "bibcode",   "b1", "const_boost", "0.5f", "boost", "0.5f", "references", "b2,b3,b4,b5");
-		adoc("id", "2", "bibcode",   "b2", "const_boost", "0.5f", "boost", "0.2f");
-		adoc("id", "3", "bibcode",   "b3", "const_boost", "0.5f", "boost", "0.3f", "references", "b9");
-		adoc("id", "4", "bibcode",   "b4", "const_boost", "0.5f", "boost", "0.1f", "references", "b100");
-		adoc("id", "5", "bibcode",   "b5", "const_boost", "0.5f", "boost", "0.8f", "references", "b10");
-		adoc("id", "6", "bibcode",   "b6", "const_boost", "0.5f", "boost", "0.01f", "references", "b5");
-		adoc("id", "7", "bibcode",   "b7", "const_boost", "0.5f", "boost", "0.01f", "references", "b5");
-		adoc("id", "8", "bibcode",   "b8", "const_boost", "0.5f", "boost", "0.01f", "references", "b5");
-		adoc("id", "9", "bibcode",   "b9", "const_boost", "0.5f", "boost", "0.01f", "references", "b2,b3,b4,b10");
-		adoc("id", "10","bibcode",  "b10", "const_boost", "0.5f", "boost", "0.01f", "references", "b3,b4");
+		adoc("id", "1", "bibcode",   "b1", "const_boost", "1.0f", "boost", "0.5f", "references", "b2,b3,b4,b5");
+		adoc("id", "2", "bibcode",   "b2", "const_boost", "1.0f", "boost", "0.2f");
+		adoc("id", "3", "bibcode",   "b3", "const_boost", "1.0f", "boost", "0.3f", "references", "b9");
+		adoc("id", "4", "bibcode",   "b4", "const_boost", "1.0f", "boost", "0.1f", "references", "b100");
+		adoc("id", "5", "bibcode",   "b5", "const_boost", "1.0f", "boost", "0.8f", "references", "b10");
+		adoc("id", "6", "bibcode",   "b6", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
+		adoc("id", "7", "bibcode",   "b7", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
+		adoc("id", "8", "bibcode",   "b8", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
+		adoc("id", "9", "bibcode",   "b9", "const_boost", "1.0f", "boost", "0.1f", "references", "b2,b3,b4,b10");
+		adoc("id", "10","bibcode",  "b10", "const_boost", "1.0f", "boost", "0.5f", "references", "b3,b4");
 		
 		reader = writer.getReader();
 		searcher = newSearcher(reader);
@@ -132,26 +132,33 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 		
 		
 		BooleanQuery bq234 = new BooleanQuery();
-		bq234.add(r2, Occur.MUST);
-		bq234.add(r3, Occur.MUST);
-		bq234.add(r4, Occur.MUST);
+		bq234.add(d2, Occur.SHOULD);
+		bq234.add(d3, Occur.SHOULD);
+		bq234.add(d4, Occur.SHOULD);
 		
-		BooleanQuery bq25 = new BooleanQuery();
-		bq25.add(r2, Occur.MUST);
-		bq25.add(r5, Occur.MUST);
+		BooleanQuery bq19 = new BooleanQuery();
+		bq19.add(d1, Occur.SHOULD);
+		bq19.add(d9, Occur.SHOULD);
 		
+		BooleanQuery bq1910 = new BooleanQuery();
+    bq1910.add(d1, Occur.SHOULD);
+    bq1910.add(d9, Occur.SHOULD);
+    bq1910.add(d10, Occur.SHOULD);
+    
 		BooleanQuery bq26 = new BooleanQuery();
-    bq26.add(r2, Occur.MUST);
-    bq26.add(r6, Occur.MUST);
+    bq26.add(d2, Occur.SHOULD);
+    bq26.add(d6, Occur.SHOULD);
+    
+    Query all = new MatchAllDocsQuery();
 		
 		// just a test that index is OK
 		assertEquals(1, searcher.search(d1, 10).totalHits);
 		assertEquals(1, searcher.search(d2, 10).totalHits);
 		assertEquals(1, searcher.search(d3, 10).totalHits);
 		assertEquals(0, searcher.search(d99, 10).totalHits);
-		assertEquals(2, searcher.search(bq234, 10).totalHits);
-		assertEquals(1, searcher.search(bq25, 10).totalHits);
-		assertEquals(0, searcher.search(bq26, 10).totalHits);
+		assertEquals(3, searcher.search(bq234, 10).totalHits);
+		assertEquals(2, searcher.search(bq19, 10).totalHits);
+		assertEquals(2, searcher.search(bq26, 10).totalHits);
 		
 		
 		// now test of references ( X --> (x))
@@ -198,19 +205,53 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 		
 		String boostField = "boost";
 		String constBoost = "const_boost";
-		assertEquals(4, searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorUseful(idField, refField, boostField)), 10).totalHits);
-		assertEquals(4, searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorUseful(idField, refField, constBoost)), 10).totalHits);
+		assertEquals(4, searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, boostField)), 10).totalHits);
+		assertEquals(4, searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, constBoost)), 10).totalHits);
 		
-		TopDocs normalSet = searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorUseful(idField, refField, boostField)), 10);
-		TopDocs constSet = searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorUseful(idField, refField, constBoost)), 10);
+		TopDocs normalSet = searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, boostField)), 10);
+		TopDocs constSet = searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, constBoost)), 10);
 		
-		assertNotSame("The scores should be different", normalSet.getMaxScore(), constSet.getMaxScore());
+		
+		// because the query finds only one document, the order is basically unchanged (because it is the order of the 'source' 
+		// paper that contributes to the weight of the found hits)
 		assert normalSet.totalHits == constSet.totalHits;
-		assertSame(new int[]{0, 1, 2, 3}, getIds(normalSet.scoreDocs));
-		assertSame(new int[]{0, 1, 2, 3}, getIds(normalSet.scoreDocs));
+		assertArrayEquals(getIds(normalSet.scoreDocs), getIds(normalSet.scoreDocs));
+		assertArrayEquals(new int[]{1, 2, 3, 4}, getIds(normalSet.scoreDocs)); // 1,2,3,4 == b2,b3,b4,b5
+		assertNotSame("The scores should be different", normalSet.getMaxScore(), constSet.getMaxScore());
 		
-		System.out.println(normalSet);
-		System.out.println(constSet);
+		
+		normalSet = searcher.search(new SecondOrderQuery(bq19, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, boostField)), 10);
+    constSet = searcher.search(new SecondOrderQuery(bq19, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, constBoost)), 10);
+    
+    // expected order: 5, 2, 3, 4, 10
+    assert normalSet.totalHits == constSet.totalHits;
+    assertArrayEquals(new int[]{1, 2, 3, 4, 9}, getIds(constSet.scoreDocs));
+    assertArrayEquals(new int[]{4, 1, 2, 3, 9}, getIds(normalSet.scoreDocs));
+    assertNotSame("The scores should be different", normalSet.getMaxScore(), constSet.getMaxScore());
+    
+    
+    normalSet = searcher.search(new SecondOrderQuery(bq1910, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, boostField)), 10);
+    constSet = searcher.search(new SecondOrderQuery(bq1910, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, constBoost)), 10);
+    
+    // now we should find the same number of papers, but their order is to be different
+    // because they are referenced (multiple times) and the new doc10 should raise up 
+    // the score of docs 3,4
+    
+    // expected order: 5, 3, 4, 2, 10
+    assert normalSet.totalHits == constSet.totalHits;
+    assertArrayEquals(new int[]{1, 2, 3, 4, 9}, getIds(constSet.scoreDocs));
+    assertArrayEquals(new int[]{4, 2, 3, 1, 9}, getIds(normalSet.scoreDocs));
+    assertNotSame("The scores should be different", normalSet.getMaxScore(), constSet.getMaxScore());
+		
+    
+    normalSet = searcher.search(new SecondOrderQuery(d5, null, new SecondOrderCollectorCitingTheMostCited(idField, refField, boostField)), 10);
+    constSet = searcher.search(new SecondOrderQuery(d5, null, new SecondOrderCollectorCitingTheMostCited(idField, refField, constBoost)), 10);
+    
+    normalSet = searcher.search(new SecondOrderQuery(all, null, new SecondOrderCollectorCitingTheMostCited(idField, refField, boostField)), 10);
+    constSet = searcher.search(new SecondOrderQuery(all, null, new SecondOrderCollectorCitingTheMostCited(idField, refField, constBoost)), 10);
+    
+    System.out.println(normalSet);
+    System.out.println(normalSet);
 	}
 	
 	private int[] getIds(ScoreDoc[] docs) {

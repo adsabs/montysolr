@@ -174,6 +174,7 @@ SecondOrderCollector {
         continue;
       }
 
+      // this penalizes papers which are references many times
       if (seenTimes > 1)
         currDoc.score = score / seenTimes;
       newHits.add(currDoc);
