@@ -31,4 +31,11 @@ public class TestAuthorNormalizeFilter extends BaseTokenStreamTestCase {
 		    TokenStream stream = factory.create(tokenizer);
 		    assertTokenStreamContents(stream, new String[] { "Gómez_Foo, He-ctor 29Q" });
 	  }
+	  public void testNoSpaceAfterComma() throws Exception {
+      Reader reader = new StringReader("Gómez,Hector Q");
+      Tokenizer tokenizer = new KeywordTokenizer(reader);
+      AuthorNormalizeFilterFactory factory = new AuthorNormalizeFilterFactory();
+      TokenStream stream = factory.create(tokenizer);
+      assertTokenStreamContents(stream, new String[] { "Gómez, Hector Q" });
+  }
 }

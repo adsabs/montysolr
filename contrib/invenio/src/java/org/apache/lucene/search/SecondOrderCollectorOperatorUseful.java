@@ -77,7 +77,7 @@ public class SecondOrderCollectorOperatorUseful extends AbstractSecondOrderColle
 		// naive implementation (probably slow)
 		Number citeBoost = document.getField(boostField).numericValue();
     if (citeBoost != null) {
-      s = s * citeBoost.floatValue();
+      s = s * citeBoost.floatValue() + 0.000001f;
     }
 		
     // find documents that are cited by our doc (references)

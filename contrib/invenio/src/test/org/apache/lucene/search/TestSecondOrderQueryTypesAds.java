@@ -48,16 +48,16 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 		writer = new RandomIndexWriter(random(), directory);
 
 		int i=0;
-		adoc("id", "1", "bibcode", "b1", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b2,b3,b4,b5");
-		adoc("id", "2", "bibcode", "b2", "const_boost", "0.1f", "boost", Float.toString(b[i++]));
-		adoc("id", "3", "bibcode", "b3", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b9");
-		adoc("id", "4", "bibcode", "b4", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b100");
-		adoc("id", "5", "bibcode", "b5", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b10");
-		adoc("id", "6", "bibcode", "b6", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b5");
-		adoc("id", "7", "bibcode", "b7", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b5");
-		adoc("id", "8", "bibcode", "b8", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b5");
-		adoc("id", "9", "bibcode", "b9", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b2,b3,b4,b10");
-		adoc("id", "10", "bibcode", "b10", "const_boost", "0.1f", "boost", Float.toString(b[i++]), "references", "b3,b4");
+		adoc("id", "1", "bibcode",   "b1", "const_boost", "0.5f", "boost", "0.5f", "references", "b2,b3,b4,b5");
+		adoc("id", "2", "bibcode",   "b2", "const_boost", "0.5f", "boost", "0.2f");
+		adoc("id", "3", "bibcode",   "b3", "const_boost", "0.5f", "boost", "0.3f", "references", "b9");
+		adoc("id", "4", "bibcode",   "b4", "const_boost", "0.5f", "boost", "0.1f", "references", "b100");
+		adoc("id", "5", "bibcode",   "b5", "const_boost", "0.5f", "boost", "0.8f", "references", "b10");
+		adoc("id", "6", "bibcode",   "b6", "const_boost", "0.5f", "boost", "0.01f", "references", "b5");
+		adoc("id", "7", "bibcode",   "b7", "const_boost", "0.5f", "boost", "0.01f", "references", "b5");
+		adoc("id", "8", "bibcode",   "b8", "const_boost", "0.5f", "boost", "0.01f", "references", "b5");
+		adoc("id", "9", "bibcode",   "b9", "const_boost", "0.5f", "boost", "0.01f", "references", "b2,b3,b4,b10");
+		adoc("id", "10","bibcode",  "b10", "const_boost", "0.5f", "boost", "0.01f", "references", "b3,b4");
 		
 		reader = writer.getReader();
 		searcher = newSearcher(reader);
@@ -204,9 +204,32 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 		TopDocs normalSet = searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorUseful(idField, refField, boostField)), 10);
 		TopDocs constSet = searcher.search(new SecondOrderQuery(d1, null, new SecondOrderCollectorOperatorUseful(idField, refField, constBoost)), 10);
 		
+		assertNotSame("The scores should be different", normalSet.getMaxScore(), constSet.getMaxScore());
+		assert normalSet.totalHits == constSet.totalHits;
+		assertSame(new int[]{0, 1, 2, 3}, getIds(normalSet.scoreDocs));
+		assertSame(new int[]{0, 1, 2, 3}, getIds(normalSet.scoreDocs));
+		
 		System.out.println(normalSet);
 		System.out.println(constSet);
 	}
+	
+	private int[] getIds(ScoreDoc[] docs) {
+	  int[] out = new int[docs.length];
+	  int i = 0;
+	  for (ScoreDoc d: docs) {
+	    out[i++] = d.doc;
+	  }
+	  return out;
+	}
+	
+	private float[] getScores(ScoreDoc[] docs) {
+    float[] out = new float[docs.length];
+    int i = 0;
+    for (ScoreDoc d: docs) {
+      out[i++] = d.score;
+    }
+    return out;
+  }
 	
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
