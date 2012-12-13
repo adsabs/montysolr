@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public abstract class AbstractSecondOrderCollector extends Collector implements
-    SecondOrderCollector {
+SecondOrderCollector {
 
   protected Scorer scorer;
   protected int docBase;
@@ -29,12 +29,12 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
   }
 
   public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
-	  
-	if (hits.size() == 0)
-		return null;
-	
+
+    if (hits.size() == 0)
+      return null;
+
     int i = -1;
-    
+
     lock.lock();
     try {
       if (!organized) {
@@ -43,44 +43,44 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
       }
       i = findClosestIndex(rangeStart, rangeEnd, 0, hits.size()-1);
       if (i == -1 || i+1 > hits.size())
-    	  return null;
-      
+        return null;
+
     } finally {
       lock.unlock();
     }
-    
-    
+
+
     ArrayList<CollectorDoc> results = new ArrayList<CollectorDoc>();
     for (;i<hits.size() && hits.get(i).doc < rangeEnd;i++) {
-    	results.add(hits.get(i));
+      results.add(hits.get(i));
     }
     return results;
-    
+
   }
-  
+
   private int findClosestIndex(int rangeStart, int rangeEnd, int low, int high) {
-	  
-	  int latest = -1;
+
+    int latest = -1;
     while (low <= high) {
-        int mid = (low + high) >>> 1;
-        int midVal = hits.get(mid).doc;
-  
-        if (midVal < rangeStart) {
-            low = mid + 1;
-            if (midVal >= rangeStart && midVal <= rangeEnd)
-              latest = mid;
-        } else if (midVal > rangeStart) {
-            high = mid - 1;
-            if (midVal >= rangeStart && midVal <= rangeEnd)
-              latest = mid;
-        } else {
-            return mid; // key found
-        }
+      int mid = (low + high) >>> 1;
+    int midVal = hits.get(mid).doc;
+
+    if (midVal < rangeStart) {
+      low = mid + 1;
+      if (midVal >= rangeStart && midVal <= rangeEnd)
+        latest = mid;
+    } else if (midVal > rangeStart) {
+      high = mid - 1;
+      if (midVal >= rangeStart && midVal <= rangeEnd)
+        latest = mid;
+    } else {
+      return mid; // key found
+    }
     }
     //if (low > 0 && low < hits.size() && hits.get(low).doc >= rangeStart && hits.get(low).doc <= rangeEnd)
     //	return low;
     if (latest > -1) return latest;
-    
+
     return -1;  // key not found
   }
 
@@ -89,7 +89,7 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
     int low = 0;
     int high = hits.size();
     Integer[] out = new Integer[]{0,0};
-    
+
     if (lastPos  != null) {
       if (lastPos+1 <= hits.size()) {
         return out;
@@ -100,7 +100,7 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
         low = lastPos+1;
       }
     }
-    
+
     int i=low;
     while (i<high) {
       int d = hits.get(i).doc;
@@ -111,16 +111,16 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
         break;
       }
     }
-    
+
     lastPos = i;
-    
+
     out[0] = low;
     out[1] = lastPos;
-    
+
     return out;
-    
+
   }
-  
+
   private int findClosestInclusive(int low, int high, int valToSearch) {
     int i;
     for (i=low;i<high;i++) {
@@ -134,18 +134,18 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
     }
     return -1;
   }
-  
+
   private int binarySearch(int low, int high, int valToSearch) {
     while (low <= high) {
-        int mid = (low + high) >>> 1;
-        int midVal = hits.get(mid).doc;
-  
-        if (midVal < valToSearch)
-            low = mid + 1;
-        else if (midVal > valToSearch)
-            high = mid - 1;
-        else
-            return mid; // key found
+      int mid = (low + high) >>> 1;
+      int midVal = hits.get(mid).doc;
+
+      if (midVal < valToSearch)
+        low = mid + 1;
+      else if (midVal > valToSearch)
+        high = mid - 1;
+      else
+        return mid; // key found
     }
     return low-1;  // key not found, get closest
   }

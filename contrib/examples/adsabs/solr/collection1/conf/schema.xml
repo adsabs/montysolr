@@ -745,7 +745,7 @@
    <field name="full" type="fulltext" indexed="true" stored="true" termVectors="true" termOffsets="true" termPositions="true"/>
    <field name="ack" type="fulltext" indexed="true" stored="true" />
    <field name="reader" type="string" indexed="true" stored="true" multiValued="true" />
-   <field name="cite_read_boost" type="float" indexed="true" stored="true" />
+   <field name="cite_read_boost" type="float" indexed="true" stored="true" multiValued="false"/>
    <field name="citation_count" type="int" indexed="true" stored="true" />
    <field name="read_count" type="float" indexed="true" stored="true" />
 
