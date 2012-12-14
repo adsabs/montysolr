@@ -295,7 +295,15 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		}));
 		stopTimer();
 
-		startTimer("Regexp queries (new style)");
+		startTimer("Regexp queries (new style, using \\w*)");
+    totals.add(runQueries(testCases, new QueryBuilder() {
+      public Query getQuery(TestCase t) throws Exception {
+        return getRegexpQuerySameAsRegex(t.parts, t.howMany, t.truncate);
+      }
+    }));
+    stopTimer();
+    
+		startTimer("Regexp queries (new style, using [^\\s]*)");
 		totals.add(runQueries(testCases, new QueryBuilder() {
 			public Query getQuery(TestCase t) throws Exception {
 				return getRegexpQuery(t.parts, t.howMany, t.truncate);
@@ -543,10 +551,30 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		return new RegexQuery(new Term("regex", getRegexQueryString(parts, howMany, truncate)));
 	}
 
+	private Query getRegexpQuerySameAsRegex(String[] parts, int howMany, boolean truncate) {
+    return new RegexpQuery(new Term("regex", getRegexQueryString(parts, howMany, truncate)));
+  }
+	
 	private Query getRegexpQuery(String[] parts, int howMany, boolean truncate) {
-		return new RegexpQuery(new Term("regex", getRegexQueryString(parts, howMany, truncate)));
+		return new RegexpQuery(new Term("regex", getRegexpQueryString(parts, howMany, truncate)));
 	}
 
+	
+	private String getRegexpQueryString(String[] parts, int howMany, boolean truncate) {
+    StringBuilder p = new StringBuilder();
+    p.append(parts[0]);
+    p.append(", ");
+    int i = 0;
+    for (; i < howMany && parts.length > i; i++) {
+      String x = truncate ? parts[i+1].substring(0, 1) : parts[i+1];
+      p.append(x + "[^\\s]* ");
+    }
+    if (parts.length > i) {
+      p.append(".*");
+    }
+    return p.toString();
+  }
+	
 	private String getRegexQueryString(String[] parts, int howMany, boolean truncate) {
 		StringBuilder p = new StringBuilder();
 		p.append(parts[0]);

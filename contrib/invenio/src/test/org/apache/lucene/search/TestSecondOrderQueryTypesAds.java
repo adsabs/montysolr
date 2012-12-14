@@ -92,7 +92,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 	}
 	
 	
-	public void testCitationQueries() throws Exception {
+	public void testADSOperators() throws Exception {
 		
 		
 		String refField = "references";
