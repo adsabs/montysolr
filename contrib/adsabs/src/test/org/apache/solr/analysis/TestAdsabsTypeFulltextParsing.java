@@ -57,7 +57,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
       File synonymsFile = createTempFile(new String[]{
           "hubble\0space\0telescope, HST\n" +
           "Massachusets\0Institute\0of\0Technology, MIT\n" +
-          "Hubble\0Space\0Microscope, HSM"
+          "Hubble\0Space\0Microscope, HSM\n" +
+          "ABC,Astrophysics\0Business\0Center\n" +
+          "Astrophysics\0Business\0Commons, ABC"
       });
       replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 
@@ -315,6 +317,11 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQ(req("q", F.TYPE_ADS_TEXT + ":Bílá"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
     assertQ(req("q", F.TYPE_ADS_TEXT + ":Bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
     assertQ(req("q", F.TYPE_ADS_TEXT + ":bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
+    
+    // test that the two lines in the synonym file get merged and produce correct synonym expansion
+    assertQueryEquals(req("q", "ABC", "qt", "aqp"), 
+        "all:acr::abc all:astrophysics business center all:astrophysics business commons", 
+        BooleanQuery.class);
   }
 
 

@@ -24,9 +24,6 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TermQuery;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.adsabs.solr.AdsConfig.F;
 
 /**
@@ -35,7 +32,6 @@ import org.adsabs.solr.AdsConfig.F;
  */
 public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
-  private int idValue = 0;
 
   @Override
   public String getSchemaFile() {
@@ -56,9 +52,9 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
   public void test() throws Exception {
 
-    assertU(adoc(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Bílá kobyla skočila přes čtyřista"));
-    assertU(adoc(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "třicet-tři stříbrných střech"));
-    assertU(adoc(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "A ještě TřistaTřicetTři stříbrných stovek"));
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Bílá kobyla skočila přes čtyřista"));
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "třicet-tři stříbrných střech"));
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "A ještě TřistaTřicetTři stříbrných stovek"));
 
     assertU(commit());
 
@@ -99,41 +95,7 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
     }
   }
   
-  public String adoc(String[] fields, String...values) {
-    ArrayList<String> vals = new ArrayList<String>(Arrays.asList(values));
-    String[] fieldsVals = new String[fields.length*(values.length*2)];
-    int i = 0;
-    for (String f: fields) {
-      for (String v: values) {
-        fieldsVals[i++] = f;
-        fieldsVals[i++] = v;
-      }
-    }
-    return adoc(fieldsVals);
-  }
-  
-  @Override
-  public String adoc(String... fieldsAndValues) {
-    ArrayList<String> fVals = new ArrayList<String>(Arrays.asList(fieldsAndValues));
-    if (fVals.indexOf(F.ID) == -1 || !(fVals.indexOf(F.ID)%2==1)) {
-      fVals.add(F.ID);
-      fVals.add(Integer.toString(incrementId()));
-    }
-    if (fVals.indexOf(F.BIBCODE) == -1 || !(fVals.indexOf(F.BIBCODE)%2==1)) {
-      fVals.add(F.BIBCODE);
-      String bibc = ("AAAAA........" + Integer.toString(idValue));
-      fVals.add(bibc.substring(bibc.length()-13, bibc.length()));
-    }
-    String[] newVals = new String[fVals.size()];
-    for (int i=0;i<fVals.size();i++) {
-      newVals[i] = fVals.get(i);
-    }
-    return super.adoc(newVals);
-  }
-  
-  public int incrementId() {
-    return idValue++;
-  }
+
 
   // Uniquely for Junit 3
   public static junit.framework.Test suite() {

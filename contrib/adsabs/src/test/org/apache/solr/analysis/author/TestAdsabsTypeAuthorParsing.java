@@ -66,6 +66,8 @@ import org.adsabs.solr.AdsConfig.F;
  *  
  *  "jones," => jones, christine; forman, c; forman, christine
  *  "jones, c" => jones, christine; forman, c; forman, christine
+ *  
+ *  12-12-2012: Finished (I told Alberto, but we didn't review it again)
  * 
  */
 public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {

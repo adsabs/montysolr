@@ -1,11 +1,14 @@
 package monty.solr.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 
+import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -24,6 +27,7 @@ import org.getopt.luke.GrowableStringArray;
 public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 
 	protected AqpTestAbstractCase tp = null;
+  private int idValue = 0;
 	
 	@Override
 	public String getSchemaFile() {
@@ -222,5 +226,40 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		}
 		return sb.toString();
 	}
+	
+  public String addDocs(String[] fields, String...values) {
+    ArrayList<String> vals = new ArrayList<String>(Arrays.asList(values));
+    String[] fieldsVals = new String[fields.length*(values.length*2)];
+    int i = 0;
+    for (String f: fields) {
+      for (String v: values) {
+        fieldsVals[i++] = f;
+        fieldsVals[i++] = v;
+      }
+    }
+    return addDocs(fieldsVals);
+  }
+  
+  public String addDocs(String... fieldsAndValues) {
+    ArrayList<String> fVals = new ArrayList<String>(Arrays.asList(fieldsAndValues));
+    if (fVals.indexOf(F.ID) == -1 || !(fVals.indexOf(F.ID)%2==1)) {
+      fVals.add(F.ID);
+      fVals.add(Integer.toString(incrementId()));
+    }
+    if (fVals.indexOf(F.BIBCODE) == -1 || !(fVals.indexOf(F.BIBCODE)%2==1)) {
+      fVals.add(F.BIBCODE);
+      String bibc = ("AAAAA........" + Integer.toString(idValue));
+      fVals.add(bibc.substring(bibc.length()-13, bibc.length()));
+    }
+    String[] newVals = new String[fVals.size()];
+    for (int i=0;i<fVals.size();i++) {
+      newVals[i] = fVals.get(i);
+    }
+    return super.adoc(newVals);
+  }
+  
+  public int incrementId() {
+    return idValue++;
+  }
 
 }

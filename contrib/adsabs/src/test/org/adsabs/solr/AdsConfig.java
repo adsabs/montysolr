@@ -20,6 +20,8 @@ public final class AdsConfig {
 		public static String TYPE_NORMALIZED_TEXT_ASCII = "keyword";
     public static String[] TYPE_NORMALIZED_TEXT_ASCII_FIELDS = new String[]{"pub", "pub_raw", "keyword", "keyword_norm"};
     
+    public static String[] TYPE_DATE_STRING_FIELDS = new String[]{"pubdate_string"};
+    
 	};
 	
 	// defType query parser
