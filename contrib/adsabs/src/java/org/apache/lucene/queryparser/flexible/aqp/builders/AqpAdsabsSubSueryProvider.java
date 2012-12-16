@@ -1,5 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -219,18 +220,44 @@ public class AqpAdsabsSubSueryProvider implements
         fParser = fp;
         return simplify(swimDeep(q));
       }
-      protected Query swimDeep(BooleanQuery query) throws ParseException {
-        List<BooleanClause>clauses = query.clauses();
-        if (clauses.size()>0) {
-          Query firstQuery = clauses.get(0).getQuery();
-          if (firstQuery instanceof TermQuery && ((TermQuery) firstQuery).getTerm().field().equals("author")) {
-            QParser aqp = fParser.subQuery("author:"+fParser.getString(), "aqp");
-            Query q = aqp.getQuery();
-            q.setBoost(query.getBoost());
-            return q;
+      protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
+        ArrayList<Query> parts = query.getDisjuncts();
+        for (int i=0;i<parts.size();i++) {
+          Query oldQ = parts.get(i);
+          String field = null;
+          if (oldQ instanceof TermQuery) {
+            field = toBeAnalyzedAgain(((TermQuery) oldQ));
+          }
+          else if(oldQ instanceof BooleanQuery) {
+            List<BooleanClause>clauses = ((BooleanQuery) oldQ).clauses();
+            if (clauses.size()>0) {
+              Query firstQuery = clauses.get(0).getQuery();
+              if (firstQuery instanceof TermQuery) {
+                field = toBeAnalyzedAgain(((TermQuery) firstQuery));
+              }
+            }
+          }
+          if (field!=null) {
+            parts.set(i, reAnalyze(field, fParser.getString(), oldQ.getBoost()));
+          }
+          else {
+            parts.set(i, swimDeep(oldQ));
+          }
         }
+        return query;
+      }
+      
+      private String toBeAnalyzedAgain(TermQuery q) {
+        if (q.getTerm().field().equals("author")) {
+          return "author";
         }
-        return super.swimDeep(query);
+        return null;
+      }
+      private Query reAnalyze(String field, String value, float boost) throws ParseException {
+        QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
+        Query q = aqp.getQuery();
+        q.setBoost(boost);
+        return q;
       }
     }.configure(false)); // not analyzed
 	};

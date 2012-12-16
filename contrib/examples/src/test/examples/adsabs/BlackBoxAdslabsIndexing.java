@@ -39,10 +39,29 @@ public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		String out = "";
 		
-		System.out.println(direct.request("/select?q=*:*", null));
+		//System.out.println(direct.request("/select?q=*:*", null));
 		embedded.deleteByQuery("*:*");
 		embedded.commit();
 		
+		// these queries will not find anything, but we can test the proper
+		// search behaviour (the extensive tests are in separate classes,
+		// here we just make sure that handful of queries is expanded/transformed
+		// properly (that all synonym files are at place etc)
+		assert direct.request("/select?q=MÜLLER&debugQuery=true&wt=json", null)
+		  .contains("(((abstract:acr::müller abstract:acr::muller)^1.3) " +
+		  		"| ((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*)^2.0) " +
+		  		"| ((title:acr::müller title:acr::muller)^1.4) " +
+		  		"| full:acr::MULLER^0.7 | keyword:muller^1.4 " +
+		  		"| keyword_norm:muller^1.4 " +
+		  		"| (all:acr::müller all:acr::muller))");
+		assert direct.request("/select?q=accomazzi&debugQuery=true&wt=json", null)
+      .contains("(abstract:accomazzi^1.3 " +
+      		"| ((author:accomazzi, author:accomazzi,*)^2.0) " +
+      		"| title:accomazzi^1.4 " +
+      		"| full:accomazzi^0.7 " +
+      		"| keyword:accomazzi^1.4 " +
+      		"| keyword_norm:accomazzi^1.4 " +
+      		"| all:accomazzi)");
 		
 		InvenioKeepRecidUpdated uHandler = (InvenioKeepRecidUpdated) core.getRequestHandler("/invenio/update");
 		uHandler.setAsynchronous(false);
@@ -63,6 +82,8 @@ public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 		assertTrue(rsp.getException() == null);
 		
 		embedded.commit(true, true);
+		
+		
 				
 	}
 	
