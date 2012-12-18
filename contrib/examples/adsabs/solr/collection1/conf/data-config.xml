@@ -231,6 +231,7 @@
         <field facetHierarchyField="true" column="author_facet_hier" fields="a_100_norm+a_700_norm,a_100+a_700" multiValuedSource="true" />
         <field facetHierarchyField="true" column="first_author_facet_hier" fields="a_100_norm,a_100" multiValuedSource="true" />
         
+        <field column="links" xpath="/collection/record/linkfield"/>
         </entity>
         
     </document>
