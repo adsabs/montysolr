@@ -1837,4 +1837,645 @@
 	        <subfield code="7">ADS metadata</subfield>
         </datafield>
     </record>
+    <record>
+  <controlfield tag="001">9143768</controlfield>
+  <controlfield tag="005">20121217122355.0</controlfield>
+  <datafield tag="024" ind1="7" ind2=" ">
+    <subfield code="a">10.1088/0004-637X/760/2/135</subfield>
+    <subfield code="2">DOI</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="y">2012arXiv1210.5163R</subfield>
+    <subfield code="2">eprint bibcode</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">arXiv:1210.5163</subfield>
+    <subfield code="2">arXiv</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">2012ApJ...760..135R</subfield>
+    <subfield code="2">ADS bibcode</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Roberts, T. P.</subfield>
+    <subfield code="b">Roberts, T</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Department of Physics, Durham University, South Road, Durham DH1 3LE, UK</subfield>
+    <subfield code="m">t.p.roberts@durham.ac.uk</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">A Variable Ultraluminous X-Ray Source in a Globular Cluster in NGC 4649</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <!-- originally was 2012-12-00 -->
+    <subfield code="c">2012-12-02</subfield>
+    <subfield code="t">date-published</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">2012-10-00</subfield>
+    <subfield code="t">date-preprint</subfield>
+    <subfield code="7">ARXIV</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <!-- originally was 2012-12-00 -->
+    <subfield code="c">2012-12-02</subfield>
+    <subfield code="t">main-date</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">7</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="500" ind1=" " ind2=" ">
+    <subfield code="a">7 pages, 4 figures, accepted for publication in ApJ</subfield>
+    <subfield code="7">ARXIV</subfield>
+    <subfield code="9">ADS</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">We report the discovery of a new ultraluminous X-ray source associated with a globular cluster in the elliptical galaxy NGC 4649. The X-ray source was initially detected with a luminosity below 5 × 10&lt;SUP&gt;38&lt;/SUP&gt; erg s&lt;SUP&gt;-1&lt;/SUP&gt;, but in subsequent observations 7 and 11 years later it had brightened substantially to 2-3 × 10&lt;SUP&gt;39&lt;/SUP&gt; erg s&lt;SUP&gt;-1&lt;/SUP&gt;. Over the course of six separate observations it displayed significant spectral variability, in both continuum slope and absorption column. Short-term variability in the X-ray flux was also present in at least one observation. The properties of this object appear consistent with a stellar-mass black hole accreting at super-Eddington rates (i.e., in the ultraluminous accretion state), although a highly super-Eddington neutron star cannot be excluded. The coincidence of an increase in absorption column with a possible enhancement in short-term variability in at least one observation is suggestive of a clumpy, radiatively driven wind crossing our line of sight to the object.</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="650" ind1="1" ind2="7">
+    <subfield code="a">Astrophysics - High Energy Astrophysical Phenomena</subfield>
+    <subfield code="7">ARXIV</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">globular clusters: general</subfield>
+    <subfield code="b">clusters globular</subfield>
+    <subfield code="2">Astronomy</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">X-rays: binaries</subfield>
+    <subfield code="b">astronomy x rays</subfield>
+    <subfield code="2">Astronomy</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">X-rays: galaxies</subfield>
+    <subfield code="b">astronomy x rays</subfield>
+    <subfield code="2">Astronomy</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="695" ind1=" " ind2=" ">
+    <subfield code="a">Astrophysics - High Energy Astrophysical Phenomena</subfield>
+    <subfield code="b"></subfield>
+    <subfield code="2">arXiv</subfield>
+    <subfield code="7">ARXIV</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Fabbiano, G.</subfield>
+    <subfield code="b">Fabbiano, G</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA 02138, USA</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Luo, B.</subfield>
+    <subfield code="b">Luo, B</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA 02138, USA</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Kim, D. -W.</subfield>
+    <subfield code="b">Kim, D</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA 02138, USA</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Strader, J.</subfield>
+    <subfield code="b">Strader, J</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA 02138, USA; Department of Physics &amp; Astronomy, Michigan State University, East Lansing, MI 48824, USA</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Middleton, M. J.</subfield>
+    <subfield code="b">Middleton, M</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Department of Physics, Durham University, South Road, Durham DH1 3LE, UK</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Brodie, J. P.</subfield>
+    <subfield code="b">Brodie, J</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">UCO/Lick Observatory, 1156 High Street, Santa Cruz, CA 95064, USA</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Fragos, T.</subfield>
+    <subfield code="b">Fragos, T</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Harvard-Smithsonian Center for Astrophysics, 60 Garden Street, Cambridge, MA 02138, USA</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Gallagher, J. S.</subfield>
+    <subfield code="b">Gallagher, J</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Department of Astronomy, University of Wisconsin, 475 North Charter Street, Madison, WI 53706, USA</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Kalogera, V.</subfield>
+    <subfield code="b">Kalogera, V</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Center for Interdisciplinary Exploration and Research in Astrophysics (CIERA) and Department of Physics &amp; Astronomy, Northwestern University, 2145 Sheridan Road, Evanston, IL 60208, USA</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">King, A. R.</subfield>
+    <subfield code="b">King, A</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Department of Physics &amp; Astronomy, University of Leicester, University Road, Leicester LE1 7RH, UK</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Zezas, A.</subfield>
+    <subfield code="b">Zezas, A</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">Physics Department, University of Crete, P.O. Box 2208, GR-710 03 Heraklion, Crete, Greece</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="773" ind1=" " ind2=" ">
+    <subfield code="p">The Astrophysical Journal</subfield>
+    <subfield code="v">760</subfield>
+    <subfield code="n">2</subfield>
+    <subfield code="c">135</subfield>
+    <subfield code="y">2012</subfield>
+    <subfield code="z">The Astrophysical Journal, Volume 760, Issue 2, article id. 135, &lt;NUMPAGES&gt;7&lt;/NUMPAGES&gt; pp. (2012).</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://$SIMBAD$/simbo.pl?bibcode=2012ApJ...760..135R</subfield>
+    <subfield code="y"></subfield>
+    <subfield code="3">simbad</subfield>
+    <subfield code="5">1</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://stacks.iop.org/0004-637X/760/135/pdf</subfield>
+    <subfield code="y"></subfield>
+    <subfield code="3">pdf</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://archive.stsci.edu/mastbibref.php?bibcode=2012ApJ...760..135R</subfield>
+    <subfield code="y">MAST References (HST)</subfield>
+    <subfield code="3">data</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://archives.esac.esa.int/hst/cgi-bin/bibbridge?2012ApJ...760..135R</subfield>
+    <subfield code="y">HST Proposal (ST-ECF)</subfield>
+    <subfield code="3">data</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://cda.harvard.edu/chaser/ocatList.do?obsid=14328,8182,12976,8507,785,12975</subfield>
+    <subfield code="y">Chandra Data Archive ObsIds 14328, 8182, 12976, 8507, 785, 12975</subfield>
+    <subfield code="3">data</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://stacks.iop.org/0004-637X/760/135</subfield>
+    <subfield code="y"></subfield>
+    <subfield code="3">electr</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="856" ind1="4" ind2=" ">
+    <subfield code="u">http://adsabs.harvard.edu/abs/2012ApJ...760..135R</subfield>
+    <subfield code="y"></subfield>
+    <subfield code="3">ADSlink</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="961" ind1=" " ind2=" ">
+    <subfield code="c">2012-12-14T18:26:15</subfield>
+    <subfield code="x">2012-12-15T05:05:27</subfield>
+    <subfield code="7">IOP</subfield>
+  </datafield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">2012ApJ...760..135R</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="a">ASTRONOMY</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">REFEREED</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="p">ARTICLE</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="b">CXC</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="b">CfA</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="b">HST</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="s">CDS</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="s">CXO</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="s">ESA</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="s">HST</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="980" ind1=" " ind2=" ">
+    <subfield code="s">MAST</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="995" ind1=" " ind2=" ">
+    <subfield code="a">{"abs":[{"p":"/proj/ads/abstracts/ast/text/K15/K15-57668.abs","primary":1,"t":"1355527575"},{"p":"/proj/ads/abstracts/ast/text/R15/R15-57668.abs","t":"1355527575"}],"full":[{"p":"/proj/ads/fulltext/extracted/20/12/Ap/J,/,,/76/0,/,1/35/R//acknowledgements.txt","t":1354565063},{"p":"/proj/ads/fulltext/extracted/20/12/Ap/J,/,,/76/0,/,1/35/R//fulltext.txt","t":1354565063}],"links":{"data":[{"t":"MAST References (HST)","u":"http://archive.stsci.edu/mastbibref.php?bibcode=2012ApJ...760..135R"},{"t":"HST Proposal (ST-ECF)","u":"http://archives.esac.esa.int/hst/cgi-bin/bibbridge?2012ApJ...760..135R"},{"t":"Chandra Data Archive ObsIds 14328, 8182, 12976, 8507, 785, 12975","u":"http://cda.harvard.edu/chaser/ocatList.do?obsid=14328,8182,12976,8507,785,12975"}],"electr":[{"u":"http://stacks.iop.org/0004-637X/760/135"}],"pdf":[{"u":"http://stacks.iop.org/0004-637X/760/135/pdf"}],"preprint":[{"u":"1210.5163"}],"simbad":[{"c":"1","u":"http://$SIMBAD$/simbo.pl?bibcode=2012ApJ...760..135R"}]},"prop":["bibgroup: CXC","bibgroup: CfA","bibgroup: HST","refereed"],"refs":[{"p":"/proj/ads/references/resolved/ApJ/0760/iss2.iop.xml.result","t":1355565927}]}</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2010MNRAS.407.2611P</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Peacock, M. B., Maccarone, T. J., Kundu, A., __amp__amp; Zepf, S. E. 2010, MNRAS, 407, 2611&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2010.17119.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Peacock, M. B., Maccarone, T. J., Kundu, A., __amp__amp; Zepf, S. E.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;407&lt;/ref_volume&gt;&lt;ref_year&gt;2010&lt;/ref_year&gt;&lt;ref_start_page&gt;2611&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2009ApJ...694..556B</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Blakeslee, J. P., Jord__amp__#225;n, A., __amp__amp; Mei, S. et al. 2009, ApJ, 694, 556&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/0004-637X/694/1/556&lt;/ref_doi&gt;&lt;ref_authors&gt;Blakeslee, J. P., Jord__amp__#225;n, A., __amp__amp; Mei, S. et al.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;694&lt;/ref_volume&gt;&lt;ref_artnum&gt;556&lt;/ref_artnum&gt;&lt;ref_year&gt;2009&lt;/ref_year&gt;&lt;ref_start_page&gt;556&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2004ApJS..154..519S</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Swartz, D. A., Ghosh, K. K., Tennant, A. F., __amp__amp; Wu, K. 2004, ApJS, 154, 519&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/422842&lt;/ref_doi&gt;&lt;ref_authors&gt;Swartz, D. A., Ghosh, K. K., Tennant, A. F., __amp__amp; Wu, K.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJS&lt;/ref_journal&gt;&lt;ref_issn&gt;0067-0049&lt;/ref_issn&gt;&lt;ref_volume&gt;154&lt;/ref_volume&gt;&lt;ref_artnum&gt;519&lt;/ref_artnum&gt;&lt;ref_year&gt;2004&lt;/ref_year&gt;&lt;ref_start_page&gt;519&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012MNRAS.424.1268C</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Clausen, D., Sigurdsson, S., Eracleous, M., __amp__amp; Irwin, J. A. 2012, MNRAS, 424, 1268&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2012.21305.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Clausen, D., Sigurdsson, S., Eracleous, M., __amp__amp; Irwin, J. A.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;424&lt;/ref_volume&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;1268&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2007MNRAS.377.1187P</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Poutanen, J., Lipunova, G., Fabrika, S., Butkevich, A. G., __amp__amp; Abolmasov, P. 2007, MNRAS, 377, 1187&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2007.11668.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Poutanen, J., Lipunova, G., Fabrika, S., Butkevich, A. G., __amp__amp; Abolmasov, P.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;377&lt;/ref_volume&gt;&lt;ref_year&gt;2007&lt;/ref_year&gt;&lt;ref_start_page&gt;1187&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012MNRAS.420.2969M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Middleton, M. J., Sutton, A. D., Roberts, T. P., Jackson, F. E., __amp__amp; Done, C. 2012, MNRAS, 420, 2969&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2011.20145.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Middleton, M. J., Sutton, A. D., Roberts, T. P., Jackson, F. E., __amp__amp; Done, C.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;420&lt;/ref_volume&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;2969&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012ApJ...749...91F</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Fryer, C. L., Belczynski, K., __amp__amp; Wiktorowicz, G. et al. 2012, ApJ, 749, 91&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/0004-637X/749/1/91&lt;/ref_doi&gt;&lt;ref_authors&gt;Fryer, C. L., Belczynski, K., __amp__amp; Wiktorowicz, G. et al.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;749&lt;/ref_volume&gt;&lt;ref_artnum&gt;91&lt;/ref_artnum&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;91&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012ApJ...752...90P</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Peacock, M. B., Zepf, S. E., __amp__amp; Maccarone, T. J. 2012, ApJ, 752, 90&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/0004-637X/752/2/90&lt;/ref_doi&gt;&lt;ref_authors&gt;Peacock, M. B., Zepf, S. E., __amp__amp; Maccarone, T. J.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;752&lt;/ref_volume&gt;&lt;ref_artnum&gt;90&lt;/ref_artnum&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;90&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2011ApJ...732L..28K</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;King, A. 2011, ApJ, 732, L28&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/2041-8205/732/2/L28&lt;/ref_doi&gt;&lt;ref_authors&gt;King, A.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;2041-8205&lt;/ref_issn&gt;&lt;ref_volume&gt;732&lt;/ref_volume&gt;&lt;ref_artnum&gt;L28&lt;/ref_artnum&gt;&lt;ref_year&gt;2011&lt;/ref_year&gt;&lt;ref_start_page&gt;L28&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2011MNRAS.410L..32M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Maccarone, T. J. __amp__amp; Warner, B. 2011, MNRAS, 410, L32&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1745-3933.2010.00973.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Maccarone, T. J. __amp__amp; Warner, B.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;410&lt;/ref_volume&gt;&lt;ref_year&gt;2011&lt;/ref_year&gt;&lt;ref_start_page&gt;L32&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2010MNRAS.409L..84M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Maccarone, T. J., Kundu, A., Zepf, S. E., __amp__amp; Rhode, K. L. 2010, MNRAS, 409, L84&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1745-3933.2010.00953.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Maccarone, T. J., Kundu, A., Zepf, S. E., __amp__amp; Rhode, K. L.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;409&lt;/ref_volume&gt;&lt;ref_year&gt;2010&lt;/ref_year&gt;&lt;ref_start_page&gt;L84&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2001ApJ...554.1035F</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Fabbiano, G., Zezas, A., __amp__amp; Murray, S. S. 2001, ApJ, 554, 1035&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/321397&lt;/ref_doi&gt;&lt;ref_authors&gt;Fabbiano, G., Zezas, A., __amp__amp; Murray, S. S.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;554&lt;/ref_volume&gt;&lt;ref_artnum&gt;1035&lt;/ref_artnum&gt;&lt;ref_year&gt;2001&lt;/ref_year&gt;&lt;ref_start_page&gt;1035&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2004ApJ...601L.143I</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Irwin, J. A., Bregman, J. N., __amp__amp; Athey, A. E. 2004, ApJ, 601, L143&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/382026&lt;/ref_doi&gt;&lt;ref_authors&gt;Irwin, J. A., Bregman, J. N., __amp__amp; Athey, A. E.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;1538-4357&lt;/ref_issn&gt;&lt;ref_volume&gt;601&lt;/ref_volume&gt;&lt;ref_artnum&gt;L143&lt;/ref_artnum&gt;&lt;ref_year&gt;2004&lt;/ref_year&gt;&lt;ref_start_page&gt;L143&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2011MNRAS.410.1655M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Maccarone, T. J., Kundu, A., Zepf, S. E., __amp__amp; Rhode, K. L. 2011, MNRAS, 410, 1655&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2010.17547.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Maccarone, T. J., Kundu, A., Zepf, S. E., __amp__amp; Rhode, K. L.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;410&lt;/ref_volume&gt;&lt;ref_year&gt;2011&lt;/ref_year&gt;&lt;ref_start_page&gt;1655&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012ApJ...755..162B</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Brassington, N. J., Fabbiano, G., __amp__amp; Zezas, A. et al. 2012, ApJ, 755, 162&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/0004-637X/755/2/162&lt;/ref_doi&gt;&lt;ref_authors&gt;Brassington, N. J., Fabbiano, G., __amp__amp; Zezas, A. et al.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;755&lt;/ref_volume&gt;&lt;ref_artnum&gt;162&lt;/ref_artnum&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;162&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2010ApJ...719..415P</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Peek, J. E. G. __amp__amp; Graves, G. J. 2010, ApJ, 719, 415&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/0004-637X/719/1/415&lt;/ref_doi&gt;&lt;ref_authors&gt;Peek, J. E. G. __amp__amp; Graves, G. J.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;719&lt;/ref_volume&gt;&lt;ref_artnum&gt;415&lt;/ref_artnum&gt;&lt;ref_year&gt;2010&lt;/ref_year&gt;&lt;ref_start_page&gt;415&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2007Ap&amp;SS.311..203R</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Roberts, T. P. 2007, Ap__amp__amp;SS, 311, 203&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1007/s10509-007-9547-z&lt;/ref_doi&gt;&lt;ref_authors&gt;Roberts, T. P.&lt;/ref_authors&gt;&lt;ref_journal&gt;Ap__amp__amp;SS&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-640X&lt;/ref_issn&gt;&lt;ref_volume&gt;311&lt;/ref_volume&gt;&lt;ref_year&gt;2007&lt;/ref_year&gt;&lt;ref_start_page&gt;203&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2004ApJ...600..729R</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Randall, S. W., Sarazin, C. L., __amp__amp; Irwin, J. A. 2004, ApJ, 600, 729&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/380109&lt;/ref_doi&gt;&lt;ref_authors&gt;Randall, S. W., Sarazin, C. L., __amp__amp; Irwin, J. A.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;600&lt;/ref_volume&gt;&lt;ref_artnum&gt;729&lt;/ref_artnum&gt;&lt;ref_year&gt;2004&lt;/ref_year&gt;&lt;ref_start_page&gt;729&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012A&amp;A...543A..20D</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;D'ai, A., Papitto, A., __amp__amp; Iaria, R. et al. 2012, A__amp__amp;A, 543, A20&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1051/0004-6361/201118577&lt;/ref_doi&gt;&lt;ref_authors&gt;D'ai, A., Papitto, A., __amp__amp; Iaria, R. et al.&lt;/ref_authors&gt;&lt;ref_journal&gt;A__amp__amp;A&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-6361&lt;/ref_issn&gt;&lt;ref_volume&gt;543&lt;/ref_volume&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;A20&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2010ApJ...721..323S</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Shih, I. C., Kundu, A., Maccarone, T. J., Zepf, S. E., __amp__amp; Joseph, T. D. 2010, ApJ, 721, 323&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/0004-637X/721/1/323&lt;/ref_doi&gt;&lt;ref_authors&gt;Shih, I. C., Kundu, A., Maccarone, T. J., Zepf, S. E., __amp__amp; Joseph, T. D.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;721&lt;/ref_volume&gt;&lt;ref_artnum&gt;323&lt;/ref_artnum&gt;&lt;ref_year&gt;2010&lt;/ref_year&gt;&lt;ref_start_page&gt;323&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2003ApJ...596L.171G</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Gao, Y., Wang, Q. D., Appleton, P. N., __amp__amp; Lucas, R. A. 2003, ApJ, 596, L171&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/379598&lt;/ref_doi&gt;&lt;ref_authors&gt;Gao, Y., Wang, Q. D., Appleton, P. N., __amp__amp; Lucas, R. A.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;1538-4357&lt;/ref_issn&gt;&lt;ref_volume&gt;596&lt;/ref_volume&gt;&lt;ref_artnum&gt;L171&lt;/ref_artnum&gt;&lt;ref_year&gt;2003&lt;/ref_year&gt;&lt;ref_start_page&gt;L171&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2007ApJ...664..458D</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Devi, A. S., Misra, R., Agrawal, V. K., __amp__amp; Singh, K. Y. 2007, ApJ, 664, 458&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/518533&lt;/ref_doi&gt;&lt;ref_authors&gt;Devi, A. S., Misra, R., Agrawal, V. K., __amp__amp; Singh, K. Y.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;664&lt;/ref_volume&gt;&lt;ref_artnum&gt;458&lt;/ref_artnum&gt;&lt;ref_year&gt;2007&lt;/ref_year&gt;&lt;ref_start_page&gt;458&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012MNRAS.423.1144R</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Ripamonti, E. __amp__amp; Mapelli, M. 2012, MNRAS, 423, 1144&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2012.20942.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Ripamonti, E. __amp__amp; Mapelli, M.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;423&lt;/ref_volume&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;1144&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2006csxs.book..157M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="book"&gt;&lt;ref_citation&gt;McClintock, J. E. __amp__amp; Remillard, R. A. 2006, Compact Stellar X-ray Sources, ed. W. H. G. Lewin __amp__amp; M. van der Klis (Cambridge: Cambridge Univ. Press), 157&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1017/CBO9780511536281&lt;/ref_doi&gt;&lt;ref_authors&gt;McClintock, J. E. __amp__amp; Remillard, R. A.&lt;/ref_authors&gt;&lt;ref_journal&gt;Compact Stellar X-ray Sources&lt;/ref_journal&gt;&lt;ref_year&gt;2006&lt;/ref_year&gt;&lt;ref_start_page&gt;157&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2011MNRAS.411..644M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Middleton, M., Roberts, T. P., Done, C., __amp__amp; Jackson, F. 2011, MNRAS, 411, 644&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2010.17712.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Middleton, M., Roberts, T. P., Done, C., __amp__amp; Jackson, F.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;411&lt;/ref_volume&gt;&lt;ref_year&gt;2011&lt;/ref_year&gt;&lt;ref_start_page&gt;644&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">1992ApJ...398..146G</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Gregory, P. C. __amp__amp; Loredo, T. J. 1992, ApJ, 398, 146&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/171844&lt;/ref_doi&gt;&lt;ref_authors&gt;Gregory, P. C. __amp__amp; Loredo, T. J.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_volume&gt;398&lt;/ref_volume&gt;&lt;ref_year&gt;1992&lt;/ref_year&gt;&lt;ref_start_page&gt;146&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2003MNRAS.342.1041D</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Done, C. __amp__amp; Gierlinski, M. 2003, MNRAS, 342, 1041&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1046/j.1365-8711.2003.06614.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Done, C. __amp__amp; Gierlinski, M.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;342&lt;/ref_volume&gt;&lt;ref_year&gt;2003&lt;/ref_year&gt;&lt;ref_start_page&gt;1041&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2009MNRAS.397.1836G</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Gladstone, J. C., Roberts, T. P., __amp__amp; Done, C. 2009, MNRAS, 397, 1836&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2009.15123.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Gladstone, J. C., Roberts, T. P., __amp__amp; Done, C.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;397&lt;/ref_volume&gt;&lt;ref_year&gt;2009&lt;/ref_year&gt;&lt;ref_start_page&gt;1836&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2000ApJ...542..914W</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Wilms, J., Allen, A., __amp__amp; McCray, R. 2000, ApJ, 542, 914&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/317016&lt;/ref_doi&gt;&lt;ref_authors&gt;Wilms, J., Allen, A., __amp__amp; McCray, R.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;542&lt;/ref_volume&gt;&lt;ref_artnum&gt;914&lt;/ref_artnum&gt;&lt;ref_year&gt;2000&lt;/ref_year&gt;&lt;ref_start_page&gt;914&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2010ApJ...725.1805B</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Brassington, N. J., Fabbiano, G., __amp__amp; Blake, S. et al. 2010, ApJ, 725, 1805&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/0004-637X/725/2/1805&lt;/ref_doi&gt;&lt;ref_authors&gt;Brassington, N. J., Fabbiano, G., __amp__amp; Blake, S. et al.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;725&lt;/ref_volume&gt;&lt;ref_artnum&gt;1805&lt;/ref_artnum&gt;&lt;ref_year&gt;2010&lt;/ref_year&gt;&lt;ref_start_page&gt;1805&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2007Natur.445..183M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Maccarone, T. J., Kundu, A., Zepf, S. E., __amp__amp; Rhode, K. L. 2007, Nature, 445, 183&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1038/nature05434&lt;/ref_doi&gt;&lt;ref_authors&gt;Maccarone, T. J., Kundu, A., Zepf, S. E., __amp__amp; Rhode, K. L.&lt;/ref_authors&gt;&lt;ref_journal&gt;Nature&lt;/ref_journal&gt;&lt;ref_volume&gt;445&lt;/ref_volume&gt;&lt;ref_year&gt;2007&lt;/ref_year&gt;&lt;ref_start_page&gt;183&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012Natur.490...71S</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Strader, J., Chomiuk, L., Maccarone, T. J., Miller-Jones, J. C. A., __amp__amp; Seth, A. C. 2012a, Nature, 490, 71&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1038/nature11490&lt;/ref_doi&gt;&lt;ref_authors&gt;Strader, J., Chomiuk, L., Maccarone, T. J., Miller-Jones, J. C. A., __amp__amp; Seth, A. C.&lt;/ref_authors&gt;&lt;ref_journal&gt;Nature&lt;/ref_journal&gt;&lt;ref_volume&gt;490&lt;/ref_volume&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;71&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2011NewAR..55..166F</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Feng, H. __amp__amp; Soria, R. 2011, New Astron. Rev., 55, 166&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1016/j.newar.2011.08.002&lt;/ref_doi&gt;&lt;ref_authors&gt;Feng, H. __amp__amp; Soria, R.&lt;/ref_authors&gt;&lt;ref_journal&gt;New Astron. Rev.&lt;/ref_journal&gt;&lt;ref_issn&gt;1387-6473&lt;/ref_issn&gt;&lt;ref_volume&gt;55&lt;/ref_volume&gt;&lt;ref_year&gt;2011&lt;/ref_year&gt;&lt;ref_start_page&gt;166&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2008PASP..120..266W</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Wong, D. S., Chornock, R., __amp__amp; Filippenko, A. V. 2008, PASP, 120, 266&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/529151&lt;/ref_doi&gt;&lt;ref_authors&gt;Wong, D. S., Chornock, R., __amp__amp; Filippenko, A. V.&lt;/ref_authors&gt;&lt;ref_journal&gt;PASP&lt;/ref_journal&gt;&lt;ref_volume&gt;120&lt;/ref_volume&gt;&lt;ref_year&gt;2008&lt;/ref_year&gt;&lt;ref_start_page&gt;266&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2004IJMPD..13....1M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Miller, M. C. __amp__amp; Colbert, E. J. M. 2004, Int. J. Mod. Phys., 13, 1&lt;/ref_citation&gt;&lt;ref_authors&gt;Miller, M. C. __amp__amp; Colbert, E. J. M.&lt;/ref_authors&gt;&lt;ref_journal&gt;Int. J. Mod. Phys.&lt;/ref_journal&gt;&lt;ref_volume&gt;13&lt;/ref_volume&gt;&lt;ref_year&gt;2004&lt;/ref_year&gt;&lt;ref_start_page&gt;1&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012arXiv1210.3621S</subfield>
+    <subfield code="r">arxiv: 1210.3621</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Strader, J., Fabbiano, G., __amp__amp; Luo, B. et al. 2012b, ApJ, in press (arXiv:1210.3621v1)&lt;/ref_citation&gt;&lt;ref_authors&gt;Strader, J., Fabbiano, G., __amp__amp; Luo, B. et al.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2002ApJS..143...25C</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Colbert, E. J. M. __amp__amp; Ptak, A. F. 2002, ApJS, 143, 25&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/342507&lt;/ref_doi&gt;&lt;ref_authors&gt;Colbert, E. J. M. __amp__amp; Ptak, A. F.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJS&lt;/ref_journal&gt;&lt;ref_issn&gt;0067-0049&lt;/ref_issn&gt;&lt;ref_volume&gt;143&lt;/ref_volume&gt;&lt;ref_artnum&gt;25&lt;/ref_artnum&gt;&lt;ref_year&gt;2002&lt;/ref_year&gt;&lt;ref_start_page&gt;25&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2008ApJ...683L.139Z</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Zepf, S. E., Stern, D., __amp__amp; Maccarone, T. J. et al. 2008, ApJ, 683, L139&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/591937&lt;/ref_doi&gt;&lt;ref_authors&gt;Zepf, S. E., Stern, D., __amp__amp; Maccarone, T. J. et al.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;1538-4357&lt;/ref_issn&gt;&lt;ref_volume&gt;683&lt;/ref_volume&gt;&lt;ref_artnum&gt;L139&lt;/ref_artnum&gt;&lt;ref_year&gt;2008&lt;/ref_year&gt;&lt;ref_start_page&gt;L139&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2010ApJ...712L...1I</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Irwin, J. A., Brink, T. G., Bregman, J. N., __amp__amp; Roberts, T. P. 2010, ApJ, 712, L1&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/2041-8205/712/1/L1&lt;/ref_doi&gt;&lt;ref_authors&gt;Irwin, J. A., Brink, T. G., Bregman, J. N., __amp__amp; Roberts, T. P.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;2041-8205&lt;/ref_issn&gt;&lt;ref_volume&gt;712&lt;/ref_volume&gt;&lt;ref_artnum&gt;L1&lt;/ref_artnum&gt;&lt;ref_year&gt;2010&lt;/ref_year&gt;&lt;ref_start_page&gt;L1&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2012ApJ...750..152S</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Soria, R., Kuntz, K. D., __amp__amp; Winkler, P. et al. 2012, ApJ, 750, 152&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1088/0004-637X/750/2/152&lt;/ref_doi&gt;&lt;ref_authors&gt;Soria, R., Kuntz, K. D., __amp__amp; Winkler, P. et al.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;750&lt;/ref_volume&gt;&lt;ref_artnum&gt;152&lt;/ref_artnum&gt;&lt;ref_year&gt;2012&lt;/ref_year&gt;&lt;ref_start_page&gt;152&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2004ApJ...602..231C</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Colbert, E. J. M., Heckman, T. M., Ptak, A. F., Strickland, D. K., __amp__amp; Weaver, K. A. 2004, ApJ, 602, 231&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/380899&lt;/ref_doi&gt;&lt;ref_authors&gt;Colbert, E. J. M., Heckman, T. M., Ptak, A. F., Strickland, D. K., __amp__amp; Weaver, K. A.&lt;/ref_authors&gt;&lt;ref_journal&gt;ApJ&lt;/ref_journal&gt;&lt;ref_issn&gt;0004-637X&lt;/ref_issn&gt;&lt;ref_volume&gt;602&lt;/ref_volume&gt;&lt;ref_artnum&gt;231&lt;/ref_artnum&gt;&lt;ref_year&gt;2004&lt;/ref_year&gt;&lt;ref_start_page&gt;231&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2000AJ....119.1645T</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Trager, S. C., Faber, S. M., Worthey, G., __amp__amp; Gonz__amp__#225;lez, J. J. 2000, AJ, 119, 1645&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1086/301299&lt;/ref_doi&gt;&lt;ref_authors&gt;Trager, S. C., Faber, S. M., Worthey, G., __amp__amp; Gonz__amp__#225;lez, J. J.&lt;/ref_authors&gt;&lt;ref_journal&gt;AJ&lt;/ref_journal&gt;&lt;ref_issn&gt;1538-3881&lt;/ref_issn&gt;&lt;ref_volume&gt;119&lt;/ref_volume&gt;&lt;ref_artnum&gt;1645&lt;/ref_artnum&gt;&lt;ref_year&gt;2000&lt;/ref_year&gt;&lt;ref_start_page&gt;1645&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">1990ARA&amp;A..28..215D</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Dickey, J. M. __amp__amp; Lockman, F. J. 1990, ARA__amp__amp;A, 28, 251&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1146/annurev.aa.28.090190.001243&lt;/ref_doi&gt;&lt;ref_authors&gt;Dickey, J. M. __amp__amp; Lockman, F. J.&lt;/ref_authors&gt;&lt;ref_journal&gt;ARA__amp__amp;A&lt;/ref_journal&gt;&lt;ref_issn&gt;0066-4146&lt;/ref_issn&gt;&lt;ref_volume&gt;28&lt;/ref_volume&gt;&lt;ref_year&gt;1990&lt;/ref_year&gt;&lt;ref_start_page&gt;251&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2011MNRAS.417..464M</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Middleton, M. J., Sutton, A. D., __amp__amp; Roberts, T. P. 2011, MNRAS, 417, 464&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2011.19285.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Middleton, M. J., Sutton, A. D., __amp__amp; Roberts, T. P.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;417&lt;/ref_volume&gt;&lt;ref_year&gt;2011&lt;/ref_year&gt;&lt;ref_start_page&gt;464&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+  <datafield tag="999" ind1="C" ind2="5">
+    <subfield code="i">2011MNRAS.416.1844W</subfield>
+    <subfield code="e">1</subfield>
+    <subfield code="f">IOP;UCP</subfield>
+    <subfield code="b">&lt;reference type="journal"&gt;&lt;ref_citation&gt;Walton, D. J., Roberts, T. P., Mateos, S., __amp__amp; Heard, V. 2011, MNRAS, 416, 1844&lt;/ref_citation&gt;&lt;ref_doi&gt;10.1111/j.1365-2966.2011.19154.x&lt;/ref_doi&gt;&lt;ref_authors&gt;Walton, D. J., Roberts, T. P., Mateos, S., __amp__amp; Heard, V.&lt;/ref_authors&gt;&lt;ref_journal&gt;MNRAS&lt;/ref_journal&gt;&lt;ref_issn&gt;0035-8711&lt;/ref_issn&gt;&lt;ref_volume&gt;416&lt;/ref_volume&gt;&lt;ref_year&gt;2011&lt;/ref_year&gt;&lt;ref_start_page&gt;1844&lt;/ref_start_page&gt;&lt;/reference&gt;</subfield>
+    <subfield code="w">iop.xml</subfield>
+    <subfield code="7">IOP;UCP</subfield>
+  </datafield>
+</record>
 </collection>

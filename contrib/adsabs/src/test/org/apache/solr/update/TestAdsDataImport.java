@@ -281,20 +281,20 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		/*
 		 * database & bibgroup
 		 */
-		assertQ(req("q", "database:astronomy"), "//*[@numFound='8']");
-		assertQ(req("q", "database:Astronomy"), "//*[@numFound='8']");
-		assertQ(req("q", "database:ASTRONOMY"), "//*[@numFound='8']");
-		assertQ(req("q", "database:ASTRONOM*"), "//*[@numFound='8']");
-		assertQ(req("q", "database:ASTRONOM?"), "//*[@numFound='8']");
-		assertQ(req("q", "database:astronom*"), "//*[@numFound='8']");
-		assertQ(req("q", "database:astronom?"), "//*[@numFound='8']");
+		assertQ(req("q", "database:astronomy"), "//*[@numFound='9']");
+		assertQ(req("q", "database:Astronomy"), "//*[@numFound='9']");
+		assertQ(req("q", "database:ASTRONOMY"), "//*[@numFound='9']");
+		assertQ(req("q", "database:ASTRONOM*"), "//*[@numFound='9']");
+		assertQ(req("q", "database:ASTRONOM?"), "//*[@numFound='9']");
+		assertQ(req("q", "database:astronom*"), "//*[@numFound='9']");
+		assertQ(req("q", "database:astronom?"), "//*[@numFound='9']");
 		
-		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='2']");
-		assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='2']");
+		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='3']");
+		assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='3']");
 		
-		assertQ(req("q", "bibgroup:cf*"), "//*[@numFound='2']");
-		assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='2']");
-		assertQ(req("q", "bibgroup:?FA"), "//*[@numFound='2']");
+		assertQ(req("q", "bibgroup:cf*"), "//*[@numFound='3']");
+		assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='3']");
+		assertQ(req("q", "bibgroup:?FA"), "//*[@numFound='3']");
 		
 		assertQ(req("q", "property:catalog AND property:nonarticle"), "//*[@numFound='4']");
 		assertQ(req("q", "property:Catalog AND property:Nonarticle"), "//*[@numFound='4']");
@@ -340,7 +340,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "bibstem:yCat..35*"), "//*[@numFound='3']");
 		assertQ(req("q", "bibstem:yCat..35?"), "//*[@numFound='3']");
 		
-		assertQ(req("q", "bibstem:apj.."), "//*[@numFound='1']");
+		assertQ(req("q", "bibstem:apj.."), "//*[@numFound='2']");
 
 		//XXX: this has changed, the last dot gets removed when we try to guess regex query
 		// need a better solution for this ambiguity yCat..* becomes 'yCat.*'
@@ -464,7 +464,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		// XXX: this nees more thinking; possibly the solution is to mark the token as 'constant'
 		// or some such (in the same way as acronyms)
 		//becomes: abstract:q'i abstract:q abstract:i abstract:qi
-		assertQ(req("q", "abstract:q\\'i", "fl", "recid,abstract,title"), "//*[@numFound='4']");
+		assertQ(req("q", "abstract:q\\'i", "fl", "recid,abstract,title"), "//*[@numFound='5']");
 		assertQ(req("q", "title:q\\'i"), "//*[@numFound='2']");
 		
 		assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
@@ -595,6 +595,9 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//*[@numFound='1']",
         "//doc/str[@name='bibcode'][.='2012AJ....144..19XX']"
         );
+    
+    	// test that 856 data is generated and stored
+    	assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links']/str[contains(text(),'MAST')]");
 	}
 	
 	
