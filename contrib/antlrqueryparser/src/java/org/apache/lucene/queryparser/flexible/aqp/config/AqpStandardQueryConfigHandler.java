@@ -75,6 +75,11 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
 	    final public static ConfigurationKey<Map<String, String>> FIELD_MAPPER = ConfigurationKey.newInstance();
 	    
 	    
+	    /**
+       * Translation mapping for index names (after analysis was done)
+       */
+      final public static ConfigurationKey<Map<String, String>> FIELD_MAPPER_POST_ANALYSIS = ConfigurationKey.newInstance();
+	    
 	}
 	
 	
@@ -92,6 +97,7 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
 	    set(ConfigurationKeys.FEEDBACK, new AqpFeedbackImpl());
 	    set(ConfigurationKeys.ALLOW_SLOW_FUZZY, false);
 	    set(ConfigurationKeys.FIELD_MAPPER, new HashMap<String, String>());
+	    set(ConfigurationKeys.FIELD_MAPPER_POST_ANALYSIS, new HashMap<String, String>());
 	    
 	  }
 

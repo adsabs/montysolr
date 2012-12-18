@@ -1561,12 +1561,12 @@
 			<subfield code="7">ARI</subfield>
 		</datafield>
 		<datafield tag="260" ind1=" " ind2=" ">
-			<subfield code="c">1976-00-00</subfield>
+			<subfield code="c">1978-00-00</subfield>
 			<subfield code="t">date-published</subfield>
 			<subfield code="7">ARI</subfield>
 		</datafield>
 		<datafield tag="260" ind1=" " ind2=" ">
-			<subfield code="c">1976-00-00</subfield>
+			<subfield code="c">1978-00-00</subfield>
 			<subfield code="t">main-date</subfield>
 			<subfield code="7">ADS metadata</subfield>
 		</datafield>
@@ -1669,4 +1669,117 @@
 			<subfield code="7">ADS metadata</subfield>
 		</datafield>
 	</record>
+	
+	<record>
+        <controlfield tag="001">20</controlfield>
+        <datafield ind1=" " ind2=" " tag="970">
+            <subfield code="a">9999XXXX..xxxxxxx20</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="245">
+            <subfield code="a">DateParsingTest #1</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">1976-00-00</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ARI</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">21</controlfield>
+        <datafield ind1=" " ind2=" " tag="970">
+            <subfield code="a">9999XXXX..xxxxxxx21</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="245">
+            <subfield code="a">DateParsingTest #2</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">1976-01-00</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ARI</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">22</controlfield>
+        <datafield ind1=" " ind2=" " tag="970">
+            <subfield code="a">9999XXXX..xxxxxxx22</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="245">
+            <subfield code="a">DateParsingTest #3</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">1976-01-02</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ARI</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">23</controlfield>
+        <datafield ind1=" " ind2=" " tag="970">
+            <subfield code="a">9999XXXX..xxxxxxx23</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="245">
+            <subfield code="a">DateParsingTest #4</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">1976-02-01</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ARI</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">24</controlfield>
+        <datafield ind1=" " ind2=" " tag="970">
+            <subfield code="a">9999XXXX..xxxxxxx24</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="245">
+            <subfield code="a">DateParsingTest #5</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">1976-00-00</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">25</controlfield>
+        <datafield ind1=" " ind2=" " tag="970">
+            <subfield code="a">9999XXXX..xxxxxxx25</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="245">
+            <subfield code="a">DateParsingTest #6</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">1976-01-32</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">26</controlfield>
+        <datafield ind1=" " ind2=" " tag="970">
+            <subfield code="a">9999XXXX..xxxxxxx26</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="245">
+            <subfield code="a">DateParsingTest #7</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">1977-00-00</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">27</controlfield>
+        <datafield ind1=" " ind2=" " tag="970">
+            <subfield code="a">9999XXXX..xxxxxxx26</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="245">
+            <subfield code="a">DateParsingTest #8</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">1977-01-01</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+    </record>
 </collection>

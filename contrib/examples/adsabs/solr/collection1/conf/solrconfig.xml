@@ -1874,6 +1874,7 @@
       <str name="defaultField">unfielded_search</str>
       <str name="defaultOperator">AND</str>
       <str name="fieldMap">arxiv identifier;</str>
+      <str name="fieldMapPostAnalysis">pubdate date;</str>
       <str name="unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
     </lst>
   </requestHandler>

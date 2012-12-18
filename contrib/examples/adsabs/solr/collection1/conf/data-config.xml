@@ -11,7 +11,7 @@
             pk="bibcode"
             url="${dataimporter.request.url}"
             processor="XPathEntityProcessor"
-	        transformer="TemplateTransformer,RegexTransformer,BibstemTransformer,MongoTransformer,FacetHierarchyTransformer"
+	        transformer="TemplateTransformer,AdsDateTransformer,RegexTransformer,BibstemTransformer,MongoTransformer,FacetHierarchyTransformer"
             forEach="/collection/record"
             flatten="false"
             xsl="data-import.xsl"
@@ -79,7 +79,14 @@
             
         <field column="pubdate" 
             xpath="/collection/record/datafield[@tag='260']/subfield[@code='c']" />
+            
         <field column="pubdate_sort" regex="-" replaceWith="" sourceColName="pubdate"/>
+        
+        <!--     
+        TODO: check where this field is used - and if it can be copyField'ed
+        i also removed: RegexTransformer
+        
+        -->
         
         <field column="abstract"        
             xpath="/collection/record/datafield[@tag='520']/subfield[@code='a']" />

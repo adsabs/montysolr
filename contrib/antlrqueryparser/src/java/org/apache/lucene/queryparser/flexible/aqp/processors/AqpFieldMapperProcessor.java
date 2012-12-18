@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -23,19 +25,16 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 public class AqpFieldMapperProcessor extends QueryNodeProcessorImpl {
 
 	private Map<String, String> fieldMap;
+  ConfigurationKey<Map<String, String>> mapKey = AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER;
 
 	public AqpFieldMapperProcessor() {
-		// empty constructor
+	  // empty constructor
 	}
 
 	@Override
 	public QueryNode process(QueryNode queryTree) throws QueryNodeException {
-
-		if (getQueryConfigHandler().has(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER)) {
-
-			fieldMap = getQueryConfigHandler().get(
-					AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
-
+		if (getQueryConfigHandler().has(mapKey)) {
+			fieldMap = getQueryConfigHandler().get(mapKey);
 			if (this.fieldMap != null) {
 				return super.process(queryTree);
 			}

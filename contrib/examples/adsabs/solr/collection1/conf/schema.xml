@@ -456,18 +456,19 @@
 
 
     <!-- Type date_string is used for properly formatting (translating) the Invenio and user
-         input into the solr format 
+         input into the solr format. The real date is stored in the field called 'date'
+         and we require a properly formatted input to search there 
          
          unittest: TestAdsabsTypeDateString
          -->
     <fieldType name="date_string" class="solr.TextField" positionIncrementGap="0">
       <analyzer type="index">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd"/>
+        <filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy"/>
       </analyzer>
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd"/>
+        <filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy"/>
       </analyzer>
     </fieldType>
         
@@ -714,11 +715,12 @@
    <field name="lang" type="normalized_string_ascii" stored="${storeAll:false}" indexed="true"/>
    
        
-   <!-- using temporary type of "string". 
-        pubdate should be date field that allows e.g. "00" for month or day values - but that requires more work -->
-   <field name="pubdate" type="string" stored="true" indexed="true" />
+   <!-- We get pubdate from invenio, we turn that into a properly formatted date string
+       and insert that into 'date' field (the DIH transformer does that) -->
+   <field name="date" type="tdate" stored="${storeAll:false}" indexed="true"/>
+   <field name="pubdate" type="date_string" stored="${storeAll:false}" indexed="true" />
    <field name="pubdate_sort" type="int" stored="${storeAll:false}" indexed="true"/>
-   <field name="pubdate_string" type="date_string" stored="${storeAll:false}" indexed="true"/>
+   
 
    <field name="title" type="ads_text" indexed="true" stored="true"/>
    <field name="alternate_title" type="ads_text" indexed="true" stored="true" multiValued="true"/>
@@ -847,6 +849,5 @@
    <copyField source="doi" dest="all"/>
    <copyField source="identifier" dest="all"/>
    
-   <copyField source="pubdate_string" dest="pubdate"/>
 </schema>
 

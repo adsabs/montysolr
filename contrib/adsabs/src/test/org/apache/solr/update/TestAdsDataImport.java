@@ -514,6 +514,74 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
     assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
     
+    /*
+     * pubdate - 17/12/2012 changed to be the date type
+     * 
+     * we have records with these dates:
+     *    20: 1976-00-00
+     *    21: 1976-01-00
+     *    22: 1976-01-02
+     *    23: 1976-02-01
+     *    24: 1976-01-02
+     *    25: 1976-31-12 // will get indexed as 1976-02-01T00:30:00Z (probably because 00-00 fals into 1/1 + 30MIN)
+     *    26: 1977-00-00
+     *    27: 1977-01-01
+     */
+    //setDebug(true);
+    //dumpDoc(null, "bibcode", "pubdate", "date");
+    
+    assertQ(req("q", "title:dateparsingtest"), "//*[@numFound='8']");
+    assertQ(req("q", "pubdate:1976", "fl", "title,pubdate,date,recid"), 
+        "//*[@numFound='6']",
+        "//doc/int[@name='recid'][.='20']",
+        "//doc/int[@name='recid'][.='21']",
+        "//doc/int[@name='recid'][.='22']",
+        "//doc/int[@name='recid'][.='23']",
+        "//doc/int[@name='recid'][.='24']",
+        "//doc/int[@name='recid'][.='25']"
+        );
+    assertQ(req("q", "pubdate:1976-00"),  // 00 gets automatically translated into 1976-01-01 (includes 1976-01-00)
+        "//*[@numFound='4']",
+        "//doc/int[@name='recid'][.='20']",
+        "//doc/int[@name='recid'][.='21']",
+        "//doc/int[@name='recid'][.='22']",
+        "//doc/int[@name='recid'][.='24']"
+        );
+    assertQ(req("q", "pubdate:1976-00-00"), // gets automatically translated into 01-01
+        "//*[@numFound='3']",
+        "//doc/int[@name='recid'][.='20']",
+        "//doc/int[@name='recid'][.='21']",
+        "//doc/int[@name='recid'][.='24']"
+        );
+    
+    assertQ(req("q", "pubdate:1976-00-32"), "//*[@numFound='0']"); // nonsense, but should be parsed properly into 01-01
+    assertQ(req("q", "pubdate:1976-01-00"), 
+        "//*[@numFound='3']",
+        "//doc/int[@name='recid'][.='20']",
+        "//doc/int[@name='recid'][.='21']",
+        "//doc/int[@name='recid'][.='24']");
+    
+    assertQ(req("q", "pubdate:1976-01-01"), 
+        "//*[@numFound='0']");
+    assertQ(req("q", "pubdate:1976-01-02"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='22']");
+    assertQ(req("q", "pubdate:1976-02-00"), 
+        "//*[@numFound='2']",
+        "//doc/int[@name='recid'][.='23']",
+        "//doc/int[@name='recid'][.='25']");
+    assertQ(req("q", "pubdate:1976-02-01"), 
+        "//*[@numFound='2']",
+        "//doc/int[@name='recid'][.='23']",
+        "//doc/int[@name='recid'][.='25']");
+    assertQ(req("q", "pubdate:1977-00-00"), 
+        "//*[@numFound='2']",
+        "//doc/int[@name='recid'][.='26']",
+        "//doc/int[@name='recid'][.='27']");
+    assertQ(req("q", "pubdate:1977-01-01"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='27']");
+    
 	}
 	
 	

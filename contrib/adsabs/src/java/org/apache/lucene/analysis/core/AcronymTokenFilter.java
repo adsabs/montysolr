@@ -69,9 +69,28 @@ public final class AcronymTokenFilter extends TokenFilter {
   }
 
   private boolean termIsAcronym(String term) {
-    if (term.length() < ACRONYM_MIN_LENGTH || !term.equals(term.toUpperCase())) {
+    if (term.length() < ACRONYM_MIN_LENGTH ) {
       return false;
     }
+    int u = 0;
+    int d = 0;
+    int l = term.length();
+
+    for (char c: term.toCharArray()) {
+      if (Character.isUpperCase(c)) {
+        u++;
+      }
+      else if (Character.isDigit(c)) {
+        d++;
+      }
+      else {
+        return false;
+      }
+    }
+    if (d==l) {
+      return false;
+    }
+    
     return true;
   }
 

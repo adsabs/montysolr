@@ -1,11 +1,19 @@
 package org.apache.solr.search;
 
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.FieldType.NumericType;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
+import org.apache.lucene.queryparser.flexible.core.config.FieldConfig;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.config.NumberDateFormat;
+import org.apache.lucene.queryparser.flexible.standard.config.NumericConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
@@ -24,7 +32,9 @@ import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.DateField;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.search.SolrIndexSearcher.SetNonLazyFieldSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,21 +105,30 @@ public class AqpAdsabsQParser extends QParser {
 			"The defaultOperator is set to null");
 		}
 		
-		if (parserConfig.get("fieldMap", null) != null) {
-			String[] fields = parserConfig.get("fieldMap").split(";");
-			Map<String, String> fieldMap = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
-			String ffs[];
-			for (String f: fields) {
-				ffs = f.split("\\s+");
-				if (ffs.length < 2) {
-					throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
-					"Configuration error inside " + adsConfigName + ", in the section: fieldMap.");
-				}
-				String target = ffs[ffs.length-1];
-				for (int i=0;i<ffs.length-1;i++) {
-					fieldMap.put(ffs[i], target);
-				}
-			}
+		Map<String, String> fieldMap;
+		for (String fName: new String[]{"fieldMap", "fieldMapPostAnalysis"}) {
+		  if (fName.equals("fieldMap")) { // booo
+		    fieldMap = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
+		  }
+		  else {
+		    fieldMap = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER_POST_ANALYSIS);
+		  }
+		  
+  		if (parserConfig.get(fName, null) != null) {
+  			String[] fields = parserConfig.get(fName).split(";");
+  			String ffs[];
+  			for (String f: fields) {
+  				ffs = f.split("\\s+");
+  				if (ffs.length < 2) {
+  					throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
+  					"Configuration error inside " + adsConfigName + ", in the section: " + fName);
+  				}
+  				String target = ffs[ffs.length-1];
+  				for (int i=0;i<ffs.length-1;i++) {
+  					fieldMap.put(ffs[i], target);
+  				}
+  			}
+  		}
 		}
 		
 		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
@@ -144,7 +163,28 @@ public class AqpAdsabsQParser extends QParser {
 		}
 		
 		
+		// this whole sections is necessary for date parsing, i should revisit and clean it
+		// it is a mess
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
+    sdf.setTimeZone(DateField.UTC);
+    
+    HashMap<String, NumericConfig> ncm = new HashMap<String, NumericConfig>();
+    config.set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP, ncm);
+    
+    config.get(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP)
+      .put("date", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+    
+    /*
+    config.get(StandardQueryConfigHandler.ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP)
+      .put("date", DateTools.Resolution.MONTH);
+    
+		config.getFieldConfig("date").set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG, 
+		    new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+		FieldConfig ddd = config.getFieldConfig("date");
 		
+		config.getFieldConfig("pubdate").set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG, 
+        new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+		*/
 	}
 
 	public Query parse() throws ParseException {

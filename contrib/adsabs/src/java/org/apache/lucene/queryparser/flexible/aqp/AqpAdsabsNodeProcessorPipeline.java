@@ -13,6 +13,8 @@ import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpan
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.NumericQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.NumericRangeQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.TermRangeQueryNodeProcessor;
@@ -22,9 +24,11 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerPr
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCarefulAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExpandAuthorSearchProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldNodePreAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQTRUNCATEDProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldMapperProcessorPostAnalysis;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpUnfieldedSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQNORMALProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQPOSITIONProcessor;
@@ -108,6 +112,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		
 		// Analysis block: here we use the Solr/Lucene analyzers
+		add(new AqpAdsabsFieldNodePreAnalysisProcessor()); // ADS specific modification of the tree before the analysis
 		
 		add(new AqpFieldMapperProcessor()); // translate the field name before we try to find the tokenizer chain
 		add(new AqpMultiWordProcessor()); // find synonyms if we have 'plain word token group'
@@ -116,6 +121,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
       add(new AqpUnfieldedSearchProcessor()); // use edismax to wrap unfielded searches
     }
 		
+		add(new NumericQueryNodeProcessor());
+    add(new NumericRangeQueryNodeProcessor());
 		add(new TermRangeQueryNodeProcessor());
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		add(new AqpAdsabsSynonymNodeProcessor()); //XXX: to remove? -- simply wraps into non-analyzed node 
@@ -127,7 +134,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpAdsabsCarefulAnalyzerProcessor()); //XXX should we remove LowercaseExpandedTermsQueryNodeProcessor? -- massages wildcard, regex, fuzzy fields 
 		add(new AqpAdsabsExpandAuthorSearchProcessor()); // kurtz, michael +> "kurtz, michael *" and stuff... 
 				
-		
+		add(new AqpAdsabsFieldMapperProcessorPostAnalysis()); // translate the field name into their final name
 		
 		add(new PhraseSlopQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());
