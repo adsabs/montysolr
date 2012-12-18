@@ -1,5 +1,6 @@
 package org.apache.solr.search;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
@@ -173,6 +174,9 @@ public class AqpAdsabsQParser extends QParser {
     
     config.get(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP)
       .put("date", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+    
+    config.get(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP)
+      .put("recid", new NumericConfig(1, NumberFormat.getNumberInstance(), NumericType.INT));
     
     /*
     config.get(StandardQueryConfigHandler.ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP)

@@ -1782,4 +1782,59 @@
             <subfield code="7">ADS metadata</subfield>
         </datafield>
     </record>
+    <record>
+        <controlfield tag="001">9067588</controlfield>
+        <controlfield tag="005">20121217130328.0</controlfield>
+        <datafield tag="024" ind1="7" ind2=" ">
+            <subfield code="a">10.1088/0004-6256/144/6/192</subfield>
+            <subfield code="2">DOI</subfield>
+            <subfield code="7">IOP</subfield>
+        </datafield>
+        <datafield tag="035" ind1=" " ind2=" ">
+            <subfield code="y">2012arXiv1209.3826M</subfield>
+            <subfield code="2">eprint bibcode</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+        <datafield tag="035" ind1=" " ind2=" ">
+            <subfield code="a">arXiv:1209.3826</subfield>
+            <subfield code="2">arXiv</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+        <datafield tag="035" ind1=" " ind2=" ">
+            <subfield code="a">2012AJ....144..192M</subfield>
+            <subfield code="2">ADS bibcode</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+        <datafield tag="100" ind1=" " ind2=" ">
+            <subfield code="a">Megeath, S. T.</subfield>
+            <subfield code="b">Megeath, S</subfield>
+            <subfield code="e">regular</subfield>
+            <subfield code="u">Department of Physics and Astronomy, University of Toledo, Toledo, OH 43560, USA</subfield>
+            <subfield code="m">megeath@physics.utoledo.edu</subfield>
+            <subfield code="7">IOP</subfield>
+        </datafield>
+        <datafield tag="245" ind1=" " ind2=" ">
+            <subfield code="a">Test that the right pubdate is picked</subfield>
+            <subfield code="7">IOP</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">2012-12-00</subfield>
+            <subfield code="t">date-published</subfield>
+            <subfield code="7">IOP</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">2012-09-00</subfield>
+            <subfield code="t">date-preprint</subfield>
+            <subfield code="7">ARXIV</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="c">2012-12-00</subfield>
+            <subfield code="t">main-date</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+        <datafield tag="970" ind1=" " ind2=" ">
+	        <subfield code="a">2012AJ....144..19XX</subfield>
+	        <subfield code="7">ADS metadata</subfield>
+        </datafield>
+    </record>
 </collection>

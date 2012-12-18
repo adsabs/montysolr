@@ -357,20 +357,23 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		
 		assertQ(req("q", "id:2"), "//*[@numFound='1']");
 		assertQ(req("q", "id:9218605"), "//*[@numFound='1']");
+		assertQ(req("q", "id:9218920"), "//*[@numFound='1']");
+		assertQ(req("q", "id:9106442"), "//*[@numFound='0']");
 	  assertQ(req("q", "id:002"), "//*[@numFound='0']");
     
     
 		/*
-		 * recid - recid is a int field, in the previous versions
-		 * this worker, but now the value must be of numeric type
-		 * to find something. The question is how to get that value
-		 * into the term query when fieldType=int 
+		 * recid - recid is a int field
 		 */
 		
-//		assertQ(req("q", "recid:2"), "//*[@numFound='1']");
-//		assertQ(req("q", "recid:9106442"), "//*[@numFound='1']");
-//		assertQ(req("q", "recid:002"), "//*[@numFound='1']");
-		
+	  assertQ(req("q", "recid:2"), "//*[@numFound='1']");
+    assertQ(req("q", "recid:9218605"), "//*[@numFound='1']");
+    assertQ(req("q", "recid:9218920"), "//*[@numFound='1']");
+    assertQ(req("q", "recid:9106442"), "//*[@numFound='0']");
+    assertQ(req("q", "recid:002"), "//*[@numFound='1']");
+    assertQ(req("q", "recid:0009218605"), "//*[@numFound='1']");
+    assertQ(req("q", "recid:9218920"), "//*[@numFound='1']");
+    assertQ(req("q", "recid:9106442"), "//*[@numFound='0']");
 		
 		
 		
@@ -473,7 +476,10 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		/*
 		 * unfielded search
 		 */
-		assertQ(req("q", "No-Sky"), "//*[@numFound='3']"); // abstract copied to all
+		// becomes: (((abstract:sky abstract:nosky)^1.3) | ((author:no-sky, author:no-sky,*)^2.0) | ((title:sky title:nosky)^1.4) | ((full:No-Sky full:Sky full:NoSky)^0.7) | keyword:no-sky^1.4 | keyword_norm:no-sky^1.4 | (all:sky all:nosky))
+		//dumpDoc(null, "bibdoc", "abstract", "author", "title", "full", "keyword", "keyword_norm", "all");
+		//assertQ(req("q", "No-Sky AND bibcode:2012AJ....144..19XX", "debugQuery", "true"), "//*[@numFound='3']");
+		assertQ(req("q", "No-Sky", "fl", "title"), "//*[@numFound='3']"); // abstract copied to all
 		assertQ(req("q", "hydrodynamics"), "//*[@numFound='1']"); // keywords copied to all
 		assertQ(req("q", "Barabási"), "//*[@numFound='1']"); // unfielded search goes to "author"
 		assertQ(req("q", "NASA"), "//*[@numFound='2']"); // affiliations copied to all
@@ -481,26 +487,22 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		/*
 		 * Cites/refersto queries (use special dummy records, field 999i)
 		 */
-//		assertQ(req("q", "recid:12"), "//*[@numFound='1']");
-//		assertQ(req("q", "recid:16"), "//*[@numFound='1']");
+		assertQ(req("q", "recid:12"), "//*[@numFound='1']");
+		assertQ(req("q", "recid:16"), "//*[@numFound='1']");
 		assertQ(req("q", "id:12"), "//*[@numFound='1']");
 		assertQ(req("q", "id:16"), "//*[@numFound='1']");
 		assertQ(req("q", "citedby(id:12)"), "//*[@numFound='3']");
 		assertQ(req("q", "citedby(title:test)"), "//*[@numFound='4']");
 		
-//		System.out.println(h.query(req("q", "cites(id:12)")));
-//		System.out.println(h.query(req("q", "cites(title:test)")));
 		
 		assertQ(req("q", "cites(id:12)"), "//*[@numFound='0']");
 		assertQ(req("q", "cites(id:13)"), "//*[@numFound='2']");
 		assertQ(req("q", "cites(id:12 OR id:13)"), "//*[@numFound='2']");
 		assertQ(req("q", "cites(title:test)"), "//*[@numFound='5']");
-		
-		
-		//TODO - this query finds nothing (recid:12) but id:12 does
-		//the problem must be with the analyzer (because i see the TermQuery has the binary
-		// value of the integer, whilst cites() query uses the string
-		//assertQ(req("q", "refersto(recid:12)"), "//*[@numFound='1']", "debugQuery", "true");cite_read_boost
+		assertQ(req("q", "cites(recid:12)"), "//*[@numFound='0']");
+    assertQ(req("q", "cites(recid:13)"), "//*[@numFound='2']");
+    assertQ(req("q", "cites(recid:12 OR recid:13)"), "//*[@numFound='2']");
+    assertQ(req("q", "cites(title:test)"), "//*[@numFound='5']");
 		
 		
 		assertQ(req("q", "read_count:1 AND bibcode:1976NASSP.389..293M"), "//*[@numFound='1']");
@@ -582,6 +584,12 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='27']");
     
+    // test the right date is picked from the record
+    assertQ(req("q", "bibcode:2012AJ....144..19XX"), 
+        "//*[@numFound='1']",
+        "//doc/str[@name='pubdate'][.='2012-12-00']"
+        //"//doc/str[@name='date'][.='2012-12-01T00:00:00Z']"
+        );
 	}
 	
 	
