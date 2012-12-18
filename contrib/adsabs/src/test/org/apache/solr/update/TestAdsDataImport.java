@@ -586,8 +586,9 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     
     // test the right date is picked from the record
     assertQ(req("q", "bibcode:2012AJ....144..19XX"), 
-        "//*[@numFound='1']",
-        "//doc/str[@name='pubdate'][.='2012-12-00']"
+        "//*[@numFound='1']"
+        // when run with -DstoreAll=true
+        //"//doc/str[@name='pubdate'][.='2012-12-00']"
         //"//doc/str[@name='date'][.='2012-12-01T00:00:00Z']"
         );
     assertQ(req("q", "pubdate:2012-12-00"), 
