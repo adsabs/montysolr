@@ -590,6 +590,10 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//doc/str[@name='pubdate'][.='2012-12-00']"
         //"//doc/str[@name='date'][.='2012-12-01T00:00:00Z']"
         );
+    assertQ(req("q", "pubdate:2012-12-00"), 
+        "//*[@numFound='1']",
+        "//doc/str[@name='bibcode'][.='2012AJ....144..19XX']"
+        );
 	}
 	
 	
