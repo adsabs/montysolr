@@ -51,7 +51,7 @@ import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
  * by that time all the parsing was already done.
  */
 
-public class AqpAdsabsSubSueryProvider implements
+public class AqpAdsabsSubQueryProvider implements
 		AqpFunctionQueryBuilderProvider {
 	
 	public static Map<String, AqpSubqueryParser> parsers = new HashMap<String, AqpSubqueryParser>();

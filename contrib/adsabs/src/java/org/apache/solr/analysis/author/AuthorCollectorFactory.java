@@ -158,7 +158,7 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
       }
       
       private boolean shortened(String[]nameParts, String[][] otherNames) {
-        for (int i=nameParts.length-1;i>=0;i--) {
+        for (int i=nameParts.length-1;i>0;i--) {
           if (nameParts[i].length() > 1) {
             nameParts[i] = nameParts[i].substring(0, 1);
             for (String[] other: otherNames) {

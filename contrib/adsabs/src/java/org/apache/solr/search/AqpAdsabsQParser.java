@@ -19,7 +19,7 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
-import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubSueryProvider;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubQueryProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
@@ -146,7 +146,7 @@ public class AqpAdsabsQParser extends QParser {
 		
 		// special analyzers
 		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpSolrFunctionProvider());
-		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpAdsabsSubSueryProvider());
+		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpAdsabsSubQueryProvider());
 		
 		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put("author", new int[0]);
 		

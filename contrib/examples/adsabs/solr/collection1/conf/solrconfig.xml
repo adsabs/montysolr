@@ -1869,7 +1869,6 @@
   -->
   
   <requestHandler name="ads-config" class="solr.AdsConfigHandler" default="false">
-     
      <lst name="queryParser">
       <str name="defaultField">unfielded_search</str>
       <str name="defaultOperator">AND</str>
@@ -1885,6 +1884,10 @@
     </lst>
   </queryParser>
   
-
+  <requestHandler name="dump-index" class="solr.DumpIndexField" default="false">
+    <lst name="defaults">
+        <str name="allowed">.*</str>
+    </lst>
+  </requestHandler>
   
 </config>

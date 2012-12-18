@@ -34,17 +34,31 @@
 	    author_notrans
 	    author_nosyn
 	    author_short_name_rage (used only by query parser)
-	    
+	    author_collector (used only by dump-index component)
      -->
-     <fieldType name="author" class="solr.TextField" positionIncrementGap="100">
-      <analyzer type="index">
+     
+     <!--  The purpose of the collector is just to harvest the author transliterations,
+           we do it separately, not during the indexing (for speed/memory/control concerns)
+           
+           testcase: TestDumpIndexFieldRequestHandler
+                     TestAuthorCollectorFactory 
+       -->
+     <fieldType name="author_collector" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="query"> <!--  it must be query type!!! -->
         <tokenizer class="solr.KeywordTokenizerFactory"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.analysis.author.AuthorTransliterationFactory"/>
         <filter class="solr.analysis.author.AuthorCollectorFactory" 
-            outFile="author_generated.translit" 
+            outFile="author_generated.translit"
             tokenTypes="AUTHOR_TRANSLITERATED"
             emitTokens="false"/>
+      </analyzer>
+     </fieldType>
+    
+     <fieldType name="author" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory"/>
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
       </analyzer>
@@ -735,6 +749,7 @@
    <field name="a_700_norm" type="author" indexed="false" stored="false" multiValued="true"/>
    
    <field name="author" type="author" indexed="true" stored="true" multiValued="true"/>
+   <field name="author_collector" type="author_collector" indexed="false" stored="false" multiValued="true"/>
    <field name="author_norm" type="normalized_string_ascii" indexed="true" stored="true" multiValued="true"/>
    <field name="author_facet" type="string" indexed="true" stored="${storeAll:false}" multiValued="true"/>
    <field name="author_facet_hier" type="string" indexed="true" stored="${storeAll:false}" multiValued="true"/>

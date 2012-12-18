@@ -161,24 +161,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
   }
 
-  private String[] formatSynonyms(String[] strings) {
-    String[] newLines = new String[strings.length];
-    int nl = 0;
-    for (String line : strings) {
-      StringBuilder out = new StringBuilder();
-      String[] kv = line.split("=>");
-      for (int i=0;i<kv.length;i++) {
-        if (i>0) out.append("=>");
-        String[] names = kv[i].split(";");
-        for (int j=0;j<names.length;j++) {
-          if (j>0) out.append(",");
-          out.append(names[j].trim().replace(" ", "\\ ").replace(",", "\\,"));
-        }
-      }
-      newLines[nl++] = out.toString();
-    }
-    return newLines;
-  }
+  
 
   @Override
   public String getSolrConfigFile() {
