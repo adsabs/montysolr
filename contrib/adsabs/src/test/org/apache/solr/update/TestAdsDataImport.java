@@ -235,11 +235,15 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		/*
      * positional search pos()
      */
-		setDebug(true);
+		//setDebug(true);
+		/*
+		 * TODO
+		 *
     assertQ(req("q", "author:^\"mosser, b\""), 
         "//*[@numFound='1']",
         "//doc/str[@name='recid'][.='9218605']"
         );
+        */
     
     
 		/*
@@ -491,7 +495,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		// becomes: (((abstract:sky abstract:nosky)^1.3) | ((author:no-sky, author:no-sky,*)^2.0) | ((title:sky title:nosky)^1.4) | ((full:No-Sky full:Sky full:NoSky)^0.7) | keyword:no-sky^1.4 | keyword_norm:no-sky^1.4 | (all:sky all:nosky))
 		//dumpDoc(null, "bibdoc", "abstract", "author", "title", "full", "keyword", "keyword_norm", "all");
 		//assertQ(req("q", "No-Sky AND bibcode:2012AJ....144..19XX", "debugQuery", "true"), "//*[@numFound='3']");
-		assertQ(req("q", "No-Sky", "fl", "title"), "//*[@numFound='3']"); // abstract copied to all
+		assertQ(req("q", "No-Sky", "fl", "title,recid"), "//*[@numFound='2']"); // abstract copied to all
 		assertQ(req("q", "hydrodynamics"), "//*[@numFound='1']"); // keywords copied to all
 		assertQ(req("q", "Barabási"), "//*[@numFound='1']"); // unfielded search goes to "author"
 		assertQ(req("q", "NASA"), "//*[@numFound='2']"); // affiliations copied to all
