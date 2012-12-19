@@ -20,8 +20,8 @@ public class AqpAdsabsFunctionProvider implements
 	
 	public static Map<String, ValueSourceParser> parsers = new HashMap<String, ValueSourceParser>();
 	
-	static {
-		parsers.put("pos", new ValueSourceParser() {
+	static { // this doesn't work right now, so as a workaround (before i fix the PositionSearchQuery) i will use author_first_index
+		parsers.put("pos-func", new ValueSourceParser() {
 	      @Override
 	      public ValueSource parse(FunctionQParser fp) throws ParseException {
     		  PositionSearchFunction o = new PositionSearchFunction(

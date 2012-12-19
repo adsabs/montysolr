@@ -22,6 +22,7 @@ import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.DataImporter;
 import org.apache.solr.handler.dataimport.config.DIHConfiguration;
@@ -229,6 +230,17 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
                           "<str>Barclay, T.</str>" + 
                           "<str>Burke, C. J.</str>" + 
                           "</arr>");
+    
+    
+		/*
+     * positional search pos()
+     */
+		setDebug(true);
+    assertQ(req("q", "author:^\"mosser, b\""), 
+        "//*[@numFound='1']",
+        "//doc/str[@name='recid'][.='9218605']"
+        );
+    
     
 		/*
 		 * For the reference resolver, the field which contains only the last
@@ -516,6 +528,8 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
     assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
     
+    
+    
     /*
      * pubdate - 17/12/2012 changed to be the date type
      * 
@@ -596,8 +610,16 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//doc/str[@name='bibcode'][.='2012AJ....144..19XX']"
         );
     
-    	// test that 856 data is generated and stored
-    	assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links']/str[contains(text(),'MAST')]");
+    
+    
+    /*
+     * links (856 data is generated and stored)
+     */
+    assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links']/str[contains(text(),'MAST')]");
+    
+    
+
+    
 	}
 	
 	

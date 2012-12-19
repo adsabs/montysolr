@@ -149,7 +149,7 @@ public class PositionSearchFunction extends ValueSource {
 
 			public String toString(int doc) {
 				StringBuilder sb = new StringBuilder();
-				sb.append("author").append('(');
+				sb.append("pos").append('(');
 				sb.append(subQuery.toString());
 				sb.append(" * ").append(floatVal(doc));
 				sb.append(')');

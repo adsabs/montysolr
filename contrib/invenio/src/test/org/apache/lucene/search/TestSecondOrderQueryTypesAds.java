@@ -19,8 +19,10 @@ import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.junit.BeforeClass;
 
+@SuppressCodecs("SimpleText")
 public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCase {
 
 	protected String idField;

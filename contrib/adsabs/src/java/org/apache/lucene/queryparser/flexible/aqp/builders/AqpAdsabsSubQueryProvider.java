@@ -260,6 +260,14 @@ public class AqpAdsabsSubQueryProvider implements
         return q;
       }
     }.configure(false)); // not analyzed
+		parsers.put("posxx", new AqpSubqueryParserFull() { // this is a temporary workaround!!! 
+      public Query parse(FunctionQParser fp) throws ParseException {
+        String field = fp.parseId();
+        String value = fp.parseId();
+        QParser ep = fp.subQuery("first_author:"+value, "aqp");
+        return ep.getQuery();
+      }
+    }.configure(false)); // not analyzed
 	};
 
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
