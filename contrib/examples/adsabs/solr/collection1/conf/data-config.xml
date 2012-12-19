@@ -31,8 +31,15 @@
             xpath="/collection/record/datafield[@tag='022']/subfield[@code='a']" />
         <field column="doi" 
             xpath="/collection/record/datafield[@tag='024']/subfield[@code='a']" />
-        <field column="identifier" 
-            xpath="/collection/record/datafield[@tag='035']/subfield[@code='a']" />
+        
+        <!-- this forces and match: xpath="/collection/record/datafield[@tag='035']/subfield[@code='a']|subfield[@code='z']|subfield[@code='y']" -->
+        <field column="identifierA" name="identifier" 
+            xpath="/collection/record/datafield[@tag='035']/subfield[@code='a']"/>
+        <field column="identifierY" name="identifier" 
+            xpath="/collection/record/datafield[@tag='035']/subfield[@code='y']"/>
+        <field column="identifierZ" name="identifier" 
+            xpath="/collection/record/datafield[@tag='035']/subfield[@code='z']"/>
+                 
         <field column="lang" 
             xpath="/collection/record/datafield[@tag='041']/subfield[@code='a']" />
         

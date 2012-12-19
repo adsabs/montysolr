@@ -437,6 +437,8 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		 * identifier
 		 * should be translated into the correct field (currently, the grammar 
 		 * understands only arxiv: and doi: (and doi gets handled separately)
+		 * 
+		 * Also, the subfields a|z|y are to be indexed inside 'identifier' index
 		 */
 		assertQ(req("q", "arxiv:1234.5678"), "//*[@numFound='1']");
 		assertQ(req("q", "arxiv:\"arXiv:1234.5678\""), "//*[@numFound='1']");
@@ -446,6 +448,20 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "arxiv:\"ARXIV:hep-ph/1234\""), "//*[@numFound='1']");
 		assertQ(req("q", "arxiv:hep-ph/1234"), "//*[@numFound='1']");
 		assertQ(req("q", "identifier:hep-ph/1234"), "//*[@numFound='1']");
+		
+		assertQ(req("q", "identifier:2001test.mat..6096A"), 
+		    "//*[@numFound='1']",
+		    "//doc/int[@name='recid'][.='5979890']");
+		assertQ(req("q", "identifier:2001cond.mat..6096A"),  
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='5979890']");
+		assertQ(req("q", "identifier:cond-mat/0106096"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='5979890']");
+		assertQ(req("q", "identifier:2002RvMP...74...47A"),  
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='5979890']");
+		
 		
 		/*
 		 * title

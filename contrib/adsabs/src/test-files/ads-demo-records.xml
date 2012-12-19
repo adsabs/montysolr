@@ -962,6 +962,11 @@
 			<subfield code="7">APS</subfield>
 		</datafield>
 		<datafield tag="035" ind1=" " ind2=" ">
+            <subfield code="z">2001test.mat..6096A</subfield>
+            <subfield code="2">test bibcode</subfield>
+            <subfield code="7">ADS metadata</subfield>
+        </datafield>
+		<datafield tag="035" ind1=" " ind2=" ">
 			<subfield code="y">2001cond.mat..6096A</subfield>
 			<subfield code="2">eprint bibcode</subfield>
 			<subfield code="7">ADS metadata</subfield>

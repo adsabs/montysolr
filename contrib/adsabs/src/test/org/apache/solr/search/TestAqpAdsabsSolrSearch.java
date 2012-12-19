@@ -262,7 +262,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 				"+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citedby[using:reference<bibcode>])", BooleanQuery.class);
 		
 		
-		
+		// useful() 
+		assertQueryEquals(req("qt", "aqp", "q", "useful(author:muller)"), 
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=cites[using:reference<weightedBy:cite_read_boost>])", SecondOrderQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "all:(x OR z) useful(author:muller OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=cites[using:reference<weightedBy:cite_read_boost>])", BooleanQuery.class);
+    
+    // reviews() 
+    assertQueryEquals(req("qt", "aqp", "q", "reviews(author:muller)"), 
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode>])", SecondOrderQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "all:(x OR z) reviews(author:muller OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode>])", BooleanQuery.class);    
 	}
 	
 	public static junit.framework.Test suite() {
