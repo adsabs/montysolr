@@ -92,6 +92,13 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja Karel"));
     assertU(commit());
     
+    assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja K"));
+    assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M K"));
+    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel Molja"));
+    assertU(adoc(F.ID, "10", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel M"));
+    assertU(adoc(F.ID, "11", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, K Molja"));
+    assertU(commit());
+    
     // check the file still contains the original data
     checkFile(formatSynonyms(new String[]{
         "ADAMCHuk, m => ADAMČuk, m",
@@ -129,6 +136,8 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
         //"Adamczuk, M Karel=>Adamčuk, M Karel",
         "Adamchuk, M K =>Adamčuk, M K",
         "Adamchuk, M =>Adamčuk, M",
+        "Adamcuk, Karel Molja=>Adamčuk, Karel Molja",
+        "Adamcuk, Karel M=>Adamčuk, Karel M",
     }));
     
   }

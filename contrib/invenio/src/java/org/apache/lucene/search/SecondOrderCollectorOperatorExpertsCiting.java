@@ -108,7 +108,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	@Override
 	public String toString() {
-		return "cites[using:" + referenceField + "]";
+		return "cites[using:" + referenceField + "<weightedBy:" + boostField + ">]";
 	}
 	
 	/** Returns a hash code value for this object. */

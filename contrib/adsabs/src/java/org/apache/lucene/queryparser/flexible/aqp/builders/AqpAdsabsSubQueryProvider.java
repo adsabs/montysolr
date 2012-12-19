@@ -24,6 +24,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
 import org.apache.lucene.search.SecondOrderCollectorCitesRAM;
+import org.apache.lucene.search.SecondOrderCollectorCitingTheMostCited;
+import org.apache.lucene.search.SecondOrderCollectorOperatorExpertsCiting;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.request.SolrQueryRequest;
@@ -174,6 +176,30 @@ public class AqpAdsabsSubQueryProvider implements
         String refField = "reference";
         String idField = "bibcode";
         return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
+      }
+      }.configure(true)); // true=canBeAnalyzed
+	  // useful() = what experts are citing
+    parsers.put("useful", new AqpSubqueryParserFull() { // this function values can be analyzed
+      public Query parse(FunctionQParser fp) throws ParseException {          
+        Query innerQuery = fp.parseNestedQuery();
+        SolrQueryRequest req = fp.getReq();
+        // TODO: make configurable
+        String refField = "reference";
+        String idField = "bibcode";
+        String boostField = "cite_read_boost";
+        return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, boostField));
+      }
+      }.configure(true)); // true=canBeAnalyzed
+    // reviews() = find papers that cite the most cited papers
+    parsers.put("reviews", new AqpSubqueryParserFull() { // this function values can be analyzed
+      public Query parse(FunctionQParser fp) throws ParseException {          
+        Query innerQuery = fp.parseNestedQuery();
+        SolrQueryRequest req = fp.getReq();
+        // TODO: make configurable
+        String refField = "reference";
+        String idField = "bibcode";
+        String boostField = "cite_read_boost";
+        return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitingTheMostCited(idField, refField, boostField));
       }
       }.configure(true)); // true=canBeAnalyzed
 		parsers.put("citis", new AqpSubqueryParserFull() {

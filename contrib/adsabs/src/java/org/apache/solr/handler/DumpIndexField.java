@@ -325,12 +325,14 @@ public class DumpIndexField extends RequestHandlerBase {
     if (!allowed.matcher(data.sourceField).matches()) {
       data.msg("Export of this field is not allowed: " + data.sourceField);
       queue.registerFailedBatch(data);
+      return;
     }
     SchemaField field = core.getSchema().getFieldOrNull(data.sourceField);
     
     if (field==null || !field.stored()) {
       data.msg("We cannot dump fields that are not stored: " + data.sourceField);
       queue.registerFailedBatch(data);
+      return;
     }
     
     final Analyzer analyzer = core.getSchema().getQueryAnalyzer();
@@ -340,6 +342,7 @@ public class DumpIndexField extends RequestHandlerBase {
     if (targetField == null) {
       data.msg("We cannot find analyzer for: " + data.targetField);
       queue.registerFailedBatch(data);
+      return;
     }
     
     final String targetAnalyzer = data.targetField;
@@ -351,8 +354,8 @@ public class DumpIndexField extends RequestHandlerBase {
     fieldsToLoad.add(data.sourceField);
     
     se.search(new MatchAllDocsQuery(), new Collector() {
-      private int baseDoc;
       private AtomicReader reader;
+      private int i = 0;
       
       @Override
       public boolean acceptsDocsOutOfOrder() {
@@ -380,7 +383,6 @@ public class DumpIndexField extends RequestHandlerBase {
       }
       @Override
       public void setNextReader(AtomicReaderContext context) {
-        this.baseDoc = context.docBase;
         this.reader = context.reader();
       }
       @Override
