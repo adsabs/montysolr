@@ -194,7 +194,7 @@ public class DumpIndexField extends RequestHandlerBase {
     else if(command.equals("info")) {
       printInfo(rsp);
     }
-    else if(command.equals("detailed-info")) {
+    else if(command.equals("detailedInfo")) {
       printDetailedInfo(rsp);
     }
     else if(command.equals("start")) {

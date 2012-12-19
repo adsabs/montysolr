@@ -99,7 +99,7 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
     }));
     
     SolrCore core = h.getCore();
-    DumpIndexField handler = (DumpIndexField) h.getCore().getRequestHandler("dump-index");
+    DumpIndexField handler = (DumpIndexField) h.getCore().getRequestHandler("/dump-index");
     SolrQueryRequest req = req("command", "dump",
         "sourceField", "author", "targetField", "author_collector");
     
@@ -112,7 +112,7 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
     core.execute(handler, req, rsp);
 
     while (handler.isBusy()) {
-      assertQ(req("qt", "dump-index", "command", "info"), 
+      assertQ(req("qt", "/dump-index", "command", "info"), 
           "//str[@name='status'][.='busy']"
           );
       Thread.sleep(300);

@@ -1884,7 +1884,7 @@
     </lst>
   </queryParser>
   
-  <requestHandler name="dump-index" class="solr.DumpIndexField" default="false">
+  <requestHandler name="/dump-index" class="solr.DumpIndexField" default="false">
     <lst name="defaults">
         <str name="allowed">.*</str>
     </lst>
