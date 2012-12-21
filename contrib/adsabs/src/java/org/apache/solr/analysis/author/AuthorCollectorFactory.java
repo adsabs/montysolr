@@ -117,12 +117,18 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
       public String formatEntry(String key, Set<String>values) {
         StringBuffer out = new StringBuffer();
         //out.append(super.formatEntry(key, values));
+        
+        // remove all but the first comma
+        key = key.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
+        
         String[] nameParts = key.split(" ");
         if (nameParts.length > 1) {
           nameParts[0] = nameParts[0].replace(",", "\\,");
           String[][] otherNames = new String[values.size()][];
           int n = 0;
           for (String name: values) {
+	        // remove all but the first comma
+	        name = name.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
             otherNames[n++] = name.split(" ");
             otherNames[n-1][0] = otherNames[n-1][0].replace(",", "\\,"); 
           }
