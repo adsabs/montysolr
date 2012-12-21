@@ -1,0 +1,1761 @@
+# This synonym file was created on Fri Dec 14 18:15:29 2012
+# by script "./parse_wikipedia_acronyms.pl" with input ""
+#
+# (CATALOG) a catalog of sources detected by ROSAT in pointed observations with its High Resolution Imager
+1RXH, 1st\ rosat\ x\ ray\ hri
+# (CATALOG) a catalog of sources detected by ROSAT in an all-sky survey
+1RXS, 1rosat\ x\ ray\ survey
+# (CATALOG) an early version of the 2MASS catalog
+2MASP, two\ micron\ all\ sky\ survey\ prototype
+# (OBSERVING_PROGRAMCATALOG) an all-sky survey in the near-infrared; also, the catalog of sources from the survey
+2MASS, two\ micron\ all\ sky\ survey
+# (CATALOG) one of the versions of the 2MASS catalog
+2MASSI, two\ micron\ all\ sky\ survey\ incremental\ release
+# (CATALOG) one of the versions of the 2MASS catalog
+2MASSW, two\ micron\ all\ sky\ survey\ working\ database
+# (OBSERVING_PROGRAM)
+2SLAQ, 2df\ sdss\ lrg\ and\ qso\ survey
+# (ORGANIZATION)
+AAA, amateur\ astronomers\ association\ of\ new\ york
+# (ORGANIZATION)
+AAO, australian\ astronomical\ observatory
+AAO, anglo\ australian\ observatory
+# (ORGANIZATION)
+AAS, american\ astronomical\ society
+# (TELESCOPE)
+AAT, anglo\ australian\ telescope
+# (ORGANIZATION)
+AAVSO, american\ association\ of\ variable\ star\ observers
+# (OBSERVING_PROGRAM)
+ABRIXAS, a\ broadband\ imaging\ x\ ray\ all\ sky\ survey
+# (CATALOG)
+AC, catalogue\ astrographique
+# (SPACECRAFT)
+ACE, advanced\ composition\ explorer
+# (INSTRUMENTATION) an instrument on the Chandra X-Ray Observatory
+ACIS, advanced\ ccd\ imaging\ spectrometer
+# (MEETING) Comets, and Meteors
+ACM, asteroids
+# (INSTRUMENTATION) an instrument on the Huygens probe
+ACP, aerosol\ collector\ and\ pyrolyser
+# (INSTRUMENTATION) an instrument on the Hubble Space Telescope
+ACS, advanced\ camera\ for\ surveys
+# (CELESTIAL_OBJECT) a class of rotating Alpha Canum Venaticorum (Cor Caroli), the archetype for the class
+ACV, alpha\ canes\ venatici
+# (CELESTIAL_OBJECT) a class of rotating Alpha Cygni (Deneb), the archetype for the class
+ACYG, alpha\ cygni
+# (ASTROPHYSICS_TERMINOLOGY) a mechanism by which matter is slowly accreted onto a black hole
+ADAF, advection\ dominated\ accretion\ flow
+# (ORGANIZATION)
+ADC, astronomical\ data\ center
+# (ORGANIZATION) an organization that provides oversight for the Astrophysics Data and Information Services
+ADEC, astrophysics\ data\ centers\ executive\ council
+# (ORGANIZATION)
+ADF, astrophysics\ data\ facility
+# (CATALOG)
+ADS, aitken\ double\ stars
+# (ORGANIZATION)
+ADIS, astrophysics\ data\ and\ information\ services
+# (ORGANIZATION) an organization that maintains an online database of scientific articles
+ADS, astrophysics\ data\ system
+# (ORGANIZATION) a research laboratory now part of the United States Air Force Research Laboratory
+AFGL, air\ force\ geophysics\ laboratory
+# (ORGANIZATION)
+AFOEV, association\ fran\ aise\ des\ observateurs\ d\ toiles\ variables
+# (ORGANIZATION)
+AG, astronomische\ gesellschaft
+# (OBSERVING_PROGRAM) a search for microlenses in front of the Andromeda Galaxy
+AGAPE, andromeda\ galaxy\ and\ amplified\ pixels\ experiment
+# (CELESTIAL_OBJECT) a type of red giant star
+AGB, asymptotic\ giant\ branch
+# (CATALOG)
+AGK, astronomische\ gesellschaft\ katalog
+# (CELESTIAL_OBJECT)
+AGN, active\ galactic\ nucleus
+# (ORGANIZATION)
+AGU, american\ geophysical\ union
+# (SPACECRAFT) a spacecraft that will study the Noctilucent clouds
+AIM, aeronomy\ of\ ice\ in\ the\ mesosphere
+# (SOFTWARE)
+AIPS, astronomical\ image\ processing\ system
+# (PUBLICATION)
+AJ, astronomical\ journal
+# (INSTRUMENTATION)
+ALEXIS, array\ of\ low\ energy\ x\ ray\ imaging\ sensors
+# (TELESCOPE)
+ALMA, atacama\ large\ millimeter\ sub\ millimeter\ array
+# (ORGANIZATION)
+ALPO, association\ of\ lunar\ and\ planetary\ observers
+# (TELESCOPE) a neutrino telescope
+AMANDA, antarctic\ muon\ and\ neutrino\ detector\ array
+# (SOFTWARE)
+AMASE, astrophysics\ multi\ spectral\ archive\ search\ engine
+# (ORGANIZATION)
+AMS, american\ meteor\ society
+# (PUBLICATION) a German scientific journal
+AN, astronomische\ nachrichten
+# (TELESCOPE)
+ANS, astronomical\ netherlands\ satellite
+# (ORGANIZATION)
+ANS, astro\ news\ service
+# (ORGANIZATION)
+ANSI, american\ national\ standards\ institute
+# (INSTRUMENTATION)
+AO, adaptive\ optics
+# (INSTRUMENTATION)
+AOR, astronomical\ observation\ request
+# (ORGANIZATION)
+APO, apache\ point\ observatory
+# (DATA)
+APOD, astronomy\ picture\ of\ the\ day
+# (TELESCOPE)
+APT, automated\ patrol\ telescope
+# (ORGANIZATION)
+ARC, ames\ research\ center
+# (ORGANIZATION)
+ARC, astrophysical\ research\ consortium
+# (ORGANIZATION)
+ASA, astronomical\ society\ of\ the\ atlantic
+# (ORGANIZATION)
+ASI, agenzia\ spaziale\ italiana
+# (ORGANIZATION)
+ASIAA, academia\ sinica\ institute\ of\ astronomy\ and\ astrophysics
+# (ORGANIZATION)
+ASP, astronomical\ society\ of\ the\ pacific
+# (SPACECRAFT)
+ASTRO, autonomous\ space\ transport\ robotic\ operations
+# (TELESCOPE) a radio interferometer array developed by the SETI Institute to search for possible signals from extraterrestrial life
+ATA, allen\ telescope\ array
+# (TELESCOPE)
+ATCA, australia\ telescope\ compact\ array
+# (PERSON) Amateur telescope making
+#ATM; hobbyist engaged in
+# (MEASUREMENT) the distance between the Earth and the Sun
+AU, astronomical\ unit
+# (ORGANIZATION)
+AUASS, arab\ union\ for\ astronomy\ and\ space\ sciences
+# (ORGANIZATION)
+AURA, association\ of\ universities\ for\ research\ in\ astronomy
+# (MEETING) an older name for the International Workshop on Cometary Astronomy
+AWCA, american\ workshop\ on\ cometary\ astronomy
+# (CELESTIAL_OBJECT)
+AXP, anomalous\ x\ ray\ pulsar
+# (TELESCOPE) an older name for the Chandra X-ray Observatory
+AXAF, advanced\ x\ ray\ astrophysics\ facility
+# (ORGANIZATION)
+BAA, british\ astronomical\ association
+# (PUBLICATION)
+BAAS, bulletin\ of\ the\ american\ astronomical\ society
+# (CATALOG)
+BAC, bordeaux\ astrographic\ catalog
+# (ORGANIZATION)
+BAO, beijing\ astronomical\ observatory
+# (OBSERVING_PROGRAM)
+BASIS, burst\ and\ all\ sky\ imaging\ survey
+# (INSTRUMENTATION) an instrument on SWIFT
+BAT, burst\ alert\ telescope
+# (OBSERVING_PROGRAM) the name of a multi-wavelength sky survey
+BATC, beijing\ arizona\ taiwan\ connecticut
+# (INSTRUMENT) an instrument on the Compton Gamma-Ray Observatory
+BATSE, burst\ and\ transient\ source\ experiment
+# (ASTROPHYSICS_TERMINOLOGY)
+BB, black\ body
+# (TELESCOPE)
+BBXRT, broad\ band\ x\ ray\ telescope
+# (CELESTIAL_OBJECT)
+BCD, blue\ compact\ dwarf
+# (SOFTWARE) data produced after basic processing
+BCD, basic\ calibrated\ data
+# (CELESTIAL_OBJECT) a class of pulsating variable stars for which Beta Cephei is the archetypal object
+BCEP, beta\ cephei
+# (CELESTIAL_OBJECT) another name for a blue compact dwarf
+BCG, blue\ compact\ galaxy
+# (CELESTIAL_OBJECT) the brightest galaxy in a cluster of galaxies
+BCG, brightest\ cluster\ galaxy
+# (CATALOG)
+BCVS, bibliographic\ catalogue\ of\ variable\ stars
+# (CATALOG)
+BD, bonner\ durchmusterung
+# (CELESTIAL_OBJECT)
+BD, brown\ dwarf
+# (CATALOG) a catalog of deep-sky objects for amateur astronomers
+BEN, jack\ bennett\ catalog
+# (CELESTIAL_OBJECT) J.A. Baldwin et al. 2004&lt;/ref&gt;
+BEL, broad\ emission\ line\ clouds\ in\ active\ galactic\ nucleus
+# (ASTROPHYSICS_TERMINOLOGY)
+BF, broadening\ function
+# (CELESTIAL_OBJECT)
+BH, black\ hole
+# (CELESTIAL_OBJECT) a type of luminous star
+BHB, blue\ horizontal\ branch
+# (CELESTIAL_OBJECT)
+BHC, black\ hole\ candidate
+# (CELESTIAL_OBJECT)
+BHXRT, black\ hole\ x\ ray\ transient
+# (ORGANIZATION_AMP_TELESCOPE)  microwave telescope it operated
+BIMA, berkeley\ illinois\ maryland\ association\ and\ also\ b\ m\ i\ array
+# (ORGANIZATION)
+BIS, british\ interplanetary\ society
+# (ORGANIZATION) a Ukrainian research institute
+BITP, bogolyubov\ institute\ for\ theoretical\ physics
+# (CELESTIAL_OBJECT) a class of active galaxies for which BL Lacertae is the archetypal object
+BLLAC, bl\ lacertae
+# (TELESCOPE)
+BLAST, balloon\ borne\ large\ aperture\ submillimeter\ telescope
+# (ORGANIZATION) the older name for UKSA
+BNSC, british\ national\ space\ centre
+# (OBSERVATORY) in Korea
+BOAO, bohyunsan\ optical\ astronomy\ observatory
+# (CATALOG)
+BPM, bruce\ proper\ motion
+# (CELESTIAL_OBJECT)
+BSG, blue\ super\ giant
+# (CELESTIAL_OBJECT)
+BSS, blue\ straggler\ star
+# (OBSERVING_PROGRAM)
+BSS, bigelow\ sky\ survey
+# (CELESTIAL_OBJECT) a class of rotating variable stars for which BY Draconis is the archetypal object
+BY, by\ draconis
+# (ORGANIZATION)
+CADC, canadian\ astronomy\ data\ centre
+# (ORGANIZATION) a German-Spanish Astronomical Centre
+CAHA, centro\ astron\ mico\ hispano\ aleman
+# (SURVEY)
+CANDELS, cosmic\ assembly\ near\ infrared\ deep\ extragalactic\ legacy\ survey, cosmic\ assembly\ and\ dark\ energy\ legacy\ survey
+# (INSTRUMENTATION) an instrument on the Cassini spacecraft
+CAPS, cassini\ plasma\ spectrometer
+# (ORGANIZATION)
+CARA, california\ association\ for\ research\ in\ astronomy
+# (ORGANIZATION)
+CARA, center\ for\ astrophysical\ research\ in\ antarctica
+# (ORGANIZATION)
+CASCA, canadian\ astronomical\ society
+# (ORGANIZATION)
+CASS, center\ for\ advanced\ space\ studies
+# (CELESTIAL_OBJECT)
+CBR, cosmic\ background\ radiation
+# (CELESTIAL_OBJECT) a newly detected observed object that initially appears to orbit another celestial object
+CC, candidate\ companion
+# (INSTRUMENTATION)
+CCD, charge\ coupled\ device
+# (ASTROPHYSICS_TERMINOLOGY) a plot that compares the differences between magnitudes in different wave bands
+CCD, color\ color\ diagram
+# (CATALOG)
+CCDM, catalog\ of\ components\ of\ double\ and\ multiple\ stars
+# (CATALOG)
+CCO, catalogue\ of\ cometary\ orbits
+# (CELESTIAL_OBJECT) a compact star in the center of a planetary nebulae
+CCO, central\ compact\ object
+# (CELESTIAL_OBJECT)
+CCS, cool\ carbon\ star
+# (CATALOG)
+CD, cordoba\ durchmusterung
+# (CATALOG)
+CDIMP, catalogue\ of\ discoveries\ and\ identifications\ of\ minor\ planets
+# (ASTROPHYSICS_TERMINOLOGY) any model for structure formation in the universe that characterize &quot;cold&quot; particles such as WIMPs as dark matter
+CDM, cold\ dark\ matter
+# (ORGANIZATION)
+CDS, centre\ de\ donn\ es\ astronomiques\ de\ strasbourg
+# (TELESCOPE) an older name for the Thirty Meter Telescope
+CELT, california\ extremely\ large\ telescope
+# (CELESTIAL_OBJECT) a type of carbon star
+CEMP, carbon\ enhanced\ metal\ poor
+# (CELESTIAL_OBJECT) a type of pulsating variable star
+CEP, cepheid
+# (ORGANIZATION)
+CEPS, center\ for\ earth\ and\ planetary\ studies
+# (TELESCOPE)
+CFHT, canada\ france\ hawaii\ telescope
+# (ASTROPHYSICS_TERMINOLOGY)
+CG, center\ of\ gravity
+# (CELESTIAL_OBJECT) a Bok globule that show signs of a tail-like extension
+CG, cometary\ globule
+# (CELESTIAL_OBJECT)
+CG, compact\ galaxy
+# (CELESTIAL_OBJECT)
+CGCS, cool\ galactic\ carbon\ star
+# (TELESCOPE)
+CGRO, compton\ gamma\ ray\ observatory
+# (CATALOG)
+CGSS, catalogue\ of\ galactic\ s\ stars
+# (ORGANIZATION)
+CHARA, center\ for\ high\ angular\ resolution\ astronomy
+# (SOFTWARE) software for processing Chandra X-ray Observatory data
+CIAO, chandra\ interactive\ analysis\ of\ observations
+# (INSTRUMENTATION) an instrument for the Subaru Telescope
+CIAO, coronagraphic\ imager\ with\ adaptive\ optics
+# (CELESTIAL_OBJECT)
+CIBR, cosmic\ infrared\ background\ radiation
+# (INSTRUMENTATION) an instrument on the Stardust spacecraft
+CIDA, cometary\ interplanetary\ dust\ analyzer
+# (OBSERVING_PROGRAM)
+CINEOS, campo\ imperatore\ near\ earth\ object\ survey
+# (CATALOG)
+CIO, catalog\ of\ infrared\ observations
+# (INSTRUMENTATION) an instrument for the Subaru Telescope
+CISCO, cooled\ infrared\ spectrograph\ and\ camera\ for\ ohs
+# (ASTROPHYSICS_TERMINOLOGY)
+CM, center\ of\ mass
+# (CELESTIAL_OBJECT)
+CMBR, cosmic\ microwave\ background\ radiation
+# (CATALOG)
+CMC, carlsberg\ meridian\ catalogue
+# (ASTROPHYSICS_TERMINOLOGY) the Hertzsprung-Russell diagram or similar diagrams
+CMD, color\ magnitude\ diagram
+# (CELESTIAL_OBJECT)
+CNB, cosmic\ neutrino\ background
+# (ORGANIZATION) the French Space Agency
+CNES, centre\ nationale\ d\ etudes\ spatiales
+# (ASTROPHYSICS_TERMINOLOGY) a sequence of nuclear fusion processes
+CNO, carbon\ nitrogen\ oxygen
+# (ORGANIZATION)
+CNR, consiglio\ nazionale\ delle\ ricerche
+# (SPACECRAFT)
+CNSR, comet\ nucleus\ sample\ return
+# (TELESCOPE) a space telescope used to study the cosmic microwave background radiation
+COBE, cosmic\ background\ explorer
+# (INSTRUMENTATION)
+COHSI, cambridge\ oh\ suppression\ instrument
+# (INSTRUMENTATION) an instrument for the Subaru Telescope
+COMICS, cooled\ mid\ infrared\ camera\ and\ spectrometer
+# (TELESCOPE) another name for the Compton Gamma Ray Observatory
+CGRO, compton\ telescope
+# (TELESCOPE) a space telescope for detecting extrasolar planets
+COROT, convection\ rotation\ and\ planetary\ transits
+# (ORGANIZATION)
+COSPAR, committee\ on\ space\ research
+# (INSTRUMENTATION) corrective optics for the Hubble Space Telescope
+COSTAR, corrective\ optics\ space\ telescope\ axial\ replacement
+# (ASTROPHYSICS_TERMINOLOGY) stars with peculiar chemical compositions
+CP, chemically\ peculiar
+# (CATALOG)
+CPD, cape\ photographic\ durchmusterung
+# (SPACECRAFT)
+CRAF, comet\ rendezvous\ asteroid\ flyby
+# (ORGANIZATION)
+CSA, canadian\ space\ agency
+# (ORGANIZATION)
+CSBN, committee\ for\ small\ body\ nomenclature
+# (CATALOG) a compilation of the catalogs, BD, CD, and CPD
+CSI, catalog\ of\ stellar\ identification
+# (TELESCOPE)
+CSO, caltech\ submillimeter\ observatory
+# (CELESTIAL_OBJECT)
+CSPN, central\ star\ of\ planetary\ nebula
+# (OBSERVING_PROGRAM)
+CSS, catalina\ sky\ survey
+# (ASTROPHYSICS_TERMINOLOGY) non-variable stars
+CST, constant
+# (CATALOG)
+CSV, catalog\ of\ suspected\ variables
+# (TELESCOPEORGANIZATION)
+CTIO, cerro\ tololo\ interamerican\ observatory
+# (CELESTIAL_OBJECT)
+CTTS, classical\ t\ tauri\ star
+# (CELESTIAL_OBJECT) a type of variable binary star system that contains a white dwarf and a companion star that changes
+CV, cataclysmic\ variable
+# (CELESTIAL_OBJECT) a class of Cepheids named after W Virginis, the archetype for the class
+CW, cepheid\ w\ virginis
+# (CELESTIAL_OBJECT)
+CXBR, cosmic\ x\ ray\ background\ radiation
+# (CATALOG) a catalog based from the Chandra space telescope
+CXO, chandra\ x\ ray\ observation
+# (ORGANIZATION)
+DAO, dominion\ astrophysical\ observatory
+# (CELESTIAL_OBJECT) a class of Cepheids named after Delta Cephei, the archetype for the class
+DCEP, delta\ cephei
+# (CELECTIAL_OBJECT)
+DDEB, double\ lined\ eclipsing\ binary
+# (OBSERVING_PROGRAMCATALOG)
+DENIS, deep\ near\ infrared\ survey
+# (OBSERVING_PROGRAM)
+DES, dark\ energy\ survey
+# (OBSERVING_PROGRAM)
+DES, deep\ ecliptic\ survey
+# (CELESTIAL_OBJECT) an absorption feature in stellar spectra with an interstellar origin
+DIB, diffuse\ interstellar\ band
+# (INSTRUMENTATION) a multiwavelength infrared detector used to map dust emission
+DIRBE, diffuse\ infrared\ background\ experiment
+# (INSTRUMENTATION) an instrument on the Huygens probe
+DISR, descent\ imager\ spectral\ radiometer
+# (INSTRUMENTATION) a microwave  instrument that would map variations (or anisotropies) in the CMB
+DMR, differential\ microwave\ radiometer
+# (CELESTIAL_OBJECT)
+DN, dwarf\ nova
+# (CELESTIAL_OBJECT) another name for a binary neutron star system
+DNS, double\ neutron\ star
+# (DATA)
+DPOSS, digitized\ palomar\ observatory\ sky\ survey
+# (CELESTIAL_OBJECT)
+DS, dwarf\ star
+# (COMMUNICATIONS_NETWORK) a network of radio antennas used for communicating to spacecraft
+DSN, deep\ space\ network
+# (DATA)
+DSS, digitized\ sky\ survey
+# (INSTRUMENTATION) an instrument on the Huygens probe
+DWE, doppler\ wind\ experiment
+# (ORGANIZATION)
+EAAE, european\ association\ for\ astronomy\ education
+# (ORGANIZATION)
+EAPSNET, east\ asian\ planet\ search\ network
+# (CELESTIAL_OBJECT) a star cluster that is partially or fully embedded in interstellar gas or dust
+EC, embedded\ cluster
+# (CELESTIAL_OBJECT)
+ECA, earth\ crossing\ asteroid
+# (CELESTIAL_OBJECT)
+EGG, evaporating\ gaseous\ globule
+# (CATALOG) a catalog of mostly white dwarfs
+EGGR, eggen\ amp\ greenstein
+# (CELESTIAL_OBJECT)
+EGP, extrasolar\ giant\ planet
+# (TELESCOPE) another name for the Compton Gamma Ray Observatory
+EGRET, energetic\ gamma\ ray\ experiment\ telescope
+# (CELESTIAL_OBJECT) a type of hot, evolved star
+EHB, extreme\ horizontal\ branch
+# (PUBLICATION)
+EJASA, electronic\ journal\ of\ the\ astronomical\ society\ of\ the\ atlantic
+# (CELESTIAL_OBJECT) an alternative name for Kuiper Belt Objects
+EKBO, edgeworth\ kuiper\ belt\ object
+# (OBSERVING_PROGRAM) a survey of high redshift galaxies performed with the Infrared Space Observatory (ISO)
+ELIAS, european\ large\ area\ iso\ survey
+# (TELESCOPE)
+ELT, extremely\ large\ telescope
+# (CATALOG)
+EMP, ephemerides\ of\ minor\ planets
+# (CELESTIAL_OBJECT) a star with few elements other than hydrogen and helium
+EMP, extremely\ metal\ poor
+# (OBSERVING_PROGRAM) a survey of galaxy clusters
+ENACS, eso\ nearby\ abell\ cluster\ survey
+# (CELESTIAL_OBJECT) a name applied to spectra
+ERO, extremely\ red\ object
+# (ORGANIZATION)
+ESA, european\ space\ agency
+# (ORGANIZATION)
+ESO, european\ southern\ observatory
+# (ORGANIZATION)
+ESTEC, european\ space\ research\ and\ technology\ centre
+# (COMMUNICATIONS_NETWORK) a network of radio antennas used for communicating to spacecraft
+ESTRACK, european\ space\ tracking
+# (ASTROPHYSICS_TERMINOLOGY)
+EUV, extreme\ ultraviolet
+# (TELESCOPE) an ultraviolet space telescope
+EUVE, extreme\ ultraviolet\ explorer
+# (ORGANIZATION)
+EVN, european\ vlbi\ network
+# (TELESCOPE)
+FAME, full\ sky\ astrometric\ mapping\ explorer
+# (TELESCOPE)
+FASTT, flagstaff\ astrometric\ scanning\ transit\ telescope
+# (CATALOG)  a catalog of galaxies in the Fornax Cluster
+FCC, fornax\ cluster\ catalog
+# (CELESTIAL_OBJECT) a solid planetary object that is being evaporated by the stellar wind
+FEB, falling\ evaporating\ body
+# (INSTRUMENTATION) an instrument on the Hubble Space Telescope
+FGS, fine\ guidance\ sensors
+# (INSTRUMENTATION) an instrument on the Hubble Space Telescope
+FHST, fixed\ head\ star\ trackers
+# (ASTROPHYSICS_TERMINOLOGY)
+FIR, far\ infrared
+# (OBSERVING_PROGRAM) a radio survey of the sky with the Very Large Array
+FIRST, faint\ images\ of\ the\ radio\ sky\ at\ twenty\ centimeters
+# (TELESCOPE) an older name for the Herschel Space Observatory
+FIRST, far\ infrared\ and\ submillimeter\ space\ telescope
+# (INSTRUMENTATION)
+FIRAS, far\ infrared\ absolute\ spectrophotometer
+# (SOFTWARE) the format commonly used for scientific astronomy images
+FITS, flexible\ image\ transport\ system
+# (INSTRUMENTATION) instrument on the VLT
+FLAMES, fibre\ large\ array\ multi\ element\ spectrograph
+# (TELESCOPE)
+FLOAT, fibre\ linked\ optical\ array\ telescope
+# (TELESCOPE)
+FLWO, fred\ l\ whipple\ observatory
+# (CELESTIAL_OBJECT) an asteroid so close to the Earth that it appears to be moving very fast
+FMO, fast\ moving\ object
+# (INSTRUMENTATION) a camera formerly on the Hubble Space Telescope
+FOC, faint\ object\ camera
+# (INSTRUMENTATION) an instrument for the Subaru Telescope
+FOCAS, faint\ object\ camera\ and\ spectrograph
+# (INSTRUMENTATION) a spectrometer formerly on the Hubble Space Telescope
+FOS, faint\ object\ spectrograph
+# (INSTRUMENTATION)
+FOV, field\ of\ view
+# (ASTROPHYSICS_TERMINOLOGY) the variations in the luminosity of gamma ray bursts over time
+FRED, fast\ rise\ exponential\ decay
+# (CATALOG) one of the catalogs produced using Infrared Astronomical Satellite data
+FSC, faint\ source\ catalogue
+# (ASTROPHYSICS_TERMINOLOGY)
+FTL, faster\ than\ light
+# (CELESTIAL_OBJECT)  a class of variable pre–main sequence stars named after FU Orionis, the archetype for the class
+FUOR, fu\ orionis\ objects
+# (TELESCOPE) an ultraviolet space telescope
+FUSE, far\ ultraviolet\ spectroscopic\ explorer
+# (INSTRUMENTATION) an ultraviolet imager for the Spectrum-Roentgen-Gamma mission
+FUVITA, far\ ultraviolet\ imaging\ telescope\ array
+# (INSTRUMENTATION) a telescope resolution
+FWHM, full\ width\ at\ half\ maximum
+# (INSTRUMENTATION) a telescopes resolution
+FWZI, full\ width\ at\ zero\ intensity
+# (TELESCOPE) a planned space telescope that will be used to make high-precision measurements of stars
+GAIA, global\ astrometric\ interferometer\ for\ astrophysics
+# (TELESCOPE) an ultraviolet space telescope
+GALEX, galaxy\ evolution\ explorer
+# (SOFTWARE)
+GASP, guide\ star\ astrometric\ support\ package
+# (CATALOG) catalog of G. Gatewood's observations
+GAT, ao\ gatewood
+# (TELESCOPE)
+GBT, green\ bank\ telescope
+# (CATALOG) a catalog of clusters, nebulae, and galaxies created by John Herschel and now superseded by the New General Catalogue
+GC, general\ catalog
+# (CELESTIAL_OBJECT) a class of eruptive variable stars named after Gamma Cassiopeiae, the archetype for the class
+GCAS, gamma\ cassiopeiae
+# (INSTRUMENTATION) an instrument on the Huygens probe
+GCMS, gas\ chromatograph\ and\ mass\ spectrometer
+# (ORGANIZATION)
+GCN, grb\ coordinates\ network
+# (ASTROPHYSICS_TERMINOLOGY)
+GCR, galactic\ cosmic\ rays
+# (CATALOG)
+GCVS, the\ general\ catalog\ of\ variable\ stars
+# (CATALOG) a catalog of white dwarf
+GD, giclas\ dwarf
+# (CELESTIAL_OBJECT) a transient feature in the clouds of Neptune
+GDS, great\ dark\ spot
+# (OBSERVING_PROGRAM)
+GEM, galactic\ emission\ mapping
+# (OBSERVING_PROGRAM) the science observation program of Europa performed by the Galileo spacecraft
+GEM, galileo\ europa\ mission
+# (OBSERVING_PROGRAM) the extended operations of the Giotto spacecraft
+GEM, giotto\ extended\ mission
+# (ORGANIZATION)
+GEMS, group\ evolution\ multi\ wavelength\ study
+# (SURVEY)
+GEMS, galaxy\ evolution\ from\ morphology\ and\ spectral\ energy\ distributions
+# (TELESCOPE) a network of telescopes used in a United States Air Force program for observing space junk
+GEODDS, ground\ based\ electro\ optical\ deep\ space\ surveillance
+# (ORGANIZATION) an amateur and professional association for study of variable stars.
+GEOS, groupe\ europ\ en\ observations\ stellaires
+# (INSTRUMENTATION) High Resolution MicroLensing Parameter survey, where GPU is an acronym for Graphics Processing Unit.
+GERLUMPH, gpu\ enabled
+# (CATALOG) a catalog of stars in the Hyades cluster
+GH, giclas\ hyades
+# (INSTRUMENTATION) a spectrograph on the Hubble Space Telescope
+GHRS, goddard\ high\ resolution\ spectrograph
+# (ORGANIZATION)
+GIA, gruppo\ italiano\ astrometristi
+# (INSTRUMENTATION) an ultraviolet imager on the Advanced Research and Global Observation Satellite
+GIMI, global\ imaging\ monitor\ of\ the\ ionosphere
+# (CATALOG)
+GJ, gliese\ jahrei\ jahreiss\ nearby\ star\ catalog
+# (CATALOG)
+GL, gliese\ nearby\ star\ catalog
+# (TELESCOPE)
+GLAST, gamma\ ray\ large\ area\ space\ telescope
+# (OBSERVING_PROGRAM)
+GLIMPSE, galactic\ legacy\ infrared\ mid\ plane\ survey\ extraordinaire
+# (CELESTIAL_OBJECT)
+GMC, giant\ molecular\ cloud
+# (CELESTIAL_OBJECT)
+GMF, galactic\ magnetic\ field
+# (TELESCOPE)
+GMRT, giant\ meter\ radio\ telescope
+# (TELESCOPE) a telescope being built by a US-Australian collaboration
+GMT, giant\ magellan\ telescope
+# (ORGANIZATION) an organization that monitors oscillations in the Sun
+GONG, global\ oscillation\ network\ group
+# (SURVEY) a survey of various redshifts to study galactic formation and evolution
+GOODS, great\ observatories\ origins\ deep\ survey
+# (ASTROPHYSICS_TERMINOLOGY) a type of observed pulse emission from pulsars
+GP, giant\ pulses
+# (ASTROPHYSICS_TEMINOLOGY) the radio or spectra of some galaxies
+GPS, ghz\ peaked\ spectrum
+# (ASTROPHYSICS_TERMINOLOGY)
+GR, general\ relativity
+# (CATALOG) a catalog of red dwarfs
+GR, giclas\ red\ dwarf
+# (CELESTIAL_OBJECT)
+GRB, gamma\ ray\ burst
+# (TELESCOPE) another name for the Compton Gamma Ray Observatory
+GRO, gamma\ ray\ observatory
+# (TELESCOPE) an automated telescope used to detect the optical counterparts to gamma ray bursts
+GROSCE, gamma\ ray\ burst\ optical\ counterparts\ search\ experiment
+# (INSTRUMENTATION) an instrument on the Mars Observer
+GRS, gamma\ ray\ spectrometer
+# (CELESTIAL_OBJECT) a feature in the clouds of Jupiter
+GRS, great\ red\ spot
+# (CATALOG) a catalog of stars used for pointing the Hubble Space Telescope
+GSC, guide\ star\ catalog
+# (CATALOG) a catalog of stars used for pointing the Hubble Space Telescope
+GSC2, guide\ star\ catalog\ version\ 2
+# (ORGANIZATION) a NASA institution
+GSFC, goddard\ space\ flight\ center
+# (CATALOG) a catalog of stars with precisely measured fluxes used to calibrate the Guide Star Catalog
+GSPC, guide\ star\ photometric\ catalog
+# (TELESCOPE) the 10.4 m reflecting telescope on the island of La Palma, Canary Islands, Spain
+GTC, gran\ telescopio\ canarias
+# (TELESCOPE) a satellite that is part of the VLBI Space Observatory Program, a Japanese radio astronomy project
+HALCA, highly\ advanced\ laboratory\ for\ communications\ and\ astronomy
+# (ORGANIZATION)
+HAO, high\ altitude\ observatory
+# (INSTRUMENTATION) a high-precision spectrograph installed on the ESO 3.6m telescope
+HARPS, high\ accuracy\ radial\ velocity\ planet\ searcher
+# (INSTRUMENTATION) an instrument on the Huygens probe
+HASI, huygens\ atmosphere\ structure\ instrument
+# (CELESTIAL_OBJECT) a type of evolved red giant star in which helium is burned in the core and hydrogen is burned in a shell around the core
+HB, horizontal\ branch
+# (CELESTIAL_OBJECT)
+HBRP, high\ magnetic\ field\ radio\ pulsar
+# (CATALOG) a catalog of variable stars
+HBV, hamburg\ bergedorf\ variables
+# (ASTROPHYSICS_TERMINOLOGY)
+HBMM, hydrogen\ burning\ minimum\ mass
+# (ORGANIZATION)
+HCO, harvard\ college\ observatory
+# (CELESTIAL_OBJECT) the boundary where the polarity of the Sun's magnetic field changes direction
+HCS, heliospheric\ current\ sheet
+# (CATALOG) a catalog of stars
+HD, henry\ draper
+# (CATALOG) a catalog of stars
+HDE, henry\ draper\ extension
+# (DATACELESTIAL_OBJECT) an area of the sky with little foreground obscuration that was observed deeply with the Hubble Space Telescope; also the name for the data product itself
+HDF, hubble\ deep\ field
+# (ASTROPHYSICS_TERMINOLOGY) any
+HDM, hot\ dark\ matter
+# (INSTRUMENTATION) a spectrograph on the Subaru Telescope
+HDS, high\ dispersion\ spectrograph
+# (CATALOG)
+HE, hamburg\ eso\ survey
+# (TELESCOPE) a series of X-ray and gamma ray space telescopes
+HEAO, high\ energy\ astronomical\ observatory
+# (ORGANIZATION) a NASA organization that deals with X-ray and gamma ray telescope data
+HEASARC, high\ energy\ astrophysics\ science\ archive\ research\ center
+# (TELESCOPE) a telescope for detecting cosmic rays
+HESS, high\ energy\ stereoscopic\ system
+# (TELESCOPE) a space telescope that performs multi-wavelength observations of gamma ray bursts
+HETE, high\ energy\ transient\ explorer
+# (ASTROPHYSICS_TERMINOLOGY)
+#HF; high frequency
+# (INSTRUMENTATION)
+HGA, high\ gain\ antenna
+# (CELESTIAL_OBJECT) objects formed when the ejecta from new stars collides with the interstellar medium
+HH, herbig\ haro\ object
+# (CATALOG) a catalog of data for the first target stars selected for observation by the Hipparcos
+HIC, hipparcos\ input\ catalog
+# (CATALOG) a catalog of HI sources, see also NHICAT
+HICAT, hipass\ catalog
+# (ASTROPHYSICS_TERMINOLOGY) a type of X-ray and gamma ray astronomy
+HID, hardness\ intensity\ diagram
+# (CATALOG) the catalog of data produced by Hipparcos
+HIP, hipparcos
+# (TELESCOPE) a space telescope specifically designed to measure distances to stars using parallax
+HIPPARCOS, high\ precision\ parallax\ collecting\ satellite
+# (ASTROPHYSICAL_TERMINOLOGY)
+HISA, hi\ self\ absorption\ region
+# (CATALOG)
+HK, survey\ for\ metal\ poor\ stars\ based\ on\ the\ strength\ of\ caii\ h\ and\ k\ absorption\ lines
+# (CELESTIAL_OBJECT) a galaxy that is brighter than 10&lt;sup&gt;13&lt;/sup&gt; solar luminosities in the infrared
+HLIRG, hyperluminous\ infrared\ galaxy
+# (INSTRUMENTATION) an instrument on the Giotto spacecraft
+HMC, halley\ multicolor\ camera
+# (CELESTIAL_OBJECT)
+HMPO, high\ mass\ proto\ stellar\ object
+# (CELESTIAL_OBJECT) an massive star
+HMXB, high\ mass\ x\ ray\ binary
+# (CELESTIAL_OBJECT) a star with high proper motion
+HPMS, high\ proper\ motion\ star
+# (CATALOG)
+HR, hoffleit\ bright\ star
+# (ASTROPHYSICS_TERMINOLOGY) a diagram that compares stars' colors to their luminosities
+HR, hertzsprung\ russell
+# (INSTRUMENTATION) an instrument on the Cassini spacecraft
+HRD, high\ rate\ detector
+# (OBSERVING_PROGRAM) a survey for microwave signals from extraterrestrial intelligence
+HRMS, high\ resolution\ microwave\ survey
+# (INSTRUMENTATION) an instrument on the ROSAT telescope
+HRI, high\ resolution\ imager
+# (INSTRUMENTATION) an instrument formerly on the Hubble Space Telescope
+HSP, high\ speed\ photometer
+# (TELESCOPE)
+HST, hubble\ space\ telescope
+# (ASTROPHYSICS_TERMINOLOGY) the observations of phenomena that vary on timescales of one second or less
+HTRA, high\ time\ resolution\ astrophysics
+# (TELESCOPE) an ultraviolet telescope that operated from the cargo bay of the Space Shuttle
+HUT, hopkins\ ultraviolet\ telescope
+# (CELESTIAL_OBJECT) an interstellar cloud with a velocity that is too high to be explained by galactic rotation
+HVC, high\ velocity\ cloud
+# (CELESTIAL_OBJECT) or
+HVS, hypervelocity\ star
+# (ORGANIZATION)
+IAC, instituto\ de\ astrofisica\ de\ canarias
+# (ORGANIZATION)
+IAPPP, international\ amateur\ professional\ photoelectric\ photometry
+# (ORGANIZATION)
+IAS, istituto\ di\ astrofisica\ spaziale
+# (OBSERVING_PROGRAM) the name given to a series of coordinated Sun-related observational programs performed in 1969 and 1971
+IASY, international\ active\ sun\ year
+# (ORGANIZATION)
+IAU, international\ astronomical\ union
+# (PUBLICATION)
+IAUC, iau\ circular
+# (MEETING)
+IAYC, international\ astronomical\ youth\ camp
+# (INSTRUMENTATION) an instrument on the INTEGRAL satellite
+IBAS, integral\ burst\ alert\ system
+# (INSTRUMENTATION) an instrument on the INTEGRAL satellite
+IBIS, imager\ on\ board\ the\ integral\ satellite
+# (PUBLICATION)
+IBVS, information\ bulletin\ on\ variable\ stars
+# (CATALOG)
+IC, index\ catalog
+# (CELESTIAL_OBJECT) either the regions between stars in star clusters or the region between galaxies in galaxy clusters
+IC, intracluster
+# (SPACECRAFT)
+ICE, international\ comet\ explorer
+# (CELESTIAL_OBJECT) is the superheated gas present at the center of a galaxy cluster
+ICM, intracluster\ medium
+# (PUBLICATION)
+ICQ, international\ comet\ quarterly
+# (ASTROPHYSICS_TERMINOLOGY) a coordinate system based on radio sources used to define the locations of objects in the sky
+ICRF, international\ celestial\ reference\ frame
+# (ASTROPHYSICS_TERMINOLOGY) a coordinate system based on Hipparcos observations used to define the locations of objects in the sky
+ICRS, international\ celestial\ reference\ system
+# (ORGANIZATION) an organization that seeks to control light pollution
+IDA, international\ dark\ sky\ association
+# (CELESTIAL_OBJECT) dust particles around planets or planetary bodies
+IDP, interplanetary\ dust\ particle
+# (CATALOG)
+IDS, index\ catalog\ of\ double\ stars
+# (ASTROPHYSICS_TERMINOLOGY) the orbits of asteroids
+IEO, inner\ earth\ object
+# (ORGANIZATION) or International Earth rotation and Reference systems Service, an organization that monitors the Earth's orientation with respect to the radio sources used to define the ICRF
+IERS, international\ earth\ rotation\ geophysical\ service
+# (CELESTIAL_OBJECT)
+IGM, intergalactic\ medium
+# (CATALOG) a catalog based on observations by the INTEGRAL telescope
+IGR, integral\ gamma\ ray\ source
+# (OBSERVING_PROGRAM) the name given to a series of coordinated geophysical and astronomical observation programs performed in 1957 and 1958
+IGY, international\ geophysical\ year
+# (ORGANIZATION) an organization created to coordinate observations of Halley's Comet in 1986
+IHW, international\ halley\ watch
+# (SPACECRAFT) a mission to measure variations in the orientation of the Moon from the Moon's surface
+ILOM, in\ situ\ lunar\ orientation\ measurement
+# (CELESTIAL_OBJECT)
+IMBH, intermediate\ mass\ black\ hole
+# (ASTROPHYSICS_TERMINOLOGY) the relative numbers of stars of different masses that form during star formation
+IMF, initial\ mass\ function
+# (ORGANIZATION)
+IMO, international\ meteor\ organization
+# (MEETING)
+IMPACT, international\ monitoring\ programs\ for\ asteroid\ and\ comet\ threat
+# (OBSERVING_PROGRAM)
+IMPS, iras\ minor\ planet\ survey
+# (ORGANIZATION)
+INAG, institut\ national\ d\ astronomie\ et\ de\ geophysique
+# (ORGANIZATION)
+ING, isaac\ newton\ group\ of\ telescopes
+# (CELESTIAL_OBJECT)
+INS, isolated\ neutron\ star
+# (TELESCOPE)
+INT, isaac\ newton\ telescope
+# (TELESCOPE) a gamma-ray space telescope
+INTEGRAL, international\ gamma\ ray\ astrophysics\ laboratory
+# (TELESCOPE)
+IOTA, infrared\ optical\ telescope\ array
+# (ORGANIZATION) an organization for monitoring occultations
+IOTA, international\ occultation\ timing\ association
+# (ORGANIZATION)
+IPAC, infrared\ processing\ amp\ analysis\ center
+# (CELESTIAL_OBJECT) another name for isolated planemos or sub-brown dwarfs
+IPMO, isolated\ planetary\ mass\ objects
+# (OBSERVING_PROGRAM) the name given to a series of coordinated Sun-related observational programs performed in 1964 and 1965
+IQSY, international\ quiet\ sun\ year
+# (ASTROPHYSICS_TERMINOLOGY)
+IR, infrared
+# (INSTRUMENTATION) a mid-infrared imager on the Spitzer Space Telescope
+IRAC, infrared\ array\ camera
+# (SOFTWARE) a general-purpose professional data-processing package
+IRAF, image\ reduction\ and\ analisys\ facility
+# (TELESCOPE)
+IRAIT, international\ robotic\ antarctic\ infrared\ telescope
+# (ORGANIZATION)
+IRAM, institut\ de\ radio\ astronomie\ millimetrique
+# (TELECOPECATALOG) an infrared space telescope; also the catalog produced using the telescope's data
+IRAS, infrared\ astronomical\ satellite
+# (INSTRUMENTATION) an instrument on the Subaru Telescope
+IRCS, infrared\ camera\ and\ spectrograph
+# (CELESTIAL_OBJECT)
+IRDC, infrared\ dark\ cloud
+# (INSTRUMENTATION) an infrared spectrometer on the Spitzer Space Telescope
+IRS, infrared\ spectrograph
+# (ORGANIZATION)
+IRSA, infrared\ science\ archive
+# (TELESCOPE)
+IRTF, infrared\ telescope\ facility
+# (ORGANIZATION)
+ISAS, institute\ of\ space\ and\ astronautical\ science
+# (ORGANIZATION) a research unit at the University of Saskatchewan
+ISAS, institute\ of\ space\ and\ atmospheric\ studies
+# (SPACECRAFT) a series of spacecraft designed to study the effects of the Sun on the Earth's space environment and magnetosphere
+ISEE, international\ sun\ earth\ explorer
+# (INSTRUMENTATION) an instrument on the INTEGRAL satellite
+ISGRI, integral\ soft\ gamma\ ray\ imager
+# (CELESTIAL_OBJECT)
+ISM, interstellar\ medium
+# (ORGANIZATION)
+ISN, international\ supernovae\ network
+# (TELESCOPE)
+ISO, infrared\ space\ observatory
+# (SPACECRAFT) another name for the Ulysses spacecraft
+ISPM, international\ solar\ polar\ mission
+# (DATA) an atlas compiled from Infrared Astronomical Satellite data
+ISSA, infrared\ sky\ survey\ atlas
+# (OBSERVING_PROGRAMMEETING) the name given to a celebration of space exploration as well as a series of coordinated astronomical observations and a series of meetings to plan future astronomy research efforts
+ISY, international\ space\ year
+# (ORGANIZATION) one of three organizations that was combined to form the Institute of Astronomy
+ITA, institute\ of\ theoretical\ astronomy
+# (TELESCOPE) an ultraviolet space telescope
+IUE, international\ ultraviolet\ explorer
+# (ORGANIZATION)
+IUEDAC, iue\ satellite\ data\ analysis\ center
+# (MEETING)
+IWCA, international\ workshop\ on\ cometary\ astronomy
+# (PUBLICATION)
+JAC, japan\ astronomical\ circular
+# (ORGANIZATION) the organization that operates the United Kingdom Infrared Telescope and the James Clerk Maxwell Telescope
+JAC, joint\ astronomy\ centre
+# (ORGANIZATION)
+JAPOA, japan\ amateur\ photoelectric\ observers\ association
+# (ORGANIZATION)
+JAXA, japan\ aerospace\ exploration\ agency
+# (TELESCOPE)
+JCMT, james\ clerk\ maxwell\ telescope
+# (ASTROPHYSICS_TERMINOLOGY) an alternative time commonly used in astronomy
+JD, julian\ date
+# (PUBLICATION)
+JGR, journal\ of\ geophysical\ research
+# (ORGANIZATION)
+JILA, formerly\ joint\ institute\ for\ laboratory\ astrophysics
+# (TELESCOPE)
+JKT, jacobus\ kapteyn\ telescope
+# (ORGANIZATION) a research center associated with NASA
+JPL, jet\ propulsion\ laboratory
+# (TELESCOPEORGANIZATION) a Japanese telescope used to track near-Earth asteroids and space junk
+JSGA, japan\ spaceguard\ association
+# (TELESCOPE) a planned space telescope that will supersede the Hubble Space Telescope
+JWST, james\ webb\ space\ telescope
+# (TELESCOPE)
+KAIT, katzman\ automatic\ imaging\ telescope
+# (TELESCOPE)
+KAO, kuiper\ airborne\ observatory
+# (CELESTIAL_OBJECT)
+KBO, kuiper\ belt\ object
+# (ORGANIZATION)
+KCAO, kumamoto\ civil\ astronomical\ observatory
+# (CATALOG) a catalog of stars with potential extrasolar planets to be observed by the Kepler Mission
+KIC, kepler\ input\ catalog
+# (ORGANIZATION)
+KPNO, kitt\ peak\ national\ observatory
+# (ORGANIZATION) a Spanish astronomy research organization
+LAEFF, laboratorio\ de\ astrofisica\ espacial\ y\ fisica\ fundamental
+# (CATALOG) a historical catalog of stars
+LAL, lalande
+# (TELESCOPE)
+LAMOST, large\ sky\ area\ multi\ object\ fiber\ spectroscopic\ telescope
+# (ORGANIZATION)
+LANL, los\ alamos\ national\ laboratory
+# (INSTRUMENTATION) an instrument on the Solar and Heliospheric Observatory
+LASCO, large\ angle\ and\ spectrometric\ coronagraph
+# (CATALOG) a catalog of bright nebulae
+LBN, lynds\ bright\ nebula
+# (ORGANIZATION)
+LBNL, lawrence\ berkeley\ national\ laboratory
+# (TELESCOPE)
+LBT, large\ binocular\ telescope
+# (CELESTIAL_OBJECT) a type of very bright variable star
+LBV, luminous\ blue\ variable
+# (ASTROPHYSICS_TERMINOLOGY) any model for structure formation in the universe that includes dark energy
+LCDM, lambda\ cold\ dark\ matter
+# (SPACECRAFT)
+LCROSS, lunar\ crater\ observation\ and\ sensing\ satellite
+# (OBSERVING_PROGRAM)
+LCRS, las\ campanas\ redshift\ survey
+# (CATALOG) a catalog of dark nebulae
+LDN, lynds\ dark\ nebula
+# (CATALOG)
+LDS, luyten\ double\ star
+# (ASTROPHYSICS_TERMINOLOGY)
+LEO, low\ earth\ orbit
+# (TELESCOPE)
+LEST, large\ earth\ based\ solar\ telescope
+# (INSTRUMENTATION) an instrument on the Chandra X-Ray Observatory
+LETGS, low\ energy\ transmission\ gratings\ spectrometer
+# (ASTROPHYSICS_TERMINOLOGY) the spatial density of objects such as star clusters and galaxies as a function of their luminosity
+LF, luminosity\ function
+# (CATALOG) a catalog of stars with proper motions exceeding 0.5&quot;
+LFT, luyten\ five\ tenths
+# (INSTRUMENTATION)
+LGA, low\ gain\ antenna
+# (CELESTIAL_OBJECT) a humorous name applied to pulsars soon after their discovery
+LGM, little\ green\ men
+# (ORGANIZATION)
+LHEA, laboratory\ for\ high\ energy\ astrophysics
+# (CATALOG) a catalog of stars with proper motions exceeding 0.5&quot;
+LHS, luyten\ half\ second
+# (CELESTIAL_OBJECT) the cloud in the interstellar medium through which the solar system is currently moving
+LIC, local\ interstellar\ cloud
+# (TELESCOPE) an instrument for detecting gravitational waves
+LIGO, laser\ interferometer\ gravitational\ wave\ observatory
+# (OBSERVING_PROGRAM)
+LINEAR, lincoln\ near\ earth\ asteroid\ research
+# (CELESTIAL_OBJECT) a galactic nucleus that is characterized by spectral line emission from weakly ionized gas
+LINER, low\ ionization\ nuclear\ emission\ region
+# (CELESTIAL_OBJECT) a galaxy that is between 10&lt;sup&gt;11&lt;/sup&gt; and 10&lt;sup&gt;12&lt;/sup&gt; solar luminosities in the infrared
+LIRG, luminous\ infrared\ galaxy
+# (TELESCOPE) a series of spacecraft that can be used to detect gravitational waves
+LISA, laser\ interferometer\ space\ antenna
+# (CELESTIAL_OBJECT) an active galactic nucleus with a low luminosity
+LLAGN, low\ luminosity\ active\ galactic\ nucleus
+# (ORGANIZATION)
+LLNL, lawrence\ livermore\ national\ laboratory
+# (CELESTIAL_OBJECT) an irregular galaxy near the Milky Way
+LMC, large\ magellanic\ cloud
+# (CELESTIAL_OBJECT) the less massive hydrogen-burning main-sequence stars
+LMS, lower\ main\ sequence\ star
+# (CELESTIAL_OBJECT) an binary star system in which one of the stars is a neutron star or black hole that is stripping material away from the other star in the system
+LMXB, low\ mass\ x\ ray\ binary
+# (INSTRUMENTATION)
+LN2, liquid\ nitrogen
+# (TELESCOPE) for radio astronomy
+LOFAR, low\ frequency\ array
+# (OBSERVING_PROGRAM)
+LONEOS, lowell\ observatory\ near\ earth\ object\ search
+# (OBSERVING_PROGRAM)
+LOSS, lick\ observatory\ supernova\ search
+# (TELESCOPE) a telescope designed to find the optical counterparts of gamma ray bursts
+LOTIS, livermore\ optical\ transient\ imaging\ system
+# (OBSERVING_PROGRAM)
+LOTOSS, lick\ observatory\ and\ tenagra\ observatory\ supernova\ searches
+# (CATALOG) a catalog of proper motion measurements of stars
+LP, luyten\ palomar
+# (ORGANIZATION)
+LPI, lunar\ and\ planetary\ institute
+# (ORGANIZATION) the planetary science department of the University of Arizona
+LPL, lunar\ and\ planetary\ laboratory
+# (ORGANIZATION)
+LPO, la\ palma\ observatory
+# (CELESTIAL_OBJECT) a type of variable star that changes in brightness slowly over time
+LPV, long\ period\ variable
+# (CELESTIAL_OBJECT) a dataset of galaxies from the Sloan Digital Sky Survey that were selected on the basis of their red colors
+LRG, luminous\ red\ galaxy
+# (SPACECRAFT)
+LRO, lunar\ reconnaissance\ orbiter
+# (ASTROPHYSICS_TERMINOLOGY) the frame of reference with a velocity equal to the average velocity of all the stars in the solar neighborhood, including the Sun
+LSR, local\ standard\ of\ rest
+# (TELESCOPE)
+LSST, large\ synoptic\ survey\ telescope
+# (ASTROPHYSICS_TERMINOLOGY) the right ascension that is currently at the zenith
+LST, local\ sidereal\ time
+# (ASTROPHYSICS_TERMINOLOGY) a state where variations in temperature, pressure, etc. do not vary on small scales
+LTE, local\ thermodynamic\ equilibrium
+# (ASTROPHYSICS_TERMINOLOGY) an observed event (such as a flash of light) on the surface of the Moon
+LTP, lunar\ transient\ phenomenon
+# (CATALOG) a catalog of proper motion measurements for stars
+LTT, luyten\ two\ tenths
+# (PROJECT) a NASA-funded project to search for exoplanets
+MARVEL, multi\ object\ apache\ point\ observatory\ radial\ velocity\ exoplanet\ large\ area\ survey
+# (OBSERVING_PROGRAM) a program to study the cometary dust from the Leonids meteor showers
+MAC, multi\ instrument\ aircraft\ campaign
+# (CELESTIAL_OBJECTOBSERVING_PROGRAMCATALOG) an object in the halo thought to comprise part of the galaxy's dark matter; also a survey to detect these sources through gravitational lensing and the catalog of sources detected by the survey
+MACHO, massive\ compact\ halo\ object
+# (TELESCOPE)
+MAGIC, major\ atmospheric\ gamma\ ray\ imaging\ cherenkov\ telescope
+# (TELESCOPE) an older name for the Wilkinson Microwave Anisotropy Probe
+MAP, microwave\ background\ anisotropy\ probe
+# (ASTROPHYSICS_TERMINOLOGY) microwave emission that is similar to the optical emission from a laser
+MASER, microwave\ amplification\ by\ stimulated\ emission\ of\ radiation
+# (CELESTIAL_OBJECT)
+MBA, main\ belt\ asteroid
+# (CELESTIAL_OBJECT)
+MBH, massive\ black\ hole
+# (CATALOG)
+MCG, morphological\ catalog\ of\ galaxies
+# (SPACECRAFT)
+MCO, mars\ climate\ orbiter
+# (OBSERVING_PROGRAM) a survey of high-redshift galaxies with the Hubble Space Telescope
+MDS, medium\ deep\ survey
+# (CELESTIAL_OBJECT) a type of object proposed as an alternative to supermassive black holes as the central compact source within active galactic nuclei
+MECO, magnetospheric\ eternally\ collapsing\ object
+# (ORGANIZATION)
+MEPAG, mars\ exploration\ program\ analysis\ group
+# (MEETING)
+MEPCO, meeting\ of\ european\ planetary\ and\ cometary\ observers
+# (SPACECRAFT)
+MER, mars\ exploration\ rover
+# (CATALOGOBSERVING_PROGRAM)
+MGC, millennium\ galaxy\ catalogue
+# (SPACECRAFT)
+MGS, mars\ global\ surveyor
+# (ASTROPHYSICS_TERMINOLOGY)
+MHD, magnetohydrodynamic
+# (SOFTWARE) astronomy almanac software created by the United States Naval Observatory
+MICO, multi\ year\ interactive\ computer\ almanac
+# (INSTRUMENTATION) an instrument on the Spitzer Space Telescope
+MIPS, multi\ band\ imaging\ photometer
+# (ASTROPHYSICS_TERMINOLOGY) the Julian date minus 2400000.5
+MJD, modified\ julian\ date
+# (SPACECRAFT) Mercury
+MMO, mercury\ magnetospheric\ orbiter
+# (ASTROPHYSICS_TERMINOLOGY)
+MMR, mean\ motion\ resonance
+# (TELESCOPE)
+MMT, multiple\ mirror\ telescope
+# (PUBLICATION)
+MNRAS, monthly\ notices\ of\ the\ royal\ astronomical\ society
+# (SPACECRAFT)
+MO, mars\ observer
+# (OBSERVING_PROGRAM) a survey searching for gravitational lenses
+MOA, microlensing\ observations\ in\ astrophysics
+# (INSTRUMENTATION) an instrument on the Mars Observer
+MOC, mars\ observer\ camera
+# (ASTROPHYSICS_TERMINOLOGY) the minimum distance between two objects' orbital paths
+MOID, minimum\ orbit\ intersection\ distance
+# (INSTRUMENTATION) an instrument on the Mars Observer used to study Mars's topology
+MOLA, mars\ observer\ laser\ altimeter
+# (ASTROPHYSICS_TERMINOLOGY)
+MOND, modified\ newtonian\ dynamics
+# (TELESCOPE) a Danish space telescope that was proposed and designed but not built
+MONS, measuring\ oscillations\ in\ nearby\ stars
+# (TELESCOPE) a space telescope designed to detect oscillations in the atmospheres of stars and extrasolar planetss in orbit around other stars
+MOST, microvariability\ and\ oscillations\ of\ stars
+# (TELESCOPE) an Australian radio telescope
+MOST, molonglo\ observatory\ synthesis\ telescope
+# (TELESCOPE)
+MOTIF, maui\ optical\ tracking\ and\ identification\ facility
+# (INSTRUMENTATION) an X-ray all-sky monitor designed for the Spectrum-X-Gamma satellite
+MOXE, monitoring\ x\ ray\ experiment
+# (PUBLICATION) also called
+MPC, minor\ planet\ circulars
+# (PUBLICATION)
+MPEC, minor\ planet\ electronic\ circular
+# (SPACECRAFT)
+MPF, mars\ pathfinder
+# (SPACECRAFT)
+MPL, mars\ polar\ lander
+# (SPACE_CRAFT) Mercury
+MPO, mercury\ planetary\ orbiter
+# (INSTRUMENTATION) CCD technology that reduces dark current noise
+MPP, multi\ pinned\ phase
+# (PUBLICATION)
+MPCS, minor\ planet\ circulars\ supplement
+# (OBSERVING_PROJECT) a program designed that detect gravitational lensing technique
+MPS, microlensing\ planet\ search
+# (SPACECRAFT)
+MRO, mars\ reconnaissance\ orbiter
+# (CELESTIAL_OBJECT)
+MSP, millisecond\ pulsar
+# (ORGANIZATION)
+MSSS, maui\ space\ surveillance\ site
+# (TELESCOPE) an infrared space telescope
+MSX, midcourse\ space\ experiment
+# (ORGANIZATION)
+MSSSO, mount\ stromlo\ and\ siding\ spring\ observatories
+# (OBSERVING_PROGRAM)
+MUNICS, munich\ near\ infrared\ cluster\ survey
+# (SPACECRAFT) a Japanese science-related spacecraft launched in a Mu rocket
+MUSES, mu\ space\ engineering\ spacecraft
+# (INSTRUMENTATION) A bolometer camera on the Green Bank Telescope.
+MUSTANG, multiplexed\ squid\ tes\ array\ at\ ninety\ ghz
+# (CELESTIAL_OBJECT)
+MW, milky\ way
+# (CELESTIAL_OBJECT)
+MWD, magnetic\ white\ dwarf
+# (CELESTIAL_OBJECT) an X-ray-luminous binary system consisting of a compact star and a very massive star
+MXRB, massive\ x\ ray\ binary
+# (CELESTIAL_OBJECT)
+MYSO, massive\ young\ stellar\ object
+# (ORGANIZATION) the older name for NASA
+NACA, national\ advisory\ committee\ on\ aeronautics
+# (ORGANIZATION)
+NAMN, north\ american\ meteor\ network
+# (ORGANIZATION)
+NAOJ, national\ astronomical\ observatory\ of\ japan
+# (ORGANIZATION) the Norwegian name for the Norwegian Astronomical Society
+NAS, norsk\ astronomisk\ selskap
+# (ORGANIZATION)
+NASA, national\ aeronautics\ and\ space\ administration
+# (ORGANIZATION)
+NASDA, national\ space\ development\ agency
+# (ORGANIZATION) an older name for the National Institute of Standards and Technology
+NBS, national\ bureau\ of\ standards
+# (TELESCOPE)
+NCT, nuclear\ compton\ telescope\ a\ balloon\ borne\ soft\ gamma\ ray\ 0\ 2\ 15\ mev\ telescope
+# (SPACECRAFT) a space probe used to study a near-Earth asteroid
+NEAP, near\ earth\ asteroid\ prospector
+# (SPACECRAFT) a space probe used to study a near-Earth asteroid
+NEAR, near\ earth\ asteroid\ rendezvous
+# (OBSERVING_PROGRAM)
+NEAT, near\ earth\ asteroid\ tracking
+# (SOFTWARE)
+NED, nasa\ ipac\ extragalactic\ database
+# (CELESTIAL_OBJECT)
+NEO, near\ earth\ object
+# (CELESTIAL_OBJECT) a type of Carbon star with high amounts of nitrogen
+NEMP, nitrogen\ enhanced\ metal\ poor\ star
+# (ORGANIZATION) a United Kingdom organization that provides information on near-Earth asteroids
+NEOIC, near\ earth\ object\ information\ center
+# (TELESCOPE) a telescope for observing near-Earth asteroids
+NESS, near\ earth\ space\ surveillance
+# (ORGANIZATION) a collaboration planning to use a ground-based telescope to observe near-Earth asteroids
+NESSI, near\ earth\ space\ surveillance\ initiative
+# (CATALOG)
+NGC, new\ general\ catalog
+# (TELESCOPE) an older name for the James Webb Space Telescope
+NGST, next\ generation\ space\ telescope
+# (CATALOG) the northern extension of the HIPASS catalogue
+NHICAT, northern\ hipass\ catalog
+# (INSTRUMENTATION) an infrared instrument on the Hubble Space Telescope
+NICMOS, near\ infrared\ camera\ multi\ object\ spectrometer
+# (INSTRUMENTATION) an instrument on the Galileo spacecraft
+NIMS, near\ infrared\ mapping\ spectrometer
+# (ASTROPHYSICS_TERMINOLOGY)
+NIR, near\ infrared
+# (ORGANIZATION)
+NIST, national\ institute\ of\ standards\ and\ technology
+# (ASTROPHYSICS_TERMINOLOGY) situations where the temperature, pressure, etc. of a system are not in equilibrium
+NLTE, non\ local\ thermodynamic\ equilibrium
+# (CATALOG) a catalog of stars with high proper motions
+NLTT, new\ luyten\ two\ tenths
+# (ORGANIZATION)
+NOAA, national\ oceanic\ and\ atmospheric\ administration
+# (ORGANIZATION)
+NOAO, national\ optical\ astronomy\ observatories
+# (TELESCOPE) a now-defunct telescope used to observe space junk and other objects
+NODO, nasa\ orbital\ debris\ observatory
+# (TELESCOPE)
+NOT, nordic\ telescope
+# (CELESTIAL_OBJECT) a series of magnitudes
+NPS, north\ polar\ sequence
+# (ORGANIZATION)
+NRAO, national\ radio\ astronomy\ observatory
+# (ORGANIZATION)
+NRL, naval\ research\ laboratory
+# (CELESTIAL_OBJECT)
+NS, neutron\ star
+# (ORGANIZATION)
+NSF, national\ science\ foundation
+# (ORGANIZATION)
+NSO, national\ solar\ observatory
+# (ORGANIZATION)
+NSSDC, national\ space\ science\ data\ center
+# (CATALOG) a catalog of variable stars
+NSV, new\ suspected\ variable
+# (ASTROPHYSICS_TERMINOLOGY) radiation that is not related to the emission source's temperature (such as synchrotron radiation)
+NT, non\ thermal
+# (TELESCOPE) a telescope operated by the European Southern Observatory
+NTT, new\ technology\ telescope
+# (OBSERVATORY) in Japan
+OAO, okayama\ astrophysical\ observatory
+# (TELESCOPE) a series of satellites with astronomical instruments that operated in the 1970s
+OAO, orbiting\ astronomical\ observatory
+# (CELESTIAL_OBJECT) a cluster of stars
+OC, open\ cluster
+# (ORGANIZATION)
+OCA, observatoire\ de\ la\ c\ te\ d\ azur
+# (CELESTIAL_OBJECT) an object (usually a comet) in the Oort cloud
+OCO, oort\ cloud\ object
+# (OBSERVING_PROGRAMCATALOG) an observing program to survey the sky for microlensing events; also the catalog of sources produced by the project
+OGLE, optical\ gravitational\ lensing\ experiment
+# (ORGANIZATION) a group established by NASA that provides advice on solar system exploration
+OPAG, outer\ planets\ assessment\ group
+# (TELESCOPE) an ultraviolet space telescope that could be released and later retrieved by the Space Shuttle
+ORFEUS, orbiting\ and\ retrievable\ far\ and\ extreme\ ultraviolet\ spectrometer
+# (INSTRUMENTATION) an instrument on the Compton Gamma Ray Observatory
+OSSE, oriented\ scintillation\ spectrometer\ experiment
+# (INSTRUMENTATION) the optics of the Hubble Space Telescope
+OTA, optical\ telescope\ assembly
+# (CELESTIAL_OBJECT)
+OVV, an\ optically\ violent\ variable\ quasar
+# (TELESCOPE) two satellites that will work together to observe cosmic rays hitting the Earth's atmosphere
+OWL, orbiting\ wide\ angle\ light\ collectors
+# (TELESCOPE) a proposed telescope with a primary mirror with a width of 100 m
+OWL, overwhelmingly\ large\ telescope
+# (TELESCOPE)
+P60, palomar\ 60\ inch\ telescope
+# (ASTROPHYSICS_TERMINOLOGY)
+PA, position\ angle
+# (ASTROPHYSICS_TERMINOLOGY)
+PAH, polycyclic\ aromatic\ hydrocarbon
+# (TELESCOPE) a space telescope used to study cosmic rays
+PAMELA, payload\ for\ antimatter\ matter\ exploration\ and\ light\ nuclei\ astrophysics
+# (PUBLICATION)
+PASJ, publications\ of\ the\ astronomical\ society\ of\ japan
+# (PUBLICATION)
+PASP, publications\ of\ the\ astronomical\ society\ of\ the\ pacific
+# (INSTRUMENTATION) an X-ray detector on the Rossi X-ray Timing Explorer
+PCA, proportional\ counter\ array
+# (OBSERVING_PROGRAM)
+PCAS, planet\ crossing\ asteroid\ survey
+# (TELESCOPE) a radio telescope
+PDBI, plateau\ de\ bure\ interferometer
+# (INSTRUMENTATION) an observing technique using photometers
+PEP, photoelectric\ photometry
+# (INSTRUMENTATION) an instrument on Deep Space 1
+PEPE, plasma\ experiment\ for\ planetary\ exploration
+# (CELESTIAL_OBJECT)
+PHA, potentially\ hazardous\ asteroid
+# (PERSON) the person who leads a scientific project
+PI, principal\ investigator
+# (CATALOG) a catalog of planetary nebulae
+PK, perek\ kohoutek
+# (OBSERVING_PROGRAM) a program to search for microlensing events
+PLANET, probing\ lensing\ anomalies\ network
+# (OBSERVING_PROGRAM) a program to search for asteroids
+PLS, palomar\ leiden\ survey
+# (OBSERVING_PROGRAM)
+PMPS, parkes\ multibeam\ pulsar\ survey
+# (CELESTIAL_OBJECT) young stars that are still in the process of formation
+PMS, pre\ main\ sequence
+# (INSTRUMENTATION)
+PMT, photomultiplier\ tube
+# (CELESTIAL_OBJECT)
+PN, planetary\ nebula
+# (CATALOG)
+PNG, galactic\ planetary\ nebula
+# (ASTROPHYSICS_TERMINOLOGY) the density of planetary nebulae as a function of their luminosity
+PNLF, planetary\ nebula\ luminosity\ function
+# (CELESTIAL_OBJECT) the central star in a planetary nebula
+PNN, planetary\ nebula\ nucleus
+# (CELESTIAL_OBJECT) a variable star in the center of a planetary nebula
+PNNV, planetary\ nebula\ nucleus\ variable
+# (OBSERVING_PROGRAM)
+POSS, palomar\ observatory\ sky\ survey
+# (ORGANIZATION) a major government-sponsored science agency in the United Kingdom, merged into the Science and Technology Facilities Council in 2007
+PPARC, particle\ physics\ and\ astronomy\ research\ council
+# (CATALOG) a catalog of the positions and proper motions of stars
+PPM, positions\ and\ proper\ motions
+# (CELESTIAL_OBJECT) an object that has partially evolved from a red giant to a planetary nebula
+PPN, proto\ planetary\ nebula
+# (ASTROPHYSICS_TERMINOLOGY)
+PRE, photospheric\ radius\ expansion
+# (CATALOG) a catalog of point-like infrared sources detected with the Infrared Astronomy Satellite
+PSC, point\ source\ catalog
+# (INSTRUMENTATION) a function that describes the blurring of a point source that is caused by the optics of the telescope and instrument (as well as other effects)
+PSF, point\ spread\ function
+# (ORGANIZATION)
+PSI, planetary\ science\ institute
+# (CELESTIAL_OBJECT)
+PSR, pulsar
+# (SPACECRAFT)
+PVO, pioneer\ venus\ orbiter
+# (CELESTIAL_OBJECT) a class of pulsating variable stars named after PV Telescopii, the archetype for the class
+PVTEL, pv\ telescopii
+# (CELESTIAL_OBJECT) a star that no longer creates energy through fusion that will eventually evolve into a white dwarf
+PWD, pre\ white\ dwarf
+# (CELESTIAL_OBJECT)
+PWN, pulsar\ wind\ nebula
+# (TELESCOPE) a general name for any telescope designed to observe objects passing at the zenith
+PZT, photographic\ zenith\ tube
+# (ASTROPHYSICS_TERMINOLOGY) a type of season variation in the Earth's atmosphere
+QBO, quasi\ biennial\ oscillation
+# (INSTRUMENTATION) the sensitivity of CCDs
+QE, quantum\ efficiency
+# (ASTROPHYSICS_TERMINOLOGY)
+QPO, quasi\ periodic\ oscillation
+# (CELESTIAL_OBJECT)
+QSO, quasi\ stellar\ object
+# (ASTROPHYSICS_TERMINOLOGY)
+RA, right\ ascension
+# (CELESTIAL_OBJECT)
+RAMBO, an\ association\ of\ brown\ dwarfs\ or\ white\ dwarfs\ form\ a\ dark\ cluster
+# (ORGANIZATION)
+RAS, royal\ astronomical\ society
+# (ORGANIZATION)
+RASC, royal\ astronomical\ society\ of\ canada
+# (OBSERVING_PROGRAMCATALOG) used as both a name for a survey with ROSAT and the catalogs produced from the survey
+RASS, rosat\ all\ sky\ survey
+# (CELESTIAL_OBJECT) a type of metal-rich red giant star
+RC, red\ clump
+# (CATALOG) a catalog of nearby galaxies
+RC, reference\ catalogue
+# (ORGANIZATIONTELESCOPE) a manufacturer of amateur and professional telescope equipment; also the telescopes themselves
+RC, ritchey\ chretien
+# (CELESTIAL_OBJECT) a class of eruptive variable stars named after R Coronae Borealis, the archetype for the class
+RCB, r\ coronae\ borealis
+# (ASTROPHYSICS_TERMINOLOGY)
+RDI, radiation\ driven\ implosion
+# (ORGANIZATION) a survey of nearby stars
+RECONS, research\ consortium\ on\ nearby\ stars
+# (CELESTIAL_OBJECT) a star that is evolving from a main-sequence star into a red giant
+RGB, red\ giant\ branch
+# (ORGANIZATION)
+RGO, royal\ greenwich\ observatory
+# (ASTROPHYSICS_TERMINOLOGY) the result of when an object in a binary system is larger than its roche lobe (i.e. when an object in a binary system expands to a radius where tidal forces become stronger than gravitational forces)
+RLOF, roche\ lobe\ overflow
+# (CELESTIAL_OBJECT) a quasar that produces strong radio emission
+RLQ, radio\ loud\ quasar
+# (CATALOG)
+RNGC, revised\ new\ general\ catalog
+# (ASTROPHYSICS_TERMINOLOGY) an inertial reference frame based on extragalactic radio sources
+RORF, radio\ optical\ reference\ frame
+# (TELESCOPE) an X-ray space telescope
+ROSAT, roentgen\ satellite
+# (OBSERVING_PROGRAMTELESCOPE) an observing program for detecting the optical counterparts of gamma ray bursts; also the telescopes used in this program
+ROTSE, robotic\ optical\ transient\ search\ experiment
+# (CELESTIAL_OBJECT) a quasar that produces weak radio emission
+RQQ, radio\ quiet\ quasar
+# (CELESTIAL_OBJECT) a population of rotating neutron stars that produce periodic bursts of emission that are separated by intervals of minutes or hours
+RRAT, rotating\ radio\ transient
+# (CELESTIAL_OBJECT) a class of pulsating variable stars named after RR Lyrae, the archetype of the class
+RRL, rr\ lyrae
+# (CATALOG) a catalog of nearby galaxies
+RSA, revised\ shapley\ ames
+# (ORGANIZATION)
+RSA, russian\ space\ agency
+# (ORGANIZATION) part of the Institute of Advanced Studies at the Australian National University
+RSAA, research\ school\ of\ astronomy\ and\ astrophysics
+# (CELESTIAL_OBJECT)
+RSG, red\ super\ giant
+# (CELESTIAL_OBJECT)
+RSN, radio\ supernova
+# (INSTRUMENTATION) a type of power generator used in spacecraft that travel far from the Sun
+RTG, radioisotope\ thermoelectric\ generator
+# (ASTROPHYSICS_TERMINOLOGY) the velocity along the line of sight
+RV, radial\ velocity
+# (CATALOG) a catalog of sources detected by ROSAT
+RX, rosat\ x\ ray
+# (TELESCOPE) a space telescope designed to observe variability in X-ray emission
+RXTE, rossi\ x\ ray\ timing\ explorer
+# (ORGANIZATION)
+SAAO, south\ african\ astronomical\ observatory
+# (TELESCOPE)
+SALT, southern\ african\ large\ telescope
+# (ORGANIZATIONCATALOG) the name of astrophysics research organization associated with Harvard University; also a catalog of stars
+SAO, smithsonian\ astrophysical\ observatory
+# (ORGANIZATION)
+SARA, society\ of\ amateur\ radio\ astronomers
+# (SOFTWARE) a software package used for processing data from the XMM-Newton Observatory
+SAS, science\ analysis\ software
+# (TELESCOPE)
+SAT, synthetic\ aperture\ telescope
+# (CELESTIAL_OBJECT)
+SB, spectroscopic\ binary
+# (ASTROPHYSICS_TERMINOLOGY)
+SB, surface\ brightness
+# (ORGANIZATIONINSTRUMENTATION) the name of both a company that manufactures telescope equipment and the company's products
+SBIG, santa\ barbara\ instrument\ group
+# (ORGANIZATION) an older name for the Committee for Small Body Nomenclature
+SBNC, small\ bodies\ names\ committee
+# (OBSERVING_PROGRAM) a project to measure the expansion of the universe using supernovae at high redshifts
+SCP, supernova\ cosmology\ project
+# (OBSERVING_PROGRAM) a survey that measured the proper motions of stars
+SCR, supercosmos\ recons
+# (TELESCOPE) a general name for a type of compact telescope that uses both lenses and mirrors
+SCT, schmidt\ cassegrain\ telescope
+# (INSTRUMENTATION) a submillimeter imager formerly at the James Clerk Maxwell Telescope
+SCUBA, submillimetre\ common\ user\ bolometer\ array
+# (CELESTIAL_OBJECT) eccentric, highly inclined orbits
+SDO, scattered\ disk\ object
+# (CELESTIAL_OBJECT) a class of eruptive variable stars named after S Doradus, the archetype for the class
+SDOR, s\ doradus
+# (OBSERVING_PROGRAMCATALOG) a large imaging and spectroscopic survey; also the catalog of sources from the survey
+SDSS, sloan\ digital\ sky\ survey
+# (ASTROPHYICS_TERMINOLOGY)
+SED, spectral\ energy\ distribution
+# (ORGANIZATION)
+SEDS, students\ for\ the\ exploration\ and\ development\ of\ space
+# (ORGANIZATION)
+SERC, science\ and\ engineering\ research\ council
+# (TELESCOPE)
+SEST, swedish\ eso\ submillimetre\ telescope
+# (OBSERVING_PROGRAM)
+SETI, search\ for\ extra\ terrestrial\ intelligence
+# (ASTROPHYSICS_TERMINOLOGY)
+SF, star\ formation
+# (ASTROPHYICS_TERMINOLOGY)
+SFR, star\ formation\ rate
+# (ORGANIZATION) an organization that tracks near-Earth asteroids
+SGF, spaceguard\ foundation
+# (CELESTIAL_OBJECT) a type of neutron star with strong magnetic fields that produces very large bursts of energy
+SGR, soft\ gamma\ repeater
+# (ASTROPHYSICS_TERMINOLOGY) a disturbance in the Earth's ionosphere caused by the Sun
+SID, sudden\ ionospheric\ disturbance
+# (ORGANIZATION)
+SIDC, sunspot\ index\ data\ center
+# (TELESCOPE) a planned optical space telescope that will be used to measure distances to stars
+SIM, space\ interferometry\ mission
+# (SOFTWARE) a website that provides catalog data on astronomical objects
+SIMBAD, set\ of\ identifications\ measurements\ and\ bibliography\ for\ astronomical\ data
+# (OBSERVING_PROGRAM) a survey of star formation in nearby galaxies selected by gas rich galaxies using H-alpha and ultraviolet observations
+SINGG, survey\ of\ ionization\ in\ neutral\ gas\ galaxies
+# (OBSERVING_PROGRAM)
+SINGS, spitzer\ infrared\ nearby\ galaxies\ survey
+# (OBSERVING_PROGRAMCATALOG) a program to identify stars with high proper motions at infrared wavelengths
+SIPS, southern\ infrared\ proper\ motion\ survey
+# (TELESCOPE) or Shuttle InfraRed Telescope Facility, older names for the Spitzer Space Telescope
+SIRTF, space\ infrared\ telescope\ facility
+# (INSTRUMENTATION)
+SIS, superconductor\ isolator\ superconductor
+# (TELESCOPE)
+SKA, square\ kilometre\ array
+# (CATALOG) the Levy, particularly Shoemaker-Levy 9
+SL, shoemaker\ levy
+# (SPACECRAFT)
+SL, spacelab
+# (TELESCOPE)
+SMA, submillimeter\ array
+# (SPACECRAFT)
+SMART, small\ missions\ for\ advanced\ research\ in\ technology
+# (CELESTIAL_OBJECT)
+SMBH, super\ massive\ black\ hole
+# (CELESTIAL_OBJECT)
+SMC, small\ magellanic\ cloud
+# (SPACECRAFT) a spacecraft used to study the Earth's ozone layer
+SME, solar\ mesosphere\ explorer
+# (SPACECRAFT) the name of a series of small astronomical spacecraft; also the program to develop the spacecraft
+SMEX, small\ explorers
+# (TELESCOPE) a solar space telescope
+SMM, solar\ maximum\ mission
+# (INSTRUMENTATION) the ratio of the signal from an object to the noise from the detector that measured the signal
+SN, signal\ to\ noise
+# (CELESTIAL_OBJECT)
+SN, supernova
+# (TELESCOPE) proposed space telescope
+SNAP, supernova\ acceleration\ probe
+# (CELESTIAL_OBJECT)
+SNR, supernova\ remnant
+# (ASTROPHYSICS_TERMINOLOGY)
+SNU, solar\ neutrino\ units
+# (SOFTWARE)
+SOARD, steward\ observatory\ asteroid\ relational\ database
+# (TELESCOPE) an infrared telescope currently under construction that will fly inside a modified Boeing 747 aircraft
+SOFIA, stratospheric\ observatory\ for\ infrared\ astronomy
+# (TELESCOPE) a solar space telescope
+SOHO, solar\ and\ heliospheric\ observatory
+# (TELESCOPE) an ultraviolet space telescope that can be released and retrieved by the Space Shuttle
+SPARTAN, shuttle\ pointed\ autonomous\ research\ tool\ for\ astronomy
+# (INSTRUMENT) an infrared instrument on the Midcourse Space Experiment spacecraft
+SPIRIT, space\ infrared\ imaging\ telescope
+# (SPACECRAFT) a general name for proposed satellites that would convert solar power into energy and then beam the energy to the surface of a planet (such as Earth) in the form of microwaves
+SPS, solar\ power\ satellite
+# (TELESCOPE)
+SPT, south\ pole\ telescope
+# (INSTRUMENTATION)
+SQIID, simultaneous\ quad\ infrared\ imaging\ device
+# (CELESTIAL_OBJECT)
+SQM, strange\ quark\ matter
+# (ASTROPHYSICS_TERMINOLOGY)
+SR, special\ relativity
+# (ORGANIZATION)
+SRON, space\ research\ organization\ of\ the\ netherlands
+# (CELESTIAL_OBJECT) a type of binary star system containing a red giant and a hot dwarf star that generate a cone-shaped nebula
+SS, symbiotic\ star
+# (INSTRUMENTATION) an instrument on the Galileo spacecraft
+SSI, solid\ state\ imager
+# (ORGANIZATION)
+SSI, space\ studies\ institute
+# (INSTRUMENTATION) on board the Huygens probe
+SSP, surface\ science\ package
+# (OBSERVING_PROGRAM)
+SSS, supercosmos\ sky\ surveys
+# (CATALOG)
+SSSPM, supercosmos\ sky\ survey\ proper\ motion
+# (TELESCOPE)
+SST, spectroscopic\ survey\ telescope
+# (TELESCOPE) a space telescope
+SST, spitzer\ space\ telescope
+# (OBSERVING_PROGRAM)
+STEPS, stellar\ planet\ survey
+# (INSTRUMENTATION) an instrument on the Hubble Space Telescope
+STIS, space\ telescope\ imaging\ spectrograph
+# (VEHICLE) or
+STS, shuttle\ transport\ system
+# (SOFTWARE)
+STSDAS, space\ telescope\ science\ data\ analysis\ system
+# (ASTROPHYSICS_TERMINOLOGY)
+SUGRA, supergravity
+# (INSTRUMENTATION) an instrument on the Subaru Telescope
+SUPRIME, subaru\ prime\ focus\ camera
+# (TELESCOPE)  an optical interferometer
+SUSI, sydney\ university\ stellar\ interferometer
+# (INSTRUMENTATION) an instrument on SOHO
+SWAN, solar\ wind\ anisotropy
+# (TELESCOPE) a submillimeter space telescope
+SWAS, submillimeter\ wave\ astronomy\ satellite
+# (OBSERVING_PROGRAM) a survey of a subsection of the plane of the Milky Way performed with the Hubble Space Telescope
+SWEEPS, sagittarius\ window\ eclipsing\ extrasolar\ planet\ search
+# (OBSERVING_PROGRAM)
+SWIRE, spitzer\ wide\ area\ infrared\ extragalactic\ survey
+# (CELESTIAL_OBJECT) a class of rotating variable stars named after SX Arietis, the archetype for the class
+SXARI, sx\ arietis
+# (CELESTIAL_OBJECT) a class of pulsating variable stars named after SX Phoenicis, the archetype for the class
+SXPHE, sx\ phoenicis
+# (ORGANIZATION) or Telescope Allocation Committee, a general name for a committee that awards telescope observing time
+TAC, time\ allocation\ committee
+# (CATALOG)
+TAC, twin\ astrograph\ catalog
+# (ASTROPHYSICS_TERMINOLOGY)
+TAI, international\ atomic\ time
+# (ASTROPHYSICS_TERMINOLOGY) stars at the point in their lifetimes where they have finished burning hydrogen in their cores
+TAMS, terminal\ age\ main\ sequence
+# (TELESCOPE)
+TAROT, t\ lescope\ action\ rapide\ pour\ les\ objets\ transitoires
+# (OBSERVING_PROGRAM)
+TASS, the\ amateur\ sky\ survey
+# (SPACECRAFT) a spacecraft mission proposed in the 1980s that would reach 1000 AU in 50 years
+TAU, thousand\ astronomical\ unit
+# (ASTROPHYSICS_TERMINOLOGY)
+TCB, barycentric\ coordinate\ time
+# (ASTROPHYSICS_TERMINOLOGY)
+TCG, geocentric\ coordinate\ time
+# (ASTROPHYSICS_TERMINOLOGY)
+TDB, barycentric\ dynamical\ time
+# (COMMUNICATIONS_NETWORK) an array of satellites used by NASA to communicate with many spacecraft in low Earth orbit
+TDRSS, tracking\ and\ data\ relay\ satellite\ system
+# (INSTRUMENTATION) a spectrometer on the Mars Observer
+TES, thermal\ emission\ spectrometer
+# (ORGANIZATION)
+TEP, transits\ of\ extrasolar\ planets
+# (CELESTIAL_OBJECT) gamma rays emitted from Earth's lightning storms
+TGF, terrestrial\ gamma\ ray\ flash
+# (INSTRUMENTATION) a camera on the Mars Odyssey spacecraft
+THEMIS, thermal\ emission\ imaging\ system
+# (CATALOG) a predecessor of the Hipparcos Input Catalog
+TIC, tycho\ input\ catalog
+# (SPACECRAFT)
+TIMED, thermosphere\ ionosphere\ mesosphere\ energetics\ and\ dynamics
+# (ORGANIZATION)
+TIE, telescopes\ in\ education
+# (ASTROPHYSICS_TERMINOLOGY) an unexplained flash of light observed from the Moon
+TLP, transient\ lunar\ phenomenon
+# (CELESTIAL_OBJECT)
+TMC, taurus\ molecular\ cloud
+# (TELESCOPE) formerly known as California Extremely Large Telescope
+TMT, thirty\ meter\ telescope
+# (PERSON) nickname for an amateur telescope maker
+TN, telescope\ nut
+# (CELESTIAL_OBJECT) any object that orbits the Sun at a distance greater than that of Neptune
+TNO, trans\ neptunian\ object
+# (PERSON) the technician who assists in operating a telescope during astronomical observations
+TO, telescope\ operator
+# (MEETING) a series of educational astronomy workshops
+TOPS, toward\ other\ planetary\ systems
+# (TELESCOPE) a planned space telescope that will be used to find extrasolar Earth-like planets
+TPF, terrestrial\ planet\ finder
+# (ASTROPHYSICS_TERMINOLOGY)
+TT, terrestrial\ time
+# (CELESTIAL_OBJECT)
+TTS, t\ tauri\ star
+# (CELESTIAL_OBJECT)
+TWA, tw\ hydrae\ association
+# (CATALOG) a catalog that was the predecessor of the Hipparcos (HIP) Catalogue
+TYC, tycho
+# (CELESTIAL_OBJECT) the object that forms when a neutron star merges with a red giant
+TZO, thorne\ ytkow\ object
+# (SPACECRAFT) a satellite used to study the Earth's upper atmosphere
+UARS, upper\ atmosphere\ research\ satellite
+# (CATALOG)
+UCAC, usno\ ccd\ astrometric\ catalog
+# (OBSERVING_PROGRAM)
+UESAC, uppsala\ eso\ survey\ of\ asteroids\ and\ comets
+# (ASTROPHYSICS_TERMINOLOGY)
+UFO, unidentified\ flying\ object
+# (CELESTIAL_OBJECT) a class of cataclysmic variable stars (also known as dwarf novae) that are named after U Geminorum, the archetype for the class
+UG, u\ geminorum
+# (CATALOG) a catalog of galaxies
+UGC, uppsala\ general\ catalogue
+# (TELESCOPE) an ultraviolet telescope that was operated from the cargo bay of the Space Shuttle
+UIT, ultraviolet\ imaging\ telescope
+# (OBSERVING_PROGRAMCATALOG)
+UKIDSS, ukirt\ infrared\ deep\ sky\ survey
+# (TELESCOPE)
+UKIRT, united\ kingdom\ infrared\ telescope
+# (ORGANIZATION)
+UKSA, uk\ space\ agency
+# (TELESCOPE)
+UKST, united\ kingdom\ schmidt\ telescope
+# (CELESTIAL_OBJECT) a galaxy that is brighter than 10&lt;sup&gt;12&lt;/sup&gt; solar luminosities in the infrared
+ULIRG, ultraluminous\ infrared\ galaxy
+# (CELESTIAL_OBJECT)
+ULX, ultraluminous\ x\ ray\ source
+# (CELESTIAL_OBJECT) the more massive hydrogen-burning main-sequence stars
+UMS, upper\ main\ sequence
+# (ORGANIZATION)
+USAF, united\ states\ air\ force
+# (ORGANIZATION)
+USGS, united\ states\ geological\ survey
+# (ORGANIZATION)
+USNO, united\ states\ naval\ observatory
+# (ASTROPHYSICS_TERMINOLOGY)
+UT, universal\ time
+# (ASTROPHYSICS_TERMINOLOGY)
+UTC, coordinated\ universal\ time
+# (ASTROPHYSICS_TERMINOLOGY)
+UV, ultraviolet
+# (INSTRUMENTATION) the name of instruments on the Voyager and Galileo spacecraft
+UVS, ultraviolet\ spectrometer
+# (CELESTIAL_OBJECT) a class of variable pre–main sequence stars named after UX Orionis, the archetype for the class
+UXOR, ux\ orionis\ objects
+# (ORGANIZATION) located in India
+VBO, vainu\ bappu\ observatory
+# (TELESCOPE) located at Vainu Bappu Observatory
+VBT, vainu\ bappu\ telescope
+# (CATALOG) a catalog of galaxies in the Virgo Cluster
+VCC, virgo\ cluster\ catalog
+# (ASTROPHYSICS_TERMINOLOGY) the path taken by the Galileo spacecraft to reach Jupiter
+VEEGA, venus\ earth\ earth\ gravity\ assist
+# (TELESCOPE) a Japanese radio telescope designed for studying objects in the Milky Way
+VERA, vlbi\ exploration\ of\ radio\ astrometry
+# (ASTROPHYSICS_TERMINOLOGY) gamma rays with high energies
+VHE, very\ high\ energy
+# (INSTRUMENTATION) instrument on the VLT
+VIMOS, visible\ multi\ object\ spectrograph
+# (TELESCOPE)
+VISTA, visible\ and\ infrared\ survey\ telescope\ for\ astronomy
+# (TELESCOPE) a radio telescope in New Mexico operated by the National Radio Astronomy Observatory
+VLA, very\ large\ array
+# (TELESCOPE) a radio telescope operated by the National Radio Astronomy Observatory with antennas spread across the United States
+VLBA, very\ long\ baseline\ array
+# (INSTRUMENTATION) combining signals from multiple telescopes/radio antennas that are separated by large distances
+VLBI, very\ long\ baseline\ interferometry
+# (ASTROPHYSICS_TERMINOLOGY) objects (usually stars) that have relatively low masses
+VLM, very\ low\ mass
+# (TELESCOPE) four 8.2 meter telescopes in Chile that operate either independently as individual telescopes or together as an interferometer
+VLT, very\ large\ telescope
+# (SOFTWARE)
+VMO, the\ virtual\ meteor\ observatory\ is\ an\ activity\ of\ the\ international\ meteor\ organisation\ together\ with\ the\ research\ and\ scientific\ support\ department\ of\ the\ european\ space\ agency\ to\ store\ meteor\ data\ from\ observers\ all\ over\ the\ world
+# (SOFTWARE)
+VO, virtual\ observatory
+# (SPACECRAFT) a spacecraft for mapping Venus that was canceled and then superseded by the Magellan spacecraft
+VOIR, venus\ orbiting\ imaging\ radar
+# (SPACECRAFT) an older name for the Magellan spacecraft
+VRM, venus\ radar\ mapper
+# (ORGANIZATION)
+VSOLJ, variable\ star\ observers\ league\ in\ japan
+# (ORGANIZATION) a project to use both satellites and ground-based radio telescopes as an interferometer
+VSOP, vlbi\ space\ observatory\ program
+# (TELESCOPE)
+VST, vlt\ survey\ telescope
+# (OBSERVING_PROGRAM)
+VVDS, vimos\ vlt\ deep\ survey
+# (CELESTIAL_OBJECT)
+WD, white\ dwarf
+# (ASTROPHYSICS_TERMINOLOGY) any model for structure formation in the universe that characterizes &quot;hot&quot; particles such as neutrinos as dark matter
+WDM, warm\ dark\ matter
+# (CATALOG) a catalog of double stars
+WDS, washington\ double\ star
+# (ORGANIZATION) a network of observers across the Earth who work together to perform continuous observations of blazars
+WEBT, whole\ earth\ blazar\ telescope
+# (ORGANIZATION) a network of astronomers spread across the Earth who work together to perform continuous observations of variable stars
+WET, whole\ earth\ telescope
+# (INSTRUMENTATION) a camera on the United Kingdom Infrared Telescope
+WFCAM, wide\ field\ camera
+# (INSTRUMENTATION) proposed instrument for the Gemini telescopes
+WFMOS, wide\ field\ multi\ object\ spectrograph
+# (INSTRUMENTATION) a camera formerly on the WFPC2
+WFPC, wide\ field\ and\ planetary\ camera
+# (INSTRUMENTATION) a camera on the Hubble Space Telescope
+WFPC2, wide\ field\ and\ planetary\ camera\ 2
+# (INSTRUMENTATION) one of the detectors in the Advanced Camera for Surveys on the Hubble Space Telescope
+WFC, wide\ field\ channel
+# (ORGANIZATION)
+WGPSN, working\ group\ for\ planetary\ system\ nomenclature
+# (TELESCOPE)
+WHT, william\ herschel\ telescope
+# (CELESTIAL_OBJECT) a hypothetical subatomic particle that may comprise most of the dark matter in the universe
+WIMP, weakly\ interacting\ massive\ particle
+# (SOFTWARE)
+WISARD, web\ interface\ for\ searching\ archival\ research\ data
+# (OBSERVING_PROGRAM)
+WISE, wide\ field\ infrared\ survey\ explorer
+# (TELESCOPE) the name of a telescope at Kitt Peak operated by the University of Wisconsin–Madison, Indiana University, Yale University, and the National Optical Astronomy Observatory
+WIYN, wisconsin\ indiana\ yale\ noao
+# (CELESTIAL_OBJECT) a nearby dwarf galaxy in the constellation Cetus
+WLM, wolf\ lundmark\ melotte
+# (TELESCOPE) a space telescope used to study the cosmic microwave background radiation
+WMAP, wilkinson\ microwave\ anisotrophy\ probe
+# (CELESTIAL_OBJECT) a type of hot, luminous star with strong stellar winds
+WR, wolf\ rayet
+# (TELESCOPE)
+WSRT, an\ aperture\ synthesis\ interferometer\ that\ consists\ of\ a\ linear\ array\ of\ 14\ antennas
+# (CELESTIAL_OBJECT) a type of young star with weak spectral line emission
+WTTS, weak\ line\ t\ tauri\ star
+# (OBSERVING_PROGRAM)
+XCS, xmm\ cluster\ survey
+# (TELESCOPE) part of the name of the XMM-Newton X-ray space telescope
+XMM, x\ ray\ multi\ mirror
+# (CELESTIAL_OBJECT)
+XN, x\ ray\ nova
+# (CELESTIAL_OBJECT)
+XRF, x\ ray\ flash
+# (CELESTIAL_OBJECT)
+YSG, yellow\ super\ giant\ star
+# (CELESTIAL_OBJECT)
+YSO, young\ stellar\ object
+# (CELESTIAL_OBJECT) horizontal branch stars that have just begun burning helium in their cores and hydrogen in a shell around the cores
+ZAHB, quot\ zero\ age\ quot\ horizontal\ branch
+# (CELESTIAL_OBJECT) a star that has just become a main-sequence star (i.e. a star that has begun burning hydrogen in its core)
+ZAMS, zero\ age\ main\ sequence
+# (CELESTIAL_OBJECT) a class of eruptive binary star system Z Andromedae, the archetype for the class
+ZAND, z\ andromedae
+# (INSTRUMENTATION) a dark matter detector
+ZEPLIN, zoned\ proportional\ scintillation\ in\ liquid\ noble\ gases
+# (ASTROPHYSICS_TERMINOLOGY) the maximum number of meteors per hour that may be observed during a meteor shower
+ZHR, zenith\ hourly\ rate
+# A list of acronyms that ADS curates independently of Wikipedia
+# They are useful to deal with some normalization of the input
+# stream which would otherwise require regular expressions
+#
+# AA 12/14/2012
+
+# first we start with classes of stars
+o\ star, ostar, o\ stars, ostars
+b\ star, bstar, b\ stars, bstars
+a\ star, astar, a\ stars, astars
+f\ star, fstar, f\ stars, fstars
+g\ star, gstar, g\ stars, gstars
+k\ star, kstar, k\ stars, kstars
+m\ star, mstar, m\ stars, mstars
+s\ star, sstar, s\ stars, sstars
+l\ star, lstar, l\ stars, lstars
+t\ star, tstar, t\ stars, tstars
+be\ star, bestar, be\ stars, bestars
+
+# common constellations
+cas, cassiopeiae
+cen, centaurus
+cyg, cygnus
+her, hercules
+per, perseus
+sgr, sagittarius
+tau, taurus
+vir, virgo
+
+# main stars in popular constellations
+cas\ a, casa, cassiopeiae\ a
+cen\ a, cena, centaurus\ a
+cyg\ a, cyga, cygnus\ a
+her\ a, hera, hercules\ a
+per\ a, pera, perseus\ a
+sgr\ a, sgra, sagittarius\ a
+tau\ a, taua, taurus\ a
+vir\ a, vira, virgo\ a
+auriga\ a, aurigaa
+fornax\ a, fornaxa
+hydra\ a, hydraa
+leo\ a, leoa
+orion\ a, oriona
+pictor\ a, pictora
+puppis\ a, puppisa
+
+# common compound words
+h\ alpha, halpha
+h\ beta, hbeta
+infra\ red, infrared
+red\ shift, redshift, red\ shifts, redshifts
+x\ ray, xray, x\ rays, xrays
+gamma\ ray, gammaray, gamma\ rays, gammarays
+s\ z, sunyaev\ zeldovich
+shoemaker\ levy\ 9, sl9
+1987\ a, 1987a
+rs\ canum\ venaticorum, rs\ can\ ven, rs\ cvn

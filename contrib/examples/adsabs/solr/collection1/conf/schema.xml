@@ -335,8 +335,14 @@
 			patterns? -->
 		<fieldType name="ads_text" class="solr.TextField">
 			<analyzer type="index">
-				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(X|GAMMA)(-| +)RAY(S?)\b" replacement="$1-RAY$3" />
+                <charFilter class="solr.PatternReplaceCharFilterFactory" 
+                    pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3 M$3" />
+                <charFilter class="solr.PatternReplaceCharFilterFactory" 
+                    pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3 A$3" />
+                <charFilter class="solr.PatternReplaceCharFilterFactory" 
+                    pattern="\b(?i:(N|NGC)(-|\s+)([0-9]+[A-Z]*))\b" replacement="NGC-$3" />
+                <charFilter class="solr.PatternReplaceCharFilterFactory" 
+                    pattern="\b(?i:([34]CR?|ADS|H[DHR]|IC|[MW]|MKN|NGC|PKS|PSR[BJ]?|SAO|UGC|UT)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3" />
 				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)"
 					group="-1" />
 				<!-- rca: i am not sure i understand, why isn't it: (\s*\-+\s*)+ and 
@@ -364,6 +370,14 @@
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
+				 <charFilter class="solr.PatternReplaceCharFilterFactory" 
+	                pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b" replacement="M$3" />
+	             <charFilter class="solr.PatternReplaceCharFilterFactory" 
+	                pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b" replacement="A$3" />
+	            <charFilter class="solr.PatternReplaceCharFilterFactory" 
+	                pattern="\b(?i:(NGC|N)(-|\s+)([0-9]+[A-Z]*))\b" replacement="NGC$3" />
+	            <charFilter class="solr.PatternReplaceCharFilterFactory" 
+	                pattern="\b(?i:([34]CR?|ADS|H[DHR]|IC|[MW]|MKN|NGC|PKS|PSR[BJ]?|SAO|UGC|UT)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1$3" />
 				<tokenizer class="solr.WhitespaceTokenizerFactory" />
 				<filter class="solr.WordDelimiterFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
@@ -372,7 +386,7 @@
 				<filter
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-					synonyms="ads_text.synonyms" ignoreCase="false" expand="true"
+					synonyms="ads_text_acr.synonyms" ignoreCase="false" expand="true"
 					tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					sanitizeOutput="true" inclOrig="false" />
@@ -777,9 +791,9 @@
 			stored="false" multiValued="true" />
 
 		<!-- MontySolr: Fields where value is fetched from Mongo text -->
-		<field name="full" type="fulltext" indexed="true" stored="true"
+		<field name="full" type="ads_text" indexed="true" stored="true"
 			termVectors="true" termOffsets="true" termPositions="true" />
-		<field name="ack" type="fulltext" indexed="true" stored="true" />
+		<field name="ack" type="ads_text" indexed="true" stored="true" />
 		<field name="reader" type="string" indexed="true" stored="true"
 			multiValued="true" />
 		<field name="cite_read_boost" type="float" indexed="true"
@@ -787,9 +801,12 @@
 		<field name="citation_count" type="int" indexed="true" stored="true" />
 		<field name="read_count" type="float" indexed="true" stored="true" />
 
-		<!-- valud is a JSON string that is stored and used for search result display -->
-		<field name="links" type="string" indexed="false" stored="true"
+		<!-- values are a JSON string that is stored and used for search result display -->
+		<field name="links_data" type="string" indexed="false" stored="true"
 			multiValued="true" />
+		<field name="ids_data" type="string" indexed="false" stored="true"
+			multiValued="true" />
+			
 		<!-- Uncommenting the following will create a "timestamp" field using a 
 			default value of "NOW" to indicate when each document was indexed. -->
 		<field name="indexstamp" type="date" indexed="true" stored="true"

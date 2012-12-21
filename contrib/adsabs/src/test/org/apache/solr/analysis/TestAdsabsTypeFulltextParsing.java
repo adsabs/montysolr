@@ -62,6 +62,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
           "Astrophysics\0Business\0Commons, ABC"
       });
       replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+      replaceInFile(newConfig, "synonyms=\"ads_text_acr.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 
 
 

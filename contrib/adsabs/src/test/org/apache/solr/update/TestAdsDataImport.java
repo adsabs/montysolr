@@ -527,10 +527,10 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		// becomes: (((abstract:sky abstract:nosky)^1.3) | ((author:no-sky, author:no-sky,*)^2.0) | ((title:sky title:nosky)^1.4) | ((full:No-Sky full:Sky full:NoSky)^0.7) | keyword:no-sky^1.4 | keyword_norm:no-sky^1.4 | (all:sky all:nosky))
 		//dumpDoc(null, "bibdoc", "abstract", "author", "title", "full", "keyword", "keyword_norm", "all");
 		//assertQ(req("q", "No-Sky AND bibcode:2012AJ....144..19XX", "debugQuery", "true"), "//*[@numFound='3']");
-		assertQ(req("q", "No-Sky", "fl", "title,recid"), "//*[@numFound='2']"); // abstract copied to all
+		assertQ(req("q", "No-Sky", "fl", "title,recid"), "//*[@numFound='3']"); // abstract copied to all
 		assertQ(req("q", "hydrodynamics"), "//*[@numFound='1']"); // keywords copied to all
 		assertQ(req("q", "Barabási"), "//*[@numFound='1']"); // unfielded search goes to "author"
-		assertQ(req("q", "NASA"), "//*[@numFound='2']"); // affiliations copied to all
+		assertQ(req("q", "NASA"), "//*[@numFound='4']"); // affiliations copied to all
 		
 		/*
 		 * Cites/refersto queries (use special dummy records, field 999i)
@@ -649,9 +649,11 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     
     
     /*
-     * links (856 data is generated and stored)
+     * links_data (856 data is generated and stored as JSON for display purposes)
+     * ids_data (035 data is generated and stored as JSON for display purposes)
      */
-    assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links']/str[contains(text(),'MAST')]");
+    assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links_data']/str[contains(text(),'MAST')]");
+    assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='ids_data']/str[contains(text(),'\"alternate_bibcode\":\"2012arXiv1210.5163R\"')]");
     
     
 
