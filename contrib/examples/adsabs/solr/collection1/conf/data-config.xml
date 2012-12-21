@@ -226,6 +226,12 @@
         <field column="cite_read_boost" mongoField="true" />
         <field column="citation_count" mongoField="true" />
         <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
+        <field column="grants" mongoField="true" />
+        
+        <!-- following two fields are not represented in the schema.
+             They are loaded from mongo only for the purpose of generating hierarchical facet -->
+        <field column="grant_agencies" mongoField="true" />
+        <field column="grant_ids" mongoField="true" />
         
         <!-- 
             Fields marked as facetHierarchyField will be processed by the FacetHierarchyTransformer.
@@ -237,6 +243,7 @@
          -->
         <field facetHierarchyField="true" column="author_facet_hier" fields="a_100_norm+a_700_norm,a_100+a_700" multiValuedSource="true" />
         <field facetHierarchyField="true" column="first_author_facet_hier" fields="a_100_norm,a_100" multiValuedSource="true" />
+        <field facetHierarchyField="true" column="grant_facet_hier" fields="grant_agencies,grant_ids" multiValuedSource="true" />
         
         <field column="links" xpath="/collection/record/linkfield"/>
         </entity>
