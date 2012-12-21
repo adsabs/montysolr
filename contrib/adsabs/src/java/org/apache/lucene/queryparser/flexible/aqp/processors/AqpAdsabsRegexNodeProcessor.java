@@ -80,7 +80,8 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 	String  regexMarker =
 		"(?<!\\\\)" + // negative lookbehind
 		"(" +
-			"(\\[|\\^|\\&|\\||\\{)" + // characters whose presence means regex
+//			"(\\[|\\^|\\&|\\||\\{)" + // characters whose presence means regex
+			"(\\[|\\^|\\||\\{)" + // characters whose presence means regex
 			"|" + "(\\\\b|\\\\B|\\\\A|\\\\G|\\\\Z|\\\\z)" +
 			"|" + "(\\\\d|\\\\D|\\\\s|\\\\S|\\\\w|\\\\W)" + // predefined char classes
 			"|" + "\\\\p\\{" + // character classes

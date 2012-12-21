@@ -461,6 +461,9 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "identifier:2002RvMP...74...47A"),  
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='5979890']");
+//		assertQ(req("q", "identifier:2011A&A...536A..89G"),
+//		"//*[@numFound='1']",
+//		"//doc/int[@name='recid'][.='9218541']");
 		
 		
 		/*
