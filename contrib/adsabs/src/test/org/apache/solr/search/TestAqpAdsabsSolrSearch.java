@@ -219,6 +219,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but"), 
 				"((all:dog) (all:cat)) title:bat pub:but", BooleanQuery.class);
 		
+		assertQueryEquals(req("qt", "aqp", "q", "identifier:2011A&A...536A..89G"), 
+        "identifier:2011a&a...536a..89g", TermQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "identifier:2011A&A" + "\u2026" + "536A..89G"), 
+        "identifier:2011a&a...536a..89g", TermQuery.class);
+		
 		
 		
 		/*
