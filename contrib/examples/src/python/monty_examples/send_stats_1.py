@@ -23,7 +23,10 @@ def run(workdir, solrurl, user, passw, spreadsheet):
    
    stats = jsondata['solr-mbeans'][3]['/invenio/import']['stats']
    
+   jsonpage = urllib.urlopen('%s/admin/cores?wt=json' % solrurl)
+   jsondata = simplejson.load(jsonpage)
    
+   core_stat = jsondata['status'][jsondata['defaultCoreName']]
    
    sf = ('Total Documents Processed', 'totalTime')
    
@@ -50,16 +53,16 @@ def run(workdir, solrurl, user, passw, spreadsheet):
    
    out.append(git_commit)
    
+   out.append('%s' % core_stat['index']['sizeInBytes'])
+   out.append('%s' % core_stat['index']['size'])
    
    data.append('|'.join(out))
    data.append('')
    
+   tmpl = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet %s --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit,IndexSizeBytes,IndexSize --data "%s"'''
+   cmd = tmpl % (sys.executable, ourdir, user, passw, spreadsheet, ','.join(data))
    
-   cmd = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet %s --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
-         % (sys.executable, ourdir, user, passw, spreadsheet, ','.join(data))
-   
-   print '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet %s --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit --data "%s"''' \
-         % (sys.executable, ourdir, user, '<passw>', spreadsheet, ','.join(data))
+   print tmpl % (sys.executable, ourdir, user, '<passw>', spreadsheet, ','.join(data))
    os.system(cmd)
 
 
