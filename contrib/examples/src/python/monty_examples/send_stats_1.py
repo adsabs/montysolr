@@ -43,7 +43,7 @@ def run(workdir, solrurl, user, passw, spreadsheet):
    
    
    out[-1] = out[-1][0:-3] # remove milliseconds
-   out.append(str(int(out[1])/int(out[2]))) # compute docs per sec
+   out.append(str(int(out[1] or '0')/max(1, int(out[2] or '0')))) # compute docs per sec
               
    
    if os.path.exists(os.path.join(workdir, 'GIT_COMMIT')):
@@ -55,11 +55,12 @@ def run(workdir, solrurl, user, passw, spreadsheet):
    
    out.append('%s' % core_stat['index']['sizeInBytes'])
    out.append('%s' % core_stat['index']['size'])
+   out.append('%s' % core_stat['index']['numDocs'])
    
    data.append('|'.join(out))
    data.append('')
    
-   tmpl = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet %s --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit,IndexSizeBytes,IndexSize --data "%s"'''
+   tmpl = '''%s %s/gd_add_row.py --user %s --password %s --spreadsheet %s --keys IndexingDate,TotalDocs,TotalSecs,DocsPerSec,GitCommit,IndexSizeBytes,IndexSize,NumDocs --data "%s"'''
    cmd = tmpl % (sys.executable, ourdir, user, passw, spreadsheet, ','.join(data))
    
    print tmpl % (sys.executable, ourdir, user, '<passw>', spreadsheet, ','.join(data))
