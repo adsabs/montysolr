@@ -269,7 +269,7 @@ def get_citation_dict(dictname):
     return bcs.get_citation_dict(dictname)
 
 
-def create_collection_bibrec(table_name, coll_name, step_size=10000):
+def create_collection_bibrec(table_name, coll_name, step_size=10000, max_size=-1):
     if table_name[0] != '_':
         raise Exception("By convention, temporary tables must begin with '_'. I don't want to give you tools to screw st important")
     
@@ -284,6 +284,8 @@ def create_collection_bibrec(table_name, coll_name, step_size=10000):
     
     c = list(c)
     l = len(c)
+    if max_size > 0:
+        l = max_size
     i = 0
     sys.stderr.write("Copying bibrec data, patience please...\n")
     while i < l:
@@ -292,7 +294,7 @@ def create_collection_bibrec(table_name, coll_name, step_size=10000):
         i = i + step_size
         #sys.stderr.write("%s\n" % i)
         
-    sys.stderr.write("Total number of records: %s\n" % l)
+    sys.stderr.write("Total number of records: %s Copied: %s\n" % (len(c), min(l, len(c))))
     
 
 

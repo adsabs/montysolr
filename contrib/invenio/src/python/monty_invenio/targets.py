@@ -173,10 +173,18 @@ def get_astro_changes(message):
         #last_recid = int(Integer.cast_(message.getParam("last_recid")).intValue())
         last_recid = int(str(message.getParam("last_recid")))
         if last_recid == -1:
-            api_calls.dispatch("create_collection_bibrec", "_astro_bibrec", "Astronomy")
+            if message.getParam("max_size"):
+                max_size = int(str(message.getParam("max_size")))
+                api_calls.dispatch("create_collection_bibrec", "_astro_bibrec", "Astronomy", max_size=max_size)
+            else:
+                api_calls.dispatch("create_collection_bibrec", "_astro_bibrec", "Astronomy")
     message.setParam("table", "_astro_bibrec")
     get_recids_changes(message)
-    
+
+def get_astro_changes_short(message):
+    """This is a special hack to retrieve only astro papers - short version"""
+    message.setParam("max_size", "100000")
+    get_astro_changes(message)    
 
 def get_citation_dict(message):
     '''TODO: unittest'''
@@ -320,6 +328,7 @@ def montysolr_targets():
            'InvenioFormatter:format_search_results', format_search_results,
            'InvenioKeepRecidUpdated:get_recids_changes', get_recids_changes,
            'InvenioKeepRecidUpdated:get_astro_changes', get_astro_changes,
+           'InvenioKeepRecidUpdated:get_astro_changes_short', get_astro_changes_short,
            'InvenioFormatter:sort_and_format', sort_and_format,
            'Invenio:diagnostic_test', diagnostic_test,
            '*:invenio_search', invenio_search,
