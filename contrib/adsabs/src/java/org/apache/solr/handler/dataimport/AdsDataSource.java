@@ -1,19 +1,20 @@
 package org.apache.solr.handler.dataimport;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.solr.schema.IndexSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.MongoURI;
-
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.ServerAddress;
+import com.mongodb.DBCollection;
 
 /**
  * {@link AdsDataSource} makes sure that the MongoDB is initialized
@@ -48,27 +49,37 @@ public class AdsDataSource extends InvenioDataSource {
 	private String mongoCollectionName;
 	private String mongoDocIdField;
 	private String mongoHost;
-	private String mongoPort;
+	private int mongoPort;
 	
 	private List<FacetHierarchy> facetHierarchies;
 	
 	private JdbcDataSource jdbc;
 	private BasicDBObject mongoFields;
 	private Map<String,String> fieldColumnMap;
+	private MongoClient mongo;
+	private DBCollection docs;
 	
 	@Override
 	public void init(Context context, Properties initProps) {
 		super.init(context, initProps);
-		initMongoFields(context, initProps);
+		initMongo(context, initProps);
 		initFacetHierarchies(context, initProps);
 	}
 	
-	private void initMongoFields(Context context, Properties initProps) {
+	private void initMongo(Context context, Properties initProps) {
 		mongoDocIdField = initProps.getProperty(MONGO_DOC_ID);
 		mongoHost = initProps.getProperty(MONGO_HOST);
-		mongoPort = initProps.getProperty(MONGO_PORT);
+		mongoPort = Integer.parseInt(initProps.getProperty(MONGO_PORT));
 		mongoDBName = initProps.getProperty(MONGO_DB_NAME);
 		mongoCollectionName = initProps.getProperty(MONGO_COLLECTION_NAME);
+		
+		try {
+			mongo = new MongoClient(new ServerAddress(mongoHost, mongoPort));
+			docs = mongo.getDB(mongoDBName).getCollection(mongoCollectionName);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		List<Map<String, String>> fields = context.getAllEntityFields();
 		
@@ -116,14 +127,11 @@ public class AdsDataSource extends InvenioDataSource {
 		}
 	}
 	
-  public void destroy() {
-    System.out.println("destroy" + Thread.currentThread());
-  }
-	
 	@Override
-  public void close() {
-    super.close();
-  }
+	public void close() {
+		super.close();
+		mongo.close();
+	}
 	
 	public List<FacetHierarchy> getFacetHierarchies() {
 		return facetHierarchies;
@@ -133,20 +141,10 @@ public class AdsDataSource extends InvenioDataSource {
 		return fieldColumnMap;
 	}
 
-	public BasicDBObject getMongoFields() {
-		return mongoFields;
-	}
-	
-	public MongoURI getMongoURI() {
-		return new MongoURI("mongodb://" + mongoHost + ":" + mongoPort);
-	}
-	
-	public String getMongoDBName() {
-		return mongoDBName;
-	}
-	
-	public String getMongoCollectionName() {
-		return mongoCollectionName;
+	public DBObject getMongoDoc(String docId) {
+		BasicDBObject query = new BasicDBObject();
+		query.put(mongoDocIdField, docId);
+		return docs.findOne(query, mongoFields);
 	}
 	
 	public String getMongoDocIdField() {
