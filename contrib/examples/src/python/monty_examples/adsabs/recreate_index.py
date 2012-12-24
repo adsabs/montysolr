@@ -104,19 +104,25 @@ def recreate_index(solr_url,
         
         recs = recs + batchsize
         
-        log.info('Indexing (round/recs/last-round-ms/total-s): %s./%s/%s/%ss' 
-                 % (round, recs, time.time() - last_round, (time.time()-start) / 1000))
+        log.info('Indexing (round/recs/last-round-s/total-s/avg-recs-per-sec): %s./%s/%.3f/%.3f/%.3f' 
+                 % (round, recs, time.time() - last_round, time.time()-start, recs/(time.time()-start)))
         
         last_round = time.time()
-        req(doctor_url, command="start") # just make sure the doctor is running
+        #req(doctor_url, command="start") # just make sure the doctor is running
             
         
     log.info('Stopped at round: %s, total time: %s' % (round, time.time() - start))
     
-    req(doctor_url, command="stop")
-    time.sleep(delay)
+    req(doctor_url, command="start")
+    while (now - start) < max_time:
+        rsp = req(doctor_url, command="info")
+        if rsp['status'] != 'busy':
+            break
+        now = time.time()
+        time.sleep(delay)
+        
     rsp = req(doctor_url, command="detailed-info")
-    
+    log.info("Indexing finished, here is status info from: %s" % doctor_url)
     log.info(repr(rsp))
     
     
