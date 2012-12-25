@@ -13,7 +13,7 @@ import org.junit.BeforeClass;
 import examples.BlackAbstractTestCase;
 
 
-public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
+public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase{
 	
 	@BeforeClass
 	public static void beforeBlackBoxAdslabsIndexing() throws Exception {
@@ -92,6 +92,6 @@ public class BlackBoxAdslabsIndexing extends BlackAbstractTestCase{
 	
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
-        return new junit.framework.JUnit4TestAdapter(BlackBoxAdslabsIndexing.class);
+        return new junit.framework.JUnit4TestAdapter(BlackBoxAdslabsDeploymentVerification.class);
     }
 }
