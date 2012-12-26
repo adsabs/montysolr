@@ -277,8 +277,11 @@ def create_collection_bibrec(table_name, coll_name, step_size=10000, max_size=-1
     dbquery.run_sql("DROP TABLE IF EXISTS `%s`" % dbquery.real_escape_string(table_name))
     dbquery.run_sql(create_stmt)
     
-    #now retrieve the collection
+    # now retrieve the collection
     c = search_engine.get_collection_reclist(coll_name)
+    # reverse sort it
+    c = sorted(c, reverse=True)
+    
     if len(c) < 0:
         sys.stderr.write("The collection %s is empty!\n" % coll_name)
     
@@ -291,7 +294,7 @@ def create_collection_bibrec(table_name, coll_name, step_size=10000, max_size=-1
     while i < l:
         dbquery.run_sql("INSERT INTO `%s` SELECT * FROM `bibrec` WHERE bibrec.id IN (%s)" % 
                              (dbquery.real_escape_string(table_name), ','.join(map(str, c[i:i+step_size]))))
-        i = i + step_size
+        i = i + len(c[i:i+step_size])
         #sys.stderr.write("%s\n" % i)
         
     sys.stderr.write("Total number of records: %s Copied: %s\n" % (len(c), min(l, len(c))))
