@@ -64,8 +64,6 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
       replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
       replaceInFile(newConfig, "synonyms=\"ads_text_acr.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 
-
-
     } catch (IOException e) {
       e.printStackTrace();
       throw new IllegalStateException(e.getMessage());

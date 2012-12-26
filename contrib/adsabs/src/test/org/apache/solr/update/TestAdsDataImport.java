@@ -36,6 +36,8 @@ import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 import org.adsabs.solr.AdsConfig.F;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field; 
 import java.util.Map;
 
@@ -46,7 +48,7 @@ import java.util.Map;
  */
 public class TestAdsDataImport extends MontySolrQueryTestCase {
 	
-	
+
 	@BeforeClass
 	public static void beforeTestAdsDataImport() throws Exception {
 		// to use filesystem instead of ram
@@ -63,14 +65,37 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
 	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
 	    	});
-		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+		
+		String configFile = MontySolrSetup.getMontySolrHome()
+      + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+		
+		return configFile;
 	}
 
 	@Override
 	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+		
+    String configFile = MontySolrSetup.getMontySolrHome()
+    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+    String dataConfig = MontySolrSetup.getMontySolrHome()
+    + "/contrib/examples/adsabs/solr/collection1/conf/data-config.xml";
+  
+    File newConfig;
+    File newDataConfig;
+    try {
+      
+      newConfig = duplicateFile(new File(configFile));
+      newDataConfig = duplicateFile(new File(dataConfig));
+  
+      replaceInFile(newDataConfig, "mongoHost=\"adszee\"", "mongoHost=\"localhost\"");
+      replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
+  
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalStateException(e.getMessage());
+    }
+  
+    return newConfig.getAbsolutePath();
 	}
 
 
@@ -155,7 +180,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		
 		commit("waitFlush", "true", "waitSearcher", "true");
 		
-		
+		dumpDoc(null);
 		
 		req = req("command", "full-import",
         "dirs", testDir,
