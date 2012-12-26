@@ -173,20 +173,6 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 				fldMap.add(f);
 			}
 			
-			System.out.println("INDEXED FIELDS: " + dd);
-			Map<String, GrowableStringArray> rf = d.getReconstructedFields();
-			for (Entry<String, GrowableStringArray> es : rf.entrySet()) {
-				String fld = es.getKey();
-				if (fldMap.size() > 0 && !fldMap.contains(fld)) {
-					continue;
-				}
-				System.out.println(fld);
-				System.out.println(docToString(es.getValue(), "\n"));
-				
-			}
-			
-			//if (true) continue;
-			
 			System.out.println("STORED FIELDS: " + dd);
 			Map<String, IndexableField[]> sf = d.getStoredFields();
 			for (Entry<String, IndexableField[]> es : sf.entrySet()) {
@@ -194,7 +180,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 				if (fldMap.size() > 0 && !fldMap.contains(fld)) {
 					continue;
 				}
-				System.out.println(fld);
+				System.out.println("field="+fld);
 				IndexableField[] val = es.getValue();
 				int j=0;
 				for (IndexableField v : val) {
@@ -202,6 +188,22 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 					j++;
 				}
 			}
+
+      //if (true) continue;
+			
+			System.out.println("INDEXED FIELDS: " + dd);
+      Map<String, GrowableStringArray> rf = d.getReconstructedFields();
+      for (Entry<String, GrowableStringArray> es : rf.entrySet()) {
+        String fld = es.getKey();
+        if (fldMap.size() > 0 && !fldMap.contains(fld)) {
+          continue;
+        }
+        System.out.println(fld);
+        System.out.println(docToString(es.getValue(), "\n"));
+        
+      }
+      
+
 		}
 		sr.close();
 	}
