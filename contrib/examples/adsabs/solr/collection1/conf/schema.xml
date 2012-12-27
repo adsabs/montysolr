@@ -756,6 +756,8 @@
 			stored="true" omitNorms="true" multiValued="true" />
 		<field name="bibgroup" type="normalized_string_ascii" indexed="true"
 			stored="true" omitNorms="true" multiValued="true" />
+		<field name="bibgroup_facet" type="string" indexed="true"
+			stored="${storeAll:false}" omitNorms="true" multiValued="true" />
 
 		<field name="thesis" type="affiliation_text" indexed="true"
 			stored="true" />
@@ -854,7 +856,7 @@
 
 	<copyField source="keyword_norm" dest="keyword" />
 	<copyField source="keyword_norm" dest="keyword_facet" />
-
+    <copyField source="bibgroup" dest="bibgroup_facet" />
 
 	<copyField source="a_100" dest="author" />
 	<copyField source="a_700" dest="author" />

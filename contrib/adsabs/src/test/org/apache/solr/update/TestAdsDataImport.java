@@ -332,6 +332,8 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		
 		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='3']");
 		assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='3']");
+		assertQ(req("q", "bibgroup_facet:CfA"), "//*[@numFound='3']");
+		assertQ(req("q", "bibgroup_facet:cfa"), "//*[@numFound='0']");
 		
 		assertQ(req("q", "bibgroup:cf*"), "//*[@numFound='3']");
 		assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='3']");
