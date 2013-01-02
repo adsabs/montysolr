@@ -59,16 +59,19 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     
     ParsedArgs pargs = new ParsedArgs(params);
     SolrQueryResponse rsp = new SolrQueryResponse();
+    SolrQueryRequest r = null;
     
     if (processedIds.size()==0 ) { // we didn't even get past the first document
       if (pargs.ids.size() == 1) {
         // we'll report only if the recid contains one doc
+        r = req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString());
         core.execute(backupHandler, req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString()), rsp);
       }
       else {
         // but likely, the first failed is erroneous, so let's create three batches
-        core.execute(backupHandler, req("command", "register-new-batch", 
-            "url", pargs.getUrl(new int[]{pargs.ids.get(0)})), rsp);
+        r = req("command", "register-new-batch", 
+            "url", pargs.getUrl(new int[]{pargs.ids.get(0)}));
+        core.execute(backupHandler, r, rsp);
         pargs.ids.remove(0);
         callProcessingAgain(pargs);
       }
@@ -76,21 +79,29 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     else { // we have to call indexing again
       removeProcessed(pargs.ids);
       if (pargs.ids.size()==0) {
-        core.execute(backupHandler, req("command", "register-failed-batch", "recid", pargs.origUrl), rsp);
+        r = req("command", "register-failed-batch", "recid", pargs.origUrl);
+        core.execute(backupHandler, r, rsp);
       }
       else if (pargs.ids.size()==1) { // the last doc is erroneous
-        core.execute(backupHandler, req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString()), rsp);
+        r = req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString());
+        core.execute(backupHandler, r, rsp);
       }
       else {
         // but likely, the first failed is erroneous, so let's create three batches
-        core.execute(backupHandler, req("command", "register-new-batch", 
-            "url", pargs.getUrl(new int[]{pargs.ids.get(0)})), rsp);
+        r = req("command", "register-new-batch", 
+            "url", pargs.getUrl(new int[]{pargs.ids.get(0)}));
+        core.execute(backupHandler, r, rsp);
         pargs.ids.remove(0);
         callProcessingAgain(pargs);
       }
+      
     }
     
+    
     log.error("Rollback was called (but we ignore it and commit)!");
+    if (r!= null) {
+      log.error("We also called " + backupHandler.getName() + " with params: " + r.getParamString());
+    }
     commit(false); // anything bad happens if we don't call commit?
   }
   
