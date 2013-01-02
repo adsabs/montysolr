@@ -2,7 +2,9 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+import org.apache.lucene.queryparser.flexible.aqp.ADSEscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
@@ -18,7 +20,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.PathQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
@@ -42,6 +43,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQuer
 public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
   
+  ADSEscapeQuerySyntaxImpl escaper = new ADSEscapeQuerySyntaxImpl();
   
 	@Override
 	protected QueryNode postProcessNode(QueryNode node)
@@ -68,9 +70,13 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	      funcName = "edismax_nonanalyzed";
 	    }
 	    else {
+	      //subQuery = "\"" + subQuery + "\"";
+	      
+	      subQuery = (String) escaper.escape(subQuery, Locale.getDefault(), EscapeQuerySyntax.Type.NORMAL);
   	    if (subQuery.contains(" ")) {
   	      subQuery = "\"" + subQuery + "\"";
   	    }
+  	    
 	    }
 	    node.setTag("subQuery", subQuery);
 	    

@@ -66,8 +66,8 @@ public class AqpAdsabsQParser extends QParser {
 		// now configure the parser using the arguments given in config
 		// and also in the request
 		
-		
 		QueryConfigHandler config = qParser.getQueryConfigHandler();
+		
 		
 		
 		AdsConfigHandler extra = (AdsConfigHandler) req.getCore().getRequestHandler(adsConfigName);
@@ -193,6 +193,10 @@ public class AqpAdsabsQParser extends QParser {
 
 	public Query parse() throws ParseException {
 		try {
+		  if (qstr.trim().endsWith(",") && !qstr.trim().endsWith("\\,")) {
+		    QueryConfigHandler config = qParser.getQueryConfigHandler();
+		    return qParser.parse(getString() + config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE), null);
+		  }
 			return qParser.parse(getString(), null);
 		} catch (QueryNodeException e) {
 			throw new ParseException(e.getLocalizedMessage());

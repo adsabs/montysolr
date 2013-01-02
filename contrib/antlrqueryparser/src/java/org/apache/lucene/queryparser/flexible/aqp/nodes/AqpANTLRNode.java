@@ -1,7 +1,10 @@
 package org.apache.lucene.queryparser.flexible.aqp.nodes;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.runtime.CommonToken;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
@@ -175,6 +178,16 @@ public class AqpANTLRNode extends QueryNodeImpl {
 		return tree;
 	}
 	
+	public int getInputTokenStart() {
+    return ((CommonToken) tree.getToken()).getCharPositionInLine();//getStartIndex();
+  }
+  
+  public int getInputTokenEnd() {
+    return ((CommonToken) tree.getToken()).getStopIndex();
+  }
+  
+  
+	
 	public AqpANTLRNode getChild(String tokenLabel) {
 		List<QueryNode> children = getChildren();
 		if (children!=null) {
@@ -189,7 +202,34 @@ public class AqpANTLRNode extends QueryNodeImpl {
 		return null;
 	}
 	
-	public Float getTokenInputFloat() {
+	public AqpANTLRNode findChild(String tokenLabel) {
+	  ArrayList<QueryNode> lst = new ArrayList<QueryNode>();
+	  findChild(this, tokenLabel, lst);
+	  
+    if (lst.size() == 1) {
+      return (AqpANTLRNode) lst.get(0);
+    }
+    else if (lst.size() > 1) {
+      throw new RuntimeException("This method is not meant to search for n>1 nodes");
+    }
+    return null;
+  }
+	
+	private void findChild(QueryNode node, String tokenLabel, ArrayList<QueryNode> lst) {
+    if (((AqpANTLRNode) node).getTokenLabel().equals(tokenLabel)) {
+      lst.add(node);
+    }
+    else {
+      if (!node.isLeaf()) {
+        for (QueryNode child: node.getChildren()) {
+          findChild(child, tokenLabel, lst);
+        }
+      }
+    }
+  }
+
+
+  public Float getTokenInputFloat() {
 		if (this.tokenInput!=null) {
 			return Float.valueOf(this.tokenInput);
 		}

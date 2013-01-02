@@ -238,13 +238,11 @@ public class AqpAdsabsSubQueryProvider implements
       }
     }.configure(false)); // not analyzed
 		parsers.put("edismax_combined_aqp", new AqpSubqueryParserFull() { // will decide whether new aqp() parse is needed
-		  private FunctionQParser fParser;
       public Query parse(FunctionQParser fp) throws ParseException {
         final String original = fp.getString();
         QParser eqp = fp.subQuery(original, ExtendedDismaxQParserPlugin.NAME);
         Query q = eqp.getQuery();
-        fParser = fp;
-        return simplify(swimDeep(q));
+        return simplify(reParse(q, fp, null));
       }
       protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
         ArrayList<Query> parts = query.getDisjuncts();
@@ -264,7 +262,7 @@ public class AqpAdsabsSubQueryProvider implements
             }
           }
           if (field!=null) {
-            parts.set(i, reAnalyze(field, fParser.getString(), oldQ.getBoost()));
+            parts.set(i, reAnalyze(field, getParser().getString(), oldQ.getBoost()));
           }
           else {
             parts.set(i, swimDeep(oldQ));
@@ -274,12 +272,17 @@ public class AqpAdsabsSubQueryProvider implements
       }
       
       private String toBeAnalyzedAgain(TermQuery q) {
-        if (q.getTerm().field().equals("author")) {
+        String f = q.getTerm().field();
+        if (f.equals("author")) {
           return "author";
+        }
+        else if(f.equals("abstract")) {
+          return "abstract";
         }
         return null;
       }
       private Query reAnalyze(String field, String value, float boost) throws ParseException {
+        QParser fParser = getParser();
         QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
         Query q = aqp.getQuery();
         q.setBoost(boost);

@@ -2,6 +2,7 @@ package org.apache.lucene.queryparser.flexible.aqp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause;
@@ -14,11 +15,16 @@ import org.apache.solr.search.QParser;
 
 public class AqpSubqueryParserFull extends AqpSubqueryParser {
   
-  
   private QParser parser = null;
   private Class<?>[] qtypes = null;
-
+  private ReentrantLock parsingLock = new ReentrantLock();
   
+  public QParser getParser() {
+    return parser;
+  }
+  public Class[] getQtypes() {
+    return qtypes;
+  }
   
   public Query simplify(Query query) {
     if (query instanceof BooleanQuery) {
@@ -36,10 +42,18 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
   }
   
   public Query reParse(Query query, QParser qp, Class<?>...types) throws ParseException {
-    parser = qp;
-    qtypes = types;
-    swimDeep(query);
-    return query;
+    parsingLock.lock();
+    try {
+      parser = qp;
+      qtypes = types;
+      swimDeep(query);
+      return query;
+    }
+    finally {
+      parser = null;
+      qtypes = null;
+      parsingLock.unlock();
+    }
   }
   
   protected boolean isWanted(Query query) {

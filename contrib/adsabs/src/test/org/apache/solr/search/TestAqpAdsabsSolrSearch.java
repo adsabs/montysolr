@@ -11,6 +11,7 @@ import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 
@@ -86,6 +87,73 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	
 	public void test() throws Exception {
+	  
+	  // author search, unfielded
+	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi,", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(abstract:accomazzi^0.4 | ((author:accomazzi, author:accomazzi,*)^2.3) | title:accomazzi)", 
+        DisjunctionMaxQuery.class);
+	  
+	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi\\,", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(abstract:accomazzi^0.4 | ((author:accomazzi, author:accomazzi,*)^2.3) | title:accomazzi)", 
+        DisjunctionMaxQuery.class);
+	  
+	  assertQueryEquals(req("qt", "aqp", "q", "\"accomazzi\\,\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(abstract:accomazzi^0.4 | ((author:accomazzi, author:accomazzi,*)^2.3) | title:accomazzi)", 
+        DisjunctionMaxQuery.class);
+	  
+	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi,alberto", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(((abstract:accomazzi abstract:alberto abstract:accomazzialberto)^0.4) " +
+        "| ((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)^2.3) " +
+        "| (title:accomazzi title:alberto title:accomazzialberto))", 
+        DisjunctionMaxQuery.class);
+	  
+	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi, alberto", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(((abstract:accomazzi abstract:alberto abstract:accomazzialberto)^0.4) " +
+        "| ((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)^2.3) " +
+        "| (title:accomazzi title:alberto title:accomazzialberto))", 
+        DisjunctionMaxQuery.class);
+	  
+	  assertQueryEquals(req("qt", "aqp", "q", "\"accomazzi, alberto\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(abstract:\"accomazzi alberto\"^0.4 " +
+        "| ((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)^2.3) " +
+        "| title:\"accomazzi alberto\")", 
+        DisjunctionMaxQuery.class);
+	  
+	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi, alberto, xxx", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(((abstract:accomazzi abstract:alberto abstract:xxx abstract:accomazzialbertoxxx)^0.4) " +
+        "| ((author:accomazzi, alberto, xxx author:accomazzi, alberto, xxx * author:accomazzi, a xxx author:accomazzi, a xxx * author:accomazzi, alberto, x author:accomazzi, alberto, x * author:accomazzi, a x author:accomazzi, a x * author:accomazzi, alberto, author:accomazzi, a author:accomazzi,)^2.3) " +
+        "| (title:accomazzi title:alberto title:xxx title:accomazzialbertoxxx))", 
+        DisjunctionMaxQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "\"accomazzi, alberto, xxx.\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(abstract:\"accomazzi alberto xxx\"^0.4 " +
+        "| ((author:accomazzi, alberto, xxx author:accomazzi, alberto, xxx * author:accomazzi, a xxx author:accomazzi, a xxx * author:accomazzi, alberto, x author:accomazzi, alberto, x * author:accomazzi, a x author:accomazzi, a x * author:accomazzi, alberto, author:accomazzi, a author:accomazzi,)^2.3) " +
+        "| title:\"accomazzi alberto xxx\")", 
+        DisjunctionMaxQuery.class);
+    
+    // now some esoteric cases of the comma parsing
+    assertQueryEquals(req("qt", "aqp", "q", "abstract:\"accomazzi, alberto\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "abstract:\"accomazzi alberto\"", 
+        PhraseQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "abstract:accomazzi, alberto", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "abstract:accomazzi abstract:alberto abstract:accomazzialberto", 
+        BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "author:accomazzi, alberto", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,", 
+        BooleanQuery.class);
 		
 		/*
 		 * Unfielded search should be expanded automatically by edismax

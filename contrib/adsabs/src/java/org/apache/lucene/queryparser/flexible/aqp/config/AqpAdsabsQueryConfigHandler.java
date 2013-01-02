@@ -40,6 +40,8 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 	    
 	    final public static ConfigurationKey<String> UNFIELDED_SEARCH_FIELD = ConfigurationKey.newInstance();
 	    
+	    final public static ConfigurationKey<String> DUMMY_VALUE = ConfigurationKey.newInstance();
+	    
 	}
 	
 	public AqpAdsabsQueryConfigHandler() {
@@ -80,6 +82,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
     
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS, new HashMap<String, int[]>());
-    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, "#$@&@nonexisting");  
+    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, "#$@&@nonexisting");
+    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE, "dummynonexxistingnullvalue");
 	}
 }

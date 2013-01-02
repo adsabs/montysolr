@@ -131,10 +131,4 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 		return terminal.getTokenInput();
 	}
 
-	private QueryNode getTerminalNode(QueryNode node) {
-		while (!node.isLeaf()) {
-			return getTerminalNode(node.getChildren().get(0));
-		}
-		return node;
-	}
 }

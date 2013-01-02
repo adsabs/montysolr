@@ -565,7 +565,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("-m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, true) +(+m:d +m:e)"); //? should we allow - at the beginning?
 		
 		assertQueryEquals("author:(huchra)", null, "author:huchra");
-		assertQueryEquals("author:(huchra, j)", null, "spanNear([author:huchra, author:j], 1, true)");
+		assertQueryEquals("author:(huchra, j)", null, "author:huchra author:j");
 		assertQueryEquals("author:(kurtz; -eichhorn, g)", null, "author:kurtz -spanNear([author:eichhorn, author:g], 1, true)");
 		assertQueryEquals("author:(muench-nashrallah)", wsa, "author:muench-nashrallah");
 		assertQueryEquals("\"dark matter\" OR (dark matter -LHC)", null, "\"dark matter\" dark matter -lhc");
