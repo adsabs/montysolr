@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -31,6 +32,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import monty.solr.jni.MontySolrVM;
+import monty.solr.jni.PythonCall;
+import monty.solr.jni.PythonMessage;
+
+import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCacheDocIdSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
@@ -50,7 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Collections;
 
-public class InvenioImportBackup extends RequestHandlerBase {
+public class InvenioImportBackup extends RequestHandlerBase implements PythonCall {
 
   public static final Logger log = LoggerFactory.getLogger(InvenioImportBackup.class);
 
@@ -58,13 +65,15 @@ public class InvenioImportBackup extends RequestHandlerBase {
 
   private volatile int counter = 0;
   private boolean asynchronous = true;
-  private volatile String workerMessage = "";
+  private volatile StringBuilder workerMessage = new StringBuilder();
   private volatile String tokenMessage = "";
 
   private long sleepTime = 300;
 
   public static String handlerName = "/import";
-
+  private String pythonFunctionName = "get_recids_changes";
+  private String handlerParams = "commit=false&command=full-import&url=";
+  
   class RequestData {
 
     public String url;
@@ -79,6 +88,8 @@ public class InvenioImportBackup extends RequestHandlerBase {
     
     private int countIds(String url) {
       int count = 0;
+      if (url == null) return count;
+      
       String[] urlParts = url.split("\\?");
       if (urlParts.length>1) {
         MultiMapSolrParams q = SolrRequestParsers.parseQueryString(urlParts[1]);
@@ -195,7 +206,7 @@ public class InvenioImportBackup extends RequestHandlerBase {
       }
       return i;
     }
-    
+
   }
 
 
@@ -208,6 +219,14 @@ public class InvenioImportBackup extends RequestHandlerBase {
     NamedList defs = (NamedList) args.get("defaults");
     if (defs.get("handler") != null) {
       handlerName  = (String) defs.get("handler");
+    }
+    
+    if (defs.get("pythonFunctionName") != null) {
+      setPythonFunctionName((String) defs.get("pythonFunctionName"));
+    }
+    
+    if (defs.get("handlerParams") != null) {
+      handlerParams  = ((String) defs.get("handlerParams"));
     }
     
     if (defs.get("sleepTime") != null) {
@@ -247,6 +266,7 @@ public class InvenioImportBackup extends RequestHandlerBase {
         rsp.add("status", "busy");
         return;
       }
+      workerMessage = new StringBuilder();
       setBusy(true);
       if (isAsynchronous()) {
         runAsynchronously(req);
@@ -255,6 +275,9 @@ public class InvenioImportBackup extends RequestHandlerBase {
         runSynchronously(queue, req);
         setBusy(false);
       }
+    }
+    else if(command.equals("discover")) {
+      queue.registerNewBatch("discover");
     }
     else {
       rsp.add("message", "Unknown command: " + command);
@@ -328,7 +351,7 @@ public class InvenioImportBackup extends RequestHandlerBase {
         setWorkerMessage("I am idle");
         try {
           while (queue.hasMore()) {
-            setWorkerMessage("Running in the background...");
+            setWorkerMessage("Running in the background... (" + queue.tbdQueue.size() + ")");
             runSynchronously(queue, request);
           }
         } catch (IOException e) {
@@ -373,11 +396,12 @@ public class InvenioImportBackup extends RequestHandlerBase {
 
   public void setWorkerMessage(String msg) {
     log.info(msg);
-    workerMessage = msg;
+    workerMessage.append(msg);
+    workerMessage.append("\n");
   }
 
   public String getWorkerMessage() {
-    return workerMessage;
+    return workerMessage.toString();
   }
 
   /*
@@ -390,8 +414,14 @@ public class InvenioImportBackup extends RequestHandlerBase {
 
     SolrRequestHandler handler = req.getCore().getRequestHandler(handlerName);
     RequestData data = queue.pop();
-    
+
     LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), data.getReqParams());
+    
+    if (data.url.equals("discover")) {
+      discoverMissingRecords(locReq);
+      return;
+    }
+    
     
     setWorkerMessage("Executing :" + handlerName + " with params: " + locReq.getParamString());
     
@@ -410,6 +440,75 @@ public class InvenioImportBackup extends RequestHandlerBase {
     } while (repeat);
     
     setWorkerMessage("Executed :" + handlerName + " with params: " + locReq.getParamString() + "\n" + rsp.getValues().toString());
+  }
+
+  private void discoverMissingRecords(SolrQueryRequest req) throws IOException {
+    // get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
+    // int }
+    SolrQueryResponse rsp = new SolrQueryResponse();
+    Integer lastRecid = -1;
+    HashMap<String, int[]> dictData = null;
+    
+    SolrParams params = req.getParams();
+    String field = params.get("field", "recid");
+    
+    int[] existingRecs = FieldCache.DEFAULT.getInts(req.getSearcher().getAtomicReader(), field, false);
+    HashMap<Integer, Integer> idToLuceneId = new HashMap<Integer, Integer>(existingRecs.length);
+    for (int i=0;i<existingRecs.length;i++) {
+      idToLuceneId.put(existingRecs[i], i);
+    }
+    
+    BitSet present = new BitSet(existingRecs.length);
+    BitSet missing = new BitSet(existingRecs.length);
+    
+    while (true) {
+      PythonMessage message = MontySolrVM.INSTANCE
+        .createMessage(pythonFunctionName)
+        .setSender("InvenioKeepRecidUpdated")
+        .setParam("max_records", 100000)
+        .setParam("request", req)
+        .setParam("response", rsp)
+        .setParam("last_recid", lastRecid);
+    
+      MontySolrVM.INSTANCE.sendMessage(message);
+
+      Object results = message.getResults();
+      if (results == null) {
+        break;
+      }
+      dictData = (HashMap<String, int[]>) results;
+      
+      for (String name: new String[]{"ADDED", "UPDATED"}) {
+        int[] coll = dictData.get(name);
+        for (int x: coll) {
+          if (idToLuceneId.containsKey(x)) {
+            present.set(x);
+          }
+          else {
+            missing.set(x);
+          }
+        }
+      }
+      
+      int[] deleted = dictData.get("DELETED"); //TODO
+      lastRecid = (Integer) message.getParam("last_recid");
+    }
+    
+    int[] ids = new int[missing.cardinality()];
+    int j = 0;
+    for (int i = missing.nextSetBit(0); i >= 0; i = missing.nextSetBit(i+1)) {
+      ids[j++] = i;
+    }
+    
+    ModifiableSolrParams rParam = new ModifiableSolrParams(SolrRequestParsers.parseQueryString(handlerParams));
+    
+    List<String> queryParts = InvenioKeepRecidUpdated.getQueryIds(200, ids);
+    for (String queryPart : queryParts) {
+      String url = InvenioKeepRecidUpdated.getInternalURL("python://search", queryPart, 10000);
+      rParam.set("url", url);
+      queue.registerNewBatch(rParam.toString());
+    }
+    
   }
 
   public SolrQueryRequest req(SolrQueryRequest req, String ... q) {
@@ -440,6 +539,14 @@ public class InvenioImportBackup extends RequestHandlerBase {
 
   public String getSource() {
     return "";
+  }
+
+  public void setPythonFunctionName(String name) {
+    pythonFunctionName = name;
+  }
+
+  public String getPythonFunctionName() {
+    return pythonFunctionName;
   }
 
 }

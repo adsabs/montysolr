@@ -792,7 +792,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	
 	
 	
-	protected String getInternalURL(String sourceUrl,
+	public static String getInternalURL(String sourceUrl,
 			String queryPart, Integer maximport)
 			throws UnsupportedEncodingException {
 		String sign = sourceUrl.contains("?") ? "&" : "?";

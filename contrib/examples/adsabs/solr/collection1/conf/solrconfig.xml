@@ -1802,6 +1802,7 @@
        <str name="importurl">/invenio/import2?command=full-import&amp;dirs=</str>
        <str name="updateurl">/invenio/import2?command=full-import&amp;dirs=</str>
        <str name="deleteurl">blankrecords</str>
+       <str name="pythonFunctionName">get_recids_changes</str>
      </lst>
   </requestHandler>
   
@@ -1813,6 +1814,8 @@
   <requestHandler name="/invenio-doctor" class="org.apache.solr.update.InvenioImportBackup">
     <lst name="defaults">
       <str name="handler">/invenio/import2</str>
+      <str name="pythonFunctionName">get_recids_changes</str>
+      <str name="handlerParams">commit=false&amp;command=full-import&amp;url=</str>
     </lst>
   </requestHandler>
   

@@ -220,6 +220,53 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
         "//str[@name='status'][.='idle']"
     );
 
+    
+    // now test the new component which looks inside the invenio db
+    // discovers the missing recs and calls indexing on them
+    
+    assertU(delQ("recid:82 OR recid:83 OR recid:84 OR recid:85 OR recid:90"));
+    assertU(commit());
+    assertQ(req("q", "*:*"), "//*[@numFound='16']");
+    
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='1']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='1']",
+        "//str[@name='registeredRequests'][.='3']",
+        "//str[@name='restartedRequests'][.='3']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']"
+    );
+    
+    req = req("command", "discover");
+    rsp = new SolrQueryResponse();
+    core.execute(doctor, req, rsp);
+
+    while (doctor.isBusy()) {
+      Thread.sleep(300);
+    }
+
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(doctor, req, rsp);
+    
+    while (doctor.isBusy()) {
+      Thread.sleep(300);
+    }
+    assertQ(req("q", "*:*"), "//*[@numFound='22']");
+    
+    
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='1']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='1']",
+        "//str[@name='registeredRequests'][.='3']",
+        "//str[@name='restartedRequests'][.='3']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']"
+    );
   }
 
   public static final Map<String, Boolean> failThis = new HashMap<String, Boolean>();
