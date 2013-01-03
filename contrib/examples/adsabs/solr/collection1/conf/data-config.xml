@@ -226,7 +226,7 @@
         <field column="cite_read_boost" mongoField="true" />
         <field column="citation_count" mongoField="true" />
         <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
-        <field column="grants" mongoField="true" />
+        <field column="grant" mongoField="true" />
         
         <!-- following two fields are not represented in the schema.
              They are loaded from mongo only for the purpose of generating hierarchical facet -->

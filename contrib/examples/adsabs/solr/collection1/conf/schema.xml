@@ -767,7 +767,7 @@
 		<field name="reference" type="normalized_string_ascii" indexed="true"
 			stored="true" multiValued="true" />
 
-        <field name="grants" type="ads_text" indexed="true" stored="true"
+        <field name="grant" type="ads_text" indexed="true" stored="true"
             multiValued="true" />
         <!--
         <field name="grant_id" type="string" indexed="false" stored="false"

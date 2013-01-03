@@ -496,7 +496,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		 * grants
 		 * 
 		 */
-		assertQ(req("q", "grants:\"NSF-AST 0618398\""),
+		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
 		"//*[@numFound='1']",
 		"//doc/int[@name='recid'][.='9311214']");
 		assertQ(req("q", "grant_facet_hier:0/NSF-AST"),
