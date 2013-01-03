@@ -151,6 +151,8 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     Integer queuedOut = 0;
     
     private volatile boolean stopped;
+    private BitSet missingRecs = null;
+    private BitSet presentRecs;
 
     public RequestData pop() {
       for (Entry e: tbdQueue.entrySet()) {
@@ -207,6 +209,22 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       return i;
     }
 
+    public void setMissing(BitSet bitSet) {
+      missingRecs = bitSet;
+    }
+    
+    public BitSet getMissing() {
+      return missingRecs;
+    }
+    
+    public void setPresent(BitSet bitSet) {
+      presentRecs = bitSet;
+    }
+
+    public BitSet getPresent() {
+      return presentRecs;
+    }
+
   }
 
 
@@ -260,6 +278,9 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     else if(command.equals("detailed-info")) {
       printDetailedInfo(rsp);
     }
+    else if(command.equals("show-missing")) {
+      printMissingRecs(rsp);
+    }
     else if(command.equals("start")) {
       if (isBusy()) {
         rsp.add("message", "Import is already running...");
@@ -311,6 +332,31 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
   }
   
 
+  private void printMissingRecs(SolrQueryResponse rsp) {
+    printInfo(rsp);
+    
+    BitSet missing = queue.getMissing();
+    BitSet present = queue.getPresent();
+    
+    if (missing == null) {
+      rsp.add("message", "We have no data yet, please run command=discover");
+    }
+    else {
+      rsp.add("message", "These are the records that were not present in the index at the time the doctor was last started. The current index may have already changed by now...");
+    }
+    
+    rsp.add("totalPresent", present.cardinality());
+    rsp.add("totalMissing", missing.cardinality());
+    
+    ArrayList<Integer> tbd = new ArrayList<Integer>(missing.cardinality());
+    rsp.add("missingRecs", tbd);
+    
+    int j = 0;
+    for (int i = missing.nextSetBit(0); i >= 0; i = missing.nextSetBit(i+1)) {
+      tbd.add(i);
+    }
+  }
+  
   private void printDetailedInfo(SolrQueryResponse rsp) {
     printInfo(rsp);
     
@@ -418,7 +464,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), data.getReqParams());
     
     if (data.url.equals("discover")) {
-      discoverMissingRecords(locReq);
+      runDiscoveryReindexing(locReq);
       locReq.close();
       return;
     }
@@ -443,8 +489,15 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     setWorkerMessage("Executed :" + handlerName + " with params: " + locReq.getParamString() + "\n" + rsp.getValues().toString());
     locReq.close();
   }
+  
+  private void runDiscoveryReindexing(SolrQueryRequest req) throws IOException {
+    BitSet[] data = discoverMissingRecords(req);
+    queue.setPresent(data[0]);
+    queue.setMissing(data[1]);
+    registerReindexingOfMissed(data[1]);
+  }
 
-  private void discoverMissingRecords(SolrQueryRequest req) throws IOException {
+  private BitSet[] discoverMissingRecords(SolrQueryRequest req) throws IOException {
     // get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
     // int }
     SolrQueryResponse rsp = new SolrQueryResponse();
@@ -495,6 +548,12 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       int[] deleted = dictData.get("DELETED"); //TODO
       lastRecid = (Integer) message.getParam("last_recid");
     }
+    
+    return new BitSet[]{present, missing};
+    
+  }
+  
+  private void registerReindexingOfMissed(BitSet missing) throws UnsupportedEncodingException {
     
     int[] ids = new int[missing.cardinality()];
     int j = 0;

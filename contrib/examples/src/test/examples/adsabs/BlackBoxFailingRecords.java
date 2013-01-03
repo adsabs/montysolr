@@ -276,6 +276,19 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
     );
+    
+    assertQ(req("qt", "/invenio-doctor", "command", "show-missing"), 
+        "//str[@name='queueSize'][.='0']",
+        "//str[@name='failedRecs'][.='1']",
+        "//str[@name='failedBatches'][.='0']",
+        "//str[@name='failedTotal'][.='1']",
+        "//str[@name='registeredRequests'][.='5']",
+        "//str[@name='restartedRequests'][.='5']",
+        "//str[@name='docsToCheck'][.='0']",
+        "//str[@name='status'][.='idle']",
+        "//arr[@name='missingRecs']/int[.='77']",
+        "//arr[@name='missingRecs']/int[.='80']"
+    );
   }
 
   public static final Map<String, Boolean> failThis = new HashMap<String, Boolean>();
