@@ -121,10 +121,4 @@ public class AqpDEFOPChildrenCatenator extends AqpQProcessor {
 		return first;
 	}
 
-	private QueryNode getTerminalNode(QueryNode node) {
-		while (!node.isLeaf()) {
-			return getTerminalNode(node.getChildren().get(0));
-		}
-		return node;
-	}
 }

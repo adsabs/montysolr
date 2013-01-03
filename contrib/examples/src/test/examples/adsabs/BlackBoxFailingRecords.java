@@ -224,17 +224,23 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
     // now test the new component which looks inside the invenio db
     // discovers the missing recs and calls indexing on them
     
-    assertU(delQ("recid:82 OR recid:83 OR recid:84 OR recid:85 OR recid:90"));
     assertU(commit());
-    assertQ(req("q", "*:*"), "//*[@numFound='16']");
+    assertQ(req("q", "recid:77 OR recid:80"), "//*[@numFound='2']");
+    assertU(delQ("recid:77 OR recid:80"));
+    
+    // this is necessary, otherwise the results may be wrong because
+    // lucene cache is used to compare records (and the cache may
+    // contain deleted records even after the commit)
+    assertU(commit("expungeDeletes", "true"));
+    assertQ(req("q", "recid:77 OR recid:80"), "//*[@numFound='0']");
     
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",
         "//str[@name='failedRecs'][.='1']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='1']",
-        "//str[@name='registeredRequests'][.='3']",
-        "//str[@name='restartedRequests'][.='3']",
+        "//str[@name='registeredRequests'][.='5']",
+        "//str[@name='restartedRequests'][.='5']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
     );
@@ -254,8 +260,11 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
     while (doctor.isBusy()) {
       Thread.sleep(300);
     }
-    assertQ(req("q", "*:*"), "//*[@numFound='22']");
     
+    
+    assertU(commit());
+    
+    assertQ(req("q", "recid:77 OR recid:80"), "//*[@numFound='2']");
     
     assertQ(req("qt", "/invenio-doctor", "command", "info"), 
         "//str[@name='queueSize'][.='0']",

@@ -419,6 +419,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
     if (data.url.equals("discover")) {
       discoverMissingRecords(locReq);
+      locReq.close();
       return;
     }
     
@@ -440,6 +441,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     } while (repeat);
     
     setWorkerMessage("Executed :" + handlerName + " with params: " + locReq.getParamString() + "\n" + rsp.getValues().toString());
+    locReq.close();
   }
 
   private void discoverMissingRecords(SolrQueryRequest req) throws IOException {
