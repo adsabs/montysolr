@@ -548,50 +548,6 @@
 			</analyzer>
 		</fieldType>
 
-		<fieldType name="fulltext" class="solr.TextField"
-			positionIncrementGap="100">
-			<!-- right now this needs to remain a separate field type from "ads_text" 
-				because of the different Similarity -->
-			<analyzer type="index">
-				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(X|GAMMA)(-| +)RAY(S?)\b" replacement="$1ray$3 $1 ray$3" />
-				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)"
-					group="-1" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="-?\s+-?"
-					replacement="-" replace="all" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$"
-					replacement="$2" />
-				<filter class="solr.SynonymFilterFactory" synonyms="ads_text.synonyms"
-					ignoreCase="true" expand="false" />
-				<filter class="solr.ASCIIFoldingFilterFactory" />
-				<filter class="solr.WordDelimiterFilterFactory"
-					generateWordParts="1" generateNumberParts="1" catenateWords="0"
-					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="1" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="text.kill" enablePositionIncrements="true" />
-				<filter class="solr.StopFilterFactory" ignoreCase="false"
-					words="text.kill_sens" enablePositionIncrements="true" />
-				<filter class="solr.AcronymTokenFilterFactory" />
-				<filter class="solr.TrimFilterFactory" />
-			</analyzer>
-			<analyzer type="query">
-				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(X|GAMMA)(-| +)RAY(S?)\b" replacement="$1ray$3" />
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
-				<filter class="solr.ASCIIFoldingFilterFactory" />
-				<filter class="solr.WordDelimiterFilterFactory"
-					generateWordParts="1" generateNumberParts="1" catenateWords="0"
-					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="1" />
-				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false" />
-				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="text.kill" enablePositionIncrements="true" />
-				<filter class="solr.StopFilterFactory" ignoreCase="false"
-					words="text.kill_sens" enablePositionIncrements="true" />
-				<filter class="solr.TrimFilterFactory" />
-			</analyzer>
-		</fieldType>
 		<!-- de-activated <similarity class="org.apache.solr.search.similarities.SweetSpotSimilarityFactory"> 
 			<str name="min">1000</str> <str name="max">20000</str> <str name="steepness">0.5</str> 
 			</similarity> </fieldType> -->
