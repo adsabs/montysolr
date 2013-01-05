@@ -55,7 +55,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
       newConfig = duplicateFile(new File(configFile));
 
       File synonymsFile = createTempFile(new String[]{
-          "hubble\0space\0telescope, HST\n" +
+          "hubble\0space\0telescope,HST\n" +
           "Massachusets\0Institute\0of\0Technology, MIT\n" +
           "Hubble\0Space\0Microscope, HSM\n" +
           "ABC,Astrophysics\0Business\0Center\n" +
@@ -189,14 +189,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     /*
      * Synonym expansion 1token->many
      */
-
     assertQueryEquals(req("q", "HST", "qt", "aqp"), 
         "all:hubble space telescope all:acr::hst", BooleanQuery.class);
-    
-    // TODO:
-    // "hst"  -> all:acr::hst OR all:acr:hst OR all:hubble space telescope
-    // "HST" -> all:acr::hst OR all:acr:hst OR all:hubble space telescope
-    // Hubble Space Telecscope -> acr:hst OR hubble space telescope (no "hst")
     
     
     // XXX: note the acronym is not present (that is because the synonym processor
@@ -218,6 +212,20 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     //setDebug(true);
 
+    /*
+     * Case (In)Sensitivity 
+     * 
+     * It shoulb be ase sensitive for single tokens, and case-insensitive
+     * for multi-tokens
+     */
+    
+    assertQueryEquals(req("q", "hst", "qt", "aqp"), 
+        "all:hst", TermQuery.class);
+    assertQueryEquals(req("q", "HSt", "qt", "aqp"), 
+        "all:hst", TermQuery.class);
+    assertQueryEquals(req("q", "Hubble Space Telescope +star", "qt", "aqp"), 
+        "+(all:hubble space telescope all:acr::hst) +all:star", BooleanQuery.class);
+    
     
     /*
      * alternation of synonym groups:

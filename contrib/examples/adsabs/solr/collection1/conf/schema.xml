@@ -779,7 +779,7 @@
             multiValued="true"/> 
             
 		<!-- this is just a fake field (for the moment) -->
-		<field name="all" type="fulltext" indexed="true" stored="false"
+		<field name="all" type="ads_text" indexed="true" stored="false"
 			multiValued="true" />
 
 

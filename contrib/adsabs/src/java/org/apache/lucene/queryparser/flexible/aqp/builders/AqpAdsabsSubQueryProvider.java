@@ -273,9 +273,6 @@ public class AqpAdsabsSubQueryProvider implements
         if (f.equals("author")) {
           return "author";
         }
-        else if(f.equals("abstract")) {
-          return "abstract";
-        }
         return null;
       }
       private Query reAnalyze(String field, String value, float boost) throws ParseException {

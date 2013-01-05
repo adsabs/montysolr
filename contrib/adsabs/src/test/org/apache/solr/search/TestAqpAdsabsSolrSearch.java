@@ -61,6 +61,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			
 			File synonymsFile = createTempFile(new String[]{
 					"Hst, hubble\\ space\\ telescope, HST",
+					"weak => lightweak",
+					"lensing => mikrolinseneffekt"
 			});
 			replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
@@ -88,6 +90,26 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 	  
+	  //pink elephant #238
+    assertQueryEquals(req("qt", "aqp", "q", "weak lensing"), 
+        "+all:weak +all:lensing", 
+        BooleanQuery.class);
+    assertQueryEquals(req("qt", "aqp", "q", "weak lensing", 
+        "qf", "author^2.3 title full keyword abstract^0.4"), 
+        "+(abstract:weak^0.4 | ((author:weak, author:weak,*)^2.3) | title:weak | full:weak | keyword:weak) " +
+        "+(abstract:lensing^0.4 | ((author:lensing, author:lensing,*)^2.3) | title:lensing | full:lensing | keyword:lensing)", 
+        BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "pink elephant"), 
+        "+all:pink +all:elephant", 
+        BooleanQuery.class);
+    assertQueryEquals(req("qt", "aqp", "q", "pink elephant",
+        "qf", "author^2.3 title full keyword abstract^0.4"),
+        "+(abstract:pink^0.4 | ((author:pink, author:pink,*)^2.3) | title:pink | full:pink | keyword:pink) " +
+        "+(abstract:elephant^0.4 | ((author:elephant, author:elephant,*)^2.3) | title:elephant | full:elephant | keyword:elephant)", 
+        BooleanQuery.class);
+    
+    
 	  // author search, unfielded
 	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi,", 
         "qf", "author^2.3 title abstract^0.4"), 
