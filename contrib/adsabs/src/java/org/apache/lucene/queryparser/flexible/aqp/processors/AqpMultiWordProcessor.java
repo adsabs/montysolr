@@ -2,6 +2,7 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -43,6 +44,7 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 	private TypeAttribute typeAtt;
   private PositionIncrementAttribute posAtt;
   private OffsetAttribute offsetAtt;
+  private ArrayList<int[]> multiTokenSynonymSpans = new ArrayList<int[]>();
 	
 	public AqpMultiWordProcessor() {
 		// empty
@@ -140,6 +142,10 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
           continue;
         }
         
+        // test we deal with multi-token synonym (as opposed to single-token synonym)
+        if (!isMultiTokenSynonym(offsetAtt.startOffset(), offsetAtt.endOffset()))
+          continue;
+        
         // discover offsets (the longest range) for synonyms
         startOffset = offsetAtt.startOffset();
         endOffset = offsetAtt.endOffset() > endOffset ? offsetAtt.endOffset() : endOffset;
@@ -189,7 +195,14 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
   }
 	
 	
-	private FieldQueryNode getNewNode(FieldQueryNode master) throws CloneNotSupportedException {
+	private boolean isMultiTokenSynonym(int startOffset, int endOffset) {
+    for (int s[]: multiTokenSynonymSpans) {
+      if (s[0]==startOffset && s[1]==endOffset) return true;
+    }
+    return false;
+  }
+
+  private FieldQueryNode getNewNode(FieldQueryNode master) throws CloneNotSupportedException {
 	  FieldableNode newNode = (FieldableNode) master.cloneTree();
     if (buffer.hasAttribute(CharTermAttribute.class)) {
       termAtt = buffer.getAttribute(CharTermAttribute.class);
@@ -236,13 +249,20 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 		}
 
 		buffer = new CachingTokenFilter(source);
-		int numSynonyms = 0;
 
+		ArrayList<int[]> spans = new ArrayList<int[]>();
+		ArrayList<int[]> synSpans = new ArrayList<int[]>();
+		
 		try {
 			while (buffer.incrementToken()) {
 				typeAtt = buffer.getAttribute(TypeAttribute.class);
+				offsetAtt = buffer.getAttribute(OffsetAttribute.class);
+				
 				if (typeAtt.type().equals(SynonymFilter.TYPE_SYNONYM)) {
-					numSynonyms++;
+				  synSpans.add(new int[]{offsetAtt.startOffset(), offsetAtt.endOffset()});
+				}
+				else {
+				  spans.add(new int[]{offsetAtt.startOffset(), offsetAtt.endOffset()});
 				}
 			}
 		} catch (IOException e) {
@@ -259,7 +279,17 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 			// ignore
 		}
 		
-		return numSynonyms;
+		multiTokenSynonymSpans.clear();
+		for (int[] synSpan: synSpans) {
+		  for (int[] sourceSpan: spans) {
+		    if (synSpan[0] <= sourceSpan[0] && synSpan[1] >= sourceSpan[1] && 
+		        synSpan[1]-synSpan[0] > sourceSpan[1]-sourceSpan[0]) {
+		      multiTokenSynonymSpans.add(synSpan);
+		    }
+		  }
+		}
+		
+		return multiTokenSynonymSpans.size();
 	}
 
 	@Override

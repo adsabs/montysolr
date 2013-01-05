@@ -60,11 +60,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			newConfig = duplicateFile(new File(configFile));
 			
 			File synonymsFile = createTempFile(new String[]{
-					"Hst, hubble\\ space\\ telescope, HST",
+					"hubble\0space\0telescope, HST",
 					"weak => lightweak",
-					"lensing => mikrolinseneffekt"
+					"lensing => mikrolinseneffekt",
+					"pink => pinkish"
 			});
-			replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+			replaceInFile(newConfig, "synonyms=\"ads_text_acr.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
 		  // hand-curated synonyms
       File curatedSynonyms = createTempFile(new String[]{
@@ -90,23 +91,43 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 	  
+	  //setDebug(true);
 	  //pink elephant #238
     assertQueryEquals(req("qt", "aqp", "q", "weak lensing"), 
-        "+all:weak +all:lensing", 
+        "+all:lightweak +all:mikrolinseneffekt", 
         BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "weak lensing", 
-        "qf", "author^2.3 title full keyword abstract^0.4"), 
-        "+(abstract:weak^0.4 | ((author:weak, author:weak,*)^2.3) | title:weak | full:weak | keyword:weak) " +
-        "+(abstract:lensing^0.4 | ((author:lensing, author:lensing,*)^2.3) | title:lensing | full:lensing | keyword:lensing)", 
+        "qf", "title full keyword abstract"), 
+        "+(abstract:lightweak | title:lightweak | full:lightweak | keyword:weak) " +
+        "+(abstract:mikrolinseneffekt | title:mikrolinseneffekt | full:mikrolinseneffekt | keyword:lensing)", 
         BooleanQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "pink elephant"), 
-        "+all:pink +all:elephant", 
+        "+all:pinkish +all:elephant", 
         BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "pink elephant",
-        "qf", "author^2.3 title full keyword abstract^0.4"),
-        "+(abstract:pink^0.4 | ((author:pink, author:pink,*)^2.3) | title:pink | full:pink | keyword:pink) " +
-        "+(abstract:elephant^0.4 | ((author:elephant, author:elephant,*)^2.3) | title:elephant | full:elephant | keyword:elephant)", 
+        "qf", "title full keyword abstract"),
+        "+(abstract:pinkish | title:pinkish | full:pinkish | keyword:pink) " +
+        "+(abstract:elephant | title:elephant | full:elephant | keyword:elephant)", 
+        BooleanQuery.class);
+
+    
+    // multi-token combined with single token
+    // TODO: I'd like to see the following parse:
+    // 
+    // +abstract:lightweak^0.6....
+    // +((abstract:hubble space telescope | abstract:accr::hst)^0.6 | (title:hubble....))
+    // 
+    // Yet, for this to work, we must reorder the steps - right now, the multi-token
+    // discovery happens before edismax, edismax then receives certain tokens wrapped
+    // into nonAnalyzed node ("hubble space telescope" | accr::hst) -- the analysis is
+    // done only on the 'weak', the other two tokens are simply spread across the 
+    // various fields by edismax
+    assertQueryEquals(req("qt", "aqp", "q", "weak hubble space telescope",
+        "qf", "title^0.9 full^0.8 keyword^0.7 abstract^0.6"),
+        "+(abstract:lightweak^0.6 | title:lightweak^0.9 | full:lightweak^0.8 | keyword:weak^0.7) " +
+        "+((abstract:hubble space telescope^0.6 | title:hubble space telescope^0.9 | full:hubble space telescope^0.8 | keyword:hubble space telescope^0.7) " +
+          "(abstract:acr::hst^0.6 | title:acr::hst^0.9 | full:acr::hst^0.8 | keyword:acr::hst^0.7))", 
         BooleanQuery.class);
     
     
