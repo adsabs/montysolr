@@ -298,7 +298,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       }
     }
     else if(command.equals("discover")) {
-      queue.registerNewBatch("discover");
+      queue.registerNewBatch("discover=1&"+params.get("params", ""));
     }
     else {
       rsp.add("message", "Unknown command: " + command);
@@ -463,7 +463,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
 
     LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), data.getReqParams());
     
-    if (data.url.equals("discover")) {
+    if (data.url.substring(0, 8).equals("discover")) {
       runDiscoveryReindexing(locReq);
       locReq.close();
       return;
@@ -494,7 +494,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     BitSet[] data = discoverMissingRecords(req);
     queue.setPresent(data[0]);
     queue.setMissing(data[1]);
-    registerReindexingOfMissed(data[1]);
+    registerReindexingOfMissed(req, data[1]);
   }
 
   private BitSet[] discoverMissingRecords(SolrQueryRequest req) throws IOException {
@@ -553,7 +553,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
   }
   
-  private void registerReindexingOfMissed(BitSet missing) throws UnsupportedEncodingException {
+  private void registerReindexingOfMissed(SolrQueryRequest req, BitSet missing) throws UnsupportedEncodingException {
     
     int[] ids = new int[missing.cardinality()];
     int j = 0;
@@ -563,9 +563,14 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
     ModifiableSolrParams rParam = new ModifiableSolrParams(SolrRequestParsers.parseQueryString(handlerParams));
     
-    List<String> queryParts = InvenioKeepRecidUpdated.getQueryIds(200, ids);
+    // for security reason, only certain params can be supplied by user
+    SolrParams params = req.getParams();
+    int batchSize = Math.max(Math.min(params.getInt("batchSize", 200), 200), 1);
+    int maxRecords = Math.max(Math.min(params.getInt("maxRecords", 10000), 10000), 1000);
+    
+    List<String> queryParts = InvenioKeepRecidUpdated.getQueryIds(batchSize, ids);
     for (String queryPart : queryParts) {
-      String url = InvenioKeepRecidUpdated.getInternalURL("python://search", queryPart, 10000);
+      String url = InvenioKeepRecidUpdated.getInternalURL("python://search", queryPart, maxRecords);
       rParam.set("url", url);
       queue.registerNewBatch(rParam.toString());
     }
