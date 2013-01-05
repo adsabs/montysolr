@@ -66,14 +66,20 @@ public class AqpOPERATORProcessor extends AqpQProcessorPost {
       return new AqpOrQueryNode(node.getChildren());
     } else if (label.equals("NOT")) {
       return new AqpNotQueryNode(node.getChildren());
-    } else if (label.contains("NEAR")) {
-      String[] parts = label.split(":");
-      if (parts.length > 1) {
-        return new AqpNearQueryNode(node.getChildren(),
-            Integer.valueOf(parts[1]));
-      } else {
+    } else if (label.toUpperCase().contains("NEAR")) {
+      if (label.length()<=4) {
         return new AqpNearQueryNode(node.getChildren(),
             getDefaultProximityValue());
+      } else {
+        int distance = Integer.parseInt(label.substring(4));
+        if (isProximityValueAllowed(distance)) {
+          return new AqpNearQueryNode(node.getChildren(),
+            distance);
+        }
+        else {
+          throw new QueryNodeException(new MessageImpl(
+              QueryParserMessages.INVALID_SYNTAX, "Proximity is only allowed in a range: " + getRange() ));
+        }
       }
 
     } else {
@@ -94,6 +100,19 @@ public class AqpOPERATORProcessor extends AqpQProcessorPost {
           + "DefaultProximity value is missing"));
     }
     return queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY);
+  }
+  
+  private int[] getRange() {
+    QueryConfigHandler queryConfig = getQueryConfigHandler();
+    return queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOWED_PROXIMITY_RANGE);
+
+  }
+  private boolean isProximityValueAllowed(int userValue) {
+    int[] range = getRange();
+    if (userValue >= range[0] && userValue <= range[1]) {
+      return true;
+    }
+    return false;
   }
 
   protected StandardQueryConfigHandler.Operator getDefaultOperator()

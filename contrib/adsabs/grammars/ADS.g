@@ -298,8 +298,7 @@ or 	:
 	;		
 
 near	:	
-	(NEAR -> ^(OPERATOR["NEAR"]) )
-	('/' b=NUMBER -> ^(OPERATOR["NEAR:" + $b.getText()]) )?
+	(NEAR -> ^(OPERATOR[$NEAR]) )
 	;
 
 comma	:	
@@ -404,7 +403,7 @@ TO	:	'TO';
 AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D')) ;
 OR  : (('o' | 'O') ('r' | 'R'));
 NOT   : ('n' | 'N') ('o' | 'O') ('t' | 'T');
-NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ;
+NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ('0'..'9')*;
 
 
 

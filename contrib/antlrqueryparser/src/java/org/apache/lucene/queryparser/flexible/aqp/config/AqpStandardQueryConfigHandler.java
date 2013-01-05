@@ -9,6 +9,7 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFUZZYProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQNORMALProcessor;
@@ -34,6 +35,15 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
 	     * 
 	     */
 	    final public static ConfigurationKey<Integer> DEFAULT_PROXIMITY = ConfigurationKey.newInstance();
+	    
+	    /**
+       * This attribute is used by {@link AqpDEFOPProcessor} processor and
+       * must be defined in the {@link QueryConfigHandler}. This attribute tells the
+       * processor what are the allowed values when user submits them. <br/>
+       * 
+       */
+      final public static ConfigurationKey<int[]> ALLOWED_PROXIMITY_RANGE = ConfigurationKey.newInstance();
+	    
 	    
 	    /**
 	     * Value of the default boost, to be used when user specified '^' without a value
@@ -92,6 +102,7 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
 	    // Default Values (besides the standard ones)
 	    set(ConfigurationKeys.DEFAULT_FIELD, null);
 	    set(ConfigurationKeys.DEFAULT_PROXIMITY, 5);
+	    set(ConfigurationKeys.ALLOWED_PROXIMITY_RANGE, new int[]{1, 5});
 	    set(ConfigurationKeys.IMPLICIT_BOOST, 1.0f);
 	    set(ConfigurationKeys.IMPLICIT_FUZZY, 0.5f);
 	    set(ConfigurationKeys.FEEDBACK, new AqpFeedbackImpl());
