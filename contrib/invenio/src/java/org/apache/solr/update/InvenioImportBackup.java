@@ -340,6 +340,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
     if (missing == null) {
       rsp.add("message", "We have no data yet, please run command=discover");
+      return;
     }
     else {
       rsp.add("message", "These are the records that were not present in the index at the time the doctor was last started. The current index may have already changed by now...");
