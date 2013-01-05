@@ -285,6 +285,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       if (isBusy()) {
         rsp.add("message", "Import is already running...");
         rsp.add("status", "busy");
+        printInfo(rsp);
         return;
       }
       workerMessage = new StringBuilder();
