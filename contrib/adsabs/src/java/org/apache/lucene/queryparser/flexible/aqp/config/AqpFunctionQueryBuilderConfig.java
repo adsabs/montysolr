@@ -11,6 +11,7 @@ public interface AqpFunctionQueryBuilderConfig extends Attribute {
 	
 	
 	public void addProvider(AqpFunctionQueryBuilderProvider provider);
+	public void addProvider(int index, AqpFunctionQueryBuilderProvider provider);
 	
 	public void setBuilder(String funcName, AqpFunctionQueryBuilder builder);
 	

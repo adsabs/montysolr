@@ -283,7 +283,7 @@ public class AqpAdsabsSubQueryProvider implements
         return q;
       }
     }.configure(false)); // not analyzed
-		parsers.put("posxx", new AqpSubqueryParserFull() { // this is a temporary workaround!!! 
+		parsers.put("posxxx", new AqpSubqueryParserFull() { // this is a temporary workaround!!! 
       public Query parse(FunctionQParser fp) throws ParseException {
         String field = fp.parseId();
         String value = fp.parseId();

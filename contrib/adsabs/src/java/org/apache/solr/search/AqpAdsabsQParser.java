@@ -19,6 +19,7 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsCustomQueryProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubQueryProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
@@ -145,10 +146,12 @@ public class AqpAdsabsQParser extends QParser {
 		config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
 		
 		// special analyzers
-		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpSolrFunctionProvider());
-		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpAdsabsSubQueryProvider());
+		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(0, new AqpAdsabsCustomQueryProvider());
+		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(1, new AqpSolrFunctionProvider());
+		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(2, new AqpAdsabsSubQueryProvider());
 		
 		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put("author", new int[0]);
+		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put("first_author", new int[0]);
 		
 		
 		if (params.getBool("debugQuery", false) != false) {
@@ -199,7 +202,7 @@ public class AqpAdsabsQParser extends QParser {
 		  }
 			return qParser.parse(getString(), null);
 		} catch (QueryNodeException e) {
-			throw new ParseException(e.getLocalizedMessage());
+			throw new ParseException(e.getMessage());
 		}
 		catch (SolrException e1) {
 			throw new ParseException(e1.getLocalizedMessage());

@@ -25,8 +25,14 @@ public class AqpFunctionQueryBuilderConfigImpl extends AttributeImpl implements
 		if (!providers.contains(provider)) {
 			providers.add(provider);
 		}
-
 	}
+	
+	public void addProvider(int index, AqpFunctionQueryBuilderProvider provider) {
+    if (providers.contains(provider)) {
+      providers.remove(provider);
+    }
+    providers.add(index, provider);
+  }
 
 	public void setBuilder(String funcName, AqpFunctionQueryBuilder builder) {
 		builders.put(funcName, builder);
