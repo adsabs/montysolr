@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexableField;
 
 public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrderCollector {
 
@@ -68,14 +69,16 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 
 	@Override
 	public void collect(int doc) throws IOException {
-		//if (reader.isDeleted(doc)) return;
 		
 		Document document = reader.document(doc, fieldsToLoad);
 		
 		float s = scorer.score();
 		
 		// naive implementation (probably slow)
-		Number citeBoost = document.getField(boostField).numericValue();
+		IndexableField bf = document.getField(boostField);
+		if (bf==null) throw new IOException("Every document must have field: " + boostField);
+		
+		Number citeBoost = bf.numericValue();
     if (citeBoost != null) {
       s = s + (s * citeBoost.floatValue());
     }

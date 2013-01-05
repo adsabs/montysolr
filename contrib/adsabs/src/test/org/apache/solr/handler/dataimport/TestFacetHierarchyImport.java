@@ -35,6 +35,8 @@ import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 import org.adsabs.solr.AdsConfig.F;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field; 
 import java.util.Map;
 
@@ -66,10 +68,33 @@ public class TestFacetHierarchyImport extends MontySolrQueryTestCase {
 	}
 
 	@Override
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
-	}
+  public String getSolrConfigFile() {
+    
+    String configFile = MontySolrSetup.getMontySolrHome()
+    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+    String dataConfig = MontySolrSetup.getMontySolrHome()
+    + "/contrib/examples/adsabs/solr/collection1/conf/data-config.xml";
+    
+    File newConfig = new File(configFile);
+    
+    if (System.getProperty("test.mongodb.host", null) != null) {
+      File newDataConfig;
+      try {
+        
+        newConfig = duplicateFile(new File(configFile));
+        newDataConfig = duplicateFile(new File(dataConfig));
+    
+        replaceInFile(newDataConfig, "mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("test.mongodb.host")));
+        replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
+    
+      } catch (IOException e) {
+        e.printStackTrace();
+        throw new IllegalStateException(e.getMessage());
+      }
+    }
+    
+    return newConfig.getAbsolutePath();
+  }
 
 	public void mockHandler(SolrRequestHandler handler) throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException {
 		

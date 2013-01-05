@@ -283,14 +283,6 @@ public class AqpAdsabsSubQueryProvider implements
         return q;
       }
     }.configure(false)); // not analyzed
-		parsers.put("posxxx", new AqpSubqueryParserFull() { // this is a temporary workaround!!! 
-      public Query parse(FunctionQParser fp) throws ParseException {
-        String field = fp.parseId();
-        String value = fp.parseId();
-        QParser ep = fp.subQuery("first_author:"+value, "aqp");
-        return ep.getQuery();
-      }
-    }.configure(false)); // not analyzed
 	};
 
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
@@ -322,13 +314,13 @@ public class AqpAdsabsSubQueryProvider implements
   		String qStr = reqAttr.getQueryString();
   		
   		Integer[] start_span = new Integer[]{0,0};
-  		Integer[] end_span = new Integer[]{qStr.length(),0};
+  		Integer[] end_span = new Integer[]{qStr.length(),qStr.length()};
   		
   		
   		swimDeep(node.getChildren().get(0), start_span);
   		swimDeep(node.getChildren().get(node.getChildren().size()-1), end_span);
   		
-  		subQuery = qStr.substring(start_span[1]+1, end_span[1]+1);
+  		subQuery = qStr.substring(start_span[1]+1, end_span[1]-1);
 		}
 		
 		AqpFunctionQParser parser = new AqpFunctionQParser(subQuery, reqAttr.getLocalParams(), 

@@ -26,6 +26,8 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -34,6 +36,7 @@ import java.io.IOException;
  * return immediately. Also, one of the fields is fetched by Python.
  * 
  */
+@Ignore
 public class BenchmarkAdsDataImport extends MontySolrQueryTestCase {
 	
 

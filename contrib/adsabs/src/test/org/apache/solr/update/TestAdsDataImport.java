@@ -79,22 +79,25 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
     String dataConfig = MontySolrSetup.getMontySolrHome()
     + "/contrib/examples/adsabs/solr/collection1/conf/data-config.xml";
-  
-    File newConfig;
-    File newDataConfig;
-    try {
-      
-      newConfig = duplicateFile(new File(configFile));
-      newDataConfig = duplicateFile(new File(dataConfig));
-  
-      replaceInFile(newDataConfig, "mongoHost=\"adszee\"", "mongoHost=\"localhost\"");
-      replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
-  
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new IllegalStateException(e.getMessage());
+    
+    File newConfig = new File(configFile);
+    
+    if (System.getProperty("test.mongodb.host", null) != null) {
+      File newDataConfig;
+      try {
+        
+        newConfig = duplicateFile(new File(configFile));
+        newDataConfig = duplicateFile(new File(dataConfig));
+    
+        replaceInFile(newDataConfig, "mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("test.mongodb.host")));
+        replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
+    
+      } catch (IOException e) {
+        e.printStackTrace();
+        throw new IllegalStateException(e.getMessage());
+      }
     }
-  
+    
     return newConfig.getAbsolutePath();
 	}
 
@@ -176,11 +179,13 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 				);
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		
+		// if you get AssertionError here, most likely the test cannot access
+		// the mongodb instance (on localhost?)
 		core.execute(handler, req, rsp);
 		
 		commit("waitFlush", "true", "waitSearcher", "true");
 		
-		dumpDoc(null);
+		//dumpDoc(null);
 		
 		req = req("command", "full-import",
         "dirs", testDir,
@@ -203,6 +208,17 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		
 		DirectSolrConnection direct = getDirectServer();
 		
+		
+		/*
+		 * 2nd order queries - to be moved down in the testfile
+		 */
+		/*
+		 * 
+		 TO finish when i get the new mongodb dump (mine is missing cite_read_boost)
+		assertQ(req("q", "useful(*:*)"), "//*[@numFound='0']");
+		assertQ(req("q", "reviews(*:*)"), "//*[@numFound='0']");
+		assertQ(req("q", "reviews(*:*)"), "//*[@numFound='0']");
+		*/
 		
 		//dumpDoc(null, "bibdoc", "author", "author_norm", "first_author", "first_author_norm", "author_facet", "author_surname", "first_author_surname", "author_facet_hier", "first_author_facet_hier");
 		
@@ -496,6 +512,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		 * grants
 		 * 
 		 */
+		//dumpDoc(null, "recid", "grant");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
 		"//*[@numFound='1']",
 		"//doc/int[@name='recid'][.='9311214']");
