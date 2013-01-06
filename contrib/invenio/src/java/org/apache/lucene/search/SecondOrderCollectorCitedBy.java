@@ -5,6 +5,12 @@ import java.util.ArrayList;
 
 import org.apache.lucene.index.AtomicReaderContext;
 
+/**
+ * // citations(P) - set of papers that have P in their reference list
+ * 
+ * see: http://labs.adsabs.harvard.edu/trac/ads-invenio/ticket/221
+ * 
+ */
 public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
 	
@@ -79,7 +85,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "citedby[using:" + referenceField + "<" + uniqueIdField + ">]";
+		return "citations[cache:" + referenceField + "<" + uniqueIdField + ">]";
 	}
 	
 	/** Returns a hash code value for this object. */

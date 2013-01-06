@@ -7,6 +7,10 @@ import java.util.Map;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
 
+/*
+ *    // references(P) - set of papers that are in the reference list of P
+ *    see: http://labs.adsabs.harvard.edu/trac/ads-invenio/ticket/221
+ */
 public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
 	protected Map<Integer, List<Integer>> docToDocidsCache = null;
@@ -80,7 +84,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "cites[using_cache:" + referenceField + "]";
+		return "references[cache:" + referenceField + "]";
 	}
 	
 	/** Returns a hash code value for this object. */

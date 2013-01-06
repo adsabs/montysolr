@@ -140,21 +140,25 @@ public class AqpAdsabsSubQueryProvider implements
 	    		  return q.getQuery();
 		      }
 		    });
-		parsers.put("citedby", new AqpSubqueryParserFull() {
+		
+		
+	  // citations(P) - set of papers that have P in their reference list
+		parsers.put("citations", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
-				
 				// TODO: make configurable 
 				String refField = "reference";
 				String idField = "bibcode";
-				
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitedBy(idField, refField), false);
-				
-		      }
-		    }.configure(true)); // true=canBeAnalyzed
-	  // cites === refersto
-		parsers.put("refersto", new AqpSubqueryParserFull() { // this function values can be analyzed
+	      }
+	    }.configure(true)); // true=canBeAnalyzed
+		parsers.put("incoming_links", parsers.get("citations"));
+		parsers.put("citedby", parsers.get("citations")); // XXX - to remove after AAS!!!
+		
+	  
+		// references(P) - set of papers that are in the reference list of P
+		parsers.put("references", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
@@ -164,18 +168,12 @@ public class AqpAdsabsSubQueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
 			}
 		  }.configure(true)); // true=canBeAnalyzed
-		// cites === refersto
-		parsers.put("cites", new AqpSubqueryParserFull() { // this function values can be analyzed
-      public Query parse(FunctionQParser fp) throws ParseException {          
-        Query innerQuery = fp.parseNestedQuery();
-        SolrQueryRequest req = fp.getReq();
-        // TODO: make configurable
-        String refField = "reference";
-        String idField = "bibcode";
-        return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
-      }
-      }.configure(true)); // true=canBeAnalyzed
-	  // useful() = what experts are citing
+		parsers.put("outgoing_links", parsers.get("references"));
+		parsers.put("cites", parsers.get("references")); // XXX - to remove after AAS!!!
+		parsers.put("refersto", parsers.get("references")); // XXX - to remove after AAS!!!
+
+		
+		// useful() = what experts are citing
     parsers.put("useful", new AqpSubqueryParserFull() { // this function values can be analyzed
       public Query parse(FunctionQParser fp) throws ParseException {          
         Query innerQuery = fp.parseNestedQuery();

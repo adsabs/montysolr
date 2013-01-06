@@ -9,6 +9,16 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 
+/*
+ *    references(P) - set of papers that are in the reference list of P
+ *    see: http://labs.adsabs.harvard.edu/trac/ads-invenio/ticket/221
+ *    
+ *    This implementation reads data directly from the indexed field
+ *    
+ *    @see: SecondOrderCollectorCitesRAM for the implementation that
+ *          uses un-inverted cache stored in RAM
+ */
+
 public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
   Set<String> fieldsToLoad;
@@ -97,7 +107,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "cites[using:" + referenceField + "]";
+		return "references[field:" + referenceField + "]";
 	}
 	
 	/** Returns a hash code value for this object. */

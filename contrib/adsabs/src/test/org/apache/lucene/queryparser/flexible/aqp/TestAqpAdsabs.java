@@ -256,7 +256,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryNodeException("pos(author, Kurtz, 1, \\-1, 5)");
 		assertQueryNodeException("pos(author, Kurtz, 1)");
 		
-		
 		/*
 		 * 
 		XXX: these work with our provider but should be inside SolrFunctionProvider
@@ -277,7 +276,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		/*
 		TODO: i don't yet have the implementations for these
 		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
-		assertQueryEquals("cites((title:(lectures physics) and author:Feynman))", null, "");
 		
 		assertQueryEquals("simbad(20 54 05.689 +37 01 17.38)", null, "");
 		assertQueryEquals("simbad(10:12:45.3-45:17:50)", null, "");
