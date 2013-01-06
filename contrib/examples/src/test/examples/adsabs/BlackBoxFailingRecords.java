@@ -289,6 +289,24 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
         "//arr[@name='missingRecs']/int[.='77']",
         "//arr[@name='missingRecs']/int[.='80']"
     );
+    
+    assertQ(req("qt", "/invenio-doctor", "command", "reset"), null);
+    assertQ(req("qt", "/invenio-doctor", "command", "discover",
+        "params", "batchSize=1&fetch_size=2&max_records=1"), null);
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(doctor, req, rsp);
+    
+    while (doctor.isBusy()) {
+      Thread.sleep(300);
+    }
+    
+    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+        "//str[@name='registeredRequests'][.='9']",
+        "//str[@name='restartedRequests'][.='9']",
+        "//str[@name='status'][.='idle']"
+    );
+    
   }
 
   public static final Map<String, Boolean> failThis = new HashMap<String, Boolean>();

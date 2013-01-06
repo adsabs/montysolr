@@ -154,6 +154,12 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     private BitSet missingRecs = null;
     private BitSet presentRecs;
 
+    public RequestData getNext() {
+      for (Entry e: tbdQueue.entrySet()) {
+        return tbdQueue.get(e.getKey());
+      }
+      return null;
+    }
     public RequestData pop() {
       for (Entry e: tbdQueue.entrySet()) {
         queuedOut++;
@@ -399,7 +405,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
         setWorkerMessage("I am idle");
         try {
           while (queue.hasMore()) {
-            setWorkerMessage("Running in the background... (" + queue.tbdQueue.size() + ")");
+            setWorkerMessage("Running in the background... (" + queue.getNext() + ")");
             runSynchronously(queue, request);
           }
         } catch (IOException e) {
@@ -493,21 +499,33 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
   }
   
   private void runDiscoveryReindexing(SolrQueryRequest req) throws IOException {
-    BitSet[] data = discoverMissingRecords(req);
+    
+    SolrParams params = req.getParams();
+    if (params.get("last_recid", null) == null || params.getInt("last_recid", 0) == -1) {
+      queue.setMissing(new BitSet());
+      queue.setMissing(new BitSet());
+      setWorkerMessage("Resetting list of missing records (new search will be done)");
+    }
+    
+    BitSet[] data = discoverMissingRecords(queue.getPresent(), queue.getMissing(), req);
     queue.setPresent(data[0]);
     queue.setMissing(data[1]);
     registerReindexingOfMissed(req, data[1]);
   }
 
-  private BitSet[] discoverMissingRecords(SolrQueryRequest req) throws IOException {
+  private BitSet[] discoverMissingRecords(BitSet present, BitSet missing, SolrQueryRequest req) throws IOException {
     // get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
     // int }
     SolrQueryResponse rsp = new SolrQueryResponse();
-    Integer lastRecid = -1;
+    
     HashMap<String, int[]> dictData = null;
     
     SolrParams params = req.getParams();
     String field = params.get("field", "recid");
+    Integer lastRecid = params.getInt("last_recid", -1);
+    Integer fetchSize = Math.min(params.getInt("fetch_size", 100000), 100000);
+    // setting maxRecs to very large value means the worker cannot be stopped in time
+    int maxRecs = Math.min(params.getInt("max_records", 100000), 1000000);
     
     int[] existingRecs = FieldCache.DEFAULT.getInts(req.getSearcher().getAtomicReader(), field, false);
     HashMap<Integer, Integer> idToLuceneId = new HashMap<Integer, Integer>(existingRecs.length);
@@ -515,14 +533,18 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       idToLuceneId.put(existingRecs[i], i);
     }
     
-    BitSet present = new BitSet(existingRecs.length);
-    BitSet missing = new BitSet(existingRecs.length);
+    if (present == null) present = new BitSet(existingRecs.length);
+    if (missing == null) missing = new BitSet(existingRecs.length);
     
-    while (true) {
+    int doneSoFar = 0;
+    
+    boolean finished = false;
+    
+    while (doneSoFar<maxRecs) {
       PythonMessage message = MontySolrVM.INSTANCE
         .createMessage(pythonFunctionName)
         .setSender("InvenioKeepRecidUpdated")
-        .setParam("max_records", 100000)
+        .setParam("max_records", fetchSize)
         .setParam("request", req)
         .setParam("response", rsp)
         .setParam("last_recid", lastRecid);
@@ -531,12 +553,14 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
 
       Object results = message.getResults();
       if (results == null) {
+        finished = true;
         break;
       }
       dictData = (HashMap<String, int[]>) results;
       
       for (String name: new String[]{"ADDED", "UPDATED"}) {
         int[] coll = dictData.get(name);
+        doneSoFar += coll.length;
         for (int x: coll) {
           if (idToLuceneId.containsKey(x)) {
             present.set(x);
@@ -548,9 +572,18 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       }
       
       int[] deleted = dictData.get("DELETED"); //TODO
+      doneSoFar += deleted.length;
       lastRecid = (Integer) message.getParam("last_recid");
+      
+      log.info("Checking database; last_recid={}; found={}", lastRecid, doneSoFar);
     }
     
+    if (!finished) {
+      ModifiableSolrParams mp = new ModifiableSolrParams(params);
+      mp.set("last_recid", lastRecid);
+      mp.remove("discover");
+      queue.registerNewBatch("discover=1"+mp.toString());
+    }
     return new BitSet[]{present, missing};
     
   }
