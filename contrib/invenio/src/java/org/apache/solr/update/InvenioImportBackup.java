@@ -65,7 +65,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
 
   private volatile int counter = 0;
   private boolean asynchronous = true;
-  private volatile StringBuilder workerMessage = new StringBuilder();
+  private volatile List<String> workerMessage = new ArrayList<String>();
   private volatile String tokenMessage = "";
 
   private long sleepTime = 300;
@@ -294,7 +294,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
         printInfo(rsp);
         return;
       }
-      workerMessage = new StringBuilder();
+      workerMessage.clear();
       setBusy(true);
       if (isAsynchronous()) {
         runAsynchronously(req);
@@ -333,11 +333,16 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     rows.put("restartedRequests", Integer.toString(queue.queuedOut));
     rows.put("docsToCheck", Integer.toString(queue.countDocs(queue.tbdQueue)));
     
-    rsp.add("lastWorkerMessage", getWorkerMessage());
+    rsp.add("lastWorkerMessage", getLastWorkerMessage());
     
     rsp.add("info", rows);
   }
   
+
+  private String getLastWorkerMessage() {
+    if (workerMessage.size() > 0) return workerMessage.get(0);
+    return "<no message yet>";
+  }
 
   private void printMissingRecs(SolrQueryResponse rsp) {
     printInfo(rsp);
@@ -384,6 +389,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       fb.add(rd.toString());
     }
     
+    rsp.add("allMessages", getWorkerMessage());
   }
 
   private void setToken(String string) {
@@ -449,13 +455,16 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
   }
 
   public void setWorkerMessage(String msg) {
-    log.info(msg);
-    workerMessage.append(msg);
-    workerMessage.append("\n");
+    workerMessage.add(0, msg);
   }
 
   public String getWorkerMessage() {
-    return workerMessage.toString();
+    StringBuilder out = new StringBuilder();
+    for (String msg: workerMessage) {
+      out.append(msg);
+      out.append("\n");
+    }
+    return out.toString();
   }
 
   /*

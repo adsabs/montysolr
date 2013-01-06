@@ -114,9 +114,10 @@ def recreate_index(solr_url,
     log.info('Stopped at round: %s, total time: %s' % (round, time.time() - start))
     
     req(doctor_url, command="start")
+    time.sleep(1)
     while (now - start) < max_time:
         rsp = req(doctor_url, command="info")
-        if rsp['status'] != 'busy':
+        if rsp['status'] == 'idle':
             break
         now = time.time()
         time.sleep(delay)
@@ -125,8 +126,25 @@ def recreate_index(solr_url,
     log.info("Indexing finished, here is status info from: %s" % doctor_url)
     log.info(repr(rsp))
     
+    rsp = req(solr_url + "/update", commit="true")
     
+    req(doctor_url, command="discover")
+    req(doctor_url, command="start")
+    time.sleep(1)
+    while (now - start) < max_time:
+        rsp = req(doctor_url, command="info")
+        if rsp['status'] == 'idle':
+            break
+        now = time.time()
+        time.sleep(delay)
+        
+    rsp = req(doctor_url, command="show-missing")
+    log.info("Did we get any missing records? %s" % doctor_url)
+    log.info(repr(rsp))
 
+    
+    rsp = req(solr_url + "/update", commit="true")
+    log.info("commit was called")
 
 
 if __name__ == '__main__':
