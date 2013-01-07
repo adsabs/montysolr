@@ -76,11 +76,10 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		
 		// naive implementation (probably slow)
 		IndexableField bf = document.getField(boostField);
-		if (bf==null) throw new IOException("Every document must have field: " + boostField);
+		//if (bf==null) throw new IOException("Every document must have field: " + boostField);
 		
-		Number citeBoost = bf.numericValue();
-    if (citeBoost != null) {
-      s = s + (s * citeBoost.floatValue());
+    if (bf != null) {
+      s = s + (s * bf.numericValue().floatValue());
     }
 		
     // find documents that are cited by our doc (references)
