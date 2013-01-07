@@ -591,7 +591,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       ModifiableSolrParams mp = new ModifiableSolrParams(params);
       mp.set("last_recid", lastRecid);
       mp.remove("discover");
-      queue.registerNewBatch("discover=1"+mp.toString());
+      queue.registerNewBatch("discover=1&"+mp.toString());
     }
     return new BitSet[]{present, missing};
     
