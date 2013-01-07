@@ -88,6 +88,69 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 
 	public void testOperators() throws Exception {
+	  
+    /*
+     * It is different if Aqp handles the boolean operations or if 
+     * edismax() does it. 
+     * 
+     * Aqp has more control, see: https://issues.apache.org/jira/browse/SOLR-4141
+     */
+    
+    assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax 
+        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"),          //aqp
+        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat)", "qf", "title^1 abstract^0.5"), //edismax
+        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "dog AND cat", "qf", "title^1 abstract^0.5"), //aqp
+        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax
+        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"), //aqp
+        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "edismax(dog cat)", "qf", "title^1 abstract^0.5"), //edismax (thinks it is a phrase?)
+        "((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))~2", BooleanQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
+        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+    
+    
+    // make sure the *:* query is not parsed by edismax
+    assertQueryEquals(req("qt", "aqp", "q", "*", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "*:*", MatchAllDocsQuery.class);
+    assertQueryEquals(req("qt", "aqp", "q", "*:*", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "*:*", MatchAllDocsQuery.class);
+    
+    /*
+     * raw() function operator
+     */
+    
+    // TODO: #234
+    //  {!raw f=myfield}Foo Bar creates TermQuery(Term("myfield","Foo Bar"))
+    //assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=myfield}Foo Bar)"), "myfield:Foo Bar", TermQuery.class);
+    //assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=x}\"Foo Bar\")"), "x:\"Foo Bar\"", TermQuery.class);
+    
+    assertQueryParseException(req("qt", "aqp", "f", "myfield", "q", "raw(Foo Bar)"));
+    
+    
+    
+    // if we use the solr analyzer to parse the query, all is configured to remove stopwords 
+    assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but"), 
+        "((all:dog) (all:cat)) title:bat", BooleanQuery.class);
+    
+    // but pub is normalized_string with a different analyzer and should retain 'but'
+    assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but"), 
+        "((all:dog) (all:cat)) title:bat pub:but", BooleanQuery.class);
+
+	  
 	  /**
      *  new function queries, the 2nd order citation operators
      */
@@ -334,65 +397,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "| ((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,)^2.3) " +
         "| title:\"forman c\")", BooleanQuery.class);
     
-    /*
-     * It is different if Aqp handles the boolean operations or if 
-     * edismax() does it. 
-     * 
-     * Aqp has more control, see: https://issues.apache.org/jira/browse/SOLR-4141
-     */
-    
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax 
-				"(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
-		
-		assertQueryEquals(req("qt", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"),          //aqp
-        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
-		
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog AND cat)", "qf", "title^1 abstract^0.5"), //edismax
-				"+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
-		
-		assertQueryEquals(req("qt", "aqp", "q", "dog AND cat", "qf", "title^1 abstract^0.5"), //aqp
-        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
-		
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax
-				"(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
-		
-		assertQueryEquals(req("qt", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"), //aqp
-        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
-		
-    assertQueryEquals(req("qt", "aqp", "q", "edismax(dog cat)", "qf", "title^1 abstract^0.5"), //edismax (thinks it is a phrase?)
-        "((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))~2", BooleanQuery.class);
-    
-    assertQueryEquals(req("qt", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
-        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
-		
-    
-    // make sure the *:* query is not parsed by edismax
-    assertQueryEquals(req("qt", "aqp", "q", "*", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "*:*", MatchAllDocsQuery.class);
-    assertQueryEquals(req("qt", "aqp", "q", "*:*", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "*:*", MatchAllDocsQuery.class);
-		
-    /*
-     * raw() function operator
-     */
-		
-    //  {!raw f=myfield}Foo Bar creates TermQuery(Term("myfield","Foo Bar"))
-    assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=myfield}Foo Bar)"), "myfield:Foo Bar", TermQuery.class);
-    assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=x}\"Foo Bar\")"), "x:\"Foo Bar\"", TermQuery.class);
-    
-    assertQueryParseException(req("qt", "aqp", "f", "myfield", "q", "raw(Foo Bar)"));
-		
-		
-		
-		// if we use the solr analyzer to parse the query, all is configured to remove stopwords 
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but"), 
-				"((all:dog) (all:cat)) title:bat", BooleanQuery.class);
-		
-		// but pub is normalized_string with a different analyzer and should retain 'but'
-		assertQueryEquals(req("qt", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but"), 
-				"((all:dog) (all:cat)) title:bat pub:but", BooleanQuery.class);
 		
 		assertQueryEquals(req("qt", "aqp", "q", "identifier:2011A&A...536A..89G"), 
         "identifier:2011a&a...536a..89g", TermQuery.class);

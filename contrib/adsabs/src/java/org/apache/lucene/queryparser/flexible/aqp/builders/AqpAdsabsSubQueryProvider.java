@@ -15,6 +15,7 @@ import org.apache.lucene.queryparser.flexible.aqp.AqpSubqueryParserFull;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
@@ -309,16 +310,22 @@ public class AqpAdsabsSubQueryProvider implements
 		  assert subQuery != null;
 		}
 		else {
-  		String qStr = reqAttr.getQueryString();
-  		
-  		Integer[] start_span = new Integer[]{0,0};
-  		Integer[] end_span = new Integer[]{qStr.length(),qStr.length()};
-  		
-  		
-  		swimDeep(node.getChildren().get(0), start_span);
-  		swimDeep(node.getChildren().get(node.getChildren().size()-1), end_span);
-  		
-  		subQuery = qStr.substring(start_span[1]+1, end_span[1]-1);
+		  
+		  if (node instanceof AqpANTLRNode) {
+		    subQuery = AqpQProcessor.getOriginalInput((AqpANTLRNode) node.getChildren().get(1));
+		  }
+		  else { // less precise method of re-constructing what was inside brackets
+    		String qStr = reqAttr.getQueryString();
+    		
+    		Integer[] start_span = new Integer[]{0,0};
+    		Integer[] end_span = new Integer[]{qStr.length(),qStr.length()};
+    		
+    		
+    		swimDeep(node.getChildren().get(0), start_span);
+    		swimDeep(node.getChildren().get(node.getChildren().size()-1), end_span);
+    		
+    		subQuery = qStr.substring(start_span[1]+1, end_span[1]-1);
+		  }
 		}
 		
 		AqpFunctionQParser parser = new AqpFunctionQParser(subQuery, reqAttr.getLocalParams(), 

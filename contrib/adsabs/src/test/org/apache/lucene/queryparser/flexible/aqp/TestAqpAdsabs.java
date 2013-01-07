@@ -95,6 +95,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	
 	public void testOldPositionalSearch() throws Exception {
 		
+	  WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+	  
 		// TODO: check for the generated warnings
 		assertQueryEquals("^two", null, "pos(author,two,1,1)", FunctionQuery.class);
 		assertQueryEquals("^two$", null, "pos(author,two,1,-1)", FunctionQuery.class);
@@ -123,8 +125,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// by users with normal words
 		assertQueryEquals("^Kurtz, M. -Eichhorn", null, 
 			"+pos(author,\"Kurtz, M.\",1,1) -eichhorn");
-		assertQueryEquals("^Kurtz, M. -Eichhorn, G. 2000", null, 
-			"+pos(author,\"Kurtz, M.\",1,1) -spanNear([eichhorn, g], 1, true)");
+		assertQueryEquals("^Kurtz, M. -Eichhorn, G. 2000", wsa, 
+			"+pos(author,\"Kurtz, M.\",1,1) -Eichhorn,G. +2000");
 		assertQueryEquals("^CERN, PH. -nothing", null, 
 			"+pos(author,\"CERN, PH.\",1,1) -nothing");
 		
@@ -567,9 +569,14 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
     assertQueryEquals("-m:(a b NEAR4 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 4, true) +(+m:d +m:e)");
     assertQueryNodeException("m:(a b NEAR7 c)"); // by default, only range 1-5 is allowed (in configuration)
     
+    assertQueryEquals("author:accomazzi, *a*", null, "author:accomazzi,*a*");
 		assertQueryEquals("author:(huchra)", null, "author:huchra");
 		assertQueryEquals("author:(huchra, j)", null, "author:huchra author:j");
-		assertQueryEquals("author:(kurtz; -eichhorn, g)", null, "author:kurtz -spanNear([author:eichhorn, author:g], 1, true)");
+		
+		
+		assertQueryEquals("author:(kurtz; -eichhorn, g)", wsa, "author:kurtz -author:eichhorn,g");
+		assertQueryEquals("author:(kurtz; -\"eichhorn, g\")", null, "author:kurtz -author:\"eichhorn g\"");
+		
 		assertQueryEquals("author:(muench-nashrallah)", wsa, "author:muench-nashrallah");
 		assertQueryEquals("\"dark matter\" OR (dark matter -LHC)", null, "\"dark matter\" dark matter -lhc");
 		

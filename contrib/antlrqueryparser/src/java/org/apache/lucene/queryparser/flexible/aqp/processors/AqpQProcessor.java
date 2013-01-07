@@ -100,7 +100,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     return node;
   }
 	
-	public String getOriginalInput(AqpANTLRNode node) throws ParseException {
+	public static String getOriginalInput(AqpANTLRNode node) throws ParseException {
 	  
 	  CharStream inputStream = getInputStream(node);
 	  if (inputStream == null) {
@@ -122,7 +122,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     return inputStream.substring(startIndex[0], lastIndex[0]);
   }
 	
-	private CharStream getInputStream(QueryNode node) {
+	private static CharStream getInputStream(QueryNode node) {
     if (node.isLeaf()) {
       if (node instanceof AqpANTLRNode) {
         if (((AqpANTLRNode) node).getTree().getToken().getInputStream() != null) {
@@ -141,7 +141,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     return null;
   }
 
-  private void getTheHighestIndex(int[] i, QueryNode node) {
+  private static void getTheHighestIndex(int[] i, QueryNode node) {
 	  if (!node.isLeaf()) {
 	    for (QueryNode n: node.getChildren()) {
 	      getTheHighestIndex(i, n);
@@ -155,7 +155,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
 	  }
 	}
 
-  private void getTheLowestIndex(int[] i, QueryNode node) {
+  private static void getTheLowestIndex(int[] i, QueryNode node) {
     if (!node.isLeaf()) {
       for (QueryNode n: node.getChildren()) {
         getTheLowestIndex(i, n);
