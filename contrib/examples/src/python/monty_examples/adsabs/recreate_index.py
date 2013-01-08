@@ -7,6 +7,7 @@ import urllib2 as u2
 import httplib
 import simplejson
 import urllib
+import pprint
 
 from montysolr import config 
 
@@ -124,7 +125,7 @@ def recreate_index(solr_url,
         
     rsp = req(doctor_url, command="detailed-info")
     log.info("Indexing finished, here is status info from: %s" % doctor_url)
-    log.info(repr(rsp))
+    log.info(pprint.pformat(rsp, indent=2, width=200))
     
     rsp = req(solr_url + "/update", commit="true")
     
@@ -140,7 +141,7 @@ def recreate_index(solr_url,
         
     rsp = req(doctor_url, command="show-missing")
     log.info("Did we get any missing records? %s" % doctor_url)
-    log.info(repr(rsp))
+    log.info(pprint.pformat(rsp, indent=2, width=200))
 
     
     rsp = req(solr_url + "/update", commit="true")
