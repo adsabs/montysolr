@@ -59,10 +59,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
           "Massachusets\0Institute\0of\0Technology, MIT\n" +
           "Hubble\0Space\0Microscope, HSM\n" +
           "ABC,Astrophysics\0Business\0Center\n" +
-          "Astrophysics\0Business\0Commons, ABC"
+          "Astrophysics\0Business\0Commons, ABC\n"
       });
       replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
-      replaceInFile(newConfig, "synonyms=\"ads_text_acr.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+      replaceInFile(newConfig, "synonyms=\"ads_text_query.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -140,6 +140,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", F.TYPE_ADS_TEXT, "Mirrors of the HubbleSpaceTelescope fourth"));
     assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxx8", F.TYPE_ADS_TEXT, "Take Massachusets Institute of Technology (MIT)"));
     assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxx9", F.TYPE_ADS_TEXT, "MIT developed new network protocols"));
+    assertU(adoc(F.ID, "10", F.BIBCODE, "xxxxxxxxxxx10", F.TYPE_ADS_TEXT, "No-sky data survey"));
+    assertU(adoc(F.ID, "11", F.BIBCODE, "xxxxxxxxxxx11", F.TYPE_ADS_TEXT, "All-sky data survey"));
+    assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxx12", F.TYPE_ADS_TEXT, "NoSky data survey"));
+    assertU(adoc(F.ID, "13", F.BIBCODE, "xxxxxxxxxxx13", F.TYPE_ADS_TEXT, "AllSky data survey"));
 
     assertU(commit());
 
@@ -285,16 +289,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      * Example of the CamelCase - because the WordDelimiterFactory is before the synonym filter
      * these token are first split and then matched. HOWEVER, the case is important!!
      * 
-     * So, HubbleSpaceMicroscope is split into: Hubble, Space, Microscope
+     * So, Hubble.Space.Microscope is split into: Hubble, Space, Microscope
      * 
      * Which will be found only if the synonym file contains the same case (OR: if we enable the
      * case insensitive search, which is on my TODO list)
      * 
      */
     assertQueryEquals(req("q", "HubbleSpaceMicroscope bum MIT BX", "qt", "aqp"), 
-        "+(all:hubble space microscope all:acr::hsm) +all:bum +(all:massachusets institute of technology all:acr::mit) +all:acr::bx", 
+        "+all:hubblespacemicroscope +all:bum +(all:massachusets institute of technology all:acr::mit) +all:acr::bx", 
         BooleanQuery.class);
-    assertQueryEquals(req("q", "HubbleSpaceMicroscope -bum MIT BX", "qt", "aqp"), 
+    assertQueryEquals(req("q", "Hubble.Space.Microscope -bum MIT BX", "qt", "aqp"), 
         "+(all:hubble space microscope all:acr::hsm) -all:bum +(all:massachusets institute of technology all:acr::mit) +all:acr::bx",
         BooleanQuery.class);
 
@@ -329,6 +333,25 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQueryEquals(req("q", "ABC", "qt", "aqp"), 
         "all:acr::abc all:astrophysics business center all:astrophysics business commons", 
         BooleanQuery.class);
+    
+    
+    // "all-sky" is indexed as "all", "sky", "all-sky"
+    // we could achieve higher precision if WDDF generateWordParts=0
+    // but that would cause "some-other-hyphenated" tokens to be missed
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":no-sky"), "//*[@numFound='3']", 
+        "//doc/str[@name='id'][.='10']",
+        "//doc/str[@name='id'][.='11']",
+        "//doc/str[@name='id'][.='12']");
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":nosky"), "//*[@numFound='2']", 
+        "//doc/str[@name='id'][.='10']",
+        "//doc/str[@name='id'][.='12']");
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":all-sky"), "//*[@numFound='3']", 
+        "//doc/str[@name='id'][.='10']",
+        "//doc/str[@name='id'][.='11']",
+        "//doc/str[@name='id'][.='13']");
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":allsky"), "//*[@numFound='2']", 
+        "//doc/str[@name='id'][.='11']",
+        "//doc/str[@name='id'][.='13']");
   }
 
 

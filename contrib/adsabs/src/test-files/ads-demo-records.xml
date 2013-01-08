@@ -24,6 +24,12 @@
             <!-- MODIFIED: added for email testing -->
             <subfield code="m">rcutri@example.edu</subfield>
         </datafield>
+        <datafield ind1=" " ind2=" " tag="700">
+            <subfield code="a">Nonexisting, F.</subfield>
+            <subfield code="b">Nonexisting, F</subfield>
+            <subfield code="e">regular</subfield>
+            <subfield code="7">SIMBAD</subfield>
+        </datafield>
         <datafield ind1=" " ind2=" " tag="245">
             <subfield code="a">WISE All-Sky Data Release (Cutri+ 2012)</subfield>
             <subfield code="7">SIMBAD</subfield>
@@ -59,7 +65,7 @@
         </datafield>
         <datafield ind1="1" ind2=" " tag="653">
             <subfield code="a">WISE</subfield>
-            <subfield code="b"/>
+            <subfield code="b">UNWISE</subfield>
             <subfield code="7">SIMBAD</subfield>
         </datafield>
         <datafield ind1=" " ind2=" " tag="700">
@@ -1953,7 +1959,7 @@
   <datafield tag="773" ind1=" " ind2=" ">
     <subfield code="p">The Astrophysical Journal</subfield>
     <subfield code="v">760</subfield>
-    <subfield code="n">2</subfield>
+    <subfield code="n">2x</subfield>
     <subfield code="c">135</subfield>
     <subfield code="y">2012</subfield>
     <subfield code="z">The Astrophysical Journal, Volume 760, Issue 2, article id. 135, &lt;NUMPAGES&gt;7&lt;/NUMPAGES&gt; pp. (2012).</subfield>

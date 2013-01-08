@@ -57,7 +57,6 @@ public class AqpAdsabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
     if (node instanceof FieldQueryNode) {
       fv = ((FieldQueryNode) node).getTextAsString();
     }
-    
     QueryNode rn = super.postProcessNode(node);
     if (rn != node || node instanceof FieldQueryNode 
         //&& !((FieldQueryNode)node).getTextAsString().equals(fv)

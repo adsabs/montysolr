@@ -65,7 +65,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 					"lensing => mikrolinseneffekt",
 					"pink => pinkish"
 			});
-			replaceInFile(newConfig, "synonyms=\"ads_text_acr.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+			replaceInFile(newConfig, "synonyms=\"ads_text_query.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
 		  // hand-curated synonyms
       File curatedSynonyms = createTempFile(new String[]{

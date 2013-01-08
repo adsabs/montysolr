@@ -169,17 +169,22 @@ public class AqpAdsabsQParser extends QParser {
 		
 		// this whole sections is necessary for date parsing, i should revisit and clean it
 		// it is a mess
+		HashMap<String, NumericConfig> ncm = new HashMap<String, NumericConfig>();
+    config.set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP, ncm);
+    
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
     sdf.setTimeZone(DateField.UTC);
     
-    HashMap<String, NumericConfig> ncm = new HashMap<String, NumericConfig>();
-    config.set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP, ncm);
+    for (String field: new String[]{"read_count", "cite_read_boost"}) {
+      ncm.put(field, new NumericConfig(6, NumberFormat.getNumberInstance(), NumericType.FLOAT));
+    }
     
-    config.get(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP)
-      .put("date", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+    ncm.put("date", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+
+    for (String field: new String[]{"recid", "pubdate_sort", "citation_count"}) {
+      ncm.put(field, new NumericConfig(1, NumberFormat.getNumberInstance(), NumericType.INT));
+    }
     
-    config.get(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP)
-      .put("recid", new NumericConfig(1, NumberFormat.getNumberInstance(), NumericType.INT));
     
     /*
     config.get(StandardQueryConfigHandler.ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP)

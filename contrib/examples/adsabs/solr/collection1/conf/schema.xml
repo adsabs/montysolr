@@ -552,6 +552,7 @@
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
 					catenateNumbers="1" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1" />
+			    <filter class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 				<filter class="solr.AcronymTokenFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
@@ -562,6 +563,7 @@
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
 					catenateNumbers="1" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1" />
+			    <filter class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
