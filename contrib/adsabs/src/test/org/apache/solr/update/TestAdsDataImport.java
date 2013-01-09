@@ -26,14 +26,12 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
 
 /**
- * Tests that the dataimport handler does really wait and does not
- * return immediately. Also, one of the fields is fetched by Python.
+ * Tests that the dataimport handler gets all the fields needed.
  * 
  */
 
@@ -57,10 +55,8 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
 	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
 	    	});
-		
 		String configFile = MontySolrSetup.getMontySolrHome()
       + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
-		
 		return configFile;
 	}
 
@@ -77,13 +73,10 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     if (System.getProperty("test.mongodb.host", null) != null) {
       File newDataConfig;
       try {
-        
         newConfig = duplicateFile(new File(configFile));
         newDataConfig = duplicateFile(new File(dataConfig));
-    
         replaceInFile(newDataConfig, "mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("test.mongodb.host")));
         replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
-    
       } catch (IOException e) {
         e.printStackTrace();
         throw new IllegalStateException(e.getMessage());
@@ -96,31 +89,30 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 
 
 	
-	public void testImport() throws Exception {
-		
-		
-		String testDir = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/";
-		
-		SolrRequestHandler handler = h.getCore().getRequestHandler("/invenio/import");
-		
-		SolrCore core = h.getCore();
-		
-		String url = "file://" + MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/ads-demo-records.xml";
-		
-		SolrQueryRequest req = req("command", "full-import",
-				"dirs", testDir,
-				"commit", "true",
-				"url", url
-				);
-		SolrQueryResponse rsp = new SolrQueryResponse();
-		
-		// if you get AssertionError here, most likely the test cannot access
-		// the mongodb instance (on localhost?)
-		core.execute(handler, req, rsp);
-		
-		commit("waitFlush", "true", "waitSearcher", "true");
-		
-		//dumpDoc(null);
+  public void testImport() throws Exception {
+
+    String testDir = MontySolrSetup.getMontySolrHome()
+        + "/contrib/adsabs/src/test-files/";
+
+    SolrRequestHandler handler = h.getCore().getRequestHandler(
+        "/invenio/import");
+
+    SolrCore core = h.getCore();
+
+    String url = "file://" + MontySolrSetup.getMontySolrHome()
+        + "/contrib/adsabs/src/test-files/ads-demo-records.xml";
+
+    SolrQueryRequest req = req("command", "full-import", "dirs", testDir,
+        "commit", "true", "url", url);
+    SolrQueryResponse rsp = new SolrQueryResponse();
+
+    // if you get AssertionError here, most likely the test cannot access
+    // the mongodb instance (on localhost)
+    core.execute(handler, req, rsp);
+
+    commit("waitFlush", "true", "waitSearcher", "true");
+
+    // dumpDoc(null);
 		
 		req = req("command", "full-import",
         "dirs", testDir,
@@ -141,7 +133,6 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//str[@name='status'][.='idle']"
         );
 		
-		DirectSolrConnection direct = getDirectServer();
 
 		
     /*
@@ -603,13 +594,13 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		/*
 		 * alternate_title
 		 */
-		
+
 		assertQ(req("q", "alternate_title:(Probing red giants)"), 
 		    "//*[@numFound='1']",
 		    "//doc/int[@name='recid'][.='9218605']"
-		    ); 
-		
-		
+		); 
+
+
 		/*
 		 * abstract
 		 * 
@@ -620,7 +611,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "abstract:sph"), "//*[@numFound='1']");
 		assertQ(req("q", "abstract:SPH"), "//*[@numFound='1']");
 		assertQ(req("q", "abstract:PARTICLE"), "//*[@numFound='0']"); // acronyms = acr::particle
-		
+
 		// tokens with special characters inside must be searched as a phrase, otherwise it
 		// becomes: abstract:q'i abstract:q abstract:i abstract:qi
 		// but even as a phrase, it will search for: "q (i qi)"
@@ -628,25 +619,25 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "abstract:\"q'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
 		assertQ(req("q", "abstract:\"q\\\\'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
 		assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
-		
-		
+
+
 		/*
 		 * reference
 		 */
 		assertQ(req("q", "reference:2010mnras.407.2611p"), 
 		    "//*[@numFound='1']",
 		    "//doc/int[@name='recid'][.='9143768']"
-		    );
+		);
 		assertQ(req("q", "reference:2009ApJ...694..556B"), 
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9143768']"
-        );
+		    "//*[@numFound='1']",
+		    "//doc/int[@name='recid'][.='9143768']"
+		);
 		assertQ(req("q", "reference:2004ApJS..154..519S"), 
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9143768']"
-        );
-		
-		
+		    "//*[@numFound='1']",
+		    "//doc/int[@name='recid'][.='9143768']"
+		);
+
+
 		/*
 		 * unfielded search
 		 * 
@@ -655,44 +646,44 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		 * 
 		 * author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1
 		 */
-  	 
-  	// author
+
+		// author
 		assertQ(req("q", "Barabási"),
 		    "//*[@numFound='1']",
 		    "//doc/int[@name='recid'][.='5979890']"
-		    ); 
+		); 
 		// title
 		assertQ(req("q", "bibcode"),
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='2']"
-        );
-    // abstract
-    assertQ(req("q", "DPi1b", "fl", "title,recid"), 
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9218605']");
-    // keyword
-    assertQ(req("q", "KERNEL FUNCTIONS"),
-        "//doc/int[@name='recid'][.='3813361']",
-        "//*[@numFound='1']");
-    // keyword norm
-    assertQ(req("q", "UNWISE"),
-        "//doc/int[@name='recid'][.='9218920']",
-        "//*[@numFound='1']");
-    // affiliations are not copied to all
+		    "//*[@numFound='1']",
+		    "//doc/int[@name='recid'][.='2']"
+		);
+		// abstract
+		assertQ(req("q", "DPi1b", "fl", "title,recid"), 
+		    "//*[@numFound='1']",
+		"//doc/int[@name='recid'][.='9218605']");
+		// keyword
+		assertQ(req("q", "KERNEL FUNCTIONS"),
+		    "//doc/int[@name='recid'][.='3813361']",
+		"//*[@numFound='1']");
+		// keyword norm
+		assertQ(req("q", "UNWISE"),
+		    "//doc/int[@name='recid'][.='9218920']",
+		"//*[@numFound='1']");
+		// affiliations are not copied to all
 		assertQ(req("q", "kavli"), 
 		    //"//doc/int[@name='recid'][.='9218511']"
 		    "//*[@numFound='0']"
-		    ); 
+		); 
 		// alternate title copied to all
 		assertQ(req("q", "Probing red giants"), 
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9218605']"
-        ); 
+		    "//*[@numFound='1']",
+		    "//doc/int[@name='recid'][.='9218605']"
+		); 
 		// full
 		assertQ(req("q", "pleasure"), 
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='1810902']"
-        );
+		    "//*[@numFound='1']",
+		    "//doc/int[@name='recid'][.='1810902']"
+		);
 		
 		
 		/*
@@ -704,38 +695,38 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "id:16"), "//*[@numFound='1']");
 		assertQ(req("q", "citations(id:12)"), "//*[@numFound='3']");
 		assertQ(req("q", "citations(title:test)"), "//*[@numFound='4']");
-		
-		
+
+
 		assertQ(req("q", "references(id:12)"), "//*[@numFound='0']");
 		assertQ(req("q", "references(id:13)"), "//*[@numFound='2']");
 		assertQ(req("q", "references(id:12 OR id:13)"), "//*[@numFound='2']");
 		assertQ(req("q", "references(title:test)"), "//*[@numFound='5']");
 		assertQ(req("q", "references(recid:12)"), "//*[@numFound='0']");
-    assertQ(req("q", "references(recid:13)"), "//*[@numFound='2']");
-    assertQ(req("q", "references(recid:12 OR recid:13)"), "//*[@numFound='2']");
-    assertQ(req("q", "references(title:test)"), "//*[@numFound='5']");
-		
-		
-    /*
-     * read_count (float type)
-     */
-    //dumpDoc(null, "recid", "read_count");
+		assertQ(req("q", "references(recid:13)"), "//*[@numFound='2']");
+		assertQ(req("q", "references(recid:12 OR recid:13)"), "//*[@numFound='2']");
+		assertQ(req("q", "references(title:test)"), "//*[@numFound='5']");
+
+
+		/*
+		 * read_count (float type)
+		 */
+		//dumpDoc(null, "recid", "read_count");
 		assertQ(req("q", "read_count:1.0"), 
 		    "//doc/int[@name='recid'][.='9218920']",
-		    "//*[@numFound='1']");
+		"//*[@numFound='1']");
 		assertQ(req("q", "read_count:[0.0 TO 1.0]"), 
-        "//doc/int[@name='recid'][.='9218920']",
-        "//*[@numFound='1']");
+		    "//doc/int[@name='recid'][.='9218920']",
+		"//*[@numFound='1']");
 		assertQ(req("q", "read_count:2.0"), 
 		    "//*[@numFound='1']",
 		    "//doc/int[@name='recid'][.='1810902']"
-		    );
+		);
 		assertQ(req("q", "read_count:[44 TO 45]"), 
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9143768']"
-        );
-		
-		
+		    "//*[@numFound='1']",
+		    "//doc/int[@name='recid'][.='9143768']"
+		);
+
+
 		/*
 		 * cite_read_boost
 		 */
@@ -745,7 +736,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "cite_read_boost:[0.0 TO 0.2]"), 
         "//doc/int[@name='recid'][.='9218920']",
         "//*[@numFound='1']");
-		*/
+		 */
 		
     /*
      * pubdate - 17/12/2012 changed to be the date type
