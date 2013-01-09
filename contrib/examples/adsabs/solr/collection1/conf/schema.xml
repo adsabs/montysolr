@@ -647,7 +647,7 @@
 			stored="${storeAll:false}" omitNorms="true" />
 
 		<field name="page" type="first_string" indexed="true" stored="true"
-			multiValued="false" /> <!-- really? -->
+			multiValued="true" />
 		<field name="year" type="first_string" stored="true" indexed="true"
 			multiValued="false" />
 		<field name="volume" type="normalized_string_ascii" stored="true"

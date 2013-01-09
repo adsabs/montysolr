@@ -45,7 +45,9 @@
         
         <!-- note, setting the column="author" would result in duplication, DIH
              creates two separate fields with the same name and they get merged
-             into one field (duplication happens) - use copyField instead -->
+             into one field (duplication happens) - use copyField instead or use
+             name="index-name" instead. BUT be careful that the column always
+             has different (non-duplicated) name! -->
         <field column="a_100"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='a']" />
         <field column="a_700"        
@@ -68,14 +70,14 @@
             and picks from it the two values, concatenates them and parses
             together for indexing
             -->
-        <field column="aff" name="aff"       
+        <field column="aff100" name="aff"       
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='u']" />
-        <field column="aff" name="aff"        
+        <field column="aff700" name="aff"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='u']" />
             
-        <field column="email" name="email"        
+        <field column="email100" name="email"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='m']" />
-        <field column="email" name="email"        
+        <field column="email700" name="email"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='m']" />       
 
         <!--  245 is the original title, 242 is translation -->
@@ -130,14 +132,14 @@
         <field column="object"        
             xpath="/collection/record/datafield[@tag='694']/subfield[@code='a']" />
         
-        <field column="keyword" name="keyword"        
+        <field column="keyword653" name="keyword"        
             xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />  <!--  free-text version -->
-        <field column="keyword_norm" name="keyword_norm"        
+        <field column="keyword_norm653" name="keyword_norm"        
             xpath="/collection/record/datafield[@tag='653']/subfield[@code='b']" />  <!--  normalized version -->
             
-        <field column="keyword" name="keyword"        
+        <field column="keyword695" name="keyword"        
             xpath="/collection/record/datafield[@tag='695']/subfield[@code='a']" />
-        <field column="keyword_norm" name="keyword"        
+        <field column="keyword_norm653" name="keyword"        
             xpath="/collection/record/datafield[@tag='695']/subfield[@code='b']" />  <!--  normalized version -->
             
         <field column="collaboration"        
@@ -149,9 +151,9 @@
         <field column="pub_raw"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='z']" />
 
-        <field column="page" name="page"        
+        <field column="pageC" name="page"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='c']" />
-        <field column="page" name="page"        
+        <field column="pageI" name="page"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='i']" />
 
         <field column="issue"        

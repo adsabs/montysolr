@@ -316,11 +316,18 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     /*
      * page marc:773
      */
-    assertQ(req("q", "page:2056 AND recid:9218920"), "//*[@numFound='1']");
-    assertQ(req("q", "page:2056-2059 AND recid:9218920"), "//*[@numFound='1']");
+    //dumpDoc(null, "recid", "page");
+    assertQ(req("q", "page:2056"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218920']");
+    assertQ(req("q", "page:2056-2059 AND recid:9218920"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218920']");
     assertQ(req("q", "page:a056"), "//*[@numFound='1']");
     assertQ(req("q", "page:a056-"), "//*[@numFound='1']");
-    assertQ(req("q", "page:a056-2059 AND recid:2"), "//*[@numFound='1']");
+    assertQ(req("q", "page:a056-2059"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='2']");
     assertQ(req("q", "page:90024"), "//*[@numFound='1']");
 
     /*
@@ -328,10 +335,10 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
      */
     assertQ(req("q", "volume:l219"), 
         "//*[@numFound='1']",
-    "//doc/int[@name='recid'][.='9218511']");
+        "//doc/int[@name='recid'][.='9218511']");
     assertQ(req("q", "volume:L219"), 
         "//*[@numFound='1']",
-    "//doc/int[@name='recid'][.='9218511']");
+        "//doc/int[@name='recid'][.='9218511']");
 
     /*
      * issue
@@ -347,6 +354,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     /*
      * aff
      */
+    //dumpDoc(null, "recid", "aff");
     assertQ(req("q", "aff:NASA"),
         "//doc/int[@name='recid'][.='9218511']",
     "//*[@numFound='1']"); // regardless of case
@@ -528,6 +536,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
      * 
      * Also, the subfields a|z|y are to be indexed inside 'identifier' index
      */
+    //dumpDoc(null, "recid", "identifier");
     assertQ(req("q", "arxiv:1234.5678"), "//*[@numFound='1']");
     assertQ(req("q", "arxiv:\"arXiv:1234.5678\""), "//*[@numFound='1']");
     assertQ(req("q", "arXiv:1234.5678"), "//*[@numFound='1']");
