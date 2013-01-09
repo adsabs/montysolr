@@ -176,13 +176,13 @@ public class AqpAdsabsQParser extends QParser {
     sdf.setTimeZone(DateField.UTC);
     
     for (String field: new String[]{"read_count", "cite_read_boost"}) {
-      ncm.put(field, new NumericConfig(6, NumberFormat.getNumberInstance(), NumericType.FLOAT));
+      ncm.put(field, new NumericConfig(8, NumberFormat.getNumberInstance(Locale.US), NumericType.FLOAT));
     }
     
     ncm.put("date", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
 
     for (String field: new String[]{"recid", "pubdate_sort", "citation_count"}) {
-      ncm.put(field, new NumericConfig(1, NumberFormat.getNumberInstance(), NumericType.INT));
+      ncm.put(field, new NumericConfig(4, NumberFormat.getNumberInstance(Locale.US), NumericType.INT));
     }
     
     

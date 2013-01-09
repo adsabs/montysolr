@@ -29,20 +29,22 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  * Tests that the dataimport handler gets all the fields needed.
  * 
  */
 
-@SuppressCodecs({"Lucene3x", "MockFixedIntBlock", "MockVariableIntBlock", "MockSep", "MockRandom"})
+//@SuppressCodecs({"Lucene3x"})
 public class TestAdsDataImport extends MontySolrQueryTestCase {
 
 
   @BeforeClass
   public static void beforeTestAdsDataImport() throws Exception {
     // to use filesystem instead of ram
-    //System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
+    System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
+    //System.setProperty("tests.codec","SimpleText");
     MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
         + "/contrib/invenio/src/python");
     MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
@@ -713,10 +715,10 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     //dumpDoc(null, "recid", "read_count");
     assertQ(req("q", "read_count:1.0"), 
         "//doc/int[@name='recid'][.='9218920']",
-    "//*[@numFound='1']");
+        "//*[@numFound='1']");
     assertQ(req("q", "read_count:[0.0 TO 1.0]"), 
         "//doc/int[@name='recid'][.='9218920']",
-    "//*[@numFound='1']");
+        "//*[@numFound='1']");
     assertQ(req("q", "read_count:2.0"), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='1810902']"
@@ -725,19 +727,55 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9143768']"
     );
-
+    assertQ(req("q", "read_count:[0 TO 2000]"), 
+        "//*[@numFound='7']",
+        "//doc/int[@name='recid'][.='9143768']",
+        "//doc/int[@name='recid'][.='9218920']",
+        "//doc/int[@name='recid'][.='3813361']",
+        "//doc/int[@name='recid'][.='2310600']",
+        "//doc/int[@name='recid'][.='5979890']",
+        "//doc/int[@name='recid'][.='1810902']",
+        "//doc/int[@name='recid'][.='9311214']"
+    );
 
     /*
      * cite_read_boost
      */
-    /*
-		dumpDoc(null, "recid", "cite_read_boost");
-		setDebug(true);
-		assertQ(req("q", "cite_read_boost:[0.0 TO 0.2]"), 
+		//dumpDoc(null, "recid", "read_count", "cite_read_boost");
+		assertQ(req("q", "cite_read_boost:0.2606999999999"), 
         "//doc/int[@name='recid'][.='9218920']",
         "//*[@numFound='1']");
-     */
-
+		assertQ(req("q", "cite_read_boost:0.1153"), 
+        "//doc/int[@name='recid'][.='1810902']",
+        "//*[@numFound='1']");
+		assertQ(req("q", "cite_read_boost:[0.1152 TO 0.1153]"), 
+        "//doc/int[@name='recid'][.='1810902']",
+        "//*[@numFound='1']");
+		assertQ(req("q", "cite_read_boost:[0.1152 TO 0.115299]"), 
+        "//*[@numFound='0']");
+		assertQ(req("q", "cite_read_boost:[0.115299 TO 0.1153]"), 
+		    "//doc/int[@name='recid'][.='1810902']",
+        "//*[@numFound='1']");
+		assertQ(req("q", "cite_read_boost:0.2182"), 
+        "//doc/int[@name='recid'][.='2310600']",
+        "//*[@numFound='1']");
+		assertQ(req("q", "cite_read_boost:[0.0 TO 0.2607]"), 
+		    "//*[@numFound='3']",
+		    "//doc/int[@name='recid'][.='9218920']",
+		    "//doc/int[@name='recid'][.='2310600']",
+		    "//doc/int[@name='recid'][.='1810902']" 
+        );
+		assertQ(req("q", "cite_read_boost:[0.0 TO 1.0]"),
+		    "//*[@numFound='7']",
+        "//doc/int[@name='recid'][.='9143768']",
+        "//doc/int[@name='recid'][.='9218920']",
+        "//doc/int[@name='recid'][.='3813361']",
+        "//doc/int[@name='recid'][.='2310600']",
+        "//doc/int[@name='recid'][.='5979890']",
+        "//doc/int[@name='recid'][.='1810902']",
+        "//doc/int[@name='recid'][.='9311214']"
+        );
+		
     /*
      * pubdate - 17/12/2012 changed to be the date type
      * 

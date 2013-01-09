@@ -1939,17 +1939,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         BooleanQuery.class);
 
     
+    
+    
     /*
      * 
     TODO: 
-    assertQ(req("q", "author:\"ADAMČuk, m\""), "//*[@numFound='3']");
-    assertQ(req("q", "author:\"adamčuk, m\""), "//*[@numFound='3']");
-    assertQ(req("q", "author:\"adamchuk, m\""), "//*[@numFound='3']");
-    assertQ(req("q", "author:\"adamcuk, m\""), "//*[@numFound='3']");
-    assertQ(req("q", "author:\"adamčuk, molja\""), "//*[@numFound='2']"); // should not match record with Adamčuk, marel
-    assertQ(req("q", "author:\"müller, w\""), "//*[@numFound='2']");
-    assertQ(req("q", "author:\"mueller, w\""), "//*[@numFound='2']");
-    assertQ(req("q", "author:\"muller, w\""), "//*[@numFound='2']");
     
     assertQ(req("q", "author:\"Albert, R\""), "//*[@numFound='1']");
     assertQ(req("q", "author:\"Albert, Reeka\""), "//*[@numFound='1']");
@@ -1966,8 +1960,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     */
     
-    // not working because: adamczuk, m is  not in synonym file
-    //assertQ(req("q", "author:\"adamczuk, m\""), "//*[@numFound='3']");
 
   }
 
