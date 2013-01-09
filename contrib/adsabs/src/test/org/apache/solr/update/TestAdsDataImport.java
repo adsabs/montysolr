@@ -37,39 +37,39 @@ import java.io.IOException;
 
 @SuppressCodecs({"Lucene3x", "MockFixedIntBlock", "MockVariableIntBlock", "MockSep", "MockRandom"})
 public class TestAdsDataImport extends MontySolrQueryTestCase {
-	
 
-	@BeforeClass
-	public static void beforeTestAdsDataImport() throws Exception {
-		// to use filesystem instead of ram
-		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-				+ "/contrib/invenio/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
-		
-	}
-	
-	@Override
-	public String getSchemaFile() {
-		makeResourcesVisible(this.solrConfig.getResourceLoader(),
-	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-	    	});
-		String configFile = MontySolrSetup.getMontySolrHome()
-      + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
-		return configFile;
-	}
 
-	@Override
-	public String getSolrConfigFile() {
-		
+  @BeforeClass
+  public static void beforeTestAdsDataImport() throws Exception {
+    // to use filesystem instead of ram
+    //System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
+    MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
+        + "/contrib/invenio/src/python");
+    MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
+
+  }
+
+  @Override
+  public String getSchemaFile() {
+    makeResourcesVisible(this.solrConfig.getResourceLoader(),
+        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+    });
+    String configFile = MontySolrSetup.getMontySolrHome()
+    + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+    return configFile;
+  }
+
+  @Override
+  public String getSolrConfigFile() {
+
     String configFile = MontySolrSetup.getMontySolrHome()
     + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
     String dataConfig = MontySolrSetup.getMontySolrHome()
     + "/contrib/examples/adsabs/solr/collection1/conf/data-config.xml";
-    
+
     File newConfig = new File(configFile);
-    
+
     if (System.getProperty("test.mongodb.host", null) != null) {
       File newDataConfig;
       try {
@@ -82,25 +82,25 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         throw new IllegalStateException(e.getMessage());
       }
     }
-    
+
     return newConfig.getAbsolutePath();
-	}
+  }
 
 
 
-	
+
   public void testImport() throws Exception {
 
     String testDir = MontySolrSetup.getMontySolrHome()
-        + "/contrib/adsabs/src/test-files/";
+    + "/contrib/adsabs/src/test-files/";
 
     SolrRequestHandler handler = h.getCore().getRequestHandler(
-        "/invenio/import");
+    "/invenio/import");
 
     SolrCore core = h.getCore();
 
     String url = "file://" + MontySolrSetup.getMontySolrHome()
-        + "/contrib/adsabs/src/test-files/ads-demo-records.xml";
+    + "/contrib/adsabs/src/test-files/ads-demo-records.xml";
 
     SolrQueryRequest req = req("command", "full-import", "dirs", testDir,
         "commit", "true", "url", url);
@@ -113,15 +113,15 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     commit("waitFlush", "true", "waitSearcher", "true");
 
     // dumpDoc(null);
-		
-		req = req("command", "full-import",
+
+    req = req("command", "full-import",
         "dirs", testDir,
         "commit", "true",
         "url", "file:///non-existing-file?p=recid:500->505 OR recid:508&foo=bar"
-        );
+    );
     rsp = new SolrQueryResponse();
     core.execute(handler, req, rsp);
-    
+
     assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
         "//str[@name='queueSize'][.='3']",
         "//str[@name='failedRecs'][.='0']",
@@ -131,25 +131,25 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//str[@name='restartedRequests'][.='0']",
         "//str[@name='docsToCheck'][.='7']",
         "//str[@name='status'][.='idle']"
-        );
-		
+    );
 
-		
+
+
     /*
      * id - str type, the unique id key, we do no processing
      */
-    
+
     assertQ(req("q", "id:2"), "//*[@numFound='1']");
     assertQ(req("q", "id:9218605"), "//*[@numFound='1']");
     assertQ(req("q", "id:9218920"), "//*[@numFound='1']");
     assertQ(req("q", "id:9106442"), "//*[@numFound='0']");
     assertQ(req("q", "id:002"), "//*[@numFound='0']");
-    
-    
+
+
     /*
      * recid - recid is a int field
      */
-    
+
     assertQ(req("q", "recid:2"), "//*[@numFound='1']");
     assertQ(req("q", "recid:9218605"), "//*[@numFound='1']");
     assertQ(req("q", "recid:9218920"), "//*[@numFound='1']");
@@ -158,11 +158,11 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     assertQ(req("q", "recid:0009218605"), "//*[@numFound='1']");
     assertQ(req("q", "recid:9218920"), "//*[@numFound='1']");
     assertQ(req("q", "recid:9106442"), "//*[@numFound='0']");		
-		
-		
-		//dumpDoc(null, "bibdoc", "author", "author_norm", "first_author", "first_author_norm", "author_facet", "author_surname", "first_author_surname", "author_facet_hier", "first_author_facet_hier");
-		
-		/*
+
+
+    //dumpDoc(null, "bibdoc", "author", "author_norm", "first_author", "first_author_norm", "author_facet", "author_surname", "first_author_surname", "author_facet_hier", "first_author_facet_hier");
+
+    /*
      * author 
      * 
      * here we really test only the import mechanism, the order of authors
@@ -170,397 +170,397 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
      */
     assertQ(req("q", "author:\"Mosser, B\""), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9218605']");
+    "//doc/int[@name='recid'][.='9218605']");
     assertQ(req("q", "author:\"Mosser, B\" AND author:\"Goupil, M\""), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9218605']");
+    "//doc/int[@name='recid'][.='9218605']");
     //System.out.println(h.query(req("q", "author:\"Mosser, B\"")));
-		assert h.query(req("q", "author:\"Mosser, B\""))
-		            .contains("<arr name=\"author_norm\">" +
-		            		      "<str>Mosser, B</str>" + 
-                          "<str>Goupil, M</str>" + 
-                          "<str>Belkacem, K</str>" + 
-                          "<str>Stello, D</str>" + 
-                          "<str>Marques, J</str>" + 
-                          "<str>Elsworth, Y</str>" + 
-                          "<str>Barban, C</str>" + 
-                          "<str>Beck, P</str>" + 
-                          "<str>Bedding, T</str>" + 
-                          "<str>De Ridder, J</str>" + 
-                          "<str>Garcia, R</str>" + 
-                          "<str>Hekker, S</str>" + 
-                          "<str>Kallinger, T</str>" + 
-                          "<str>Samadi, R</str>" + 
-                          "<str>Stumpe, M</str>" + 
-                          "<str>Barclay, T</str>" + 
-                          "<str>Burke, C</str></arr>");
-		assert h.query(req("q", "author:\"Mosser, B\""))
-                .contains("<arr name=\"author\">" + 
-                          "<str>Mosser, B.</str>" + 
-                          "<str>Goupil, M. J.</str>" + 
-                          "<str>Belkacem, K.</str>" + 
-                          "<str>Stello, D.</str>" + 
-                          "<str>Marques, J. P.</str>" + 
-                          "<str>Elsworth, Y.</str>" + 
-                          "<str>Barban, C.</str>" + 
-                          "<str>Beck, P. G.</str>" + 
-                          "<str>Bedding, T. R.</str>" + 
-                          "<str>De Ridder, J.</str><" + 
-                          "str>Garcia, R. A.</str>" + 
-                          "<str>Hekker, S.</str>" + 
-                          "<str>Kallinger, T.</str>" + 
-                          "<str>Samadi, R.</str>" + 
-                          "<str>Stumpe, M. C.</str>" + 
-                          "<str>Barclay, T.</str>" + 
-                          "<str>Burke, C. J.</str>" + 
-                          "</arr>");
-    
-    
-    
-		/*
-		 * For the reference resolver, the field which contains only the last
-		 * name of the first author
-		 * 
-		 *  first_author
-		 *  first_author_norm
-		 *  first_author_surname
-		 *  author_norm
-		 */
-		
-		assertQ(req("q", "first_author:\"Cutri, R M\""), 
+    assert h.query(req("q", "author:\"Mosser, B\""))
+    .contains("<arr name=\"author_norm\">" +
+        "<str>Mosser, B</str>" + 
+        "<str>Goupil, M</str>" + 
+        "<str>Belkacem, K</str>" + 
+        "<str>Stello, D</str>" + 
+        "<str>Marques, J</str>" + 
+        "<str>Elsworth, Y</str>" + 
+        "<str>Barban, C</str>" + 
+        "<str>Beck, P</str>" + 
+        "<str>Bedding, T</str>" + 
+        "<str>De Ridder, J</str>" + 
+        "<str>Garcia, R</str>" + 
+        "<str>Hekker, S</str>" + 
+        "<str>Kallinger, T</str>" + 
+        "<str>Samadi, R</str>" + 
+        "<str>Stumpe, M</str>" + 
+        "<str>Barclay, T</str>" + 
+    "<str>Burke, C</str></arr>");
+    assert h.query(req("q", "author:\"Mosser, B\""))
+    .contains("<arr name=\"author\">" + 
+        "<str>Mosser, B.</str>" + 
+        "<str>Goupil, M. J.</str>" + 
+        "<str>Belkacem, K.</str>" + 
+        "<str>Stello, D.</str>" + 
+        "<str>Marques, J. P.</str>" + 
+        "<str>Elsworth, Y.</str>" + 
+        "<str>Barban, C.</str>" + 
+        "<str>Beck, P. G.</str>" + 
+        "<str>Bedding, T. R.</str>" + 
+        "<str>De Ridder, J.</str><" + 
+        "str>Garcia, R. A.</str>" + 
+        "<str>Hekker, S.</str>" + 
+        "<str>Kallinger, T.</str>" + 
+        "<str>Samadi, R.</str>" + 
+        "<str>Stumpe, M. C.</str>" + 
+        "<str>Barclay, T.</str>" + 
+        "<str>Burke, C. J.</str>" + 
+    "</arr>");
+
+
+
+    /*
+     * For the reference resolver, the field which contains only the last
+     * name of the first author
+     * 
+     *  first_author
+     *  first_author_norm
+     *  first_author_surname
+     *  author_norm
+     */
+
+    assertQ(req("q", "first_author:\"Cutri, R M\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
+    );
     assertQ(req("q", "first_author:\"Cutri, R\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
+    );
     assertQ(req("q", "first_author:\"Cutri,R\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
+    );
     assertQ(req("q", "first_author:Cutri, R"), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-    
+    );
+
     // the record contains "Cutri, R"
     assertQ(req("q", "first_author_norm:\"Cutri, R. M.\""), 
         "//*[@numFound='0']"
-        );
+    );
     assertQ(req("q", "first_author_norm:\"Cutri, R.\""), 
         "//*[@numFound='0']"
-        );
+    );
     assertQ(req("q", "first_author_norm:\"Cutri, R\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
+    );
     assertQ(req("q", "first_author_norm:\"cutri, r\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
+    );
     assertQ(req("q", "first_author_norm:\"Cutri,R\""), 
         "//*[@numFound='0']"
-        );
-    
-    
-		assertQ(req("q", "first_author_surname:cutri"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218920']"
-		    );
-		assertQ(req("q", "first_author_surname:Cutri"), 
+    );
+
+
+    assertQ(req("q", "first_author_surname:cutri"), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		assertQ(req("q", "first_author_surname:\"Cutri,\""), 
+    );
+    assertQ(req("q", "first_author_surname:Cutri"), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		assertQ(req("q", "first_author_surname:\"Cutri,R\""), 
+    );
+    assertQ(req("q", "first_author_surname:\"Cutri,\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		assertQ(req("q", "first_author_surname:CUTRI"), 
+    );
+    assertQ(req("q", "first_author_surname:\"Cutri,R\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		
-		assertQ(req("q", "author_surname:\"Nonexisting, F\""), 
+    );
+    assertQ(req("q", "first_author_surname:CUTRI"), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		assertQ(req("q", "author_surname:\"Nonexisting,F\""), 
+    );
+
+    assertQ(req("q", "author_surname:\"Nonexisting, F\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		assertQ(req("q", "author_surname:\"Nonexisting,\""), 
+    );
+    assertQ(req("q", "author_surname:\"Nonexisting,F\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		
-		assertQ(req("q", "author_norm:\"Nonexisting, F\""), 
+    );
+    assertQ(req("q", "author_surname:\"Nonexisting,\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		
-		/*
+    );
+
+    assertQ(req("q", "author_norm:\"Nonexisting, F\""), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218920']"
+    );
+
+    /*
      * author facets
      */
-    
+
     assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
     assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
-		
-		
-		/*
-		 * page marc:773
-		 */
-		assertQ(req("q", "page:2056 AND recid:9218920"), "//*[@numFound='1']");
-		assertQ(req("q", "page:2056-2059 AND recid:9218920"), "//*[@numFound='1']");
-		assertQ(req("q", "page:a056"), "//*[@numFound='1']");
-		assertQ(req("q", "page:a056-"), "//*[@numFound='1']");
-		assertQ(req("q", "page:a056-2059 AND recid:2"), "//*[@numFound='1']");
-		assertQ(req("q", "page:90024"), "//*[@numFound='1']");
-		
-		/*
-		 * volume
-		 */
-		assertQ(req("q", "volume:l219"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218511']");
-		assertQ(req("q", "volume:L219"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218511']");
-		
-		/*
-		 * issue
-		 */
-		assertQ(req("q", "issue:4"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218511']");
-		assertQ(req("q", "issue:2x"), 
+
+
+    /*
+     * page marc:773
+     */
+    assertQ(req("q", "page:2056 AND recid:9218920"), "//*[@numFound='1']");
+    assertQ(req("q", "page:2056-2059 AND recid:9218920"), "//*[@numFound='1']");
+    assertQ(req("q", "page:a056"), "//*[@numFound='1']");
+    assertQ(req("q", "page:a056-"), "//*[@numFound='1']");
+    assertQ(req("q", "page:a056-2059 AND recid:2"), "//*[@numFound='1']");
+    assertQ(req("q", "page:90024"), "//*[@numFound='1']");
+
+    /*
+     * volume
+     */
+    assertQ(req("q", "volume:l219"), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9143768']");
-		
-		
-		/*
-		 * aff
-		 */
-		assertQ(req("q", "aff:NASA"),
-		    "//doc/int[@name='recid'][.='9218511']",
-		    "//*[@numFound='1']"); // regardless of case
-		assertQ(req("q", "aff:SPACE"), "//*[@numFound='0']"); // be case sensitive with uppercased query terms
-		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']"); // same here
-		assertQ(req("q", "aff:kavli"), // otherwise case-insensitive
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218511']"); 
-		assertQ(req("q", "aff:Kavli"), 
+    "//doc/int[@name='recid'][.='9218511']");
+    assertQ(req("q", "volume:L219"), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9218511']");
-		assertQ(req("q", "aff:46556"), 
-		    "//*[@numFound='1']");
+    "//doc/int[@name='recid'][.='9218511']");
+
+    /*
+     * issue
+     */
+    assertQ(req("q", "issue:4"), 
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='9218511']");
+    assertQ(req("q", "issue:2x"), 
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='9143768']");
+
+
+    /*
+     * aff
+     */
+    assertQ(req("q", "aff:NASA"),
+        "//doc/int[@name='recid'][.='9218511']",
+    "//*[@numFound='1']"); // regardless of case
+    assertQ(req("q", "aff:SPACE"), "//*[@numFound='0']"); // be case sensitive with uppercased query terms
+    assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']"); // same here
+    assertQ(req("q", "aff:kavli"), // otherwise case-insensitive
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='9218511']"); 
+    assertQ(req("q", "aff:Kavli"), 
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='9218511']");
+    assertQ(req("q", "aff:46556"), 
+    "//*[@numFound='1']");
     assertQ(req("q", "aff:\"Notre Dame\""), 
-        "//*[@numFound='1']");
-		
-		/*
-		 * email
-		 */
-		assertQ(req("q", "email:rcutri@example.edu"), "//*[@numFound='1']");
-		assertQ(req("q", "email:rCutri@example.edu"), "//*[@numFound='1']");
-		assertQ(req("q", "email:rcutri@example*"), "//*[@numFound='1']");
-		
+    "//*[@numFound='1']");
 
-		/*
-		 * database & bibgroup
-		 */
-		assertQ(req("q", "database:astronomy"), "//*[@numFound='9']");
-		assertQ(req("q", "database:Astronomy"), "//*[@numFound='9']");
-		assertQ(req("q", "database:ASTRONOMY"), "//*[@numFound='9']");
-		assertQ(req("q", "database:ASTRONOM*"), "//*[@numFound='9']");
-		assertQ(req("q", "database:ASTRONOM?"), "//*[@numFound='9']");
-		assertQ(req("q", "database:astronom*"), "//*[@numFound='9']");
-		assertQ(req("q", "database:astronom?"), "//*[@numFound='9']");
-		
-		assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='3']");
-		assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='3']");
-		assertQ(req("q", "bibgroup_facet:CfA"), "//*[@numFound='3']");
-		assertQ(req("q", "bibgroup_facet:cfa"), "//*[@numFound='0']");
-		
-		assertQ(req("q", "bibgroup:cf*"), "//*[@numFound='3']");
-		assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='3']");
-		assertQ(req("q", "bibgroup:?FA"), "//*[@numFound='3']");
-		
-		assertQ(req("q", "property:catalog AND property:nonarticle"), "//*[@numFound='4']");
-		assertQ(req("q", "property:Catalog AND property:Nonarticle"), "//*[@numFound='4']");
-		assertQ(req("q", "property:CATALOG AND property:nonarticle"), "//*[@numFound='4']");
-		assertQ(req("q", "property:catalog AND property:NONARTICLE"), "//*[@numFound='4']");
-		
-		
-		/*
-		 * Bibcodes
-		 */
-		
-		assertQ(req("q", "bibcode:2012yCat..35409143M"), "//*[@numFound='1']");
-		assertQ(req("q", "bibcode:2012ycat..35409143m"), "//*[@numFound='1']");
-		assertQ(req("q", "bibcode:2012YCAT..35409143M"), "//*[@numFound='1']");
-		assertQ(req("q", "bibcode:2012YCAT..*"), "//*[@numFound='5']");
-		assertQ(req("q", "bibcode:201?YCAT..35409143M"), "//*[@numFound='1']");
-		assertQ(req("q", "bibcode:*YCAT..35409143M"), "//*[@numFound='1']");
-		
-		
-		/*
-		 * Bibstem is derived from bibcode, it is either the bibcode[4:9] OR
-		 * bibcode[4:13] when the volume information is NOT present
-		 * 
-		 * So this bibcode: 2012yCat..35a09143M
-		 * has bibstem:     yCat..35a
-		 * 
-		 * But this bicode: 2012yCat..35009143M
-		 * has bibstem:     yCat
-		 * 
-		 * Bibstem is not case sensitive (at least for now, so the above values
-		 * are lowercased)
-		 * 
-		 */
-		
+    /*
+     * email
+     */
+    assertQ(req("q", "email:rcutri@example.edu"), "//*[@numFound='1']");
+    assertQ(req("q", "email:rCutri@example.edu"), "//*[@numFound='1']");
+    assertQ(req("q", "email:rcutri@example*"), "//*[@numFound='1']");
+
+
+    /*
+     * database & bibgroup
+     */
+    assertQ(req("q", "database:astronomy"), "//*[@numFound='9']");
+    assertQ(req("q", "database:Astronomy"), "//*[@numFound='9']");
+    assertQ(req("q", "database:ASTRONOMY"), "//*[@numFound='9']");
+    assertQ(req("q", "database:ASTRONOM*"), "//*[@numFound='9']");
+    assertQ(req("q", "database:ASTRONOM?"), "//*[@numFound='9']");
+    assertQ(req("q", "database:astronom*"), "//*[@numFound='9']");
+    assertQ(req("q", "database:astronom?"), "//*[@numFound='9']");
+
+    assertQ(req("q", "bibgroup:cfa"), "//*[@numFound='3']");
+    assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='3']");
+    assertQ(req("q", "bibgroup_facet:CfA"), "//*[@numFound='3']");
+    assertQ(req("q", "bibgroup_facet:cfa"), "//*[@numFound='0']");
+
+    assertQ(req("q", "bibgroup:cf*"), "//*[@numFound='3']");
+    assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='3']");
+    assertQ(req("q", "bibgroup:?FA"), "//*[@numFound='3']");
+
+    assertQ(req("q", "property:catalog AND property:nonarticle"), "//*[@numFound='4']");
+    assertQ(req("q", "property:Catalog AND property:Nonarticle"), "//*[@numFound='4']");
+    assertQ(req("q", "property:CATALOG AND property:nonarticle"), "//*[@numFound='4']");
+    assertQ(req("q", "property:catalog AND property:NONARTICLE"), "//*[@numFound='4']");
+
+
+    /*
+     * Bibcodes
+     */
+
+    assertQ(req("q", "bibcode:2012yCat..35409143M"), "//*[@numFound='1']");
+    assertQ(req("q", "bibcode:2012ycat..35409143m"), "//*[@numFound='1']");
+    assertQ(req("q", "bibcode:2012YCAT..35409143M"), "//*[@numFound='1']");
+    assertQ(req("q", "bibcode:2012YCAT..*"), "//*[@numFound='5']");
+    assertQ(req("q", "bibcode:201?YCAT..35409143M"), "//*[@numFound='1']");
+    assertQ(req("q", "bibcode:*YCAT..35409143M"), "//*[@numFound='1']");
+
+
+    /*
+     * Bibstem is derived from bibcode, it is either the bibcode[4:9] OR
+     * bibcode[4:13] when the volume information is NOT present
+     * 
+     * So this bibcode: 2012yCat..35a09143M
+     * has bibstem:     yCat..35a
+     * 
+     * But this bicode: 2012yCat..35009143M
+     * has bibstem:     yCat
+     * 
+     * Bibstem is not case sensitive (at least for now, so the above values
+     * are lowercased)
+     * 
+     */
+
     //dumpDoc(null, F.ID, "bibcode", "bibstem");
-		
-		//System.out.println(direct.request("/select?q=*:*&fl=bibcode,bibstem,recid,title", null).replace("</", "\n</"));
-		assertQ(req("q", "bibstem:YCAT"), "//*[@numFound='5']");
-		assertQ(req("q", "bibstem:yCat"), "//*[@numFound='5']");
-		assertQ(req("q", "bibstem:ycat"), "//*[@numFound='5']");
 
-		assertQ(req("q", "bibstem:yCat..35a"), "//*[@numFound='1']");
-		assertQ(req("q", "bibstem:yCat..35*"), "//*[@numFound='3']");
-		assertQ(req("q", "bibstem:yCat..35?"), "//*[@numFound='3']");
-		
-		assertQ(req("q", "bibstem:apj.."), "//*[@numFound='2']");
+    //System.out.println(direct.request("/select?q=*:*&fl=bibcode,bibstem,recid,title", null).replace("</", "\n</"));
+    assertQ(req("q", "bibstem:YCAT"), "//*[@numFound='5']");
+    assertQ(req("q", "bibstem:yCat"), "//*[@numFound='5']");
+    assertQ(req("q", "bibstem:ycat"), "//*[@numFound='5']");
 
-		//XXX: this has changed, the last dot gets removed when we try to guess regex query
-		// need a better solution for this ambiguity yCat..* becomes 'yCat.*'
-		assertQ(req("q", "bibstem:yCat..*"), "//*[@numFound='5']");
-		assertQ(req("q", "bibstem:yCat.*"), "//*[@numFound='5']");
-		assertQ(req("q", "bibstem:yCat*"), "//*[@numFound='5']");
-		assertQ(req("q", "bibstem:stat.conf"), "//*[@numFound='1']");
-		assertQ(req("q", "bibstem:STAT.CONF"), "//*[@numFound='1']");
-		
-		
-		
-		
-		
-		/*
-		 * doi:
-		 * 
-		 * According to the standard, doi can contain almost any utf-8
-		 * char
-		 */
-		
-		//dumpDoc(null, F.ID, "bibcode", "doi");
-		assertQ(req("q", "doi:abcds/esdfs.123045"), "//*[@numFound='1']");
-		assertQ(req("q", "doi:doi\\:abcds/esdfs.123045"), "//*[@numFound='1']");
-		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
-		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
-		assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ.123456789\""), "//*[@numFound='1']");
-		assertQ(req("q", "doi:\"doi:žščřďťň.123456789\""), "//*[@numFound='1']");
-		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ?123456789\""), "//*[@numFound='2']");
-		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
-		
-		//dumpDoc(null, "recid", "title", "keyword");
-		
-		/*
-		 * keywords
-		 */
-		assertQ(req("q", "keyword:\"classical statistical mechanics\""), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='5979890']"
-		    );
-		assertQ(req("q", "keyword:\"WORLD WIDE WEB\""), // should be case-insensitive 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='5979890']"); 
-		assertQ(req("q", "keyword:\"fluid dynamics\""),
-		    "//doc/int[@name='recid'][.='3813361']", // should get both 695$a ...
-		    "//*[@numFound='1']"); 
-		assertQ(req("q", "keyword:\"angular momentum\""), // ... and 695$b
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='3813361']");  
-		assertQ(req("q", "keyword:WISE"), // ... and 653$a 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218920']"
-		    ); 
-		assertQ(req("q", "keyword:UNWISE"), // ... and 653$b 
+    assertQ(req("q", "bibstem:yCat..35a"), "//*[@numFound='1']");
+    assertQ(req("q", "bibstem:yCat..35*"), "//*[@numFound='3']");
+    assertQ(req("q", "bibstem:yCat..35?"), "//*[@numFound='3']");
+
+    assertQ(req("q", "bibstem:apj.."), "//*[@numFound='2']");
+
+    //XXX: this has changed, the last dot gets removed when we try to guess regex query
+    // need a better solution for this ambiguity yCat..* becomes 'yCat.*'
+    assertQ(req("q", "bibstem:yCat..*"), "//*[@numFound='5']");
+    assertQ(req("q", "bibstem:yCat.*"), "//*[@numFound='5']");
+    assertQ(req("q", "bibstem:yCat*"), "//*[@numFound='5']");
+    assertQ(req("q", "bibstem:stat.conf"), "//*[@numFound='1']");
+    assertQ(req("q", "bibstem:STAT.CONF"), "//*[@numFound='1']");
+
+
+
+
+
+    /*
+     * doi:
+     * 
+     * According to the standard, doi can contain almost any utf-8
+     * char
+     */
+
+    //dumpDoc(null, F.ID, "bibcode", "doi");
+    assertQ(req("q", "doi:abcds/esdfs.123045"), "//*[@numFound='1']");
+    assertQ(req("q", "doi:doi\\:abcds/esdfs.123045"), "//*[@numFound='1']");
+    assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
+    assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ:123456789\""), "//*[@numFound='1']");
+    assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ.123456789\""), "//*[@numFound='1']");
+    assertQ(req("q", "doi:\"doi:žščřďťň.123456789\""), "//*[@numFound='1']");
+    assertQ(req("q", "doi:\"doi:žščŘĎŤŇ?123456789\""), "//*[@numFound='2']");
+    assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
+
+    //dumpDoc(null, "recid", "title", "keyword");
+
+    /*
+     * keywords
+     */
+    assertQ(req("q", "keyword:\"classical statistical mechanics\""), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='5979890']"
+    );
+    assertQ(req("q", "keyword:\"WORLD WIDE WEB\""), // should be case-insensitive 
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='5979890']"); 
+    assertQ(req("q", "keyword:\"fluid dynamics\""),
+        "//doc/int[@name='recid'][.='3813361']", // should get both 695$a ...
+    "//*[@numFound='1']"); 
+    assertQ(req("q", "keyword:\"angular momentum\""), // ... and 695$b
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='3813361']");  
+    assertQ(req("q", "keyword:WISE"), // ... and 653$a 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		assertQ(req("q", "keyword:wise"), // ... and 653$a 
+    ); 
+    assertQ(req("q", "keyword:UNWISE"), // ... and 653$b 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        ); 
+    );
+    assertQ(req("q", "keyword:wise"), // ... and 653$a 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218920']"
+    ); 
     assertQ(req("q", "keyword:unwise"), // ... and 653$b 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
-        );
-		assertQ(req("q", "keyword:\"planets and satellites\""), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218511']"
-		    ); 
-		
-		assertQ(req("q", "keyword_norm:\"angular momentum\""),
-		    "//doc/int[@name='recid'][.='3813361']",
-		    "//*[@numFound='1']"); // case-insensitive
-		assertQ(req("q", "keyword_norm:Magnitudes"), "//*[@numFound='0']"); // should not get 695$a 
-		assertQ(req("q", "keyword_norm:WISE"), "//*[@numFound='0']"); // ... or 653$a
-		assertQ(req("q", "keyword_norm:unwise"), "//*[@numFound='1']"); // ... but 653$b
-		assertQ(req("q", "keyword_norm:\"methods numerical\""), "//*[@numFound='1']"); // should get 695$b 
-		
-		assertQ(req("q", "keyword_facet:\"world wide web\""), "//*[@numFound='0']"); // case-sensitive
-		assertQ(req("q", "keyword_facet:planets"), "//*[@numFound='0']"); // not tokenized
-		assertQ(req("q", "keyword_facet:\"planets and satellites\""), "//*[@numFound='1']"); // should get 653$b
-		assertQ(req("q", "keyword_facet:\"methods numerical\""), "//*[@numFound='1']"); // should get 695$b
-		
-		
-		
-		/*
-		 * identifier
-		 * 
-		 * should be translated into the correct field (currently, the grammar 
-		 * understands only arxiv: and doi: (and doi gets handled separately)
-		 * 
-		 * Also, the subfields a|z|y are to be indexed inside 'identifier' index
-		 */
-		assertQ(req("q", "arxiv:1234.5678"), "//*[@numFound='1']");
-		assertQ(req("q", "arxiv:\"arXiv:1234.5678\""), "//*[@numFound='1']");
-		assertQ(req("q", "arXiv:1234.5678"), "//*[@numFound='1']");
-		assertQ(req("q", "identifier:1234.5678"), "//*[@numFound='1']");
-		assertQ(req("q", "arXiv:hep-ph/1234"), "//*[@numFound='1']");
-		assertQ(req("q", "arxiv:\"ARXIV:hep-ph/1234\""), "//*[@numFound='1']");
-		assertQ(req("q", "arxiv:hep-ph/1234"), "//*[@numFound='1']");
-		assertQ(req("q", "identifier:hep-ph/1234"), "//*[@numFound='1']");
-		
-		assertQ(req("q", "identifier:2001test.mat..6096A"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='5979890']");
-		assertQ(req("q", "identifier:2001cond.mat..6096A"),  
+    );
+    assertQ(req("q", "keyword:\"planets and satellites\""), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='5979890']");
-		assertQ(req("q", "identifier:cond-mat/0106096"), 
+        "//doc/int[@name='recid'][.='9218511']"
+    ); 
+
+    assertQ(req("q", "keyword_norm:\"angular momentum\""),
+        "//doc/int[@name='recid'][.='3813361']",
+    "//*[@numFound='1']"); // case-insensitive
+    assertQ(req("q", "keyword_norm:Magnitudes"), "//*[@numFound='0']"); // should not get 695$a 
+    assertQ(req("q", "keyword_norm:WISE"), "//*[@numFound='0']"); // ... or 653$a
+    assertQ(req("q", "keyword_norm:unwise"), "//*[@numFound='1']"); // ... but 653$b
+    assertQ(req("q", "keyword_norm:\"methods numerical\""), "//*[@numFound='1']"); // should get 695$b 
+
+    assertQ(req("q", "keyword_facet:\"world wide web\""), "//*[@numFound='0']"); // case-sensitive
+    assertQ(req("q", "keyword_facet:planets"), "//*[@numFound='0']"); // not tokenized
+    assertQ(req("q", "keyword_facet:\"planets and satellites\""), "//*[@numFound='1']"); // should get 653$b
+    assertQ(req("q", "keyword_facet:\"methods numerical\""), "//*[@numFound='1']"); // should get 695$b
+
+
+
+    /*
+     * identifier
+     * 
+     * should be translated into the correct field (currently, the grammar 
+     * understands only arxiv: and doi: (and doi gets handled separately)
+     * 
+     * Also, the subfields a|z|y are to be indexed inside 'identifier' index
+     */
+    assertQ(req("q", "arxiv:1234.5678"), "//*[@numFound='1']");
+    assertQ(req("q", "arxiv:\"arXiv:1234.5678\""), "//*[@numFound='1']");
+    assertQ(req("q", "arXiv:1234.5678"), "//*[@numFound='1']");
+    assertQ(req("q", "identifier:1234.5678"), "//*[@numFound='1']");
+    assertQ(req("q", "arXiv:hep-ph/1234"), "//*[@numFound='1']");
+    assertQ(req("q", "arxiv:\"ARXIV:hep-ph/1234\""), "//*[@numFound='1']");
+    assertQ(req("q", "arxiv:hep-ph/1234"), "//*[@numFound='1']");
+    assertQ(req("q", "identifier:hep-ph/1234"), "//*[@numFound='1']");
+
+    assertQ(req("q", "identifier:2001test.mat..6096A"), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='5979890']");
-		assertQ(req("q", "identifier:2002RvMP...74...47A"),  
+    "//doc/int[@name='recid'][.='5979890']");
+    assertQ(req("q", "identifier:2001cond.mat..6096A"),  
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='5979890']");
-		assertQ(req("q", "identifier:1992ARA&A..30..543M"),
-    		"//*[@numFound='1']",
-    		"//doc/int[@name='recid'][.='3813361']");
-		
-		/*
-		 * grants
-		 * 
-		 */
-		//dumpDoc(null, "recid", "grant");
-		/*
-		 * currently failing because there is no
-		 * data for this record (in the mongodb)
-		 */
-		/*
+    "//doc/int[@name='recid'][.='5979890']");
+    assertQ(req("q", "identifier:cond-mat/0106096"), 
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='5979890']");
+    assertQ(req("q", "identifier:2002RvMP...74...47A"),  
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='5979890']");
+    assertQ(req("q", "identifier:1992ARA&A..30..543M"),
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='3813361']");
+
+    /*
+     * grants
+     * 
+     */
+    //dumpDoc(null, "recid", "grant");
+    /*
+     * currently failing because there is no
+     * data for this record (in the mongodb)
+     */
+    /*
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
   		"//*[@numFound='1']",
   		"//doc/int[@name='recid'][.='9311214']");
@@ -570,174 +570,174 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "grant_facet_hier:1/NSF-AST/0618398"),
   		"//*[@numFound='1']",
   		"//doc/int[@name='recid'][.='9311214']");
-		*/
-		
-		
-		/*
-		 * title
-		 * 
-		 * just basics here, the parsing tests are inside TestAdstypeFulltextParsing
-		 * 
-		 */
-		assertQ(req("q", "title:\"title is not available\""), "//*[@numFound='1']"); // everything besides title is stopword
-		assertQ(req("q", "title:no-sky"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
-		assertQ(req("q", "title:nosky"), "//*[@numFound='1']");
-		assertQ(req("q", "title:KEPLER"), "//*[@numFound='0']"); // should search only for acronym acr::kepler
-		assertQ(req("q", "title:kepler"), "//*[@numFound='2']"); // normal search
-		assertQ(req("q", "title:probing"), "//*[@numFound='0']"); // alternate titles shouldn't go in main title field
-		assertQ(req("q", "title:(KEPLER) alternate_title:probing"), "//*[@numFound='0']");
-		assertQ(req("q", "title:(kepler) alternate_title:probing"), "//*[@numFound='1']");
-		assertQ(req("q", "title:\"q\\'i\""), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='4']");
-		
-		/*
-		 * alternate_title
-		 */
-
-		assertQ(req("q", "alternate_title:(Probing red giants)"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218605']"
-		); 
+     */
 
 
-		/*
-		 * abstract
-		 * 
-		 */
-		assertQ(req("q", "abstract:abstract"), "//*[@numFound='1']"); // everything besides title is stopword
-		assertQ(req("q", "abstract:No-SKy"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
-		assertQ(req("q", "abstract:nosky"), "//*[@numFound='1']");
-		assertQ(req("q", "abstract:sph"), "//*[@numFound='1']");
-		assertQ(req("q", "abstract:SPH"), "//*[@numFound='1']");
-		assertQ(req("q", "abstract:PARTICLE"), "//*[@numFound='0']"); // acronyms = acr::particle
+    /*
+     * title
+     * 
+     * just basics here, the parsing tests are inside TestAdstypeFulltextParsing
+     * 
+     */
+    assertQ(req("q", "title:\"title is not available\""), "//*[@numFound='1']"); // everything besides title is stopword
+    assertQ(req("q", "title:no-sky"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
+    assertQ(req("q", "title:nosky"), "//*[@numFound='1']");
+    assertQ(req("q", "title:KEPLER"), "//*[@numFound='0']"); // should search only for acronym acr::kepler
+    assertQ(req("q", "title:kepler"), "//*[@numFound='2']"); // normal search
+    assertQ(req("q", "title:probing"), "//*[@numFound='0']"); // alternate titles shouldn't go in main title field
+    assertQ(req("q", "title:(KEPLER) alternate_title:probing"), "//*[@numFound='0']");
+    assertQ(req("q", "title:(kepler) alternate_title:probing"), "//*[@numFound='1']");
+    assertQ(req("q", "title:\"q\\'i\""), 
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='4']");
 
-		// tokens with special characters inside must be searched as a phrase, otherwise it
-		// becomes: abstract:q'i abstract:q abstract:i abstract:qi
-		// but even as a phrase, it will search for: "q (i qi)"
-		assertQ(req("q", "abstract:\"q\\'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
-		assertQ(req("q", "abstract:\"q'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
-		assertQ(req("q", "abstract:\"q\\\\'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
-		assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
+    /*
+     * alternate_title
+     */
 
-
-		/*
-		 * reference
-		 */
-		assertQ(req("q", "reference:2010mnras.407.2611p"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9143768']"
-		);
-		assertQ(req("q", "reference:2009ApJ...694..556B"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9143768']"
-		);
-		assertQ(req("q", "reference:2004ApJS..154..519S"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9143768']"
-		);
+    assertQ(req("q", "alternate_title:(Probing red giants)"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218605']"
+    ); 
 
 
-		/*
-		 * unfielded search
-		 * 
-		 * test we get records without specifying the field (depends on the current
-		 * solrconfig.xml setup)
-		 * 
-		 * author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1
-		 */
+    /*
+     * abstract
+     * 
+     */
+    assertQ(req("q", "abstract:abstract"), "//*[@numFound='1']"); // everything besides title is stopword
+    assertQ(req("q", "abstract:No-SKy"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
+    assertQ(req("q", "abstract:nosky"), "//*[@numFound='1']");
+    assertQ(req("q", "abstract:sph"), "//*[@numFound='1']");
+    assertQ(req("q", "abstract:SPH"), "//*[@numFound='1']");
+    assertQ(req("q", "abstract:PARTICLE"), "//*[@numFound='0']"); // acronyms = acr::particle
 
-		// author
-		assertQ(req("q", "Barabási"),
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='5979890']"
-		); 
-		// title
-		assertQ(req("q", "bibcode"),
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='2']"
-		);
-		// abstract
-		assertQ(req("q", "DPi1b", "fl", "title,recid"), 
-		    "//*[@numFound='1']",
-		"//doc/int[@name='recid'][.='9218605']");
-		// keyword
-		assertQ(req("q", "KERNEL FUNCTIONS"),
-		    "//doc/int[@name='recid'][.='3813361']",
-		"//*[@numFound='1']");
-		// keyword norm
-		assertQ(req("q", "UNWISE"),
-		    "//doc/int[@name='recid'][.='9218920']",
-		"//*[@numFound='1']");
-		// affiliations are not copied to all
-		assertQ(req("q", "kavli"), 
-		    //"//doc/int[@name='recid'][.='9218511']"
-		    "//*[@numFound='0']"
-		); 
-		// alternate title copied to all
-		assertQ(req("q", "Probing red giants"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9218605']"
-		); 
-		// full
-		assertQ(req("q", "pleasure"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='1810902']"
-		);
-		
-		
-		/*
-		 * citations()/references() queries (use special dummy records, field 999i)
-		 */
-		assertQ(req("q", "recid:12"), "//*[@numFound='1']");
-		assertQ(req("q", "recid:16"), "//*[@numFound='1']");
-		assertQ(req("q", "id:12"), "//*[@numFound='1']");
-		assertQ(req("q", "id:16"), "//*[@numFound='1']");
-		assertQ(req("q", "citations(id:12)"), "//*[@numFound='3']");
-		assertQ(req("q", "citations(title:test)"), "//*[@numFound='4']");
+    // tokens with special characters inside must be searched as a phrase, otherwise it
+    // becomes: abstract:q'i abstract:q abstract:i abstract:qi
+    // but even as a phrase, it will search for: "q (i qi)"
+    assertQ(req("q", "abstract:\"q\\'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
+    assertQ(req("q", "abstract:\"q'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
+    assertQ(req("q", "abstract:\"q\\\\'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
+    assertQ(req("q", "abstract:ABSTRACT", "fl", "recid,abstract,title"), "//*[@numFound='0']"); // is considered acronym
 
 
-		assertQ(req("q", "references(id:12)"), "//*[@numFound='0']");
-		assertQ(req("q", "references(id:13)"), "//*[@numFound='2']");
-		assertQ(req("q", "references(id:12 OR id:13)"), "//*[@numFound='2']");
-		assertQ(req("q", "references(title:test)"), "//*[@numFound='5']");
-		assertQ(req("q", "references(recid:12)"), "//*[@numFound='0']");
-		assertQ(req("q", "references(recid:13)"), "//*[@numFound='2']");
-		assertQ(req("q", "references(recid:12 OR recid:13)"), "//*[@numFound='2']");
-		assertQ(req("q", "references(title:test)"), "//*[@numFound='5']");
+    /*
+     * reference
+     */
+    assertQ(req("q", "reference:2010mnras.407.2611p"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9143768']"
+    );
+    assertQ(req("q", "reference:2009ApJ...694..556B"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9143768']"
+    );
+    assertQ(req("q", "reference:2004ApJS..154..519S"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9143768']"
+    );
 
 
-		/*
-		 * read_count (float type)
-		 */
-		//dumpDoc(null, "recid", "read_count");
-		assertQ(req("q", "read_count:1.0"), 
-		    "//doc/int[@name='recid'][.='9218920']",
-		"//*[@numFound='1']");
-		assertQ(req("q", "read_count:[0.0 TO 1.0]"), 
-		    "//doc/int[@name='recid'][.='9218920']",
-		"//*[@numFound='1']");
-		assertQ(req("q", "read_count:2.0"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='1810902']"
-		);
-		assertQ(req("q", "read_count:[44 TO 45]"), 
-		    "//*[@numFound='1']",
-		    "//doc/int[@name='recid'][.='9143768']"
-		);
+    /*
+     * unfielded search
+     * 
+     * test we get records without specifying the field (depends on the current
+     * solrconfig.xml setup)
+     * 
+     * author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1
+     */
+
+    // author
+    assertQ(req("q", "Barabási"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='5979890']"
+    ); 
+    // title
+    assertQ(req("q", "bibcode"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='2']"
+    );
+    // abstract
+    assertQ(req("q", "DPi1b", "fl", "title,recid"), 
+        "//*[@numFound='1']",
+    "//doc/int[@name='recid'][.='9218605']");
+    // keyword
+    assertQ(req("q", "KERNEL FUNCTIONS"),
+        "//doc/int[@name='recid'][.='3813361']",
+    "//*[@numFound='1']");
+    // keyword norm
+    assertQ(req("q", "UNWISE"),
+        "//doc/int[@name='recid'][.='9218920']",
+    "//*[@numFound='1']");
+    // affiliations are not copied to all
+    assertQ(req("q", "kavli"), 
+        //"//doc/int[@name='recid'][.='9218511']"
+        "//*[@numFound='0']"
+    ); 
+    // alternate title copied to all
+    assertQ(req("q", "Probing red giants"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218605']"
+    ); 
+    // full
+    assertQ(req("q", "pleasure"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='1810902']"
+    );
 
 
-		/*
-		 * cite_read_boost
-		 */
-		/*
+    /*
+     * citations()/references() queries (use special dummy records, field 999i)
+     */
+    assertQ(req("q", "recid:12"), "//*[@numFound='1']");
+    assertQ(req("q", "recid:16"), "//*[@numFound='1']");
+    assertQ(req("q", "id:12"), "//*[@numFound='1']");
+    assertQ(req("q", "id:16"), "//*[@numFound='1']");
+    assertQ(req("q", "citations(id:12)"), "//*[@numFound='3']");
+    assertQ(req("q", "citations(title:test)"), "//*[@numFound='4']");
+
+
+    assertQ(req("q", "references(id:12)"), "//*[@numFound='0']");
+    assertQ(req("q", "references(id:13)"), "//*[@numFound='2']");
+    assertQ(req("q", "references(id:12 OR id:13)"), "//*[@numFound='2']");
+    assertQ(req("q", "references(title:test)"), "//*[@numFound='5']");
+    assertQ(req("q", "references(recid:12)"), "//*[@numFound='0']");
+    assertQ(req("q", "references(recid:13)"), "//*[@numFound='2']");
+    assertQ(req("q", "references(recid:12 OR recid:13)"), "//*[@numFound='2']");
+    assertQ(req("q", "references(title:test)"), "//*[@numFound='5']");
+
+
+    /*
+     * read_count (float type)
+     */
+    //dumpDoc(null, "recid", "read_count");
+    assertQ(req("q", "read_count:1.0"), 
+        "//doc/int[@name='recid'][.='9218920']",
+    "//*[@numFound='1']");
+    assertQ(req("q", "read_count:[0.0 TO 1.0]"), 
+        "//doc/int[@name='recid'][.='9218920']",
+    "//*[@numFound='1']");
+    assertQ(req("q", "read_count:2.0"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='1810902']"
+    );
+    assertQ(req("q", "read_count:[44 TO 45]"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9143768']"
+    );
+
+
+    /*
+     * cite_read_boost
+     */
+    /*
 		dumpDoc(null, "recid", "cite_read_boost");
 		setDebug(true);
 		assertQ(req("q", "cite_read_boost:[0.0 TO 0.2]"), 
         "//doc/int[@name='recid'][.='9218920']",
         "//*[@numFound='1']");
-		 */
-		
+     */
+
     /*
      * pubdate - 17/12/2012 changed to be the date type
      * 
@@ -753,7 +753,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
      */
     //setDebug(true);
     //dumpDoc(null, "bibcode", "pubdate", "date");
-    
+
     assertQ(req("q", "title:dateparsingtest"), "//*[@numFound='8']");
     assertQ(req("q", "pubdate:1976", "fl", "title,pubdate,date,recid"), 
         "//*[@numFound='6']",
@@ -763,72 +763,72 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='23']",
         "//doc/int[@name='recid'][.='24']",
         "//doc/int[@name='recid'][.='25']"
-        );
+    );
     assertQ(req("q", "pubdate:1976-00"),  // 00 gets automatically translated into 1976-01-01 (includes 1976-01-00)
         "//*[@numFound='4']",
         "//doc/int[@name='recid'][.='20']",
         "//doc/int[@name='recid'][.='21']",
         "//doc/int[@name='recid'][.='22']",
         "//doc/int[@name='recid'][.='24']"
-        );
+    );
     assertQ(req("q", "pubdate:1976-00-00"), // gets automatically translated into 01-01
         "//*[@numFound='3']",
         "//doc/int[@name='recid'][.='20']",
         "//doc/int[@name='recid'][.='21']",
         "//doc/int[@name='recid'][.='24']"
-        );
-    
+    );
+
     assertQ(req("q", "pubdate:1976-00-32"), "//*[@numFound='0']"); // nonsense, but should be parsed properly into 01-01
     assertQ(req("q", "pubdate:1976-01-00"), 
         "//*[@numFound='3']",
         "//doc/int[@name='recid'][.='20']",
         "//doc/int[@name='recid'][.='21']",
-        "//doc/int[@name='recid'][.='24']");
-    
+    "//doc/int[@name='recid'][.='24']");
+
     assertQ(req("q", "pubdate:1976-01-01"), 
-        "//*[@numFound='0']");
+    "//*[@numFound='0']");
     assertQ(req("q", "pubdate:1976-01-02"), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='22']");
+    "//doc/int[@name='recid'][.='22']");
     assertQ(req("q", "pubdate:1976-02-00"), 
         "//*[@numFound='2']",
         "//doc/int[@name='recid'][.='23']",
-        "//doc/int[@name='recid'][.='25']");
+    "//doc/int[@name='recid'][.='25']");
     assertQ(req("q", "pubdate:1976-02-01"), 
         "//*[@numFound='2']",
         "//doc/int[@name='recid'][.='23']",
-        "//doc/int[@name='recid'][.='25']");
+    "//doc/int[@name='recid'][.='25']");
     assertQ(req("q", "pubdate:1977-00-00"), 
         "//*[@numFound='2']",
         "//doc/int[@name='recid'][.='26']",
-        "//doc/int[@name='recid'][.='27']");
+    "//doc/int[@name='recid'][.='27']");
     assertQ(req("q", "pubdate:1977-01-01"), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='27']");
-    
+    "//doc/int[@name='recid'][.='27']");
+
     // test the right date is picked from the record
     assertQ(req("q", "bibcode:2012AJ....144..19XX"), 
         "//*[@numFound='1']"
         // when run with -DstoreAll=true
         //"//doc/str[@name='pubdate'][.='2012-12-00']"
         //"//doc/str[@name='date'][.='2012-12-01T00:00:00Z']"
-        );
+    );
     assertQ(req("q", "pubdate:2012-12-00"), 
         "//*[@numFound='1']",
         "//doc/str[@name='bibcode'][.='2012AJ....144..19XX']"
-        );
-    
-    
-    
+    );
+
+
+
     /*
      * links_data (856 data is generated and stored as JSON for display purposes)
      * ids_data (035 data is generated and stored as JSON for display purposes)
      */
     assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links_data']/str[contains(text(),'MAST')]");
     assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='ids_data']/str[contains(text(),'\"alternate_bibcode\":\"2012arXiv1210.5163R\"')]");
-    
-    
-    
+
+
+
     /*
      * 2nd order queries
      */
@@ -838,14 +838,14 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     assertQ(req("q", "useful(*:*)"), "//*[@numFound='0']");
     assertQ(req("q", "reviews(*:*)"), "//*[@numFound='0']");
     assertQ(req("q", "reviews(*:*)"), "//*[@numFound='0']");
-    */
+     */
 
-    
-	}
-	
-	
-	// Uniquely for Junit 3
-	public static junit.framework.Test suite() {
-        return new junit.framework.JUnit4TestAdapter(TestAdsDataImport.class);
-    }
+
+  }
+
+
+  // Uniquely for Junit 3
+  public static junit.framework.Test suite() {
+    return new junit.framework.JUnit4TestAdapter(TestAdsDataImport.class);
+  }
 }
