@@ -13,6 +13,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
@@ -89,14 +90,14 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
       }
 	  }
 	  else if(node instanceof AqpAdsabsRegexQueryNode) {
-	    field = ((RegexpQueryNode) node).getFieldAsString() + "_regex";
-	    value = ((RegexpQueryNode) node).getText().toString();
+	    field = ((FieldQueryNode) node).getFieldAsString() + "_regex";
+	    value = ((FieldQueryNode) node).getText().toString();
 	    if (hasAnalyzer(field)) {
 	      tokens =  analyze(field, value);
 	      if (!tokens[0].equals(value)) {
-	        return new AqpAdsabsRegexQueryNode(((RegexpQueryNode) node).getFieldAsString(), 
-	            tokens[0], ((AqpAdsabsRegexQueryNode)node).getBegin(),
-	            ((AqpAdsabsRegexQueryNode)node).getEnd());
+	        return new AqpAdsabsRegexQueryNode(((FieldQueryNode) node).getFieldAsString(), 
+	            tokens[0], ((FieldQueryNode)node).getBegin(),
+	            ((FieldQueryNode)node).getEnd());
 	      }
 	    }
 	  }

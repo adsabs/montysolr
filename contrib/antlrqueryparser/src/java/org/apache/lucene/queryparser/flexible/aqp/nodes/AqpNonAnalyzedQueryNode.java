@@ -18,7 +18,7 @@ package org.apache.lucene.queryparser.flexible.aqp.nodes;
  */
 
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 
 /**
  * A {@link NonAnalyzedQueryNode} represents a query that will not
@@ -27,7 +27,7 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
  * 
  * Example: e(+)
  */
-public class AqpNonAnalyzedQueryNode extends WildcardQueryNode {
+public class AqpNonAnalyzedQueryNode extends QuotedFieldQueryNode {
 
 	private static final long serialVersionUID = 6921391439471630844L;
 

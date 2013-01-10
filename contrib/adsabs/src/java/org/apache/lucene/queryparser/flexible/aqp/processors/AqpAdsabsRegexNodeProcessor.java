@@ -29,7 +29,8 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
-		if (node instanceof FieldQueryNode && !(node.getParent() instanceof TermRangeQueryNode)) {
+		if (node instanceof FieldQueryNode && !(node instanceof AqpNonAnalyzedQueryNode) &&
+		    !(node.getParent() instanceof TermRangeQueryNode)) {
 			FieldQueryNode n = (FieldQueryNode) node;
 			String input = n.getTextAsString();
 			

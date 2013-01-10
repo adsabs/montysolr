@@ -225,6 +225,17 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "(author:^Kurtz, M.^0.8 | title:^Kurtz, M.^0.5)",
         DisjunctionMaxQuery.class);
 	  
+	  assertQueryEquals(req("qt", "aqp", "q", "author:/kurtz, m.*/"), 
+        "author:/kurtz, m.*/",
+        RegexpQuery.class);
+	  assertQueryEquals(req("qt", "aqp", "q", "author:(/kurtz, m.*/)"), 
+        "author:/kurtz, m.*/",
+        RegexpQuery.class);
+	  assertQueryEquals(req("qt", "aqp", "q", "abstract:/nas\\S+/"), 
+        "abstract:/nas\\S+/",
+        RegexpQuery.class);
+	  
+	  
 //	  assertQueryEquals(req("qt", "aqp", "q", "author:(accomazzi NEAR5 kurtz)"), 
 //        "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
 //        BooleanQuery.class);
