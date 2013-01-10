@@ -82,10 +82,10 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		assertQueryEquals("author:\"A Einstein\"", null, "author:\"a einstein\"", PhraseQuery.class);
 		// probably, this should construct a different query (a phrase perhaps)
-		assertQueryEquals("=author:\"A Einstein\"", null, "author:a einstein", TermQuery.class);
+		assertQueryEquals("=author:\"A Einstein\"", null, "author:A Einstein", TermQuery.class);
 		
 		assertQueryEquals("author:\"M. J. Kurtz\" author:\"G. Eichhorn\" 2004", wsa, "+author:\"M. J. Kurtz\" +author:\"G. Eichhorn\" +2004");
-		assertQueryEquals("author:\"M. J. Kurtz\" =author:\"G. Eichhorn\" 2004", null, "+author:\"m j kurtz\" +author:g. eichhorn");
+		assertQueryEquals("author:\"M. J. Kurtz\" =author:\"G. Eichhorn\" 2004", null, "+author:\"m j kurtz\" +author:G. Eichhorn");
 		
 		assertQueryEquals("author:\"huchra, j\"", wsa, "author:\"huchra, j\"");
 		assertQueryEquals("author:\"huchra, j\"", null, "author:\"huchra j\"");
