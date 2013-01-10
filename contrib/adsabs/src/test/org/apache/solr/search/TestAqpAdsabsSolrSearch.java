@@ -12,6 +12,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.PhraseQuery;
+import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 
@@ -205,16 +206,36 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 	  
-	  setDebug(true);
-	  assertQueryEquals(req("qt", "aqp", "q", "author:(accomazzi NEAR5 kurtz)"), 
-        "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
-        BooleanQuery.class);
+	  
+	  // regex
+	  
+	  assertQueryEquals(req("qt", "aqp", "q", "author:/^Kurtz,\\WM./"), 
+        "author:/^Kurtz,\\WM./",
+        RegexpQuery.class);
+	  assertQueryEquals(req("qt", "aqp", "q", "author:/^kurtz,\\Wm./"), 
+        "author:/^kurtz,\\Wm./",
+        RegexpQuery.class);
+	  
+	  // this is treated as regex, but because it is unfielded search
+	  // it ends up in the all field. Feature or a bug?
+	  assertQueryEquals(req("qt", "aqp", "q", "/^Kurtz, M./"), 
+        "all:^Kurtz, M.",
+        TermQuery.class);
+	  assertQueryEquals(req("qt", "aqp", "q", "/^Kurtz, M./", "qf", "title^0.5 author^0.8"), 
+        "(author:^Kurtz, M.^0.8 | title:^Kurtz, M.^0.5)",
+        DisjunctionMaxQuery.class);
+	  
+//	  assertQueryEquals(req("qt", "aqp", "q", "author:(accomazzi NEAR5 kurtz)"), 
+//        "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
+//        BooleanQuery.class);
 	  
 	  
 	  // temporary workaround for 'first author' search
+	  
 	  assertQueryEquals(req("qt", "aqp", "q", "^Kurtz, M."), 
 	      "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
         BooleanQuery.class);
+	  
 	  assertQueryEquals(req("qt", "aqp", "q", "^Kurtz, Michael"), 
         "first_author:kurtz, michael first_author:kurtz, michael * first_author:kurtz, m first_author:kurtz, m * first_author:kurtz,",
         BooleanQuery.class);

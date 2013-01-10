@@ -21,6 +21,7 @@ import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.Version;
@@ -620,6 +621,15 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 			assertQueryEquals("weak lensing", null, "+weak lensing");
 			assertQueryEquals("weak lensing", null, "+weak lensing");
 	}
+	
+  public void testRegex() throws Exception{
+      
+      WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+      assertQueryEquals("/foo$/", wsa, "/foo$/", RegexpQuery.class);
+      assertQueryEquals("keyword:/foo$/", wsa, "keyword:/foo$/", RegexpQuery.class);
+      assertQueryEquals("keyword:/^foo$/", wsa, "keyword:/^foo$/", RegexpQuery.class);
+      assertQueryEquals("keyword:/^foo$/ AND \"^foo$\"", wsa, "+keyword:/^foo$/ +pos(author,foo,1,-1)", BooleanQuery.class);
+  }
 	
 	public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabs.class);

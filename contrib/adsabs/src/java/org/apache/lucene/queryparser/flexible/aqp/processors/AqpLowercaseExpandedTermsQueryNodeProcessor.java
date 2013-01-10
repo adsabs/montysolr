@@ -1,15 +1,16 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 
 /**
  * A modified version of the {@link LowercaseExpandedTermsQueryNodeProcessor}
  * 
- * It is used only in the lucene mode (ie. when SOLR analyzer is not available)
+ * We prevent lowercasing for {@link AqpNonAnalyzedQueryNode}
+ * 
+ * LUCENE-4679
  * 
  * @author rchyla
  * 
@@ -17,16 +18,12 @@ import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpan
 public class AqpLowercaseExpandedTermsQueryNodeProcessor extends
 LowercaseExpandedTermsQueryNodeProcessor {
 
+	
 	@Override
-	public QueryNode process(QueryNode queryTree) throws QueryNodeException {
-		QueryConfigHandler config = this.getQueryConfigHandler();
-
-		if (config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
-				&& config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
-				.getRequest() != null) {
-			return super.process(queryTree);
-		}
-
-		return queryTree;
+  protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
+	  if (node instanceof AqpNonAnalyzedQueryNode) {
+	    return node;
+	  }
+	  return super.postProcessNode(node);
 	}
 }
