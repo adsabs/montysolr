@@ -205,10 +205,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 	  
-//	  setDebug(true);
-//	  assertQueryEquals(req("qt", "aqp", "q", "author:(accomazzi NEAR5 kurtz)"), 
-//        "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
-//        BooleanQuery.class);
+	  setDebug(true);
+	  assertQueryEquals(req("qt", "aqp", "q", "author:(accomazzi NEAR5 kurtz)"), 
+        "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
+        BooleanQuery.class);
 	  
 	  
 	  // temporary workaround for 'first author' search

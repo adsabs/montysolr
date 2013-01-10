@@ -43,7 +43,7 @@ import org.apache.lucene.util.LuceneTestCase;
 import org.apache.lucene.util._TestUtil;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 
-@SuppressCodecs("Lucene3x")
+@SuppressCodecs({"Lucene3x", "SimpleText"})
 public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private IndexSearcher searcher;
 	private IndexReader reader;

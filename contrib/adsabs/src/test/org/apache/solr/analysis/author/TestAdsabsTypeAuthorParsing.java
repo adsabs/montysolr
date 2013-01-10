@@ -331,6 +331,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "126", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Jones, R Lynne"));
     assertU(adoc(F.ID, "127", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Jones, R L"));
     
+    assertU(adoc(F.ID, "200", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, H C"));
+    assertU(adoc(F.ID, "201", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, H-C"));
+    assertU(adoc(F.ID, "202", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, Harwin-C"));
+    assertU(adoc(F.ID, "203", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, Harwin-Costa"));
+    
+    
     assertU(adoc(F.ID, "130", F.BIBCODE, "xxxxxxxxxxxxx", 
         F.AUTHOR, "Author, A",
         F.AUTHOR, "Author, B",
@@ -1938,8 +1944,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "author:muller, b author:muller, b *",
         BooleanQuery.class);
 
-    
-    
+    /*
+    setDebug(true);
+    testAuthorQuery(
+        "Lee, H-C", "author:forman, author:forman, c author:jones, christine author:jones, c " +
+                  "author:forman, christine author:forman,*",
+                         "//*[@numFound='7']"
+    );    
+    */
     
     /*
      * 

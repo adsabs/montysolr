@@ -27,6 +27,8 @@ tokens {
   QCOMMA;
   QIDENTIFIER;
   QCOORDINATE;
+  QREGEX;
+  XMETA;
   EQUAL;
   HASH;
 }
@@ -101,25 +103,6 @@ field
 	//| STAR COLON -> STAR["*"]
 	;
 
-value  
-	: 
-	range_term_in -> ^(QRANGEIN range_term_in)
-//	| range_term_ex -> ^(QRANGEEX range_term_ex) 
-	| identifier -> ^(QIDENTIFIER identifier)
-	| coordinate -> ^(QCOORDINATE coordinate)
-	| normal -> ^(QNORMAL normal)	
-	| truncated -> ^(QTRUNCATED truncated)	
-	| quoted -> ^(QPHRASE quoted)
-	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| DATE_RANGE -> ^(QDATE DATE_RANGE)
-	| AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
-	| QMARK -> ^(QTRUNCATED QMARK)
-	| STAR COLON b=STAR -> ^(QANYTHING $b)
-	| STAR -> ^(QTRUNCATED STAR)
-	//| COMMA -> ^(QCOMMA COMMA)
-  	;
-
-	
 
 range_term_in
         options {greedy=true;}
@@ -141,6 +124,28 @@ range_term_ex
        RCURLY
 	;	
 */
+value  
+	:
+	REGEX -> ^(QREGEX REGEX) 
+	|range_term_in -> ^(QRANGEIN range_term_in)
+//	| range_term_ex -> ^(QRANGEEX range_term_ex) 
+	| identifier -> ^(QIDENTIFIER identifier)
+	| coordinate -> ^(QCOORDINATE coordinate)
+	| normal -> ^(QNORMAL normal)	
+	| truncated -> ^(QTRUNCATED truncated)	
+	| quoted -> ^(QPHRASE quoted)
+	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+	| DATE_RANGE -> ^(QDATE DATE_RANGE)
+	| AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
+	| QMARK -> ^(QTRUNCATED QMARK)
+	| STAR COLON b=STAR -> ^(QANYTHING $b)
+	| STAR -> ^(QTRUNCATED STAR)
+	| LOCAL_PARAMS -> ^(XMETA LOCAL_PARAMS)	
+	//| COMMA -> ^(QCOMMA COMMA)
+  	;
+
+	
+
 
 range_value
 	:	
@@ -483,14 +488,14 @@ fragment TERM_START_CHAR
 	      | '(' | ')' | '[' | ']' | '{' | '}'
 	      | '+' | '-' | '!' | ':' | '~' | '^' 
 	      | '?' | '*' | '\\'|',' | '=' | '#'
-	      | '–' | ';'
+	      | '–' | ';'|'/'
 	      )
 	 | ESC_CHAR );  	
 
 
 fragment TERM_CHAR
 	:	
-	(TERM_START_CHAR  | '+' | '-' | '–' | '=' | '#')
+	(TERM_START_CHAR  | '+' | '-' | '–' | '=' | '#'|'/')
 	;
 
 
@@ -544,4 +549,9 @@ PHRASE_ANYTHING	:
 	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
 	;
 
-	
+LOCAL_PARAMS	:	
+	'{!' (ESC_CHAR|~('}'|'\\'))+ '}'
+	;
+REGEX	:	
+	'/' (ESC_CHAR|~('/'|'\\'))+ '/'
+	;	

@@ -326,20 +326,20 @@ mainQ:
 "2'"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL 2')))))"		
 "\"2'\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"2'\")))))"		
 				
+//10Jan – added support for /regex/ and {!local params}	->			
+"foo /^bar$/"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QREGEX /^bar$/)))))"		
+"foo /^ba\"r$/"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QREGEX /^ba\"r$/)))))"		
+"foo /^ba\\r$/"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QREGEX /^ba\\\r$/)))))"		
+"foo /^ba[a-z](this|that|OR|NEAR) \\w/"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QREGEX /^ba[a-z](this|that|OR|NEAR) \\w/)))))"		
+"10.1/12345 is not re/gex"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL 10.1/12345)))) (NOT (MODIFIER (TMODIFIER (FIELD (QNORMAL is)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL re/gex))))))"		
 				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
+"raw({!aqp fl=title,abstract}foo,bar)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC raw( (DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!aqp fl=title,abstract})))) (COMMA (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))))))))"		
+"raw({!aqp fl=title,abstract} foo,bar)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC raw( (DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!aqp fl=title,abstract})))) (COMMA (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))))))))"		
+"raw(    {!aqp fl=title,abstract} foo, bar)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC raw( (DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!aqp fl=title,abstract})))) (COMMA (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))))))))"		
+"{!bla bla} raw(    {!aqp fl=title,abstract} foo, bar)"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!bla bla})))) (CLAUSE (MODIFIER (TMODIFIER (QFUNC raw( (DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!aqp fl=title,abstract})))) (COMMA (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))))))))"		
+"raw({!aqp fl=title,abstract v=\"phrase\"}foo,bar)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC raw( (DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!aqp fl=title,abstract v=\"phrase\"})))) (COMMA (MODIFIER (TMODIFIER (FIELD (QNORMAL foo)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))))))))"		
+"raw({!aqp fl=title,abstract v=\"phrase\" foo,bar)"		FAIL		
+"raw({!!@#$%^&*()-+\"}foo) bar"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC raw( (DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!!@#$%^&*()-+\"})))) (MODIFIER (TMODIFIER (FIELD (QNORMAL foo))))))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))"		
 				
 				
 				
