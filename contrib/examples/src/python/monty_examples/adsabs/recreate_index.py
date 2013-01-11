@@ -10,25 +10,10 @@ import urllib
 import pprint
 
 from montysolr import config 
+from montysolr_examples.utils import req
 
 log = config.get_logger("montysolr.examples.adsabs.recreate_index")
 
-def req(url, **kwargs):
-    kwargs['wt'] = 'json'
-    params = urllib.urlencode(kwargs)
-    page = ''
-    try:
-        conn = urllib.urlopen(url, params)
-        page = conn.read()
-        rsp = simplejson.loads(page)
-        conn.close()
-        return rsp
-    except Exception, e:
-        log.error(str(e))
-        log.error(page)
-        raise e
-    
-    
     
 
 def recreate_index(solr_url, 

@@ -28,7 +28,10 @@ import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 
 /**
@@ -38,8 +41,7 @@ import java.util.Properties;
 
 //@SuppressCodecs({"Lucene3x"})
 public class TestAdsDataImport extends MontySolrQueryTestCase {
-
-
+  
   @BeforeClass
   public static void beforeTestAdsDataImport() throws Exception {
     // to use filesystem instead of ram
