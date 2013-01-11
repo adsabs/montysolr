@@ -89,7 +89,8 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return referenceField.hashCode() ^ (docToDocidsCache!=null ? docToDocidsCache.hashCode() : 0);
+	  // when using docToDocidsCache.hashCode() java tries to compute hashCode of all objects inside
+		return referenceField.hashCode() ^ (docToDocidsCache!=null ? docToDocidsCache.size() : 0);
 	}
 	
 	
