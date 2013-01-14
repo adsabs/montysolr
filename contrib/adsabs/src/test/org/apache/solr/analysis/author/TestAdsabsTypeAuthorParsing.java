@@ -1944,14 +1944,42 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "author:muller, b author:muller, b *",
         BooleanQuery.class);
 
-    /*
-    setDebug(true);
+    
+    //setDebug(true);
     testAuthorQuery(
-        "Lee, H-C", "author:forman, author:forman, c author:jones, christine author:jones, c " +
-                  "author:forman, christine author:forman,*",
-                         "//*[@numFound='7']"
+        "Lee, H-C", "author:lee, h c author:lee, h c* author:/lee, h[^\\s]+ c/ author:/lee, h[^\\s]+ c .*/ author:lee, h author:lee,",
+                    "//*[@numFound='3']",
+                    // Lee, H-C numFound=3
+                    // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C                            
+        "\"Lee, H C\"", "author:lee, h c author:lee, h c* author:/lee, h[^\\s]+ c/ author:/lee, h[^\\s]+ c .*/ author:lee, h author:lee,",
+                    "//*[@numFound='3']",
+                    // "Lee, H-C" numFound=3
+                    // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C
+        "Lee, H C", "+(author:lee, h author:lee, h* author:lee,) +all:c",
+                    "//*[@numFound='0']",                    
+        "Lee, Harwin-C", "author:lee, harwin c author:lee, harwin c* author:lee, h c author:lee, h c* author:lee, harwin author:lee, h author:lee,",
+                    "//*[@numFound='4']",
+                    // Lee, Harwin-C numFound=4
+                    // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C          
+                    // 203 Lee, Harwin-Costa
+        "\"Lee, Harwin C\"", "author:lee, harwin c author:lee, harwin c* author:lee, h c author:lee, h c* author:lee, harwin author:lee, h author:lee,",
+                    "//*[@numFound='4']",
+                    // Lee, Harwin C numFound=4
+                    // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C          
+                    // 203 Lee, Harwin-Costa                    
+        "Lee, Harwin-*", "author:lee, harwin-*",
+                    "//*[@numFound='0']",
+                    // Lee, Harwin-* numFound=0
+        "Lee, Harwin*", "author:lee, harwin*",
+                    "//*[@numFound='2']",
+                     // Lee, Harwin* numFound=2
+                     // 202 Lee, Harwin-C          203  Lee, Harwin-Costa
+        "Lee, H*", "author:lee, h author:lee, h* author:lee,",
+                    "//*[@numFound='4']"
+                     // Lee, Harwin-C numFound=4
+                     // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C          
+                     // 203 Lee, Harwin-Costa 
     );    
-    */
     
     /*
      * 

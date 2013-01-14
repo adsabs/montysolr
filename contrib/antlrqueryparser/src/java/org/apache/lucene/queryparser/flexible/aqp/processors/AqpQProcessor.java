@@ -100,7 +100,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     return node;
   }
 	
-	public static String getOriginalInput(AqpANTLRNode node) throws ParseException {
+	public static OriginalInput getOriginalInput(AqpANTLRNode node) throws ParseException {
 	  
 	  CharStream inputStream = getInputStream(node);
 	  if (inputStream == null) {
@@ -119,7 +119,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     //if (lastIndex[0]+1 < inputStream.size()) {
     //  lastIndex[0] += 1;
     //}
-    return inputStream.substring(startIndex[0], lastIndex[0]);
+    return new OriginalInput(inputStream.substring(startIndex[0], lastIndex[0]), startIndex[0], lastIndex[0]);
   }
 	
 	private static CharStream getInputStream(QueryNode node) {
@@ -166,6 +166,20 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
       if (si > -1 && si < i[0]) {
         i[0] = si;
       }
+    }
+  }
+  
+  public static class OriginalInput {
+    public String value;
+    public int start;
+    public int end;
+    public OriginalInput(String value, int startIndex, int endIndex) {
+      this.value = value;
+      this.start = startIndex;
+      this.end = endIndex;
+    }
+    public String toString() {
+      return String.format("%s [%d:%d]", this.value, this.start, this.end);
     }
   }
 }

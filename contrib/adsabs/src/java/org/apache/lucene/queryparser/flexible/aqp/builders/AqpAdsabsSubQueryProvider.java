@@ -16,6 +16,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
@@ -312,7 +313,8 @@ public class AqpAdsabsSubQueryProvider implements
 		else {
 		  
 		  if (node instanceof AqpANTLRNode) {
-		    subQuery = AqpQProcessor.getOriginalInput((AqpANTLRNode) node.getChildren().get(1));
+		    OriginalInput input = AqpQProcessor.getOriginalInput((AqpANTLRNode) node.getChildren().get(1));
+		    subQuery = input.value;
 		  }
 		  else { // less precise method of re-constructing what was inside brackets
     		String qStr = reqAttr.getQueryString();

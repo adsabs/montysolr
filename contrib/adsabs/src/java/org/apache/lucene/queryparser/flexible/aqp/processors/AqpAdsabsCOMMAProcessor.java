@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -24,14 +25,27 @@ public class AqpAdsabsCOMMAProcessor extends AqpCOMMAProcessor {
       String dummy = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE);
       QueryNode targetNode = null;
       QueryNode valueNode = null;
+      OriginalInput input;
+      OriginalInput lastInput = null;
+      
       for (QueryNode child: children) {
         // we need only the value, excluding field 
         AqpANTLRNode fldNode = ((AqpANTLRNode) child).findChild("FIELD");
         QueryNode valNode = fldNode.getChildren().get(fldNode.getChildren().size()-1);
         
-        String input = getOriginalInput((AqpANTLRNode) valNode);
+        input = getOriginalInput((AqpANTLRNode) valNode);
         if (!input.equals(dummy)) {
-          vals.add(input);
+          
+          if (lastInput != null) {
+            if (lastInput.end+2 == input.start) {
+              vals.add(",");
+            }
+            else {
+              vals.add(", ");
+            }
+          }
+          vals.add(input.value);
+          lastInput = input;
           if (targetNode == null) {
             targetNode = child;
             valueNode = valNode;
@@ -39,11 +53,8 @@ public class AqpAdsabsCOMMAProcessor extends AqpCOMMAProcessor {
         }
       }
       StringBuilder sb = new StringBuilder();
-      boolean first = true;
       for (String v: vals) {
-        if (!first) sb.append(",");
         sb.append(v);
-        first = false;
       }
       if (targetNode == null) {
         throw new ParseException(new MessageImpl("There is no user input"));
