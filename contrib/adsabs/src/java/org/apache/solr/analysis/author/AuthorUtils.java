@@ -34,6 +34,7 @@ public class AuthorUtils {
 		a = n1.matcher(a).replaceAll("");
 		a = n3.matcher(a).replaceAll(", ");
 		a = n2.matcher(a.trim()).replaceAll(" ");
+		a = a.replace('-', ' ');
 		//a = a.toUpperCase();
 		if (!(a.contains(",") || a.contains(" ")))
 		  a = a + ",";
