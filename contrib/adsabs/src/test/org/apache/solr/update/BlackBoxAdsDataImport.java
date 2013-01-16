@@ -21,18 +21,13 @@ package org.apache.solr.update;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Properties;
 
 /**
  * Tests that the dataimport handler gets all the fields needed.
@@ -40,7 +35,7 @@ import java.util.Properties;
  */
 
 //@SuppressCodecs({"Lucene3x"})
-public class TestAdsDataImport extends MontySolrQueryTestCase {
+public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
   
   @BeforeClass
   public static void beforeTestAdsDataImport() throws Exception {
@@ -74,12 +69,12 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 
     File newConfig = new File(configFile);
 
-    if (System.getProperty("test.mongodb.host", null) != null) {
+    if (System.getProperty("tests.mongodb.host", null) != null) {
       File newDataConfig;
       try {
         newConfig = duplicateFile(new File(configFile));
         newDataConfig = duplicateFile(new File(dataConfig));
-        replaceInFile(newDataConfig, "mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("test.mongodb.host")));
+        replaceInFile(newDataConfig, "mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("tests.mongodb.host")));
         replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
       } catch (IOException e) {
         e.printStackTrace();
@@ -445,7 +440,11 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     assertQ(req("q", "bibstem:yCat..35*"), "//*[@numFound='3']");
     assertQ(req("q", "bibstem:yCat..35?"), "//*[@numFound='3']");
 
-    assertQ(req("q", "bibstem:apj.."), "//*[@numFound='2']");
+    assertQ(req("q", "bibstem:apj.."), 
+        "//*[@numFound='3']",
+        "//doc/str[@name='bibcode'][.='1981ApJ...243..677D']",
+        "//doc/str[@name='bibcode'][.='2012ApJ...760..135R']",
+        "//doc/str[@name='bibcode'][.='1991ApJ...371..665R']");
 
     //XXX: this has changed, the last dot gets removed when we try to guess regex query
     // need a better solution for this ambiguity yCat..* becomes 'yCat.*'
@@ -693,9 +692,10 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='9218605']"
     ); 
     // full
-    assertQ(req("q", "pleasure"), 
+    //dumpDoc(null, "recid", "full");
+    assertQ(req("q", "hashimoto"), 
         "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='1810902']"
+        "//doc/int[@name='recid'][.='3673891']"
     );
 
 
@@ -723,70 +723,62 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     /*
      * read_count (float type)
      */
-    //dumpDoc(null, "recid", "read_count");
+    //dumpDoc(null, "recid", "bibcode", "read_count", "cite_read_boost");
+    assertQ(req("q", "read_count:[0.0 TO 19.0]"), 
+        "//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
+        "//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
+        "//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']",
+        "//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+        "//*[@numFound='4']");
+    assertQ(req("q", "read_count:19.0"), 
+        "//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
+        "//*[@numFound='1']");
+    assertQ(req("q", "read_count:15.0"), 
+        "//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
+        "//*[@numFound='1']");
     assertQ(req("q", "read_count:1.0"), 
-        "//doc/int[@name='recid'][.='9218920']",
+        "//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']",
         "//*[@numFound='1']");
-    assertQ(req("q", "read_count:[0.0 TO 1.0]"), 
-        "//doc/int[@name='recid'][.='9218920']",
+    assertQ(req("q", "read_count:0.0"), 
+        "//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
         "//*[@numFound='1']");
-    assertQ(req("q", "read_count:3.0"), 
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='1810902']"
-    );
-    assertQ(req("q", "read_count:[44 TO 45]"), 
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='9143768']"
-    );
-    assertQ(req("q", "read_count:[0 TO 2000]"), 
-        "//*[@numFound='7']",
-        "//doc/int[@name='recid'][.='9143768']",
-        "//doc/int[@name='recid'][.='9218920']",
-        "//doc/int[@name='recid'][.='3813361']",
-        "//doc/int[@name='recid'][.='2310600']",
-        "//doc/int[@name='recid'][.='5979890']",
-        "//doc/int[@name='recid'][.='1810902']",
-        "//doc/int[@name='recid'][.='9311214']"
-    );
+    
 
     /*
      * cite_read_boost
      */
 		//dumpDoc(null, "recid", "read_count", "cite_read_boost");
-		assertQ(req("q", "cite_read_boost:0.269099999"), 
-        "//doc/int[@name='recid'][.='9218920']",
+    assertQ(req("q", "cite_read_boost:[0.0 TO 1.0]"), 
+        "//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
+        "//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
+        "//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']",
+        "//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+        "//*[@numFound='4']");
+    assertQ(req("q", "cite_read_boost:0.4649"), 
+        "//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:0.1454"), 
-        "//doc/int[@name='recid'][.='1810902']",
+    assertQ(req("q", "cite_read_boost:0.373"), 
+        "//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:[0.1453 TO 0.1454]"), 
-        "//doc/int[@name='recid'][.='1810902']",
+    assertQ(req("q", "cite_read_boost:0.2416"), 
+        "//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:[0.14541 TO 0.1455]"), 
-        "//*[@numFound='0']");
-		assertQ(req("q", "cite_read_boost:[0.14539 TO 0.145399999999999999]"), 
-		    "//doc/int[@name='recid'][.='1810902']",
+    assertQ(req("q", "cite_read_boost:0.4104"), 
+        "//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:0.2182"), 
-        "//doc/int[@name='recid'][.='2310600']",
+    
+    assertQ(req("q", "cite_read_boost:[0.1 TO 0.373]"), 
+        "//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
+        "//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']",
+        "//*[@numFound='2']");
+    assertQ(req("q", "cite_read_boost:[0.4103 TO 0.410399999999]"), 
+        "//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:[0.0 TO 0.2691]"), 
-		    "//*[@numFound='3']",
-		    "//doc/int[@name='recid'][.='9218920']",
-		    "//doc/int[@name='recid'][.='2310600']",
-		    "//doc/int[@name='recid'][.='1810902']" 
-        );
-		assertQ(req("q", "cite_read_boost:[0.0 TO 1.0]"),
-		    "//*[@numFound='7']",
-        "//doc/int[@name='recid'][.='9143768']",
-        "//doc/int[@name='recid'][.='9218920']",
-        "//doc/int[@name='recid'][.='3813361']",
-        "//doc/int[@name='recid'][.='2310600']",
-        "//doc/int[@name='recid'][.='5979890']",
-        "//doc/int[@name='recid'][.='1810902']",
-        "//doc/int[@name='recid'][.='9311214']"
-        );
-		
+    assertQ(req("q", "cite_read_boost:[0.41039999 TO 0.4648999999]"), 
+        "//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+        "//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
+        "//*[@numFound='2']");
+    
     /*
      * pubdate - 17/12/2012 changed to be the date type
      * 
@@ -893,6 +885,6 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
 
   // Uniquely for Junit 3
   public static junit.framework.Test suite() {
-    return new junit.framework.JUnit4TestAdapter(TestAdsDataImport.class);
+    return new junit.framework.JUnit4TestAdapter(BlackBoxAdsDataImport.class);
   }
 }

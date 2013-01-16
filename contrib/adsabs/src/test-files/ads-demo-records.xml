@@ -2622,4 +2622,49 @@
     <subfield code="7">ARXIV</subfield>
   </datafield>
 </record>
+<record>
+  <controlfield tag="001">3673891</controlfield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Raiteri, C. M.</subfield>
+    <subfield code="b">Raiteri, C</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="7">APJ; KNUDSEN</subfield>
+    <subfield code="u">Scuola Internazionale Superiore di Studi Avanzati, Trieste, Italy</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">Test fulltext from mongo : S-Process Nucleosynthesis in Massive Stars and the Weak Component. II. Carbon Burning and Galactic Enrichment</subfield>
+    <subfield code="7">APJ; KNUDSEN</subfield>
+  </datafield>
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">1991ApJ...371..665R</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+</record>
+<record>
+    <controlfield tag="001">50</controlfield>
+    <datafield ind1=" " ind2=" " tag="970">
+        <subfield code="a">1976AJ.....81...67S</subfield>
+    </datafield>
+    <datafield ind1=" " ind2=" " tag="245">
+        <subfield code="a">MongoFieldsTest #1</subfield>
+    </datafield>
+</record>
+<record>
+    <controlfield tag="001">51</controlfield>
+    <datafield ind1=" " ind2=" " tag="970">
+        <subfield code="a">2009arXiv0909.1287I</subfield>
+    </datafield>
+    <datafield ind1=" " ind2=" " tag="245">
+        <subfield code="a">MongoFieldsTest #2</subfield>
+    </datafield>
+</record>
+<record>
+    <controlfield tag="001">52</controlfield>
+    <datafield ind1=" " ind2=" " tag="970">
+        <subfield code="a">1987PhRvD..36..277B</subfield>
+    </datafield>
+    <datafield ind1=" " ind2=" " tag="245">
+        <subfield code="a">MongoFieldsTest #3</subfield>
+    </datafield>
+</record>
 </collection>
