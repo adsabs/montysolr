@@ -289,7 +289,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           "(abstract:acr::hst^0.6 | title:acr::hst^0.9 | full:acr::hst^0.8 | keyword:acr::hst^0.7))", 
         BooleanQuery.class);
     
-    
 	  // author search, unfielded
 	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi,", 
         "qf", "author^2.3 title abstract^0.4"), 
@@ -313,6 +312,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "| (title:accomazzi title:alberto title:accomazzialberto))", 
         DisjunctionMaxQuery.class);
 	  
+	  setDebug(true);
 	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi, alberto", 
         "qf", "author^2.3 title abstract^0.4"), 
         "(((abstract:accomazzi abstract:alberto abstract:accomazzialberto)^0.4) " +

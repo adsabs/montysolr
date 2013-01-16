@@ -78,8 +78,16 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		IndexableField bf = document.getField(boostField);
 		//if (bf==null) throw new IOException("Every document must have field: " + boostField);
 		
+		// TODO: we must find the proper values for this, that means to compute the statistics
+		// (find the local minimas, maximas) for this function; this is just guessing....
+		
+		
     if (bf != null) {
       s = s + (s * bf.numericValue().floatValue());
+    }
+    else {
+      // penalize docs without boost
+      s = s * 0.8f;
     }
 		
     // find documents that are cited by our doc (references)

@@ -723,7 +723,7 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     /*
      * read_count (float type)
      */
-    //dumpDoc(null, "recid", "read_count");
+    dumpDoc(null, "recid", "read_count");
     assertQ(req("q", "read_count:1.0"), 
         "//doc/int[@name='recid'][.='9218920']",
         "//*[@numFound='1']");

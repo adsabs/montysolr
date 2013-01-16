@@ -101,28 +101,32 @@ public class TestAuthorParsing extends TestCase {
     public void testParseAuthor13() throws Exception {
         HashMap<String,String> expected = new HashMap<String,String>();
         expected.put("last", "KAO");
-        expected.put("first", "P'ING-TZU");
+        expected.put("first", "P'ING");
+        expected.put("middle", "TZU");
         assertEquals(expected, AuthorUtils.parseAuthor("P'ING-TZU KAO"));
     }
 
     public void testParseAuthor14() throws Exception {
         HashMap<String,String> expected = new HashMap<String,String>();
         expected.put("last", "KAO");
-        expected.put("first", "P'ING-TZU");
+        expected.put("first", "P'ING");
+        expected.put("middle", "TZU");
         assertEquals(expected, AuthorUtils.parseAuthor("KAO, P'ING-TZU"));
     }
 
     public void testParseAuthor15() throws Exception {
         HashMap<String,String> expected = new HashMap<String,String>();
         expected.put("last", "Kao");
-        expected.put("first", "P'ing-Tzu");
+        expected.put("first", "P'ing");
+        expected.put("middle", "Tzu");
         assertEquals(expected, AuthorUtils.parseAuthor("Kao, P'ing-Tzu"));
     }
 
     public void testParseAuthor16() throws Exception {
         HashMap<String,String> expected = new HashMap<String,String>();
         expected.put("last", "Kao");
-        expected.put("first", "P'ing-Tzu");
+        expected.put("first", "P'ing");
+        expected.put("middle", "Tzu");
         assertEquals(expected, AuthorUtils.parseAuthor("Kao, P'ing-Tzu"));
     }
 
@@ -299,7 +303,7 @@ public class TestAuthorParsing extends TestCase {
 
     public void testParseAuthor39() throws Exception {
         HashMap<String,String> expected = new HashMap<String,String>();
-        expected.put("last", "Torres-Flores");
+        expected.put("last", "Torres Flores");
         expected.put("first", "S");
         assertEquals(expected, AuthorUtils.parseAuthor("Torres-Flores, S"));
     }

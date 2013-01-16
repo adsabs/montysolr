@@ -161,33 +161,36 @@ SecondOrderCollector {
     ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
         (hits.size() * 0.75f)).intValue());
 
-    CollectorDoc currDoc = null;
+    if (hits.size() < 1)
+      return;
+    
+    CollectorDoc currDoc = hits.get(0);
     int seenTimes = 0;
-    float score = 0.0f;
-
+    float score = 1.0f;
+    
     for (CollectorDoc d : hits) {
-      if (currDoc == null || d.doc == currDoc.doc) {
-        score += d.score;
+      //System.out.println("seen=" + seenTimes + " score=" + score + " currDoc " + currDoc.toString() + " d " + d.toString());
+      if (d.doc == currDoc.doc) {
+        score *= d.score;
         seenTimes += 1;
-        if (currDoc == null)
-          currDoc = d;
         continue;
       }
-
-      // this penalizes papers which are references many times
+      // compute geometric mean (not arithmetic, as that is not good for comparison
+      // of normalized values
+      
       if (seenTimes > 1)
-        currDoc.score = score / seenTimes;
+        currDoc.score = (float) Math.pow(score, 1.0f/seenTimes);
+      //System.out.println("adding " + currDoc.toString());
       newHits.add(currDoc);
-
       currDoc = d;
-      score = d.score;
       seenTimes = 1;
+      score = currDoc.score;
     }
-    if (currDoc != null) {
-      if (seenTimes > 1)
-        currDoc.score = score / seenTimes;
-      newHits.add(currDoc);
+    
+    if (seenTimes > 0) {
+      currDoc.score = (float) Math.pow(score, 1/seenTimes);
     }
+    newHits.add(currDoc);
 
     hits = newHits;
   }
