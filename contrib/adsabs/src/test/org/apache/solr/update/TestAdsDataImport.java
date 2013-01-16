@@ -723,14 +723,14 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     /*
      * read_count (float type)
      */
-    dumpDoc(null, "recid", "read_count");
+    //dumpDoc(null, "recid", "read_count");
     assertQ(req("q", "read_count:1.0"), 
         "//doc/int[@name='recid'][.='9218920']",
         "//*[@numFound='1']");
     assertQ(req("q", "read_count:[0.0 TO 1.0]"), 
         "//doc/int[@name='recid'][.='9218920']",
         "//*[@numFound='1']");
-    assertQ(req("q", "read_count:2.0"), 
+    assertQ(req("q", "read_count:3.0"), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='1810902']"
     );
@@ -753,24 +753,24 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
      * cite_read_boost
      */
 		//dumpDoc(null, "recid", "read_count", "cite_read_boost");
-		assertQ(req("q", "cite_read_boost:0.2606999999999"), 
+		assertQ(req("q", "cite_read_boost:0.269099999"), 
         "//doc/int[@name='recid'][.='9218920']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:0.1153"), 
+		assertQ(req("q", "cite_read_boost:0.1454"), 
         "//doc/int[@name='recid'][.='1810902']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:[0.1152 TO 0.1153]"), 
+		assertQ(req("q", "cite_read_boost:[0.1453 TO 0.1454]"), 
         "//doc/int[@name='recid'][.='1810902']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:[0.1152 TO 0.115299]"), 
+		assertQ(req("q", "cite_read_boost:[0.14541 TO 0.1455]"), 
         "//*[@numFound='0']");
-		assertQ(req("q", "cite_read_boost:[0.115299 TO 0.1153]"), 
+		assertQ(req("q", "cite_read_boost:[0.14539 TO 0.145399999999999999]"), 
 		    "//doc/int[@name='recid'][.='1810902']",
         "//*[@numFound='1']");
 		assertQ(req("q", "cite_read_boost:0.2182"), 
         "//doc/int[@name='recid'][.='2310600']",
         "//*[@numFound='1']");
-		assertQ(req("q", "cite_read_boost:[0.0 TO 0.2607]"), 
+		assertQ(req("q", "cite_read_boost:[0.0 TO 0.2691]"), 
 		    "//*[@numFound='3']",
 		    "//doc/int[@name='recid'][.='9218920']",
 		    "//doc/int[@name='recid'][.='2310600']",
@@ -881,14 +881,12 @@ public class TestAdsDataImport extends MontySolrQueryTestCase {
     /*
      * 2nd order queries
      */
+    //TO finish when i get the new mongodb dump (mine is missing cite_read_boost)
     /*
-     * 
-     TO finish when i get the new mongodb dump (mine is missing cite_read_boost)
     assertQ(req("q", "useful(*:*)"), "//*[@numFound='0']");
     assertQ(req("q", "reviews(*:*)"), "//*[@numFound='0']");
     assertQ(req("q", "reviews(*:*)"), "//*[@numFound='0']");
-     */
-
+    */
 
   }
 
