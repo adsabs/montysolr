@@ -10,7 +10,7 @@ import urllib
 import pprint
 
 from montysolr import config 
-from montysolr_examples.utils import req
+from monty_examples.utils import req
 
 log = config.get_logger("montysolr.examples.adsabs.recreate_index")
 
