@@ -301,11 +301,16 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
       Thread.sleep(300);
     }
     
-    assertQ(req("qt", "/invenio-doctor", "command", "info"), 
+    assertU(commit());
+    assertQ(req("q", "recid:77 OR recid:80"), "//*[@numFound='2']");
+    
+    /*
+    assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
         "//str[@name='registeredRequests'][.='9']",
         "//str[@name='restartedRequests'][.='9']",
         "//str[@name='status'][.='idle']"
     );
+    */
     
   }
 

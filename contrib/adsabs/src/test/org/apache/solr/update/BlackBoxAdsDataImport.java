@@ -30,7 +30,15 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Tests that the dataimport handler gets all the fields needed.
+ * This test verifies all indexes are in place and the search against
+ * them works. This is the main black-box for the whole ADS search.
+ * 
+ * The test is using demo-records from contrib/adsabs/src/test-files/ads-demo-records.xml
+ * 
+ * And also MongoDB (test instance) with demorecords loaded. We do not use
+ * Invenio (Python/MySQL) though it must be present in the environment
+ * for the test to work.
+ * 
  * 
  */
 

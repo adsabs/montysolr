@@ -73,6 +73,6 @@ public class BlackBoxDataimportIndexingPythonic extends BlackAbstractTestCase{
 	
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
-        return new junit.framework.JUnit4TestAdapter(BlackBoxDataimportIndexing.class);
+        return new junit.framework.JUnit4TestAdapter(BlackBoxDataimportIndexingPythonic.class);
     }
 }
