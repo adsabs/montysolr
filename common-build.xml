@@ -587,7 +587,7 @@
 		<attribute name="tests.weekly" default="${tests.weekly}"/>
 		<attribute name="tests.slow" default="${tests.slow}"/>
 		<attribute name="tests.multiplier" default="${tests.multiplier}"/>
-		<attribute name="testId" default="Test"/>
+		<attribute name="testFamily" default="Test"/>
 
 		<sequential>
 			<!-- Warn if somebody uses removed properties. -->
@@ -818,8 +818,8 @@
 				<!-- Input test classes. -->
 	            <junit4:duplicate times="${tests.dups}">
 	              <fileset dir="@{testsDir}">
-	                <include name="**/Test*.class" />
-	                <include name="**/*Test.class" />
+	                <include name="**/@{testFamily}*.class" />
+	                <include name="**/*@{testFamily}.class" />
 	                <exclude name="**/*$*" />
 	              </fileset>
 	            </junit4:duplicate>
@@ -847,7 +847,7 @@
 		description="Runs unit tests">
 		<mkdir dir="${junit.output.dir}"/>
 		<mkdir dir="${common.dir}/build/junit4"/>
-		<test-macro threadNum="${tests.jvms}" testId="${tests.family}"/>
+		<test-macro threadNum="${tests.jvms}" testFamily="${tests.family}"/>
 	</target>
 
 
