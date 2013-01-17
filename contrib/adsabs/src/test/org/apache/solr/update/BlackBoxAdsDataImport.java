@@ -69,6 +69,7 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
 
     File newConfig = new File(configFile);
 
+    System.err.println(System.getProperties());
     System.err.println("tests.mongodb.host=" + System.getProperty("tests.mongodb.host", "<null>"));
     
     if (System.getProperty("tests.mongodb.host", null) != null) {
@@ -726,7 +727,7 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
      * read_count (float type)
      */
     //dumpDoc(null, "recid", "bibcode", "read_count", "cite_read_boost");
-    assertQ(req("q", "read_count:[0.0 TO 19.0]", "fl", "recid,bibdoc,title,read_count"), 
+    assertQ(req("q", "read_count:[0.0 TO 19.0]", "fl", "recid,bibcode,title,read_count"), 
         "//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
         "//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
         "//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']",

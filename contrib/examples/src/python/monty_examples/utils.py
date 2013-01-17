@@ -1,9 +1,6 @@
 
-import urllib2 as u2
-import httplib
 import simplejson
 import urllib
-import pprint
 
 def req(url, **kwargs):
     kwargs['wt'] = 'json'

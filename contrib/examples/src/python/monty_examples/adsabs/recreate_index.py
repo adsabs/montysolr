@@ -1,12 +1,7 @@
 
 import sys
 import time
-import logging
 
-import urllib2 as u2
-import httplib
-import simplejson
-import urllib
 import pprint
 
 from montysolr import config 
