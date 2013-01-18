@@ -341,7 +341,7 @@ mainQ:
 "raw({!!@#$%^&*()-+\"}foo) bar"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC raw( (DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!!@#$%^&*()-+\"})))) (MODIFIER (TMODIFIER (FIELD (QNORMAL foo))))))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))"		
 				
 //18Jan - #287	->			
-"year:2000 ((bibstem:ApJ page:L*) OR bibstem:ApJS)"	->	""		
+"year:2000 ((bibstem:ApJ page:L*) OR bibstem:ApJS)"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD year (QNORMAL 2000)))) (DEFOP (OR (DEFOP (MODIFIER (TMODIFIER (FIELD bibstem (QNORMAL ApJ)))) (MODIFIER (TMODIFIER (FIELD page (QTRUNCATED L*))))) (MODIFIER (TMODIFIER (FIELD bibstem (QNORMAL ApJS)))))))"		
 				
 				
 				
