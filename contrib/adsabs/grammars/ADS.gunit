@@ -340,8 +340,8 @@ mainQ:
 "raw({!aqp fl=title,abstract v=\"phrase\" foo,bar)"		FAIL		
 "raw({!!@#$%^&*()-+\"}foo) bar"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC raw( (DEFOP (MODIFIER (TMODIFIER (FIELD (XMETA {!!@#$%^&*()-+\"})))) (MODIFIER (TMODIFIER (FIELD (QNORMAL foo))))))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL bar)))))"		
 				
-				
-				
+//18Jan - #287	->			
+"year:2000 ((bibstem:ApJ page:L*) OR bibstem:ApJS)"	->	""		
 				
 				
 				
