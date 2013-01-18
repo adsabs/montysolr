@@ -1,4 +1,3 @@
-				
 gunit ADS;				
 @header {				
 package org.apache.lucene.queryparser.flexible.aqp.parser;				
@@ -39,17 +38,17 @@ mainQ:
 "\"jakarta apache\" AND \"Apache Lucene\"" 	->	"(DEFOP (AND (MODIFIER (TMODIFIER (FIELD (QPHRASE \"jakarta apache\")))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"Apache Lucene\"))))))"		
 "+jakarta lucene" 	->	"(DEFOP (MODIFIER + (TMODIFIER (FIELD (QNORMAL jakarta)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL lucene)))))"		
 "\"jakarta apache\" NOT \"Apache Lucene\"" 	->	"(DEFOP (NOT (MODIFIER (TMODIFIER (FIELD (QPHRASE \"jakarta apache\")))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"Apache Lucene\"))))))"		
-"(jakarta OR apache) AND website" 	->	"(DEFOP (AND (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL jakarta)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL apache))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL website))))))"		
-"this (that)" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))"		
-"this ((that))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))"		
-"(this) ((((((that))))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))"		
-"(this) (that)" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))"		
+"(jakarta OR apache) AND website" 	->	"(DEFOP (AND (DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QNORMAL jakarta)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL apache)))))) (MODIFIER (TMODIFIER (FIELD (QNORMAL website))))))"		
+"this (that)" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that))))))"		
+"this ((that))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))"		
+"(this) ((((((that))))))" 	->	"(DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this))))) (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))))))"		
+"(this) (that)" 	->	"(DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this))))) (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that))))))"		
 "this +(that)" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))))"		
-"this ((((+(that)))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))))"		
-"this (+(((+(that)))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))))))))"		
-"this +((((+(that)))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))))))))"		
-"this +(+((((that)))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))))))))"		
-"this (+(that)^7)" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (BOOST ^7) FUZZY (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))))"		
+"this ((((+(that)))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (DEFOP (DEFOP (DEFOP (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))))))))))))"		
+"this (+(((+(that)))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (DEFOP (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that))))))))))))))))"		
+"this +((((+(that)))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (DEFOP (DEFOP (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that))))))))))))))))"		
+"this +(+((((that)))))" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (DEFOP (DEFOP (DEFOP (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that))))))))))))))))"		
+"this (+(that)^7)" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (DEFOP (CLAUSE (MODIFIER + (TMODIFIER (BOOST ^7) FUZZY (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that))))))))))"		
 "this (+(((+(that))))"		FAIL		
 "this (++(((+(that)))))"		FAIL		
 "this +(that thus)^7" 	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (CLAUSE (MODIFIER + (TMODIFIER (BOOST ^7) FUZZY (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL that)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL thus)))))))))"		
@@ -227,10 +226,10 @@ mainQ:
 "one ^two, j, k$"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPOSITION ^two, j, k$)))))"		
 "one ^two,j,k$"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPOSITION ^two,j,k$)))))"		
 "What , happens,with, commas ,,"		FAIL		
-"cites((title:(lectures physics) and author:Feynman))"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC cites( (DEFOP (AND (CLAUSE (MODIFIER (TMODIFIER (FIELD title (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL lectures)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL physics))))))))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL Feynman)))))))))))"		
+"cites((title:(lectures physics) and author:Feynman))"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (QFUNC cites( (DEFOP (DEFOP (AND (CLAUSE (MODIFIER (TMODIFIER (FIELD title (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL lectures)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL physics))))))))) (MODIFIER (TMODIFIER (FIELD author (QNORMAL Feynman))))))))))))"		
 "#synonyms"	->	"(DEFOP (MODIFIER # (TMODIFIER (FIELD (QNORMAL synonyms)))))"		
 "#(request synonyms)"	->	"(DEFOP (CLAUSE (MODIFIER # (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL request)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL synonyms)))))))))"		
-"this and (one #two)"	->	"(DEFOP (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER # (TMODIFIER (FIELD (QNORMAL two))))))"		
+"this and (one #two)"	->	"(DEFOP (AND (MODIFIER (TMODIFIER (FIELD (QNORMAL this)))) (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER # (TMODIFIER (FIELD (QNORMAL two)))))))"		
 "="		FAIL		
 "=(exact search)"	->	"(DEFOP (CLAUSE (MODIFIER = (TMODIFIER (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL exact)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL search)))))))))"		
 "=\"exact phrase\""	->	"(DEFOP (MODIFIER = (TMODIFIER (FIELD (QPHRASE \"exact phrase\")))))"		
@@ -294,7 +293,7 @@ mainQ:
 "author:(kurtz; -eichhorn, g)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (FIELD author (DEFOP (SEMICOLON (MODIFIER (TMODIFIER (FIELD (QNORMAL kurtz)))) (COMMA (MODIFIER - (TMODIFIER (FIELD (QNORMAL eichhorn)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL g))))))))))))"		
 "author:(kurzz~2; -echhorn)^2 OR ^accomazzi, a"	->	"(DEFOP (OR (CLAUSE (MODIFIER (TMODIFIER (BOOST ^2) FUZZY (FIELD author (DEFOP (SEMICOLON (MODIFIER (TMODIFIER BOOST (FUZZY ~2) (FIELD (QNORMAL kurzz)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL echhorn)))))))))) (MODIFIER (TMODIFIER (FIELD (QPOSITION ^accomazzi, a))))))"		
 "author:(muench-nashrallah)"	->	"(DEFOP (CLAUSE (MODIFIER (TMODIFIER (FIELD author (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL muench-nashrallah))))))))))"		
-"\"dark matter\" OR (dark matter -LHC)"	->	"(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QPHRASE \"dark matter\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL dark)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL matter)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL LHC))))))"		
+"\"dark matter\" OR (dark matter -LHC)"	->	"(DEFOP (OR (MODIFIER (TMODIFIER (FIELD (QPHRASE \"dark matter\")))) (DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL dark)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL matter)))) (MODIFIER - (TMODIFIER (FIELD (QNORMAL LHC)))))))"		
 "year:[2000 TO *]"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD year (QRANGEIN (QNORMAL 2000) (QANYTHING *))))))"		
 "year:2000-"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD year (QDATE 2000-)))))"		
 "2000-"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QDATE 2000-)))))"		

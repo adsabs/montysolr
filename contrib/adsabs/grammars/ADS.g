@@ -79,7 +79,7 @@ clauseBasic
 	| (LPAREN clauseOr+ RPAREN rmodifier)=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
 	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN )=> LPAREN clauseOr+ RPAREN
-		-> clauseOr+
+		-> ^(OPERATOR["DEFOP"] clauseOr+)
 	| atom
 	;
     
