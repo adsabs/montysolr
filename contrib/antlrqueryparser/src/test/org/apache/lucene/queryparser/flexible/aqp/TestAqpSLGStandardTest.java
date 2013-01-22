@@ -19,11 +19,18 @@ package org.apache.lucene.queryparser.flexible.aqp;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.analysis.MockTokenizer;
@@ -902,10 +909,8 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   
-/*  
-    TODO: ARGH. Why does this test seem to randomly fail or pass? 
   
-    public void testLocalDateFormat() throws IOException, QueryNodeException {
+  public void testLocalDateFormat() throws IOException, QueryNodeException, ParseException {
     Directory ramDir = new RAMDirectory();
     IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)));
     addDateDoc("a", 2005, 12, 2, 10, 15, 33, iw);
@@ -913,17 +918,29 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     iw.close();
     IndexSearcher is = new IndexSearcher(DirectoryReader.open(ramDir));
     
-    System.out.println("one");
-    assertHits(1, "[12/1/05 TO 12/3/05]", is);
-    assertHits(2, "[12/1/2005 TO 12/4/2005]", is);
-    setDebug(true);
-    assertHits(1, "[12/3/2005 TO 12/4/2005]", is);
-    setDebug(false);
-    assertHits(1, "{12/1/2005 TO 12/3/2005}", is);
-    assertHits(1, "{12/1/2005 TO 12/4/2005}", is);
-    assertHits(0, "{12/3/2005 TO 12/4/2005}", is);
+    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy",Locale.ROOT);
+    Date d1_12 = format.parse("1/12/2005");
+    Date d3_12 = format.parse("3/12/2005");
+    Date d4_12 = format.parse("4/12/2005");
+    Date d28_12 = format.parse("28/12/2005");
+    
+    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault());
+    String dec1 = df.format(d1_12);
+    String dec2 = df.format(format.parse("2/12/2005"));
+    String dec3 = df.format(d3_12);
+    String dec4 = df.format(d4_12);
+    String dec28 = df.format(d28_12);
+    
+    
+    assertHits(2, String.format("[%s TO %s]", dec1, dec28), is);
+    assertHits(2, String.format("[%s TO %s]", dec1, dec4), is);
+    
+    assertHits(2, String.format("{%s TO %s}", dec1, dec28), is);
+    assertHits(1, String.format("{%s TO %s}", dec1, dec4), is);
+    assertHits(0, String.format("{%s TO %s}", dec3, dec4), is);
+    
     ramDir.close();
-  }*/
+  }
 
 
   public void testStopwords() throws Exception {

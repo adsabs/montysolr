@@ -286,7 +286,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 			throw new QueryNodeException(e);
 		}
 		qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
-		qp.setLocale(Locale.ENGLISH);
+		//qp.setLocale(Locale.ENGLISH);
 		qp.setDateResolution(DateTools.Resolution.DAY);
 
 		Query q = qp.parse(query, "date");
@@ -308,7 +308,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 			throws IOException {
 		Document d = new Document();
 		d.add(new Field("f", content, TextField.TYPE_STORED));
-		Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+		Calendar cal = Calendar.getInstance(Locale.ROOT);
 		cal.set(year, month - 1, day, hour, minute, second);
 		d.add(new Field("date", getDate(cal.getTime(), DateTools.Resolution.DAY),
 				StringField.TYPE_NOT_STORED));
