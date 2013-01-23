@@ -486,12 +486,17 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
     if (data.url.substring(0, 8).equals("discover")) {
       try {
-        runDiscoveryReindexing(locReq);
+        runDiscovery(locReq);
       } catch (IOException e) {
         throw e;
       } finally {
         locReq.close();
       }
+      return;
+    }
+    else if (data.url.contains("index-discovered") && data.url.substring(0, 16).equals("index-discovered")) {
+      runIndexingOfDiscovered(locReq);
+      locReq.close();
       return;
     }
     
@@ -542,8 +547,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
   }
   
-  private void runDiscoveryReindexing(SolrQueryRequest req) throws IOException {
-    
+  private void runDiscovery(SolrQueryRequest req) throws IOException {
     SolrParams params = req.getParams();
     if (params.get("last_recid", null) == null || params.getInt("last_recid", 0) == -1) {
       queue.setMissing(new BitSet());
@@ -554,7 +558,10 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     BitSet[] data = discoverMissingRecords(queue.getPresent(), queue.getMissing(), req);
     queue.setPresent(data[0]);
     queue.setMissing(data[1]);
-    registerReindexingOfMissed(req, data[1]);
+  }
+  
+  private void runIndexingOfDiscovered(SolrQueryRequest req) throws UnsupportedEncodingException {
+    registerReindexingOfMissed(req, queue.getMissing());
   }
 
   private BitSet[] discoverMissingRecords(BitSet present, BitSet missing, SolrQueryRequest req) throws IOException {
@@ -627,6 +634,9 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       mp.set("last_recid", lastRecid);
       mp.remove("discover");
       queue.registerNewBatch("discover=1&"+mp.toString());
+    }
+    else {
+      queue.registerNewBatch("index-discovered");
     }
     return new BitSet[]{present, missing};
     

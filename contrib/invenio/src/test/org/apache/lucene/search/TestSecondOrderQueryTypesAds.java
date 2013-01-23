@@ -20,8 +20,10 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+//import org.apache.lucene.util.LuceneTestCase.BadApple;
 import org.junit.BeforeClass;
 
+//@BadApple
 @SuppressCodecs("SimpleText")
 public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCase {
 
