@@ -230,6 +230,13 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     public BitSet getPresent() {
       return presentRecs;
     }
+    
+    public void reInsert(RequestData rd) {
+      if (!tbdQueue.containsKey(rd.url)) {
+        queuedIn++;
+        tbdQueue.put(rd.url, rd);
+      }
+    }
 
   }
 
@@ -278,9 +285,6 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     else if(command.equals("reset")) {
       queue.reset();
     }
-    else if(command.equals("info")) {
-      printInfo(rsp);
-    }
     else if(command.equals("detailed-info")) {
       printDetailedInfo(rsp);
     }
@@ -294,6 +298,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
         printInfo(rsp);
         return;
       }
+      queue.start();
       workerMessage.clear();
       setBusy(true);
       if (isAsynchronous()) {
@@ -310,11 +315,11 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     else {
       rsp.add("message", "Unknown command: " + command);
       rsp.add("message", "Allowed: start,stop,reset,info,detailed-info");
-      printInfo(rsp);
     }
     
     
     rsp.add("status", isBusy() ? "busy" : "idle");
+    printInfo(rsp);
     //setToken("");
 
   }
@@ -345,7 +350,6 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
   }
 
   private void printMissingRecs(SolrQueryResponse rsp) {
-    printInfo(rsp);
     
     BitSet missing = queue.getMissing();
     BitSet present = queue.getPresent();
@@ -371,7 +375,6 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
   }
   
   private void printDetailedInfo(SolrQueryResponse rsp) {
-    printInfo(rsp);
     
     
     List<String> tbd = new ArrayList<String>();
@@ -464,25 +467,31 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       out.append(msg);
       out.append("\n");
     }
+    workerMessage.clear();
     return out.toString();
   }
 
   /*
    * The main call
    */
-  private void runSynchronously(RequestQueue queue, SolrQueryRequest req)
-  throws MalformedURLException, IOException, InterruptedException {
+  private void runSynchronously(RequestQueue queue, SolrQueryRequest req) throws InterruptedException, IOException {
 
     SolrCore core = req.getCore();
 
     SolrRequestHandler handler = req.getCore().getRequestHandler(handlerName);
     RequestData data = queue.pop();
-
-    LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), data.getReqParams());
+    SolrParams params = data.getReqParams();
+    
+    LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), params);
     
     if (data.url.substring(0, 8).equals("discover")) {
-      runDiscoveryReindexing(locReq);
-      locReq.close();
+      try {
+        runDiscoveryReindexing(locReq);
+      } catch (IOException e) {
+        throw e;
+      } finally {
+        locReq.close();
+      }
       return;
     }
     
@@ -490,21 +499,47 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     setWorkerMessage("Executing :" + handlerName + " with params: " + locReq.getParamString());
     
     SolrQueryResponse rsp;
+    locReq.close();
     
     boolean repeat = false;
+    int maxRepeat = 10;
     do {
+      locReq = new LocalSolrQueryRequest(req.getCore(), params);
       rsp = new SolrQueryResponse();
+      
       core.execute(handler, locReq, rsp);
       String is = (String) rsp.getValues().get("status");
+      
       if (is.equals("busy")) {
         repeat = true;
-        Thread.sleep(sleepTime );
+        try {
+          Thread.sleep(sleepTime );
+        } catch (InterruptedException e) {
+          queue.reInsert(data);
+          throw e;
+        } finally {
+          locReq.close();
+        }
         setWorkerMessage("Waiting for handler to be idle: " + handlerName);
+      }
+      else {
+        repeat = false;
+      }
+      
+      setWorkerMessage("Executed :" + handlerName + " result: " + rsp.getValues().toString());
+      locReq.close();
+      
+      if (maxRepeat-- < 0) {
+        setWorkerMessage("Batch failed, worker is too busy, max waiting time exhausted");
+        try {
+          queue.registerFailedBatch(req.getParamString());
+        } catch (UnsupportedEncodingException e) {
+          log.error(e.getMessage());
+        }
+        repeat = false;
       }
     } while (repeat);
     
-    setWorkerMessage("Executed :" + handlerName + " with params: " + locReq.getParamString() + "\n" + rsp.getValues().toString());
-    locReq.close();
   }
   
   private void runDiscoveryReindexing(SolrQueryRequest req) throws IOException {
