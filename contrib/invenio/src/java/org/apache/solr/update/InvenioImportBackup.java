@@ -591,6 +591,8 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
     boolean finished = false;
     
+    log.info("Checking database for changed records; last_recid={}", lastRecid);
+    
     while (doneSoFar<maxRecs) {
       PythonMessage message = MontySolrVM.INSTANCE
         .createMessage(pythonFunctionName)
@@ -626,7 +628,8 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       doneSoFar += deleted.length;
       lastRecid = (Integer) message.getParam("last_recid");
       
-      log.info("Checking database; last_recid={}; found={}", lastRecid, doneSoFar);
+      log.info("Checking database; restart_from={}; found={}", (Integer) message.getParam("last_recid"), doneSoFar);
+      
     }
     
     if (!finished) {
