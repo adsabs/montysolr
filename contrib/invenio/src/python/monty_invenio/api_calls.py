@@ -32,7 +32,7 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
     
     The time is selected according to some know recid, ie. 
     we retrieve the modification time of one record and look
-    at those that are older.
+    at those that are older. 
     
         OR
         
@@ -42,7 +42,14 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
     added => bibrec.modification_date == bibrec.creation_date
     updated => bibrec.modification_date >= bibrec.creation_date
     deleted => bibrec.status == DELETED
+    
+    We usually return list of max_recs size, however if there 
+    are records past max_recs size and their modification date 
+    is the same, we'll add them too. This is a workaround and 
+    necessary because Invenio doesn't use timestamp with high
+    enough granularity
     """
+    
     table = dbquery.real_escape_string(table)
     search_op = '>'    
     if not mod_date:
@@ -51,8 +58,13 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
             mod_date = l[0][0].strftime(format="%Y-%m-%d %H:%M:%S")
             search_op = '>='
         else:
-            # let's make sure we have a valid recid (or get the close valid one)
-            l = list(dbquery.run_sql("SELECT id, modification_date FROM `" + table + "` WHERE id >= %s LIMIT 1", (last_recid,)))
+            l = list(dbquery.run_sql("SELECT id, modification_date FROM `" + table + "` WHERE id = %s LIMIT 1", (last_recid,)))
+            if not len(l):
+                # let's make sure we have a valid recid (or get the close valid one) BUT this could mean we get the wrong
+                # modification date! (and could result in non-ending loop!)
+                l = list(dbquery.run_sql("SELECT id, modification_date FROM `" + table + "` WHERE id >= %s LIMIT 1", (last_recid,)))
+                sys.stderr.write("Warning, the last_recid %s does not exist, we have found the closest higher id %s with mod_date: %s\n" %
+                           (l[0][0], l[0][1].strftime(format="%Y-%m-%d %H:%M:%S")))
             if not len(l):
                 return
             last_recid = l[0][0]
@@ -64,7 +76,7 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
             #    return
         
     modified_records = list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM `" + table +
-                    "` WHERE modification_date " + search_op + "\"%s\" ORDER BY modification_date ASC, id ASC LIMIT %s" %
+                    "` WHERE modification_date " + search_op + " '%s' ORDER BY modification_date ASC, id ASC LIMIT %s" %
                     (mod_date, max_recs )))
     
     #sys.stderr.write(str(("SELECT id,modification_date, creation_date FROM bibrec "
@@ -74,6 +86,15 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
     
     if not len(modified_records):
         return
+    
+    # because invenio understands regularity of only one sec (which is very stupid) we must make sure
+    # that we include all records that were modified in that one second
+    if modified_records[-1][1].strftime(format="%Y-%m-%d %H:%M:%S") == mod_date:
+        for to_add in list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM `" + table +
+                    "` WHERE modification_date = '%s' AND id > %s ORDER BY id ASC" %
+                    (mod_date, modified_records[-1][0]))):
+            modified_records.append(to_add)
+            
     
     added = []
     updated = []
@@ -102,7 +123,7 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
         else:
             updated.append(recid)
     
-    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, recid, str(mod_date)
+    return {'DELETED': deleted, 'UPDATED': updated, 'ADDED': added}, recid, mod_date.strftime(format="%Y-%m-%d %H:%M:%S")
 
 
 
