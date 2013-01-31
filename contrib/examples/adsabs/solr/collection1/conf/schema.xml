@@ -747,6 +747,8 @@
 		       multiValued="true" />
 		<field name="thesis" type="affiliation_text" indexed="true"
 			stored="true" />
+		<field name="comment" type="string" indexed="true"
+            stored="${storeAll:false}" />
 		<field name="copyright" type="affiliation_text" indexed="true"
 			stored="true" />
 
