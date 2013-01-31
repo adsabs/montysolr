@@ -46,6 +46,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
   				uniqueIdField, referenceField);
 		  }
 		}
+		super.searcherInitialization(searcher);
 	}
 	
 

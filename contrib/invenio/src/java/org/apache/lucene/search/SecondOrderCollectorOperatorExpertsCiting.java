@@ -58,6 +58,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
   				getTranslationCacheString(searcher.getIndexReader(), uniqueIdField);
 		  }
 		}
+		super.searcherInitialization(searcher);
 	}
 	
 

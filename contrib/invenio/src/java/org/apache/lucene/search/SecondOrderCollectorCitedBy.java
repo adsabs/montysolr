@@ -56,6 +56,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 				uniqueIdField, referenceField);
 		  }
 		}
+		super.searcherInitialization(searcher);
 	}
 	
 

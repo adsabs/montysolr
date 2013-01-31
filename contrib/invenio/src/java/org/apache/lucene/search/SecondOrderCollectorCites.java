@@ -64,6 +64,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
   				getTranslationCacheString(searcher.getIndexReader(), uniqueIdField);
 		  }
 		}
+		super.searcherInitialization(searcher);
 	}
 	
 
