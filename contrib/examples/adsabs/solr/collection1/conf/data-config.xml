@@ -115,6 +115,8 @@
          -->
         <field column="thesis"        
             xpath="/collection/record/datafield[@tag='502']/subfield" />
+        <field column="comment"        
+            xpath="/collection/record/datafield[@tag='500']/subfield" />
         
         <!-- we do not distinguist primary/secondary here, if we are to, 
             the xpath will have to test for indicator: 1=Primary, 7=Secondary 

@@ -56,7 +56,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
       boostCache = FieldCache.DEFAULT.getFloats(DictionaryRecIdCache.INSTANCE.getAtomicReader(((IndexSearcher) searcher).getIndexReader()), 
           boostField, false);
     }
-    
+    super.searcherInitialization(searcher);
   }
   
 

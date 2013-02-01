@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public abstract class AbstractSecondOrderCollector extends Collector implements
-SecondOrderCollector {
+  SecondOrderCollector {
 
   protected Scorer scorer;
   protected int docBase;
@@ -18,6 +18,7 @@ SecondOrderCollector {
   protected volatile boolean organized = false;
   protected Lock lock = null;
   private Integer lastPos = null;
+  protected float ensureCapacityRatio = 0.25f;
 
   public AbstractSecondOrderCollector() {
     lock = new ReentrantLock();
@@ -25,7 +26,8 @@ SecondOrderCollector {
   }
 
   public void searcherInitialization(IndexSearcher searcher) throws IOException {
-
+    // this is pretty arbitrary, but 2nd order queries may return many hits...
+    ((ArrayList) hits).ensureCapacity((int) (searcher.getIndexReader().maxDoc() * ensureCapacityRatio));
   }
 
   public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {

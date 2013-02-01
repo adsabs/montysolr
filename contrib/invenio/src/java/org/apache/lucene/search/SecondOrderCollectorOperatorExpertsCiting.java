@@ -58,6 +58,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
   				getTranslationCacheString(searcher.getIndexReader(), uniqueIdField);
 		  }
 		}
+		super.searcherInitialization(searcher);
 	}
 	
 
@@ -123,7 +124,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return referenceField.hashCode() ^ (valueToDocidCache != null ? valueToDocidCache.hashCode() : 0);
+		return referenceField.hashCode() ^ (valueToDocidCache != null ? valueToDocidCache.size() : 0);
 	}
 	
 	
