@@ -66,29 +66,31 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
   private volatile int counter = 0;
   private boolean asynchronous = true;
   private volatile List<String> workerMessage = new ArrayList<String>();
-  private volatile String tokenMessage = "";
 
   private long sleepTime = 300;
 
   public static String handlerName = "/import";
   private String pythonFunctionName = "get_recids_changes";
   private String handlerParams = "commit=false&command=full-import&url=";
+	private String deleteHandlerName = "/delete";
   
   class RequestData {
 
     public String url;
     public int count;
     private MultiMapSolrParams params;
+    public String handler;
 
-    public RequestData(String url) throws UnsupportedEncodingException {
+    public RequestData(String handler, String url) throws UnsupportedEncodingException {
       this.url = url;
       this.params = SolrRequestParsers.parseQueryString(this.url);
-      this.count = countIds(params.get("url"));
+      this.count = getIds(params.get("url")).size();
+      this.handler = handler;
     }
     
-    private int countIds(String url) {
-      int count = 0;
-      if (url == null) return count;
+    public List<Integer> getIds(String url) {
+    	List<Integer> ids = new ArrayList<Integer>();
+      if (url == null) return ids;
       
       String[] urlParts = url.split("\\?");
       if (urlParts.length>1) {
@@ -99,15 +101,22 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
             t = t.replace("recid:", "");
             if (t.indexOf("->") > -1) {
               String[] range = t.split("->");
-              count = count + (Integer.parseInt(range[1]) - Integer.parseInt(range[0])) + 1; 
+              int start = Integer.parseInt(range[0]);
+              int end = Integer.parseInt(range[1]);
+              ids.add(start);
+              while (start < end) {
+              	ids.add(++start);
+              }
+              //ids = ids + (Integer.parseInt(range[1]) - Integer.parseInt(range[0])) + 1; 
             }
             else {
-              count++;
+              //ids++;
+            	ids.add(Integer.parseInt(t));
             }
           }
         }
       }
-      return count;
+      return ids;
     }
 
     public SolrParams getReqParams() {
@@ -115,7 +124,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     }
     
     public String toString() {
-      return "(" + count + ") " + url;
+      return handler + " (" + count + ") " + url;
     }
     
     /*
@@ -153,6 +162,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     private volatile boolean stopped;
     private BitSet missingRecs = null;
     private BitSet presentRecs;
+    private BitSet toDeleteRecs;
 
     public RequestData getNext() {
       for (Entry e: tbdQueue.entrySet()) {
@@ -173,14 +183,14 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     }
 
     public void registerFailedBatch(String url) throws UnsupportedEncodingException {
-      RequestData rd = new RequestData(url);
+      RequestData rd = new RequestData("#failed", url);
       if (!failedQueue.containsKey(rd.url)) {
         failedQueue.put(rd.url, rd);
       }
     }
 
-    public void registerNewBatch(String url) throws UnsupportedEncodingException {
-      RequestData rd = new RequestData(url);
+    public void registerNewBatch(String handler, String url) throws UnsupportedEncodingException {
+      RequestData rd = new RequestData(handler, url);
       if (!tbdQueue.containsKey(rd.url)) {
         queuedIn++;
         tbdQueue.put(rd.url, rd);
@@ -237,6 +247,12 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
         tbdQueue.put(rd.url, rd);
       }
     }
+		public BitSet getToDelete() {
+	    return toDeleteRecs;
+    }
+		public void setToDelete(BitSet bitSet) {
+	    toDeleteRecs = bitSet;
+    }
 
   }
 
@@ -250,6 +266,10 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     NamedList defs = (NamedList) args.get("defaults");
     if (defs.get("handler") != null) {
       handlerName  = (String) defs.get("handler");
+    }
+    
+    if (defs.get("deleteHandler") != null) {
+      deleteHandlerName  = (String) defs.get("deleteHandler");
     }
     
     if (defs.get("pythonFunctionName") != null) {
@@ -277,7 +297,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       queue.registerFailedBatch(params.get("url"));
     }
     else if(command.equals("register-new-batch")) {
-      queue.registerNewBatch(params.get("url"));
+      queue.registerNewBatch(handlerName, params.get("url"));
     }
     else if(command.equals("stop")) {
       queue.stop();
@@ -310,7 +330,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       }
     }
     else if(command.equals("discover")) {
-      queue.registerNewBatch("discover=1&"+params.get("params", ""));
+      queue.registerNewBatch("#discover", params.get("params", ""));
     }
     else {
       rsp.add("message", "Unknown command: " + command);
@@ -320,7 +340,6 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
     rsp.add("status", isBusy() ? "busy" : "idle");
     printInfo(rsp);
-    //setToken("");
 
   }
 
@@ -353,6 +372,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
     BitSet missing = queue.getMissing();
     BitSet present = queue.getPresent();
+    BitSet toDelete = queue.getToDelete();
     
     if (missing == null) {
       rsp.add("message", "We have no data yet, please run command=discover");
@@ -364,6 +384,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
     rsp.add("totalPresent", present.cardinality());
     rsp.add("totalMissing", missing.cardinality());
+    rsp.add("totalToDelete", toDelete.cardinality());
     
     ArrayList<Integer> tbd = new ArrayList<Integer>(missing.cardinality());
     rsp.add("missingRecs", tbd);
@@ -371,6 +392,13 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     int j = 0;
     for (int i = missing.nextSetBit(0); i >= 0; i = missing.nextSetBit(i+1)) {
       tbd.add(i);
+    }
+    
+    ArrayList<Integer> tbdel = new ArrayList<Integer>(toDelete.cardinality());
+    rsp.add("missingRecs", tbdel);
+    j = 0;
+    for (int i = toDelete.nextSetBit(0); i >= 0; i = toDelete.nextSetBit(i+1)) {
+    	tbdel.add(i);
     }
   }
   
@@ -393,14 +421,6 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     }
     
     rsp.add("allMessages", getWorkerMessage());
-  }
-
-  private void setToken(String string) {
-    tokenMessage = string;
-  }
-
-  private String getToken() {
-    return tokenMessage;
   }
 
 
@@ -478,13 +498,13 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
 
     SolrCore core = req.getCore();
 
-    SolrRequestHandler handler = req.getCore().getRequestHandler(handlerName);
     RequestData data = queue.pop();
+    
     SolrParams params = data.getReqParams();
     
     LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), params);
     
-    if (data.url.substring(0, 8).equals("discover")) {
+    if (data.handler.equals("#discover")) {
       try {
         runDiscovery(locReq);
       } catch (IOException e) {
@@ -494,14 +514,20 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       }
       return;
     }
-    else if (data.url.contains("index-discovered") && data.url.substring(0, 16).equals("index-discovered")) {
+    else if (data.handler.equals("#index-discovered")) {
       runIndexingOfDiscovered(locReq);
       locReq.close();
       return;
     }
+    else if (data.handler.equals("#delete")) {
+    	runDeleteRecords(locReq, data);
+    	locReq.close();
+    	return;
+    }
     
     
-    setWorkerMessage("Executing :" + handlerName + " with params: " + locReq.getParamString());
+    SolrRequestHandler handler = req.getCore().getRequestHandler(data.handler);
+    setWorkerMessage("Executing :" + data.handler + " with params: " + locReq.getParamString());
     
     SolrQueryResponse rsp;
     locReq.close();
@@ -515,6 +541,12 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       core.execute(handler, locReq, rsp);
       String is = (String) rsp.getValues().get("status");
       
+      if (is == null) {
+      	setWorkerMessage("Executed :" + data.handler + " result: " + rsp.getValues().toString());
+      	locReq.close();
+      	break; // some unknown handler
+      }
+      
       if (is.equals("busy")) {
         repeat = true;
         try {
@@ -525,13 +557,13 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
         } finally {
           locReq.close();
         }
-        setWorkerMessage("Waiting for handler to be idle: " + handlerName);
+        setWorkerMessage("Waiting for handler to be idle: " + data.handler);
       }
       else {
         repeat = false;
       }
       
-      setWorkerMessage("Executed :" + handlerName + " result: " + rsp.getValues().toString());
+      setWorkerMessage("Executed :" + data.handler + " result: " + rsp.getValues().toString());
       locReq.close();
       
       if (maxRepeat-- < 0) {
@@ -547,24 +579,53 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     
   }
   
-  private void runDiscovery(SolrQueryRequest req) throws IOException {
+  // XXX: to remove, it should be done via xml messages to the appropriate handle
+  // but i am tired and lazy now
+  private void runDeleteRecords(LocalSolrQueryRequest locReq, RequestData data) 
+  		throws IOException {
+		UpdateHandler updateHandler = locReq.getCore().getUpdateHandler();
+		DeleteUpdateCommand delCmd = new DeleteUpdateCommand(locReq);
+		
+		List<Integer> recids = data.getIds(data.params.get("url"));
+	  if (recids.size() > 0) {
+			for (int i : recids) {
+			  delCmd.clear();
+				delCmd.id = Integer.toString(i);
+				updateHandler.delete(delCmd);
+			}
+		}
+  }
+
+	private void runDiscovery(SolrQueryRequest req) throws IOException {
     SolrParams params = req.getParams();
     if (params.get("last_recid", null) == null || params.getInt("last_recid", 0) == -1) {
       queue.setMissing(new BitSet());
       queue.setMissing(new BitSet());
+      queue.setToDelete(new BitSet());
       setWorkerMessage("Resetting list of missing records (new search will be done)");
     }
     
-    BitSet[] data = discoverMissingRecords(queue.getPresent(), queue.getMissing(), req);
+    BitSet[] data = discoverMissingRecords(queue.getPresent(), queue.getMissing(), 
+    		queue.getToDelete(), req);
     queue.setPresent(data[0]);
     queue.setMissing(data[1]);
+    queue.setToDelete(data[2]);
   }
   
   private void runIndexingOfDiscovered(SolrQueryRequest req) throws UnsupportedEncodingException {
-    registerReindexingOfMissed(req, queue.getMissing());
+  	ModifiableSolrParams rParam = new ModifiableSolrParams(SolrRequestParsers.parseQueryString(handlerParams));
+  	if (queue.getMissing().cardinality() > 0) {
+  		registerReindexingOfRecords(handlerName, req, rParam, queue.getMissing());
+  	}
+  	
+    if (queue.getToDelete().cardinality() > 0) {
+    	registerReindexingOfRecords("#delete" , req, rParam, queue.getToDelete());
+    }
+    queue.registerNewBatch("/update", "commit=true");
   }
 
-  private BitSet[] discoverMissingRecords(BitSet present, BitSet missing, SolrQueryRequest req) throws IOException {
+  private BitSet[] discoverMissingRecords(BitSet present, BitSet missing, BitSet toDelete, 
+  		SolrQueryRequest req) throws IOException {
     // get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
     // int }
     SolrQueryResponse rsp = new SolrQueryResponse();
@@ -624,10 +685,14 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
         }
       }
       
-      int[] deleted = dictData.get("DELETED"); //TODO
+      int[] deleted = dictData.get("DELETED");
       doneSoFar += deleted.length;
       lastRecid = (Integer) message.getParam("last_recid");
-      
+      for (int x: deleted) {
+      	if (idToLuceneId.containsKey(x)) {
+      		toDelete.set(x);
+      	}
+      }
       log.info("Checking database; restart_from={}; found={}", (Integer) message.getParam("last_recid"), doneSoFar);
       
     }
@@ -636,24 +701,24 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
       ModifiableSolrParams mp = new ModifiableSolrParams(params);
       mp.set("last_recid", lastRecid);
       mp.remove("discover");
-      queue.registerNewBatch("discover=1&"+mp.toString());
+      queue.registerNewBatch("#discover", mp.toString());
     }
     else {
-      queue.registerNewBatch("index-discovered");
+      queue.registerNewBatch("#index-discovered", "index-discovered");
     }
-    return new BitSet[]{present, missing};
+    return new BitSet[]{present, missing, toDelete};
     
   }
   
-  private void registerReindexingOfMissed(SolrQueryRequest req, BitSet missing) throws UnsupportedEncodingException {
+  private void registerReindexingOfRecords(String handler, SolrQueryRequest req, 
+  		ModifiableSolrParams rParam, BitSet records) 
+  		throws UnsupportedEncodingException {
     
-    int[] ids = new int[missing.cardinality()];
+    int[] ids = new int[records.cardinality()];
     int j = 0;
-    for (int i = missing.nextSetBit(0); i >= 0; i = missing.nextSetBit(i+1)) {
+    for (int i = records.nextSetBit(0); i >= 0; i = records.nextSetBit(i+1)) {
       ids[j++] = i;
     }
-    
-    ModifiableSolrParams rParam = new ModifiableSolrParams(SolrRequestParsers.parseQueryString(handlerParams));
     
     // for security reason, only certain params can be supplied by user
     SolrParams params = req.getParams();
@@ -664,7 +729,7 @@ public class InvenioImportBackup extends RequestHandlerBase implements PythonCal
     for (String queryPart : queryParts) {
       String url = InvenioKeepRecidUpdated.getInternalURL("python://search", queryPart, maxRecords);
       rParam.set("url", url);
-      queue.registerNewBatch(rParam.toString());
+      queue.registerNewBatch(handler, rParam.toString());
     }
     
   }

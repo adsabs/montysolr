@@ -271,8 +271,8 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
         "//str[@name='failedRecs'][.='1']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='1']",
-        "//str[@name='registeredRequests'][.='6']",
-        "//str[@name='restartedRequests'][.='6']",
+        "//str[@name='registeredRequests'][.='7']",
+        "//str[@name='restartedRequests'][.='7']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']"
     );
@@ -282,8 +282,8 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
         "//str[@name='failedRecs'][.='1']",
         "//str[@name='failedBatches'][.='0']",
         "//str[@name='failedTotal'][.='1']",
-        "//str[@name='registeredRequests'][.='6']",
-        "//str[@name='restartedRequests'][.='6']",
+        "//str[@name='registeredRequests'][.='7']",
+        "//str[@name='restartedRequests'][.='7']",
         "//str[@name='docsToCheck'][.='0']",
         "//str[@name='status'][.='idle']",
         "//arr[@name='missingRecs']/int[.='77']",
