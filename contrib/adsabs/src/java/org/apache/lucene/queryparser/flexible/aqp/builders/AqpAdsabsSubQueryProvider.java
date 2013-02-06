@@ -1,5 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,8 @@ import org.apache.lucene.search.SecondOrderCollectorCitingTheMostCited;
 import org.apache.lucene.search.SecondOrderCollectorOperatorExpertsCiting;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.join.JoinUtil;
+import org.apache.lucene.search.join.ScoreMode;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.AqpFunctionQParser;
 import org.apache.solr.search.BoostQParserPlugin;
@@ -173,7 +176,39 @@ public class AqpAdsabsSubQueryProvider implements
 		parsers.put("outgoing_links", parsers.get("references"));
 		parsers.put("cites", parsers.get("references")); // XXX - to remove after AAS!!!
 		parsers.put("refersto", parsers.get("references")); // XXX - to remove after AAS!!!
-
+		
+		// test for comparison with the citation query
+		parsers.put("joincitations", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				Query innerQuery = fp.parseNestedQuery();
+				SolrQueryRequest req = fp.getReq();
+				// TODO: make configurable
+				String refField = "reference";
+				String idField = "bibcode";
+				try {
+	        return JoinUtil.createJoinQuery(idField, false, refField, innerQuery, 
+	        		req.getSearcher(), ScoreMode.Avg);
+        } catch (IOException e) {
+        	throw new ParseException(e.getMessage());
+        }
+			}
+		  }.configure(true)); // true=canBeAnalyzed
+		
+		parsers.put("joinreferences", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				Query innerQuery = fp.parseNestedQuery();
+				SolrQueryRequest req = fp.getReq();
+				// TODO: make configurable
+				String refField = "reference";
+				String idField = "bibcode";
+				try {
+	        return JoinUtil.createJoinQuery(refField, true, idField, innerQuery, 
+	        		req.getSearcher(), ScoreMode.None); // will not work properly iff mode=Avg|Max
+        } catch (IOException e) {
+        	throw new ParseException(e.getMessage());
+        }
+			}
+		  }.configure(true)); // true=canBeAnalyzed
 		
 		// useful() = what experts are citing
     parsers.put("useful", new AqpSubqueryParserFull() { // this function values can be analyzed

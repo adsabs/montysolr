@@ -14,6 +14,7 @@ def run(solr_url, query, repetitions=1):
     
     if (os.path.exists(query)):
         queries = load_queries(query)
+        log.info("Loaded %s queries from: %s" % (len(queries), query))
     else:
         queries = [query]
     

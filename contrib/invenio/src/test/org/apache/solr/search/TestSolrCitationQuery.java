@@ -16,34 +16,68 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 	}
 	
 	public String getSchemaFile() {
-		return MontySolrSetup.getMontySolrHome() + 
-		"/contrib/invenio/src/test-files/solr/collection1/conf/schema-citation-query.xml";
+		makeResourcesVisible(this.solrConfig.getResourceLoader(),
+    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+    	});
+		return MontySolrSetup.getMontySolrHome()
+				+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
 	}
 
 	
 	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome() + 
-		"/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-invenio-query-parser.xml";
+		return MontySolrSetup.getMontySolrHome()
+				+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
 	}
 	
 	
 	public void testSearch() throws Exception {
 		
-		assertU(adoc("id", "A", "references", "B", "references", "C", "references", "D"));
-		assertU(adoc("id", "B"));
-		assertU(adoc("id", "C", "references", "E", "references", "F"));
-		assertU(adoc("id", "D", "references", "B"));
-		assertU(adoc("id", "E"));
-		assertU(adoc("id", "F"));
+		assertU(adoc("id", "0", "bibcode", "A", "reference", "B", "reference", "C", "reference", "D"));
+		assertU(adoc("id", "1", "bibcode", "B", "reference", "X"));
+		assertU(adoc("id", "2", "bibcode", "C", "reference", "E", "reference", "F"));
+		assertU(adoc("id", "3", "bibcode", "D", "reference", "B"));
+		assertU(adoc("id", "4", "bibcode", "E"));
+		assertU(adoc("id", "5", "bibcode", "F"));
 		assertU(commit());
 		
 		assertQ(req("q", "*:*"),
 				"//*[@numFound='6']"
 				);
 		
-		assertQ(req("q", "id:A"),
+		assertQ(req("q", "bibcode:A"),
 				"//*[@numFound='1']",
-				"//result/doc[1]/str[@name='id']='A'"
+				"//result/doc[1]/str[@name='bibcode']='A'"
+				);
+		
+		assertQ(req("q", "citations(bibcode:A)"),
+				"//*[@numFound='0']"
+				);
+		
+		assertQ(req("q", "citations(bibcode:B)"),
+				"//*[@numFound='2']",
+				"//result/doc/str[@name='bibcode']='A'",
+				"//result/doc/str[@name='bibcode']='D'"
+				);
+		
+		assertQ(req("q", "joincitations(bibcode:B)"),
+				"//*[@numFound='2']",
+				"//result/doc/str[@name='bibcode']='A'",
+				"//result/doc/str[@name='bibcode']='D'"
+				);
+		
+		assertQ(req("q", "references(bibcode:A)"),
+				"//*[@numFound='3']",
+				"//result/doc/str[@name='bibcode']='B'",
+				"//result/doc/str[@name='bibcode']='C'",
+				"//result/doc/str[@name='bibcode']='D'"
+				);
+		
+		assertQ(req("q", "joinreferences(bibcode:A)"),
+				"//*[@numFound='3']",
+				"//result/doc/str[@name='bibcode']='B'",
+				"//result/doc/str[@name='bibcode']='C'",
+				"//result/doc/str[@name='bibcode']='D'"
 				);
 		
 	}

@@ -3,6 +3,7 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.join.JoinUtil;
+import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.store.Directory;
 import org.junit.BeforeClass;
 
@@ -44,9 +47,9 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		directory = newDirectory();
 		writer = new RandomIndexWriter(random(), directory);
 
-		adoc("id", "1", "references", "2", "references", "3", "references", "4");
-		adoc("id", "2");
-		adoc("id", "3", "references", "5", "references", "6", "references", "99");
+		adoc("id", "1", "references", "2", "references", "3", "references", "4", "x", "test");
+		adoc("id", "2", "x", "test");
+		adoc("id", "3", "references", "5", "references", "6", "references", "99", "x", "test");
 		adoc("id", "4", "references", "2", "references", "1");
 		adoc("id", "5");
 		adoc("id", "6");
@@ -54,9 +57,9 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		// the same thing, but using bibcode-like data
 		
-		adoc("id", "11", "bibcode", "b1", "breferences", "b2", "breferences", "b3", "breferences", "b4");
-		adoc("id", "12", "bibcode", "b2");
-		adoc("id", "13", "bibcode", "b3", "breferences", "b5", "breferences", "b6", "breferences", "b99");
+		adoc("id", "11", "bibcode", "b1", "breferences", "b2", "breferences", "b3", "breferences", "b4", "b", "test");
+		adoc("id", "12", "bibcode", "b2", "b", "test");
+		adoc("id", "13", "bibcode", "b3", "breferences", "b5", "breferences", "b6", "breferences", "b99", "b", "test");
 		adoc("id", "14", "bibcode", "b4", "breferences", "b2", "breferences", "b1");
 		adoc("id", "15", "bibcode", "b5");
 		adoc("id", "16", "bibcode", "b6");
@@ -101,6 +104,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		TermQuery q6 = new TermQuery(new Term("id", String.valueOf(idPrefix + 6)));
 		TermQuery q7 = new TermQuery(new Term("id", String.valueOf(idPrefix + 7)));
 		TermQuery q99 = new TermQuery(new Term("id", String.valueOf(idPrefix + 99)));
+		TermQuery xTest = new TermQuery(new Term("x", "test"));
+		TermQuery bTest = new TermQuery(new Term("b", "test"));
 		
 		BooleanQuery bq13 = new BooleanQuery();
 		bq13.add(q1, Occur.SHOULD);
@@ -127,6 +132,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(1, searcher.search(q3, 10).totalHits);
 		assertEquals(0, searcher.search(q99, 10).totalHits);
 		assertEquals(2, searcher.search(bq13, 10).totalHits);
+		assertEquals(3, searcher.search(xTest, 10).totalHits);
+		assertEquals(3, searcher.search(bTest, 10).totalHits);
 		
 		
 		// now test of references ( X --> (x))
@@ -144,7 +151,32 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(0, searcher.search(new SecondOrderQuery(q6, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
 		assertEquals(0, searcher.search(new SecondOrderQuery(q99, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
 		assertEquals(5, searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(5, searcher.search(new SecondOrderQuery(bq123, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(5, searcher.search(new SecondOrderQuery(xTest, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
 		
+		// the same thing using lucene joins
+		assertEquals(3, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q1, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q2, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q3, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q4, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q5, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q6, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q99, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(5, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, bq13, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(5, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, bq123, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(5, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, xTest, searcher, ScoreMode.Max), 10).totalHits);
+
+		compareCitations(idField, refField, q1);
+		compareCitations(idField, refField, q2);
+		compareCitations(idField, refField, q3);
+		compareCitations(idField, refField, q4);
+		compareCitations(idField, refField, q5);
+		compareCitations(idField, refField, q6);
+		compareCitations(idField, refField, q99);
+		compareCitations(idField, refField, bq13);
+		compareCitations(idField, refField, bq123);
+		
+			
 		ScoreDoc[] docs = searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField)), 10).scoreDocs;
 		
 		ArrayList<Integer> ar = new ArrayList<Integer>();
@@ -169,13 +201,37 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(2, searcher.search(new SecondOrderQuery(q5, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		assertEquals(1, searcher.search(new SecondOrderQuery(q6, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		assertEquals(0, searcher.search(new SecondOrderQuery(q99, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
-		
 		assertEquals(2, searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		assertEquals(2, searcher.search(new SecondOrderQuery(bq123, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		assertEquals(2, searcher.search(new SecondOrderQuery(bq1234, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		assertEquals(3, searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
+		assertEquals(2, searcher.search(new SecondOrderQuery(xTest, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		
+		// the same thing, but using lucene join query
+		assertEquals(1, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q1, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q2, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(1, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q3, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(1, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q4, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q5, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(1, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q6, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q99, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bq13, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bq123, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bq1234, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(3, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bq15, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, xTest, searcher, ScoreMode.Avg), 10).totalHits);
 		
+		compareCitedBy(idField, refField, q1);
+		compareCitedBy(idField, refField, q2);
+		compareCitedBy(idField, refField, q3);
+		compareCitedBy(idField, refField, q4);
+		compareCitedBy(idField, refField, q5);
+		compareCitedBy(idField, refField, q6);
+		compareCitedBy(idField, refField, q99);
+		compareCitedBy(idField, refField, bq13);
+		compareCitedBy(idField, refField, bq123);
+		
+				
 		ar = new ArrayList<Integer>();
 		for (ScoreDoc d: searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).scoreDocs) {
 		  Document doc = reader.document(d.doc);
@@ -253,6 +309,19 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(0, searcher.search(new SecondOrderQuery(q6, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
 		assertEquals(0, searcher.search(new SecondOrderQuery(q99, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
 		assertEquals(5, searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		assertEquals(5, searcher.search(new SecondOrderQuery(bq123, null, new SecondOrderCollectorCites(idField, refField)), 10).totalHits);
+		
+		// the same thing using lucene joins
+		assertEquals(3, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q1, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q2, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q3, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q4, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q5, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q6, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, q99, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(5, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, bq13, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(5, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, bq123, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(5, searcher.search(JoinUtil.createJoinQuery(refField, true, idField, bTest, searcher, ScoreMode.Max), 10).totalHits);
 		
 		docs = searcher.search(new SecondOrderQuery(bq13, null, new SecondOrderCollectorCites(idField, refField)), 10).scoreDocs;
 		
@@ -285,6 +354,19 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(2, searcher.search(new SecondOrderQuery(bq1234, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		assertEquals(3, searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).totalHits);
 		
+		// the same thing, but using lucene join query
+		assertEquals(1, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q1, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q2, searcher, ScoreMode.Max), 10).totalHits);
+		assertEquals(1, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q3, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(1, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q4, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q5, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(1, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q6, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(0, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, q99, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bq13, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bq123, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bq1234, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(3, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bq15, searcher, ScoreMode.Avg), 10).totalHits);
+		assertEquals(2, searcher.search(JoinUtil.createJoinQuery(idField, false, refField, bTest, searcher, ScoreMode.Avg), 10).totalHits);
 		
 		ar = new ArrayList<Integer>();
 		for (ScoreDoc d: searcher.search(new SecondOrderQuery(bq15, null, new SecondOrderCollectorCitedBy(idField, refField)), 10).scoreDocs) {
@@ -307,6 +389,36 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		FieldCache.DEFAULT.purgeAllCaches();
 	}
 	
+	private void compareCitedBy(String idField,
+      String refField, Query query) throws IOException {
+		ScoreDoc[] r1 = searcher.search(new SecondOrderQuery(query, null, new SecondOrderCollectorCitedBy(idField, refField)), 100).scoreDocs;
+		ScoreDoc[] r2 = searcher.search(JoinUtil.createJoinQuery(idField, false, refField, query, searcher, ScoreMode.Max), 100).scoreDocs;
+		ArrayList<Integer> a1 = new ArrayList<Integer>();
+		ArrayList<Integer> a2 = new ArrayList<Integer>();
+		for (int i=0;i<r1.length;i++) {
+			a1.add(r1[i].doc);
+			a2.add(r2[i].doc);
+		}
+		Collections.sort(a1);
+		Collections.sort(a2);
+		assertEquals("The implementations return different results", a1, a2);
+  }
+	
+	private void compareCitations(String idField,
+      String refField, Query query) throws IOException {
+		ScoreDoc[] r1 = searcher.search(new SecondOrderQuery(query, null, new SecondOrderCollectorCites(idField, refField)), 100).scoreDocs;
+		ScoreDoc[] r2 = searcher.search(JoinUtil.createJoinQuery(refField, true, idField, query, searcher, ScoreMode.Max), 100).scoreDocs;
+		ArrayList<Integer> a1 = new ArrayList<Integer>();
+		ArrayList<Integer> a2 = new ArrayList<Integer>();
+		for (int i=0;i<r1.length;i++) {
+			a1.add(r1[i].doc);
+			a2.add(r2[i].doc);
+		}
+		Collections.sort(a1);
+		Collections.sort(a2);
+		assertEquals("The implementations return different results", a1, a2);
+  }
+
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestCitationQuery.class);
