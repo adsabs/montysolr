@@ -213,6 +213,7 @@
 			</fileset>
 		</copy>
 
+	  
 		<!-- put contrib jars into example/solr/lib -->
 		<copy todir="${build.dir}/${example.name}/solr/lib" flatten="true" overwrite="true" verbose="false">
 			<fileset dir="${common.dir}/build/contrib">
@@ -260,9 +261,9 @@
 
 	    
 		<!-- get external dependencies from solr and put them into example/solr/lib -->
-        <get-lucene-solr-package package="dataimporthandler" into="${build.dir}/${example.name}/solr/lib"/>
-        <get-lucene-solr-package package="sandbox" into="${build.dir}/${example.name}/solr/lib"/>
-
+    <get-lucene-solr-package package="dataimporthandler" into="${build.dir}/${example.name}/solr/lib"/>
+    <get-lucene-solr-package package="sandbox" into="${build.dir}/${example.name}/solr/lib"/>
+	  <get-lucene-solr-package package="join" into="${build.dir}/${example.name}/solr/lib"/>
 		
 	    
 		<!-- generate startup file for montysolr from start.jar and the main montysolr -->
