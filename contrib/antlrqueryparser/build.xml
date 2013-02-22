@@ -78,8 +78,8 @@
 		</fileset>
 		<fileset dir="${prop.solr.home}">
 			<include name="solr/dist/**/lucene-queryparser*.jar"/>
-            <include name="lucene/build/sandbox/**.jar"/>
-        </fileset>
+          <include name="lucene/build/sandbox/**.jar"/>
+    </fileset>
 	</path>
 
     <path id="compile.classpath">

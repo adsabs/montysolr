@@ -36,7 +36,8 @@ def run(solr_url, query, repetitions=1):
                 results[q] = DataPoint(q, rsp['responseHeader']['QTime'], rsp['response']['numFound'])
             
                 
-    print "%50s\t%10s\t\t%10s\t%10s\t%10s\t%10s\t%10s" % ("Query", "QTime", "numFound", "minQTime", "maxQTime", "#invocations", "return consistent")
+    #print "%50s\t%10s\t\t%10s\t%10s\t%10s\t%10s\t%10s" % ("Query", "QTime", "numFound", "minQTime", "maxQTime", "#invocations", "return consistent")
+    print "%s\t%s\t%s\t%s\t%s\t%s\t%s" % ("Query", "QTime", "numFound", "minQTime", "maxQTime", "#invocations", "return consistent")
             
     items = sorted(results.items(), key=lambda x: x[1].data[0])
     for k,v in items:
@@ -48,7 +49,7 @@ class DataPoint(object):
         self.points = []
         self.query = query
         self.add(qtime, numfound)
-        self.data = ()
+        self.get_avg()
         
     def add(self, qtime, numfound):
         self.points.append((int(qtime), int(numfound)))
@@ -65,13 +66,16 @@ class DataPoint(object):
         return self.data
     
     def __str__(self):
-        return '%50s\t%s' % (self.query, ("%10s\t\t%10s\t%10s\t%10s\t%10s\t%10s" % self.data))
-        
+        #return '%50s\t%s' % (self.query, ("%10s\t\t%10s\t%10s\t%10s\t%10s\t%10s" % self.data))
+        return '%s\t%s' % (self.query, ("%s\t%s\t%s\t%s\t%s\t%s" % self.data))
+    
 def load_queries(file):
     fo = open(file, 'r')
     queries = []
     for line in fo:
         if len(line.strip()) > 0 and line[0] != '#':
+            if ('#' in line):
+                line = line[0:line.index('#')]
             queries.append(line.strip())
     return queries
 

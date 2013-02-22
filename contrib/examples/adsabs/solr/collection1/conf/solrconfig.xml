@@ -593,13 +593,9 @@
     </listener>
     <listener event="firstSearcher" class="solr.QuerySenderListener">
       <arr name="queries">
-        <lst>
-          <str name="q">static firstSearcher warming in solrconfig.xml</str>
-        </lst>
-        <!--ADSLABS:06/2012 -->
-        <lst> 
-          <str name="q">{!iq iq.mode=maxsolr}inv_field:init-python</str>
-        </lst>
+        <lst><str name="q">static firstSearcher warming in solrconfig.xml</str></lst>
+        <lst><str name="q">references(recid:[0 TO 20])</str></lst>
+        <lst><str name="q">citations(recid:[0 TO 20])</str></lst>
       </arr>
     </listener>
 

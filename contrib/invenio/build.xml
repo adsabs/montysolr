@@ -49,8 +49,8 @@
 		<path refid="test.classpath"/>
 		<path refid="compile.classpath"/>
 		<fileset dir="lib">
-            <include name="**/**.jar"/>
-        </fileset>
+        <include name="**/**.jar"/>
+    </fileset>
     </path>
 	
 	<path id="junit.classpath">
