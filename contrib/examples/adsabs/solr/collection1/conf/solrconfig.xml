@@ -1061,7 +1061,7 @@
   <!-- ping/healthcheck -->
   <requestHandler name="/admin/ping" class="solr.PingRequestHandler">
     <lst name="invariants">
-      <str name="q">solrpingquery</str>
+      <str name="q">recid:1</str>
     </lst>
     <lst name="defaults">
       <str name="echoParams">all</str>
