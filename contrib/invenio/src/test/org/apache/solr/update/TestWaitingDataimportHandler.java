@@ -159,7 +159,7 @@ public class TestWaitingDataimportHandler extends AbstractSolrTestCase {
         );
     
     
-    InvenioImportBackup controller = (InvenioImportBackup) h.getCore().getRequestHandler("/invenio-doctor");
+    InvenioDoctor controller = (InvenioDoctor) h.getCore().getRequestHandler("/invenio-doctor");
     req = req("command", "start");
     rsp = new SolrQueryResponse();
     core.execute(controller, req, rsp);

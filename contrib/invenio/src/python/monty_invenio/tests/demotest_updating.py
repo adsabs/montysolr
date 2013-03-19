@@ -119,6 +119,7 @@ def create_delete(message):
 
 def create_record(message):
     """creates record"""
+    
     diff = message.getParam('diff')
     if diff:
         diff = int(str(diff))
@@ -127,6 +128,15 @@ def create_record(message):
     recid = bibupload.create_new_record()
     message.setResults(Integer(int(recid)))
     #dbquery.run_sql("UPDATE bibrec SET modification_date=NOW() + %s, creation_date=NOW() + %s WHERE id=%s" % (diff, diff,recid))
+    
+    data = message.getParam('data')
+    if data:
+        record = search_engine.get_record(recid)
+        for field_data in str(data).split("|"):
+            points = field_data.split(":", 3)
+            bibrecord.record_add_field(record, points[0], subfields=[(points[1], points[2])])
+        ret = bibupload.bibupload(record, opt_mode='replace')
+    
     change_date(recid, diff=diff, cdiff=diff)    
     
 def delete_record(message):

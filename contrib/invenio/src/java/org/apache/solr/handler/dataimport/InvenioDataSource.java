@@ -45,7 +45,7 @@ public class InvenioDataSource extends URLDataSource implements PythonCall {
 				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, 
 						"Wrong url parameter, no query specified: " + query);
 			}
-			LOG.debug("Python request: " + q);
+			LOG.debug("Python request: {}", q);
 			
 			Map<String, List<String>> params;
 			try {

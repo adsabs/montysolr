@@ -52,14 +52,14 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.servlet.SolrRequestParsers;
-import org.apache.solr.update.InvenioImportBackup.RequestData;
+import org.apache.solr.update.InvenioDoctor.RequestData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Collections;
 
-public class InvenioImportBackup extends RequestHandlerBase implements PythonCall {
+public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
 
-  public static final Logger log = LoggerFactory.getLogger(InvenioImportBackup.class);
+  public static final Logger log = LoggerFactory.getLogger(InvenioDoctor.class);
 
   RequestQueue queue = new RequestQueue();
 

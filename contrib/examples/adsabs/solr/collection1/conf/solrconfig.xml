@@ -1809,7 +1809,7 @@
         slighlty customized versions of the standard handlers  
   -->
   
-  <requestHandler name="/invenio-doctor" class="org.apache.solr.update.InvenioImportBackup">
+  <requestHandler name="/invenio-doctor" class="org.apache.solr.update.InvenioDoctor">
     <lst name="defaults">
       <str name="handler">/invenio/import2</str>
       <str name="pythonFunctionName">get_recids_changes</str>
