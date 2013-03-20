@@ -13,6 +13,77 @@ from invenio import bibrecord
 from invenio.intbitset import intbitset
 from invenio import bibrank_citation_searcher as bcs
 
+"""
+total = 0
+lastid=-1
+moddate=None
+dtotal=0
+utotal=0
+atotal=0
+set_added = set()
+set_deleted = set()
+set_updated = set()
+
+while lastid is not None:
+    print lastid, moddate
+    if lid == -1:
+        total = 0
+        row = 0
+    results = get_recids_changes(lastid, max_recs=1000000)
+    if results is None:
+        break
+    d, lastid, moddate = results
+    row = sum(len(x) for x in d.values())
+    total += row
+    deleted, updated, added = len(d['DELETED']), len(d['UPDATED']), len(d['ADDED'])
+    dtotal += deleted
+    utotal += updated
+    atotal += added
+    print "del=%s (%s) upd=%s (%s) add=%s (%s) row=%s total=%s" % (deleted, dtotal, updated, utotal, added, atotal, row, total)
+    set_updated.update(d['UPDATED'])
+    set_added.update(d['ADDED'])
+    set_deleted.update(d['DELETED'])
+
+totalrecs = dbquery.run_sql("select count(id) from bibrec")[0][0]
+deleted_ids = [a[0] for a in list(dbquery.run_sql("""SELECT distinct(id_bibrec) FROM bibrec_bib98x WHERE id_bibxxx='%s' ORDER BY id_bibrec""", (197,)))]
+
+print "\ndatabse:"
+print "totalrecs=", totalrecs
+print "liverecs (%s-%s)= %s" % (totalrecs, len(deleted_ids), totalrecs-len(deleted_ids))
+
+print "\ndiscovered:"
+trex = (sum((dtotal, utotal, atotal)))
+print "totalrecs=%s (vefification=%s)" % (trex, len(set_updated) + len(set_added) + len(set_deleted))
+print "liverecs (%s-%s)= %s" % (trex, dtotal, trex-dtotal)
+
+
+print "\ndifference %s-%s=%s" % (totalrecs-len(deleted_ids), trex-dtotal, totalrecs-len(deleted_ids)-(trex-dtotal))
+
+deleted_ids = set(deleted_ids)
+
+lost_recs = {'in_del':[], 'in_upd':[], 'in_add':[], 'present_in_one':[], 'present_in_many':[], 'present_in_none':[]}
+for r_del in deleted_ids:
+  counter = 0
+  if r_del in set_deleted:
+    lost_recs['in_del'].append(r_del)
+    counter += 1
+  if r_del in set_updated:
+    lost_recs['in_upd'].append(r_del)
+    counter += 1
+  if r_del in set_added:
+    lost_recs['in_add'].append(r_del)
+    counter += 1
+  if counter == 1:
+    lost_recs['present_in_one'].append(r_del)
+  elif counter > 1:
+    lost_recs['present_in_many'].append(r_del)
+  else:
+    lost_recs['present_in_none'].append(r_del)
+  
+for k, v in lost_recs.items():
+  print "%s=%s" % (k, len(v))
+
+"""
 
 
 from StringIO import StringIO as sIO
@@ -88,11 +159,11 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
         return
     
     # because invenio understands regularity of only one sec (which is very stupid) we must make sure
-    # that we include all records that were modified in that one second
-    if modified_records[-1][1].strftime(format="%Y-%m-%d %H:%M:%S") == mod_date:
-        for to_add in list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM `" + table +
+    # that we include all records that were modified in that one second to close the group
+    #if modified_records[-1][1].strftime(format="%Y-%m-%d %H:%M:%S") == mod_date:
+    for to_add in list(dbquery.run_sql("SELECT id,modification_date, creation_date FROM `" + table +
                     "` WHERE modification_date = '%s' AND id > %s ORDER BY id ASC" %
-                    (mod_date, modified_records[-1][0]))):
+                    (modified_records[-1][1].strftime(format="%Y-%m-%d %H:%M:%S"), modified_records[-1][0]))):
             modified_records.append(to_add)
             
     
@@ -100,13 +171,19 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
     updated = []
     deleted = []
     
+
+    # find records that are marked as deleted, this can select lots of recs (in the worst case
+    # all deleted recs) but usually it will work with a subrange
+    rec_ids = sorted([r[0] for r in modified_records])
+    local_min = rec_ids[0]
+    local_max = rec_ids[-1]
+
     dels = {}
     for x in list(dbquery.run_sql("""SELECT distinct(id_bibrec) FROM bibrec_bib98x WHERE 
-        id_bibrec >= %s AND id_bibrec <= %s AND 
-        id_bibxxx=(SELECT id FROM bib98x WHERE VALUE='%s')""" % (modified_records[0][0],
-                                                          modified_records[-1][0],
-                                                          'DELETED'))):
+        (id_bibrec >= %s AND id_bibrec <= %s) AND 
+        id_bibxxx=(SELECT id FROM bib98x WHERE VALUE='DELETED')""" % (local_min, local_max))):
         dels[int(x[0])] = 1
+    #print "delets local min=%s max=%s found=%s" % (local_min, local_max, len(dels))
     
     
     for recid, mod_date, create_date in modified_records:

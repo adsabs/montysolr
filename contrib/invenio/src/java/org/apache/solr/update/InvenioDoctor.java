@@ -395,7 +395,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     }
     
     ArrayList<Integer> tbdel = new ArrayList<Integer>(toDelete.cardinality());
-    rsp.add("missingRecs", tbdel);
+    rsp.add("toDeleteRecs", tbdel);
     j = 0;
     for (int i = toDelete.nextSetBit(0); i >= 0; i = toDelete.nextSetBit(i+1)) {
     	tbdel.add(i);
@@ -635,6 +635,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     SolrParams params = req.getParams();
     String field = params.get("field", "recid");
     Integer lastRecid = params.getInt("last_recid", -1);
+    String modDate = params.get("mod_date", null);
     Integer fetchSize = Math.min(params.getInt("fetch_size", 100000), 100000);
     // setting maxRecs to very large value means the worker cannot be stopped in time
     int maxRecs = Math.min(params.getInt("max_records", 100000), 1000000);
@@ -661,6 +662,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
         .setParam("max_records", fetchSize)
         .setParam("request", req)
         .setParam("response", rsp)
+        .setParam("mod_date", modDate)
         .setParam("last_recid", lastRecid);
     
       MontySolrVM.INSTANCE.sendMessage(message);
@@ -687,19 +689,24 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
       
       int[] deleted = dictData.get("DELETED");
       doneSoFar += deleted.length;
-      lastRecid = (Integer) message.getParam("last_recid");
+      
       for (int x: deleted) {
       	if (idToLuceneId.containsKey(x)) {
       		toDelete.set(x);
       	}
       }
-      log.info("Checking database; restart_from={}; found={}", (Integer) message.getParam("last_recid"), doneSoFar);
+      
+      lastRecid = (Integer) message.getParam("last_recid");
+      modDate = (String) message.getParam("mod_date");
+      
+      log.info("Checking database; restart_from={}; found={}", lastRecid, doneSoFar);
       
     }
     
     if (!finished) {
       ModifiableSolrParams mp = new ModifiableSolrParams(params);
       mp.set("last_recid", lastRecid);
+      mp.set("mod_date", modDate);
       mp.remove("discover");
       queue.registerNewBatch("#discover", mp.toString());
     }
