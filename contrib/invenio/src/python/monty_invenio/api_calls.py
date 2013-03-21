@@ -338,7 +338,7 @@ class ReqStringIO(sIO):
         self.uri = None
         
 
-def test_get_recids:
+def test_get_recids():
     """This is used to manually run and compare results against the DB"""
     
     total = 0
