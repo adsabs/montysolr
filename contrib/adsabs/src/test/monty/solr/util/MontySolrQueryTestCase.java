@@ -41,6 +41,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		throw new IllegalAccessError("You must override this method");
 	} 
 	
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		
@@ -63,11 +64,12 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		tp.setUp();
 	}
 	
+	@Override
 	public void tearDown() throws Exception {
-		super.tearDown();
 		
 		tp.tearDown();
 		tp = null;
+		super.tearDown();
 		
 	}
 	
