@@ -331,17 +331,23 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "126", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Jones, R Lynne"));
     assertU(adoc(F.ID, "127", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Jones, R L"));
     
-    assertU(adoc(F.ID, "200", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, H C"));
-    assertU(adoc(F.ID, "201", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, H-C"));
-    assertU(adoc(F.ID, "202", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, Harwin-C"));
-    assertU(adoc(F.ID, "203", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, Harwin-Costa"));
-    
-    
     assertU(adoc(F.ID, "130", F.BIBCODE, "xxxxxxxxxxxxx", 
         F.AUTHOR, "Author, A",
         F.AUTHOR, "Author, B",
         F.AUTHOR, "Author, C"
     ));
+    
+    assertU(adoc(F.ID, "200", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, H C"));
+    assertU(adoc(F.ID, "201", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, H-C"));
+    assertU(adoc(F.ID, "202", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, Harwin-C"));
+    assertU(adoc(F.ID, "203", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Lee, Harwin-Costa"));
+    
+    assertU(adoc(F.ID, "210", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Pinilla-Alonso")); // just surname
+    assertU(adoc(F.ID, "211", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Pinilla-Alonso,"));
+    assertU(adoc(F.ID, "212", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Pinilla-Alonso, B"));
+    assertU(adoc(F.ID, "213", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Pinilla-Alonso, Brava"));
+    assertU(adoc(F.ID, "214", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Pinilla-Alonso, Borat"));
+    assertU(adoc(F.ID, "215", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Pinilla-Alonso, Amer"));
     
     
     assertU(commit());
@@ -364,6 +370,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     // TODO: force reload of the synonym map
     //h.getCoreContainer().reload("collection1");
+
+    
+    
 
     
     // test proper order of authors
@@ -1980,6 +1989,55 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                      // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C          
                      // 203 Lee, Harwin-Costa 
     );    
+    
+    
+    //setDebug(true);
+    testAuthorQuery(
+         "Pinilla-Alonso", 
+        					//"author:pinilla alonso, author:pinilla alonso, *", // should we rather want this???
+        				   "author:pinilla alonso, author:pinilla alonso, * author:pinilla a author:pinilla a * author:pinilla",
+                   "//*[@numFound='6']",
+                   // Pinilla-Alonso numFound=6
+                   // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
+                   // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer  
+         "\"Pinilla Alonso\"", 
+         				   "author:pinilla alonso, author:pinilla alonso, * author:pinilla a author:pinilla a * author:pinilla",
+                    "//*[@numFound='6']",
+                    // Pinilla-Alonso numFound=6
+                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
+                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer
+         "\"Pinilla Alonso,\"", 
+         				   "author:pinilla alonso, author:pinilla alonso, * author:pinilla a author:pinilla a * author:pinilla",
+                    "//*[@numFound='6']",
+                    // Pinilla-Alonso numFound=6
+                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
+                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer
+         "Pinilla-Alonso,", 
+         				   "author:pinilla alonso, author:pinilla alonso, * author:pinilla a author:pinilla a * author:pinilla",
+                    "//*[@numFound='6']",
+                    // Pinilla-Alonso numFound=6
+                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
+                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer  
+			   "Pinilla-Alonso, B", 
+        				   "author:pinilla alonso, b author:pinilla alonso, b* author:pinilla a b author:pinilla a b* author:pinilla alonso, author:pinilla a author:pinilla",
+                   "//*[@numFound='5']",
+                   // Pinilla-Alonso numFound=6
+                   // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
+                   // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat   
+         "Pinilla-Alonso, B.", 
+        				   "author:pinilla alonso, b author:pinilla alonso, b* author:pinilla a b author:pinilla a b* author:pinilla alonso, author:pinilla a author:pinilla",
+                   "//*[@numFound='5']",
+                   // Pinilla-Alonso numFound=6
+                   // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
+                   // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat                      
+         "Pinilla-Alonso, Brava", 
+        				   // TODO: the following produces hits that cannot be in the index, those without the trailing comma - but otherwise it is OK
+                   "author:pinilla alonso, brava author:pinilla alonso, brava * author:pinilla a brava author:pinilla a brava * author:pinilla alonso, b author:pinilla alonso, b * author:pinilla a b author:pinilla a b * author:pinilla alonso, author:pinilla a author:pinilla",
+                   "//*[@numFound='4']"
+                   // Pinilla-Alonso, Brava numFound=4
+                   // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
+                   // 213	Pinilla-Alonso, Brava         				   
+        );
     
     /*
      * 

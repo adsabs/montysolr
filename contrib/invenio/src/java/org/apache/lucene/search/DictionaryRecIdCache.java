@@ -365,6 +365,9 @@ public enum DictionaryRecIdCache {
 		
 		DocTermOrds unInvertedIndex = new DocTermOrds(atom, entry.field);
 		TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(atom);
+		if (termsEnum == null) {
+			return new int[reader.maxDoc()][];
+		}
 		int[][] retArray = new int[reader.maxDoc()][];
 		DocsEnum docs = null;
 		
