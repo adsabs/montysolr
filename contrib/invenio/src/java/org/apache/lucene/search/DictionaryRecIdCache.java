@@ -211,6 +211,11 @@ public enum DictionaryRecIdCache {
 		// since most likely this will be needed anyway, i don't bother with reading just the values from the index
 		int[][] invCache = getUnInvertedDocidsStrField(atomReader, externalIds, refField);
 		
+		if (invCache == null) {
+			//throw new IOException("Error initializing cache, no data in the field: " + externalIds + ":" + refField);
+			return new HashMap<Integer, List<Integer>>();
+		}
+		
 		HashMap<Integer, List<Integer>> docsPointingToDocId = new HashMap<Integer, List<Integer>>();
 		Integer i = -1;
 		for (int[] docIds: invCache) {
@@ -366,7 +371,8 @@ public enum DictionaryRecIdCache {
 		DocTermOrds unInvertedIndex = new DocTermOrds(atom, entry.field);
 		TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(atom);
 		if (termsEnum == null) {
-			return new int[reader.maxDoc()][];
+			//throw new IOException("Error initializing cache, no data in the field: " + entry.field);
+			return null;
 		}
 		int[][] retArray = new int[reader.maxDoc()][];
 		DocsEnum docs = null;
