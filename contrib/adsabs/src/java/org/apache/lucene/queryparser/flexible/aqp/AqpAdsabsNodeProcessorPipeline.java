@@ -30,6 +30,8 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITI
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQTRUNCATEDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldMapperProcessorPostAnalysis;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPMarkPlainNodes;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFixMultiphraseQuery;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQREGEXProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpUnfieldedSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQNORMALProcessor;
@@ -133,6 +135,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		add(new AqpAdsabsAuthorPreProcessor()); // must happen before analysis
 		add(new AqpAdsabsAnalyzerProcessor()); // the main analysis happens here (but not for wildcard nodes and co)
+		add(new AqpFixMultiphraseQuery()); // "(word | synonym) phrase query" -> "word phrase query" | synonym 
 		add(new AqpLowercaseExpandedTermsQueryNodeProcessor()); // lowercase ASTRO* -> astro* (we index everything lowercase)
 		add(new AqpAdsabsCarefulAnalyzerProcessor()); //XXX should we remove LowercaseExpandedTermsQueryNodeProcessor? -- massages wildcard, regex, fuzzy fields 
 		add(new AqpAdsabsExpandAuthorSearchProcessor()); // kurtz, michael +> "kurtz, michael *" and stuff... 

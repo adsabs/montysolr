@@ -31,6 +31,21 @@ import org.adsabs.solr.AdsConfig.F;
  * Tests that the fulltext is parsed properly, the ads_text type
  * is not as simple as it seems
  * 
+ * The ads_text has several tasks to do:
+ * 
+ *    1) normalize the input text, ie. token -foo => token-foo
+ *       this is done through a series of pattern replace filters
+ *    2) use WordDelimiterFilterFactory to split words (ie. all-sky)
+ *    3) discover synonyms (and we have several families of synonyms)
+ *       - multi-token: search case insensitively
+ *       - acronyms: search case sensitively
+ *       - single-token: search case insensitively
+ *       Each of the newly discovered tokens is *inserted* into the
+ *       document, we take care to preserve also the original token
+ *       Synonyms have prefix 'syn::' and acronyms 'acr::'
+ *    4) remove stopwords
+ *    5) normalization (lowercase etc)
+ * 
  */
 public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
@@ -47,22 +62,33 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      */
 
     String configFile = MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+    		+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
 
     File newConfig;
     try {
 
       newConfig = duplicateFile(new File(configFile));
-
-      File synonymsFile = createTempFile(new String[]{
+      
+      // notice 'mond' is a synonym in both synonym files
+      // notice two rows point into 'lunar' - they should be merged, which means
+      // if you searched for 'mond' or 'space', it resolves to 'syn:lunar' 
+      // but if you search for lunar, you WILL NOT find 'mond'
+      File simpleTokenSynonymsFile = createTempFile(new String[]{
+      		"moon,moons,luna,lune,mond=>lunar\n" +
+      		"space=> lunar\n"
+      });
+      
+      File multiTokenSynonymsFile = createTempFile(new String[]{
           "hubble\0space\0telescope,HST\n" +
           "Massachusets\0Institute\0of\0Technology, MIT\n" +
           "Hubble\0Space\0Microscope, HSM\n" +
           "ABC,Astrophysics\0Business\0Center\n" +
-          "Astrophysics\0Business\0Commons, ABC\n"
+          "Astrophysics\0Business\0Commons, ABC\n" + 
+          "MOND,modified\0newtonian\0dynamics\n"
       });
-      replaceInFile(newConfig, "synonyms=\"ads_text.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
-      replaceInFile(newConfig, "synonyms=\"ads_text_query.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+      
+      replaceInFile(newConfig, "synonyms=\"ads_text_multi.synonyms\"", "synonyms=\"" + multiTokenSynonymsFile.getAbsolutePath() + "\"");
+      replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + simpleTokenSynonymsFile.getAbsolutePath() + "\"");
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -144,11 +170,91 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "11", F.BIBCODE, "xxxxxxxxxxx11", F.TYPE_ADS_TEXT, "All-sky data survey"));
     assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxx12", F.TYPE_ADS_TEXT, "NoSky data survey"));
     assertU(adoc(F.ID, "13", F.BIBCODE, "xxxxxxxxxxx13", F.TYPE_ADS_TEXT, "AllSky data survey"));
-
+    assertU(adoc(F.ID, "14", F.BIBCODE, "xxxxxxxxxxx14", F.TYPE_ADS_TEXT, "Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions"));
+    assertU(adoc(F.ID, "15", F.BIBCODE, "xxxxxxxxxxx15", F.TYPE_ADS_TEXT, "MOND test"));
+    assertU(adoc(F.ID, "16", F.BIBCODE, "xxxxxxxxxxx16", F.TYPE_ADS_TEXT, "mond test"));
+    
     assertU(commit());
 
-
-
+    
+    dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
+    // ticket #320
+    // in natural language: when searching for MOND, we'll first find the multi-token synonyms
+    // ie. MOND, modified newtonina dynamics
+    // then search for simple synonymes: <find nothing, ie. ignore 'mond'>
+    // MOND is caught by acronym filter, which is configured to eat the original
+    // and the result is made of acronym + synonym + multi-token-synonym
+    
+    // test with a field
+    assertQueryEquals(req("q", "title:MOND", "qt", "aqp"), 
+        "title:acr::mond title:syn::acr::mond title:syn::modified newtonian dynamics", BooleanQuery.class);
+    assertQueryEquals(req("q", "title:mond", "qt", "aqp"), 
+        "title:mond title:syn::lunar", BooleanQuery.class);
+    assertQueryEquals(req("q", "title:Mond", "qt", "aqp"), 
+        "title:mond title:syn::lunar", BooleanQuery.class);
+    
+    // unfielded simple token
+    assertQueryEquals(req("q", "MOND", "qt", "aqp"), 
+        "all:acr::mond all:syn::acr::mond all:syn::modified newtonian dynamics", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":MOND"), "//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
+    
+    assertQueryEquals(req("q", "mond", "qt", "aqp"), 
+        "all:mond all:syn::lunar", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":mond", "explain", "true"), "//*[@numFound='4']",
+    		"//doc/str[@name='id'][.='4']", // orig 'space' -> syn:lunar; look at the synonym file to understand
+    		"//doc/str[@name='id'][.='14']",
+    		"//doc/str[@name='id'][.='15']",
+        "//doc/str[@name='id'][.='16']");
+    
+    assertQueryEquals(req("q", "Mond", "qt", "aqp"), 
+        "all:mond all:syn::lunar", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":Mond"), "//*[@numFound='4']",
+    		"//doc/str[@name='id'][.='4']", // orig 'space' -> syn:lunar; look at the synonym file to understand
+    		"//doc/str[@name='id'][.='14']",
+    		"//doc/str[@name='id'][.='15']",
+        "//doc/str[@name='id'][.='16']");
+    
+    // search for 'space' and find 'mond' (there is intentional error/duplication
+    // in our synonym files - look above)
+    assertQueryEquals(req("q", "space", "qt", "aqp"), 
+        "all:space all:syn::lunar", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":space"), "//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='4']", 
+        "//doc/str[@name='id'][.='16']");
+    
+    // search for 'lunar' MUST NOT return 'mond' (because synonyms are explicit =>)
+    // and 'lunar' is not on the left hand side
+    assertQueryEquals(req("q", "lunar", "qt", "aqp"), 
+        "all:lunar", TermQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":lunar"), "//*[@numFound='0']");
+    
+    // but 'luna' is a synonym (syn::lunar)
+    assertQueryEquals(req("q", "luna", "qt", "aqp"), 
+        "all:luna all:syn::lunar", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":luna"), "//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='4']", 
+        "//doc/str[@name='id'][.='16']");
+    
+    // unfielded multi-token
+    setDebug(true);
+    
+    assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp"), 
+        "+(title:syn::mond title:acr::mond) +title:syn::modified newtonian dynamics", BooleanQuery.class);
+    
+    
+    assertQueryEquals(req("q", "title:\"modified newtonian dynamics\"", "qt", "aqp"), 
+        "title:mond title:syn::lunar", BooleanQuery.class);
+    assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp", "qf", "title"), 
+        "+(title:syn::mond title:acr::mond) +title:syn::modified newtonian dynamics", BooleanQuery.class);
+    assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp", "qf", "title"), 
+        "+(title:syn::mond title:acr::mond) +title:syn::modified newtonian dynamics", BooleanQuery.class);
+    
+    
+    
+    
+    
     /*
      * Test multi-token translation, the chain is set to recognize
      * synonyms. So even if the query string is split into 3 tokens,

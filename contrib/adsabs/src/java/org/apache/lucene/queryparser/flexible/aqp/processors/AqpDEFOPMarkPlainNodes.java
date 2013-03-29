@@ -1,4 +1,4 @@
-package org.apache.lucene.queryparser.flexible.aqp;
+package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.ArrayList;
 import java.util.List;

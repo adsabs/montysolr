@@ -90,10 +90,12 @@ public class SecondOrderQuery extends Query {
 			
 			Weight firstOrderWeight = firstOrderQuery.createWeight(searcher);
 			
-			secondOrderCollector.searcherInitialization(searcher);
+			// conduct search only if initialization of necessary caches went well
+			if (secondOrderCollector.searcherInitialization(searcher)) {
+				searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
+			}
 			
-			searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
-		    
+			// no logging, we are basic lucene class
 			return new SecondOrderWeight(firstOrderWeight, secondOrderCollector);
 		}
 	}

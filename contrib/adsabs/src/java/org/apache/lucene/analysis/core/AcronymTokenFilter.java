@@ -20,9 +20,7 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
  * adds the full name after the term (depends on the value of emitBoth)
  */
 public final class AcronymTokenFilter extends TokenFilter {
-  public static final String TOKEN_TYPE_ACRONYM = "ACRONYM";
   public static final int ACRONYM_MIN_LENGTH = 2;
-  public static final String ACRONYM_PREFIX = "acr::";
 
   // controls index-time vs. query-time behavior
   private boolean emitBoth;
@@ -31,10 +29,14 @@ public final class AcronymTokenFilter extends TokenFilter {
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
   private State currentState = null;
+	private String prefix;
+	private String tokenType;
 
-  public AcronymTokenFilter(TokenStream in, boolean emitBoth) {
+  public AcronymTokenFilter(TokenStream in, boolean emitBoth, String prefix, String tokenType) {
     super(in);
     this.emitBoth = emitBoth;
+    this.prefix = prefix;
+    this.tokenType = tokenType;
   }
 
   @Override
@@ -42,7 +44,9 @@ public final class AcronymTokenFilter extends TokenFilter {
     // check if we got an acronym
     if (this.currentState != null) {
       restoreState(currentState);
-      typeAtt.setType(TOKEN_TYPE_ACRONYM);
+      if (this.tokenType != null) {
+      	typeAtt.setType(this.tokenType);
+      }
       posIncrAtt.setPositionIncrement(0);
       currentState=null;
       return true;
@@ -54,10 +58,14 @@ public final class AcronymTokenFilter extends TokenFilter {
 
     String origTerm = termAtt.toString();
     if (termIsAcronym(origTerm)) {
-      termAtt.setEmpty().append(ACRONYM_PREFIX+origTerm);
+    	if (prefix != null) {
+    		termAtt.setEmpty().append(prefix+origTerm);
+    	}
 
       if (!emitBoth) {
-        typeAtt.setType(TOKEN_TYPE_ACRONYM);
+      	if (this.tokenType != null) {
+      		typeAtt.setType(this.tokenType);
+      	}
         return true;
       }
       currentState = captureState();

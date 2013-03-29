@@ -42,7 +42,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   }
   
   @Override
-  public void searcherInitialization(IndexSearcher searcher) throws IOException {
+  public boolean searcherInitialization(IndexSearcher searcher) throws IOException {
     if (invertedIndex == null) {
       if (cacheGetter != null) {
         invertedIndex = (int[][]) cacheGetter.getCache();
@@ -56,7 +56,10 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
       boostCache = FieldCache.DEFAULT.getFloats(DictionaryRecIdCache.INSTANCE.getAtomicReader(((IndexSearcher) searcher).getIndexReader()), 
           boostField, false);
     }
-    super.searcherInitialization(searcher);
+    if (invertedIndex == null || invertedIndex.length == 0 || boostCache.length == 0) {
+    	return false;
+    }
+    return super.searcherInitialization(searcher);
   }
   
 

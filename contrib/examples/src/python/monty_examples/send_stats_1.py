@@ -64,7 +64,7 @@ def run(workdir, solrurl, user, passw, spreadsheet):
    cmd = tmpl % (sys.executable, ourdir, user, passw, spreadsheet, ','.join(data))
    
    print tmpl % (sys.executable, ourdir, user, '<passw>', spreadsheet, ','.join(data))
-   os.system(cmd)
+   return os.system(cmd)
 
 
       

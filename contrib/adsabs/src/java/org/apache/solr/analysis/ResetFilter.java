@@ -25,10 +25,12 @@ public final class ResetFilter extends TokenFilter {
   private final CharTermAttribute termAtt;
   private int lowEnd;
   private int highEnd;
+	private String prefix;
 
   
   public ResetFilter(TokenStream input, String incomingType,
-      Integer posIncrement, String outgoingType, int[] range) {
+      Integer posIncrement, String outgoingType, int[] range,
+      String prefix) {
     super(input);
     posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     typeAtt = addAttribute(TypeAttribute.class);
@@ -39,6 +41,7 @@ public final class ResetFilter extends TokenFilter {
     this.outgoingType = outgoingType;
     this.lowEnd = range[0];
     this.highEnd = range[1];
+    this.prefix = prefix;
   }
 
   
@@ -77,6 +80,10 @@ public final class ResetFilter extends TokenFilter {
     }
     if (outgoingType != null) {
       typeAtt.setType(outgoingType);
+    }
+    if (prefix != null) {
+    	String newValue = prefix + termAtt.toString();
+    	termAtt.setEmpty().append(newValue);
     }
   }
 

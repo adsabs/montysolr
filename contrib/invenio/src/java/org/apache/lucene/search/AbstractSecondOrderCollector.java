@@ -25,9 +25,10 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
     hits = new ArrayList<CollectorDoc>();
   }
 
-  public void searcherInitialization(IndexSearcher searcher) throws IOException {
+  public boolean searcherInitialization(IndexSearcher searcher) throws IOException {
     // this is pretty arbitrary, but 2nd order queries may return many hits...
     ((ArrayList) hits).ensureCapacity((int) (searcher.getIndexReader().maxDoc() * ensureCapacityRatio));
+    return true;
   }
 
   public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {

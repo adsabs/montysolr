@@ -35,7 +35,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	
 	@SuppressWarnings("unchecked")
   @Override
-	public void searcherInitialization(IndexSearcher searcher) throws IOException {
+	public boolean searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (docToDocidsCache == null) {
 		  if (cacheGetter != null) {
 		    docToDocidsCache = (Map<Integer, List<Integer>>) cacheGetter.getCache();
@@ -46,7 +46,10 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
   				uniqueIdField, referenceField);
 		  }
 		}
-		super.searcherInitialization(searcher);
+		if (docToDocidsCache == null || docToDocidsCache.size() == 0) {
+			return false;
+		}
+		return super.searcherInitialization(searcher);
 	}
 	
 

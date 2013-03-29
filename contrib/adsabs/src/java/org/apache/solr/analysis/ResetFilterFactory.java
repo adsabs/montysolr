@@ -14,6 +14,7 @@ public class ResetFilterFactory extends TokenFilterFactory {
     private Integer posIncrement;
     private String outgoingType;
     private int[] range;
+    private String prefix;
 
     public void init(Map<String, String> args) {
 	    super.init(args);
@@ -42,13 +43,17 @@ public class ResetFilterFactory extends TokenFilterFactory {
           range[i++] = Integer.parseInt(x);
         }
       }
+      prefix = null;
+      if (args.containsKey("addPrefix")) {
+        prefix = (String) args.get("addPrefix");
+      }
 	}
 	  
 	/* (non-Javadoc)
 	 * @see org.apache.solr.analysis.TokenFilterFactory#create(org.apache.lucene.analysis.TokenStream)
 	 */
 	public ResetFilter create(TokenStream input) {
-		return new ResetFilter(input, incomingType, posIncrement, outgoingType, range);
+		return new ResetFilter(input, incomingType, posIncrement, outgoingType, range, prefix);
 	}
 
 }

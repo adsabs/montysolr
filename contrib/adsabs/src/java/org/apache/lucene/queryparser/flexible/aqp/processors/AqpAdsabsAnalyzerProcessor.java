@@ -1,14 +1,11 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 
 /**
  * This processor prevents analysis to happen for nodes that are 
@@ -19,7 +16,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
  * @author rchyla
  *
  */
-public class AqpAdsabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
+public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
 
   private boolean enteredCleanZone = false;
   private int counter = 0;
@@ -67,6 +64,5 @@ public class AqpAdsabsAnalyzerProcessor extends AnalyzerQueryNodeProcessor {
     return rn;
 
   }
-
-
+  
 }

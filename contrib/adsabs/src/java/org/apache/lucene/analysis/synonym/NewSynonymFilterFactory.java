@@ -276,15 +276,17 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 'eats' the source token when single-token synonym is there. 
    * 
    */
-  public static class BestEffortIgnoreCase extends SynonymBuilderFactory {
+  public static class BestEffortSearchLowercase extends SynonymBuilderFactory {
+  	boolean inclOrig = false;
     public void inform(ResourceLoader loader) throws IOException {
       args.put("ignoreCase", "false");
+      inclOrig = args.containsKey("inclOrig") ? ((String) args.get("inclOrig")).equals("true") : false;
     }
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
         public void add(CharsRef input, CharsRef output, boolean includeOrig) {
-          super.add(lowercase(input), replaceNulls(output), countWords(input) > 1 ? true : false);
+          super.add(lowercase(input), replaceNulls(output), countWords(input) > 1 ? true : inclOrig);
         }
         private CharsRef lowercase(CharsRef chars) {
           chars = CharsRef.deepCopyOf(chars);
@@ -303,24 +305,26 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   /*
    * This is a custom configuration for multi-token query-time synonym expansion.
    * 
-   * Multi-tokens are searched case insentively and original parts are returned
+   * Multi-tokens are searched lowercase and original parts are returned
    * 
-   * Single tokens are searched case *sensitively*
+   * Single tokens are searched as they are written in the synonym file
    * 
-   * The parser also returns source tokens for the multi-token group, but
-   * 'eats' the source token when single-token synonym is there. 
+   * The parser also returns source tokens for the multi-token group, for 
+   * single-token the behaviour is governed by settings of includeOrig
    * 
    */
   public static class BestEffortIgnoreCaseSelectively extends SynonymBuilderFactory {
+  	boolean inclOrig = false;
     public void inform(ResourceLoader loader) throws IOException {
       args.put("ignoreCase", "false");
+      inclOrig = args.containsKey("inclOrig") ? ((String) args.get("inclOrig")).equals("true") : false;
     }
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
-        public void add(CharsRef input, CharsRef output, boolean includeOrig) {
+        public void add(CharsRef input, CharsRef output, boolean includeOrig) { //is always false :(
           int count = countWords(input);
-          super.add(count > 1 ? lowercase(input) : input, replaceNulls(output), count > 1 ? true : false);
+          super.add(count > 1 ? lowercase(input) : input, replaceNulls(output), count > 1 ? true : inclOrig);
         }
         private CharsRef lowercase(CharsRef chars) {
           chars = CharsRef.deepCopyOf(chars);

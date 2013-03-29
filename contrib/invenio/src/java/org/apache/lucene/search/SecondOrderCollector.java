@@ -11,10 +11,13 @@ public interface SecondOrderCollector {
      * the collector can (should|must) inspect it and discover the
      * subreaders and how they are partitioned
      * 
+     * Must return true if the initialization succeeded, otherwise
+     * the query will not be executed
+     * 
      * @param searcher
      * @throws IOException 
      */
-    public void searcherInitialization(IndexSearcher searcher) throws IOException;
+    public boolean searcherInitialization(IndexSearcher searcher) throws IOException;
 
     
     

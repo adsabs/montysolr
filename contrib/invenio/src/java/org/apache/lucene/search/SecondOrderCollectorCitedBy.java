@@ -45,7 +45,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	}
 	
 	@Override
-	public void searcherInitialization(IndexSearcher searcher) throws IOException {
+	public boolean searcherInitialization(IndexSearcher searcher) throws IOException {
 		if (invertedIndex == null) {
 		  if (cacheGetter != null) {
 		    invertedIndex = (int[][]) cacheGetter.getCache();
@@ -56,7 +56,11 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 				uniqueIdField, referenceField);
 		  }
 		}
-		super.searcherInitialization(searcher);
+		
+		if (invertedIndex == null || invertedIndex.length == 0) {
+			return false;
+		}
+		return super.searcherInitialization(searcher);
 	}
 	
 

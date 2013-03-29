@@ -90,7 +90,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
-    args.put("builderFactory", NewSynonymFilterFactory.BestEffortIgnoreCase.class.getName());
+    args.put("builderFactory", NewSynonymFilterFactory.BestEffortSearchLowercase.class.getName());
     
     factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
     factory.init(args);
