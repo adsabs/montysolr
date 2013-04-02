@@ -79,6 +79,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
       });
       
       File multiTokenSynonymsFile = createTempFile(new String[]{
+      		"dynamics\0hubble,dyhu\n" +
           "hubble\0space\0telescope,HST\n" +
           "Massachusets\0Institute\0of\0Technology, MIT\n" +
           "Hubble\0Space\0Microscope, HSM\n" +

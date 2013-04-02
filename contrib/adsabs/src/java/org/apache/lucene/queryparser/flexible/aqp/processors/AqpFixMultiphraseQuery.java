@@ -30,11 +30,11 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 			NodeOfQuery graph = new NodeOfQuery(((FieldQueryNode)children.get(0)).getBegin());
 			
 			for (QueryNode child : children) {
-				System.out.println("addToken(): " + child);
+				//System.out.println("addToken(): " + child);
 				graph.addNode((FieldQueryNode)child);
 			}
 			
-			System.out.println(graph.toString());
+			//System.out.println(graph.toString());
 			
 			List<List<List<QueryNode>>> queries;
 			try {
@@ -142,43 +142,36 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 			if (node.getBegin() == startPos) {
 				if (endPos > -1 && node.getEnd() == endPos) {
 					if (!payload.contains(node))
-						System.out.println("Adding payload: " + node);
+						//System.out.println("Adding payload: " + node);
 						payload.add(node);
 					  return;
 				}
 				if (children.containsKey(node.getEnd())) {
-					System.out.println("Adding child: [" + node.getEnd() + "] " + node);
+					//System.out.println("Adding child: [" + node.getEnd() + "] " + node);
 					children.get(node.getEnd()).addNode(node);
 				}
 				else {
-					System.out.println("Creating child: [" + node.getEnd() + "] " + node);
+					//System.out.println("Creating child: [" + node.getEnd() + "] " + node);
 					children.put(node.getEnd(), new NodeOfQuery(node));
 				}
 			}
 			else {
 				if (endPos > -1 && node.getEnd() == endPos && node.getBegin() == startPos) {
 					if (!payload.contains(node))
-						System.out.println("#2 Adding payload: " + node);
+						//System.out.println("#2 Adding payload: " + node);
 						payload.add(node);
 					  return;
 				}
 				
 				if (children.size() == 0 && node.getBegin() > endPos) {
-					System.out.println("#2 Appending child: [" + node.getEnd() + "] " + node);
+					//System.out.println("#2 Appending child: [" + node.getEnd() + "] " + node);
 					children.put(node.getEnd(), new NodeOfQuery(node));
 				}
 				else {
-					//if (children.containsKey(node.getEnd())) {
-					//	System.out.println("#2 Adding child: [" + node.getEnd() + "] " + node);
-					//	children.get(node.getEnd()).addNode(node);
-					//	return;
-					//}
 					
 					for (Entry<Integer, NodeOfQuery> child: children.entrySet()) {
-						//if (node.getEnd() > child.getKey()) {
-							System.out.println("Descending into: " + child.getKey());
-							child.getValue().addNode(node);
-						//}
+						//System.out.println("Descending into: " + child.getKey());
+						child.getValue().addNode(node);
 					}
 				}
 			}
