@@ -177,7 +177,18 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(commit());
 
     
+    
     dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
+   
+    setDebug(true);
+    // test of the multi-synonym replacement, phrase handling etc
+    // this is a very crazy stuff hidden in AdsFixMultiPhraseQueryProcessor
+    assertQueryEquals(req("q", "\"hubble space telescope multi-space query\"", "qt", "aqp"), 
+        "", BooleanQuery.class);
+    assertQueryEquals(req("q", "hubble space telescope and MIT", "qt", "aqp"), 
+        "", BooleanQuery.class);
+    
+    
     // ticket #320
     // in natural language: when searching for MOND, we'll first find the multi-token synonyms
     // ie. MOND, modified newtonina dynamics
@@ -246,6 +257,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("q", "title:\"modified newtonian dynamics\"", "qt", "aqp"), 
         "title:mond title:syn::lunar", BooleanQuery.class);
+    assertQueryEquals(req("q", "title:\"modified newtonian dynamics hubble space scope\"", "qt", "aqp"), 
+        "title:mond title:syn::lunar", BooleanQuery.class);
+    assertQueryEquals(req("q", "title:\"modified newtonian dynamics hubble space scope\"", "qt", "aqp"), 
+        "title:mond title:syn::lunar", BooleanQuery.class);
+    assertQueryEquals(req("q", "title:\"modified newtonian dynamics hubble space scope\"", "qt", "aqp"), 
+        "title:mond title:syn::lunar", BooleanQuery.class);
+    
+    assertQueryEquals(req("q", "title:\"modified newtonian dynamics\"", "qt", "aqp"), 
+        "title:mond title:syn::lunar", BooleanQuery.class);
+    
     assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp", "qf", "title"), 
         "+(title:syn::mond title:acr::mond) +title:syn::modified newtonian dynamics", BooleanQuery.class);
     assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp", "qf", "title"), 

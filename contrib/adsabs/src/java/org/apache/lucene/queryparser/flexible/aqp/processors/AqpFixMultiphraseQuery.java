@@ -1,24 +1,18 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
-import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
-
-import com.mongodb.QueryOperators;
 
 public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 
@@ -30,21 +24,57 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 	@Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
 		if (node instanceof MultiPhraseQueryNode) {
-			NodeOfQuery graph = null;
+			
 			
 			List<QueryNode> children = node.getChildren();
+			NodeOfQuery graph = new NodeOfQuery(((FieldQueryNode)children.get(0)).getBegin());
+			
 			for (QueryNode child : children) {
-				System.out.println(((FieldQueryNode) child).getPositionIncrement() + child.toString());
-				if (graph == null) {
-					graph = new NodeOfQuery(((FieldQueryNode)child).getBegin());
-				}
+				System.out.println("addToken(): " + child);
 				graph.addNode((FieldQueryNode)child);
 			}
+			
+			System.out.println(graph.toString());
+			
+			List<List<List<QueryNode>>> queries;
 			try {
-	      List<List<List<FieldQueryNode>>> queries = graph.traverseGraphFindAllQueries();
+	      queries = graph.traverseGraphFindAllQueries();
       } catch (CloneNotSupportedException e) {
 	      throw new QueryNodeException(e);
       }
+			
+			// each list is a query - inside the query, every 
+			// element is a list (if there are more elements, they 
+			// share the same span)
+			
+			List<QueryNode> mainQueryClauses = new ArrayList<QueryNode>();
+			for (List<List<QueryNode>> oneQuery: queries) {
+				QueryNode qn;
+				List<QueryNode> clauses = new ArrayList<QueryNode>();
+				for (List<QueryNode> qElement: oneQuery) {
+					if (qElement.size() > 1) { // synonymous tokens at the same position/offset
+						qn = new AqpOrQueryNode((List<QueryNode>) qElement);
+					}
+					else {
+						qn = qElement.get(0);
+					}
+					clauses.add(qn);
+				}
+				if (clauses.size() > 1) {
+					mainQueryClauses.add(new AqpAndQueryNode(clauses));
+				}
+				else {
+					mainQueryClauses.add(clauses.get(0));
+				}
+				
+			}
+			if (mainQueryClauses.size() > 1) {
+				return new AqpOrQueryNode(mainQueryClauses);
+			}
+			else {
+				return mainQueryClauses.get(0);
+			}
+				
 		}
 	  return node;
   }
@@ -58,27 +88,54 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 
 	class NodeOfQuery {
 		protected int startPos;
-		private List<FieldQueryNode> payload = new ArrayList<FieldQueryNode>();
+		private List<QueryNode> payload = new ArrayList<QueryNode>();
 		private Map<Integer, NodeOfQuery> children;
 		private int nodeRetrieved = 0;
 		protected int endPos = -1;
 
 		public NodeOfQuery(int startPosition) {
 			startPos = startPosition;
-			payload = new ArrayList<FieldQueryNode>();
+			payload = new ArrayList<QueryNode>();
 			children = new HashMap<Integer, NodeOfQuery>();
 		}
 		
-		public NodeOfQuery(FieldQueryNode node) {
-			startPos = node.getBegin();
-			payload = new ArrayList<FieldQueryNode>();
+		public NodeOfQuery(QueryNode node) {
+			startPos = ((FieldQueryNode) node).getBegin();
+			payload = new ArrayList<QueryNode>();
 			children = new HashMap<Integer, NodeOfQuery>();
-			endPos  = node.getEnd();
+			endPos  = ((FieldQueryNode) node).getEnd();
 			payload.add(node);
 		}
 		
+		@Override
+		public String toString() {
+			return prn(0);
+		}
 		
-		public void addNode(FieldQueryNode node) {
+		public String prn(int indent) {
+			StringBuilder sb = new StringBuilder();
+			for (int i=0;i<indent;i++) {
+				sb.append(" ");
+			}
+			String ind = sb.toString();
+			sb = new StringBuilder();
+			
+			sb.append(ind + "<NodeOfQuery startPos=\"" + this.startPos
+					      + "\" endPos=\"" + this.endPos + "\"/>\n");
+			for (QueryNode child: payload) {
+				sb.append(ind + "<payload>" + child + "</payload>\n");
+			}
+			for (Entry<Integer, NodeOfQuery> nq: children.entrySet()) {
+				sb.append(ind + "<child key=\"" + nq.getKey() + "\">\n");
+				sb.append(nq.getValue().prn(indent + 2));
+				sb.append(ind +"</child>\n");
+			}
+			sb.append(ind + "</NodeOfQuery>\n");
+			return sb.toString();
+		}
+		
+		public void addNode(QueryNode qnode) {
+			FieldQueryNode node = ((FieldQueryNode) qnode);
 			assert node.getBegin() > -1;
 			assert node.getEnd() > -1 && node.getEnd() > node.getBegin();
 			
@@ -90,25 +147,38 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 					  return;
 				}
 				if (children.containsKey(node.getEnd())) {
-					System.out.println("Adding child: " + node.getEnd());
+					System.out.println("Adding child: [" + node.getEnd() + "] " + node);
 					children.get(node.getEnd()).addNode(node);
 				}
 				else {
-					System.out.println("Creating child: " + node.getEnd());
+					System.out.println("Creating child: [" + node.getEnd() + "] " + node);
 					children.put(node.getEnd(), new NodeOfQuery(node));
 				}
 			}
 			else {
-				if (children.size() == 0) {
-					System.out.println("Appending child: " + node.getBegin());
+				if (endPos > -1 && node.getEnd() == endPos && node.getBegin() == startPos) {
+					if (!payload.contains(node))
+						System.out.println("#2 Adding payload: " + node);
+						payload.add(node);
+					  return;
+				}
+				
+				if (children.size() == 0 && node.getBegin() > endPos) {
+					System.out.println("#2 Appending child: [" + node.getEnd() + "] " + node);
 					children.put(node.getEnd(), new NodeOfQuery(node));
 				}
 				else {
+					//if (children.containsKey(node.getEnd())) {
+					//	System.out.println("#2 Adding child: [" + node.getEnd() + "] " + node);
+					//	children.get(node.getEnd()).addNode(node);
+					//	return;
+					//}
+					
 					for (Entry<Integer, NodeOfQuery> child: children.entrySet()) {
-						if (node.getBegin() > child.getKey()) {
+						//if (node.getEnd() > child.getKey()) {
 							System.out.println("Descending into: " + child.getKey());
 							child.getValue().addNode(node);
-						}
+						//}
 					}
 				}
 			}
@@ -128,7 +198,7 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 			}
 		}
 		
-		public List<List<List<FieldQueryNode>>> traverseGraphFindAllQueries() 
+		public List<List<List<QueryNode>>> traverseGraphFindAllQueries() 
 				throws CloneNotSupportedException {
 			QueryPath path = new QueryPath(); // find all queries
 			drillDown(path);
@@ -144,13 +214,13 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 					max = m;
 			}
 			
-			List<List<List<FieldQueryNode>>> queries = new ArrayList<List<List<FieldQueryNode>>>();
+			List<List<List<QueryNode>>> queries = new ArrayList<List<List<QueryNode>>>();
 			
 			// retrieve only the queries made of query elements that cover the longest distance
 			for (int i=0;i<measured.length;i++) {
 				if (measured[i] != max) 
 					continue;
-				List<List<FieldQueryNode>> oneQuery = new ArrayList<List<FieldQueryNode>>();
+				List<List<QueryNode>> oneQuery = new ArrayList<List<QueryNode>>();
 				retrieveQueryElements(oneQuery, paths.get(i), 0);
 				assert oneQuery.size() == paths.get(i).size() / 2;
 				queries.add(oneQuery);
@@ -160,13 +230,13 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 			return queries;
 		}
 		
-		private void retrieveQueryElements(List<List<FieldQueryNode>> oneQuery, List<Integer> path, int pos) 
+		private void retrieveQueryElements(List<List<QueryNode>> oneQuery, List<Integer> path, int pos) 
 				throws CloneNotSupportedException {
 	    //assert path.get(pos) == startPos;
 	    if (payload.size() > 0) {
 		    if (nodeRetrieved > 0) {
-		    	ArrayList<FieldQueryNode> copyOfNodes = new ArrayList<FieldQueryNode>(payload.size());
-		    	for (FieldQueryNode n: payload) {
+		    	ArrayList<QueryNode> copyOfNodes = new ArrayList<QueryNode>(payload.size());
+		    	for (QueryNode n: payload) {
 		    		copyOfNodes.add(n.cloneTree());
 		    	}
 		    	oneQuery.add(copyOfNodes);
