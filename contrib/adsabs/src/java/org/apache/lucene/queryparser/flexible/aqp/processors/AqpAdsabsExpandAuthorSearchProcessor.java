@@ -28,8 +28,8 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.solr.analysis.author.AuthorUtils;
 
 /**
- * Looks at the QueryNode(s) and translates the field name if we have a mapping
- * for it. It is used to change the field names on-the-fly
+ * Looks at the QueryNode(s) and if they are author searches,
+ * it adds to them some ADS specific post-analysis logic
  * 
  * @see AqpFieldMapper
  * @see QueryConfigHandler

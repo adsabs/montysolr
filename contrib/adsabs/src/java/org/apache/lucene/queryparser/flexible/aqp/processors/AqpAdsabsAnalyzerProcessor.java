@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -61,7 +62,7 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
       rn.setTag(ORIGINAL_VALUE, fv);
     }
     
-    return rn;
+    return new AqpAnalyzedQueryNode(rn);
 
   }
   

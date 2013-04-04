@@ -25,6 +25,11 @@ import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
  *                                Q<node>
  *                                  |
  *                                <value>
+ *                                
+ * This node carries within itself a 'builder' which is responsible for
+ * turning the node into a Query at *build* time. Ie. after the processors
+ * finished running (that is the step 2).
+ * 
  * @author rchyla
  *
  */

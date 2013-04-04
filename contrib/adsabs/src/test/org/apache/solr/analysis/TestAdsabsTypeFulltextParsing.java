@@ -75,6 +75,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
       // but if you search for lunar, you WILL NOT find 'mond'
       File simpleTokenSynonymsFile = createTempFile(new String[]{
       		"moon,moons,luna,lune,mond=>lunar\n" +
+      		"stetoscope=>glass\n" +
       		"space=> lunar\n"
       });
       
@@ -174,20 +175,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "14", F.BIBCODE, "xxxxxxxxxxx14", F.TYPE_ADS_TEXT, "Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions"));
     assertU(adoc(F.ID, "15", F.BIBCODE, "xxxxxxxxxxx15", F.TYPE_ADS_TEXT, "MOND test"));
     assertU(adoc(F.ID, "16", F.BIBCODE, "xxxxxxxxxxx16", F.TYPE_ADS_TEXT, "mond test"));
+    assertU(adoc(F.ID, "17", F.BIBCODE, "xxxxxxxxxxx17", F.TYPE_ADS_TEXT, "hubble space telescope multi-space foobar"));
+    
     
     assertU(commit());
 
     
     
     dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
-   
-    setDebug(true);
-    // test of the multi-synonym replacement, phrase handling etc
-    // this is a very crazy stuff hidden in AdsFixMultiPhraseQueryProcessor
-    assertQueryEquals(req("q", "\"hubble space telescope multi-space query\"", "qt", "aqp"), 
-        "", BooleanQuery.class);
-    assertQueryEquals(req("q", "hubble space telescope and MIT", "qt", "aqp"), 
-        "", BooleanQuery.class);
+    
+    
     
     
     // ticket #320
@@ -214,7 +211,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("q", "mond", "qt", "aqp"), 
         "all:mond all:syn::lunar", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":mond", "explain", "true"), "//*[@numFound='4']",
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":mond", "explain", "true"), "//*[@numFound='5']",
     		"//doc/str[@name='id'][.='4']", // orig 'space' -> syn:lunar; look at the synonym file to understand
     		"//doc/str[@name='id'][.='14']",
     		"//doc/str[@name='id'][.='15']",
@@ -222,8 +219,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("q", "Mond", "qt", "aqp"), 
         "all:mond all:syn::lunar", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":Mond"), "//*[@numFound='4']",
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":Mond"), "//*[@numFound='5']",
     		"//doc/str[@name='id'][.='4']", // orig 'space' -> syn:lunar; look at the synonym file to understand
+    		"//doc/str[@name='id'][.='17']", // orig 'space' -> syn:lunar; look at the synonym file to understand
     		"//doc/str[@name='id'][.='14']",
     		"//doc/str[@name='id'][.='15']",
         "//doc/str[@name='id'][.='16']");
@@ -232,8 +230,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // in our synonym files - look above)
     assertQueryEquals(req("q", "space", "qt", "aqp"), 
         "all:space all:syn::lunar", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":space"), "//*[@numFound='2']",
-    		"//doc/str[@name='id'][.='4']", 
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":space"), "//*[@numFound='3']",
+    		"//doc/str[@name='id'][.='4']",
+    		"//doc/str[@name='id'][.='17']",
         "//doc/str[@name='id'][.='16']");
     
     // search for 'lunar' MUST NOT return 'mond' (because synonyms are explicit =>)
@@ -245,34 +244,46 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // but 'luna' is a synonym (syn::lunar)
     assertQueryEquals(req("q", "luna", "qt", "aqp"), 
         "all:luna all:syn::lunar", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":luna"), "//*[@numFound='2']",
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":luna"), "//*[@numFound='3']",
     		"//doc/str[@name='id'][.='4']", 
+    		"//doc/str[@name='id'][.='17']",
         "//doc/str[@name='id'][.='16']");
+
     
-    // unfielded multi-token
-    setDebug(true);
+    // now the multi-token version
+    assertQueryEquals(req("q", "title:\"modified newtonian dynamics\"", "qt", "aqp"), 
+        "(title:syn::acr::mond title:syn::modified newtonian dynamics) title:\"modified newtonian dynamics\"", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":\"modified newtonian dynamics\""), "//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
+    
+
+    // unfielded multi-token. this is truly crazy (several synonyms overlap)
+    // 'hubble space telescope' is a synonym
+    // 'space' is a synonym
+    // multi-space is split by WDFF and expanded with a synonym
+    assertQueryEquals(req("q", "title:\"hubble space telescope multi-space foobar\"", "qt", "aqp"), 
+        "title:\"(syn::hubble space telescope syn::acr::hst) ? ? multi (space syn::lunar) foobar\" " +
+        "title:\"hubble (space syn::lunar) telescope multi (space syn::lunar) foobar\"", 
+        BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":\"hubble space telescope multi-space foobar\""), "//*[@numFound='1']",
+        "//doc/str[@name='id'][.='17']");
+    
+    
     
     assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp"), 
-        "+(title:syn::mond title:acr::mond) +title:syn::modified newtonian dynamics", BooleanQuery.class);
+        "+(all:syn::acr::mond all:syn::modified newtonian dynamics)", BooleanQuery.class);
     
     
-    assertQueryEquals(req("q", "title:\"modified newtonian dynamics\"", "qt", "aqp"), 
-        "title:mond title:syn::lunar", BooleanQuery.class);
-    assertQueryEquals(req("q", "title:\"modified newtonian dynamics hubble space scope\"", "qt", "aqp"), 
-        "title:mond title:syn::lunar", BooleanQuery.class);
-    assertQueryEquals(req("q", "title:\"modified newtonian dynamics hubble space scope\"", "qt", "aqp"), 
-        "title:mond title:syn::lunar", BooleanQuery.class);
-    assertQueryEquals(req("q", "title:\"modified newtonian dynamics hubble space scope\"", "qt", "aqp"), 
-        "title:mond title:syn::lunar", BooleanQuery.class);
+
     
-    assertQueryEquals(req("q", "title:\"modified newtonian dynamics\"", "qt", "aqp"), 
-        "title:mond title:syn::lunar", BooleanQuery.class);
-    
-    assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp", "qf", "title"), 
-        "+(title:syn::mond title:acr::mond) +title:syn::modified newtonian dynamics", BooleanQuery.class);
-    assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp", "qf", "title"), 
-        "+(title:syn::mond title:acr::mond) +title:syn::modified newtonian dynamics", BooleanQuery.class);
-    
+    setDebug(true);
+    // test of the multi-synonym replacement, phrase handling etc
+    // this is a very crazy stuff hidden in AdsFixMultiPhraseQueryProcessor
+    assertQueryEquals(req("q", "\"hubble space telescope multi-space query\"", "qt", "aqp"), 
+        "", BooleanQuery.class);
+    assertQueryEquals(req("q", "hubble space telescope and MIT", "qt", "aqp"), 
+        "", BooleanQuery.class);
     
     
     

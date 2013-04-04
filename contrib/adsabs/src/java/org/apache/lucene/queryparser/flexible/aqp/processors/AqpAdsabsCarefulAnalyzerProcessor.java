@@ -30,6 +30,8 @@ import org.apache.solr.request.SolrQueryRequest;
  * these fields are of the following types
  * 
  * _wildcard - to be used on the wildcard searches
+ * _regex
+ * _fuzzy
  * 
  * @author rchyla
  *

@@ -31,7 +31,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERPr
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQTRUNCATEDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldMapperProcessorPostAnalysis;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPMarkPlainNodes;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFixMultiphraseQuery;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQREGEXProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpUnfieldedSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQNORMALProcessor;
@@ -133,13 +133,13 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpAdsabsSynonymNodeProcessor()); //XXX: to remove? -- simply wraps into non-analyzed node 
 		
 		
-		add(new AqpAdsabsAuthorPreProcessor()); // must happen before analysis
+		// analysis block (lots of logic here...)
+		add(new AqpAdsabsAuthorPreProcessor()); // clean up author searches before analysis stage
 		add(new AqpAdsabsAnalyzerProcessor()); // the main analysis happens here (but not for wildcard nodes and co)
-		add(new AqpFixMultiphraseQuery()); // "(word | synonym) phrase query" -> "word phrase query" | synonym 
-		add(new AqpLowercaseExpandedTermsQueryNodeProcessor()); // lowercase ASTRO* -> astro* (we index everything lowercase)
 		add(new AqpAdsabsCarefulAnalyzerProcessor()); //XXX should we remove LowercaseExpandedTermsQueryNodeProcessor? -- massages wildcard, regex, fuzzy fields 
-		add(new AqpAdsabsExpandAuthorSearchProcessor()); // kurtz, michael +> "kurtz, michael *" and stuff... 
-				
+		add(new AqpAdsabsExpandAuthorSearchProcessor()); // kurtz, michael +> "kurtz, michael *" and stuff...
+		add(new AqpLowercaseExpandedTermsQueryNodeProcessor()); // lowercase ASTRO* -> astro* (we index everything lowercase)
+		add(new AqpPostAnalysisProcessor()); // deals with the the-same-position tokens: "(word | synonym) phrase query" -> "word phrase query" | synonym
 		add(new AqpAdsabsFieldMapperProcessorPostAnalysis()); // translate the field name into their final name
 		
 		add(new PhraseSlopQueryNodeProcessor());

@@ -6,15 +6,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 
-public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
+public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 
 	@Override
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
@@ -23,15 +29,109 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 
 	@Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
-		if (node instanceof MultiPhraseQueryNode) {
+		if (node instanceof AqpAnalyzedQueryNode) {
+			QueryNode child = ((AqpAnalyzedQueryNode) node).getChild();
+			List<List<List<QueryNode>>> queryStructure;
 			
+			if (child instanceof TokenizedPhraseQueryNode) { // no need to do anything
+				return child;
+			}
+			else if (child instanceof GroupQueryNode ) { // boolean query, all tokens at one position
+				return child;
+			}
+			else if (child instanceof MultiPhraseQueryNode ) {
+				queryStructure = extractQueries(child);
+				
+				if (node.getParent() instanceof FuzzyQueryNode) { // "some span query"~3
+					
+					final FuzzyQueryNode parent = (FuzzyQueryNode) node.getParent();
+					return buildNewQueryNode(queryStructure,
+							new QueryBuilder() {
+								@Override
+								public QueryNode buildQuery(List<QueryNode> clauses) {
+									return new AqpNearQueryNode(clauses, parent.getPositionIncrement()); 
+								}
+							}
+					);
+				}
+				else {
+					
+					return buildNewQueryNode(queryStructure,      // default: create boolean ((+a +b) OR (+a +(b|c)))
+							new QueryBuilder() {
+								@Override
+								public QueryNode buildQuery(List<QueryNode> clauses) {
+									if (this.isMultiDimensional) {
+										MultiPhraseQueryNode pq = new MultiPhraseQueryNode();
+										for (QueryNode c: clauses) {
+											if (c.isLeaf()) {
+												pq.add(c);
+											}
+											else {
+												for (QueryNode child: c.getChildren()) {
+													pq.add(child);
+												}
+											}
+										}
+										return pq;
+									} 
+									else {
+										TokenizedPhraseQueryNode pq = new TokenizedPhraseQueryNode();
+										pq.add(clauses);
+										return pq;
+									}
+								}
+							}
+					);
+				}
+			}
+			else { // do nothing, we don't know how to process this type
+				return child;
+			}
+		}
+		
+	  return node;
+  }
+	
+	
+
+	/*
+	 * Build a simple Query node from
+	 * 	  queries
+	 *       - list of queries, all the possible combinations of consecutive
+	 *         QueryNodes ordered to cover the query input
+	 */
+	protected QueryNode buildNewQueryNode (List<List<List<QueryNode>>> queries,
+			QueryBuilder queryBuilder) {
+		List<QueryNode> mainQueryClauses = new ArrayList<QueryNode>();
+		for (List<List<QueryNode>> oneQuery: queries) {
+			List<QueryNode> clauses = new ArrayList<QueryNode>();
+			for (List<QueryNode> qElement: oneQuery) {
+				clauses.add(queryBuilder.buildQueryElement(qElement));
+			}
+			if (clauses.size() > 1) {
+				mainQueryClauses.add(queryBuilder.buildQuery(clauses));
+				
+			}
+			else {
+				mainQueryClauses.add(clauses.get(0));
+			}
+		}
+		return queryBuilder.buildTopQuery(mainQueryClauses);
+	}
+	
+	
+	/*
+	 * this method knows to handle FieldQueryNodes, it is especially useful
+	 * for 	MultiPhraseQueryNode 
+	 */
+	protected List<List<List<QueryNode>>> extractQueries(QueryNode node) throws QueryNodeException {
 			
 			List<QueryNode> children = node.getChildren();
 			NodeOfQuery graph = new NodeOfQuery(((FieldQueryNode)children.get(0)).getBegin());
 			
 			for (QueryNode child : children) {
 				//System.out.println("addToken(): " + child);
-				graph.addNode((FieldQueryNode)child);
+				graph.addNode(child);
 			}
 			
 			//System.out.println(graph.toString());
@@ -46,39 +146,9 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 			// each list is a query - inside the query, every 
 			// element is a list (if there are more elements, they 
 			// share the same span)
-			
-			List<QueryNode> mainQueryClauses = new ArrayList<QueryNode>();
-			for (List<List<QueryNode>> oneQuery: queries) {
-				QueryNode qn;
-				List<QueryNode> clauses = new ArrayList<QueryNode>();
-				for (List<QueryNode> qElement: oneQuery) {
-					if (qElement.size() > 1) { // synonymous tokens at the same position/offset
-						qn = new AqpOrQueryNode((List<QueryNode>) qElement);
-					}
-					else {
-						qn = qElement.get(0);
-					}
-					clauses.add(qn);
-				}
-				if (clauses.size() > 1) {
-					mainQueryClauses.add(new AqpAndQueryNode(clauses));
-				}
-				else {
-					mainQueryClauses.add(clauses.get(0));
-				}
-				
-			}
-			if (mainQueryClauses.size() > 1) {
-				return new AqpOrQueryNode(mainQueryClauses);
-			}
-			else {
-				return mainQueryClauses.get(0);
-			}
-				
-		}
-	  return node;
-  }
-
+			return queries;
+	}
+	
 	@Override
   protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
       throws QueryNodeException {
@@ -260,6 +330,7 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 		}
 	}
 	
+	
 	class QueryPath {
 		private ArrayList<Integer> data;
 		private ArrayList<List<Integer>> paths;
@@ -280,5 +351,32 @@ public class AqpFixMultiphraseQuery extends QueryNodeProcessorImpl {
 		public List<List<Integer>> getAllPaths() {
 			return paths;
 		}
+	}
+	
+	class QueryBuilder {
+		public boolean isMultiDimensional = false;
+		public void reset() {
+			isMultiDimensional = false;
+		}
+		public QueryNode buildQueryElement(List<QueryNode> samePositionElements) {
+			if (samePositionElements.size() > 1) { // synonymous tokens at the same position/offset
+				isMultiDimensional = true;
+				return new AqpOrQueryNode(samePositionElements);
+			}
+			else {
+				return samePositionElements.get(0);
+			}
+		}
+		public QueryNode buildQuery(List<QueryNode> queryElements) {
+			return new AqpAndQueryNode(queryElements);
+		}
+		public QueryNode buildTopQuery(List<QueryNode> mainQueryClauses) {
+	    if (mainQueryClauses.size() == 1) {
+	    	return mainQueryClauses.get(0);
+	    }
+	    else {
+	    	return new AqpOrQueryNode(mainQueryClauses);
+	    }
+    }
 	}
 }
