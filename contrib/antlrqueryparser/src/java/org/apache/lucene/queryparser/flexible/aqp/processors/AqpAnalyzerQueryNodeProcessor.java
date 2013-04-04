@@ -145,7 +145,10 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         posIncrAtt = buffer.getAttribute(PositionIncrementAttribute.class);
       }
       
-      TypeAttribute typeAtt = buffer.getAttribute(TypeAttribute.class);
+      TypeAttribute typeAtt = null;
+      if (buffer.hasAttribute(TypeAttribute.class)) {
+      	typeAtt = buffer.getAttribute(TypeAttribute.class);
+      }
 
       try {
 
@@ -212,7 +215,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         	fieldNode.setBegin(queryStart + offsetAtt.startOffset());
         	fieldNode.setEnd(queryStart + offsetAtt.endOffset());
         }
-        fieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+        if (typeAtt != null)
+        	fieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
         return fieldNode;
 
       } else if (severalTokensAtSamePosition || !(node instanceof QuotedFieldQueryNode)) {
@@ -237,7 +241,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             }
 
             FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart, offsetEnd);
-            fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+            if (typeAtt != null)
+            	fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
             children.add(fq);
 
           }
@@ -268,7 +273,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
               	offsetStart = queryStart + offsetAtt.startOffset();
               	offsetEnd = queryStart + offsetAtt.endOffset();
               }
-              tokenType = typeAtt.type();
+              if (typeAtt != null)
+              	tokenType = typeAtt.type();
             } catch (IOException e) {
               // safe to ignore, because we know the number of tokens
             }
@@ -349,7 +355,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
           }
 
           FieldQueryNode newFieldNode = new FieldQueryNode(field, term, offsetStart, offsetEnd);
-          newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+          if (typeAtt != null)
+          	newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
           
           if (this.positionIncrementsEnabled) {
             position += positionIncrement;

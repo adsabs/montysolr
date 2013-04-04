@@ -309,7 +309,51 @@ public class AqpAdsabsSubQueryProvider implements
           return "author";
         }
         return null;
+        //return f; // always re-analyze
       }
+      private Query reAnalyze(String field, String value, float boost) throws ParseException {
+        QParser fParser = getParser();
+        QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
+        Query q = aqp.getQuery();
+        q.setBoost(boost);
+        return q;
+      }
+    }.configure(false)); // not analyzed
+		parsers.put("edismax_always_aqp", new AqpSubqueryParserFull() { // will use edismax to create top query, but the rest is done by aqp
+      public Query parse(FunctionQParser fp) throws ParseException {
+        final String original = fp.getString();
+        QParser eqp = fp.subQuery("xxx", ExtendedDismaxQParserPlugin.NAME);
+        fp.setString(original);
+        Query q = eqp.getQuery();
+        return simplify(reParse(q, fp, null));
+      }
+      protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
+        ArrayList<Query> parts = query.getDisjuncts();
+        for (int i=0;i<parts.size();i++) {
+          Query oldQ = parts.get(i);
+          String field = null;
+          if (oldQ instanceof TermQuery) {
+            field = ((TermQuery)oldQ).getTerm().field();
+          }
+          else if(oldQ instanceof BooleanQuery) {
+            List<BooleanClause>clauses = ((BooleanQuery) oldQ).clauses();
+            if (clauses.size()>0) {
+              Query firstQuery = clauses.get(0).getQuery();
+              if (firstQuery instanceof TermQuery) {
+                field = ((TermQuery) firstQuery).getTerm().field();
+              }
+            }
+          }
+          if (field!=null) {
+            parts.set(i, reAnalyze(field, getParser().getString(), oldQ.getBoost()));
+          }
+          else {
+            parts.set(i, swimDeep(oldQ));
+          }
+        }
+        return query;
+      }
+      
       private Query reAnalyze(String field, String value, float boost) throws ParseException {
         QParser fParser = getParser();
         QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");

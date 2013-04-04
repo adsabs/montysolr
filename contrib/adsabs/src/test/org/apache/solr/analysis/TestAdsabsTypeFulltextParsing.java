@@ -22,7 +22,11 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.spans.SpanNearQuery;
+
 import java.io.File;
 import java.io.IOException;
 import org.adsabs.solr.AdsConfig.F;
@@ -76,7 +80,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
       File simpleTokenSynonymsFile = createTempFile(new String[]{
       		"moon,moons,luna,lune,mond=>lunar\n" +
       		"stetoscope=>glass\n" +
-      		"space=> lunar\n"
+      		"pace=> lunar\n"
       });
       
       File multiTokenSynonymsFile = createTempFile(new String[]{
@@ -86,7 +90,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
           "Hubble\0Space\0Microscope, HSM\n" +
           "ABC,Astrophysics\0Business\0Center\n" +
           "Astrophysics\0Business\0Commons, ABC\n" + 
-          "MOND,modified\0newtonian\0dynamics\n"
+          "MOND,modified\0newtonian\0dynamics\n" +
+          "bubble\0pace\0telescope,BPT\n"
       });
       
       replaceInFile(newConfig, "synonyms=\"ads_text_multi.synonyms\"", "synonyms=\"" + multiTokenSynonymsFile.getAbsolutePath() + "\"");
@@ -162,7 +167,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", F.TYPE_ADS_TEXT, "Bílá kobyla skočila přes čtyřista"));
     assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", F.TYPE_ADS_TEXT, "třicet-tři stříbrných střech"));
     assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", F.TYPE_ADS_TEXT, "A ještě TřistaTřicetTři stříbrných křepeliček"));
-    assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", F.TYPE_ADS_TEXT, "Mirrors of the hubble space telescope first"));
+    assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", F.TYPE_ADS_TEXT, "Mirrors of the hubble space telescope goes home"));
     assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxx5", F.TYPE_ADS_TEXT, "Mirrors of the HST second"));
     assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxx6", F.TYPE_ADS_TEXT, "Mirrors of the Hst third"));
     assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", F.TYPE_ADS_TEXT, "Mirrors of the HubbleSpaceTelescope fourth"));
@@ -175,14 +180,14 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "14", F.BIBCODE, "xxxxxxxxxxx14", F.TYPE_ADS_TEXT, "Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions"));
     assertU(adoc(F.ID, "15", F.BIBCODE, "xxxxxxxxxxx15", F.TYPE_ADS_TEXT, "MOND test"));
     assertU(adoc(F.ID, "16", F.BIBCODE, "xxxxxxxxxxx16", F.TYPE_ADS_TEXT, "mond test"));
-    assertU(adoc(F.ID, "17", F.BIBCODE, "xxxxxxxxxxx17", F.TYPE_ADS_TEXT, "hubble space telescope multi-space foobar"));
-    
+    assertU(adoc(F.ID, "17", F.BIBCODE, "xxxxxxxxxxx17", F.TYPE_ADS_TEXT, "bubble pace telescope multi-pace foobar"));
+    assertU(adoc(F.ID, "18", F.BIBCODE, "xxxxxxxxxxx18", F.TYPE_ADS_TEXT, "Mirrors of the Hubble fooox Space Telescope"));
     
     assertU(commit());
 
     
     
-    dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
+    //dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
     
     
     
@@ -211,27 +216,25 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("q", "mond", "qt", "aqp"), 
         "all:mond all:syn::lunar", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":mond", "explain", "true"), "//*[@numFound='5']",
-    		"//doc/str[@name='id'][.='4']", // orig 'space' -> syn:lunar; look at the synonym file to understand
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":mond", "explain", "true"), "//*[@numFound='4']",
     		"//doc/str[@name='id'][.='14']",
     		"//doc/str[@name='id'][.='15']",
-        "//doc/str[@name='id'][.='16']");
+        "//doc/str[@name='id'][.='16']",
+        "//doc/str[@name='id'][.='17']");
     
     assertQueryEquals(req("q", "Mond", "qt", "aqp"), 
         "all:mond all:syn::lunar", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":Mond"), "//*[@numFound='5']",
-    		"//doc/str[@name='id'][.='4']", // orig 'space' -> syn:lunar; look at the synonym file to understand
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":Mond"), "//*[@numFound='4']",
     		"//doc/str[@name='id'][.='17']", // orig 'space' -> syn:lunar; look at the synonym file to understand
     		"//doc/str[@name='id'][.='14']",
     		"//doc/str[@name='id'][.='15']",
         "//doc/str[@name='id'][.='16']");
     
-    // search for 'space' and find 'mond' (there is intentional error/duplication
+    // search for 'pace' and find 'mond' (there is intentional error/duplication
     // in our synonym files - look above)
-    assertQueryEquals(req("q", "space", "qt", "aqp"), 
-        "all:space all:syn::lunar", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":space"), "//*[@numFound='3']",
-    		"//doc/str[@name='id'][.='4']",
+    assertQueryEquals(req("q", "pace", "qt", "aqp"), 
+        "all:pace all:syn::lunar", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":pace"), "//*[@numFound='2']",
     		"//doc/str[@name='id'][.='17']",
         "//doc/str[@name='id'][.='16']");
     
@@ -244,8 +247,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // but 'luna' is a synonym (syn::lunar)
     assertQueryEquals(req("q", "luna", "qt", "aqp"), 
         "all:luna all:syn::lunar", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":luna"), "//*[@numFound='3']",
-    		"//doc/str[@name='id'][.='4']", 
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":luna"), "//*[@numFound='2']",
     		"//doc/str[@name='id'][.='17']",
         "//doc/str[@name='id'][.='16']");
 
@@ -259,31 +261,78 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
 
     // unfielded multi-token. this is truly crazy (several synonyms overlap)
-    // 'hubble space telescope' is a synonym
-    // 'space' is a synonym
-    // multi-space is split by WDFF and expanded with a synonym
-    assertQueryEquals(req("q", "title:\"hubble space telescope multi-space foobar\"", "qt", "aqp"), 
-        "title:\"(syn::hubble space telescope syn::acr::hst) ? ? multi (space syn::lunar) foobar\" " +
-        "title:\"hubble (space syn::lunar) telescope multi (space syn::lunar) foobar\"", 
+    // 'bubble pace telescope' is a synonym
+    // 'pace' is a synonym
+    // multi-pace is split by WDFF and expanded with a synonym
+    assertQueryEquals(req("q", "title:\"bubble pace telescope multi-pace foobar\"", "qt", "aqp"), 
+        "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multi (pace syn::lunar) foobar\" " +
+        "title:\"bubble (pace syn::lunar) telescope multi (pace syn::lunar) foobar\"", 
         BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":\"hubble space telescope multi-space foobar\""), "//*[@numFound='1']",
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":\"bubble pace telescope multi-pace foobar\""), "//*[@numFound='1']",
         "//doc/str[@name='id'][.='17']");
     
     
+    // now the same thing, but not using phrases
+    assertQueryEquals(req("q", "title:modified\\ newtonian\\ dynamics", "qt", "aqp"), 
+        "(title:syn::acr::mond title:syn::modified newtonian dynamics) spanNear([title:modified, title:newtonian, title:dynamics], 5, true)", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":modified\\ newtonian\\ dynamics"), "//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
     
-    assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp"), 
-        "+(all:syn::acr::mond all:syn::modified newtonian dynamics)", BooleanQuery.class);
+    assertQueryEquals(req("q", "title:modified newtonian dynamics", "qt", "aqp"), 
+    		"(title:syn::acr::mond title:syn::modified newtonian dynamics) spanNear([title:modified, title:newtonian, title:dynamics], 5, true)", BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":modified newtonian dynamics"), "//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
     
     
+    // and even unfielded!
+    assertQueryEquals(req("q", "modified\\ newtonian\\ dynamics", "qt", "aqp", "qf", ""), 
+        "spanNear([all:modified, all:newtonian, all:dynamics], 5, true) (all:syn::acr::mond all:syn::modified newtonian dynamics)", BooleanQuery.class);
+    assertQ(req("q", "modified\\ newtonian\\ dynamics"), "//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
+    
+    assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp", "qf", ""), 
+        "spanNear([all:modified, all:newtonian, all:dynamics], 5, true) (all:syn::acr::mond all:syn::modified newtonian dynamics)", BooleanQuery.class);
+    assertQ(req("q", "modified newtonian dynamics"), "//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
+    
+    assertQueryEquals(req("q", "modified\\ newtonian\\ dynamics", "qt", "aqp", "qf", "title^2.0 all^1.5"), 
+        "((((title:syn::acr::mond title:syn::modified newtonian dynamics) spanNear([title:modified, title:newtonian, title:dynamics], 5, true))^2.0) | ((spanNear([all:modified, all:newtonian, all:dynamics], 5, true) (all:syn::acr::mond all:syn::modified newtonian dynamics))^1.5))", DisjunctionMaxQuery.class);
+    assertQ(req("q", "modified\\ newtonian\\ dynamics", "qf", "title^2.0 all^1.5"), 
+    		"//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
+    
+    assertQueryEquals(req("q", "modified newtonian dynamics", "qt", "aqp", "qf", "title^2.0 all^1.5"), 
+    		"((((title:syn::acr::mond title:syn::modified newtonian dynamics) spanNear([title:modified, title:newtonian, title:dynamics], 5, true))^2.0) | ((spanNear([all:modified, all:newtonian, all:dynamics], 5, true) (all:syn::acr::mond all:syn::modified newtonian dynamics))^1.5))", DisjunctionMaxQuery.class);
+    assertQ(req("q", "modified newtonian dynamics", "qf", "title^2.0 all^1.5"), 
+    		"//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
+    
+    // lastly - unfielded phrase
+    assertQueryEquals(req("q", "\"modified newtonian dynamics\"", "qt", "aqp", "qf", "title^2.0 all^1.5"), 
+    		"((((title:syn::acr::mond title:syn::modified newtonian dynamics) title:\"modified newtonian dynamics\")^2.0) | (((all:syn::acr::mond all:syn::modified newtonian dynamics) all:\"modified newtonian dynamics\")^1.5))", DisjunctionMaxQuery.class);
+    assertQ(req("q", "\"modified newtonian dynamics\"", "qf", "title^2.0 all^1.5"), 
+    		"//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
 
     
-    setDebug(true);
     // test of the multi-synonym replacement, phrase handling etc
-    // this is a very crazy stuff hidden in AdsFixMultiPhraseQueryProcessor
-    assertQueryEquals(req("q", "\"hubble space telescope multi-space query\"", "qt", "aqp"), 
-        "", BooleanQuery.class);
-    assertQueryEquals(req("q", "hubble space telescope and MIT", "qt", "aqp"), 
-        "", BooleanQuery.class);
+    assertQueryEquals(req("q", "\"bubble pace telescope multi-pace query\"", "qt", "aqp"), 
+        "all:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multi (pace syn::lunar)\" all:\"bubble (pace syn::lunar) telescope multi (pace syn::lunar)\"", BooleanQuery.class);
+    
+    // wow! this works correctly - but it is wrong still
+    // the AND operator has precedence, but I guess we should merge
+    // the previous tokens to form AND operator; but the query
+    // as it stands, is doing the right thing!
+    assertQueryEquals(req("q", "bubble pace telescope and MIT", "qt", "aqp"), 
+        "+(+all:telescope +(all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) " +
+        "+spanNear([all:bubble, spanOr([all:pace, all:syn::lunar])], 5, true)", BooleanQuery.class);
     
     
     
@@ -295,24 +344,83 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      * 
      */
     
+    dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
+    
     //setDebug(true);
     // simple case
+    assertQueryEquals(req("q", "\"hubble space telescope\"", "qt", "aqp"), 
+        "(all:syn::hubble space telescope all:syn::acr::hst) all:\"hubble space telescope\"", BooleanQuery.class);
+    assertQ(req("q", "\"hubble space telescope\""), 
+    		"//*[@numFound='2']",
+    		"//doc/str[@name='id'][.='4']",
+        "//doc/str[@name='id'][.='5']");
+    
+    // non-phrase: by default do span search
     assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp"), 
-        "all:hubble space telescope all:acr::hst", BooleanQuery.class);
+        "spanNear([all:hubble, all:space, all:telescope], 5, true) (all:syn::hubble space telescope all:syn::acr::hst)", BooleanQuery.class);
+    assertQ(req("q", "hubble space telescope"), 
+    		"//*[@numFound='3']",
+    		"//doc/str[@name='id'][.='4']",
+        "//doc/str[@name='id'][.='5']",
+        "//doc/str[@name='id'][.='18']"
+        );
     
     // make sure the unfielded search is expanded properly (by edismax) - we use it just here
+    // HOWEVER: maybe it should do expansion inside each clause? now it favors docs with matches in all fields (which is fine)
     assertQueryEquals(req("q", "hubble space telescope", "qt", "aqp", "qf", "title^2.0 keyword^1.5"), 
-        "(title:hubble space telescope^2.0 | keyword:hubble space telescope^1.5) (title:acr::hst^2.0 | keyword:acr::hst^1.5)", BooleanQuery.class);
+        "(((spanNear([title:hubble, title:space, title:telescope], 5, true) (title:syn::hubble space telescope title:syn::acr::hst))^2.0) | spanNear([keyword:hubble, keyword:space, keyword:telescope], 5, true)^1.5)", DisjunctionMaxQuery.class);
     
-    // followed by something
+    // query followed by something
+    assertQueryEquals(req("q", "\"hubble space telescope goes home\"", "qt", "aqp"), 
+        "all:\"(syn::hubble space telescope syn::acr::hst) ? ? goes home\" all:\"hubble space telescope goes home\"", BooleanQuery.class);
+    assertQ(req("q", "\"hubble space telescope goes home\""), 
+    		"//*[@numFound='1']",
+    		"//doc/str[@name='id'][.='4']"
+        );
+    
     assertQueryEquals(req("q", "hubble space telescope goes home", "qt", "aqp"), 
-        "+(all:hubble space telescope all:acr::hst) +all:goes +all:home", BooleanQuery.class);
+        "spanNear([all:hubble, all:space, all:telescope, all:goes, all:home], 5, true) spanNear([spanOr([all:syn::hubble space telescope, all:syn::acr::hst]), all:goes, all:home], 5, true)", BooleanQuery.class);
+    assertQ(req("q", "hubble space telescope goes home"), 
+    		"//*[@numFound='1']",
+    		"//doc/str[@name='id'][.='4']"
+        );
+    
     // preceded by something
+    setDebug(true);
+    assertQueryEquals(req("q", "\"mirrors hubble space telescope start home\"", "qt", "aqp"), 
+        "all:\"mirrors (hubble syn::hubble space telescope syn::acr::hst) ? ? start home\"", MultiPhraseQuery.class);
+    assertQueryEquals(req("q", "\"mirrors hubble space telescope start home\"", "qt", "aqp"), 
+        "all:\"mirrors (hubble syn::hubble space telescope syn::acr::hst) ? ? start home\"", MultiPhraseQuery.class);
+    assertQueryEquals(req("q", "\"mirrors hubble space telescope start home\"", "qt", "aqp"), 
+        "all:\"mirrors (hubble syn::hubble space telescope syn::acr::hst) ? ? start home\"", MultiPhraseQuery.class);
+    assertQueryEquals(req("q", "\"mirrors hubble space telescope start home\"", "qt", "aqp"), 
+        "all:\"mirrors (hubble syn::hubble space telescope syn::acr::hst) ? ? start home\"", MultiPhraseQuery.class);
+    
+    assertQueryEquals(req("q", "\"mirrors hubble space telescope start home\"", "qt", "aqp"), 
+        "all:\"mirrors (hubble syn::hubble space telescope syn::acr::hst) ? ? start home\"", MultiPhraseQuery.class);
+    assertQ(req("q", "\"mirrors of the hubble space telescope start home\""), 
+    		"//*[@numFound='0']"
+        );
     assertQueryEquals(req("q", "mirrors hubble space telescope start home", "qt", "aqp"), 
-        "+all:mirrors +(all:hubble space telescope all:acr::hst) +all:start +all:home", BooleanQuery.class);
+        "spanNear([all:mirrors, all:hubble, spanOr([all:syn::hubble space telescope, all:syn::acr::hst]), all:start, all:home], 5, true)", SpanNearQuery.class);
+    assertQ(req("q", "mirrors of the hubble space telescope goes home"), 
+    		"//*[@numFound='0']"
+        );
+    
     // surrounded by something
+    assertQueryEquals(req("q", "\"mirrors of the hubble space telescope goes home\"", "qt", "aqp"), 
+        "all:\"mirrors (hubble syn::hubble space telescope syn::acr::hst) ? ? goes home\"", MultiPhraseQuery.class);
+    assertQ(req("q", "\"mirrors of the hubble space telescope goes home\""), 
+    		"//*[@numFound='1']",
+    		"//doc/str[@name='id'][.='4']"
+        );
     assertQueryEquals(req("q", "mirrors of the hubble space telescope start home", "qt", "aqp"), 
         "+all:mirrors +(all:hubble space telescope all:acr::hst) +all:start +all:home", BooleanQuery.class);
+    assertQ(req("q", "mirrors of the hubble space telescope goes home"), 
+    		"//*[@numFound='1']",
+    		"//doc/str[@name='id'][.='4']"
+        );
+
     // surrounded by stop words
     assertQueryEquals(req("q", "mirrors of the hubble space telescope the start home", "qt", "aqp"), 
         "+all:mirrors +(all:hubble space telescope all:acr::hst) +all:start +all:home", BooleanQuery.class);

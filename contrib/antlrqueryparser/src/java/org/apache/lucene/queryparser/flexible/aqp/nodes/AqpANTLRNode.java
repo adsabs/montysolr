@@ -186,7 +186,13 @@ public class AqpANTLRNode extends QueryNodeImpl {
     return ((CommonToken) tree.getToken()).getStopIndex();
   }
   
+  public void setInputTokenEnd(int stop) {
+    ((CommonToken) tree.getToken()).setStopIndex(stop);
+  }
   
+  public void setInputTokenStart(int start) {
+    ((CommonToken) tree.getToken()).setStartIndex(start);
+  }
 	
 	public AqpANTLRNode getChild(String tokenLabel) {
 		List<QueryNode> children = getChildren();

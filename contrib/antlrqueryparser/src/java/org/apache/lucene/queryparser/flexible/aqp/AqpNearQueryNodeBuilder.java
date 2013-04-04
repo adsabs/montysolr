@@ -20,6 +20,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spans.SpanMultiTermQueryWrapper;
 import org.apache.lucene.search.spans.SpanNearQuery;
+import org.apache.lucene.search.spans.SpanNotQuery;
 import org.apache.lucene.search.spans.SpanOrQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanTermQuery;
@@ -43,7 +44,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
 				Object obj = child
 						.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
 				if (obj != null) {
-					clauses[i++] = getSpanQuery(obj);
+					clauses[i++] = getSpanQuery(obj, nearNode);
 				} else {
 					throw new QueryNodeException(
 							new MessageImpl(
@@ -61,7 +62,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
 				"Illegal state for: " + nearNode.toString()));
 	}
 
-	protected SpanQuery getSpanQuery(Object obj) throws QueryNodeException {
+	protected SpanQuery getSpanQuery(Object obj, AqpNearQueryNode nearNode) throws QueryNodeException {
 		Query q = (Query) obj;
 		if (q instanceof SpanQuery) {
 			return (SpanQuery) q;
@@ -72,7 +73,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
 		} else if (q instanceof PrefixQuery) {
       return new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q);  
 		} else if (q instanceof BooleanQuery) {
-      return convertBooleanToSpan((BooleanQuery) q);
+      return convertBooleanToSpan((BooleanQuery) q, nearNode);
 		} else {
 			throw new QueryNodeException(new MessageImpl(
 					QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
@@ -80,16 +81,46 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
 					"(yet) Unsupported clause inside span query: " + q.getClass().getName()));
 		}
 	}
-	
-	protected SpanQuery convertBooleanToSpan(BooleanQuery q) {
+	/*
+	 * Silly convertor for now it can handle only boolean queries of the 
+	 * same type (ie not mixed cases). To do that, I have to build a graph
+	 * (tree) and maybe of only pairs (?)
+	 */
+	protected SpanQuery convertBooleanToSpan(BooleanQuery q, AqpNearQueryNode nearNode) throws QueryNodeException {
 	  BooleanClause[] clauses = q.getClauses();
+	  SpanQuery[] spanClauses = new SpanQuery[clauses.length];
+	  Occur o = null;
+	  int i = 0;
 	  for (BooleanClause c: clauses) {
-	    Occur o = c.getOccur();
-	    if (o.equals(Occur.MUST)) {
-	      
+	    if (o != null && !o.equals(c.getOccur())) {
+	    	throw new QueryNodeException(new MessageImpl(
+						QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+						q.toString(),
+						"(yet) Unsupported clause inside span query: " + q.getClass().getName()));
 	    }
+	    o = c.getOccur();
+	    spanClauses[i] = getSpanQuery(c.getQuery(), nearNode);
+	    i++;
 	  }
-	  return null;
+	  
+	  if (o.equals(Occur.MUST)) {
+	  	return new SpanNearQuery(spanClauses, nearNode.getSlop(), nearNode.getInOrder());
+    }
+	  else if(o.equals(Occur.SHOULD)) {
+	  	return new SpanOrQuery(spanClauses);
+	  }
+	  else if(o.equals(Occur.MUST_NOT)) {
+	  	SpanQuery[] exclude = new SpanQuery[spanClauses.length-1];
+	  	for (int j=1;j<spanClauses.length;j++) {
+	  		exclude[j-1] = spanClauses[j];
+	  	}
+	  	return new SpanNotQuery(spanClauses[0], new SpanOrQuery(exclude));
+	  }
+	  
+	  throw new QueryNodeException(new MessageImpl(
+				QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+				q.toString(),
+				"Congratulations! You have hit (yet) unsupported case: " + q.getClass().getName()));
 	}
 	
 	class Leaf {

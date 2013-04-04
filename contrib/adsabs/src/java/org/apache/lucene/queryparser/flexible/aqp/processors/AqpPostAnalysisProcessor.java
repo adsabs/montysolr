@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
@@ -18,8 +21,23 @@ import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 
+/**
+ * This processor must follow the {@link AqpAnalyzerQueryNodeProcessor}
+ * It will build a graph of the query node and will handle the cases
+ * where a synonym expansion spans over several tokens. Basically,
+ * we build every possible path that queries can be constructed.
+ * 
+ * You can supply your own query builder(s) which can do different things
+ * based on the type of the resulting query graph. Ie. you may want to
+ * add a boost to queries that were original input, or wrap queries with
+ * many terms into a spanquery instead of a phrase. The options are many!
+ * 
+ * @author rchyla
+ *
+ */
 public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 
 	@Override
@@ -36,8 +54,21 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			if (child instanceof TokenizedPhraseQueryNode) { // no need to do anything
 				return child;
 			}
-			else if (child instanceof GroupQueryNode ) { // boolean query, all tokens at one position
-				return child;
+			else if (child instanceof GroupQueryNode ) { // may have multi-token expansion (when it wasn't surrounded by "")
+				
+				if (child.getChildren().size() > 0 && child.getChildren().get(0) instanceof BooleanQueryNode) {
+					queryStructure = extractQueries(child.getChildren().get(0));
+					final int proximity = getDefaultProximityValue();
+					return buildNewQueryNode(queryStructure,
+							new QueryBuilder() {
+								@Override
+								public QueryNode buildQuery(List<QueryNode> clauses) {
+									return new AqpNearQueryNode(clauses, proximity); 
+								}
+							}
+					);
+				}
+				
 			}
 			else if (child instanceof MultiPhraseQueryNode ) {
 				queryStructure = extractQueries(child);
@@ -92,7 +123,17 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 	  return node;
   }
 	
-	
+	private Integer getDefaultProximityValue() throws QueryNodeException {
+    QueryConfigHandler queryConfig = getQueryConfigHandler();
+    if (queryConfig == null
+        || !queryConfig.has(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY)) {
+      throw new QueryNodeException(new MessageImpl(
+          QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+          "Configuration error: "
+          + "DefaultProximity value is missing"));
+    }
+    return queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY);
+  }
 
 	/*
 	 * Build a simple Query node from
@@ -122,7 +163,10 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 	
 	/*
 	 * this method knows to handle FieldQueryNodes, it is especially useful
-	 * for 	MultiPhraseQueryNode 
+	 * for 	MultiPhraseQueryNode
+	 * 
+	 * If there are non-fieldable nodes, it will fail. We cannot process
+	 * such queries (and we shouldn't!)
 	 */
 	protected List<List<List<QueryNode>>> extractQueries(QueryNode node) throws QueryNodeException {
 			
@@ -130,11 +174,11 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			NodeOfQuery graph = new NodeOfQuery(((FieldQueryNode)children.get(0)).getBegin());
 			
 			for (QueryNode child : children) {
-				//System.out.println("addToken(): " + child);
+				System.out.println("addToken(): " + child);
 				graph.addNode(child);
 			}
 			
-			//System.out.println(graph.toString());
+			System.out.println(graph.toString());
 			
 			List<List<List<QueryNode>>> queries;
 			try {
@@ -212,35 +256,36 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			if (node.getBegin() == startPos) {
 				if (endPos > -1 && node.getEnd() == endPos) {
 					if (!payload.contains(node))
-						//System.out.println("Adding payload: " + node);
+						System.out.println("Adding payload: " + node);
 						payload.add(node);
 					  return;
 				}
 				if (children.containsKey(node.getEnd())) {
-					//System.out.println("Adding child: [" + node.getEnd() + "] " + node);
+					System.out.println("Adding child: [" + node.getEnd() + "] " + node);
 					children.get(node.getEnd()).addNode(node);
 				}
 				else {
-					//System.out.println("Creating child: [" + node.getEnd() + "] " + node);
+					System.out.println("Creating child: [" + node.getEnd() + "] " + node);
 					children.put(node.getEnd(), new NodeOfQuery(node));
 				}
 			}
 			else {
 				if (endPos > -1 && node.getEnd() == endPos && node.getBegin() == startPos) {
 					if (!payload.contains(node))
-						//System.out.println("#2 Adding payload: " + node);
+						System.out.println("#2 Adding payload: " + node);
 						payload.add(node);
 					  return;
 				}
 				
 				if (children.size() == 0 && node.getBegin() > endPos) {
-					//System.out.println("#2 Appending child: [" + node.getEnd() + "] " + node);
+				//if (node.getBegin() > endPos) {
+					System.out.println("#2 Appending child: [" + node.getEnd() + "] " + node);
 					children.put(node.getEnd(), new NodeOfQuery(node));
 				}
 				else {
 					
 					for (Entry<Integer, NodeOfQuery> child: children.entrySet()) {
-						//System.out.println("Descending into: " + child.getKey());
+						System.out.println("Descending into: " + child.getKey());
 						child.getValue().addNode(node);
 					}
 				}

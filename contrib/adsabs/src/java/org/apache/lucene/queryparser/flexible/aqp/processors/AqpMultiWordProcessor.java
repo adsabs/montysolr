@@ -35,6 +35,32 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 
+/*
+ * A first incarnation of the code that was able to deal with 
+ * multi-token synonym replacements. This class was superseded
+ * by: AqpAdsabsPostAnalysisProcessor
+ * 
+ * This processor will extract all synonyms from the "multi token stream"
+ * it will join the synonyms with OR's and keep other tokens in place
+ * ie. it will create a new tree:
+ * 
+ * <pre>
+ *                      hubble space telescope goes home
+ *                                         |
+ *                                   ----------------      
+ *                                  /          \     \
+ *       (hubble space telescope | HST)       goes   home
+ *  
+ *  </pre>
+ *       
+ *  to use it, your pipeline must look like:
+ *  
+ *  <pre>
+ *  add(new AqpDEFOPMarkPlainNodes(false));
+ *  ....
+ *  add(new AqpMultiWordProcessor());
+ *  </pre>
+ */
 public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 
 	private CachingTokenFilter buffer;

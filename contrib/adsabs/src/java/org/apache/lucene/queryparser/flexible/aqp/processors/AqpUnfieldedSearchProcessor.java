@@ -20,6 +20,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.PathQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
@@ -63,19 +64,21 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	          "Missing FunctionQueryBuilder provider"));
 	    }
 	    
-	    String funcName = "edismax_combined_aqp";
+	    String funcName = "edismax_always_aqp"; //"edismax_combined_aqp";
 	    String subQuery = ((FieldQueryNode) node).getTextAsString();
 	    
 	    if (node instanceof AqpNonAnalyzedQueryNode) {
 	      funcName = "edismax_nonanalyzed";
 	    }
 	    else {
-	      //subQuery = "\"" + subQuery + "\"";
-	      
 	      subQuery = (String) escaper.escape(subQuery, Locale.getDefault(), EscapeQuerySyntax.Type.NORMAL);
-  	    if (subQuery.contains(" ")) {
-  	      subQuery = "\"" + subQuery + "\"";
-  	    }
+	      
+	      if (node instanceof QuotedFieldQueryNode) {
+	      	subQuery = "\"" + subQuery + "\"";
+	      }
+  	    //if (subQuery.contains(" ")) {
+  	    //  subQuery = "\"" + subQuery + "\"";
+  	    //}
   	    
 	    }
 	    node.setTag("subQuery", subQuery);

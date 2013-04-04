@@ -2,6 +2,8 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.runtime.CharStream;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -41,6 +43,15 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	public static String PLAIN_TOKEN = "PLAIN_TOKEN";
 	public static String PLAIN_TOKEN_SEPARATOR = " ";
 	public static String PLAIN_TOKEN_CONCATENATED = "PLAIN_TOKEN_CONCATENATED";
+	private boolean modifyTree = false;
+	
+	public AqpDEFOPMarkPlainNodes() {
+		modifyTree = false;
+	}
+	
+	public AqpDEFOPMarkPlainNodes(boolean modifyTree) {
+		this.modifyTree = modifyTree;
+	}
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("DEFOP")) {
@@ -58,6 +69,8 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 		
 		List<QueryNode> children = node.getChildren();
 		List<QueryNode> forMarking = new ArrayList<QueryNode>();
+		List<QueryNode> newChildren = new ArrayList<QueryNode>();
+		
 		
 		Integer previous = -1;
 		for (int i=0;i<children.size();i++) {
@@ -70,34 +83,60 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 					forMarking.add(children.get(i));
 					previous = i;
 					continue;
-					
 				}
 				else {
 					previous = -1;
-					tagPlainNodes(forMarking);
+					tagPlainNodes(forMarking, newChildren);
 					continue;
 				}
+			}
+			else if (modifyTree){
+				newChildren.add(children.get(i));
 			}
 		}
 		
 		if (forMarking.size() > 0)
-			tagPlainNodes(forMarking);
+			tagPlainNodes(forMarking, newChildren);
+		
+		if (modifyTree) 
+			node.set(newChildren);
 		
 		return node;
 	}
 	
-	private void tagPlainNodes(List<QueryNode> forMarking) {
+	private void tagPlainNodes(List<QueryNode> forMarking, List<QueryNode> newChildren) {
+		
+		int startPos = -1;
+		int endPos = -1;
+		StringBuffer concatenated = new StringBuffer();	
+		AqpANTLRNode terminal;
 		
 		if (forMarking.size() > 1) {
-			StringBuffer concatenated = new StringBuffer();
 			int tag = concatenated.hashCode();
 			for (int i=0;i<forMarking.size();i++) {
 				concatenated.append(markChild(tag, forMarking.get(i)));
 				if (i+1 != forMarking.size())
 					concatenated.append(PLAIN_TOKEN_SEPARATOR);
+				if (modifyTree) {
+					terminal = (AqpANTLRNode) getTerminalNode(forMarking.get(i));
+					if (startPos == -1)
+						startPos = ((AqpANTLRNode)terminal).getInputTokenStart();
+					endPos = ((AqpANTLRNode)terminal).getInputTokenEnd();
+				}
 			}
-			QueryNode terminal = getTerminalNode(forMarking.get(0));
-			terminal.setTag(PLAIN_TOKEN_CONCATENATED, concatenated.toString());
+		}
+		if (modifyTree ) { // keep the first node in the group
+			QueryNode first = forMarking.get(0);
+			if (forMarking.size() > 1) {
+				terminal = (AqpANTLRNode) getTerminalNode(first);
+				CharStream is = AqpQProcessor.getInputStream(terminal);
+				String val = is.substring(startPos, endPos);
+				terminal.setInputTokenStart(startPos);
+				terminal.setInputTokenEnd(endPos);
+				terminal.setTokenInput(val);
+				terminal.setTag(PLAIN_TOKEN_CONCATENATED, concatenated.toString());
+			}
+			newChildren.add(first);
 		}
 		forMarking.clear();
 	}

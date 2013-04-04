@@ -95,7 +95,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
 	
 	public QueryNode getTerminalNode(QueryNode node) {
     while (!node.isLeaf()) {
-      return getTerminalNode(node.getChildren().get(0));
+      return getTerminalNode(node.getChildren().get(node.getChildren().size()-1));
     }
     return node;
   }
@@ -122,7 +122,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     return new OriginalInput(inputStream.substring(startIndex[0], lastIndex[0]), startIndex[0], lastIndex[0]);
   }
 	
-	private static CharStream getInputStream(QueryNode node) {
+	public static CharStream getInputStream(QueryNode node) {
     if (node.isLeaf()) {
       if (node instanceof AqpANTLRNode) {
         if (((AqpANTLRNode) node).getTree().getToken().getInputStream() != null) {
