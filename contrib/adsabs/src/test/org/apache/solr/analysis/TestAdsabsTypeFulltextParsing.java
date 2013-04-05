@@ -183,12 +183,22 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "17", F.BIBCODE, "xxxxxxxxxxx17", F.TYPE_ADS_TEXT, "bubble pace telescope multi-pace foobar"));
     assertU(adoc(F.ID, "18", F.BIBCODE, "xxxxxxxxxxx18", F.TYPE_ADS_TEXT, "Mirrors of the Hubble fooox Space Telescope"));
     
+    assertU(adoc(F.ID, "318", F.BIBCODE, "xxxxxxxxxxx18", F.TYPE_ADS_TEXT, "creation of a thesaurus"));
+    
     assertU(commit());
 
     
     
     //dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
     
+    
+    // ticket #318
+    assertQueryEquals(req("q", "creation of a thesaurus", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+        "(spanNear([abstract:creation, abstract:thesaurus], 5, true)^1.3 | ((author:creation of a thesaurus, author:creation of a thesaurus, * author:/creation of a[^\\s]+ thesaurus,/ author:/creation of a[^\\s]+ thesaurus, .*/ author:creation o a thesaurus, author:creation o a thesaurus, * author:/creation o a[^\\s]+ thesaurus,/ author:/creation o a[^\\s]+ thesaurus, .*/ author:creation of a t author:creation of a t * author:/creation of a[^\\s]+ t/ author:/creation of a[^\\s]+ t .*/ author:creation o a t author:creation o a t * author:/creation o a[^\\s]+ t/ author:/creation o a[^\\s]+ t .*/ author:creation of author:creation o author:creation)^1.5) | spanNear([title:creation, title:thesaurus], 5, true)^1.4 | spanNear([all:creation, all:thesaurus], 5, true))", 
+        DisjunctionMaxQuery.class);
+    assertQ(req("q", "creation of a thesaurus", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+    		"//*[@numFound='1']",
+        "//doc/str[@name='id'][.='318']");
     
     
     
