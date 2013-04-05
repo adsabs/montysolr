@@ -247,6 +247,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	public void testFunctionalQueries() throws Exception {
+		setDebug(true);
 		assertQueryEquals("pos(author, \"Accomazzi, A\", 1, \\-1)", null, "pos(author,\"Accomazzi, A\",1,-1)", FunctionQuery.class);
 		assertQueryEquals("pos(author, Kurtz, 1, 1)", null, "pos(author,Kurtz,1,1)", FunctionQuery.class);
 		

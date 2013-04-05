@@ -16,6 +16,8 @@ public class TestAcronymFilter extends BaseTokenStreamTestCase {
 		    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
 		    factory.init(new HashMap<String,String>() {{
 		    	put("emitBoth", "false");
+		    	put("prefix", "acr::");
+		    	put("setType", "ACRONYM");
 		    }});
 		    
 		    TokenStream stream = factory.create(new MockTokenizer(new StringReader("mit MIT"), MockTokenizer.WHITESPACE, false));
@@ -26,7 +28,7 @@ public class TestAcronymFilter extends BaseTokenStreamTestCase {
 		    stream = factory.create(new MockTokenizer(new StringReader("mit MIT"), MockTokenizer.WHITESPACE, false));
 		    assertTokenStreamContents(stream, 
             new String[] { "mit", "acr::MIT" },
-            new String[] { TypeAttribute.DEFAULT_TYPE, AcronymTokenFilter.TOKEN_TYPE_ACRONYM }
+            new String[] { TypeAttribute.DEFAULT_TYPE, "ACRONYM" }
         );
 		    
         
@@ -38,6 +40,8 @@ public class TestAcronymFilter extends BaseTokenStreamTestCase {
 		    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
 		    factory.init(new HashMap<String,String>() {{
 		    	put("emitBoth", "true");
+		    	put("prefix", "acr::");
+		    	put("setType", "ACRONYM");
 		    }});
 		    
 		    TokenStream stream = factory.create(new MockTokenizer(new StringReader("M MIT"), MockTokenizer.WHITESPACE, false));
@@ -48,7 +52,7 @@ public class TestAcronymFilter extends BaseTokenStreamTestCase {
 		    stream = factory.create(new MockTokenizer(new StringReader("M MIT"), MockTokenizer.WHITESPACE, false));
 		    assertTokenStreamContents(stream, 
             new String[] { "M", "MIT", "acr::MIT" },
-            new String[] { TypeAttribute.DEFAULT_TYPE, TypeAttribute.DEFAULT_TYPE,  AcronymTokenFilter.TOKEN_TYPE_ACRONYM }
+            new String[] { TypeAttribute.DEFAULT_TYPE, TypeAttribute.DEFAULT_TYPE,  "ACRONYM" }
         );
 	  }
 }

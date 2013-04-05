@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -22,6 +23,8 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 
 /**
@@ -41,15 +44,16 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNod
 public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 
 	@Override
-  protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
+  protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
 	  return node;
   }
 
 	@Override
-  protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
+  protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
 		if (node instanceof AqpAnalyzedQueryNode) {
 			QueryNode child = ((AqpAnalyzedQueryNode) node).getChild();
 			List<List<List<QueryNode>>> queryStructure;
+			
 			
 			if (child instanceof TokenizedPhraseQueryNode) { // no need to do anything
 				return child;
@@ -59,10 +63,15 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 				if (child.getChildren().size() > 0 && child.getChildren().get(0) instanceof BooleanQueryNode) {
 					queryStructure = extractQueries(child.getChildren().get(0));
 					final int proximity = getDefaultProximityValue();
+					final boolean useBooleanQuery = getDefaultOperator().equals(Operator.OR) ? true : false;
+					
 					return buildNewQueryNode(queryStructure,
 							new QueryBuilder() {
 								@Override
 								public QueryNode buildQuery(List<QueryNode> clauses) {
+									if (useBooleanQuery) {
+										return new AqpOrQueryNode(clauses);
+									}
 									return new AqpNearQueryNode(clauses, proximity); 
 								}
 							}
@@ -76,6 +85,7 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 				if (node.getParent() instanceof FuzzyQueryNode) { // "some span query"~3
 					
 					final FuzzyQueryNode parent = (FuzzyQueryNode) node.getParent();
+					
 					return buildNewQueryNode(queryStructure,
 							new QueryBuilder() {
 								@Override
@@ -107,6 +117,7 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 									} 
 									else {
 										TokenizedPhraseQueryNode pq = new TokenizedPhraseQueryNode();
+										//MultiPhraseQueryNode pq = new MultiPhraseQueryNode();
 										pq.add(clauses);
 										return pq;
 									}
@@ -115,12 +126,25 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 					);
 				}
 			}
-			else { // do nothing, we don't know how to process this type
-				return child;
-			}
+			
+			// do nothing, we don't know how to process this type
+			return child; // return child (= remove the surrounding parent node)
+			
 		}
 		
 	  return node;
+  }
+	
+	private Operator getDefaultOperator() throws QueryNodeException {
+    QueryConfigHandler queryConfig = getQueryConfigHandler();
+    if (queryConfig == null
+        || !queryConfig.has(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR)) {
+      throw new QueryNodeException(new MessageImpl(
+          QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+          "Configuration error: "
+          + "DefaultProximity value is missing"));
+    }
+    return queryConfig.get(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR);
   }
 	
 	private Integer getDefaultProximityValue() throws QueryNodeException {
@@ -171,14 +195,14 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 	protected List<List<List<QueryNode>>> extractQueries(QueryNode node) throws QueryNodeException {
 			
 			List<QueryNode> children = node.getChildren();
-			NodeOfQuery graph = new NodeOfQuery(((FieldQueryNode)children.get(0)).getBegin());
+			NodeOfQuery graph = new NodeOfQuery(-1, -1);
 			
 			for (QueryNode child : children) {
-				System.out.println("addToken(): " + child);
-				graph.addNode(child);
+				//System.out.println("addToken(): " + child);
+				graph.consume(child);
 			}
 			
-			System.out.println(graph.toString());
+			//System.out.println(graph.toString());
 			
 			List<List<List<QueryNode>>> queries;
 			try {
@@ -203,20 +227,21 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 	class NodeOfQuery {
 		protected int startPos;
 		private List<QueryNode> payload = new ArrayList<QueryNode>();
-		private Map<Integer, NodeOfQuery> children;
+		private List<NodeOfQuery> children;
 		private int nodeRetrieved = 0;
 		protected int endPos = -1;
 
-		public NodeOfQuery(int startPosition) {
+		public NodeOfQuery(int startPosition, int endPosition) {
 			startPos = startPosition;
+			endPos = endPosition;
 			payload = new ArrayList<QueryNode>();
-			children = new HashMap<Integer, NodeOfQuery>();
+			children = new ArrayList<NodeOfQuery>();
 		}
 		
 		public NodeOfQuery(QueryNode node) {
 			startPos = ((FieldQueryNode) node).getBegin();
 			payload = new ArrayList<QueryNode>();
-			children = new HashMap<Integer, NodeOfQuery>();
+			children = new ArrayList<NodeOfQuery>();
 			endPos  = ((FieldQueryNode) node).getEnd();
 			payload.add(node);
 		}
@@ -239,68 +264,50 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			for (QueryNode child: payload) {
 				sb.append(ind + "<payload>" + child + "</payload>\n");
 			}
-			for (Entry<Integer, NodeOfQuery> nq: children.entrySet()) {
-				sb.append(ind + "<child key=\"" + nq.getKey() + "\">\n");
-				sb.append(nq.getValue().prn(indent + 2));
+			for (NodeOfQuery child: children) {
+				sb.append(ind + "<child>\n");
+				sb.append(child.prn(indent + 2));
 				sb.append(ind +"</child>\n");
 			}
 			sb.append(ind + "</NodeOfQuery>\n");
 			return sb.toString();
 		}
 		
-		public void addNode(QueryNode qnode) {
+		public void consume(QueryNode qnode) {
 			FieldQueryNode node = ((FieldQueryNode) qnode);
-			assert node.getBegin() > -1;
-			assert node.getEnd() > -1 && node.getEnd() > node.getBegin();
-			
-			if (node.getBegin() == startPos) {
-				if (endPos > -1 && node.getEnd() == endPos) {
-					if (!payload.contains(node))
-						System.out.println("Adding payload: " + node);
-						payload.add(node);
-					  return;
+			boolean descended = false;
+			for (NodeOfQuery child: children) {
+				if (child.startPos == node.getBegin() && child.endPos == node.getEnd()) {
+					child.addPayload(node);
+					return;
 				}
-				if (children.containsKey(node.getEnd())) {
-					System.out.println("Adding child: [" + node.getEnd() + "] " + node);
-					children.get(node.getEnd()).addNode(node);
-				}
-				else {
-					System.out.println("Creating child: [" + node.getEnd() + "] " + node);
-					children.put(node.getEnd(), new NodeOfQuery(node));
+				if (child.startPos < node.getBegin() && child.endPos < node.getEnd()) {
+					child.consume(qnode);
+					descended = true;
 				}
 			}
-			else {
-				if (endPos > -1 && node.getEnd() == endPos && node.getBegin() == startPos) {
-					if (!payload.contains(node))
-						System.out.println("#2 Adding payload: " + node);
-						payload.add(node);
-					  return;
-				}
-				
-				if (children.size() == 0 && node.getBegin() > endPos) {
-				//if (node.getBegin() > endPos) {
-					System.out.println("#2 Appending child: [" + node.getEnd() + "] " + node);
-					children.put(node.getEnd(), new NodeOfQuery(node));
-				}
-				else {
-					
-					for (Entry<Integer, NodeOfQuery> child: children.entrySet()) {
-						System.out.println("Descending into: " + child.getKey());
-						child.getValue().addNode(node);
-					}
-				}
+			if (descended == false && node.getBegin() > this.startPos) {
+				children.add(new NodeOfQuery(node));
 			}
 		}
+		
+		public void addPayload(QueryNode node) {
+			if (!payload.contains(node))
+				//System.out.println("Adding payload: " + node);
+				payload.add(node);
+		}
+		
+
 		
 		public void drillDown(QueryPath path) {
 			if (children.size() == 0) { // terminal node
 				path.terminus();
 				return;
 			}
-			for (Entry<Integer, NodeOfQuery> child: children.entrySet()) {
-				path.push(child.getValue().startPos);
-				path.push(child.getValue().endPos);
-				child.getValue().drillDown(path);
+			for (NodeOfQuery child: children) {
+				path.push(child.startPos);
+				path.push(child.endPos);
+				child.drillDown(path);
 				path.pop();
 				path.pop();
 			}
@@ -340,25 +347,37 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 		
 		private void retrieveQueryElements(List<List<QueryNode>> oneQuery, List<Integer> path, int pos) 
 				throws CloneNotSupportedException {
-	    //assert path.get(pos) == startPos;
-	    if (payload.size() > 0) {
-		    if (nodeRetrieved > 0) {
-		    	ArrayList<QueryNode> copyOfNodes = new ArrayList<QueryNode>(payload.size());
-		    	for (QueryNode n: payload) {
-		    		copyOfNodes.add(n.cloneTree());
-		    	}
-		    	oneQuery.add(copyOfNodes);
-		    }
-		    else {
-		    	oneQuery.add(payload);
-		    }
-	    }
-	    nodeRetrieved++;
-	    if (pos >= path.size())
+			if (pos >= path.size())
 				return;
-			children.get(path.get(pos+1)).retrieveQueryElements(oneQuery, path, pos+2);
+			
+			Integer keyStart = path.get(pos);
+			Integer keyEnd = path.get(pos+1);
+			
+
+			for (NodeOfQuery child: children) {
+				if (child.startPos == keyStart && child.endPos == keyEnd) {
+					child.insertItself(oneQuery);
+					child.retrieveQueryElements(oneQuery, path, pos+2);
+					return;
+				}
+			}
+			throw new IllegalStateException("Trying to get query element that doesn't exist: " + keyStart + ":" + keyEnd);
+    }
+		
+		private void insertItself(List<List<QueryNode>> oneQuery) throws CloneNotSupportedException {
+			if (nodeRetrieved > 0) {
+	    	ArrayList<QueryNode> copyOfNodes = new ArrayList<QueryNode>(payload.size());
+	    	for (QueryNode n: payload) {
+	    		copyOfNodes.add(n.cloneTree());
+	    	}
+	    	oneQuery.add(copyOfNodes);
+	    }
+	    else {
+	    	oneQuery.add(payload);
+	    }
     }
 
+		
 		private int[] measurePaths(List<List<Integer>> paths) {
 			int[] measuredPaths = new int[paths.size()];
 			int j = 0;

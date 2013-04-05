@@ -139,8 +139,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpAdsabsCarefulAnalyzerProcessor()); //XXX should we remove LowercaseExpandedTermsQueryNodeProcessor? -- massages wildcard, regex, fuzzy fields 
 		add(new AqpAdsabsExpandAuthorSearchProcessor()); // kurtz, michael +> "kurtz, michael *" and stuff...
 		add(new AqpLowercaseExpandedTermsQueryNodeProcessor()); // lowercase ASTRO* -> astro* (we index everything lowercase)
-		add(new AqpPostAnalysisProcessor()); // deals with the the-same-position tokens: "(word | synonym) phrase query" -> "word phrase query" | synonym
 		add(new AqpAdsabsFieldMapperProcessorPostAnalysis()); // translate the field name into their final name
+		add(new AqpPostAnalysisProcessor()); // deals with the the-same-position tokens: "(word | synonym) phrase query" -> "word phrase query" | synonym
 		
 		add(new PhraseSlopQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());

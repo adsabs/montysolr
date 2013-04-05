@@ -91,6 +91,8 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 				}
 			}
 			else if (modifyTree){
+				if (forMarking.size() > 0)
+					tagPlainNodes(forMarking, newChildren);
 				newChildren.add(children.get(i));
 			}
 		}
@@ -146,13 +148,21 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 		StringBuffer sb = new StringBuffer();
 		harvestLabels(node, sb, 5);
 		if (sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QNORMAL")) {
+			ArrayList<String> vals = new ArrayList<String>();
+			harvestValues(node, vals, 3);
+			if (vals.size()>0) {
+				return false;
+			}
 			return true;
 		}
 		return false;
 	}
 		
 	private void harvestLabels(QueryNode node, StringBuffer data, int maxDepth) {
-		if (maxDepth > 0 && node instanceof AqpANTLRNode) {
+		if (maxDepth == 0)
+			return;
+		
+		if (node instanceof AqpANTLRNode) {
 			if (node.isLeaf()) {
 				return; // avoid the terminal node
 			}
@@ -161,6 +171,27 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 			for (QueryNode child: node.getChildren()) {
 				harvestLabels(child, data, maxDepth-1);
 			}
+		}
+		else {
+			data.append("/?");
+		}
+	}
+	
+	private void harvestValues(QueryNode node, List<String> data, int maxDepth) {
+		if (maxDepth == 0)
+			return;
+		
+		if (node instanceof AqpANTLRNode) {
+			if (node.isLeaf()) {
+				data.add(((AqpANTLRNode) node).getTokenLabel());
+				return;
+			}
+			for (QueryNode child: node.getChildren()) {
+				harvestValues(child, data, maxDepth-1);
+			}
+		}
+		else {
+			data.add("?");
 		}
 	}
 	
