@@ -28,7 +28,7 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
     if (enteredCleanZone == true) {
       counter++;
     }
-    else if (node instanceof AqpNonAnalyzedQueryNode) {
+    else if (node instanceof AqpNonAnalyzedQueryNode || node instanceof AqpAnalyzedQueryNode) {
       enteredCleanZone = true;
       counter++;
     }
@@ -60,9 +60,10 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
         //&& !((FieldQueryNode)node).getTextAsString().equals(fv)
         ) {
       rn.setTag(ORIGINAL_VALUE, fv);
+      return new AqpAnalyzedQueryNode(rn);
     }
     
-    return new AqpAnalyzedQueryNode(rn);
+    return rn;
 
   }
   

@@ -16,6 +16,8 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.ADSSyntaxParser;
 
 public class AqpAdsabsQueryParser extends AqpQueryParser {
 	
+	public static String AQP_UNFIELDED_OPERATOR_PARAM = "aqp.uop";
+	
 	public static AqpQueryParser init() throws Exception {
 		AqpAdsabsQueryConfigHandler c = new AqpAdsabsQueryConfigHandler();
 		return new AqpAdsabsQueryParser(c, 

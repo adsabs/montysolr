@@ -331,7 +331,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// with standard tokenizer, it goes away
 		assertQueryEquals("this^ 5", null, "this");
 		
-		assertQueryEquals("this^0. 5", wsa, "+this +5");
+		//assertQueryEquals("this^0. 5", wsa, "+this +5");
+		assertQueryEquals("this^0. 5", wsa, "/this^0. 5/");
 		assertQueryEquals("this^0.4 5", wsa, "+this^0.4 +5");
 		
 		assertQueryEquals("this^5~ 9", null, "this~2^5.0");
@@ -496,7 +497,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("\"galactic rotation\"", null, "\"galactic rotation\"", PhraseQuery.class);
 		assertQueryEquals("title:\"X x\" AND text:go title:\"x y\" AND A", null, "+title:\"x x\" +text:go +title:\"x y\" +a");
 		assertQueryEquals("title:\"X x\" OR text:go title:\"x y\" OR A", null, "+(title:\"x x\" text:go) +(title:\"x y\" a)");
-		assertQueryEquals("title:X Y Z", null, "+title:x +y +z"); // effectively --> title:x field:y field:z
+		assertQueryEquals("title:X Y Z", null, "+title:x +title:y +title:z");
 		
 		
 		
@@ -569,10 +570,11 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("m:(+a b c)", null, "+m:a +m:b +m:c");
 		assertQueryEquals("m:(+a b OR c)", null, "+m:a +(m:b m:c)");
 		assertQueryEquals("m:(-a +b c)^0.6", null, "(-m:a +m:b +m:c)^0.6");
-		assertQueryEquals("m:(a b c or d)", null, "+m:a +m:b +(m:c m:d)");
-		assertQueryEquals("m:(a b c OR d)", null, "+m:a +m:b +(m:c m:d)");
-		assertQueryEquals("m:(a b c AND d)", null, "+m:a +m:b +(+m:c +m:d)");
-		assertQueryEquals("m:(a b c OR d NOT e)", null, "+m:a +m:b +(m:c (+m:d -m:e))");
+		assertQueryEquals("m:(a b c or d)", null, "+(+m:a +m:b) +(m:c m:d)"); // without token concatenation: +m:a +m:b +(m:c m:d)
+		//setDebug(true);
+		assertQueryEquals("m:(a b c OR d)", null, "+(+m:a +m:b) +(m:c m:d)"); // +m:a +m:b +(m:c m:d)
+		assertQueryEquals("m:(a b c AND d)", null, "+m:a +m:b +m:c +m:d"); // +m:a +m:b +(+m:c +m:d)
+		assertQueryEquals("m:(a b c OR d NOT e)", null, "+(+m:a +m:b) +(m:c (+m:d -m:e))"); // +m:a +m:b +(m:c (+m:d -m:e))
 		assertQueryEquals("m:(a b NEAR c)", null, "+m:a +spanNear([m:b, m:c], 5, true)");
 		assertQueryEquals("m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, true) +(+m:d +m:e)");
 		assertQueryEquals("-m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, true) +(+m:d +m:e)"); //? should we allow - at the beginning?
@@ -584,13 +586,13 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
     
     assertQueryEquals("author:accomazzi, *a*", null, "author:accomazzi, *a*");
 		assertQueryEquals("author:(huchra)", null, "author:huchra");
-		assertQueryEquals("author:(huchra, j)", null, "author:huchra author:j");
+		assertQueryEquals("author:(huchra, j)", null, "+author:huchra +author:j");
 		
 		assertQueryEquals("author:(kurtz; -eichhorn, g)", kwa, "author:kurtz -author:eichhorn, g");
 		assertQueryEquals("author:(kurtz; -\"eichhorn, g\")", null, "author:kurtz -author:\"eichhorn g\"");
 		
 		assertQueryEquals("author:(muench-nashrallah)", wsa, "author:muench-nashrallah");
-		assertQueryEquals("\"dark matter\" OR (dark matter -LHC)", null, "\"dark matter\" (+dark +matter -lhc)");
+		assertQueryEquals("\"dark matter\" OR (dark matter -LHC)", null, "\"dark matter\" (+(+dark +matter) -lhc)"); // \"dark matter\" (+dark +matter -lhc)
 		
 		
 		assertQueryEquals("this999", wsa, "this999");

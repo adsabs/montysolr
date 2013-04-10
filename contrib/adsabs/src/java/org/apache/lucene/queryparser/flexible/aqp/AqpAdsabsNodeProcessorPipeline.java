@@ -1,5 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
+import java.util.Arrays;
+
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.processors.NoChildOptimizationQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
@@ -73,7 +75,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		QueryConfigHandler config = getQueryConfigHandler();
 	
-		add(new AqpDEFOPMarkPlainNodes(true)); // true=modifyTree (remove the plain tokens, join them into one)
+		add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"))); // true=modifyTree (remove the plain tokens, join them into one)
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 		

@@ -183,13 +183,60 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "17", F.BIBCODE, "xxxxxxxxxxx17", F.TYPE_ADS_TEXT, "bubble pace telescope multi-pace foobar"));
     assertU(adoc(F.ID, "18", F.BIBCODE, "xxxxxxxxxxx18", F.TYPE_ADS_TEXT, "Mirrors of the Hubble fooox Space Telescope"));
     
-    assertU(adoc(F.ID, "318", F.BIBCODE, "xxxxxxxxxxx18", F.TYPE_ADS_TEXT, "creation of a thesaurus"));
+    assertU(adoc(F.ID, "147", F.BIBCODE, "xxxxxxxxxx147", F.TYPE_ADS_TEXT, "NAG5-5269"));
+    assertU(adoc(F.ID, "148", F.BIBCODE, "xxxxxxxxxx148", F.TYPE_ADS_TEXT, "NAG55269"));
+    assertU(adoc(F.ID, "149", F.BIBCODE, "xxxxxxxxxx149", F.TYPE_ADS_TEXT, "NAG5 5269"));
+    assertU(adoc(F.ID, "150", F.BIBCODE, "xxxxxxxxxx150", F.TYPE_ADS_TEXT, "nag5-5269"));
+    assertU(adoc(F.ID, "151", F.BIBCODE, "xxxxxxxxxx151", F.TYPE_ADS_TEXT, "nag55269"));
+    assertU(adoc(F.ID, "152", F.BIBCODE, "xxxxxxxxxx152", F.TYPE_ADS_TEXT, "nag5 5269"));
+    
+    assertU(adoc(F.ID, "318", F.BIBCODE, "xxxxxxxxxx318", F.TYPE_ADS_TEXT, "creation of a thesaurus"));
+    
+    
     
     assertU(commit());
 
     
     
-    //dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
+    dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
+    
+    
+//    assertQueryEquals(req("q", "\"NASA grant\"~3 NEAR N*", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+//        "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))", 
+//        DisjunctionMaxQuery.class);
+//    assertQ(req("q", "NAG5-5269", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+//    		"//*[@numFound='3']",
+//        "//doc/str[@name='id'][.='147']",
+//        "//doc/str[@name='id'][.='148']",
+//        "//doc/str[@name='id'][.='149']"
+//        );
+    
+    // related to ticket #147
+    assertQueryEquals(req("q", "NAG5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all", "aqp.uop", "span"), 
+        "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))", 
+        DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "NAG5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+        "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))", 
+        DisjunctionMaxQuery.class);
+    assertQ(req("q", "NAG5-5269", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+    		"//*[@numFound='3']",
+        "//doc/str[@name='id'][.='147']",
+        "//doc/str[@name='id'][.='148']",
+        "//doc/str[@name='id'][.='149']"
+        );
+    
+    assertQueryEquals(req("q", "nag5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+        "(((spanNear([abstract:nag5, abstract:5269], 5, true) abstract:nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:nag5, title:5269], 5, true) title:nag55269)^1.4) | (spanNear([all:nag5, all:5269], 5, true) all:nag55269))", 
+        DisjunctionMaxQuery.class);
+    assertQ(req("q", "nag5-5269", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+    		"//*[@numFound='6']",
+    		"//doc/str[@name='id'][.='147']",
+        "//doc/str[@name='id'][.='148']",
+        "//doc/str[@name='id'][.='149']",
+        "//doc/str[@name='id'][.='150']",
+        "//doc/str[@name='id'][.='151']",
+        "//doc/str[@name='id'][.='152']"
+        );
     
     
     // ticket #318

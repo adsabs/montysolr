@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.antlr.runtime.CharStream;
@@ -44,17 +45,31 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	public static String PLAIN_TOKEN_SEPARATOR = " ";
 	public static String PLAIN_TOKEN_CONCATENATED = "PLAIN_TOKEN_CONCATENATED";
 	private boolean modifyTree = false;
+	private List<String> firstChildAllowedModifiers;
 	
 	public AqpDEFOPMarkPlainNodes() {
 		modifyTree = false;
+		firstChildAllowedModifiers = Arrays.asList("+", "-");
 	}
 	
-	public AqpDEFOPMarkPlainNodes(boolean modifyTree) {
+	public AqpDEFOPMarkPlainNodes(boolean modifyTree, List<String> firstChildAllowedModifiers) {
 		this.modifyTree = modifyTree;
+		this.firstChildAllowedModifiers = firstChildAllowedModifiers;
 	}
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("DEFOP")) {
+			
+  		// refuse processing: =(this that token)
+			// but this is not the ideal place for it (it is kind of arbitrary)
+			if (node.getParent() != null && node.getParent().getParent() != null) {
+				QueryNode p = node.getParent().getParent();
+				if (p.getChildren().size() > 1 &&
+						!firstChildAllowedModifiers.contains(((AqpANTLRNode) p.getChildren().get(0)).getTokenInput())) {
+					return false; 
+				}
+			}
+				
 			return true;
 		}
 		return false;
@@ -74,7 +89,7 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 		
 		Integer previous = -1;
 		for (int i=0;i<children.size();i++) {
-			if (isBareNode(children.get(i))) {
+			if (isBareNode(children.get(i), forMarking.size() == 0)) {
 				if (forMarking.size() == 0) {
 					previous = i;
 					forMarking.add(children.get(i));
@@ -144,13 +159,16 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	}
 	
 	
-	private boolean isBareNode(QueryNode node) {
+	private boolean isBareNode(QueryNode node, boolean isPotentiallyFirst) {
 		StringBuffer sb = new StringBuffer();
 		harvestLabels(node, sb, 5);
 		if (sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QNORMAL")) {
 			ArrayList<String> vals = new ArrayList<String>();
 			harvestValues(node, vals, 3);
 			if (vals.size()>0) {
+				if (isPotentiallyFirst && firstChildAllowedModifiers.contains(vals.get(0))) {// we allow modifiers for the first child
+					return true;
+				}
 				return false;
 			}
 			return true;

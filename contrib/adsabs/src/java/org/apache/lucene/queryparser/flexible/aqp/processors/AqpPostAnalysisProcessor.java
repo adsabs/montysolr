@@ -6,11 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNotQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
@@ -26,6 +30,7 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
+import org.apache.solr.common.params.SolrParams;
 
 /**
  * This processor must follow the {@link AqpAnalyzerQueryNodeProcessor}
@@ -54,25 +59,39 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			QueryNode child = ((AqpAnalyzedQueryNode) node).getChild();
 			List<List<List<QueryNode>>> queryStructure;
 			
+			AqpRequestParams req = getRequest();
+			SolrParams params = req.getParams();
+			final String unfieldedDefaultOperator = "and";
+			if (params != null) {
+				params.get(AqpAdsabsQueryParser.AQP_UNFIELDED_OPERATOR_PARAM, "or").toLowerCase();
+			}
 			
 			if (child instanceof TokenizedPhraseQueryNode) { // no need to do anything
 				return child;
 			}
 			else if (child instanceof GroupQueryNode ) { // may have multi-token expansion (when it wasn't surrounded by "")
 				
-				if (child.getChildren().size() > 0 && child.getChildren().get(0) instanceof BooleanQueryNode) {
+				if (child.getChildren().size() > 0 && child.getChildren().get(0) instanceof BooleanQueryNode 
+						&& ((BooleanQueryNode) child.getChildren().get(0)).getChildren().size() > 1) {
 					queryStructure = extractQueries(child.getChildren().get(0));
 					final int proximity = getDefaultProximityValue();
-					final boolean useBooleanQuery = getDefaultOperator().equals(Operator.OR) ? true : false;
 					
 					return buildNewQueryNode(queryStructure,
 							new QueryBuilder() {
 								@Override
 								public QueryNode buildQuery(List<QueryNode> clauses) {
-									if (useBooleanQuery) {
+									if (unfieldedDefaultOperator.equals("span")) {
+										return new AqpNearQueryNode(clauses, proximity);
+									}
+									else if (unfieldedDefaultOperator.equals("and")) {
+										return new AqpAndQueryNode(clauses);
+									}
+									else if (unfieldedDefaultOperator.equals("not")) {
+										return new AqpNotQueryNode(clauses);
+									}
+									else {
 										return new AqpOrQueryNode(clauses);
 									}
-									return new AqpNearQueryNode(clauses, proximity); 
 								}
 							}
 					);
@@ -135,17 +154,18 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 	  return node;
   }
 	
-	private Operator getDefaultOperator() throws QueryNodeException {
-    QueryConfigHandler queryConfig = getQueryConfigHandler();
-    if (queryConfig == null
-        || !queryConfig.has(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR)) {
-      throw new QueryNodeException(new MessageImpl(
+	private AqpRequestParams getRequest() throws QueryNodeException {
+		QueryConfigHandler config = getQueryConfigHandler();
+		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+		if (config == null || config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST) == null) {
+			throw new QueryNodeException(new MessageImpl(
           QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
           "Configuration error: "
-          + "DefaultProximity value is missing"));
-    }
-    return queryConfig.get(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR);
-  }
+          + "SOLR_REQUEST is missing"));
+		}
+		return config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+	}
+	
 	
 	private Integer getDefaultProximityValue() throws QueryNodeException {
     QueryConfigHandler queryConfig = getQueryConfigHandler();
