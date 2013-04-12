@@ -5,14 +5,12 @@ bin
 examples/*
 build
 *~
-contrib/antlrqueryparser/src/java/org/apache/lucene/queryParser/aqp/parser/*
-contrib/invenio/src/java/org/apache/lucene/queryParser/aqp/parser/*
-contrib/antlrqueryparser/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/*
-contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/*
-contrib/adsabs/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/*
-contrib/adsabs/src/java/org/apache/lucene/queryparser/flexible/aqp/parser
-contrib/antlrqueryparser/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/*
-contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/*
-*queryparser/flexible/aqp/parser/*.java
+contrib/antlrqueryparser/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/StandardLuceneGrammarLexer.java
+contrib/antlrqueryparser/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/StandardLuceneGrammarParser.java
+contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/FixInvenioLexer.java
+contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/FixInvenioParser.java
+contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/InvenioLexer.java
+contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/InvenioParser.java
+
 # a symbolic links to other grammars in contrib/invenio
 contrib/antlrqueryparser/grammars/*Invenio.*
