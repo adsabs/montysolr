@@ -44,8 +44,14 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.MultiFields;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.util.BytesRef;
 import org.apache.noggit.JSONUtil;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -552,6 +558,70 @@ public class BatchHandler extends RequestHandlerBase {
   }
   
   private void populateDefaultProviders() {
+  	
+  	providers.put("dump-freqs", new Provider("dump-freqs") {
+  		public void run(SolrQueryRequest req) throws Exception {
+  			
+  			SolrCore core = req.getCore();
+  			SolrParams params = req.getParams();
+  			IndexSchema schema = core.getSchema();
+  			final HashSet<String> fieldsToLoad = new HashSet<String>();
+  			
+  			String[] fields = params.getParams("fields");
+  			for (String f: fields) {
+  				for (String ff: f.split("( |,)")) {
+		  			SchemaField field = schema.getFieldOrNull(ff);
+		  	    if (field==null || !field.indexed()) {
+		  	      throw new SolrException(ErrorCode.BAD_REQUEST, "We cannot dump fields that do not exist or are not indexed: " + ff);
+		  	    }
+		  	    fieldsToLoad.add(ff);
+  				}
+  			}
+  			
+  			File jobFile = new File(tmpDir + "/" + params.get("jobid"));
+  	    final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
+  	    out.write("term");
+				out.write("\t");
+				out.write("termFreq");
+				out.write("\t");
+				out.write("docFreq");
+  	    
+  			DirectoryReader ir = req.getSearcher().getIndexReader();
+  			TermsEnum reuse = null;
+  			int processed = 0;
+  			for (String f: fieldsToLoad) {
+	  	    
+  				out.write("\n\n# " + f + "\n");
+  				
+	  	    Terms te = MultiFields.getTerms(ir, f);
+	  	    if (te == null) {
+	  	    	out.write("# term stats is not available for this field");
+	  	    	continue;
+	  	    }
+	  	    reuse = te.iterator(reuse);
+	  	    
+	  	    BytesRef term;
+					while((term = reuse.next()) != null) {
+						out.write(term.utf8ToString());
+						out.write("\t");
+						out.write(Long.toString(reuse.totalTermFreq()));
+						out.write("\t");
+						out.write(Long.toString(reuse.docFreq()));
+						out.write("\n");
+						
+						processed++;
+						if (processed % 10000 == 0) {
+	          	if(queue.isStopped()) { // inside, because queue is synchronized
+	          		throw new IOException("Collector interrupted - stopping");
+	          	}
+	          }
+	  	    }
+  			}
+  	    out.close();
+  	    
+  		}
+  	});
+  	
   	
   	providers.put("dump-index", new Provider("dump-index") {
   		public void run(SolrQueryRequest req) throws Exception {

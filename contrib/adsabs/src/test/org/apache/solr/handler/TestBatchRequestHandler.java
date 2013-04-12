@@ -27,12 +27,14 @@ import monty.solr.util.MontySolrSetup;
 
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
 
+@SuppressCodecs({"Lucene3x", "SimpleText"})
 public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 
 
@@ -60,13 +62,13 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk,", F.TYPE_ADS_TEXT, "what ever comes under"));
     assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M.", F.TYPE_ADS_TEXT, "my head is not what"));
     assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Marel", F.TYPE_ADS_TEXT, "goes in yours"));
-    assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja", F.TYPE_ADS_TEXT, "the old warriors of the"));
+    assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja", F.TYPE_ADS_TEXT, "the old warrior angels of angels"));
     assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja Karel", F.TYPE_ADS_TEXT, "great war, with horses"));
     assertU(commit());
     
     assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja K", F.TYPE_ADS_TEXT, "and heavy horses"));
-    assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M K", F.TYPE_ADS_TEXT, "cut down by the machine"));
-    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel Molja", F.TYPE_ADS_TEXT, "guns, from different angles"));
+    assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M K", F.TYPE_ADS_TEXT, "cutting down machine and by the machine"));
+    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel Molja", F.TYPE_ADS_TEXT, "guns, from different angels"));
     assertU(adoc(F.ID, "10", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel M", F.TYPE_ADS_TEXT, "but still, British insisted"));
     assertU(adoc(F.ID, "11", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, K Molja", F.TYPE_ADS_TEXT, "as well as Germans did"));
     assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "ǎguşan, Adrian, , Dr", F.TYPE_ADS_TEXT, "words are too weak..."));
@@ -77,6 +79,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     handler.init(nl); // default
     
     
+    //while (true) {
     	
     SolrQueryRequest req = req("command", "dump-index", "q", "*:*",
         "fields", "bibcode,title,author");
@@ -113,6 +116,47 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxxx\"],");
     assert sw.toString().contains("\"title\":[\"head\"]");
     //System.out.println(sw.toString());
+    
+    
+    
+    // ======================
+    
+    req = req("command", "dump-freqs", "q", "*:*",
+        "fields", "bibcode,title,author");
+    rsp = new SolrQueryResponse();
+    
+    core.execute(handler, req, rsp);
+    req.close();
+    
+    jobid = (String) rsp.getValues().get("jobid");
+    assert jobid != null;
+    
+    
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    while (handler.isBusy()) {
+      Thread.sleep(300);
+    }
+    req.close();
+    
+    req = req("command", "get-results", "jobid", jobid);
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    while (handler.isBusy()) {
+      Thread.sleep(300);
+    }
+    
+    sw = new StringWriter(32000);
+    responseWriter = core.getQueryResponseWriter(req);
+    responseWriter.write(sw,req,rsp);
+    req.close();
+    
+    //System.out.println(sw.toString());
+    assert sw.toString().contains("angels\t3\t2");
+    
+    
+    //}
     
   }
   
