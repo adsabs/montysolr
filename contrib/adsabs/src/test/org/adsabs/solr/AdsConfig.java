@@ -14,8 +14,8 @@ public final class AdsConfig {
 		public static String AUTHOR = "author";
 		
 		// a field using type='ads_text'
-		public static String TYPE_ADS_TEXT = "all";
-		public static String[] TYPE_ADS_TEXT_FIELDS = new String[]{"all", "title", "alternate_title", "abstract"};
+		public static String TYPE_ADS_TEXT = "title";
+		public static String[] TYPE_ADS_TEXT_FIELDS = new String[]{"title", "alternate_title", "abstract"};
 		
 		public static String TYPE_NORMALIZED_TEXT_ASCII = "keyword";
     public static String[] TYPE_NORMALIZED_TEXT_ASCII_FIELDS = new String[]{"pub", "pub_raw", "keyword", "keyword_norm"};

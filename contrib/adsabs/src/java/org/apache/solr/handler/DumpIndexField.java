@@ -167,6 +167,7 @@ public class DumpIndexField extends RequestHandlerBase {
     
     SolrParams params = req.getParams();
     String command = params.get("command","info");
+    
     if (command.equals("dump")) {
       queue.registerNewRequest(params);
     }
@@ -254,7 +255,6 @@ public class DumpIndexField extends RequestHandlerBase {
     final SolrQueryRequest request = req;
 
     new Thread(new Runnable() {
-
       public void run() {
         setWorkerMessage("I am idle");
         try {
