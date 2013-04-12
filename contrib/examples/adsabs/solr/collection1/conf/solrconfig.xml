@@ -1891,4 +1891,10 @@
     </lst>
   </requestHandler>
   
+  <requestHandler name="/batch" class="solr.BatchHandler" default="false">
+    <lst name="defaults">
+        <str name="allowed">.*</str>
+    </lst>
+  </requestHandler>
+  
 </config>

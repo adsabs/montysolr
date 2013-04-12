@@ -74,9 +74,15 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "ǎguşan, Adrian, , Dr", F.TYPE_ADS_TEXT, "words are too weak..."));
     assertU(commit());
     
-    BatchHandler handler = new BatchHandler();
-    NamedList<String> nl = new NamedList<String>();
-    handler.init(nl); // default
+    BatchHandler handler;
+    if (usually()) {
+	    handler = new BatchHandler();
+	    NamedList<String> nl = new NamedList<String>();
+	    handler.init(nl); // default
+    }
+    else {
+    	handler = (BatchHandler) h.getCore().getRequestHandler("/batch");
+    }
     
     
     //while (true) {
@@ -115,7 +121,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     
     assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxxx\"],");
     assert sw.toString().contains("\"title\":[\"head\"]");
-    System.out.println(sw.toString());
+    //System.out.println(sw.toString());
     
     
     
@@ -152,7 +158,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     responseWriter.write(sw,req,rsp);
     req.close();
     
-    System.out.println(sw.toString());
+    //System.out.println(sw.toString());
     assert sw.toString().contains("angels\t3\t2");
     
     
