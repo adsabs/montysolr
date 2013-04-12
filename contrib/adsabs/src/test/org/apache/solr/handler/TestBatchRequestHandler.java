@@ -115,7 +115,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     
     assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxxx\"],");
     assert sw.toString().contains("\"title\":[\"head\"]");
-    //System.out.println(sw.toString());
+    System.out.println(sw.toString());
     
     
     
@@ -152,7 +152,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     responseWriter.write(sw,req,rsp);
     req.close();
     
-    //System.out.println(sw.toString());
+    System.out.println(sw.toString());
     assert sw.toString().contains("angels\t3\t2");
     
     

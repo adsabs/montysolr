@@ -11,6 +11,10 @@ contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/FixIn
 contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/FixInvenioParser.java
 contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/InvenioLexer.java
 contrib/invenio/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/InvenioParser.java
+contrib/adsabs/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/ADS.tokens
+contrib/adsabs/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/ADSLexer.java
+contrib/adsabs/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/ADSParser.java
+contrib/adsabs/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/ADSSyntaxParser.java
 
 # a symbolic links to other grammars in contrib/invenio
 contrib/antlrqueryparser/grammars/*Invenio.*
