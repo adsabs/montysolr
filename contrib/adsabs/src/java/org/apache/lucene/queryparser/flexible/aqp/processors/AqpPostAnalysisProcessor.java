@@ -48,6 +48,7 @@ import org.apache.solr.common.params.SolrParams;
  */
 public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 
+  
 	@Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
 	  return node;
@@ -55,8 +56,7 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 
 	@Override
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
-		if (node instanceof AqpAnalyzedQueryNode) {
-			QueryNode child = ((AqpAnalyzedQueryNode) node).getChild();
+		if (node.getTag(AqpAdsabsAnalyzerProcessor.ANALYZED) != null) {
 			List<List<List<QueryNode>>> queryStructure;
 			
 			AqpRequestParams req = getRequest();
@@ -66,14 +66,14 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 				params.get(AqpAdsabsQueryParser.AQP_UNFIELDED_OPERATOR_PARAM, "or").toLowerCase();
 			}
 			
-			if (child instanceof TokenizedPhraseQueryNode) { // no need to do anything
-				return child;
+			if (node instanceof TokenizedPhraseQueryNode) { // no need to do anything
+				return node;
 			}
-			else if (child instanceof GroupQueryNode ) { // may have multi-token expansion (when it wasn't surrounded by "")
+			else if (node instanceof GroupQueryNode ) { // may have multi-token expansion (when it wasn't surrounded by "")
 				
-				if (child.getChildren().size() > 0 && child.getChildren().get(0) instanceof BooleanQueryNode 
-						&& ((BooleanQueryNode) child.getChildren().get(0)).getChildren().size() > 1) {
-					queryStructure = extractQueries(child.getChildren().get(0));
+				if (node.getChildren().size() > 0 && node.getChildren().get(0) instanceof BooleanQueryNode 
+						&& ((BooleanQueryNode) node.getChildren().get(0)).getChildren().size() > 1) {
+					queryStructure = extractQueries(node.getChildren().get(0));
 					final int proximity = getDefaultProximityValue();
 					
 					return buildNewQueryNode(queryStructure,
@@ -98,8 +98,8 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 				}
 				
 			}
-			else if (child instanceof MultiPhraseQueryNode ) {
-				queryStructure = extractQueries(child);
+			else if (node instanceof MultiPhraseQueryNode ) {
+				queryStructure = extractQueries(node);
 				
 				if (node.getParent() instanceof FuzzyQueryNode) { // "some span query"~3
 					
@@ -147,7 +147,7 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			}
 			
 			// do nothing, we don't know how to process this type
-			return child; // return child (= remove the surrounding parent node)
+			return node; 
 			
 		}
 		

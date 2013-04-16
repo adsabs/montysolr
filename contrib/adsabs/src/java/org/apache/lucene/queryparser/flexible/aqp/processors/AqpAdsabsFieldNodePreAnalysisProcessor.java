@@ -62,8 +62,7 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
       String field = ((FieldQueryNode) node).getFieldAsString();
       
       // we must detect pubdate:YYYY(-MM-DD) queries, and turn them into range query if necessary
-      if (field.equals("pubdate") && !(node.getParent() instanceof TermRangeQueryNode)){
-        
+      if (field.equals("pubdate")){  
         // first parse the date with the appropriate analyzer
         String value = fieldNode.getTextAsString();
         Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
@@ -101,6 +100,13 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
           throw new QueryNodeException(new MessageImpl(e.getMessage()));
         }
         
+        // when we are called to parse values that are already inside range QNode
+        if (node.getParent() instanceof TermRangeQueryNode) {
+        	fieldNode.setField("date");
+          fieldNode.setValue(normalizedDate);
+        	return new AqpNonAnalyzedQueryNode(fieldNode);
+        }
+
         // make a copy of the pubdate node
         FieldQueryNode upperBound;
         try {
@@ -114,6 +120,7 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
         
         fieldNode.setField("date");
         fieldNode.setValue(normalizedDate);
+        
         
         return new TermRangeQueryNode(new AqpNonAnalyzedQueryNode(fieldNode), 
             new AqpNonAnalyzedQueryNode(upperBound), true, false); // not include the lowerBound

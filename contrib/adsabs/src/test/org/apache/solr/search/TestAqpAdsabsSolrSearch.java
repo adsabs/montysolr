@@ -60,13 +60,17 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			
 			newConfig = duplicateFile(new File(configFile));
 			
-			File synonymsFile = createTempFile(new String[]{
+			File multiSynonymsFile = createTempFile(new String[]{
 					"hubble\0space\0telescope, HST",
+			});
+			replaceInFile(newConfig, "synonyms=\"ads_text_multi.synonyms\"", "synonyms=\"" + multiSynonymsFile.getAbsolutePath() + "\"");
+			
+			File synonymsFile = createTempFile(new String[]{
 					"weak => lightweak",
 					"lensing => mikrolinseneffekt",
 					"pink => pinkish"
 			});
-			replaceInFile(newConfig, "synonyms=\"ads_text_query.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
+			replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
 		  // hand-curated synonyms
       File curatedSynonyms = createTempFile(new String[]{

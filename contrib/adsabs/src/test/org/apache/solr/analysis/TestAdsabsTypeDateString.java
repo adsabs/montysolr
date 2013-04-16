@@ -50,30 +50,83 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 
   public void test() throws Exception {
 
-    // The real job of the indexing is done by the DIH transformer, so this test
-    // is sort of useless without it (but look at TestADSDataImport, there we test
-    // it)
+    // also look at TestADSDataImport, there we test it too
     
     assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-10-01T00:00:00Z"));
+    assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-10-01T00:30:00Z"));
+    assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-10-01T00:31:00Z"));
     assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-11-01T00:00:00Z"));
     assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-12-01T00:00:00Z"));
+    
+    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-10-01T00:00:00Z"));
+    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-10-01T00:30:00Z"));
+    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-10-01T00:31:00Z"));
+    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-11-01T00:00:00Z"));
+    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-12-01T00:00:00Z"));
 
     assertU(commit());
 
-    assertQ(req("q", "*:*"), "//*[@numFound='3']");
+    assertQ(req("q", "*:*"), "//*[@numFound='10']");
+    
     assertQueryEquals(req("q", "pubdate:2012", "qt", "aqp"), "date:[1325376000000 TO 1356998400000}", NumericRangeQuery.class);
-    assertQ(req("q", "pubdate:2012"), "//*[@numFound='3']", 
+    assertQ(req("q", "pubdate:2012"), "//*[@numFound='5']", 
         "//doc/str[@name='id'][.='0']",
         "//doc/str[@name='id'][.='1']",
-        "//doc/str[@name='id'][.='2']");
+        "//doc/str[@name='id'][.='2']",
+        "//doc/str[@name='id'][.='3']",
+        "//doc/str[@name='id'][.='4']"
+        );
+    
+    // notice, if doc contains values "2012-10-00" "2012-10-01" without
+    // specifying the seconds, it will be indexed into 00:00 of a day
+    // but when you search for "2012-10-01" you will search everything
+    // *after* the first 30mins of a day! If you want to get also the
+    // 'zero' hour docs, you must search for '2012-01' or specify the 
+    // hour precisely
+    assertQueryEquals(req("q", "pubdate:2012-10-01", "qt", "aqp"), "date:[1349051400000 TO 1349137800000}", NumericRangeQuery.class);
+    assertQ(req("q", "pubdate:2012-10-01"), 
+        "//*[@numFound='2']", 
+        "//doc/str[@name='id'][.='1']",
+        "//doc/str[@name='id'][.='2']"
+        );
     
     assertQueryEquals(req("q", "pubdate:2012-11", "qt", "aqp"), "date:[1351728000000 TO 1354320000000}", NumericRangeQuery.class);
     assertQ(req("q", "pubdate:2012-11"), 
         "//*[@numFound='1']", 
-        "//doc/str[@name='id'][.='1']");
+        "//doc/str[@name='id'][.='3']");
     
-    assertQueryEquals(req("q", "pubdate:2012-12-02", "qt", "aqp"), "date:[1354408200000 TO 1354494600000}", NumericRangeQuery.class);
+    // notice, the pubdate search fails, but when we use date it works
+    assertQueryEquals(req("q", "pubdate:2012-12-02", "qt", "aqp"), 
+    		"date:[1354408200000 TO 1354494600000}", NumericRangeQuery.class);
     assertQ(req("q", "pubdate:2012-12-02"), "//*[@numFound='0']");
+    
+    assertQ(req("q", "date:2012-12-01T00\\:00\\:00Z"), 
+    		"//*[@numFound='1']",
+    		"//doc/str[@name='id'][.='4']"
+    		);
+    
+    
+    // notice: the range is not inclusive at the end [....} like above
+    assertQueryEquals(req("q", "pubdate:[2012-10-00 TO 2012-12-02]", "qt", "aqp"), 
+    		"date:[1349049600000 TO 1354408200000]", NumericRangeQuery.class);
+    
+
+    // search for any article from the 10th month
+    assertQ(req("q", "pubdate:[2012-10-00 TO 2012-12-02]"), "//*[@numFound='5']", 
+    		"//doc/str[@name='id'][.='0']",
+        "//doc/str[@name='id'][.='1']",
+        "//doc/str[@name='id'][.='2']",
+        "//doc/str[@name='id'][.='3']",
+        "//doc/str[@name='id'][.='4']"
+        );
+    
+    // here we skip the the articles that were indexed with 2012-10-00 pubdate
+    assertQ(req("q", "pubdate:[2012-10-01 TO 2012-12-02]"), "//*[@numFound='4']", 
+        "//doc/str[@name='id'][.='1']",
+        "//doc/str[@name='id'][.='2']",
+        "//doc/str[@name='id'][.='3']",
+        "//doc/str[@name='id'][.='4']"
+        );
     
   }
   

@@ -19,16 +19,19 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  */
 public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
 
+	public final static String ORIGINAL_VALUE = "ORIGINAL_ANALYZED_VALUE";
+  public final static String ANALYZED = "already_analyzed";
+  
   private boolean enteredCleanZone = false;
   private int counter = 0;
-  public final static String ORIGINAL_VALUE = "ORIGINAL_ANALYZED_VALUE";
+  
 
   @Override
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
     if (enteredCleanZone == true) {
       counter++;
     }
-    else if (node instanceof AqpNonAnalyzedQueryNode || node instanceof AqpAnalyzedQueryNode) {
+    else if (node instanceof AqpNonAnalyzedQueryNode || node.getTag(ANALYZED) != null) {
       enteredCleanZone = true;
       counter++;
     }
@@ -60,7 +63,8 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
         //&& !((FieldQueryNode)node).getTextAsString().equals(fv)
         ) {
       rn.setTag(ORIGINAL_VALUE, fv);
-      return new AqpAnalyzedQueryNode(rn);
+      rn.setTag(ANALYZED, true);
+      //return new AqpAnalyzedQueryNode(rn);
     }
     
     return rn;
