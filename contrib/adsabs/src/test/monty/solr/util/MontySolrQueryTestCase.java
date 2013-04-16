@@ -248,11 +248,11 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
   
   public String addDocs(String... fieldsAndValues) {
     ArrayList<String> fVals = new ArrayList<String>(Arrays.asList(fieldsAndValues));
-    if (fVals.indexOf(F.ID) == -1 || !(fVals.indexOf(F.ID)%2==1)) {
+    if (fVals.indexOf(F.ID) == -1 || fVals.indexOf(F.ID)%2==1) {
       fVals.add(F.ID);
       fVals.add(Integer.toString(incrementId()));
     }
-    if (fVals.indexOf(F.BIBCODE) == -1 || !(fVals.indexOf(F.BIBCODE)%2==1)) {
+    if (fVals.indexOf(F.BIBCODE) == -1 || fVals.indexOf(F.BIBCODE)%2==1) {
       fVals.add(F.BIBCODE);
       String bibc = ("AAAAA........" + Integer.toString(idValue));
       fVals.add(bibc.substring(bibc.length()-13, bibc.length()));

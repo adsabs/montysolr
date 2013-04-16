@@ -60,7 +60,6 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
     assertQ(req("q", "*:*"), "//*[@numFound='3']");
 
-    // the ascii folding filter emits both unicode and the ascii version
     for (String f: F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS) {
       
       // ascii normalization
@@ -72,10 +71,10 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
       assertQ(req("q", f + ":bila"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='0']");
       
       // whitespace analyzer & phrases
-      assertQueryEquals(req("q", f + ":třicet-tři", "qt", "aqp"), f+":tricet-tri", TermQuery.class);
+      assertQueryEquals(req("q", f + ":třicet-tři", "qt", "aqp"), f+":tricettri", TermQuery.class);
       assertQ(req("q", f + ":třicet-tři"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
       
-      assertQueryEquals(req("q", f + ":třicet tři", "qt", "aqp"), String.format("+%s:tricet +(%s:tři %s:tri)", f, F.DEF_FIELD, F.DEF_FIELD), BooleanQuery.class);
+      assertQueryEquals(req("q", f + ":třicet tři", "qt", "aqp"), String.format("+%s:tricet +%s:tri", f, f), BooleanQuery.class);
       assertQ(req("q", f + ":třicet tři"), "//*[@numFound='0']");
       
       assertQueryEquals(req("q", f + ":\"třicet tři\"", "qt", "aqp"), String.format("%s:\"tricet tri\"", f), PhraseQuery.class);

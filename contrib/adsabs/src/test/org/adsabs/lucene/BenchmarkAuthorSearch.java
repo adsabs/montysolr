@@ -42,6 +42,7 @@ import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.LuceneTestCase;
 import org.apache.lucene.util._TestUtil;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.junit.BeforeClass;
 
 @SuppressCodecs({"Lucene3x", "SimpleText"})
 public class BenchmarkAuthorSearch extends LuceneTestCase{
@@ -57,6 +58,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private String[] names = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "x",
 			"john", "jay", "giovanni", "alberto", "edwin", "michael"};
 
+	
 	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
