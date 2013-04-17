@@ -64,7 +64,7 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
       		"| all:accomazzi)");
 		
 		// #231 - use 'aqp' as a default parser also for filter queries
-		assert direct.request("/select?q=*:*&fq=author:\"Civano, F\"&debugQuery=true&wt=json", null)
+		assert direct.request("/select?q=*:*&fq={!aqp}author:\"Civano, F\"&debugQuery=true&wt=json", null)
     	.contains("author:civano, f author:civano, f* author:civano,");
 		
 		

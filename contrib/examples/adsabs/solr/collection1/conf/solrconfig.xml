@@ -1885,18 +1885,6 @@
     </lst>
   </queryParser>
   
-  <!-- for now, it is not possible to set a default qparser to be
-       something else than 'lucene', so filter queries, for example,
-       use 'lucene' even if 'defType' is 'aqp'. This will force 'aqp'
-       to be a default qparser, but it is a hack -->
-       
-       
-  <queryParser name="lucene_" class="solr.LuceneQParserPlugin" />
-  <queryParser name="lucene" class="solr.AdsQParserPlugin">
-    <lst name="defaults">
-       <str name="idfield">recid</str>
-    </lst>
-  </queryParser>
   
   <requestHandler name="/dump-index" class="solr.DumpIndexField" default="false">
     <lst name="defaults">
