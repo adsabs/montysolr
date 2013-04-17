@@ -210,9 +210,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 	  
-	  
+		
 	  // regex
-	  
 	  assertQueryEquals(req("qt", "aqp", "q", "author:/^Kurtz,\\WM./"), 
         "author:/^Kurtz,\\WM./",
         RegexpQuery.class);

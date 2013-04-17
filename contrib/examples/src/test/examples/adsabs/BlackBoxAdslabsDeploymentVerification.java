@@ -63,6 +63,12 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
       		"| keyword_norm:accomazzi^1.4 " +
       		"| all:accomazzi)");
 		
+		// #231 - use 'aqp' as a default parser also for filter queries
+		assert direct.request("/select?q=*:*&fq=author:\"Civano, F\"&debugQuery=true&wt=json", null)
+    	.contains("author:civano, f author:civano, f* author:civano,");
+		
+		
+		
 		InvenioKeepRecidUpdated uHandler = (InvenioKeepRecidUpdated) core.getRequestHandler("/invenio/update");
 		uHandler.setAsynchronous(false);
 		

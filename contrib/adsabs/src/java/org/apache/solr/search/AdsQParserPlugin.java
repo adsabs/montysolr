@@ -9,31 +9,8 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
 
 /**
- * Parse query that is made of the solr fields as well as Invenio query syntax,
- * the field that are prefixed using the special code <code>inv_</code> get
- * automatically passed to Invenio
- * 
- * Other parameters:
- * <ul>
- * <li>q.op - the default operator "OR" or "AND"</li>
- * <li>df - the default field name</li>
- * </ul>
- * <br>
- * Example: <code>{!aqp mode=maxinv xfields=fulltext}035:arxiv +bar -baz</code>
- * 
- * The example above would query everything as Invenio field, but fulltext will
- * be served by Solr.
- * 
- * Example:
- * <code>{!iq iq.mode=maxsolr iq.xfields=fulltext,abstract iq.channel=bitset}035:arxiv +bar -baz</code>
- * 
- * The example above will try to map all the fields into the Solr schema, if the
- * field exists, it will be served by Solr. The fulltext will be served by
- * Invenio no matter if it is defined in schema. And communication between Java
- * and Invenio is done using bitset
- * 
- * If the query is written as:<code>inv_field:value</code> the search will be
- * always passed to Invenio.
+ * An instance of absolute crazy (but fun to work with) query parser.
+ * Implements the ADS grammar together with lots of business logic.
  * 
  */
 public class AdsQParserPlugin extends QParserPlugin {
