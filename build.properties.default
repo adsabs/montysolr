@@ -8,8 +8,8 @@
 # the lucene version and that one must match with the version of lucene used
 # inside solr.
 
-solr.version=4.0.0-ALPHA
-montysolr.version=4.0.0-ALPHA
+solr.version=4.0.0-SVN
+montysolr.version=4.0.0-SVN
 
 
 # Python executable
