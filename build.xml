@@ -409,17 +409,39 @@ ant=${ant}
 	    
     
     <target name="build-contrib" >
-    	<apply executable="${ant}" parallel="false" failonerror="true" failifexecutionfails="true">
-    	  <arg line="build-all"/>
-    	  <arg value="-f"/>
-    	  <fileset dir="${common.dir}/contrib">
-    	  	<include name="**/antlrqueryparser/build.xml"/>
-    	  	<include name="**/invenio/build.xml"/>
-    	  	<include name="**/newseman/build.xml"/>
-    	  	<include name="**/adsabs/build.xml"/>
-    	  	<include name="**/examples/build.xml"/>
-	  	  </fileset>
-    	</apply>
+      
+      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
+        <arg line="build-all -f ${common.dir}/contrib/antlrqueryparser/build.xml"/>
+      </exec>
+      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
+        <arg line="build-all -f ${common.dir}/contrib/invenio/build.xml"/>
+      </exec>
+      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
+        <arg line="build-all -f ${common.dir}/contrib/newseman/build.xml"/>
+      </exec>
+      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
+        <arg line="build-all -f ${common.dir}/contrib/adsabs/build.xml"/>
+      </exec>
+      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
+        <arg line="build-all -f ${common.dir}/contrib/examples/build.xml"/>
+      </exec>
+
+      <!--
+           seems that ant 1.8.x gets the order differently, huh... so we must make sure
+           antlrqueryparser is built before the rest, so i can't use apply
+           
+      <apply executable="${ant}" parallel="false" failonerror="true" failifexecutionfails="true">
+        <arg line="build-all"/>
+        <arg value="-f"/>
+        <fileset dir="${common.dir}/contrib">
+          <include name="**/invenio/build.xml"/>
+          <include name="**/newseman/build.xml"/>
+          <include name="**/adsabs/build.xml"/>
+          <include name="**/examples/build.xml"/>
+        </fileset>
+      </apply>
+      -->
+      
     </target>
 	
 	<target name="test-contrib" >

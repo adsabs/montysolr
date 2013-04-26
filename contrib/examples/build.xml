@@ -411,7 +411,8 @@
 	                    @{arguments}   &amp;
 
 	    pid=$!
-	    echo "Solr pid=$!"
+	    echo "MontySolr pid=$pid"
+	    echo "$pid" > "$HOMEDIR/montysolr.pid"
 	    trap "kill $pid" TERM
 	    trap "kill $pid" SIGINT
 	    wait $pid                           
