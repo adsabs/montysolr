@@ -269,7 +269,11 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218920']"
     );
+    // success because the field is normalized
     assertQ(req("q", "first_author_norm:\"Cutri,R\""), 
+        "//*[@numFound='1']"
+    );
+    assertQ(req("q", "first_author_norm:\"Cutri,.R\""), 
         "//*[@numFound='0']"
     );
 
@@ -578,12 +582,7 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
      * grants
      * 
      */
-    //dumpDoc(null, "recid", "grant");
-    /*
-     * currently failing because there is no
-     * data for this record (in the mongodb)
-     */
-    /*
+    //dumpDoc(null, "recid", "grant", "grant_ids", "grant_facet_hier");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
   		"//*[@numFound='1']",
   		"//doc/int[@name='recid'][.='9311214']");
@@ -593,7 +592,6 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "grant_facet_hier:1/NSF-AST/0618398"),
   		"//*[@numFound='1']",
   		"//doc/int[@name='recid'][.='9311214']");
-     */
 
 
     /*

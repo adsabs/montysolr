@@ -55,6 +55,9 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Bílá kobyla skočila přes čtyřista"));
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "třicet-tři stříbrných střech"));
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "A ještě TřistaTřicetTři stříbrných stovek"));
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri, R"));
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri,R"));
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri,.R"));
 
     assertU(commit());
 
@@ -91,6 +94,7 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
       assertQ(req("q", f + ":třistatřicettři"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='2']");
       assertQ(req("q", f + ":TristaTricetTri"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='2']");
       
+      assertQ(req("q", f + ":\"cutri,r\""), "//*[@numFound='2']", "//doc[1]/str[@name='id'][.='3']", "//doc[1]/str[@name='id'][.='4']");
     }
   }
   

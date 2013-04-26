@@ -728,10 +728,13 @@ public class BatchHandler extends RequestHandlerBase {
 	              }
 	            }
 	          }
+	          
+	          if (processed > 1) {
+	          	out.write(",\n");
+	          }
 	          // bummer, it doesn't have api for newlines - according to quick googling
 	          // control chars should be escaped in JSON, so this should be safe
 	          out.write(JSONUtil.toJSON(document).replace("\n", " "));
-	          out.write(",\n");
   	      }
   	      @Override
   	      public void setNextReader(AtomicReaderContext context) {

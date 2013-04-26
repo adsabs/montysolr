@@ -230,12 +230,19 @@
         <field column="cite_read_boost" mongoField="true" />
         <field column="citation_count" mongoField="true" />
         <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
-        <field column="grant" mongoField="true" />
+        
+        <!--  TODO: mongodb is not serving grants now -->
+        <!-- 
+        <field column="grant_agencies" name="grant" mongoField="true" />
+        <field column="grant_ids" name="grant" mongoField="true" />
+        -->
+        
         
         <!-- following two fields are not represented in the schema.
              They are loaded from mongo only for the purpose of generating hierarchical facet -->
         <field column="grant_agencies" mongoField="true" />
         <field column="grant_ids" mongoField="true" />
+        
         
         <!-- 
             Fields marked as facetHierarchyField will be processed by the FacetHierarchyTransformer.
