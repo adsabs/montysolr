@@ -61,8 +61,10 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
     assertU(commit());
 
-    assertQ(req("q", "*:*"), "//*[@numFound='3']");
-
+    assertQ(req("q", "*:*"), "//*[@numFound='6']");
+    
+    dumpDoc(null, F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS);
+    
     for (String f: F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS) {
       
       // ascii normalization
@@ -94,7 +96,9 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
       assertQ(req("q", f + ":třistatřicettři"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='2']");
       assertQ(req("q", f + ":TristaTricetTri"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='2']");
       
-      assertQ(req("q", f + ":\"cutri,r\""), "//*[@numFound='2']", "//doc[1]/str[@name='id'][.='3']", "//doc[1]/str[@name='id'][.='4']");
+      assertQ(req("q", f + ":\"cutri,\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='3']");
+      assertQ(req("q", f + ":cutri,r"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='4']");
+      assertQ(req("q", f + ":cutri,.r"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='5']");
     }
   }
   
