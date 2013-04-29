@@ -586,13 +586,16 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
   		"//*[@numFound='1']",
   		"//doc/int[@name='recid'][.='9311214']");
-		assertQ(req("q", "grant_facet_hier:0/NSF-AST"),
+		assertQ(req("q", "grant_facet_hier:\"0/NSF-AST\""),
   		"//*[@numFound='1']",
   		"//doc/int[@name='recid'][.='9311214']");
 		assertQ(req("q", "grant_facet_hier:1/NSF-AST/0618398"),
   		"//*[@numFound='1']",
   		"//doc/int[@name='recid'][.='9311214']");
-
+		assertQ(req("q", "grant_facet_hier:0/NSF-AST"),
+	  		"//*[@numFound='1']",
+	  		"//doc/int[@name='recid'][.='9311214']");
+		
 
     /*
      * title

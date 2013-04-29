@@ -630,25 +630,8 @@
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 		</fieldType>
+
 		
-		
-		<!-- fix for #244, PLEASE REMOVE the copy field once the grant data are supplied-->
-		<fieldType name="grant_workaround" class="solr.TextField">
-      <analyzer type="index">
-        <tokenizer class="solr.PatternTokenizerFactory" pattern="\d/|/" />
-        <filter class="solr.LowerCaseFilterFactory" />
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_| )"
-          replacement="" replace="all" />
-        <filter class="solr.TrimFilterFactory" />
-      </analyzer>
-      <analyzer type="query">
-        <tokenizer class="solr.WhitespaceTokenizerFactory" />
-        <filter class="solr.LowerCaseFilterFactory" />
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_| )"
-          replacement="" replace="all" />
-        <filter class="solr.TrimFilterFactory" />
-      </analyzer>
-    </fieldType>
 
 		<fieldType name="affiliation_text" class="solr.TextField"
 			positionIncrementGap="100">
@@ -903,13 +886,8 @@
 		<field name="reference_wildcard" type="normalized_string_ascii" 
       indexed="false" stored="false" required="false" multiValued="false" />	
 
-    <!-- #244 workaround, please remove ASAP -->
-    <!--
-		<field name="grant" type="ads_text" indexed="true" stored="true"
-			multiValued="true" />
-			-->
 			
-		<field name="grant" type="grant_workaround" indexed="true" stored="true"
+		<field name="grant" type="normalized_text_ascii" indexed="true" stored="true"
       multiValued="true" />
 			
 		<!-- <field name="grant_id" type="string" indexed="false" stored="false" 
@@ -1022,9 +1000,6 @@
 	<copyField source="bibcode" dest="all" />
 	<copyField source="doi" dest="all" />
 	<copyField source="identifier" dest="all" />
-	
-	<!-- #244 workaround, please remove ASAP -->
-	<copyField source="grant_facet_hier" dest="grant" />
 	
 
 </schema>

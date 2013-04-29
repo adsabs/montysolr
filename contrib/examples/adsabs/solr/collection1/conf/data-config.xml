@@ -232,10 +232,7 @@
         <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
         
         <!--  TODO: mongodb is not serving grants now -->
-        <!-- 
-        <field column="grant_agencies" name="grant" mongoField="true" />
-        <field column="grant_ids" name="grant" mongoField="true" />
-        -->
+        <field column="grants" name="grant" mongoField="true" />
         
         
         <!-- following two fields are not represented in the schema.
