@@ -75,7 +75,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		QueryConfigHandler config = getQueryConfigHandler();
 	
-		add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"))); // true=modifyTree (remove the plain tokens, join them into one)
+		//add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"))); // true=modifyTree (remove the plain tokens, join them into one)
+		add(new AqpDEFOPMarkPlainNodes());
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 		
@@ -122,7 +123,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpAdsabsFieldNodePreAnalysisProcessor()); // ADS specific modification of the tree before the analysis
 		
 		add(new AqpFieldMapperProcessor()); // translate the field name before we try to find the tokenizer chain
-		//add(new AqpMultiWordProcessor()); // find synonyms if we have 'plain word token group'
+		add(new AqpMultiWordProcessor()); // find synonyms if we have 'plain word token group'
 		
 		if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY) == true) {
       add(new AqpUnfieldedSearchProcessor()); // use edismax to wrap unfielded searches

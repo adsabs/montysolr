@@ -138,9 +138,8 @@
 		
 	</target>
 	
-	<target name="build-all"  depends="clean,invenio-build-grammar,jar">
+	<target name="build-all"  depends="clean,invenio-build-grammar,jar" />
 	    
-    </target>
 	
 
 </project>
