@@ -887,6 +887,9 @@
       indexed="false" stored="false" required="false" multiValued="false" />	
 
 			
+		<field name="facility" type="normalized_text_ascii" indexed="true" stored="true"
+      multiValued="true" />
+			
 		<field name="grant" type="normalized_text_ascii" indexed="true" stored="true"
       multiValued="true" />
 			
