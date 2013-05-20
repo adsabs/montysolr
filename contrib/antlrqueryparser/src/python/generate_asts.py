@@ -3,6 +3,11 @@ import sys
 import subprocess as sub
 import os
 
+"""
+Simple utility script to generate HTML charts of how ANTLR parses
+every query and what is the resulting AST. 
+"""
+
 def run(grammar_name, basedir='', 
         cp='.:/dvt/antlr-142/lib/antlr-3.4-complete.jar:/x/dev/antlr-34/lib/antlr-3.4-complete.jar',
         grammardir='',

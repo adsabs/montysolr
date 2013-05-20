@@ -10,6 +10,7 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpUtils;
 
 /**
  * This processor applies the user-submitted value to all {@link FieldableNode}
@@ -34,7 +35,7 @@ public class AqpFIELDProcessor extends QueryNodeProcessorImpl implements
       String field = getFieldValue(node);
       node = node.getChildren().get(node.getChildren().size() - 1);
       if (field != null) {
-        applyFieldToAllChildren(EscapeQuerySyntaxImpl.discardEscapeChar(field)
+        AqpUtils.applyFieldToAllChildren(EscapeQuerySyntaxImpl.discardEscapeChar(field)
             .toString(), node);
       }
     }
@@ -60,16 +61,5 @@ public class AqpFIELDProcessor extends QueryNodeProcessorImpl implements
     return null;
   }
 
-  private void applyFieldToAllChildren(String field, QueryNode node) {
-
-    if (node instanceof FieldQueryNode) {
-      ((FieldQueryNode) node).setField(field);
-    }
-    if (node.getChildren() != null) {
-      for (QueryNode child : node.getChildren()) {
-        applyFieldToAllChildren(field, child);
-      }
-    }
-  }
 
 }

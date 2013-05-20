@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler.ConfigurationKeys;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;

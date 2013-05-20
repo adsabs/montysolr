@@ -1,4 +1,4 @@
-package org.apache.lucene.queryparser.flexible.aqp;
+package org.apache.lucene.queryparser.flexible.aqp.parser;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -111,7 +111,7 @@ public class AqpStandardQueryNodeProcessorPipeline extends
     add(new AqpFuzzyModifierProcessor());
 
     // TODO: remove the processors which are not needed
-    // these were the standard guys before AQP were added
+    // these were the standard guys before AQP ones were added
 
     add(new WildcardQueryNodeProcessor());
     add(new MultiFieldQueryNodeProcessor());

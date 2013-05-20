@@ -1,4 +1,4 @@
-package org.apache.lucene.queryparser.flexible.aqp;
+package org.apache.lucene.queryparser.flexible.aqp.util;
 
 import java.util.Map;
 

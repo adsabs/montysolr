@@ -7,7 +7,7 @@ import org.antlr.runtime.CommonToken;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
-import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
 
 /**
  * When Aqp parser starts processing the AST (abstract syntax tree)

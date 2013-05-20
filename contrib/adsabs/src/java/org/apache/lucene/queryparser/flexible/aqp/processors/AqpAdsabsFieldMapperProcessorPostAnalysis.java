@@ -1,7 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;

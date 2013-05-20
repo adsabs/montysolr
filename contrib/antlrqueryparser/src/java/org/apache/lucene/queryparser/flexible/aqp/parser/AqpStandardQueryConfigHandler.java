@@ -1,4 +1,4 @@
-package org.apache.lucene.queryparser.flexible.aqp.config;
+package org.apache.lucene.queryparser.flexible.aqp.parser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,10 @@ import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackEvent;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackEventHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackImpl;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPProcessor;

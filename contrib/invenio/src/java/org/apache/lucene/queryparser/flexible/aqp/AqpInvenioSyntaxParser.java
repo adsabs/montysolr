@@ -12,14 +12,14 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
-import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
-import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTreeAdaptor;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParserAbstract;
 import org.apache.lucene.queryparser.flexible.aqp.parser.FixInvenioLexer;
 import org.apache.lucene.queryparser.flexible.aqp.parser.FixInvenioParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.InvenioLexer;
 import org.apache.lucene.queryparser.flexible.aqp.parser.InvenioParser;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTreeAdaptor;
 
 /**
  * A modified version of the default parser, it uses two grammars.

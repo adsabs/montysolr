@@ -1,8 +1,10 @@
-package org.apache.lucene.queryparser.flexible.aqp;
+package org.apache.lucene.queryparser.flexible.aqp.parser;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParserLoadableImpl;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
+import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 
 public class AqpStandardLuceneParser {
 
@@ -21,8 +23,20 @@ public class AqpStandardLuceneParser {
         new AqpStandardQueryTreeBuilder());
   }
 
+  /**
+   * Instantiates {@link StandardLuceneGrammarSyntaxParser}, this method
+   * is using a dedicated parser class, instead of loading the parser
+   * by name
+   * 
+   * @return
+   * @throws QueryNodeParseException
+   */
   public static AqpQueryParser init() throws QueryNodeParseException {
-    return AqpStandardLuceneParser.init("StandardLuceneGrammar");
+  	return new AqpQueryParser(new AqpStandardQueryConfigHandler(),
+  			new StandardLuceneGrammarSyntaxParser(),
+        new AqpStandardQueryNodeProcessorPipeline(null),
+        new AqpStandardQueryTreeBuilder());
+  	
   }
 
   /**

@@ -9,8 +9,8 @@ import org.apache.lucene.queryparser.flexible.standard.config.FieldDateResolutio
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpInvenioQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.InvenioQueryAttributeImpl;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

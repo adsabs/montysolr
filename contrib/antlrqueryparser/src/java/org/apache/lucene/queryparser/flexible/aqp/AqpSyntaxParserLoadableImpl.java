@@ -17,14 +17,24 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
-import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
-import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTreeAdaptor;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardLuceneParser;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTreeAdaptor;
 
 /**
  * This implementation can load any AST grammar from the repository of grammars
  * without a need to provide a Java implementation. It uses reflection, so it
  * might be slower than a dedicated parsing class.
  * 
+ * Every grammar must have a top-level rule called <b>mainQ</b>
+ * 
+ * And every grammar must return AST.
+ * 
+ * If you know that you are going to instantiate specific parser, then 
+ * you should not use this generic class. 
+ * 
+ * @see AqpSyntaxParserAbstract
+ * @see AqpStandardLuceneParser#init()
  * 
  */
 public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {

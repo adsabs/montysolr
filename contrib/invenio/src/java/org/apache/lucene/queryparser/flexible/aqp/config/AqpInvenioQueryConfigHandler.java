@@ -1,5 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp.config;
 
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 
 public class AqpInvenioQueryConfigHandler extends AqpStandardQueryConfigHandler {

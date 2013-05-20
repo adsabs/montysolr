@@ -1,4 +1,4 @@
-package org.apache.lucene.queryparser.flexible.aqp;
+package org.apache.lucene.queryparser.flexible.aqp.parser;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -59,6 +59,7 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 import org.apache.lucene.search.Query;
@@ -72,7 +73,7 @@ import org.apache.lucene.search.Query;
  * @see QueryTreeBuilder
  * @see StandardQueryNodeProcessorPipeline
  */
-public class AqpStandardQueryTreeBuilder extends QueryTreeBuilder implements
+public class AqpStandardQueryTreeBuilder extends AqpQueryTreeBuilder implements
     StandardQueryBuilder {
 
   private boolean debug = false;

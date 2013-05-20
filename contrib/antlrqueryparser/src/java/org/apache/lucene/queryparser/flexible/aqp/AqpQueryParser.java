@@ -31,9 +31,11 @@ import org.apache.lucene.queryparser.flexible.core.QueryParserHelper;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
+import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.config.FuzzyConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.NumericConfig;
@@ -42,11 +44,12 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.parser.StandardSyntaxParser;
 import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryNodeProcessorPipeline;
-import org.apache.lucene.queryparser.flexible.aqp.AqpDebuggingQueryNodeProcessorPipeline;
-import org.apache.lucene.queryparser.flexible.aqp.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpDebuggingQueryNodeProcessorPipeline;
+import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.Query;
@@ -288,7 +291,8 @@ public class AqpQueryParser extends QueryParserHelper {
    * or {@link Operator#OR}.
    */
   public StandardQueryConfigHandler.Operator getDefaultOperator() {
-    return getQueryConfigHandler().get(ConfigurationKeys.DEFAULT_OPERATOR);
+  	return getQueryConfigHandler().get(ConfigurationKeys.DEFAULT_OPERATOR);
+    
   }
 
   /**

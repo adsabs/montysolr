@@ -1,4 +1,4 @@
-package org.apache.lucene.queryparser.flexible.aqp;
+package org.apache.lucene.queryparser.flexible.aqp.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.Map;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTreeAdaptor;
 
-import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTree;
 
 public class AqpCommonTreeAdaptor extends CommonTreeAdaptor {
 
