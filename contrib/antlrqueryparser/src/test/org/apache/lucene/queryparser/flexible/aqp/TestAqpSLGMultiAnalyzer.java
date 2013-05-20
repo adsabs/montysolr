@@ -47,13 +47,11 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   private static int multiToken = 0;
 
   public void testMultiAnalyzer() throws QueryNodeException, Exception {
-	  
-	
+
     AqpQueryParser qp = getParser();
     qp.setDefaultOperator(Operator.OR);
     qp.setAnalyzer(new MultiAnalyzer());
-    
-    
+
     // trivial, no multiple tokens:
     assertEquals("foo", qp.parse("foo", "").toString());
     assertEquals("foo", qp.parse("\"foo\"", "").toString());
@@ -68,8 +66,8 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
     assertEquals("(multi multi2) (multi multi2)", qp.parse("multi multi", "")
         .toString());
     Query q = qp.parse("(foo multi) +(bar multi)", "");
-    assertEquals("foo (multi multi2) +(bar (multi multi2))", 
-    		qp.parse("(foo multi) +(bar multi)", "").toString());
+    assertEquals("foo (multi multi2) +(bar (multi multi2))",
+        qp.parse("(foo multi) +(bar multi)", "").toString());
     assertEquals("+(foo (multi multi2)) field:\"bar (multi multi2)\"", qp
         .parse("+(foo multi) field:\"bar multi\"", "").toString());
 
@@ -78,20 +76,20 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
         .toString());
     assertEquals("\"foo (multi multi2)\"", qp.parse("\"foo multi\"", "")
         .toString());
-    assertEquals("\"foo (multi multi2) foobar (multi multi2)\"", qp.parse(
-        "\"foo multi foobar multi\"", "").toString());
+    assertEquals("\"foo (multi multi2) foobar (multi multi2)\"",
+        qp.parse("\"foo multi foobar multi\"", "").toString());
 
     // fields:
-    assertEquals("(field:multi field:multi2) field:foo", qp.parse(
-        "field:multi field:foo", "").toString());
-    assertEquals("field:\"(multi multi2) foo\"", qp.parse(
-        "field:\"multi foo\"", "").toString());
+    assertEquals("(field:multi field:multi2) field:foo",
+        qp.parse("field:multi field:foo", "").toString());
+    assertEquals("field:\"(multi multi2) foo\"",
+        qp.parse("field:\"multi foo\"", "").toString());
 
     // three tokens at one position:
     assertEquals("triplemulti multi3 multi2", qp.parse("triplemulti", "")
         .toString());
-    assertEquals("foo (triplemulti multi3 multi2) foobar", qp.parse(
-        "foo triplemulti foobar", "").toString());
+    assertEquals("foo (triplemulti multi3 multi2) foobar",
+        qp.parse("foo triplemulti foobar", "").toString());
 
     // phrase with non-default slop:
     assertEquals("\"(multi multi2) foo\"~10", qp.parse("\"multi foo\"~10", "")
@@ -103,10 +101,10 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
 
     // phrase after changing default slop
     qp.setDefaultPhraseSlop(99);
-    assertEquals("\"(multi multi2) foo\"~99 bar", qp.parse("\"multi foo\" bar",
-        "").toString());
-    assertEquals("\"(multi multi2) foo\"~99 \"foo bar\"~2", qp.parse(
-        "\"multi foo\" \"foo bar\"~2", "").toString());
+    assertEquals("\"(multi multi2) foo\"~99 bar",
+        qp.parse("\"multi foo\" bar", "").toString());
+    assertEquals("\"(multi multi2) foo\"~99 \"foo bar\"~2",
+        qp.parse("\"multi foo\" \"foo bar\"~2", "").toString());
     qp.setDefaultPhraseSlop(0);
 
     // non-default operator:
@@ -128,17 +126,17 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   // assertEquals("\"(multi multi2) bar\"~99",
   // qp.getSuperFieldQuery("","multi bar").toString());
   //
-  //    
+  //
   // // ask sublcass to parse phrase with modified default slop
   // assertEquals("\"(multi multi2) foo\"~99 bar",
   // qp.parse("\"multi foo\" bar").toString());
-  //    
+  //
   // }
 
   public void testPosIncrementAnalyzer() throws QueryNodeException, Exception {
     AqpQueryParser qp = getParser();
     qp.setDefaultOperator(Operator.OR);
-    
+
     qp.setAnalyzer(new PosIncrementAnalyzer());
 
     assertEquals("quick brown", qp.parse("the quick brown", "").toString());
@@ -157,8 +155,10 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   private class MultiAnalyzer extends Analyzer {
 
     @Override
-    public TokenStreamComponents createComponents(String fieldName, Reader reader) {
-      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE, true);
+    public TokenStreamComponents createComponents(String fieldName,
+        Reader reader) {
+      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE,
+          true);
       return new TokenStreamComponents(result, new TestFilter(result));
     }
   }
@@ -224,9 +224,12 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   private class PosIncrementAnalyzer extends Analyzer {
 
     @Override
-    public TokenStreamComponents createComponents(String fieldName, Reader reader) {
-      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE, true);
-      return new TokenStreamComponents(result, new TestPosIncrementFilter(result));
+    public TokenStreamComponents createComponents(String fieldName,
+        Reader reader) {
+      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE,
+          true);
+      return new TokenStreamComponents(result, new TestPosIncrementFilter(
+          result));
     }
   }
 
@@ -256,10 +259,10 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
     }
 
   }
-  
-  //Uniquely for Junit 3
+
+  // Uniquely for Junit 3
   public static junit.framework.Test suite() {
-      return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiAnalyzer.class);
+    return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiAnalyzer.class);
   }
 
 }

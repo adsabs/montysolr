@@ -21,90 +21,96 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
  * 
  * <br/>
  * 
- * If BOOST node contains only one child, we return that child and do 
- * nothing.
+ * If BOOST node contains only one child, we return that child and do nothing.
  * 
  * <br/>
  * 
- * If BOOST node contains two children, we take the first and check its
- * input, eg.
+ * If BOOST node contains two children, we take the first and check its input,
+ * eg.
+ * 
  * <pre>
  *                  FUZZY
  *                  /  \
  *               ~0.1  rest
  * </pre>
  * 
- * We create a new node  {@@link AqpFuzzyModifierNode} (rest, 0.1) and return that node.
+ * We create a new node {@@link AqpFuzzyModifierNode} (rest, 0.1) and
+ * return that node.
  * 
  * <br/>
  * 
- * Presence of the BOOST node child means user specified at least "^"
- * We'll use the default from the configuration {@link BoostAttribute}
+ * Presence of the BOOST node child means user specified at least "^" We'll use
+ * the default from the configuration {@link BoostAttribute}
  * 
  * @see AqpTMODIFIERProcessor
  * @see AqpFUZZYProcessor
  */
 public class AqpFUZZYProcessor extends QueryNodeProcessorImpl implements
-		QueryNodeProcessor {
+    QueryNodeProcessor {
 
-	@Override
-	protected QueryNode preProcessNode(QueryNode node)
-			throws QueryNodeException {
-		if (node instanceof AqpANTLRNode && ((AqpANTLRNode) node).getTokenLabel().equals("FUZZY")) {
-			
-			if (node.getChildren().size()==1) {
-				return node.getChildren().get(0);
-			}
-			
-			Float fuzzy= getFuzzyValue(node);
-			
-			if (fuzzy==null) {
-				return node.getChildren().get(node.getChildren().size()-1);
-			}
-			
-			return new AqpFuzzyModifierNode(node.getChildren().get(node.getChildren().size()-1), fuzzy);
-			
-		}
-		return node;
-		
-	}
+  @Override
+  protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
+    if (node instanceof AqpANTLRNode
+        && ((AqpANTLRNode) node).getTokenLabel().equals("FUZZY")) {
 
-	@Override
-	protected QueryNode postProcessNode(QueryNode node)
-			throws QueryNodeException {
-		return node;
-	}
+      if (node.getChildren().size() == 1) {
+        return node.getChildren().get(0);
+      }
 
-	@Override
-	protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
-			throws QueryNodeException {
-		return children;
-	}
-	
-	private Float getFuzzyValue(QueryNode fuzzyNode) throws QueryNodeException {
-		if (fuzzyNode.getChildren()!=null) {
-			
-			AqpANTLRNode child = ((AqpANTLRNode) fuzzyNode.getChildren().get(0));
-			String input = child.getTokenInput();
-			float fuzzy;
-			
-			if (input.equals("~")) {
-				QueryConfigHandler queryConfig = getQueryConfigHandler();
-				if (queryConfig == null || !queryConfig.has(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY)) {
-					throw new QueryNodeException(new MessageImpl(
-			                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-			                "Configuration error: " + AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY.toString() + " is missing"));
-				}
-				fuzzy = queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY);
-			}
-			else {
-				fuzzy = Float.valueOf(input.replace("~", ""));
-			}
-			
-			return fuzzy;
-			
-		}
-		return null;
-	}
+      Float fuzzy = getFuzzyValue(node);
+
+      if (fuzzy == null) {
+        return node.getChildren().get(node.getChildren().size() - 1);
+      }
+
+      return new AqpFuzzyModifierNode(node.getChildren().get(
+          node.getChildren().size() - 1), fuzzy);
+
+    }
+    return node;
+
+  }
+
+  @Override
+  protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
+    return node;
+  }
+
+  @Override
+  protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
+      throws QueryNodeException {
+    return children;
+  }
+
+  private Float getFuzzyValue(QueryNode fuzzyNode) throws QueryNodeException {
+    if (fuzzyNode.getChildren() != null) {
+
+      AqpANTLRNode child = ((AqpANTLRNode) fuzzyNode.getChildren().get(0));
+      String input = child.getTokenInput();
+      float fuzzy;
+
+      if (input.equals("~")) {
+        QueryConfigHandler queryConfig = getQueryConfigHandler();
+        if (queryConfig == null
+            || !queryConfig
+                .has(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY)) {
+          throw new QueryNodeException(
+              new MessageImpl(
+                  QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+                  "Configuration error: "
+                      + AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY
+                          .toString() + " is missing"));
+        }
+        fuzzy = queryConfig
+            .get(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY);
+      } else {
+        fuzzy = Float.valueOf(input.replace("~", ""));
+      }
+
+      return fuzzy;
+
+    }
+    return null;
+  }
 
 }

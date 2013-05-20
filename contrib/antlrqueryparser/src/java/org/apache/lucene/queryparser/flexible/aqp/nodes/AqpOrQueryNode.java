@@ -19,7 +19,6 @@ package org.apache.lucene.queryparser.flexible.aqp.nodes;
 
 import java.util.List;
 
-import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
 /**
@@ -30,23 +29,23 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  */
 public class AqpOrQueryNode extends AqpBooleanQueryNode {
 
-	private static final long serialVersionUID = 8472252510866053747L;
+  private static final long serialVersionUID = 8472252510866053747L;
 
-	/**
-	 * @param clauses
-	 *            - the query nodes to be or'ed
-	 */
-	public AqpOrQueryNode(List<QueryNode> clauses) {
-		super(clauses);
-		
-		operator = "OR";
-		
-		//applyModifier(clauses, Modifier.MOD_NONE);
-		
-		// unfortunately we have to do it like this (when subclassing from
-		// BooleanQueryNode)
-		set(clauses);
+  /**
+   * @param clauses
+   *          - the query nodes to be or'ed
+   */
+  public AqpOrQueryNode(List<QueryNode> clauses) {
+    super(clauses);
 
-	}
+    operator = "OR";
+
+    // applyModifier(clauses, Modifier.MOD_NONE);
+
+    // unfortunately we have to do it like this (when subclassing from
+    // BooleanQueryNode)
+    set(clauses);
+
+  }
 
 }

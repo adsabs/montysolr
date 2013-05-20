@@ -27,86 +27,88 @@ import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode.Modif
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 
 /**
- * A {@link AqpBooleanQueryNode} represents base boolean operation performed on a
- * list of nodes. It will apply the @{link ModifierQueryNode} to the clauses.
- * The normal behaviour is not to override the ModifierQueryNode values, if already
- * present. 
+ * A {@link AqpBooleanQueryNode} represents base boolean operation performed on
+ * a list of nodes. It will apply the @{link ModifierQueryNode} to the clauses.
+ * The normal behaviour is not to override the ModifierQueryNode values, if
+ * already present.
  */
 public class AqpBooleanQueryNode extends BooleanQueryNode {
 
-	private static final long serialVersionUID = -5974910790857168198L;
+  private static final long serialVersionUID = -5974910790857168198L;
 
-	protected String operator = "DEFOP";
-	protected boolean overrideModifiers = false;
+  protected String operator = "DEFOP";
+  protected boolean overrideModifiers = false;
 
-	/**
-	 * @param clauses
-	 *            - the query nodes to be op'ed
-	 */
-	public AqpBooleanQueryNode(List<QueryNode> clauses) {
-		super(clauses);
+  /**
+   * @param clauses
+   *          - the query nodes to be op'ed
+   */
+  public AqpBooleanQueryNode(List<QueryNode> clauses) {
+    super(clauses);
 
-	}
+  }
 
-	@Override
-	public String toString() {
-		if (getChildren() == null || getChildren().size() == 0)
-			return "<boolean operation='" + operator + "'/>";
-		StringBuilder sb = new StringBuilder();
-		sb.append("<boolean operation='" + operator + "'>");
-		for (QueryNode child : getChildren()) {
-			sb.append("\n");
-			sb.append(child.toString());
+  @Override
+  public String toString() {
+    if (getChildren() == null || getChildren().size() == 0)
+      return "<boolean operation='" + operator + "'/>";
+    StringBuilder sb = new StringBuilder();
+    sb.append("<boolean operation='" + operator + "'>");
+    for (QueryNode child : getChildren()) {
+      sb.append("\n");
+      sb.append(child.toString());
 
-		}
-		sb.append("\n</boolean>");
-		return sb.toString();
-	}
+    }
+    sb.append("\n</boolean>");
+    return sb.toString();
+  }
 
-	@Override
-	public CharSequence toQueryString(EscapeQuerySyntax escapeSyntaxParser) {
-		if (getChildren() == null || getChildren().size() == 0)
-			return "";
+  @Override
+  public CharSequence toQueryString(EscapeQuerySyntax escapeSyntaxParser) {
+    if (getChildren() == null || getChildren().size() == 0)
+      return "";
 
-		StringBuilder sb = new StringBuilder();
-		String filler = "";
-		for (QueryNode child : getChildren()) {
-			sb.append(filler).append(child.toQueryString(escapeSyntaxParser));
-			filler = " " + operator + " ";
-		}
+    StringBuilder sb = new StringBuilder();
+    String filler = "";
+    for (QueryNode child : getChildren()) {
+      sb.append(filler).append(child.toQueryString(escapeSyntaxParser));
+      filler = " " + operator + " ";
+    }
 
-		// in case is root or the parent is a group node avoid parenthesis
-		if ((getParent() != null && getParent() instanceof GroupQueryNode)
-				|| isRoot())
-			return sb.toString();
-		else
-			return "( " + sb.toString() + " )";
-	}
+    // in case is root or the parent is a group node avoid parenthesis
+    if ((getParent() != null && getParent() instanceof GroupQueryNode)
+        || isRoot())
+      return sb.toString();
+    else
+      return "( " + sb.toString() + " )";
+  }
 
-	public void applyModifier(List<QueryNode> clauses, Modifier mod) {
-		for (int i = 0; i < clauses.size(); i++) {
-			QueryNode child = clauses.get(i);
+  public void applyModifier(List<QueryNode> clauses, Modifier mod) {
+    for (int i = 0; i < clauses.size(); i++) {
+      QueryNode child = clauses.get(i);
 
-			if (child instanceof ModifierQueryNode || child instanceof GroupQueryNode) {
-				if (overrideModifiers) {
-					clauses.set(i, new ModifierQueryNode(
-						((ModifierQueryNode) child).getChild(), mod));
-				}
-			} else {
-				clauses.set(i, new ModifierQueryNode(child, mod));
-			}
-		}
-	}
-	
-	public void setOverrideModifiers(boolean val) {
-		this.overrideModifiers = val;
-	}
-	
-	public void setOperator(String op) {
-		operator = op;
-	}
-	
-	public String getOperator() {
-		return operator;
-	}
+      if (child instanceof ModifierQueryNode || child instanceof GroupQueryNode) {
+        if (overrideModifiers) {
+          clauses
+              .set(i,
+                  new ModifierQueryNode(((ModifierQueryNode) child).getChild(),
+                      mod));
+        }
+      } else {
+        clauses.set(i, new ModifierQueryNode(child, mod));
+      }
+    }
+  }
+
+  public void setOverrideModifiers(boolean val) {
+    this.overrideModifiers = val;
+  }
+
+  public void setOperator(String op) {
+    operator = op;
+  }
+
+  public String getOperator() {
+    return operator;
+  }
 }

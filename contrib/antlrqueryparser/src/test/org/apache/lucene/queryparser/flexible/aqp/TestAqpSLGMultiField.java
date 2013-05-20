@@ -68,7 +68,6 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     assertStopQueryEquals("(stop)", "");
     assertStopQueryEquals("((stop))", "");
   }
-  
 
   // verify parsing of query using a stopping analyzer
   private void assertStopQueryEquals(String qtxt, String expectedRes)
@@ -103,12 +102,12 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     assertEquals("+(b:one t:one) +(b:two t:two)", q.toString());
 
     q = mfqp.parse("+one -two -three", null);
-    assertEquals("+(b:one t:one) -(b:two t:two) -(b:three t:three)", q
-        .toString());
+    assertEquals("+(b:one t:one) -(b:two t:two) -(b:three t:three)",
+        q.toString());
 
     q = mfqp.parse("one^2 two", null);
     assertEquals("((b:one t:one)^2.0) (b:two t:two)", q.toString());
-    
+
     mfqp.setAllowSlowFuzzy(true);
     q = mfqp.parse("one~ two", null);
     assertEquals("(b:one~0.5 t:one~0.5) (b:two t:two)", q.toString());
@@ -129,8 +128,8 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     assertEquals("b:\"foo bar\" t:\"foo bar\"", q.toString());
 
     q = mfqp.parse("\"aa bb cc\" \"dd ee\"", null);
-    assertEquals("(b:\"aa bb cc\" t:\"aa bb cc\") (b:\"dd ee\" t:\"dd ee\")", q
-        .toString());
+    assertEquals("(b:\"aa bb cc\" t:\"aa bb cc\") (b:\"dd ee\" t:\"dd ee\")",
+        q.toString());
 
     q = mfqp.parse("\"foo bar\"~4", null);
     assertEquals("b:\"foo bar\"~4 t:\"foo bar\"~4", q.toString());
@@ -155,7 +154,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
   }
 
   public void testBoostsSimple() throws Exception {
-    Map<String,Float> boosts = new HashMap<String,Float>();
+    Map<String, Float> boosts = new HashMap<String, Float>();
     boosts.put("b", Float.valueOf(5));
     boosts.put("t", Float.valueOf(10));
     String[] fields = { "b", "t" };
@@ -170,8 +169,8 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     // Check for AND
     q = mfqp.parse("one AND two", null);
-    assertEquals("+(b:one^5.0 t:one^10.0) +(b:two^5.0 t:two^10.0)", q
-        .toString());
+    assertEquals("+(b:one^5.0 t:one^10.0) +(b:two^5.0 t:two^10.0)",
+        q.toString());
 
     // Check for OR
     q = mfqp.parse("one OR two", null);
@@ -179,8 +178,8 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     // Check for AND and a field
     q = mfqp.parse("one AND two AND foo:test", null);
-    assertEquals("+(b:one^5.0 t:one^10.0) +(b:two^5.0 t:two^10.0) +foo:test", q
-        .toString());
+    assertEquals("+(b:one^5.0 t:one^10.0) +(b:two^5.0 t:two^10.0) +foo:test",
+        q.toString());
 
     q = mfqp.parse("one^3 AND two^4", null);
     assertEquals("+((b:one^5.0 t:one^10.0)^3.0) +((b:two^5.0 t:two^10.0)^4.0)",
@@ -194,7 +193,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     qp.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
     Query q = AqpQueryParserUtil.parse(qp, queries, fields);
     assertEquals("b:one t:two", q.toString());
-    
+
     String[] queries2 = { "+one", "+two" };
     q = AqpQueryParserUtil.parse(qp, queries2, fields);
     assertEquals("b:one t:two", q.toString());
@@ -218,17 +217,18 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     // check also with stop words for this static form (qtxts[], fields[]).
     TestQPHelper.QPTestAnalyzer stopA = new TestQPHelper.QPTestAnalyzer();
     qp.setAnalyzer(stopA);
-    
+
     String[] queries6 = { "((+stop))", "+((stop))" };
     q = AqpQueryParserUtil.parse(qp, queries6, fields);
     assertEquals("", q.toString());
 
     String[] queries7 = { "one ((+stop)) +more", "+((stop)) +two" };
     q = AqpQueryParserUtil.parse(qp, queries7, fields);
-    // well, aqp is better in removing the parens from top-level, 
-    // so this is the correct result (the AqpQueryUtils has fundamental flaw anyway)
+    // well, aqp is better in removing the parens from top-level,
+    // so this is the correct result (the AqpQueryUtils has fundamental flaw
+    // anyway)
     // original was: (b:one +b:more) (+t:two)
-    assertEquals("(b:one +b:more) t:two", q.toString()); 
+    assertEquals("(b:one +b:more) t:two", q.toString());
 
   }
 
@@ -236,16 +236,18 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     String[] fields = { "b", "t" };
     BooleanClause.Occur[] flags = { BooleanClause.Occur.MUST,
         BooleanClause.Occur.MUST_NOT };
-    Query q = QueryParserUtil.parse("one", fields, flags,
-        new StandardAnalyzer(TEST_VERSION_CURRENT));
+    Query q = QueryParserUtil.parse("one", fields, flags, new StandardAnalyzer(
+        TEST_VERSION_CURRENT));
     assertEquals("+b:one -t:one", q.toString());
 
-    q = QueryParserUtil.parse("one two", fields, flags, new StandardAnalyzer(TEST_VERSION_CURRENT));
+    q = QueryParserUtil.parse("one two", fields, flags, new StandardAnalyzer(
+        TEST_VERSION_CURRENT));
     assertEquals("+(b:one b:two) -(t:one t:two)", q.toString());
 
     try {
       BooleanClause.Occur[] flags2 = { BooleanClause.Occur.MUST };
-      q = QueryParserUtil.parse("blah", fields, flags2, new StandardAnalyzer(TEST_VERSION_CURRENT));
+      q = QueryParserUtil.parse("blah", fields, flags2, new StandardAnalyzer(
+          TEST_VERSION_CURRENT));
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -260,17 +262,19 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     parser.setMultiFields(fields);
     parser.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
 
-    Query q = QueryParserUtil.parse("one", fields, flags,
-        new StandardAnalyzer(TEST_VERSION_CURRENT));// , fields, flags, new
+    Query q = QueryParserUtil.parse("one", fields, flags, new StandardAnalyzer(
+        TEST_VERSION_CURRENT));// , fields, flags, new
     // StandardAnalyzer());
     assertEquals("+b:one -t:one", q.toString());
 
-    q = QueryParserUtil.parse("one two", fields, flags, new StandardAnalyzer(TEST_VERSION_CURRENT));
+    q = QueryParserUtil.parse("one two", fields, flags, new StandardAnalyzer(
+        TEST_VERSION_CURRENT));
     assertEquals("+(b:one b:two) -(t:one t:two)", q.toString());
 
     try {
       BooleanClause.Occur[] flags2 = { BooleanClause.Occur.MUST };
-      q = QueryParserUtil.parse("blah", fields, flags2, new StandardAnalyzer(TEST_VERSION_CURRENT));
+      q = QueryParserUtil.parse("blah", fields, flags2, new StandardAnalyzer(
+          TEST_VERSION_CURRENT));
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -288,8 +292,8 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     try {
       BooleanClause.Occur[] flags2 = { BooleanClause.Occur.MUST };
-      q = QueryParserUtil
-          .parse(queries, fields, flags2, new StandardAnalyzer(TEST_VERSION_CURRENT));
+      q = QueryParserUtil.parse(queries, fields, flags2, new StandardAnalyzer(
+          TEST_VERSION_CURRENT));
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -307,8 +311,8 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     try {
       BooleanClause.Occur[] flags2 = { BooleanClause.Occur.MUST };
-      q = QueryParserUtil
-          .parse(queries, fields, flags2, new StandardAnalyzer(TEST_VERSION_CURRENT));
+      q = QueryParserUtil.parse(queries, fields, flags2, new StandardAnalyzer(
+          TEST_VERSION_CURRENT));
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -336,7 +340,8 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
   public void testStopWordSearching() throws Exception {
     Analyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
     Directory ramDir = new RAMDirectory();
-    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(TEST_VERSION_CURRENT, analyzer));
+    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(
+        TEST_VERSION_CURRENT, analyzer));
     Document doc = new Document();
     doc.add(newField("body", "blah the footest blah", TextField.TYPE_NOT_STORED));
     iw.addDocument(doc);
@@ -365,7 +370,8 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     }
 
     @Override
-    public TokenStreamComponents createComponents(String fieldName, Reader reader) {
+    public TokenStreamComponents createComponents(String fieldName,
+        Reader reader) {
       if ("f1".equals(fieldName)) {
         return new TokenStreamComponents(new EmptyTokenizer(reader));
       } else {
@@ -373,11 +379,10 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
       }
     }
   }
-  
-  
-  //Uniquely for Junit 3
+
+  // Uniquely for Junit 3
   public static junit.framework.Test suite() {
-      return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiField.class);
+    return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiField.class);
   }
 
 }

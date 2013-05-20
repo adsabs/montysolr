@@ -67,25 +67,23 @@ public class AqpOPERATORProcessor extends AqpQProcessorPost {
     } else if (label.equals("NOT")) {
       return new AqpNotQueryNode(node.getChildren());
     } else if (label.toUpperCase().contains("NEAR")) {
-      if (label.length()<=4) {
+      if (label.length() <= 4) {
         return new AqpNearQueryNode(node.getChildren(),
             getDefaultProximityValue());
       } else {
         int distance = Integer.parseInt(label.substring(4));
         if (isProximityValueAllowed(distance)) {
-          return new AqpNearQueryNode(node.getChildren(),
-            distance);
-        }
-        else {
+          return new AqpNearQueryNode(node.getChildren(), distance);
+        } else {
           throw new QueryNodeException(new MessageImpl(
-              QueryParserMessages.INVALID_SYNTAX, "Proximity is only allowed in a range: " + getRange() ));
+              QueryParserMessages.INVALID_SYNTAX,
+              "Proximity is only allowed in a range: " + getRange()));
         }
       }
 
     } else {
       throw new QueryNodeException(new MessageImpl(
-          QueryParserMessages.INVALID_SYNTAX, "Unknown operator "
-          + label));
+          QueryParserMessages.INVALID_SYNTAX, "Unknown operator " + label));
     }
 
   }
@@ -93,20 +91,23 @@ public class AqpOPERATORProcessor extends AqpQProcessorPost {
   private Integer getDefaultProximityValue() throws QueryNodeException {
     QueryConfigHandler queryConfig = getQueryConfigHandler();
     if (queryConfig == null
-        || !queryConfig.has(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY)) {
+        || !queryConfig
+            .has(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY)) {
       throw new QueryNodeException(new MessageImpl(
           QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-          "Configuration error: "
-          + "DefaultProximity value is missing"));
+          "Configuration error: " + "DefaultProximity value is missing"));
     }
-    return queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY);
+    return queryConfig
+        .get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY);
   }
-  
+
   private int[] getRange() {
     QueryConfigHandler queryConfig = getQueryConfigHandler();
-    return queryConfig.get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOWED_PROXIMITY_RANGE);
+    return queryConfig
+        .get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOWED_PROXIMITY_RANGE);
 
   }
+
   private boolean isProximityValueAllowed(int userValue) {
     int[] range = getRange();
     if (userValue >= range[0] && userValue <= range[1]) {
@@ -116,21 +117,21 @@ public class AqpOPERATORProcessor extends AqpQProcessorPost {
   }
 
   protected StandardQueryConfigHandler.Operator getDefaultOperator()
-  throws QueryNodeException {
+      throws QueryNodeException {
     QueryConfigHandler queryConfig = getQueryConfigHandler();
 
     if (queryConfig != null) {
       if (queryConfig
           .has(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR)) {
         return queryConfig
-        .get(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR);
+            .get(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR);
       }
     }
     throw new QueryNodeException(new MessageImpl(
         QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
         "Configuration error: "
-        + StandardQueryConfigHandler.ConfigurationKeys.class
-        .toString() + " is missing"));
+            + StandardQueryConfigHandler.ConfigurationKeys.class.toString()
+            + " is missing"));
   }
 
 }

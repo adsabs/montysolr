@@ -29,39 +29,44 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  * 
  * <br/>
  * 
- * The first node is set to be required {@link ModifierQueryNode.Modifier#MOD_REQ}
- * and the rest of the clauses will have a {@link ModifierQueryNode.Modifier#MOD_NOT} 
+ * The first node is set to be required
+ * {@link ModifierQueryNode.Modifier#MOD_REQ} and the rest of the clauses will
+ * have a {@link ModifierQueryNode.Modifier#MOD_NOT}
  * 
  * @see AqpBooleanQueryNode
  */
 public class AqpNotQueryNode extends AqpBooleanQueryNode {
 
+  private static final long serialVersionUID = 4054514488434283069L;
 
-	private static final long serialVersionUID = 4054514488434283069L;
+  /**
+   * @param clauses
+   *          - the query nodes to be and'ed
+   */
+  public AqpNotQueryNode(List<QueryNode> clauses) {
+    super(clauses);
 
-	/**
-	 * @param clauses
-	 *            - the query nodes to be and'ed
-	 */
-	public AqpNotQueryNode(List<QueryNode> clauses) {
-		super(clauses);
+    operator = "NOT";
 
-		operator = "NOT";
+    if ((clauses == null) || (clauses.size() < 2)) {
+      throw new IllegalArgumentException(
+          "NOT query must have at least two clauses");
+    }
 
-		if ((clauses == null) || (clauses.size() < 2)) {
-			throw new IllegalArgumentException(
-					"NOT query must have at least two clauses");
-		}
-		
-		QueryNode firstNode = clauses.get(0);
-		applyModifier(clauses, Modifier.MOD_NOT);
-		// reset the first node (if it was wrapped, ie not already having user specified MODIFIER)
-		if (!firstNode.equals(clauses.get(0))) {
-			clauses.set(0, new ModifierQueryNode(((ModifierQueryNode) clauses.get(0)).getChild(), Modifier.MOD_REQ));
-		}
-		
-		set(clauses);
+    QueryNode firstNode = clauses.get(0);
+    applyModifier(clauses, Modifier.MOD_NOT);
+    // reset the first node (if it was wrapped, ie not already having user
+    // specified MODIFIER)
+    if (!firstNode.equals(clauses.get(0))) {
+      clauses
+          .set(
+              0,
+              new ModifierQueryNode(((ModifierQueryNode) clauses.get(0))
+                  .getChild(), Modifier.MOD_REQ));
+    }
 
-	}
+    set(clauses);
+
+  }
 
 }

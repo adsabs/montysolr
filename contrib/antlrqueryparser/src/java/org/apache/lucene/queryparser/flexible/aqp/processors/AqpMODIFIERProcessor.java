@@ -49,44 +49,44 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  */
 public class AqpMODIFIERProcessor extends AqpQProcessor {
 
-	public boolean nodeIsWanted(AqpANTLRNode node) {
-		if (node.getTokenLabel().equals("MODIFIER")) {
-			return true;
-		}
-		return false;
-	}
-	
-	public AqpANTLRNode getModifierNode(QueryNode node) {
-		return ((AqpANTLRNode) node.getChildren().get(0));
-	}
-	
-	public QueryNode getValueNode(QueryNode node) {
-		return node.getChildren().get(node.getChildren().size() - 1);
-	}
+  public boolean nodeIsWanted(AqpANTLRNode node) {
+    if (node.getTokenLabel().equals("MODIFIER")) {
+      return true;
+    }
+    return false;
+  }
 
-	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
+  public AqpANTLRNode getModifierNode(QueryNode node) {
+    return ((AqpANTLRNode) node.getChildren().get(0));
+  }
 
-		if (node.getChildren().size() == 1) {
-			return node.getChildren().get(0);
-		}
+  public QueryNode getValueNode(QueryNode node) {
+    return node.getChildren().get(node.getChildren().size() - 1);
+  }
 
-		AqpANTLRNode modifierNode = getModifierNode(node);
-		String modifier = modifierNode.getTokenName();
+  public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
 
-		QueryNode childNode = getValueNode(node);
-		
-		if (modifier.equals("PLUS")) {
-			return new ModifierQueryNode(childNode,
-					ModifierQueryNode.Modifier.MOD_REQ);
-		} else if (modifier.equals("MINUS")) {
-			return new ModifierQueryNode(childNode,
-					ModifierQueryNode.Modifier.MOD_NOT);
-		} else {
-			throw new QueryNodeException(new MessageImpl(
-					QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-					"Unknown modifier: " + modifier + "\n" + node.toString()));
-		}
+    if (node.getChildren().size() == 1) {
+      return node.getChildren().get(0);
+    }
 
-	}
+    AqpANTLRNode modifierNode = getModifierNode(node);
+    String modifier = modifierNode.getTokenName();
+
+    QueryNode childNode = getValueNode(node);
+
+    if (modifier.equals("PLUS")) {
+      return new ModifierQueryNode(childNode,
+          ModifierQueryNode.Modifier.MOD_REQ);
+    } else if (modifier.equals("MINUS")) {
+      return new ModifierQueryNode(childNode,
+          ModifierQueryNode.Modifier.MOD_NOT);
+    } else {
+      throw new QueryNodeException(new MessageImpl(
+          QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+          "Unknown modifier: " + modifier + "\n" + node.toString()));
+    }
+
+  }
 
 }

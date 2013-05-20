@@ -1,6 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp.config;
 
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,34 +17,32 @@ package org.apache.lucene.queryparser.flexible.aqp.config;
  * limitations under the License.
  */
 
-
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.util.Attribute;
 
-
 /**
- * This attribute is used to collect feedback messages and suggestions
- * from the query parser
+ * This attribute is used to collect feedback messages and suggestions from the
+ * query parser
  * 
  * WARNING: experimental, may change soon!
  */
 public interface AqpFeedback extends Attribute {
-	
-	public enum TYPE { DEBUG, INFO, WARN, ERROR, SYNTAX_SUGGESTION, DEPRECATED };
-	
-	/*
-	 * I am NOT trying to re-implement a wheel, I am just 
-	 * confused what is the proper way to wrap SLF4J used
-	 * by SOLR (but not by Lucene) and not introduce it as
-	 * a dependency to Lucene
-	 */
-	public AqpFeedbackEvent createEvent(TYPE level, 
-			Class<? extends QueryNodeProcessor> qnClass, 
-			QueryNode node, 
-			String msg, Object...args);
-	
-	public void sendEvent(AqpFeedbackEvent event);
-	
-	public void registerEventHandler(AqpFeedbackEventHandler handler);
+
+  public enum TYPE {
+    DEBUG, INFO, WARN, ERROR, SYNTAX_SUGGESTION, DEPRECATED
+  };
+
+  /*
+   * I am NOT trying to re-implement a wheel, I am just confused what is the
+   * proper way to wrap SLF4J used by SOLR (but not by Lucene) and not introduce
+   * it as a dependency to Lucene
+   */
+  public AqpFeedbackEvent createEvent(TYPE level,
+      Class<? extends QueryNodeProcessor> qnClass, QueryNode node, String msg,
+      Object... args);
+
+  public void sendEvent(AqpFeedbackEvent event);
+
+  public void registerEventHandler(AqpFeedbackEventHandler handler);
 }

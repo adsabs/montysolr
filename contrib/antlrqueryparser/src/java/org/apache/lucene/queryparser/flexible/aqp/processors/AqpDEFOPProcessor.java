@@ -58,109 +58,92 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  * 
  */
 public class AqpDEFOPProcessor extends QueryNodeProcessorImpl implements
-		QueryNodeProcessor {
+    QueryNodeProcessor {
 
-	@Override
-	protected QueryNode preProcessNode(QueryNode node)
-			throws QueryNodeException {
-		
-		if (node instanceof AqpANTLRNode
-				&& ((AqpANTLRNode) node).getTokenLabel().equals("DEFOP")) {
+  @Override
+  protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
 
-			// only one child, we'll simplify the tree
-			if (node.getChildren().size() == 1) {
-			  QueryNode child = node.getChildren().get(0);
-			  while (child instanceof AqpANTLRNode && ((AqpANTLRNode) child).getTokenLabel().equals("DEFOP")) {
-			    child = child.getChildren().get(0);
-			  }
-				return child;
-			}
+    if (node instanceof AqpANTLRNode
+        && ((AqpANTLRNode) node).getTokenLabel().equals("DEFOP")) {
 
-			/*
-			 * This used to be here to modify the AST tree, but is 
-			 * now handled by the AqpOptimizationProcessor
-			 * 
-			AqpANTLRNode thisNode = (AqpANTLRNode) node;
-			StandardQueryConfigHandler.Operator op = getDefaultOperator();
+      // only one child, we'll simplify the tree
+      if (node.getChildren().size() == 1) {
+        QueryNode child = node.getChildren().get(0);
+        while (child instanceof AqpANTLRNode
+            && ((AqpANTLRNode) child).getTokenLabel().equals("DEFOP")) {
+          child = child.getChildren().get(0);
+        }
+        return child;
+      }
 
-			// Turn the DEFOP into the default operator
-			thisNode.setTokenLabel(op.name());
+      /*
+       * This used to be here to modify the AST tree, but is now handled by the
+       * AqpOptimizationProcessor
+       * 
+       * AqpANTLRNode thisNode = (AqpANTLRNode) node;
+       * StandardQueryConfigHandler.Operator op = getDefaultOperator();
+       * 
+       * // Turn the DEFOP into the default operator
+       * thisNode.setTokenLabel(op.name());
+       * 
+       * List<QueryNode> children = node.getChildren(); if (children != null &&
+       * children.size() == 1) { AqpANTLRNode child = (AqpANTLRNode)
+       * children.get(0); if (child.getTokenName().equals("OPERATOR") ||
+       * child.getTokenLabel().equals("CLAUSE") ||
+       * child.getTokenLabel().equals("ATOM")) { return child; } } else if
+       * (children != null && children.size() > 1) { // several childeren
+       * (=clauses) below the operator // we check if we can put them together,
+       * ie // (this) AND (that) --> this AND that
+       * 
+       * String thisOp = thisNode.getTokenLabel(); String last = ((AqpANTLRNode)
+       * children.get(0)).getTokenLabel(); boolean rewriteSafe = true;
+       * 
+       * for (int i = 1; i < children.size(); i++) { AqpANTLRNode t =
+       * (AqpANTLRNode) children.get(i); String tt = t.getTokenLabel(); if
+       * (!(tt.equals(last) && t.getTokenLabel().equals(thisOp))) { rewriteSafe
+       * = false; break; } }
+       * 
+       * if (rewriteSafe == true) { QueryNode firstChild = children.get(0);
+       * List<QueryNode> childrenList = firstChild.getChildren();
+       * 
+       * for (int i = 1; i < children.size(); i++) { QueryNode otherChild =
+       * children.get(i); for (QueryNode nod : otherChild.getChildren()) {
+       * childrenList.add(nod); } }
+       * 
+       * children.clear(); thisNode.set(childrenList); } }
+       */
+    }
+    return node;
+  }
 
-			List<QueryNode> children = node.getChildren();
-			if (children != null && children.size() == 1) {
-				AqpANTLRNode child = (AqpANTLRNode) children.get(0);
-				if (child.getTokenName().equals("OPERATOR")
-						|| child.getTokenLabel().equals("CLAUSE")
-						|| child.getTokenLabel().equals("ATOM")) {
-					return child;
-				}
-			} else if (children != null && children.size() > 1) {
-				// several childeren (=clauses) below the operator
-				// we check if we can put them together, ie
-				// (this) AND (that) --> this AND that
+  @Override
+  protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
+    return node;
+  }
 
-				String thisOp = thisNode.getTokenLabel();
-				String last = ((AqpANTLRNode) children.get(0)).getTokenLabel();
-				boolean rewriteSafe = true;
+  @Override
+  protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
+      throws QueryNodeException {
+    return children;
+  }
 
-				for (int i = 1; i < children.size(); i++) {
-					AqpANTLRNode t = (AqpANTLRNode) children.get(i);
-					String tt = t.getTokenLabel();
-					if (!(tt.equals(last) && t.getTokenLabel().equals(thisOp))) {
-						rewriteSafe = false;
-						break;
-					}
-				}
+  protected StandardQueryConfigHandler.Operator getDefaultOperator()
+      throws QueryNodeException {
+    QueryConfigHandler queryConfig = getQueryConfigHandler();
 
-				if (rewriteSafe == true) {
-					QueryNode firstChild = children.get(0);
-					List<QueryNode> childrenList = firstChild.getChildren();
+    if (queryConfig != null) {
 
-					for (int i = 1; i < children.size(); i++) {
-						QueryNode otherChild = children.get(i);
-						for (QueryNode nod : otherChild.getChildren()) {
-							childrenList.add(nod);
-						}
-					}
-
-					children.clear();
-					thisNode.set(childrenList);
-				}
-			}
-			*/
-		}
-		return node;
-	}
-
-	@Override
-	protected QueryNode postProcessNode(QueryNode node)
-			throws QueryNodeException {
-		return node;
-	}
-
-	@Override
-	protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
-			throws QueryNodeException {
-		return children;
-	}
-
-	protected StandardQueryConfigHandler.Operator getDefaultOperator()
-			throws QueryNodeException {
-		QueryConfigHandler queryConfig = getQueryConfigHandler();
-
-		if (queryConfig != null) {
-
-			if (queryConfig
-					.has(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR)) {
-				return queryConfig
-						.get(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR);
-			}
-		}
-		throw new QueryNodeException(new MessageImpl(
-				QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
-				"Configuration error: "
-						+ StandardQueryConfigHandler.ConfigurationKeys.class
-								.toString() + " is missing"));
-	}
+      if (queryConfig
+          .has(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR)) {
+        return queryConfig
+            .get(StandardQueryConfigHandler.ConfigurationKeys.DEFAULT_OPERATOR);
+      }
+    }
+    throw new QueryNodeException(new MessageImpl(
+        QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+        "Configuration error: "
+            + StandardQueryConfigHandler.ConfigurationKeys.class.toString()
+            + " is missing"));
+  }
 
 }

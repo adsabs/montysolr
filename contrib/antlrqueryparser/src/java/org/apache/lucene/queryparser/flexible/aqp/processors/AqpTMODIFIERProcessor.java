@@ -10,8 +10,8 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 
 /**
- * TMODIFIER node contains FUZZY, BOOST, FIELD nodes.
- * This processor changes the tree from this shape:
+ * TMODIFIER node contains FUZZY, BOOST, FIELD nodes. This processor changes the
+ * tree from this shape:
  * 
  * <pre>
  *               TMODIFIER
@@ -20,9 +20,10 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  *             /           \
  *            ^1           ...
  * </pre>
- *           
- *  To this shape:
- * <pre>              
+ * 
+ * To this shape:
+ * 
+ * <pre>
  *               BOOST
  *                / \
  *              ^1  FUZZY
@@ -30,72 +31,68 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  *                    FIELD
  *                      \
  *                     ...
- * </pre>                    
- *  
- *  After the processor ran, the TMODIFIER node is removed and we return
- *  the FUZZY node
- *  <br/>
- *  
- *  If TMODIFIER contains only single child, we return that child
- *  (thus remove the TMODIFIER node from the tree).
- *  <br/>
- *  
- *  @see AqpFUZZYProcessor
- *  @see AqpBOOSTProcessor
- *  @see AqpFIELDProcessor
+ * </pre>
+ * 
+ * After the processor ran, the TMODIFIER node is removed and we return the
+ * FUZZY node <br/>
+ * 
+ * If TMODIFIER contains only single child, we return that child (thus remove
+ * the TMODIFIER node from the tree). <br/>
+ * 
+ * @see AqpFUZZYProcessor
+ * @see AqpBOOSTProcessor
+ * @see AqpFIELDProcessor
  */
 public class AqpTMODIFIERProcessor extends QueryNodeProcessorImpl implements
-		QueryNodeProcessor {
+    QueryNodeProcessor {
 
-	@Override
-	protected QueryNode postProcessNode(QueryNode node)
-			throws QueryNodeException {
-		
-		if (node instanceof AqpANTLRNode
-				&& ((AqpANTLRNode) node).getTokenLabel().equals("TMODIFIER")) {
-			
-			List<QueryNode> children = node.getChildren();
-			
-			if (children.size()==1) {
-				return children.get(0);
-			}
-			
-			QueryNode masterChild = null;
-			QueryNode currentChild;
-			List<QueryNode> currentChildren;
-			
-			for (int i=0;i<children.size();i++) {
-				currentChild = children.get(i);
-				if (currentChild.isLeaf()) {
-					continue;
-				}
-				if (masterChild==null) {
-					masterChild = currentChild;
-					node = masterChild;
-					continue;
-				}
-				currentChildren = masterChild.getChildren();
-				currentChildren.add(currentChild);
-				//masterChild.set(currentChildren);
-				masterChild = children.get(i);
-			}
-			
-			return node;
-			
-		}
-		return node;
-	}
+  @Override
+  protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
 
-	@Override
-	protected QueryNode preProcessNode(QueryNode node)
-			throws QueryNodeException {
-		return node;
-	}
+    if (node instanceof AqpANTLRNode
+        && ((AqpANTLRNode) node).getTokenLabel().equals("TMODIFIER")) {
 
-	@Override
-	protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
-			throws QueryNodeException {
-		return children;
-	}
+      List<QueryNode> children = node.getChildren();
+
+      if (children.size() == 1) {
+        return children.get(0);
+      }
+
+      QueryNode masterChild = null;
+      QueryNode currentChild;
+      List<QueryNode> currentChildren;
+
+      for (int i = 0; i < children.size(); i++) {
+        currentChild = children.get(i);
+        if (currentChild.isLeaf()) {
+          continue;
+        }
+        if (masterChild == null) {
+          masterChild = currentChild;
+          node = masterChild;
+          continue;
+        }
+        currentChildren = masterChild.getChildren();
+        currentChildren.add(currentChild);
+        // masterChild.set(currentChildren);
+        masterChild = children.get(i);
+      }
+
+      return node;
+
+    }
+    return node;
+  }
+
+  @Override
+  protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
+    return node;
+  }
+
+  @Override
+  protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
+      throws QueryNodeException {
+    return children;
+  }
 
 }

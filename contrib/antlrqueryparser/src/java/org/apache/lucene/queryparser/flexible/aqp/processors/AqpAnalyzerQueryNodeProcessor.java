@@ -50,19 +50,19 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 
 /**
- * This is an improved version of the {@link AnalyzerQueryNodeProcessor}
- * it is better because it keeps track of the position offset
- * which is absolutely indispensable for proper parsing of expanded
- * queries. And also we save the type attribute name with the node
+ * This is an improved version of the {@link AnalyzerQueryNodeProcessor} it is
+ * better because it keeps track of the position offset which is absolutely
+ * indispensable for proper parsing of expanded queries. And also we save the
+ * type attribute name with the node
  * 
  * TODO: send a patch and make them accept it
  * 
- * This processor verifies if {@link ConfigurationKeys#ANALYZER}
- * is defined in the {@link QueryConfigHandler}. If it is and the analyzer is
- * not <code>null</code>, it looks for every {@link FieldQueryNode} that is not
- * {@link WildcardQueryNode}, {@link FuzzyQueryNode} or
- * {@link RangeQueryNode} contained in the query node tree, then it applies
- * the analyzer to that {@link FieldQueryNode} object. <br/>
+ * This processor verifies if {@link ConfigurationKeys#ANALYZER} is defined in
+ * the {@link QueryConfigHandler}. If it is and the analyzer is not
+ * <code>null</code>, it looks for every {@link FieldQueryNode} that is not
+ * {@link WildcardQueryNode}, {@link FuzzyQueryNode} or {@link RangeQueryNode}
+ * contained in the query node tree, then it applies the analyzer to that
+ * {@link FieldQueryNode} object. <br/>
  * <br/>
  * If the analyzer return only one term, the returned term is set to the
  * {@link FieldQueryNode} and it's returned. <br/>
@@ -80,8 +80,8 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
  */
 
 public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
-	
-	public String TYPE_ATTRIBUTE = "token_type_attribute";
+
+  public String TYPE_ATTRIBUTE = "token_type_attribute";
   private Analyzer analyzer;
 
   private boolean positionIncrementsEnabled;
@@ -93,14 +93,15 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
   @Override
   public QueryNode process(QueryNode queryTree) throws QueryNodeException {
     Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
-    
+
     if (analyzer != null) {
       this.analyzer = analyzer;
       this.positionIncrementsEnabled = false;
-      Boolean positionIncrementsEnabled = getQueryConfigHandler().get(ConfigurationKeys.ENABLE_POSITION_INCREMENTS);
+      Boolean positionIncrementsEnabled = getQueryConfigHandler().get(
+          ConfigurationKeys.ENABLE_POSITION_INCREMENTS);
 
       if (positionIncrementsEnabled != null) {
-          this.positionIncrementsEnabled = positionIncrementsEnabled;
+        this.positionIncrementsEnabled = positionIncrementsEnabled;
       }
 
       if (this.analyzer != null) {
@@ -144,10 +145,10 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
       if (buffer.hasAttribute(PositionIncrementAttribute.class)) {
         posIncrAtt = buffer.getAttribute(PositionIncrementAttribute.class);
       }
-      
+
       TypeAttribute typeAtt = null;
       if (buffer.hasAttribute(TypeAttribute.class)) {
-      	typeAtt = buffer.getAttribute(TypeAttribute.class);
+        typeAtt = buffer.getAttribute(TypeAttribute.class);
       }
 
       try {
@@ -184,15 +185,14 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
       }
 
       CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
-      
+
       int offsetStart = -1;
       int offsetEnd = -1;
       OffsetAttribute offsetAtt;
       if (buffer.hasAttribute(OffsetAttribute.class)) {
         offsetAtt = buffer.getAttribute(OffsetAttribute.class);
-      }
-      else {
-      	offsetAtt = null;
+      } else {
+        offsetAtt = null;
       }
 
       if (numTokens == 0) {
@@ -212,14 +212,15 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
         fieldNode.setText(term);
         if (offsetAtt != null) {
-        	fieldNode.setBegin(queryStart + offsetAtt.startOffset());
-        	fieldNode.setEnd(queryStart + offsetAtt.endOffset());
+          fieldNode.setBegin(queryStart + offsetAtt.startOffset());
+          fieldNode.setEnd(queryStart + offsetAtt.endOffset());
         }
         if (typeAtt != null)
-        	fieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+          fieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
         return fieldNode;
 
-      } else if (severalTokensAtSamePosition || !(node instanceof QuotedFieldQueryNode)) {
+      } else if (severalTokensAtSamePosition
+          || !(node instanceof QuotedFieldQueryNode)) {
         if (positionCount == 1 || !(node instanceof QuotedFieldQueryNode)) {
           // no phrase query:
           LinkedList<QueryNode> children = new LinkedList<QueryNode>();
@@ -232,22 +233,23 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
               assert hasNext == true;
               term = termAtt.toString();
               if (offsetAtt != null) {
-              	offsetStart = queryStart + offsetAtt.startOffset();
-              	offsetEnd = queryStart + offsetAtt.endOffset();
+                offsetStart = queryStart + offsetAtt.startOffset();
+                offsetEnd = queryStart + offsetAtt.endOffset();
               }
 
             } catch (IOException e) {
               // safe to ignore, because we know the number of tokens
             }
 
-            FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart, offsetEnd);
+            FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
+                offsetEnd);
             if (typeAtt != null)
-            	fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+              fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
             children.add(fq);
 
           }
-          return new GroupQueryNode(
-            new StandardBooleanQueryNode(children, positionCount==1));
+          return new GroupQueryNode(new StandardBooleanQueryNode(children,
+              positionCount == 1));
         } else {
           // phrase query:
           MultiPhraseQueryNode mpq = new MultiPhraseQueryNode();
@@ -256,7 +258,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
           int position = -1;
           int i = 0;
           int termGroupCount = 0;
-          
+
           for (; i < numTokens; i++) {
             String term = null;
             offsetStart = offsetEnd = -1;
@@ -270,11 +272,11 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                 positionIncrement = posIncrAtt.getPositionIncrement();
               }
               if (offsetAtt != null) {
-              	offsetStart = queryStart + offsetAtt.startOffset();
-              	offsetEnd = queryStart + offsetAtt.endOffset();
+                offsetStart = queryStart + offsetAtt.startOffset();
+                offsetEnd = queryStart + offsetAtt.endOffset();
               }
               if (typeAtt != null)
-              	tokenType = typeAtt.type();
+                tokenType = typeAtt.type();
             } catch (IOException e) {
               // safe to ignore, because we know the number of tokens
             }
@@ -302,7 +304,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             }
 
             position += positionIncrement;
-            FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart, offsetEnd);
+            FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
+                offsetEnd);
             fq.setTag(TYPE_ATTRIBUTE, tokenType);
             multiTerms.add(fq);
 
@@ -335,7 +338,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
           String term = null;
           int positionIncrement = 1;
           offsetStart = offsetEnd = -1;
-          
+
           try {
             boolean hasNext = buffer.incrementToken();
             assert hasNext == true;
@@ -344,20 +347,21 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             if (posIncrAtt != null) {
               positionIncrement = posIncrAtt.getPositionIncrement();
             }
-            
+
             if (offsetAtt != null) {
-            	offsetStart = queryStart + offsetAtt.startOffset();
-            	offsetEnd = queryStart + offsetAtt.endOffset();
+              offsetStart = queryStart + offsetAtt.startOffset();
+              offsetEnd = queryStart + offsetAtt.endOffset();
             }
 
           } catch (IOException e) {
             // safe to ignore, because we know the number of tokens
           }
 
-          FieldQueryNode newFieldNode = new FieldQueryNode(field, term, offsetStart, offsetEnd);
+          FieldQueryNode newFieldNode = new FieldQueryNode(field, term,
+              offsetStart, offsetEnd);
           if (typeAtt != null)
-          	newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
-          
+            newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+
           if (this.positionIncrementsEnabled) {
             position += positionIncrement;
             newFieldNode.setPositionIncrement(position);

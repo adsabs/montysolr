@@ -122,171 +122,175 @@ import org.apache.lucene.search.Query;
  * @see StandardQueryTreeBuilder
  * 
  * 
- * TODO: add the constructor to the SQP and remove the duplicated code
+ *      TODO: add the constructor to the SQP and remove the duplicated code
  * 
- * public StandardQueryParser(QueryConfigHandler config, SyntaxParser parser,
-      QueryNodeProcessor processor, QueryBuilder builder) {
-    super(config, parser,processor, builder);
-  }
+ *      public StandardQueryParser(QueryConfigHandler config, SyntaxParser
+ *      parser, QueryNodeProcessor processor, QueryBuilder builder) {
+ *      super(config, parser,processor, builder); }
  */
 public class AqpQueryParser extends QueryParserHelper {
-	
-	private boolean debugMode = false;
-	private String syntaxName = null;
-	
-	
-	public AqpQueryParser(QueryConfigHandler config, AqpSyntaxParser parser,
-			QueryNodeProcessorPipeline processor, QueryTreeBuilder builder) {
-		
-		super(config, parser,processor, builder);
-		syntaxName = parser.getClass().getName();
-	}
-	
 
+  private boolean debugMode = false;
+  private String syntaxName = null;
 
+  public AqpQueryParser(QueryConfigHandler config, AqpSyntaxParser parser,
+      QueryNodeProcessorPipeline processor, QueryTreeBuilder builder) {
 
-	@Override
-	public String toString() {
-		return "<AqpQueryParser config=\"" + this.getQueryConfigHandler()
-				+ "\" grammar=\"" + syntaxName
-				+ "\"/>";
-	}
+    super(config, parser, processor, builder);
+    syntaxName = parser.getClass().getName();
+  }
 
-	/*
-	 * De/activates the debugging print of the processed query tree
-	 */
-	@SuppressWarnings("unchecked")
-  public void setDebug(boolean debug) throws InstantiationException, IllegalAccessException {
-		if (debug) {
-			QueryNodeProcessor qp = this.getQueryNodeProcessor();
-			AqpDebuggingQueryNodeProcessorPipeline np = new AqpDebuggingQueryNodeProcessorPipeline(
-					getQueryConfigHandler());
-			
-			List<QueryNodeProcessor> qnp = (List<QueryNodeProcessor>) qp;
-			ListIterator<QueryNodeProcessor> it = qnp.listIterator();
-			while (it.hasNext()) {
-				np.add(it.next());
-			}
-			this.setQueryNodeProcessor(np);
-			
-			QueryBuilder qb = this.getQueryBuilder();
-			QueryBuilder newBuilder = qb.getClass().newInstance();
-			if (newBuilder instanceof AqpStandardQueryTreeBuilder) {
-				((AqpStandardQueryTreeBuilder) newBuilder).debug(debug);
-				((AqpStandardQueryTreeBuilder) newBuilder).init();
-				this.setQueryBuilder(newBuilder);
-			}
-			
-		}
-		else {
-			if (debugMode != debug) {
-				QueryBuilder qb = this.getQueryBuilder();
-				QueryBuilder newBuilder = qb.getClass().newInstance();
-				this.setQueryBuilder(newBuilder);
-			}
-		}
-		debugMode = debug;
-	}
-	
-	public boolean getDebug() {
-		return debugMode;
-	}
+  @Override
+  public String toString() {
+    return "<AqpQueryParser config=\"" + this.getQueryConfigHandler()
+        + "\" grammar=\"" + syntaxName + "\"/>";
+  }
 
-	
-	
-	
-	/**
-	 * Overrides {@link QueryParserHelper#parse(String, String)} so it casts the
-	 * return object to {@link Query}. For more reference about this method,
-	 * check {@link QueryParserHelper#parse(String, String)}.
-	 * 
-	 * @param query
-	 *            the query string
-	 * @param defaultField
-	 *            the default field used by the text parser
-	 * 
-	 * @return the object built from the query
-	 * 
-	 * @throws QueryNodeException
-	 *             if something wrong happens along the three phases
-	 */
-	@Override
-	public Query parse(String query, String defaultField)
-			throws QueryNodeException {
-		
-		if(defaultField != null) {
-			setDefaultField(defaultField);
-		}
-		try {
-			return (Query) super.parse(query, defaultField);
-		}
-		catch (NestedParseException e) {
-			throw new QueryNodeException(e);
-		}
+  /*
+   * De/activates the debugging print of the processed query tree
+   */
+  @SuppressWarnings("unchecked")
+  public void setDebug(boolean debug) throws InstantiationException,
+      IllegalAccessException {
+    if (debug) {
+      QueryNodeProcessor qp = this.getQueryNodeProcessor();
+      AqpDebuggingQueryNodeProcessorPipeline np = new AqpDebuggingQueryNodeProcessorPipeline(
+          getQueryConfigHandler());
 
-	}
-	
-	public String getDefaultField() {
-		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD);
-	}
-	
-	public void setDefaultField(String field) {
-		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, field);
-	}
-	
-	public Integer getDefaultProximity() {
-		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY);
-	}
-	
-	public void setDefaultProximity(Integer value) {
-		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY, value);
-	}
-	
-	public Float getImplicitBoost() {
-		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_BOOST);
-	}
-	
-	public void setImplicitBoost(Float value) {
-		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_BOOST, value);
-	}
-	
-	public AqpFeedback getFeedback() {
-		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK);
-	}
-	
-	public void setFeedback(AqpFeedback feedbackInstance) {
-		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK, feedbackInstance);
-	}
-	
-	public Float getImplicitFuzzy() {
-		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY);
-	}
-	
-	public void setImplicitFuzzy(Float value) {
-		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY, value);
-	}
-	
-	public Boolean getAllowSlowFuzzy() {
-		return getQueryConfigHandler().get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY);
-	}
-	
-	public void setAllowSlowFuzzy(Boolean value) {
-		getQueryConfigHandler().set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY, value);
-	}
-	
-	
-	/********************************************************************
-	 * Everything below is simpy copy of the StandardQueryParser        *
-	 *******************************************************************/
-	 
-	/**
+      List<QueryNodeProcessor> qnp = (List<QueryNodeProcessor>) qp;
+      ListIterator<QueryNodeProcessor> it = qnp.listIterator();
+      while (it.hasNext()) {
+        np.add(it.next());
+      }
+      this.setQueryNodeProcessor(np);
+
+      QueryBuilder qb = this.getQueryBuilder();
+      QueryBuilder newBuilder = qb.getClass().newInstance();
+      if (newBuilder instanceof AqpStandardQueryTreeBuilder) {
+        ((AqpStandardQueryTreeBuilder) newBuilder).debug(debug);
+        ((AqpStandardQueryTreeBuilder) newBuilder).init();
+        this.setQueryBuilder(newBuilder);
+      }
+
+    } else {
+      if (debugMode != debug) {
+        QueryBuilder qb = this.getQueryBuilder();
+        QueryBuilder newBuilder = qb.getClass().newInstance();
+        this.setQueryBuilder(newBuilder);
+      }
+    }
+    debugMode = debug;
+  }
+
+  public boolean getDebug() {
+    return debugMode;
+  }
+
+  /**
+   * Overrides {@link QueryParserHelper#parse(String, String)} so it casts the
+   * return object to {@link Query}. For more reference about this method, check
+   * {@link QueryParserHelper#parse(String, String)}.
+   * 
+   * @param query
+   *          the query string
+   * @param defaultField
+   *          the default field used by the text parser
+   * 
+   * @return the object built from the query
+   * 
+   * @throws QueryNodeException
+   *           if something wrong happens along the three phases
+   */
+  @Override
+  public Query parse(String query, String defaultField)
+      throws QueryNodeException {
+
+    if (defaultField != null) {
+      setDefaultField(defaultField);
+    }
+    try {
+      return (Query) super.parse(query, defaultField);
+    } catch (NestedParseException e) {
+      throw new QueryNodeException(e);
+    }
+
+  }
+
+  public String getDefaultField() {
+    return getQueryConfigHandler().get(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD);
+  }
+
+  public void setDefaultField(String field) {
+    getQueryConfigHandler().set(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, field);
+  }
+
+  public Integer getDefaultProximity() {
+    return getQueryConfigHandler().get(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY);
+  }
+
+  public void setDefaultProximity(Integer value) {
+    getQueryConfigHandler().set(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_PROXIMITY,
+        value);
+  }
+
+  public Float getImplicitBoost() {
+    return getQueryConfigHandler().get(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_BOOST);
+  }
+
+  public void setImplicitBoost(Float value) {
+    getQueryConfigHandler().set(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_BOOST, value);
+  }
+
+  public AqpFeedback getFeedback() {
+    return getQueryConfigHandler().get(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK);
+  }
+
+  public void setFeedback(AqpFeedback feedbackInstance) {
+    getQueryConfigHandler().set(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK,
+        feedbackInstance);
+  }
+
+  public Float getImplicitFuzzy() {
+    return getQueryConfigHandler().get(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY);
+  }
+
+  public void setImplicitFuzzy(Float value) {
+    getQueryConfigHandler().set(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY, value);
+  }
+
+  public Boolean getAllowSlowFuzzy() {
+    return getQueryConfigHandler().get(
+        AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY);
+  }
+
+  public void setAllowSlowFuzzy(Boolean value) {
+    getQueryConfigHandler()
+        .set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY,
+            value);
+  }
+
+  /********************************************************************
+   * Everything below is simpy copy of the StandardQueryParser *
+   *******************************************************************/
+
+  /**
    * Gets implicit operator setting, which will be either {@link Operator#AND}
    * or {@link Operator#OR}.
    */
   public StandardQueryConfigHandler.Operator getDefaultOperator() {
     return getQueryConfigHandler().get(ConfigurationKeys.DEFAULT_OPERATOR);
   }
-  
+
   /**
    * Sets the boolean operator of the QueryParser. In default mode (
    * {@link Operator#OR}) terms without any modifiers are considered optional:
@@ -298,7 +302,7 @@ public class AqpQueryParser extends QueryParserHelper {
   public void setDefaultOperator(StandardQueryConfigHandler.Operator operator) {
     getQueryConfigHandler().set(ConfigurationKeys.DEFAULT_OPERATOR, operator);
   }
-  
+
   /**
    * Set to <code>true</code> to allow leading wildcard characters.
    * <p>
@@ -309,24 +313,26 @@ public class AqpQueryParser extends QueryParserHelper {
    * Default: false.
    */
   public void setLowercaseExpandedTerms(boolean lowercaseExpandedTerms) {
-    getQueryConfigHandler().set(ConfigurationKeys.LOWERCASE_EXPANDED_TERMS, lowercaseExpandedTerms);
+    getQueryConfigHandler().set(ConfigurationKeys.LOWERCASE_EXPANDED_TERMS,
+        lowercaseExpandedTerms);
   }
-  
+
   /**
    * @see #setLowercaseExpandedTerms(boolean)
    */
   public boolean getLowercaseExpandedTerms() {
-    Boolean lowercaseExpandedTerms = getQueryConfigHandler().get(ConfigurationKeys.LOWERCASE_EXPANDED_TERMS);
-    
+    Boolean lowercaseExpandedTerms = getQueryConfigHandler().get(
+        ConfigurationKeys.LOWERCASE_EXPANDED_TERMS);
+
     if (lowercaseExpandedTerms == null) {
       return true;
-      
+
     } else {
       return lowercaseExpandedTerms;
     }
-    
+
   }
-  
+
   /**
    * Set to <code>true</code> to allow leading wildcard characters.
    * <p>
@@ -337,9 +343,10 @@ public class AqpQueryParser extends QueryParserHelper {
    * Default: false.
    */
   public void setAllowLeadingWildcard(boolean allowLeadingWildcard) {
-    getQueryConfigHandler().set(ConfigurationKeys.ALLOW_LEADING_WILDCARD, allowLeadingWildcard);
+    getQueryConfigHandler().set(ConfigurationKeys.ALLOW_LEADING_WILDCARD,
+        allowLeadingWildcard);
   }
-  
+
   /**
    * Set to <code>true</code> to enable position increments in result query.
    * <p>
@@ -350,24 +357,26 @@ public class AqpQueryParser extends QueryParserHelper {
    * Default: false.
    */
   public void setEnablePositionIncrements(boolean enabled) {
-    getQueryConfigHandler().set(ConfigurationKeys.ENABLE_POSITION_INCREMENTS, enabled);
+    getQueryConfigHandler().set(ConfigurationKeys.ENABLE_POSITION_INCREMENTS,
+        enabled);
   }
-  
+
   /**
    * @see #setEnablePositionIncrements(boolean)
    */
   public boolean getEnablePositionIncrements() {
-    Boolean enablePositionsIncrements = getQueryConfigHandler().get(ConfigurationKeys.ENABLE_POSITION_INCREMENTS);
-    
+    Boolean enablePositionsIncrements = getQueryConfigHandler().get(
+        ConfigurationKeys.ENABLE_POSITION_INCREMENTS);
+
     if (enablePositionsIncrements == null) {
-       return false;
-       
+      return false;
+
     } else {
       return enablePositionsIncrements;
     }
-    
+
   }
-  
+
   /**
    * By default, it uses
    * {@link MultiTermQuery#CONSTANT_SCORE_AUTO_REWRITE_DEFAULT} when creating a
@@ -379,37 +388,41 @@ public class AqpQueryParser extends QueryParserHelper {
    * not relevant then use this change the rewrite method.
    */
   public void setMultiTermRewriteMethod(MultiTermQuery.RewriteMethod method) {
-    getQueryConfigHandler().set(ConfigurationKeys.MULTI_TERM_REWRITE_METHOD, method);
+    getQueryConfigHandler().set(ConfigurationKeys.MULTI_TERM_REWRITE_METHOD,
+        method);
   }
-  
+
   /**
    * @see #setMultiTermRewriteMethod(org.apache.lucene.search.MultiTermQuery.RewriteMethod)
    */
   public MultiTermQuery.RewriteMethod getMultiTermRewriteMethod() {
-    return getQueryConfigHandler().get(ConfigurationKeys.MULTI_TERM_REWRITE_METHOD);
+    return getQueryConfigHandler().get(
+        ConfigurationKeys.MULTI_TERM_REWRITE_METHOD);
   }
-  
+
   /**
    * Set the fields a query should be expanded to when the field is
    * <code>null</code>
    * 
-   * @param fields the fields used to expand the query
+   * @param fields
+   *          the fields used to expand the query
    */
   public void setMultiFields(CharSequence[] fields) {
-    
+
     if (fields == null) {
       fields = new CharSequence[0];
     }
 
     getQueryConfigHandler().set(ConfigurationKeys.MULTI_FIELDS, fields);
-    
+
   }
-  
+
   /**
-   * Returns the fields used to expand the query when the field for a
-   * certain query is <code>null</code>
+   * Returns the fields used to expand the query when the field for a certain
+   * query is <code>null</code>
    * 
-   * @param fields the fields used to expand the query
+   * @param fields
+   *          the fields used to expand the query
    */
   public void getMultiFields(CharSequence[] fields) {
     getQueryConfigHandler().get(ConfigurationKeys.MULTI_FIELDS);
@@ -424,38 +437,39 @@ public class AqpQueryParser extends QueryParserHelper {
   public void setFuzzyPrefixLength(int fuzzyPrefixLength) {
     QueryConfigHandler config = getQueryConfigHandler();
     FuzzyConfig fuzzyConfig = config.get(ConfigurationKeys.FUZZY_CONFIG);
-    
+
     if (fuzzyConfig == null) {
       fuzzyConfig = new FuzzyConfig();
       config.set(ConfigurationKeys.FUZZY_CONFIG, fuzzyConfig);
     }
 
     fuzzyConfig.setPrefixLength(fuzzyPrefixLength);
-    
+
   }
-  
-  public void setNumericConfigMap(Map<String,NumericConfig> numericConfigMap) {
-    getQueryConfigHandler().set(ConfigurationKeys.NUMERIC_CONFIG_MAP, numericConfigMap);
+
+  public void setNumericConfigMap(Map<String, NumericConfig> numericConfigMap) {
+    getQueryConfigHandler().set(ConfigurationKeys.NUMERIC_CONFIG_MAP,
+        numericConfigMap);
   }
-  
-  public Map<String,NumericConfig> getNumericConfigMap() {
+
+  public Map<String, NumericConfig> getNumericConfigMap() {
     return getQueryConfigHandler().get(ConfigurationKeys.NUMERIC_CONFIG_MAP);
   }
-  
+
   /**
    * Set locale used by date range parsing.
    */
   public void setLocale(Locale locale) {
     getQueryConfigHandler().set(ConfigurationKeys.LOCALE, locale);
   }
-  
+
   /**
    * Returns current locale, allowing access by subclasses.
    */
   public Locale getLocale() {
     return getQueryConfigHandler().get(ConfigurationKeys.LOCALE);
   }
-  
+
   /**
    * Sets the default slop for phrases. If zero, then exact phrase matches are
    * required. Default value is zero.
@@ -464,81 +478,87 @@ public class AqpQueryParser extends QueryParserHelper {
    */
   @Deprecated
   public void setDefaultPhraseSlop(int defaultPhraseSlop) {
-    getQueryConfigHandler().set(ConfigurationKeys.PHRASE_SLOP, defaultPhraseSlop);
+    getQueryConfigHandler().set(ConfigurationKeys.PHRASE_SLOP,
+        defaultPhraseSlop);
   }
-  
+
   /**
    * Sets the default slop for phrases. If zero, then exact phrase matches are
    * required. Default value is zero.
    */
   public void setPhraseSlop(int defaultPhraseSlop) {
-    getQueryConfigHandler().set(ConfigurationKeys.PHRASE_SLOP, defaultPhraseSlop);
+    getQueryConfigHandler().set(ConfigurationKeys.PHRASE_SLOP,
+        defaultPhraseSlop);
   }
 
   public void setAnalyzer(Analyzer analyzer) {
     getQueryConfigHandler().set(ConfigurationKeys.ANALYZER, analyzer);
   }
-  
+
   public Analyzer getAnalyzer() {
-    return getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);       
+    return getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
   }
-  
+
   /**
    * @see #setAllowLeadingWildcard(boolean)
    */
   public boolean getAllowLeadingWildcard() {
-    Boolean allowLeadingWildcard = getQueryConfigHandler().get(ConfigurationKeys.ALLOW_LEADING_WILDCARD);
-    
+    Boolean allowLeadingWildcard = getQueryConfigHandler().get(
+        ConfigurationKeys.ALLOW_LEADING_WILDCARD);
+
     if (allowLeadingWildcard == null) {
       return false;
-      
+
     } else {
       return allowLeadingWildcard;
     }
   }
-  
+
   /**
    * Get the minimal similarity for fuzzy queries.
    */
   public float getFuzzyMinSim() {
-    FuzzyConfig fuzzyConfig = getQueryConfigHandler().get(ConfigurationKeys.FUZZY_CONFIG);
-    
+    FuzzyConfig fuzzyConfig = getQueryConfigHandler().get(
+        ConfigurationKeys.FUZZY_CONFIG);
+
     if (fuzzyConfig == null) {
       return FuzzyQuery.defaultMinSimilarity;
     } else {
       return fuzzyConfig.getMinSimilarity();
     }
   }
-  
+
   /**
    * Get the prefix length for fuzzy queries.
    * 
    * @return Returns the fuzzyPrefixLength.
    */
   public int getFuzzyPrefixLength() {
-    FuzzyConfig fuzzyConfig = getQueryConfigHandler().get(ConfigurationKeys.FUZZY_CONFIG);
-    
+    FuzzyConfig fuzzyConfig = getQueryConfigHandler().get(
+        ConfigurationKeys.FUZZY_CONFIG);
+
     if (fuzzyConfig == null) {
       return FuzzyQuery.defaultPrefixLength;
     } else {
       return fuzzyConfig.getPrefixLength();
     }
   }
-  
+
   /**
    * Gets the default slop for phrases.
    */
   public int getPhraseSlop() {
-    Integer phraseSlop = getQueryConfigHandler().get(ConfigurationKeys.PHRASE_SLOP);
-    
+    Integer phraseSlop = getQueryConfigHandler().get(
+        ConfigurationKeys.PHRASE_SLOP);
+
     if (phraseSlop == null) {
       return 0;
-      
+
     } else {
       return phraseSlop;
     }
   }
-  
+
   /**
    * Set the minimum similarity for fuzzy queries. Default is defined on
    * {@link FuzzyQuery#defaultMinSimilarity}.
@@ -546,7 +566,7 @@ public class AqpQueryParser extends QueryParserHelper {
   public void setFuzzyMinSim(float fuzzyMinSim) {
     QueryConfigHandler config = getQueryConfigHandler();
     FuzzyConfig fuzzyConfig = config.get(ConfigurationKeys.FUZZY_CONFIG);
-    
+
     if (fuzzyConfig == null) {
       fuzzyConfig = new FuzzyConfig();
       config.set(ConfigurationKeys.FUZZY_CONFIG, fuzzyConfig);
@@ -554,38 +574,41 @@ public class AqpQueryParser extends QueryParserHelper {
 
     fuzzyConfig.setMinSimilarity(fuzzyMinSim);
   }
-  
+
   /**
    * Sets the boost used for each field.
    * 
-   * @param boosts a collection that maps a field to its boost 
+   * @param boosts
+   *          a collection that maps a field to its boost
    */
   public void setFieldsBoost(Map<String, Float> boosts) {
     getQueryConfigHandler().set(ConfigurationKeys.FIELD_BOOST_MAP, boosts);
   }
-  
+
   /**
    * Returns the field to boost map used to set boost for each field.
    * 
-   * @return the field to boost map 
+   * @return the field to boost map
    */
   public Map<String, Float> getFieldsBoost() {
     return getQueryConfigHandler().get(ConfigurationKeys.FIELD_BOOST_MAP);
   }
 
   /**
-   * Sets the default {@link Resolution} used for certain field when
-   * no {@link Resolution} is defined for this field.
+   * Sets the default {@link Resolution} used for certain field when no
+   * {@link Resolution} is defined for this field.
    * 
-   * @param dateResolution the default {@link Resolution}
+   * @param dateResolution
+   *          the default {@link Resolution}
    */
   public void setDateResolution(DateTools.Resolution dateResolution) {
-    getQueryConfigHandler().set(ConfigurationKeys.DATE_RESOLUTION, dateResolution);
+    getQueryConfigHandler().set(ConfigurationKeys.DATE_RESOLUTION,
+        dateResolution);
   }
-  
+
   /**
-   * Returns the default {@link Resolution} used for certain field when
-   * no {@link Resolution} is defined for this field.
+   * Returns the default {@link Resolution} used for certain field when no
+   * {@link Resolution} is defined for this field.
    * 
    * @return the default {@link Resolution}
    */
@@ -596,30 +619,36 @@ public class AqpQueryParser extends QueryParserHelper {
   /**
    * Sets the {@link Resolution} used for each field
    * 
-   * @param dateRes a collection that maps a field to its {@link Resolution}
+   * @param dateRes
+   *          a collection that maps a field to its {@link Resolution}
    * 
-   * @deprecated this method was renamed to {@link #setDateResolutionMap(Map)} 
+   * @deprecated this method was renamed to {@link #setDateResolutionMap(Map)}
    */
   @Deprecated
   public void setDateResolution(Map<CharSequence, DateTools.Resolution> dateRes) {
     setDateResolutionMap(dateRes);
   }
-  
+
   /**
-   * Returns the field to {@link Resolution} map used to normalize each date field.
+   * Returns the field to {@link Resolution} map used to normalize each date
+   * field.
    * 
    * @return the field to {@link Resolution} map
    */
   public Map<CharSequence, DateTools.Resolution> getDateResolutionMap() {
-    return getQueryConfigHandler().get(ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP);
+    return getQueryConfigHandler().get(
+        ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP);
   }
-  
+
   /**
    * Sets the {@link Resolution} used for each field
    * 
-   * @param dateRes a collection that maps a field to its {@link Resolution}
+   * @param dateRes
+   *          a collection that maps a field to its {@link Resolution}
    */
-  public void setDateResolutionMap(Map<CharSequence, DateTools.Resolution> dateRes) {
-    getQueryConfigHandler().set(ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP, dateRes);
+  public void setDateResolutionMap(
+      Map<CharSequence, DateTools.Resolution> dateRes) {
+    getQueryConfigHandler().set(ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP,
+        dateRes);
   }
 }

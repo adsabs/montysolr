@@ -88,9 +88,9 @@ import org.apache.lucene.util.automaton.CharacterRunAutomaton;
  * This test case is a copy of the core Lucene query parser test, it was adapted
  * to use new QueryParserHelper instead of the old query parser.
  * 
- * TODO: modify the QueryParserHelper so that we can extend it (it is not flexible
- * in getting the parser, otherwise we could use the test methods there for most 
- * part)
+ * TODO: modify the QueryParserHelper so that we can extend it (it is not
+ * flexible in getting the parser, otherwise we could use the test methods there
+ * for most part)
  * 
  * Tests QueryParser.
  */
@@ -141,23 +141,25 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     /** Filters MockTokenizer with StopFilter. */
     @Override
-    public final TokenStreamComponents createComponents(String fieldName, Reader reader) {
-      Tokenizer tokenizer = new MockTokenizer(reader, MockTokenizer.SIMPLE, true);
+    public final TokenStreamComponents createComponents(String fieldName,
+        Reader reader) {
+      Tokenizer tokenizer = new MockTokenizer(reader, MockTokenizer.SIMPLE,
+          true);
       return new TokenStreamComponents(tokenizer, new QPTestFilter(tokenizer));
     }
   }
 
   public static class QPTestParser extends AqpQueryParser {
     public QPTestParser(QueryConfigHandler config, AqpSyntaxParser parser,
-			QueryNodeProcessorPipeline processor, QueryTreeBuilder builder) {
-		super(config, parser, processor, builder);
-		// TODO Auto-generated constructor stub
-	}
+        QueryNodeProcessorPipeline processor, QueryTreeBuilder builder) {
+      super(config, parser, processor, builder);
+      // TODO Auto-generated constructor stub
+    }
 
-	public static AqpQueryParser init(Analyzer a) throws Exception {
-    	AqpQueryParser p = AqpStandardLuceneParser.init();
-    	
-      ((QueryNodeProcessorPipeline)p.getQueryNodeProcessor())
+    public static AqpQueryParser init(Analyzer a) throws Exception {
+      AqpQueryParser p = AqpStandardLuceneParser.init();
+
+      ((QueryNodeProcessorPipeline) p.getQueryNodeProcessor())
           .add(new QPTestParserQueryNodeProcessor());
       p.setAnalyzer(a);
       return p;
@@ -201,30 +203,30 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   }
 
-
   @Override
   public void setUp() throws Exception {
     super.setUp();
     originalMaxClauses = BooleanQuery.getMaxClauseCount();
   }
-  
-      
 
   public void testConstantScoreAutoRewrite() throws Exception {
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
-    
+
     Query q = qp.parse("foo*bar", "field");
     assertTrue(q instanceof WildcardQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT,
+        ((MultiTermQuery) q).getRewriteMethod());
 
     q = qp.parse("foo*", "field");
     assertTrue(q instanceof PrefixQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT,
+        ((MultiTermQuery) q).getRewriteMethod());
 
     q = qp.parse("[a TO z]", "field");
     assertTrue(q instanceof TermRangeQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT,
+        ((MultiTermQuery) q).getRewriteMethod());
   }
 
   public void testCJK() throws Exception {
@@ -232,82 +234,88 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     // used google to translate the word "term" to japanese -> ??
     assertQueryEquals("term\u3000term\u3000term", null,
         "term\u0020term\u0020term");
-    assertQueryEqualsAllowLeadingWildcard("??\u3000??\u3000??", null, "??\u0020??\u0020??");
+    assertQueryEqualsAllowLeadingWildcard("??\u3000??\u3000??", null,
+        "??\u0020??\u0020??");
   }
-  
+
   public void testCJKTerm() throws Exception {
     // individual CJK chars as terms
     StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
-    
+
     BooleanQuery expected = new BooleanQuery();
-    expected.add(new TermQuery(new Term("field", "中")), BooleanClause.Occur.SHOULD);
-    expected.add(new TermQuery(new Term("field", "国")), BooleanClause.Occur.SHOULD);
-    
+    expected.add(new TermQuery(new Term("field", "中")),
+        BooleanClause.Occur.SHOULD);
+    expected.add(new TermQuery(new Term("field", "国")),
+        BooleanClause.Occur.SHOULD);
+
     assertEquals(expected, getQuery("中国", analyzer));
   }
-  
+
   public void testCJKBoostedTerm() throws Exception {
     // individual CJK chars as terms
     StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
-    
+
     BooleanQuery expected = new BooleanQuery();
     expected.setBoost(0.5f);
-    expected.add(new TermQuery(new Term("field", "中")), BooleanClause.Occur.SHOULD);
-    expected.add(new TermQuery(new Term("field", "国")), BooleanClause.Occur.SHOULD);
-    
+    expected.add(new TermQuery(new Term("field", "中")),
+        BooleanClause.Occur.SHOULD);
+    expected.add(new TermQuery(new Term("field", "国")),
+        BooleanClause.Occur.SHOULD);
+
     assertEquals(expected, getQuery("中国^0.5", analyzer));
   }
-  
+
   public void testCJKPhrase() throws Exception {
     // individual CJK chars as terms
     StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
-    
+
     PhraseQuery expected = new PhraseQuery();
     expected.add(new Term("field", "中"));
     expected.add(new Term("field", "国"));
-    
+
     assertEquals(expected, getQuery("\"中国\"", analyzer));
   }
-  
+
   public void testCJKBoostedPhrase() throws Exception {
     // individual CJK chars as terms
     StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
-    
+
     PhraseQuery expected = new PhraseQuery();
     expected.setBoost(0.5f);
     expected.add(new Term("field", "中"));
     expected.add(new Term("field", "国"));
-    
+
     assertEquals(expected, getQuery("\"中国\"^0.5", analyzer));
   }
-  
+
   public void testCJKSloppyPhrase() throws Exception {
     // individual CJK chars as terms
     StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
-    
+
     PhraseQuery expected = new PhraseQuery();
     expected.setSlop(3);
     expected.add(new Term("field", "中"));
     expected.add(new Term("field", "国"));
-    
+
     assertEquals(expected, getQuery("\"中国\"~3", analyzer));
   }
 
   public void testSimple() throws Exception {
     assertQueryEquals("\"term germ\"~2", null, "\"term germ\"~2");
     assertQueryEquals("term term term", null, "term term term");
-    assertQueryEquals("t�rm term term", new WhitespaceAnalyzer(TEST_VERSION_CURRENT),
-        "t�rm term term");
-    assertQueryEquals("�mlaut", new WhitespaceAnalyzer(TEST_VERSION_CURRENT), "�mlaut");
+    assertQueryEquals("t�rm term term", new WhitespaceAnalyzer(
+        TEST_VERSION_CURRENT), "t�rm term term");
+    assertQueryEquals("�mlaut", new WhitespaceAnalyzer(TEST_VERSION_CURRENT),
+        "�mlaut");
 
     // XXX: not allowed, TODO???
-    //assertQueryEquals("\"\"", new KeywordAnalyzer(), "");
-    //assertQueryEquals("foo:\"\"", new KeywordAnalyzer(), "foo:");
+    // assertQueryEquals("\"\"", new KeywordAnalyzer(), "");
+    // assertQueryEquals("foo:\"\"", new KeywordAnalyzer(), "foo:");
 
     assertQueryEquals("a AND b", null, "+a +b");
     assertQueryEquals("(a AND b)", null, "+a +b");
     assertQueryEquals("c OR (a AND b)", null, "c (+a +b)");
-    
+
     assertQueryEquals("a AND NOT b", null, "+a -b");
     assertQueryEquals("a NOT b", null, "+a -b");
 
@@ -345,25 +353,26 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertQueryEquals("term^2", null, "term^2.0");
     assertQueryEquals("\"germ term\"^2.0", null, "\"germ term\"^2.0");
     assertQueryEquals("\"term germ\"^2", null, "\"term germ\"^2.0");
-    
+
     assertQueryEquals("(foo OR bar) AND (baz OR boo)", null,
         "+(foo bar) +(baz boo)");
-    
+
     assertQueryEquals("((a OR b) AND NOT c) OR d", null, "(+(a b) -c) d");
     assertQueryEquals("((a OR b) NOT c) OR d", null, "(+(a b) -c) d");
-    
+
     assertQueryEquals("+(apple \"steve jobs\") -(foo bar baz)", null,
         "+(apple \"steve jobs\") -(foo bar baz)");
     assertQueryEquals("+title:(dog OR cat) -author:\"bob dole\"", null,
         "+(title:dog title:cat) -author:\"bob dole\"");
-    
+
     AqpQueryParser qp = getParser();
     qp.setDefaultOperator(Operator.OR);
     assertQueryMatch(qp, "title:(+a -b c)", "text", "+title:a -title:b title:c");
-    
+
     qp.setDefaultOperator(Operator.AND);
-    assertQueryMatch(qp, "title:(+a -b c)", "text", "+title:a -title:b +title:c");
-    
+    assertQueryMatch(qp, "title:(+a -b c)", "text",
+        "+title:a -title:b +title:c");
+
   }
 
   public void testPunct() throws Exception {
@@ -410,15 +419,13 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertTrue(getQuery("term*^2", null) instanceof PrefixQuery);
     assertTrue(getQuery("term~", null) instanceof FuzzyQuery);
     assertTrue(getQuery("term~0.7", null) instanceof FuzzyQuery);
-    
-    
+
     FuzzyQuery fq = (FuzzyQuery) getQuery("term~0.7", null);
     assertEquals(1, fq.getMaxEdits());
     assertEquals(FuzzyQuery.defaultPrefixLength, fq.getPrefixLength());
     fq = (FuzzyQuery) getQuery("term~", null);
     assertEquals(2, fq.getMaxEdits());
     assertEquals(FuzzyQuery.defaultPrefixLength, fq.getPrefixLength());
-
 
     assertTrue(getQuery("term*germ", null) instanceof WildcardQuery);
 
@@ -506,7 +513,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     // expected: term phrase1 phrase2 term
     assertQueryEquals("term phrase term", qpAnalyzer,
         "term (phrase1 phrase2) term");
-    
+
     // TODO: plug the modifier GroupQueryNodeProcessor
     // expected: term phrase1 phrase2 term
     assertQueryEquals("term AND NOT phrase term", qpAnalyzer,
@@ -526,12 +533,14 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testRange() throws Exception {
     assertQueryEquals("[ a TO z]", null, "[a TO z]");
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((TermRangeQuery)getQuery("[ a TO z]", null)).getRewriteMethod());
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT,
+        ((TermRangeQuery) getQuery("[ a TO z]", null)).getRewriteMethod());
 
     AqpQueryParser qp = getParser();
-    
+
     qp.setMultiTermRewriteMethod(MultiTermQuery.SCORING_BOOLEAN_QUERY_REWRITE);
-    assertEquals(MultiTermQuery.SCORING_BOOLEAN_QUERY_REWRITE,((TermRangeQuery)qp.parse("[ a TO z]", "field")).getRewriteMethod());
+    assertEquals(MultiTermQuery.SCORING_BOOLEAN_QUERY_REWRITE,
+        ((TermRangeQuery) qp.parse("[ a TO z]", "field")).getRewriteMethod());
 
     assertQueryEquals("[ a TO z ]", null, "[a TO z]");
     assertQueryEquals("{ a TO z}", null, "{a TO z}");
@@ -540,64 +549,57 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertQueryEquals("[ a TO z] OR bar", null, "[a TO z] bar");
     assertQueryEquals("[ a TO z] AND bar", null, "+[a TO z] +bar");
     assertQueryEquals("( bar blar { a TO z}) ", null, "bar blar {a TO z}");
-    
-    // the original expected value was: gack (bar blar {a TO z}) 
+
+    // the original expected value was: gack (bar blar {a TO z})
     assertQueryEquals("gack ( bar blar { a TO z}) ", null,
         "gack bar blar {a TO z}");
   }
 
-  /** removed in lucene-4.0
-  public void testFarsiRangeCollating() throws Exception {
-    Directory ramDir = newDirectory();
-    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)));
-    Document doc = new Document();
-    doc.add(newField("content", "\u0633\u0627\u0628", Field.Store.YES,
-        Field.Index.NOT_ANALYZED));
-    iw.addDocument(doc);
-    iw.close();
-    IndexSearcher is = new IndexSearcher(ramDir, true);
-
-    AqpQueryParser qp = getParser();
-    qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
-
-    // Neither Java 1.4.2 nor 1.5.0 has Farsi Locale collation available in
-    // RuleBasedCollator. However, the Arabic Locale seems to order the
-    // Farsi
-    // characters properly.
-    Collator c = Collator.getInstance(new Locale("ar"));
-    qp.setRangeCollator(c);
-
-    // Unicode order would include U+0633 in [ U+062F - U+0698 ], but Farsi
-    // orders the U+0698 character before the U+0633 character, so the
-    // single
-    // index Term below should NOT be returned by a ConstantScoreRangeQuery
-    // with a Farsi Collator (or an Arabic one for the case when Farsi is
-    // not
-    // supported).
-
-    // Test ConstantScoreRangeQuery
-    qp.setMultiTermRewriteMethod(MultiTermQuery.CONSTANT_SCORE_FILTER_REWRITE);
-    ScoreDoc[] result = is.search(qp.parse("[ \u062F TO \u0698 ]", "content"),
-        null, 1000).scoreDocs;
-    assertEquals("The index Term should not be included.", 0, result.length);
-
-    result = is.search(qp.parse("[ \u0633 TO \u0638 ]", "content"), null, 1000).scoreDocs;
-    assertEquals("The index Term should be included.", 1, result.length);
-
-    // Test RangeQuery
-    qp.setMultiTermRewriteMethod(MultiTermQuery.SCORING_BOOLEAN_QUERY_REWRITE);
-    result = is.search(qp.parse("[ \u062F TO \u0698 ]", "content"), null, 1000).scoreDocs;
-    assertEquals("The index Term should not be included.", 0, result.length);
-
-    result = is.search(qp.parse("[ \u0633 TO \u0638 ]", "content"), null, 1000).scoreDocs;
-    assertEquals("The index Term should be included.", 1, result.length);
-
-    is.close();
-    ramDir.close();
-  }
-
-  */
-
+  /**
+   * removed in lucene-4.0 public void testFarsiRangeCollating() throws
+   * Exception { Directory ramDir = newDirectory(); IndexWriter iw = new
+   * IndexWriter(ramDir, newIndexWriterConfig(TEST_VERSION_CURRENT, new
+   * WhitespaceAnalyzer(TEST_VERSION_CURRENT))); Document doc = new Document();
+   * doc.add(newField("content", "\u0633\u0627\u0628", Field.Store.YES,
+   * Field.Index.NOT_ANALYZED)); iw.addDocument(doc); iw.close(); IndexSearcher
+   * is = new IndexSearcher(ramDir, true);
+   * 
+   * AqpQueryParser qp = getParser(); qp.setAnalyzer(new
+   * WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+   * 
+   * // Neither Java 1.4.2 nor 1.5.0 has Farsi Locale collation available in //
+   * RuleBasedCollator. However, the Arabic Locale seems to order the // Farsi
+   * // characters properly. Collator c = Collator.getInstance(new
+   * Locale("ar")); qp.setRangeCollator(c);
+   * 
+   * // Unicode order would include U+0633 in [ U+062F - U+0698 ], but Farsi //
+   * orders the U+0698 character before the U+0633 character, so the // single
+   * // index Term below should NOT be returned by a ConstantScoreRangeQuery //
+   * with a Farsi Collator (or an Arabic one for the case when Farsi is // not
+   * // supported).
+   * 
+   * // Test ConstantScoreRangeQuery
+   * qp.setMultiTermRewriteMethod(MultiTermQuery.CONSTANT_SCORE_FILTER_REWRITE);
+   * ScoreDoc[] result = is.search(qp.parse("[ \u062F TO \u0698 ]", "content"),
+   * null, 1000).scoreDocs;
+   * assertEquals("The index Term should not be included.", 0, result.length);
+   * 
+   * result = is.search(qp.parse("[ \u0633 TO \u0638 ]", "content"), null,
+   * 1000).scoreDocs; assertEquals("The index Term should be included.", 1,
+   * result.length);
+   * 
+   * // Test RangeQuery
+   * qp.setMultiTermRewriteMethod(MultiTermQuery.SCORING_BOOLEAN_QUERY_REWRITE);
+   * result = is.search(qp.parse("[ \u062F TO \u0698 ]", "content"), null,
+   * 1000).scoreDocs; assertEquals("The index Term should not be included.", 0,
+   * result.length);
+   * 
+   * result = is.search(qp.parse("[ \u0633 TO \u0638 ]", "content"), null,
+   * 1000).scoreDocs; assertEquals("The index Term should be included.", 1,
+   * result.length);
+   * 
+   * is.close(); ramDir.close(); }
+   */
 
   public void testDateRange() throws Exception {
     String startDate = getLocalizedDate(2002, 1, 1);
@@ -611,10 +613,9 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     final String hourField = "hour";
     AqpQueryParser qp = getParser();
 
+    Map<CharSequence, DateTools.Resolution> dateRes = new HashMap<CharSequence, DateTools.Resolution>();
 
-    Map<CharSequence, DateTools.Resolution> dateRes =  new HashMap<CharSequence, DateTools.Resolution>();
-    
-    // set a field specific date resolution    
+    // set a field specific date resolution
     dateRes.put(monthField, DateTools.Resolution.MONTH);
     qp.setDateResolution(dateRes);
 
@@ -638,7 +639,6 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertDateRangeQueryEquals(qp, hourField, startDate, endDate,
         endDateExpected.getTime(), DateTools.Resolution.HOUR);
   }
-
 
   public void testEscaped() throws Exception {
     Analyzer a = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
@@ -665,9 +665,9 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
      */
 
     assertQueryEquals("\\*", a, "*");
-    
+
     assertQueryEquals("\\a", a, "a");
-    
+
     assertQueryEquals("a\\-b:c", a, "a-b:c");
     assertQueryEquals("a\\+b:c", a, "a+b:c");
     assertQueryEquals("a\\:b:c", a, "a:b:c");
@@ -736,7 +736,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertQueryEquals("\\\\", a, "\\"); // escaped backslash
 
     assertQueryNodeException("\\"); // a backslash must always be escaped
-    
+
     setDebug(true);
     // LUCENE-1189
     assertQueryEquals("(\"a\\\\\") or (\"b\")", a, "a\\ or b");
@@ -813,8 +813,10 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public void testBoost() throws Exception {
-	CharacterRunAutomaton stopSet = new CharacterRunAutomaton(BasicAutomata.makeString("on"));
-	Analyzer oneStopAnalyzer = new MockAnalyzer(random(), MockTokenizer.SIMPLE, true, stopSet, true);
+    CharacterRunAutomaton stopSet = new CharacterRunAutomaton(
+        BasicAutomata.makeString("on"));
+    Analyzer oneStopAnalyzer = new MockAnalyzer(random(), MockTokenizer.SIMPLE,
+        true, stopSet, true);
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(oneStopAnalyzer);
 
@@ -839,12 +841,10 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertEquals(1.0f, q.getBoost(), 0.01f);
   }
 
-  
-
   public void testException() throws Exception {
     assertQueryNodeException("*leadingWildcard"); // disallowed by default
     assertQueryNodeException("(foo bar");
-    
+
     // these exceptions are not thrown
     setDebug(true);
     assertQueryNodeException("\"some phrase");
@@ -857,16 +857,18 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testCustomQueryParserWildcard() throws Exception {
     try {
-      QPTestParser.init(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse("a?t", "contents");
+      QPTestParser.init(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse(
+          "a?t", "contents");
       fail("Wildcard queries should not be allowed");
     } catch (QueryNodeException expected) {
       // expected exception
-    } 
+    }
   }
 
   public void testCustomQueryParserFuzzy() throws Exception {
     try {
-      QPTestParser.init(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse("xunit~", "contents");
+      QPTestParser.init(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse(
+          "xunit~", "contents");
       fail("Fuzzy queries should not be allowed");
     } catch (QueryNodeException expected) {
       // expected exception
@@ -892,61 +894,61 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   public void testPrecedence() throws Exception {
     AqpQueryParser qp1 = getParser();
     qp1.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
-    
+
     AqpQueryParser qp2 = getParser();
     qp2.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
-    
+
     // TODO: to achieve standard lucene behaviour (no operator precedence)
     // modify the GroupQueryNodeProcessor to recognize our new BooleanQN classes
     // then do:
-    QueryNodeProcessorPipeline processor = (QueryNodeProcessorPipeline) qp1.getQueryNodeProcessor();
+    QueryNodeProcessorPipeline processor = (QueryNodeProcessorPipeline) qp1
+        .getQueryNodeProcessor();
     processor.add(new GroupQueryNodeProcessor());
-    
+
     Query query1 = qp1.parse("A AND B OR C AND D", "field");
     Query query2 = qp2.parse("+A +B +C +D", "field");
 
     assertEquals(query1, query2);
   }
 
-  
-  
-  public void testLocalDateFormat() throws IOException, QueryNodeException, ParseException {
+  public void testLocalDateFormat() throws IOException, QueryNodeException,
+      ParseException {
     Directory ramDir = new RAMDirectory();
-    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)));
+    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(
+        TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)));
     addDateDoc("a", 2005, 12, 2, 10, 15, 33, iw);
     addDateDoc("b", 2005, 12, 4, 22, 15, 00, iw);
     iw.close();
     IndexSearcher is = new IndexSearcher(DirectoryReader.open(ramDir));
-    
-    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy",Locale.ROOT);
+
+    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.ROOT);
     Date d1_12 = format.parse("1/12/2005");
     Date d3_12 = format.parse("3/12/2005");
     Date d4_12 = format.parse("4/12/2005");
     Date d28_12 = format.parse("28/12/2005");
-    
-    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault());
+
+    DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT,
+        Locale.getDefault());
     String dec1 = df.format(d1_12);
     String dec2 = df.format(format.parse("2/12/2005"));
     String dec3 = df.format(d3_12);
     String dec4 = df.format(d4_12);
     String dec28 = df.format(d28_12);
-    
-    
+
     assertHits(2, String.format("[%s TO %s]", dec1, dec28), is);
     assertHits(2, String.format("[%s TO %s]", dec1, dec4), is);
-    
+
     assertHits(2, String.format("{%s TO %s}", dec1, dec28), is);
     assertHits(1, String.format("{%s TO %s}", dec1, dec4), is);
     assertHits(0, String.format("{%s TO %s}", dec3, dec4), is);
-    
+
     ramDir.close();
   }
 
-
   public void testStopwords() throws Exception {
     AqpQueryParser qp = getParser();
-    qp.setAnalyzer(
-        new StopAnalyzer(TEST_VERSION_CURRENT, StopFilter.makeStopSet(TEST_VERSION_CURRENT, "the", "foo" )));
+    qp.setAnalyzer(new StopAnalyzer(TEST_VERSION_CURRENT, StopFilter
+        .makeStopSet(TEST_VERSION_CURRENT, "the", "foo")));
 
     Query result = qp.parse("a:the OR a:foo", "a");
     assertNotNull("result is null and it shouldn't be", result);
@@ -956,11 +958,11 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     result = qp.parse("a:woo OR a:the", "a");
     assertNotNull("result is null and it shouldn't be", result);
     assertTrue("result is not a TermQuery", result instanceof TermQuery);
-    
+
     result = qp.parse(
         "(fieldX:xxxxx OR fieldy:xxxxxxxx)^2 AND (fieldx:the OR fieldy:foo)",
         "a");
-    
+
     assertNotNull("result is null and it shouldn't be", result);
     assertTrue("result is not a BooleanQuery", result instanceof BooleanQuery);
     if (VERBOSE)
@@ -971,8 +973,8 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testPositionIncrement() throws Exception {
     AqpQueryParser qp = getParser();
-    qp.setAnalyzer(
-        new StopAnalyzer(TEST_VERSION_CURRENT, StopFilter.makeStopSet(TEST_VERSION_CURRENT, "the", "in", "are", "this" )));
+    qp.setAnalyzer(new StopAnalyzer(TEST_VERSION_CURRENT, StopFilter
+        .makeStopSet(TEST_VERSION_CURRENT, "the", "in", "are", "this")));
 
     qp.setEnablePositionIncrements(true);
 
@@ -1002,62 +1004,64 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertTrue(bq.getClauses()[1].getQuery() instanceof MatchAllDocsQuery);
   }
 
-
   private class CannedTokenizer extends Tokenizer {
-	    private int upto = 0;
-	    private final PositionIncrementAttribute posIncr = addAttribute(PositionIncrementAttribute.class);
-	    private final CharTermAttribute term = addAttribute(CharTermAttribute.class);
+    private int upto = 0;
+    private final PositionIncrementAttribute posIncr = addAttribute(PositionIncrementAttribute.class);
+    private final CharTermAttribute term = addAttribute(CharTermAttribute.class);
 
-	    public CannedTokenizer(Reader reader) {
-	      super(reader);
-	    }
+    public CannedTokenizer(Reader reader) {
+      super(reader);
+    }
 
-	    @Override
-	    public boolean incrementToken() {
-	      clearAttributes();
-	      if (upto == 4) {
-	        return false;
-	      }
-	      if (upto == 0) {
-	        posIncr.setPositionIncrement(1);
-	        term.setEmpty().append("a");
-	      } else if (upto == 1) {
-	        posIncr.setPositionIncrement(1);
-	        term.setEmpty().append("b");
-	      } else if (upto == 2) {
-	        posIncr.setPositionIncrement(0);
-	        term.setEmpty().append("c");
-	      } else {
-	        posIncr.setPositionIncrement(0);
-	        term.setEmpty().append("d");
-	      }
-	      upto++;
-	      return true;
-	    }
+    @Override
+    public boolean incrementToken() {
+      clearAttributes();
+      if (upto == 4) {
+        return false;
+      }
+      if (upto == 0) {
+        posIncr.setPositionIncrement(1);
+        term.setEmpty().append("a");
+      } else if (upto == 1) {
+        posIncr.setPositionIncrement(1);
+        term.setEmpty().append("b");
+      } else if (upto == 2) {
+        posIncr.setPositionIncrement(0);
+        term.setEmpty().append("c");
+      } else {
+        posIncr.setPositionIncrement(0);
+        term.setEmpty().append("d");
+      }
+      upto++;
+      return true;
+    }
 
-	    @Override
-	    public void reset() throws IOException {
-	      super.reset();
-	      this.upto = 0;
-	    }
-	  }
+    @Override
+    public void reset() throws IOException {
+      super.reset();
+      this.upto = 0;
+    }
+  }
+
   private class CannedAnalyzer extends Analyzer {
-	    @Override
-	    public TokenStreamComponents createComponents(String ignored, Reader alsoIgnored) {
-	      return new TokenStreamComponents(new CannedTokenizer(alsoIgnored));
-	    }
-	  }
+    @Override
+    public TokenStreamComponents createComponents(String ignored,
+        Reader alsoIgnored) {
+      return new TokenStreamComponents(new CannedTokenizer(alsoIgnored));
+    }
+  }
 
   public void testMultiPhraseQuery() throws Exception {
     Directory dir = newDirectory();
-    IndexWriter w = new IndexWriter(dir, newIndexWriterConfig(TEST_VERSION_CURRENT, new CannedAnalyzer()));
+    IndexWriter w = new IndexWriter(dir, newIndexWriterConfig(
+        TEST_VERSION_CURRENT, new CannedAnalyzer()));
     Document doc = new Document();
     doc.add(newField("field", "", TextField.TYPE_NOT_STORED));
     w.addDocument(doc);
     w.commit();
     IndexReader r = DirectoryReader.open(w.getDirectory());
     IndexSearcher s = newSearcher(r);
-    
+
     Query q = QPTestParser.init(new CannedAnalyzer()).parse("\"a\"", "field");
     assertTrue(q instanceof MultiPhraseQuery);
     assertEquals(1, s.search(q, 10).totalHits);
@@ -1065,10 +1069,10 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     w.close();
     dir.close();
   }
-  
-  //Uniquely for Junit 3
+
+  // Uniquely for Junit 3
   public static junit.framework.Test suite() {
-      return new junit.framework.JUnit4TestAdapter(TestAqpSLGStandardTest.class);
+    return new junit.framework.JUnit4TestAdapter(TestAqpSLGStandardTest.class);
   }
 
 }

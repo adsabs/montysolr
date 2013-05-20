@@ -25,7 +25,6 @@ import org.apache.lucene.queryparser.flexible.aqp.AqpCommonTreeAdaptor;
  * without a need to provide a Java implementation. It uses reflection, so it
  * might be slower than a dedicated parsing class.
  * 
- * @author rchyla
  * 
  */
 public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
@@ -72,7 +71,7 @@ public class AqpSyntaxParserLoadableImpl extends AqpSyntaxParserAbstract {
       iLexer = ctLexer.newInstance(arglist);
 
       // instantiate parser using no parameters
-      //ANTLRStringStream fakeInput = new ANTLRStringStream("none");
+      // ANTLRStringStream fakeInput = new ANTLRStringStream("none");
       CommonTokenStream fakeTokens = new CommonTokenStream(
           (TokenSource) clsLexer.cast(iLexer));
       Class partypes2[] = new Class[1];

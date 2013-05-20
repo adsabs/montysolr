@@ -30,28 +30,28 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  */
 public class AqpAndQueryNode extends AqpBooleanQueryNode {
 
-	private static final long serialVersionUID = -4148186404006404927L;
+  private static final long serialVersionUID = -4148186404006404927L;
 
-	/**
-	 * @param clauses
-	 *            - the query nodes to be and'ed
-	 */
-	public AqpAndQueryNode(List<QueryNode> clauses) {
-		super(clauses);
+  /**
+   * @param clauses
+   *          - the query nodes to be and'ed
+   */
+  public AqpAndQueryNode(List<QueryNode> clauses) {
+    super(clauses);
 
-		operator = "AND";
+    operator = "AND";
 
-		if ((clauses == null) || (clauses.size() == 0)) {
-			throw new IllegalArgumentException(
-					"AND query must have at least one clause");
-		}
-		
-		applyModifier(clauses, Modifier.MOD_REQ);
-		
-		// unfortunately we have to do it like this (when subclassing from
-		// BooleanQueryNode)
-		set(clauses);
+    if ((clauses == null) || (clauses.size() == 0)) {
+      throw new IllegalArgumentException(
+          "AND query must have at least one clause");
+    }
 
-	}
+    applyModifier(clauses, Modifier.MOD_REQ);
+
+    // unfortunately we have to do it like this (when subclassing from
+    // BooleanQueryNode)
+    set(clauses);
+
+  }
 
 }

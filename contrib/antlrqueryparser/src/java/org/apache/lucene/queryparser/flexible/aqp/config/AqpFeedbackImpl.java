@@ -1,6 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp.config;
 
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +17,6 @@ package org.apache.lucene.queryparser.flexible.aqp.config;
  * limitations under the License.
  */
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,53 +25,44 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.util.AttributeImpl;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackEventHandler.ACTION;
 
+public class AqpFeedbackImpl extends AttributeImpl implements AqpFeedback {
 
-public class AqpFeedbackImpl extends AttributeImpl 
-				implements AqpFeedback {
-	
-	private static final long serialVersionUID = 5178148416076100953L;
-	
+  private static final long serialVersionUID = 5178148416076100953L;
 
-	private List<AqpFeedbackEvent> events =  new ArrayList<AqpFeedbackEvent>();
-	private List<AqpFeedbackEventHandler> handlers = new ArrayList<AqpFeedbackEventHandler>();
-	
-	@Override
-	public void clear() {
-		events.clear();
-	}
+  private List<AqpFeedbackEvent> events = new ArrayList<AqpFeedbackEvent>();
+  private List<AqpFeedbackEventHandler> handlers = new ArrayList<AqpFeedbackEventHandler>();
 
-	@Override
-	public void copyTo(AttributeImpl target) {
-		throw new UnsupportedOperationException();
-	}
+  @Override
+  public void clear() {
+    events.clear();
+  }
 
-	public void registerEventHandler(AqpFeedbackEventHandler handler) {
-		handlers.add(handler);
-	}
+  @Override
+  public void copyTo(AttributeImpl target) {
+    throw new UnsupportedOperationException();
+  }
 
-	public AqpFeedbackEvent createEvent(TYPE level,
-			Class<? extends QueryNodeProcessor> qnClass, QueryNode node,
-			String msg, Object... args) {
-		return new AqpFeedbackEventImpl(level, qnClass, node, msg, args);
-	}
+  public void registerEventHandler(AqpFeedbackEventHandler handler) {
+    handlers.add(handler);
+  }
 
-	public void sendEvent(AqpFeedbackEvent event) {
-		for (AqpFeedbackEventHandler handler : handlers) {
-			ACTION r = handler.handle(event);
-			if (r == ACTION.STOP) {
-				return;
-			}
-			else if (r == ACTION.SAVE_EVENT) {
-				if (!events.contains(event)) {
-					events.add(event);
-				}
-			}
-		}
-	}
+  public AqpFeedbackEvent createEvent(TYPE level,
+      Class<? extends QueryNodeProcessor> qnClass, QueryNode node, String msg,
+      Object... args) {
+    return new AqpFeedbackEventImpl(level, qnClass, node, msg, args);
+  }
 
-
-	
+  public void sendEvent(AqpFeedbackEvent event) {
+    for (AqpFeedbackEventHandler handler : handlers) {
+      ACTION r = handler.handle(event);
+      if (r == ACTION.STOP) {
+        return;
+      } else if (r == ACTION.SAVE_EVENT) {
+        if (!events.contains(event)) {
+          events.add(event);
+        }
+      }
+    }
+  }
 
 }
-
-

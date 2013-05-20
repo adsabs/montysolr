@@ -18,53 +18,46 @@ package org.apache.lucene.queryparser.flexible.aqp.nodes;
  */
 
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
-import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 
 /**
- * A {@link NonAnalyzedQueryNode} represents a query that was already
- * be processed by an analyzer. The child (typically only one) is the
- * result of a call to another analyzer.
+ * A {@link NonAnalyzedQueryNode} represents a query that was already be
+ * processed by an analyzer. The child (typically only one) is the result of a
+ * call to another analyzer.
  * 
  * @see AqpAnalyzerQueryNodeProcessor
  */
 public class AqpAnalyzedQueryNode extends QueryNodeImpl {
 
+  /**
+   * @param node
+   *          - query node
+   */
+  public AqpAnalyzedQueryNode(QueryNode node) {
+    allocate();
+    setLeaf(false);
+    this.add(node);
+  }
 
-	/**
-	 * @param node
-	 *          - query node
-	 */
-	public AqpAnalyzedQueryNode(QueryNode node) {
-		allocate();
-		setLeaf(false);
-		this.add(node);
-	}
+  @Override
+  public String toString() {
+    return "<analyzed>" + this.getChild() + "</analyzed>";
+  }
 
+  @Override
+  public AqpAnalyzedQueryNode cloneTree() throws CloneNotSupportedException {
+    AqpAnalyzedQueryNode clone = (AqpAnalyzedQueryNode) super.cloneTree();
+    // nothing to do here
+    return clone;
+  }
 
+  public CharSequence toQueryString(EscapeQuerySyntax escapeSyntaxParser) {
+    return this.getChildren().get(0).toQueryString(escapeSyntaxParser);
+  }
 
-	@Override
-	public String toString() {
-		return "<analyzed>" + this.getChild() + "</analyzed>";
-	}
-
-	@Override
-	public AqpAnalyzedQueryNode cloneTree() throws CloneNotSupportedException {
-		AqpAnalyzedQueryNode clone = (AqpAnalyzedQueryNode) super.cloneTree();
-		// nothing to do here
-		return clone;
-	}
-
-
-	@Override
-	public CharSequence toQueryString(EscapeQuerySyntax escapeSyntaxParser) {
-		return this.getChildren().get(0).toQueryString(escapeSyntaxParser);
-	}
-	
-	public QueryNode getChild() {
-		return this.getChildren().get(0);
-	}
+  public QueryNode getChild() {
+    return this.getChildren().get(0);
+  }
 }

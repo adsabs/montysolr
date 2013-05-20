@@ -10,17 +10,17 @@ import org.apache.lucene.sandbox.queries.SlowFuzzyQuery;
 @SuppressWarnings("deprecation")
 public class AqpSlowFuzzyQueryNodeBuilder implements StandardQueryBuilder {
 
-	public AqpSlowFuzzyQueryNodeBuilder() {
-		// empty constructor
-	}
+  public AqpSlowFuzzyQueryNodeBuilder() {
+    // empty constructor
+  }
 
-	public SlowFuzzyQuery build(QueryNode queryNode) throws QueryNodeException {
-		SlowFuzzyQueryNode fuzzyNode = (SlowFuzzyQueryNode) queryNode;
+  public SlowFuzzyQuery build(QueryNode queryNode) throws QueryNodeException {
+    SlowFuzzyQueryNode fuzzyNode = (SlowFuzzyQueryNode) queryNode;
 
-		return new SlowFuzzyQuery(new Term(fuzzyNode.getFieldAsString(),
-				fuzzyNode.getTextAsString()), fuzzyNode.getSimilarity(),
-				fuzzyNode.getPrefixLength());
+    return new SlowFuzzyQuery(new Term(fuzzyNode.getFieldAsString(),
+        fuzzyNode.getTextAsString()), fuzzyNode.getSimilarity(),
+        fuzzyNode.getPrefixLength());
 
-	}
+  }
 
 }

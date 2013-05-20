@@ -10,17 +10,17 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 
 public class AqpFieldQueryNodeRegexBuilder implements StandardQueryBuilder {
-	
-	public AqpFieldQueryNodeRegexBuilder() {
-		// empty constructor
-	}
 
-	public Query build(QueryNode queryNode) throws QueryNodeException {
-	    FieldQueryNode fieldNode = (FieldQueryNode) queryNode;
-	    
-	    return new RegexpQuery(new Term(fieldNode.getFieldAsString(), fieldNode
-	        .getTextAsString()));
+  public AqpFieldQueryNodeRegexBuilder() {
+    // empty constructor
+  }
 
-	  }
+  public Query build(QueryNode queryNode) throws QueryNodeException {
+    FieldQueryNode fieldNode = (FieldQueryNode) queryNode;
+
+    return new RegexpQuery(new Term(fieldNode.getFieldAsString(),
+        fieldNode.getTextAsString()));
+
+  }
 
 }

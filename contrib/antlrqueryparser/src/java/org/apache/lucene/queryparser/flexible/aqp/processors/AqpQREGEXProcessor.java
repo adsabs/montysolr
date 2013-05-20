@@ -10,36 +10,36 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 
 /**
- * Converts QREGEX node into @{link {@link RegexpQueryNode}. 
- * The field value is the @{link DefaultFieldAttribute} 
- * specified in the configuration.
+ * Converts QREGEX node into @{link {@link RegexpQueryNode}. The field value is
+ * the @{link DefaultFieldAttribute} specified in the configuration.
  * 
  * <br/>
  * 
- * If the user specified a field, it will be set by the @{link AqpFIELDProcessor}
- * Therefore the {@link AqpQNORMALProcessor} should run before it.
+ * If the user specified a field, it will be set by the @{link
+ * AqpFIELDProcessor} Therefore the {@link AqpQNORMALProcessor} should run
+ * before it.
  * 
  * 
  * @see QueryConfigHandler
  * @see DefaultFieldAttribute
- *
+ * 
  */
 public class AqpQREGEXProcessor extends AqpQProcessor {
 
-	public boolean nodeIsWanted(AqpANTLRNode node) {
-		if (node.getTokenLabel().equals("QREGEX")) {
-			return true;
-		}
-		return false;
-	}
-	
-	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
-		String field = getDefaultFieldName();
-		
-		AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
-		String input = subChild.getTokenInput();
-		return new AqpAdsabsRegexQueryNode(field,	input.substring(1,input.length()-1), 
-		    subChild.getTokenStart(),	subChild.getTokenEnd());
-	}
+  public boolean nodeIsWanted(AqpANTLRNode node) {
+    if (node.getTokenLabel().equals("QREGEX")) {
+      return true;
+    }
+    return false;
+  }
+
+  public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
+    String field = getDefaultFieldName();
+
+    AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
+    String input = subChild.getTokenInput();
+    return new AqpAdsabsRegexQueryNode(field, input.substring(1,
+        input.length() - 1), subChild.getTokenStart(), subChild.getTokenEnd());
+  }
 
 }

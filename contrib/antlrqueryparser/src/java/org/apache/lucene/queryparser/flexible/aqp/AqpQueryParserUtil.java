@@ -56,7 +56,6 @@ final public class AqpQueryParserUtil {
       throw new IllegalArgumentException("queries.length != fields.length");
     BooleanQuery bQuery = new BooleanQuery();
 
-
     for (int i = 0; i < fields.length; i++) {
       Query q = qp.parse(queries[i], fields[i]);
 
@@ -83,7 +82,7 @@ final public class AqpQueryParserUtil {
    * MultiFieldQueryParser.parse(&quot;query&quot;, fields, flags, analyzer);
    * &lt;/code&gt;
    * </pre>
-   *<p>
+   * <p>
    * The code above would construct a query:
    * 
    * <pre>
@@ -137,7 +136,7 @@ final public class AqpQueryParserUtil {
    * MultiFieldQueryParser.parse(query, fields, flags, analyzer);
    * &lt;/code&gt;
    * </pre>
-   *<p>
+   * <p>
    * The code above would construct a query:
    * 
    * <pre>
@@ -157,8 +156,9 @@ final public class AqpQueryParserUtil {
    * @throws IllegalArgumentException
    *           if the length of the queries, fields, and flags array differ
    */
-  public static Query parse(AqpQueryParser qp, String[] queries, String[] fields,
-      BooleanClause.Occur[] flags, Analyzer analyzer) throws QueryNodeException {
+  public static Query parse(AqpQueryParser qp, String[] queries,
+      String[] fields, BooleanClause.Occur[] flags, Analyzer analyzer)
+      throws QueryNodeException {
     if (!(queries.length == fields.length && queries.length == flags.length))
       throw new IllegalArgumentException(
           "queries, fields, and flags array have have different length");

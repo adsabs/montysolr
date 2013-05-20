@@ -21,15 +21,14 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 
 /**
- * A {@link NonAnalyzedQueryNode} represents a query that will not
- * be processed by an analyzer. It will be served to the search
- * engine as it is
+ * A {@link NonAnalyzedQueryNode} represents a query that will not be processed
+ * by an analyzer. It will be served to the search engine as it is
  * 
  * Example: e(+)
  */
 public class AqpNonAnalyzedQueryNode extends QuotedFieldQueryNode {
 
-	private static final long serialVersionUID = 6921391439471630844L;
+  private static final long serialVersionUID = 6921391439471630844L;
 
   /**
    * @param field
@@ -41,15 +40,14 @@ public class AqpNonAnalyzedQueryNode extends QuotedFieldQueryNode {
    * @param end
    *          - position in the query string
    */
-  public AqpNonAnalyzedQueryNode(CharSequence field, CharSequence text, int begin,
-      int end) {
+  public AqpNonAnalyzedQueryNode(CharSequence field, CharSequence text,
+      int begin, int end) {
     super(field, text, begin, end);
   }
 
   public AqpNonAnalyzedQueryNode(FieldQueryNode fqn) {
     this(fqn.getField(), fqn.getText(), fqn.getBegin(), fqn.getEnd());
   }
-
 
   @Override
   public String toString() {

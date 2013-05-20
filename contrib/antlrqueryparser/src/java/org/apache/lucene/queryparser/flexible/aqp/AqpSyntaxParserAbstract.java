@@ -6,10 +6,9 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 
 public abstract class AqpSyntaxParserAbstract implements AqpSyntaxParser {
 
-	
-    public QueryNode parse(CharSequence query, CharSequence field)
-	throws QueryNodeParseException {
-    	TokenStream tokens = getTokenStream(query);
-    	return parseTokenStream(tokens, query, field);
-    }
+  public QueryNode parse(CharSequence query, CharSequence field)
+      throws QueryNodeParseException {
+    TokenStream tokens = getTokenStream(query);
+    return parseTokenStream(tokens, query, field);
+  }
 }

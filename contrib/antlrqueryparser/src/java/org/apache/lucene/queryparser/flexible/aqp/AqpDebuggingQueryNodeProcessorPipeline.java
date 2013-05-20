@@ -11,93 +11,103 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 
+/**
+ *  This class is used for debugging purposes (eg. from unittests
+ *  or when the query parser was invoked with debuqQuery=true)
+ *  
+ *  The debugging output shows the stage of the AST tree after
+ *  each processing stage completed. Including the changes in 
+ *  the internal 'map'.
+ * 
+ */
 public class AqpDebuggingQueryNodeProcessorPipeline extends
-QueryNodeProcessorPipeline {
-	
-	EscapeQuerySyntax escaper = new EscapeQuerySyntaxImpl();
-	
-	public AqpDebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
-		super(queryConfig);
+    QueryNodeProcessorPipeline {
 
-	}
+  EscapeQuerySyntax escaper = new EscapeQuerySyntaxImpl();
 
-	public QueryNode process(QueryNode queryTree) throws QueryNodeException {
-		String oldVal = null;
-		String newVal = null;
-		String oldMap = null;
-		String newMap = null;
+  public AqpDebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
+    super(queryConfig);
 
+  }
 
-		oldVal = queryTree.toString();
-		oldMap = harvestTagMap(queryTree);
-		newMap = oldMap;
+  public QueryNode process(QueryNode queryTree) throws QueryNodeException {
+    String oldVal = null;
+    String newVal = null;
+    String oldMap = null;
+    String newMap = null;
 
-		int i = 1;
-		System.out.println("     0. starting");
-		System.out.println("--------------------------------------------");
-		System.out.println(oldVal);
+    oldVal = queryTree.toString();
+    oldMap = harvestTagMap(queryTree);
+    newMap = oldMap;
 
-		Iterator<QueryNodeProcessor> it = this.iterator();
+    int i = 1;
+    System.out.println("     0. starting");
+    System.out.println("--------------------------------------------");
+    System.out.println(oldVal);
 
-		QueryNodeProcessor processor;
-		while (it.hasNext()) {
-			processor = it.next();
+    Iterator<QueryNodeProcessor> it = this.iterator();
 
-			System.out.println("     " + i + ". step "	+ processor.getClass().toString());
-			queryTree = processor.process(queryTree);
-			newVal = queryTree.toString();
-			newMap = harvestTagMap(queryTree);
-			System.out.println("     Tree changed: " + (newVal.equals(oldVal) ? "NO" : "YES"));
+    QueryNodeProcessor processor;
+    while (it.hasNext()) {
+      processor = it.next();
 
-			if (!newMap.equals(oldMap)) {
-				System.out.println("     Tags changed: YES");
-				System.out.println("     -----------------");
-				System.out.println(newMap);
-				System.out.println("     -----------------");
-			}
-			
-			System.out.println("--------------------------------------------");
+      System.out.println("     " + i + ". step "
+          + processor.getClass().toString());
+      queryTree = processor.process(queryTree);
+      newVal = queryTree.toString();
+      newMap = harvestTagMap(queryTree);
+      System.out.println("     Tree changed: "
+          + (newVal.equals(oldVal) ? "NO" : "YES"));
 
+      if (!newMap.equals(oldMap)) {
+        System.out.println("     Tags changed: YES");
+        System.out.println("     -----------------");
+        System.out.println(newMap);
+        System.out.println("     -----------------");
+      }
 
-			System.out.println(newVal.equals(oldVal) ? "" : newVal);
+      System.out.println("--------------------------------------------");
 
-			oldVal = newVal;
-			oldMap = newMap;
-			i += 1;
-		}
+      System.out.println(newVal.equals(oldVal) ? "" : newVal);
 
-		System.out.println("");
-		System.out.println("final result:");
-		System.out.println("--------------------------------------------");
-		System.out.println(queryTree.toString());
-		return queryTree;
+      oldVal = newVal;
+      oldMap = newMap;
+      i += 1;
+    }
 
-	}
+    System.out.println("");
+    System.out.println("final result:");
+    System.out.println("--------------------------------------------");
+    System.out.println(queryTree.toString());
+    return queryTree;
 
-	private String harvestTagMap(QueryNode queryTree) {
-		StringBuffer output = new StringBuffer();
-		harvestTagMapDesc(queryTree, output, 0);
-		return output.toString().trim();
-	}
+  }
 
-	private void harvestTagMapDesc(QueryNode queryTree, StringBuffer output, int level) {
-		if (queryTree.getTagMap().size() > 0) {
-			for(int i=0;i<level;i++) {
-				output.append("");
-			}
-			output.append(queryTree.toQueryString(escaper));
-			output.append(" : ");
-			//output.append(queryTree.getClass().getSimpleName());
-			//output.append(" : ");
-			output.append(queryTree.getTagMap());
-			output.append("\n");
-		}
-		List<QueryNode> children = queryTree.getChildren();
-		if (children != null) {
-			for (QueryNode child: queryTree.getChildren()) {
-				harvestTagMapDesc(child, output, level+1);
-			}
-		}
-	}
+  private String harvestTagMap(QueryNode queryTree) {
+    StringBuffer output = new StringBuffer();
+    harvestTagMapDesc(queryTree, output, 0);
+    return output.toString().trim();
+  }
+
+  private void harvestTagMapDesc(QueryNode queryTree, StringBuffer output,
+      int level) {
+    if (queryTree.getTagMap().size() > 0) {
+      for (int i = 0; i < level; i++) {
+        output.append("");
+      }
+      output.append(queryTree.toQueryString(escaper));
+      output.append(" : ");
+      // output.append(queryTree.getClass().getSimpleName());
+      // output.append(" : ");
+      output.append(queryTree.getTagMap());
+      output.append("\n");
+    }
+    List<QueryNode> children = queryTree.getChildren();
+    if (children != null) {
+      for (QueryNode child : queryTree.getChildren()) {
+        harvestTagMapDesc(child, output, level + 1);
+      }
+    }
+  }
 
 }

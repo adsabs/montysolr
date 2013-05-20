@@ -24,47 +24,44 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 
 /**
- * A {@link AqpDefopQueryNode} represents the default boolean operation performed on a
- * list of nodes. 
+ * A {@link AqpDefopQueryNode} represents the default boolean operation
+ * performed on a list of nodes.
  * 
- * This behaves the same way as any AqpBooleanQueryNode but we have the advantage of
- * knowing which tokens were marked by the DEFOP operator and later on we can look at 
- * them and process specially (in the logic that explicit AND is stronger than implicit
- * AND) 
+ * This behaves the same way as any AqpBooleanQueryNode but we have the
+ * advantage of knowing which tokens were marked by the DEFOP operator and later
+ * on we can look at them and process specially (in the logic that explicit AND
+ * is stronger than implicit AND)
  * 
  * @see AqpBooleanQueryNode
  * @see StandardQueryConfigHandler.Operator
  */
 public class AqpDefopQueryNode extends AqpBooleanQueryNode {
 
+  /**
+   * @param clauses
+   *          - the query nodes to be joined
+   */
+  public AqpDefopQueryNode(List<QueryNode> clauses,
+      StandardQueryConfigHandler.Operator op) {
+    super(clauses);
 
-	/**
-	 * @param clauses
-	 *            - the query nodes to be joined
-	 */
-	public AqpDefopQueryNode(List<QueryNode> clauses, StandardQueryConfigHandler.Operator op) {
-		super(clauses);
+    if ((clauses == null) || (clauses.size() == 0)) {
+      throw new IllegalArgumentException(
+          "DEFOP query must have at least one clause");
+    }
 
+    if (op.equals(StandardQueryConfigHandler.Operator.AND)) {
+      operator = "AND";
+      applyModifier(clauses, Modifier.MOD_REQ);
+    } else if (op.equals(StandardQueryConfigHandler.Operator.OR)) {
+      operator = "OR";
+      applyModifier(clauses, Modifier.MOD_NONE);
+    }
 
-		if ((clauses == null) || (clauses.size() == 0)) {
-			throw new IllegalArgumentException(
-					"DEFOP query must have at least one clause");
-		}
-		
-		if (op.equals(StandardQueryConfigHandler.Operator.AND)) {
-			operator = "AND";
-			applyModifier(clauses, Modifier.MOD_REQ);
-		}
-		else if (op.equals(StandardQueryConfigHandler.Operator.OR)) {
-			operator = "OR";
-			applyModifier(clauses, Modifier.MOD_NONE);
-		}
-		
-		
-		// unfortunately we have to do it like this (when subclassing from
-		// BooleanQueryNode)
-		set(clauses);
+    // unfortunately we have to do it like this (when subclassing from
+    // BooleanQueryNode)
+    set(clauses);
 
-	}
+  }
 
 }

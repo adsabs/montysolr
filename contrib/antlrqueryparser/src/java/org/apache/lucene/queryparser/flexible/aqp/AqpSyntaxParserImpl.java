@@ -64,7 +64,7 @@ public abstract class AqpSyntaxParserImpl extends AqpSyntaxParserAbstract
       iLexer = ctLexer.newInstance(arglist);
 
       // instantiate parser using no parameters
-      //ANTLRStringStream fakeInput = new ANTLRStringStream("none");
+      // ANTLRStringStream fakeInput = new ANTLRStringStream("none");
       CommonTokenStream fakeTokens = new CommonTokenStream(
           (TokenSource) clsLexer.cast(iLexer));
       Class partypes2[] = new Class[1];
