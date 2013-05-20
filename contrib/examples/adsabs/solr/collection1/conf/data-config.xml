@@ -1,7 +1,7 @@
 <dataConfig>
     <dataSource type="AdsDataSource" 
-        mongoHost="adszee" 
-        mongoPort="27017" 
+        mongoHost="adszee"
+        mongoPort="27017"
         mongoDocIdField="bibcode" 
         mongoDBName="solr4ads"
         mongoCollectionName="docs"
@@ -230,9 +230,8 @@
         <field column="cite_read_boost" mongoField="true" />
         <field column="citation_count" mongoField="true" />
         <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
-        
-        <!--  TODO: mongodb is not serving grants now -->
-        <field column="grants" name="grant" mongoField="true" />
+        <field column="facility" mongoField="true" /> 
+        <field column="grant" mongoField="true" mongoFieldName="grants" />
         
         
         <!-- following two fields are not represented in the schema.
