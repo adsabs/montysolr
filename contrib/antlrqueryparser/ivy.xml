@@ -19,6 +19,10 @@
 <ivy-module version="2.0">
     <info organisation="montysolr" module="antlrqueryparser"/>
     <dependencies>
-      <exclude org="*" ext="*" matcher="regexp" type="${ivy.exclude.types}"/> 
+      
+      <dependency org="org.antlr" name="antlr-runtime" rev="3.4" transitive="false"/> 
+      <dependency org="org.antlr" name="antlr" rev="3.4" transitive="false"/>
+      
+      <exclude org="*" ext="*" matcher="regexp" type="${ivy.exclude.types}"/>
     </dependencies>
 </ivy-module>

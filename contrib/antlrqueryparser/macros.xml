@@ -41,7 +41,7 @@
         <attribute name="build-dir"/>
         <attribute name="parser-dir"/>
         <attribute name="classpathref"/>
-    	<attribute name="compilerarg" default="-nowarn"/> <!-- Because parser is a generated code, we have little control over it and  disable the warnings -->
+    	  <attribute name="compilerarg" default="-nowarn"/> <!-- Because parser is a generated code, we have little control over it and  disable the warnings -->
         <sequential>
             
             <clean-parser parser-dir="@{parser-dir}" grammar-name="@{grammar-name}"/>
@@ -50,7 +50,7 @@
             <echo>
                 Regenerating: @{grammar-name}
                 Output: @{parser-dir}
-                </echo>
+            </echo>
 
             
             <java classpathref="@{classpathref}"
@@ -64,16 +64,16 @@
             
             <mkdir dir="@{build-dir}"/>
         	
-        	<compile
+        	  <compile
                 srcdir="@{parser-dir}"
                 destdir="@{build-dir}">
-        		<exclude name="**/*" />
-        		<include name="**/@{grammar-name}Parser.java" />
-                <include name="**/@{grammar-name}Lexer.java" />
-                <include name="**/@{grammar-name}.tokens" />
-        		<classpath refid="@{classpathref}" />
-        		<compilerarg line="@{compilerarg}" />
-        	</compile>
+          		<exclude name="**/*" />
+          		<include name="**/@{grammar-name}Parser.java" />
+                  <include name="**/@{grammar-name}Lexer.java" />
+                  <include name="**/@{grammar-name}.tokens" />
+          		<classpath refid="@{classpathref}" />
+          		<compilerarg line="@{compilerarg}" />
+          	</compile>
         	
         	
             <!-- generate the wrapper for lucene -->
@@ -91,10 +91,10 @@
         <sequential>
             <delete file="@{output-file}" failonerror="false"/>
             <echo>
-                    Generating DOT: @{grammar-name}  
-                    Query: @{query} 
-                    Rule: @{rule}       
-                </echo>
+                Generating DOT: @{grammar-name}  
+                Query: @{query} 
+                Rule: @{rule}       
+            </echo>
             <java classpathref="@{classpathref}"
                     classname="org.apache.lucene.queryparser.flexible.aqp.parser.BuildAST"
                     output="@{output-file}"
@@ -141,8 +141,7 @@
             </echo>
             <java classpathref="@{classpathref}"
                 classname="org.antlr.gunit.Interp"
-            	failonerror="true"
-                >
+            	  failonerror="true">
                 <arg value="@{grammar-dir}/@{grammar-name}.gunit"/>
             </java>
         </sequential>
@@ -155,8 +154,8 @@
         <attribute name="build-dir" />
         <attribute name="classpath" />
         <attribute name="grammar-dir" />
-    	<attribute name="java-executable" default="java"/>
-    	<attribute name="dot-executable" default="dot"/>
+    	  <attribute name="java-executable" default="java"/>
+    	  <attribute name="dot-executable" default="dot"/>
     	
         <sequential>
             <exec executable="@{python-executable}" failonerror="true" >
@@ -165,8 +164,8 @@
                 <arg value="@{build-dir}"/>
                 <arg value="@{classpath}" />
                 <arg value="@{grammar-dir}"/>
-            	<arg value="@{java-executable}"/>
-        		<arg value="@{dot-executable}"/>
+            	  <arg value="@{java-executable}"/>
+        		    <arg value="@{dot-executable}"/>
             </exec>
             <echo>
             The html with diagram is at: @{build-dir}/@{grammar-name}.html
@@ -209,66 +208,60 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.@{grammar-name}Parser;
 
 
 public class @{grammar-name}SyntaxParser extends AqpSyntaxParserAbstract {
+  public AqpSyntaxParser initializeGrammar(String grammarName)
+          throws QueryNodeParseException {
+    return this;
+  }
+
+  public TokenStream getTokenStream(CharSequence input) {
+    ANTLRStringStream in = new ANTLRStringStream(input.toString());
+    @{grammar-name}Lexer lexer = new @{grammar-name}Lexer(in);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    return tokens;
+  }
+
+  public QueryNode parseTokenStream(TokenStream tokens, CharSequence query,
+          CharSequence field) throws QueryNodeParseException {
+    @{grammar-name}Parser parser = new @{grammar-name}Parser(tokens);
+    @{grammar-name}Parser.mainQ_return returnValue;
     
+    AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor(parser.getTokenNames());
+    parser.setTreeAdaptor(adaptor);
     
-    public AqpSyntaxParser initializeGrammar(String grammarName)
-            throws QueryNodeParseException {
-        return this;
+    AqpCommonTree astTree;
+    
+    try {
+      returnValue = parser.mainQ();
+      // this prevents parser from recovering, however it can also interfere
+      // with custom error handling (if present inside the grammar)
+    	if (parser.getNumberOfSyntaxErrors() > 0) {
+            throw new Exception("The parser reported a syntax error, antlrqueryparser hates errors!");
+      }
+      astTree = (AqpCommonTree) returnValue.getTree();
+      return astTree.toQueryNodeTree();
+    } catch (RecognitionException e) {
+      throw new QueryNodeParseException(new MessageImpl(query + " " + parser.getErrorMessage(e, parser.getTokenNames())));
+    } catch (Exception e) {
+      Message message = new MessageImpl(
+              QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
+              e.getMessage());
+      QueryNodeParseException ee = new QueryNodeParseException(e);
+      ee.setQuery(query);
+      ee.setNonLocalizedMessage(message);
+      throw ee;
+    } catch (Error e) {
+      Message message = new MessageImpl(
+              QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
+              e.getMessage());
+      QueryNodeParseException ee = new QueryNodeParseException(e);
+      ee.setQuery(query);
+      ee.setNonLocalizedMessage(message);
+      throw ee;
     }
-
-    public TokenStream getTokenStream(CharSequence input) {
-        ANTLRStringStream in = new ANTLRStringStream(input.toString());
-        @{grammar-name}Lexer lexer = new @{grammar-name}Lexer(in);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        return tokens;
-    }
-
-    public QueryNode parseTokenStream(TokenStream tokens, CharSequence query,
-            CharSequence field) throws QueryNodeParseException {
-        @{grammar-name}Parser parser = new @{grammar-name}Parser(tokens);
-        @{grammar-name}Parser.mainQ_return returnValue;
-        
-        AqpCommonTreeAdaptor adaptor = new AqpCommonTreeAdaptor(parser.getTokenNames());
-        parser.setTreeAdaptor(adaptor);
-        
-        AqpCommonTree astTree;
-        
-        try {
-            returnValue = parser.mainQ();
-            // this prevents parser from recovering, however it can also interfere
-            // with custom error handling (if present inside the grammar)
-        	if (parser.getNumberOfSyntaxErrors() > 0) {
-                throw new Exception("The parser reported a syntax error, antlrqueryparser hates errors!");
-            }
-            astTree = (AqpCommonTree) returnValue.getTree();
-            return astTree.toQueryNodeTree();
-        } catch (RecognitionException e) {
-            throw new QueryNodeParseException(new MessageImpl(query + " " + parser.getErrorMessage(e, parser.getTokenNames())));
-        } catch (Exception e) {
-            Message message = new MessageImpl(
-                    QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
-                    e.getMessage());
-            QueryNodeParseException ee = new QueryNodeParseException(e);
-            ee.setQuery(query);
-            ee.setNonLocalizedMessage(message);
-            throw ee;
-        } catch (Error e) {
-            Message message = new MessageImpl(
-                    QueryParserMessages.INVALID_SYNTAX_CANNOT_PARSE, query,
-                    e.getMessage());
-            QueryNodeParseException ee = new QueryNodeParseException(e);
-            ee.setQuery(query);
-            ee.setNonLocalizedMessage(message);
-            throw ee;
-        }
-    }
-
+  }
 }
-
-            
 ]]>
             </echo>
-
         </sequential>
     </macrodef>
 
