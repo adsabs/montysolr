@@ -16,6 +16,8 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.apache.lucene.queryparser.flexible.messages.Message;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTreeAdaptor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -24,8 +26,6 @@ import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParserAbstract;
 import org.apache.lucene.queryparser.flexible.aqp.parser.StandardLuceneGrammarLexer;
 import org.apache.lucene.queryparser.flexible.aqp.parser.StandardLuceneGrammarParser;
-import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
-import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTreeAdaptor;
 
 
 public class StandardLuceneGrammarSyntaxParser extends AqpSyntaxParserAbstract {
