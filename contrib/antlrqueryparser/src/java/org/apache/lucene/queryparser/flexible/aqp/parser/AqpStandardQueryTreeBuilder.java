@@ -17,9 +17,6 @@ package org.apache.lucene.queryparser.flexible.aqp.parser;
  * limitations under the License.
  */
 
-import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
-import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
@@ -28,7 +25,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.MatchAllDocsQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.MatchNoDocsQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
@@ -57,36 +53,20 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.StandardBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
-import org.apache.lucene.search.Query;
 
 /**
- * This query tree builder only defines the necessary map to build a
- * {@link Query} tree object. It should be used to generate a {@link Query} tree
- * object from a query node tree processed by a
- * {@link AqpStandardQueryNodeProcessorPipeline}. <br/>
+ * This query tree builder provides configuration for the standard
+ * lucene syntax. <br/>
  * 
- * @see QueryTreeBuilder
- * @see StandardQueryNodeProcessorPipeline
+ * @see AqpStandardLuceneParser
  */
 public class AqpStandardQueryTreeBuilder extends AqpQueryTreeBuilder implements
     StandardQueryBuilder {
 
-  private boolean debug = false;
-  private int counter = 0;
-
-  public AqpStandardQueryTreeBuilder(boolean debug) {
-    this.debug = debug;
-    init();
-  }
-
-  public AqpStandardQueryTreeBuilder() {
-    init();
-  }
 
   public void init() {
     setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
@@ -112,54 +92,5 @@ public class AqpStandardQueryTreeBuilder extends AqpQueryTreeBuilder implements
     setBuilder(MatchAllDocsQueryNode.class, new MatchAllDocsQueryNodeBuilder());
   }
 
-  @Override
-  public Query build(QueryNode queryNode) throws QueryNodeException {
-    this.counter = 0;
-    return (Query) super.build(queryNode);
-  }
-
-  public void debug(boolean debug) {
-    this.debug = debug;
-  }
-
-  public void setBuilder(Class<? extends QueryNode> queryNodeClass,
-      QueryBuilder builder) {
-    if (this.debug) {
-      super.setBuilder(queryNodeClass, new DebuggingNodeBuilder(queryNodeClass,
-          builder));
-    } else {
-      super.setBuilder(queryNodeClass, builder);
-    }
-  }
-
-  class DebuggingNodeBuilder implements QueryBuilder {
-    private Class<? extends QueryNode> clazz = null;
-    private QueryBuilder realBuilder = null;
-
-    DebuggingNodeBuilder(Class<? extends QueryNode> queryNodeClass,
-        QueryBuilder builder) {
-      clazz = queryNodeClass;
-      realBuilder = builder;
-    }
-
-    public Object build(QueryNode queryNode) throws QueryNodeException {
-      System.out.println("--------------------------------------------");
-      System.out.println("step     " + counter++ + ".");
-      System.out.println("builder: " + realBuilder.getClass().getName());
-      System.out.println("node:    " + clazz.getName());
-      System.out.println(queryNode.toString());
-      System.out.println("   -->");
-      Object result = realBuilder.build(queryNode);
-      if (result != null) {
-        System.out.println(((Query) result).toString() + "  <"
-            + result.getClass().getName() + ">");
-      } else {
-        System.out.println("null");
-      }
-      System.out.println("--------------------------------------------");
-      return result;
-    }
-
-  };
 
 }

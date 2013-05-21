@@ -32,13 +32,26 @@ import org.apache.lucene.search.Query;
  * @see QueryTreeBuilder
  * @see StandardQueryNodeProcessorPipeline
  */
-public abstract class AqpQueryTreeBuilder extends QueryTreeBuilder implements
+public class AqpQueryTreeBuilder extends QueryTreeBuilder implements
     StandardQueryBuilder {
 
   private boolean debug = false;
   private int counter = 0;
+  
+  public AqpQueryTreeBuilder(boolean debug) {
+    this.setDebug(debug);
+    init();
+  }
+
+  public AqpQueryTreeBuilder() {
+    init();
+  }
 
   public void setDebug(boolean val) {
+  	if (val != debug) {
+  		debug = val;
+  		init();
+  	}
   	debug = val;
   }
   
@@ -46,6 +59,9 @@ public abstract class AqpQueryTreeBuilder extends QueryTreeBuilder implements
   	return debug;
   }
   
+  public void init() {
+  	throw new IllegalAccessError("AqpQueryTreeBuilder must be subclassed and has the init() method");
+  }
 
   @Override
   public Query build(QueryNode queryNode) throws QueryNodeException {

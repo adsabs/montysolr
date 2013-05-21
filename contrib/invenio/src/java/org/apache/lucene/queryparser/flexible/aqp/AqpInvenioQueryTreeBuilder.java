@@ -1,10 +1,10 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.InvenioQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.InvenioQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
@@ -35,7 +35,7 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.StandardBooleanQuer
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 
-public class AqpInvenioQueryTreeBuilder extends AqpStandardQueryTreeBuilder {
+public class AqpInvenioQueryTreeBuilder extends AqpQueryTreeBuilder {
 	public void init() {
 		setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());

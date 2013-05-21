@@ -31,11 +31,9 @@ import org.apache.lucene.queryparser.flexible.core.QueryParserHelper;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
-import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.config.FuzzyConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.NumericConfig;
@@ -45,11 +43,10 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.parser.StandardSyntaxParser;
 import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpDebuggingQueryNodeProcessorPipeline;
-import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.Query;
@@ -149,39 +146,51 @@ public class AqpQueryParser extends QueryParserHelper {
         + "\" grammar=\"" + syntaxName + "\"/>";
   }
 
-  /*
-   * De/activates the debugging print of the processed query tree
+  /**
+   * De/activates the debugging output of the query parser
+   * 
+   * It works by wrapping the processor pipeline into a debugging
+   * class and by calling setDebug on the underlying builder.
+   * 
+   * @see AqpDebuggingQueryNodeProcessorPipeline
+   * @see AqpQueryTreeBuilder
    */
   @SuppressWarnings("unchecked")
   public void setDebug(boolean debug) throws InstantiationException,
       IllegalAccessException {
-    if (debug) {
-      QueryNodeProcessor qp = this.getQueryNodeProcessor();
-      AqpDebuggingQueryNodeProcessorPipeline np = new AqpDebuggingQueryNodeProcessorPipeline(
-          getQueryConfigHandler());
+  	
+  	if (debugMode != debug) {
+  		
+  		QueryNodeProcessorPipeline processor = (QueryNodeProcessorPipeline) this.getQueryNodeProcessor();
+  		QueryBuilder builder = this.getQueryBuilder();
+  		
+  		QueryNodeProcessorPipeline newPipeline;
+  		
+	    if (debug) {
+	      newPipeline = new AqpDebuggingQueryNodeProcessorPipeline(
+	      		this.getQueryConfigHandler(), processor.getClass());
+	    }
+	    else {
+	    	newPipeline = ((AqpDebuggingQueryNodeProcessorPipeline) processor)
+	    		.getOriginalProcessorClass().newInstance();
+	    }
+	    
 
-      List<QueryNodeProcessor> qnp = (List<QueryNodeProcessor>) qp;
-      ListIterator<QueryNodeProcessor> it = qnp.listIterator();
+      List<QueryNodeProcessor> listOfProcessors = (List<QueryNodeProcessor>) processor;
+      ListIterator<QueryNodeProcessor> it = listOfProcessors.listIterator();
       while (it.hasNext()) {
-        np.add(it.next());
+        newPipeline.add(it.next());
       }
-      this.setQueryNodeProcessor(np);
-
-      QueryBuilder qb = this.getQueryBuilder();
-      QueryBuilder newBuilder = qb.getClass().newInstance();
-      if (newBuilder instanceof AqpStandardQueryTreeBuilder) {
-        ((AqpStandardQueryTreeBuilder) newBuilder).debug(debug);
-        ((AqpStandardQueryTreeBuilder) newBuilder).init();
+      this.setQueryNodeProcessor(newPipeline);
+	
+	      
+      QueryBuilder newBuilder = builder.getClass().newInstance();
+      if (newBuilder instanceof AqpQueryTreeBuilder) {
+        ((AqpQueryTreeBuilder) newBuilder).setDebug(debug);
         this.setQueryBuilder(newBuilder);
       }
-
-    } else {
-      if (debugMode != debug) {
-        QueryBuilder qb = this.getQueryBuilder();
-        QueryBuilder newBuilder = qb.getClass().newInstance();
-        this.setQueryBuilder(newBuilder);
-      }
-    }
+	
+  	}
     debugMode = debug;
   }
 

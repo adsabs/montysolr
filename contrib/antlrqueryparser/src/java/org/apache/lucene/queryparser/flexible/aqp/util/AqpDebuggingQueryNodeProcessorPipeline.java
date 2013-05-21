@@ -24,10 +24,12 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
     QueryNodeProcessorPipeline {
 
   EscapeQuerySyntax escaper = new EscapeQuerySyntaxImpl();
+	private Class<? extends QueryNodeProcessorPipeline> originalProcessorClass;
 
-  public AqpDebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
+  public AqpDebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig, 
+  		Class<? extends QueryNodeProcessorPipeline> originalClass) {
     super(queryConfig);
-
+    originalProcessorClass = originalClass;
   }
 
   public QueryNode process(QueryNode queryTree) throws QueryNodeException {
@@ -109,5 +111,8 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
       }
     }
   }
-
+  
+  public Class<? extends QueryNodeProcessorPipeline> getOriginalProcessorClass() {
+  	return originalProcessorClass;
+  }
 }

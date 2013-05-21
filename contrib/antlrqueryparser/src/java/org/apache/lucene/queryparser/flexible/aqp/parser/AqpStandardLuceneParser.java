@@ -26,7 +26,7 @@ public class AqpStandardLuceneParser {
   /**
    * Instantiates {@link StandardLuceneGrammarSyntaxParser}, this method
    * is using a dedicated parser class, instead of loading the parser
-   * by name
+   * by its grammar name
    * 
    * @return
    * @throws QueryNodeParseException
