@@ -1,5 +1,54 @@
 grammar StandardLuceneGrammar;
 
+//
+//  This is a re-implementation of the standard lucene syntax with ANTLR3
+//   http://lucene.apache.org/core/4_3_0/queryparser/index.html
+//   
+//   The query syntax is complete and supports the same features as the 
+//   original parser written in JCC. The advantage of this grammar is that it
+//   is 'pluggable' into Lucene's modern flexible parser, so that you can 
+//   add custom logic on top of the 'rigid' query syntax. Besides...the grammar
+//   is not that 'rigid' - you can modify the grammar and easily recompile.
+//   
+//   # run this commad inside antlrqueryparser
+//   
+//      $ ant generate-antlr -Dgrammar=MyNewGrammar
+//   
+//   # or if you want to test things, do:
+//   
+//      $ ant try-view -Dgrammar=MyNewGrammar -Dquery="foo AND bar"
+//   
+//   
+//   Implementation note: I have tried hard to avoid putting language specific details
+//   into the grammar, unfortunately this was not always possible. But it is kept
+//   at minimum. You can generate parser code in your language of choice
+//   if you change the following:
+//   
+//   options  : 
+//     language=<your-target-language-supported-by-antlr3>
+//     superClass= the default is to subclass 'UnforgivingParser', this java class
+//                         lives in the package oal.queryparser.flixible.aqp.parser
+//                         and its purpose is to bark everytime when an exception
+//                         happens (otherwise, ANTLR tries to recover from some situations
+//                         -- you may want to remove this definition, or add your own
+//                         error recovery logic there)
+//
+//   @header:  this adds the java declaration to the generated parser file,
+//                    feel free to remove (if you want to test the grammar using
+//                    ANTLRWorks, you want to remove it)
+//   @lexer::header: dtto but for lexer
+//   @lexer::members: again, necessary for being strict and prevent error 
+//                                recovery, but this applies only to lexer errors.
+//
+//  One last note - if you want to implement your own error recovery, have a look
+//  at the generated java class 
+//       
+//      oal.queryparser.flixible.aqp.parser.<GrammarName>SyntaxParser.java
+//
+//  There we are raising parse exception as well
+//
+
+
 options {
   language = Java;
   output = AST;
@@ -25,12 +74,28 @@ tokens {
   QDATE;
 }
 
+
+// java-specific and error recovery-unfriendly details.... 
+
 @header{
   package org.apache.lucene.queryparser.flexible.aqp.parser;
 }
 @lexer::header {
-   package org.apache.lucene.queryparser.flexible.aqp.parser;
+  package org.apache.lucene.queryparser.flexible.aqp.parser;
 }
+// this is for exceptions on lexer level - ANTLRv3 does not seem to have a better way
+@lexer::members {
+	public void recover(RecognitionException re) {
+		// throw unchecked exception
+	  throw new RuntimeException(re);
+	}
+}
+
+// ...below this point, language agnostic EBNF grammar lives.
+
+
+
+
 
 mainQ : 
 	clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+)

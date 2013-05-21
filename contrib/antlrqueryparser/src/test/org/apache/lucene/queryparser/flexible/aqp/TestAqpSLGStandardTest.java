@@ -738,10 +738,14 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     assertQueryNodeException("\\"); // a backslash must always be escaped
 
-    setDebug(true);
     // LUCENE-1189
-    assertQueryEquals("(\"a\\\\\") or (\"b\")", a, "a\\ or b");
-    setDebug(false);
+    // the original result was set to be: 
+    // assertQueryEquals("(\"a\\\\\") or (\"b\")", a, "a\\ or b");
+    // however, this is wrong, because the query is: ("a\\") or ("b")
+    // the AQP parser is handling escaped chars (even escaped escapes)
+    // correctly
+    assertQueryEquals("(\"a\\\\\") or (\"b\")", a, "a\\ b");
+    assertQueryEquals("(foo:\"a\\\\\") or (bar:\"b\")", a, "foo:a\\ bar:b");
   }
 
   public void testQueryStringEscaping() throws Exception {
@@ -846,14 +850,11 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertQueryNodeException("*leadingWildcard"); // disallowed by default
     assertQueryNodeException("(foo bar");
 
-    // these exceptions are not thrown
-    setDebug(true);
     assertQueryNodeException("\"some phrase");
     assertQueryNodeException("foo bar))");
     assertQueryNodeException("field:term:with:colon some more terms");
     assertQueryNodeException("(sub query)^5.0^2.0 plus more");
     assertQueryNodeException("secret AND illegal) AND access:confidential");
-    setDebug(false);
   }
 
   public void testCustomQueryParserWildcard() throws Exception {
