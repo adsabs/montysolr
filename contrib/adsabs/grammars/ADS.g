@@ -3,6 +3,7 @@ grammar ADS;
 options {
   language = Java;
   output = AST;
+  superClass = UnforgivingParser;
 }
 
 tokens {
@@ -41,7 +42,7 @@ tokens {
 }
 
 mainQ : 
-	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
+	clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
 	;
    
   

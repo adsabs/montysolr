@@ -3,6 +3,7 @@ grammar StandardLuceneGrammar;
 options {
   language = Java;
   output = AST;
+  superClass = UnforgivingParser;
 }
 
 tokens {
@@ -25,14 +26,14 @@ tokens {
 }
 
 @header{
-   package org.apache.lucene.queryparser.flexible.aqp.parser;
+  package org.apache.lucene.queryparser.flexible.aqp.parser;
 }
 @lexer::header {
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 }
 
 mainQ : 
-	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
+	clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+)
 	;
    
   
@@ -58,7 +59,7 @@ clauseBasic
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN clauseOr+ RPAREN term_modifier)=> modifier? LPAREN clauseOr+ RPAREN term_modifier? 
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
-	| (LPAREN )=> LPAREN clauseOr+ RPAREN
+	| (LPAREN  )=> LPAREN clauseOr+ RPAREN
 	 -> clauseOr+
 	| atom
 	;

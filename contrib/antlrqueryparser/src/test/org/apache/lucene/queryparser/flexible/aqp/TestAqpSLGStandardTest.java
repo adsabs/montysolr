@@ -728,9 +728,10 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     // Tests bug LUCENE-800
     assertQueryEquals("(item:\\\\ item:ABCD\\\\)", a, "item:\\ item:ABCD\\");
-    //setDebug(true);
     assertQueryNodeException("(item:\\\\ item:ABCD\\\\))"); // unmatched closing
-    //setDebug(false);
+    assertQueryNodeException("(item:\\\\ item:ABCD\\\\)))"); // unmatched closing
+    assertQueryNodeException("(item:\\\\ item:ABCD\\\\) foo)"); // unmatched closing
+    
     // paranthesis
     assertQueryEquals("\\*", a, "*");
     assertQueryEquals("\\\\", a, "\\"); // escaped backslash
