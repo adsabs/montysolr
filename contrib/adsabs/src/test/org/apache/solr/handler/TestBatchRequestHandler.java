@@ -33,11 +33,11 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
+import org.junit.BeforeClass;
 
 @SuppressCodecs({"Lucene3x", "SimpleText"})
 public class TestBatchRequestHandler extends MontySolrQueryTestCase {
-
-
+	
   private File generatedTransliterations;
 
 
@@ -66,9 +66,9 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja Karel", F.TYPE_ADS_TEXT, "great war, with horses"));
     assertU(commit());
     
-    assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja K", F.TYPE_ADS_TEXT, "and heavy horses"));
+    assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", F.AUTHOR, "Adamčuk, Molja K", F.TYPE_ADS_TEXT, "and heavy horses"));
     assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M K", F.TYPE_ADS_TEXT, "cutting down machine and by the machine"));
-    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel Molja", F.TYPE_ADS_TEXT, "guns, from different angels"));
+    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxx9", F.AUTHOR, "Adamčuk, Karel Molja", F.TYPE_ADS_TEXT, "guns, from different angels"));
     assertU(adoc(F.ID, "10", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel M", F.TYPE_ADS_TEXT, "but still, British insisted"));
     assertU(adoc(F.ID, "11", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, K Molja", F.TYPE_ADS_TEXT, "as well as Germans did"));
     assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "ǎguşan, Adrian, , Dr", F.TYPE_ADS_TEXT, "words are too weak..."));
@@ -163,6 +163,43 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     
     
     //}
+    
+    // ==============================================
+    
+    req = req("command", "dump-index", "q", "id:7 OR id:9",
+        "fields", "bibcode,title,author");
+    rsp = new SolrQueryResponse();
+    
+    core = h.getCore();
+    core.execute(handler, req, rsp);
+    req.close();
+    
+    jobid= (String) rsp.getValues().get("jobid");
+    assert jobid != null;
+    
+    
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    while (handler.isBusy()) {
+      Thread.sleep(300);
+    }
+    req.close();
+    
+    req = req("command", "get-results", "jobid", jobid);
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    while (handler.isBusy()) {
+      Thread.sleep(300);
+    }
+    
+    sw = new StringWriter(32000);
+    responseWriter = core.getQueryResponseWriter(req);
+    responseWriter.write(sw,req,rsp);
+    req.close();
+    
+    assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxx7\"],");
+    assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxx9\"],");
     
   }
   
