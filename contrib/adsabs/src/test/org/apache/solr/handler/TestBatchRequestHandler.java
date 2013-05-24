@@ -20,6 +20,7 @@ package org.apache.solr.handler;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import monty.solr.util.MontySolrQueryTestCase;
@@ -28,8 +29,12 @@ import monty.solr.util.MontySolrSetup;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.solr.common.util.ContentStream;
+import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.batch.BatchHandler;
+import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
@@ -75,15 +80,15 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assertU(commit());
     
     BatchHandler handler;
-    if (usually()) {
-	    handler = new BatchHandler();
-	    NamedList<String> nl = new NamedList<String>();
-	    handler.init(nl); // default
-    }
-    else {
-    	handler = (BatchHandler) h.getCore().getRequestHandler("/batch");
-    }
-    
+//    if (usually()) {
+//	    handler = new BatchHandler();
+//	    NamedList<String> nl = new NamedList<String>();
+//	    handler.init(nl); // default
+//    }
+//    else {
+//    	handler = (BatchHandler) h.getCore().getRequestHandler("/batch");
+//    }
+    handler = (BatchHandler) h.getCore().getRequestHandler("/batch");
     
     //while (true) {
     	
@@ -201,6 +206,50 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxx7\"],");
     assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxx9\"],");
     
+    
+    //=================================================================
+    
+
+    // first create a job that needs data
+    req = req("command", "dump-index-use-bibcodes", "fields", "bibcode,title,author");
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    req.close();
+    jobid= (String) rsp.getValues().get("jobid");
+    assert jobid != null;
+    // now send data to be used for dumping
+    req = req("command", "receive-data", "jobid", jobid);
+    rsp = new SolrQueryResponse();
+    List<ContentStream> cs = new ArrayList<ContentStream>(1);
+    ContentStreamBase f = new ContentStreamBase.StringStream("xxxxxxxxxxxx7\nxxxxxxxxxxxx9");
+    cs.add(f);
+    ((LocalSolrQueryRequest)req).setContentStreams(cs);
+    core.execute(handler, req, rsp);
+    
+    // start processing
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    while (handler.isBusy()) {
+      Thread.sleep(300);
+    }
+    req.close();
+    
+    req = req("command", "get-results", "jobid", jobid);
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    while (handler.isBusy()) {
+      Thread.sleep(300);
+    }
+    
+    // get back results
+    sw = new StringWriter(32000);
+    responseWriter = core.getQueryResponseWriter(req);
+    responseWriter.write(sw,req,rsp);
+    req.close();
+    
+    assert sw.toString().contains("horses");
+    assert sw.toString().contains("angels");
   }
   
   private void checkFile(String... expected) throws IOException {

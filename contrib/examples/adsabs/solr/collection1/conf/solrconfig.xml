@@ -1892,9 +1892,16 @@
     </lst>
   </requestHandler>
   
-  <requestHandler name="/batch" class="solr.BatchHandler" default="false">
+  <requestHandler name="/batch" class="org.apache.solr.handler.batch.BatchHandler" default="false">
     <lst name="defaults">
         <str name="allowed">.*</str>
+        <bool name="asynchronous">true</bool>
+        <str name="workdir">batch-handler</str>
+    </lst>
+    <lst name="providers">
+      <str name="dump-index">org.apache.solr.handler.batch.BatchProviderDumpIndex</str>
+      <str name="dump-index-use-bibcodes">org.apache.solr.handler.batch.BatchProviderDumpBibcodes</str>
+      <str name="dump-freqs">org.apache.solr.handler.batch.BatchProviderDumpTermFreqs</str>
     </lst>
   </requestHandler>
   
