@@ -256,12 +256,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	  
 	  //pink elephant #238
     assertQueryEquals(req("qt", "aqp", "q", "weak lensing"), 
-        "+all:lightweak +all:mikrolinseneffekt", 
+        //"+all:lightweak +all:mikrolinseneffekt",
+    		"+(all:weak all:syn::lightweak) +(all:lensing all:syn::mikrolinseneffekt)",
         BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "weak lensing", 
         "qf", "title full keyword abstract"), 
-        "+(abstract:lightweak | title:lightweak | full:lightweak | keyword:weak) " +
-        "+(abstract:mikrolinseneffekt | title:mikrolinseneffekt | full:mikrolinseneffekt | keyword:lensing)", 
+        //"+(abstract:lightweak | title:lightweak | full:lightweak | keyword:weak) " +
+        //"+(abstract:mikrolinseneffekt | title:mikrolinseneffekt | full:mikrolinseneffekt | keyword:lensing)",
+        "+((abstract:weak abstract:syn::lightweak) | (title:weak title:syn::lightweak) | (full:weak full:syn::lightweak) | keyword:weak) " +
+        "+((abstract:lensing abstract:syn::mikrolinseneffekt) | (title:lensing title:syn::mikrolinseneffekt) | (full:lensing full:syn::mikrolinseneffekt) | keyword:lensing)",
         BooleanQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "pink elephant"), 

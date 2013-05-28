@@ -63,7 +63,7 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
     assertQ(req("q", "*:*"), "//*[@numFound='6']");
     
-    dumpDoc(null, F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS);
+    //dumpDoc(null, F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS);
     
     for (String f: F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS) {
       
@@ -79,8 +79,8 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
       assertQueryEquals(req("q", f + ":třicet-tři", "qt", "aqp"), f+":tricettri", TermQuery.class);
       assertQ(req("q", f + ":třicet-tři"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='1']");
       
-      assertQueryEquals(req("q", f + ":třicet tři", "qt", "aqp"), String.format("+%s:tricet +%s:tri", f, f), BooleanQuery.class);
-      assertQ(req("q", f + ":třicet tři"), "//*[@numFound='0']");
+      assertQueryEquals(req("q", f + ":(třicet tři)", "qt", "aqp"), String.format("+%s:tricet +%s:tri", f, f), BooleanQuery.class);
+      assertQ(req("q", f + ":(třicet tři)"), "//*[@numFound='0']");
       
       assertQueryEquals(req("q", f + ":\"třicet tři\"", "qt", "aqp"), String.format("%s:\"tricet tri\"", f), PhraseQuery.class);
       assertQ(req("q", f + ":\"třicet tři\""), "//*[@numFound='0']");

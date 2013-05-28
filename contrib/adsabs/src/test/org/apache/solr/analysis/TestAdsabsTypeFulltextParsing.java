@@ -110,8 +110,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
   }
 
-
-  public void test() throws Exception {
+  @Override
+  public void setUp() throws Exception {
 
     /*
      * The difficult part with this token type is the presence of synonyms (besides other things)
@@ -196,9 +196,11 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertU(commit());
 
+  }
+  
+  public void testMultiTokens() throws Exception {
     
-    
-    dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
+    //dumpDoc(null, F.ID, F.TYPE_ADS_TEXT);
     
     
 //    assertQueryEquals(req("q", "\"NASA grant\"~3 NEAR N*", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
@@ -211,12 +213,22 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 //        "//doc/str[@name='id'][.='149']"
 //        );
     
+    
+    boolean token_merged = false;
+    
     // related to ticket #147
-    assertQueryEquals(req("q", "NAG5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all", "aqp.uop", "span"), 
-        "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))", 
+    assertQueryEquals(req("q", "NAG5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all", "aqp.uop", "span"),
+    		// this is when all-token-analysis is ON
+    		token_merged ?
+        "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))"
+    				:
+    		"((((+abstract:acr::nag5 +abstract:5269) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | (((+title:acr::nag5 +title:5269) title:acr::nag55269)^1.4) | ((+all:acr::nag5 +all:5269) all:acr::nag55269))",
         DisjunctionMaxQuery.class);
-    assertQueryEquals(req("q", "NAG5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
-        "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))", 
+    assertQueryEquals(req("q", "NAG5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"),
+    		token_merged ?
+        "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))"
+    				:
+    		"((((+abstract:acr::nag5 +abstract:5269) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | (((+title:acr::nag5 +title:5269) title:acr::nag55269)^1.4) | ((+all:acr::nag5 +all:5269) all:acr::nag55269))", 
         DisjunctionMaxQuery.class);
     assertQ(req("q", "NAG5-5269", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
     		"//*[@numFound='3']",
@@ -225,8 +237,11 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='149']"
         );
     
-    assertQueryEquals(req("q", "nag5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
-        "(((spanNear([abstract:nag5, abstract:5269], 5, true) abstract:nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:nag5, title:5269], 5, true) title:nag55269)^1.4) | (spanNear([all:nag5, all:5269], 5, true) all:nag55269))", 
+    assertQueryEquals(req("q", "nag5-5269", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"),
+    		token_merged ?
+        "(((spanNear([abstract:nag5, abstract:5269], 5, true) abstract:nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:nag5, title:5269], 5, true) title:nag55269)^1.4) | (spanNear([all:nag5, all:5269], 5, true) all:nag55269))"
+    				:
+    		"((((+abstract:nag5 +abstract:5269) abstract:nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | (((+title:nag5 +title:5269) title:nag55269)^1.4) | ((+all:nag5 +all:5269) all:nag55269))", 
         DisjunctionMaxQuery.class);
     assertQ(req("q", "nag5-5269", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
     		"//*[@numFound='6']",
@@ -240,10 +255,15 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     
     // ticket #318
-    assertQueryEquals(req("q", "creation of a thesaurus", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
-        "(spanNear([abstract:creation, abstract:thesaurus], 5, true)^1.3 | ((author:creation of a thesaurus, author:creation of a thesaurus, * author:/creation of a[^\\s]+ thesaurus,/ author:/creation of a[^\\s]+ thesaurus, .*/ author:creation o a thesaurus, author:creation o a thesaurus, * author:/creation o a[^\\s]+ thesaurus,/ author:/creation o a[^\\s]+ thesaurus, .*/ author:creation of a t author:creation of a t * author:/creation of a[^\\s]+ t/ author:/creation of a[^\\s]+ t .*/ author:creation o a t author:creation o a t * author:/creation o a[^\\s]+ t/ author:/creation o a[^\\s]+ t .*/ author:creation of author:creation o author:creation)^1.5) | spanNear([title:creation, title:thesaurus], 5, true)^1.4 | spanNear([all:creation, all:thesaurus], 5, true))", 
-        DisjunctionMaxQuery.class);
-    assertQ(req("q", "creation of a thesaurus", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+    assertQueryEquals(req("q", "creation of a thesaurus", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"),
+    		token_merged ?
+        "(spanNear([abstract:creation, abstract:thesaurus], 5, true)^1.3 | ((author:creation of a thesaurus, author:creation of a thesaurus, * author:/creation of a[^\\s]+ thesaurus,/ author:/creation of a[^\\s]+ thesaurus, .*/ author:creation o a thesaurus, author:creation o a thesaurus, * author:/creation o a[^\\s]+ thesaurus,/ author:/creation o a[^\\s]+ thesaurus, .*/ author:creation of a t author:creation of a t * author:/creation of a[^\\s]+ t/ author:/creation of a[^\\s]+ t .*/ author:creation o a t author:creation o a t * author:/creation o a[^\\s]+ t/ author:/creation o a[^\\s]+ t .*/ author:creation of author:creation o author:creation)^1.5) | spanNear([title:creation, title:thesaurus], 5, true)^1.4 | spanNear([all:creation, all:thesaurus], 5, true))" 
+    				:
+    		"+(abstract:creation^1.3 | ((author:creation, author:creation,*)^1.5) | title:creation^1.4 | all:creation) +((()^1.3) | ((author:of, author:of,*)^1.5) | (()^1.4) | ()) +((()^1.3) | ((author:a, author:a,*)^1.5) | (()^1.4) | ()) +(abstract:thesaurus^1.3 | ((author:thesaurus, author:thesaurus,*)^1.5) | title:thesaurus^1.4 | all:thesaurus)", 
+        token_merged ? DisjunctionMaxQuery.class : BooleanQuery.class);
+    
+    if (token_merged)
+    	assertQ(req("q", "creation of a thesaurus", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
     		"//*[@numFound='1']",
         "//doc/str[@name='id'][.='318']");
     
@@ -334,20 +354,28 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     
     // now the same thing, but not using phrases
-    assertQueryEquals(req("q", "title:modified\\ newtonian\\ dynamics", "qt", "aqp"), 
+    assertQueryEquals(req("q", "title:modified\\ newtonian\\ dynamics", "qt", "aqp"),
+    		token_merged ?
         "spanNear([title:modified, title:newtonian, title:dynamics], 5, true)" +
-        " (title:syn::acr::mond title:syn::modified newtonian dynamics)", 
+        " (title:syn::acr::mond title:syn::modified newtonian dynamics)"
+        :
+        "(+title:modified +title:newtonian +title:dynamics) (title:syn::acr::mond title:syn::modified newtonian dynamics)", 
         BooleanQuery.class);
     assertQ(req("q", F.TYPE_ADS_TEXT + ":modified\\ newtonian\\ dynamics"), "//*[@numFound='2']",
     		"//doc/str[@name='id'][.='14']",
         "//doc/str[@name='id'][.='15']");
     
-    assertQueryEquals(req("q", "title:modified newtonian dynamics", "qt", "aqp"), 
-    		"spanNear([title:modified, title:newtonian, title:dynamics], 5, true)" +
-    		" (title:syn::acr::mond title:syn::modified newtonian dynamics)", BooleanQuery.class);
-    assertQ(req("q", F.TYPE_ADS_TEXT + ":modified newtonian dynamics"), "//*[@numFound='2']",
-    		"//doc/str[@name='id'][.='14']",
-        "//doc/str[@name='id'][.='15']");
+    assertQueryEquals(req("q", "title:modified newtonian dynamics", "qt", "aqp"),
+    		token_merged ?
+    		"spanNear([title:modified, title:newtonian, title:dynamics], 5, true)" +  // this has additional problem/feature: dynamics should not be in field 'title'
+    		" (title:syn::acr::mond title:syn::modified newtonian dynamics)"
+    		:
+    		"+title:modified +all:newtonian +all:dynamics", 
+    		BooleanQuery.class);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":modified newtonian dynamics"), 
+    		"//*[@numFound='1']",
+    		"//doc/str[@name='id'][.='14']"
+        );
     
     
     // and even unfielded!
@@ -417,7 +445,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "+spanNear([all:bubble, spanOr([all:pace, all:syn::lunar])], 5, true)", BooleanQuery.class);
     
     
-    
+  }
+  
+  public void testSynonyms() throws Exception {
     
     /*
      * Test multi-token translation, the chain is set to recognize

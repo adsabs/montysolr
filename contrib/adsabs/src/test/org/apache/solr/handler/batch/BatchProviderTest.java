@@ -18,6 +18,11 @@ public class BatchProviderTest extends AbstractSolrTestCase {
 		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-fieldpos.xml";
 	}
 	
+	@Override
+	public String getSolrHome() {
+		return MontySolrSetup.getMontySolrHome();
+	}
+	
 	protected void checkFile(String file, String... expected) throws IOException {
     List<String> lines = h.getCore().getResourceLoader().getLines(file);
     for (String t: expected) {

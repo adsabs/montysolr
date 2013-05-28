@@ -1899,9 +1899,11 @@
         <str name="workdir">batch-handler</str>
     </lst>
     <lst name="providers">
-      <str name="dump-index">org.apache.solr.handler.batch.BatchProviderDumpIndex</str>
+      <str name="dump-index">org.apache.solr.handler.batch.BatchProviderDumpIndexFields</str>
       <str name="dump-index-use-bibcodes">org.apache.solr.handler.batch.BatchProviderDumpBibcodes</str>
       <str name="dump-freqs">org.apache.solr.handler.batch.BatchProviderDumpTermFreqs</str>
+      <str name="dump-docs">org.apache.solr.handler.batch.BatchProviderDumpIndex</str>
+      <str name="dump-citation-index">org.apache.solr.handler.batch.BatchProviderDumpCitationCache</str>
     </lst>
   </requestHandler>
   
