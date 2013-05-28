@@ -258,8 +258,8 @@ public class BatchHandler extends RequestHandlerBase {
 			List<String> commands = new ArrayList<String>(Arrays.asList(
 					"start", "stop", "reset", "info", "detailed-info",
 					"get-results", "receive-data", "status"));
-			for (BatchProvider p: providers.values()) {
-				commands.add(p.name);
+			for (String p: providers.keySet()) {
+				commands.add(p);
 			}
 			rsp.add("availableCommands", commands);
 		}

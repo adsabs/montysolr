@@ -41,11 +41,18 @@
 			done everywhere -->
 		<field name="id" type="sfloat" indexed="true" stored="true"
 			required="true" />
-		<field name="text" type="text" indexed="true" stored="false" />
-		<field name="author" type="text" indexed="true" stored="false"
+		<field name="bibcode" type="string" indexed="true" stored="true"
+      required="false" />
+		<field name="text" type="text" indexed="true" stored="true" />
+		<field name="author" type="text" indexed="true" stored="true"
 			termVectors="true" multiValued="true" termPositions="true"
 			termOffsets="true" />
-		<dynamicField name="*_ws" type="text_ws" indexed="true"
+			
+		<!-- for citation tests -->
+		<field name="references" type="string" indexed="true" stored="true" multiValued="true"/>
+		<field name="breferences" type="string" indexed="true" stored="true" multiValued="true"/>
+		
+		<dynamicField name="*" type="text_ws" indexed="true"
 			stored="true" />
 	</fields>
 </schema>

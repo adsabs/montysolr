@@ -22,7 +22,7 @@ import org.apache.solr.request.SolrQueryRequest;
 
 public class BatchProviderDumpBibcodes extends BatchProvider {
 	
-	private BatchProviderDumpIndex internalWorker = new BatchProviderDumpIndex();
+	private BatchProviderDumpIndexFields internalWorker = new BatchProviderDumpIndexFields();
 
 	@Override
   public void run(SolrQueryRequest locReq, BatchHandlerRequestQueue queue) throws Exception {

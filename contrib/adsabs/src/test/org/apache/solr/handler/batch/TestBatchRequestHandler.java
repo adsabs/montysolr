@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.solr.handler;
+package org.apache.solr.handler.batch;
 
 import java.io.File;
 import java.io.IOException;
