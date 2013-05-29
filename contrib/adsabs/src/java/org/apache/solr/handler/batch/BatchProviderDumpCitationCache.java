@@ -3,16 +3,12 @@ package org.apache.solr.handler.batch;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.Map;
-
 import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.FieldCache.DocTerms;
-import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.response.JSONDumper;
 
 /**
  * This dumps a CITEDBY data structure to disk
@@ -26,8 +22,8 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 		SolrParams params = req.getParams();
 	  String jobid = params.get("jobid");
 	  String workDir = params.get("#workdir");
-	  String uniqueField = params.get("unique_field");
-	  String refField = params.get("ref_field");
+	  String uniqueField = params.get("unique_field", "bibcode");
+	  String refField = params.get("ref_field", "reference");
 	  boolean returnDocids = params.getBool("return_docids", false);
 	  
 	  assert jobid != null && new File(workDir).canWrite();

@@ -77,8 +77,8 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
 
     File newConfig = new File(configFile);
 
-    System.err.println(System.getProperties());
-    System.err.println("tests.mongodb.host=" + System.getProperty("tests.mongodb.host", "<null>"));
+    //System.err.println(System.getProperties());
+    //System.err.println("tests.mongodb.host=" + System.getProperty("tests.mongodb.host", "<null>"));
     
     if (System.getProperty("tests.mongodb.host", null) != null) {
       File newDataConfig;
@@ -582,19 +582,19 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
      * grants
      * 
      */
-    //dumpDoc(null, "recid", "grant", "grant_ids", "grant_facet_hier");
+    //dumpDoc(null, "recid", "bibcode", "grant", "grant_ids", "grant_facet_hier", "reference");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
   		"//*[@numFound='1']",
-  		"//doc/int[@name='recid'][.='9311214']");
+  		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
 		assertQ(req("q", "grant_facet_hier:\"0/NSF-AST\""),
   		"//*[@numFound='1']",
-  		"//doc/int[@name='recid'][.='9311214']");
+  		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
 		assertQ(req("q", "grant_facet_hier:1/NSF-AST/0618398"),
   		"//*[@numFound='1']",
-  		"//doc/int[@name='recid'][.='9311214']");
+  		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
 		assertQ(req("q", "grant_facet_hier:0/NSF-AST"),
 	  		"//*[@numFound='1']",
-	  		"//doc/int[@name='recid'][.='9311214']");
+	  		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
 		
 
     /*
@@ -604,7 +604,7 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
      * 
      */
     assertQ(req("q", "title:\"title is not available\""), "//*[@numFound='1']"); // everything besides title is stopword
-    assertQ(req("q", "title:no-sky"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
+    assertQ(req("q", "title:no-sky"), "//*[@numFound='1']");
     assertQ(req("q", "title:nosky"), "//*[@numFound='1']");
     assertQ(req("q", "title:KEPLER"), "//*[@numFound='0']"); // should search only for acronym acr::kepler
     assertQ(req("q", "title:kepler"), "//*[@numFound='2']"); // normal search
@@ -630,7 +630,7 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
      * 
      */
     assertQ(req("q", "abstract:abstract"), "//*[@numFound='1']"); // everything besides title is stopword
-    assertQ(req("q", "abstract:No-SKy"), "//*[@numFound='2']"); //becomes: title:no-sky title:sky title:no-sky
+    assertQ(req("q", "abstract:No-SKy"), "//*[@numFound='1']");
     assertQ(req("q", "abstract:nosky"), "//*[@numFound='1']");
     assertQ(req("q", "abstract:sph"), "//*[@numFound='1']");
     assertQ(req("q", "abstract:SPH"), "//*[@numFound='1']");

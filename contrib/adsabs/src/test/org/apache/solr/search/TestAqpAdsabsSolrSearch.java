@@ -208,6 +208,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode>])", BooleanQuery.class);
 	}
 	
+	
+	
 	public void test() throws Exception {
 	  
 		
@@ -268,12 +270,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         BooleanQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "pink elephant"), 
-        "+all:pinkish +all:elephant", 
+        "+(all:pink all:syn::pinkish) +all:elephant",
         BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "pink elephant",
         "qf", "title full keyword abstract"),
-        "+(abstract:pinkish | title:pinkish | full:pinkish | keyword:pink) " +
-        "+(abstract:elephant | title:elephant | full:elephant | keyword:elephant)", 
+        "+((abstract:pink abstract:syn::pinkish) | (title:pink title:syn::pinkish) | (full:pink full:syn::pinkish) | keyword:pink) " +
+        "+(abstract:elephant | title:elephant | full:elephant | keyword:elephant)",
         BooleanQuery.class);
 
     

@@ -50,6 +50,57 @@ import org.adsabs.solr.AdsConfig.F;
  *    4) remove stopwords
  *    5) normalization (lowercase etc)
  * 
+ * 
+ * 
+ * The difficult part with this token type is the presence of synonyms (besides other things)
+ * So, for example in the sentence:
+ * 
+ *   Mirrors of the hubble space telescope
+ *   
+ * We must do different things during indexing and querying
+ * 
+ *  indexing: mirrors,hubble|hubble space telescope|hst,space,telescope
+ *  querying: +mirrors +(hubble space telescope | hst)
+ *  
+ * 
+ * During the indexing we want to output BOTH the original tokens, as well as their
+ * synonyms. But in the search phase, we only want the synonyms. HOWEVER, we need
+ * the original tokens for the proximity queries, if we indexed 'hubble space telescope'
+ * as one token, we cannot search for 'hubble NEAR telescope'
+ * 
+ * The default solr synonym filter is configured for indexing, but it has the ability
+ * to do what we want. Unfortunately, the public API does not allow us to configure
+ * its behaviour (so I made a custom factory, hopefully that can go away).
+ * 
+ * 
+ * ACRONYMS:
+ *   Acronyms are identified IFF they were all UPPERCASE and were present in the 
+ *   source text. Acronym is indexed in the original form, as well as with prefix 'acr::'
+ *   
+ *   Example: MIT
+ *   Indexed: mit|acr::mit
+ *   
+ *   But if the source text contains:
+ *   
+ *     Massachusets Institute of Technology
+ *     
+ *   It is expanded into:
+ *     0: massachusets|mit|massachusets institute of technology
+ *     1: institute
+ *     2: (null, removed by the stop filter)
+ *     3: technology
+ *     
+ *   Because the synonym filters IGNORE case, the synonym MIT is emitted as 'mit'
+ *   Therefore it cannot be recognized by the Acronym filter (even it it sits after the
+ *   synonym filter)
+ *   
+ *   This has the effect that 'acr::*' will find only documents where the acronym 
+ *   was in the source (as opposed to synonym expansion)
+ *   
+ *   
+ *   TODO: maybe we can make the FST search with ignoreCase=true, but emit UpperCase
+ *   TODO: the analyzer for the synonyms must use the same StopFilters as the query chain
+ * 
  */
 public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
@@ -110,60 +161,12 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
   }
 
+  
+  
   @Override
   public void setUp() throws Exception {
-
-    /*
-     * The difficult part with this token type is the presence of synonyms (besides other things)
-     * So, for example in the sentence:
-     * 
-     *   Mirrors of the hubble space telescope
-     *   
-     * We must do different things during indexing and querying
-     * 
-     *  indexing: mirrors,hubble|hubble space telescope|hst,space,telescope
-     *  querying: +mirrors +(hubble space telescope | hst)
-     *  
-     * 
-     * During the indexing we want to output BOTH the original tokens, as well as their
-     * synonyms. But in the search phase, we only want the synonyms. HOWEVER, we need
-     * the original tokens for the proximity queries, if we indexed 'hubble space telescope'
-     * as one token, we cannot search for 'hubble NEAR telescope'
-     * 
-     * The default solr synonym filter is configured for indexing, but it has the ability
-     * to do what we want. Unfortunately, the public API does not allow us to configure
-     * its behaviour (so I made a custom factory, hopefully that can go away).
-     * 
-     * 
-     * ACRONYMS:
-     *   Acronyms are identified IFF they were all UPPERCASE and were present in the 
-     *   source text. Acronym is indexed in the original form, as well as with prefix 'acr::'
-     *   
-     *   Example: MIT
-     *   Indexed: mit|acr::mit
-     *   
-     *   But if the source text contains:
-     *   
-     *     Massachusets Institute of Technology
-     *     
-     *   It is expanded into:
-     *     0: massachusets|mit|massachusets institute of technology
-     *     1: institute
-     *     2: (null, removed by the stop filter)
-     *     3: technology
-     *     
-     *   Because the synonym filters IGNORE case, the synonym MIT is emitted as 'mit'
-     *   Therefore it cannot be recognized by the Acronym filter (even it it sits after the
-     *   synonym filter)
-     *   
-     *   This has the effect that 'acr::*' will find only documents where the acronym 
-     *   was in the source (as opposed to synonym expansion)
-     *   
-     *   
-     *   TODO: maybe we can make the FST search with ignoreCase=true, but emit UpperCase
-     *   TODO: the analyzer for the synonyms must use the same StopFilters as the query chain
-     * 
-     */
+  	super.setUp();
+  	
     assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", F.TYPE_ADS_TEXT, "Bílá kobyla skočila přes čtyřista"));
     assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", F.TYPE_ADS_TEXT, "třicet-tři stříbrných střech"));
     assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", F.TYPE_ADS_TEXT, "A ještě TřistaTřicetTři stříbrných křepeliček"));
@@ -191,12 +194,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "152", F.BIBCODE, "xxxxxxxxxx152", F.TYPE_ADS_TEXT, "nag5 5269"));
     
     assertU(adoc(F.ID, "318", F.BIBCODE, "xxxxxxxxxx318", F.TYPE_ADS_TEXT, "creation of a thesaurus"));
-    
-    
-    
     assertU(commit());
-
   }
+  
   
   public void testMultiTokens() throws Exception {
     
@@ -257,9 +257,15 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // ticket #318
     assertQueryEquals(req("q", "creation of a thesaurus", "qt", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"),
     		token_merged ?
-        "(spanNear([abstract:creation, abstract:thesaurus], 5, true)^1.3 | ((author:creation of a thesaurus, author:creation of a thesaurus, * author:/creation of a[^\\s]+ thesaurus,/ author:/creation of a[^\\s]+ thesaurus, .*/ author:creation o a thesaurus, author:creation o a thesaurus, * author:/creation o a[^\\s]+ thesaurus,/ author:/creation o a[^\\s]+ thesaurus, .*/ author:creation of a t author:creation of a t * author:/creation of a[^\\s]+ t/ author:/creation of a[^\\s]+ t .*/ author:creation o a t author:creation o a t * author:/creation o a[^\\s]+ t/ author:/creation o a[^\\s]+ t .*/ author:creation of author:creation o author:creation)^1.5) | spanNear([title:creation, title:thesaurus], 5, true)^1.4 | spanNear([all:creation, all:thesaurus], 5, true))" 
+        "(spanNear([abstract:creation, abstract:thesaurus], 5, true)^1.3 " +
+        "| ((author:creation of a thesaurus, author:creation of a thesaurus, * author:/creation of a[^\\s]+ thesaurus,/ author:/creation of a[^\\s]+ thesaurus, .*/ author:creation o a thesaurus, author:creation o a thesaurus, * author:/creation o a[^\\s]+ thesaurus,/ author:/creation o a[^\\s]+ thesaurus, .*/ author:creation of a t author:creation of a t * author:/creation of a[^\\s]+ t/ author:/creation of a[^\\s]+ t .*/ author:creation o a t author:creation o a t * author:/creation o a[^\\s]+ t/ author:/creation o a[^\\s]+ t .*/ author:creation of author:creation o author:creation)^1.5) " +
+        "| spanNear([title:creation, title:thesaurus], 5, true)^1.4 " +
+        "| spanNear([all:creation, all:thesaurus], 5, true))" 
     				:
-    		"+(abstract:creation^1.3 | ((author:creation, author:creation,*)^1.5) | title:creation^1.4 | all:creation) +((()^1.3) | ((author:of, author:of,*)^1.5) | (()^1.4) | ()) +((()^1.3) | ((author:a, author:a,*)^1.5) | (()^1.4) | ()) +(abstract:thesaurus^1.3 | ((author:thesaurus, author:thesaurus,*)^1.5) | title:thesaurus^1.4 | all:thesaurus)", 
+    		"+(abstract:creation^1.3 | ((author:creation, author:creation,*)^1.5) | title:creation^1.4 | all:creation) " +
+    		"+((()^1.3) | ((author:of, author:of,*)^1.5) | (()^1.4) | ()) " +
+    		"+((()^1.3) | ((author:a, author:a,*)^1.5) | (()^1.4) | ()) " +
+    		"+(abstract:thesaurus^1.3 | ((author:thesaurus, author:thesaurus,*)^1.5) | title:thesaurus^1.4 | all:thesaurus)", 
         token_merged ? DisjunctionMaxQuery.class : BooleanQuery.class);
     
     if (token_merged)

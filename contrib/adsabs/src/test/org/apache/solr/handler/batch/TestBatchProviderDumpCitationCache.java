@@ -1,13 +1,6 @@
 package org.apache.solr.handler.batch;
 
-import java.util.Map;
-
-import org.adsabs.solr.AdsConfig.F;
-import org.apache.lucene.search.DictionaryRecIdCache;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.util.RefCounted;
 
 public class TestBatchProviderDumpCitationCache extends BatchProviderTest {
 
