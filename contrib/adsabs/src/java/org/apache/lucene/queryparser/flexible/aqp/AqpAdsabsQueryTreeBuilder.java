@@ -43,6 +43,7 @@ import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.IgnoreQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.InvenioQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
@@ -50,7 +51,19 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.InvenioQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
+import org.apache.solr.search.AqpAdsabsQParser;
 
+/**
+ * This is the configuration for the ADS grammar (the last phase: BUILDER)
+ * 
+ * It receives results from the {@link AqpAdsabsNodeProcessorPipeline}
+ * 
+ * @see AqpAdsabsNodeProcessorPipeline
+ * @see AqpAdsabsQueryConfigHandler
+ * @see AqpAdsabsQueryTreeBuilder
+ * @see AqpAdsabsQParser
+ *
+ */
 public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 
 	public void init() {

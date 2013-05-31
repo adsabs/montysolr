@@ -60,7 +60,7 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("DEFOP")) {
 			
-  		// refuse processing: =(this that token)
+  		// refuse processing: '=(this that token)'
 			// but this is not the ideal place for it (it is kind of arbitrary)
 			if (node.getParent() != null && node.getParent().getParent() != null) {
 				QueryNode p = node.getParent().getParent();

@@ -18,6 +18,7 @@ import org.apache.lucene.queryparser.flexible.standard.config.NumericConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsCustomQueryProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubQueryProvider;
@@ -40,6 +41,17 @@ import org.apache.solr.search.SolrIndexSearcher.SetNonLazyFieldSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is the MAIN solr entry point - this instantiates 'aqp' query 
+ * parser - it sets some default parameters from the config and prepares 
+ * ulr parameters.
+ * 
+ * @see AdsQParserPlugin
+ * @see AqpAdsabsQueryConfigHandler
+ * @see AqpAdsabsQueryTreeBuilder
+ * @see AqpAdsabsQParser
+ *
+ */
 public class AqpAdsabsQParser extends QParser {
 
 	public static final Logger log = LoggerFactory

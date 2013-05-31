@@ -7,13 +7,29 @@ import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.standard.config.FieldBoostMapFCListener;
 import org.apache.lucene.queryparser.flexible.standard.config.FieldDateResolutionFCListener;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsNodeProcessorPipeline;
+import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpInvenioQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.InvenioQueryAttributeImpl;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
+import org.apache.solr.search.AqpAdsabsQParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is the CONFIGURATION for the ADS grammar (the zero phase: instantiation)
+ * 
+ * It is usually called from {@link AdsQParserPlugin}. This class contains the
+ * sensitive default. However, some parameters can be overriden using url
+ * params - that happens inside: {@link AqpAdsabsQParser}
+ * 
+ * @see AqpAdsabsNodeProcessorPipeline
+ * @see AqpAdsabsQueryConfigHandler
+ * @see AqpAdsabsQueryTreeBuilder
+ * @see AqpAdsabsQParser
+ *
+ */
 
 public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 	public static final Logger log = LoggerFactory
