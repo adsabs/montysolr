@@ -78,7 +78,7 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
     File newConfig = new File(configFile);
 
     //System.err.println(System.getProperties());
-    //System.err.println("tests.mongodb.host=" + System.getProperty("tests.mongodb.host", "<null>"));
+    System.err.println("tests.mongodb.host=" + System.getProperty("tests.mongodb.host", "<null>"));
     
     if (System.getProperty("tests.mongodb.host", null) != null) {
       File newDataConfig;

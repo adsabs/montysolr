@@ -164,8 +164,8 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 		harvestLabels(node, sb, 5);
 		if (sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QNORMAL")) {
 			ArrayList<String> vals = new ArrayList<String>();
-			harvestValues(node, vals, 3);
-			if (vals.size()>0) {
+			harvestValues(node, vals, 4);
+			if (vals.size()>0 && vals.size()<=1) {
 				if (isPotentiallyFirst && firstChildAllowedModifiers.contains(vals.get(0))) {// we allow modifiers for the first child
 					return true;
 				}

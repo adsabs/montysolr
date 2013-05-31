@@ -7,6 +7,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -38,31 +39,46 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
       List<QueryNode> children = node.getChildren();
       String thisOp = ((AqpBooleanQueryNode) node).getOperator();
       boolean rewriteSafe = true;
-
-      QueryNode modifier;
+      	
       QueryNode subClause;
+      QueryNode child;
+      int counterOfElements = 0;
+      
       for (int i = 0; i < children.size(); i++) {
-        modifier = children.get(i);
-        if (modifier.isLeaf()) {
+        child = children.get(i);
+        if (child.isLeaf()) {
           rewriteSafe = false;
           break;
         }
-        subClause = modifier.getChildren().get(0);
-        if (!(subClause instanceof AqpBooleanQueryNode && ((AqpBooleanQueryNode) subClause)
-            .getOperator().equals(thisOp))) {
-          rewriteSafe = false;
-          break;
+        
+        subClause = getClauseIgnoreModifiers(child); // skips multiple modifier nodes
+        if (subClause instanceof FieldableNode) {
+        	counterOfElements++;
         }
+        else if (subClause instanceof AqpBooleanQueryNode && ((AqpBooleanQueryNode) subClause)
+	            .getOperator().equals(thisOp)) {
+        	counterOfElements = counterOfElements + subClause.getChildren().size() + 1;
+        }
+        else {
+        	rewriteSafe = false;
+        	break;
+        }
+        
       }
 
-      if (rewriteSafe == true) {
+      if (rewriteSafe && counterOfElements > children.size()) {
         List<QueryNode> childrenList = new ArrayList<QueryNode>();
 
-        for (int i = 0; i < children.size(); i++) {
-          subClause = children.get(i).getChildren().get(0);
-          for (QueryNode nod : subClause.getChildren()) {
-            childrenList.add(nod);
-          }
+        for (QueryNode ch: children) {
+        	subClause = getClauseIgnoreModifiers(ch);
+        	if (subClause instanceof AqpBooleanQueryNode) {
+	          for (QueryNode nod : subClause.getChildren()) {
+	            childrenList.add(nod);
+	          }
+        	}
+        	else {
+        		childrenList.add(ch);
+        	}
         }
 
         children.clear();
@@ -73,7 +89,26 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
     return node;
   }
 
-  @Override
+  private QueryNode getClauseIgnoreModifiers(QueryNode node) {
+  	if (node instanceof ModifierQueryNode 
+  			&& node.getChildren().get(0) instanceof ModifierQueryNode 
+  			&& ((ModifierQueryNode) node.getChildren().get(0)).getModifier()
+  			.equals(((ModifierQueryNode) node).getModifier())) {
+  		return getClauseIgnoreModifiers(node.getChildren().get(0));
+  	}
+  	return node.getChildren().get(0);
+  }
+  
+  private boolean oneOfChildrenBoolean(QueryNode node) {
+	  for (QueryNode n: node.getChildren()) {
+	  	if (n instanceof AqpBooleanQueryNode) {
+	  		return true;
+	  	}
+	  }
+	  return false;
+  }
+
+	@Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
     return node;
   }

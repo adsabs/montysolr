@@ -330,7 +330,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// with standard tokenizer, it goes away
 		assertQueryEquals("this^ 5", null, "this");
 		
-		assertQueryEquals("this^0. 5", wsa, "+this +5");
+		assertQueryEquals("this^0. 5", wsa, "/this^0. 5/");
 		assertQueryEquals("this^0.4 5", wsa, "+this^0.4 +5");
 		
 		assertQueryEquals("this^5~ 9", null, "this~2^5.0");
@@ -361,19 +361,13 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("#(request synonyms 5)", null, "+request +synonyms");
 		
 		
-		// in previous grammar, we were able to simplify into: +this +one
-		// however because of bug #287 the grammar produces a different parse tree
-		// (there are two elements under DEFOP) and after the analysis removes #5
-		// we are left with one token inside brackets. I could deal with that, 
-		// however lucene should be able to deal with it (ie. optimize) on its own
-		// during rewite() phase 
-		assertQueryEquals("this and (one #5)", null, "+this +(+one)");
-		assertQueryEquals("this and (one #5)", wsa, "+this +(+one +5)");
+		assertQueryEquals("this and (one #5)", null, "+this +one");
+		assertQueryEquals("this and (one #5)", wsa, "+this +one +5");
 		
 		assertQueryEquals("=5", null, "5");
 		assertQueryEquals("=(request synonyms 5)", null, "+request +synonyms +5");
-		assertQueryEquals("this and (one =5)", null, "+this +(+one +5)");
-		assertQueryEquals("this and (one =5)", wsa, "+this +(+one +5)");
+		assertQueryEquals("this and (one =5)", null, "+this +one +5");
+		assertQueryEquals("this and (one =5)", wsa, "+this +one +5");
 		
 	}
 	
@@ -485,14 +479,14 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
 		KeywordAnalyzer kwa = new KeywordAnalyzer();
-		
 		assertQueryEquals("keyword:\"planets and satellites\"", wsa, "keyword:\"planets and satellites\"", PhraseQuery.class);
 		
 		assertQueryEquals("weak lensing", null, "+weak +lensing");
 		assertQueryEquals("+contact +binaries -eclipsing", null, "+contact +binaries -eclipsing");
-		assertQueryEquals("+contact +xfield:binaries -eclipsing", null, "+contact +xfield:binaries -eclipsing");
+		//x assertQueryEquals("+contact +xfield:binaries -eclipsing", null, "+contact +xfield:binaries -eclipsing");
 		assertQueryEquals("intitle:\"yellow symbiotic\"", null, "intitle:\"yellow symbiotic\"");
 		assertQueryEquals("\"galactic rotation\"", null, "\"galactic rotation\"", PhraseQuery.class);
+		
 		assertQueryEquals("title:\"X x\" AND text:go title:\"x y\" AND A", null, "+title:\"x x\" +text:go +title:\"x y\" +a");
 		assertQueryEquals("title:\"X x\" OR text:go title:\"x y\" OR A", null, "+(title:\"x x\" text:go) +(title:\"x y\" a)");
 		assertQueryEquals("title:X Y Z", null, "+title:x +y +z");
@@ -541,7 +535,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("fieldx:(one +two -three)", null, "+fieldx:one +fieldx:two -fieldx:three");
 		assertQueryEquals("+field:(-one +two three)", null, "-one +two +three");
 		assertQueryEquals("-field:(-one +two three)", null, "-one +two +three");
-		assertQueryEquals("+field:(-one +two three) x:four", null, "+(-one +two +three) +x:four");
+		assertQueryEquals("+field:(-one +two three) x:four", null, "-one +two +three +x:four");
 		
 		//TODO
 		//assertQueryEquals("x:four -field:(-one +two three)", null, "+x:four -(-one +two +three)");
@@ -561,18 +555,32 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		
 		assertQueryEquals("m:(a b c)", null, "+m:a +m:b +m:c");
-		assertQueryEquals("+m:(a b c)", null, "+m:a +m:b +m:c"); //??? +m:a +m:b +m:c
-		assertQueryEquals("+m:(a b c) x:d", null, "+(+m:a +m:b +m:c) +x:d"); //? +m:a +m:b +m:c
-		assertQueryEquals("+m:(a OR b OR c) x:d", null, "+(m:a m:b m:c) +x:d"); //? +m:a +m:b +m:c
+		assertQueryEquals("+m:(a b c)", null, "+m:a +m:b +m:c"); 
+		assertQueryEquals("+m:(a b c) +x:d", null, "+m:a +m:b +m:c +x:d");
+		assertQueryEquals("+m:(a b c) x:d", null, "+m:a +m:b +m:c +x:d"); // OR is default, I always get tripped
+		assertQueryEquals("+m:(a b c) OR x:d", null, "+(+m:a +m:b +m:c) x:d");
+		assertQueryEquals("+m:(a b c) -x:d", null, "+m:a +m:b +m:c -x:d");
+		
+		assertQueryEquals("+x:d +m:(a b c)", null, "+x:d +m:a +m:b +m:c");
+		assertQueryEquals("x:d +m:(a b c)", null, "+x:d +m:a +m:b +m:c"); // OR is default, I always get tripped
+		assertQueryEquals("x:d OR +m:(a b c)", null, "x:d +(+m:a +m:b +m:c)");
+		assertQueryEquals("-x:d +m:(a b c)", null, "-x:d +m:a +m:b +m:c");
+		
+		assertQueryEquals("+x:d +m:(a b c) +y:e", null, "+x:d +m:a +m:b +m:c +y:e");
+		assertQueryEquals("x:d +m:(a b c) y:e", null, "+x:d +m:a +m:b +m:c +y:e"); // OR is default, I always get tripped
+		assertQueryEquals("x:d OR +m:(a b c) OR y:e", null, "x:d +(+m:a +m:b +m:c) y:e");
+		assertQueryEquals("-x:d +m:(a b c) -y:e", null, "-x:d +m:a +m:b +m:c -y:e");
+		
+		assertQueryEquals("+m:(a OR b OR c) x:d", null, "+(m:a m:b m:c) +x:d");
 		
 		assertQueryEquals("m:(+a b c)", null, "+m:a +m:b +m:c");
 		assertQueryEquals("m:(+a b OR c)", null, "+m:a +(m:b m:c)");
 		assertQueryEquals("m:(-a +b c)^0.6", null, "(-m:a +m:b +m:c)^0.6");
-		assertQueryEquals("m:(a b c or d)", null, "+m:a +m:b +(m:c m:d)");
-		//setDebug(true);
-		assertQueryEquals("m:(a b c OR d)", null, "+m:a +m:b +(m:c m:d)"); 
-		assertQueryEquals("m:(a b c AND d)", null, "+m:a +m:b +(+m:c +m:d)");
-		assertQueryEquals("m:(a b c OR d NOT e)", null, "+m:a +m:b +(m:c (+m:d -m:e))");
+		assertQueryEquals("m:(a b c or d)", null, "+(+m:a +m:b) +(m:c m:d)");
+		
+		assertQueryEquals("m:(a b c OR d)", null, "+(+m:a +m:b) +(m:c m:d)"); 
+		assertQueryEquals("m:(a b c AND d)", null, "+m:a +m:b +m:c +m:d");
+		assertQueryEquals("m:(a b c OR d NOT e)", null, "+(+m:a +m:b) +(m:c (+m:d -m:e))");
 		assertQueryEquals("m:(a b NEAR c)", null, "+m:a +spanNear([m:b, m:c], 5, true)");
 		assertQueryEquals("m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, true) +(+m:d +m:e)");
 		assertQueryEquals("-m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, true) +(+m:d +m:e)"); //? should we allow - at the beginning?

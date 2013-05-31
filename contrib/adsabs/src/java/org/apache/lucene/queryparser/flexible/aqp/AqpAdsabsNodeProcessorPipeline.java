@@ -75,8 +75,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		QueryConfigHandler config = getQueryConfigHandler();
 	
-		//add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"))); // true=modifyTree (remove the plain tokens, join them into one)
-		add(new AqpDEFOPMarkPlainNodes());
+		add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"))); // true=modifyTree (remove the plain tokens, join them into one)
+		//add(new AqpDEFOPMarkPlainNodes());
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 		
