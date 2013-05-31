@@ -43,7 +43,6 @@ import org.apache.solr.common.params.SolrParams;
  * add a boost to queries that were original input, or wrap queries with
  * many terms into a spanquery instead of a phrase. The options are many!
  * 
- * @author rchyla
  *
  */
 public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {

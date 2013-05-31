@@ -465,9 +465,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     //setDebug(true);
     // simple case
     assertQueryEquals(req("q", "\"hubble space telescope\"", "qt", "aqp"), 
-        "all:\"hubble space telescope\"" +
-        " (all:syn::hubble space telescope all:syn::acr::hst)", 
-        BooleanQuery.class);
+        "all:\"(hubble syn::hubble space telescope syn::acr::hst) space telescope\"", 
+        MultiPhraseQuery.class);
     assertQ(req("q", "\"hubble space telescope\""), 
     		"//*[@numFound='2']",
     		"//doc/str[@name='id'][.='4']",

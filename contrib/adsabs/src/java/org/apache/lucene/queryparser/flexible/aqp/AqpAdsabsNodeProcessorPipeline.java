@@ -232,7 +232,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
     // translate the field names back into their index-name variants
 		add(new AqpAdsabsFieldMapperProcessorPostAnalysis()); 
 		
-	  // deals with the the-same-position tokens: "(word | synonym) phrase query" -> "word phrase query" | synonym
+	  // deals with the the-same-position tokens: 
+		// "(word | synonym) phrase query" -> "word phrase query" | synonym
 		add(new AqpPostAnalysisProcessor()); 
 		
 		

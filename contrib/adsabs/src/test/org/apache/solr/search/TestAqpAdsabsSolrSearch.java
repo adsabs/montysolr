@@ -15,6 +15,7 @@ import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.spans.SpanNearQuery;
 
 
 /**
@@ -123,7 +124,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))~2", BooleanQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
-        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+        "(((abstract:dog abstract:cat)^0.5) | (title:dog title:cat))", DisjunctionMaxQuery.class);
+    
     
     
     // make sure the *:* query is not parsed by edismax
@@ -139,9 +141,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
      */
     
     // TODO: #234
+    // need to add a processor which puts these local values into a request object
     //  {!raw f=myfield}Foo Bar creates TermQuery(Term("myfield","Foo Bar"))
-    //assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=myfield}Foo Bar)"), "myfield:Foo Bar", TermQuery.class);
-    //assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=x}\"Foo Bar\")"), "x:\"Foo Bar\"", TermQuery.class);
+    // <astLOCAL_PARAMS value="{!f=myfield}" start="4" end="15" name="LOCAL_PARAMS" type="27" />
+    // assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=myfield}Foo Bar)"), "myfield:Foo Bar", TermQuery.class);
+    // assertQueryEquals(req("qt", "aqp", "f", "myfield", "q", "raw({!f=x}\"Foo Bar\")"), "x:\"Foo Bar\"", TermQuery.class);
     
     assertQueryParseException(req("qt", "aqp", "f", "myfield", "q", "raw(Foo Bar)"));
     
@@ -241,13 +245,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         RegexpQuery.class);
 	  
 	  
-//	  assertQueryEquals(req("qt", "aqp", "q", "author:(accomazzi NEAR5 kurtz)"), 
-//        "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
-//        BooleanQuery.class);
+	  // NEAR queries are little bit too crazy and will need taming
+	  // and *more* unittest examples
+	  assertQueryEquals(req("qt", "aqp", "q", "author:(accomazzi NEAR5 kurtz)"), 
+        "spanNear([spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), " +
+        "spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)])], 5, true)",
+        SpanNearQuery.class);
 	  
 	  
 	  // temporary workaround for 'first author' search
-	  
 	  assertQueryEquals(req("qt", "aqp", "q", "^Kurtz, M."), 
 	      "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
         BooleanQuery.class);
@@ -256,28 +262,27 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "first_author:kurtz, michael first_author:kurtz, michael * first_author:kurtz, m first_author:kurtz, m * first_author:kurtz,",
         BooleanQuery.class);
 	  
-	  //pink elephant #238
-    assertQueryEquals(req("qt", "aqp", "q", "weak lensing"), 
-        //"+all:lightweak +all:mikrolinseneffekt",
-    		"+(all:weak all:syn::lightweak) +(all:lensing all:syn::mikrolinseneffekt)",
-        BooleanQuery.class);
-    assertQueryEquals(req("qt", "aqp", "q", "weak lensing", 
-        "qf", "title full keyword abstract"), 
-        //"+(abstract:lightweak | title:lightweak | full:lightweak | keyword:weak) " +
-        //"+(abstract:mikrolinseneffekt | title:mikrolinseneffekt | full:mikrolinseneffekt | keyword:lensing)",
-        "+((abstract:weak abstract:syn::lightweak) | (title:weak title:syn::lightweak) | (full:weak full:syn::lightweak) | keyword:weak) " +
-        "+((abstract:lensing abstract:syn::mikrolinseneffekt) | (title:lensing title:syn::mikrolinseneffekt) | (full:lensing full:syn::mikrolinseneffekt) | keyword:lensing)",
-        BooleanQuery.class);
-    
+	  //#238 - single synonyms were caught by the multi-synonym component
+	  // also note:
+	  // the 'qf' is not set, but still edismax is responsible for parsing this query
+	  // and since edismax is using default OR (that is hardcoded!), we cannot change
+	  // that, we would have to parse the query ourselves; but after a long discussion
+	  // it was decided that we'll use OR for the unfielded searches, so it should be 
+	  // OK - if not, I have to rewrite edismax parsing logic myself
     assertQueryEquals(req("qt", "aqp", "q", "pink elephant"), 
-        "+(all:pink all:syn::pinkish) +all:elephant",
+        "all:pink all:syn::pinkish all:elephant", // "+(all:pink all:syn::pinkish) +all:elephant",
         BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "pink elephant",
-        "qf", "title full keyword abstract"),
-        "+((abstract:pink abstract:syn::pinkish) | (title:pink title:syn::pinkish) | (full:pink full:syn::pinkish) | keyword:pink) " +
-        "+(abstract:elephant | title:elephant | full:elephant | keyword:elephant)",
+        "qf", "title keyword"),
+        "((title:pink title:syn::pinkish title:elephant) | (keyword:pink keyword:elephant))",
+        DisjunctionMaxQuery.class);
+    
+    // but when combined, the ADS's default AND should be visible
+    assertQueryEquals(req("qt", "aqp", "q", "pink elephant title:foo",
+        "qf", "title keyword"),
+        "+((title:pink title:syn::pinkish title:elephant) | (keyword:pink keyword:elephant)) +title:foo",
         BooleanQuery.class);
-
+    
     
     // multi-token combined with single token
     // TODO: I'd like to see the following parse:
@@ -291,11 +296,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     // done only on the 'weak', the other two tokens are simply spread across the 
     // various fields by edismax
     assertQueryEquals(req("qt", "aqp", "q", "weak hubble space telescope",
-        "qf", "title^0.9 full^0.8 keyword^0.7 abstract^0.6"),
-        "+(abstract:lightweak^0.6 | title:lightweak^0.9 | full:lightweak^0.8 | keyword:weak^0.7) " +
-        "+((abstract:hubble space telescope^0.6 | title:hubble space telescope^0.9 | full:hubble space telescope^0.8 | keyword:hubble space telescope^0.7) " +
-          "(abstract:acr::hst^0.6 | title:acr::hst^0.9 | full:acr::hst^0.8 | keyword:acr::hst^0.7))", 
-        BooleanQuery.class);
+        "qf", "title^0.9 keyword^0.7"),
+        "(((title:weak title:syn::lightweak title:hubble title:syn::hubble space telescope title:syn::acr::hst title:space title:telescope)^0.9) " +
+        "| ((keyword:weak keyword:hubble keyword:space keyword:telescope)^0.7))", 
+        DisjunctionMaxQuery.class);
+
+    
     
 	  // author search, unfielded
 	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi,", 
@@ -320,15 +326,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "| (title:accomazzi title:alberto title:accomazzialberto))", 
         DisjunctionMaxQuery.class);
 	  
-	  //TODO: strictly speaking, this should not be parsed as a phrase (but to fix it I must change the parser)
+	  
 	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi, alberto", 
         "qf", "author^2.3 title abstract^0.4"), 
-        //"(((abstract:accomazzi abstract:alberto abstract:accomazzialberto)^0.4) " +
-        //"| ((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)^2.3) " +
-        //"| (title:accomazzi title:alberto title:accomazzialberto))",
-        "(abstract:\"accomazzi alberto\"^0.4 " +
+        "(((abstract:accomazzi abstract:alberto)^0.4) " +
         "| ((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)^2.3) " +
-        "| title:\"accomazzi alberto\")",
+        "| (title:accomazzi title:alberto))",
         DisjunctionMaxQuery.class);
 	  
 	  assertQueryEquals(req("qt", "aqp", "q", "\"accomazzi, alberto\"", 
@@ -340,12 +343,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	  
 	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi, alberto, xxx", 
         "qf", "author^2.3 title abstract^0.4"), 
-        //"(((abstract:accomazzi abstract:alberto abstract:xxx abstract:accomazzialbertoxxx)^0.4) " +
-        //"| ((author:accomazzi, alberto, xxx author:accomazzi, alberto, xxx * author:accomazzi, a xxx author:accomazzi, a xxx * author:accomazzi, alberto, x author:accomazzi, alberto, x * author:accomazzi, a x author:accomazzi, a x * author:accomazzi, alberto, author:accomazzi, a author:accomazzi,)^2.3) " +
-        //"| (title:accomazzi title:alberto title:xxx title:accomazzialbertoxxx))",
-        "(abstract:\"accomazzi alberto xxx\"^0.4 " +
+        "(((abstract:accomazzi abstract:alberto abstract:xxx)^0.4) " +
         "| ((author:accomazzi, alberto, xxx author:accomazzi, alberto, xxx * author:accomazzi, a xxx author:accomazzi, a xxx * author:accomazzi, alberto, x author:accomazzi, alberto, x * author:accomazzi, a x author:accomazzi, a x * author:accomazzi, alberto, author:accomazzi, a author:accomazzi,)^2.3) " +
-        "| title:\"accomazzi alberto xxx\")",
+        "| (title:accomazzi title:alberto title:xxx))",
         DisjunctionMaxQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "\"accomazzi, alberto, xxx.\"", 
@@ -355,20 +355,18 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "| title:\"accomazzi alberto xxx\")", 
         DisjunctionMaxQuery.class);
     
-    // now some esoteric cases of the comma parsing
-    assertQueryEquals(req("qt", "aqp", "q", "abstract:\"accomazzi, alberto\"", 
-        "qf", "author^2.3 title abstract^0.4"), 
+    // now some esoteric cases of the comma parsing, comma should be appended
+    // yet we do not do do a good jobs in splitting things (not yet)
+    assertQueryEquals(req("qt", "aqp", "q", "abstract:\"accomazzi, alberto\""), 
         "abstract:\"accomazzi alberto\"", 
         PhraseQuery.class);
     
-    assertQueryEquals(req("qt", "aqp", "q", "abstract:accomazzi, alberto", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        //"abstract:accomazzi abstract:alberto abstract:accomazzialberto",
-        "abstract:accomazzi abstract:alberto",
+    assertQueryEquals(req("qt", "aqp", "q", "abstract:accomazzi, alberto"), 
+        "+abstract:accomazzi +abstract:alberto",
         BooleanQuery.class);
     
-    assertQueryEquals(req("qt", "aqp", "q", "author:accomazzi, alberto", 
-        "qf", "author^2.3 title abstract^0.4"), 
+    
+    assertQueryEquals(req("qt", "aqp", "q", "author:accomazzi, alberto"), 
         "author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,", 
         BooleanQuery.class);
 		
@@ -457,7 +455,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		 */
 		
 		
-		// field map is set to translate arxiv->identifier
+		// field_map is set to translate arxiv->identifier
 		assertQueryEquals(req("qt", "aqp", "q", "arxiv:1002.1524"), 
 				"identifier:1002.1524", TermQuery.class);
 		assertQueryParseException(req("qt", "aqp", "q", "arxivvvv:1002.1524"));
