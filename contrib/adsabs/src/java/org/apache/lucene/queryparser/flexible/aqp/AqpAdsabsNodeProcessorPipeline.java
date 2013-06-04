@@ -28,6 +28,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreP
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCOMMAProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCarefulAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExpandAuthorSearchProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExtractMultisynonymsProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldNodePreAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
@@ -89,7 +90,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		// find separate tokens and join them into one 'string'
 		// true=modify the parse tree, otherwise values are 'added'
 		// into the first token
-	  // this was the original behaviour, you can still activate it
+	  // this was the original behaviour, you can still activate:
 		// add(new AqpDEFOPMarkPlainNodes());
 		add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-")));
 		
@@ -189,7 +190,12 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 			
 			// take the 'unfielded search' values and wrap them into edismax('xxxxx') call
 			// it will be executed/built in the 'build' phase (after processors finished)
-      add(new AqpUnfieldedSearchProcessor()); 
+      add(new AqpUnfieldedSearchProcessor());
+      
+      // TEMPORARY solution for the unfielded multi-token searches, edismax
+      // does not know how to handle properly token expansions spanning several
+      // positions; so we extract these and add them next to the edismax generated query
+      add(new AqpAdsabsExtractMultisynonymsProcessor());
       
     }
 		
@@ -212,6 +218,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		// non-analyzed nodes), these will stay untouched
 		add(new AqpAdsabsAnalyzerProcessor()); 
 		
+		
 		// here we analyze input that was not analyzed by the previous step
 		// this applies mostly to wildcard, regex, fuzzy searches; the ADS 
 		// convention is that if a '<field>_wildcard' will be used to analyze
@@ -223,14 +230,17 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		// a special case are non-analyzed nodes - these are left =UnTouchEd
 		add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
 
+		
 		// author search: 'kurtz, michael' is expanded with "kurtz, michael *" ...
 	  // ADS has a 'very special' requirement for expanding the author search
 		// this expansion cannot be solved inside the analysis chain (because
 		// it depends on the context [knowing the original input]), so it is 
 		add(new AqpAdsabsExpandAuthorSearchProcessor()); 
 		
+		
     // translate the field names back into their index-name variants
 		add(new AqpAdsabsFieldMapperProcessorPostAnalysis()); 
+		
 		
 	  // deals with the the-same-position tokens: 
 		// "(word | synonym) phrase query" -> "word phrase query" | synonym

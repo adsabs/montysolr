@@ -371,8 +371,8 @@ public class AqpTestAbstractCase extends LuceneTestCase {
   public void debugFail(String query, String expected, String actual) {
     if (this.debugParser) {
       System.err.println("Number of failures: " + ++noFailures);
-      System.err.println("query:/" + query + "/ expected:/" + expected
-          + "/ actual:/" + actual + "/");
+      System.err.println("query:/" + query + "/ \nexpected:\n" + expected
+          + " \nactual:\n" + actual + "/");
     } else {
       assertEquals(expected, actual);
     }

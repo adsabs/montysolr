@@ -33,8 +33,6 @@ import org.apache.solr.request.SolrQueryRequest;
  * _regex
  * _fuzzy
  * 
- * @author rchyla
- *
  */
 
 public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {

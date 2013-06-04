@@ -63,6 +63,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			
 			File multiSynonymsFile = createTempFile(new String[]{
 					"hubble\0space\0telescope, HST",
+					"r\0s\0t, RST",
 			});
 			replaceInFile(newConfig, "synonyms=\"ads_text_multi.synonyms\"", "synonyms=\"" + multiSynonymsFile.getAbsolutePath() + "\"");
 			
@@ -284,26 +285,43 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         BooleanQuery.class);
     
     
-    // multi-token combined with single token
-    // TODO: I'd like to see the following parse:
-    // 
-    // +abstract:lightweak^0.6....
-    // +((abstract:hubble space telescope | abstract:accr::hst)^0.6 | (title:hubble....))
-    // 
-    // Yet, for this to work, we must reorder the steps - right now, the multi-token
-    // discovery happens before edismax, edismax then receives certain tokens wrapped
-    // into nonAnalyzed node ("hubble space telescope" | accr::hst) -- the analysis is
-    // done only on the 'weak', the other two tokens are simply spread across the 
-    // various fields by edismax
-    assertQueryEquals(req("qt", "aqp", "q", "weak hubble space telescope",
+    // multi-token combined with single token, workaroudn for edismax is activated
+    // where there is a quote in the subquery string
+    assertQueryEquals(req("qt", "aqp", "q", "r s t",
         "qf", "title^0.9 keyword^0.7"),
-        "(((title:weak title:syn::lightweak title:hubble title:syn::hubble space telescope title:syn::acr::hst title:space title:telescope)^0.9) " +
-        "| ((keyword:weak keyword:hubble keyword:space keyword:telescope)^0.7))", 
+        "(((title:r title:syn::r s t title:syn::acr::rst title:s title:t)^0.9) " +
+        "| ((keyword:r keyword:s keyword:t)^0.7))", 
+        DisjunctionMaxQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "x r s t",
+        "qf", "title^0.9 keyword^0.7"),
+        "(((title:x title:r title:syn::r s t title:syn::acr::rst title:s title:t)^0.9) " +
+        "| ((keyword:x keyword:r keyword:s keyword:t)^0.7))", 
+        DisjunctionMaxQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "r s t x",
+        "qf", "title^0.9 keyword^0.7"),
+        "(((title:r title:syn::r s t title:syn::acr::rst title:s title:t title:x)^0.9) " +
+        "| ((keyword:r keyword:s keyword:t keyword:x)^0.7))", 
+        DisjunctionMaxQuery.class);
+    
+    assertQueryEquals(req("qt", "aqp", "q", "y r s t x",
+        "qf", "title^0.9 keyword^0.7"),
+        "(((title:y title:r title:syn::r s t title:syn::acr::rst title:s title:t title:x)^0.9) " +
+        "| ((keyword:y keyword:r keyword:s keyword:t keyword:x)^0.7))", 
         DisjunctionMaxQuery.class);
 
     
+    assertQueryEquals(req("qt", "aqp", "q", "\"r s t\"",
+        "qf", "title^0.9 keyword^0.7"),
+        "title:syn::r s t^0.09 title:syn::acr::rst^0.09 " + // workaround/fix - notice different boosts
+        "(title:\"(r syn::r s t syn::acr::rst) s t\"^0.9 | keyword:\"r s t\"^0.7)", // normal edismax 
+        BooleanQuery.class);
+
     
-	  // author search, unfielded
+    
+	  // author search, unfielded - just test it is there, the rest
+    // of unittests is in the dedicated class
 	  assertQueryEquals(req("qt", "aqp", "q", "accomazzi,", 
         "qf", "author^2.3 title abstract^0.4"), 
         "(abstract:accomazzi^0.4 | ((author:accomazzi, author:accomazzi,*)^2.3) | title:accomazzi)", 
@@ -370,6 +388,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,", 
         BooleanQuery.class);
 		
+    
+    
 		/*
 		 * Unfielded search should be expanded automatically by edismax
 		 * 
