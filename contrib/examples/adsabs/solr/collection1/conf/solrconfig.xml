@@ -292,7 +292,8 @@
     -->
 
   <!-- The default high-performance update handler -->
-  <updateHandler class="solr.DirectUpdateHandler2">
+  <updateHandler class="solr.DirectUpdateHandler2"
+                 enable="${montysolr.enable.write:true}">
 
     <!-- AutoCommit
 
@@ -360,6 +361,23 @@
        </listener>
       -->
 
+    <!-- trigger core reload of the read-only instance of the same datadir
+    
+         if this instance of solr is used for indexing, there may be another instance
+         of solr (sharing the same datadir, on the same machine) which is doing only
+         search. This command will trigger index re-open on the remote instance. However
+         this is not good for near-real-time commits (but ADS is not using them yet,
+         and likely not in the future) -->
+         
+    <listener event="postCommit" 
+      class="solr.RunExecutableListener"
+      enable="${montysolr.enable.curl:false}">
+      <str name="exe">curl</str>
+      <str name="dir">.</str>
+      <bool name="wait">false</bool>
+      <arr name="args"> <str>${montysolr.read.master:http://read-only-master-url}/solr/admin/cores?wt=json&amp;action=RELOAD&amp;core=collection1</str></arr>
+    </listener>
+    
     <!-- Enables a transaction log, currently used for real-time get.
          "dir" - the target directory for transaction logs, defaults to the
             solr data directory.  --> 
@@ -583,17 +601,20 @@
     <!-- QuerySenderListener takes an array of NamedList and executes a
          local query request for each NamedList in sequence. 
       -->
-    <listener event="newSearcher" class="solr.QuerySenderListener">
+    <listener event="newSearcher" 
+      class="solr.QuerySenderListener"
+      enable="${montysolr.enable.warming:true}">
       <arr name="queries">
-        <!--
-           <lst><str name="q">solr</str><str name="sort">price asc</str></lst>
-           <lst><str name="q">rocks</str><str name="sort">weight asc</str></lst>
-          -->
+        <lst><str name="q">new searcher warming</str></lst>
+        <lst><str name="q">references(recid:[0 TO 20])</str></lst>
+        <lst><str name="q">citations(recid:[0 TO 20])</str></lst>
       </arr>
     </listener>
-    <listener event="firstSearcher" class="solr.QuerySenderListener">
+    <listener event="firstSearcher" 
+              class="solr.QuerySenderListener"
+              enable="${montysolr.enable.warming:true}">
       <arr name="queries">
-        <lst><str name="q">static firstSearcher warming in solrconfig.xml</str></lst>
+        <lst><str name="q">first searcher warming</str></lst>
         <lst><str name="q">references(recid:[0 TO 20])</str></lst>
         <lst><str name="q">citations(recid:[0 TO 20])</str></lst>
       </arr>
@@ -606,7 +627,7 @@
          warming searcher and use it.  If "false" then all requests
          will block until the first searcher is done warming.
       -->
-    <useColdSearcher>false</useColdSearcher>
+    <useColdSearcher>true</useColdSearcher>
 
     <!-- Max Warming Searchers
          
@@ -936,7 +957,9 @@
        This handler will pick a response format to match the input
        if the 'wt' parameter is not explicit
     -->
-  <requestHandler name="/update" class="solr.UpdateRequestHandler">
+  <requestHandler name="/update" 
+                  class="solr.UpdateRequestHandler"
+                  enable="${montysolr.enable.write:true}">
     <!-- See below for information on defining 
          updateRequestProcessorChains that can be used by name 
          on each Update Request
@@ -956,7 +979,8 @@
     -->
   <requestHandler name="/update/extract" 
                   startup="lazy"
-                  class="solr.extraction.ExtractingRequestHandler" >
+                  class="solr.extraction.ExtractingRequestHandler" 
+                  enable="${montysolr.enable.write:true}">
     <lst name="defaults">
       <!-- All the main content goes into "text"... if you need to return
            the extracted text or do highlighting, use a stored field. -->
@@ -1780,7 +1804,10 @@
                     4: /invenio-failed-import -> invokes 2: until all failing recs are caught/indexed/logged
   
    -->
-  <requestHandler name="/invenio/update" class="solr.InvenioKeepRecidUpdated" default="false">
+  <requestHandler name="/invenio/update" 
+                  class="solr.InvenioKeepRecidUpdated" 
+                  default="false"
+                  enable="${montysolr.enable.write:true}">
      <lst name="defaults">
        <str name="inveniourl">${solr.inveniourl:python://adsx/search}</str>
        <!-- str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
@@ -1792,7 +1819,10 @@
      </lst>
   </requestHandler>
   
-  <requestHandler name="/invenio/update2" class="solr.InvenioKeepRecidUpdated" default="false">
+  <requestHandler name="/invenio/update2" 
+                  class="solr.InvenioKeepRecidUpdated" 
+                  default="false"
+                  enable="${montysolr.enable.write:true}">
      <lst name="defaults">
        <str name="inveniourl">${solr.inveniourl:python://adsx/search}</str>
        <!-- str name="inveniourl">http://invenio-demo.cern.ch/search</str> -->
@@ -1809,7 +1839,9 @@
         slighlty customized versions of the standard handlers  
   -->
   
-  <requestHandler name="/invenio-doctor" class="org.apache.solr.update.InvenioDoctor">
+  <requestHandler name="/invenio-doctor" 
+                  class="org.apache.solr.update.InvenioDoctor"
+                  enable="${montysolr.enable.write:true}">
     <lst name="defaults">
       <str name="handler">/invenio/import2</str>
       <str name="pythonFunctionName">get_recids_changes</str>
@@ -1817,7 +1849,9 @@
     </lst>
   </requestHandler>
   
-  <requestHandler name="/invenio/import" class="solr.WaitingDataImportHandler">
+  <requestHandler name="/invenio/import" 
+                  class="solr.WaitingDataImportHandler"
+                  enable="${montysolr.enable.write:true}">
     <lst name="defaults">
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
@@ -1828,7 +1862,9 @@
     </lst>
   </requestHandler>
 
-  <requestHandler name="/invenio/import2" class="solr.WaitingDataImportHandler">
+  <requestHandler name="/invenio/import2" 
+                  class="solr.WaitingDataImportHandler"
+                  enable="${montysolr.enable.write:true}" >
     <lst name="defaults">
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
@@ -1857,7 +1893,9 @@
     </lst>
   </queryParser>
   
-  <requestHandler name="/dataimport" class="org.apache.solr.handler.dataimport.DataImportHandler">
+  <requestHandler name="/dataimport" 
+                  class="org.apache.solr.handler.dataimport.DataImportHandler"
+                  enable="${montysolr.enable.write:true}" >
     <lst name="defaults">
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
@@ -1892,7 +1930,10 @@
     </lst>
   </requestHandler>
   
-  <requestHandler name="/batch" class="org.apache.solr.handler.batch.BatchHandler" default="false">
+  <requestHandler name="/batch" 
+                  class="org.apache.solr.handler.batch.BatchHandler"
+                  enable="${montysolr.enable.write:true}" 
+                  default="false">
     <lst name="defaults">
         <str name="allowed">.*</str>
         <bool name="asynchronous">true</bool>
