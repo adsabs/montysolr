@@ -367,7 +367,7 @@
          of solr (sharing the same datadir, on the same machine) which is doing only
          search. This command will trigger index re-open on the remote instance. However
          this is not good for near-real-time commits (but ADS is not using them yet,
-         and likely not in the future) -->
+         and likely not in the future)
          
     <listener event="postCommit" 
       class="solr.RunExecutableListener"
@@ -377,6 +377,8 @@
       <bool name="wait">false</bool>
       <arr name="args"> <str>${montysolr.read.master:http://read-only-master-url}/solr/admin/cores?wt=json&amp;action=RELOAD&amp;core=collection1</str></arr>
     </listener>
+    -->
+    
     
     <!-- Enables a transaction log, currently used for real-time get.
          "dir" - the target directory for transaction logs, defaults to the
