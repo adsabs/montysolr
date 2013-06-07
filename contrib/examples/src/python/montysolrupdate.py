@@ -276,11 +276,11 @@ class Tag(object):
         self.patch = int(data[3])
         
         # This has the effect of normalizing the version.
-        self.text = "{}.{}.{}.{}".format(self.solr_ver, 
-                                    self.major, self.minor, self.patch)
+        self.text = self.__str__()
 
     def __str__(self):
-        return self.text
+        return "{}.{}.{}.{}".format(self.solr_ver, 
+                                    self.major, self.minor, self.patch)
 
     def __cmp__(self, other):
         for att in ['solr_ver', 'major', 'minor', 'patch']:

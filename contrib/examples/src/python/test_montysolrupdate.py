@@ -31,13 +31,14 @@ os.environ['JAVA_HOME'] = '/usr/lib/jvm/java-7-openjdk-amd64/'
 
 class TotalNukeDuke(TestCase):
     def setUp(self):
-        subprocess.call('rm -fR %s/perpetuum' % TESTDIR, shell=True, stdout=subprocess.PIPE)
+        if os.path.exists('perpetuum'):
+            subprocess.call('rm -fR %s/perpetuum' % TESTDIR, shell=True, stdout=subprocess.PIPE)
         
     def tearDown(self):
-        cleanup(TESTDIR + "/perpetuum/test-*")
+        subprocess.call('rm -fR %s/perpetuum' % TESTDIR, shell=True, stdout=subprocess.PIPE)
         
 
-class test_00_starting_from_scratch(TotalNukeDuke):
+class nuke_00_starting_from_scratch(TotalNukeDuke):
     def test_00_everything_is_built(self):
         montysolrupdate.main(['foo', '-a'])
         paths_exist(['python', 
@@ -82,17 +83,52 @@ class test_00_starting_from_scratch(TotalNukeDuke):
         kill_solr('test-7000')
         
 
-class test_starting_from_scratch03(TestCase):
+class NormalTest(TestCase):
     def setUp(self):
-        montysolrupdate.INSTDIR = 'y'
+        pass
         
-    def test_everything_is_built(self):
-        print montysolrupdate.INSTDIR
+    def tearDown(self):
+        cleanup("perpetuum/test-*")
+    
+        
+
+# We are assuming the montysolr is already built locally
+class test_01_various_tag_changes(NormalTest):
+    
+    def setUp(self):
+        NormalTest.setUp(self)
+        self.old_get = montysolrupdate.get_latest_git_release_tag
+        
+        def mocker(path):
+            tag = self.old_get.get_latest_git_release_tag
+            return self.modify(tag)
+        
+        montysolrupdate.get_latest_git_release_tag = mocker
+        
+    def tearDown(self):
+        montysolrupdate.get_latest_git_release_tag = self.old_get
+    
+    
+    def test_major_upgrade(self):
+        """
+        Simulate the tag version was bumped from 40.x.x.x to 41.x.x.x
+        """
+        curr_tag = montysolrupdate.get_release_tag("montysolr/RELEASE")
+        curr_tag.major = curr_tag.major + 1
+        
+            
+        self.intercept('get_output')
+        
+        montysolrupdate.main(['foo', '-c', '-u', 'test-7000'])
+        
+        
+        
+        
 
 
 def cleanup(path):
-    for p in glob.glob(path):
-        os.system("rm -fR %s" % p)
+    for p in glob.glob(TESTDIR + "/" + path):
+        subprocess.call("rm -fR %s" % p, shell=True, stdout=subprocess.PIPE)
         
     
     
@@ -127,6 +163,9 @@ def kill_solr(path):
 def run_tests(options, tests=[]):
     if tests == None or len(tests) == 0:
         tests = get_tests()
+        
+        if not options.nuke:
+            tests = filter(lambda x: 'nuke_' not in x, tests)
     
     this_module = sys.modules['__main__']
     for test in tests:
@@ -142,7 +181,7 @@ def paths_exist(paths):
             raise Exception(p)        
 
 def get_tests():
-    tests = filter(lambda x: 'test_' in x, dir(sys.modules['__main__']))
+    tests = filter(lambda x: 'test_' in x or 'nuke_' in x, dir(sys.modules['__main__']))
     tests = sorted(tests)
     return tests
 
@@ -159,6 +198,10 @@ def get_arg_parser():
     p.add_option('-p', '--print_tests',
                  action='store_true',
                  help='Print the list of tests')
+    
+    p.add_option('-n', '--nuke',
+                 action='store_true',
+                 help='Run also the nuke tests')
     
     p.add_option('-v', '--verbosity',
                  default=3, action='store',
