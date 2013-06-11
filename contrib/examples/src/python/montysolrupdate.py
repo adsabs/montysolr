@@ -292,8 +292,8 @@ class Tag(object):
         
 
     def __str__(self):
-        return "{}.{}.{}.{}".format(self.solr_ver, 
-                                    self.major, self.minor, self.patch)
+        return "%d.%d.%d.%d" % (self.solr_ver, 
+                               self.major, self.minor, self.patch)
 
     def __cmp__(self, other):
         for att in ['solr_ver', 'major', 'minor', 'patch']:
