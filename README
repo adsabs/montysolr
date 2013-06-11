@@ -13,6 +13,9 @@ code inside Solr (http://lucene.apache.org/solr). You can call Python routines
 from the Java side, as well as control (most of the) Solr operations from the
 Python side.
 
+It is used by Astrophysics Data System, and grew to contain many interesting
+features.
+
 
 CONFIGURATION AND FEATURES
 --------------------------
@@ -50,9 +53,11 @@ More about writing wrappers to call your Python system(s):
 If you need new functionality that is not present in MontySolr, search for
 existing solutions or discussion on the mailing list:
 
-  * Invenio Development Team
-    <info@invenio-software.org>
-    <http://invenio-software.org/>
+  * ADS Development Team
+    adsteam at head dot cfa point harvard dot edu
+    
+    Roman Chyla
+    roman point chyla at gmail point com 
     
   * For more information about developing
     See docs/development.txt

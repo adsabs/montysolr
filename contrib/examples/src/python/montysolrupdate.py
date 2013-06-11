@@ -476,6 +476,8 @@ def check_live_instance(options, instance_names):
         instance_names.insert(0, instance_names.pop(instance_names.index(writer_instance_name)))
         writer_instance_name = writer_instance_name[0:-2]
     
+    writer_finished = False
+    
     for instance_name in instance_names:
         
         if '#' in instance_name:
@@ -501,12 +503,14 @@ def check_live_instance(options, instance_names):
         
         if not os.path.exists(symbolic_name):
             # instance does not exist yet
-            # status: OK, missing unittest
+            # status: OK, unittest OK
             if options.create:
                 run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s' % INSTNAME, real_name])
                 run_cmd(['ln', '-s', real_name, symbolic_name])
-                run_cmd(['mkdir', real_name_data])
-                #run_cmd(['rm', "%s/solr/data" % real_name])
+                if instance_mode != 'r':
+                    run_cmd(['mkdir', real_name_data])
+                else:
+                    assert os.path.exists(real_name_data)
                 run_cmd(['ln', '-s', '%s/%s' % (base_path, real_name_data), "%s/%s/solr/data" % (base_path, symbolic_name)])
                 run_cmd(['ln', '-s', real_name_data, symbolic_name_data])
                 assert start_live_instance(options, symbolic_name, 
@@ -531,7 +535,7 @@ def check_live_instance(options, instance_names):
         # is indexing data, once it has finished, we can stop it and move upfront
         if os.path.exists(next_release):
             
-            # status: OK, missing unittest
+            # status: OK, unittest OK
             
             assert os.path.exists(next_release_data)
             port = get_pid(os.path.join(next_release, 'port')) # it will fail if it doesn't exist
@@ -540,7 +544,11 @@ def check_live_instance(options, instance_names):
             if check_pid_is_running(next_pid)==False:
                 error("The next-release is present, but dead - we do not expect this!!!") 
             
-            if is_invenio_doctor_idle(port):
+            if instance_mode == 'r' and not writer_finished:
+                    continue 
+                
+            if instance_mode == 'r' or is_invenio_doctor_idle(port):
+                
                 assert stop_live_instance(next_release, max_wait=options.timeout)
                 assert stop_live_instance(symbolic_name, max_wait=options.timeout)
                 orig_port = get_pid(os.path.join(symbolic_name, 'port'))
@@ -550,6 +558,7 @@ def check_live_instance(options, instance_names):
                 run_cmd(['ln', '-s', os.path.realpath(next_release_data), symbolic_name_data])
                 run_cmd(['rm', next_release])
                 run_cmd(['rm', next_release_data])
+                writer_finished=True
                 assert start_live_instance(options, symbolic_name, orig_port, 
                                            max_wait=options.timeout,
                                            list_of_readers=list_of_reader_instances,
@@ -558,12 +567,13 @@ def check_live_instance(options, instance_names):
                 print ('%s still getting itself ready, nothing to do yet...' % next_release)
             continue 
                 
+                
         live_tag = get_release_tag(path='%s/RELEASE' % symbolic_name)
         
         
         if live_tag == git_tag:
             
-            # status: OK, missing unittest
+            # status: OK, unittest missing
             
             if options.force_recompilation:
                 run_cmd(['cp', '-fr', 'montysolr/build/contrib/examples/%s' % INSTNAME, symbolic_name])
@@ -588,7 +598,7 @@ def check_live_instance(options, instance_names):
             continue # nothing to do
         
         
-        if live_tag.major != git_tag.major:
+        if live_tag.major != git_tag.major or live_tag.solr_ver != git_tag.solr_ver:
             # major upgrade, we start a new instance and indexing
             # status: OK, unittest: OK
             
@@ -600,11 +610,16 @@ def check_live_instance(options, instance_names):
                         error("The live instance at %s is already running, we cannot create new-release with the same name" % real_name)
                 
                 run_cmd(['rm', '-fr', real_name])
-                run_cmd(['rm', '-fr', real_name_data])
+                if instance_mode != 'r':
+                    run_cmd(['rm', '-fr', real_name_data])
                 
             
             run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s' % INSTNAME, real_name])
-            run_cmd(['mkdir', real_name_data])
+            
+            if instance_mode != 'r':
+                run_cmd(['mkdir', real_name_data])
+            else:
+                assert os.path.exists(real_name_data)
             
             run_cmd(['ln', '-s', real_name, next_release])
             run_cmd(['ln', '-s', real_name_data, next_release_data])
@@ -622,15 +637,21 @@ def check_live_instance(options, instance_names):
             
             if options.start_indexing:
                 assert start_indexing(next_release, port=temporary_port)
+                
         elif live_tag.minor != git_tag.minor:
             # minor upgrade, we can re-use the index (we create a copy and keep)
             # the old index in place
             
+            # status: OK, unittest: OK
+            
             run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s' % INSTNAME, real_name])
             run_cmd(['rm', '-fr', "%s/solr/data" % real_name], strict=False)
             
-            run_cmd(['mkdir', real_name_data])
-            run_cmd(['cp', '-fR', '%s/*' % symbolic_name_data, real_name_data])
+            if instance_mode != 'r':
+                run_cmd(['mkdir', real_name_data])
+                run_cmd(['cp', '-fR', '%s/*' % symbolic_name_data, real_name_data])
+            else:
+                assert os.path.exists(real_name_data)
             
             stop_live_instance(symbolic_name, max_wait=options.timeout)
             
@@ -649,7 +670,7 @@ def check_live_instance(options, instance_names):
                                        instance_mode=instance_mode)
         else:
             # just a patch, we will re-use index 
-            # status: OK, missing unittest
+            # status: OK, unittest: OK
             
             stop_live_instance(symbolic_name, max_wait=options.timeout)
             
@@ -907,8 +928,7 @@ def setup_python(options):
         return # python already installed
 
     with open("install_python.sh", "w") as inpython:
-        inpython.write("""
-#!/bin/bash -e
+        inpython.write("""#!/bin/bash -e
 
 echo "using python: %(python)s"
 
@@ -1168,7 +1188,7 @@ def main(argv):
             
             if curr_tag > git_tag:
                 error("whaaat!?! The current release has higher tag than git!? %s > %s" % (curr_tag, git_tag))
-            elif curr_tag == git_tag:
+            if curr_tag == git_tag:
                 if len(instance_names) > 0:
                     print("Compiled version is the latest, we'll just check the live instance(s)")
             elif curr_tag != git_tag:
