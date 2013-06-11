@@ -355,7 +355,7 @@ def upgrade_montysolr(curr_tag, git_tag):
     with changed_dir('montysolr'):
         
         with open('build-montysolr.sh', 'w') as build_script:
-            build_script.write("""#!bash -e -x
+            build_script.write("""#!/bin/bash -ex
 
 export JAVA_HOME=%(java_home)s
 export ANT_HOME=%(ant_home)s
@@ -398,13 +398,13 @@ deactivate
             # maybe i could make this to work, right now: upgrades must be  invoked after source was called
             #run_cmd(['bash', '-c', 'source %s/python/bin/activate; ant get-solr build-solr; deactivate' % os.path.realpath('..')])
             #run_cmd(['ant', 'build-all'])
-            run_cmd(['bash', './build-montysolr.sh', 'nuke'])
+            run_cmd(['./build-montysolr.sh', 'nuke'])
         elif curr_tag.minor != git_tag.minor:
             #run_cmd(['ant', 'get-solr', 'build-solr'])
             #run_cmd(['ant', 'build-all'])
-            run_cmd(['bash', './build-montysolr.sh', 'minor'])
+            run_cmd(['./build-montysolr.sh', 'minor'])
         else:
-            run_cmd(['bash', './build-montysolr.sh'])
+            run_cmd(['./build-montysolr.sh'])
             
         # always re-compile, this is not too expensive
         #run_cmd(['ant', 'build-contrib'])
@@ -424,7 +424,7 @@ def build_example(git_tag):
     
     with changed_dir('montysolr'):
         with open('build-example.sh', 'w') as build_script:
-            build_script.write("""#!bash -e -x
+            build_script.write("""#!/bin/bash -ex
 
 export JAVA_HOME=%(java_home)s
 export ANT_HOME=%(ant_home)s
@@ -438,7 +438,7 @@ deactivate
         )
         
         run_cmd(['chmod', 'u+x', './build-example.sh'])
-        run_cmd(['bash', '-e', './build-example.sh'])
+        run_cmd(['./build-example.sh'])
         with open('build/contrib/examples/%s/RELEASE' % INSTNAME, 'w') as release:
                 release.write(str(git_tag))
             
@@ -447,11 +447,11 @@ deactivate
 def check_live_instance(options, instance_names):
     
     git_tag = get_release_tag(path='montysolr/RELEASE')
-    example_tag = get_release_tag(path='montysolr/build/contrib/example/%s/RELEASE' % INSTNAME)
+    example_tag = get_release_tag(path='montysolr/build/contrib/examples/%s/RELEASE' % INSTNAME)
     
     if example_tag != git_tag:
         build_example(git_tag)
-
+        example_tag = get_release_tag(path='montysolr/build/contrib/examples/%s/RELEASE' % INSTNAME)
     base_path = os.path.realpath('.') # git_tag.minor =  1; git_tag.text = '40.1.1.2'
     
     writer_counter = 0
@@ -535,17 +535,22 @@ def check_live_instance(options, instance_names):
             
             assert os.path.exists(next_release_data)
             port = get_pid(os.path.join(next_release, 'port')) # it will fail if it doesn't exist
+            next_pid = get_pid(next_release + "/montysolr.pid")
+            
+            if check_pid_is_running(next_pid)==False:
+                error("The next-release is present, but dead - we do not expect this!!!") 
             
             if is_invenio_doctor_idle(port):
                 assert stop_live_instance(next_release, max_wait=options.timeout)
                 assert stop_live_instance(symbolic_name, max_wait=options.timeout)
+                orig_port = get_pid(os.path.join(symbolic_name, 'port'))
                 run_cmd(['rm', symbolic_name])
                 run_cmd(['rm', symbolic_name_data])
                 run_cmd(['ln', '-s', os.path.realpath(next_release), symbolic_name])
                 run_cmd(['ln', '-s', os.path.realpath(next_release_data), symbolic_name_data])
                 run_cmd(['rm', next_release])
                 run_cmd(['rm', next_release_data])
-                assert start_live_instance(options, symbolic_name, port, 
+                assert start_live_instance(options, symbolic_name, orig_port, 
                                            max_wait=options.timeout,
                                            list_of_readers=list_of_reader_instances,
                                            instance_mode=instance_mode)
@@ -583,9 +588,9 @@ def check_live_instance(options, instance_names):
             continue # nothing to do
         
         
-        if live_tag.major != git_tag.major or live_tag.minor != git_tag.minor:
+        if live_tag.major != git_tag.major:
             # major upgrade, we start a new instance and indexing
-            # status: OK?, unittest missing
+            # status: OK, unittest: OK
             
             if os.path.exists(real_name) or os.path.exists(real_name_data):
                 
@@ -617,8 +622,33 @@ def check_live_instance(options, instance_names):
             
             if options.start_indexing:
                 assert start_indexing(next_release, port=temporary_port)
+        elif live_tag.minor != git_tag.minor:
+            # minor upgrade, we can re-use the index (we create a copy and keep)
+            # the old index in place
+            
+            run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s' % INSTNAME, real_name])
+            run_cmd(['rm', '-fr', "%s/solr/data" % real_name], strict=False)
+            
+            run_cmd(['mkdir', real_name_data])
+            run_cmd(['cp', '-fR', '%s/*' % symbolic_name_data, real_name_data])
+            
+            stop_live_instance(symbolic_name, max_wait=options.timeout)
+            
+            run_cmd(['rm', symbolic_name])
+            run_cmd(['rm', symbolic_name_data])
+            
+            run_cmd(['ln', '-s', real_name, symbolic_name])
+            run_cmd(['ln', '-s', real_name_data, symbolic_name_data])            
+            run_cmd(['ln', '-s', '%s/%s' % (base_path, symbolic_name_data), "%s/solr/data" % real_name])
+            
+            
+            assert start_live_instance(options, symbolic_name, 
+                                       port=port, 
+                                       max_wait=options.timeout,
+                                       list_of_readers=list_of_reader_instances,
+                                       instance_mode=instance_mode)
         else:
-            # minor upgrade, we can re-use the index
+            # just a patch, we will re-use index 
             # status: OK, missing unittest
             
             stop_live_instance(symbolic_name, max_wait=options.timeout)
