@@ -290,8 +290,6 @@ class Tag(object):
         self.minor = int(data[2])
         self.patch = int(data[3])
         
-        # This has the effect of normalizing the version.
-        self.text = self.__str__()
 
     def __str__(self):
         return "{}.{}.{}.{}".format(self.solr_ver, 
