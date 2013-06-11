@@ -85,6 +85,21 @@ PYLUCENE_SVN_TAG='MONTYSOLR_PYLUCENE_SVN_TAG' in os.environ and os.environ['MONT
 
 # Ideas stolen from python release script
 
+if "check_output" not in dir( subprocess ): # duck punch it in!
+    def f(*popenargs, **kwargs):
+        if 'stdout' in kwargs:
+            raise ValueError('stdout argument not allowed, it will be overridden.')
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            raise subprocess.CalledProcessError(retcode, cmd)
+        return output
+    subprocess.check_output = f
+    
 def error(*msgs):
     sys.stderr.write("**ERROR**\n")
     for msg in msgs:
@@ -969,8 +984,7 @@ def setup_jcc(options):
         return # already there
     
     with open("install_jcc.sh", "w") as inpython:
-        inpython.write("""
-#!/bin/bash -e
+        inpython.write("""#!/bin/bash -e
 
 source python/bin/activate
 
@@ -1007,10 +1021,12 @@ def setup_pylucene(options):
     run_cmd(['rm', 'pylucene/Makefile*'], strict=False)
     
     with open("install_pylucene.sh", "w") as infile:
-        infile.write("""
-#!/bin/bash -xe
+        infile.write("""#!/bin/bash -xe
 
 source python/bin/activate
+
+export ANT_HOME=%(ant_home)s
+export JAVA_HOME=%(java_home)s
 
 svn co http://svn.apache.org/repos/asf/lucene/pylucene/trunk@%(PYLUCENE_SVN_TAG)s pylucene
 cd pylucene
@@ -1044,7 +1060,8 @@ echo "%(PYLUCENE_SVN_TAG)s" > RELEASE
 cd ..
 deactivate
 exit 0
-""" % {'ant_home': os.environ['ANT_HOME'], 'PYLUCENE_SVN_TAG': PYLUCENE_SVN_TAG})
+""" % {'ant_home': os.environ['ANT_HOME'], 'PYLUCENE_SVN_TAG': PYLUCENE_SVN_TAG,
+       'java_home': os.environ['JAVA_HOME']})
         
     run_cmd(['chmod', 'u+x', 'install_pylucene.sh'])
     run_cmd(['bash', '-e', './install_pylucene.sh'])
@@ -1067,8 +1084,7 @@ def setup_invenio(options):
         
     
     with open("install_invenio.sh", "w") as inpython:
-        inpython.write("""
-#!/bin/bash -e
+        inpython.write("""#!/bin/bash -e
 
 source python/bin/activate
 
