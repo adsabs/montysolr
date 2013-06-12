@@ -156,6 +156,9 @@ def get_arg_parser():
     p.add_option('-p', '--setup_python',
                  default=False, action='store_true',
                  help='Setup Python virtualenv')
+    p.add_option('--setup_ant',
+                 default=False, action='store_true',
+                 help='Install Ant (1.8.3) into perpetuum folder, this must be called with ANT_HOME=<perpetuum>/ant')
     p.add_option('-j', '--setup_jcc',
                  default=False, action='store_true',
                  help='Install JCC')
@@ -391,6 +394,8 @@ esac
 ant build-contrib
 ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s
 ant -file contrib/examples/build.xml run-configured -Dename=%(example)s -Dtarget=generate-run.sh -Dprofile=silent.profile
+
+ant test-python
 deactivate
         """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
         )
@@ -778,6 +783,16 @@ def start_live_instance(options, instance_dir, port,
         start = fi.read()
         fi.close()
         
+        lines = start.split("\n")
+        lines.insert(1, """
+        
+        # File modified by: montysolrupdate.py
+        
+        source ../python/bin/activate
+        export PYTHONPATH=`python -c "import sys;print ':'.join(sys.path)"`:$PYTHONPATH
+        """
+        )
+        
         start = re.sub(r'HOMEDIR=.*\n', 'HOMEDIR=%s\n' % os.path.realpath('.'), start)
         start = re.sub(r'--port\s+\d+', '--port %s' % port, start)
         start = re.sub('\n([\t\s]+)(java -cp )', '\\1export PATH=%s/bin:$PATH\n\\1\\2' % os.environ['JAVA_HOME'], start)
@@ -915,6 +930,9 @@ def check_pid_is_running(pid):
             
 
 def check_prerequisites(options):
+    
+    if options.setup_ant:
+        setup_ant(options)
     if options.setup_prerequisites or options.setup_python:
         setup_python(options)
     if options.setup_prerequisites or options.setup_jcc:
@@ -924,6 +942,8 @@ def check_prerequisites(options):
     if options.setup_prerequisites or options.setup_invenio:
         setup_invenio(options)
     
+    check_ant(options)
+    
     if not os.path.exists('montysolr'):
         run_cmd(['git', 'clone', GITURL, 'montysolr'])
         
@@ -931,13 +951,61 @@ def check_prerequisites(options):
         run_cmd(['git', 'fetch'])
         run_cmd(['git', 'reset', '--hard', 'origin/master'])
         run_cmd(['git', 'checkout', 'master'])
+
+
+def check_ant(options):
+    version = get_output(["ant -version"])
+    if ' version ' in version:
+        elements = version.split()
+        version = elements[elements.index('version')+1]
+        version = int(version.replace('.', '')[0:3])
+        if version < 182:
+            error("""
+                Your installation of ant is too old: %s
+                You can run: montysolrupdate.py --setup_ant 
+                and set ANT_HOME=%s""" % 
+                (version, os.path.join(INSTDIR, "perpetuum/ant")))
+        
+def setup_ant(options):
+    """
+    On old systems, such as CentOS, the ant binaries are useless
+    """
     
+    if options.force_recompilation and os.path.exists('ant'):
+        run_cmd(['rm', '-fr', 'ant'])
+    elif os.path.exists('ant/RELEASE') and str(get_pid('ant/RELEASE')) == str(JCC_SVN_TAG):
+        return # already installed
+    
+    with open("install_ant.sh", "w") as build_ant:
+        build_ant.write("""#!/bin/bash -e
+        
+        export JAVA_HOME=%(java_home)s
+        export ANT_HOME=%(ant_home)s
+        
+        
+        wget -nc http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.tar.gz
+        tar -xzf apache-ant-1.8.4-bin.tar.gz
+        mv apache-ant-1.8.4 ant
+        cd ant
+        
+        ant -f fetch.xml -Ddest=system
+        echo "%(release)s" > RELEASE
+        
+        """ % {'java_home': os.environ['JAVA_HOME'], 
+               'ant_home': os.path.join(INSTDIR, "perpetuum/ant"),
+               'release': JCC_SVN_TAG})
+    
+    run_cmd(['chmod', 'u+x', 'install_ant.sh'])
+    run_cmd(['./install_ant.sh'])
+    
+    
+        
 
 def setup_python(options):
     
     if options.force_recompilation and os.path.exists('python'):
         run_cmd(['rm', '-fr', 'python'])
-    elif os.path.exists('python/RELEASE') and str(get_pid('jcc/RELEASE')) == str(JCC_SVN_TAG):
+    elif os.path.exists('python/RELEASE') and str(get_pid('python/RELEASE')) == str(JCC_SVN_TAG):
         return # python already installed
 
     with open("install_python.sh", "w") as inpython:
@@ -963,6 +1031,10 @@ pip install lxml
 pip install simplejson
 pip install configobj
 pip install pyparsing==1.5.7
+
+# verify installation
+python -c "import numpy,lxml,simplejson,configobj,pyparsing, MySQLdb, sqlachemy"
+
 deactivate
 echo "%(release)s" > python/RELEASE
 
@@ -970,7 +1042,6 @@ exit 0
 """ % {'python': sys.executable, 'release': JCC_SVN_TAG} )
         
     run_cmd(['chmod', 'u+x', 'install_python.sh'])
-    #run_cmd(['bash', '-e', './install_python.sh'])
     run_cmd(['./install_python.sh'])
 
 def setup_jcc(options):
@@ -996,7 +1067,12 @@ python setup.py bdist_egg
 python setup.py install
 echo "%(JCC_SVN_TAG)s" > RELEASE
 
+
+# verify installation
 cd ..
+python -c "import jcc;jcc.initVM();print jcc.__file__"
+
+
 deactivate
 exit 0
 """ % {'JAVA_HOME': os.environ['JAVA_HOME'], 'JCC_SVN_TAG' : JCC_SVN_TAG})
@@ -1055,7 +1131,12 @@ make
 make install
 
 echo "%(PYLUCENE_SVN_TAG)s" > RELEASE
+
+# verify installation
 cd ..
+python -c "import lucene;lucene.initVM();print lucene.__file__"
+
+
 deactivate
 exit 0
 """ % {'ant_home': os.environ['ANT_HOME'], 'PYLUCENE_SVN_TAG': PYLUCENE_SVN_TAG,

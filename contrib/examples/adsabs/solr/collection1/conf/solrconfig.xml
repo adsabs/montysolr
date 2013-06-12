@@ -1905,9 +1905,9 @@
     </lst>
   </requestHandler>
   
-  <!-- checks the system and prints information from both Java and Python side 
-  <requestHandler name="/diagnostic_test" class="org.apache.solr.handler.PythonDiagnosticHandler" default="false" />
-  -->
+  <!-- checks the system and prints information from both Java and Python side -->
+  <requestHandler name="/montysolr_diagnostics" class="org.apache.solr.handler.PythonDiagnosticHandler" default="false" />
+  
   
   <requestHandler name="ads-config" class="solr.AdsConfigHandler" default="false">
      <lst name="queryParser">

@@ -589,7 +589,7 @@ class test_04_dual_mode_upgrade(NormalTest):
         
         
         # instance is stopped, this should start it
-        montysolrupdate.main(['foo', '-c', '-u', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
+        montysolrupdate.main(['foo', '-c', '-a', '-u', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
         
         old_tag = montysolrupdate.get_release_tag("test-7000/RELEASE")
         new_tag = copy.copy(old_tag)

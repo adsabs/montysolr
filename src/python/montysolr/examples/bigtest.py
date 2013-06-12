@@ -41,15 +41,15 @@ def bigtest(message):
             result = [ '%s' % x for x in xrange(size)]
             result = JArray_string(result)
         elif action == 'recids_hm_strstr':
-            result = HashMap().of_(String, String)
+            result = HashMap()#.of_(String, String)
             for x in xrange(size):
                 result.put(str(x), str(x))
         elif action == 'recids_hm_strint':
-            result = HashMap().of_(String, Integer)
+            result = HashMap()#.of_(String, Integer)
             for x in xrange(size):
                 result.put(str(x), x)
         elif action == 'recids_hm_intint':
-            result = HashMap().of_(Integer, Integer)
+            result = HashMap()#.of_(Integer, Integer)
             for x in xrange(size):
                 result.put(x, x)
         elif action == 'recids_bitset':
