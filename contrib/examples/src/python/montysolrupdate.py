@@ -371,7 +371,7 @@ def upgrade_montysolr(curr_tag, git_tag):
     with changed_dir('montysolr'):
         
         with open('build-montysolr.sh', 'w') as build_script:
-            build_script.write("""#!/bin/bash -ex
+            build_script.write("""#!/bin/bash -e
 
 export JAVA_HOME=%(java_home)s
 export ANT_HOME=%(ant_home)s
@@ -384,10 +384,12 @@ case "$1" in
     ant clean
     ant get-solr build-solr
     ant build-all
+    ant test-python
     ;;
 "minor" | "3")
     ant get-solr build-solr
     ant build-all
+    ant test-python
     ;;
 esac
 
@@ -395,7 +397,6 @@ ant build-contrib
 ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s
 ant -file contrib/examples/build.xml run-configured -Dename=%(example)s -Dtarget=generate-run.sh -Dprofile=silent.profile
 
-ant test-python
 deactivate
         """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
         )
