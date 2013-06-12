@@ -82,7 +82,7 @@ GITURL = 'MONTYSOLR_GIT' in os.environ and os.environ['MONTYSOLR_GIT'] or 'https
 NEW_INSTANCE_PORT_GAP = 'MONTYSOLR_URL_GAP' in os.environ and os.environ['MONTYSOLR_URL_GAP'] or 10 #when we build a new release, it will be started as orig_port+GAP
 JCC_SVN_TAG='MONTYSOLR_JCC_SVN_TAG' in os.environ and os.environ['MONTYSOLR_JCC_SVN_TAG'] or '1452473' #the version of JCC we rely on (Use the one from Jenkins)
 PYLUCENE_SVN_TAG='MONTYSOLR_PYLUCENE_SVN_TAG' in os.environ and os.environ['MONTYSOLR_PYLUCENE_SVN_TAG'] or JCC_SVN_TAG
-
+INVENIO_CONFIG='INVENIO_CONFIG' in os.environ and os.environ['INVENIO_CONFIG'] or ''
 # Ideas stolen from python release script
 
 if "check_output" not in dir( subprocess ): # duck punch it in!
@@ -167,7 +167,10 @@ def get_arg_parser():
                  help='Install pylucene')
     p.add_option('-i', '--setup_invenio',
                  default=False, action='store_true',
-                 help='Install invenio')
+                 help='Install invenio, you need INVENIO_CONFIG variable')
+    p.add_option('-d', '--check_diagnostics',
+                 default=False, action='store_true',
+                 help='Invokes /solr/montysolr_diagnostics when checking MontySolr health')
     p.add_option('-u', '--update',
                  default=False, action='store_true',
                  help='Update live instances. You must supply their names as arguments')
@@ -443,7 +446,7 @@ def build_example(git_tag):
     
     with changed_dir('montysolr'):
         with open('build-example.sh', 'w') as build_script:
-            build_script.write("""#!/bin/bash -ex
+            build_script.write("""#!/bin/bash -e
 
 export JAVA_HOME=%(java_home)s
 export ANT_HOME=%(ant_home)s
@@ -603,7 +606,10 @@ def check_live_instance(options, instance_names):
                 run_cmd(['rm', '%s/FAILED.counter'], strict=False)
                 
             # just check if the instance is in a healthy state
-            if not check_instance_health(port, max_wait=options.timeout):
+            kwargs = dict(max_wait=options.timeout)
+            if options.check_diagnostics:
+                kwargs['tmpl'] ='http://localhost:%s/solr/montysolr_diagnostics'
+            if not check_instance_health(port, **kwargs):
                 if stop_live_instance(symbolic_name, max_wait=options.timeout):
                     start_live_instance(options, symbolic_name, port, 
                                         max_wait=options.timeout,
@@ -793,11 +799,12 @@ def start_live_instance(options, instance_dir, port,
         export PYTHONPATH=`python -c "import sys;print ':'.join(sys.path)"`:$PYTHONPATH
         """
         )
+        start = '\n'.join(lines)
         
         start = re.sub(r'HOMEDIR=.*\n', 'HOMEDIR=%s\n' % os.path.realpath('.'), start)
         start = re.sub(r'--port\s+\d+', '--port %s' % port, start)
         start = re.sub('\n([\t\s]+)(java -cp )', '\\1export PATH=%s/bin:$PATH\n\\1\\2' % os.environ['JAVA_HOME'], start)
-	    
+
         if instance_mode == 'r': # for master-readers
             start = start.replace('monty.solr.JettyRunner', 
             '-Dmontysolr.enable.write=false -Dmontysolr.enable.warming=true monty.solr.JettyRunner')
@@ -846,7 +853,10 @@ def start_live_instance(options, instance_dir, port,
         run_cmd(['chmod', 'u+x', 'automatic-run.sh'])
         run_cmd(['bash', '-e', './automatic-run.sh', '&'])
         
-        if not check_instance_health(port, max_wait=max_wait):
+        kwargs = dict(max_wait=options.timeout)
+        if options.check_diagnostics:
+            kwargs['tmpl'] ='http://localhost:%s/solr/montysolr_diagnostics'
+        if not check_instance_health(port, **kwargs):
             run_cmd(['kill', '-9', str(get_pid('montysolr.pid'))])
             time.sleep(3)
             failed += 1
@@ -881,16 +891,19 @@ def start_indexing(instance_dir, port):
     return True
         
 
-def check_instance_health(port, max_wait=30):
-    url = 'http://localhost:%s/solr/admin/ping' % port
+def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admin/ping'):
+    url = tmpl % port
+    
     max_time = time.time() + max_wait
+    rsp = None
     while time.time() < max_time:
         try:
             rsp = req(url)
-            if rsp['status'] == 'OK':
+            if rsp['status'] == '0' or rsp['status'] == 'OK':
                 return True
-        except:
-            pass
+        except Exception, e:
+            if rsp is not None and 'error' in rsp:
+                error(str(rsp['error']).replace('\\n', "\n"))
         time.sleep(1)
     return False
 
@@ -1197,26 +1210,15 @@ make
 make install
 ln -s %(INSTDIR)s/perpetuum/invenio/lib/python/invenio $site_packages/invenio
 
-echo "[Invenio]
-CFG_SITE_NAME = ADS Metadata repository
-CFG_DATABASE_NAME = inveniolive
-CFG_DATABASE_PASS = 12cd\$invEni0#2
-CFG_SITE_URL = http://adsx.cfa.harvard.edu
-CFG_SITE_SECURE_URL = http://adsx.cfa.harvard.edu
-CFG_SITE_SUPPORT_EMAIL = gdimilia@cfa.harvard.edu
-CFG_SITE_ADMIN_EMAIL = gdimilia@cfa.harvard.edu
-CFG_WEBSEARCH_NB_RECORDS_TO_SORT = 10000000
-CFG_WEBSEARCH_WILDCARD_LIMIT = 10000000
-CFG_SITE_LANGS = en
-CFG_WEBSEARCH_SPLIT_BY_COLLECTION = 0
-CFG_ADS_SITE = 1
-CFG_BIBUPLOAD_BIBXXX_TAGS = 024,035,100,245,653,695,700,710,970,980,995
-CFG_DATABASE_HOST=adsx.cfa.harvard.edu
+echo "%(invenio_config)s
 " > %(INSTDIR)s/perpetuum/invenio/etc/invenio-local.conf
+
+# this actually generates invnenio module (inside invenio lib)
+python %(INSTDIR)s/perpetuum/invenio/bin/inveniocfg --update-all
 
 deactivate
 exit 0
-""" % {'INSTDIR':INSTDIR, })
+""" % {'INSTDIR':INSTDIR, 'invenio_config': INVENIO_CONFIG})
         
     run_cmd(['chmod', 'u+x', 'install_invenio.sh'])
     run_cmd(['bash', '-e', './install_invenio.sh'])
