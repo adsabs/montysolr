@@ -1104,7 +1104,6 @@ def setup_pylucene(options):
     if os.path.exists('pylucene') and str(get_pid('pylucene/RELEASE')) == str(PYLUCENE_SVN_TAG):
         return # already there
 
-    jcc_invocation = {5:'-m jcc',6:'-m jcc.__main__',7:'-m jcc'}[sys.version_info[1]]
     
     run_cmd(['rm', 'pylucene/Makefile*'], strict=False)
     
@@ -1123,6 +1122,12 @@ echo "0" > RELEASE
 
 if [ ! -f Makefile.copy ]; then
     cp Makefile Makefile.copy
+    
+    # on stupid old centos, icupkg is outdated and since it took 2 hours of my life
+    # i deactivate it from the build (we don't use it anyways....)
+    
+    sed 's/shell which icupkg/shell which icupkgooooo/' Makefile > Makefile
+
     echo "VERSION=4.0-0
 LUCENE_SVN_VER=HEAD
 LUCENE_VER=4.0
