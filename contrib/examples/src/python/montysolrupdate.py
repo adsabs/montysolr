@@ -1157,7 +1157,7 @@ exit 0
        'java_home': os.environ['JAVA_HOME']})
         
     run_cmd(['chmod', 'u+x', 'install_pylucene.sh'])
-    run_cmd(['bash', '-e', './install_pylucene.sh'])
+    run_cmd(['./install_pylucene.sh'])
 
 
 def setup_invenio(options):
