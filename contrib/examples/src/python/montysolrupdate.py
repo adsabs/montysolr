@@ -1047,7 +1047,7 @@ pip install configobj
 pip install pyparsing==1.5.7
 
 # verify installation
-python -c "import numpy,lxml,simplejson,configobj,pyparsing, MySQLdb, sqlachemy"
+python -c "import numpy,lxml,simplejson,configobj,pyparsing, MySQLdb, sqlalchemy"
 
 deactivate
 echo "%(release)s" > python/RELEASE
