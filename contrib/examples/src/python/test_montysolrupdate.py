@@ -833,19 +833,19 @@ class test_07_checkout_branch(NormalTest):
     def test_master_branch(self):
         
         self.registerTestInstance('test-7000')
+        self.registerTestInstance('test-7001')
         
         # first invocation should take time
-        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000#w'])
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000#w', 'test-7000#r'])
         
-        # but next must be fast
-        start = time.time()
-        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000#w'])
-        self.assertTrue(time.time() - start < 3, "Invocation took too long")
-                    
-
-        start = time.time()
-        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000#w'])
-        self.assertTrue(time.time() - start < 3, "Invocation took too long")
+        with montysolrupdate.changed_dir('montysolr'):
+            '* master' in montysolrupdate.get_output(['git', 'branch'])
+        
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'refs/tags/v40.1.0.5', 'test-7000#w', 'test-7000#r'])
+        
+        with montysolrupdate.changed_dir('montysolr'):
+            '* refs/tags/v40.1.0.5' in montysolrupdate.get_output(['git', 'branch'])
+            
 
 
 def cleanup(path):
