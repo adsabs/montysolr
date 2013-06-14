@@ -1142,7 +1142,8 @@ NUM_FILES=3
     # on stupid old centos, icupkg is outdated and since it took 2 hours of my life
     # i deactivate it from the build (we don't use it anyways....)
     
-    sed 's/shell which icupkg/shell which icupkgooooo/' Makefile > Makefile
+    sed 's/shell which icupkg/shell which icupkgooooo/' Makefile > Makefile.tmp
+    mv Makefile.tmp Makefile
 
 fi
 
@@ -1171,7 +1172,7 @@ def setup_invenio(options):
     if options.force_recompilation and os.path.exists('invenio'):
         run_cmd(['rm', '-fr', 'invenio'])
         
-    if os.path.exists('invenio.git'):
+    if os.path.exists('invenio.git') and os.path.exists('invenio'):
         with changed_dir('invenio.git'):
             commit = get_output(["git", "log", "--pretty=oneline", "--abbrev-commit", "-n 1"])
             run_cmd(['git', 'fetch'])
