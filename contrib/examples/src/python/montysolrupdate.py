@@ -1318,10 +1318,10 @@ def main(argv):
             
             if curr_tag > git_tag:
                 error("whaaat!?! The current release has higher tag than git!? %s > %s" % (curr_tag, git_tag))
-            if curr_tag == git_tag and not options.test_branch:
+            if curr_tag == git_tag:
                 if len(instance_names) > 0:
                     print("Compiled version is the latest, we'll just check the live instance(s)")
-            elif curr_tag != git_tag or options.test_branch:
+            elif curr_tag != git_tag:
                 upgrade_montysolr(curr_tag, git_tag)
         
         if len(instance_names) > 0:
