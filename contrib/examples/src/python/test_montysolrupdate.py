@@ -110,17 +110,19 @@ class NormalTest(TestCase):
         def run_cmd(args, silent=False, strict=True):
             cmd = ' '.join(map(str, args))
             self.cmd_collector.append(cmd)
-            if cmd in self.interceptor:
-                return self.interceptor[cmd](args, silent, strict)
+            for pattern in self.interceptor:
+                if pattern.match(cmd):
+                    return self.interceptor[pattern](args, silent, strict)
             else:
                 return self.old_run_cmd(args, silent, strict)
+            
         montysolrupdate.run_cmd = run_cmd
         
     def registerTestInstance(self, name):
         self.to_kill.append(name)
         
     def intercept(self, args, func):
-        self.interceptor[args] = func
+        self.interceptor[re.compile(args)] = func
         
     def interceptTag(self, path, func):
         self.tagInterceptors[path] = func
@@ -246,7 +248,7 @@ class test_01_major_upgrade(NormalTest):
                 
         
         # but do not bother to re-compile
-        self.intercept('./build-example.sh', lambda x,y,z: True)
+        self.intercept('./build-example.sh .*', lambda x,y,z: True)
         self.intercept('./build-montysolr.sh nuke', lambda x,y,z: True)
         
         
@@ -267,7 +269,7 @@ class test_01_major_upgrade(NormalTest):
                   'git checkout -f -b refs/tags/*', 
                   './build-montysolr.sh nuke',   # <-- build everything from scratch
                   'chmod u+x ./build-example.sh', 
-                  './build-example.sh', 
+                  './build-example.sh *', 
                   'cp -r montysolr/build/contrib/examples/adsabs test-7000_*', 
                   'mkdir test-7000_*_data', 
                   'ln -s test-7000_* next-release_test-7000', 
@@ -358,7 +360,7 @@ class test_02_minor_upgrade(NormalTest):
         self.interceptTag('perpetuum/montysolr', tag_up)
         
         # but do not bother to re-compile
-        self.intercept('./build-example.sh', lambda x,y,z: True)
+        self.intercept('./build-example.sh .*', lambda x,y,z: True)
         self.intercept('./build-montysolr.sh minor', lambda x,y,z: True)
         
         
@@ -397,7 +399,7 @@ class test_02_minor_upgrade(NormalTest):
                   'git checkout -f -b refs/tags/*', 
                   './build-montysolr.sh minor', # <- recompilation 
                   'chmod u+x ./build-example.sh', 
-                  './build-example.sh',  # <- assemble example
+                  './build-example.sh *',  # <- assemble example
                   'cp -r montysolr/build/contrib/examples/adsabs test-7000_*', 
                   'rm -fr test-7000_%s/solr/data' % str(new_tag), 
                   'mkdir test-7000_%s_data' % str(new_tag), 
@@ -468,7 +470,7 @@ class test_03_patch_level_upgrade(NormalTest):
         self.interceptTag('perpetuum/montysolr', tag_up)
         
         # but do not bother to re-compile
-        self.intercept('./build-example.sh', lambda x,y,z: True)
+        self.intercept('./build-example.sh .*', lambda x,y,z: True)
         self.intercept('./build-montysolr.sh', lambda x,y,z: True)
         
         
@@ -502,7 +504,7 @@ class test_03_patch_level_upgrade(NormalTest):
                   'git checkout -f -b refs/tags/*', 
                   './build-montysolr.sh', # <- recompilation 
                   'chmod u+x ./build-example.sh', 
-                  './build-example.sh',  # <- assemble example
+                  './build-example.sh *',  # <- assemble example
                   'kill *',
                   'cp -r montysolr/build/contrib/examples/adsabs test-7000_%s' % str(new_tag), 
                   'rm -fr test-7000_%s/solr/data' % str(new_tag), 
@@ -549,7 +551,7 @@ class test_03_patch_level_upgrade(NormalTest):
                   'git checkout -f -b refs/tags/*', 
                   './build-montysolr.sh', # <- recompilation 
                   'chmod u+x ./build-example.sh', 
-                  './build-example.sh',  # <- assemble example
+                  './build-example.sh *',  # <- assemble example
                   'kill *',
                   'cp -r montysolr/build/contrib/examples/adsabs test-7000_%s' % str(new_tag), 
                   'rm -fr test-7000_%s/solr/data' % str(new_tag), 
@@ -818,6 +820,31 @@ class test_06_no_changes(NormalTest):
 
         start = time.time()
         montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000'])
+        self.assertTrue(time.time() - start < 3, "Invocation took too long")
+
+
+class test_07_checkout_branch(NormalTest):
+    """
+    This test assumes montysolr is already built locally and we can simply
+    copy files around (without rebuilding them)
+    """
+        
+    
+    def test_master_branch(self):
+        
+        self.registerTestInstance('test-7000')
+        
+        # first invocation should take time
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000#w'])
+        
+        # but next must be fast
+        start = time.time()
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000#w'])
+        self.assertTrue(time.time() - start < 3, "Invocation took too long")
+                    
+
+        start = time.time()
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000#w'])
         self.assertTrue(time.time() - start < 3, "Invocation took too long")
 
 

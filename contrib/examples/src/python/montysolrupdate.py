@@ -194,6 +194,9 @@ def get_arg_parser():
     p.add_option('-s', '--start',
                  default=False, action='store_true',
                  help='Start instances')
+    p.add_option('-b', '--test_branch',
+                 action='store',
+                 help='Instead of a tag, checkout a branch (latest code) instead of a tag. Use only for testing!')
     return p
 
 
@@ -345,124 +348,7 @@ def get_latest_git_release_tag(path=os.path.join(INSTDIR, 'montysolr')):
             error("Git returned no tagged reference")
         return Tag(tag.strip())
 
-def setup_build_properties():
-    lines = []
-    with open('build.properties.default', 'r') as infile:
-        for line in infile:
-            line = line.strip()
-            if len(line) > 0 and line[0] != '#':
-                parts = line.split('=', 1)
-                if parts[0] == 'python':
-                    lines.append('python=%s' % os.path.realpath(os.path.join(INSTDIR, "perpetuum", "python/bin/python")))
-                elif parts[0] == 'jcc':
-                    lines.append('jcc=%s' % {5:'-m jcc',6:'-m jcc.__main__',7:'-m jcc'}[sys.version_info[1]])
-                elif parts[0] == 'ant':
-                    lines.append('ant=%s' % 'ant')
-                else:
-                    lines.append(line)
-    fo = open('build.properties', 'w')
-    fo.write("\n".join(lines))
-    fo.close()
-    
-    
-    
-        
-
-def upgrade_montysolr(curr_tag, git_tag):
-    
-    
-    with changed_dir('montysolr'):
-        
-        with open('build-montysolr.sh', 'w') as build_script:
-            build_script.write("""#!/bin/bash -e
-
-export JAVA_HOME=%(java_home)s
-export ANT_HOME=%(ant_home)s
-
-source ../python/bin/activate
-
-
-case "$1" in
-"nuke")
-    ant clean
-    ant get-solr build-all
-    ant test-python
-    ;;
-"minor" | "3")
-    ant get-solr build-all
-    ant test-python
-    ;;
-esac
-
-ant build-contrib
-ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s
-ant -file contrib/examples/build.xml run-configured -Dename=%(example)s -Dtarget=generate-run.sh -Dprofile=silent.profile
-
-deactivate
-        """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
-        )
-    
-        run_cmd(['chmod', 'u+x', 'build-montysolr.sh'])
-    
-        if os.path.exists('RELEASE'):
-            run_cmd(['rm', 'RELEASE'], strict=False)
-        
-        # get the target tag
-        run_cmd(['git', 'checkout', '-f', '-b', git_tag.ref], strict=False)
-        setup_build_properties()
-        
-        # nuke everything, start from scratch
-        if curr_tag.solr_ver != git_tag.solr_ver or curr_tag.major != git_tag.major:
-            #run_cmd(['ant', 'clean'])
-            #run_cmd(['ant', 'get-solr', 'build-solr'])
-            # maybe i could make this to work, right now: upgrades must be  invoked after source was called
-            #run_cmd(['bash', '-c', 'source %s/python/bin/activate; ant get-solr build-solr; deactivate' % os.path.realpath('..')])
-            #run_cmd(['ant', 'build-all'])
-            run_cmd(['./build-montysolr.sh', 'nuke'])
-        elif curr_tag.minor != git_tag.minor:
-            #run_cmd(['ant', 'get-solr', 'build-solr'])
-            #run_cmd(['ant', 'build-all'])
-            run_cmd(['./build-montysolr.sh', 'minor'])
-        else:
-            run_cmd(['./build-montysolr.sh'])
-            
-        # always re-compile, this is not too expensive
-        #run_cmd(['ant', 'build-contrib'])
-        
-        # assemble the deployment target
-        #run_cmd(['ant', '-file', 'contrib/examples/build.xml', 'clean', 'build-one', '-Dename=%s' % INSTNAME])
-        #run_cmd(['ant', '-file', 'contrib/examples/build.xml', 'run-configured', '-Dename=%s' % INSTNAME,
-        #                '-Dtarget=generate-run.sh', '-Dprofile=silent.profile'])
-            
-        # update the RELEASE file
-        with open('RELEASE', 'w') as release:
-            release.write(str(git_tag))
-        
-            
-
-def build_example(git_tag):
-    
-    with changed_dir('montysolr'):
-        with open('build-example.sh', 'w') as build_script:
-            build_script.write("""#!/bin/bash -e
-
-export JAVA_HOME=%(java_home)s
-export ANT_HOME=%(ant_home)s
-
-source ../python/bin/activate
-
-ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s
-ant -file contrib/examples/build.xml run-configured -Dename=%(example)s -Dtarget=generate-run.sh -Dprofile=silent.profile
-deactivate
-        """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
-        )
-        
-        run_cmd(['chmod', 'u+x', './build-example.sh'])
-        run_cmd(['./build-example.sh'])
-        with open('build/contrib/examples/%s/RELEASE' % INSTNAME, 'w') as release:
-                release.write(str(git_tag))
-            
-                   
+  
           
 def check_live_instance(options, instance_names):
     
@@ -721,151 +607,7 @@ def extract_port(symbolic_name):
         error("The instance name must end with the port, eg. live-9002. We got: %s" % symbolic_name)
     return int(''.join(digits))
 
-def stop_live_instance(instance_dir, max_wait=30):
-    with changed_dir(instance_dir):
-        pid = get_pid('montysolr.pid')
-        if check_pid_is_running(pid) == False:
-            print('Warning: wanted to stop live instance which is not running: %s' % instance_dir)
-            return True
-        
-        port = None
-        if os.path.exists('port'):
-            fo = open('port', 'r')
-            port = fo.read().strip()
-            fo.close()
-        
-        wait_no_more = time.time() + max_wait/2
-        
-        while time.time() < wait_no_more:
-            if check_pid_is_running(pid):
-                run_cmd(['kill', pid])
-                time.sleep(1)
-            else:
-                continue
-        
-        if check_pid_is_running(pid):
-            wait_no_more = time.time() + max_wait/2
-            while time.time() < wait_no_more:
-                if check_pid_is_running(pid):
-                    run_cmd(['kill', '-9', pid])
-                    time.sleep(1)
-                else:
-                    continue
-        
-        if check_pid_is_running(pid):
-            error("We cannot stop %s pid=%s" % (instance_dir, pid))
-        
-        return True    
-        
-        
 
-def start_live_instance(options, instance_dir, port, 
-                        max_attempts = 3, 
-                        max_wait=30,
-                        instance_mode='',
-                        list_of_readers=[]):
-    with changed_dir(instance_dir):
-        pid = get_pid('montysolr.pid')
-        if pid != -1 and check_pid_is_running(pid):
-            error("The live instance at %s is still running" % instance_dir)
-            
-        fo = open('port', 'w')
-        fo.write(str(port))
-        fo.close()
-        
-        #i am seeing the socket is not closed on time
-        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #try:
-        #    s.bind(('', port)) # will fail if the socket is already used
-        #finally:
-        #    s.close()
-        
-        failed = get_pid('FAILED.counter')
-        if failed > max_attempts:
-            error("The live instance is a zombie (probably compilation failed), call a doctor!")
-        
-        fi = open('run.sh', 'r')
-        start = fi.read()
-        fi.close()
-        
-        lines = start.split("\n")
-        lines.insert(1, """
-        
-        # File modified by: montysolrupdate.py
-        
-        source ../python/bin/activate
-        export PYTHONPATH=`python -c "import sys;print ':'.join(sys.path)"`:$PYTHONPATH
-        """
-        )
-        start = '\n'.join(lines)
-        
-        start = re.sub(r'HOMEDIR=.*\n', 'HOMEDIR=%s\n' % os.path.realpath('.'), start)
-        start = re.sub(r'--port\s+\d+', '--port %s' % port, start)
-        start = re.sub('\n([\t\s]+)(java -cp )', '\\1export PATH=%s/bin:$PATH\n\\1\\2' % os.environ['JAVA_HOME'], start)
-
-        if instance_mode == 'r': # for master-readers
-            start = start.replace('monty.solr.JettyRunner', 
-            '-Dmontysolr.enable.write=false -Dmontysolr.enable.warming=true monty.solr.JettyRunner')
-              
-        elif instance_mode =='w': # for master-writers
-            start = start.replace('monty.solr.JettyRunner', 
-            '-Dmontysolr.enable.write=true -Dmontysolr.enable.warming=false monty.solr.JettyRunner')
-            
-            # we must change also the solrconfig
-            if len(list_of_readers) <= 0:
-                error("When you use write-master, you must also specify a reader node")
-                 
-            list_of_nodes = []
-            for n in list_of_readers:
-                reader_port = extract_port(n.split('#')[0])
-                list_of_nodes.append(' <str>http://localhost:%s/solr/admin/cores?wt=json&amp;action=RELOAD&amp;core=collection1</str>' % reader_port)
-                 
-            if not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
-                run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
-            
-            solrconfig = open('solr/collection1/conf/solrconfig.xml.orig', 'r').read()
-            
-            solrconfig = solrconfig.replace('</updateHandler>',
-                              """
-                              <!-- automatically generated by montysolr-update.py -->
-                              
-                              <listener event="postCommit" 
-                                  class="solr.RunExecutableListener">
-                                  <str name="exe">curl</str>
-                                  <str name="dir">.</str>
-                                  <bool name="wait">false</bool>
-                                  <arr name="args"> %s </arr>
-                                </listener>
-                              </updateHandler>
-                              """ % ' '.join(list_of_nodes))
-            
-            with open('solr/collection1/conf/solrconfig.xml.new', 'w') as fi_solrconfig:
-                fi_solrconfig.write(solrconfig)
-            with open('solr/collection1/conf/solrconfig.xml', 'w') as fi_solrconfig:
-                fi_solrconfig.write(solrconfig)
-
-        fo = open('automatic-run.sh', 'w')
-        fo.write(start)
-        fo.close()
-        
-        run_cmd(['chmod', 'u+x', 'automatic-run.sh'])
-        run_cmd(['bash', '-e', './automatic-run.sh', '&'])
-        
-        kwargs = dict(max_wait=options.timeout)
-        if options.check_diagnostics:
-            kwargs['tmpl'] ='http://localhost:%s/solr/montysolr_diagnostics'
-        if not check_instance_health(port, **kwargs):
-            run_cmd(['kill', '-9', str(get_pid('montysolr.pid'))])
-            time.sleep(3)
-            failed += 1
-            save_into_file('FAILED.counter', failed)
-            error("Instance is not in a healthy state %s" % instance_dir)
-            return False
-        
-        if os.path.exists('FAILED.counter'):
-            run_cmd(['rm', 'FAILED.counter'])
-        
-        return True
 
 def save_into_file(path, value):
     assert isinstance(value, int)
@@ -934,6 +676,19 @@ def req(url, **kwargs):
     conn.close()
     return rsp
 
+def get_pid(pidpath):
+    if os.path.exists(pidpath):
+        with open(pidpath, 'r') as pidfile:
+            r_pid = pidfile.read().strip()
+        try:
+            return int(r_pid)
+        except ValueError:
+            return -1
+    return -1
+
+
+def remove_lock(pidpath):
+    os.remove(pidpath)
             
 def check_pid_is_running(pid):
     if os.path.exists('/proc/%s' % pid):
@@ -1229,19 +984,287 @@ exit 0
     run_cmd(['bash', '-e', './install_invenio.sh'])
 
 
-def get_pid(pidpath):
-    if os.path.exists(pidpath):
-        with open(pidpath, 'r') as pidfile:
-            r_pid = pidfile.read().strip()
-        try:
-            return int(r_pid)
-        except ValueError:
-            return -1
-    return -1
+def setup_build_properties():
+    lines = []
+    with open('build.properties.default', 'r') as infile:
+        for line in infile:
+            line = line.strip()
+            if len(line) > 0 and line[0] != '#':
+                parts = line.split('=', 1)
+                if parts[0] == 'python':
+                    lines.append('python=%s' % os.path.realpath(os.path.join(INSTDIR, "perpetuum", "python/bin/python")))
+                elif parts[0] == 'jcc':
+                    lines.append('jcc=%s' % {5:'-m jcc',6:'-m jcc.__main__',7:'-m jcc'}[sys.version_info[1]])
+                elif parts[0] == 'ant':
+                    lines.append('ant=%s' % 'ant')
+                else:
+                    lines.append(line)
+    fo = open('build.properties', 'w')
+    fo.write("\n".join(lines))
+    fo.close()
+    
+    
+    
+        
+
+def upgrade_montysolr(curr_tag, git_tag):
+    
+    
+    with changed_dir('montysolr'):
+        
+        with open('build-montysolr.sh', 'w') as build_script:
+            build_script.write("""#!/bin/bash -e
+
+export JAVA_HOME=%(java_home)s
+export ANT_HOME=%(ant_home)s
+
+source ../python/bin/activate
 
 
-def remove_lock(pidpath):
-    os.remove(pidpath)
+case "$1" in
+"nuke")
+    ant clean
+    ant get-solr build-all
+    ant test-python
+    ;;
+"minor" | "3")
+    ant get-solr build-all
+    ant test-python
+    ;;
+esac
+
+ant build-contrib
+ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s
+ant -file contrib/examples/build.xml run-configured -Dename=%(example)s -Dtarget=generate-run.sh -Dprofile=silent.profile
+
+deactivate
+        """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
+        )
+    
+        run_cmd(['chmod', 'u+x', 'build-montysolr.sh'])
+    
+        if os.path.exists('RELEASE'):
+            run_cmd(['rm', 'RELEASE'], strict=False)
+        
+        # get the target tag
+        run_cmd(['git', 'checkout', '-f', '-b', git_tag.ref], strict=False)
+        setup_build_properties()
+        
+        # nuke everything, start from scratch
+        if curr_tag.solr_ver != git_tag.solr_ver or curr_tag.major != git_tag.major:
+            #run_cmd(['ant', 'clean'])
+            #run_cmd(['ant', 'get-solr', 'build-solr'])
+            # maybe i could make this to work, right now: upgrades must be  invoked after source was called
+            #run_cmd(['bash', '-c', 'source %s/python/bin/activate; ant get-solr build-solr; deactivate' % os.path.realpath('..')])
+            #run_cmd(['ant', 'build-all'])
+            run_cmd(['./build-montysolr.sh', 'nuke'])
+        elif curr_tag.minor != git_tag.minor:
+            #run_cmd(['ant', 'get-solr', 'build-solr'])
+            #run_cmd(['ant', 'build-all'])
+            run_cmd(['./build-montysolr.sh', 'minor'])
+        else:
+            run_cmd(['./build-montysolr.sh'])
+            
+        # always re-compile, this is not too expensive
+        #run_cmd(['ant', 'build-contrib'])
+        
+        # assemble the deployment target
+        #run_cmd(['ant', '-file', 'contrib/examples/build.xml', 'clean', 'build-one', '-Dename=%s' % INSTNAME])
+        #run_cmd(['ant', '-file', 'contrib/examples/build.xml', 'run-configured', '-Dename=%s' % INSTNAME,
+        #                '-Dtarget=generate-run.sh', '-Dprofile=silent.profile'])
+            
+        # update the RELEASE file
+        with open('RELEASE', 'w') as release:
+            release.write(str(git_tag))
+        
+            
+
+def build_example(git_tag):
+    
+    with changed_dir('montysolr'):
+        with open('build-example.sh', 'w') as build_script:
+            build_script.write("""#!/bin/bash -e
+
+example=${1:%(example)s}
+profile_names=${2:silent}
+export JAVA_HOME=%(java_home)s
+export ANT_HOME=%(ant_home)s
+
+source ../python/bin/activate
+
+ant -file contrib/examples/build.xml clean build-one -Dename=$example
+
+# generate run.sh for every profile 
+for profile_name in $profile_names
+do
+  ant -file contrib/examples/build.xml run-configured -Dename=$example -Dtarget=generate-run.sh -Dprofile=${profile_name}.profile
+  mv build/contrib/examples/${example}/run.sh build/contrib/examples/${example}/${profile_name}.run.sh
+done
+
+deactivate
+        """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
+        )
+        
+        run_cmd(['chmod', 'u+x', './build-example.sh'])
+        profiles = map(lambda x: x.replace('.profile',''), filter(lambda x: '.profile' in x, os.listdir('build/contrib/examples/%s' % INSTNAME)))
+        
+        run_cmd(['./build-example.sh', INSTNAME, '"%s"' % " ".join(profiles)])
+        
+        with open('build/contrib/examples/%s/RELEASE' % INSTNAME, 'w') as release:
+                release.write(str(git_tag))
+            
+                 
+def stop_live_instance(instance_dir, max_wait=30):
+    with changed_dir(instance_dir):
+        pid = get_pid('montysolr.pid')
+        if check_pid_is_running(pid) == False:
+            print('Warning: wanted to stop live instance which is not running: %s' % instance_dir)
+            return True
+        
+        port = None
+        if os.path.exists('port'):
+            fo = open('port', 'r')
+            port = fo.read().strip()
+            fo.close()
+        
+        wait_no_more = time.time() + max_wait/2
+        
+        while time.time() < wait_no_more:
+            if check_pid_is_running(pid):
+                run_cmd(['kill', pid])
+                time.sleep(1)
+            else:
+                continue
+        
+        if check_pid_is_running(pid):
+            wait_no_more = time.time() + max_wait/2
+            while time.time() < wait_no_more:
+                if check_pid_is_running(pid):
+                    run_cmd(['kill', '-9', pid])
+                    time.sleep(1)
+                else:
+                    continue
+        
+        if check_pid_is_running(pid):
+            error("We cannot stop %s pid=%s" % (instance_dir, pid))
+        
+        return True    
+        
+        
+
+def start_live_instance(options, instance_dir, port, 
+                        max_attempts = 3, 
+                        max_wait=30,
+                        instance_mode='',
+                        list_of_readers=[]):
+    with changed_dir(instance_dir):
+        pid = get_pid('montysolr.pid')
+        if pid != -1 and check_pid_is_running(pid):
+            error("The live instance at %s is still running" % instance_dir)
+            
+        fo = open('port', 'w')
+        fo.write(str(port))
+        fo.close()
+        
+        #i am seeing the socket is not closed on time
+        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #try:
+        #    s.bind(('', port)) # will fail if the socket is already used
+        #finally:
+        #    s.close()
+        
+        failed = get_pid('FAILED.counter')
+        if failed > max_attempts:
+            error("The live instance is a zombie (probably compilation failed), call a doctor!")
+        
+        profile_name = 'normal'
+        if instance_mode == 'w':
+            profile_name = 'writer'
+        elif instance_mode == 'r':
+            profile_name = 'reader'
+        else:
+            profile_name = 'normal'
+        
+        if not os.path.exists('%s.run.sh' % profile_name):
+            error("Missing %s.run.sh - (you must have a %s.profile to generate this file)" % 
+                  (profile_name, profile_name))
+        
+        fi = open('%s.run.sh' % profile_name, 'r')
+        start = fi.read()
+        fi.close()
+        
+        lines = start.split("\n")
+        lines.insert(1, """
+        
+        # File modified by: montysolrupdate.py
+        
+        source ../python/bin/activate
+        export PYTHONPATH=`python -c "import sys;print ':'.join(sys.path)"`:$PYTHONPATH
+        """
+        )
+        start = '\n'.join(lines)
+        
+        start = re.sub(r'HOMEDIR=.*\n', 'HOMEDIR=%s\n' % os.path.realpath('.'), start)
+        start = re.sub(r'--port\s+\d+', '--port %s' % port, start)
+        start = re.sub('\n([\t\s]+)(java -cp )', '\\1export PATH=%s/bin:$PATH\n\\1\\2' % os.environ['JAVA_HOME'], start)
+
+        if instance_mode =='w': # for master-writers
+            # we must change also the solrconfig
+            if len(list_of_readers) <= 0:
+                error("When you use write-master, you must also specify a reader node")
+                 
+            list_of_nodes = []
+            for n in list_of_readers:
+                reader_port = extract_port(n.split('#')[0])
+                list_of_nodes.append(' <str>http://localhost:%s/solr/admin/cores?wt=json&amp;action=RELOAD&amp;core=collection1</str>' % reader_port)
+                 
+            if not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
+                run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
+            
+            solrconfig = open('solr/collection1/conf/solrconfig.xml.orig', 'r').read()
+            
+            solrconfig = solrconfig.replace('</updateHandler>',
+                              """
+                              <!-- automatically generated by montysolr-update.py -->
+                              
+                              <listener event="postCommit" 
+                                  class="solr.RunExecutableListener">
+                                  <str name="exe">curl</str>
+                                  <str name="dir">.</str>
+                                  <bool name="wait">false</bool>
+                                  <arr name="args"> %s </arr>
+                                </listener>
+                              </updateHandler>
+                              """ % ' '.join(list_of_nodes))
+            
+            with open('solr/collection1/conf/solrconfig.xml.new', 'w') as fi_solrconfig:
+                fi_solrconfig.write(solrconfig)
+            with open('solr/collection1/conf/solrconfig.xml', 'w') as fi_solrconfig:
+                fi_solrconfig.write(solrconfig)
+
+        fo = open('automatic-run.sh', 'w')
+        fo.write(start)
+        fo.close()
+        
+        run_cmd(['chmod', 'u+x', 'automatic-run.sh'])
+        run_cmd(['bash', '-e', './automatic-run.sh', '&'])
+        
+        kwargs = dict(max_wait=options.timeout)
+        if options.check_diagnostics:
+            kwargs['tmpl'] ='http://localhost:%s/solr/montysolr_diagnostics'
+        if not check_instance_health(port, **kwargs):
+            run_cmd(['kill', '-9', str(get_pid('montysolr.pid'))])
+            time.sleep(3)
+            failed += 1
+            save_into_file('FAILED.counter', failed)
+            error("Instance is not in a healthy state %s" % instance_dir)
+            return False
+        
+        if os.path.exists('FAILED.counter'):
+            run_cmd(['rm', 'FAILED.counter'])
+        
+        return True
+
               
 
 def main(argv):
@@ -1289,12 +1312,16 @@ def main(argv):
             git_tag = get_latest_git_release_tag('montysolr')
             curr_tag = get_release_tag('montysolr/RELEASE')
             
+            # for testing, we may want to use the latest code
+            if options.test_branch:
+                git_tag.ref = options.test_branch
+            
             if curr_tag > git_tag:
                 error("whaaat!?! The current release has higher tag than git!? %s > %s" % (curr_tag, git_tag))
-            if curr_tag == git_tag:
+            if curr_tag == git_tag and not options.test_branch:
                 if len(instance_names) > 0:
                     print("Compiled version is the latest, we'll just check the live instance(s)")
-            elif curr_tag != git_tag:
+            elif curr_tag != git_tag or options.test_branch:
                 upgrade_montysolr(curr_tag, git_tag)
         
         if len(instance_names) > 0:
@@ -1302,7 +1329,8 @@ def main(argv):
                 check_live_instance(options, instance_names)
             elif options.stop:
                 for iname in instance_names:
-                    stop_live_instance(instance_dir=iname, max_wait=60) # when killing, we can be nasty
+                    parts = iname.split('#')
+                    stop_live_instance(instance_dir=parts[0], max_wait=60) # when killing, we can be nasty
             
             
         remove_lock('update.pid')    

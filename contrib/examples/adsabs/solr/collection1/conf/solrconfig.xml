@@ -482,7 +482,7 @@
     <!--ADSLABS:06/2012 -->
     <filterCache class="solr.FastLRUCache"
                  size="${solr.cache.size:512}"
-                 initialSize="${solr.cache.size:512}"
+                 initialSize="${solr.cache.initial:512}"
                  autowarmCount="0"/>
 
     <!-- Query Result Cache
@@ -493,7 +493,7 @@
     <!--ADSLABS:06/2012 -->
     <queryResultCache class="solr.LRUCache"
                      size="${solr.cache.size:512}"
-                     initialSize="${solr.cache.size:512}"
+                     initialSize="${solr.cache.initial:512}"
                      autowarmCount="0"/>
    
     <!-- Document Cache
@@ -505,7 +505,7 @@
     <!--ADSLABS:06/2012 -->  
     <documentCache class="solr.LRUCache"
                    size="${solr.cache.size:512}"
-                   initialSize="${solr.cache.size:512}"
+                   initialSize="${solr.cache.initial:512}"
                    autowarmCount="0"/>
     
     <!-- Field Value Cache
