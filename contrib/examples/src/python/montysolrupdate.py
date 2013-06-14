@@ -385,13 +385,11 @@ source ../python/bin/activate
 case "$1" in
 "nuke")
     ant clean
-    ant get-solr build-solr
-    ant build-all
+    ant get-solr build-all
     ant test-python
     ;;
 "minor" | "3")
-    ant get-solr build-solr
-    ant build-all
+    ant get-solr build-all
     ant test-python
     ;;
 esac
@@ -921,7 +919,7 @@ def reload_core(port):
     url = 'http://localhost:%s/solr/admin/cores?action=RELOAD&core=collection1' % port
     
     rsp = req(url, command='status')
-    if rsp['status'] == '0':
+    if 'status' in rsp and rsp['status'] == '0':
         return True
     else:
         error('something is wrong, unxpected reply: %s' % rsp)
@@ -1304,7 +1302,7 @@ def main(argv):
                 check_live_instance(options, instance_names)
             elif options.stop:
                 for iname in instance_names:
-                    stop_live_instance(instance_dir=iname, max_wait=options.timeout)
+                    stop_live_instance(instance_dir=iname, max_wait=60) # when killing, we can be nasty
             
             
         remove_lock('update.pid')    
