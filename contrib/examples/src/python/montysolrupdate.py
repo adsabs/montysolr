@@ -1123,11 +1123,6 @@ echo "0" > RELEASE
 if [ ! -f Makefile.copy ]; then
     cp Makefile Makefile.copy
     
-    # on stupid old centos, icupkg is outdated and since it took 2 hours of my life
-    # i deactivate it from the build (we don't use it anyways....)
-    
-    sed 's/shell which icupkg/shell which icupkgooooo/' Makefile > Makefile
-
     echo "VERSION=4.0-0
 LUCENE_SVN_VER=HEAD
 LUCENE_VER=4.0
@@ -1143,6 +1138,12 @@ NUM_FILES=3
 " > Makefile
     
     tail -n +25 Makefile.copy >> Makefile
+    
+    # on stupid old centos, icupkg is outdated and since it took 2 hours of my life
+    # i deactivate it from the build (we don't use it anyways....)
+    
+    sed 's/shell which icupkg/shell which icupkgooooo/' Makefile > Makefile
+
 fi
 
 
