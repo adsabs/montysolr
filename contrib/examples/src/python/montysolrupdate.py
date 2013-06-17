@@ -1197,10 +1197,11 @@ def start_live_instance(options, instance_dir, port,
         lines.insert(1, """
         
         # File modified by: montysolrupdate.py
+        # Base profile: %(profile)s.run.sh
         
         source ../python/bin/activate
         export PYTHONPATH=`python -c "import sys;print ':'.join(sys.path)"`:$PYTHONPATH
-        """
+        """ % {'profile': profile_name}
         )
         start = '\n'.join(lines)
         

@@ -821,6 +821,7 @@ class test_06_no_changes(NormalTest):
         start = time.time()
         montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000'])
         self.assertTrue(time.time() - start < 3, "Invocation took too long")
+        
 
 
 class test_07_checkout_branch(NormalTest):
@@ -846,7 +847,55 @@ class test_07_checkout_branch(NormalTest):
         with montysolrupdate.changed_dir('montysolr'):
             '* refs/tags/v40.1.0.5' in montysolrupdate.get_output(['git', 'branch'])
             
+        
+            
 
+class test_08_different_startups(NormalTest):
+    """
+    This test assumes montysolr is already built locally and we can simply
+    copy files around (without rebuilding them)
+    """
+        
+    
+    def test_written_profiles(self):
+        
+        self.registerTestInstance('test-7000')
+        self.registerTestInstance('test-7001')
+        self.registerTestInstance('test-7002')
+        
+        # first invocation should take time
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000'])
+        
+        
+        # check the built demo contains proper startup files
+        
+        self.assertTrue(os.path.exists('test-7000/reader.run.sh'), "Missing startup")
+        self.assertTrue(os.path.exists('test-7000/writer.run.sh'), "Missing startup")
+        self.assertTrue(os.path.exists('test-7000/normal.run.sh'), "Missing startup")
+        self.assertTrue(os.path.exists('test-7000/silent.run.sh'), "Missing startup")
+        
+        
+        # you should not be doing this normally - to invoke a build of a new instance
+        # with changed parameters, because t7000 is already running, the script will
+        # just check it is healthy (it won't change its config)
+        
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
+        
+        t7000 = open('test-7000/automatic-run.sh', 'r').read()
+        t7001 = open('test-7001/automatic-run.sh', 'r').read()
+        t7002 = open('test-7002/automatic-run.sh', 'r').read()
+         
+        self.assertTrue('Base profile: normal.run.sh' in t7000, "The instance was not based on correct profile")
+        self.assertTrue('Base profile: reader.run.sh' in t7001, "The instance was not based on correct profile")
+        self.assertTrue('Base profile: reader.run.sh' in t7002, "The instance was not based on correct profile")
+        
+        # now it should have a correct profile applied
+        montysolrupdate.stop_live_instance('test-7000', max_wait=10)
+            
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
+        t7000 = open('test-7000/automatic-run.sh', 'r').read()
+        self.assertTrue('Base profile: writer.run.sh' in t7000, "The instance was not based on correct profile")
+        
 
 def cleanup(path):
     for p in glob.glob(TESTDIR + "/" + path):
@@ -890,9 +939,15 @@ def run_tests(options, tests=[]):
             tests = filter(lambda x: 'nuke_' not in x, tests)
     
     this_module = sys.modules['__main__']
+    test_suite = None 
     for test in tests:
         test_object = getattr(this_module, test) #XXX: i do not checking
-        test_suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_object)
+        if test_suite is None:
+            test_suite = unittest.defaultTestLoader.loadTestsFromTestCase(test_object)
+        else:
+            test_suite.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(test_object))
+    
+    if test_suite is not None:
         runner = unittest.TextTestRunner(verbosity=options.verbosity)
         runner.run(test_suite)
 
