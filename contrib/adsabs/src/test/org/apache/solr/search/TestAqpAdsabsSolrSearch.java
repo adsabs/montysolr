@@ -254,6 +254,18 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         SpanNearQuery.class);
 	  
 	  
+	  assertQueryEquals(req("qt", "aqp", "q", "\"NASA grant\"~3 NEAR N*"), 
+        "spanNear([spanNear([all:acr::nasa, all:grant], 3, true), SpanMultiTermQueryWrapper(all:n*)], 5, true)",
+        SpanNearQuery.class);
+	  assertQueryEquals(req("qt", "aqp", "q", "\"NASA grant\"^0.9 NEAR N*"), 
+        "spanNear([spanNear([all:acr::nasa, all:grant], 1, true)^0.9, SpanMultiTermQueryWrapper(all:n*)], 5, true)",
+        SpanNearQuery.class);
+	  assertQueryEquals(req("qt", "aqp", "q", "\"NASA grant\"~3^0.9 NEAR N*"), 
+        "spanNear([spanNear([all:acr::nasa, all:grant], 3, true)^0.9, SpanMultiTermQueryWrapper(all:n*)], 5, true)",
+        SpanNearQuery.class);
+	  
+	  
+	  
 	  // temporary workaround for 'first author' search
 	  assertQueryEquals(req("qt", "aqp", "q", "^Kurtz, M."), 
 	      "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",

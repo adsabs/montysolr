@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
@@ -14,6 +15,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -89,7 +91,9 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
       for (QueryNode child : children) {
         Object obj = child.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
         if (obj != null) {
-          clauses[i++] = getSpanQuery(obj, nearNode);
+        	SpanQuery result = getSpanQuery(obj, nearNode);
+        	result.setBoost(((Query) obj).getBoost());
+          clauses[i++] = result;
         } else {
           throw new QueryNodeException(new MessageImpl(
               QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
@@ -117,6 +121,8 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
       return new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q);
     } else if (q instanceof PrefixQuery) {
       return new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q);
+    } else if (q instanceof PhraseQuery) {
+    	return convertPhraseToSpan((PhraseQuery) q, nearNode);
     } else if (q instanceof BooleanQuery) {
       return convertBooleanToSpan((BooleanQuery) q, nearNode);
     } else {
@@ -127,7 +133,16 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
     }
   }
 
-  /*
+  private SpanQuery convertPhraseToSpan(PhraseQuery q, AqpNearQueryNode nearNode) {
+  	SpanQuery clauses[] = new SpanQuery[q.getTerms().length];
+  	int i = 0;
+	  for (Term term: q.getTerms()) {
+	  	clauses[i++] = new SpanTermQuery(term); 
+	  }
+	  return new SpanNearQuery(clauses, q.getSlop() > 0 ? q.getSlop() : 1, true);
+  }
+
+	/*
    * Silly convertor for now it can handle only boolean queries of the same type
    * (ie not mixed cases). To do that, I have to build a graph (tree) and maybe
    * of only pairs (?)
@@ -146,7 +161,11 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
                 + q.getClass().getName()));
       }
       o = c.getOccur();
-      spanClauses[i] = getSpanQuery(c.getQuery(), nearNode);
+      
+      Query sq = c.getQuery();
+      SpanQuery result = getSpanQuery(sq, nearNode);
+      result.setBoost(sq.getBoost());
+      spanClauses[i] = result;
       i++;
     }
 

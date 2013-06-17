@@ -114,7 +114,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "ADAMŠuk, m;ADAMGuk, m;ADAMČuk, m",  // hand-made additions
           "MÜLLER, A WILLIAM;MÜLLER, A BILL",
           "MÜLLER, WILLIAM;MÜLLER, BILL",
-          "JONES, CHRISTINE;FORMAN, CHRISTINE" // the famous post-synonym expansion
+          "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
+          "DE ZEEUW, TIM=>DE ZEEUW, P TIM;DE ZEEUW, P\\w* TIM\\b.*;DE ZEEUW,;DE ZEEUW, P\\w*",
+          "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,;DE ZEEUW, TIM\\b.*;DE ZEEUW, T"
       }));
 
       // automatically harvested variations of author names (collected during indexing)
@@ -2113,6 +2115,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     */
     
+    
+    /*
+     * Test we are not mixing/concatenating fields - Ticket #346 
+     */
+    testAuthorQuery(
+        "\"obama,\" boo", "+(author:obama, author:obama,*) +all:boo", 
+        "//*[@numFound='0']"
+        );
 
   }
 

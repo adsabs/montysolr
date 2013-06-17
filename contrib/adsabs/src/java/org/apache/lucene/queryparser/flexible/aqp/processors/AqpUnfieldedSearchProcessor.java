@@ -15,12 +15,14 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.PathQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
@@ -75,6 +77,15 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	      
 	      if (node instanceof QuotedFieldQueryNode) {
 	      	subQuery = "\"" + subQuery + "\"";
+	      }
+	      if (node.getParent() instanceof SlopQueryNode) {
+	      	subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
+	      	if (node.getParent().getParent() instanceof BoostQueryNode) {
+		      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent().getParent()).getValue();
+		      }
+	      }
+	      else if (node.getParent() instanceof BoostQueryNode) {
+	      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent()).getValue();
 	      }
   	    //if (subQuery.contains(" ")) {
   	    //  subQuery = "\"" + subQuery + "\"";
