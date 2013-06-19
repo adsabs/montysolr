@@ -1023,11 +1023,17 @@ source ../python/bin/activate
 
 case "$1" in
 "nuke")
+    if [ -f RELEASE ]; then
+       rm RELEASE
+    fi
     ant clean
     ant get-solr build-all
     ant test-python
     ;;
 "minor" | "3")
+    if [ -f RELEASE ]; then
+       rm RELEASE
+    fi
     ant get-solr build-all
     ant test-python
     ;;
@@ -1035,7 +1041,6 @@ esac
 
 ant build-contrib
 ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s
-ant -file contrib/examples/build.xml run-configured -Dename=%(example)s -Dtarget=generate-run.sh -Dprofile=silent.profile
 
 deactivate
         """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
@@ -1043,8 +1048,8 @@ deactivate
     
         run_cmd(['chmod', 'u+x', 'build-montysolr.sh'])
     
-        if os.path.exists('RELEASE'):
-            run_cmd(['rm', 'RELEASE'], strict=False)
+        #if os.path.exists('RELEASE'):
+        #    run_cmd(['rm', 'RELEASE'], strict=False)
         
         # get the target tag
         run_cmd(['git', 'checkout', '-f', '-b', git_tag.ref], strict=False)
@@ -1063,7 +1068,7 @@ deactivate
             #run_cmd(['ant', 'build-all'])
             run_cmd(['./build-montysolr.sh', 'minor'])
         else:
-            run_cmd(['./build-montysolr.sh'])
+            run_cmd(['./build-montysolr.sh', 'patch'])
             
         # always re-compile, this is not too expensive
         #run_cmd(['ant', 'build-contrib'])
@@ -1111,7 +1116,7 @@ deactivate
         run_cmd(['./build-example.sh', INSTNAME, '"%s"' % " ".join(profiles)])
         
         with open('build/contrib/examples/%s/RELEASE' % INSTNAME, 'w') as release:
-                release.write(str(git_tag))
+            release.write(str(git_tag))
             
                  
 def stop_live_instance(instance_dir, max_wait=30):

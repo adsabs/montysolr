@@ -265,7 +265,6 @@ class test_01_major_upgrade(NormalTest):
                   'git reset --hard origin/master', 
                   'git checkout master', 
                   'chmod u+x build-montysolr.sh', 
-                  'rm RELEASE', 
                   'git checkout -f -b refs/tags/*', 
                   './build-montysolr.sh nuke',   # <-- build everything from scratch
                   'chmod u+x ./build-example.sh', 
@@ -395,7 +394,6 @@ class test_02_minor_upgrade(NormalTest):
                   'git reset --hard origin/master', 
                   'git checkout master', 
                   'chmod u+x build-montysolr.sh', 
-                  'rm RELEASE', 
                   'git checkout -f -b refs/tags/*', 
                   './build-montysolr.sh minor', # <- recompilation 
                   'chmod u+x ./build-example.sh', 
@@ -449,7 +447,6 @@ class test_03_patch_level_upgrade(NormalTest):
         self.isRunning(7000)
         open("test-7000_data/foo", 'w').write('index')
         
-        
         self.checkCommandSequence( 
                           'git fetch', 
                           'git reset --hard origin/master', 
@@ -471,7 +468,7 @@ class test_03_patch_level_upgrade(NormalTest):
         
         # but do not bother to re-compile
         self.intercept('./build-example.sh .*', lambda x,y,z: True)
-        self.intercept('./build-montysolr.sh', lambda x,y,z: True)
+        self.intercept('./build-montysolr.sh patch', lambda x,y,z: True)
         
         
         self.cmd_collector = []
@@ -500,9 +497,8 @@ class test_03_patch_level_upgrade(NormalTest):
                   'git reset --hard origin/master', 
                   'git checkout master', 
                   'chmod u+x build-montysolr.sh', 
-                  'rm RELEASE', 
                   'git checkout -f -b refs/tags/*', 
-                  './build-montysolr.sh', # <- recompilation 
+                  './build-montysolr.sh patch', # <- recompilation 
                   'chmod u+x ./build-example.sh', 
                   './build-example.sh *',  # <- assemble example
                   'kill *',
@@ -547,9 +543,8 @@ class test_03_patch_level_upgrade(NormalTest):
                   'git reset --hard origin/master', 
                   'git checkout master', 
                   'chmod u+x build-montysolr.sh', 
-                  'rm RELEASE', 
                   'git checkout -f -b refs/tags/*', 
-                  './build-montysolr.sh', # <- recompilation 
+                  './build-montysolr.sh patch', # <- recompilation 
                   'chmod u+x ./build-example.sh', 
                   './build-example.sh *',  # <- assemble example
                   'kill *',
@@ -561,6 +556,18 @@ class test_03_patch_level_upgrade(NormalTest):
                   'chmod u+x automatic-run.sh', 
                   'bash -e ./automatic-run.sh &'
                  )
+        
+        # and now check that no-change does not trigger recompilation
+        self.cmd_collector = []
+        self.interceptTag('perpetuum/montysolr', lambda t: t)
+        self.intercept('./build-example.sh .*', lambda x,y,z: 1/0)
+        self.intercept('./build-montysolr.sh patch', lambda x,y,z: 1/0)
+        montysolrupdate.main(['foo', '-c', '-u', '-t', '10', 'test-7000'])
+        self.checkCommandSequence( 
+                  'git fetch', 
+                  'git reset --hard origin/master', 
+                  'git checkout master', 
+                  )
         
 
 class test_04_dual_mode_upgrade(NormalTest):
@@ -630,7 +637,7 @@ class test_04_dual_mode_upgrade(NormalTest):
         
         # but do not bother to re-compile
         self.intercept('./build-example.sh', lambda x,y,z: True)
-        self.intercept('./build-montysolr.sh', lambda x,y,z: True)
+        self.intercept('./build-montysolr.sh patch', lambda x,y,z: True)
         self.intercept('./build-montysolr.sh minor', lambda x,y,z: True)
         self.intercept('./build-montysolr.sh nuke', lambda x,y,z: True)
         
