@@ -63,7 +63,8 @@ def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'
                 # let's make sure we have a valid recid (or get the close valid one) BUT this could mean we get the wrong
                 # modification date! (and could result in non-ending loop!)
                 l = list(dbquery.run_sql("SELECT id, modification_date FROM `" + table + "` WHERE id >= %s LIMIT 1", (last_recid,)))
-                sys.stderr.write("Warning, the last_recid %s does not exist, we have found the closest higher id %s with mod_date: %s\n" %
+                if len(l):
+                    sys.stderr.write("Warning, the last_recid %s does not exist, we have found the closest higher id %s with mod_date: %s\n" %
                            (l[0][0], l[0][1].strftime(format="%Y-%m-%d %H:%M:%S")))
             if not len(l):
                 return

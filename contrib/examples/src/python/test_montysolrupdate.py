@@ -142,8 +142,8 @@ class NormalTest(TestCase):
 class TotalNukeDuke(NormalTest):
     def setUp(self):
         NormalTest.setUp(self)
-        if os.path.exists('perpetuum'):
-            subprocess.call('rm -fR %s/perpetuum' % TESTDIR, shell=True, stdout=subprocess.PIPE)
+        if os.path.exists('%s/perpetuum' % TESTDIR):
+            subprocess.call('rm -fR %s/perpetuum/*' % TESTDIR, shell=True, stdout=subprocess.PIPE)
         
     def tearDown(self):
         #subprocess.call('rm -fR %s/perpetuum' % TESTDIR, shell=True, stdout=subprocess.PIPE)
