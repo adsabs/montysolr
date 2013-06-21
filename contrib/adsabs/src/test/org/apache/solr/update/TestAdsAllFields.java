@@ -42,19 +42,16 @@ import java.util.Properties;
 
 /**
  * This test verifies all indexes are in place and the search against
- * them works. This is the main black-box for the whole ADS search.
+ * them works. This is the main test for the whole ADS search.
  * 
  * The test is using demo-records from contrib/adsabs/src/test-files/ads-demo-records.xml
  * 
- * And also MongoDB (test instance) with demorecords loaded. We do not use
- * Invenio (Python/MySQL) though it must be present in the environment
- * for the test to work.
- * 
+ * We mock MongoDB data and we do NOT use Invenio
  * 
  */
 
 //@SuppressCodecs({"Lucene3x"})
-public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
+public class TestAdsAllFields extends MontySolrQueryTestCase {
   
   @BeforeClass
   public static void beforeTestAdsDataImport() throws Exception {
@@ -88,22 +85,19 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
 
     File newConfig = new File(configFile);
 
-    //System.err.println(System.getProperties());
-    System.err.println("tests.mongodb.host=" + System.getProperty("tests.mongodb.host", "<null>"));
     
-    //if (System.getProperty("tests.mongodb.host", null) != null) {
-      File newDataConfig;
-      try {
-        newConfig = duplicateFile(new File(configFile));
-        newDataConfig = duplicateModify(new File(dataConfig), 
-        		"mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("tests.mongodb.host")),
-        		"AdsDataSource", this.getClass().getCanonicalName() + "\\$MongoMockDataSource");
-        replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
-      } catch (IOException e) {
-        e.printStackTrace();
-        throw new IllegalStateException(e.getMessage());
-      }
-    //}
+    //Mock the MongoDB data
+    File newDataConfig;
+    try {
+      newConfig = duplicateFile(new File(configFile));
+      newDataConfig = duplicateModify(new File(dataConfig), 
+      		"mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("tests.mongodb.host")),
+      		"AdsDataSource", this.getClass().getCanonicalName() + "\\$MongoMockDataSource");
+      replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalStateException(e.getMessage());
+    }
 
     return newConfig.getAbsolutePath();
   }
@@ -156,6 +150,8 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
     );
 
 
+
+    
 
     /*
      * id - str type, the unique id key, we do no processing
@@ -899,12 +895,37 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
     /*
      * 2nd order queries
      */
-    //TO finish when i get the new mongodb dump (mine is missing cite_read_boost)
-    /*
-    assertQ(req("q", "useful(*:*)"), "//*[@numFound='0']");
-    assertQ(req("q", "reviews(*:*)"), "//*[@numFound='0']");
-    assertQ(req("q", "reviews(*:*)"), "//*[@numFound='0']");
-    */
+    
+     // what other papers we cite
+    assertQ(req("q", "references(*:*)"), 
+    		"//*[@numFound='5']");
+    assertQ(req("q", "references(id:10)"), 
+				"//*[@numFound='2']",
+				"//doc/int[@name='recid'][.='11']",
+				"//doc/int[@name='recid'][.='12']");
+    
+    // who cites us
+    assertQ(req("q", "citations(*:*)"), 
+    		"//*[@numFound='4']");
+    assertQ(req("q", "citations(id:10)"), 
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='11']");
+    
+    // similar to references(X)
+    assertQ(req("q", "useful(*:*)"), 
+    		"//*[@numFound='5']");
+    assertQ(req("q", "useful(id:10)"), 
+				"//*[@numFound='2']",
+				"//doc/int[@name='recid'][.='11']",
+				"//doc/int[@name='recid'][.='12']");
+    
+    
+    // this is similar to citations(x)
+    assertQ(req("q", "reviews(*:*)"), 
+    		"//*[@numFound='4']");
+    assertQ(req("q", "reviews(id:10)"), 
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='11']");
 
   }
 
@@ -962,6 +983,6 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
   
   // Uniquely for Junit 3
   public static junit.framework.Test suite() {
-    return new junit.framework.JUnit4TestAdapter(BlackBoxAdsDataImport.class);
+    return new junit.framework.JUnit4TestAdapter(TestAdsAllFields.class);
   }
 }

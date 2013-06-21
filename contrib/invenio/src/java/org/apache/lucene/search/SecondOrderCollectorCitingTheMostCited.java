@@ -5,6 +5,14 @@ import java.util.ArrayList;
 
 import org.apache.lucene.index.AtomicReaderContext;
 
+/**
+ * Find the papers that are citing results of the search
+ * 
+ *   - find docs that are citing us 
+ *   - and set their score to the score of the paper they cite
+       later it will get turned into arithmetic mean 
+ *
+ */
 public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderCollector {
 
   

@@ -10,6 +10,11 @@ import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 
+/**
+ * Finds papers that are cited by our search. And then adjusts the score so that
+ * papers with most value from the cited_read_boost field are up 
+ *
+ */
 public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrderCollector {
 
   Set<String> fieldsToLoad;
