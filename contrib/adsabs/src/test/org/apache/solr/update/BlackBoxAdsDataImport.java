@@ -22,12 +22,23 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.dataimport.AdsDataSource;
+import org.apache.solr.handler.dataimport.Context;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
+
+import com.mongodb.MongoClient;
+
 import java.io.File;
 import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * This test verifies all indexes are in place and the search against
@@ -71,27 +82,28 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
   public String getSolrConfigFile() {
 
     String configFile = MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+    		+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
     String dataConfig = MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/data-config.xml";
+    		+ "/contrib/examples/adsabs/solr/collection1/conf/data-config.xml";
 
     File newConfig = new File(configFile);
 
     //System.err.println(System.getProperties());
     System.err.println("tests.mongodb.host=" + System.getProperty("tests.mongodb.host", "<null>"));
     
-    if (System.getProperty("tests.mongodb.host", null) != null) {
+    //if (System.getProperty("tests.mongodb.host", null) != null) {
       File newDataConfig;
       try {
         newConfig = duplicateFile(new File(configFile));
-        newDataConfig = duplicateFile(new File(dataConfig));
-        replaceInFile(newDataConfig, "mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("tests.mongodb.host")));
+        newDataConfig = duplicateModify(new File(dataConfig), 
+        		"mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("tests.mongodb.host")),
+        		"AdsDataSource", this.getClass().getCanonicalName() + "\\$MongoMockDataSource");
         replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
       } catch (IOException e) {
         e.printStackTrace();
         throw new IllegalStateException(e.getMessage());
       }
-    }
+    //}
 
     return newConfig.getAbsolutePath();
   }
@@ -578,11 +590,12 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
         "//*[@numFound='1']",
     "//doc/int[@name='recid'][.='3813361']");
 
+    
     /*
      * grants
      * 
      */
-    dumpDoc(null, "recid", "bibcode", "grant", "grant_ids", "grant_facet_hier", "reference");
+    //dumpDoc(null, "recid", "bibcode", "grant", "grant_ids", "grant_facet_hier", "reference");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
   		"//*[@numFound='1']",
   		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
@@ -615,6 +628,7 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
         "//*[@numFound='1']",
     "//doc/int[@name='recid'][.='4']");
 
+    
     /*
      * alternate_title
      */
@@ -894,7 +908,58 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
 
   }
 
-
+  
+  public static class MongoMockDataSource extends AdsDataSource {
+  	
+  	@Override
+    protected void initMongo(Context context, Properties initProps) {
+  		return;
+  	}
+  	
+  	
+  	@Override
+  	public void close() {
+  		return; // do nothing
+  	}
+  	
+  	@Override
+  	protected void populateMongoCache(List<String> bibcodes) {
+  		
+  		assert bibcodes.contains("1987PhRvD..36..277B");
+  		assert bibcodes.contains("1991ApJ...371..665R");
+  		assert bibcodes.contains("1976AJ.....81...67S");
+  		assert bibcodes.contains("2009arXiv0909.1287I");
+  		
+  		HashMap<String, Object> row = new HashMap<String, Object>();
+  		row.put("grant", Arrays.asList("NSF-AST 0618398"));
+  		row.put("grant_agencies", Arrays.asList("NSF-AST"));
+  		row.put("grant_ids", Arrays.asList("0618398"));
+  		row.put("read_count", Arrays.asList(0.0f));
+  		row.put("cite_read_boost", Arrays.asList(0.4104f));
+  		mongoCache.put("1987PhRvD..36..277B", row);
+  		
+  		row = new HashMap<String, Object>();
+  		row.put("full", Arrays.asList("Some fulltext Hashimoto"));
+  		row.put("read_count", Arrays.asList(19.0f));
+  		row.put("cite_read_boost", Arrays.asList(0.4649f));
+  		mongoCache.put("1991ApJ...371..665R", row);
+  		
+  		
+  		row = new HashMap<String, Object>();
+  		row.put("read_count", Arrays.asList(15.0f));
+  		row.put("cite_read_boost", Arrays.asList(0.373f));
+  		mongoCache.put("1976AJ.....81...67S", row);
+  		
+  		row = new HashMap<String, Object>();
+  		row.put("read_count", Arrays.asList(1.0f));
+  		row.put("cite_read_boost", Arrays.asList(0.2416f));
+  		mongoCache.put("2009arXiv0909.1287I", row);
+  		
+  		
+  		
+  	}
+  }
+  
   // Uniquely for Junit 3
   public static junit.framework.Test suite() {
     return new junit.framework.JUnit4TestAdapter(BlackBoxAdsDataImport.class);

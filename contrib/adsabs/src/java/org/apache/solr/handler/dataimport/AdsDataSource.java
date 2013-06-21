@@ -1,11 +1,7 @@
 package org.apache.solr.handler.dataimport;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,51 +38,30 @@ public class AdsDataSource extends InvenioDataSource {
 
 	Logger log = LoggerFactory.getLogger(AdsDataSource.class);
 
-	private final static String MONGO_DOC_ID = "mongoDocIdField";
-	private final static String MONGO_HOST = "mongoHost";
-	private final static String MONGO_PORT = "mongoPort";
-	private final static String MONGO_DB_NAME = "mongoDBName";
-	private final static String MONGO_COLLECTION_NAME = "mongoCollectionName";
-	private final static String MONGO_FIELD_NAME_ATTR = "mongoFieldName";
-	private final static String MONGO_FIELD_ATTR = "mongoField";
+	public final static String MONGO_DOC_ID = "mongoDocIdField";
+	public final static String MONGO_HOST = "mongoHost";
+	public final static String MONGO_PORT = "mongoPort";
+	public final static String MONGO_DB_NAME = "mongoDBName";
+	public final static String MONGO_COLLECTION_NAME = "mongoCollectionName";
+	public final static String MONGO_FIELD_NAME_ATTR = "mongoFieldName";
+	public final static String MONGO_FIELD_ATTR = "mongoField";
 	
+	protected String mongoDocIdField;
+	protected Map<String, Map<String, Object>> mongoCache = new HashMap<String, Map<String, Object>>();
+	protected BasicDBObject mongoFields;
+	protected Map<String,String> fieldColumnMap;
+	protected MongoClient mongo;
+	protected DBCollection docs;
 	
-	
-	private String mongoDBName;
-	private String mongoCollectionName;
-	private String mongoDocIdField;
-	private String mongoHost;
-	private int mongoPort;
-	
-	private Map<String, Map<String, Object>> mongoCache = new HashMap<String, Map<String, Object>>();
-	private BasicDBObject mongoFields;
-	private Map<String,String> fieldColumnMap;
-	private MongoClient mongo;
-	private DBCollection docs;
 	
 	@Override
 	public void init(Context context, Properties initProps) {
 		super.init(context, initProps);
 		initMongo(context, initProps);
-	}
-	
-	private void initMongo(Context context, Properties initProps) {
-		mongoDocIdField = initProps.getProperty(MONGO_DOC_ID);
-		mongoHost = initProps.getProperty(MONGO_HOST);
-		mongoPort = Integer.parseInt(initProps.getProperty(MONGO_PORT));
-		mongoDBName = initProps.getProperty(MONGO_DB_NAME);
-		mongoCollectionName = initProps.getProperty(MONGO_COLLECTION_NAME);
-		
-		try {
-			mongo = new MongoClient(new ServerAddress(mongoHost, mongoPort));
-			docs = mongo.getDB(mongoDBName).getCollection(mongoCollectionName);
-		} catch (UnknownHostException e) {
-			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, 
-			    e.toString());
-		}
 		
 		List<Map<String, String>> fields = context.getAllEntityFields();
 		
+		mongoDocIdField = initProps.getProperty(MONGO_DOC_ID);
 		fieldColumnMap = new HashMap<String,String>();
 		mongoFields = new BasicDBObject();
 		mongoFields.put("_id", 0);
@@ -101,6 +76,22 @@ public class AdsDataSource extends InvenioDataSource {
 				mongoFields.put(mongoFieldName, 1);
 				fieldColumnMap.put(columnName, mongoFieldName);
 			}
+		}
+	}
+	
+	protected void initMongo(Context context, Properties initProps) {
+		
+		String mongoHost = initProps.getProperty(MONGO_HOST);
+		int mongoPort = Integer.parseInt(initProps.getProperty(MONGO_PORT));
+		String mongoDBName = initProps.getProperty(MONGO_DB_NAME);
+		String mongoCollectionName = initProps.getProperty(MONGO_COLLECTION_NAME);
+		
+		try {
+			mongo = new MongoClient(new ServerAddress(mongoHost, mongoPort));
+			docs = mongo.getDB(mongoDBName).getCollection(mongoCollectionName);
+		} catch (UnknownHostException e) {
+			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, 
+			    e.toString());
 		}
 	}
 	
@@ -147,37 +138,34 @@ public class AdsDataSource extends InvenioDataSource {
         bibcode = StringEscapeUtils.unescapeHtml(bibcode);
 				bibcodes.add(bibcode);
 			}
-			
-			scanner.reset();
-			//try {
-	      //data.reset(); // reposition the reader
-	      scanner.reset();
-      //} catch (IOException e) {
-      //	e.printStackTrace();
-      //}
+
+			if (bibcodes.size() > 0)
+				populateMongoCache(bibcodes);
       
-			BasicDBObject mongoQuery = new BasicDBObject();
-			mongoQuery.put(mongoDocIdField, new BasicDBObject("$in", bibcodes)); //new String[]{"2009arXiv0909.1287I","1987PhRvD..36..277B"})); //new String[]{"2009arXiv0909.1287I","1987PhRvD..36..277B"}
-			
-			DBCursor cursor = docs.find(mongoQuery, mongoFields);
-			Iterator<DBObject> it = cursor.iterator();
-			while (it.hasNext()) {
-				DBObject doc = it.next();
-				String docId = (String) doc.get(mongoDocIdField);
-				Map<String, Object> row = new HashMap<String, Object>();
-				for (String column : fieldColumnMap.keySet()) {
-					String mongoField = fieldColumnMap.get(column);
-					row.put(column, doc.get(mongoField));
-				}
-				mongoCache.put(docId, row);
-			}
-			
 			return new StringReader(buffer.toString());
 			
 		}
 		return data;
 	}
 	
+	protected void populateMongoCache(List<String> bibcodes) {
+		BasicDBObject mongoQuery = new BasicDBObject();
+		mongoQuery.put(mongoDocIdField, new BasicDBObject("$in", bibcodes)); //new String[]{"2009arXiv0909.1287I","1987PhRvD..36..277B"})); //new String[]{"2009arXiv0909.1287I","1987PhRvD..36..277B"}
+		
+		DBCursor cursor = docs.find(mongoQuery, mongoFields);
+		Iterator<DBObject> it = cursor.iterator();
+		while (it.hasNext()) {
+			DBObject doc = it.next();
+			String docId = (String) doc.get(mongoDocIdField);
+			Map<String, Object> row = new HashMap<String, Object>();
+			for (String column : fieldColumnMap.keySet()) {
+				String mongoField = fieldColumnMap.get(column);
+				row.put(column, doc.get(mongoField));
+			}
+			mongoCache.put(docId, row);
+		}
+  }
+
 	@Override
 	public void close() {
 		super.close();
@@ -195,7 +183,13 @@ public class AdsDataSource extends InvenioDataSource {
 		return docs.findOne(query, mongoFields);
 	}
 	
-
+	
+	/**
+	 * this must be called from outside, by some
+	 * of the transformers
+	 * 
+	 * @param row
+	 */
 	public void transformRow(Map<String, Object> row) {
 		
 		String docId = (String) row.get(mongoDocIdField);
