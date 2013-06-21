@@ -29,15 +29,11 @@ import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 
-import com.mongodb.MongoClient;
-
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 /**

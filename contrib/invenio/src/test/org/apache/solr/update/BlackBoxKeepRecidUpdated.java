@@ -38,7 +38,7 @@ import org.junit.BeforeClass;
  * This extensive suite verifies that we are able to pick changes
  * that are happening inside Invenio. We are not running any actual
  * indexing, but we do test whether the handlers *would* be called.
- * We do not change anything in the Invenio DB, not Solr index.
+ * We do not change anything in the Invenio DB, nor Solr index.
  * 
  * This test requires python access to Invenio demo-site. And we 
  * use the solr/example - to serve as solr installation.

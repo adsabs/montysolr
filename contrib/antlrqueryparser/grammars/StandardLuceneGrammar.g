@@ -136,8 +136,6 @@ atom
 	 -> ^(CLAUSE ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field multi_value))))
 	| modifier? field? value term_modifier? 
 	 -> ^(MODIFIER modifier? ^(TMODIFIER term_modifier? ^(FIELD field? value)))
-	| modifier? (STAR COLON)? STAR 
-	 -> ^(MODIFIER modifier? ^(QANYTHING STAR["*"]))
 	;
    
 
@@ -155,7 +153,9 @@ value
 	| quoted -> ^(QPHRASE quoted)
 	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
 	| QMARK -> ^(QTRUNCATED QMARK)
-  	;
+	| STAR COLON b=STAR -> ^(QANYTHING $b)
+  | STAR -> ^(QTRUNCATED STAR)
+  ;
 
 	
 
