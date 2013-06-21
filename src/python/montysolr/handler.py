@@ -87,6 +87,8 @@ class Handler(object):
                     self.retrieve_targets(place, silent=silent)
             except Exception, e:
                 sys.stderr.write('Error when loading: %s\n' % place)
+                sys.stderr.write(traceback.format_exc())
+                sys.stderr.write("\n")
                 raise e
 
     def import_module(self, module_name):

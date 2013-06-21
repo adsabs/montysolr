@@ -968,6 +968,11 @@ rm -fR $target
 make clean
 make
 make install
+
+if [ -f $site_packages/invenio ]; then
+  rm $site_packages/invenio
+fi
+
 ln -s %(INSTDIR)s/perpetuum/invenio/lib/python/invenio $site_packages/invenio
 
 echo "%(invenio_config)s
