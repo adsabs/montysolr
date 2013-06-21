@@ -582,7 +582,7 @@ public class BlackBoxAdsDataImport extends MontySolrQueryTestCase {
      * grants
      * 
      */
-    //dumpDoc(null, "recid", "bibcode", "grant", "grant_ids", "grant_facet_hier", "reference");
+    dumpDoc(null, "recid", "bibcode", "grant", "grant_ids", "grant_facet_hier", "reference");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
   		"//*[@numFound='1']",
   		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");

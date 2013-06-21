@@ -4,29 +4,24 @@ import java.util.Map;
 
 import com.mongodb.DBObject;
 
+/**
+ * This class is a workaround for loading data from several
+ * resources at once. The data itself is loaded by the 
+ * parent DataSource, however since there is no way to 
+ * register transformers directly from there (without hacks)
+ * this class here is responsible for calling the DataSource 
+ *
+ */
 public class MongoTransformer extends Transformer {
 
-//	private Mongo mongo = null;
 	
 	@Override
 	public Object transformRow(Map<String, Object> row, Context context) {
 		
-		AdsDataSource ds = (AdsDataSource) context.getDataSource();
-		Map<String,String> fieldColumnMap = ds.getFieldColumnMap();		// mapping mongo field names -> solr schema names
-		
-		// do not bother if there are no mongo fields requested
-		if (fieldColumnMap.size()==0) return row;
-		
-		String docId = (String) row.get(ds.getMongoDocIdField());
-		DBObject doc = ds.getMongoDoc(docId);
-		
-		if (doc != null) {
-			for (String column : fieldColumnMap.keySet()) {
-				String mongoField = fieldColumnMap.get(column);
-				row.put(column, doc.get(mongoField));
-			}
-		}
-		
+	  if (context.getDataSource() instanceof AdsDataSource) {
+	    ((AdsDataSource) context.getDataSource()).transformRow(row);
+	  }
+	  
 		return row;
 	}
 
