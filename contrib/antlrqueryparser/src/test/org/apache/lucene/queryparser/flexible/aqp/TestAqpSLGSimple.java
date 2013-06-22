@@ -233,6 +233,14 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
     } catch (QueryNodeException expected) {
       // too many boolean clauses, so ParseException is expected
     }
+    
+    
+    assertQueryMatch(qp, "*:*", "field", "*:*");
+    qp.setAllowLeadingWildcard(true);
+    assertQueryMatch(qp, "*", "field", "field:*");
+    assertQueryMatch(qp, "field:*", "field", "field:*");
+    
+    
   }
 
   // Uniquely for Junit 3
