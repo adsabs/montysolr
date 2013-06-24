@@ -65,6 +65,8 @@ public class AdsDataSource extends InvenioDataSource {
 		fieldColumnMap = new HashMap<String,String>();
 		mongoFields = new BasicDBObject();
 		mongoFields.put("_id", 0);
+		mongoFields.put(mongoDocIdField, 1);
+		
 		for (Map<String, String> field : fields) {
 			if ("true".equals(field.get(MONGO_FIELD_ATTR))) {
 				String mongoFieldName = field.get(MONGO_FIELD_NAME_ATTR);
@@ -157,6 +159,8 @@ public class AdsDataSource extends InvenioDataSource {
 		while (it.hasNext()) {
 			DBObject doc = it.next();
 			String docId = (String) doc.get(mongoDocIdField);
+			assert docId != null;
+			
 			Map<String, Object> row = new HashMap<String, Object>();
 			for (String column : fieldColumnMap.keySet()) {
 				String mongoField = fieldColumnMap.get(column);
