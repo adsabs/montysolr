@@ -3,6 +3,7 @@
  */
 package org.apache.solr.analysis.author;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -115,9 +116,8 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
       
       @Override
       public String formatEntry(String key, Set<String>values) {
-        StringBuffer out = new StringBuffer();
         //out.append(super.formatEntry(key, values));
-        
+        List<String> rows = new ArrayList<String>();
         // remove all but the first comma
         key = key.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
         
@@ -134,7 +134,9 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
           }
           int cycle=0;
           do {
+          	
             for (n=0;n<nameParts.length;n++) {
+            	StringBuffer out = new StringBuffer();
               if (cycle>0 && n==0) continue;
               out.append(join(nameParts, n));
               out.append("=>");
@@ -144,12 +146,30 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
                 out.append(join(other, n));
                 notFirst = true;
               }
-              out.append("\n");
+              rows.add(out.toString());
             }
             cycle++;
           } while (shortened(nameParts, otherNames));
         }
-        return out.toString();
+        
+        // cleanup entries, keep only those that have non-ascii character
+        StringBuffer toReturn = new StringBuffer();
+        for (String row: rows) {
+        	if (hasNonAscii(row)) {
+        		toReturn.append(row);
+        		toReturn.append("\n");
+        	}
+        }
+        return toReturn.toString();
+      }
+      
+      private boolean hasNonAscii(String s) {
+      	for (char c: s.toCharArray()) {
+      		if ((int)c > 128) {
+      			return true;
+      		}
+      	}
+      	return false;
       }
       
       private String join(String[] name, int v) {

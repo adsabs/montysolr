@@ -95,7 +95,7 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     
     //clean and redo
     synMap.clear();
-    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜLLER, WILLIAM BILL;ASCII, NAME"), Pattern.compile(";"), -1);
+    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜLLER, WILLIAM BILL;ASCII, NAME;SURNAME, JMÉNO"), Pattern.compile(";"), -1);
     ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     ts.reset();
     while (ts.incrementToken() != false) {
@@ -148,7 +148,10 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
         "MUELLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
         "MUELLER\\,\\ B=>MÜLLER\\,\\ B",
         "MUELLER\\,=>MÜLLER\\,",
-        "MULLER\\,=>MÜLLER\\,"
+        "MULLER\\,=>MÜLLER\\,",
+        "!ASCII",
+        "!SURNAME\\,\\ J=>SURNAME\\,\\ J",
+        "SURNAME\\,\\ JMENO=>SURNAME\\,\\ JMÉNO"
         );
     
     // now load the factory and check the synonyms were loaded properly
