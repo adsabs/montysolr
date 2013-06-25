@@ -1,5 +1,6 @@
 package org.apache.solr.handler.dataimport;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.UnknownHostException;
@@ -144,6 +145,11 @@ public class AdsDataSource extends InvenioDataSource {
 			if (bibcodes.size() > 0)
 				populateMongoCache(bibcodes);
       
+			try {
+	      data.close();
+      } catch (IOException e) {
+	      log.error(e.getMessage());
+      }
 			return new StringReader(buffer.toString());
 			
 		}
@@ -163,11 +169,11 @@ public class AdsDataSource extends InvenioDataSource {
 			
 			Map<String, Object> row = new HashMap<String, Object>();
 			for (String column : fieldColumnMap.keySet()) {
-				String mongoField = fieldColumnMap.get(column);
-				row.put(column, doc.get(mongoField));
+				row.put(column, doc.get(fieldColumnMap.get(column)));
 			}
 			mongoCache.put(docId, row);
 		}
+		cursor.close();
   }
 
 	@Override
