@@ -1,0 +1,20 @@
+To run the tests, jmeter must be on PATH, you can pass various parameters
+to the command line (open the *.xlt) file and look at the top Test Plan
+
+Normally, tests need a list of queries, these can be stored in a file and 
+passed as a parameter. Test results are also saved into a separate folder
+YOU MUST create this folder yourself.
+
+A typical session may look like:
+
+$ rm -fr test
+$ mkdir test
+$ jmeter -n -t SolrQueryTest.jmx -DbaseDir=test -DdurationInSecs=5 -DrampUpInSecs=0 -DqueryFile=classic
+Created the tree successfully using SolrQueryTest.jmx
+Starting the test @ Wed Jun 26 17:56:12 EDT 2013 (1372283772638)
+Waiting for possible shutdown message on port 4445
+Generate Summary Results =     70 in   5.1s =   13.7/s Avg:   362 Min:    10 Max:  1562 Err:     0 (0.00%)
+Tidying up ...    @ Wed Jun 26 17:56:18 EDT 2013 (1372283778017)
+... end of run
+
+

@@ -14,6 +14,8 @@ bibstem:ycat
 doi:sfsfsfsdf
 arxiv:1002*
 title:what
-title:foo
-title:of
-title:and
+neutrinos
+weak lensing
+weak lensing Kurtz
+weak lensing Kurtz 1980
+
