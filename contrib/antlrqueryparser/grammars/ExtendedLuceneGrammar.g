@@ -1,10 +1,10 @@
-grammar StandardLuceneGrammar;
+grammar ExtendedLuceneGrammar;
 
 //
 //  This is a re-implementation of the standard lucene syntax with ANTLR3
 //   http://lucene.apache.org/core/4_3_0/queryparser/index.html
 //   
-//   The query syntax is complete and supports the same features as the 
+//   The query syntax is complete and supports the same features as the  
 //   original parser written in JCC. The advantage of this grammar is that it
 //   is 'pluggable' into Lucene's modern flexible parser, so that you can 
 //   add custom logic on top of the 'rigid' query syntax. Besides...the grammar
@@ -103,7 +103,6 @@ tokens {
 mainQ : 
 	clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+)
 	;
-   
   
 clauseOr
   : (first=clauseAnd -> $first) (or others=clauseAnd -> ^(OPERATOR["OR"] clauseAnd+ ))*
@@ -114,9 +113,12 @@ clauseAnd
   ;
   
 clauseNot
-  : (first=clauseBasic -> $first) (not others=clauseBasic -> ^(OPERATOR["NOT"] clauseBasic+) )* 
+  : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
   
+clauseNear
+  : (first=clauseBasic -> $first) (near others=clauseBasic -> ^(near clauseBasic+) )* 
+  ;
   
 clauseBasic
 	:
@@ -196,7 +198,7 @@ multi_value
 multiClause	
 	:
 	
-	//m:(a b AND c OR d OR e)
+	//m:(a b NEAR c OR d OR e)
 	
 	// without duplicating the rules (but it allows recursion)
 	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
@@ -229,9 +231,13 @@ multiAnd
 
 multiNot	
 	:	
-	(first=multiBasic  -> $first) (not others=multiBasic-> ^(not multiBasic+ ))*
+	(first=multiNear  -> $first) (not others=multiNear-> ^(OPERATOR["NOT"] multiNear+ ))*
 	;	
 
+multiNear	
+	:	
+	(first=multiBasic  -> $first) (near others=multiBasic-> ^(near multiBasic+ ))*
+	;	
 
 
 multiBasic
@@ -276,6 +282,7 @@ operator: (
 	AND -> OPERATOR["AND"]
 	| OR -> OPERATOR["OR"]
 	| NOT -> OPERATOR["NOT"]
+	| NEAR -> OPERATOR["NEAR"]
 	);
 
 modifier: 
@@ -337,6 +344,9 @@ or 	:
 	OR
 	;		
 
+near  : 
+  (NEAR -> ^(OPERATOR[$NEAR]) )
+  ;
 
 date	:	
 	//a=NUMBER '/' b=NUMBER '/' c=NUMBER -> ^(QDATE $a $b $c)
@@ -395,6 +405,7 @@ TO	:	'TO';
 AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D') | (AMPER AMPER?)) ;
 OR  : (('o' | 'O') ('r' | 'R') | (VBAR VBAR?));
 NOT   : ('n' | 'N') ('o' | 'O') ('t' | 'T');
+NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ('0'..'9')*;
 
 
 WS  :   ( ' '

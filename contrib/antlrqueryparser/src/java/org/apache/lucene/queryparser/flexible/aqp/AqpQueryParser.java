@@ -17,6 +17,8 @@ package org.apache.lucene.queryparser.flexible.aqp;
  * limitations under the License.
  */
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
@@ -151,13 +153,17 @@ public class AqpQueryParser extends QueryParserHelper {
    * 
    * It works by wrapping the processor pipeline into a debugging
    * class and by calling setDebug on the underlying builder.
+   * @throws SecurityException 
+   * @throws NoSuchMethodException 
+   * @throws InvocationTargetException 
+   * @throws IllegalArgumentException 
    * 
    * @see AqpDebuggingQueryNodeProcessorPipeline
    * @see AqpQueryTreeBuilder
    */
   @SuppressWarnings("unchecked")
   public void setDebug(boolean debug) throws InstantiationException,
-      IllegalAccessException {
+      IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
   	
   	if (debugMode != debug) {
   		
@@ -166,13 +172,20 @@ public class AqpQueryParser extends QueryParserHelper {
   		
   		QueryNodeProcessorPipeline newPipeline;
   		
+  		QueryConfigHandler configHandler = this.getQueryConfigHandler();
+  		
 	    if (debug) {
 	      newPipeline = new AqpDebuggingQueryNodeProcessorPipeline(
 	      		this.getQueryConfigHandler(), processor.getClass());
 	    }
 	    else {
-	    	newPipeline = ((AqpDebuggingQueryNodeProcessorPipeline) processor)
-	    		.getOriginalProcessorClass().newInstance();
+	    	// can't use the simple form because parser pipelines may be using config to adjust themselves
+	    	// newPipeline = clazz.newInstance();
+	    	
+	    	Class<? extends QueryNodeProcessorPipeline> clazz = ((AqpDebuggingQueryNodeProcessorPipeline) processor)
+    								.getOriginalProcessorClass();
+	    	Constructor<? extends QueryNodeProcessorPipeline> constructor = clazz.getConstructor(QueryConfigHandler.class);
+	    	newPipeline = constructor.newInstance(new Object[]{configHandler});
 	    }
 	    
 

@@ -89,8 +89,7 @@ atom
 	: 
 	lmodifier? field multi_value rmodifier?
 	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field multi_value))))
-	| 
-	lmodifier? field? value rmodifier? 
+	| lmodifier? field? value rmodifier? 
 	-> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
 	//| lmodifier? (STAR COLON)? STAR 
 	//-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))

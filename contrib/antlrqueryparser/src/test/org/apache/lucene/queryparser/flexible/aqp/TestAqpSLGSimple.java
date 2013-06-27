@@ -129,10 +129,10 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
         "+(+field:A +field:B) +((+field:C +field:D) field:E)");
 
     assertQueryMatch(qp, "one OR +two", "f", "f:one +f:two");
-
+    
     assertQueryMatch(qp, "one OR two NOT three", "field",
         "field:one (+field:two -field:three)");
-
+    
     assertQueryMatch(qp, "one OR (two AND three) NOT four", "field",
         "field:one (+(+field:two +field:three) -field:four)");
 
