@@ -57,7 +57,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
       }
       else {
       invertedIndex = DictionaryRecIdCache.INSTANCE.
-        getUnInvertedDocidsStrField(((IndexSearcher) searcher).getIndexReader(), 
+        getUnInvertedDocidsStrField(searcher, 
         uniqueIdField, referenceField);
       }
       

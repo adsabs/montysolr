@@ -64,6 +64,13 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		adoc("id", "15", "bibcode", "b5");
 		adoc("id", "16", "bibcode", "b6");
 		adoc("id", "17", "bibcode", "b7", "breferences", "b5");
+		
+		// for testing the alternate identifiers
+		
+		adoc("id", "25", "bibcode", "b25", "alternate_bibcode", "x25", "alternate_bibcode", "x26", "breferences", "b27");
+		adoc("id", "27", "bibcode", "b27", "alternate_bibcode", "x20", "alternate_bibcode", "x21", "breferences", "x26", "breferences", "b28");
+		adoc("id", "28", "bibcode", "b28", "breferences", "b25", "breferences", "x26");
+		
 
 		reader = writer.getReader();
 		searcher = newSearcher(reader);
@@ -295,8 +302,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		// now test of references ( X --> (x))
-		Map<String, Integer> scache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher.getIndexReader(), idField);
-		Map<String, Integer> scache2 = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher.getIndexReader(), idField);
+		Map<String, Integer> scache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher, idField);
+		Map<String, Integer> scache2 = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher, idField);
 		assertTrue(scache.hashCode() == scache2.hashCode());
 		assertTrue(scache == scache2);
 		
@@ -334,8 +341,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(ar.containsAll(er));
 		
 		
-		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(reader, idField, refField);
-		invCache2 = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(reader, idField, refField);
+		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(searcher, idField, refField);
+		invCache2 = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(searcher, idField, refField);
 		
 		assertTrue(invCache.equals(invCache2));
 		assertTrue(invCache == invCache2);
@@ -387,6 +394,44 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(c3.equals(c4));
 		
 		FieldCache.DEFAULT.purgeAllCaches();
+		
+		
+		// now test alternate-bibcodes 
+		
+		TermQuery q25 = new TermQuery(new Term("id", "25"));
+		TermQuery q27 = new TermQuery(new Term("id", "27"));
+		TermQuery q28 = new TermQuery(new Term("id", "28"));
+		
+		idField = idField + ",alternate_bibcode";
+		hasResults(new SecondOrderQuery(q25, null, new SecondOrderCollectorCitedBy(idField, refField)),
+				Arrays.asList("27", "28"));
+		hasResults(new SecondOrderQuery(q27, null, new SecondOrderCollectorCitedBy(idField, refField)),
+				Arrays.asList("25"));
+		hasResults(new SecondOrderQuery(q28, null, new SecondOrderCollectorCitedBy(idField, refField)),
+				Arrays.asList("27"));
+		
+		
+		hasResults(new SecondOrderQuery(q25, null, new SecondOrderCollectorCites(idField, refField)),
+				Arrays.asList("27"));
+		hasResults(new SecondOrderQuery(q27, null, new SecondOrderCollectorCites(idField, refField)),
+				Arrays.asList("25", "28"));
+		hasResults(new SecondOrderQuery(q28, null, new SecondOrderCollectorCites(idField, refField)),
+				Arrays.asList("25"));
+	}
+	
+	
+	private void hasResults(Query q, List<String> expected) throws IOException {
+		ArrayList<String> ar = new ArrayList<String>();
+		for (ScoreDoc d: searcher.search(q, 100).scoreDocs) {
+			Document doc = reader.document(d.doc);
+			ar.add(doc.get("id"));
+		}
+		if (expected == null) {
+			assertTrue(ar.size() == 0);
+			return;
+		}
+		assertTrue(ar.containsAll(expected));
+		assertTrue(ar.size() == expected.size());
 	}
 	
 	private void compareCitedBy(String idField,

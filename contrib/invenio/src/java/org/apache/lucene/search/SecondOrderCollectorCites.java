@@ -61,7 +61,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		  }
 		  else {
   			valueToDocidCache = DictionaryRecIdCache.INSTANCE.
-  				getTranslationCacheString(searcher.getIndexReader(), uniqueIdField);
+  				getTranslationCacheString(searcher, uniqueIdField);
 		  }
 		}
 		if (valueToDocidCache == null || valueToDocidCache.size() == 0) {

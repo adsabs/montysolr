@@ -175,11 +175,10 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		HashMap<Integer, int[]> citedBy = invert(cites);
 		
 		final Map<String, Integer> refCache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(
-				reader, "bibcode");
+				searcher, "bibcode");
 		
 		final int[][] invertedCache = DictionaryRecIdCache.INSTANCE.
-				getUnInvertedDocidsStrField(((IndexSearcher) searcher).getIndexReader(), 
-				"bibcode", "breference");
+				getUnInvertedDocidsStrField(searcher,	"bibcode", "breference");
 		
 		
 		

@@ -751,6 +751,8 @@
 
 		<field name="identifier" type="identifier_normalized_string_ascii"
 			indexed="true" stored="true" required="false" multiValued="true" />
+		<field name="alternate_bibcode" type="identifier_normalized_string_ascii"
+      indexed="true" stored="true" required="false" multiValued="true" />
 
 		<field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}"
 			multiValued="true" />
@@ -998,6 +1000,8 @@
 	<copyField source="a_700" dest="author_surname" />
 
 
+  <copyField source="alternate_bibcode" dest="identifier" />
+  
 	<copyField source="author_norm" dest="all" />
 	<copyField source="alternate_title" dest="all" />
 	<copyField source="bibcode" dest="all" />

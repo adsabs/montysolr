@@ -1,8 +1,6 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.ArrayList;
-
 import org.apache.lucene.index.AtomicReaderContext;
 
 /**
@@ -52,7 +50,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 		  }
 		  else {
 			invertedIndex = DictionaryRecIdCache.INSTANCE.
-				getUnInvertedDocidsStrField(((IndexSearcher) searcher).getIndexReader(), 
+				getUnInvertedDocidsStrField(searcher, 
 				uniqueIdField, referenceField);
 		  }
 		}

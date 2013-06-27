@@ -35,7 +35,7 @@
         <!-- this forces and match: xpath="/collection/record/datafield[@tag='035']/subfield[@code='a']|subfield[@code='z']|subfield[@code='y']" -->
         <field column="identifierA" name="identifier" 
             xpath="/collection/record/datafield[@tag='035']/subfield[@code='a']"/>
-        <field column="identifierY" name="identifier" 
+        <field column="identifierY" name="alternate_bibcode" 
             xpath="/collection/record/datafield[@tag='035']/subfield[@code='y']"/>
         <field column="identifierZ" name="identifier" 
             xpath="/collection/record/datafield[@tag='035']/subfield[@code='z']"/>

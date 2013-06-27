@@ -42,7 +42,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 		  }
 		  else {
   			docToDocidsCache = DictionaryRecIdCache.INSTANCE.
-  				getCacheTranslatedMultiValuesString(searcher.getIndexReader(), 
+  				getCacheTranslatedMultiValuesString(searcher, 
   				uniqueIdField, referenceField);
 		  }
 		}

@@ -43,7 +43,7 @@ public class BatchProviderDumpBibcodes extends BatchProvider {
 	  // but since we are using the bibcodes in the second-order
 	  // search, the lookup cache is already available
 	  
-	  Map<String, Integer> bibcodes = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(reader, "bibcode");
+	  Map<String, Integer> bibcodes = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(locReq.getSearcher(), "bibcode");
 	  
 	  // construct a filter
 	  BufferedReader br = new BufferedReader(new FileReader(input));

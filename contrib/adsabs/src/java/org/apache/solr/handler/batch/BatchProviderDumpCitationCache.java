@@ -34,7 +34,7 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  DocTerms uniqueValueCache = FieldCache.DEFAULT.getTerms(req.getSearcher().getAtomicReader(), uniqueField);
 	  
 	  int[][] invertedIndex = DictionaryRecIdCache.INSTANCE.
-				getUnInvertedDocidsStrField(req.getSearcher().getIndexReader(), 
+				getUnInvertedDocidsStrField(req.getSearcher(), 
 				uniqueField, refField);
 
 	  BytesRef ret = new BytesRef();

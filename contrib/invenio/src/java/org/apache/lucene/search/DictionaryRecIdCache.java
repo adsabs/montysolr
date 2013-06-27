@@ -2,25 +2,24 @@ package org.apache.lucene.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.DocTermOrds;
-import org.apache.lucene.index.DocsAndPositionsEnum;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.index.SlowCompositeReaderWrapper;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.search.FieldCache.IntParser;
 import org.apache.lucene.search.FieldCacheImpl.Entry;
-import org.apache.lucene.search.FieldCacheImpl.StopFillCacheException;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 
@@ -99,6 +98,85 @@ public enum DictionaryRecIdCache {
 		return fromFieldToLuceneId;
 	}
 	
+  private Map<String, Integer> buildCacheStr(IndexSearcher searcher, String externalIdsField) throws IOException {
+		
+	  AtomicReader reader = getAtomicReader(searcher.getIndexReader());
+  	DocTerms idMapping;
+  	
+  	if (externalIdsField.contains(",")) {
+  		String[] fields = externalIdsField.split(",");
+  		idMapping = FieldCache.DEFAULT.getTerms(reader, fields[0]);
+  		translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
+  		
+  		final Map<String, Integer> fromFieldToLuceneId = buildCacheStr(idMapping);
+  		
+  		for (int y=1;y<fields.length;y++) {
+  			final String fromField = fields[y];
+  			
+	  		searcher.search(new PrefixQuery(new Term(fromField, "")), new Collector() {
+	        private Scorer scorer;
+	        private DocTermOrds docTermOrds;
+	        private TermsEnum docTermsEnum;
+	        private DocTermOrds.TermOrdsIterator reuse;
+					private int docBase;
+	
+	        public void collect(int doc) throws IOException {
+	          if (docTermOrds.isEmpty()) {
+	            return;
+	          }
+	
+	          reuse = docTermOrds.lookup(doc, reuse);
+	          int[] buffer = new int[5];
+	
+	          int chunk;
+	          do {
+	            chunk = reuse.read(buffer);
+	            if (chunk == 0) {
+	              return;
+	            }
+	
+	            for (int idx = 0; idx < chunk; idx++) {
+	              int key = buffer[idx];
+	              docTermsEnum.seekExact((long) key);
+	              BytesRef termValue = docTermsEnum.term();
+	              if (termValue == null) {
+	                continue;
+	              }
+	              fromFieldToLuceneId.put(termValue.utf8ToString(), doc+docBase);
+	            }
+	          } while (chunk >= buffer.length);
+	        }
+	
+	        public void setNextReader(AtomicReaderContext context) throws IOException {
+	          docTermOrds = FieldCache.DEFAULT.getDocTermOrds(context.reader(), fromField);
+	          docTermsEnum = docTermOrds.getOrdTermsEnum(context.reader());
+	          docBase = context.docBase;
+	          reuse = null;
+	        }
+	
+	        public void setScorer(Scorer scorer) {
+	          this.scorer = scorer;
+	        }
+	
+	        public boolean acceptsDocsOutOfOrder() {
+	          return false;
+	        }
+	      });
+  		}
+  		
+  		if (fromFieldToLuceneId.containsKey(null))	fromFieldToLuceneId.remove(null);
+  		return fromFieldToLuceneId;
+  		
+  	}
+  	else {
+  		idMapping = FieldCache.DEFAULT.getTerms(reader, externalIdsField);
+  		translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
+  		return buildCacheStr(idMapping);
+  	}
+  	
+  	
+		
+	}
 	
 	private boolean indexUnchanged(AtomicReader reader, String field, Boolean isString) throws IOException {
 		// first check that the index wasn't updated
@@ -172,16 +250,15 @@ public enum DictionaryRecIdCache {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<String, Integer> getTranslationCacheString(IndexReader reader, String externalIdsField) throws IOException {
+	public Map<String, Integer> getTranslationCacheString(IndexSearcher searcher, String externalIdsField) throws IOException {
 		
-	  AtomicReader atomReader = getAtomicReader(reader);
+	  AtomicReader atomReader = getAtomicReader(searcher.getIndexReader());
 	  
 		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(atomReader, externalIdsField, true))) {
 			synchronized(translation_cache_tracker) {
-				DocTerms idMapping = FieldCache.DEFAULT.getTerms(atomReader, externalIdsField);
-				Map<String, Integer> translTable = buildCacheStr(idMapping);
+				
+				Map<String, Integer> translTable = buildCacheStr(searcher, externalIdsField);
 				translation_cache.put(externalIdsField, translTable);
-				translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
 				return translTable;
 			}
 		}
@@ -199,17 +276,17 @@ public enum DictionaryRecIdCache {
 	 */
 	private HashMap<String, Object>multiValuesCache = new HashMap<String, Object >(2);
 	
-	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(IndexReader reader, String externalIds, String refField) 
+	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(IndexSearcher searcher, String externalIds, String refField) 
 		throws IOException {
 	  
-	  AtomicReader atomReader = getAtomicReader(reader);
+	  AtomicReader atomReader = getAtomicReader(searcher.getIndexReader());
 		
 		if (multiValuesCache.containsKey(refField) && indexUnchanged(atomReader, externalIds, true)) {
 			return (Map<Integer, List<Integer>>) multiValuesCache.get(refField);
 		}
 		
 		// since most likely this will be needed anyway, i don't bother with reading just the values from the index
-		int[][] invCache = getUnInvertedDocidsStrField(atomReader, externalIds, refField);
+		int[][] invCache = getUnInvertedDocidsStrField(searcher, externalIds, refField);
 		
 		if (invCache == null) {
 			//throw new IOException("Error initializing cache, no data in the field: " + externalIds + ":" + refField);
@@ -325,17 +402,17 @@ public enum DictionaryRecIdCache {
 		return _atom;
 	}
 
-	public int[][] getUnInvertedDocidsStrField(IndexReader reader, String externalIds, String refField) throws IOException {
+	public int[][] getUnInvertedDocidsStrField(IndexSearcher searcher, String externalIds, String refField) throws IOException {
 		
-	  AtomicReader atomReader = getAtomicReader(reader);
+	  AtomicReader atomReader = getAtomicReader(searcher.getIndexReader());
 	  
 		if (invertedCache.containsKey(refField) && indexUnchanged(atomReader, externalIds, true)) {
 			return (int[][]) invertedCache.get(refField);
 		}
 		
-		final Map<?, Integer> idMapping = getTranslationCacheString(reader, externalIds);
+		final Map<?, Integer> idMapping = getTranslationCacheString(searcher, externalIds);
 		
-		Object val = unInvertField(reader, new Entry(refField, new FieldCache.IntParser() {
+		Object val = unInvertField(searcher.getIndexReader(), new Entry(refField, new FieldCache.IntParser() {
 		    public int parseInt(BytesRef value) {
 		        if (idMapping.containsKey(value.utf8ToString())) {
 		        	return idMapping.get(value.utf8ToString());
