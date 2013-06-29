@@ -975,8 +975,7 @@ fi
 
 ln -s %(INSTDIR)s/perpetuum/invenio/lib/python/invenio $site_packages/invenio
 
-echo "%(invenio_config)s
-" > %(INSTDIR)s/perpetuum/invenio/etc/invenio-local.conf
+echo "%(invenio_config)s" > %(INSTDIR)s/perpetuum/invenio/etc/invenio-local.conf
 
 # this actually generates invnenio module (inside invenio lib)
 python %(INSTDIR)s/perpetuum/invenio/bin/inveniocfg --update-all
