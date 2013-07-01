@@ -5,6 +5,8 @@ import java.util.BitSet;
 import java.util.Arrays;
 import java.util.zip.*;
 
+import org.apache.solr.common.util.Base64;
+
 /**
  * This file was developed by Jan for Invenio, taken from
  * http://invenio-software
@@ -141,20 +143,48 @@ public class InvenioBitSetExtra extends BitSet {
 		bytes[bit / 8] |= BIT_MASK[bit % 8];
 	}
 
-	public static void main(String[] args) throws DataFormatException, IOException {
+	public static void main(String[] args) throws Exception {
 
 		int min = 0;
-		int max = 5000;
+		int max = 500000;
 		InvenioBitSetExtra ibs = new InvenioBitSetExtra(max);
-		for (int i = 0; i < 500; i++) {
+		BitSet sbs = new BitSet(max);
+		for (int i = 0; i < max*0.25f; i++) {
 			int r = min + (int) (Math.random() * ((max - min) + 1));
 			ibs.set(r);
+			sbs.set(r);
 		}
 		ByteArrayOutputStream b = ibs.fastDump();
+		System.out.println("cardinality=" + ibs.cardinality());
+		System.out.println("length=" + ibs.length());
+		System.out.println("byte arr len=" + ibs.toByteArray().length);
+		//System.out.println("hex=" + ibs.getHexString(ibs.fastDump().toByteArray()));
+		System.out.println("hex len=" + ibs.getHexString(ibs.fastDump().toByteArray()).length());
+		System.out.println("byte arr len=" + ibs.fastDump().toByteArray().length);
+		//System.out.println("base64" + ibs.encode(ibs.fastDump().toByteArray()));
+		System.out.println("base64 len=" + ibs.encode(ibs.fastDump().toByteArray()).length());
+		System.out.println("compress length=" + ibs.compress().length);
+		
 		InvenioBitSetExtra bs;
 		bs = InvenioBitSetExtra.fastLoad(b.toByteArray());
 		System.out.println("set lengths: " + ibs.cardinality() + " - " + bs.cardinality());
 		System.out.println("Set equals? " + ibs.equals(bs));
+		assert ibs == sbs;
+		assert bs == sbs;
+	}
+	
+	public String encode(byte[] data) throws Exception {
+    return Base64.byteArrayToBase64(data, 0, data.length);
+  }
+	
+	public byte[] compress() throws IOException {
+	  ByteArrayOutputStream out = new ByteArrayOutputStream();
 
+    GZIPOutputStream zOut = new GZIPOutputStream(out);
+    zOut.write(this.toByteArray());
+    zOut.flush();
+    zOut.close();
+    System.out.printf("Deflater Compression ratio %f\n", (1.0f * out.size()/(this.size()/8)));
+    return out.toByteArray();
 	}
 }

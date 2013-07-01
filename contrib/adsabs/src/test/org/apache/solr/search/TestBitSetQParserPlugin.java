@@ -132,11 +132,14 @@ public class TestBitSetQParserPlugin extends SolrTestCaseJ4 {
 		for (int i: numbers) {
 			bitSet.set(i);
 		}
-
+		
+	
+		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		DeflaterOutputStream zOut = new DeflaterOutputStream(out);
-		zOut.write(bitSet.toByteArray());
+		//zOut.write(bitSet.toByteArray());
+		zOut.write(toByteArray(bitSet));
 		zOut.flush();
 		zOut.close();
 		System.out.printf("Deflater Compression ratio %f\n", (1.0f * out.size()/bitSet.cardinality()));
@@ -151,9 +154,9 @@ public class TestBitSetQParserPlugin extends SolrTestCaseJ4 {
 		}
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+		
 		GZIPOutputStream zOut = new GZIPOutputStream(out);
-		zOut.write(bitSet.toByteArray());
+		zOut.write(toByteArray(bitSet));
 		zOut.flush();
 		zOut.close();
 		System.out.printf("Deflater Compression ratio %f\n", (1.0f * out.size()/bitSet.cardinality()));
@@ -166,11 +169,12 @@ public class TestBitSetQParserPlugin extends SolrTestCaseJ4 {
 		for (int i: numbers) {
 			bitSet.set(i);
 		}
-
+		
+		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		ZOutputStream zOut = new ZOutputStream(out, JZlib.Z_BEST_SPEED);
-		zOut.write(bitSet.toByteArray());
+		zOut.write(toByteArray(bitSet));
 		zOut.flush();
 		zOut.close();
 		System.out.printf("Deflater Compression ratio %f\n", (1.0f * out.size()/bitSet.cardinality()));
@@ -184,6 +188,15 @@ public class TestBitSetQParserPlugin extends SolrTestCaseJ4 {
 
 	public byte[] decode(String data) throws Exception {
 		return Base64.base64ToByteArray(data);
+	}
+	
+	private byte[] toByteArray(BitSet bitSet) {
+	  // java6 doesn't have toByteArray()
+    byte[] bytes = new byte[(bitSet.length() + 7) / 8];
+    for ( int i = bitSet.nextSetBit(0); i >= 0; i = bitSet.nextSetBit(i+1) ) {
+        bytes[i / 8] |= 128 >> (i % 8);
+    }
+    return bytes;
 	}
 }
 
