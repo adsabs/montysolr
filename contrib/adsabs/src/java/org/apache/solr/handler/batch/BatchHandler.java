@@ -23,9 +23,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -81,7 +78,7 @@ public class BatchHandler extends RequestHandlerBase {
 	private long sleepTime;
 	private Map<String, BatchProvider> providers;
 	private Thread thread;
-	private Path tmpDir;
+	private File tmpDir;
 
 	
 	public BatchHandler() {
@@ -131,36 +128,30 @@ public class BatchHandler extends RequestHandlerBase {
 		if (defs.get("workdir") != null) {
 			File wdir = new File((String) defs.get("workdir"));
 			if (wdir.isAbsolute() && wdir.canWrite()) {
-				tmpDir = wdir.toPath();
+				tmpDir = wdir;
 			}
 			else if (!wdir.isAbsolute() && wdir.canWrite()) {
 				log.info("Batch handler will write into: {}", wdir.getAbsolutePath());
-				tmpDir = wdir.toPath();
+				tmpDir = wdir;
 			}
 			else if (!wdir.exists()) {
 				if (!wdir.isAbsolute()) {
 					wdir = new File(startDir + "/" + wdir.toString());
 				}
-				try {
-					Files.createDirectory(wdir.toPath(), 
-							PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-----")));
-				} catch (IOException e) {
-					throw new RuntimeException("Cannot create folder: " + wdir.toString());
-				}
-				tmpDir = wdir.toPath();
+				// sadly, available only for java 7
+        //Files.createDirectory(wdir.toPath(), 
+        //		PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-----")));
+        wdir.mkdir();
+				tmpDir = wdir;
 			}
 			else {
 				throw new RuntimeException("The folder is not readable: " + wdir.toString());
 			}
 		}
 		else {
-			// TODO: this sucks and files will stall there until os reboot
-			try {
-				tmpDir = Files.createTempDirectory("montysolr-batch-handler", 
-						PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-----")));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			//tmpDir = Files.createTempDirectory("montysolr-batch-handler", 
+      //		PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-----")));
+      createTempDir("montysolr-batch-handler");
 		}
 
 	}
@@ -248,7 +239,7 @@ public class BatchHandler extends RequestHandlerBase {
 			if (mParams.get("jobid", null) == null) {
 				mParams.set( "jobid", UUID.randomUUID().toString());
 			}
-			mParams.set("#workdir", tmpDir.toAbsolutePath().toString());
+			mParams.set("#workdir", tmpDir.getAbsolutePath());
 			
 			queue.registerNewBatch(providers.get(command), req.getParams());
 			rsp.add("jobid", req.getParams().get("jobid"));
@@ -553,6 +544,26 @@ public class BatchHandler extends RequestHandlerBase {
 		public String toString() {
 			return "LazyBatchProvider:(" + this.name + ")";
 		}
+	}
+	
+	/*
+	 * A copy from the Google Guava, as Java 6 is missing this 
+	 * functionality
+	 */
+	public static File createTempDir(String baseName) {
+	  int TEMP_DIR_ATTEMPTS =  10000;
+	  File baseDir = new File(System.getProperty("java.io.tmpdir"));
+	  baseName = baseName + "-" + System.currentTimeMillis() + "-";
+
+	  for (int counter = 0; counter < TEMP_DIR_ATTEMPTS; counter++) {
+	    File tempDir = new File(baseDir, baseName + counter);
+	    if (tempDir.mkdir()) {
+	      return tempDir;
+	    }
+	  }
+	  throw new IllegalStateException("Failed to create directory within "
+	      + TEMP_DIR_ATTEMPTS + " attempts (tried "
+	      + baseName + "0 to " + baseName + (TEMP_DIR_ATTEMPTS - 1) + ')');
 	}
 }
 

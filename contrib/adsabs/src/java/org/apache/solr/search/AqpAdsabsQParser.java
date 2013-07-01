@@ -1,5 +1,6 @@
 package org.apache.solr.search;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -169,13 +170,9 @@ public class AqpAdsabsQParser extends QParser {
 		if (params.getBool("debugQuery", false) != false) {
 			try {
 				qParser.setDebug(true);
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			} catch (Exception e) {
+        e.printStackTrace();
+      }
 		}
 		
 		

@@ -2,6 +2,7 @@ package monty.solr.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -73,7 +74,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		
 	}
 	
-	public QParser getParser(SolrQueryRequest req) throws ParseException, InstantiationException, IllegalAccessException {
+	public QParser getParser(SolrQueryRequest req) throws ParseException, InstantiationException, IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
 		SolrParams params = req.getParams();
 		String query = params.get(CommonParams.Q);
 		String qt = params.get(CommonParams.QT);
