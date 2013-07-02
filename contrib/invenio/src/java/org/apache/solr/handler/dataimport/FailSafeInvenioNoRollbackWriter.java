@@ -1,7 +1,6 @@
 package org.apache.solr.handler.dataimport;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,6 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.NamedList.NamedListEntry;
@@ -103,6 +101,7 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       log.error("We also called " + backupHandler.getName() + " with params: " + r.getParamString());
     }
     commit(false); // anything bad happens if we don't call commit?
+    super.rollback();
   }
   
   protected SolrQueryRequest getReq() {
@@ -129,8 +128,15 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     for (int i=0;i<half;i++) {
       ids[i] = docIds.get(i);
     }
-    core.execute(backupHandler, req("command", "register-new-batch", 
-        "url", pargs.getUrl(ids)), rsp);
+    
+    SolrQueryRequest r = req("command", "register-new-batch", "url", pargs.getUrl(ids));
+    
+    try {
+    	core.execute(backupHandler, r, rsp);
+    }
+    finally {
+    	r.close();
+    }
     
     ids = new int[docIds.size()-half];
     
@@ -140,8 +146,17 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     for (int i=half;i<docIds.size();i++,j++) {
       ids[j] = docIds.get(i);
     }
-    core.execute(backupHandler, req("command", "register-new-batch", 
-        "url", pargs.getUrl(ids)), rsp);
+    
+    r = req("command", "register-new-batch", 
+        "url", pargs.getUrl(ids));
+    
+    try {
+    	core.execute(backupHandler, r, rsp);
+    }
+    finally {
+    	r.close();
+    }
+    
   }
 
   class ParsedArgs {
@@ -203,7 +218,7 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
   }
   
   @SuppressWarnings("unchecked")
-  public SolrQueryRequest req(String ... q) {
+  private SolrQueryRequest req(String ... q) {
     if (q.length%2 != 0) { 
       throw new RuntimeException("The length of the string array (query arguments) needs to be even");
     }

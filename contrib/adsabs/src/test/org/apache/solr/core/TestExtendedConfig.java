@@ -43,7 +43,7 @@ public class TestExtendedConfig extends MontySolrAbstractTestCase {
 
 
   public void testExtendedConfig() {
-	  AdsConfigHandler handler = (AdsConfigHandler) h.getCore().getRequestHandler("ads-config");
+	  AdsConfigHandler handler = (AdsConfigHandler) h.getCore().getRequestHandler("/ads-config");
 	  SolrParams defaults = handler.getParams("defaults");
 	  assertTrue(defaults.get("spellcheck.onlyMorePopular").equals("false"));
 	  SolrParams test = handler.getParams("testVal");

@@ -504,78 +504,74 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     
     LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), params);
     
-    if (data.handler.equals("#discover")) {
-      try {
-        runDiscovery(locReq);
-      } catch (IOException e) {
-        throw e;
-      } finally {
-        locReq.close();
-      }
-      return;
+    try {
+	    if (data.handler.equals("#discover")) {
+	    	runDiscovery(locReq);
+	    	return;
+	    }
+	    else if (data.handler.equals("#index-discovered")) {
+	    	runIndexingOfDiscovered(locReq);
+	    	return;
+	    }
+	    else if (data.handler.equals("#delete")) {
+	    	runDeleteRecords(locReq, data);
+	    	return;
+	    }
+	    
+	    
+	    SolrRequestHandler handler = req.getCore().getRequestHandler(data.handler);
+	    setWorkerMessage("Executing :" + data.handler + " with params: " + locReq.getParamString());
+	    
+	    SolrQueryResponse rsp;
+	    
+	    boolean repeat = false;
+	    int maxRepeat = 10;
+	    do {
+	    	
+	      rsp = new SolrQueryResponse();	      
+	      core.execute(handler, locReq, rsp);
+	      String is = (String) rsp.getValues().get("status");
+	      
+	      if (is == null) {
+	      	setWorkerMessage("Executed :" + data.handler + " result: " + rsp.getValues().toString());
+	      	break; // some unknown handler
+	      }
+	      
+	      if (is.equals("busy")) {
+	        repeat = true;
+	        try {
+	          Thread.sleep(sleepTime );
+	        } catch (InterruptedException e) {
+	          queue.reInsert(data);
+	          throw e;
+	        } 
+	        setWorkerMessage("Waiting for handler to be idle: " + data.handler);
+	      }
+	      else {
+	        repeat = false;
+	      }
+	      
+	      setWorkerMessage("Executed :" + data.handler + " result: " + rsp.getValues().toString());
+	      
+	      if (maxRepeat-- < 0) {
+	        setWorkerMessage("Batch failed, worker is too busy, max waiting time exhausted");
+	        try {
+	          queue.registerFailedBatch(req.getParamString());
+	        } catch (UnsupportedEncodingException e) {
+	          log.error(e.getMessage());
+	        }
+	        repeat = false;
+	      }
+	      else {
+		      locReq.close();
+		      locReq = new LocalSolrQueryRequest(req.getCore(), params);
+	      }
+	      
+	    } while (repeat);
     }
-    else if (data.handler.equals("#index-discovered")) {
-      runIndexingOfDiscovered(locReq);
-      locReq.close();
-      return;
-    }
-    else if (data.handler.equals("#delete")) {
-    	runDeleteRecords(locReq, data);
+    finally {
     	locReq.close();
-    	return;
     }
-    
-    
-    SolrRequestHandler handler = req.getCore().getRequestHandler(data.handler);
-    setWorkerMessage("Executing :" + data.handler + " with params: " + locReq.getParamString());
-    
-    SolrQueryResponse rsp;
-    locReq.close();
-    
-    boolean repeat = false;
-    int maxRepeat = 10;
-    do {
-      locReq = new LocalSolrQueryRequest(req.getCore(), params);
-      rsp = new SolrQueryResponse();
-      
-      core.execute(handler, locReq, rsp);
-      String is = (String) rsp.getValues().get("status");
-      
-      if (is == null) {
-      	setWorkerMessage("Executed :" + data.handler + " result: " + rsp.getValues().toString());
-      	locReq.close();
-      	break; // some unknown handler
-      }
-      
-      if (is.equals("busy")) {
-        repeat = true;
-        try {
-          Thread.sleep(sleepTime );
-        } catch (InterruptedException e) {
-          queue.reInsert(data);
-          throw e;
-        } finally {
-          locReq.close();
-        }
-        setWorkerMessage("Waiting for handler to be idle: " + data.handler);
-      }
-      else {
-        repeat = false;
-      }
-      
-      setWorkerMessage("Executed :" + data.handler + " result: " + rsp.getValues().toString());
-      locReq.close();
-      
-      if (maxRepeat-- < 0) {
-        setWorkerMessage("Batch failed, worker is too busy, max waiting time exhausted");
-        try {
-          queue.registerFailedBatch(req.getParamString());
-        } catch (UnsupportedEncodingException e) {
-          log.error(e.getMessage());
-        }
-        repeat = false;
-      }
-    } while (repeat);
     
   }
   
@@ -739,17 +735,6 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
       queue.registerNewBatch(handler, rParam.toString());
     }
     
-  }
-
-  public SolrQueryRequest req(SolrQueryRequest req, String ... q) {
-    if (q.length%2 != 0) { 
-      throw new RuntimeException("The length of the string array (query arguments) needs to be even");
-    }
-    Map.Entry<String, String> [] entries = new NamedListEntry[q.length / 2];
-    for (int i = 0; i < q.length; i += 2) {
-      entries[i/2] = new NamedListEntry<String>(q[i], q[i+1]);
-    }
-    return new LocalSolrQueryRequest(req.getCore(), new NamedList(entries));
   }
 
 

@@ -248,16 +248,13 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			return;
 		}
 
-		LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), params);
-		
-		locReq.getContext().put(IKRU_PROPERTIES, prop);
+		req.getContext().put(IKRU_PROPERTIES, prop);
 		
 		if (isAsynchronous()) {
-			runAsynchronously(dictData, locReq);
+			runAsynchronously(dictData, req);
 		}
 		else {
-			runSynchronously(dictData, locReq);
-			locReq.close();
+			runSynchronously(dictData, req);
 			setBusy(false);
 		}
 		
@@ -372,26 +369,27 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			SolrQueryRequest req) {
 		
 		final Map<String, Object> dataToProcess = dictData;
-		final SolrQueryRequest request = req;
+		final SolrQueryRequest localReq = new LocalSolrQueryRequest(req.getCore(), req.getParams());
+		localReq.getContext().put(IKRU_PROPERTIES, req.getContext().get(IKRU_PROPERTIES));
 		
 		new Thread(new Runnable() {
-			
+
 			public void run() {
 				try {
-	                runSynchronously(dataToProcess, request);
-                } catch (IOException e) {
-                	log.error(e.getLocalizedMessage());
-                	log.error(e.getStackTrace().toString());
-                } catch (InterruptedException e) {
-                	log.error(e.getLocalizedMessage());
-                	log.error(e.getStackTrace().toString());
+					runSynchronously(dataToProcess, localReq);
+				} catch (IOException e) {
+					log.error(e.getLocalizedMessage());
+					log.error(e.getStackTrace().toString());
+				} catch (InterruptedException e) {
+					log.error(e.getLocalizedMessage());
+					log.error(e.getStackTrace().toString());
 				} finally {
-                	setBusy(false);
-                	request.close();
-                }
+					setBusy(false);
+					localReq.close();
+				}
 			}
 		}).start();
-    }
+	}
 
 
 	public void setAsynchronous(boolean val) {
@@ -732,7 +730,12 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			hParams.put("url", invP);
 			localReq = new LocalSolrQueryRequest(req.getCore(), hParams);
 			SolrQueryResponse rsp = new SolrQueryResponse();
-			req.getCore().execute(handler, localReq, rsp);
+			try {
+				req.getCore().execute(handler, localReq, rsp);
+			}
+			finally {
+				localReq.close();
+			}
 			
 			if (queryParts.size() > 1) {
 				log.warn("Warning, we have started the importer, but it runs in parallel!");

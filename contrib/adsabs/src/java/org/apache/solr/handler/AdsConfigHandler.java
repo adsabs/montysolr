@@ -51,7 +51,13 @@ public class AdsConfigHandler extends RequestHandlerBase {
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
 			throws Exception {
 		
-		// TODO: allow changing arguments via URL requests
+		SolrParams params = req.getParams();
+    String command = params.get("command","info");
+    
+    if (command.equals("reopenSearcher")) {
+    	req.getCore().getSearcher(true, false, null, false);
+    }
+    
 	}
 	
 	public boolean hasParams(String key) {

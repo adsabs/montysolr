@@ -1,24 +1,20 @@
 package org.apache.solr.search;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.FieldType.NumericType;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
-import org.apache.lucene.queryparser.flexible.core.config.FieldConfig;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.NumberDateFormat;
 import org.apache.lucene.queryparser.flexible.standard.config.NumericConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
-import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsCustomQueryProvider;
@@ -31,14 +27,11 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.common.params.DefaultSolrParams;
-import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.DateField;
 import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.search.SolrIndexSearcher.SetNonLazyFieldSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +52,7 @@ public class AqpAdsabsQParser extends QParser {
 			.getLogger(AqpAdsabsQParser.class);
 
 	private AqpQueryParser qParser;
-	private static String adsConfigName = "ads-config";
+	private static String adsConfigName = "/ads-config";
 
 	public AqpAdsabsQParser(AqpQueryParser parser, String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req)
