@@ -982,7 +982,7 @@ python %(INSTDIR)s/perpetuum/invenio/bin/inveniocfg --update-all
 
 deactivate
 exit 0
-""" % {'INSTDIR':INSTDIR, 'invenio_config': INVENIO_CONFIG})
+""" % {'INSTDIR':INSTDIR, 'invenio_config': INVENIO_CONFIG.replace("$", "\\$")})
         
     run_cmd(['chmod', 'u+x', 'install_invenio.sh'])
     run_cmd(['bash', '-e', './install_invenio.sh'])
