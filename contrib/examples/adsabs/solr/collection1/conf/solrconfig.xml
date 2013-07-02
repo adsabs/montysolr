@@ -201,7 +201,12 @@
          More details on the nuances of each LockFactory...
          http://wiki.apache.org/lucene-java/AvailableLockFactories
     -->
-    <!-- <lockType>native</lockType> -->
+    
+    <!-- When we run several instances sharing the same index, we must
+         make sure that only one writer is modifying it; and other 
+         instances are using 'single' lockType -->
+         
+    <lockType>${montysolr.locktype:native}</lockType>
 
     <!-- Unlock On Startup
 
