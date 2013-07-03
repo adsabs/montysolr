@@ -124,6 +124,9 @@ class NormalTest(TestCase):
     def intercept(self, args, func):
         self.interceptor[re.compile(args)] = func
         
+    def clear_interceptors(self):
+        self.interceptor.clear()
+        
     def interceptTag(self, path, func):
         self.tagInterceptors[path] = func
         
@@ -137,6 +140,14 @@ class NormalTest(TestCase):
                 if not desired == present:
                     raise self.failureException("sequence %i\nwant=%s\n got=%s\nfull=\n%s" %  
                                                 (i, desired, present, "\n".join(self.cmd_collector)))
+    
+    def command_present(self, command):
+        pattern = re.compile(command)
+        for c in self.cmd_collector:
+            if pattern.match(c):
+                return True 
+        return False
+            
                 
 
 class TotalNukeDuke(NormalTest):
@@ -831,7 +842,7 @@ class test_06_no_changes(NormalTest):
         
 
 
-class test_07_checkout_branch(NormalTest):
+class test_07_custom_branch(NormalTest):
     """
     This test assumes montysolr is already built locally and we can simply
     copy files around (without rebuilding them)
@@ -841,19 +852,44 @@ class test_07_checkout_branch(NormalTest):
     def test_master_branch(self):
         
         self.registerTestInstance('test-7000')
-        self.registerTestInstance('test-7001')
         
         # first invocation should take time
-        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000#w', 'test-7000#r'])
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000'])
         
         with montysolrupdate.changed_dir('montysolr'):
             '* master' in montysolrupdate.get_output(['git', 'branch'])
         
-        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'refs/tags/v40.1.0.5', 'test-7000#w', 'test-7000#r'])
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'refs/tags/v40.1.0.5', 'test-7000'])
         
         with montysolrupdate.changed_dir('montysolr'):
             '* refs/tags/v40.1.0.5' in montysolrupdate.get_output(['git', 'branch'])
             
+        
+        # now try the various tricks to force the script into activity
+        # even if the tag hasn't changed
+
+        # but do not bother to re-compile        
+        self.intercept('./build-example.sh .*', lambda x,y,z: True)
+        self.intercept('./build-montysolr.sh .*', lambda x,y,z: True)
+        
+        # should force major rebuild
+        self.cmd_collector = []
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', '-S', 'major', 'test-7000'])
+        self.command_present('./build-montysolr.sh nuke')
+        self.command_present('./build-montysolr.sh .*')
+        
+            
+        # should force minor rebuild
+        self.cmd_collector = []
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', '-S', 'minor', 'test-7000'])
+        self.command_present('./build-montysolr.sh minor')
+        self.command_present('./build-montysolr.sh .*')
+        
+        # should force patch rebuild
+        self.cmd_collector = []
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', '-S', 'patch', 'test-7000'])
+        self.command_present('./build-montysolr.sh patch')
+        self.command_present('./build-montysolr.sh .*')
         
             
 

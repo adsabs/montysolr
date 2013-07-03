@@ -146,6 +146,24 @@ def check_basics():
 def check_options(options):
     if options.force_recompilation:
         options.update = True
+    
+    if options.test_scenario:
+        if not re.compile(r"^(\+|\-)?(major|minor|patch)$").match(options.test_scenario):
+            error("Wrong format in --test_scenario: " % options.test_scenario)
+        if options.test_scenario[0] == '+':
+            operator = lambda x: x+1
+        else:
+            operator = lambda x: x-1
+        if 'major' in options.test_scenario:
+            operation = lambda tag: tag.__setattr__('major', operator(tag.major))
+        elif 'minor' in options.test_scenario:
+            operation = lambda tag: tag.__setattr__('minor', operator(tag.minor))
+        elif 'patch' in options.test_scenario:
+            operation = lambda tag: tag.__setattr__('patch', operator(tag.patch))
+        else:
+            error("I'll never be executed :-) Or, will i?")
+        
+        options.test_scenario = operation
 
 def get_arg_parser():
     usage = '%prog [options] tagname'
@@ -197,6 +215,11 @@ def get_arg_parser():
     p.add_option('-b', '--test_branch',
                  action='store',
                  help='Instead of a tag, checkout a branch (latest code) instead of a tag. Use only for testing!')
+    
+    p.add_option('-S', '--test_scenario',
+                 action='store',
+                 default=None,
+                 help='Change the existing installation tag - the script will think in needs to rebuild things. values: [+/-](major,minor,patch) Use only for testing! ')
     return p
 
 
@@ -354,6 +377,10 @@ def check_live_instance(options, instance_names):
     
     git_tag = get_release_tag(path='montysolr/RELEASE')
     example_tag = get_release_tag(path='montysolr/build/contrib/examples/%s/RELEASE' % INSTNAME)
+    
+    # pretend some change has happened (used for testing)
+    if options.test_scenario:
+        options.test_scenario(example_tag)
     
     if example_tag != git_tag:
         build_example(git_tag)
@@ -1325,9 +1352,13 @@ def main(argv):
             # for testing, we may want to use the latest code
             if options.test_branch:
                 git_tag.ref = options.test_branch
+                
+            # pretend some change has happened (used for testing)
+            if options.test_scenario:
+                options.test_scenario(curr_tag)
             
             if curr_tag > git_tag:
-                error("whaaat!?! The current release has higher tag than git!? %s > %s" % (curr_tag, git_tag))
+                error("whaaat!?! The current instance has a higher tag than montysolr.git!? %s > %s" % (curr_tag, git_tag))
             if curr_tag == git_tag:
                 if len(instance_names) > 0:
                     print("Compiled version is the latest, we'll just check the live instance(s)")
