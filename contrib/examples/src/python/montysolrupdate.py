@@ -509,7 +509,7 @@ def check_live_instance(options, instance_names):
             # status: OK, unittest missing
             
             if options.force_recompilation:
-                run_cmd(['cp', '-fr', 'montysolr/build/contrib/examples/%s' % INSTNAME, symbolic_name])
+                run_cmd(['cp', '-fr', 'montysolr/build/contrib/examples/%s/*' % INSTNAME, symbolic_name])
                 if instance_mode != '' and os.path.exists(os.path.join(symbolic_name, 'solr/collection1/conf/solrconfig.xml.new')):
                     run_cmd(['cp', os.path.join(symbolic_name, 'solr/collection1/conf/solrconfig.xml.new'),
                              os.path.join(symbolic_name, 'solr/collection1/conf/solrconfig.xml')])
@@ -580,7 +580,10 @@ def check_live_instance(options, instance_names):
             
             # status: OK, unittest: OK
             
-            run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s' % INSTNAME, real_name])
+            if options.test_scenario and os.path.exists(real_name):
+                run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s/*' % INSTNAME, real_name])
+            else:
+                run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s' % INSTNAME, real_name])
             run_cmd(['rm', '-fr', "%s/solr/data" % real_name], strict=False)
             
             if instance_mode != 'r':
@@ -610,7 +613,10 @@ def check_live_instance(options, instance_names):
             
             stop_live_instance(symbolic_name, max_wait=options.timeout)
             
-            run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s' % INSTNAME, real_name])
+            if options.test_scenario and os.path.exists(real_name):
+                run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s/*' % INSTNAME, real_name])
+            else:
+                run_cmd(['cp', '-r', 'montysolr/build/contrib/examples/%s' % INSTNAME, real_name])
             run_cmd(['rm', '-fr', "%s/solr/data" % real_name], strict=False)
             run_cmd(['ln', '-s', '%s/%s' % (base_path, symbolic_name_data), "%s/solr/data" % real_name])
             
