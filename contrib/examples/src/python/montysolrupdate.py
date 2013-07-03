@@ -1260,7 +1260,12 @@ def start_live_instance(options, instance_dir, port,
             for n in list_of_readers:
                 reader_port = extract_port(n.split('#')[0])
                 list_of_nodes.append(' <str>http://localhost:%s/solr/admin/cores?wt=json&amp;action=RELOAD&amp;core=collection1</str>' % reader_port)
-                 
+                
+            # this is necessary only when in test run (and there we can be sure that the files were
+            # overwritten when a new code was installed)
+            if options.test_scenarios:
+                run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
+            
             if not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
                 run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
             
