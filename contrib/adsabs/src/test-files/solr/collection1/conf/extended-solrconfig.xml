@@ -8,7 +8,7 @@
   <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
     
   
-  <requestHandler name="ads-config" class="solr.AdsConfigHandler" default="false">
+  <requestHandler name="/ads-config" class="solr.AdsConfigHandler" default="false">
      <arr name="query">
         <str name="defField">all</str>
         <bool name="overwriteDupes">false</bool>
