@@ -1263,7 +1263,7 @@ def start_live_instance(options, instance_dir, port,
                 
             # this is necessary only when in test run (and there we can be sure that the files were
             # overwritten when a new code was installed)
-            if options.test_scenarios:
+            if options.test_scenario:
                 run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
             
             if not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
