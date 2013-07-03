@@ -77,7 +77,7 @@ public class AqpOPERATORProcessor extends AqpQProcessorPost {
         } else {
           throw new QueryNodeException(new MessageImpl(
               QueryParserMessages.INVALID_SYNTAX,
-              "Proximity is only allowed in a range: " + getRange()));
+              "Proximity is only allowed in a range: " + getRange()[0] + "-" + getRange()[1]));
         }
       }
 

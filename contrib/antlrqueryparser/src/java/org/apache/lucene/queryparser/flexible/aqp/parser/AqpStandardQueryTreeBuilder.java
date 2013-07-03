@@ -54,8 +54,10 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.StandardBooleanQuer
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpNearQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 
 /**

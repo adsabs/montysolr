@@ -5,6 +5,7 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardLuceneParser;
@@ -13,6 +14,7 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryNodePro
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryTreeBuilder;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
@@ -70,10 +72,10 @@ public class AqpLuceneQParser extends QParser {
 		IndexSchema schema = req.getSchema();
 
 		
-		// now configure the parser using the request params 
+		// now configure the parser using the request params, likely incomplete (yet)
 		QueryConfigHandler config = qParser.getQueryConfigHandler();
 		qParser.setAnalyzer(schema.getAnalyzer());
-
+		qParser.setDefaultField(params.get(CommonParams.DF, qParser.getDefaultField()));
 		
 		String opParam = getParam(QueryParsing.OP);
 		if (opParam != null) {
@@ -85,9 +87,9 @@ public class AqpLuceneQParser extends QParser {
 			qParser.setDefaultOperator(Operator.OR);
 		}
 		
-		// now add the special analyzer that knows to use solr token chains
-		config.set(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER, req.getSchema().getQueryAnalyzer());
 		
+		// this is not useful in solr world (?) - but must be available
+		config.set(ConfigurationKeys.MULTI_FIELDS, new CharSequence[0]);
 		
 		if (params.getBool("debugQuery", false) != false) {
 			try {
