@@ -100,8 +100,7 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
     if (r!= null) {
       log.error("We also called " + backupHandler.getName() + " with params: " + r.getParamString());
     }
-    commit(false); // anything bad happens if we don't call commit?
-    super.rollback();
+    //commit(false); // anything bad happens if we don't call commit?
   }
   
   protected SolrQueryRequest getReq() {
