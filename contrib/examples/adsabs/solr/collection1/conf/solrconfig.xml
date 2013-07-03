@@ -1918,7 +1918,7 @@
   <requestHandler name="/montysolr_diagnostics" class="org.apache.solr.handler.PythonDiagnosticHandler" default="false" />
   
   
-  <requestHandler name="ads-config" class="solr.AdsConfigHandler" default="false">
+  <requestHandler name="/ads-config" class="solr.AdsConfigHandler" default="false">
      <lst name="queryParser">
       <str name="defaultField">unfielded_search</str>
       <str name="defaultOperator">AND</str>
