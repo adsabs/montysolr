@@ -508,19 +508,15 @@ def check_live_instance(options, instance_names):
             
             # status: OK, unittest missing
             
-            if options.force_recompilation:
+            if options.force_recompilation or options.test_scenario:
                 run_cmd(['cp', '-fr', 'montysolr/build/contrib/examples/%s/*' % INSTNAME, symbolic_name])
-                if instance_mode != '' and os.path.exists(os.path.join(symbolic_name, 'solr/collection1/conf/solrconfig.xml.new')):
-                    run_cmd(['cp', os.path.join(symbolic_name, 'solr/collection1/conf/solrconfig.xml.new'),
-                             os.path.join(symbolic_name, 'solr/collection1/conf/solrconfig.xml')])
-                reload_core(port)
-                run_cmd(['rm', '%s/FAILED.counter'], strict=False)
-                
+            
             # just check if the instance is in a healthy state
             kwargs = dict(max_wait=options.timeout)
             if options.check_diagnostics:
                 kwargs['tmpl'] ='http://localhost:%s/solr/montysolr_diagnostics'
-            if not check_instance_health(port, **kwargs):
+                
+            if not check_instance_health(port, **kwargs) or options.test_scenario or options.force_recompilation:
                 if stop_live_instance(symbolic_name, max_wait=options.timeout):
                     start_live_instance(options, symbolic_name, port, 
                                         max_wait=options.timeout,
@@ -529,6 +525,7 @@ def check_live_instance(options, instance_names):
                 else:
                     error("Can't restart: %s" % symbolic_name)
             else:
+                
                 print ('%s is HEALTHY' % symbolic_name)
             
             continue # nothing to do
@@ -1263,10 +1260,7 @@ def start_live_instance(options, instance_dir, port,
                 
             # this is necessary only when in test run (and there we can be sure that the files were
             # overwritten when a new code was installed)
-            if options.test_scenario:
-                run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
-            
-            if not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
+            if options.test_scenario or not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
                 run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
             
             solrconfig = open('solr/collection1/conf/solrconfig.xml.orig', 'r').read()
