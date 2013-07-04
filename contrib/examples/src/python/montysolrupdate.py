@@ -1263,7 +1263,6 @@ def start_live_instance(options, instance_dir, port,
                 reader_port = extract_port(n.split('#')[0])
                 list_of_nodes.append(' <str>http://localhost:%s/solr/admin/cores?wt=json&amp;action=RELOAD&amp;core=collection1</str>' % reader_port)
                 
-            
             solrconfig = open('solr/collection1/conf/solrconfig.xml.orig', 'r').read()
             
             solrconfig = solrconfig.replace('</updateHandler>',

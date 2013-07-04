@@ -239,7 +239,8 @@ class test_01_major_upgrade(NormalTest):
                           'ln -s test-7000_* test-7000', 
                           'mkdir test-7000_*_data', 
                           'ln -s */perpetuum/test-7000_*_data */perpetuum/test-7000/solr/data', 
-                          'ln -s test-7000_*_data test-7000_data', 
+                          'ln -s test-7000_*_data test-7000_data',
+                          'cp solr/collection1/conf/solrconfig.xml solr/collection1/conf/solrconfig.xml.orig', 
                           'chmod u+x automatic-run.sh', 
                           'bash -e ./automatic-run.sh &'
                          )
@@ -285,7 +286,8 @@ class test_01_major_upgrade(NormalTest):
                   'ln -s test-7000_* next-release_test-7000', 
                   'ln -s test-7000_*_data next-release_test-7000_data', 
                   'rm -fr test-7000_*/solr/data', 
-                  'ln -s */perpetuum/test-7000_*_data */perpetuum/next-release_test-7000/solr/data', 
+                  'ln -s */perpetuum/test-7000_*_data */perpetuum/next-release_test-7000/solr/data',
+                  'cp solr/collection1/conf/solrconfig.xml solr/collection1/conf/solrconfig.xml.orig', 
                   'chmod u+x automatic-run.sh', 
                   'bash -e ./automatic-run.sh &'
                  )
@@ -358,7 +360,8 @@ class test_02_minor_upgrade(NormalTest):
                           'ln -s test-7000_* test-7000', 
                           'mkdir test-7000_*_data', 
                           'ln -s */perpetuum/test-7000_*_data */perpetuum/test-7000/solr/data', 
-                          'ln -s test-7000_*_data test-7000_data', 
+                          'ln -s test-7000_*_data test-7000_data',
+                          'cp solr/collection1/conf/solrconfig.xml solr/collection1/conf/solrconfig.xml.orig', 
                           'chmod u+x automatic-run.sh', 
                           'bash -e ./automatic-run.sh &'
                          )
@@ -418,7 +421,8 @@ class test_02_minor_upgrade(NormalTest):
                   'rm test-7000_data', 
                   'ln -s test-7000_%s test-7000' % str(new_tag), 
                   'ln -s test-7000_%s_data test-7000_data' % str(new_tag), 
-                  'ln -s */perpetuum/test-7000_data test-7000_%s/solr/data' % str(new_tag), 
+                  'ln -s */perpetuum/test-7000_data test-7000_%s/solr/data' % str(new_tag),
+                  'cp solr/collection1/conf/solrconfig.xml solr/collection1/conf/solrconfig.xml.orig', 
                   'chmod u+x automatic-run.sh', 
                   'bash -e ./automatic-run.sh &'
                  )
@@ -467,6 +471,7 @@ class test_03_patch_level_upgrade(NormalTest):
                           'mkdir test-7000_*_data', 
                           'ln -s */perpetuum/test-7000_*_data */perpetuum/test-7000/solr/data', 
                           'ln -s test-7000_*_data test-7000_data', 
+                          'cp solr/collection1/conf/solrconfig.xml solr/collection1/conf/solrconfig.xml.orig',
                           'chmod u+x automatic-run.sh', 
                           'bash -e ./automatic-run.sh &'
                          )
@@ -517,7 +522,8 @@ class test_03_patch_level_upgrade(NormalTest):
                   'rm -fr test-7000_%s/solr/data' % str(new_tag), 
                   'ln -s */perpetuum/test-7000_data test-7000_%s/solr/data' % str(new_tag), 
                   'rm test-7000', 
-                  'ln -s test-7000_%s test-7000' % str(new_tag), 
+                  'ln -s test-7000_%s test-7000' % str(new_tag),
+                  'cp solr/collection1/conf/solrconfig.xml solr/collection1/conf/solrconfig.xml.orig', 
                   'chmod u+x automatic-run.sh', 
                   'bash -e ./automatic-run.sh &'
                  )
@@ -548,7 +554,7 @@ class test_03_patch_level_upgrade(NormalTest):
                         os.path.abspath("test-7000_%s_data/solr/data" % str(old_tag)), 
                         "The new instance solr/data should point to old instance data folder")
         
-        
+        self.cmd_collector = []
         self.checkCommandSequence( 
                   'git fetch', 
                   'git reset --hard origin/master', 
