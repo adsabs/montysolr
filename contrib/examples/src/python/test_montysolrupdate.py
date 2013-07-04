@@ -840,6 +840,7 @@ class test_06_no_changes(NormalTest):
         montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000'])
         self.assertTrue(time.time() - start < 3, "Invocation took too long")
         
+        
 
 
 class test_07_custom_branch(NormalTest):
@@ -852,6 +853,7 @@ class test_07_custom_branch(NormalTest):
     def test_master_branch(self):
         
         self.registerTestInstance('test-7000')
+        self.registerTestInstance('test-7001')
         
         # first invocation should take time
         montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', 'test-7000'])
@@ -881,15 +883,25 @@ class test_07_custom_branch(NormalTest):
             
         # should force minor rebuild
         self.cmd_collector = []
-        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', '-S', 'minor', 'test-7000'])
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', '-S', 'minor', 'test-7000#w', 'test-7001#r'])
         self.command_present('./build-montysolr.sh minor')
         self.command_present('./build-montysolr.sh .*')
         
-        # should force patch rebuild
+        # simulate broken configuration - we want to test if the master fixes it
+        for instance in ('test-7000', 'test-7001'):
+            with montysolrupdate.changed_dir(instance):
+                data = ''
+                open('solr/collection1/conf/solrconfig.xml.new', 'w').write(data)
+                open('solr/collection1/conf/solrconfig.xml', 'w').write(data)
+                open('solr/collection1/conf/solrconfig.xml.orig', 'w').write(data)
+                
         self.cmd_collector = []
-        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', '-S', 'patch', 'test-7000'])
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', '-b', 'master', '-S', 'patch', 'test-7000#w', 'test-7001#r'])
         self.command_present('./build-montysolr.sh patch')
         self.command_present('./build-montysolr.sh .*')
+        self.command_present('kill .*')
+        self.isRunning(7000)
+        self.isRunning(7001)
         
             
 

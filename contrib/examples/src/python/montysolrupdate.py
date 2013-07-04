@@ -1247,7 +1247,12 @@ def start_live_instance(options, instance_dir, port,
         start = re.sub(r'HOMEDIR=.*\n', 'HOMEDIR=%s\n' % os.path.realpath('.'), start)
         start = re.sub(r'--port\s+\d+', '--port %s' % port, start)
         start = re.sub('\n([\t\s]+)(java -cp )', '\\1export PATH=%s/bin:$PATH\n\\1\\2' % os.environ['JAVA_HOME'], start)
-
+        
+        # this is necessary only when in test run (and there we can be sure that the files were
+        # overwritten when a new code was installed)
+        if options.test_scenario or not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
+            run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
+            
         if instance_mode =='w': # for master-writers
             # we must change also the solrconfig
             if len(list_of_readers) <= 0:
@@ -1258,10 +1263,6 @@ def start_live_instance(options, instance_dir, port,
                 reader_port = extract_port(n.split('#')[0])
                 list_of_nodes.append(' <str>http://localhost:%s/solr/admin/cores?wt=json&amp;action=RELOAD&amp;core=collection1</str>' % reader_port)
                 
-            # this is necessary only when in test run (and there we can be sure that the files were
-            # overwritten when a new code was installed)
-            if options.test_scenario or not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
-                run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
             
             solrconfig = open('solr/collection1/conf/solrconfig.xml.orig', 'r').read()
             
