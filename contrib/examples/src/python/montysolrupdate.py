@@ -1261,7 +1261,7 @@ def start_live_instance(options, instance_dir, port,
             list_of_nodes = []
             for n in list_of_readers:
                 reader_port = extract_port(n.split('#')[0])
-                list_of_nodes.append(' <str>http://localhost:%s/solr/admin/cores?wt=json&amp;action=RELOAD&amp;core=collection1</str>' % reader_port)
+                list_of_nodes.append(' <str>http://localhost:%s/solr/ads-config?command=reopenSearcher</str>' % reader_port)
                 
             solrconfig = open('solr/collection1/conf/solrconfig.xml.orig', 'r').read()
             
