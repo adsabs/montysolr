@@ -369,6 +369,36 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 
 		assertU(commit());
 		assertQ(req("q", "recid:" + added), "//*[@numFound='0']");
+		
+		
+		// now delete records inside solr and see whether the doctor can
+		// discover them and recover them
+		
+		assertU(delQ("*:*"));
+		assertU(commit());
+		assertQ(req("q", "*:*"), "//*[@numFound='0']");
+
+		failThis.clear();
+
+		req = req("command", "discover");
+		rsp = new SolrQueryResponse();
+		core.execute(doctor, req, rsp);
+
+		while (doctor.isBusy()) {
+			Thread.sleep(300);
+		}
+
+		req = req("command", "start");
+		rsp = new SolrQueryResponse();
+		core.execute(doctor, req, rsp);
+
+		while (doctor.isBusy()) {
+			Thread.sleep(300);
+		}
+
+		assertU(commit());
+
+		assertQ(req("q", "*:*"), "//*[@numFound='22']");
 
 	}
 

@@ -159,6 +159,33 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		while (handler.isBusy()) {
 			Thread.sleep(10);
 		}
+		
+		
+		// test batchsize and maximport params
+		message = MontySolrVM.INSTANCE
+		.createMessage("set_changed_recids_mock")
+		.setParam("ADDED", "1,2,3")
+		.setParam("UPDATED", "4,6")
+		.setParam("DELETED", "5")
+		.setParam("last_recid", "-1")
+		.setParam("mod_date", "xxxx");
+	  
+		MontySolrVM.INSTANCE.sendMessage(message);
+		
+		rsp = new SolrQueryResponse();
+		handler.setName("h-04");
+		core.execute(handler, req("last_recid", "-1", 
+			  "inveniourl", inveniourl,
+				"importurl", importurl,
+				"updateurl", updateurl,
+				"deleteurl", deleteurl,
+				"maximport", "1",
+				"batchsize", "2",
+				"idtoken", "#4"), rsp2);
+		
+		assert handler.batchSize == 2;
+		assert handler.maximport == 1;
+	
 	}
 	
 	
@@ -174,6 +201,8 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 		public int[] deleted = null;
 		public String tName = null;
 		public boolean testUpload = true;
+		private Integer batchSize = null;
+		private Integer maximport = null;
 		
 		public void setName(String name) {
 			tName = name;
@@ -190,12 +219,21 @@ public class TestInvenioKeepRecidUpdated extends MontySolrAbstractTestCase {
 				lastRecId = Integer.valueOf(prop.getProperty("last_recid"));
 			}
 			
-		    Map<String, Object> ret = super.retrieveRecids(prop, req, rsp);
-		    if (ret != null) {
-		    	retrievedRecIds = (Map<String, int[]>) ret.get("dictData");
-		    	lastUpdatedRecId = (Integer) ret.get("last_recid");
-		    }
-		    return ret;
+			Map<String, Object> ret = super.retrieveRecids(prop, req, rsp);
+			if (ret != null) {
+				retrievedRecIds = (Map<String, int[]>) ret.get("dictData");
+				lastUpdatedRecId = (Integer) ret.get("last_recid");
+			}
+			
+			if (prop.containsKey("batchsize")) {
+				batchSize  = (Integer) prop.get("batchsize");
+			}
+			
+			if (prop.containsKey("maximport")) {
+				maximport   = (Integer) prop.get("maximport");
+			}
+			
+			return ret;
 		}
 		
 		@Override

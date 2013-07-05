@@ -179,8 +179,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 
 	
 	private String pythonFunctionName = "get_recids_changes";
-	private int max_maximport = 50000;
-	private int max_batchsize = 50000;
+	private int max_maximport = 20000;
+	private int max_batchsize = 500000;
 	
 	
 	@Override

@@ -620,6 +620,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     queue.registerNewBatch("/update", "commit=true");
   }
 
+  private Map<Integer, Map<Integer, Integer>> tmpMap = new HashMap<Integer, Map<Integer,Integer>>();
   private BitSet[] discoverMissingRecords(BitSet present, BitSet missing, BitSet toDelete, 
   		SolrQueryRequest req) throws IOException {
     // get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
@@ -636,11 +637,21 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     // setting maxRecs to very large value means the worker cannot be stopped in time
     int maxRecs = Math.min(params.getInt("max_records", 100000), 1000000);
     
+    
     int[] existingRecs = FieldCache.DEFAULT.getInts(req.getSearcher().getAtomicReader(), field, false);
-    HashMap<Integer, Integer> idToLuceneId = new HashMap<Integer, Integer>(existingRecs.length);
-    for (int i=0;i<existingRecs.length;i++) {
-      idToLuceneId.put(existingRecs[i], i);
+    Map<Integer, Integer> idToLuceneId;
+    
+    if (tmpMap.containsKey(existingRecs.hashCode())) {
+    	idToLuceneId = tmpMap.get(existingRecs.hashCode());
     }
+    else {
+    	tmpMap.clear();
+    	idToLuceneId = new HashMap<Integer, Integer>(existingRecs.length);
+    	for (int i=0;i<existingRecs.length;i++) {
+        idToLuceneId.put(existingRecs[i], i);
+      }
+    }
+    
     
     if (present == null) present = new BitSet(existingRecs.length);
     if (missing == null) missing = new BitSet(existingRecs.length);
@@ -666,6 +677,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
       Object results = message.getResults();
       if (results == null) {
         finished = true;
+        tmpMap.clear();
         break;
       }
       dictData = (HashMap<String, int[]>) results;
@@ -725,8 +737,8 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     
     // for security reason, only certain params can be supplied by user
     SolrParams params = req.getParams();
-    int batchSize = Math.max(Math.min(params.getInt("batchSize", 200), 200), 1);
-    int maxRecords = Math.max(Math.min(params.getInt("maxRecords", 10000), 10000), 1000);
+    int batchSize = Math.max(Math.min(params.getInt("batchSize", 200), 2000), 1);
+    int maxRecords = Math.max(Math.min(params.getInt("maxRecords", 10000), 100000), 1000);
     
     List<String> queryParts = InvenioKeepRecidUpdated.getQueryIds(batchSize, ids);
     for (String queryPart : queryParts) {
