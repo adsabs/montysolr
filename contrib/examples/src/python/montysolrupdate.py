@@ -69,6 +69,9 @@ import simplejson
 import urllib
 import time
 import socket 
+import threading
+import Queue
+import traceback
 
 from contextlib import contextmanager
 
@@ -672,6 +675,8 @@ def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admi
             if rsp['status'] == '0' or rsp['status'] == 'OK':
                 return True
         except Exception, e:
+            if rsp is None:
+                traceback.print_exc(e)
             if rsp is not None and 'error' in rsp:
                 error(str(rsp['error']).replace('\\n', "\n"))
         time.sleep(1)
@@ -695,16 +700,33 @@ def reload_core(port):
         return True
     else:
         error('something is wrong, unxpected reply: %s' % rsp)
+
+
+def make_request(q, url, kwargs):
+    try:
+        kwargs['wt'] = 'json'
+        params = urllib.urlencode(kwargs)
+        page = ''
+        conn = urllib.urlopen(url, params)
+        page = conn.read()
+        rsp = simplejson.loads(page)
+        conn.close()
+        q.put(rsp)
+    except Exception, e:
+        q.put(e)
+    
         
 def req(url, **kwargs):
-    kwargs['wt'] = 'json'
-    params = urllib.urlencode(kwargs)
-    page = ''
-    conn = urllib.urlopen(url, params)
-    page = conn.read()
-    rsp = simplejson.loads(page)
-    conn.close()
-    return rsp
+    q = Queue.Queue()
+    t = threading.Thread(target=make_request, args = (q, url, kwargs))
+    t.start()
+    t.join(3.0)
+    r = q.get()
+    if r is Exception:
+        raise r
+    elif r is None:
+        raise Exception("Timeout getting url=%s & %s" % (url, kwargs))
+    return r
 
 def get_pid(pidpath):
     if os.path.exists(pidpath):
