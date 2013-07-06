@@ -319,7 +319,7 @@
          searcher to be opened to make those changes visible.
       -->
      <autoCommit> 
-       <maxDocs>40000</maxDocs>  <!--ADSLABS:06/2012 -->
+       <maxDocs>100000</maxDocs>  <!--ADSLABS:06/2012 -->
        <maxTime>1800000</maxTime> <!--ADSLABS:06/2012 --> 
      </autoCommit>
 
@@ -1827,7 +1827,7 @@
        <str name="updateurl">/invenio/import?command=full-import&amp;dirs=</str>
        <str name="deleteurl">blankrecords</str>
        <str name="pythonFunctionName">get_recids_changes</str>
-       <int name="maximport">1000</int>
+       <int name="maximport">100</int>
        <int name="batchsize">100000</int>
      </lst>
   </requestHandler>
@@ -1844,8 +1844,8 @@
        <str name="updateurl">/invenio/import2?command=full-import&amp;dirs=</str>
        <str name="deleteurl">blankrecords</str>
        <str name="pythonFunctionName">get_recids_changes</str>
-       <int name="maximport">1000</int>
-       <int name="batchsize">10000</int>
+       <int name="maximport">100</int>
+       <int name="batchsize">100000</int>
      </lst>
   </requestHandler>
   
