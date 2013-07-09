@@ -205,6 +205,7 @@
 			solr-example="${prop.solr.real.location}/example" />
 	    
 		<mkdir dir="${build.dir}/${example.name}/solr/lib" />
+	  <mkdir dir="${build.dir}/${example.name}/work" />
 		
 		<!-- put core jar into example/lib -->
 		<copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true" verbose="yes">
