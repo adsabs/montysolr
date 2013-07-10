@@ -594,6 +594,8 @@
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_)"
           replacement="" replace="all" />
+        <filter
+          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.WhitespaceTokenizerFactory" />
@@ -849,12 +851,12 @@
 			multiValued="true" />
 
 		<field name="keyword" type="normalized_text_ascii" indexed="true"
-			stored="true" multiValued="true" />
+			stored="true" multiValued="true" omitNorms="true"/>
 		<field name="keyword_wildcard" type="normalized_text_ascii" 
-      indexed="false" stored="false" required="false" multiValued="false" />
+      indexed="false" stored="false" required="false" multiValued="false"/>
       	
 		<field name="keyword_norm" type="normalized_text_ascii" indexed="true"
-			stored="true" multiValued="true" />
+			stored="true" multiValued="true" omitNorms="true"/>
 		<field name="keyword_norm_wildcard" type="normalized_text_ascii" 
       indexed="false" stored="false" required="false" multiValued="false" />
       	
@@ -890,10 +892,10 @@
 
 			
 		<field name="facility" type="normalized_text_ascii" indexed="true" stored="true"
-      multiValued="true" />
+      multiValued="true" omitNorms="true"/>
 			
 		<field name="grant" type="normalized_text_ascii" indexed="true" stored="true"
-      multiValued="true" />
+      multiValued="true" omitNorms="true"/>
 			
 		<!-- <field name="grant_id" type="string" indexed="false" stored="false" 
 			multiValued="true"/> <field name="grant_agencies" type="string" indexed="false" 
