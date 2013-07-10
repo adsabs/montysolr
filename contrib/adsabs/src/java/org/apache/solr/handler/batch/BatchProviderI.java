@@ -6,4 +6,5 @@ public interface BatchProviderI {
 	public void run(SolrQueryRequest locReq, BatchHandlerRequestQueue queue) throws Exception;
 	public void setName(String name);
 	public String getName();
+	public String getDescription();
 }

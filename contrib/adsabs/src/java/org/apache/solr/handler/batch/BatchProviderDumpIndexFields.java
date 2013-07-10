@@ -36,6 +36,10 @@ import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.SolrIndexSearcher;
 
+/**
+ * Provider that dumps selected fields to disk.
+ * The data is stored in CSV format.
+ */
 public class BatchProviderDumpIndexFields extends BatchProvider {
 	
 	private Filter filter = null;
@@ -176,5 +180,9 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 		out.write("}");
 		out.close();
 	}
-
+	
+	@Override
+  public String getDescription() {
+	  return "Dumps selected fields (for selected docs) to disk in JSON format";
+  }
 }

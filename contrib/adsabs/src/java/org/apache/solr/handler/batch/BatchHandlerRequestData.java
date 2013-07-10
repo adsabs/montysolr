@@ -13,6 +13,7 @@ public class BatchHandlerRequestData {
 	public int count;
 	private SolrParams params;
 	public BatchProvider handler;
+	private String msg = null;
 
 	public BatchHandlerRequestData(BatchProvider handler, SolrParams params) {
 		this.url = params.toString();
@@ -31,7 +32,15 @@ public class BatchHandlerRequestData {
 	}
 
 	public String toString() {
-		return handler + "::" + url;
+		return handler + "::" + url + (msg != null ? msg : "");
+	}
+	
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
+	
+	public String getMsg() {
+		return msg;
 	}
 
 	/*

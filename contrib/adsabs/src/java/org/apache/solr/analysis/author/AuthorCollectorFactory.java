@@ -22,6 +22,7 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
 
   private List<String> tokenTypes;
   private boolean emitTokens;
+	private boolean collectTokens;
 
   public void init(Map<String, String> args) {
     super.init(args);
@@ -37,6 +38,13 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
         emitTokens = true;
       }
     }
+    collectTokens = false;
+    if (args.containsKey("collectTokens")) {
+      if (((String) args.get("collectTokens")).equals("true")) {
+        collectTokens = true;
+      }
+    }
+    
   }
 
   /* (non-Javadoc)
@@ -44,7 +52,7 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
    */
   public AuthorCollectorFilter create(TokenStream input) {
     
-    AuthorCollectorFilter collector = new AuthorCollectorFilter(input, getSynonymMap());
+    AuthorCollectorFilter collector = new AuthorCollectorFilter(input, collectTokens ? getSynonymMap() : null);
     collector.setTokenTypes(tokenTypes);
     collector.setEmitTokens(emitTokens);
     return collector;

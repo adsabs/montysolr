@@ -503,18 +503,22 @@ public class BatchHandler extends RequestHandlerBase {
 
 		BatchProviderI _runner = null;
 		BatchHandlerRequestQueue _queue = null;
+		
+		private void initialize(SolrQueryRequest req) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+			Class clazz = loadClass(name, req.getCore());
+			if (BatchProviderI.class.isAssignableFrom(clazz)) {
+				_runner = (BatchProviderI) clazz.newInstance();
+				_runner.setName(name);
+			}
+			else {
+				throw new RuntimeException("The class does not provide BatchProviderI interface: " + this.name);
+			}
+		}
 
 		@Override
 		public void run(SolrQueryRequest locReq, BatchHandlerRequestQueue queue) throws Exception {
 			if (_runner == null) {
-				Class clazz = loadClass(name, locReq.getCore());
-				if (BatchProviderI.class.isAssignableFrom(clazz)) {
-					_runner = (BatchProviderI) clazz.newInstance();
-					_runner.setName(name);
-				}
-				else {
-					throw new RuntimeException("The class does not provide BatchProviderI interface: " + this.name);
-				}
+				initialize(locReq);
 			}
 			_runner.run(locReq, _queue);
 		}
@@ -544,6 +548,16 @@ public class BatchHandler extends RequestHandlerBase {
 		public String toString() {
 			return "LazyBatchProvider:(" + this.name + ")";
 		}
+
+		@Override
+    public String getDescription() {
+	    if (_runner == null) {
+	    	return "Lazy loader for a provider: " + name + " I don't know what I hold :-)";
+	    }
+	    else {
+	    	return _runner.getDescription();
+	    }
+    }
 	}
 	
 	/*

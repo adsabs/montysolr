@@ -18,8 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author rchyla
- * 
  * This class harvests (eats) different spellings and variations of the
  * author names. The variations will not get indexed.
  * 
@@ -32,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public final class AuthorCollectorFilter extends TokenFilter {
 
   public static final Logger log = LoggerFactory.getLogger(AuthorCollectorFilter.class);
-  private WriteableSynonymMap synMap;
+  private WriteableSynonymMap synMap = null;
 
   private final CharTermAttribute termAtt;
   private final TypeAttribute typeAtt;
@@ -94,7 +92,7 @@ public final class AuthorCollectorFilter extends TokenFilter {
 
 
   private void addTokensToSynMap() {
-    if (tokenBuffer.size()>0) {
+    if (tokenBuffer.size()>0 && synMap != null) {
       synMap.add(authorInput, tokenBuffer);
       tokenBuffer.clear();
       authorInput=null;

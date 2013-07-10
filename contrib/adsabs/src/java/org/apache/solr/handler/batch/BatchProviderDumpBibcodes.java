@@ -92,4 +92,9 @@ public class BatchProviderDumpBibcodes extends BatchProvider {
     }
     
   }
+	
+	@Override
+  public String getDescription() {
+	  return "Receives bibcodes and dumps selected fields to disk in JSON format";
+  }
 }

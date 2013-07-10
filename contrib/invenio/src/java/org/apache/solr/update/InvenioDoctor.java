@@ -595,7 +595,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
 	private void runDiscovery(SolrQueryRequest req) throws IOException {
     SolrParams params = req.getParams();
     if (params.get("last_recid", null) == null || params.getInt("last_recid", 0) == -1) {
-      queue.setMissing(new BitSet());
+      queue.setPresent(new BitSet());
       queue.setMissing(new BitSet());
       queue.setToDelete(new BitSet());
       setWorkerMessage("Resetting list of missing records (new search will be done)");

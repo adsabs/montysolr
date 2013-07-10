@@ -19,6 +19,20 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 
+/**
+ * Provider that dumps selected fields to disk.
+ * The resulting file has 3 columns:
+ * 
+ * #term #termFreq #docFreq
+ * 
+ * You can dump several fields at one, just
+ * separate them by a comma
+ * 
+ * Parameters:
+ * 
+ *    field: string, comma separated list of 
+ *           field names
+ */
 public class BatchProviderDumpTermFreqs extends BatchProvider {
 	public void run(SolrQueryRequest req, BatchHandlerRequestQueue queue) throws Exception {
 
@@ -81,6 +95,10 @@ public class BatchProviderDumpTermFreqs extends BatchProvider {
 			}
 		}
 		out.close();
-
 	}
+	
+	@Override
+  public String getDescription() {
+	  return "Dumps term, termFreq, and docFreq (for selected fields) to disk in CSV format";
+  }
 }

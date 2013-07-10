@@ -6,6 +6,11 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.JSONDumper;
 
+/**
+ * Provider which saves documents from the index in
+ * JSON format on disk. 
+ *
+ */
 public class BatchProviderDumpIndex extends BatchProvider {
 	
 	private Bits docsToCollect = null;
@@ -27,5 +32,10 @@ public class BatchProviderDumpIndex extends BatchProvider {
 		dumper.writeResponse();
 	  
 	}
+	
+	@Override
+  public String getDescription() {
+	  return "Generic provider which dumps (selected docs) to disk in JSON format";
+  }
 
 }

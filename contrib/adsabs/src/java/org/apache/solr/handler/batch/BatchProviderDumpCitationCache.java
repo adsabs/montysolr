@@ -85,4 +85,9 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  out.close();
 	}
 
+	@Override
+  public String getDescription() {
+	  return "Dumps citation network structure to disk";
+  }
+
 }
