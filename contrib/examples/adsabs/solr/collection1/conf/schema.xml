@@ -1006,6 +1006,7 @@
   
 	<copyField source="author_norm" dest="all" />
 	<copyField source="alternate_title" dest="all" />
+	<copyField source="alternate_title" dest="title" />
 	<copyField source="bibcode" dest="all" />
 	<copyField source="doi" dest="all" />
 	<copyField source="identifier" dest="all" />
