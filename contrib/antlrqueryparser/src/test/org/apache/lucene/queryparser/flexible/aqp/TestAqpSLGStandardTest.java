@@ -923,7 +923,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     iw.close();
     IndexSearcher is = new IndexSearcher(DirectoryReader.open(ramDir));
 
-    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.ROOT);
+    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
     Date d1_12 = format.parse("1/12/2005");
     Date d3_12 = format.parse("3/12/2005");
     Date d4_12 = format.parse("4/12/2005");
@@ -936,13 +936,13 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     String dec3 = df.format(d3_12);
     String dec4 = df.format(d4_12);
     String dec28 = df.format(d28_12);
+    // some locales translate date into string /w spaces, so we must use "phrase"
+    assertHits(2, String.format("[\"%s\" TO \"%s\"]", dec1, dec28), is);
+    assertHits(2, String.format("[\"%s\" TO \"%s\"]", dec1, dec4), is);
 
-    assertHits(2, String.format("[%s TO %s]", dec1, dec28), is);
-    assertHits(2, String.format("[%s TO %s]", dec1, dec4), is);
-
-    assertHits(2, String.format("{%s TO %s}", dec1, dec28), is);
-    assertHits(1, String.format("{%s TO %s}", dec1, dec4), is);
-    assertHits(0, String.format("{%s TO %s}", dec3, dec4), is);
+    assertHits(2, String.format("{\"%s\" TO \"%s\"}", dec1, dec28), is);
+    assertHits(1, String.format("{\"%s\" TO \"%s\"}", dec1, dec4), is);
+    assertHits(0, String.format("{\"%s\" TO \"%s\"}", dec3, dec4), is);
 
     ramDir.close();
   }
