@@ -153,7 +153,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
      * id - str type, the unique id key, we do no processing
      */
     
-    dumpDoc(null, "id", "title");
     assertQ(req("q", "id:2"), "//*[@numFound='1']");
     assertQ(req("q", "id:9218605"), "//*[@numFound='1']");
     assertQ(req("q", "id:9218920"), "//*[@numFound='1']");

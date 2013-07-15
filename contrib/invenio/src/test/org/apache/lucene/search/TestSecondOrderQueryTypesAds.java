@@ -33,12 +33,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
   private IndexSearcher searcher;
   private RandomIndexWriter writer;
 
-  @BeforeClass
-  public static void beforeTestCitationQuery() throws Exception {
-    MontySolrSetup.addBuildProperties("contrib/invenio");
-    MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
-        + "/contrib/invenio/src/python");
-  }
+  
 
   @Override
   public void setUp() throws Exception {

@@ -161,8 +161,6 @@ public class AqpAdsabsSubQueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitedBy(idField, refField), false);
 	      }
 	    }.configure(true)); // true=canBeAnalyzed
-		parsers.put("incoming_links", parsers.get("citations"));
-		parsers.put("citedby", parsers.get("citations")); // XXX - to remove after AAS!!!
 		
 	  
 		// references(P) - set of papers that are in the reference list of P
@@ -176,9 +174,6 @@ public class AqpAdsabsSubQueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
 			}
 		  }.configure(true)); // true=canBeAnalyzed
-		parsers.put("outgoing_links", parsers.get("references"));
-		parsers.put("cites", parsers.get("references")); // XXX - to remove after AAS!!!
-		parsers.put("refersto", parsers.get("references")); // XXX - to remove after AAS!!!
 		
 		// test for comparison with the citation query
 		parsers.put("joincitations", new AqpSubqueryParserFull() {
