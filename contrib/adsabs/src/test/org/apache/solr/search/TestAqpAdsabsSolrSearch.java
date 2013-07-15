@@ -168,35 +168,21 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     // references()
     assertQueryEquals(req("qt", "aqp", "q", "references(author:muller)"), 
         "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=references[cache:reference])", SecondOrderQuery.class);
-    assertQueryEquals(req("qt", "aqp", "q", "outgoing_links(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=references[cache:reference])", SecondOrderQuery.class);
     
-    //to be removed!
-    assertQueryEquals(req("qt", "aqp", "q", "cites(author:muller)"),  
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=references[cache:reference])", SecondOrderQuery.class);
-    assertQueryEquals(req("qt", "aqp", "q", "refersto(author:muller)"),
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=references[cache:reference])", SecondOrderQuery.class);
     
     // various searches
     assertQueryEquals(req("qt", "aqp", "q", "all:x OR all:z references(author:muller OR title:body)"), 
         "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=references[cache:reference])", BooleanQuery.class);
     assertQueryEquals(req("qt", "aqp", "q", "citations((title:(lectures physics) and author:Feynman))"),
-        "SecondOrderQuery(+(+title:lectures +title:physics) +(author:feynman, author:feynman,*), filter=null, collector=citations[cache:reference<bibcode>])", 
+        "SecondOrderQuery(+(+title:lectures +title:physics) +(author:feynman, author:feynman,*), filter=null, collector=citations[cache:reference<bibcode,alternate_title>])", 
         SecondOrderQuery.class);
     
     
     
     // citations()
     assertQueryEquals(req("qt", "aqp", "q", "citations(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citations[cache:reference<bibcode>])", SecondOrderQuery.class);
-    assertQueryEquals(req("qt", "aqp", "q", "incoming_links(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citations[cache:reference<bibcode>])", SecondOrderQuery.class);
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citations[cache:reference<bibcode,alternate_title>])", SecondOrderQuery.class);
     
-    // to be removed!!!
-    assertQueryEquals(req("qt", "aqp", "q", "citedby(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citations[cache:reference<bibcode>])", SecondOrderQuery.class);
-    assertQueryEquals(req("qt", "aqp", "q", "all:(x OR z) citedby(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citations[cache:reference<bibcode>])", BooleanQuery.class);    
     
     // useful() 
     assertQueryEquals(req("qt", "aqp", "q", "useful(author:muller)"), 
@@ -207,10 +193,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     
     // reviews() 
     assertQueryEquals(req("qt", "aqp", "q", "reviews(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode>])", SecondOrderQuery.class);
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode,alternate_title>])", SecondOrderQuery.class);
     
     assertQueryEquals(req("qt", "aqp", "q", "all:(x OR z) reviews(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode>])", BooleanQuery.class);
+        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode,alternate_title>])", BooleanQuery.class);
 	}
 	
 	

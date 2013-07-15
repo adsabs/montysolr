@@ -753,7 +753,7 @@
 
 		<field name="identifier" type="identifier_normalized_string_ascii"
 			indexed="true" stored="true" required="false" multiValued="true" />
-		<field name="alternate_bibcode" type="identifier_normalized_string_ascii"
+		<field name="alternate_bibcode" type="normalized_string_ascii"
       indexed="true" stored="true" required="false" multiValued="true" />
 
 		<field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}"

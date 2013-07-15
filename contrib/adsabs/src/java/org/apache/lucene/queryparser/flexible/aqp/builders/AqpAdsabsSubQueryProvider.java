@@ -63,6 +63,10 @@ public class AqpAdsabsSubQueryProvider implements
 	
 	public static Map<String, AqpSubqueryParser> parsers = new HashMap<String, AqpSubqueryParser>();
 	
+  //TODO: make configurable
+	static String citationSearchIdField = "bibcode,alternate_title";
+	static String citationSearchRefField = "reference";
+	
 	static {
 		parsers.put(LuceneQParserPlugin.NAME, new AqpSubqueryParser() {
 		      public Query parse(FunctionQParser fp) throws ParseException {    		  
@@ -155,10 +159,8 @@ public class AqpAdsabsSubQueryProvider implements
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
-				// TODO: make configurable 
-				String refField = "reference";
-				String idField = "bibcode";
-				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitedBy(idField, refField), false);
+				return new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorCitedBy(citationSearchIdField, citationSearchRefField), false);
 	      }
 	    }.configure(true)); // true=canBeAnalyzed
 		
@@ -168,10 +170,8 @@ public class AqpAdsabsSubQueryProvider implements
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
-				// TODO: make configurable
-				String refField = "reference";
-				String idField = "bibcode";
-				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitesRAM(idField, refField), false);
+				return new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorCitesRAM(citationSearchIdField, citationSearchRefField), false);
 			}
 		  }.configure(true)); // true=canBeAnalyzed
 		
@@ -180,11 +180,9 @@ public class AqpAdsabsSubQueryProvider implements
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
-				// TODO: make configurable
-				String refField = "reference";
-				String idField = "bibcode";
 				try {
-	        return JoinUtil.createJoinQuery(idField, false, refField, innerQuery, 
+					// XXX: not sure if i can use several fields: citationSearchIdField
+	        return JoinUtil.createJoinQuery("bibcode", false, "reference", innerQuery, 
 	        		req.getSearcher(), ScoreMode.Avg);
         } catch (IOException e) {
         	throw new ParseException(e.getMessage());
@@ -196,11 +194,8 @@ public class AqpAdsabsSubQueryProvider implements
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
-				// TODO: make configurable
-				String refField = "reference";
-				String idField = "bibcode";
 				try {
-	        return JoinUtil.createJoinQuery(refField, true, idField, innerQuery, 
+	        return JoinUtil.createJoinQuery("reference", true, "bibcode", innerQuery, 
 	        		req.getSearcher(), ScoreMode.None); // will not work properly iff mode=Avg|Max
         } catch (IOException e) {
         	throw new ParseException(e.getMessage());
@@ -213,11 +208,9 @@ public class AqpAdsabsSubQueryProvider implements
       public Query parse(FunctionQParser fp) throws ParseException {          
         Query innerQuery = fp.parseNestedQuery();
         SolrQueryRequest req = fp.getReq();
-        // TODO: make configurable
-        String refField = "reference";
-        String idField = "bibcode";
         String boostField = "cite_read_boost";
-        return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, boostField));
+        return new SecondOrderQuery(innerQuery, null, 
+        		new SecondOrderCollectorOperatorExpertsCiting(citationSearchIdField, citationSearchRefField, boostField));
       }
       }.configure(true)); // true=canBeAnalyzed
     // reviews() = find papers that cite the most cited papers
@@ -225,23 +218,17 @@ public class AqpAdsabsSubQueryProvider implements
       public Query parse(FunctionQParser fp) throws ParseException {          
         Query innerQuery = fp.parseNestedQuery();
         SolrQueryRequest req = fp.getReq();
-        // TODO: make configurable
-        String refField = "reference";
-        String idField = "bibcode";
         String boostField = "cite_read_boost";
-        return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCitingTheMostCited(idField, refField, boostField));
+        return new SecondOrderQuery(innerQuery, null, 
+        		new SecondOrderCollectorCitingTheMostCited(citationSearchIdField, citationSearchRefField, boostField));
       }
       }.configure(true)); // true=canBeAnalyzed
 		parsers.put("citis", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
-				
-				// TODO: make configurable
-				String refField = "reference";
-				String idField = "bibcode";
-				
-				return new SecondOrderQuery(innerQuery, null, new SecondOrderCollectorCites(idField, refField), false);
+				return new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorCites(citationSearchIdField, citationSearchRefField), false);
 				
 			}
 		  }.configure(true)); // true=canBeAnalyzed
