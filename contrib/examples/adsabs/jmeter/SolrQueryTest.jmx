@@ -34,12 +34,12 @@
           </elementProp>
           <elementProp name="serverPort" elementType="Argument">
             <stringProp name="Argument.name">serverPort</stringProp>
-            <stringProp name="Argument.value">${__P(serverPort,8987)}</stringProp>
+            <stringProp name="Argument.value">${__P(serverPort,9002)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="queryFile" elementType="Argument">
             <stringProp name="Argument.name">queryFile</stringProp>
-            <stringProp name="Argument.value">${__P(queryFile,/dvt/workspace/montysolr/contrib/examples/adsabs/jmeter/ads_classic_queries.csv)}</stringProp>
+            <stringProp name="Argument.value">${__P(queryFile,/dvt/workspace/montysolr/contrib/examples/adsabs/jmeter/field.queries)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -152,7 +152,6 @@
               </value>
             </objProp>
             <stringProp name="filename">${baseDir}/aggregate_graph.data</stringProp>
-            <boolProp name="ResultCollector.success_only_logging">true</boolProp>
           </ResultCollector>
           <hashTree/>
           <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
@@ -175,48 +174,19 @@
                 <responseData>false</responseData>
                 <samplerData>false</samplerData>
                 <xml>false</xml>
-                <fieldNames>false</fieldNames>
+                <fieldNames>true</fieldNames>
                 <responseHeaders>false</responseHeaders>
                 <requestHeaders>false</requestHeaders>
                 <responseDataOnError>false</responseDataOnError>
                 <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
                 <assertionsResultsToSave>0</assertionsResultsToSave>
                 <bytes>true</bytes>
+                <threadCounts>true</threadCounts>
+                <sampleCount>true</sampleCount>
+                <idleTime>true</idleTime>
               </value>
             </objProp>
             <stringProp name="filename">${baseDir}/aggregate_report.data</stringProp>
-          </ResultCollector>
-          <hashTree/>
-          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
-            <boolProp name="ResultCollector.error_logging">false</boolProp>
-            <objProp>
-              <name>saveConfig</name>
-              <value class="SampleSaveConfiguration">
-                <time>true</time>
-                <latency>true</latency>
-                <timestamp>true</timestamp>
-                <success>true</success>
-                <label>true</label>
-                <code>true</code>
-                <message>true</message>
-                <threadName>true</threadName>
-                <dataType>true</dataType>
-                <encoding>false</encoding>
-                <assertions>true</assertions>
-                <subresults>true</subresults>
-                <responseData>false</responseData>
-                <samplerData>false</samplerData>
-                <xml>false</xml>
-                <fieldNames>false</fieldNames>
-                <responseHeaders>false</responseHeaders>
-                <requestHeaders>false</requestHeaders>
-                <responseDataOnError>false</responseDataOnError>
-                <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-                <assertionsResultsToSave>0</assertionsResultsToSave>
-                <bytes>true</bytes>
-              </value>
-            </objProp>
-            <stringProp name="filename">${baseDir}/summary_report.data</stringProp>
           </ResultCollector>
           <hashTree/>
           <ResultCollector guiclass="SplineVisualizer" testclass="ResultCollector" testname="Spline Visualizer" enabled="false">
@@ -285,7 +255,7 @@
             <boolProp name="ResultCollector.success_only_logging">true</boolProp>
           </ResultCollector>
           <hashTree/>
-          <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="XPath Extractor" enabled="false">
+          <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="XPath Extractor" enabled="true">
             <stringProp name="XPathExtractor.default">-1</stringProp>
             <stringProp name="XPathExtractor.refname">numFound</stringProp>
             <stringProp name="XPathExtractor.xpathQuery">/response/result/@numFound</stringProp>
@@ -294,7 +264,7 @@
             <boolProp name="XPathExtractor.namespace">false</boolProp>
           </XPathExtractor>
           <hashTree/>
-          <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="XPath Extractor" enabled="false">
+          <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="XPath Extractor" enabled="true">
             <stringProp name="XPathExtractor.default">-1</stringProp>
             <stringProp name="XPathExtractor.refname">qTime</stringProp>
             <stringProp name="XPathExtractor.xpathQuery">/response/lst[@name=&quot;responseHeader&quot;]/int[@name=&quot;QTime&quot;]</stringProp>
@@ -312,8 +282,73 @@ log.info(&quot;q=&quot; + vars.get(&quot;QUERY&quot;) + &quot;; numFound=&quot; 
 </stringProp>
           </BeanShellPostProcessor>
           <hashTree/>
+          <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>true</responseData>
+                <samplerData>true</samplerData>
+                <xml>true</xml>
+                <fieldNames>false</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+                <url>true</url>
+              </value>
+            </objProp>
+            <stringProp name="filename">${baseDir}/view_results_tree.data</stringProp>
+          </ResultCollector>
+          <hashTree/>
+          <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+            <boolProp name="ResultCollector.error_logging">false</boolProp>
+            <objProp>
+              <name>saveConfig</name>
+              <value class="SampleSaveConfiguration">
+                <time>true</time>
+                <latency>true</latency>
+                <timestamp>true</timestamp>
+                <success>true</success>
+                <label>true</label>
+                <code>true</code>
+                <message>true</message>
+                <threadName>true</threadName>
+                <dataType>true</dataType>
+                <encoding>false</encoding>
+                <assertions>true</assertions>
+                <subresults>true</subresults>
+                <responseData>false</responseData>
+                <samplerData>false</samplerData>
+                <xml>true</xml>
+                <fieldNames>false</fieldNames>
+                <responseHeaders>false</responseHeaders>
+                <requestHeaders>false</requestHeaders>
+                <responseDataOnError>false</responseDataOnError>
+                <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+                <assertionsResultsToSave>0</assertionsResultsToSave>
+                <bytes>true</bytes>
+              </value>
+            </objProp>
+            <stringProp name="filename">${baseDir}/summary_report.data</stringProp>
+          </ResultCollector>
+          <hashTree/>
         </hashTree>
-        <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="Debug Sampler" enabled="false">
+        <DebugSampler guiclass="TestBeanGUI" testclass="DebugSampler" testname="Debug Sampler" enabled="true">
           <boolProp name="displayJMeterProperties">false</boolProp>
           <boolProp name="displayJMeterVariables">true</boolProp>
           <boolProp name="displaySystemProperties">false</boolProp>
@@ -336,9 +371,9 @@ log.info(&quot;q=&quot; + vars.get(&quot;QUERY&quot;) + &quot;; numFound=&quot; 
                 <encoding>false</encoding>
                 <assertions>true</assertions>
                 <subresults>true</subresults>
-                <responseData>false</responseData>
-                <samplerData>false</samplerData>
-                <xml>false</xml>
+                <responseData>true</responseData>
+                <samplerData>true</samplerData>
+                <xml>true</xml>
                 <fieldNames>false</fieldNames>
                 <responseHeaders>false</responseHeaders>
                 <requestHeaders>false</requestHeaders>
@@ -346,9 +381,10 @@ log.info(&quot;q=&quot; + vars.get(&quot;QUERY&quot;) + &quot;; numFound=&quot; 
                 <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
                 <assertionsResultsToSave>0</assertionsResultsToSave>
                 <bytes>true</bytes>
+                <url>true</url>
               </value>
             </objProp>
-            <stringProp name="filename"></stringProp>
+            <stringProp name="filename">${baseDir}/view_results_tree.data</stringProp>
           </ResultCollector>
           <hashTree/>
         </hashTree>

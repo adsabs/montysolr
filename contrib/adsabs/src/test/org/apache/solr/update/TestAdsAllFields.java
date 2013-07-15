@@ -152,7 +152,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     /*
      * id - str type, the unique id key, we do no processing
      */
-
+    
+    dumpDoc(null, "id", "title");
     assertQ(req("q", "id:2"), "//*[@numFound='1']");
     assertQ(req("q", "id:9218605"), "//*[@numFound='1']");
     assertQ(req("q", "id:9218920"), "//*[@numFound='1']");
@@ -229,7 +230,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "<str>Burke, C. J.</str>" + 
     "</arr>");
 
-
+   
 
     /*
      * For the reference resolver, the field which contains only the last
@@ -328,7 +329,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "author_facet:\"Tenenbaum, P\""), "//*[@numFound='1']");
     assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
 
-
+    assertQ(req("q", "first_author_facet_hier:\"0/Cutri, R\""), "//*[@numFound='1']");
+		assertQ(req("q", "first_author_facet_hier:\"1/Cutri, R/Cutri, R. M.\""), "//*[@numFound='1']");
+		assertQ(req("q", "author_facet_hier:\"0/Stumpe, M\""), "//*[@numFound='2']");
+		assertQ(req("q", "author_facet_hier:\"1/Stumpe, M/Stumpe, M. C.\""), "//*[@numFound='2']");
+		assertQ(req("q", "author_facet_hier:\"1//et al.\""), "//*[@numFound='0']");
+		
+    
     /*
      * page marc:773
      */
@@ -613,24 +620,33 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "title:nosky"), "//*[@numFound='1']");
     assertQ(req("q", "title:KEPLER"), "//*[@numFound='0']"); // should search only for acronym acr::kepler
     assertQ(req("q", "title:kepler"), "//*[@numFound='2']"); // normal search
-    assertQ(req("q", "title:probing"), "//*[@numFound='0']"); // alternate titles shouldn't go in main title field
-    assertQ(req("q", "title:(KEPLER) alternate_title:probing"), "//*[@numFound='0']");
-    assertQ(req("q", "title:(kepler) alternate_title:probing"), "//*[@numFound='1']");
     assertQ(req("q", "title:\"q\\'i\""), 
         "//*[@numFound='1']",
-    "//doc/int[@name='recid'][.='4']");
+    		"//doc/int[@name='recid'][.='4']");
 
     
     /*
      * alternate_title
+     * 
+     * should be copid into main title field
      */
 
-    assertQ(req("q", "alternate_title:(Probing red giants)"), 
+    assertQ(req("q", "alternate_title:\"Probing red giants\""), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218605']"
     ); 
-
-
+    assertQ(req("q", "title:\"Probing red giants\""), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218605']"
+    );
+    assertQ(req("q", "alternate_title:\"Oscillations of red giants\""), 
+    		"//*[@numFound='0']"
+    		);
+    assertQ(req("q", "title:oscillations alternate_title:probing"), 
+    		"//*[@numFound='1']",
+    		"//doc/int[@name='recid'][.='9218605']");
+    
+    
     /*
      * abstract
      * 

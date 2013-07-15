@@ -804,7 +804,7 @@
 			indexed="true" />
 
 
-		<field name="title" type="ads_text" indexed="true" stored="true" />
+		<field name="title" type="ads_text" indexed="true" stored="true" multiValued="true"/>
 		<field name="alternate_title" type="ads_text" indexed="true"
 			stored="true" multiValued="true" />
 
