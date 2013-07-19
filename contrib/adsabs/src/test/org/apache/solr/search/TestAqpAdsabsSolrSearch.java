@@ -198,7 +198,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     assertQueryEquals(req("qt", "aqp", "q", "all:(x OR z) reviews(author:muller OR title:body)"), 
         "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode,alternate_title>])", BooleanQuery.class);
     
-    new String("XXX".contains("X"));
 	}
 	
 	
