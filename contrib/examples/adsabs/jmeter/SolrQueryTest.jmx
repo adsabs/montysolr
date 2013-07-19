@@ -337,6 +337,7 @@ if (!cond.trim().equals(&quot;&quot;)) {
                 <assertionsResultsToSave>0</assertionsResultsToSave>
                 <bytes>true</bytes>
                 <url>true</url>
+                <threadCounts>true</threadCounts>
                 <sampleCount>true</sampleCount>
                 <idleTime>true</idleTime>
               </value>

@@ -722,7 +722,7 @@ def req(url, **kwargs):
     t.start()
     t.join(3.0)
     r = q.get()
-    if r is Exception:
+    if isinstance(r, Exception):
         raise r
     elif r is None:
         raise Exception("Timeout getting url=%s & %s" % (url, kwargs))
@@ -738,6 +738,11 @@ def get_pid(pidpath):
             return -1
     return -1
 
+
+def acquire_lock(pidpath):
+    fo = open(pidpath, 'w')
+    fo.write(str(os.getpid()))
+    fo.close()
 
 def remove_lock(pidpath):
     os.remove(pidpath)
@@ -1345,9 +1350,7 @@ def main(argv):
         if update_pid != -1 and check_pid_is_running(update_pid):
             error("The script is already running with pid: %s" % update_pid)
         
-        fo = open('update.pid', 'w')
-        fo.write(str(os.getpid()))
-        fo.close()
+        acquire_lock('update.pid')
         
         parser = get_arg_parser()
         options, args = parser.parse_args(argv)
