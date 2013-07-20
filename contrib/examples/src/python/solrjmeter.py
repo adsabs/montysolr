@@ -505,6 +505,11 @@ def generate_html(test_name, options, ):
     
     before_test = simplejson.load(open('before-test.json', 'r'))
     after_test = simplejson.load(open('after-test.json', 'r'))
+    
+    for k,v in after_test.items():
+        if before_test[k] != v:
+            after_test[k] = '<b>%s</b>' % v
+    
     runtime_env = simplejson.load(open('runtime-env.json', 'r'))
     
     kwargs.update(before_test)
