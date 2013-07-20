@@ -22,10 +22,13 @@ import optparse
 import subprocess
 import re
 import glob
+import csv
 import simplejson
+import datetime
 from montysolrupdate import error, run_cmd, get_output, check_basics, changed_dir, Tag,\
      get_release_tag, get_latest_git_release_tag, check_pid_is_running, remove_lock, \
      get_pid, req, acquire_lock, INSTDIR
+from pprint import pprint,pformat
 
 COMMASPACE = ', '
 SPACE = ' '
@@ -57,7 +60,7 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
 
 
 
-def check_options(options):
+def check_options(options, args):
     
     if not options.jmx_test or not os.path.exists(options.jmx_test):
         error('option jmx_test must point to a valid JMX file, we got: %s' % options.jmx_test )
@@ -80,6 +83,8 @@ def check_options(options):
     else:
         options.upload = False
         
+    options.script_home = os.path.join(os.path.abspath(args[0] + '/..'))
+    options.today = datetime.datetime.now().strftime("%a %Y-%m-%d %H:%M")
     
 
 def get_arg_parser():
@@ -375,13 +380,32 @@ def harvest_details_about_montysolr(options):
 
 def run_test(test, options):
     
+    save_into_file('before-test.json', simplejson.dumps(harvest_details_about_montysolr(options)))
+    
     # run the test, results will be summary_report.data
-    run_cmd(['%(jmeter)s -n -t %(jmx_test)s %(jmx_args)s -l results.jtl -DqueryFile=%(query_file)s' \
+    run_cmd(['%(jmeter)s -n -t %(jmx_test)s %(jmx_args)s -l results.jtl -DqueryFile=%(query_file)s ' \
              '-DbaseDir=%(basedir)s'  % 
              dict(jmeter=options.jmeter,
                   jmx_test=options.jmx_test, jmx_args=options.jmx_args, query_file=test,
                   basedir=os.path.abspath('.'))])
     
+    runtime = {}
+    runtime.update(options.__dict__)
+    runtime['google_password'] = 'XXX'
+    
+    save_into_file('runtime-env.json', simplejson.dumps(runtime))
+    
+    save_into_file('after-test.json', simplejson.dumps(harvest_details_about_montysolr(options)))
+    
+    
+    
+def tablify(csv_filepath):    
+    with open(csv_filepath, 'r') as f:
+        data = csv.reader(f)
+        labels = data.next()
+        return Table(*[Table.Column(x[0], tuple(x[1:])) for x in zip(labels, *list(data))])        
+    
+def generate_graphs(options):    
     # now generate various metrics/graphs from the summary
     reporter = '%(java)s -jar %(jmeter_base)s/lib/ext/CMDRunner.jar --tool Reporter' \
                ' --input-jtl summary_report.data' % dict(java=options.java, 
@@ -395,8 +419,9 @@ def run_test(test, options):
     run_cmd([reporter, '--plugin-type BytesThroughputOverTime --generate-png bytes-throughput-over-time.png'])
     run_cmd([reporter, '--plugin-type BytesThroughputOverTime --generate-csv bytes-throughput-over-time.csv'])
     
-    run_cmd([reporter, '--plugin-type HitsPerSecond --generate-png hits-per-sec.png'])
-    run_cmd([reporter, '--plugin-type HitsPerSecond --generate-csv hits-per-sec.csv'])
+    # the same info is at response-codes-per-sec including the number of failed requests
+    #run_cmd([reporter, '--plugin-type HitsPerSecond --generate-png hits-per-sec.png'])
+    #run_cmd([reporter, '--plugin-type HitsPerSecond --generate-csv hits-per-sec.csv'])
     
     run_cmd([reporter, '--plugin-type LatenciesOverTime --generate-png latencies-over-time.png'])
     run_cmd([reporter, '--plugin-type LatenciesOverTime --generate-csv latencies-over-time.csv'])
@@ -414,13 +439,13 @@ def run_test(test, options):
     run_cmd([reporter, '--plugin-type ResponseTimesDistribution --generate-csv response-times-distribution-1000.csv --granulation 1000'])
     
     # time series of #no of responses during test
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-10.png --granulation 10'])
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-100.png --granulation 100'])
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-1000.png --granulation 1000'])
+    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-10.png --granulation 100'])
+    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-100.png --granulation 1000'])
+    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-1000.png --granulation 10000'])
     
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-10.csv --granulation 10'])
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-100.csv --granulation 100'])
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-1000.csv --granulation 1000'])
+    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-10.csv --granulation 100'])
+    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-100.csv --granulation 1000'])
+    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-1000.csv --granulation 10000'])
     
     
     run_cmd([reporter, '--plugin-type ResponseTimesPercentiles  --generate-png response-times-percentiles.png'])
@@ -441,9 +466,22 @@ def run_test(test, options):
     run_cmd([reporter, '--plugin-type PageDataExtractorOverTime  --generate-png page-data-extractor-over-time.png'])
     run_cmd([reporter, '--plugin-type PageDataExtractorOverTime  --generate-csv page-data-extractor-over-time.csv'])
     
+    
+    
+    
 
-def harvest_results(options, results):
-    pass    
+def harvest_results(test_name, results):
+    aggregate = tablify('aggregate-report.csv')
+    percentiles = tablify('response-times-percentiles.csv')
+    print aggregate.get_col_byname('average')[0]
+    print aggregate.get_col_byname('aggregate_report_stddev')[0]
+    print aggregate.get_col_byname('aggregate_report_count')[0]
+    print percentiles.get_row_byvalue("Percentiles", "95.0")[1]
+    print percentiles.get_row_byvalue("Percentiles", "98.0")[1]
+    print percentiles.get_row_byvalue("Percentiles", "99.0")[1]
+    
+    
+     
 
 
 def save_results(options, results):
@@ -458,9 +496,95 @@ def save_into_file(path, value):
     fo.write(str(value))
     fo.close()
 
+def generate_html(test_name, options, ):
+    with open(options.script_home + '/test-view.tmpl', 'r') as t:
+        tmpl = t.read()
+    kwargs = {}
+    kwargs.update(options.__dict__)
+    kwargs['test_name'] = test_name
+    
+    before_test = simplejson.load(open('before-test.json', 'r'))
+    after_test = simplejson.load(open('after-test.json', 'r'))
+    runtime_env = simplejson.load(open('runtime-env.json', 'r'))
+    
+    kwargs.update(before_test)
+    kwargs['before_test'] = pformat(before_test)
+    kwargs['after_test'] = pformat(after_test)
+    kwargs['runtime_env'] = pformat(runtime_env)
+    kwargs['aggregate_report'] = str(tablify('aggregate-report.csv'))
+    kwargs['transactions_per_sec'] = str(tablify('transactions-per-sec.csv'))
+    kwargs['response_codes_per_sec'] = str(tablify('response-codes-per-sec.csv'))
+    kwargs['bytes_throughput_over_time'] = str(tablify('bytes-throughput-over-time.csv'))
+    kwargs['latencies_over_time'] = str(tablify('latencies-over-time.csv'))
+    kwargs['response_times_distribution_10'] = str(tablify('response-times-distribution-10.csv'))
+    kwargs['response_times_distribution_100'] = str(tablify('response-times-distribution-100.csv'))
+    kwargs['response_times_distribution_1000'] = str(tablify('response-times-distribution-1000.csv'))
+    kwargs['response_times_over_time_10'] = str(tablify('response-times-over-time-10.csv'))
+    kwargs['response_times_over_time_100'] = str(tablify('response-times-over-time-100.csv'))
+    kwargs['response_times_over_time_1000'] = str(tablify('response-times-over-time-1000.csv'))
+    kwargs['response_times_percentiles'] = str(tablify('response-times-percentiles.csv'))
+    kwargs['throughput_vs_threads'] = str(tablify('throughput-vs-threads.csv'))
+    kwargs['times_vs_threads'] = str(tablify('times-vs-threads.csv'))
+    
+    kwargs['jvmCommandLineArgs'] = '\n'.join(kwargs['jvmCommandLineArgs'].split())
+    
+    with open('index.html', 'w') as w:
+        w.write(tmpl % kwargs)
+    
+    
+    
+    
+
 class JMeterResults(object):
     def __init__(self):
         pass              
+
+class Table:
+    def __init__(self, *columns):
+        self.columns = columns
+        self.length = max(len(col.data) for col in columns)
+    def get_col_byname(self, name):
+        for col in self.columns:
+            if col.name == name:
+                return col.data
+    def get_row_byvalue(self, column_name, value):
+        data = []
+        for col in self.columns:
+            if col.name == column_name:
+                for val, i in zip(col.data, range(len(col.data))):
+                    if val == value:
+                        for col in self.columns:
+                            data.append(col.data[i])
+        return data
+                            
+    def get_row(self, rownum=None):
+        for col in self.columns:
+            if rownum is None:
+                yield col.format % col.name
+            else:
+                yield col.format % col.data[rownum]
+    def get_line(self):
+        for col in self.columns:
+            yield '-' * (col.width + 2)
+    def join_n_wrap(self, char, elements):
+        return ' ' + char + char.join(elements) + char
+    def get_rows(self):
+        yield self.join_n_wrap('+', self.get_line())
+        yield self.join_n_wrap('|', self.get_row(None))
+        yield self.join_n_wrap('+', self.get_line())
+        for rownum in range(0, self.length):
+            yield self.join_n_wrap('|', self.get_row(rownum))
+        yield self.join_n_wrap('+', self.get_line())
+    def __str__(self):
+        return '\n'.join(self.get_rows())
+    class Column():
+        LEFT, RIGHT = '-', ''
+        def __init__(self, name, data, align=RIGHT):
+            self.data = data
+            self.name = name
+            self.width = max(len(name), max(len(x) for x in data))
+            self.format = ' %%%s%ds ' % (align, self.width)
+
 
 def main(argv):
     
@@ -480,7 +604,7 @@ def main(argv):
         
         parser = get_arg_parser()
         options, args = parser.parse_args(argv)
-        check_options(options)
+        check_options(options, args)
         
         print "============="
         for k,v in options.__dict__.items():
@@ -528,10 +652,11 @@ def main(argv):
             
             with changed_dir(test_dir):
                 
-                save_into_file('before-test-%s.json' % test_name, simplejson.dumps(harvest_details_about_montysolr(options)))
-                run_test(test, options)
-                harvest_results(options, results)
-                save_into_file('after-test-%s.json' % test_name, simplejson.dumps(harvest_details_about_montysolr(options)))
+                
+                #run_test(test, options)
+                #generate_graphs(options)
+                generate_html(test_name, options)
+                harvest_results(test_name, results)
             
             
             if options.save:

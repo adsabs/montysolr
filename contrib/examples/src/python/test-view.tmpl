@@ -1,0 +1,231 @@
+<html>
+<head>
+<title>Load Test Results: %(test_name)s (%(today)s)</title>
+<style type="text/css">
+body {
+font:normal verdana,arial,helvetica;
+color:#000000;
+}
+
+h1 {
+margin: 0px 0px 5px; font: 165%% verdana,arial,helvetica
+}
+h2 {
+margin-top: 1em; margin-bottom: 0.5em; font: bold 125%% verdana,arial,helvetica
+}
+h3 {
+margin-bottom: 0.5em; font: bold 115%% verdana,arial,helvetica
+}
+.Failure {
+font-weight:bold; color:red;
+}
+
+img
+{
+border-width: 0px;
+}
+.expand_link
+{
+position=absolute;
+right: 0px;
+width: 27px;
+top: 1px;
+height: 27px;
+}
+
+.page_details
+{
+display: none;
+}
+
+.page_details_expanded
+{
+display: block;
+display/* hide this definition from IE5/6 */: table-row;
+}
+
+
+</style>
+
+<script language="JavaScript">
+function expand(details_id){
+ document.getElementById(details_id).className = "page_details_expanded";
+}
+
+function collapse(details_id){
+ document.getElementById(details_id).className = "page_details";
+}
+
+function change(details_id){
+  if(document.getElementById(details_id).className.match("page_details_expanded")){
+     collapse(details_id);
+  }
+  else {
+     expand(details_id);
+  }
+}
+</script>
+
+</head>
+<body>
+
+<h1> %(test_name)s (%(today)s) </h1>
+
+<pre>
+<b>MontySolr version:</b> %(luceneImplVersion)s
+<b>MontySolr commit:</b> --
+<b>Java:</b> %(jvmVersion)s
+<b>System:</b> %(systemUname)s
+<b>Java command line:</b> %(jvmCommandLineArgs)s
+
+%(aggregate_report)s
+
+<b>Lucene impl version:</b> %(luceneImplVersion)s
+<b>Lucene spec version:</b> %(luceneSpecVersion)s
+<b>Solr impl version:</b> %(solrImplVersion)s
+<b>Solr spec version:</b> %(solrSpecVersion)s
+</pre>
+
+<p>
+Runtime environment <a href="runtime-env.json">download</a> <a href="javascript:change('runtime_env')">show/hide</a>
+<pre class="page_details" id="runtime_env">
+%(runtime_env)s
+</pre>
+Solr Env before test <a href="before-test.json">download</a> <a href="javascript:change('before_test')">show/hide</a>
+<pre class="page_details" id="before_test">
+%(before_test)s
+</pre>
+Solr Env after test <a href="after-test.json">download</a> <a href="javascript:change('after_test')">show/hide</a>
+<pre class="page_details" id="after_test">
+%(after_test)s
+</pre>
+</p>
+
+
+
+
+<table>
+<tr align="center">
+  <td>
+    <b>Number of transactions/sec</b>
+    <img src="transactions-per-sec.png" title="Responses that were rejected as invalid + HTTP error codes (ideally, you will see only successess)"/>  
+    <p><a href="transactions-per-sec.csv">download</a> <a href="javascript:change('transactions_per_sec')">show/hide</a><br/>
+	<pre class="page_details" id="transactions_per_sec">
+%(transactions_per_sec)s
+	</pre>
+    </p>
+  </td>
+  <td>
+    <b>Number of HTTP responses/sec</b>
+    <img src="response-codes-per-sec.png" title="This graph shows HTTP codes only"/>
+    <p><a href="response-codes-per-sec.csv">download</a> <a href="javascript:change('response_codes_per_sec')">show/hide</a><br/>
+	<pre class="page_details" id="response_codes_per_sec">
+%(response_codes_per_sec)s
+	</pre>
+    </p>
+  </td>
+</tr>
+<tr align="center">
+  <td>
+    <b>Bytes received and sent</b>
+    <img src="bytes-throughput-over-time.png"/>  
+    <p><a href="bytes-throughput-over-time.csv">download</a> <a href="javascript:change('bytes_throughput_over_time')">show/hide</a><br/>
+	<pre class="page_details" id="bytes_throughput_over_time">
+%(bytes_throughput_over_time)s
+	</pre>
+    </p>    
+  </td>
+  <td>
+    <b>Latencies over time (how long we were waiting)</b>
+    <img src="latencies-over-time.png" title="This will depend on number of threads running"/>
+    <p><a href="latencies-over-time.csv">download</a> <a href="javascript:change('latencies_over_time')">show/hide</a><br/>
+	<pre class="page_details" id="latencies_over_time">
+%(latencies_over_time)s
+	</pre>
+    </p>
+  </td>
+</tr>
+<tr align="center">
+  <td>
+    <b>Histograms of response times</b>
+   <img src="response-times-distribution-10.png" title="Detailed view"/>  
+    <p><a href="response-times-distribution-10.csv">download</a> <a href="javascript:change('response_times_distribution_10')">show/hide</a><br/>
+	<pre class="page_details" id="response_times_distribution_10">
+%(response_times_distribution_10)s
+	</pre>
+    </p>
+   <img src="response-times-distribution-100.png" title="Zooming out"/>  
+    <p><a href="response-times-distribution-100.csv">download</a> <a href="javascript:change('response_times_distribution_100')">show/hide</a><br/>
+	<pre class="page_details" id="response_times_distribution_100">
+%(response_times_distribution_100)s
+	</pre>
+    </p>
+   <img src="response-times-distribution-1000.png" title="Everything should be in the first column, if not, we are slow"/>  
+    <p><a href="response-times-distribution-1000.csv">download</a> <a href="javascript:change('response_times_distribution_1000')">show/hide</a><br/>
+	<pre class="page_details" id="response_times_distribution_1000">
+%(response_times_distribution_1000)s
+	</pre>
+    </p>
+  </td>
+  <td>
+    <b>View of how the search performed over time</b>
+   <img src="response-times-over-time-10.png" />
+    <p><a href="response-times-over-time-10.csv">download</a> <a href="javascript:change('response_times_over_time_10')">show/hide</a><br/>
+	<pre class="page_details" id="response_times_over_time_10">
+%(response_times_over_time_10)s
+	</pre>
+    </p>
+   <img src="response-times-over-time-100.png" />  
+    <p><a href="response-times-over-time-100.csv">download</a> <a href="javascript:change('response_times_over_time_100')">show/hide</a><br/>
+	<pre class="page_details" id="response_times_over_time_100">
+%(response_times_over_time_100)s
+	</pre>
+    </p>
+   <img src="response-times-over-time-1000.png" />    
+    <p><a href="response-times-over-time-1000.csv">download</a> <a href="javascript:change('response_times_over_time_1000')">show/hide</a><br/>
+	<pre class="page_details" id="response_times_over_time_1000">
+%(response_times_over_time_1000)s
+	</pre>
+    </p>
+  </td>
+</tr>
+<tr align="center">
+  <td>
+    <b>Query response percentiles</b>
+   <img src="response-times-percentiles.png" title="Ratio of queries served under (x) miliseconds"/>  
+    <p><a href="response-times-percentiles.csv">download</a> <a href="javascript:change('response_times_percentiles')">show/hide</a><br/>
+	<pre class="page_details" id="response_times_percentiles">
+%(response_times_percentiles)s
+	</pre>
+    </p>
+  </td>
+  <td>
+    <b>Througput vs #no of simultaneous users </b>
+   <img src="throughput-vs-threads.png" title="JMeter estimate of highest response rate given the number of threads we ran"/>  
+    <p><a href="throughput-vs-threads.csv">download</a> <a href="javascript:change('throughput_vs_threads')">show/hide</a><br/>
+	<pre class="page_details" id="throughput_vs_threads">
+%(throughput_vs_threads)s
+	</pre>
+    </p>
+  </td>
+</tr>
+<tr align="center">
+  <td>
+   <b>Latency vs #no of simultaneous users </b>
+   <img src="times-vs-threads.png" title="As the number of threads grows, the server may take more time to respond"/>  
+    <p><a href="times-vs-threads.csv">download</a> <a href="javascript:change('times_vs_threads')">show/hide</a><br/>
+	<pre class="page_details" id="times_vs_threads">
+%(times_vs_threads)s
+	</pre>
+    </p>
+  </td>
+  <td>
+
+  </td>
+</tr>
+</table>
+
+</body>
+</html>
+
+
