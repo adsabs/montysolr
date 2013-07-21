@@ -85,6 +85,11 @@ def check_options(options, args):
     options.script_home = os.path.join(os.path.abspath(args[0] + '/..'))
     options.today = datetime.datetime.now().strftime("%a %Y-%m-%d %H:%M")
     
+    if options.debug:
+        options.today_folder = 'debug'
+    else:
+        options.today_folder = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
+    
 
 def get_arg_parser():
     usage = '%prog [options] example.queries example2.queries....'
@@ -99,6 +104,9 @@ def get_arg_parser():
     p.add_option('-j', '--setup_jmeter',
                  default=False, action='store_true',
                  help='Install jmeter')
+    p.add_option('-d', '--debug',
+                 default=False, action='store_true',
+                 help='Debug mode (we are saving data into one folder: debug)')
     p.add_option('-J', '--java',
                  default='java', action='store',
                  help='Java executable')
@@ -112,8 +120,8 @@ def get_arg_parser():
                  default=False, action='store_true',
                  help='Generate 500 queries for certain fields')
     p.add_option('-S', '--save',
-                 default='', action='store',
-                 help='Save results into a folder: x')
+                 default=True, action='store_true',
+                 help='Save results as the test proceeds')
     p.add_option('--google_spreadsheet',
                  default='', action='store',
                  help='Upload results into a Google spread sheet: x')
@@ -392,12 +400,6 @@ def run_test(test, options):
                   jmx_test=options.jmx_test, jmx_args=options.jmx_args, query_file=test,
                   basedir=os.path.abspath('.'))])
     
-    runtime = {}
-    runtime.update(options.__dict__)
-    runtime['google_password'] = 'XXX'
-    
-    save_into_file('runtime-env.json', simplejson.dumps(runtime))
-    
     save_into_file('after-test.json', simplejson.dumps(harvest_details_about_montysolr(options)))
     
     
@@ -407,7 +409,8 @@ def tablify(csv_filepath):
         data = csv.reader(f)
         labels = data.next()
         return Table(*[Table.Column(x[0], tuple(x[1:])) for x in zip(labels, *list(data))])        
-    
+
+   
 def generate_graphs(options):    
     # now generate various metrics/graphs from the summary
     reporter = '%(java)s -jar %(jmeter_base)s/lib/ext/CMDRunner.jar --tool Reporter' \
@@ -476,19 +479,41 @@ def generate_graphs(options):
 def harvest_results(test_name, results):
     aggregate = tablify('aggregate-report.csv')
     percentiles = tablify('response-times-percentiles.csv')
-    print aggregate.get_col_byname('average')[0]
-    print aggregate.get_col_byname('aggregate_report_stddev')[0]
-    print aggregate.get_col_byname('aggregate_report_count')[0]
-    print percentiles.get_row_byvalue("Percentiles", "95.0")[1]
-    print percentiles.get_row_byvalue("Percentiles", "98.0")[1]
-    print percentiles.get_row_byvalue("Percentiles", "99.0")[1]
+    results.add_datapoint(test_name, 'avg', aggregate.get_col_byname('average')[0])
+    results.add_datapoint(test_name, 'stdev', aggregate.get_col_byname('aggregate_report_stddev')[0])
+    results.add_datapoint(test_name, 'count', aggregate.get_col_byname('aggregate_report_count')[0])
+    results.add_datapoint(test_name, 'median', aggregate.get_col_byname('aggregate_report_median')[0])
+    results.add_datapoint(test_name, 'max', aggregate.get_col_byname('aggregate_report_max')[0])
+    results.add_datapoint(test_name, 'min', aggregate.get_col_byname('aggregate_report_min')[0])
+    results.add_datapoint(test_name, '%error', aggregate.get_col_byname('aggregate_report_error%')[0])
     
+    results.add_datapoint(test_name, '%90', percentiles.get_row_byvalue("Percentiles", "90.0")[1])
+    results.add_datapoint(test_name, '%95', percentiles.get_row_byvalue("Percentiles", "95.0")[1])
+    results.add_datapoint(test_name, '%98', percentiles.get_row_byvalue("Percentiles", "98.0")[1])
+    results.add_datapoint(test_name, '%99', percentiles.get_row_byvalue("Percentiles", "99.0")[1])
     
      
 
 
 def save_results(options, results):
-    pass
+    tests = results.get_tests()
+    if len(tests) == 0:
+        return
+    with open('aggregate-report.csv', 'w') as aggr:
+        writer = csv.writer(aggr, delimiter=',',
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        keys = sorted(tests[0][1].keys())
+        writer.writerow(['Test'] + keys)
+        
+        for tname, tvalues in tests:
+            row = [tname]
+            for k in keys:
+                if k in tvalues:
+                    row.append(tvalues[k])
+                else:
+                    row.append('-')
+            writer.writerow(row)
+        
 
 
 def upload_results(options, results):
@@ -499,27 +524,46 @@ def save_into_file(path, value):
     fo.write(str(value))
     fo.close()
 
-def generate_html(test_name, options, ):
-    with open(options.script_home + '/test-view.tmpl', 'r') as t:
+
+def generate_today_dashboard(options, results):
+    # assemble a page that points to various measurements
+    with open(options.script_home + '/day-view.tmpl', 'r') as t:
         tmpl = t.read()
-    kwargs = {}
-    kwargs.update(options.__dict__)
-    kwargs['test_name'] = test_name
-    
-    before_test = simplejson.load(open('before-test.json', 'r'))
-    after_test = simplejson.load(open('after-test.json', 'r'))
-    
-    for k,v in after_test.items():
-        if before_test[k] != v:
-            after_test[k] = '<b>%s</b>' % v
+   
+    kwargs = load_tmpl_kwargs(options)
     
     runtime_env = simplejson.load(open('runtime-env.json', 'r'))
-    
-    kwargs.update(before_test)
-    kwargs['before_test'] = pformat(before_test)
-    kwargs['after_test'] = pformat(after_test)
     kwargs['runtime_env'] = pformat(runtime_env)
-    kwargs['aggregate_report'] = str(tablify('aggregate-report.csv'))
+    
+    valid_tests = []
+    for f in os.listdir('.'):
+        if os.path.isfile(f) or f == '.' or f == '..':
+            continue 
+        valid_tests.append(f)
+        
+    one_block = """
+    <div class="test-block">
+    <h3>%(test_name)s</h3>
+    <p>
+    <a href="%(test_name)s/index.html">
+        <img src="%(test_name)s/transactions-per-sec.png" title="Responses that were rejected as invalid + HTTP error codes (ideally, you will see only successess)"/>
+    </a>  
+    </p>
+    </div>
+    """
+    
+    
+    blocks = '\n'.join([one_block % {'test_name': test_name} for test_name in valid_tests])
+    
+    kwargs['blocks'] = blocks
+    with open('index.html', 'w') as w:
+        w.write(tmpl % kwargs)
+ 
+def generate_one_run_html(test_name, options, ):
+    with open(options.script_home + '/test-view.tmpl', 'r') as t:
+        tmpl = t.read()
+    kwargs = load_tmpl_kwargs(options)
+    kwargs['test_name'] = test_name
     kwargs['transactions_per_sec'] = str(tablify('transactions-per-sec.csv'))
     kwargs['response_codes_per_sec'] = str(tablify('response-codes-per-sec.csv'))
     kwargs['bytes_throughput_over_time'] = str(tablify('bytes-throughput-over-time.csv'))
@@ -533,19 +577,51 @@ def generate_html(test_name, options, ):
     kwargs['response_times_percentiles'] = str(tablify('response-times-percentiles.csv'))
     kwargs['throughput_vs_threads'] = str(tablify('throughput-vs-threads.csv'))
     kwargs['times_vs_threads'] = str(tablify('times-vs-threads.csv'))
-    
-    kwargs['jvmCommandLineArgs'] = '\n'.join(kwargs['jvmCommandLineArgs'].split())
-    
     with open('index.html', 'w') as w:
         w.write(tmpl % kwargs)
+    
+    
+def load_tmpl_kwargs(options):
+    kwargs = {}
+    kwargs.update(options.__dict__)
+    
+    before_test = simplejson.load(open('before-test.json', 'r'))
+    after_test = simplejson.load(open('after-test.json', 'r'))
+    
+    for k,v in after_test.items():
+        if before_test[k] != v:
+            after_test[k] = '<b>%s</b>' % v
+    
+    kwargs.update(before_test)
+    kwargs['before_test'] = pformat(before_test)
+    kwargs['after_test'] = pformat(after_test)
+    kwargs['aggregate_report'] = str(tablify('aggregate-report.csv'))
+    
+    
+    kwargs['jvmCommandLineArgs'] = '\n'.join(kwargs['jvmCommandLineArgs'].split())
+    return kwargs
+    
     
     
     
     
 
-class JMeterResults(object):
-    def __init__(self):
-        pass              
+class JMeterResults(dict):
+    def __init__(self, *args):
+        dict.__init__(self, args)
+        self['tests'] = {}
+        
+    def add_datapoint(self, name, metric_name, datapoint):
+        if name not in self['tests']:
+            self['tests'][name] = {}
+        self['tests'][name][metric_name] = datapoint
+        
+    def get_tests(self):
+        tests = []
+        for k, v in self['tests'].items():
+            tests.append((k, v))
+        return sorted(tests, key=lambda x: x[0])
+          
 
 class Table:
     def __init__(self, *columns):
@@ -626,8 +702,6 @@ def main(argv):
         # install pre-requisities if requested
         check_prerequisities(options)
         
-        if options.update_command:
-            update_montysolr(options)
         
         if options.generate_queries:
             generate_queries(options)
@@ -639,39 +713,60 @@ def main(argv):
         
         if len(tests) == 0: 
             error('no test name(s) supplied nor found in: %s' % options.queries_pattern)
-            
-        results = JMeterResults()
         
-        before_test = harvest_details_about_montysolr(options)
+        if options.purge and os.path.exists('results'):
+            run_cmd(['rm', '-fr', 'results'])
         
-        if options.save:
-            save_into_file('before-test.json', simplejson.dumps(before_test))
-        
-        for test in tests:
+        if not os.path.exists('results'):
+            run_cmd(['mkdir', 'results'])
             
-            test_name = os.path.basename(test)
-            test_dir = test_name + '_results'
+        with changed_dir('results'):
+            results = JMeterResults()
             
-            if options.purge and os.path.exists(test_dir):
-                run_cmd(['rm', '-fr', test_dir])
-                
-            if not os.path.exists(test_dir):
-                run_cmd(['mkdir', test_dir])
+            if not os.path.exists(options.today_folder):
+                run_cmd(['mkdir', options.today_folder])
             
-            with changed_dir(test_dir):
+            with changed_dir(options.today_folder):
                 
                 
-                #run_test(test, options)
-                #generate_graphs(options)
-                generate_html(test_name, options)
-                harvest_results(test_name, results)
-            
-            
-            if options.save:
-                save_results(options, results)
                 
-            if options.upload:
-                upload_results(options, results)
+                if options.save:
+                    runtime = {}
+                    runtime.update(options.__dict__)
+                    runtime['google_password'] = 'XXX'
+                    save_into_file('runtime-env.json', simplejson.dumps(runtime))
+                
+                    before_test = harvest_details_about_montysolr(options)
+                    save_into_file('before-test.json', simplejson.dumps(before_test))
+                
+                for test in tests:
+                    
+                    test_name = os.path.basename(test)
+                    test_dir = test_name
+                    
+                    if not os.path.exists(test_dir):
+                        run_cmd(['mkdir', test_dir])
+                    
+                    with changed_dir(test_dir):
+                        
+                        run_test(test, options)
+                        generate_graphs(options)
+                        generate_one_run_html(test_name, options)
+                        harvest_results(test_name, results)
+                    
+                    
+                    
+                    if options.save:
+                        after_test = harvest_details_about_montysolr(options)
+                        save_into_file('after-test.json', simplejson.dumps(after_test))
+                        save_results(options, results)
+                        generate_today_dashboard(options, results)
+                        
+                        
+                    if options.upload:
+                        upload_results(options, results)
+                        
+                    
             
         
         remove_lock('update.pid')    

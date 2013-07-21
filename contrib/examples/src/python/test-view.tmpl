@@ -69,7 +69,7 @@ function change(details_id){
 </head>
 <body>
 
-<h1> %(test_name)s (%(today)s) </h1>
+<h1> %(test_name)s  <a href="../index.html">(%(today)s)</a> </h1>
 
 <pre>
 <b>MontySolr version:</b> %(luceneImplVersion)s
@@ -87,10 +87,8 @@ function change(details_id){
 </pre>
 
 <p>
-Runtime environment <a href="runtime-env.json">download</a> <a href="javascript:change('runtime_env')">show/hide</a>
-<pre class="page_details" id="runtime_env">
-%(runtime_env)s
-</pre>
+<a href="../runtime-env.json">Runtime environment</a>. 
+
 Solr Env before test <a href="before-test.json">download</a> <a href="javascript:change('before_test')">show/hide</a>
 <pre class="page_details" id="before_test">
 %(before_test)s
