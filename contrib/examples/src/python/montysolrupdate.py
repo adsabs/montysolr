@@ -676,7 +676,8 @@ def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admi
                 return True
         except Exception, e:
             if rsp is None:
-                traceback.print_exc(e)
+                #traceback.print_exc(e)
+                print "Waiting for instance to come up: %s sec." % (int(max_time - time.time())/1000,) 
             if rsp is not None and 'error' in rsp:
                 error(str(rsp['error']).replace('\\n', "\n"))
         time.sleep(1)

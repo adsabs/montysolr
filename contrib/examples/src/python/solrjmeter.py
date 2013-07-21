@@ -9,7 +9,6 @@ Here are the assumptions under which we work:
 
    - PATH contains correct versions of ant, java, javac, python, gcc,
          git
-   - PYTHONPATH contains jcc, lucene
    - we have internet access
    - the INSTDIR already exists
    - we run as user 'montysolr'
@@ -94,7 +93,7 @@ def get_arg_parser():
                  default=False, action='store_true',
                  help='Install all prerequisites')
     p.add_option('-x', '--jmx_test',
-                 default='%s/perpetuum/montysolr/contrib/examples/jmeter/SolrQueryTest.jmx' % INSTDIR, 
+                 default='%s/perpetuum/montysolr/contrib/examples/adsabs/jmeter/SolrQueryTest.jmx' % INSTDIR, 
                  action='store',
                  help='The configuration of the test (location of .jmx file)')
     p.add_option('-j', '--setup_jmeter',
@@ -103,16 +102,16 @@ def get_arg_parser():
     p.add_option('-J', '--java',
                  default='java', action='store',
                  help='Java executable')
-    p.add_option('-p', '--queries_pattern',
+    p.add_option('-q', '--queries_pattern',
                  default='', action='store',
                  help='Pattern to use for retrieving jmeter queries')
     p.add_option('-u', '--update_command',
                  default='', action='store',
                  help='Invoke this command before running tests - use to restart/update instance')
-    p.add_option('-q', '--generate_queries',
+    p.add_option('-g', '--generate_queries',
                  default=False, action='store_true',
                  help='Generate 500 queries for certain fields')
-    p.add_option('-s', '--save',
+    p.add_option('-S', '--save',
                  default='', action='store',
                  help='Save results into a folder: x')
     p.add_option('--google_spreadsheet',
@@ -130,10 +129,10 @@ def get_arg_parser():
     
     
     # JMeter options specific to our .jmx test
-    p.add_option('-e', '--serverName',
+    p.add_option('-s', '--serverName',
                  default='adswhy', action='store',
                  help='Machine we run test against, eg. adswhy')
-    p.add_option('-o', '--serverPort',
+    p.add_option('-p', '--serverPort',
                  default='', action='store',
                  help='Port, eg. 9000')
     p.add_option('-i', '--durationInSecs',
@@ -170,6 +169,10 @@ def check_prerequisities(options):
     else:
         error('Cannot find executable jmeter (is $PATH set correctly?)')
     
+    try:
+        req(options.query_endpoint + "/select")
+    except:
+        error('Cannot contact: %s' % options.query_endpoint)
 
 
 def setup_jmeter(options):
