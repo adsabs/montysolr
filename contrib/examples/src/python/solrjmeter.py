@@ -141,6 +141,9 @@ def get_arg_parser():
     p.add_option('-P', '--purge',
                  default=False, action='store_true',
                  help='Remove the test folder before running the test (if already exists)')
+    p.add_option('-R', '--results_folder',
+                 default='results', action='store',
+                 help='Name of the folder where to save results [results]')
     
     
     # JMeter options specific to our .jmx test
@@ -772,13 +775,13 @@ def main(argv):
         if len(tests) == 0: 
             error('no test name(s) supplied nor found in: %s' % options.queries_pattern)
         
-        if options.purge and os.path.exists('results'):
-            run_cmd(['rm', '-fr', 'results'])
+        if options.purge and os.path.exists(options.results_folder):
+            run_cmd(['rm', '-fr', options.results_folder])
         
-        if not os.path.exists('results'):
-            run_cmd(['mkdir', 'results'])
+        if not os.path.exists(options.results_folder):
+            run_cmd(['mkdir', options.results_folder])
             
-        with changed_dir('results'):
+        with changed_dir(options.results_folder):
             results = JMeterResults()
             
             if options.save:

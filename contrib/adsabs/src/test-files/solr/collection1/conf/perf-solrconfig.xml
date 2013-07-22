@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+
+
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
+    
+  <requestHandler name="/perf" class="perf.CreatePerformanceQueriesHandler">
+    <lst name="defaults">
+      <str name="defaultField">id</str>
+    </lst>
+  </requestHandler>
+  
+  
+</config>
