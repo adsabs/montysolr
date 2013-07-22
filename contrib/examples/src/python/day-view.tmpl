@@ -1,93 +1,14 @@
 <html>
 <head>
 <title>Load Test Results: (%(today)s)</title>
-<style type="text/css">
-body {
-font:normal verdana,arial,helvetica;
-color:#000000;
-}
-
-h1 {
-margin: 0px 0px 5px; font: 165%% verdana,arial,helvetica
-}
-h2 {
-margin-top: 1em; margin-bottom: 0.5em; font: bold 125%% verdana,arial,helvetica
-}
-h3 {
-margin-bottom: 0.5em; font: bold 115%% verdana,arial,helvetica
-}
-.Failure {
-font-weight:bold; color:red;
-}
-
-div.dashboard {
-  width:100%%;
-}
-
-div.test-block {
-  border: 1px solid black;
-  float: left;
-  border: 1px solid #d9d8cd;
-  background: #edece6;
-  padding: 5px;
-  width: 49%%;
-  text-align:center;
-}
-div.test-block img {
-  width:95%%;
-  text-align:center;
-}
-
-img
-{
-border-width: 0px;
-}
-.expand_link
-{
-position=absolute;
-right: 0px;
-width: 27px;
-top: 1px;
-height: 27px;
-}
-
-.page_details
-{
-display: none;
-}
-
-.page_details_expanded
-{
-display: block;
-display/* hide this definition from IE5/6 */: table-row;
-}
-
-
-</style>
-
-<script language="JavaScript">
-function expand(details_id){
- document.getElementById(details_id).className = "page_details_expanded";
-}
-
-function collapse(details_id){
- document.getElementById(details_id).className = "page_details";
-}
-
-function change(details_id){
-  if(document.getElementById(details_id).className.match("page_details_expanded")){
-     collapse(details_id);
-  }
-  else {
-     expand(details_id);
-  }
-}
-</script>
-
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../javascript.js"></script>
 </head>
 <body>
 
 <h1>Load Test: %(today)s</h1>
+
+<a href="../dashboard-view.html">back to dashboard</a>
 
 <pre>
 <b>MontySolr version:</b> %(luceneImplVersion)s

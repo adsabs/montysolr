@@ -24,6 +24,7 @@ import glob
 import csv
 import simplejson
 import datetime
+import time
 from montysolrupdate import error, run_cmd, get_output, check_basics, changed_dir, Tag,\
      get_release_tag, get_latest_git_release_tag, check_pid_is_running, remove_lock, \
      get_pid, req, acquire_lock, INSTDIR
@@ -83,12 +84,18 @@ def check_options(options, args):
         options.upload = False
         
     options.script_home = os.path.join(os.path.abspath(args[0] + '/..'))
-    options.today = datetime.datetime.now().strftime("%a %Y-%m-%d %H:%M")
+    
+    timestamp = time.time()
+    options.timestamp = timestamp
+    options.today = datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
     
     if options.debug:
         options.today_folder = 'debug'
     else:
-        options.today_folder = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
+        options.today_folder = options.today.replace(':', '.').replace(' ', '.').replace('-', '.')
+        
+    if options.queries_pattern is None or options.queries_pattern == '':
+        error('Missing --queries_pattern parameter')
     
 
 def get_arg_parser():
@@ -111,7 +118,7 @@ def get_arg_parser():
                  default='java', action='store',
                  help='Java executable')
     p.add_option('-q', '--queries_pattern',
-                 default='', action='store',
+                 default=None, action='store',
                  help='Pattern to use for retrieving jmeter queries')
     p.add_option('-u', '--update_command',
                  default='', action='store',
@@ -491,7 +498,6 @@ def harvest_results(test_name, results):
     results.add_datapoint(test_name, '%95', percentiles.get_row_byvalue("Percentiles", "95.0")[1])
     results.add_datapoint(test_name, '%98', percentiles.get_row_byvalue("Percentiles", "98.0")[1])
     results.add_datapoint(test_name, '%99', percentiles.get_row_byvalue("Percentiles", "99.0")[1])
-    
      
 
 
@@ -524,16 +530,61 @@ def save_into_file(path, value):
     fo.write(str(value))
     fo.close()
 
+def generate_includes(options):
+    
+    if not os.path.exists('style.css'):
+        run_cmd(['cp', options.script_home + '/style.css', './'])
+    if not os.path.exists('javascript.js'):
+        run_cmd(['cp', options.script_home + '/javascript.js', './'])
+    if not os.path.exists('dygraph-combined.js'):
+        run_cmd(['cp', options.script_home + '/dygraph-combined.js', './'])
+    
+def update_global_dashboard(options, results):
+    
+    for test_name, test_results in results.get_tests():
+        csv_file = test_name + '.csv'
+        if not os.path.exists(csv_file):
+            with open(csv_file, 'w') as w:
+                w.write('Date,QPS\n')
+                w.write(options.today + ',%(avg)s,%(stdev)s\n' % test_results)
+        else:
+            with open(csv_file, 'a') as w:
+                w.write(options.today + ',%(avg)s,%(stdev)s\n' % test_results)
+    
+    valid_csvs = sorted([x[0:-4] for x in glob.glob('*.csv')])
+    
+    
+    with open(options.script_home + '/dashboard-view.tmpl', 'r') as t:
+        tmpl = t.read()
+
+    kwargs = load_tmpl_kwargs(options)
+            
+    one_block = """
+    <div class="dygraph-block" id="%(test_name)s" />
+    <script type="text/javascript">
+    doGraph('%(test_name)s');
+    </script>
+    """
+    
+    
+    blocks = '\n'.join([one_block % {'test_name': test_name} for test_name in valid_csvs])
+    
+    
+    kwargs['blocks'] = blocks
+    
+    with open('dashboard-view.html', 'w') as w:
+        w.write(tmpl % kwargs)
+    
 
 def generate_today_dashboard(options, results):
+    
     # assemble a page that points to various measurements
     with open(options.script_home + '/day-view.tmpl', 'r') as t:
         tmpl = t.read()
    
     kwargs = load_tmpl_kwargs(options)
     
-    runtime_env = simplejson.load(open('runtime-env.json', 'r'))
-    kwargs['runtime_env'] = pformat(runtime_env)
+    
     
     valid_tests = []
     for f in os.listdir('.'):
@@ -545,7 +596,7 @@ def generate_today_dashboard(options, results):
     <div class="test-block">
     <h3>%(test_name)s</h3>
     <p>
-    <a href="%(test_name)s/index.html">
+    <a href="%(test_name)s/day-view.html">
         <img src="%(test_name)s/transactions-per-sec.png" title="Responses that were rejected as invalid + HTTP error codes (ideally, you will see only successess)"/>
     </a>  
     </p>
@@ -556,7 +607,7 @@ def generate_today_dashboard(options, results):
     blocks = '\n'.join([one_block % {'test_name': test_name} for test_name in valid_tests])
     
     kwargs['blocks'] = blocks
-    with open('index.html', 'w') as w:
+    with open('day-view.html', 'w') as w:
         w.write(tmpl % kwargs)
  
 def generate_one_run_html(test_name, options, ):
@@ -577,7 +628,7 @@ def generate_one_run_html(test_name, options, ):
     kwargs['response_times_percentiles'] = str(tablify('response-times-percentiles.csv'))
     kwargs['throughput_vs_threads'] = str(tablify('throughput-vs-threads.csv'))
     kwargs['times_vs_threads'] = str(tablify('times-vs-threads.csv'))
-    with open('index.html', 'w') as w:
+    with open('test-view.html', 'w') as w:
         w.write(tmpl % kwargs)
     
     
@@ -585,20 +636,27 @@ def load_tmpl_kwargs(options):
     kwargs = {}
     kwargs.update(options.__dict__)
     
-    before_test = simplejson.load(open('before-test.json', 'r'))
-    after_test = simplejson.load(open('after-test.json', 'r'))
+    if os.path.exists('before-test.json'):
+        before_test = simplejson.load(open('before-test.json', 'r'))
+        after_test = simplejson.load(open('after-test.json', 'r'))
+        
+        for k,v in after_test.items():
+            if before_test[k] != v:
+                after_test[k] = '<b>%s</b>' % v
+        
+        kwargs.update(before_test)
+        kwargs['before_test'] = pformat(before_test)
+        kwargs['after_test'] = pformat(after_test)
+        kwargs['jvmCommandLineArgs'] = '\n'.join(kwargs['jvmCommandLineArgs'].split())
     
-    for k,v in after_test.items():
-        if before_test[k] != v:
-            after_test[k] = '<b>%s</b>' % v
-    
-    kwargs.update(before_test)
-    kwargs['before_test'] = pformat(before_test)
-    kwargs['after_test'] = pformat(after_test)
-    kwargs['aggregate_report'] = str(tablify('aggregate-report.csv'))
+    if os.path.exists('aggregate-report.csv'):
+        kwargs['aggregate_report'] = str(tablify('aggregate-report.csv'))
     
     
-    kwargs['jvmCommandLineArgs'] = '\n'.join(kwargs['jvmCommandLineArgs'].split())
+    if os.path.exists('runtime-env.json'):
+        runtime_env = simplejson.load(open('runtime-env.json', 'r'))
+        kwargs['runtime_env'] = pformat(runtime_env)
+    
     return kwargs
     
     
@@ -723,6 +781,9 @@ def main(argv):
         with changed_dir('results'):
             results = JMeterResults()
             
+            if options.save:
+                generate_includes(options)
+                
             if not os.path.exists(options.today_folder):
                 run_cmd(['mkdir', options.today_folder])
             
@@ -753,9 +814,7 @@ def main(argv):
                         generate_graphs(options)
                         generate_one_run_html(test_name, options)
                         harvest_results(test_name, results)
-                    
-                    
-                    
+                        
                     if options.save:
                         after_test = harvest_details_about_montysolr(options)
                         save_into_file('after-test.json', simplejson.dumps(after_test))
@@ -763,8 +822,11 @@ def main(argv):
                         generate_today_dashboard(options, results)
                         
                         
-                    if options.upload:
-                        upload_results(options, results)
+            if options.save:
+                update_global_dashboard(options, results)
+                
+            if options.upload:
+                    upload_results(options, results)
                         
                     
             
