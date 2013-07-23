@@ -3,7 +3,6 @@ package perf;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.misc.GetTermInfo;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.TopDocs;
 import org.apache.solr.common.params.CommonParams;
@@ -22,7 +20,6 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
@@ -31,10 +28,6 @@ import org.apache.solr.search.SolrIndexSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.xml.internal.bind.v2.runtime.RuntimeUtil.ToStringAdapter;
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
-import perf.CreatePerformanceQueriesHandler.FormattedQuery;
 import perf.CreateQueries.TermFreq;
 
 public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
