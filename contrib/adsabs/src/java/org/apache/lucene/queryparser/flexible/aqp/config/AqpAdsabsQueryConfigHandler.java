@@ -100,5 +100,9 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS, new HashMap<String, int[]>());
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, "#$@&@nonexisting");
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE, "dummynonexxistingnullvalue");
+    
+    // This is not being initialized inside the standard config handler, which causes
+    // errors (even if the functionality is not used, wtf...)
+    set(StandardQueryConfigHandler.ConfigurationKeys.MULTI_FIELDS, new CharSequence[0]);
 	}
 }

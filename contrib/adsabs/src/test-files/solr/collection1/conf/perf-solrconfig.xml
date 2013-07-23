@@ -13,5 +13,29 @@
     </lst>
   </requestHandler>
   
+  <queryParser name="aqp" class="solr.AdsQParserPlugin">
+    <lst name="defaults">
+       <str name="idfield">recid</str>
+    </lst>
+  </queryParser>
+  
+  <requestHandler name="/ads-config" class="solr.AdsConfigHandler" default="false">
+     <arr name="query">
+        <str name="defField">all</str>
+        <bool name="overwriteDupes">false</bool>
+     </arr>
+     
+     <str name="testVal">testValue</str>
+     
+     <lst name="defaults">
+      <!-- omp = Only More Popular -->
+      <str name="spellcheck.onlyMorePopular">false</str>
+      <!-- exr = Extended Results -->
+      <str name="spellcheck.extendedResults">false</str>
+      <!--  The number of suggestions to return -->
+      <str name="spellcheck.count">1</str>
+    </lst>
+  </requestHandler>
+  
   
 </config>
