@@ -1964,4 +1964,7 @@
     </lst>
   </requestHandler>
   
+  <requestHandler name="/perf" class="perf.CreatePerformanceQueriesHandler">
+  </requestHandler>
+  
 </config>
