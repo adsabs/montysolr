@@ -305,11 +305,15 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 	
 	protected Set<FormattedQuery> createEntries(TermFreq[] terms, Formatter formatter) throws ParseException, IOException {
 		final Set<FormattedQuery> seen = new HashSet<FormattedQuery>();
+		int count = 0;
 		for (TermFreq tf: terms) {
+			if (count > numQueries)
+				break;
 			if (tf.term.length >= 3) {
 				FormattedQuery d = formatter.format(tf);
 				if (d != null && !seen.contains(d)) {
 					seen.add(d);
+					count++;
 				}
 			}
 		}

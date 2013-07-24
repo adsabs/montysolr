@@ -244,7 +244,7 @@ def update_montysolr(options):
 def generate_queries(options):
     
     print 'Getting perf queries from solr'
-    data = simplejson.load(open('/home/rchyla/tmp/perf.json', 'r'))
+    data = simplejson.load(open('/var/lib/montysolr/solrjmeter/results/perf2.json', 'r'))
     if 0:
         if options.generate_queries:
             args = options.generate_queries.split('&')
@@ -284,9 +284,9 @@ def generate_queries(options):
                 if len(parts) > 2:
                     query_types[qtype].append('%s:(%s)\t=%s' % (field, parts[0], parts[3].replace('#numFound=', '')))
                     unfielded_query_types[qtype].append('%s:(%s)\t=%s' % (field, parts[0], parts[3].replace('#numFound=', '')))
-                else:
-                    query_types[qtype].append('%s:(%s)\t>%s' % (field, parts[0], 0))
-                    unfielded_query_types[qtype].append('%s:(%s)\t=%s' % (field, parts[0], 0))
+                elif len(parts) == 2:
+                    query_types[qtype].append('%s:(%s)\t>=%s' % (field, parts[0], 0))
+                    unfielded_query_types[qtype].append('%s:(%s)\t>=%s' % (field, parts[0], 0))
     
     for k,v in query_types.items():
         with open(k + '.aq', 'w') as qfile:
