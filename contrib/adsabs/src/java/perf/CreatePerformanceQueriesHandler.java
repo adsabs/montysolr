@@ -266,7 +266,7 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(query);
-			sb.append("\\t");
+			sb.append("\t");
 			sb.append("#freq=");
 			boolean first = true;
 			for (long f: frequencies) {
@@ -275,7 +275,7 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 				first = false;
 			}
 			if (totalHits > -1) {
-				sb.append("\\t#numFound=");
+				sb.append("\t#numFound=");
 				sb.append(totalHits);
 			}
 			sb.append("\n");

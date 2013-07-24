@@ -96,6 +96,9 @@ def check_options(options, args):
         
     if options.queries_pattern is None or options.queries_pattern == '':
         error('Missing --queries_pattern parameter')
+        
+    if '=' not in options.generate_queries:
+        options.generate_queries = ''
     
 
 def get_arg_parser():
@@ -127,8 +130,8 @@ def get_arg_parser():
                  default='', action='store',
                  help='Invoke this command AFTER running tests - use to restart/update instance')
     p.add_option('-g', '--generate_queries',
-                 default=False, action='store_true',
-                 help='Generate 500 queries for certain fields')
+                 default=None, action='store',
+                 help='Generate queries for certain fields (you can pass solr parameters)')
     p.add_option('-S', '--save',
                  default=True, action='store_true',
                  help='Save results as the test proceeds')
@@ -239,8 +242,57 @@ def update_montysolr(options):
         
         
 def generate_queries(options):
-    # TODO: run the lucene java to generate queries?
-    return 
+    
+    print 'Getting perf queries from solr'
+    data = simplejson.load(open('/home/rchyla/tmp/perf.json', 'r'))
+    if 0:
+        if options.generate_queries:
+            args = options.generate_queries.split('&')
+            kwargs = {}.update(args.split('='))
+            data = req('%s/perf' % options.query_endpoint, **kwargs)
+        else:
+            data = req('%s/perf' % options.query_endpoint, numQueries=20)
+        
+    fields = data.keys()
+    query_types = {}
+    unfielded_query_types = {}
+    
+    for f in fields:
+        if 'error' in data[f]:
+            print 'Field %s generated error' % f
+            print data[f]['error']
+            del data[f]
+        elif f == 'error':
+            print 'Other unspecified error'
+            print data[f]
+        else:
+            for k in data[f].keys():
+                query_types[k] = []
+                unfielded_query_types[k] = []
+                
+    for field, values in data.items():
+        for qtype, lines in values.items():
+            lines = lines.split('\n')
+            
+            for l in lines:
+                parts = l.split('\t')
+                if len(parts) > 2:
+                    query_types[qtype].append('%s:(%s)\t=%s' % (field, parts[0], parts[3].replace('#numFound=', '')))
+                    unfielded_query_types[qtype].append('%s:(%s)\t=%s' % (field, parts[0], parts[3].replace('#numFound=', '')))
+                else:
+                    query_types[qtype].append('%s:(%s)\t>%s' % (field, parts[0], 0))
+                    unfielded_query_types[qtype].append('%s:(%s)\t=%s' % (field, parts[0], 0))
+    
+    for k,v in query_types.items():
+        with open(k + '.aq', 'w') as qfile:
+            qfile.write('\n'.join(v))
+            print 'Generated %s.aq with %s queries' % (k, len(v))
+    for k,v in unfielded_query_types.items():
+        with open(k + 'Unfielded.aq', 'w') as qfile:
+            qfile.write('\n'.join(v))
+            print 'Generated %sUnfielded.aq with %s queries' % (k, len(v))
+    
+    
 
 def find_tests(options):
     if options.queries_pattern:
@@ -767,9 +819,6 @@ def main(argv):
         check_prerequisities(options)
         
         
-        if options.generate_queries:
-            generate_queries(options)
-        
         if len(args) > 1:
             tests = args[1:]
         else:
@@ -786,6 +835,9 @@ def main(argv):
             
         with changed_dir(options.results_folder):
             results = JMeterResults()
+            
+            if options.generate_queries is not None:
+                generate_queries(options)
             
             if options.save:
                 generate_includes(options)

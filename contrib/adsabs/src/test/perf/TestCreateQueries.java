@@ -70,22 +70,22 @@ public class TestCreateQueries extends MontySolrAbstractTestCase {
 		
 		assertQ(req("qt", "/perf", "fields","text,id", "topN", "20", 
 				"numQueries", "5", "defType", "aqp"),
-				"//lst[@name='text']/str[@name='termQueriesHighFreq'][contains(text(),'for\\t#freq=2')]",
-				"//lst[@name='text']/str[@name='wildcardQueriesBeginStarHighFreq'][contains(text(),'*ple\\t#freq=1')]",
-				"//lst[@name='text']/str[@name='wildcardQueriesEndStarHighFreq'][contains(text(),'lib*\\t#freq=1')]",
-				"//lst[@name='text']/str[@name='wildcardQueriesMidStarHighFreq'][contains(text(),'exch*e\\t#freq=1')]",
-				"//lst[@name='text']/str[@name='fuzzyQueries1HighFreq'][contains(text(),'\"stopword\"~1\\t#freq=3')]",
-				"//lst[@name='text']/str[@name='fuzzyQueries2HighFreq'][contains(text(),'\"stopword\"~2\\t#freq=3')]"
+				"//lst[@name='text']/str[@name='termQueriesHighFreq'][contains(text(),'for\t#freq=2')]",
+				"//lst[@name='text']/str[@name='wildcardQueriesBeginStarHighFreq'][contains(text(),'*ple\t#freq=1')]",
+				"//lst[@name='text']/str[@name='wildcardQueriesEndStarHighFreq'][contains(text(),'lib*\t#freq=1')]",
+				"//lst[@name='text']/str[@name='wildcardQueriesMidStarHighFreq'][contains(text(),'exch*e\t#freq=1')]",
+				"//lst[@name='text']/str[@name='fuzzyQueries1HighFreq'][contains(text(),'\"stopword\"~1\t#freq=3')]",
+				"//lst[@name='text']/str[@name='fuzzyQueries2HighFreq'][contains(text(),'\"stopword\"~2\t#freq=3')]"
 		);
 
 		assertQ(req("qt", "/perf", "fields","text,id", "topN", "20", 
 				"numQueries", "5", "runTotalHitsResolution", "true", "defType", "aqp"),
-				"//lst[@name='text']/str[@name='termQueriesHighFreq'][contains(text(),'for\\t#freq=2')]",
-				"//lst[@name='text']/str[@name='wildcardQueriesBeginStarHighFreq'][contains(text(),'*ple\\t#freq=1\\t#numFound=1')]",
-				"//lst[@name='text']/str[@name='wildcardQueriesEndStarHighFreq'][contains(text(),'lib*\\t#freq=1\\t#numFound=1')]",
-				"//lst[@name='text']/str[@name='wildcardQueriesMidStarHighFreq'][contains(text(),'exch*e\\t#freq=1\\t#numFound=1')]",
-				"//lst[@name='text']/str[@name='fuzzyQueries1HighFreq'][contains(text(),'\"stopword\"~1\\t#freq=3\\t#numFound=3')]",
-				"//lst[@name='text']/str[@name='fuzzyQueries2HighFreq'][contains(text(),'\"stopword\"~2\\t#freq=3\\t#numFound=3')]"
+				"//lst[@name='text']/str[@name='termQueriesHighFreq'][contains(text(),'for\t#freq=2')]",
+				"//lst[@name='text']/str[@name='wildcardQueriesBeginStarHighFreq'][contains(text(),'*ple\t#freq=1\t#numFound=1')]",
+				"//lst[@name='text']/str[@name='wildcardQueriesEndStarHighFreq'][contains(text(),'lib*\t#freq=1\t#numFound=1')]",
+				"//lst[@name='text']/str[@name='wildcardQueriesMidStarHighFreq'][contains(text(),'exch*e\t#freq=1\t#numFound=1')]",
+				"//lst[@name='text']/str[@name='fuzzyQueries1HighFreq'][contains(text(),'\"stopword\"~1\t#freq=3\t#numFound=3')]",
+				"//lst[@name='text']/str[@name='fuzzyQueries2HighFreq'][contains(text(),'\"stopword\"~2\t#freq=3\t#numFound=3')]"
 		);
 
 	}
