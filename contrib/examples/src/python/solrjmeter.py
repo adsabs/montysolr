@@ -120,9 +120,12 @@ def get_arg_parser():
     p.add_option('-q', '--queries_pattern',
                  default=None, action='store',
                  help='Pattern to use for retrieving jmeter queries')
-    p.add_option('-u', '--update_command',
+    p.add_option('-B', '--run_command_before',
                  default='', action='store',
-                 help='Invoke this command before running tests - use to restart/update instance')
+                 help='Invoke this command BEFORE running tests - use to restart/update instance')
+    p.add_option('-A', '--run_command_after',
+                 default='', action='store',
+                 help='Invoke this command AFTER running tests - use to restart/update instance')
     p.add_option('-g', '--generate_queries',
                  default=False, action='store_true',
                  help='Generate 500 queries for certain fields')
@@ -792,7 +795,8 @@ def main(argv):
             
             with changed_dir(options.today_folder):
                 
-                
+                if options.run_command_before:
+                    run_cmd([options.run_command_before])
                 
                 if options.save:
                     runtime = {}
@@ -823,6 +827,9 @@ def main(argv):
                         save_into_file('after-test.json', simplejson.dumps(after_test))
                         save_results(options, results)
                         generate_today_dashboard(options, results)
+                
+                if options.run_command_after:
+                    run_cmd([options.run_command_after])
                         
                         
             if options.save:

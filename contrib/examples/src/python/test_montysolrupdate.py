@@ -956,6 +956,109 @@ class test_08_different_startups(NormalTest):
         montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
         t7000 = open('test-7000/automatic-run.sh', 'r').read()
         self.assertTrue('Base profile: writer.run.sh' in t7000, "The instance was not based on correct profile")
+    
+        
+class test_09_restart(NormalTest):
+    """
+    This test assumes montysolr is already built locally and we can simply
+    copy files around (without rebuilding them)
+    """
+            
+    def test_restart(self):
+        
+        self.registerTestInstance('test-7000')
+        self.registerTestInstance('test-7001')
+        self.registerTestInstance('test-7002')
+        
+        self.intercept('./build-montysolr.sh patch', lambda x,y,z: True)
+        self.intercept('./build-montysolr.sh minor', lambda x,y,z: True)
+        self.intercept('./build-montysolr.sh nuke', lambda x,y,z: True)
+        
+        # first invocation should take time
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
+        
+        p7000 = open('test-7000/montysolr.pid', 'r').read()
+        p7001 = open('test-7001/montysolr.pid', 'r').read()
+        p7002 = open('test-7002/montysolr.pid', 'r').read()
+        
+        # should force restart
+        self.cmd_collector = []
+        montysolrupdate.main(['foo', '-c', '-r', '-a', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
+        self.command_present('kill .*')
+        
+        self.assertTrue(p7000 != open('test-7000/automatic-run.sh', 'r').read(), "The instance was not restarted")
+        self.assertTrue(p7001 != open('test-7001/automatic-run.sh', 'r').read(), "The instance was not restarted")
+        self.assertTrue(p7002 != open('test-7002/automatic-run.sh', 'r').read(), "The instance was not restarted")
+        
+        
+        t7000 = open('test-7000/automatic-run.sh', 'r').read()
+        t7001 = open('test-7001/automatic-run.sh', 'r').read()
+        t7002 = open('test-7002/automatic-run.sh', 'r').read()
+        
+        self.assertTrue('Base profile: writer.run.sh' in t7000, "The instance was not based on correct profile")
+        self.assertTrue('Base profile: reader.run.sh' in t7001, "The instance was not based on correct profile")
+        self.assertTrue('Base profile: reader.run.sh' in t7002, "The instance was not based on correct profile")
+        
+        
+        self.isRunning(7000)
+        self.isRunning(7001)
+        self.isRunning(7002)
+        
+        montysolrupdate.stop_live_instance('test-7001', max_wait=10)
+        
+        self.isNotRunning(7001)
+        
+        p7000 = open('test-7000/montysolr.pid', 'r').read()
+        p7001 = open('test-7001/montysolr.pid', 'r').read()
+        p7002 = open('test-7002/montysolr.pid', 'r').read()
+        
+        # should check and start if necessary
+        self.cmd_collector = []
+        montysolrupdate.main(['foo', '-c', '-s', '-a', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
+        
+        self.isRunning(7000)
+        self.isRunning(7001)
+        self.isRunning(7002)
+        
+        self.assertTrue(p7000 != open('test-7000/automatic-run.sh', 'r').read(), "The instance was restarted")
+        self.assertTrue(p7001 != open('test-7001/automatic-run.sh', 'r').read(), "The instance was not started")
+        self.assertTrue(p7002 != open('test-7002/automatic-run.sh', 'r').read(), "The instance was restarted")
+        
+        
+        # should stop
+        self.cmd_collector = []
+        montysolrupdate.main(['foo', '-c', '-o', '-a', '-t', '10', 'test-7000#w', 'test-7001#r', 'test-7002#r'])
+        
+        self.isNotRunning(7000)
+        self.isNotRunning(7001)
+        self.isNotRunning(7002)
+        
+        
+class test_10_custom_commands(NormalTest):
+    """
+    This test assumes montysolr is already built locally and we can simply
+    copy files around (without rebuilding them)
+    """
+            
+    def test_restart(self):
+        
+        self.registerTestInstance('test-7000')
+        
+        self.intercept('./build-montysolr.sh patch', lambda x,y,z: True)
+        self.intercept('./build-montysolr.sh minor', lambda x,y,z: True)
+        self.intercept('./build-montysolr.sh nuke', lambda x,y,z: True)
+        
+        # first invocation should take time
+        montysolrupdate.main(['foo', '-c', '-u', '-a', '-t', '10', 'test-7000', 
+                              '-B', 'echo "hello" > hello.world; echo "world" >> hello.world',
+                              '-A', 'echo `cat hello.world` > hello.world2',
+                              ])
+        
+        self.isRunning(7000)
+        
+        self.assertTrue(open('test-7000/hello.world', 'r').read() == 'hello\nworld\n', "Initial command not executed")
+        self.assertTrue(open('test-7000/hello.world2', 'r').read() == 'hello world\n', "Final command not executed")
+        
         
 
 def cleanup(path):

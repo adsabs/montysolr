@@ -86,7 +86,9 @@ NEW_INSTANCE_PORT_GAP = 'MONTYSOLR_URL_GAP' in os.environ and os.environ['MONTYS
 JCC_SVN_TAG='MONTYSOLR_JCC_SVN_TAG' in os.environ and os.environ['MONTYSOLR_JCC_SVN_TAG'] or '1452473' #the version of JCC we rely on (Use the one from Jenkins)
 PYLUCENE_SVN_TAG='MONTYSOLR_PYLUCENE_SVN_TAG' in os.environ and os.environ['MONTYSOLR_PYLUCENE_SVN_TAG'] or JCC_SVN_TAG
 INVENIO_CONFIG='INVENIO_CONFIG' in os.environ and os.environ['INVENIO_CONFIG'] or ''
-# Ideas stolen from python release script
+INVENIO_COMMIT='INVENIO_COMMIT' in os.environ and os.environ['INVENIO_COMMIT'] or 'master'
+
+# some ideas stolen from python release script
 
 if "check_output" not in dir( subprocess ): # duck punch it in!
     def f(*popenargs, **kwargs):
@@ -133,11 +135,6 @@ def get_output(args):
 
 
 def check_basics():
-    for v in 'PATH,ANT_HOME,JAVA_HOME'.split(','):
-        if v not in os.environ:
-            error('%s not detected.' % v,
-              'Please set your enviroment variable')
-        
     if not os.path.exists(INSTDIR):
         error('INSTDIR does not exist: %s' % INSTDIR )
         
@@ -147,6 +144,11 @@ def check_basics():
     
 
 def check_options(options):
+    for v in 'PATH,ANT_HOME,JAVA_HOME'.split(','):
+        if v not in os.environ:
+            error('%s not detected.' % v,
+              'Please set your enviroment variable')
+            
     if options.force_recompilation:
         options.update = True
     
@@ -215,14 +217,22 @@ def get_arg_parser():
     p.add_option('-s', '--start',
                  default=False, action='store_true',
                  help='Start instances')
+    p.add_option('-r', '--restart',
+                 default=False, action='store_true',
+                 help='Restart running instances')
     p.add_option('-b', '--test_branch',
                  action='store',
                  help='Instead of a tag, checkout a branch (latest code) instead of a tag. Use only for testing!')
-    
     p.add_option('-S', '--test_scenario',
                  action='store',
                  default=None,
                  help='Change the existing installation tag - the script will think in needs to rebuild things. values: [+/-](major,minor,patch) Use only for testing! ')
+    p.add_option('-B', '--run_command_before',
+                 default='', action='store',
+                 help='Invoke this command BEFORE run - use to restart/update instance')
+    p.add_option('-A', '--run_command_after',
+                 default='', action='store',
+                 help='Invoke this command AFTER run - use to restart/update instance')
     return p
 
 
@@ -677,7 +687,7 @@ def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admi
         except Exception, e:
             if rsp is None:
                 #traceback.print_exc(e)
-                print "Waiting for instance to come up: %s sec." % (int(max_time - time.time())/1000,) 
+                print "Waiting for instance to come up: %d sec." % (max_time - time.time(),) 
             if rsp is not None and 'error' in rsp:
                 error(str(rsp['error']).replace('\\n', "\n"))
         time.sleep(1)
@@ -700,7 +710,7 @@ def reload_core(port):
     if 'status' in rsp and rsp['status'] == '0':
         return True
     else:
-        error('something is wrong, unxpected reply: %s' % rsp)
+        error('something is wrong, unexpected reply: %s' % rsp)
 
 
 def make_request(q, url, kwargs):
@@ -1224,7 +1234,12 @@ def start_live_instance(options, instance_dir, port,
                         max_wait=30,
                         instance_mode='',
                         list_of_readers=[]):
+    
     with changed_dir(instance_dir):
+        
+        if options.run_command_before:
+            run_cmd([options.run_command_before])
+                    
         pid = get_pid('montysolr.pid')
         if pid != -1 and check_pid_is_running(pid):
             error("The live instance at %s is still running" % instance_dir)
@@ -1333,6 +1348,9 @@ def start_live_instance(options, instance_dir, port,
         if os.path.exists('FAILED.counter'):
             run_cmd(['rm', 'FAILED.counter'])
         
+        if options.run_command_after:
+            run_cmd([options.run_command_after])
+            
         return True
 
               
@@ -1397,12 +1415,12 @@ def main(argv):
                 upgrade_montysolr(curr_tag, git_tag)
         
         if len(instance_names) > 0:
-            if options.update or options.start:
-                check_live_instance(options, instance_names)
-            elif options.stop:
+            if options.stop or options.restart:
                 for iname in instance_names:
                     parts = iname.split('#')
                     stop_live_instance(instance_dir=parts[0], max_wait=60) # when killing, we can be nasty
+            if options.update or options.start or options.restart:
+                check_live_instance(options, instance_names)
             
             
         remove_lock('update.pid')    
