@@ -257,6 +257,8 @@ def generate_queries(options):
     query_types = {}
     unfielded_query_types = {}
     
+    to_skip = ['responseHeader']
+    
     for f in fields:
         if 'error' in data[f]:
             print 'Field %s generated error' % f
@@ -265,6 +267,9 @@ def generate_queries(options):
         elif f == 'error':
             print 'Other unspecified error'
             print data[f]
+            del data[f]
+        elif f in to_skip:
+            del data[f]
         else:
             for k in data[f].keys():
                 query_types[k] = []
