@@ -74,14 +74,16 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 		for (String field: fieldsToTarget) {
 			log.info("Finding top df terms for field: " + field);
 			TermFreq[] topTerms;
+			
+			Map<String, String> fieldData = new HashMap<String, String>();
+			rsp.add(field, fieldData);
+			
 			try {
 				topTerms = CreateQueries.getTopTermsByDocFreq(reader, field, topN, false);
 			}
 			catch (RuntimeException e) {
-				if (e.getMessage().contains("index is too small")) {
-					continue;
-				}
-				throw e;
+				fieldData.put("error", e.getMessage());
+				continue;
 			}
 			
 			long maxDF = topTerms[0].df;
@@ -109,8 +111,6 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 	    System.arraycopy(topTerms, downTo, lowFreqTerms, 0, lowFreqTerms.length);
 	    
 			
-			Map<String, String> fieldData = new HashMap<String, String>();
-			rsp.add(field, fieldData);
 			
 			List<String> prefixes = Arrays.asList("HighFreq", "MedFreq", "LowFreq");
 			List<TermFreq[]> data = Arrays.asList(highFreqTerms, mediumFreqTerms, lowFreqTerms);
