@@ -25,6 +25,7 @@ import csv
 import simplejson
 import datetime
 import time
+import copy
 from montysolrupdate import error, run_cmd, get_output, check_basics, changed_dir, Tag,\
      get_release_tag, get_latest_git_release_tag, check_pid_is_running, remove_lock, \
      get_pid, req, acquire_lock, INSTDIR
@@ -150,6 +151,9 @@ def get_arg_parser():
     p.add_option('-R', '--results_folder',
                  default='results', action='store',
                  help='Name of the folder where to save results [results]')
+    p.add_option('-f', '--regenerate_html',
+                 default=False, action='store_true',
+                 help='Regenerate the html view before running any test')
     
     
     # JMeter options specific to our .jmx test
@@ -569,13 +573,13 @@ def generate_graphs(options):
 def harvest_results(test_name, results):
     aggregate = tablify('aggregate-report.csv')
     percentiles = tablify('response-times-percentiles.csv')
-    results.add_datapoint(test_name, 'avg', aggregate.get_col_byname('average')[0])
-    results.add_datapoint(test_name, 'stdev', aggregate.get_col_byname('aggregate_report_stddev')[0])
+    results.add_datapoint(test_name, 'avg', '%0.3f' % float(aggregate.get_col_byname('average')[0]))
+    results.add_datapoint(test_name, 'stdev', '%0.3f' % float(aggregate.get_col_byname('aggregate_report_stddev')[0]))
     results.add_datapoint(test_name, 'count', aggregate.get_col_byname('aggregate_report_count')[0])
     results.add_datapoint(test_name, 'median', aggregate.get_col_byname('aggregate_report_median')[0])
     results.add_datapoint(test_name, 'max', aggregate.get_col_byname('aggregate_report_max')[0])
     results.add_datapoint(test_name, 'min', aggregate.get_col_byname('aggregate_report_min')[0])
-    results.add_datapoint(test_name, '%error', aggregate.get_col_byname('aggregate_report_error%')[0])
+    results.add_datapoint(test_name, '%error', '%0.3f' % float(aggregate.get_col_byname('aggregate_report_error%')[0]))
     
     results.add_datapoint(test_name, '%90', percentiles.get_row_byvalue("Percentiles", "90.0")[1])
     results.add_datapoint(test_name, '%95', percentiles.get_row_byvalue("Percentiles", "95.0")[1])
@@ -613,40 +617,57 @@ def save_into_file(path, value):
     fo.write(str(value))
     fo.close()
 
-def generate_includes(options):
+def generate_includes(options, force=False):
     
-    if not os.path.exists('style.css'):
+    if not os.path.exists('style.css') or force:
         run_cmd(['cp', options.script_home + '/style.css', './'])
-    if not os.path.exists('javascript.js'):
+    if not os.path.exists('javascript.js') or force:
         run_cmd(['cp', options.script_home + '/javascript.js', './'])
-    if not os.path.exists('dygraph-combined.js'):
+    if not os.path.exists('dygraph-combined.js') or force:
         run_cmd(['cp', options.script_home + '/dygraph-combined.js', './'])
     
-def update_global_dashboard(options, results):
+def update_global_dashboard(options, results, previous_results=None):
     
     for test_name, test_results in results.get_tests():
         csv_file = test_name + '.csv'
         if not os.path.exists(csv_file):
-            with open(csv_file, 'w') as w:
-                w.write('Date,QPS\n')
-                w.write(options.today + ',%(avg)s,%(stdev)s\n' % test_results)
+            w = open(csv_file, 'w')
+            if previous_results:
+                w.write('Date,Avg,Prev\n')
+            else:
+                w.write('Date,Avg\n')
         else:
-            with open(csv_file, 'a') as w:
-                w.write(options.today + ',%(avg)s,%(stdev)s\n' % test_results)
+            w = open(csv_file, 'a')
+                
+        if previous_results:
+            data = {'prev': test_results['avg'], 'prev_stdev': test_results['stdev']}
+            data.update(test_results)
+            if previous_results.get_test_by_name(test_name) != None:
+                prev = previous_results.get_test_by_name(test_name)
+                data['prev'] = prev['avg']
+                data['prev_stdev'] = prev['stdev']
+            w.write(options.today + ',%(avg)s,%(stdev)s,%(prev)s,%(prev_stdev)s\n' % data)
+        else:
+            w.write(options.today + ',%(avg)s,%(stdev)s,-1,0\n' % test_results)
     
+    
+
+def regenerate_global_dashboard(options, results):
     valid_csvs = sorted([x[0:-4] for x in glob.glob('*.csv')])
-    
-    
+        
     with open(options.script_home + '/dashboard-view.tmpl', 'r') as t:
         tmpl = t.read()
 
     kwargs = load_tmpl_kwargs(options)
             
     one_block = """
-    <div class="dygraph-block" id="%(test_name)s" />
+    <div class="dygraph-container">
+    <div class="dygraph-block" id="%(test_name)s">
     <script type="text/javascript">
     doGraph('%(test_name)s');
     </script>
+    </div>
+    </div>
     """
     
     
@@ -674,6 +695,7 @@ def generate_today_dashboard(options, results):
         if os.path.isfile(f) or f == '.' or f == '..':
             continue 
         valid_tests.append(f)
+    valid_tests = sorted(valid_tests)
         
     one_block = """
     <div class="test-block">
@@ -733,7 +755,9 @@ def load_tmpl_kwargs(options):
         kwargs['jvmCommandLineArgs'] = '\n'.join(kwargs['jvmCommandLineArgs'].split())
     
     if os.path.exists('aggregate-report.csv'):
-        kwargs['aggregate_report'] = str(tablify('aggregate-report.csv'))
+        aggregate = tablify('aggregate-report.csv')
+        
+        kwargs['aggregate_report'] = str(aggregate)
     
     
     if os.path.exists('runtime-env.json'):
@@ -743,8 +767,51 @@ def load_tmpl_kwargs(options):
     return kwargs
     
     
+
+def regenerate_html(options):
+        
+    options_copy = copy.deepcopy(options)
+    
+    collected_results = []
+    
+    for date_folder in sorted(os.listdir('.')):
+        if not os.path.isdir(date_folder):
+            continue
+        
+        with changed_dir(date_folder):
+            results = JMeterResults()
+            runtime = simplejson.load(open('runtime-env.json', 'r'))
+            options_copy.__dict__ = runtime
+            collected_results.append((runtime, results))
+            
+            for test_folder in os.listdir('.'):
+                if not os.path.isdir(test_folder):
+                    continue 
+                with changed_dir(test_folder):
+                    print 'Regenerating test view'
+                    generate_one_run_html(test_folder, options_copy)
+                    harvest_results(test_folder, results)
+            
+            print 'Regenerating day view'
+            generate_today_dashboard(options_copy, results)
+            
+        
+    print 'Regenerating dashboard view'
+    valid_csvs = sorted([x[0:-4] for x in glob.glob('*.csv')])
+    for csv in valid_csvs:
+        run_cmd(['rm', csv + '.csv'])
+        
+    if len(collected_results) > 0:
+        previous_results = collected_results[0][1]
+    for runtime, results in collected_results:
+        options_copy.__dict__ = runtime
+        update_global_dashboard(options_copy, results, previous_results)
+        previous_results = results
+    regenerate_global_dashboard(options_copy, results)
     
     
+    print 'Regenerating includes'
+    generate_includes(options_copy, force=True)
     
 
 class JMeterResults(dict):
@@ -762,6 +829,12 @@ class JMeterResults(dict):
         for k, v in self['tests'].items():
             tests.append((k, v))
         return sorted(tests, key=lambda x: x[0])
+    
+    def get_test_by_name(self, name):
+        if name in self['tests']:
+            return self['tests'][name]
+        else:
+            return None
           
 
 class Table:
@@ -817,19 +890,26 @@ def main(argv):
     
     if not os.path.exists(os.path.join(INSTDIR, _NAME)):
         run_cmd(['mkdir', os.path.join(INSTDIR, _NAME)])
-    
+        
     
     with changed_dir(os.path.join(INSTDIR, _NAME)):
-        
-        update_pid = get_pid('update.pid')
-        if update_pid != -1 and check_pid_is_running(update_pid):
-            error("The script is already running with pid: %s" % update_pid)
-        
-        acquire_lock('update.pid')
         
         parser = get_arg_parser()
         options, args = parser.parse_args(argv)
         check_options(options, args)
+        
+        update_pid = get_pid('%s/solrjmeter.pid' % options.results_folder)
+        if update_pid != -1 and check_pid_is_running(update_pid):
+            error("The script is already running with pid: %s" % update_pid)
+        
+        
+        if options.purge and os.path.exists(options.results_folder):
+            run_cmd(['rm', '-fr', options.results_folder])
+        
+        if not os.path.exists(options.results_folder):
+            run_cmd(['mkdir', options.results_folder])
+
+        acquire_lock('%s/solrjmeter.pid' % options.results_folder)
         
         print "============="
         for k,v in options.__dict__.items():
@@ -843,26 +923,33 @@ def main(argv):
         # install pre-requisities if requested
         check_prerequisities(options)
         
+                    
+        if options.regenerate_html:
+            with changed_dir(options.results_folder):
+                regenerate_html(options)
         
+        if options.generate_queries is not None:
+            generate_queries(options)
+            
         if len(args) > 1:
             tests = args[1:]
         else:
             tests = find_tests(options)
-        
+            
         if len(tests) == 0: 
             error('no test name(s) supplied nor found in: %s' % options.queries_pattern)
-        
-        if options.purge and os.path.exists(options.results_folder):
-            run_cmd(['rm', '-fr', options.results_folder])
-        
-        if not os.path.exists(options.results_folder):
-            run_cmd(['mkdir', options.results_folder])
+            
             
         with changed_dir(options.results_folder):
             results = JMeterResults()
+            previous_results = JMeterResults()
             
-            if options.generate_queries is not None:
-                generate_queries(options)
+            all_tests = sorted(filter(lambda y: '.' in y, filter(lambda x: os.path.isdir(x), os.listdir('.'))))
+            
+            if len(all_tests) > 0:
+                print 'Reading results of the previous test'
+                with changed_dir(all_tests[-1]):
+                    harvest_results(all_tests[-1], previous_results)
             
             if options.save:
                 generate_includes(options)
@@ -913,15 +1000,15 @@ def main(argv):
                         
                         
             if options.save:
-                update_global_dashboard(options, results)
+                update_global_dashboard(options, results, previous_results)
+                regenerate_global_dashboard(options, results)
                 
             if options.upload:
                     upload_results(options, results)
                         
                     
-            
-        
-        remove_lock('update.pid')    
+        remove_lock('%s/solrjmeter.pid' % options.results_folder)    
+    
     
 
 if __name__ == '__main__':

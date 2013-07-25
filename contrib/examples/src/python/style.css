@@ -19,6 +19,17 @@ font-weight:bold; color:red;
 div.dashboard {
   width:100%;
 }
+div.dygraph-block  {
+  border: 1px solid #d9d8cd;
+  //background: #edece6;
+  float:right;
+}
+div.dygraph-container {
+  border: 1px solid black;
+  float:left;
+  width: 40%;
+  padding: 5px;
+}
 
 div.test-block {
   border: 1px solid black;
@@ -57,4 +68,3 @@ display: none;
 display: block;
 display/* hide this definition from IE5/6 */: table-row;
 }
-
