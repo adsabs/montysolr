@@ -31,9 +31,9 @@ function change(details_id){
 	  return new Dygraph(
 	    document.getElementById(graphId),
 	    graphId + ".csv",
-	    {title: "field.queries", 
+	    {title: graphId, 
 	     xlabel: "Date", 
-	     ylabel: "Queries/sec", 
+	     ylabel: "avg (ms)", 
 	     labelsKMB: true, 
 	     labelsSeparateLines: true, 
 	     labelsDivWidth: 700, 

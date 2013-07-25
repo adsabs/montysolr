@@ -29,6 +29,8 @@ from montysolrupdate import error, run_cmd, get_output, check_basics, changed_di
      get_release_tag, get_latest_git_release_tag, check_pid_is_running, remove_lock, \
      get_pid, req, acquire_lock, INSTDIR
 from pprint import pprint,pformat
+import Queue
+import threading
 
 COMMASPACE = ', '
 SPACE = ' '
@@ -54,11 +56,6 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
     subprocess.check_output = f
 
     
-
-
-
-
-
 
 def check_options(options, args):
     
@@ -97,8 +94,11 @@ def check_options(options, args):
     if options.queries_pattern is None or options.queries_pattern == '':
         error('Missing --queries_pattern parameter')
         
-    if '=' not in options.generate_queries:
+    if options.generate_queries and '=' not in options.generate_queries:
         options.generate_queries = ''
+        
+    if options.queries_pattern:
+        options.queries_pattern = options.queries_pattern.split(',')
     
 
 def get_arg_parser():
@@ -244,8 +244,9 @@ def update_montysolr(options):
 def generate_queries(options):
     
     print 'Getting perf queries from solr'
-    data = simplejson.load(open('/var/lib/montysolr/solrjmeter/results/perf2.json', 'r'))
-    if 0:
+    data = None
+    #data = simplejson.load(open('/var/lib/montysolr/solrjmeter/results/perf.json', 'r'))
+    if not data:
         if options.generate_queries:
             args = options.generate_queries.split('&')
             kwargs = {}.update(args.split('='))
@@ -280,8 +281,9 @@ def generate_queries(options):
             lines = lines.split('\n')
             
             for l in lines:
+                is_resolved = 'numFound=' in l 
                 parts = l.split('\t')
-                if len(parts) > 2:
+                if is_resolved and len(parts) > 2:
                     query_types[qtype].append('%s:(%s)\t=%s' % (field, parts[0], parts[3].replace('#numFound=', '')))
                     unfielded_query_types[qtype].append('%s:(%s)\t=%s' % (field, parts[0], parts[3].replace('#numFound=', '')))
                 elif len(parts) == 2:
@@ -301,11 +303,16 @@ def generate_queries(options):
 
 def find_tests(options):
     if options.queries_pattern:
-        if os.path.exists(options.queries_pattern):
-            with changed_dir(options.queries_pattern):
-                return glob.glob('*.queries')
-        else:
-            return glob.glob(options.queries_pattern)
+        tests = set()
+        for pattern in options.queries_pattern:
+            if os.path.exists(pattern):
+                with changed_dir(pattern):
+                    for x in glob.glob('*.queries'):
+                        tests.add(x)
+            else:
+                for x in glob.glob(pattern):
+                    tests.add(x)
+        return tests
     else:
         return glob.glob(os.path.join(INSTDIR, 'perpetuum/montysolr/contrib/examples/adsabs/jmeter/*.queries'))
     
@@ -480,6 +487,12 @@ def tablify(csv_filepath):
         labels = data.next()
         return Table(*[Table.Column(x[0], tuple(x[1:])) for x in zip(labels, *list(data))])        
 
+def run_cmd_thread(*args):
+    t = threading.Thread(target=run_cmd, args=args)
+    #t.daemon = True 
+    t.start()
+    #t.run()
+    
    
 def generate_graphs(options):    
     # now generate various metrics/graphs from the summary
@@ -488,61 +501,68 @@ def generate_graphs(options):
                                                      jmeter_base=os.path.abspath(options.jmeter + '/../..'))
                
     
-    ## 
-    run_cmd([reporter, '--plugin-type AggregateReport --generate-csv aggregate-report.csv'])
+    orig_thread_count = threading.active_count()
+    
+    run_cmd_thread([reporter, '--plugin-type AggregateReport --generate-csv aggregate-report.csv'])
     
     
-    run_cmd([reporter, '--plugin-type BytesThroughputOverTime --generate-png bytes-throughput-over-time.png'])
-    run_cmd([reporter, '--plugin-type BytesThroughputOverTime --generate-csv bytes-throughput-over-time.csv'])
+    run_cmd_thread([reporter, '--plugin-type BytesThroughputOverTime --generate-png bytes-throughput-over-time.png'])
+    run_cmd_thread([reporter, '--plugin-type BytesThroughputOverTime --generate-csv bytes-throughput-over-time.csv'])
     
     # the same info is at response-codes-per-sec including the number of failed requests
     #run_cmd([reporter, '--plugin-type HitsPerSecond --generate-png hits-per-sec.png'])
     #run_cmd([reporter, '--plugin-type HitsPerSecond --generate-csv hits-per-sec.csv'])
     
-    run_cmd([reporter, '--plugin-type LatenciesOverTime --generate-png latencies-over-time.png'])
-    run_cmd([reporter, '--plugin-type LatenciesOverTime --generate-csv latencies-over-time.csv'])
+    run_cmd_thread([reporter, '--plugin-type LatenciesOverTime --generate-png latencies-over-time.png'])
+    run_cmd_thread([reporter, '--plugin-type LatenciesOverTime --generate-csv latencies-over-time.csv'])
     
-    run_cmd([reporter, '--plugin-type ResponseCodesPerSecond --generate-png response-codes-per-sec.png'])
-    run_cmd([reporter, '--plugin-type ResponseCodesPerSecond --generate-csv response-codes-per-sec.csv'])
+    run_cmd_thread([reporter, '--plugin-type ResponseCodesPerSecond --generate-png response-codes-per-sec.png'])
+    run_cmd_thread([reporter, '--plugin-type ResponseCodesPerSecond --generate-csv response-codes-per-sec.csv'])
     
     # histogram of number of responses that fit in 100ms, 1s, 10s,
-    run_cmd([reporter, '--plugin-type ResponseTimesDistribution --generate-png response-times-distribution-10.png --granulation 10'])
-    run_cmd([reporter, '--plugin-type ResponseTimesDistribution --generate-png response-times-distribution-100.png --granulation 100'])
-    run_cmd([reporter, '--plugin-type ResponseTimesDistribution --generate-png response-times-distribution-1000.png --granulation 1000'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesDistribution --generate-png response-times-distribution-10.png --granulation 10'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesDistribution --generate-png response-times-distribution-100.png --granulation 100'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesDistribution --generate-png response-times-distribution-1000.png --granulation 1000'])
     
-    run_cmd([reporter, '--plugin-type ResponseTimesDistribution --generate-csv response-times-distribution-10.csv --granulation 10'])
-    run_cmd([reporter, '--plugin-type ResponseTimesDistribution --generate-csv response-times-distribution-100.csv --granulation 100'])
-    run_cmd([reporter, '--plugin-type ResponseTimesDistribution --generate-csv response-times-distribution-1000.csv --granulation 1000'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesDistribution --generate-csv response-times-distribution-10.csv --granulation 10'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesDistribution --generate-csv response-times-distribution-100.csv --granulation 100'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesDistribution --generate-csv response-times-distribution-1000.csv --granulation 1000'])
     
     # time series of #no of responses during test
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-10.png --granulation 100'])
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-100.png --granulation 1000'])
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-1000.png --granulation 10000'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-10.png --granulation 100'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-100.png --granulation 1000'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesOverTime  --generate-png response-times-over-time-1000.png --granulation 10000'])
     
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-10.csv --granulation 100'])
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-100.csv --granulation 1000'])
-    run_cmd([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-1000.csv --granulation 10000'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-10.csv --granulation 100'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-100.csv --granulation 1000'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesOverTime  --generate-csv response-times-over-time-1000.csv --granulation 10000'])
     
     
-    run_cmd([reporter, '--plugin-type ResponseTimesPercentiles  --generate-png response-times-percentiles.png'])
-    run_cmd([reporter, '--plugin-type ResponseTimesPercentiles  --generate-csv response-times-percentiles.csv'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesPercentiles  --generate-png response-times-percentiles.png'])
+    run_cmd_thread([reporter, '--plugin-type ResponseTimesPercentiles  --generate-csv response-times-percentiles.csv'])
     
     #run_cmd([reporter, '--plugin-type ThroughputOverTime  --generate-png throughput-over-time.png'])
     #run_cmd([reporter, '--plugin-type ThroughputOverTime  --generate-csv throughput-over-time.csv'])
     
-    run_cmd([reporter, '--plugin-type ThroughputVsThreads  --generate-png throughput-vs-threads.png'])
-    run_cmd([reporter, '--plugin-type ThroughputVsThreads  --generate-csv throughput-vs-threads.csv'])
+    run_cmd_thread([reporter, '--plugin-type ThroughputVsThreads  --generate-png throughput-vs-threads.png'])
+    run_cmd_thread([reporter, '--plugin-type ThroughputVsThreads  --generate-csv throughput-vs-threads.csv'])
     
-    run_cmd([reporter, '--plugin-type TimesVsThreads  --generate-png times-vs-threads.png'])
-    run_cmd([reporter, '--plugin-type TimesVsThreads  --generate-csv times-vs-threads.csv'])
+    run_cmd_thread([reporter, '--plugin-type TimesVsThreads  --generate-png times-vs-threads.png'])
+    run_cmd_thread([reporter, '--plugin-type TimesVsThreads  --generate-csv times-vs-threads.csv'])
     
-    run_cmd([reporter, '--plugin-type TransactionsPerSecond  --generate-png transactions-per-sec.png'])
-    run_cmd([reporter, '--plugin-type TransactionsPerSecond  --generate-csv transactions-per-sec.csv'])
+    run_cmd_thread([reporter, '--plugin-type TransactionsPerSecond  --generate-png transactions-per-sec.png'])
+    run_cmd_thread([reporter, '--plugin-type TransactionsPerSecond  --generate-csv transactions-per-sec.csv'])
     
-    run_cmd([reporter, '--plugin-type PageDataExtractorOverTime  --generate-png page-data-extractor-over-time.png'])
-    run_cmd([reporter, '--plugin-type PageDataExtractorOverTime  --generate-csv page-data-extractor-over-time.csv'])
+    run_cmd_thread([reporter, '--plugin-type PageDataExtractorOverTime  --generate-png page-data-extractor-over-time.png'])
+    run_cmd_thread([reporter, '--plugin-type PageDataExtractorOverTime  --generate-csv page-data-extractor-over-time.csv'])
     
-    
+    max_sleep = 120
+    slept = 0.0
+    while threading.active_count() > orig_thread_count:
+        time.sleep(0.4)
+        slept += 0.4
+        if slept > max_sleep:
+            error('We got a zombie!')
     
     
 
@@ -659,7 +679,7 @@ def generate_today_dashboard(options, results):
     <div class="test-block">
     <h3>%(test_name)s</h3>
     <p>
-    <a href="%(test_name)s/day-view.html">
+    <a href="%(test_name)s/test-view.html">
         <img src="%(test_name)s/transactions-per-sec.png" title="Responses that were rejected as invalid + HTTP error codes (ideally, you will see only successess)"/>
     </a>  
     </p>
@@ -864,7 +884,10 @@ def main(argv):
                     before_test = harvest_details_about_montysolr(options)
                     save_into_file('before-test.json', simplejson.dumps(before_test))
                 
+                i = 0
                 for test in tests:
+                    i += 1
+                    print 'Running (%s/%s): %s' % (i, len(tests), test)
                     
                     test_name = os.path.basename(test)
                     test_dir = test_name
