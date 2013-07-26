@@ -85,7 +85,8 @@ def check_options(options, args):
     
     timestamp = time.time()
     options.timestamp = timestamp
-    options.today = datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+    options.timeformat = "%Y-%m-%d %H:%M:%S"
+    options.today = datetime.datetime.fromtimestamp(timestamp).strftime(options.timeformat)
     
     if options.debug:
         options.today_folder = 'debug'
@@ -100,6 +101,33 @@ def check_options(options, args):
         
     if options.queries_pattern:
         options.queries_pattern = options.queries_pattern.split(',')
+        
+    if options.generate_comparison:
+        options.generate_comparison = options.generate_comparison.split(',')
+        if len(options.generate_comparison) < 1:
+            error("When generating comparison, we need at least two result folders")
+        for rf in options.generate_comparison:
+            if rf == options.results_folder or os.path.exists(rf):
+                continue
+            error("The folder '%s' does not exist" % rf)
+        
+        roundup_correction = options.roundup_correction
+        try:
+            options.roundup_correction = int(roundup_correction)
+        except:
+            if 'week' in roundup_correction:
+                options.roundup_correction = 7 * 24 * 3600
+            elif 'day' in roundup_correction:
+                options.roundup_correction = 24 * 3600
+            elif 'hour' in roundup_correction:
+                options.roundup_correction = 3600
+            elif 'min' in roundup_correction:
+                options.roundup_correction = 60
+            elif 'sec' in roundup_correction:
+                options.roundup_correction = 1
+            else:
+                error('Unknown correction value: %s' % roundup_correction)
+        
     
 
 def get_arg_parser():
@@ -154,6 +182,13 @@ def get_arg_parser():
     p.add_option('-f', '--regenerate_html',
                  default=False, action='store_true',
                  help='Regenerate the html view before running any test')
+    p.add_option('-C', '--generate_comparison',
+                 default=None, action='store',
+                 help='Comma separated list of result folders to create aggregate view')
+    p.add_option('-c', '--roundup_correction',
+                 default='3600', action='store',
+                 help='Roundup date of the measurement (to cluster) different tests; possible values: day,hour,min,sec,[int=number of seconds]')
+    
     
     
     # JMeter options specific to our .jmx test
@@ -640,12 +675,12 @@ def update_global_dashboard(options, results, previous_results=None):
             w = open(csv_file, 'a')
                 
         if previous_results:
-            data = {'prev': test_results['avg'], 'prev_stdev': test_results['stdev']}
+            data = {'prev': test_results['avg'], 'prev_stdev': '0.0'}
             data.update(test_results)
             if previous_results.get_test_by_name(test_name) != None:
                 prev = previous_results.get_test_by_name(test_name)
                 data['prev'] = prev['avg']
-                data['prev_stdev'] = prev['stdev']
+                #data['prev_stdev'] = prev['stdev']
             w.write(options.today + ',%(avg)s,%(stdev)s,%(prev)s,%(prev_stdev)s\n' % data)
         else:
             w.write(options.today + ',%(avg)s,%(stdev)s,-1,0\n' % test_results)
@@ -812,7 +847,121 @@ def regenerate_html(options):
     
     print 'Regenerating includes'
     generate_includes(options_copy, force=True)
+
+
+
+def generate_top_level_comparison(options):
     
+    js_blocks = []
+    one_block = """
+    <div class="dygraph-container">
+    <div class="dygraph-block" id="%(comparison_id)s">
+    <script type="text/javascript">
+    var data = %(offsets)s;
+    
+    doComparisonGraph('%(comparison_id)s', '%(test_name)s', data);
+    </script>
+    </div>
+    </div>
+    """
+    
+    # first discover tests that are common
+    valid_tests = {}
+    for results_folder in options.generate_comparison:
+        with changed_dir(results_folder):
+            valid_csvs = sorted([x[0:-4] for x in glob.glob('*.csv')])
+            for vc in valid_csvs:
+                valid_tests.setdefault(vc, 0)
+                valid_tests[vc] += 1
+    
+    # remove tests that are not present in all folders
+    max_count = max(valid_tests.values())
+    for to_remove in filter(lambda x: x[1] != max_count, valid_tests.items()):
+        del valid_tests[to_remove[0]]
+    
+    roundup_correction = options.roundup_correction
+    
+    # read in data, apply rounding up corrections
+    for test_name in valid_tests.keys():
+        results = {}
+        print 'reading: %s' % results_folder + "/" + test_name + '.csv'
+        for test_id, results_folder in zip(range(len(options.generate_comparison)), options.generate_comparison):
+            with open(results_folder + "/" + test_name + '.csv', 'r') as test_file:
+                count = -1
+                for line in test_file:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    
+                    count += 1
+                    
+                    if count == 0:
+                        continue
+                    data = line.split(',')
+                    
+                    date = data[0]
+                    value = data[1]
+                    stdev = data[2]
+                    
+                    timestamp = time.mktime(datetime.datetime.strptime(date, options.timeformat).timetuple())
+                    rounded_timestamp = timestamp - (timestamp % roundup_correction)
+                    if rounded_timestamp not in results:
+                        results[rounded_timestamp] = [[] for x in range(len(options.generate_comparison))]
+                    
+                    results[rounded_timestamp][test_id].append((test_id, timestamp, value, stdev))
+        
+        # transform results into simple CSV (some dates may be missing, or be present multiple times [inside interval])
+        offsets = {}
+        for k in options.generate_comparison:
+            offsets[k] = []
+        report_name = 'comparison-%s-%s-aggregate-report' % (test_name, '_'.join(options.generate_comparison))
+        with open(report_name + '.csv', 'w') as aggr:
+            writer = csv.writer(aggr, delimiter=',',
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(['Date'] + options.generate_comparison)
+            
+            for rounded_timestamp, data in sorted(results.items(), key=lambda x: x[0]):
+                max_no_of_observations = max([len(x) for x in data])
+                interval = roundup_correction / (max_no_of_observations+1)
+                corrected_timestamp = None
+                for series in range(max_no_of_observations):
+                    row = []
+                    if series == 0:
+                        row.append(datetime.datetime.fromtimestamp(rounded_timestamp).strftime(options.timeformat))
+                        corrected_timestamp = rounded_timestamp
+                    else:
+                        corrected_timestamp += interval
+                        row.append(datetime.datetime.fromtimestamp(corrected_timestamp).strftime(options.timeformat))
+                        
+                    for comparison_name, data_row in zip(options.generate_comparison, data):
+                        if len(data_row) > series:
+                            row.append(data_row[series][2]) # value
+                            row.append(data_row[series][3]) # stdev
+                            offsets[comparison_name].append(datetime.datetime.fromtimestamp(data_row[series][1]).strftime(options.timeformat)) # save the real date
+                        else:
+                            row.append('NaN') 
+                            row.append('NaN')
+                    writer.writerow(row)
+                    
+        js_blocks.append(one_block % {'comparison_id': report_name, 'test_name': test_name, 'offsets': simplejson.dumps(offsets)})
+                   
+                   
+                    
+    with open(options.script_home + '/comparison-view.tmpl', 'r') as t:
+        tmpl = t.read()
+    kwargs = load_tmpl_kwargs(options)
+    
+    
+    kwargs['blocks'] = '\n'.join(js_blocks)
+    
+    with open(report_name + '.html', 'w') as w:
+        w.write(tmpl % kwargs)
+                        
+    generate_includes(options, force=True)                                 
+                    
+                
+                
+        
 
 class JMeterResults(dict):
     def __init__(self, *args):
@@ -937,77 +1086,78 @@ def main(argv):
             tests = find_tests(options)
             
         if len(tests) == 0: 
-            error('no test name(s) supplied nor found in: %s' % options.queries_pattern)
-            
-            
-        with changed_dir(options.results_folder):
-            results = JMeterResults()
-            previous_results = JMeterResults()
-            
-            all_tests = sorted(filter(lambda y: '.' in y, filter(lambda x: os.path.isdir(x), os.listdir('.'))))
-            
-            if len(all_tests) > 0:
-                print 'Reading results of the previous test'
-                with changed_dir(all_tests[-1]):
-                    for prev_dir in filter(lambda x: os.path.isdir(x), os.listdir('.')):
-                        with changed_dir(prev_dir):
-                            harvest_results(prev_dir, previous_results)
-            
-            if options.save:
-                generate_includes(options)
+            print 'WARNING: no test name(s) supplied nor found in: %s' % options.queries_pattern
+        else:    
+            with changed_dir(options.results_folder):
+                results = JMeterResults()
+                previous_results = JMeterResults()
                 
-            if not os.path.exists(options.today_folder):
-                run_cmd(['mkdir', options.today_folder])
-            
-            with changed_dir(options.today_folder):
+                all_tests = sorted(filter(lambda y: '.' in y, filter(lambda x: os.path.isdir(x), os.listdir('.'))))
                 
-                if options.run_command_before:
-                    run_cmd([options.run_command_before])
+                if len(all_tests) > 0:
+                    print 'Reading results of the previous test'
+                    with changed_dir(all_tests[-1]):
+                        for prev_dir in filter(lambda x: os.path.isdir(x), os.listdir('.')):
+                            with changed_dir(prev_dir):
+                                harvest_results(prev_dir, previous_results)
                 
                 if options.save:
-                    runtime = {}
-                    runtime.update(options.__dict__)
-                    runtime['google_password'] = 'XXX'
-                    save_into_file('runtime-env.json', simplejson.dumps(runtime))
+                    generate_includes(options)
+                    
+                if not os.path.exists(options.today_folder):
+                    run_cmd(['mkdir', options.today_folder])
                 
-                    before_test = harvest_details_about_montysolr(options)
-                    save_into_file('before-test.json', simplejson.dumps(before_test))
-                
-                i = 0
-                for test in tests:
-                    i += 1
-                    print 'Running (%s/%s): %s' % (i, len(tests), test)
+                with changed_dir(options.today_folder):
                     
-                    test_name = os.path.basename(test)
-                    test_dir = test_name
+                    if options.run_command_before:
+                        run_cmd([options.run_command_before])
                     
-                    if not os.path.exists(test_dir):
-                        run_cmd(['mkdir', test_dir])
-                    
-                    with changed_dir(test_dir):
-                        
-                        run_test(test, options)
-                        generate_graphs(options)
-                        generate_one_run_html(test_name, options)
-                        harvest_results(test_name, results)
-                        
                     if options.save:
-                        after_test = harvest_details_about_montysolr(options)
-                        save_into_file('after-test.json', simplejson.dumps(after_test))
-                        save_results(options, results)
-                        generate_today_dashboard(options, results)
-                
-                if options.run_command_after:
-                    run_cmd([options.run_command_after])
+                        runtime = {}
+                        runtime.update(options.__dict__)
+                        runtime['google_password'] = 'XXX'
+                        save_into_file('runtime-env.json', simplejson.dumps(runtime))
+                    
+                        before_test = harvest_details_about_montysolr(options)
+                        save_into_file('before-test.json', simplejson.dumps(before_test))
+                    
+                    i = 0
+                    for test in tests:
+                        i += 1
+                        print 'Running (%s/%s): %s' % (i, len(tests), test)
                         
+                        test_name = os.path.basename(test)
+                        test_dir = test_name
                         
-            if options.save:
-                update_global_dashboard(options, results, previous_results)
-                regenerate_global_dashboard(options, results)
-                
-            if options.upload:
-                    upload_results(options, results)
+                        if not os.path.exists(test_dir):
+                            run_cmd(['mkdir', test_dir])
                         
+                        with changed_dir(test_dir):
+                            
+                            run_test(test, options)
+                            generate_graphs(options)
+                            generate_one_run_html(test_name, options)
+                            harvest_results(test_name, results)
+                            
+                        if options.save:
+                            after_test = harvest_details_about_montysolr(options)
+                            save_into_file('after-test.json', simplejson.dumps(after_test))
+                            save_results(options, results)
+                            generate_today_dashboard(options, results)
+                    
+                    if options.run_command_after:
+                        run_cmd([options.run_command_after])
+                            
+                            
+                if options.save:
+                    update_global_dashboard(options, results, previous_results)
+                    regenerate_global_dashboard(options, results)
+                    
+                if options.upload:
+                        upload_results(options, results)
+                        
+        if options.generate_comparison:
+            generate_top_level_comparison(options)
                     
         remove_lock('%s/solrjmeter.pid' % options.results_folder)    
     

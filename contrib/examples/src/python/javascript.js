@@ -34,15 +34,37 @@ function doGraph(graphId) {
     {title: graphId, 
      xlabel: "Date", 
      ylabel: "Avg response time (ms)", 
+     labelsDivWidth: 300,
      labelsKMB: true,
      clickCallback: function c(ev, msec, pts) {             
-    doClick(graphId, ev, msec, pts);
-   },
+      doClick(graphId, ev, msec, pts);
+     },
      labelsDivStyles: {'background-color': 'transparent'}, 
      errorBars: true, 
      sigma: 1, 
      showRoller: true,
-       rollPeriod: 5,
-       }
+     }
+  );
+}
+
+function doComparisonGraph(graphId, testName, data) {
+  return new Dygraph(
+    document.getElementById(graphId),
+    graphId + ".csv",
+    {title: testName, 
+     xlabel: "Date", 
+     ylabel: "Avg response time (ms)", 
+     labelsDivWidth: 300,
+     labelsKMB: true,
+     pointClickCallback: function(event, p) {
+        real_milli = Dygraph.dateParser(data[p.name][p.idx]);
+        d = new Date(real_milli);
+        top.location = p.name + "/" + d.getFullYear() + "." + zp(1+d.getMonth(), 2) + "." + zp(d.getDate(), 2) + "." + zp(d.getHours(), 2) + "." + zp(d.getMinutes(), 2) + "." + zp(d.getSeconds(), 2) + "/" + testName + "/test-view.html";
+     },
+     labelsDivStyles: {'background-color': 'transparent'}, 
+     errorBars: true, 
+     sigma: 1, 
+     showRoller: true,
+     }
   );
 }
