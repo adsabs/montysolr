@@ -949,7 +949,9 @@ def main(argv):
             if len(all_tests) > 0:
                 print 'Reading results of the previous test'
                 with changed_dir(all_tests[-1]):
-                    harvest_results(all_tests[-1], previous_results)
+                    for prev_dir in filter(lambda x: os.path.isdir(x), os.listdir('.')):
+                        with changed_dir(prev_dir):
+                            harvest_results(prev_dir, previous_results)
             
             if options.save:
                 generate_includes(options)
