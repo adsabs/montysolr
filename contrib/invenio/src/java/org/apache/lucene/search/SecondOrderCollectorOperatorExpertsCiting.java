@@ -53,7 +53,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	@SuppressWarnings("unchecked")
   @Override
-	public boolean searcherInitialization(IndexSearcher searcher) throws IOException {
+	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
 		if (valueToDocidCache == null) {
 		  if (cacheGetter != null) {
 		    valueToDocidCache = (Map<String, Integer>) cacheGetter.getCache();
@@ -66,7 +66,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		if (valueToDocidCache == null || valueToDocidCache.size() == 0) {
 			return false;
 		}
-		return super.searcherInitialization(searcher);
+		return super.searcherInitialization(searcher, firstOrderWeight);
 	}
 	
 

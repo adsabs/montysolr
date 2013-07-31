@@ -51,7 +51,9 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	@Override
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
-	  if (node instanceof FieldQueryNode) {
+
+		// HACK-FUNC-to-refactor
+	  if (node instanceof FieldQueryNode && !(node.getParent() instanceof AqpFunctionQueryNode)) {
 	    
 		  QueryConfigHandler config = getQueryConfigHandler();
 		  

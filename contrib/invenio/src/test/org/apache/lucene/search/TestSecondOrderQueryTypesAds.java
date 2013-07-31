@@ -10,15 +10,20 @@ import java.util.Map;
 import monty.solr.util.MontySolrAbstractLuceneTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FloatField;
 import org.apache.lucene.document.StringField;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.MockIndexWriter;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 //import org.apache.lucene.util.LuceneTestCase.BadApple;
 import org.junit.BeforeClass;
@@ -31,7 +36,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
   private Directory directory;
   private IndexReader reader;
   private IndexSearcher searcher;
-  private RandomIndexWriter writer;
+  private MockIndexWriter writer;
 
   
 
@@ -44,7 +49,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 
   private void addDocs(float[] b) throws IOException {
     assert b.length == 10;
-    writer = new RandomIndexWriter(random(), directory);
+    reOpenWriter(OpenMode.CREATE);
 
     int i=0;
     adoc("id", "0", "bibcode",   "b0", "const_boost", "1.0f", "boost", "0.5f");
@@ -53,6 +58,10 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     adoc("id", "3", "bibcode",   "b3", "const_boost", "1.0f", "boost", "0.3f", "references", "b9");
     adoc("id", "4", "bibcode",   "b4", "const_boost", "1.0f", "boost", "0.1f", "references", "b100");
     adoc("id", "5", "bibcode",   "b5", "const_boost", "1.0f", "boost", "0.8f", "references", "b10");
+    
+    writer.commit();
+		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
+		
     adoc("id", "6", "bibcode",   "b6", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
     adoc("id", "7", "bibcode",   "b7", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
     adoc("id", "8", "bibcode",   "b8", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
@@ -63,6 +72,15 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     searcher = newSearcher(reader);
     writer.close();
   }
+  
+  private void reOpenWriter(OpenMode mode) throws CorruptIndexException, LockObtainFailedException, IOException {
+		if (writer != null) writer.close();
+		writer = new MockIndexWriter(directory, newIndexWriterConfig(TEST_VERSION_CURRENT, 
+				new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).setOpenMode(mode)
+				//.setRAMBufferSizeMB(0.1f)
+				//.setMaxBufferedDocs(500)
+				);
+	}
 
   @Override
   public void tearDown() throws Exception {
@@ -255,6 +273,26 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 
     //System.out.println(normalSet);
     //System.out.println(normalSet);
+    
+    
+    TopDocs topSet = searcher.search(new SecondOrderQuery(new MatchAllDocsQuery(), null, new SecondOrderCollectorTopN(2, true)), 10);
+    testDocOrder(topSet.scoreDocs, 0, 1);
+    
+    topSet = searcher.search(new SecondOrderQuery(new MatchAllDocsQuery(), null, new SecondOrderCollectorTopN(3, false)), 10);
+    testDocOrder(topSet.scoreDocs, 0, 1, 2);
+    
+    // returns: 2,3,4,5,10
+    SecondOrderQuery constQuery = new SecondOrderQuery(bq1910, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, constBoost));
+    // returns: 5,2,3,4,10
+    SecondOrderQuery boostQuery = new SecondOrderQuery(bq1910, null, new SecondOrderCollectorOperatorExpertsCiting(idField, refField, boostField));
+    
+    topSet = searcher.search(new SecondOrderQuery(constQuery, null, new SecondOrderCollectorTopN(3, false)), 10);
+    testDocOrder(topSet.scoreDocs, 2, 3, 4);
+    
+    topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorTopN(3, false)), 10);
+    testDocOrder(topSet.scoreDocs, 5, 2, 3);
+    
+    
   }
 
   private int[] getIds(ScoreDoc[] docs) {

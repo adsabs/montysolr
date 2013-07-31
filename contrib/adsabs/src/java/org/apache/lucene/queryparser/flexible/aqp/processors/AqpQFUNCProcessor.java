@@ -67,6 +67,15 @@ public class AqpQFUNCProcessor extends AqpQProcessorPost {
 					"Unknown function \"" + funcName + "\"" ));
 		}
 		
+	  // HACK-FUNC-to-refactor
+   	// FIX: hack, the correct solution is to have QFUNC builder
+  	// decide what values it wants, all this code must be simplified
+  	// the AqpFunctionQueryNode should only contain the original
+  	// user input and all the analysis is directed by the handler
+  	if (node.getChildren().size() == 1 && node.getChild("COMMA") != null) {
+  		return new AqpFunctionQueryNode(funcName, builder, node.getChild("COMMA"));
+  	}
+		
 		return new AqpFunctionQueryNode(funcName, builder, node);
 		
 	}

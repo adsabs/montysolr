@@ -937,6 +937,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "reviews(id:10)"), 
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='11']");
+    
+    // cut only the first n results
+    assertQ(req("q", "topn(2, reviews(*:*))"), 
+		"//*[@numFound='2']");
 
   }
 

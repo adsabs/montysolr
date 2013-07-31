@@ -28,6 +28,7 @@ import org.apache.lucene.search.SecondOrderCollectorCites;
 import org.apache.lucene.search.SecondOrderCollectorCitesRAM;
 import org.apache.lucene.search.SecondOrderCollectorCitingTheMostCited;
 import org.apache.lucene.search.SecondOrderCollectorOperatorExpertsCiting;
+import org.apache.lucene.search.SecondOrderCollectorTopN;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.join.JoinUtil;
@@ -153,6 +154,18 @@ public class AqpAdsabsSubQueryProvider implements
 		      }
 		    });
 		
+	  // topn(int, Q) - limit results to the best top N (by their score)
+		parsers.put("topn", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {
+				int topN = fp.parseInt();
+				if (topN < 1 || topN > 50000) {
+					throw new ParseException("Hmmm, you have tried to fool me. Try st better!");
+				}
+				Query innerQuery = fp.parseNestedQuery();
+				return new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorTopN(topN));
+	      }
+	    }.configure(false)); // true=canBeAnalyzed
 		
 	  // citations(P) - set of papers that have P in their reference list
 		parsers.put("citations", new AqpSubqueryParserFull() {

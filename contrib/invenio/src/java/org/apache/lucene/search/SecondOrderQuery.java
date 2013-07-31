@@ -17,7 +17,7 @@ import org.apache.lucene.util.ToStringUtils;
  * 
  * This is a 2nd attempt on the 2nd order operators, while it works, 
  * it will work only for searching inside the boundaries of index
- * segments.
+ * segments (ie no distributed search)
  * 
  */
 public class SecondOrderQuery extends Query {
@@ -91,7 +91,7 @@ public class SecondOrderQuery extends Query {
 			Weight firstOrderWeight = firstOrderQuery.createWeight(searcher);
 			
 			// conduct search only if initialization of necessary caches went well
-			if (secondOrderCollector.searcherInitialization(searcher)) {
+			if (secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
 				searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
 			}
 			

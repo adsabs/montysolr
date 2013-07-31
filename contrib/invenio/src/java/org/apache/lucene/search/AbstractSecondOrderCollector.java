@@ -19,15 +19,18 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
   protected Lock lock = null;
   private Integer lastPos = null;
   protected float ensureCapacityRatio = 0.25f;
+	protected boolean firstOrderScorerOutOfOrder = false;
 
   public AbstractSecondOrderCollector() {
     lock = new ReentrantLock();
     hits = new ArrayList<CollectorDoc>();
   }
 
-  public boolean searcherInitialization(IndexSearcher searcher) throws IOException {
+  public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
     // this is pretty arbitrary, but 2nd order queries may return many hits...
-    ((ArrayList) hits).ensureCapacity((int) (searcher.getIndexReader().maxDoc() * ensureCapacityRatio));
+    ((ArrayList<CollectorDoc>) hits).ensureCapacity((int) (searcher.getIndexReader().maxDoc() * ensureCapacityRatio));
+    if (firstOrderWeight != null)
+    	firstOrderScorerOutOfOrder = firstOrderWeight.scoresDocsOutOfOrder();
     return true;
   }
 

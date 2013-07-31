@@ -11,6 +11,7 @@ import org.apache.lucene.queries.function.valuesource.LiteralValueSource;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
@@ -51,6 +52,12 @@ public class AqpFunctionQParser extends FunctionQParser {
 	
 	protected String consumeAsString() {
 		QueryNode qn = consume();
+	  // HACK-FUNC-to-refactor
+		// should be only contain simple string values (inside OpaqueNode, i don't care where)
+		// but not a combination of values and not even analyzed values
+		if (qn instanceof FieldQueryNode) {
+			return ((FieldQueryNode) qn).getTextAsString();
+		}
 		return (String) ((OpaqueQueryNode) qn).getValue();
 	}
 	

@@ -191,7 +191,7 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		Map<Integer, Integer> histogram = new HashMap<Integer, Integer>();
 		
 		SecondOrderCollectorCites coll = new SecondOrderCollectorCites("bibcode", "breference");
-		coll.searcherInitialization(searcher);
+		coll.searcherInitialization(searcher, null);
 		
 		searcher.search(new MatchAllDocsQuery(), coll); // run it through the whole index (no IO error should happen)
 		

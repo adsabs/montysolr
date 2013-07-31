@@ -15,9 +15,10 @@ public interface SecondOrderCollector {
      * the query will not be executed
      * 
      * @param searcher
+     * @param firstOrderWeight 
      * @throws IOException 
      */
-    public boolean searcherInitialization(IndexSearcher searcher) throws IOException;
+    public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException;
 
     
     

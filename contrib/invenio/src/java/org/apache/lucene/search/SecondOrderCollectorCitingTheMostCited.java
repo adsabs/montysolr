@@ -50,7 +50,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   }
   
   @Override
-  public boolean searcherInitialization(IndexSearcher searcher) throws IOException {
+  public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
     if (invertedIndex == null) {
       if (cacheGetter != null) {
         invertedIndex = (int[][]) cacheGetter.getCache();
@@ -67,7 +67,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
     if (invertedIndex == null || invertedIndex.length == 0 || boostCache.length == 0) {
     	return false;
     }
-    return super.searcherInitialization(searcher);
+    return super.searcherInitialization(searcher, firstOrderWeight);
   }
   
 
