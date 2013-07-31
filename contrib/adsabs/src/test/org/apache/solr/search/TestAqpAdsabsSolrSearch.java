@@ -205,6 +205,36 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	public void test() throws Exception {
 	  
 		
+		// #375
+		assertQueryEquals(req("qt", "aqp", "q", "author:\"Civano, F\" -author_facet_hier:(\"Civano, Fa\" OR \"Civano, Da\")"), 
+        "+(author:civano, f author:civano, f* author:civano,) -(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
+        BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "author:\"Civano, F\" +author_facet_hier:(\"Civano, Fa\" OR \"Civano, Da\")"), 
+        "+(author:civano, f author:civano, f* author:civano,) +(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
+        BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "title:xxx -title:(foo OR bar)"), 
+        "+title:xxx -(title:foo title:bar)",
+        BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "title:xxx +title:(foo OR bar)"), 
+        "+title:xxx +(title:foo title:bar)",
+        BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "title:xxx +title:(-foo OR bar)"), 
+        "+title:xxx +(-title:foo title:bar)",
+        BooleanQuery.class);
+		
+		// TO FINISH, it will cause build failure
+		assertQueryEquals(req("qt", "aqp", "q", "title:xxx -title:(foo bar)"), 
+        "+title:xxx -title:foo -title:bar",
+        BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "title:xxx +title:(foo bar)"), 
+        "+title:xxx +title:foo +title:bar",
+        BooleanQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "title:xxx +title:(-foo bar)"), 
+        "+title:xxx -title:foo +title:bar",
+        BooleanQuery.class);
+		
+		
+		
 	  // regex
 	  assertQueryEquals(req("qt", "aqp", "q", "author:/^Kurtz,\\WM./"), 
         "author:/^Kurtz,\\WM./",

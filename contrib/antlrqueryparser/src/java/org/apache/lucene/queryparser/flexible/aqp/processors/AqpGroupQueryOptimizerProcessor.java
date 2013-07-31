@@ -50,7 +50,7 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
           modified = true;
         }
         if (data.getModifier() != null) {
-          changedNode = new BooleanModifierNode(changedNode, data.getModifier());
+          changedNode = new ModifierQueryNode(changedNode, data.getModifier());
           modified = true;
           /*
            * Why was I doing this? Firstly, it is buggy, the second branch
@@ -75,6 +75,17 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 
   @Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
+  	// also detect the situations when the default operator included modifier
+  	// but user supplied modifer before the clause, eg. 
+  	// value -field:(somethig something)
+  	// we should honour the closest modifier, but it is not caught in the
+  	// pre-processor, because that one is looking only at groups, and
+  	// this will be one level above the group; but after it was simplified
+  	// we can see it here, it will be chain of modifier>modifier>modifier...
+  	if (node instanceof ModifierQueryNode && node.getChildren().size() == 1 
+  			&& node.getChildren().get(0) instanceof ModifierQueryNode) {
+  		return node.getChildren().get(0);
+  	}
     return node;
   }
 
