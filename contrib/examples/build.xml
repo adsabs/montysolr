@@ -392,6 +392,9 @@
 	    #           classpathref: @{classpathref}
 	    #           classname: @{montysolr-class}
 
+	    JVMARGS=$1
+	    ARGS=$2
+	          
 	    export HOMEDIR=@@@          
 	    export PYTHONPATH=@{pythonpath}
 	    export MONTYSOLR_HANDLER=${env.MONTYSOLR_HANDLER}
@@ -405,11 +408,11 @@
 	    java -cp $CP \
 	                    -Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir} \
 	                    -Djava.library.path=@{jcc-classpath} \
-	                    @{jvmargs} \
+	                    @{jvmargs} $JVMARGS \
 	                    @{montysolr-class} \
                         --webroot @{webroot} \
                         --context @{context} \
-	                    @{arguments}   &amp;
+	                    @{arguments} $ARGS  &amp;
 
 	    pid=$!
 	    echo "MontySolr pid=$pid"
