@@ -156,14 +156,14 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
     return low-1;  // key not found, get closest
   }
 
-  private void organizeResults() {
+  protected void organizeResults() {
 
     sortHits();
     compactHits();
 
   }
 
-  private void compactHits() {
+  protected void compactHits() {
     ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
         (hits.size() * 0.75f)).intValue());
 
@@ -194,14 +194,14 @@ public abstract class AbstractSecondOrderCollector extends Collector implements
     }
     
     if (seenTimes > 0) {
-      currDoc.score = (float) Math.pow(score, 1/seenTimes);
+      currDoc.score = (float) Math.pow(score, 1.0f/seenTimes);
     }
     newHits.add(currDoc);
 
     hits = newHits;
   }
 
-  private void sortHits() {
+  protected void sortHits() {
 
     Collections.sort(hits, new Comparator<ScoreDoc>() {
       public int compare(ScoreDoc o1, ScoreDoc o2) {

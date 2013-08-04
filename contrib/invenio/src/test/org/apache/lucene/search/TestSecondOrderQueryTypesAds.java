@@ -275,6 +275,8 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     //System.out.println(normalSet);
     
     
+    // topN()
+    
     TopDocs topSet = searcher.search(new SecondOrderQuery(new MatchAllDocsQuery(), null, new SecondOrderCollectorTopN(2, true)), 10);
     testDocOrder(topSet.scoreDocs, 0, 1);
     
@@ -290,6 +292,13 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     testDocOrder(topSet.scoreDocs, 2, 3, 4);
     
     topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorTopN(3, false)), 10);
+    testDocOrder(topSet.scoreDocs, 5, 2, 3);
+    
+    // ADS Classic scoring
+    
+    topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorAdsClassicScoringFormula(boostField)), 10);
+    topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorAdsClassicScoringFormula(boostField)), 10);
+    topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorAdsClassicScoringFormula(boostField)), 10);
     testDocOrder(topSet.scoreDocs, 5, 2, 3);
     
     
