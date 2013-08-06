@@ -66,7 +66,7 @@ public class AqpAdsabsSubQueryProvider implements
 	public static Map<String, AqpSubqueryParser> parsers = new HashMap<String, AqpSubqueryParser>();
 	
   //TODO: make configurable
-	static String citationSearchIdField = "bibcode,alternate_title";
+	static String citationSearchIdField = "bibcode,alternate_bibcode";
 	static String citationSearchRefField = "reference";
 	
 	static {
@@ -178,7 +178,7 @@ public class AqpAdsabsSubQueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorTopN(topN));
 	      }
-	    }.configure(false)); // true=canBeAnalyzed
+	    }.configure(true)); // true=canBeAnalyzed
 		
 	  // citations(P) - set of papers that have P in their reference list
 		parsers.put("citations", new AqpSubqueryParserFull() {
