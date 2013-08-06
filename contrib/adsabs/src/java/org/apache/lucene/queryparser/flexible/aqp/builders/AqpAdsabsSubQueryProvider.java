@@ -66,7 +66,7 @@ public class AqpAdsabsSubQueryProvider implements
 	public static Map<String, AqpSubqueryParser> parsers = new HashMap<String, AqpSubqueryParser>();
 	
   //TODO: make configurable
-	static String citationSearchIdField = "bibcode,alternate_bibcode";
+	static String citationSearchIdField = "bibcode";
 	static String citationSearchRefField = "reference";
 	
 	static {
