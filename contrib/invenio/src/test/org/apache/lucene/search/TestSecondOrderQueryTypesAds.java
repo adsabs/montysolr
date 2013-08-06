@@ -52,21 +52,21 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     reOpenWriter(OpenMode.CREATE);
 
     int i=0;
-    adoc("id", "0", "bibcode",   "b0", "const_boost", "1.0f", "boost", "0.5f");
-    adoc("id", "1", "bibcode",   "b1", "const_boost", "1.0f", "boost", "0.5f", "references", "b2,b3,b4,b5");
-    adoc("id", "2", "bibcode",   "b2", "const_boost", "1.0f", "boost", "0.2f");
-    adoc("id", "3", "bibcode",   "b3", "const_boost", "1.0f", "boost", "0.3f", "references", "b9");
-    adoc("id", "4", "bibcode",   "b4", "const_boost", "1.0f", "boost", "0.1f", "references", "b100");
-    adoc("id", "5", "bibcode",   "b5", "const_boost", "1.0f", "boost", "0.8f", "references", "b10");
+    adoc("id", "0", "bibcode",   "b0", "const_boost", "1.0f", "boost", "0.5f", "ads_boost", "0.1f");
+    adoc("id", "1", "bibcode",   "b1", "const_boost", "1.0f", "boost", "0.5f", "references", "b2,b3,b4,b5", "ads_boost", "0.1f");
+    adoc("id", "2", "bibcode",   "b2", "const_boost", "1.0f", "boost", "0.2f", "ads_boost", "0.1f");
+    adoc("id", "3", "bibcode",   "b3", "const_boost", "1.0f", "boost", "0.3f", "references", "b9", "ads_boost", "0.9f");
+    adoc("id", "4", "bibcode",   "b4", "const_boost", "1.0f", "boost", "0.1f", "references", "b100", "ads_boost", "0.1f");
+    adoc("id", "5", "bibcode",   "b5", "const_boost", "1.0f", "boost", "0.8f", "references", "b10", "ads_boost", "0.0f");
     
     writer.commit();
 		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
 		
-    adoc("id", "6", "bibcode",   "b6", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
-    adoc("id", "7", "bibcode",   "b7", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
-    adoc("id", "8", "bibcode",   "b8", "const_boost", "1.0f", "boost", "0.1f", "references", "b5");
-    adoc("id", "9", "bibcode",   "b9", "const_boost", "1.0f", "boost", "0.1f", "references", "b2,b3,b4,b10");
-    adoc("id", "10","bibcode",  "b10", "const_boost", "1.0f", "boost", "0.5f", "references", "b3,b4");
+    adoc("id", "6", "bibcode",   "b6", "const_boost", "1.0f", "boost", "0.1f", "references", "b5", "ads_boost", "0.9f");
+    adoc("id", "7", "bibcode",   "b7", "const_boost", "1.0f", "boost", "0.1f", "references", "b5", "ads_boost", "0.9f");
+    adoc("id", "8", "bibcode",   "b8", "const_boost", "1.0f", "boost", "0.1f", "references", "b5", "ads_boost", "0.9f");
+    adoc("id", "9", "bibcode",   "b9", "const_boost", "1.0f", "boost", "0.1f", "references", "b2,b3,b4,b10", "ads_boost", "0.9f");
+    adoc("id", "10","bibcode",  "b10", "const_boost", "1.0f", "boost", "0.5f", "references", "b3,b4", "ads_boost", "0.1f");
 
     reader = writer.getReader();
     searcher = newSearcher(reader);
@@ -294,12 +294,14 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorTopN(3, false)), 10);
     testDocOrder(topSet.scoreDocs, 5, 2, 3);
     
-    // ADS Classic scoring
+    topSet = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", "xxxx")), null, new SecondOrderCollectorTopN(3, false)), 10);
+    assert topSet.totalHits == 0;
     
-    topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorAdsClassicScoringFormula(boostField)), 10);
-    topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorAdsClassicScoringFormula(boostField)), 10);
-    topSet = searcher.search(new SecondOrderQuery(boostQuery, null, new SecondOrderCollectorAdsClassicScoringFormula(boostField)), 10);
-    testDocOrder(topSet.scoreDocs, 5, 2, 3);
+    
+    // ADS Classic scoring formula
+    topSet = searcher.search(new SecondOrderQuery(constQuery, null, new SecondOrderCollectorAdsClassicScoringFormula("ads_boost")), 10);
+    testDocOrder(topSet.scoreDocs, 3, 2, 4, 10, 5);
+    assertArrayEquals(getScores(topSet.scoreDocs), new float[]{0.95f, 0.55f, 0.55f, 0.55f, 0.5f}, 0.1f);
     
     
   }

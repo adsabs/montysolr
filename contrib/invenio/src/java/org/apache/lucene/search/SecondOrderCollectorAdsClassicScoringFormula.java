@@ -1,6 +1,7 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
@@ -28,12 +29,11 @@ import org.apache.lucene.index.IndexReader;
 
 public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecondOrderCollector {
 
-	private IndexReader reader;
-	private CacheGetter cacheGetter;
 	private String boostField;
 	private float highestLuceneScore;
 	private AtomicReaderContext context;
 	private float[] boostCache;
+	private List<CollectorDoc> hitSet = new ArrayList<CollectorDoc>();
 
 	public SecondOrderCollectorAdsClassicScoringFormula(String boostField) {
 		this.boostField = boostField;
@@ -73,19 +73,18 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	public void setNextReader(AtomicReaderContext context)
 			throws IOException {
 		this.context = context;
-		this.reader = context.reader();
 		this.docBase = context.docBase;
 
 	}
 
 	@Override
 	public boolean acceptsDocsOutOfOrder() {
-		return false;
+		return firstOrderScorerOutOfOrder;
 	}
 	
 	@Override
 	public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
-
+		
 		if (hits.size() == 0)
 			return null;
 		

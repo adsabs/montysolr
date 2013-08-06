@@ -23,6 +23,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SecondOrderCollectorAdsClassicScoringFormula;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
 import org.apache.lucene.search.SecondOrderCollectorCitesRAM;
@@ -154,6 +155,18 @@ public class AqpAdsabsSubQueryProvider implements
 		      }
 		    });
 		
+		// ADS Classic toy-implementation of the relevance score
+		parsers.put("classic_relevance", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {
+				
+				Query innerQuery = fp.parseNestedQuery();
+				return new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost"));
+	      }
+	    }.configure(false)); // true=canBeAnalyzed
+		parsers.put("cr", parsers.get("classic_relevance"));
+		
+		
 	  // topn(int, Q) - limit results to the best top N (by their score)
 		parsers.put("topn", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
@@ -216,8 +229,25 @@ public class AqpAdsabsSubQueryProvider implements
 			}
 		  }.configure(true)); // true=canBeAnalyzed
 		
-		// useful() = what experts are citing
-    parsers.put("useful", new AqpSubqueryParserFull() { // this function values can be analyzed
+		
+		// useful() = what experts are citing; ADS Classic implementation
+		// is: references(topn(200, classic_relevance(Q)))
+		parsers.put("useful", new AqpSubqueryParserFull() { // this function values can be analyzed
+      public Query parse(FunctionQParser fp) throws ParseException {          
+        Query innerQuery = fp.parseNestedQuery();
+        
+        return  new SecondOrderQuery( // references
+			        		new SecondOrderQuery( // topn
+			        				new SecondOrderQuery(innerQuery, // classic_relevance
+			        						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost")), 
+	    						new SecondOrderCollectorTopN(200)),
+			    			new SecondOrderCollectorCitesRAM(citationSearchIdField, citationSearchRefField));
+        
+	      };
+    }.configure(true)); // true=canBeAnalyzed
+		
+		// original implementation of useful() -- using special collector
+    parsers.put("useful2", new AqpSubqueryParserFull() { // this function values can be analyzed
       public Query parse(FunctionQParser fp) throws ParseException {          
         Query innerQuery = fp.parseNestedQuery();
         SolrQueryRequest req = fp.getReq();
@@ -226,8 +256,26 @@ public class AqpAdsabsSubQueryProvider implements
         		new SecondOrderCollectorOperatorExpertsCiting(citationSearchIdField, citationSearchRefField, boostField));
       }
       }.configure(true)); // true=canBeAnalyzed
-    // reviews() = find papers that cite the most cited papers
-    parsers.put("reviews", new AqpSubqueryParserFull() { // this function values can be analyzed
+    
+    
+    // reviews() = what is cited by experts; ADS Classic implementation
+		// is: citations(topn(200, classic_relevance(Q)))
+		parsers.put("reviews", new AqpSubqueryParserFull() { // this function values can be analyzed
+      public Query parse(FunctionQParser fp) throws ParseException {          
+        Query innerQuery = fp.parseNestedQuery();
+        
+        return  new SecondOrderQuery( // citations
+			        		new SecondOrderQuery( // topn
+			        				new SecondOrderQuery(innerQuery, // classic_relevance
+			        						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost")), 
+	    						new SecondOrderCollectorTopN(200)),
+	    						new SecondOrderCollectorCitedBy(citationSearchIdField, citationSearchRefField));
+        
+	      };
+    }.configure(true)); // true=canBeAnalyzed
+		
+    // original impl of reviews() = find papers that cite the most cited papers
+    parsers.put("reviews2", new AqpSubqueryParserFull() { // this function values can be analyzed
       public Query parse(FunctionQParser fp) throws ParseException {          
         Query innerQuery = fp.parseNestedQuery();
         SolrQueryRequest req = fp.getReq();

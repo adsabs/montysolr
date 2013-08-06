@@ -45,5 +45,15 @@ public interface SecondOrderCollector {
     public int hashCode();
 	
     public boolean equals(Object o);
+    
+    /**
+     * Called by the Second Order Query before starting the search. 
+     * The collector should reset its data (it will collect the same
+     * data, from the same query; so in theory it could just refuse
+     * to collect new ones - which might be faster
+     * 
+     */
+    public void reset();
+    
 
 }

@@ -938,6 +938,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='11']");
     
+    System.out.println("This !");
     // cut only the first n results
     assertQ(req("q", "topn(2, reviews(*:*))"), 
 		"//*[@numFound='2']");

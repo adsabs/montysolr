@@ -27,6 +27,7 @@ public class SecondOrderQuery extends Query {
 	Filter filter = null;
 	private SecondOrderCollector secondOrderCollector;
 	private boolean threaded;
+	private boolean alreadyExecuted;
 
 	/**
 	 * Constructs a new query which applies a filter to the results of the
@@ -44,6 +45,7 @@ public class SecondOrderQuery extends Query {
 		this.filter = filter;
 		this.secondOrderCollector = collector;
 		this.threaded = threaded;
+		this.alreadyExecuted = false;
 		
 		if (collector == null) {
 			throw new IllegalStateException("Collector must not be null");
@@ -51,14 +53,11 @@ public class SecondOrderQuery extends Query {
 	}
 	
 	public SecondOrderQuery(Query query, Filter filter, SecondOrderCollector collector) {
-    this.firstOrderQuery = query;
-    this.filter = filter;
-    this.secondOrderCollector = collector;
-    this.threaded = false;
-    
-    if (collector == null) {
-      throw new IllegalStateException("Collector must not be null");
-    }
+		this(query, filter, collector, false);
+  }
+	
+	public SecondOrderQuery(Query query, SecondOrderCollector collector) {
+		this(query, null, collector, false);
   }
 	
 	/*
@@ -80,6 +79,11 @@ public class SecondOrderQuery extends Query {
 	/**
 	 * Returns a Weight that applies the filter to the enclosed query's Weight.
 	 * This is accomplished by overriding the Scorer returned by the Weight.
+	 * 
+	 * The Weight is prepared before the search begins, but since we are inside
+	 * the second order query, we start searching, collect results and then
+	 * return the Weight object, which carries with itself the results of the
+	 * first-order query
 	 */
 	public Weight createWeight(final IndexSearcher searcher) throws IOException {
 	    
@@ -91,8 +95,14 @@ public class SecondOrderQuery extends Query {
 			Weight firstOrderWeight = firstOrderQuery.createWeight(searcher);
 			
 			// conduct search only if initialization of necessary caches went well
-			if (secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
+			if (!alreadyExecuted && secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
+				System.out.println("Executing: " + firstOrderQuery.toString());
 				searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
+				
+				// TODO: can we avoid being called (initialized) in a loop?
+				// this looks like a bad design (on my side) if it happens
+				// it happens when 2nd order operators are nested
+				alreadyExecuted = true;
 			}
 			
 			// no logging, we are basic lucene class
