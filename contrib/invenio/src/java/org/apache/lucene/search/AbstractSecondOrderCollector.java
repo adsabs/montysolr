@@ -225,5 +225,17 @@ SecondOrderCollector {
 		organized = false;
 	}
 
+	protected String fieldsToStr(String[] fields) {
+		StringBuilder out = new StringBuilder();
+		boolean first = false;
+		for (String f: fields) {
+			if (first) {
+				out.append(",");
+			}
+			first = true;
+			out.append(f);
+		}
+		return out.toString();
+	}
 
 }

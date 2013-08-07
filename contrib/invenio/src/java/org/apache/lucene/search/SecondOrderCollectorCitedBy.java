@@ -88,7 +88,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "citations[cache:" + referenceField + "<" + uniqueIdField + ">]";
+		return "citations[cache:" + referenceField + "<" + fieldsToStr(uniqueIdField) + ">]";
 	}
 	
 	/** Returns a hash code value for this object. */
