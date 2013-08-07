@@ -20,7 +20,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
   Set<String> fieldsToLoad;
 	protected Map<String, Integer> valueToDocidCache = null;
 	protected String referenceField;
-	protected String uniqueIdField;
+	protected String[] uniqueIdField;
 	protected String boostField;
 	private AtomicReaderContext context;
 	private IndexReader reader;
@@ -35,7 +35,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		initFldSelector();
 	}
 	
-	public SecondOrderCollectorOperatorExpertsCiting(String uniqueIdField, String referenceField, String boostField) {
+	public SecondOrderCollectorOperatorExpertsCiting(String[] uniqueIdField, String referenceField, String boostField) {
 		super();
 		valueToDocidCache = null;
 		this.uniqueIdField = uniqueIdField;

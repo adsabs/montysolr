@@ -24,7 +24,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
   Set<String> fieldsToLoad;
 	protected Map<String, Integer> valueToDocidCache = null;
 	protected String referenceField;
-	protected String uniqueIdField;
+	protected String[] uniqueIdField;
 	private AtomicReaderContext context;
 	private IndexReader reader;
 	private CacheGetter cacheGetter;
@@ -38,7 +38,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		initFldSelector();
 	}
 	
-	public SecondOrderCollectorCites(String uniqueIdField, String referenceField) {
+	public SecondOrderCollectorCites(String[] uniqueIdField, String referenceField) {
 		super();
 		valueToDocidCache = null;
 		this.uniqueIdField = uniqueIdField;

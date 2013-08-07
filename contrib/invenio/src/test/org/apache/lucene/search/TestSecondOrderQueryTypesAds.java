@@ -114,14 +114,14 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 
 
     String refField = "references";
-    String idField = "id";
+    String[] idField = new String[] {"id"};
 
 
     // for the queries that use the String values
     // ------------------------------------------
 
     refField = "references";
-    idField = "bibcode";
+    idField = new String[] {"bibcode"};
     int idPrefix = 0;
 
     Query d1 = new TermQuery(new Term("id", String.valueOf(idPrefix + 1)));

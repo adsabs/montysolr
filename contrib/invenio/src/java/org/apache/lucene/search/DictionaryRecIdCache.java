@@ -61,16 +61,12 @@ public enum DictionaryRecIdCache {
 			cache.put(name, value);
 		}
 	}
-	
 	public Map<Integer, int[]> getCache(String name) {
 		return cache.get(name);
 	}
 	
-	public int[] getLuceneCache(AtomicReader reader, String field) throws IOException {
-		return FieldCache.DEFAULT.getInts(reader, field, false);
-	}
 	
-	public Map<Integer, Integer> buildCache(int[] idMapping) throws IOException {
+	private Map<Integer, Integer> buildCache(int[] idMapping) throws IOException {
 		
 		Map<Integer, Integer> fromFieldToLuceneId = new HashMap<Integer, Integer>(idMapping.length);
 		int i = 0;
@@ -82,7 +78,7 @@ public enum DictionaryRecIdCache {
 		return fromFieldToLuceneId;
 	}
 	
-	public Map<String, Integer> buildCacheStr(DocTerms idMapping) throws IOException {
+	private Map<String, Integer> buildCacheStr(DocTerms idMapping) throws IOException {
 		
 		Map<String, Integer> fromFieldToLuceneId = new HashMap<String, Integer>(idMapping.size());
 		int i = 0;
@@ -178,21 +174,31 @@ public enum DictionaryRecIdCache {
 		
 	}
 	
-	private boolean indexUnchanged(AtomicReader reader, String field, Boolean isString) throws IOException {
+  //private boolean indexUnchanged(AtomicReader reader, String field, Boolean isString) throws IOException {
+  //	return indexUnchanged(reader, new String[]{field}, isString);
+  //}
+  
+	private boolean indexUnchanged(AtomicReader reader, String[] fields, Boolean isString) throws IOException {
 		// first check that the index wasn't updated
-		Integer old_hash = null;
-		if (translation_cache_tracker.containsKey(field)) {
-			old_hash = translation_cache_tracker.get(field);
+		int passed = 0;
+		for (String field: fields) {
+			Integer old_hash = null;
+			if (translation_cache_tracker.containsKey(field)) {
+				old_hash = translation_cache_tracker.get(field);
+			}
+			else {
+				return false;
+			}
+			if (isString) {
+				if (old_hash.equals(FieldCache.DEFAULT.getTerms(reader, field).hashCode()))
+					passed++;
+			}
+			else {
+				if (old_hash.equals(FieldCache.DEFAULT.getInts(reader, field, false).hashCode()))
+					passed++;
+			}
 		}
-		else {
-			return false;
-		}
-		if (isString) {
-			return old_hash.equals(FieldCache.DEFAULT.getTerms(reader, field).hashCode());
-		}
-		else {
-			return old_hash.equals(FieldCache.DEFAULT.getInts(reader, field, false).hashCode());
-		}
+		return passed == fields.length;
 	}
 	
 	
@@ -217,21 +223,39 @@ public enum DictionaryRecIdCache {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<Integer, Integer> getTranslationCache(IndexReader reader, String externalIdsField) throws IOException {
+
+	private String idsToStr(String[] vals) {
+		StringBuilder out = new StringBuilder();
+		for (String v: vals) {
+			out.append(v);
+		}
+		return out.toString();
+	}
+	public Map<Integer, Integer> getTranslationCache(IndexReader reader, String[] externalIdsField) throws IOException {
 		AtomicReader atomReader = getAtomicReader(reader);
 		
-		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(atomReader, externalIdsField, false))) {
+		String mainField = externalIdsField[0];
+		String cacheName = idsToStr(externalIdsField);
+		
+		if (!(translation_cache.containsKey(cacheName) && indexUnchanged(atomReader, externalIdsField, false))) {
 			synchronized(translation_cache_tracker) {
-				int[] idMapping = FieldCache.DEFAULT.getInts(atomReader, externalIdsField, false);
+				int[] idMapping = FieldCache.DEFAULT.getInts(atomReader, mainField, false);
 				Map<Integer, Integer> translTable = buildCache(idMapping);
-				translation_cache.put(externalIdsField, translTable);
-				translation_cache_tracker.put(externalIdsField, idMapping.hashCode());
+				translation_cache.put(cacheName, translTable);
+				translation_cache_tracker.put(mainField, idMapping.hashCode());
+				
+				for (int i=1; i<externalIdsField.length;i++) {
+					idMapping = FieldCache.DEFAULT.getInts(atomReader, externalIdsField[i], false);
+					Map<Integer, Integer> additionalTranslTable = buildCache(idMapping);
+					translation_cache_tracker.put(mainField, idMapping.hashCode());
+					translTable.putAll(additionalTranslTable);
+				}
+				
 				return translTable;
 			}
 		}
-		return (Map<Integer, Integer>) translation_cache.get(externalIdsField);
+		return (Map<Integer, Integer>) translation_cache.get(cacheName);
 	}
-	
 	
 	/**
 	 * Provides mapping from the string value (stored in refField) onto the 
@@ -250,19 +274,28 @@ public enum DictionaryRecIdCache {
 	 * @return
 	 * @throws IOException
 	 */
-	public Map<String, Integer> getTranslationCacheString(IndexSearcher searcher, String externalIdsField) throws IOException {
+	public Map<String, Integer> getTranslationCacheString(IndexSearcher searcher, String[] externalIdsField) throws IOException {
 		
 	  AtomicReader atomReader = getAtomicReader(searcher.getIndexReader());
 	  
-		if (!(translation_cache_tracker.containsKey(externalIdsField) && indexUnchanged(atomReader, externalIdsField, true))) {
+	  String mainField = externalIdsField[0];
+	  String cacheName = idsToStr(externalIdsField);
+	  
+		if (!(translation_cache.containsKey(cacheName) && indexUnchanged(atomReader, externalIdsField, true))) {
 			synchronized(translation_cache_tracker) {
 				
-				Map<String, Integer> translTable = buildCacheStr(searcher, externalIdsField);
-				translation_cache.put(externalIdsField, translTable);
+				Map<String, Integer> translTable = buildCacheStr(searcher, mainField);
+				translation_cache.put(cacheName, translTable);
+				
+				for (int i=1; i<externalIdsField.length;i++) {
+					Map<String, Integer> additionalTranslTable = buildCacheStr(searcher, externalIdsField[i]);
+					translTable.putAll(additionalTranslTable);
+				}
+				
 				return translTable;
 			}
 		}
-		return (Map<String, Integer>) translation_cache.get(externalIdsField);
+		return (Map<String, Integer>) translation_cache.get(cacheName);
 	}
 	
 	
@@ -276,13 +309,14 @@ public enum DictionaryRecIdCache {
 	 */
 	private HashMap<String, Object>multiValuesCache = new HashMap<String, Object >(2);
 	
-	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(IndexSearcher searcher, String externalIds, String refField) 
+	public Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(IndexSearcher searcher, String[] externalIds, String refField) 
 		throws IOException {
 	  
 	  AtomicReader atomReader = getAtomicReader(searcher.getIndexReader());
+	  String cacheName = idsToStr(externalIds);
 		
-		if (multiValuesCache.containsKey(refField) && indexUnchanged(atomReader, externalIds, true)) {
-			return (Map<Integer, List<Integer>>) multiValuesCache.get(refField);
+		if (multiValuesCache.containsKey(cacheName) && indexUnchanged(atomReader, externalIds, true)) {
+			return (Map<Integer, List<Integer>>) multiValuesCache.get(cacheName);
 		}
 		
 		// since most likely this will be needed anyway, i don't bother with reading just the values from the index
@@ -304,11 +338,10 @@ public enum DictionaryRecIdCache {
 				}
 				docsPointingToDocId.get(docId).add(i);
 			}
-			
 		}
 		
 		synchronized(multiValuesCache) {
-			multiValuesCache.put(refField, docsPointingToDocId);
+			multiValuesCache.put(cacheName, docsPointingToDocId);
 		}
 		return docsPointingToDocId;
 		
@@ -351,7 +384,7 @@ public enum DictionaryRecIdCache {
 	
 	private HashMap<String, Object>invertedCache = new HashMap<String, Object >(2);
 	
-	public int[][] getUnInvertedDocids(IndexReader reader, String externalIds, String refField) throws IOException {
+	public int[][] getUnInvertedDocids(IndexReader reader, String[] externalIds, String refField) throws IOException {
 		
 		AtomicReader atomReader = getAtomicReader(reader);
 		
@@ -402,7 +435,7 @@ public enum DictionaryRecIdCache {
 		return _atom;
 	}
 
-	public int[][] getUnInvertedDocidsStrField(IndexSearcher searcher, String externalIds, String refField) throws IOException {
+	public int[][] getUnInvertedDocidsStrField(IndexSearcher searcher, String[] externalIds, String refField) throws IOException {
 		
 	  AtomicReader atomReader = getAtomicReader(searcher.getIndexReader());
 	  
@@ -439,7 +472,7 @@ public enum DictionaryRecIdCache {
 	
 	// XXX: should go away and be replaced by a smarter subclass of DocTermOrds
 	// which can read the terms on-the-fly
-	protected Object unInvertField(IndexReader reader, Entry entry)
+	private Object unInvertField(IndexReader reader, Entry entry)
 		throws IOException {
 		AtomicReader atom = getAtomicReader(reader);
 		IntParser parser = (IntParser) entry.custom;
@@ -494,7 +527,7 @@ public enum DictionaryRecIdCache {
 	 * https://issues.apache.org/jira/browse/LUCENE-3354
 	 */
 	
-	protected Object unInvertFieldx(IndexReader reader, Entry entryKey)
+	private Object unInvertFieldx(IndexReader reader, Entry entryKey)
 	throws IOException {
 		AtomicReader atom = getAtomicReader(reader);
 		Entry entry = entryKey;

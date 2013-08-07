@@ -96,7 +96,7 @@ public class SecondOrderQuery extends Query {
 			
 			// conduct search only if initialization of necessary caches went well
 			if (!alreadyExecuted && secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
-				System.out.println("Executing: " + firstOrderQuery.toString());
+				//System.out.println("Executing: " + firstOrderQuery.toString());
 				searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
 				
 				// TODO: can we avoid being called (initialized) in a loop?

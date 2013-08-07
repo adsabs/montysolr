@@ -23,6 +23,7 @@ import org.apache.solr.search.DocListAndSet;
 import org.apache.solr.search.DocSlice;
 import org.apache.solr.search.SortSpec;
 import org.apache.lucene.search.DictionaryRecIdCache;
+import org.apache.lucene.search.FieldCache;
 
 
 public class InvenioFormatter extends SearchComponent
@@ -90,7 +91,9 @@ public class InvenioFormatter extends SearchComponent
 			DocIterator it = dl.iterator();
 
 			AtomicReader reader = rb.req.getSearcher().getAtomicReader();
-			int[] docidMap = DictionaryRecIdCache.INSTANCE.getLuceneCache(reader, getIdField(rb.req));
+			
+			//int[] docidMap = DictionaryRecIdCache.INSTANCE.getLuceneCache(reader, getIdField(rb.req));
+			int[] docidMap = FieldCache.DEFAULT.getInts(reader, getIdField(rb.req), false);
 
 			// translate into Invenio ID's
 			for (int i=0;it.hasNext();i++) {
@@ -127,7 +130,7 @@ public class InvenioFormatter extends SearchComponent
 			}
 			else {
 				Map<Integer, Integer> recidToDocid = DictionaryRecIdCache.INSTANCE
-						.getTranslationCache(reader, rb.req.getSchema().getUniqueKeyField().getName());
+						.getTranslationCache(reader, new String[] {rb.req.getSchema().getUniqueKeyField().getName()});
 				int[] recs = (int[]) result;
 
 				// truncate the number of retrieved documents back into reasonable size

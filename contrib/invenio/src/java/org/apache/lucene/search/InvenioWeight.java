@@ -41,7 +41,7 @@ public class InvenioWeight extends Weight {
 		this.similarity = searcher.getSimilarity();
 		this.query = query;
 		this.recidToDocid = DictionaryRecIdCache.INSTANCE.getTranslationCache(
-				searcher.getIndexReader(), idField);
+				searcher.getIndexReader(), new String[] {idField});
 		this.searcherCounter = 0;
 		this.idField = idField;
 		

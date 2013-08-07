@@ -14,7 +14,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	
 	private int[][] invertedIndex = null;
 	private String referenceField = null;
-	private String uniqueIdField = null;
+	private String[] uniqueIdField = null;
   private AtomicReaderContext context;
   private CacheGetter cacheGetter;
 
@@ -35,7 +35,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	 * @param field
 	 * @param cacheField
 	 */
-	public SecondOrderCollectorCitedBy(String uniqueIdField, String referenceField) {
+	public SecondOrderCollectorCitedBy(String[] uniqueIdField, String referenceField) {
 		super();
 		this.referenceField = referenceField;
 		this.uniqueIdField = uniqueIdField;

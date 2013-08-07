@@ -15,7 +15,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
 	protected Map<Integer, List<Integer>> docToDocidsCache = null;
 	protected String referenceField;
-	protected String uniqueIdField;
+	protected String[] uniqueIdField;
   private AtomicReaderContext context;
   private AtomicReader reader;
   private CacheGetter cacheGetter;
@@ -25,7 +25,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
     cacheGetter = getter;
   }
 	
-	public SecondOrderCollectorCitesRAM(String uniqueIdField, final String referenceField) {
+	public SecondOrderCollectorCitesRAM(String[] uniqueIdField, final String referenceField) {
 		super();
 		this.uniqueIdField = uniqueIdField;
 		this.referenceField = referenceField;

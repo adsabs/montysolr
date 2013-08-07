@@ -28,6 +28,8 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  
 	  assert jobid != null && new File(workDir).canWrite();
 	  
+	  String[] idFields = uniqueField.split(",");
+	  
 	  File jobFile = new File(workDir + "/" + jobid);
 		final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
 		
@@ -35,7 +37,7 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  
 	  int[][] invertedIndex = DictionaryRecIdCache.INSTANCE.
 				getUnInvertedDocidsStrField(req.getSearcher(), 
-				uniqueField, refField);
+				idFields, refField);
 
 	  BytesRef ret = new BytesRef();
 	  boolean first = true;

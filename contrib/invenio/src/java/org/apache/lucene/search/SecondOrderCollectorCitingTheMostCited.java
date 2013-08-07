@@ -18,7 +18,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   
   private int[][] invertedIndex = null;
   private String referenceField = null;
-  private String uniqueIdField = null;
+  private String[] uniqueIdField = null;
   private AtomicReaderContext context;
   private CacheGetter cacheGetter;
   private String boostField;
@@ -41,7 +41,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
    * @param field
    * @param cacheField
    */
-  public SecondOrderCollectorCitingTheMostCited(String uniqueIdField, String referenceField, String boostField) {
+  public SecondOrderCollectorCitingTheMostCited(String[] uniqueIdField, String referenceField, String boostField) {
     super();
     this.referenceField = referenceField;
     this.uniqueIdField = uniqueIdField;
