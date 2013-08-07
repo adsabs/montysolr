@@ -525,7 +525,7 @@ def check_live_instance(options, instance_names):
                 run_cmd(['cp', '-fr', 'montysolr/build/contrib/examples/%s/*' % INSTNAME, symbolic_name])
             
             # just check if the instance is in a healthy state
-            kwargs = dict(max_wait=options.timeout)
+            kwargs = dict(max_wait=6) # it should be already running, so do it quickly
             if options.check_diagnostics:
                 kwargs['tmpl'] ='http://localhost:%s/solr/montysolr_diagnostics'
                 
@@ -687,7 +687,7 @@ def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admi
         except Exception, e:
             if rsp is None:
                 #traceback.print_exc(e)
-                print "Waiting for instance to come up: %d sec." % (max_time - time.time(),) 
+                print "Waiting for instance to come up at %s: %d sec." % (url, max_time - time.time(),) 
             if rsp is not None and 'error' in rsp:
                 error(str(rsp['error']).replace('\\n', "\n"))
         time.sleep(1)
