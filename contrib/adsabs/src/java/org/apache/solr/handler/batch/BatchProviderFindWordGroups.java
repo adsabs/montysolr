@@ -137,12 +137,12 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 											tokenQueue.addFirst(tokenStr);
 										}
 										if (termMap.contains(tokenStr)) {
-											addGroup(tokenStr, tokenQueue, collectedItems);
+											addEverythingRightToLeft(tokenQueue, collectedItems);
 											keepAdding = tokenQueue.size();
 										}
 									}
 									else if (termMap.contains(tokenStr)) {
-										addGroup(tokenStr, tokenQueue, collectedItems);
+										addEverythingRightToLeft(tokenQueue, collectedItems);
 									}
 								}
 							}
@@ -157,11 +157,11 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 									}
 									
 									if (termMap.contains(tokenStr)) {
-										addGroup(0, tokenQueue, collectedItems);
+										addEverythingRightToLeft(tokenQueue, collectedItems);
 										keepAdding = tokenQueue.size();
 									}
 									else if (keepAdding-- > 0) {
-										addGroup(keepAdding, tokenQueue, collectedItems);
+										addEverythingRightToLeft(tokenQueue, collectedItems);
 									}
 									
 								}
@@ -170,21 +170,35 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 					}
 				}
 				
-				private void addGroup(String string, LinkedList<String> tokenQueue,
+				private void addEverythingRightToLeft(LinkedList<String> tokenQueue,
             Map<String, Integer> collectedItems) {
-					String key = string;
-					
+					String key = tokenQueue.get(tokenQueue.size()-1);
 	        for (int i=tokenQueue.size();i>0;i--) {
 	        	key = tokenQueue.get(i) + " " + key;
 	        	if (collectedItems.containsKey(key)) {
 	        		collectedItems.put(key, collectedItems.get(key)+1);
 	        	}
 	        	else {
-	        		collectedItems.put(key, 0);
+	        		collectedItems.put(key, 1);
 	        	}
 	        }
         }
 
+				private void addEverythingLeftToRight(LinkedList<String> tokenQueue,
+            Map<String, Integer> collectedItems) {
+					String key = tokenQueue.get(0);
+	        for (int i=1;i<tokenQueue.size();i++) {
+	        	key = tokenQueue.get(i) + " " + key;
+	        	if (collectedItems.containsKey(key)) {
+	        		collectedItems.put(key, collectedItems.get(key)+1);
+	        	}
+	        	else {
+	        		collectedItems.put(key, 1);
+	        	}
+	        }
+        }
+				
+				
 				@Override
 				public void setNextReader(AtomicReaderContext context) {
 					this.reader = context.reader();

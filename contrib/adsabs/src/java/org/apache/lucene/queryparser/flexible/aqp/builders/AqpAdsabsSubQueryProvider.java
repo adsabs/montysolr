@@ -163,7 +163,7 @@ public class AqpAdsabsSubQueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost"));
 	      }
-	    }.configure(false)); // true=canBeAnalyzed
+	    }.configure(true)); // true=canBeAnalyzed
 		parsers.put("cr", parsers.get("classic_relevance"));
 		
 		
