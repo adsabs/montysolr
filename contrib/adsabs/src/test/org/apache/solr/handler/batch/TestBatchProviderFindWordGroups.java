@@ -1,5 +1,9 @@
 package org.apache.solr.handler.batch;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.solr.request.SolrQueryRequest;
 
@@ -8,39 +12,147 @@ public class TestBatchProviderFindWordGroups extends BatchProviderTest {
 
 	public void test() throws Exception {
 
+		String field = "text_sw";
+		
 		// now index some data
-		assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", F.TYPE_ADS_TEXT, "green wall"));
-		assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", F.TYPE_ADS_TEXT, "of trees"));
-		assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", F.TYPE_ADS_TEXT, "blues sky"));
-		assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", F.TYPE_ADS_TEXT, "of seas"));
-		assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxx5", F.TYPE_ADS_TEXT, "no fight"));
-		assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxx6", F.TYPE_ADS_TEXT, "for peace"));
+		assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", field, "green wall for the blue sky"));
+		assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", field, "of trees angels edens"));
+		assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", field, "blue sky no blues dye"));
+		assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", field, "of high seas and low"));
+		assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxx5", field, "flights of the heroes"));
+		assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxx6", field, "fo the race past race for peace"));
 		assertU(commit());
 		// this creates another segment
-		assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", F.TYPE_ADS_TEXT, "no fight"));
-		assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxx8", F.TYPE_ADS_TEXT, "for peace"));
+		assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", field, "no fight, no plight"));
+		assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxx8", field, "no peace, think twice"));
 		assertU(commit());
+		
+		
 		
 		
 		BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
 		String tmpDir = System.getProperty("java.io.tmpdir");
-		SolrQueryRequest req = req("jobid", "00000", 
-				"#workdir", tmpDir,
-				"fields", F.TYPE_ADS_TEXT,
-				"maxDistance", "2"
-				);
 		
-		BatchProviderDumpIndex provider = new BatchProviderDumpIndex();
+		writeData(tmpDir + "/00001.input", "blue\nseas\nrace");
+		
+		
+		BatchProviderFindWordGroups provider = new BatchProviderFindWordGroups();
+		
+		SolrQueryRequest req = req(
+				"jobid", "00001", 
+				"#workdir", tmpDir,
+				"fields", field,
+				"maxlen", "2",
+				"lowerLimit", "0.0"
+				);
 		provider.run(req, queue);
 		req.close();
 		
-		checkFile(tmpDir + "/00000", 
-				"{\"id\":1.0,\"bibcode\":\"xxxxxxxxxxxx1\",\"title\":\"green wall\"}",
-				",{\"id\":5.0,\"bibcode\":\"xxxxxxxxxxxx5\",\"title\":\"no fight\"}",
-				",{\"id\":6.0,\"bibcode\":\"xxxxxxxxxxxx6\",\"title\":\"for peace\"}",
-				",{\"id\":7.0,\"bibcode\":\"xxxxxxxxxxxx7\",\"title\":\"no fight\"}",
-				",{\"id\":8.0,\"bibcode\":\"xxxxxxxxxxxx8\",\"title\":\"for peace\"}"
+		checkFile(tmpDir + "/00001",
+				"blue|sky\t2",
+				"high|seas\t1",
+				"fo|race\t1",
+				"past|race\t1",
+				"race|past\t1",
+				"race|peace\t1",
+				"seas|low\t1",
+				"wall|blue\t1"
 		);
+
+		
+		
+		req = req(
+				"jobid", "00001", 
+				"#workdir", tmpDir,
+				"fields", field,
+				"maxlen", "2",
+				"lowerLimit", "0.5"
+				);
+		provider.run(req, queue);
+		req.close();
+		
+		checkFile(tmpDir + "/00001",
+				"blue|sky\t2",
+				"high|seas\t1",
+				"fo|race\t1",
+				"past|race\t1",
+				"!race|past\t1",
+				"!race|peace\t1",
+				"!seas|low\t1",
+				"!wall|blue\t1"
+		);
+		
+		req = req(
+				"jobid", "00001", 
+				"#workdir", tmpDir,
+				"fields", field,
+				"maxlen", "2",
+				"upperLimit", "0.9",
+				"lowerLimit", "0.4"
+				);
+		provider.run(req, queue);
+		req.close();
+		
+		checkFile(tmpDir + "/00001",
+				"!blue|sky\t2",
+				"high|seas\t1",
+				"fo|race\t1",
+				"past|race\t1",
+				"race|past\t1",
+				"!race|peace\t1",
+				"!seas|low\t1",
+				"!wall|blue\t1"
+		);
+		
+		// use the limit on the number of collected results
+		req = req(
+				"jobid", "00001", 
+				"#workdir", tmpDir,
+				"fields", field,
+				"maxlen", "2",
+				"lowerLimit", "0.0",
+				"stopAfterReaching", "2"
+				);
+		provider.run(req, queue);
+		req.close();
+		
+		checkFile(tmpDir + "/00001",
+				"blue|sky\t2",
+				"sky|blues\t1",
+				"wall|blue\t1",
+				"!fo|race\t1",
+				"!past|race\t1",
+				"!race|past\t1",
+				"!race|peace\t1",
+				"!seas|low\t1"
+		);
+
+		
+		req = req(
+				"jobid", "00001", 
+				"#workdir", tmpDir,
+				"fields", field,
+				"maxlen", "4",
+				"lowerLimit", "0.0"
+				);
+		provider.run(req, queue);
+		req.close();
+		
+		checkFile(tmpDir + "/00001",
+				"blue|sky|blues|dye\t1",
+				"fo|race|past|race\t1",
+				"green|wall|blue|sky\t1",
+				"race|past|race|peace\t1"
+		);
+		
+		
+	}
+	
+	private void writeData(String targetFile, String targetData) throws IOException {
+		File fo = new File(targetFile);
+		FileWriter fw = new FileWriter(fo);
+		fw.write(targetData);
+		fw.close();
 	}
 	
 	

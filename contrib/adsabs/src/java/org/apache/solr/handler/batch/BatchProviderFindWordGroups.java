@@ -8,11 +8,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -61,7 +64,15 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  File jobFile = new File(workDir + "/" + params.get("jobid"));
 		final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
 		
-		final int maxDistance = params.getInt("maxDistance", 2);
+		final int maxlen = params.getInt("maxlen", 2);
+		final int stopAterReaching = params.getInt("stopAfterReaching", 10000);
+		float upperLimit = Float.parseFloat(params.get("upperLimit", "1.0"));
+		float lowerLimit = Float.parseFloat(params.get("lowerLimit", "0.9"));
+		
+		assert upperLimit <= 1.0f && upperLimit > 0.0f;
+		assert lowerLimit < upperLimit && lowerLimit >= 0.0f;
+		
+		
 		final Analyzer analyzer = schema.getAnalyzer();
 		final HashSet<String> fieldsToLoad = new HashSet<String>();
 		String[] fields = params.getParams("fields");
@@ -75,10 +86,15 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 			}
 		}
 	  
-	  boolean isFinished = false;
+	  final Boolean isFinished = false;
 	  final Map<String, Integer> collectedItems = new HashMap<String, Integer>();
 	  
-	  while (isFinished == false) {
+	  while (true) {
+	  	
+	  	if (terms.size() < 1 || collectedItems.size() > stopAterReaching) {
+	  		break;
+	  	}
+	  	
 	  	Query query = buildQuery(terms, fieldsToLoad);
 	  	
 			final BatchHandlerRequestQueue batchQueue = queue;
@@ -96,23 +112,30 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 
 				@Override
 				public void collect(int i) throws IOException {
-					Document d;
-					d = reader.document(i, fieldsToLoad);
-					processed++;
-					String tokenStr;
-					int keepAdding = 0;
 					
 					if (processed % 10000 == 0) {
 						if(batchQueue.isStopped()) { // inside, because queue is synchronized
 							throw new IOException("Collector interrupted - stopping");
 						}
 					}
-
+					
+					if (collectedItems.size() > stopAterReaching) {
+						return;
+					}
+					
+					Document d;
+					d = reader.document(i, fieldsToLoad);
+					processed++;
+					String tokenStr;
+					int keepAdding = -1;
+					
+					
 					
 					for (String f: fieldsToLoad) {
 						String[] vals = d.getValues(f);
 						posIncrAtt = null;
 						for (String s: vals) {
+							//System.out.println("analyzing: " + s);
 							LinkedList<String> tokenQueue = new LinkedList<String>();
 							TokenStream buffer = analyzer.tokenStream(f, new StringReader(s));
 
@@ -131,18 +154,30 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 									
 									tokenStr = termAtt.toString();
 									
-									if (posIncrAtt.getPositionIncrement() != 0) {
-										if (tokenQueue.size() >= maxDistance-1) {
-											tokenQueue.removeLast();
-											tokenQueue.addFirst(tokenStr);
-										}
+									//System.out.println(tokenStr);
+									
+									if (posIncrAtt.getPositionIncrement() == 0) {
 										if (termMap.contains(tokenStr)) {
-											addEverythingRightToLeft(tokenQueue, collectedItems);
-											keepAdding = tokenQueue.size();
+											tokenQueue.removeLast();
+											tokenQueue.addLast(tokenStr);
+											addEverythingLeftToRight(tokenQueue, collectedItems);
+											keepAdding = maxlen;
 										}
+										continue;
 									}
-									else if (termMap.contains(tokenStr)) {
-										addEverythingRightToLeft(tokenQueue, collectedItems);
+									
+									if (tokenQueue.size() >= maxlen) {
+										tokenQueue.removeFirst();
+									}
+									
+									tokenQueue.addLast(tokenStr);
+									
+									if (termMap.contains(tokenStr)) {
+										addEverythingLeftToRight(tokenQueue, collectedItems);
+										keepAdding = maxlen;
+									}
+									else if (keepAdding-- > 0) {
+										addEverythingLeftToRight(tokenQueue, collectedItems);
 									}
 								}
 							}
@@ -151,17 +186,17 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 									
 									tokenStr = termAtt.toString();
 									
-									if (tokenQueue.size() >= maxDistance-1) {
-										tokenQueue.removeLast();
-										tokenQueue.addFirst(tokenStr);
+									if (tokenQueue.size() >= maxlen) {
+										tokenQueue.removeFirst();
+										tokenQueue.addLast(tokenStr);
 									}
 									
 									if (termMap.contains(tokenStr)) {
-										addEverythingRightToLeft(tokenQueue, collectedItems);
-										keepAdding = tokenQueue.size();
+										addEverythingLeftToRight(tokenQueue, collectedItems);
+										keepAdding = maxlen;
 									}
 									else if (keepAdding-- > 0) {
-										addEverythingRightToLeft(tokenQueue, collectedItems);
+										addEverythingLeftToRight(tokenQueue, collectedItems);
 									}
 									
 								}
@@ -170,32 +205,22 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 					}
 				}
 				
-				private void addEverythingRightToLeft(LinkedList<String> tokenQueue,
-            Map<String, Integer> collectedItems) {
-					String key = tokenQueue.get(tokenQueue.size()-1);
-	        for (int i=tokenQueue.size();i>0;i--) {
-	        	key = tokenQueue.get(i) + " " + key;
-	        	if (collectedItems.containsKey(key)) {
-	        		collectedItems.put(key, collectedItems.get(key)+1);
-	        	}
-	        	else {
-	        		collectedItems.put(key, 1);
-	        	}
-	        }
-        }
-
 				private void addEverythingLeftToRight(LinkedList<String> tokenQueue,
             Map<String, Integer> collectedItems) {
+					if (tokenQueue.size() == 1 || tokenQueue.size() < maxlen)
+						return;
+					
 					String key = tokenQueue.get(0);
 	        for (int i=1;i<tokenQueue.size();i++) {
-	        	key = tokenQueue.get(i) + " " + key;
-	        	if (collectedItems.containsKey(key)) {
-	        		collectedItems.put(key, collectedItems.get(key)+1);
-	        	}
-	        	else {
-	        		collectedItems.put(key, 1);
-	        	}
+	        	key = key + "|" + tokenQueue.get(i);
 	        }
+	        //System.out.println("adding: " + key);
+	        if (collectedItems.containsKey(key)) {
+        		collectedItems.put(key, collectedItems.get(key)+1);
+        	}
+        	else {
+        		collectedItems.put(key, 1);
+        	}
         }
 				
 				
@@ -208,7 +233,40 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 					// Do Nothing
 				}
 			});
+			
+			if (collectedItems.size() > stopAterReaching) {
+				break;
+			}
 		}
+	  
+	  // sort results by frequency, highest first
+	  List<Entry<String, Integer>> colVal = new ArrayList<Entry<String, Integer>>(collectedItems.size());
+	  for (Entry e: collectedItems.entrySet()) {
+	  	colVal.add(e);
+	  }
+	  
+	  Collections.sort(colVal, new Comparator<Entry<String, Integer>>() {
+			@Override
+      public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
+	      int f = o2.getValue().compareTo(o1.getValue());
+	      if (f == 0)
+	      	return o1.getKey().compareTo(o2.getKey());
+	      return f;
+      };
+		});
+	  
+	  int upperL = upperLimit == 1.0f ? 0 : colVal.size() - Math.round(colVal.size() * upperLimit);
+	  int lowerL = lowerLimit == 0.0f ? colVal.size() : colVal.size() - Math.round(colVal.size() * lowerLimit);
+	  
+	  for (int i=upperL; i < colVal.size() && i < lowerL; i++) {
+	  	Entry<String, Integer> entry = colVal.get(i);
+	  	out.write(entry.getKey());
+	  	out.write("\t");
+	  	out.write(Integer.toString(entry.getValue()));
+	  	out.write("\n");
+	  }
+	  out.close();
+	  
   }
 	
 	private Query buildQuery(List<String> terms, HashSet<String> fieldsToLoad) {
@@ -216,7 +274,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  BooleanQuery bq = new BooleanQuery();
 	  
 	  String ff = "";
-	  if (fieldsToLoad.size() > 1) {
+	  if (fieldsToLoad.size() > 0) {
 	  	for (String x: fieldsToLoad) {
 	  		ff = x;
 	  	}
@@ -234,6 +292,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  	else {
 	  		bq.add(new BooleanClause(new TermQuery(new Term(ff, terms.get(i))), Occur.SHOULD));
 	  	}
+	  	toRemove.add(terms.get(i));
 	  }
 	  for (String t: toRemove) {
 	  	terms.remove(t);

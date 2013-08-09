@@ -10,12 +10,12 @@ import org.apache.solr.util.AbstractSolrTestCase;
 public class BatchProviderTest extends AbstractSolrTestCase {
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-fieldpos.xml";
+		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-batch-provider.xml";
 	}
 
 	public String getSolrConfigFile() {
 		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-fieldpos.xml";
+		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-batch-provider.xml";
 	}
 	
 	@Override

@@ -171,8 +171,8 @@ public class AqpAdsabsSubQueryProvider implements
 		parsers.put("topn", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
 				int topN = fp.parseInt();
-				if (topN < 1 || topN > 50000) {
-					throw new ParseException("Hmmm, you have tried to fool me. Try st better!");
+				if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
+					throw new ParseException("Hmmm, the first argument of your operator must be a positive number.");
 				}
 				Query innerQuery = fp.parseNestedQuery();
 				return new SecondOrderQuery(innerQuery, null, 
