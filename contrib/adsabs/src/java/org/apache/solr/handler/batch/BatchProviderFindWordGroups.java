@@ -41,7 +41,6 @@ import org.apache.solr.search.SolrIndexSearcher;
 
 public class BatchProviderFindWordGroups extends BatchProvider {
 	
-	int maxClauses = 500;
 	
 	@Override
   public void run(SolrQueryRequest locReq, BatchHandlerRequestQueue queue) throws Exception {
@@ -65,9 +64,10 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 		final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
 		
 		final int maxlen = params.getInt("maxlen", 2);
-		final int stopAterReaching = params.getInt("stopAfterReaching", 10000);
+		final int stopAterReaching = Math.min(params.getInt("stopAfterReaching", 10000), 1000000);
 		float upperLimit = Float.parseFloat(params.get("upperLimit", "1.0"));
 		float lowerLimit = Float.parseFloat(params.get("lowerLimit", "0.9"));
+		final int maxClauses = Math.min(params.getInt("maxClauses", 5), 500);
 		
 		assert upperLimit <= 1.0f && upperLimit > 0.0f;
 		assert lowerLimit < upperLimit && lowerLimit >= 0.0f;
@@ -86,7 +86,6 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 			}
 		}
 	  
-	  final Boolean isFinished = false;
 	  final Map<String, Integer> collectedItems = new HashMap<String, Integer>();
 	  
 	  while (true) {
@@ -95,7 +94,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  		break;
 	  	}
 	  	
-	  	Query query = buildQuery(terms, fieldsToLoad);
+	  	Query query = buildQuery(terms, fieldsToLoad, maxClauses);
 	  	
 			final BatchHandlerRequestQueue batchQueue = queue;
 			
@@ -241,7 +240,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  
 	  // sort results by frequency, highest first
 	  List<Entry<String, Integer>> colVal = new ArrayList<Entry<String, Integer>>(collectedItems.size());
-	  for (Entry e: collectedItems.entrySet()) {
+	  for (Entry<String, Integer> e: collectedItems.entrySet()) {
 	  	colVal.add(e);
 	  }
 	  
@@ -269,7 +268,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  
   }
 	
-	private Query buildQuery(List<String> terms, HashSet<String> fieldsToLoad) {
+	private Query buildQuery(List<String> terms, HashSet<String> fieldsToLoad, int maxClauses) {
 	  ArrayList<String> toRemove = new ArrayList<String>();
 	  BooleanQuery bq = new BooleanQuery();
 	  

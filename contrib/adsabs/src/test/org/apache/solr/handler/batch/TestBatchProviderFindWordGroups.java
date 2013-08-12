@@ -13,18 +13,19 @@ public class TestBatchProviderFindWordGroups extends BatchProviderTest {
 	public void test() throws Exception {
 
 		String field = "text_sw";
+		String field2 = "text";
 		
 		// now index some data
-		assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", field, "green wall for the blue sky"));
-		assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", field, "of trees angels edens"));
-		assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", field, "blue sky no blues dye"));
-		assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", field, "of high seas and low"));
-		assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxx5", field, "flights of the heroes"));
-		assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxx6", field, "fo the race past race for peace"));
+		assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxx1", field, "green wall for the blue sky", field2, "green wall for the blue sky"));
+		assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxx2", field, "of trees angels edens", field2, "of trees angels edens"));
+		assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxx3", field, "blue sky no blues dye", field2, "blue sky no blues dye"));
+		assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxx4", field, "of high seas and low", field2, "of high seas and low"));
+		assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxx5", field, "flights of the heroes", field2, "flights of the heroes"));
+		assertU(adoc(F.ID, "6", F.BIBCODE, "xxxxxxxxxxxx6", field, "fo the race past race for peace", field2, "fo the race past race for peace"));
 		assertU(commit());
 		// this creates another segment
-		assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", field, "no fight, no plight"));
-		assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxx8", field, "no peace, think twice"));
+		assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxx7", field, "no fight, no plight", field2, "no fight, no plight"));
+		assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxx8", field, "no peace, think twice", field2, "no peace, think twice"));
 		assertU(commit());
 		
 		
