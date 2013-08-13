@@ -147,11 +147,15 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 							if (buffer.hasAttribute(PositionIncrementAttribute.class)) {
 								posIncrAtt = buffer.getAttribute(PositionIncrementAttribute.class);
 							}
-
+							
+							buffer.reset();
 							if (posIncrAtt != null) {
 								while (buffer.incrementToken()) {
 									
 									tokenStr = termAtt.toString();
+									
+									if (tokenStr.trim().equals(""))
+										continue;
 									
 									//System.out.println(tokenStr);
 									
@@ -184,6 +188,9 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 								while (buffer.incrementToken()) {
 									
 									tokenStr = termAtt.toString();
+									
+									if (tokenStr.trim().equals(""))
+										continue;
 									
 									if (tokenQueue.size() >= maxlen) {
 										tokenQueue.removeFirst();

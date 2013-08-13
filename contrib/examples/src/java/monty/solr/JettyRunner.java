@@ -146,27 +146,6 @@ public class JettyRunner {
       html = IOUtils.toString( new URL(adminPath).openStream() );
       assert html.contains("Solr Admin"); // real error will be an exception
 
-      // analysis
-      html = IOUtils.toString( new URL(adminPath+"analysis.jsp").openStream() );
-      assert html.contains("Field Analysis"); // real error will be an exception
-
-      // schema browser
-      html = IOUtils.toString( new URL(adminPath+"schema.jsp").openStream() );
-      assert html.contains("Schema"); // real error will be an exception
-
-      // schema browser
-      html = IOUtils.toString( new URL(adminPath+"threaddump.jsp").openStream() );
-      assert html.contains("org.apache.solr"); // real error will be an exception
-
-      // special caching query
-      html = IOUtils.toString( new URL(queryPath+"select/?q=*%3A*&version=2.2&start=0&rows=10&indent=on&qt=recidspython").openStream());
-      int start_pos = html.indexOf("name=\"docs\">") + 12;
-      System.out.println(html);
-
-      // special caching query
-      html = IOUtils.toString( new URL(queryPath+"select/?q=*%3A*&version=2.2&start=0&rows=10&indent=on&qt=recidspython").openStream());
-      start_pos = html.indexOf("name=\"docs\">") + 12;
-      System.out.println(html);
     }
 
   /**
