@@ -96,6 +96,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public void testOperators() throws Exception {
 	  
+		//top_sorted
+		assertQueryEquals(req("qt", "aqp", "q", "top_sorted(5, \"date desc\", *:*)"), 
+        "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false])", 
+        SecondOrderQuery.class);
+		assertQueryEquals(req("qt", "aqp", "q", "top_sorted(5, \"date desc\", author:civano)"), 
+        "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false])", 
+        SecondOrderQuery.class);
 		
 		// topN - added Aug2013
 		assertQueryEquals(req("qt", "aqp", "q", "topn(5, *:*)"), 

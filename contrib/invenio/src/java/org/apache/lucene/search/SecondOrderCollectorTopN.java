@@ -8,9 +8,14 @@ import org.apache.lucene.index.AtomicReaderContext;
 
 public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 
-	private TopScoreDocCollector topCollector;
+	private TopDocsCollector topCollector;
 	private int topN;
 
+	public SecondOrderCollectorTopN(int topN, TopDocsCollector collector) {
+		this.topN = topN;
+		topCollector = collector;
+	}
+	
 	public SecondOrderCollectorTopN(int topN, boolean docsScoredInOrder) {
 		topCollector = TopScoreDocCollector.create(topN, docsScoredInOrder);
 		this.topN = topN;

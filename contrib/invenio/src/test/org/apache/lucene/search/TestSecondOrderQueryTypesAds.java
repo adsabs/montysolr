@@ -13,10 +13,12 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.FloatField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.MockIndexWriter;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
@@ -25,6 +27,10 @@ import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.solr.schema.DateField;
+import org.apache.solr.schema.FieldProperties;
+import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.TrieDateField;
 //import org.apache.lucene.util.LuceneTestCase.BadApple;
 import org.junit.BeforeClass;
 
@@ -52,12 +58,24 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     reOpenWriter(OpenMode.CREATE);
 
     int i=0;
-    adoc("id", "0", "bibcode",   "b0", "const_boost", "1.0f", "boost", "0.5f", "ads_boost", "0.1f");
-    adoc("id", "1", "bibcode",   "b1", "const_boost", "1.0f", "boost", "0.5f", "references", "b2,b3,b4,b5", "ads_boost", "0.1f");
-    adoc("id", "2", "bibcode",   "b2", "const_boost", "1.0f", "boost", "0.2f", "ads_boost", "0.1f");
-    adoc("id", "3", "bibcode",   "b3", "const_boost", "1.0f", "boost", "0.3f", "references", "b9", "ads_boost", "0.9f");
-    adoc("id", "4", "bibcode",   "b4", "const_boost", "1.0f", "boost", "0.1f", "references", "b100", "ads_boost", "0.1f");
-    adoc("id", "5", "bibcode",   "b5", "const_boost", "1.0f", "boost", "0.8f", "references", "b10", "ads_boost", "0.0f");
+    adoc("id", "0", "bibcode",   "b0", 
+    		"const_boost", "1.0f", "boost", "0.5f", "ads_boost", "0.1f",
+    		"date", "1966-01-01T00:00:00Z");
+    adoc("id", "1", "bibcode",   "b1", 
+    		"const_boost", "1.0f", "boost", "0.5f", "references", "b2,b3,b4,b5", "ads_boost", "0.1f",
+    		"date", "1966-01-02T00:00:00Z");
+    adoc("id", "2", "bibcode",   "b2", 
+    		"const_boost", "1.0f", "boost", "0.2f", "ads_boost", "0.1f",
+    		"date", "1966-01-03T00:00:00Z");
+    adoc("id", "3", "bibcode",   "b3", 
+    		"const_boost", "1.0f", "boost", "0.3f", "references", "b9", "ads_boost", "0.9f",
+    		"date", "1966-01-03T01:00:00Z");
+    adoc("id", "4", "bibcode",   "b4", 
+    		"const_boost", "1.0f", "boost", "0.1f", "references", "b100", "ads_boost", "0.1f",
+    		"date", "1966-01-03T01:01:00Z");
+    adoc("id", "5", "bibcode",   "b5", 
+    		"const_boost", "1.0f", "boost", "0.8f", "references", "b10", "ads_boost", "0.0f",
+    		"date", "1966-01-03T01:01:01Z");
     
     writer.commit();
 		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
@@ -91,11 +109,17 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 
   private void adoc(String... fields) throws IOException {
     Document doc = new Document();
+    DateField df = new TrieDateField();
+    SchemaField sf = new SchemaField("test", new TrieDateField());
+    
     for (int i = 0; i < fields.length; i = i + 2) {
       String f = fields[i];
       if (f.contains("boost")) {
         doc.add(new FloatField(f, Float.parseFloat(fields[i + 1]), Field.Store.YES));
       }
+      //else if (f.contains("date")) {
+      //	doc.add(df.createField(sf, fields[i+1], 1.0f));
+      //}
       else {
         for (String v: fields[i + 1].split(",")) {
           doc.add(newField(fields[i], v, StringField.TYPE_STORED));
@@ -302,6 +326,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     topSet = searcher.search(new SecondOrderQuery(constQuery, null, new SecondOrderCollectorAdsClassicScoringFormula("ads_boost")), 10);
     testDocOrder(topSet.scoreDocs, 3, 2, 4, 10, 5);
     assertArrayEquals(getScores(topSet.scoreDocs), new float[]{0.95f, 0.55f, 0.55f, 0.55f, 0.5f}, 0.1f);
+    
     
     
   }

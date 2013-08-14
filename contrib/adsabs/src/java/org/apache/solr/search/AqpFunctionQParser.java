@@ -14,6 +14,7 @@ import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.params.SolrParams;
@@ -58,7 +59,13 @@ public class AqpFunctionQParser extends FunctionQParser {
 		if (qn instanceof FieldQueryNode) {
 			return ((FieldQueryNode) qn).getTextAsString();
 		}
-		return (String) ((OpaqueQueryNode) qn).getValue();
+		else if (qn instanceof OpaqueQueryNode) {
+			return (String) ((OpaqueQueryNode) qn).getValue();
+		}
+		else {
+			return (String) qn.toQueryString(new EscapeQuerySyntaxImpl());
+		}
+		
 	}
 	
 	

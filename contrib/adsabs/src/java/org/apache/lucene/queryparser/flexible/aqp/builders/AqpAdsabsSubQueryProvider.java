@@ -31,7 +31,9 @@ import org.apache.lucene.search.SecondOrderCollectorCitingTheMostCited;
 import org.apache.lucene.search.SecondOrderCollectorOperatorExpertsCiting;
 import org.apache.lucene.search.SecondOrderCollectorTopN;
 import org.apache.lucene.search.SecondOrderQuery;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopFieldCollector;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -51,6 +53,8 @@ import org.apache.solr.search.PrefixQParserPlugin;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.RawQParserPlugin;
+import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SortSpec;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
 
@@ -179,6 +183,36 @@ public class AqpAdsabsSubQueryProvider implements
 						new SecondOrderCollectorTopN(topN));
 	      }
 	    }.configure(true)); // true=canBeAnalyzed
+		
+		
+  	// top_sorted(int, field, Q) - limit results to the best top N (by their sort order)
+		parsers.put("top_sorted", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {
+				int topN = fp.parseInt();
+				if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
+					throw new ParseException("Hmmm, the first argument of your operator must be a positive number.");
+				}
+				
+				String field = fp.parseId();
+				Sort sort = QueryParsing.parseSort(field, fp.getReq());
+				
+				SolrIndexSearcher searcher = fp.getReq().getSearcher();
+				
+				TopFieldCollector collector;
+			  try {
+	        collector = TopFieldCollector.create(searcher.weightSort(sort), topN, false, false, false, true);
+        } catch (IOException e) {
+	        throw new ParseException("I am sorry, you can't use " + field + " for topn() sorting. Reason: " + e.getMessage());
+        }
+				
+        QParser eqp = fp.subQuery(fp.parseId(), "aqp");
+        Query innerQuery = eqp.getQuery();
+        
+				//Query innerQuery = fp.parseNestedQuery();
+				return new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorTopN(topN, collector));
+	      }
+	    }.configure(false)); // true=canBeAnalyzed
 		
 	  // citations(P) - set of papers that have P in their reference list
 		parsers.put("citations", new AqpSubqueryParserFull() {
