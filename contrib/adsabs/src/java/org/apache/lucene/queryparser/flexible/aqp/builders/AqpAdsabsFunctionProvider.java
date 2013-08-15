@@ -48,8 +48,8 @@ public class AqpAdsabsFunctionProvider implements
 		// the params are all null because we know we are not using solr request handler params
 		AqpFunctionQParser queryParser = new AqpFunctionQParser(null, null, null, null);
 		
-		AqpFunctionQueryTreeBuilder.flattenChildren(node); // convert into opaque nodes
-		AqpFunctionQueryTreeBuilder.simplifyValueNode(node); // remove func name, leave only values
+		//AqpFunctionQueryTreeBuilder.flattenChildren(node); // convert into opaque nodes
+		//AqpFunctionQueryTreeBuilder.simplifyValueNode(node); // remove func name, leave only values
 		
 		return new AqpFunctionQueryTreeBuilder(vsProvider, queryParser);
 				

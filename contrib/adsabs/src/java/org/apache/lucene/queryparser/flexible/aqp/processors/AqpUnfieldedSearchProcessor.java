@@ -10,6 +10,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
@@ -52,8 +53,7 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 
-		// HACK-FUNC-to-refactor
-	  if (node instanceof FieldQueryNode && !(node.getParent() instanceof AqpFunctionQueryNode)) {
+	  if (node instanceof FieldQueryNode) {
 	    
 		  QueryConfigHandler config = getQueryConfigHandler();
 		  
@@ -89,10 +89,6 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	      else if (node.getParent() instanceof BoostQueryNode) {
 	      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent()).getValue();
 	      }
-  	    //if (subQuery.contains(" ")) {
-  	    //  subQuery = "\"" + subQuery + "\"";
-  	    //}
-  	    
 	    }
 	    node.setTag("subQuery", subQuery);
 	    
@@ -105,13 +101,9 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	    }
 	    
 	    
-	    ArrayList<QueryNode> children = new ArrayList<QueryNode>();
-	    children.add(new OpaqueQueryNode("func", funcName));
-	    children.add(new OpaqueQueryNode("unfielded", subQuery));
-	    
-	    QueryNode fNode = new BooleanQueryNode(children);
-	    
-	    return new AqpFunctionQueryNode(funcName, builder, fNode);
+	    List<OriginalInput> fValues = new ArrayList<OriginalInput>();
+	    fValues.add(new OriginalInput(subQuery, -1, -1));
+	    return new AqpFunctionQueryNode(funcName, builder, fValues);
 		}
 		return node;
 	}

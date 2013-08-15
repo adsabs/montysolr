@@ -1,10 +1,17 @@
 package org.apache.lucene.queryparser.flexible.aqp.nodes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
+import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
+import org.apache.lucene.queryparser.flexible.standard.parser.ParseException;
 
 /**
  * This QNode receives all the children of the QFUNC node, so typically
@@ -38,13 +45,33 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 	private static final long serialVersionUID = 751068795564006998L;
 	private AqpFunctionQueryBuilder builder = null;
 	private String name = null;
+	private OriginalInput originalInput = null;
+	private List<OriginalInput> funcValues;
 	
-	public AqpFunctionQueryNode(String name, AqpFunctionQueryBuilder builder, QueryNode node) {
+	public AqpFunctionQueryNode(String name, AqpFunctionQueryBuilder builder, List<OriginalInput> values) throws ParseException {
 		allocate();
-		setLeaf(false);
-		//add(node.getChildren().get(1).getChildren()); // we keep only the values
-		//add(node.getChildren().get(1));
-		add(node.getChildren());
+		setLeaf(true);
+		originalInput = null;
+		funcValues = values;
+		this.builder = builder;
+		this.name = name;
+	}
+	
+	public AqpFunctionQueryNode(String name, AqpFunctionQueryBuilder builder, AqpANTLRNode node) throws ParseException {
+		allocate();
+		setLeaf(true);
+		
+		originalInput = AqpQProcessor.getOriginalInput(node);
+		
+		if (node.getChildren().size() == 1 && node.getChild("COMMA") != null) {
+  		node = node.getChild("COMMA");
+  	}
+		
+		funcValues = new ArrayList<OriginalInput>();
+		for (QueryNode n: node.getChildren()) {
+			funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) n));
+		}
+		
 		this.builder = builder;
 		this.name = name;
 	}
@@ -53,6 +80,7 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		StringBuffer bo = new StringBuffer();
 		bo.append("<function name=\"");
 		bo.append(this.name == null ? getBuilder().getClass() : this.name);
+		bo.append("originalInput=\"" + originalInput + "\"");
 		bo.append("\">\n");
 		for (QueryNode child: this.getChildren()) {
 			bo.append(child.toString());
@@ -79,6 +107,14 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 	}
 	
 	public Boolean canBeAnalyzed() {
-	  return builder.canBeAnalyzed();
+	  return false;
+	}
+	
+	public List<OriginalInput> getFuncValues() {
+		return funcValues;
+	}
+	
+	public OriginalInput getOriginalInput() {
+		return originalInput;
 	}
 }

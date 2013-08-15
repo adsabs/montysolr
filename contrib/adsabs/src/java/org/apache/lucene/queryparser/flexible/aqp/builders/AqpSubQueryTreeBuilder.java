@@ -2,6 +2,7 @@ package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
@@ -22,7 +23,7 @@ public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
 	
 	public Query build(QueryNode node) throws QueryNodeException {
 		try {
-			functionQueryParser.setQueryNode(node);
+			functionQueryParser.setQueryNode((AqpFunctionQueryNode) node);
 			return aqpValueSourceParser.parse(functionQueryParser);
 		} catch (ParseException e) {
 			throw new QueryNodeException(new MessageImpl(e.getLocalizedMessage()));

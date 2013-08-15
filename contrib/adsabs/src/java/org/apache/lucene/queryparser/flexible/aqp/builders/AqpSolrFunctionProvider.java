@@ -38,8 +38,8 @@ public class AqpSolrFunctionProvider implements AqpFunctionQueryBuilderProvider 
 		AqpFunctionQParser fParser = new AqpFunctionQParser(null, reqAttr.getLocalParams(), 
 				reqAttr.getParams(), req);
 		
-		AqpFunctionQueryTreeBuilder.flattenChildren(node);
-		AqpFunctionQueryTreeBuilder.simplifyValueNode(node);
+		//AqpFunctionQueryTreeBuilder.flattenChildren(node);
+		//AqpFunctionQueryTreeBuilder.simplifyValueNode(node);
 		
 		return new AqpFunctionQueryTreeBuilder(provider, fParser);
 		

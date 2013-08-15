@@ -74,13 +74,14 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		set(ConfigurationKeys.SOLR_LOGGER, log);
 		set(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG, new AqpFunctionQueryBuilderConfigImpl());
 		
+		
 		get(AqpStandardQueryConfigHandler.ConfigurationKeys.FEEDBACK).registerEventHandler(new AqpAdsabsLoggingHandler());
 		set(ConfigurationKeys.DEFAULT_DATE_RANGE_FIELD, "date");
 		set(ConfigurationKeys.DEFAULT_IDENTIFIER_FIELD, "identifier");
 		
 		set(StandardQueryConfigHandler.ConfigurationKeys.ALLOW_LEADING_WILDCARD, true);
 		
-		get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(new AqpAdsabsFunctionProvider());
+		
 		
 		
 		set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY, true);

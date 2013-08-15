@@ -38,7 +38,7 @@ public class AqpFunctionQueryTreeBuilder extends QueryTreeBuilder
 	}
 	
 	
-	public static void flattenChildren(QueryNode node) throws QueryNodeException {
+	public static void XflattenChildren(QueryNode node) throws QueryNodeException {
 		
 		// we know that for solr functions, the literal values are enough (so we can safely replace
 		// nodes with their literal values - just the nested functions will remain as functions)
@@ -62,14 +62,14 @@ public class AqpFunctionQueryTreeBuilder extends QueryTreeBuilder
 		//valueNode.set(children);
 	}
 	
-	public static void simplifyValueNode(QueryNode node) throws QueryNodeException {
+	public static void XsimplifyValueNode(QueryNode node) throws QueryNodeException {
 		List<QueryNode> children = node.getChildren();
 		List<QueryNode> valChildren = children.get(1).getChildren();
 		children.clear();
 		children.addAll(valChildren);
 	}
 	
-	public static void removeFuncName(QueryNode node) throws QueryNodeException {
+	public static void XremoveFuncName(QueryNode node) throws QueryNodeException {
 		List<QueryNode> children = node.getChildren();
 		children.remove(0);
 	}
@@ -111,7 +111,7 @@ public class AqpFunctionQueryTreeBuilder extends QueryTreeBuilder
 	}
 
 	private AqpFunctionQParser getParser(QueryNode node) {
-		functionQueryParser.setQueryNode(node);
+		functionQueryParser.setQueryNode((AqpFunctionQueryNode) node);
 		return functionQueryParser;
 	}
 

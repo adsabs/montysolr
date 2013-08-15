@@ -59,8 +59,8 @@ public class AqpAdsabsCustomQueryProvider implements
     }
     
 		
-		AqpFunctionQueryTreeBuilder.flattenChildren(node); // convert into opaque nodes
-		AqpFunctionQueryTreeBuilder.simplifyValueNode(node); // remove func name, leave only values
+		//AqpFunctionQueryTreeBuilder.flattenChildren(node); // convert into opaque nodes
+		//AqpFunctionQueryTreeBuilder.simplifyValueNode(node); // remove func name, leave only values
 		
 		return new AqpSubQueryTreeBuilder(provider, queryParser);
 				
