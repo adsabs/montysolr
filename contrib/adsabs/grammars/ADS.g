@@ -108,7 +108,7 @@ range_term_in
         options {greedy=true;}
 	:	
        LBRACK
-       (a=range_value -> range_value ^(QANYTHING QANYTHING["*"]))
+       (a=range_value -> $a ^(QANYTHING QANYTHING["*"]))
        (TO?  b=range_value -> $a $b? )?
        RBRACK
 	;
@@ -138,7 +138,7 @@ value
 	| DATE_RANGE -> ^(QDATE DATE_RANGE)
 	| AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
 	| QMARK -> ^(QTRUNCATED QMARK)
-	| STAR COLON b=STAR -> ^(QANYTHING $b)
+	| match_all -> ^(QANYTHING match_all)
 	| STAR -> ^(QTRUNCATED STAR)
 	| LOCAL_PARAMS -> ^(XMETA LOCAL_PARAMS)	
 	//| COMMA -> ^(QCOMMA COMMA)
@@ -238,6 +238,10 @@ operator: (
 	);	
 */	
 
+match_all
+	:	
+	STAR COLON STAR
+	;
 normal	
 	:
 	TERM_NORMAL

@@ -20,6 +20,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
@@ -102,14 +103,13 @@ public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorIm
 		
 	  if (node instanceof AqpFunctionQueryNode && ((AqpFunctionQueryNode) node).getName().contains("edismax")) {
 	  	
-	  	QueryNode valueNode = node.getChildren().get(node.getChildren().size()-1);
-	  	String subQuery = null;
-	  	if (valueNode instanceof OpaqueQueryNode) {
-	  		subQuery = (String) ((OpaqueQueryNode)valueNode).getValue();
-	  	}
 	  	
-	  	if (subQuery == null)
+	  	OriginalInput oi = ((AqpFunctionQueryNode) node).getOriginalInput();
+	  	
+	  	if (oi == null)
 	  		return node;
+	  	
+	  	String subQuery = oi.value;
 	  	
 	  	subQuery = ADSEscapeQuerySyntaxImpl.discardEscapeChar(subQuery).toString();
 	  	

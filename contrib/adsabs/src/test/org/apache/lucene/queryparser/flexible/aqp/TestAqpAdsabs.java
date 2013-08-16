@@ -247,8 +247,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	public void testFunctionalQueries() throws Exception {
-		assertQueryEquals("pos(author, \"Accomazzi, A\", 1, \\-1)", null, "pos(author,\"Accomazzi, A\",1,-1)", FunctionQuery.class);
-		assertQueryEquals("pos(author, Kurtz, 1, 1)", null, "pos(author,Kurtz,1,1)", FunctionQuery.class);
+		assertQueryEquals("pos(author, 1, \\-1, \"Accomazzi, A\")", null, "pos(author,\"Accomazzi, A\",1,-1)", FunctionQuery.class);
+		assertQueryEquals("pos(author, 1, 1, Kurtz)", null, "pos(author,Kurtz,1,1)", FunctionQuery.class);
 		
 		
 		// with the new parser, we are stricter (or lazier ;)) - i am not sure if it was a good idea to 
@@ -647,7 +647,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
       assertQueryEquals("/foo$/", wsa, "/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/foo$/", wsa, "keyword:/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/^foo$/", wsa, "keyword:/^foo$/", RegexpQuery.class);
-      assertQueryEquals("keyword:/^foo$/ AND \"^foo$\"", wsa, "+keyword:/^foo$/ +pos(author,foo,1,-1)", BooleanQuery.class);
+      assertQueryEquals("keyword:/^foo$/ AND \"^foo$\"", wsa, "+keyword:/^foo$/ +pos(author,1,-1,foo)", BooleanQuery.class);
   }
 	
 	public static junit.framework.Test suite() {

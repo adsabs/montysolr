@@ -63,13 +63,13 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       if (pargs.ids.size() == 1) {
         // we'll report only if the recid contains one doc
         r = req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString());
-        core.execute(backupHandler, req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString()), rsp);
+      	coreExecute(backupHandler, r, rsp);
       }
       else {
         // but likely, the first failed is erroneous, so let's create three batches
         r = req("command", "register-new-batch", 
             "url", pargs.getUrl(new int[]{pargs.ids.get(0)}));
-        core.execute(backupHandler, r, rsp);
+        coreExecute(backupHandler, r, rsp);
         pargs.ids.remove(0);
         callProcessingAgain(pargs);
       }
@@ -78,17 +78,17 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       removeProcessed(pargs.ids);
       if (pargs.ids.size()==0) {
         r = req("command", "register-failed-batch", "recid", pargs.origUrl);
-        core.execute(backupHandler, r, rsp);
+        coreExecute(backupHandler, r, rsp);
       }
       else if (pargs.ids.size()==1) { // the last doc is erroneous
         r = req("command", "register-failed-doc", "recid", pargs.ids.get(0).toString());
-        core.execute(backupHandler, r, rsp);
+        coreExecute(backupHandler, r, rsp);
       }
       else {
         // but likely, the first failed is erroneous, so let's create three batches
         r = req("command", "register-new-batch", 
             "url", pargs.getUrl(new int[]{pargs.ids.get(0)}));
-        core.execute(backupHandler, r, rsp);
+        coreExecute(backupHandler, r, rsp);
         pargs.ids.remove(0);
         callProcessingAgain(pargs);
       }
@@ -101,6 +101,15 @@ public class FailSafeInvenioNoRollbackWriter extends SolrWriter {
       log.error("We also called " + backupHandler.getName() + " with params: " + r.getParamString());
     }
     //commit(false); // anything bad happens if we don't call commit?
+  }
+  
+  private void coreExecute(SolrRequestHandler handler, SolrQueryRequest localReq, SolrQueryResponse rsp) {
+  	try {
+  		req.getCore().execute(handler, localReq, rsp);
+  	}
+  	finally {
+  		localReq.close();
+  	}
   }
   
   protected SolrQueryRequest getReq() {

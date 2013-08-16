@@ -212,10 +212,14 @@ public class AqpAdsabsQParser extends QParser {
 		  }
 			return qParser.parse(getString(), null);
 		} catch (QueryNodeException e) {
-			throw new ParseException(e.getMessage());
+			ParseException ex = new ParseException(e.getMessage());
+			ex.setStackTrace(e.getStackTrace());
+			throw ex;
 		}
 		catch (SolrException e1) {
-			throw new ParseException(e1.getLocalizedMessage());
+			ParseException ex2 = new ParseException(e1.getMessage());
+			ex2.setStackTrace(e1.getStackTrace());
+			throw ex2;
 		}
 	}
 

@@ -24,9 +24,14 @@ public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
 	public Query build(QueryNode node) throws QueryNodeException {
 		try {
 			functionQueryParser.setQueryNode((AqpFunctionQueryNode) node);
+			if (((AqpFunctionQueryNode) node).getOriginalInput() != null) {
+				functionQueryParser.setString(((AqpFunctionQueryNode) node).getOriginalInput().value);
+			}
 			return aqpValueSourceParser.parse(functionQueryParser);
 		} catch (ParseException e) {
 			throw new QueryNodeException(new MessageImpl(e.getLocalizedMessage()));
+		} finally {
+			functionQueryParser.getReq().close();
 		}
 	}
 

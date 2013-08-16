@@ -120,6 +120,9 @@ public class AqpFunctionQParser extends FunctionQParser {
 
 	public void setQueryNode(AqpFunctionQueryNode node) {
 		this.qNode = node;
+		if (node.getOriginalInput() != null) {
+			sp = new QueryParsing.StrParser(node.getOriginalInput().value);
+		}
 	}
 
 	public QueryNode getQueryNode() {
@@ -159,7 +162,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 	}
 
 	public Query parseNestedQuery() throws ParseException {
-		OriginalInput node = consume();
+ 		OriginalInput node = consume();
 		QParser parser = subQuery(node.value, null); // use the default parser
 		return parser.getQuery();
 	}
@@ -167,4 +170,5 @@ public class AqpFunctionQParser extends FunctionQParser {
 	public boolean hasMoreArguments() {
 		return canConsume();
 	}
+	
 }

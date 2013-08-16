@@ -24,11 +24,16 @@ public class AqpAdsabsFunctionProvider implements
 		parsers.put("pos", new ValueSourceParser() {
 	      @Override
 	      public ValueSource parse(FunctionQParser fp) throws ParseException {
+	      	String field = fp.parseId();
+	      	int start = fp.parseInt();
+	      	int end = fp.parseInt();
+	      	String value = fp.parseId();
+	      	
     		  PositionSearchFunction o = new PositionSearchFunction(
-    			  fp.parseId(),
-    			  fp.parseId(),
-    			  fp.parseInt(),
-    			  fp.parseInt());
+    			  field,
+    			  value,
+    			  start,
+    			  end);
     		  if (fp.hasMoreArguments()) {
     			  throw new NestedParseException("Wrong number of arguments");
     		  }

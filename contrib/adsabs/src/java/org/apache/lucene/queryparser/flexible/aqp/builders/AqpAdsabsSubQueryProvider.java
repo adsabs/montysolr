@@ -37,6 +37,7 @@ import org.apache.lucene.search.TopFieldCollector;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.AqpFunctionQParser;
 import org.apache.solr.search.BoostQParserPlugin;
@@ -186,23 +187,26 @@ public class AqpAdsabsSubQueryProvider implements
 		
 		
   	// top_sorted(int, field, Q) - limit results to the best top N (by their sort order)
-		parsers.put("top_sorted", new AqpSubqueryParserFull() {
+		parsers.put("topn_sorted", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
 				int topN = fp.parseInt();
 				if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
 					throw new ParseException("Hmmm, the first argument of your operator must be a positive number.");
 				}
 				
-				String field = fp.parseId();
-				Sort sort = QueryParsing.parseSort(field, fp.getReq());
+				String sort = fp.parseId();
+				if (sort.contains("\"") || sort.contains("\'")) {
+					sort = sort.substring(1, sort.length()-1);
+				}
+				Sort sortSpec = QueryParsing.parseSort(sort, fp.getReq());
 				
 				SolrIndexSearcher searcher = fp.getReq().getSearcher();
 				
 				TopFieldCollector collector;
 			  try {
-	        collector = TopFieldCollector.create(searcher.weightSort(sort), topN, false, false, false, true);
+	        collector = TopFieldCollector.create(searcher.weightSort(sortSpec), topN, false, false, false, true);
         } catch (IOException e) {
-	        throw new ParseException("I am sorry, you can't use " + field + " for topn() sorting. Reason: " + e.getMessage());
+	        throw new ParseException("I am sorry, you can't use " + sort + " for topn() sorting. Reason: " + e.getMessage());
         }
 				
         QParser eqp = fp.subQuery(fp.parseId(), "aqp");
@@ -210,7 +214,7 @@ public class AqpAdsabsSubQueryProvider implements
         
 				//Query innerQuery = fp.parseNestedQuery();
 				return new SecondOrderQuery(innerQuery, null, 
-						new SecondOrderCollectorTopN(topN, collector));
+						new SecondOrderCollectorTopN("topn_sorted", topN, collector));
 	      }
 	    }.configure(false)); // true=canBeAnalyzed
 		
@@ -462,7 +466,7 @@ public class AqpAdsabsSubQueryProvider implements
 		
 		// need better way to get the input string
 		//if (node instanceof AqpANTLRNode)
-		
+		/*
 		String subQuery = "";
 		
 		if (node.isLeaf()) {
@@ -500,7 +504,21 @@ public class AqpAdsabsSubQueryProvider implements
   			AqpFunctionQueryTreeBuilder.simplifyValueNode(node);
   		}
 		}
+		*/
 		
+		SolrParams localParams = reqAttr.getLocalParams();
+		if (localParams == null) {
+			localParams = new ModifiableSolrParams();
+		}
+		else {
+			localParams = new ModifiableSolrParams(localParams);
+		}
+		
+		if (localParams.get(QueryParsing.DEFTYPE, null) == null) {
+			((ModifiableSolrParams) localParams).set(QueryParsing.DEFTYPE, "aqp");
+		}
+		AqpFunctionQParser parser = new AqpFunctionQParser("", localParams, 
+				reqAttr.getParams(), req);
 		return new AqpSubQueryTreeBuilder(provider, parser);
 				
 	}

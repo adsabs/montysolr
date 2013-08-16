@@ -1,12 +1,20 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
 
 public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
@@ -70,58 +78,6 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 		
 		input = input.trim(); // it may contain trailing spaces, especially when: ^name, j, k   AND somethi...
 		
-		if ((input.contains(",") || input.contains(" ")) && !input.startsWith("\"")) { 
-			input = "\"" + input + "\"";
-		}
-		
-		AqpCommonTree tree = node.getTree();
-		
-		// content under QFUNC
-		AqpANTLRNode semicolonNode = new AqpANTLRNode(tree);
-		semicolonNode.setTokenName("OPERATOR");
-		semicolonNode.setTokenLabel("COMMA");
-		
-		// 1. value (field name)
-		AqpANTLRNode field = new AqpANTLRNode(tree);
-		field.setTokenLabel("TOKEN");
-		field.setTokenName("TOKEN");
-		field.setTokenInput(getFieldName(node, "author")); // the first argument should be the field name
-		semicolonNode.add(getChain(field));
-		
-		// 2nd value (user input)
-		AqpANTLRNode author = new AqpANTLRNode(tree);
-		author.setTokenName(input.startsWith("\"") ? "PHRASE" : "TOKEN");
-		author.setTokenLabel(input.startsWith("\"") ? "PHRASE" : "TOKEN");
-		author.setTokenInput(input);
-		semicolonNode.add(getChain(author));
-		
-		// 3rd value (starting position)
-		AqpANTLRNode startNode = new AqpANTLRNode(tree);
-		startNode.setTokenName("TOKEN");
-		startNode.setTokenLabel("TOKEN");
-		startNode.setTokenInput(String.valueOf(start));
-		semicolonNode.add(getChain(startNode));
-		
-		// 4th value (ending position)
-		AqpANTLRNode endNode = new AqpANTLRNode(tree);
-		endNode.setTokenName("TOKEN");
-		endNode.setTokenLabel("TOKEN");
-		endNode.setTokenInput(String.valueOf(end));
-		semicolonNode.add(getChain(endNode));
-		
-		
-		// now we build QFUNC tree and attach semicolon to it
-		AqpANTLRNode funcNode = new AqpANTLRNode(tree);
-		funcNode.setTokenName("QFUNC");
-		funcNode.setTokenLabel("QFUNC");
-		
-		AqpANTLRNode funcValue = new AqpANTLRNode(tree);
-		funcValue.setTokenName("TOKEN");
-		funcValue.setTokenName("TOKEN");
-		funcValue.setTokenInput("pos(");
-		
-		funcNode.add(funcValue);
-		funcNode.add(semicolonNode);
 		
 		
 		// finally, generate warning
@@ -130,9 +86,30 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 				this.getClass(), 
 				node, 
 				"This is an obsolete syntax! One day you may wake up and discover strange errors..." +
-				"Please use: {{{pos(author," + author + "," + start + "," + end + "}}}"));
+				"Please use: {{{pos(author, " + start + ", " + end +", \"" + input + "\"}}}"));
 		
-		return funcNode;
+		QueryConfigHandler config = getQueryConfigHandler();
+		
+		if (!config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)) {
+			throw new QueryNodeException(new MessageImpl(
+					"Invalid configuration",
+					"Missing FunctionQueryBuilder provider"));
+		}
+		
+		AqpFunctionQueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
+			.getBuilder("pos", (QueryNode) node, config);
+		
+		String fieldName = getFieldName(node, "author");
+		List<OriginalInput> values = new ArrayList<OriginalInput>();
+		values.add(new OriginalInput(fieldName, -1, -1));
+		values.add(new OriginalInput(String.valueOf(start), -1, -1));
+		values.add(new OriginalInput(String.valueOf(end), -1, -1));
+		values.add(new OriginalInput(input, -1, -1));
+		
+		
+		
+		return new AqpFunctionQueryNode("pos", builder, values);
+		
 	}
 	
 	// tries to discover the field (if present, otherwise returns the default)

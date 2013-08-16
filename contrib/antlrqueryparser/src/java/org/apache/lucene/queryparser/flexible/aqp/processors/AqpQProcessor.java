@@ -1,6 +1,11 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.antlr.runtime.CharStream;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
@@ -27,7 +32,8 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     QueryNodeProcessor {
 
   public String defaultField = null;
-
+  
+  
   @Override
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
     if (node instanceof AqpANTLRNode) {
@@ -96,7 +102,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     return node;
   }
 
-  public static OriginalInput getOriginalInput(AqpANTLRNode node)
+  public static OriginalInput getOriginalInput(AqpANTLRNode node, Set<String> labelsToIncreaseCount)
       throws ParseException {
 
     CharStream inputStream = getInputStream(node);
@@ -111,20 +117,20 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
           "We cannot find where the input starts"));
     }
     int[] lastIndex = new int[] { startIndex[0] };
-    getTheHighestIndex(lastIndex, node);
+    getTheHighestIndex(lastIndex, node, labelsToIncreaseCount);
     if (lastIndex[0] < startIndex[0]) {
       throw new ParseException(new MessageImpl(
           "We cannot find where the input ends"));
     }
-    // if (lastIndex[0]+1 < inputStream.size()) {
-    // lastIndex[0] += 1;
-    // }
+    
     return new OriginalInput(
         inputStream.substring(startIndex[0], lastIndex[0]), startIndex[0],
         lastIndex[0]);
   }
 
-  public static CharStream getInputStream(QueryNode node) {
+  
+
+	public static CharStream getInputStream(QueryNode node) {
     if (node.isLeaf()) {
       if (node instanceof AqpANTLRNode) {
         if (((AqpANTLRNode) node).getTree().getToken().getInputStream() != null) {
@@ -142,14 +148,27 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     return null;
   }
 
-  private static void getTheHighestIndex(int[] i, QueryNode node) {
+  private static void getTheHighestIndex(int[] i, QueryNode node, Set<String> labelsToIncreaseCount) {
     if (!node.isLeaf()) {
       for (QueryNode n : node.getChildren()) {
-        getTheHighestIndex(i, n);
+        getTheHighestIndex(i, n, labelsToIncreaseCount);
       }
     }
     if (node instanceof AqpANTLRNode) {
       int si = ((AqpANTLRNode) node).getInputTokenEnd();
+      /*
+       * In the grammar, we are generating AST tree, but leaving out
+       * brackets, because they were not deemed interesting to see - 
+       * but this means we don't know their position, so if the node
+       * contained the QRANGE or something similar, we'll see the 
+       * input shortened by n x 1
+       */
+      if (labelsToIncreaseCount != null) {
+      	String label = ((AqpANTLRNode) node).getTokenLabel();
+      	if (labelsToIncreaseCount.contains(label))
+      		i[0] =  i[0]+1;
+      }
+      
       if (i[0] < si) {
         i[0] = si;
       }
@@ -157,15 +176,15 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
   }
 
   private static void getTheLowestIndex(int[] i, QueryNode node) {
-    if (!node.isLeaf()) {
-      for (QueryNode n : node.getChildren()) {
-        getTheLowestIndex(i, n);
-      }
-    }
-    if (node instanceof AqpANTLRNode) {
+  	if (node instanceof AqpANTLRNode) {
       int si = ((AqpANTLRNode) node).getInputTokenStart();
       if (si > -1 && si < i[0]) {
         i[0] = si;
+      }
+    }
+    if (!node.isLeaf()) {
+      for (QueryNode n : node.getChildren()) {
+        getTheLowestIndex(i, n);
       }
     }
   }
@@ -182,7 +201,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     }
 
     public String toString() {
-      return String.format("%s [%d:%d]", this.value, this.start, this.end);
+      return String.format("%s <%d:%d>", this.value, this.start, this.end);
     }
   }
 }

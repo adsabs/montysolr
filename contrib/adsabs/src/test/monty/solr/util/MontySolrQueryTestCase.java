@@ -22,6 +22,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.AqpAdsabsQParser;
 import org.apache.solr.search.QParser;
+import org.apache.solr.search.QueryParsing;
 import org.getopt.luke.DocReconstructor;
 import org.getopt.luke.DocReconstructor.Reconstructed;
 import org.getopt.luke.GrowableStringArray;
@@ -77,8 +78,8 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 	public QParser getParser(SolrQueryRequest req) throws ParseException, InstantiationException, IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
 		SolrParams params = req.getParams();
 		String query = params.get(CommonParams.Q);
-		String qt = params.get(CommonParams.QT);
-		QParser qParser = QParser.getParser(query, qt, req);
+		String defType = params.get(QueryParsing.DEFTYPE);
+		QParser qParser = QParser.getParser(query, defType, req);
 		
 		if (qParser instanceof AqpAdsabsQParser) {
 			((AqpAdsabsQParser) qParser).getParser().setDebug(tp.debugParser);

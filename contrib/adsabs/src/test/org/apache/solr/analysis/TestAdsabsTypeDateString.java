@@ -68,7 +68,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 
     assertQ(req("q", "*:*"), "//*[@numFound='10']");
     
-    assertQueryEquals(req("q", "pubdate:2012", "qt", "aqp"), "date:[1325376000000 TO 1356998400000}", NumericRangeQuery.class);
+    assertQueryEquals(req("q", "pubdate:2012", "defType", "aqp"), "date:[1325376000000 TO 1356998400000}", NumericRangeQuery.class);
     assertQ(req("q", "pubdate:2012"), "//*[@numFound='5']", 
         "//doc/str[@name='id'][.='0']",
         "//doc/str[@name='id'][.='1']",
@@ -83,20 +83,20 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     // *after* the first 30mins of a day! If you want to get also the
     // 'zero' hour docs, you must search for '2012-01' or specify the 
     // hour precisely
-    assertQueryEquals(req("q", "pubdate:2012-10-01", "qt", "aqp"), "date:[1349051400000 TO 1349137800000}", NumericRangeQuery.class);
+    assertQueryEquals(req("q", "pubdate:2012-10-01", "defType", "aqp"), "date:[1349051400000 TO 1349137800000}", NumericRangeQuery.class);
     assertQ(req("q", "pubdate:2012-10-01"), 
         "//*[@numFound='2']", 
         "//doc/str[@name='id'][.='1']",
         "//doc/str[@name='id'][.='2']"
         );
     
-    assertQueryEquals(req("q", "pubdate:2012-11", "qt", "aqp"), "date:[1351728000000 TO 1354320000000}", NumericRangeQuery.class);
+    assertQueryEquals(req("q", "pubdate:2012-11", "defType", "aqp"), "date:[1351728000000 TO 1354320000000}", NumericRangeQuery.class);
     assertQ(req("q", "pubdate:2012-11"), 
         "//*[@numFound='1']", 
         "//doc/str[@name='id'][.='3']");
     
     // notice, the pubdate search fails, but when we use date it works
-    assertQueryEquals(req("q", "pubdate:2012-12-02", "qt", "aqp"), 
+    assertQueryEquals(req("q", "pubdate:2012-12-02", "defType", "aqp"), 
     		"date:[1354408200000 TO 1354494600000}", NumericRangeQuery.class);
     assertQ(req("q", "pubdate:2012-12-02"), "//*[@numFound='0']");
     
@@ -107,7 +107,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     
     
     // notice: the range is not inclusive at the end [....} like above
-    assertQueryEquals(req("q", "pubdate:[2012-10-00 TO 2012-12-02]", "qt", "aqp"), 
+    assertQueryEquals(req("q", "pubdate:[2012-10-00 TO 2012-12-02]", "defType", "aqp"), 
     		"date:[1349049600000 TO 1354408200000]", NumericRangeQuery.class);
     
 

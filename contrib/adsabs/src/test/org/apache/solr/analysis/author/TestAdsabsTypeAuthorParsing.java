@@ -2089,7 +2089,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      **/
 
 
-    assertQueryEquals(req("qt", "aqp", "q", "author:\"Muller, William\""),
+    assertQueryEquals(req("defType", "aqp", "q", "author:\"Muller, William\""),
         // this was the old-style result, note "muller, w*"
         //"author:muller, w author:muller, w* author:muller, william author:müller, william author:mueller, william author:muller,",
         "author:müller, william author:müller, william * " +
@@ -2169,7 +2169,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       }
       System.out.println();
       }
-      assertQueryEquals(req("qt", "aqp", "q", String.format("author:%s", vals[i])),
+      assertQueryEquals(req("defType", "aqp", "q", String.format("author:%s", vals[i])),
           vals[i+1],
           null);
       assertQ(req("fl", "id,author", "rows", "100", "q", String.format("author:%s", vals[i])), vals[i+2].split(";"));

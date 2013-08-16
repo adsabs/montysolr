@@ -35,7 +35,7 @@ public class AqpAdsabsCOMMAProcessor extends AqpCOMMAProcessor {
         AqpANTLRNode fldNode = ((AqpANTLRNode) child).findChild("FIELD");
         QueryNode valNode = fldNode.getChildren().get(fldNode.getChildren().size()-1);
         
-        input = getOriginalInput((AqpANTLRNode) valNode);
+        input = getOriginalInput((AqpANTLRNode) valNode, null);
         if (!dummy.equals(input.value)) {
           
           if (lastInput != null) {

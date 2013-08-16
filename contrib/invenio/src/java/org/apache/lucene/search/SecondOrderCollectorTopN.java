@@ -10,10 +10,12 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 
 	private TopDocsCollector topCollector;
 	private int topN;
+	private String name = "topn";
 
-	public SecondOrderCollectorTopN(int topN, TopDocsCollector collector) {
+	public SecondOrderCollectorTopN(String name, int topN, TopDocsCollector collector) {
 		this.topN = topN;
 		topCollector = collector;
+		this.name = name;
 	}
 	
 	public SecondOrderCollectorTopN(int topN, boolean docsScoredInOrder) {
@@ -75,7 +77,7 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "topn[" + topN + ", outOfOrder=" + this.acceptsDocsOutOfOrder() + "]";
+		return name + "[" + topN + ", outOfOrder=" + this.acceptsDocsOutOfOrder() + "]";
 	}
 
 }

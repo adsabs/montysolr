@@ -25,8 +25,12 @@ public class AqpAdsabsCustomQueryProvider implements
 		parsers.put("pos", new AqpSubqueryParser() {
 	      @Override
 	      public Query parse(FunctionQParser fp) throws ParseException {
-	        String field = fp.parseId();
-	        String value = fp.parseId();
+	      	String field = fp.parseId();
+	      	int start = fp.parseInt();
+	      	int end = fp.parseInt();
+	      	String value = fp.parseId();
+	      	
+	        
 	        if (!value.contains("\"")) {
 	          value = '"' + value + '"';
 	        }

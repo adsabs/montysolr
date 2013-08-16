@@ -79,7 +79,7 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
   public void test() throws Exception {
     
     // first, let's see if the tokenizer correctly picked up the rules from the existing transliteration file
-    assertQueryEquals(req("qt", "aqp", "q", "author:\"adamchuk, m\""), 
+    assertQueryEquals(req("defType", "aqp", "q", "author:\"adamchuk, m\""), 
         "author:adamčuk, m author:adamčuk, m* author:adamčuk, " +
         "author:adamchuk, m author:adamchuk, m* author:adamchuk, " +
         "author:adamcuk, m author:adamcuk, m* author:adamcuk,", BooleanQuery.class);

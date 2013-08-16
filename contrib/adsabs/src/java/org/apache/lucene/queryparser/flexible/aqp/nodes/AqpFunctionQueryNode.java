@@ -1,7 +1,10 @@
 package org.apache.lucene.queryparser.flexible.aqp.nodes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
@@ -47,11 +50,12 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 	private String name = null;
 	private OriginalInput originalInput = null;
 	private List<OriginalInput> funcValues;
+	private Set<String> nodesToCount = new HashSet<String>(Arrays.asList("QRANGEIN", "QRANGEEX", "QFUNC"));
 	
 	public AqpFunctionQueryNode(String name, AqpFunctionQueryBuilder builder, List<OriginalInput> values) throws ParseException {
 		allocate();
 		setLeaf(true);
-		originalInput = null;
+		originalInput = values.get(0);
 		funcValues = values;
 		this.builder = builder;
 		this.name = name;
@@ -61,15 +65,17 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		allocate();
 		setLeaf(true);
 		
-		originalInput = AqpQProcessor.getOriginalInput(node);
 		
-		if (node.getChildren().size() == 1 && node.getChild("COMMA") != null) {
-  		node = node.getChild("COMMA");
-  	}
-		
+		originalInput = AqpQProcessor.getOriginalInput(node, nodesToCount);
 		funcValues = new ArrayList<OriginalInput>();
-		for (QueryNode n: node.getChildren()) {
-			funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) n));
+		
+		if (node.getTokenLabel().equals("COMMA")) {
+  		for (QueryNode n: node.getChildren()) {
+				funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) n, nodesToCount));
+			}
+  	}
+		else {
+			funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) node, nodesToCount));
 		}
 		
 		this.builder = builder;
@@ -80,12 +86,12 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		StringBuffer bo = new StringBuffer();
 		bo.append("<function name=\"");
 		bo.append(this.name == null ? getBuilder().getClass() : this.name);
-		bo.append("originalInput=\"" + originalInput + "\"");
+		bo.append(" originalInput=\"" + originalInput + "\"");
 		bo.append("\">\n");
-		for (QueryNode child: this.getChildren()) {
-			bo.append(child.toString());
+		for (OriginalInput child: this.getFuncValues()) {
+			bo.append("<funcValue>" + child.toString() + "</funcValue>\n");
 		}
-		bo.append("\n</function>");
+		bo.append("</function>");
 		return bo.toString();
 	}
 	

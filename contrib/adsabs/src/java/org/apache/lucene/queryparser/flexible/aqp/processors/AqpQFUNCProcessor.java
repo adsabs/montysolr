@@ -34,7 +34,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
  * @author rchyla
  *
  */
-public class AqpQFUNCProcessor extends AqpQProcessorPost {
+public class AqpQFUNCProcessor extends AqpQProcessor {
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("QFUNC")) {
@@ -66,8 +66,7 @@ public class AqpQFUNCProcessor extends AqpQProcessorPost {
 			throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
 					"Unknown function \"" + funcName + "\"" ));
 		}
-		
-		return new AqpFunctionQueryNode(funcName, builder, node);
+		return new AqpFunctionQueryNode(funcName, builder, (AqpANTLRNode) children.get(1));
 		
 	}
 
