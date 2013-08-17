@@ -184,10 +184,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
      */
     assertQ(req("q", "author:\"Mosser, B\""), 
         "//*[@numFound='1']",
-    "//doc/int[@name='recid'][.='9218605']");
+        "//doc/int[@name='recid'][.='9218605']");
     assertQ(req("q", "author:\"Mosser, B\" AND author:\"Goupil, M\""), 
         "//*[@numFound='1']",
-    "//doc/int[@name='recid'][.='9218605']");
+        "//doc/int[@name='recid'][.='9218605']");
     //System.out.println(h.query(req("q", "author:\"Mosser, B\"")));
     assert h.query(req("q", "author:\"Mosser, B\""))
     .contains("<arr name=\"author_norm\">" +
@@ -229,7 +229,25 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "<str>Burke, C. J.</str>" + 
     "</arr>");
 
-   
+    
+    
+    /*
+     * pos() testing on the author search
+     */
+    assertQ(req("q", "pos(author:\"Cutri, R\", 1)"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218920']"
+    );
+    assertQ(req("q", "pos(author:\"Cutri, R\", 1, 2)"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218920']"
+    );
+    assertQ(req("q", "pos(author:\"Cutri, R\", 2)"), 
+        "//*[@numFound='0']"
+    );
+    assertQ(req("q", "pos(author:\"Goupil, M. J.\", 2)"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='9218605']");
 
     /*
      * For the reference resolver, the field which contains only the last
@@ -938,7 +956,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='11']");
     
-    System.out.println("This !");
     // cut only the first n results
     assertQ(req("q", "topn(2, reviews(*:*))"), 
 		"//*[@numFound='2']");

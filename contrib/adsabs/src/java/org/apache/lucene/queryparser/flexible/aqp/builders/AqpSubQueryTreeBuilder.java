@@ -29,7 +29,9 @@ public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
 			}
 			return aqpValueSourceParser.parse(functionQueryParser);
 		} catch (ParseException e) {
-			throw new QueryNodeException(new MessageImpl(e.getLocalizedMessage()));
+			QueryNodeException ex = new QueryNodeException(new MessageImpl(e.getMessage()));
+			ex.setStackTrace(e.getStackTrace());
+			throw ex;
 		} finally {
 			functionQueryParser.getReq().close();
 		}

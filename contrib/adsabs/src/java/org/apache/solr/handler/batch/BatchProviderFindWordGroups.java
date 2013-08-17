@@ -90,11 +90,14 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  
 	  while (true) {
 	  	
+	  	int origSize = terms.size();
 	  	if (terms.size() < 1 || collectedItems.size() > stopAterReaching) {
 	  		break;
 	  	}
 	  	
+	  	
 	  	Query query = buildQuery(terms, fieldsToLoad, maxClauses);
+	  	assert terms.size() < origSize;
 	  	
 			final BatchHandlerRequestQueue batchQueue = queue;
 			

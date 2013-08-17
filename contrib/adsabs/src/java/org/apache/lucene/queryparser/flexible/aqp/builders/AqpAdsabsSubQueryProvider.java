@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.standard.CommonQueryParserConfiguration;
+import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
@@ -36,6 +38,8 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopFieldCollector;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
+import org.apache.lucene.search.spans.SpanPositionRangeQuery;
+import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -58,6 +62,8 @@ import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.search.SortSpec;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
+import org.apache.solr.search.ValueSourceParser;
+import org.apache.solr.search.function.PositionSearchFunction;
 
 
 /*
@@ -159,6 +165,40 @@ public class AqpAdsabsSubQueryProvider implements
 	    		  return q.getQuery();
 		      }
 		    });
+		
+		parsers.put("pos", new AqpSubqueryParserFull() {
+      @Override
+      public Query parse(FunctionQParser fp) throws ParseException {
+      	Query query = fp.parseNestedQuery();
+      	int start = fp.parseInt();
+      	int end = start;
+      	
+      	if (fp.hasMoreArguments()) {
+  			  end = fp.parseInt();
+  		  }
+      	
+      	if (fp.hasMoreArguments()) {
+  			  throw new NestedParseException("Wrong number of arguments");
+  		  }
+      	
+      	assert start > 0;
+      	assert start <= end;
+      	
+      	SpanConverter converter = new SpanConverter();
+      	converter.setWrapNonConvertible(true);
+      	
+      	SpanQuery spanQuery;
+        try {
+	        spanQuery = converter.getSpanQuery(new SpanConverterContainer(query, 1, true));
+        } catch (QueryNodeException e) {
+	        ParseException ex = new ParseException(e.getMessage());
+	        ex.setStackTrace(e.getStackTrace());
+	        throw ex;
+        }
+      	
+      	return new SpanPositionRangeQuery(spanQuery, start-1, end); //lucene counts from zeroes
+      }
+    });
 		
 		// ADS Classic toy-implementation of the relevance score
 		parsers.put("classic_relevance", new AqpSubqueryParserFull() {
@@ -456,55 +496,12 @@ public class AqpAdsabsSubQueryProvider implements
 		if (provider == null)
 			return null;
 			
-		//AqpFunctionQueryTreeBuilder.flattenChildren(node);
-		
 		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
 		
 		SolrQueryRequest req = reqAttr.getRequest();
 		if (req == null)
 			return null;
 		
-		// need better way to get the input string
-		//if (node instanceof AqpANTLRNode)
-		/*
-		String subQuery = "";
-		
-		if (node.isLeaf()) {
-		  subQuery = (String) node.getTag("subQuery");
-		  assert subQuery != null;
-		}
-		else {
-		  
-		  if (node instanceof AqpANTLRNode) {
-		    OriginalInput input = AqpQProcessor.getOriginalInput((AqpANTLRNode) node.getChildren().get(1));
-		    subQuery = input.value;
-		  }
-		  else { // less precise method of re-constructing what was inside brackets
-    		String qStr = reqAttr.getQueryString();
-    		
-    		Integer[] start_span = new Integer[]{0,0};
-    		Integer[] end_span = new Integer[]{qStr.length(),qStr.length()};
-    		
-    		
-    		swimDeep(node.getChildren().get(0), start_span);
-    		swimDeep(node.getChildren().get(node.getChildren().size()-1), end_span);
-    		
-    		subQuery = qStr.substring(start_span[1]+1, end_span[1]-1);
-		  }
-		}
-		
-		AqpFunctionQParser parser = new AqpFunctionQParser(subQuery, reqAttr.getLocalParams(), 
-				reqAttr.getParams(), req);
-		
-		if (!node.isLeaf()) {
-  		if (provider instanceof AqpSubqueryParserFull) {
-  			AqpFunctionQueryTreeBuilder.removeFuncName(node);
-  		}
-  		else {
-  			AqpFunctionQueryTreeBuilder.simplifyValueNode(node);
-  		}
-		}
-		*/
 		
 		SolrParams localParams = reqAttr.getLocalParams();
 		if (localParams == null) {

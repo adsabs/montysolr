@@ -7,6 +7,7 @@ import java.io.IOException;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
@@ -16,6 +17,7 @@ import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.spans.SpanNearQuery;
+import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 
 
 /**
@@ -96,6 +98,61 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public void testOperators() throws Exception {
 	  
+		
+		// pos() operator
+		assertQueryEquals(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\", 1, 100)"), 
+				"spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 100)", 
+				SpanPositionRangeQuery.class);
+		
+		// we're ignoring modifiers, this is a feature, not a bug - but if I ever want to
+		// treat everything, then I have to modify the grammar to output positions for the
+		// modifiers and other stuff
+		assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"Accomazzi, A\", 1)"), 
+				"spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)", 
+				SpanPositionRangeQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "pos(+author:\"Accomazzi, A\", 1, 1)"), 
+				"spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)", 
+				SpanPositionRangeQuery.class);
+		
+		
+		assertQueryParseException(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\", 1, -1)"));
+		assertQueryParseException(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\", 1, 1, 1)"));
+		assertQueryParseException(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\")"));
+		assertQueryParseException(req("defType", "aqp", "q", "^two$"));
+		assertQueryParseException(req("defType", "aqp", "q", "two$"));
+		assertQueryParseException(req("defType", "aqp", "q", "\"two phrase$\""));
+
+		
+		
+		// old positional search
+	  // TODO: check for the generated warnings
+		
+		assertQueryEquals(req("defType", "aqp", "q","^two"),
+				"spanPosRange(spanOr([author:two,, SpanMultiTermQueryWrapper(author:two,*)]), 0, 1)", 
+				SpanPositionRangeQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q","one ^two, j, k"), 
+				"+all:one +spanPosRange(spanOr([author:two, j, k, SpanMultiTermQueryWrapper(author:two, j, k*), author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), author:two, j,, author:two, j, author:two,]), 0, 1)",
+				BooleanQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q","one \"^author phrase\""), 
+				"+all:one +spanPosRange(spanOr([author:author phrase,, SpanMultiTermQueryWrapper(author:author phrase, *), author:author p, SpanMultiTermQueryWrapper(author:author p *), author:author]), 0, 1)",
+				BooleanQuery.class);
+		
+		
+		/*
+		TODO: i don't yet have the implementations for these
+		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
+		
+		assertQueryEquals("simbad(20 54 05.689 +37 01 17.38)", null, "");
+		assertQueryEquals("simbad(10:12:45.3-45:17:50)", null, "");
+		assertQueryEquals("simbad(15h17m-11d10m)", null, "");
+		assertQueryEquals("simbad(15h17+89d15)", null, "");
+		assertQueryEquals("simbad(275d11m15.6954s+17d59m59.876s)", null, "");
+		assertQueryEquals("simbad(12.34567h-17.87654d)", null, "");
+		assertQueryEquals("simbad(350.123456d-17.33333d <=> 350.123456-17.33333)", null, "");
+		*/
+		
+		
+		
 		//top_sorted
 		assertQueryEquals(req("defType", "aqp", "q", "topn_sorted(5, \"date desc\", *:*)"), 
         "SecondOrderQuery(*:*, filter=null, collector=topn_sorted[5, outOfOrder=false])", 
@@ -321,14 +378,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         SpanNearQuery.class);
 	  
 	  
-	  // temporary workaround for 'first author' search
-	  assertQueryEquals(req("defType", "aqp", "q", "^Kurtz, M."), 
-	      "first_author:kurtz, m first_author:kurtz, m* first_author:kurtz,",
-        BooleanQuery.class);
-	  
-	  assertQueryEquals(req("defType", "aqp", "q", "^Kurtz, Michael"), 
-        "first_author:kurtz, michael first_author:kurtz, michael * first_author:kurtz, m first_author:kurtz, m * first_author:kurtz,",
-        BooleanQuery.class);
 	  
 	  //#238 - single synonyms were caught by the multi-synonym component
 	  // also note:

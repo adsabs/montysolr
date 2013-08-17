@@ -72,13 +72,19 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 		}
 		
 		if (input.endsWith("$")) {
-			input = input.substring(0, input.length()-1);
-			end = -1;
+			throw new QueryNodeException(new MessageImpl(
+					"Invalid argument: $",
+					"We do not support the syntax for finding the last author, you can use range"));
+			
+			//input = input.substring(0, input.length()-1);
+			//end = -1;
 		}
 		
 		input = input.trim(); // it may contain trailing spaces, especially when: ^name, j, k   AND somethi...
 		
-		
+		if (!(input.substring(0, 1).equals("\""))) {
+			input = "\"" + input + "\"";
+		}
 		
 		// finally, generate warning
 		AqpFeedback feedback = getFeedbackAttr();
@@ -99,12 +105,17 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 		AqpFunctionQueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
 			.getBuilder("pos", (QueryNode) node, config);
 		
+		if (builder == null) {
+			throw new QueryNodeException(new MessageImpl(
+					"Unknown function pos()"));
+		}
+			
+		
 		String fieldName = getFieldName(node, "author");
 		List<OriginalInput> values = new ArrayList<OriginalInput>();
-		values.add(new OriginalInput(fieldName, -1, -1));
+		values.add(new OriginalInput(fieldName + ":" + input, subChild.getInputTokenStart(), subChild.getInputTokenEnd()));
 		values.add(new OriginalInput(String.valueOf(start), -1, -1));
 		values.add(new OriginalInput(String.valueOf(end), -1, -1));
-		values.add(new OriginalInput(input, -1, -1));
 		
 		
 		

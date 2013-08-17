@@ -45,7 +45,7 @@
 			we do it separately, not during the indexing (for speed/memory/control concerns) 
 			testcase: TestDumpIndexFieldRequestHandler TestAuthorCollectorFactory -->
 		<fieldType name="author_collector" class="solr.TextField"
-			positionIncrementGap="100">
+			positionIncrementGap="0">
 			<analyzer type="query"> <!-- it must be query type!!! -->
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
@@ -57,7 +57,7 @@
 		</fieldType>
 
 		<fieldType name="author" class="solr.TextField"
-			positionIncrementGap="100">
+			positionIncrementGap="0">
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
@@ -132,7 +132,7 @@
 		<!-- Author: transliteration NO, Synonym expansion YES -->
 
 		<fieldType name="author_notrans" class="solr.TextField"
-			positionIncrementGap="100">
+			positionIncrementGap="0">
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
@@ -176,7 +176,7 @@
 		<!-- Author: Transliteration YES, Synonym Expansion NO -->
 
 		<fieldType name="author_nosyn" class="solr.TextField"
-			positionIncrementGap="100">
+			positionIncrementGap="0">
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
@@ -224,7 +224,7 @@
 		<!-- Author: Transliteration NO, Synonym expansion NO -->
 
 		<fieldType name="author_notrans_nosyn" class="solr.TextField"
-			positionIncrementGap="100">
+			positionIncrementGap="0">
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />

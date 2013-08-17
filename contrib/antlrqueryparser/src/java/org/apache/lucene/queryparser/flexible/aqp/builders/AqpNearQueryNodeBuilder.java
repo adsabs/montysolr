@@ -82,6 +82,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
   public Object build(QueryNode queryNode) throws QueryNodeException {
     AqpNearQueryNode nearNode = (AqpNearQueryNode) queryNode;
 
+    SpanConverter converter = new SpanConverter();
     List<QueryNode> children = nearNode.getChildren();
 
     if (children != null) {
@@ -91,7 +92,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
       for (QueryNode child : children) {
         Object obj = child.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
         if (obj != null) {
-        	SpanQuery result = getSpanQuery(obj, nearNode);
+        	SpanQuery result = converter.getSpanQuery(new SpanConverterContainer((Query) obj, nearNode.getSlop(), nearNode.getInOrder()));
         	result.setBoost(((Query) obj).getBoost());
           clauses[i++] = result;
         } else {
@@ -110,123 +111,5 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
         "Illegal state for: " + nearNode.toString()));
   }
 
-  protected SpanQuery getSpanQuery(Object obj, AqpNearQueryNode nearNode)
-      throws QueryNodeException {
-    Query q = (Query) obj;
-    if (q instanceof SpanQuery) {
-      return (SpanQuery) q;
-    } else if (q instanceof TermQuery) {
-      return new SpanTermQuery(((TermQuery) q).getTerm());
-    } else if (q instanceof WildcardQuery) {
-      return new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q);
-    } else if (q instanceof PrefixQuery) {
-      return new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q);
-    } else if (q instanceof PhraseQuery) {
-    	return convertPhraseToSpan((PhraseQuery) q, nearNode);
-    } else if (q instanceof BooleanQuery) {
-      return convertBooleanToSpan((BooleanQuery) q, nearNode);
-    } else {
-      throw new QueryNodeException(new MessageImpl(
-          QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
-          "(yet) Unsupported clause inside span query: "
-              + q.getClass().getName()));
-    }
-  }
-
-  private SpanQuery convertPhraseToSpan(PhraseQuery q, AqpNearQueryNode nearNode) {
-  	SpanQuery clauses[] = new SpanQuery[q.getTerms().length];
-  	int i = 0;
-	  for (Term term: q.getTerms()) {
-	  	clauses[i++] = new SpanTermQuery(term); 
-	  }
-	  return new SpanNearQuery(clauses, q.getSlop() > 0 ? q.getSlop() : 1, true);
-  }
-
-	/*
-   * Silly convertor for now it can handle only boolean queries of the same type
-   * (ie not mixed cases). To do that, I have to build a graph (tree) and maybe
-   * of only pairs (?)
-   */
-  protected SpanQuery convertBooleanToSpan(BooleanQuery q,
-      AqpNearQueryNode nearNode) throws QueryNodeException {
-    BooleanClause[] clauses = q.getClauses();
-    SpanQuery[] spanClauses = new SpanQuery[clauses.length];
-    Occur o = null;
-    int i = 0;
-    for (BooleanClause c : clauses) {
-      if (o != null && !o.equals(c.getOccur())) {
-        throw new QueryNodeException(new MessageImpl(
-            QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
-            "(yet) Unsupported clause inside span query: "
-                + q.getClass().getName()));
-      }
-      o = c.getOccur();
-      
-      Query sq = c.getQuery();
-      SpanQuery result = getSpanQuery(sq, nearNode);
-      result.setBoost(sq.getBoost());
-      spanClauses[i] = result;
-      i++;
-    }
-
-    if (o.equals(Occur.MUST)) {
-      return new SpanNearQuery(spanClauses, nearNode.getSlop(),
-          nearNode.getInOrder());
-    } else if (o.equals(Occur.SHOULD)) {
-      return new SpanOrQuery(spanClauses);
-    } else if (o.equals(Occur.MUST_NOT)) {
-      SpanQuery[] exclude = new SpanQuery[spanClauses.length - 1];
-      for (int j = 1; j < spanClauses.length; j++) {
-        exclude[j - 1] = spanClauses[j];
-      }
-      return new SpanNotQuery(spanClauses[0], new SpanOrQuery(exclude));
-    }
-
-    throw new QueryNodeException(new MessageImpl(
-        QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
-        "Congratulations! You have hit (yet) unsupported case: "
-            + q.getClass().getName()));
-  }
-
-  class Leaf {
-    public List<BooleanClause> members = new ArrayList<BooleanClause>();
-    public BooleanClause left;
-    public Leaf right;
-
-    public Leaf(BooleanClause left, Leaf right) {
-      this.left = left;
-      this.right = right;
-    }
-  }
-
-  /*
-   * Creates a tree of the clauses, according to operator precedence:
-   * 
-   * Thus: D +C -A -B becomes:
-   * 
-   * - / \ A - / \ B + / \ C D
-   */
-  private Leaf constructTree(BooleanClause[] clauses) {
-    List<BooleanClause> toProcess = Arrays.asList(clauses);
-    Leaf leaf = new Leaf(null, null);
-    leaf.members = toProcess;
-
-    // from highest priority
-    // findNots(leaf);
-    // findAnds(leaf);
-    // findOrs(leaf);
-    return leaf;
-  }
-
-  private void findNots(Leaf leaf) {
-
-    for (BooleanClause m : leaf.members) {
-      if (m.getOccur().equals(Occur.MUST_NOT)) {
-        leaf.members.remove(m);
-        leaf.left = m;
-      }
-    }
-
-  }
-
+  
 }

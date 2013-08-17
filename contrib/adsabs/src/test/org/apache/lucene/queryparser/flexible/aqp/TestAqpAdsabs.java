@@ -94,51 +94,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 	}
 	
-	public void testOldPositionalSearch() throws Exception {
-		
-	  WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
-	  KeywordAnalyzer kwa = new KeywordAnalyzer();
-	  
-		// TODO: check for the generated warnings
-		assertQueryEquals("^two", null, "pos(author,two,1,1)", FunctionQuery.class);
-		assertQueryEquals("^two$", null, "pos(author,two,1,-1)", FunctionQuery.class);
-		assertQueryEquals("two$", null, "pos(author,two,-1,-1)", FunctionQuery.class);
-		
-		assertQueryEquals("one ^two", null, "+one +pos(author,two,1,1)");
-		assertQueryEquals("^one ^two$", null, "+pos(author,one,1,1) +pos(author,two,1,-1)");
-		assertQueryEquals("^one NOT two$", null, "+pos(author,one,1,1) -pos(author,two,-1,-1)");
-		assertQueryEquals("one ^two, j, k$", null, "+one +pos(author,\"two, j, k\",1,-1)");
-		assertQueryEquals("one ^two,j,k$", null, "+one +pos(author,\"two,j,k\",1,-1)");
-		
-		assertQueryEquals("one \"^author phrase\"", null, "+one +pos(author,\"author phrase\",1,1)");
-		assertQueryEquals("one \"^author phrase$\"", null, "+one +pos(author,\"author phrase\",1,-1)");
-		assertQueryEquals("one \"author phrase$\"", null, "+one +pos(author,\"author phrase\",-1,-1)");
-		
-		
-		// and now the very weird cases, but as the example shows, the name is NOT analyzed
-		// and for this to work, we are required to make a strange number of steps, OR, translate
-		// this query into another functional query
-		assertQueryEquals("author:\"^Peter H. Smith\"", null, "pos(author,\"Peter H. Smith\",1,1)");
-		assertQueryEquals("xfield:\"^Peter H. Smith\"", null, "pos(xfield,\"Peter H. Smith\",1,1)");
-		
-		
-		// and what about synonym replacement? How shall we distinguish these cases and apply 
-		// appropriate synonym/acronym translation/expansion to them? Worse, they can be mixed
-		// by users with normal words
-		assertQueryEquals("^Kurtz, M. -Eichhorn", null, 
-			"+pos(author,\"Kurtz, M.\",1,1) -eichhorn");
-		assertQueryEquals("^Kurtz, M. -Eichhorn, G. 2000", kwa, 
-			"+pos(author,\"Kurtz, M.\",1,1) -Eichhorn, G. +2000");
-		assertQueryEquals("^CERN, PH. -nothing", null, 
-			"+pos(author,\"CERN, PH.\",1,1) -nothing");
-		
-		assertQueryEquals("author:(A~0.2; -B)^2 OR c", null, 
-			"((author:a~0.2 -author:b)^2.0) c");
-		assertQueryEquals("author:(A~0.2 -B)^2 OR c", null, 
-			"((+author:a~0.2 -author:b)^2.0) c");
-		assertQueryEquals("author:(kurtz~0.2; -echhorn)^2 OR ^accomazzi, a", null, 
-				"((author:kurtz~0.2 -author:echhorn)^2.0) pos(author,\"accomazzi, a\",1,1)");
-	}
 	
 	public void testAcronyms() throws Exception {
 		assertQueryEquals("\"dark matter\" -LHC", null, "+\"dark matter\" -lhc");
@@ -246,51 +201,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 	}
 	
-	public void testFunctionalQueries() throws Exception {
-		assertQueryEquals("pos(author, 1, \\-1, \"Accomazzi, A\")", null, "pos(author,\"Accomazzi, A\",1,-1)", FunctionQuery.class);
-		assertQueryEquals("pos(author, 1, 1, Kurtz)", null, "pos(author,Kurtz,1,1)", FunctionQuery.class);
-		
-		
-		// with the new parser, we are stricter (or lazier ;)) - i am not sure if it was a good idea to 
-		// fill in the missing values
-		//assertQueryEquals("pos(author, Kurtz, 1)", null, "pos(author,Kurtz,1,1)", FunctionQuery.class);
-		//assertQueryEquals("pos(author, Kurtz, 5)", null, "pos(author,Kurtz,5,5)", FunctionQuery.class);
-		
-		assertQueryNodeException("pos(author:\"Accomazzi, A\", 1, \\-1)");
-		assertQueryNodeException("pos(author, Kurtz, 1, \\-1, 5)");
-		assertQueryNodeException("pos(author, Kurtz, 1)");
-		
-		/*
-		 * 
-		XXX: these work with our provider but should be inside SolrFunctionProvider
-		as they may depend on the req objects
-		 
-		assertQueryEquals("ord(author)", null, "top(ord(author))", FunctionQuery.class);
-		assertQueryEquals("literal(author)", null, "literal(author)", FunctionQuery.class);
-		assertQueryEquals("literal(\"author\")", null, "literal(\"author\")", FunctionQuery.class);
-		
-		assertQueryEquals("max(5, 10)", null, "max(const(5.0),10.0)", FunctionQuery.class);
-		assertQueryEquals("max(10, 5)", null, "max(const(10.0),5.0)", FunctionQuery.class);
-		assertQueryEquals("log(0)", null, "log(const(0.0))", FunctionQuery.class);
-		assertQueryEquals("sum(10, 5)", null, "sum(const(10.0),const(5.0))", FunctionQuery.class);
-		*/
-		
-		
-		
-		/*
-		TODO: i don't yet have the implementations for these
-		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
-		
-		assertQueryEquals("simbad(20 54 05.689 +37 01 17.38)", null, "");
-		assertQueryEquals("simbad(10:12:45.3-45:17:50)", null, "");
-		assertQueryEquals("simbad(15h17m-11d10m)", null, "");
-		assertQueryEquals("simbad(15h17+89d15)", null, "");
-		assertQueryEquals("simbad(275d11m15.6954s+17d59m59.876s)", null, "");
-		assertQueryEquals("simbad(12.34567h-17.87654d)", null, "");
-		assertQueryEquals("simbad(350.123456d-17.33333d <=> 350.123456-17.33333)", null, "");
-		*/
-		
-	}
 	
 	
 	public void testModifiers() throws Exception {
@@ -647,7 +557,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
       assertQueryEquals("/foo$/", wsa, "/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/foo$/", wsa, "keyword:/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/^foo$/", wsa, "keyword:/^foo$/", RegexpQuery.class);
-      assertQueryEquals("keyword:/^foo$/ AND \"^foo$\"", wsa, "+keyword:/^foo$/ +pos(author,1,-1,foo)", BooleanQuery.class);
+      assertQueryEquals("keyword:/^foo$/ AND \"foo bar\"", wsa, "+keyword:/^foo$/ +\"foo bar\"", BooleanQuery.class);
   }
 	
 	public static junit.framework.Test suite() {

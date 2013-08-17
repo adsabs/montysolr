@@ -13,10 +13,8 @@ import org.apache.solr.search.ValueSourceParser;
 
 /**
  * Returns a special FunctionQParser provider for the functions implemented
- * by Solr: http://wiki.apache.org/solr/FunctionQuery
+ * by Solr functions: http://wiki.apache.org/solr/FunctionQuery
  * 
- * @author rchyla
- *
  */
 public class AqpSolrFunctionProvider implements AqpFunctionQueryBuilderProvider {
 

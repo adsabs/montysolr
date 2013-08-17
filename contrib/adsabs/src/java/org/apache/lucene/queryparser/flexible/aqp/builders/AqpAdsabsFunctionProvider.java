@@ -10,54 +10,43 @@ import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.solr.search.AqpFunctionQParser;
 import org.apache.solr.search.FunctionQParser;
 import org.apache.solr.search.ValueSourceParser;
 import org.apache.solr.search.function.PositionSearchFunction;
 
+/**
+ * 
+ * This here is a place for our own custom functions implemented
+ * as ValueSource (ie. the same as SOLR functions). This is
+ * different from the {@link AqpAdsabsSubQueryProvider}
+ *
+ */
 public class AqpAdsabsFunctionProvider implements
-		AqpFunctionQueryBuilderProvider {
-	
+AqpFunctionQueryBuilderProvider {
+
 	public static Map<String, ValueSourceParser> parsers = new HashMap<String, ValueSourceParser>();
-	
-	static { // this doesn't work right now, so as a workaround (before i fix the PositionSearchQuery) i will use author_first_index
-		parsers.put("pos", new ValueSourceParser() {
-	      @Override
-	      public ValueSource parse(FunctionQParser fp) throws ParseException {
-	      	String field = fp.parseId();
-	      	int start = fp.parseInt();
-	      	int end = fp.parseInt();
-	      	String value = fp.parseId();
-	      	
-    		  PositionSearchFunction o = new PositionSearchFunction(
-    			  field,
-    			  value,
-    			  start,
-    			  end);
-    		  if (fp.hasMoreArguments()) {
-    			  throw new NestedParseException("Wrong number of arguments");
-    		  }
-    		  return o;
-	      }
-	    });
+
+	static {
+		// currently empty	
 	};
 
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
-		throws QueryNodeException {
-		
-		
+	throws QueryNodeException {
+
+
 		ValueSourceParser vsProvider = parsers.get(funcName);
 		if (vsProvider == null)
 			return null;
-			
+
 		// the params are all null because we know we are not using solr request handler params
 		AqpFunctionQParser queryParser = new AqpFunctionQParser(null, null, null, null);
-		
-		//AqpFunctionQueryTreeBuilder.flattenChildren(node); // convert into opaque nodes
-		//AqpFunctionQueryTreeBuilder.simplifyValueNode(node); // remove func name, leave only values
-		
+
+
 		return new AqpFunctionQueryTreeBuilder(vsProvider, queryParser);
-				
+
 	}
 
 }

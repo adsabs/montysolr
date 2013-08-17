@@ -34,6 +34,14 @@ public class PositionSearchFunction extends ValueSource {
 		this.end = end;
 		subQuery = new SpanTermQuery(new Term(this.field, this.value));
 	}
+	
+	public PositionSearchFunction(Term term, int start, int end) {
+		this.field = term.field();
+		this.value = term.text();
+		this.start = start;
+		this.end = end;
+		subQuery = new SpanTermQuery(term);
+	}
 
 	protected String name() {
 		return "author";
