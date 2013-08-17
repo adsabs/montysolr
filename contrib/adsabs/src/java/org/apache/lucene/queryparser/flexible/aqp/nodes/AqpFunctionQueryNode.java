@@ -74,6 +74,11 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 				funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) n, nodesToCount));
 			}
   	}
+		else if (node.getTokenLabel().equals("DEFOP") && node.getChild("COMMA") != null) {
+  		for (QueryNode n: node.getChild("COMMA").getChildren()) {
+				funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) n, nodesToCount));
+			}
+  	}
 		else {
 			funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) node, nodesToCount));
 		}

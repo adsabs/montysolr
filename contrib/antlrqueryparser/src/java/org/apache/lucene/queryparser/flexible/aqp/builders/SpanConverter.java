@@ -255,7 +255,7 @@ public class SpanConverter {
 
 		@Override
     public String toString(String field) {
-	    return "EmptySpanQuery(wrapping:" + wrappedQ.toString()+")";
+	    return "EmptySpanQuery(" + wrappedQ.toString()+")";
     }
 		
 		@Override

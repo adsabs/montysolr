@@ -138,6 +138,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 				BooleanQuery.class);
 		
 		
+		// author expansion can generate regexes, so we should deal with them (actually we ignore them)
+		assertQueryEquals(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A. K. B.\", 1)"), 
+				"spanPosRange(spanOr([author:accomazzi, a k b, SpanMultiTermQueryWrapper(author:accomazzi, a k b*), EmptySpanQuery(author:/accomazzi, a[^\\s]+ k[^\\s]+ b/), EmptySpanQuery(author:/accomazzi, a[^\\s]+ k[^\\s]+ b .*/), author:accomazzi, a, author:accomazzi,]), 0, 1)", 
+				SpanPositionRangeQuery.class);
+		
+		
+		//#322 - comma used as an operator joining a function query
+		assertQueryEquals(req("defType", "aqp", "q", "author:\"^roberts\", author:\"ables\""), 
+				"spanNear([spanPosRange(spanOr([author:roberts,, SpanMultiTermQueryWrapper(author:roberts,*)]), 0, 1), spanOr([author:ables,, SpanMultiTermQueryWrapper(author:ables,*)])], 1, true)", 
+				SpanNearQuery.class);
+		
+		
+				
 		/*
 		TODO: i don't yet have the implementations for these
 		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
@@ -153,18 +166,25 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		
 		
-		//top_sorted
-		assertQueryEquals(req("defType", "aqp", "q", "topn_sorted(5, \"date desc\", *:*)"), 
-        "SecondOrderQuery(*:*, filter=null, collector=topn_sorted[5, outOfOrder=false])", 
+		//topn sorted - added 15Aug2013
+		assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, \"date desc\")"), 
+        "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false, info=date desc])", 
         SecondOrderQuery.class);
-		assertQueryEquals(req("defType", "aqp", "q", "topn_sorted(5, \"date desc\", author:civano)"), 
-        "SecondOrderQuery(author:civano, author:civano,*, filter=null, collector=topn_sorted[5, outOfOrder=false])", 
+		assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, (date desc))"), 
+        "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false, info=date desc])", 
+        SecondOrderQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc\")"), 
+        "SecondOrderQuery(author:civano, author:civano,*, filter=null, collector=topn[5, outOfOrder=false, info=date desc])", 
         SecondOrderQuery.class);
 		
 		// topN - added Aug2013
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*)"), 
         "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false])", 
         SecondOrderQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "topn(5, (foo bar))"), 
+        "SecondOrderQuery(all:foo all:bar, filter=null, collector=topn[5, outOfOrder=false])", 
+        SecondOrderQuery.class);
+		
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, edismax(dog OR cat))", "qf", "title^1 abstract^0.5"), 
         "SecondOrderQuery((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat), filter=null, collector=topn[5, outOfOrder=false])", 
         SecondOrderQuery.class);

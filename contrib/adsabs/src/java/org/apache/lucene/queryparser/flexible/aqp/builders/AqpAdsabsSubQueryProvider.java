@@ -212,51 +212,52 @@ public class AqpAdsabsSubQueryProvider implements
 		parsers.put("cr", parsers.get("classic_relevance"));
 		
 		
-	  // topn(int, Q) - limit results to the best top N (by their score)
+  	// topn(int, Q, [relevance|sort-spec]) - limit results to the best top N (by their ranking or sort order)
 		parsers.put("topn", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
 				int topN = fp.parseInt();
 				if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
 					throw new ParseException("Hmmm, the first argument of your operator must be a positive number.");
 				}
-				Query innerQuery = fp.parseNestedQuery();
-				return new SecondOrderQuery(innerQuery, null, 
-						new SecondOrderCollectorTopN(topN));
-	      }
-	    }.configure(true)); // true=canBeAnalyzed
-		
-		
-  	// top_sorted(int, field, Q) - limit results to the best top N (by their sort order)
-		parsers.put("topn_sorted", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {
-				int topN = fp.parseInt();
-				if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
-					throw new ParseException("Hmmm, the first argument of your operator must be a positive number.");
-				}
 				
-				String sort = fp.parseId();
-				if (sort.contains("\"") || sort.contains("\'")) {
-					sort = sort.substring(1, sort.length()-1);
-				}
-				Sort sortSpec = QueryParsing.parseSort(sort, fp.getReq());
-				
-				SolrIndexSearcher searcher = fp.getReq().getSearcher();
-				
-				TopFieldCollector collector;
-			  try {
-	        collector = TopFieldCollector.create(searcher.weightSort(sortSpec), topN, false, false, false, true);
-        } catch (IOException e) {
-	        throw new ParseException("I am sorry, you can't use " + sort + " for topn() sorting. Reason: " + e.getMessage());
-        }
-				
-        QParser eqp = fp.subQuery(fp.parseId(), "aqp");
+				QParser eqp = fp.subQuery(fp.parseId(), "aqp");
         Query innerQuery = eqp.getQuery();
         
-				//Query innerQuery = fp.parseNestedQuery();
-				return new SecondOrderQuery(innerQuery, null, 
-						new SecondOrderCollectorTopN("topn_sorted", topN, collector));
-	      }
-	    }.configure(false)); // true=canBeAnalyzed
+        if (innerQuery == null) {
+        	throw new ParseException("This query is empty: " + eqp.getString());
+        }
+        
+        String sortOrRank = "relevance"; 
+        if (fp.hasMoreArguments()) {
+        	sortOrRank = fp.parseId();
+        }
+				
+				if (sortOrRank.contains("\"") || sortOrRank.contains("\'")) {
+					sortOrRank = sortOrRank.substring(1, sortOrRank.length()-1);
+				}
+				
+				sortOrRank = sortOrRank.toLowerCase();
+				if (sortOrRank.equals("relevance")) {
+					return new SecondOrderQuery(innerQuery, null, 
+							new SecondOrderCollectorTopN(topN));
+				}
+				else {
+					Sort sortSpec = QueryParsing.parseSort(sortOrRank, fp.getReq());
+					
+					SolrIndexSearcher searcher = fp.getReq().getSearcher();
+					
+					TopFieldCollector collector;
+				  try {
+		        collector = TopFieldCollector.create(searcher.weightSort(sortSpec), topN, false, false, false, true);
+	        } catch (IOException e) {
+		        throw new ParseException("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
+	        }
+	        
+	        return new SecondOrderQuery(innerQuery, null, 
+							new SecondOrderCollectorTopN(sortOrRank, topN, collector));
+				}
+			}
+		}.configure(false)); // true=canBeAnalyzed
 		
 	  // citations(P) - set of papers that have P in their reference list
 		parsers.put("citations", new AqpSubqueryParserFull() {

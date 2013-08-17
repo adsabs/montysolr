@@ -110,7 +110,11 @@ public class AqpCOMMAProcessor extends AqpQProcessorPost {
 		}
 		AqpANTLRNode fieldNode = n.getChild("FIELD");
 		if (fieldNode != null) {
-			return ((AqpANTLRNode) (fieldNode.getChildren().get(0)).getChildren().get(0)).getTokenInput();
+			if (fieldNode.getChildren().size() > 0  
+					&& !fieldNode.getChildren().get(0).isLeaf() 
+					&& fieldNode.getChildren().get(0).getChildren().get(0) instanceof AqpANTLRNode) {
+				return ((AqpANTLRNode) (fieldNode.getChildren().get(0)).getChildren().get(0)).getTokenInput();
+			}
 		}
 		
 		return null;

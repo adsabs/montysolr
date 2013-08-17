@@ -31,10 +31,17 @@ public class AqpAdsabsCOMMAProcessor extends AqpCOMMAProcessor {
       OriginalInput lastInput = null;
       
       for (QueryNode child: children) {
+      	
         // we need only the value, excluding field 
         AqpANTLRNode fldNode = ((AqpANTLRNode) child).findChild("FIELD");
         QueryNode valNode = fldNode.getChildren().get(fldNode.getChildren().size()-1);
         
+        // break if we are not dealing with ANTLR nodes - this happens
+        // for the old ^author syntax, old skeleton in the attic...
+      	if (!(valNode instanceof AqpANTLRNode)) {
+      		return super.createQNode(node);
+      	}
+      	
         input = getOriginalInput((AqpANTLRNode) valNode, null);
         if (!dummy.equals(input.value)) {
           
