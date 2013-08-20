@@ -1,13 +1,21 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.function.ValueSource;
+import org.apache.lucene.queries.mlt.MoreLikeThis;
+import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
@@ -23,8 +31,11 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SecondOrderCollectorAdsClassicScoringFormula;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
@@ -40,8 +51,12 @@ import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.util.Version;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.MoreLikeThisParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.handler.MoreLikeThisHandler;
+import org.apache.solr.handler.MoreLikeThisHandler.MoreLikeThisHelper;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.AqpFunctionQParser;
 import org.apache.solr.search.BoostQParserPlugin;
@@ -64,11 +79,13 @@ import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
 import org.apache.solr.search.ValueSourceParser;
 import org.apache.solr.search.function.PositionSearchFunction;
+import org.apache.solr.util.SolrPluginUtils;
 
 
 /*
  * I know this is confusing. This is called in the building phase,
- * by that time all the parsing was already done.
+ * by that time all the parsing was already done. All the parsers
+ * here return a QUERY
  */
 
 public class AqpAdsabsSubQueryProvider implements
@@ -165,6 +182,73 @@ public class AqpAdsabsSubQueryProvider implements
 	    		  return q.getQuery();
 		      }
 		    });
+		
+	  // coreads(Q) - what people read: MoreLikeThese(topn(200,classic_relevance(Q)))
+		parsers.put("trendy", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser aqp = fp.subQuery(fp.getString(), "aqp");
+				Query innerQuery = aqp.parse();
+				
+				SolrQueryRequest req = fp.getReq();
+				SolrIndexSearcher searcher = req.getSearcher();
+				
+				// find the 200 most interesting papers and collect their readers
+				SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorTopN(200));
+				
+				final StringBuilder readers = new StringBuilder();
+				final HashSet<String> fieldsToLoad = new HashSet<String>();
+				final String fieldName = "reader";
+				fieldsToLoad.add(fieldName);
+				
+				try {
+	        searcher.search(discoverMostReadQ, new Collector() {
+						private Document d;
+						private AtomicReader reader;
+						private boolean firstPassed = false;
+	        	@Override
+	          public void setScorer(Scorer scorer) throws IOException {
+	            //pass
+	          }
+	        	@Override
+	          public void collect(int doc) throws IOException {
+	        		d = reader.document(doc, fieldsToLoad);
+	            for (String val: d.getValues(fieldName)) {
+	            	if (firstPassed)
+	            		readers.append(" ");
+	            	readers.append(val);
+	            	firstPassed = true;
+	            }
+	          }
+
+	        	@Override
+	          public void setNextReader(AtomicReaderContext context)
+	              throws IOException {
+	            this.reader = context.reader();
+	          }
+
+	        	@Override
+	          public boolean acceptsDocsOutOfOrder() {
+	            return false;
+	          }
+	        });
+        } catch (IOException e) {
+	        throw new ParseException(e.getMessage());
+        }
+				
+        MoreLikeThisQuery mlt = new MoreLikeThisQueryFixed(readers.toString(), new String[] {fieldName}, 
+        		new WhitespaceAnalyzer(Version.LUCENE_40), fieldName);
+        SolrParams params = req.getParams();
+        
+        // configurable params
+        mlt.setMinTermFrequency(1);
+        mlt.setMinDocFreq(1);
+        mlt.setMaxQueryTerms(512);
+        mlt.setBoost(2.0f);
+        
+        return mlt;
+			}
+		  }.configure(true)); // true=canBeAnalyzed
 		
 		parsers.put("pos", new AqpSubqueryParserFull() {
       @Override

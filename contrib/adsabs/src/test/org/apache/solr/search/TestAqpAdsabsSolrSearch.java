@@ -7,7 +7,9 @@ import java.io.IOException;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.queries.function.FunctionQuery;
+import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
@@ -98,6 +100,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public void testOperators() throws Exception {
 	  
+    // trendy() - what people read, it reads data from index
+		assertU(addDocs("author", "muller", "reader", "bibcode1", "reader", "bibcode2"));
+    assertU(addDocs("author", "muller", "reader", "bibcode2", "reader", "bibcode4"));
+    assertU(addDocs("author", "muller", "reader", "bibcode5", "reader", "bibcode2"));
+    assertU(commit());
+    assertQueryEquals(req("defType", "aqp", "q", "trendy(author:muller)"), 
+        "like:bibcode1 bibcode2 bibcode2 bibcode4 bibcode5 bibcode2", 
+        MoreLikeThisQuery.class);
+    
 		
 		// pos() operator
 		assertQueryEquals(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\", 1, 100)"), 

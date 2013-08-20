@@ -959,6 +959,20 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     // cut only the first n results
     assertQ(req("q", "topn(2, reviews(*:*))"), 
 		"//*[@numFound='2']");
+    
+    // trending() - what people read
+    // read by nobody
+    assertQ(req("q", "trendy(bibcode:1976AJ.....81...67S)"), 
+    		"//*[@numFound='1']",
+				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']");
+    // read by many
+    assertQ(req("q", "trendy(bibcode:1991ApJ...371..665R OR bibcode:2009arXiv0909.1287I)"), 
+    		"//*[@numFound='3']",
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
+				"//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']"
+				);
+    
 
   }
 
@@ -990,23 +1004,27 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
   		row.put("grant_ids", Arrays.asList("0618398"));
   		row.put("read_count", Arrays.asList(0.0f));
   		row.put("cite_read_boost", Arrays.asList(0.4104f));
+  		row.put("reader", Arrays.asList("0xeeeeeeee", "1xeeeeeeee"));
   		mongoCache.put("1987PhRvD..36..277B", row);
   		
   		row = new HashMap<String, Object>();
   		row.put("full", Arrays.asList("Some fulltext Hashimoto"));
   		row.put("read_count", Arrays.asList(19.0f));
   		row.put("cite_read_boost", Arrays.asList(0.4649f));
+  		row.put("reader", Arrays.asList("0xeeeeeeee", "1xeeeeeeee", "2xeeeeeeee"));
   		mongoCache.put("1991ApJ...371..665R", row);
   		
   		
   		row = new HashMap<String, Object>();
   		row.put("read_count", Arrays.asList(15.0f));
   		row.put("cite_read_boost", Arrays.asList(0.373f));
+  		row.put("reader", Arrays.asList("3xeeeeeeee"));
   		mongoCache.put("1976AJ.....81...67S", row);
   		
   		row = new HashMap<String, Object>();
   		row.put("read_count", Arrays.asList(1.0f));
   		row.put("cite_read_boost", Arrays.asList(0.2416f));
+  		row.put("reader", Arrays.asList("4xeeeeeeee", "1xeeeeeeee"));
   		mongoCache.put("2009arXiv0909.1287I", row);
   		
   		
