@@ -962,11 +962,11 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     
     // trending() - what people read
     // read by nobody
-    assertQ(req("q", "trendy(bibcode:1976AJ.....81...67S)"), 
+    assertQ(req("q", "trending(bibcode:1976AJ.....81...67S)"), 
     		"//*[@numFound='1']",
 				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']");
     // read by many
-    assertQ(req("q", "trendy(bibcode:1991ApJ...371..665R OR bibcode:2009arXiv0909.1287I)"), 
+    assertQ(req("q", "trending(bibcode:1991ApJ...371..665R OR bibcode:2009arXiv0909.1287I)"), 
     		"//*[@numFound='3']",
 				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
 				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
