@@ -10,6 +10,7 @@ import monty.solr.util.MontySolrSetup;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
+import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
@@ -107,7 +108,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     assertU(commit());
     assertQueryEquals(req("defType", "aqp", "q", "trending(author:muller)"), 
         "like:bibcode1 bibcode2 bibcode2 bibcode4 bibcode5 bibcode2", 
-        MoreLikeThisQuery.class);
+        MoreLikeThisQueryFixed.class);
     
 		
 		// pos() operator
