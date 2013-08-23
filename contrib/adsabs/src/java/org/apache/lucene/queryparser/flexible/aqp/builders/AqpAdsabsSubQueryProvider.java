@@ -436,6 +436,7 @@ public class AqpAdsabsSubQueryProvider implements
         
 	      };
     }.configure(true)); // true=canBeAnalyzed
+		parsers.put("instructive", parsers.get("reviews"));
 		
     // original impl of reviews() = find papers that cite the most cited papers
     parsers.put("reviews2", new AqpSubqueryParserFull() { // this function values can be analyzed
