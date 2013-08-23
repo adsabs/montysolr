@@ -184,7 +184,7 @@ public class AqpAdsabsSubQueryProvider implements
 		    });
 		
 	  // coreads(Q) - what people read: MoreLikeThese(topn(200,classic_relevance(Q)))
-		parsers.put("trendy", new AqpSubqueryParserFull() {
+		parsers.put("trending", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				QParser aqp = fp.subQuery(fp.getString(), "aqp");
 				Query innerQuery = aqp.parse();
@@ -311,7 +311,7 @@ public class AqpAdsabsSubQueryProvider implements
         	throw new ParseException("This query is empty: " + eqp.getString());
         }
         
-        String sortOrRank = "relevance"; 
+        String sortOrRank = "score"; 
         if (fp.hasMoreArguments()) {
         	sortOrRank = fp.parseId();
         }
@@ -321,7 +321,7 @@ public class AqpAdsabsSubQueryProvider implements
 				}
 				
 				sortOrRank = sortOrRank.toLowerCase();
-				if (sortOrRank.equals("relevance")) {
+				if (sortOrRank.equals("score")) {
 					return new SecondOrderQuery(innerQuery, null, 
 							new SecondOrderCollectorTopN(topN));
 				}

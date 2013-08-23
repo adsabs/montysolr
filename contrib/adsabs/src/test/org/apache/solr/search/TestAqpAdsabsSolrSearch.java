@@ -105,7 +105,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     assertU(addDocs("author", "muller", "reader", "bibcode2", "reader", "bibcode4"));
     assertU(addDocs("author", "muller", "reader", "bibcode5", "reader", "bibcode2"));
     assertU(commit());
-    assertQueryEquals(req("defType", "aqp", "q", "trendy(author:muller)"), 
+    assertQueryEquals(req("defType", "aqp", "q", "trending(author:muller)"), 
         "like:bibcode1 bibcode2 bibcode2 bibcode4 bibcode5 bibcode2", 
         MoreLikeThisQuery.class);
     
