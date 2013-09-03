@@ -972,7 +972,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
 				"//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']"
 				);
-    
+    assertQ(req("q", "trending(*:*)"), 
+    		"//*[@numFound='4']",
+    		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
+				"//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']",
+				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']"
+				);
 
   }
 

@@ -245,7 +245,7 @@ public class AqpAdsabsSubQueryProvider implements
         mlt.setMinDocFreq(1);
         mlt.setMaxQueryTerms(512);
         mlt.setBoost(2.0f);
-        
+        mlt.setPercentTermsToMatch(0.0f);
         return mlt;
 			}
 		  }.configure(true)); // true=canBeAnalyzed
