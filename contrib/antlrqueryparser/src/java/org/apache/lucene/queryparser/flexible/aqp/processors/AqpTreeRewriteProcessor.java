@@ -40,24 +40,6 @@ public class AqpTreeRewriteProcessor extends QueryNodeProcessorImpl {
         }
       }
 
-      /*
-       * if (node.getParent()==null && children.size() > 1) { // it is a root
-       * mode String last = ((AqpANTLRNode)children.get(0)).getTokenLabel();
-       * boolean rewriteSafe = true; // check all children nodes are of the same
-       * type for (int i=1;i<children.size();i++) { AqpANTLRNode t =
-       * (AqpANTLRNode) children.get(i); String tt = t.getTokenLabel(); if
-       * (!(tt.equals(last) && t.getTokenName().equals("OPERATOR"))) {
-       * rewriteSafe = false; break; } } if (rewriteSafe==true) {
-       * 
-       * QueryNode firstChild = children.get(0); List<QueryNode> childrenList =
-       * firstChild.getChildren();
-       * 
-       * for (int i=1;i<children.size();i++) { QueryNode otherChild =
-       * children.get(i); for (QueryNode nod: otherChild.getChildren()) {
-       * childrenList.add(nod); } }
-       * 
-       * children.clear(); n.set(childrenList); } }
-       */
     }
     return node;
   }

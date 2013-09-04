@@ -65,6 +65,12 @@ public enum DictionaryRecIdCache {
 		return cache.get(name);
 	}
 	
+	public void clear() {
+		synchronized (cache) {
+			cache.clear();
+			multiValuesCache.clear();
+    }
+	}
 	
 	private Map<Integer, Integer> buildCache(int[] idMapping) throws IOException {
 		

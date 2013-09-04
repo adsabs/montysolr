@@ -46,20 +46,24 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	public static String PLAIN_TOKEN_CONCATENATED = "PLAIN_TOKEN_CONCATENATED";
 	private boolean modifyTree = false;
 	private List<String> firstChildAllowedModifiers;
+	private List<String> firstChildAllowedFields;
 	
 	public AqpDEFOPMarkPlainNodes() {
 		modifyTree = false;
 		firstChildAllowedModifiers = Arrays.asList("+", "-");
+		firstChildAllowedFields = Arrays.asList("");
 	}
 	
-	public AqpDEFOPMarkPlainNodes(boolean modifyTree, List<String> firstChildAllowedModifiers) {
+	public AqpDEFOPMarkPlainNodes(boolean modifyTree, 
+			List<String> firstChildAllowedModifiers,
+			List<String> firstChildAllowedFields) {
 		this.modifyTree = modifyTree;
 		this.firstChildAllowedModifiers = firstChildAllowedModifiers;
+		this.firstChildAllowedFields = firstChildAllowedFields;
 	}
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("DEFOP")) {
-			
   		// refuse processing: '=(this that token)'
 			// but this is not the ideal place for it (it is kind of arbitrary)
 			if (node.getParent() != null && node.getParent().getParent() != null) {
@@ -142,8 +146,8 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 				}
 			}
 		}
-		if (modifyTree ) { // keep the first node in the group
-			QueryNode first = forMarking.get(0);
+		if (modifyTree ) { // keep the first QNORMAL node from the group
+			QueryNode first = getQNode(forMarking);
 			if (forMarking.size() > 1) {
 				terminal = (AqpANTLRNode) getTerminalNode(first);
 				CharStream is = AqpQProcessor.getInputStream(terminal);
@@ -158,20 +162,47 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 		forMarking.clear();
 	}
 	
+	private QueryNode getQNode(List<QueryNode> forMarking) {
+		for (QueryNode c: forMarking) {
+			AqpANTLRNode terminal = (AqpANTLRNode) getTerminalNode(c);
+			if (((AqpANTLRNode) terminal.getParent()).getTokenLabel().equals("QNORMAL")) {
+				return c;
+			}
+		}
+		// else return first child
+		return forMarking.get(0);
+	}
 	
 	private boolean isBareNode(QueryNode node, boolean isPotentiallyFirst) {
 		StringBuffer sb = new StringBuffer();
 		harvestLabels(node, sb, 5);
-		if (sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QNORMAL")) {
+		if (sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QNORMAL") || 
+				(sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QDELIMITER") 
+						&& ((AqpANTLRNode) getTerminalNode(node)).getTokenInput().equals(","))) {
 			ArrayList<String> vals = new ArrayList<String>();
 			harvestValues(node, vals, 4);
-			if (vals.size()>0 && vals.size()<=1) {
-				if (isPotentiallyFirst && firstChildAllowedModifiers.contains(vals.get(0))) {// we allow modifiers for the first child
+			if (vals.size() == 0) {
+				return true;
+			}
+			else if (vals.size()==1) {
+				if (isPotentiallyFirst && 
+						(firstChildAllowedModifiers.contains(vals.get(0)) || // we allow modifiers for the first child 
+						 firstChildAllowedFields.contains(vals.get(0))) ) {  // or certain fields
 					return true;
 				}
 				return false;
 			}
-			return true;
+			else if (vals.size()==2) {
+				if (isPotentiallyFirst && 
+						(firstChildAllowedModifiers.contains(vals.get(0)) && // we allow modifiers for the first child 
+						 firstChildAllowedFields.contains(vals.get(1))) ) {  // or certain fields
+					return true;
+				}
+				return false;
+			}
+			else {
+				return false;
+			}
 		}
 		return false;
 	}

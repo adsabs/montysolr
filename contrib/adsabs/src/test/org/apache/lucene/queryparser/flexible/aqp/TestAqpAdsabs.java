@@ -303,7 +303,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryNodeException("this =and that");
 		assertQueryNodeException("(doi:tricky:01235)");
 		
-		assertQueryNodeException("What , happens,with, commas ,,");
 	}
 	
 	public void testWildCards() throws Exception {
@@ -393,7 +392,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		assertQueryEquals("weak lensing", null, "+weak +lensing");
 		assertQueryEquals("+contact +binaries -eclipsing", null, "+contact +binaries -eclipsing");
-		//x assertQueryEquals("+contact +xfield:binaries -eclipsing", null, "+contact +xfield:binaries -eclipsing");
+		assertQueryEquals("+contact +foo:binaries -eclipsing", null, "+contact +foo:binaries -eclipsing");
+		
 		assertQueryEquals("intitle:\"yellow symbiotic\"", null, "intitle:\"yellow symbiotic\"");
 		assertQueryEquals("\"galactic rotation\"", null, "\"galactic rotation\"", PhraseQuery.class);
 		
@@ -409,10 +409,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("(jakarta OR apache) AND website", null, "+(jakarta apache) +website");
 		
 		assertQueryEquals("weak NEAR lensing", null, "spanNear([weak, lensing], 5, true)");
-		
-		//TODO: the parser does not recognize the number
-		//assertQueryEquals("weka NEAR/2 lensing", null, "");
-		//assertQueryEquals("weka NEAR2 lensing", null, "");
+		assertQueryEquals("weka NEAR2 lensing", null, "spanNear([weka, lensing], 2, true)");
 		
 		assertQueryEquals("a -b", null, "+a -b");
 		assertQueryEquals("a +b", null, "+a +b");
@@ -447,9 +444,10 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("-field:(-one +two three)", null, "-one +two +three");
 		assertQueryEquals("+field:(-one +two three) x:four", null, "-one +two +three +x:four");
 		
-		//TODO
-		//assertQueryEquals("x:four -field:(-one +two three)", null, "+x:four -(-one +two +three)");
-		//assertQueryEquals("x:four -field:(-one +two x:three)", null, "x:four -(-one +two x:three)");
+		
+		assertQueryEquals("x:four -field:(-one +two three)", null, "+x:four -one +two +three");
+		//TODO: the last x: field is overwritten, a bug?
+		assertQueryEquals("x:four -foo:(-one two x:three)", null, "+x:four -(+foo:one +foo:two) +foo:three");
 		
 		assertQueryEquals("a test:(one)", null, "+a +test:one");
 		assertQueryEquals("a test:(a)", null, "+a +test:a");
@@ -500,12 +498,12 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
     assertQueryEquals("-m:(a b NEAR4 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 4, true) +(+m:d +m:e)");
     assertQueryNodeException("m:(a b NEAR7 c)"); // by default, only range 1-5 is allowed (in configuration)
     
-    assertQueryEquals("author:accomazzi, *a*", null, "author:accomazzi, *a*");
+    
 		assertQueryEquals("author:(huchra)", null, "author:huchra");
 		assertQueryEquals("author:(huchra, j)", null, "+author:huchra +author:j");
 		
-		assertQueryEquals("author:(kurtz; -eichhorn, g)", kwa, "author:kurtz -author:eichhorn, g");
-		assertQueryEquals("author:(kurtz; -\"eichhorn, g\")", null, "author:kurtz -author:\"eichhorn g\"");
+		assertQueryEquals("author:(kurtz; -eichhorn, g)", kwa, "+author:kurtz -author:eichhorn, g");
+		assertQueryEquals("author:(kurtz; -\"eichhorn, g\")", null, "+author:kurtz -author:\"eichhorn g\"");
 		
 		assertQueryEquals("author:(muench-nashrallah)", wsa, "author:muench-nashrallah");
 		assertQueryEquals("\"dark matter\" OR (dark matter -LHC)", null, "\"dark matter\" (+dark +matter -lhc)");
@@ -558,6 +556,39 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
       assertQueryEquals("keyword:/foo$/", wsa, "keyword:/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/^foo$/", wsa, "keyword:/^foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/^foo$/ AND \"foo bar\"", wsa, "+keyword:/^foo$/ +\"foo bar\"", BooleanQuery.class);
+  }
+  
+  public void testDelimiters() throws Exception {
+  	
+  	WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+  	
+  	assertQueryEquals("What , happens,with, commas ,,",
+  			null,
+  			"+what +happens +with +commas", 
+  			BooleanQuery.class);
+  	
+  	assertQueryEquals("What ; happens;with; semicolons ;;",
+  			null,
+  			"+what +happens +with +semicolons", 
+  			BooleanQuery.class);
+  	
+  	assertQueryEquals("What , happens,with, commas ,,",
+  			wsa,
+  			"+What +, +happens,with, +commas +,,", 
+  			BooleanQuery.class);
+  	
+  	assertQueryEquals("What ; happens;with; semicolons ;;",
+  			wsa,
+  			"+What +happens +with +semicolons", 
+  			BooleanQuery.class);
+  	
+    // commas should cause non-field to be joined
+    assertQueryEquals("accomazzi, a", null, "+accomazzi +a");
+    // the same for certain specified fields
+    assertQueryEquals("author:accomazzi, a", null, "+author:accomazzi +author:a");
+    // but not for the rest
+    assertQueryEquals("title:accomazzi, a", null, "+title:accomazzi +a");
+    
   }
 	
 	public static junit.framework.Test suite() {

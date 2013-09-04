@@ -6,13 +6,11 @@ import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.processors.NoChildOptimizationQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.core.processors.RemoveDeletedQueryNodesProcessor;
-import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.processors.AllowLeadingWildcardProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.BooleanSingleChildOptimizationQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.BoostQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.DefaultPhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.FuzzyQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
@@ -25,13 +23,13 @@ import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryN
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCOMMAProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCarefulAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExpandAuthorSearchProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExtractMultisynonymsProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldNodePreAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQDELIMITERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQTRUNCATEDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldMapperProcessorPostAnalysis;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPMarkPlainNodes;
@@ -42,11 +40,9 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQNORMALPro
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsRegexNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsSynonymNodeProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalysisQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCLAUSEProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCOMMAProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFIELDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFUZZYProcessor;
@@ -54,7 +50,6 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFieldMapperProce
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpGroupQueryOptimizerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpLowercaseExpandedTermsQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpMultiWordProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpNullDefaultFieldProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOptimizationProcessor;
@@ -65,7 +60,6 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQIDENTIFIERProce
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASETRUNCProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQRANGEINProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQTRUNCATEDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTMODIFIERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTreeRewriteProcessor;
 import org.apache.solr.search.AqpAdsabsQParser;
@@ -86,13 +80,20 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		QueryConfigHandler config = getQueryConfigHandler();
 		
+		// function queries are handled first, because they will be parsed
+		// again (during resolution)
+		add(new AqpAdsabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$
+		add(new AqpAdsabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
+		add(new AqpQFUNCProcessor()); // prepares function node (may decide which implementation to call)
+		
 	
 		// find separate tokens and join them into one 'string'
 		// true=modify the parse tree, otherwise values are 'added'
 		// into the first token
 	  // this was the original behaviour, you can still activate:
 		// add(new AqpDEFOPMarkPlainNodes());
-		add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-")));
+		add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"),
+				Arrays.asList("author", "first_author")));
 		
 
 		/**
@@ -105,14 +106,10 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		 * this is the right place to do it
 		 */
 		
-		add(new AqpDEFOPProcessor());
-		add(new AqpTreeRewriteProcessor());
+		add(new AqpDEFOPProcessor()); // sets DEFOP to be AND|OR....
+		add(new AqpTreeRewriteProcessor()); // makes (AND(AND(AND... to be (AND...
 		
-		add(new AqpAdsabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$
-		add(new AqpAdsabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
-		add(new AqpQFUNCProcessor()); // prepares function node (may decide which implementation to call)
 		
-		add(new AqpAdsabsCOMMAProcessor()); // extends operators with COMMA and SEMICOLON
 		add(new AqpAdsabsMODIFIERProcessor()); // extends PLUS and MINUS with # and =
 		add(new AqpOPERATORProcessor()); 
 		add(new AqpCLAUSEProcessor());
@@ -251,6 +248,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		 * Analysis-phase is over, these are the standard flex guys
 		 * massaging remaining query elements
 		 */
+		add(new AqpAdsabsQDELIMITERProcessor());
 		add(new PhraseSlopQueryNodeProcessor());
 		add(new AllowLeadingWildcardProcessor());
 		// add(new GroupQueryNodeProcessor()); // this removes the boolean opearator precedence

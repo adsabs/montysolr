@@ -17,22 +17,19 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
 
 /**
  * Processing of functional queries may be more involved than the standard
- * queries. The functions calls can be nested and often we may want to
- * wait until the values are prepared by other processors, before we grab 
- * them and use inside the query.
+ * queries. The functions calls can be nested.
  * 
  * Also each functional processor can be different, therefore my decision
  * was to register individual function builders inside the config
  * @see AqpFunctionQueryBuilderConfig#getBuilder(String, QueryNode)
  * and then insert this builder into the QNode. It will wait there
  * until it is picked by the {@link AqpFunctionQueryBuilder} which 
- * will call it at the end.
+ * will decide how it wants to parse the query (ie. it may just want
+ * the literals, or it will request a full query object to be built, etc)
  * 
  * You should check each {@link AqpFunctionQueryBuilder#createQNode(QueryNode)}
  * for details on how are data processed.
  * 
- * @author rchyla
- *
  */
 public class AqpQFUNCProcessor extends AqpQProcessor {
 	

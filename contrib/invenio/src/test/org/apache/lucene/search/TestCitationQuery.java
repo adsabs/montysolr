@@ -53,6 +53,10 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		reOpenWriter(OpenMode.CREATE);
 
 		adoc("id", "1", "references", "2", "references", "3", "references", "4", "x", "test");
+		
+		writer.commit();
+		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
+		
 		adoc("id", "2", "x", "test");
 		adoc("id", "3", "references", "5", "references", "6", "references", "99", "x", "test");
 		
@@ -61,6 +65,9 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		adoc("id", "4", "references", "2", "references", "1");
 		adoc("id", "5");
+		
+		writer.commit();
+		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
 		adoc("id", "6");
 		adoc("id", "7", "references", "5");
 		
@@ -70,6 +77,10 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		adoc("id", "11", "bibcode", "b1", "breferences", "b2", "breferences", "b3", "breferences", "b4", "b", "test");
 		adoc("id", "12", "bibcode", "b2", "b", "test");
+		
+		writer.commit();
+		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
+		
 		adoc("id", "13", "bibcode", "b3", "breferences", "b5", "breferences", "b6", "breferences", "b99", "b", "test");
 		adoc("id", "14", "bibcode", "b4", "breferences", "b2", "breferences", "b1");
 		
@@ -83,6 +94,10 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		// for testing the alternate identifiers
 		
 		adoc("id", "25", "bibcode", "b25", "alternate_bibcode", "x25", "alternate_bibcode", "x26", "breferences", "b27");
+		
+		writer.commit();
+		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
+		
 		adoc("id", "27", "bibcode", "b27", "alternate_bibcode", "x20", "alternate_bibcode", "x21", "breferences", "x26", "breferences", "b28");
 		adoc("id", "28", "bibcode", "b28", "breferences", "b25", "breferences", "x26");
 		
@@ -166,6 +181,7 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(3, searcher.search(xTest, 10).totalHits);
 		assertEquals(3, searcher.search(bTest, 10).totalHits);
 		
+		DictionaryRecIdCache.INSTANCE.clear();
 		
 		// now test of references ( X --> (x))
 		Map<Integer, Integer> cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), idField);

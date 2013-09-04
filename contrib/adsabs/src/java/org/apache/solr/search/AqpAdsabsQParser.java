@@ -204,10 +204,10 @@ public class AqpAdsabsQParser extends QParser {
 
 	public Query parse() throws ParseException {
 		try {
-		  if (qstr.trim().endsWith(",") && !qstr.trim().endsWith("\\,")) {
-		    QueryConfigHandler config = qParser.getQueryConfigHandler();
-		    return qParser.parse(getString() + config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE), null);
-		  }
+		  //if (qstr.trim().endsWith(",") && !qstr.trim().endsWith("\\,")) {
+		  //  QueryConfigHandler config = qParser.getQueryConfigHandler();
+		  //  return qParser.parse(getString() + config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE), null);
+		  //}
 			return qParser.parse(getString(), null);
 		} catch (QueryNodeException e) {
 			ParseException ex = new ParseException(e.getMessage());

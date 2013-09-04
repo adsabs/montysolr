@@ -172,10 +172,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 				SpanPositionRangeQuery.class);
 		
 		
-		//#322 - comma used as an operator joining a function query
-		assertQueryEquals(req("defType", "aqp", "q", "author:\"^roberts\", author:\"ables\""), 
-				"spanNear([spanPosRange(spanOr([author:roberts,, SpanMultiTermQueryWrapper(author:roberts,*)]), 0, 1), spanOr([author:ables,, SpanMultiTermQueryWrapper(author:ables,*)])], 1, true)", 
-				SpanNearQuery.class);
+		//#322 - trailing comma
+		assertQueryEquals(req("defType", "aqp", "q", "author:\"^roberts\", author:\"ables\""),
+				"+spanPosRange(spanOr([author:roberts,, SpanMultiTermQueryWrapper(author:roberts,*)]), 0, 1) +(author:ables, author:ables,*)",
+				BooleanQuery.class);
 		
 		
 				
@@ -538,16 +538,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         DisjunctionMaxQuery.class);
     
     // now some esoteric cases of the comma parsing, comma should be appended
-    // yet we do not do do a good jobs in splitting things (not yet)
     assertQueryEquals(req("defType", "aqp", "q", "abstract:\"accomazzi, alberto\""), 
         "abstract:\"accomazzi alberto\"", 
         PhraseQuery.class);
     
+    // abstract is not in the list of allowed fields
     assertQueryEquals(req("defType", "aqp", "q", "abstract:accomazzi, alberto"), 
-        "+abstract:accomazzi +abstract:alberto",
+        "+abstract:accomazzi +all:alberto",
         BooleanQuery.class);
     
-    
+    // author is
     assertQueryEquals(req("defType", "aqp", "q", "author:accomazzi, alberto"), 
         "author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,", 
         BooleanQuery.class);
