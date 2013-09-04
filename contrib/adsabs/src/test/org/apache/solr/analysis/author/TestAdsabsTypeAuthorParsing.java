@@ -417,8 +417,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                     "//*[@numFound='3']",
                     // "Lee, H-C" numFound=3
                     // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C
-        "Lee, H C", "+(author:lee, h author:lee, h* author:lee,) +all:c",
-                    "//*[@numFound='0']",                    
+        "Lee, H C", "author:lee, h c author:lee, h c* author:/lee, h[^\\s]+ c/ author:/lee, h[^\\s]+ c .*/ author:lee, h author:lee,",
+						        "//*[@numFound='3']",
+						        // "Lee, H-C" numFound=3
+						        // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C                    
         "Lee, Harwin-C", "author:lee, harwin c author:lee, harwin c* author:lee, h c author:lee, h c* author:lee, harwin author:lee, h author:lee,",
                     "//*[@numFound='4']",
                     // Lee, Harwin-C numFound=4

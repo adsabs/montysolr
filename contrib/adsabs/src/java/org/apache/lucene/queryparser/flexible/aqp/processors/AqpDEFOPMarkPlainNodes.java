@@ -176,7 +176,8 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	private boolean isBareNode(QueryNode node, boolean isPotentiallyFirst) {
 		StringBuffer sb = new StringBuffer();
 		harvestLabels(node, sb, 5);
-		if (sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QNORMAL") || 
+		if (sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QNORMAL") ||
+				sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QTRUNCATED") ||
 				(sb.toString().equals("/MODIFIER/TMODIFIER/FIELD/QDELIMITER") 
 						&& ((AqpANTLRNode) getTerminalNode(node)).getTokenInput().equals(","))) {
 			ArrayList<String> vals = new ArrayList<String>();
@@ -195,7 +196,7 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 			else if (vals.size()==2) {
 				if (isPotentiallyFirst && 
 						(firstChildAllowedModifiers.contains(vals.get(0)) && // we allow modifiers for the first child 
-						 firstChildAllowedFields.contains(vals.get(1))) ) {  // or certain fields
+						 firstChildAllowedFields.contains(vals.get(1))) ) {  // in certain fields
 					return true;
 				}
 				return false;
