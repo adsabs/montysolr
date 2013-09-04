@@ -69,15 +69,28 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		originalInput = AqpQProcessor.getOriginalInput(node, nodesToCount);
 		funcValues = new ArrayList<OriginalInput>();
 		
-		if (node.getTokenLabel().equals("COMMA")) {
+		if (!node.isLeaf()) {
+			AqpANTLRNode container = new AqpANTLRNode(node.getTree());
+			ArrayList<QueryNode> children = new ArrayList<QueryNode>();
   		for (QueryNode n: node.getChildren()) {
-				funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) n, nodesToCount));
+  			int l = ((AqpANTLRNode) n).hasTokenName("QDELIMITER", 0);
+  			if (l > 0 && l < 4) { // MODIFIER/TMODIFIER/FIELD/QDELIMITER
+  				container.set(children);
+  				funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) container, nodesToCount));
+  				children.clear();
+  				continue;
+  			}
+  			else {
+  				children.add(n);
+  			}
 			}
-  	}
-		else if (node.getTokenLabel().equals("DEFOP") && node.getChild("COMMA") != null) {
-  		for (QueryNode n: node.getChild("COMMA").getChildren()) {
-				funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) n, nodesToCount));
+  		
+  		if (children.size() > 0) {
+				container.set(children);
+				funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) container, nodesToCount));
+				children.clear();
 			}
+  		
   	}
 		else {
 			funcValues.add(AqpQProcessor.getOriginalInput((AqpANTLRNode) node, nodesToCount));

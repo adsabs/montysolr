@@ -145,10 +145,21 @@ public class AqpANTLRNode extends QueryNodeImpl {
     return tokenLabel;
   }
 
+  /**
+   * Label is what is displayed in the AST tree, for example and, And, AND will
+   * all have label=AND
+   * 
+   * (But their internal name is an 'OPERATOR')
+   * 
+   */
   public void setTokenLabel(String tokenLabel) {
     this.tokenLabel = tokenLabel;
   }
 
+  /**
+   * Name is the internal token name, for example and, And, AND will
+   * all have name=OPERATOR
+   */
   public String getTokenName() {
     return tokenName;
   }
@@ -211,6 +222,22 @@ public class AqpANTLRNode extends QueryNodeImpl {
 
     }
     return null;
+  }
+  
+  public int hasTokenName(String tokenName, int level) {
+    List<QueryNode> children = getChildren();
+    if (children != null) {
+      for (QueryNode child : children) {
+        AqpANTLRNode n = (AqpANTLRNode) child;
+        if (n.getTokenLabel().equals(tokenName)) {
+          return level+1;
+        }
+        int nl = n.hasTokenName(tokenName, level+1);
+        if (nl > level+1)
+        	return nl;
+      }
+    }
+    return level;
   }
 
   public AqpANTLRNode findChild(String tokenLabel) {

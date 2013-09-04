@@ -299,7 +299,14 @@ public class AqpAdsabsSubQueryProvider implements
   	// topn(int, Q, [relevance|sort-spec]) - limit results to the best top N (by their ranking or sort order)
 		parsers.put("topn", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
-				int topN = fp.parseInt();
+				int topN = -1;
+				try {
+					topN = fp.parseInt();
+				}
+				catch (NumberFormatException e) {
+					throw new ParseException("The function signature is topn(int, query, [sort order]). Error: " + e.getMessage());
+				}
+				
 				if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
 					throw new ParseException("Hmmm, the first argument of your operator must be a positive number.");
 				}

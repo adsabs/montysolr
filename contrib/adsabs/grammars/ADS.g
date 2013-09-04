@@ -25,7 +25,7 @@ tokens {
   QDATE;
   QPOSITION;
   QFUNC;
-  QCOMMA;
+  QDELIMITER;
   QIDENTIFIER;
   QCOORDINATE;
   QREGEX;
@@ -50,19 +50,10 @@ clauseOr
   : (first=clauseAnd -> $first) (or others=clauseAnd -> ^(OPERATOR["OR"] clauseAnd+ ))*
   ;
 
-
 clauseAnd
-  : (first=clauseSemicolon  -> $first) (and others=clauseSemicolon -> ^(OPERATOR["AND"] clauseSemicolon+ ))*
+  : (first=clauseNot  -> $first) (and others=clauseNot -> ^(OPERATOR["AND"] clauseNot+ ))*
   ;
 
-clauseSemicolon
-  : (first=clauseComma  -> $first) (semicolon others=clauseComma -> ^(OPERATOR["SEMICOLON"] clauseComma+ ))*
-  ;
-
-clauseComma
-  : (first=clauseNot  -> $first) (comma others=clauseNot -> ^(OPERATOR["COMMA"] clauseNot+ ))*
-  ;
-    
 clauseNot
   : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
@@ -141,7 +132,8 @@ value
 	| match_all -> ^(QANYTHING match_all)
 	| STAR -> ^(QTRUNCATED STAR)
 	| LOCAL_PARAMS -> ^(XMETA LOCAL_PARAMS)	
-	//| COMMA -> ^(QCOMMA COMMA)
+	| COMMA -> ^(QDELIMITER COMMA)
+	| SEMICOLON -> ^(QDELIMITER SEMICOLON)
   	;
 
 	

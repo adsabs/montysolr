@@ -7,9 +7,6 @@ import java.io.IOException;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.adsabs.solr.AdsConfig.F;
-import org.apache.lucene.queries.function.FunctionQuery;
-import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
@@ -100,7 +97,26 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 
 	public void testOperators() throws Exception {
-	  
+
+		// # 389		
+		// make sure the functional parsing is handling things well
+		assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo OR topn(10, title:bar OR title:baz))))"), 
+        "SecondOrderQuery(title:foo SecondOrderQuery(title:bar title:baz, filter=null, collector=topn[10, outOfOrder=false]), filter=null, collector=topn[200, outOfOrder=false])", 
+        SecondOrderQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo AND topn(10, title:bar OR title:baz))))"), 
+        "SecondOrderQuery(+title:foo +SecondOrderQuery(title:bar title:baz, filter=null, collector=topn[10, outOfOrder=false]), filter=null, collector=topn[200, outOfOrder=false])", 
+        SecondOrderQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "topn(200, title:foo, date desc)"), 
+        "SecondOrderQuery(title:foo, filter=null, collector=topn[200, outOfOrder=false, info=date desc])", 
+        SecondOrderQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "topn(200, (title:foo), (date desc))"), 
+        "SecondOrderQuery(title:foo, filter=null, collector=topn[200, outOfOrder=false, info=date desc])", 
+        SecondOrderQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "topn(200, \"foo bar\", \"date desc\")"), 
+        "SecondOrderQuery(all:\"foo bar\", filter=null, collector=topn[200, outOfOrder=false, info=date desc])", 
+        SecondOrderQuery.class);
+		
+		
     // trendy() - what people read, it reads data from index
 		assertU(addDocs("author", "muller", "reader", "bibcode1", "reader", "bibcode2"));
     assertU(addDocs("author", "muller", "reader", "bibcode2", "reader", "bibcode4"));
