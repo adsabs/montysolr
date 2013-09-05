@@ -351,7 +351,7 @@ public class AqpAdsabsSubQueryProvider implements
 					
 					TopFieldCollector collector;
 				  try {
-		        collector = TopFieldCollector.create(searcher.weightSort(sortSpec), topN, false, true, true, false);
+		        collector = TopFieldCollector.create(searcher.weightSort(sortSpec), topN, false, true, true, true);
 	        } catch (IOException e) {
 		        throw new ParseException("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
 	        }
