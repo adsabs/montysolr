@@ -293,7 +293,7 @@ SecondOrderCollector {
 			seenTimes = 1.0f;
 		}
 		
-		if (seenTimes > 1.0f) {
+		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
 			currDoc.score = seenTimes;
 			newHits.add(currDoc);
 		}
@@ -325,7 +325,7 @@ SecondOrderCollector {
 			score = currDoc.score;
 		}
 
-		if (seenTimes > 1) {
+		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
 			currDoc.score = (float) score/seenTimes;
 		}
 		newHits.add(currDoc);
@@ -362,7 +362,7 @@ SecondOrderCollector {
 			score = currDoc.score;
 		}
 
-		if (seenTimes > 1) {
+		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
 			currDoc.score = (float) Math.pow(score, 1.0f/seenTimes);
 		}
 		newHits.add(currDoc);

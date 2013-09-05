@@ -199,6 +199,7 @@ public class AqpAdsabsSubQueryProvider implements
 				// find the 200 most interesting papers and collect their readers
 				SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorTopN(200));
+				discoverMostReadQ.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
 				
 				final StringBuilder readers = new StringBuilder();
 				final HashSet<String> fieldsToLoad = new HashSet<String>();
@@ -245,11 +246,18 @@ public class AqpAdsabsSubQueryProvider implements
         SolrParams params = req.getParams();
         
         // configurable params
-        mlt.setMinTermFrequency(1);
-        mlt.setMinDocFreq(1);
-        mlt.setMaxQueryTerms(512);
+        mlt.setMinTermFrequency(0);
+        mlt.setMinDocFreq(3);
+        mlt.setMaxQueryTerms(200);
         mlt.setBoost(2.0f);
         mlt.setPercentTermsToMatch(0.0f);
+        
+        //try {
+	      //  Query q = mlt.rewrite(req.getSearcher().getIndexReader());
+	      //  System.out.println(q);
+        //} catch (IOException e) {
+        //}
+        
         return mlt;
 			}
 		  }.configure(true)); // true=canBeAnalyzed
