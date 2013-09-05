@@ -3,6 +3,7 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.lucene.search.DocIdSetIterator;
 
 import org.apache.lucene.index.AtomicReaderContext;
 
@@ -37,7 +38,6 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 	@Override
 	public void collect(int doc) throws IOException {
 		topCollector.collect(doc);
-
 	}
 
 	@Override
