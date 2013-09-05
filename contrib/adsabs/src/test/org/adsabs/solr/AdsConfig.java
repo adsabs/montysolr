@@ -25,6 +25,7 @@ public final class AdsConfig {
     	"issue", "lang", "issn", "isbn", "property", "database", "data", "bibgroup", "vizier"};
     
     public static String[] TYPE_DATE_FIELDS = new String[]{"date"};
+    public static String[] TYPE_AUTHOR_FIELDS = new String[]{"author", "first_author"};
     
 	};
 	

@@ -97,7 +97,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 
 	public void testOperators() throws Exception {
-
+		
+		// added ability to interactively tweak queries
+		assertQueryEquals(req("defType", "aqp", "q", "tweak(collector_final_value=ARITHM_MEAN, citations(author:muller))"), 
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citations[cache:reference<bibcode,alternate_bibcode>])", 
+        SecondOrderQuery.class);
+    
+		
 		// # 389		
 		// make sure the functional parsing is handling things well
 		assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo OR topn(10, title:bar OR title:baz))))"), 

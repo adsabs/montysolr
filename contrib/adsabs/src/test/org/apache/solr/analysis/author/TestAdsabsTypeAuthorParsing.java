@@ -73,6 +73,8 @@ import org.adsabs.solr.AdsConfig.F;
 public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
 
+	private String author_field = "author";
+	
   @BeforeClass
   public static void beforeTestAdsDataImport() throws Exception {
     // to use filesystem instead of ram
@@ -271,7 +273,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "224", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "van Dokkum, Hiatus"));
     assertU(adoc(F.ID, "225", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "van Dokkum, Romulus"));
     
-    assertU(adoc(F.ID, "230", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Böser"));
+    assertU(adoc(F.ID, "230", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Böser", "first_author", "Böser, S"));
     assertU(adoc(F.ID, "231", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Böser, S"));
     assertU(adoc(F.ID, "232", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Boser, S"));
     assertU(adoc(F.ID, "233", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Boser,"));
@@ -310,7 +312,21 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   
   public void testAuthorParsingUseCases() throws Exception {
-
+  	
+  	// making sure also other fields are being parsed properly
+  	author_field = "first_author";
+  	testAuthorQuery(
+        "\"Boser, S\"", 
+        		"first_author:böser, s first_author:böser, s* first_author:böser, first_author:boeser, s first_author:boeser, s* first_author:boeser, first_author:boser, s first_author:boser, s* first_author:boser,",
+        		"//*[@numFound='1']",
+    		"\"Böser, S\"", 
+        		"first_author:böser, s first_author:böser, s* first_author:böser, first_author:boser, s first_author:boser, s* first_author:boser, first_author:boeser, s first_author:boeser, s* first_author:boeser,",
+        		"//*[@numFound='1']"
+        		);
+  	
+  	
+  	// back to the standard: author
+  	author_field = "author";
   	testAuthorQuery(
         "\"Boser, S\"", 
         		"author:böser, s author:böser, s* author:böser, author:boeser, s author:boeser, s* author:boeser, author:boser, s author:boser, s* author:boser,",
@@ -2148,12 +2164,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assert vals.length%3==0;
     for (int i=0;i<vals.length;i=i+3) {
       if (tp.debugParser) {
-      System.out.println("Running test for " + String.format("author:%s", vals[i]));
-      String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("author:%s", vals[i])));
+      System.out.println("Running test for " + String.format("%s:%s", author_field, vals[i]));
+      String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])));
       
       ArrayList<String> out = new ArrayList<String>();
       Matcher m = Pattern.compile("numFound=\\\"(\\d+)").matcher(response);
-      Matcher m2 = Pattern.compile("<doc><str name=\\\"id\\\">(\\d+)</str><arr name=\\\"author\\\"><str>([^<]*)</str></arr></doc>").matcher(response);
+      Matcher m2 = Pattern.compile("<doc><str name=\\\"id\\\">(\\d+)</str><arr name=\\\"" + author_field + "\\\"><str>([^<]*)</str></arr></doc>").matcher(response);
       m.find();
       String numFound = m.group(1);
       while (m2.find()) {
@@ -2171,10 +2187,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       }
       System.out.println();
       }
-      assertQueryEquals(req("defType", "aqp", "q", String.format("author:%s", vals[i])),
+      assertQueryEquals(req("defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])),
           vals[i+1],
           null);
-      assertQ(req("fl", "id,author", "rows", "100", "q", String.format("author:%s", vals[i])), vals[i+2].split(";"));
+      assertQ(req("fl", "id," + author_field, "rows", "100", "q", String.format("%s:%s", author_field, vals[i])), vals[i+2].split(";"));
     }
 
   }

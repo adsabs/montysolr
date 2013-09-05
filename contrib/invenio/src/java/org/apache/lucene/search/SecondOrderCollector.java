@@ -5,6 +5,11 @@ import java.util.List;
 
 public interface SecondOrderCollector {
 
+		public enum FinalValueType {
+			ARITHM_MEAN, GEOM_MEAN, ABS_COUNT, MAX_VALUE, MIN_VALUE,
+			GEOM_MEAN_NORM, ARITHM_MEAN_NORM, ABS_COUNT_NORM;
+		}
+		
     /**
      * Called from the SecondOrderQuery when the Weight object
      * is being created. The searcher is the top searcher, therefore
@@ -55,5 +60,7 @@ public interface SecondOrderCollector {
      */
     public void reset();
     
+    
+    public void setFinalValueType(FinalValueType type);
 
 }

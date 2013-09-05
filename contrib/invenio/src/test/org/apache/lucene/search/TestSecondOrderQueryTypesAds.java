@@ -23,6 +23,7 @@ import org.apache.lucene.index.MockIndexWriter;
 import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
@@ -86,6 +87,19 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     adoc("id", "9", "bibcode",   "b9", "const_boost", "1.0f", "boost", "0.1f", "references", "b2,b3,b4,b10", "ads_boost", "0.9f");
     adoc("id", "10","bibcode",  "b10", "const_boost", "1.0f", "boost", "0.5f", "references", "b3,b4", "ads_boost", "0.1f");
 
+
+    writer.commit();
+		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
+		
+		
+    adoc("kw", "x", "ka", "b", "id", "16", "bibcode", "b16", "references", "b17,b18,b20", "ads_boost", "0.9f");       // links: 1
+    adoc("kw", "x", "ka", "a", "id", "17", "bibcode", "b17", "references", "b16,b18,b20", "ads_boost", "0.7f");       // links: 2
+    adoc("kw", "x", "ka", "b", "id", "18", "bibcode", "b18", "references", "b20", "ads_boost", "0.5f");               // links: 3
+    adoc("kw", "x", "ka", "b", "id", "19", "bibcode", "b19", "references", "b17,b18,b20", "ads_boost", "0.3f");   // links: 0
+    adoc("kw", "x", "ka", "b", "id", "20", "bibcode", "b20", "references", "b20", "ads_boost", "0.1f");               // links: 5
+    
+
+		
     reader = writer.getReader();
     searcher = newSearcher(reader);
     writer.close();
@@ -329,6 +343,77 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     
     
     
+    // various algorithms for compacting the hits
+    TermQuery kwq = new TermQuery(new Term("kw", "x"));
+    TermQuery kwa = new TermQuery(new Term("ka", "a"));
+    BooleanQuery bqa = new BooleanQuery();
+    bqa.add(kwq, Occur.SHOULD);
+    bqa.add(kwa, Occur.SHOULD);
+    
+    SecondOrderCollectorCites c = new SecondOrderCollectorCites(idField, refField);
+    c.setFinalValueType(FinalValueType.ABS_COUNT);
+    topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
+    testDocOrder(topSet.scoreDocs, 15, 13, 12, 11);
+    assertArrayEquals(getScores(topSet.scoreDocs), new float[]{5.0f, 3.0f, 2.0f, 1.0f}, 0.1f);
+    
+    c = new SecondOrderCollectorCites(idField, refField);
+    c.setFinalValueType(FinalValueType.ABS_COUNT_NORM);
+    topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
+    testDocOrder(topSet.scoreDocs, 15, 13, 12, 11);
+    assertArrayEquals(getScores(topSet.scoreDocs), new float[]{1.0f, 0.6f, 0.4f, 0.2f}, 0.1f);
+    
+    c = new SecondOrderCollectorCites(idField, refField);
+    c.setFinalValueType(FinalValueType.MIN_VALUE);
+    topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
+    testDocOrder(topSet.scoreDocs, 11, 12, 13, 15);
+    //assertArrayEquals(getScores(topSet.scoreDocs), new float[]{2.78f, 0.41f, 0.41f, 0.41f}, 0.1f);
+    
+    c = new SecondOrderCollectorCites(idField, refField);
+    c.setFinalValueType(FinalValueType.MAX_VALUE);
+    topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
+    testDocOrder(topSet.scoreDocs, 11, 12, 13, 15);
+    float tops = topSet.scoreDocs[0].score;
+    for (ScoreDoc s: topSet.scoreDocs) {
+    	//assertEquals(tops, s.score, 0.02);
+    }
+    //assertArrayEquals(getScores(topSet.scoreDocs), new float[]{1.98f, 1.98f, 1.98f, 1.98f}, 0.1f);
+    
+    System.out.println("gmean");
+    c = new SecondOrderCollectorCites(idField, refField);
+    c.setFinalValueType(FinalValueType.GEOM_MEAN);
+    topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
+    testDocOrder(topSet.scoreDocs, 11, 13, 15, 12);
+    float[] gscores = getScores(topSet.scoreDocs);
+    //assertArrayEquals(getScores(topSet.scoreDocs), new float[]{1.98f, 1.98f, 1.98f, 1.98f}, 0.1f);
+    
+    System.out.println("amean");
+    c = new SecondOrderCollectorCites(idField, refField);
+    c.setFinalValueType(FinalValueType.ARITHM_MEAN);
+    topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
+    testDocOrder(topSet.scoreDocs, 11, 13, 15, 12);
+    float[] ascores = getScores(topSet.scoreDocs);
+    
+    //assertArrayEquals(getScores(topSet.scoreDocs), new float[]{1.98f, 1.98f, 1.98f, 1.98f}, 0.1f);
+    
+    System.out.println("gmean norm");
+    c = new SecondOrderCollectorCites(idField, refField);
+    c.setFinalValueType(FinalValueType.GEOM_MEAN_NORM);
+    topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
+    testDocOrder(topSet.scoreDocs, 11, 13, 15, 12);
+    float[] gnscores = getScores(topSet.scoreDocs);
+    
+    System.out.println("amean norm");
+    c = new SecondOrderCollectorCites(idField, refField);
+    c.setFinalValueType(FinalValueType.ARITHM_MEAN_NORM);
+    topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
+    testDocOrder(topSet.scoreDocs, 11, 13, 15, 12);
+    float[] anscores = getScores(topSet.scoreDocs);
+    //assertArrayEquals(getScores(topSet.scoreDocs), new float[]{1.98f, 1.98f, 1.98f, 1.98f}, 0.1f);
+    
+    assertTrue(ascores[1] != gscores[1]);
+    assertTrue(ascores[2] != gscores[2]);
+    assertTrue(anscores[0] < ascores[0]);
+    assertTrue(gnscores[0] < gscores[0]);
   }
 
   private int[] getIds(ScoreDoc[] docs) {
@@ -374,14 +459,18 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     
     for (int i=0;i<expected.length;i++) {
       ScoreDoc doc = docs[i];
-      if (!scoreMap.get(doc.score).contains(doc.doc)) {
-        fail("The document on position " + i + "is not " + expected[i] + " but " + doc.doc);
-      }
+      System.out.println(doc);
       
       if (lastScore != doc.score) {
         scoreMap.remove(lastScore);
         lastScore = doc.score;
       }
+      
+      if (!scoreMap.get(lastScore).contains((Integer)doc.doc)) {
+        fail("The document on position " + i + " is not " + expected[i] + ", we want: " + doc.doc);
+      }
+      
+      
     }
   }
 }

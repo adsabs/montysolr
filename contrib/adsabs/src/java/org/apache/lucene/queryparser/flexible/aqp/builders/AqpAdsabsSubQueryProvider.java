@@ -36,6 +36,8 @@ import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
+import org.apache.lucene.search.SecondOrderCollector;
+import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.search.SecondOrderCollectorAdsClassicScoringFormula;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
@@ -54,6 +56,7 @@ import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.util.Version;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MoreLikeThisParams;
+import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.MoreLikeThisHandler;
 import org.apache.solr.handler.MoreLikeThisHandler.MoreLikeThisHelper;
@@ -79,6 +82,7 @@ import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
 import org.apache.solr.search.ValueSourceParser;
 import org.apache.solr.search.function.PositionSearchFunction;
+import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.util.SolrPluginUtils;
 
 
@@ -579,6 +583,30 @@ public class AqpAdsabsSubQueryProvider implements
         return q;
       }
     }.configure(false)); // not analyzed
+		
+		parsers.put("tweak", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {
+				
+				String configuration = fp.parseId();
+				Query q = fp.parseNestedQuery();
+				
+				MultiMapSolrParams params = SolrRequestParsers.parseQueryString(configuration);
+				
+				if (params.get("collector_final_value", null) != null) {
+					String cfv = params.get("collector_final_value", "avg");
+					if (q instanceof SecondOrderQuery) {
+						SecondOrderCollector collector = ((SecondOrderQuery) q).getcollector();
+						try {
+							collector.setFinalValueType(SecondOrderCollector.FinalValueType.valueOf(cfv));
+						}
+						catch (IllegalArgumentException e) {
+							throw new ParseException("Wrong parameter: " + e.getMessage());
+						}
+					}
+				}
+        return q;
+      }
+		});
 	};
 
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
