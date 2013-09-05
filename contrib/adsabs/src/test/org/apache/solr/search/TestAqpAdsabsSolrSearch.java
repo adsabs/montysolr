@@ -98,6 +98,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public void testOperators() throws Exception {
 		
+		// unbalanced brackets for functions
+		assertQueryEquals(req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy), date asc)"), 
+        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=topn[201, outOfOrder=false, info=date asc])", 
+        SecondOrderQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy),   date asc   )"), 
+        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=topn[201, outOfOrder=false, info=date asc])", 
+        SecondOrderQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "topn(201,(  ((\"foo bar\") AND database:astronomy)),date asc)"), 
+        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=topn[201, outOfOrder=false, info=date asc])", 
+        SecondOrderQuery.class);
+		
+		
+		
 		// added ability to interactively tweak queries
 		assertQueryEquals(req("defType", "aqp", "q", "tweak(collector_final_value=ARITHM_MEAN, citations(author:muller))"), 
         "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=citations[cache:reference<bibcode,alternate_bibcode>])", 
@@ -115,7 +128,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		assertQueryEquals(req("defType", "aqp", "q", "topn(200, title:foo, date desc)"), 
         "SecondOrderQuery(title:foo, filter=null, collector=topn[200, outOfOrder=false, info=date desc])", 
         SecondOrderQuery.class);
-		assertQueryEquals(req("defType", "aqp", "q", "topn(200, (title:foo), (date desc))"), 
+		assertQueryEquals(req("defType", "aqp", "q", "topn(200, (title:foo), date desc)"), 
         "SecondOrderQuery(title:foo, filter=null, collector=topn[200, outOfOrder=false, info=date desc])", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(200, \"foo bar\", \"date desc\")"), 
@@ -138,11 +151,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 				"spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 100)", 
 				SpanPositionRangeQuery.class);
 		
-		// we're ignoring modifiers, this is a feature, not a bug - but if I ever want to
-		// treat everything, then I have to modify the grammar to output positions for the
-		// modifiers and other stuff
+		// notice the use of modifier '='
 		assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"Accomazzi, A\", 1)"), 
-				"spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)", 
+				"spanPosRange(author:Accomazzi, A, 0, 1)", 
 				SpanPositionRangeQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "pos(+author:\"Accomazzi, A\", 1, 1)"), 
 				"spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)", 
@@ -201,10 +212,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		
 		//topn sorted - added 15Aug2013
-		assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, \"date desc\")"), 
-        "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false, info=date desc])", 
-        SecondOrderQuery.class);
-		assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, (date desc))"), 
+		assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, date desc)"), 
         "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false, info=date desc])", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc\")"), 

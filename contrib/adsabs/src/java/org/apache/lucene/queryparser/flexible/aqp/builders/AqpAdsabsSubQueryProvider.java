@@ -335,11 +335,13 @@ public class AqpAdsabsSubQueryProvider implements
         	sortOrRank = fp.parseId();
         }
 				
+        sortOrRank = sortOrRank.toLowerCase();
+				
 				if (sortOrRank.contains("\"") || sortOrRank.contains("\'")) {
 					sortOrRank = sortOrRank.substring(1, sortOrRank.length()-1);
 				}
 				
-				sortOrRank = sortOrRank.toLowerCase();
+				
 				if (sortOrRank.equals("score")) {
 					return new SecondOrderQuery(innerQuery, null, 
 							new SecondOrderCollectorTopN(topN));

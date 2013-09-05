@@ -94,7 +94,7 @@ public class AqpQProcessor extends QueryNodeProcessorImpl implements
     }
   }
 
-  public QueryNode getTerminalNode(QueryNode node) {
+  public static QueryNode getTerminalNode(QueryNode node) {
     while (!node.isLeaf()) {
       return getTerminalNode(node.getChildren().get(
           node.getChildren().size() - 1));

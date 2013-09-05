@@ -65,7 +65,7 @@ clauseNear
 clauseBasic
 	: 
 	 (lmodifier? func_name) => lmodifier? func_name clauseOr+  RPAREN rmodifier?
-	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(QFUNC func_name ^(OPERATOR["DEFOP"] clauseOr+)))))
+	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(QFUNC func_name ^(OPERATOR["DEFOP"] clauseOr+) RPAREN))))
 	| (lmodifier LPAREN clauseOr+ RPAREN )=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
 	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
 	| (LPAREN clauseOr+ RPAREN rmodifier)=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 

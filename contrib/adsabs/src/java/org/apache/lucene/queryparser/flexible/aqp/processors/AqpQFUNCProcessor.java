@@ -1,7 +1,9 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.runtime.CharStream;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
@@ -13,6 +15,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFunctionQueryBuilderConfig;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
 
 /**
@@ -43,7 +46,9 @@ public class AqpQFUNCProcessor extends AqpQProcessor {
 	public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
 		List<QueryNode> children = node.getChildren();
 		
-		String funcName = ((AqpANTLRNode) children.get(0)).getTokenInput();
+		AqpANTLRNode funcHead = ((AqpANTLRNode) children.get(0));
+		
+		String funcName = funcHead.getTokenInput();
 		if (funcName.endsWith("(")) {
 			funcName = funcName.substring(0, funcName.length()-1);
 		}
@@ -63,7 +68,35 @@ public class AqpQFUNCProcessor extends AqpQProcessor {
 			throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
 					"Unknown function \"" + funcName + "\"" ));
 		}
-		return new AqpFunctionQueryNode(funcName, builder, (AqpANTLRNode) children.get(1));
+		
+		if (((AqpANTLRNode) children.get(children.size()-1)).getTokenName().equals("RPAREN")) {
+			CharStream inputStream = AqpQProcessor.getInputStream(node);
+			AqpANTLRNode funcTail = (AqpANTLRNode) children.get(children.size()-1);
+			OriginalInput originalInput = new OriginalInput(inputStream.substring(funcHead.getInputTokenEnd(), funcTail.getInputTokenStart()), 
+					funcHead.getInputTokenStart(),
+					funcHead.getInputTokenEnd());
+			
+			ArrayList<OriginalInput> values = new ArrayList<OriginalInput>();
+			int start = funcHead.getInputTokenEnd()+1;
+			int stop = start;
+			
+			for (QueryNode n: children.get(1).getChildren()) {
+				AqpANTLRNode a = (AqpANTLRNode) n;
+  			int l = a.hasTokenName("QDELIMITER", 0);
+  			if (l > 0 && l < 4) { // MODIFIER/TMODIFIER/FIELD/QDELIMITER
+  				AqpANTLRNode delimiter = (AqpANTLRNode) AqpQProcessor.getTerminalNode(a);
+  				stop = delimiter.getInputTokenStart()-1;
+  				values.add(new OriginalInput(inputStream.substring(start, stop), start, stop));
+  				start = delimiter.getInputTokenEnd()+1;
+  			}
+			}
+			stop = funcTail.getInputTokenEnd()-1;
+			values.add(new OriginalInput(inputStream.substring(start, stop), start, stop));
+			return new AqpFunctionQueryNode(funcName, builder, originalInput, values);
+		}
+		else { // the old semantics when we try hard to discover elements of the function
+			return new AqpFunctionQueryNode(funcName, builder, (AqpANTLRNode) children.get(1));
+		}
 		
 	}
 

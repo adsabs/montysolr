@@ -98,7 +98,18 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		
 		this.builder = builder;
 		this.name = name;
+		trimValues();
 	}
+
+	public AqpFunctionQueryNode(String funcName, AqpFunctionQueryBuilder builder, OriginalInput origInput, ArrayList<OriginalInput> values) {
+		allocate();
+		setLeaf(true);
+		this.originalInput = origInput;
+		funcValues = values;
+		this.name = funcName;
+		this.builder = builder;
+		trimValues();
+  }
 
 	public String toString() {
 		StringBuffer bo = new StringBuffer();
@@ -113,6 +124,11 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		return bo.toString();
 	}
 	
+	private void trimValues() {
+		for (OriginalInput oi: funcValues) {
+			oi.value = oi.value.trim();
+		}
+	}
 	
 	public QueryNode getChild() {
 		return getChildren().get(0);
