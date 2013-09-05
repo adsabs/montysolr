@@ -448,13 +448,14 @@ public class AqpAdsabsSubQueryProvider implements
       public Query parse(FunctionQParser fp) throws ParseException {          
         Query innerQuery = fp.parseNestedQuery();
         
-        return  new SecondOrderQuery( // citations
+        SecondOrderQuery outerQuery = new SecondOrderQuery( // citations
 			        		new SecondOrderQuery( // topn
 			        				new SecondOrderQuery(innerQuery, // classic_relevance
 			        						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost")), 
 	    						new SecondOrderCollectorTopN(200)),
 	    						new SecondOrderCollectorCitedBy(citationSearchIdField, citationSearchRefField));
-        
+        outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
+        return outerQuery;
 	      };
     }.configure(true)); // true=canBeAnalyzed
 		parsers.put("instructive", parsers.get("reviews"));

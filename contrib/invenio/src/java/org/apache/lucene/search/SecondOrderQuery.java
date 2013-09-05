@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.util.ToStringUtils;
 
 
@@ -133,6 +134,18 @@ public class SecondOrderQuery extends Query {
 	
 	public SecondOrderCollector getcollector() {
 		return secondOrderCollector;
+	}
+	
+	/**
+	 * Recursively sets the implemantation type of the
+	 * final score (down the wrapped queries, if they
+	 * are of the SecondOrderQuery
+	 */
+	public void setFinalValueType(FinalValueType type) {
+		secondOrderCollector.setFinalValueType(type);
+		if (firstOrderQuery instanceof SecondOrderQuery) {
+			((SecondOrderQuery) firstOrderQuery).setFinalValueType(type);
+		}
 	}
 
 	// inherit javadoc
