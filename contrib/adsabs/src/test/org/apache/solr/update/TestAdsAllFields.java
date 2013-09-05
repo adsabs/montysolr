@@ -961,10 +961,11 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		"//*[@numFound='2']");
     
     // trending() - what people read
-    // read by nobody
+    // ony one reader = no match (because we set minDocFreq = 2)
     assertQ(req("q", "trending(bibcode:1976AJ.....81...67S)"), 
-    		"//*[@numFound='1']",
-				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']");
+    		"//*[@numFound='0']"
+				//"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']"
+    		);
     // read by many
     assertQ(req("q", "trending(bibcode:1991ApJ...371..665R OR bibcode:2009arXiv0909.1287I)"), 
     		"//*[@numFound='3']",
@@ -973,11 +974,11 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']"
 				);
     assertQ(req("q", "trending(*:*)"), 
-    		"//*[@numFound='4']",
+    		"//*[@numFound='3']",
     		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
 				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
-				"//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']",
-				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']"
+				"//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']"
+				//"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']"
 				);
 
   }

@@ -247,7 +247,7 @@ public class AqpAdsabsSubQueryProvider implements
         
         // configurable params
         mlt.setMinTermFrequency(0);
-        mlt.setMinDocFreq(3);
+        mlt.setMinDocFreq(2);
         mlt.setMaxQueryTerms(200);
         mlt.setBoost(2.0f);
         mlt.setPercentTermsToMatch(0.0f);
