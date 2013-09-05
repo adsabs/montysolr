@@ -960,6 +960,23 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "topn(2, reviews(*:*))"), 
 		"//*[@numFound='2']");
     
+    //dumpDoc(null, "id", "recid", "title");
+    assertQ(req("q", "topn(5, recid:[1 TO 10], id asc)"), 
+				"//*[@numFound='4']",
+				"//doc[1]/int[@name='recid'][.='2']",
+				"//doc[2]/int[@name='recid'][.='3']",
+				"//doc[3]/int[@name='recid'][.='4']",
+				"//doc[4]/int[@name='recid'][.='10']");
+    
+    // TODO: I am too tired now to find out why the sorting is weird
+    // but found it must be!
+//    assertQ(req("q", "topn(5, recid:[1 TO 10], id desc)", "fl", "recid"), 
+//				"//*[@numFound='4']",
+//				"//doc[1]/int[@name='recid'][.='10']",
+//				"//doc[2]/int[@name='recid'][.='4']",
+//				"//doc[3]/int[@name='recid'][.='3']",
+//				"//doc[4]/int[@name='recid'][.='2']");
+    
     // trending() - what people read
     // ony one reader = no match (because we set minDocFreq = 2)
     assertQ(req("q", "trending(bibcode:1976AJ.....81...67S)"), 
