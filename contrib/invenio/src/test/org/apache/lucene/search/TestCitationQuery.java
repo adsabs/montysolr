@@ -26,6 +26,8 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.junit.BeforeClass;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 
 public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 
@@ -134,6 +136,9 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 	
 	public void testCitationQueries() throws Exception {
 		
+		//JUnitCore junit = new JUnitCore();
+		//Result result = junit.run(TestCitesCollectorPerformance.class);
+		
 		
 		// for the queries that use the Integer values
 		// -------------------------------------------
@@ -181,11 +186,11 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertEquals(3, searcher.search(xTest, 10).totalHits);
 		assertEquals(3, searcher.search(bTest, 10).totalHits);
 		
-		DictionaryRecIdCache.INSTANCE.clear();
+		//DictionaryRecIdCache.INSTANCE.clear();
 		
 		// now test of references ( X --> (x))
-		Map<Integer, Integer> cache = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), idField);
-		Map<Integer, Integer> cache2 = DictionaryRecIdCache.INSTANCE.getTranslationCache(searcher.getIndexReader(), idField);
+		Map<Integer, Integer> cache = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Int2LuceneId.MAPPING, searcher, idField);
+		Map<Integer, Integer> cache2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Int2LuceneId.MAPPING, searcher, idField);
 		assertTrue(cache.hashCode() == cache2.hashCode());
 		assertTrue(cache == cache2);
 		
@@ -235,8 +240,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(ar.containsAll(er));
 		
 		
-		int[][] invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, idField, refField);
-		int[][] invCache2 = DictionaryRecIdCache.INSTANCE.getUnInvertedDocids(reader, idField, refField);
+		int[][] invCache = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_INT, searcher, idField, refField);
+		int[][] invCache2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_INT, searcher, idField, refField);
 		
 		assertTrue(invCache == invCache2);
 		assertTrue(invCache.hashCode() == invCache.hashCode());
@@ -342,8 +347,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		
 		
 		// now test of references ( X --> (x))
-		Map<String, Integer> scache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher, idField);
-		Map<String, Integer> scache2 = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher, idField);
+		Map<String, Integer> scache = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, searcher, idField);
+		Map<String, Integer> scache2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, searcher, idField);
 		assertTrue(scache.hashCode() == scache2.hashCode());
 		assertTrue(scache == scache2);
 		
@@ -392,8 +397,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		assertTrue(ar.containsAll(er));
 		
 		
-		invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(searcher, idField, refField);
-		invCache2 = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(searcher, idField, refField);
+		invCache = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, searcher, idField, refField);
+		invCache2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, searcher, idField, refField);
 		
 		assertTrue(invCache.equals(invCache2));
 		assertTrue(invCache == invCache2);
@@ -462,8 +467,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 				Arrays.asList("27"));
 		
 		// check the cache was not rebuilt
-		int[][] yc = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(searcher, idField, refField);
-		int[][] yc2 = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(searcher, idField, refField);
+		int[][] yc = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, searcher, idField, refField);
+		int[][] yc2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, searcher, idField, refField);
 		assertTrue(yc.hashCode() == yc2.hashCode());
 		assertTrue(yc == yc2);
 		
@@ -475,8 +480,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		hasResults(new SecondOrderQuery(q28, null, new SecondOrderCollectorCites(idField, refField)),
 				Arrays.asList("25"));
 		
-		Map<String, Integer> xcache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher, idField);
-		Map<String, Integer> xcache2 = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher, idField);
+		Map<String, Integer> xcache = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, searcher, idField);
+		Map<String, Integer> xcache2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, searcher, idField);
 		
 		assertTrue(xcache == xcache2);
 		assertTrue(xcache.hashCode() == xcache2.hashCode());
@@ -488,8 +493,8 @@ public class TestCitationQuery extends MontySolrAbstractLuceneTestCase {
 		hasResults(new SecondOrderQuery(q28, null, new SecondOrderCollectorCitesRAM(idField, refField)),
 				Arrays.asList("25"));
 		
-		Map<Integer, List<Integer>> acache = DictionaryRecIdCache.INSTANCE.getCacheTranslatedMultiValuesString(searcher,	idField, refField);
-		Map<Integer, List<Integer>> acache2 = DictionaryRecIdCache.INSTANCE.getCacheTranslatedMultiValuesString(searcher,	idField, refField);
+		Map<Integer, List<Integer>> acache = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedMap.MULTIVALUED, searcher,	idField, refField);
+		Map<Integer, List<Integer>> acache2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedMap.MULTIVALUED, searcher,	idField, refField);
 		
 		assertTrue(acache == acache2);
 		assertTrue(acache.hashCode() == acache2.hashCode());

@@ -50,8 +50,9 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 		  }
 		  else {
 			invertedIndex = DictionaryRecIdCache.INSTANCE.
-				getUnInvertedDocidsStrField(searcher, 
-				uniqueIdField, referenceField);
+				getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
+						searcher, 
+				    uniqueIdField, referenceField);
 		  }
 		}
 		

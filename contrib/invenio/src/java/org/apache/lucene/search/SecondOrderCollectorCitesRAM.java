@@ -41,8 +41,8 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 		    docToDocidsCache = (Map<Integer, List<Integer>>) cacheGetter.getCache();
 		  }
 		  else {
-  			docToDocidsCache = DictionaryRecIdCache.INSTANCE.
-  				getCacheTranslatedMultiValuesString(searcher, 
+  			docToDocidsCache = DictionaryRecIdCache.INSTANCE
+  				.getCache(DictionaryRecIdCache.UnInvertedMap.MULTIVALUED, searcher, 
   				uniqueIdField, referenceField);
 		  }
 		}

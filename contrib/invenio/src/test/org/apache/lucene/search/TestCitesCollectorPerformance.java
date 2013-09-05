@@ -176,11 +176,13 @@ public class TestCitesCollectorPerformance extends MontySolrAbstractLuceneTestCa
 		
 		String[] idField = new String[] {"bibcode"};
 		
-		final Map<String, Integer> refCache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(
+		final Map<String, Integer> refCache = DictionaryRecIdCache.INSTANCE.getCache(
+				DictionaryRecIdCache.Str2LuceneId.MAPPING,
 				searcher, idField);
 		
-		final int[][] invertedCache = DictionaryRecIdCache.INSTANCE.
-				getUnInvertedDocidsStrField(searcher,	idField, "breference");
+		final int[][] invertedCache = DictionaryRecIdCache.INSTANCE
+				    .getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
+						 searcher,	idField, "breference");
 		
 		
 		

@@ -40,8 +40,9 @@ public class InvenioWeight extends Weight {
 		this.weight = innerQuery.createWeight(searcher);
 		this.similarity = searcher.getSimilarity();
 		this.query = query;
-		this.recidToDocid = DictionaryRecIdCache.INSTANCE.getTranslationCache(
-				searcher.getIndexReader(), new String[] {idField});
+		this.recidToDocid = DictionaryRecIdCache.INSTANCE.getCache(
+		    DictionaryRecIdCache.Int2LuceneId.MAPPING,
+				searcher, new String[] {idField});
 		this.searcherCounter = 0;
 		this.idField = idField;
 		

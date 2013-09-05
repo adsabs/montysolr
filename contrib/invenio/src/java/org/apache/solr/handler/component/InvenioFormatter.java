@@ -130,7 +130,9 @@ public class InvenioFormatter extends SearchComponent
 			}
 			else {
 				Map<Integer, Integer> recidToDocid = DictionaryRecIdCache.INSTANCE
-						.getTranslationCache(reader, new String[] {rb.req.getSchema().getUniqueKeyField().getName()});
+						.getCache(DictionaryRecIdCache.Int2LuceneId.MAPPING,
+								      rb.req.getSearcher(), 
+								      new String[] {rb.req.getSchema().getUniqueKeyField().getName()});
 				int[] recs = (int[]) result;
 
 				// truncate the number of retrieved documents back into reasonable size

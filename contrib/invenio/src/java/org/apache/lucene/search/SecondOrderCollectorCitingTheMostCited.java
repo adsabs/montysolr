@@ -57,8 +57,10 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
       }
       else {
       invertedIndex = DictionaryRecIdCache.INSTANCE.
-        getUnInvertedDocidsStrField(searcher, 
-        uniqueIdField, referenceField);
+        getCache(
+        		DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING,
+        		searcher, 
+            uniqueIdField, referenceField);
       }
       
       boostCache = FieldCache.DEFAULT.getFloats(DictionaryRecIdCache.INSTANCE.getAtomicReader(((IndexSearcher) searcher).getIndexReader()), 

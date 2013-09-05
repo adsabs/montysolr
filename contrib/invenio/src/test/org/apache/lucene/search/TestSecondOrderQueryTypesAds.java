@@ -204,8 +204,8 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 
 
     // now test of references ( X --> (x))
-    Map<String, Integer> scache = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher, idField);
-    Map<String, Integer> scache2 = DictionaryRecIdCache.INSTANCE.getTranslationCacheString(searcher, idField);
+    Map<String, Integer> scache = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, searcher, idField);
+    Map<String, Integer> scache2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, searcher, idField);
     assertTrue(scache.hashCode() == scache2.hashCode());
     assertTrue(scache == scache2);
 
@@ -224,8 +224,8 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
 
 
 
-    int[][] invCache = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(searcher, idField, refField);
-    int[][] invCache2 = DictionaryRecIdCache.INSTANCE.getUnInvertedDocidsStrField(searcher, idField, refField);
+    int[][] invCache = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, searcher, idField, refField);
+    int[][] invCache2 = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, searcher, idField, refField);
     assertTrue(invCache.equals(invCache2));
     assertTrue(invCache == invCache2);
 
