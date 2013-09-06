@@ -217,6 +217,10 @@ public enum DictionaryRecIdCache {
   		
   	}
   	else {
+  		
+  		// TODO: I need to collect multiple terms
+  		// use something like: TermsCollector.MV
+  		
   		idMapping = FieldCache.DEFAULT.getTerms(reader, externalIdsField);
   		Map<String, Integer> x = buildCacheStr(idMapping);
   		translation_cache_tracker.put(externalIdsField, idMapping.hashCode());

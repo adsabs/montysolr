@@ -49,8 +49,8 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 		    invertedIndex = (int[][]) cacheGetter.getCache();
 		  }
 		  else {
-			invertedIndex = DictionaryRecIdCache.INSTANCE.
-				getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
+		  	invertedIndex = DictionaryRecIdCache.INSTANCE
+					.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
 						searcher, 
 				    uniqueIdField, referenceField);
 		  }
