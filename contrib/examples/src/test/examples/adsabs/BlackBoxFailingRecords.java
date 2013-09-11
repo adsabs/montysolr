@@ -29,6 +29,10 @@ import monty.solr.jni.MontySolrVM;
 import monty.solr.jni.PythonMessage;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.core.SolrCore;
@@ -36,8 +40,10 @@ import org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.update.InvenioDoctor;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
+import org.apache.solr.util.RefCounted;
 import org.junit.BeforeClass;
 
 import examples.BlackAbstractTestCase;
@@ -399,6 +405,39 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 		assertU(commit());
 
 		assertQ(req("q", "*:*"), "//*[@numFound='22']");
+		
+		
+		// check that force-reindexing will update recs
+		RefCounted<SolrIndexSearcher> searcher = h.getCore().getSearcher();
+		SolrIndexSearcher s = searcher.get();
+		Document doc77 = s.doc(s.search(new TermQuery(new Term("recid", "77")), 1).scoreDocs[0].doc);
+		String is = doc77.get("indexstamp");
+		
+		req = req("command", "force-reindexing");
+    rsp = new SolrQueryResponse();
+    core.execute(doctor, req, rsp);
+
+    while (doctor.isBusy()) {
+      Thread.sleep(300);
+    }
+
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(doctor, req, rsp);
+
+    while (doctor.isBusy()) {
+      Thread.sleep(300);
+    }
+    assertU(commit());
+    
+    Document doc77b = s.doc(s.search(new TermQuery(new Term("recid", "77")), 1).scoreDocs[0].doc);
+    String is2 = doc77.get("indexstamp");
+    
+    assertQ(req("q", "*:*"), "//*[@numFound='22']");
+    assertTrue("Docs were not re-indexed", !is.equals(is2));
+    
+		s.close();
+		searcher.decref();
 
 	}
 

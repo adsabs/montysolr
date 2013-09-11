@@ -332,6 +332,9 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     else if(command.equals("discover")) {
       queue.registerNewBatch("#discover", params.get("params", ""));
     }
+    else if(command.equals("force-reindexing")) {
+      queue.registerNewBatch("#discover", "force_reindexing=true");
+    }
     else {
       rsp.add("message", "Unknown command: " + command);
       rsp.add("message", "Allowed: start,stop,reset,info,detailed-info");
@@ -633,6 +636,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     String field = params.get("field", "recid");
     Integer lastRecid = params.getInt("last_recid", -1);
     String modDate = params.get("mod_date", null);
+    Boolean forceReindexing = params.getBool("force_reindexing");
     Integer fetchSize = Math.min(params.getInt("fetch_size", 100000), 100000);
     // setting maxRecs to very large value means the worker cannot be stopped in time
     int maxRecs = Math.min(params.getInt("max_records", 100000), 1000000);
@@ -686,7 +690,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
         int[] coll = dictData.get(name);
         doneSoFar += coll.length;
         for (int x: coll) {
-          if (idToLuceneId.containsKey(x)) {
+          if (!forceReindexing && idToLuceneId.containsKey(x)) {
             present.set(x);
           }
           else {
