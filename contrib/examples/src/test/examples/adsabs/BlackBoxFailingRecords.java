@@ -431,7 +431,7 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
     assertU(commit());
     
     Document doc77b = s.doc(s.search(new TermQuery(new Term("recid", "77")), 1).scoreDocs[0].doc);
-    String is2 = doc77.get("indexstamp");
+    String is2 = doc77b.get("indexstamp");
     
     assertQ(req("q", "*:*"), "//*[@numFound='22']");
     assertTrue("Docs were not re-indexed", !is.equals(is2));
