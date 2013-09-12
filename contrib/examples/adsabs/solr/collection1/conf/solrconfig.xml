@@ -844,6 +844,17 @@
       -->
     </requestHandler>
 
+    <!-- request handler for generating list of similar articles -->
+	<requestHandler name="/mlt" class="solr.MoreLikeThisHandler">
+		<lst name="defaults">
+		<str name="mlt.fl">title,abstract</str>
+		<str name="mlt.qf">title^1.4 abstract^1.3</str>
+		<str name="mlt.mintf">1</str>
+		<str name="mlt.mindf">1</str>
+		<str name="mlt.match.include">false</str>
+		</lst>
+	</requestHandler> 
+
   <!-- A request handler that returns indented JSON by default -->
   <requestHandler name="/query" class="solr.SearchHandler">
      <lst name="defaults">
