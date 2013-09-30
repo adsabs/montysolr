@@ -58,14 +58,6 @@ public class TestMontySolrBasicOperations extends MontySolrAbstractTestCase {
 				res.contains("PYTHONPATH") && res.contains("sys.path")
 				&& res.contains("PYTHONPATH"));
 		
-		assertQ("nope",
-				req("qt", "/diagnostic_test", "q", "nope"),
-				"//lst/int"); //TODO: get xpath correctly
-		
-		//send several messages (the same)
-		MontySolrVM.INSTANCE.sendMessage(message);
-		MontySolrVM.INSTANCE.sendMessage(message);
-		MontySolrVM.INSTANCE.sendMessage(message);
 		
 		// can't use solr log facility
 		System.err.println("Please ignore ERROR messages, if any...");

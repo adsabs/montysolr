@@ -1,3 +1,5 @@
+<?xml version="1.0" ?>
+
 <!--
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with
@@ -15,7 +17,16 @@
  limitations under the License.
 -->
 
-This directory is where any non-transient, non-java files needed
-for the execution of tests should live.
-
-It is used as the CWD when running JUnit tests.
+<!-- a basic solrconfig that tests can use when they want simple minimal solrconfig/schema
+     DO NOT ADD THINGS TO THIS CONFIG! -->
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
+  
+  <!-- checks the system and prints information from both Java and Python side -->
+  <requestHandler name="/diagnostic_test" class="org.apache.solr.handler.PythonDiagnosticHandler" default="false" />
+  
+  
+</config>
