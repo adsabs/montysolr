@@ -373,7 +373,7 @@ public enum DictionaryRecIdCache {
 	}
 	
 	
-	
+	// XXX: I should not be using a Map, but a simple array (reverse of the existing invCache)
 	
 	private Map<Integer, List<Integer>> getCacheTranslatedMultiValuesString(IndexSearcher searcher, String[] externalIds, String refField) 
 		throws IOException {
