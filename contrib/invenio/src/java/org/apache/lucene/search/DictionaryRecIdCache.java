@@ -3,8 +3,10 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.DocTermOrds;
@@ -233,13 +235,24 @@ public enum DictionaryRecIdCache {
 	
   
   private void checkIndexForChanges(IndexSearcher is, String[] fields, Boolean isString) throws IOException {
-  	if (!isIndexUnchanged(getAtomicReader(is.getIndexReader()), fields, isString)) {
+  	AtomicReader reader = getAtomicReader(is.getIndexReader());
+  	if (!isIndexUnchanged(reader, fields, isString)) {
   		clear();
   	}
+  	translation_cache_tracker.put("#maxDoc", reader.maxDoc());
   }
   
 	private boolean isIndexUnchanged(AtomicReader reader, String[] fields, Boolean isString) throws IOException {
+		if (!translation_cache_tracker.containsKey("#maxDoc")) {
+			return false;
+		}
+		if (translation_cache_tracker.get("#maxDoc") != reader.maxDoc()) {
+			return false;
+		}
+		return true;
+		
 		// first check that the index wasn't updated
+		/*
 		int passed = 0;
 		for (String field: fields) {
 			Integer old_hash = null;
@@ -259,6 +272,7 @@ public enum DictionaryRecIdCache {
 			}
 		}
 		return passed == fields.length;
+		*/
 	}
 	
 	
@@ -358,15 +372,14 @@ public enum DictionaryRecIdCache {
 		if (!translation_cache.containsKey(cacheName)) {
 			synchronized(translation_cache_tracker) {
 				
-				Map<String, Integer> translTable = buildCacheStr(searcher, mainField);
-				translation_cache.put(cacheName, translTable);
-				
-				for (int i=1; i<externalIdsField.length;i++) {
-					Map<String, Integer> additionalTranslTable = buildCacheStr(searcher, externalIdsField[i]);
-					translTable.putAll(additionalTranslTable);
+				//Map<String, Integer> translTable = buildCacheStr(searcher, mainField);
+				StringBuilder tmpName = new StringBuilder();
+				for (int i=0; i<externalIdsField.length;i++) {
+					tmpName.append(externalIdsField[i]);
+					tmpName.append(",");
 				}
-				
-				return translTable;
+				Map<String, Integer> translTable = buildCacheStr(searcher, tmpName.toString());
+				translation_cache.put(cacheName, translTable);
 			}
 		}
 		return (Map<String, Integer>) translation_cache.get(cacheName);
@@ -549,13 +562,15 @@ public enum DictionaryRecIdCache {
 		int[][] retArray = new int[reader.maxDoc()][];
 		DocsEnum docs = null;
 		
-		ArrayList<Integer> docIds = new ArrayList<Integer>();
+		Set<Integer> docIds = new HashSet<Integer>();
 		for (;;) {
 			BytesRef term = termsEnum.next();
 			if (term == null)
 				break;
 			
+			//System.out.println("uninverting: " + term.utf8ToString());
 			int luceneDocId = parser.parseInt(term);
+			//System.out.println("lucene id: " + luceneDocId);
 			if (luceneDocId < 0) continue; // skip terms that are not mapped onto lucene ids
 			
 			int i = 0;
@@ -572,15 +587,27 @@ public enum DictionaryRecIdCache {
 				docIds.add(d);
 				//i++;
 			}
+			
+			// must merge with the 
+			if (retArray[luceneDocId] != null) {
+				for (int existing: retArray[luceneDocId]) {
+					docIds.add(existing);
+				}
+			}
+			
 			int[] val = new int[docIds.size()];
 			for (int x: docIds) {
 				val[i] = x;
 				i++;
 			}
+			//System.out.println("resolved: " + luceneDocId + "=" + docIds);
+			//System.out.println("old val=" + retArray[luceneDocId]);
 			retArray[luceneDocId] = val;
+			//System.out.println("new val=" + retArray[luceneDocId]);
 		}
 		return retArray;
 	}
+	
 	
 	/*
 	 * A temporary hack to get uninverted values from the index

@@ -21,6 +21,7 @@ import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.DictionaryRecIdCache.Str2LuceneId;
 import org.apache.lucene.search.DictionaryRecIdCache.UnInvertedMap;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
@@ -53,7 +54,7 @@ public class TestCitationCache extends MontySolrAbstractLuceneTestCase {
 		reOpenWriter(OpenMode.CREATE);
 
 		adoc("id", "0", "bibcode", "b0", 
-				"reference", "b2", "reference", "b3", "reference", "b4");
+				"reference", "x2", "reference", "b3", "reference", "b4");
 		adoc("id", "1", "bibcode", "b1", 
 				"reference", "b2", "reference", "b3", "reference", "b4");
 		adoc("id", "2", "bibcode", "b2", "alternate_bibcode", "x2", "alternate_bibcode", "x22",
@@ -67,7 +68,7 @@ public class TestCitationCache extends MontySolrAbstractLuceneTestCase {
 		reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
 		
 		adoc("id", "5", "bibcode", "b5", "alternate_bibcode", "x5",
-				"reference", "b2", "reference", "b3", "reference", "b4");
+				"reference", "x22", "reference", "b3", "reference", "b4");
 		adoc("id", "6", "bibcode", "b6", 
 				"reference", "b2", "reference", "b3", "reference", "b4");
 		adoc("id", "7", "bibcode", "b7", 
@@ -118,8 +119,6 @@ public class TestCitationCache extends MontySolrAbstractLuceneTestCase {
 	
 	public void testCitationCache() throws Exception {
 		
-		// first make sure
-		
 		
 		// what papers are referenced by each paper
 		Map<Integer, List<Integer>> cache1 = DictionaryRecIdCache.INSTANCE.getCache(UnInvertedMap.MULTIVALUED, 
@@ -135,19 +134,45 @@ public class TestCitationCache extends MontySolrAbstractLuceneTestCase {
 		assertTrue( cache1.equals(cache2));
 		assertTrue( cache1 == cache2 );
 		
-		// TODO: finish
-//		assertTrue(cache1.get(0).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(1).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(2).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(3).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(4).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(5).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(6).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(7).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(8).equals(Arrays.asList(2, 4)));
-//		assertTrue(cache1.get(9).equals(Arrays.asList(2, 3, 4)));
-//		assertTrue(cache1.get(10).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(0).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(1).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(2).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(3).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(4).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(5).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(6).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(7).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(8).equals(Arrays.asList(2, 4)));
+		assertTrue(cache1.get(9).equals(Arrays.asList(2, 3, 4)));
+		assertTrue(cache1.get(10).equals(Arrays.asList(2, 3, 4)));
 		
+		
+		// references
+		Map<String, Integer> refs1 = DictionaryRecIdCache.INSTANCE.getCache(Str2LuceneId.MAPPING, 
+				searcher, 
+				new String[] {"bibcode", "alternate_bibcode"});
+		
+		Map<String, Integer> refs2 = DictionaryRecIdCache.INSTANCE.getCache(Str2LuceneId.MAPPING, 
+				searcher, 
+				new String[] {"bibcode", "alternate_bibcode"});
+		
+		assertTrue( refs1.equals(refs2));
+		assertTrue( refs1 == refs2 );
+		
+		assertTrue( refs1.get("b0").equals(0));
+		assertTrue( refs1.get("b1").equals(1));
+		assertTrue( refs1.get("b2").equals(2));
+		assertTrue( refs1.get("x2").equals(2));
+		assertTrue( refs1.get("x22").equals(2));
+		assertTrue( refs1.get("b3").equals(3));
+		assertTrue( refs1.get("b4").equals(4));
+		assertTrue( refs1.get("b5").equals(5));
+		assertTrue( refs1.get("x5").equals(5));
+		assertTrue( refs1.get("b6").equals(6));
+		assertTrue( refs1.get("b7").equals(7));
+		assertTrue( refs1.get("b8").equals(8));
+		assertTrue( refs1.get("b9").equals(9));
+		assertTrue( refs1.get("b10").equals(10));
 		
 	}
 	
