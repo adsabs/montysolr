@@ -123,9 +123,8 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     QueryResponseWriter responseWriter = core.getQueryResponseWriter(req);
     responseWriter.write(sw,req,rsp);
     req.close();
-    
     assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxxx\"],");
-    assert sw.toString().contains("\"title\":[\"head\"]");
+    assert sw.toString().contains("\"title\":[\"head");
     //System.out.println(sw.toString());
     
     

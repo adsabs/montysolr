@@ -2153,7 +2153,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * Test we are not mixing/concatenating fields - Ticket #346 
      */
     testAuthorQuery(
-        "\"obama,\" boo", "+(author:obama, author:obama,*) +all:boo", 
+        "\"obama,\" boooo", "+(author:obama, author:obama,*) +all:boooo", 
         "//*[@numFound='0']"
         );
 

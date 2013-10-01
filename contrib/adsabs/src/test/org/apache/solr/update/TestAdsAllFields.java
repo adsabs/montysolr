@@ -737,8 +737,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         //"//doc/int[@name='recid'][.='9218511']"
         "//*[@numFound='0']"
     ); 
-    // alternate title copied to all
-    assertQ(req("q", "Probing red giants"), 
+    // alternate title should be present (doing exact search
+    // to avoid matches from synonyms/other fields)
+    assertQ(req("q", "=(Probing red giants)"), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218605']"
     ); 
