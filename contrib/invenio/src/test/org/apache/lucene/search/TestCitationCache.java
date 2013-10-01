@@ -174,6 +174,33 @@ public class TestCitationCache extends MontySolrAbstractLuceneTestCase {
 		assertTrue( refs1.get("b9").equals(9));
 		assertTrue( refs1.get("b10").equals(10));
 		
+		
+		// citations as arrays
+		int[][] refs3 = DictionaryRecIdCache.INSTANCE
+			.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
+				searcher, 
+				new String[] {"bibcode", "alternate_bibcode"},
+				"reference");
+		int[][] refs4 = DictionaryRecIdCache.INSTANCE
+		.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
+			searcher, 
+			new String[] {"bibcode", "alternate_bibcode"},
+			"reference");
+		assertTrue( refs3.equals(refs4));
+		assertTrue( refs3 == refs4 );
+		
+		assertTrue( refs3[0] == null);
+		assertTrue( refs3[1] == null);
+		assertArrayEquals( refs3[2], new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		assertArrayEquals( refs3[3], new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10});
+		assertArrayEquals( refs3[4], new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		assertTrue( refs3[5] == null);
+		assertTrue( refs3[6] == null);
+		assertTrue( refs3[7] == null);
+		assertTrue( refs3[8] == null);
+		assertTrue( refs3[9] == null);
+		
+		
 	}
 	
 	

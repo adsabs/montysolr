@@ -109,7 +109,7 @@ public enum DictionaryRecIdCache {
 		}
 	}
 	
-	private void clear() {
+	public void clear() {
 		synchronized (translation_cache_tracker) {
 			translation_cache.clear();
 			multiValuesCache.clear();
