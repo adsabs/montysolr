@@ -173,7 +173,7 @@ class CitationsTransform extends DocTransformer
 	private List<String> getCitationValues(SolrDocument doc, int docid) {
 		ArrayList<String> data = new ArrayList<String>();
 		BytesRef ret = new BytesRef();
-		if (citations.length >= docid) {
+		if (citations.length >= docid && citations[docid] != null) {
 			for (Integer v: citations[docid]) {
 				if (idMapping != null) {
 					ret = idMapping.getTerm(v, ret);
@@ -205,7 +205,7 @@ class CitationsTransform extends DocTransformer
   }
 
 	private int getCitationCount(SolrDocument doc, int docid) {
-	  if (citations.length >= docid) {
+	  if (citations.length >= docid && citations[docid] != null) {
 	  	return citations[docid].length;
 	  }
 	  else {

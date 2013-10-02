@@ -31,7 +31,7 @@ public class TestCitationsTransformer extends AbstractSolrTestCase {
 		assertU(adoc("id", "2", "bibcode", "b2", "alternate_bibcode", "x2", "alternate_bibcode", "x22",
 				"reference", "b2", "reference", "b3", "reference", "b4"));
 		assertU(adoc("id", "3", "bibcode", "b3", 
-				"reference", "b2", "reference", "b3", "reference", "b4"));
+				"reference", "b2", "reference", "b3", "reference", "b4", "reference", "foo"));
 		assertU(adoc("id", "4", "bibcode", "b4", 
 				"reference", "b2", "reference", "b3", "reference", "b4"));
 		
@@ -50,7 +50,7 @@ public class TestCitationsTransformer extends AbstractSolrTestCase {
 				"reference", "b2", "reference", "b3", "reference", "b4"));
 		assertU(adoc("id", "10", "bibcode", "b10",
 				"reference", "b2", "reference", "b3", "reference", "b4"));
-		
+		assertU(adoc("id", "11", "bibcode", "b11"));		
 		assertU(commit());
 	}
 	
@@ -101,6 +101,15 @@ public class TestCitationsTransformer extends AbstractSolrTestCase {
         "//doc/lst[@name='[citations]']/arr[@name='citations']/str[1][.='b0']",
         "//doc/lst[@name='[citations]']/arr[@name='citations']/str[10][.='b10']"
     );
+		
+		assertQ(req("q", "bibcode:b11", 
+				"fl", "id,[citations values=citations,references resolve=true]",
+				"indent", "true"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='id'][.='11']",
+        "//doc/lst[@name='[citations]']/int[@name='num_citations'][.='0']",
+        "//doc/lst[@name='[citations]']/int[@name='num_references'][.='0']"
+        );
 		
 	}
 }
