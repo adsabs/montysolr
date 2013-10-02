@@ -122,7 +122,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     // the mongodb instance (on localhost)
     core.execute(handler, req, rsp);
 
-    commit("waitFlush", "true", "waitSearcher", "true");
+    assertU(commit("waitSearcher", "true"));
 
     // dumpDoc(null);
 
@@ -999,6 +999,21 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				//"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']"
 				);
 
+    
+    // test we can retrieve citations data (from the cache)
+    assertQ(req("q", "id:10", 
+    		"fl", "recid,[citations values=citations,references resolve=true]",
+    		"indent", "true"), 
+				"//*[@numFound='1']",
+				"//doc/lst[@name='[citations]']/int[@name='num_references'][.='2']",
+				"//doc/lst[@name='[citations]']/arr[@name='references']/str[1][.='2002rvmp....74...11']",
+				"//doc/lst[@name='[citations]']/arr[@name='references']/str[2][.='2002rvmp....74...12']",
+				
+				"//doc/lst[@name='[citations]']/int[@name='num_citations'][.='1']",
+				"//doc/lst[@name='[citations]']/arr[@name='citations']/str[1][.='2002rvmp....74...11']"
+				);
+    
+    
   }
 
   

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="minimal" version="1.1">
+  <types>
+    <fieldType name="string" class="solr.StrField" />
+    <fieldType name="int" class="solr.TrieIntField"
+      precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+  </types>
+  <fields>
+    <field name="id" type="int" indexed="true" stored="true"
+      required="true" />
+    <field name="bibcode" type="string" indexed="true" stored="true"
+      required="false" />
+    <field name="alternate_bibcode" type="string" indexed="true" stored="true"
+      required="false" multiValued="true"/>  
+    <field name="reference" type="string" indexed="true" stored="true" multiValued="true"/>
+    
+  </fields>
+</schema>
