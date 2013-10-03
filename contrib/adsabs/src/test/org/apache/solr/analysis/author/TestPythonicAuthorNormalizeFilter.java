@@ -43,6 +43,9 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
 		compare("Jean Luc de Picard", "de Picard, Jean Luc");
 		compare("Juan Q. Xavier Velasquez y Garcia, Jr.", "Velasquez y Garcia, Juan Q. Xavier");
 		compare("Jean-Luc Picard;Jean Luc de Picardie", "Picard, Jean-Luc", "de Picardie, Jean Luc");
+		compare("Pinilla-Alonso", "Pinilla-Alonso,");
+		compare("Pinilla Alonso,", "Pinilla Alonso,");
+		compare("Pinilla-Alonso, Brava", "Pinilla-Alonso, Brava");
 	}
 	
 	public void compare(String input, String... expected) throws Exception {

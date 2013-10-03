@@ -67,6 +67,8 @@
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<!-- deal with natural order queries (this is used only at query time) -->
+				<filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />

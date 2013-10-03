@@ -79,6 +79,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   public static void beforeTestAdsDataImport() throws Exception {
     // to use filesystem instead of ram
     //System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
+  	MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
+				+ "/contrib/adsabs/src/python");
+		MontySolrSetup.addTargetsToHandler("adsabs.targets");
   }
 
   @Override
@@ -342,81 +345,79 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // doesn't return any results, even though it should yield 2010Natur.468..940V.
     testAuthorQuery(
         "\"van Dokkum\"", 
-        				   "author:van dokkum, author:van dokkum, * author:van d author:van d * author:van",
+        				   "author:van dokkum, author:van dokkum, *",
                    "//*[@numFound='6']",
                    // "van Dokkum" numFound=6
                    // 220	van Dokkum             221	van Dokkum,            222	van Dokkum, H          
                    // 223	van Dokkum, Hector     224	van Dokkum, Hiatus     225	van Dokkum, Romulus    
         "\"van Dokkum,\"", 
-        				   "author:van dokkum, author:van dokkum, * author:van d author:van d * author:van",
+        				   "author:van dokkum, author:van dokkum, *",
                    "//*[@numFound='6']",
                    // "van Dokkum," numFound=6
                    // 220	van Dokkum             221	van Dokkum,            222	van Dokkum, H          
                    // 223	van Dokkum, Hector     224	van Dokkum, Hiatus     225	van Dokkum, Romulus    
 			   "\"van Dokkum, H\"", 
-       				   "author:van dokkum, h author:van dokkum, h* author:van d h author:van d h* author:van dokkum, author:van d author:van",
+       				   "author:van dokkum, h author:van dokkum, h* author:van dokkum,",
                   "//*[@numFound='5']",
                   // "van Dokkum, H" numFound=5
                   // 220	van Dokkum             221	van Dokkum,            222	van Dokkum, H          
                   // 223	van Dokkum, Hector     224	van Dokkum, Hiatus        
         "\"van Dokkum, H.\"", 
-       				   "author:van dokkum, h author:van dokkum, h* author:van d h author:van d h* author:van dokkum, author:van d author:van",
+       				   "author:van dokkum, h author:van dokkum, h* author:van dokkum,",
                   "//*[@numFound='5']",
                   // "van Dokkum, H." numFound=5
                   // 220	van Dokkum             221	van Dokkum,            222	van Dokkum, H          
                   // 223	van Dokkum, Hector     224	van Dokkum, Hiatus                       
         "\"van Dokkum, Romulus\"", 
-       				   // TODO: the following produces hits that cannot be in the index, those without the trailing comma - but otherwise it is OK
-                  "author:van dokkum, romulus author:van dokkum, romulus * author:van d romulus author:van d romulus * author:van dokkum, r author:van dokkum, r * author:van d r author:van d r * author:van dokkum, author:van d author:van",
+                  "author:van dokkum, romulus author:van dokkum, romulus * author:van dokkum, r author:van dokkum, r * author:van dokkum,",
                   "//*[@numFound='3']"
                   // "van Dokkum, Romulus" numFound=3
                   // 220	van Dokkum             221	van Dokkum,            225	van Dokkum, Romulus             				   
        );
 
     
-    
-    //bug #234
+    //bug #324
+    //setDebug(true);
     testAuthorQuery(
          "Pinilla-Alonso", 
-        					//"author:pinilla alonso, author:pinilla alonso, *", // should we rather want this???
-        				   "author:pinilla alonso, author:pinilla alonso, * author:pinilla a author:pinilla a * author:pinilla",
+        				   "author:pinilla alonso, author:pinilla alonso, *",
                    "//*[@numFound='6']",
                    // Pinilla-Alonso numFound=6
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer  
          "\"Pinilla Alonso\"", 
-         				   "author:pinilla alonso, author:pinilla alonso, * author:pinilla a author:pinilla a * author:pinilla",
-                    "//*[@numFound='6']",
+         				    // we can't do magic here and i'd like to avoid generating all possible combinations
+         						"author:alonso, pinilla author:alonso, pinilla * author:alonso, p author:alonso, p * author:alonso,",
+                    "//*[@numFound='0']",
                     // Pinilla-Alonso numFound=6
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                     // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer
          "\"Pinilla Alonso,\"", 
-         				   "author:pinilla alonso, author:pinilla alonso, * author:pinilla a author:pinilla a * author:pinilla",
+         				   "author:pinilla alonso, author:pinilla alonso, *",
                     "//*[@numFound='6']",
                     // Pinilla-Alonso numFound=6
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                     // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer
          "Pinilla-Alonso,", 
-         				   "author:pinilla alonso, author:pinilla alonso, * author:pinilla a author:pinilla a * author:pinilla",
+         				   "author:pinilla alonso, author:pinilla alonso, *",
                     "//*[@numFound='6']",
                     // Pinilla-Alonso numFound=6
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                     // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer  
 			   "Pinilla-Alonso, B", 
-        				   "author:pinilla alonso, b author:pinilla alonso, b* author:pinilla a b author:pinilla a b* author:pinilla alonso, author:pinilla a author:pinilla",
+        				   "author:pinilla alonso, b author:pinilla alonso, b* author:pinilla alonso,",
                    "//*[@numFound='5']",
                    // Pinilla-Alonso numFound=6
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat   
-         "Pinilla-Alonso, B.", 
-        				   "author:pinilla alonso, b author:pinilla alonso, b* author:pinilla a b author:pinilla a b* author:pinilla alonso, author:pinilla a author:pinilla",
+         "Pinilla Alonso, B.", 
+        				   "author:pinilla alonso, b author:pinilla alonso, b* author:pinilla alonso,",
                    "//*[@numFound='5']",
                    // Pinilla-Alonso numFound=6
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat                      
          "Pinilla-Alonso, Brava", 
-        				   // TODO: the following produces hits that cannot be in the index, those without the trailing comma - but otherwise it is OK
-                   "author:pinilla alonso, brava author:pinilla alonso, brava * author:pinilla a brava author:pinilla a brava * author:pinilla alonso, b author:pinilla alonso, b * author:pinilla a b author:pinilla a b * author:pinilla alonso, author:pinilla a author:pinilla",
+                   "author:pinilla alonso, brava author:pinilla alonso, brava * author:pinilla alonso, b author:pinilla alonso, b * author:pinilla alonso,",
                    "//*[@numFound='4']"
                    // Pinilla-Alonso, Brava numFound=4
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      

@@ -106,8 +106,40 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
       return true;
     }
     
-    String[] parts = authorName.split(" ", maxNumberOfNames );
-    String[] origParts = origAuthorName.split(" ", maxNumberOfNames );
+    
+    String[] parts = null;
+    String[] origParts = null;
+    
+    if (authorName.contains(",")) {
+    	
+    	String[] authorParts = authorName.split(",\\s*", 2);
+      String[] origAuthorParts = origAuthorName.split(",\\s*", 2);
+      
+    	if (authorParts.length > 1) {
+    	
+	    	String[] nameParts = authorParts[1].split(" ", maxNumberOfNames-1 );
+		    String[] origNameParts = origAuthorParts[1].split(" ", maxNumberOfNames-1 );
+		    
+		    parts = new String[nameParts.length+1];
+		    parts[0] = authorParts[0] + ",";
+		    for (int i=1;i<nameParts.length+1;i++) {
+		    	parts[i] = nameParts[i-1];
+		    }
+		    origParts = new String[origNameParts.length+1];
+		    origParts[0] = origAuthorParts[0]  + ",";
+		    for (int i=1;i<origNameParts.length+1;i++) {
+		    	origParts[i] = origNameParts[i-1];
+		    }
+    	}
+    	else {
+    		parts = authorParts;
+    		origParts = origAuthorParts;
+    	}
+    }
+    else {
+    	parts = authorName.split(" ", maxNumberOfNames );
+	    origParts = origAuthorName.split(" ", maxNumberOfNames );
+    }
     
     // this is an important indicator that influences how the wildcard variant
     // is generated (if there is only acronym in the input, we do prefix search,
