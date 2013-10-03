@@ -4,8 +4,8 @@ import os
 import thread
 import sys
 
+from nameparser import HumanName
 
-import ptree
 
 
 def dispatch(func_name, *args, **kwargs):
@@ -18,17 +18,15 @@ def dispatch(func_name, *args, **kwargs):
 
 
 
-def load_fulltext(bibcode, field_name):
-    ptree_path = ptree.id2ptree(bibcode)
-    # TODO: make this path a config setting again
-    full_path = '/proj/ads/fulltext/extracted%s%s.txt' % (ptree_path, field_name)
-    if os.path.exists(full_path):
-        fo = open(full_path, 'r')
-        text = fo.read()
-        fo.close()
-        return text.decode('utf-8')
-    else:
-        return u""
+def parse_human_name(input):
+    """Parses human names using python nameparse library
+    """
+    name = HumanName(input)
+    out = {}
+    for k in ('first', 'middle', 'last', 'suffix', 'title'):
+        if getattr(name, k):
+            out[k[0].upper() + k[1:]] = getattr(name, k)
+    return out 
       
 
 if __name__ == '__main__':

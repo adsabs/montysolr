@@ -48,6 +48,10 @@ class Handler(object):
         if message_id in self._db:
             return self._db[message_id]
         else:
+            message_id = '*:' + recipient
+            if message_id in self._db:
+                return self._db[message_id]
+            
             self.log.error("Unknown target; message_id=%s\nKnown targets: %s" %
                            (message_id, self._db.keys()))
             raise Exception("Unknown target; message_id=%s" %

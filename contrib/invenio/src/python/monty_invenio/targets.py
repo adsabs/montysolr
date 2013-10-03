@@ -343,5 +343,5 @@ def montysolr_targets():
         num_cpus = multi_api_calls.start_multiprocessing(int(config.MONTYSOLR_MAX_WORKERS))
     
     if num_cpus > 1:
-         api_calls = multi_api_calls # swap the providers
+        api_calls = multi_api_calls # swap the providers
     return targets
