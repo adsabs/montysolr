@@ -15,17 +15,17 @@ public class PythonicAuthorNormalizeFilterFactory extends TokenFilterFactory {
 	
 	public PythonicAuthorNormalizeFilterFactory() {
 		// test python is ready (don't want to wait until its too late)
-		Reader reader = new StringReader("Malcolm X");
-		Tokenizer tokenizer = new KeywordTokenizer(reader);
-		PythonicAuthorNormalizerFilter filter = new PythonicAuthorNormalizerFilter(tokenizer);
-		try {
-	    filter.reset();
-	    while (filter.incrementToken()) {
-				//pass
-			}
-    } catch (IOException e) {
-	    throw new SolrException(ErrorCode.SERVER_ERROR, "Server is not ready to execute Pythonic name parser", e);
-    }
+//		Reader reader = new StringReader("Malcolm X");
+//		Tokenizer tokenizer = new KeywordTokenizer(reader);
+//		PythonicAuthorNormalizerFilter filter = new PythonicAuthorNormalizerFilter(tokenizer);
+//		try {
+//	    filter.reset();
+//	    while (filter.incrementToken()) {
+//				//pass
+//			}
+//    } catch (IOException e) {
+//	    throw new SolrException(ErrorCode.SERVER_ERROR, "Server is not ready to execute Pythonic name parser", e);
+//    }
 		
 	}
 	

@@ -739,11 +739,13 @@ def req(url, **kwargs):
         raise Exception("Timeout getting url=%s & %s" % (url, kwargs))
     return r
 
-def get_pid(pidpath):
+def get_pid(pidpath, raw=False):
     if os.path.exists(pidpath):
         with open(pidpath, 'r') as pidfile:
             r_pid = pidfile.read().strip()
         try:
+            if raw:
+                return r_pid
             return int(r_pid)
         except ValueError:
             return -1
@@ -994,15 +996,18 @@ def setup_invenio(options):
     if options.force_recompilation and os.path.exists('invenio'):
         run_cmd(['rm', '-fr', 'invenio'])
         
-    if os.path.exists('invenio.git') and os.path.exists('invenio'):
-        with changed_dir('invenio.git'):
-            commit = get_output(["git", "log", "--pretty=oneline", "--abbrev-commit", "-n 1"])
-            run_cmd(['git', 'fetch'])
-            run_cmd(['git', 'reset', '--hard', 'origin/master'])
-            run_cmd(['git', 'checkout', 'master'])
-            commit2 = get_output(["git", "log", "--pretty=oneline", "--abbrev-commit", "-n 1"])
-            if commit == commit2 and len(commit2) > 0:
-                return # already installed, no changes there
+    if os.path.exists('invenio/RELEASE') and str(get_pid('invenio/RELEASE', raw=True)) == str(INVENIO_COMMIT):
+        return # already there
+        
+    #if os.path.exists('invenio.git') and os.path.exists('invenio'):
+    #    with changed_dir('invenio.git'):
+    #        commit = get_output(["git", "log", "--pretty=oneline", "--abbrev-commit", "-n 1"])
+    #        run_cmd(['git', 'fetch'])
+    #        run_cmd(['git', 'reset', '--hard', 'origin/master'])
+    #        run_cmd(['git', 'checkout', 'master'])
+    #        commit2 = get_output(["git", "log", "--pretty=oneline", "--abbrev-commit", "-n 1"])
+    #        if commit == commit2 and len(commit2) > 0:
+    #            return # already installed, no changes there
         
     
     with open("install_invenio.sh", "w") as inpython:
@@ -1018,14 +1023,13 @@ else
    cd invenio.git
    git fetch
    git reset --hard origin/master
-   git checkout master
    cd ..
 fi
 
 site_packages=`python -c "import os,sys;print '%%s/lib/python%%s.%%s/site-packages' %% (os.path.realpath('python'), sys.version_info[0], sys.version_info[1])"`
 
 cd invenio.git
-git checkout master
+git checkout %(INVENIO_COMMIT)s
 
 aclocal && automake -a && autoconf
 
@@ -1046,12 +1050,16 @@ ln -s %(INSTDIR)s/perpetuum/invenio/lib/python/invenio $site_packages/invenio
 
 echo "%(invenio_config)s" > %(INSTDIR)s/perpetuum/invenio/etc/invenio-local.conf
 
+echo "%(INVENIO_COMMIT)s" > %(INSTDIR)s/perpetuum/invenio/RELEASE
+
 # this actually generates invnenio module (inside invenio lib)
 python %(INSTDIR)s/perpetuum/invenio/bin/inveniocfg --update-all
 
 deactivate
 exit 0
-""" % {'INSTDIR':INSTDIR, 'invenio_config': INVENIO_CONFIG.replace("$", "\\$")})
+""" % {'INSTDIR':INSTDIR, 
+       'invenio_config': INVENIO_CONFIG.replace("$", "\\$"),
+       'INVENIO_COMMIT': INVENIO_COMMIT})
         
     run_cmd(['chmod', 'u+x', 'install_invenio.sh'])
     run_cmd(['bash', '-e', './install_invenio.sh'])

@@ -23,8 +23,8 @@ def check_demo_site_exists():
     u = dbquery.run_sql("SELECT id FROM user WHERE email='romeo.montague@cds.cern.ch'")
     r = dbquery.run_sql("SELECT COUNT(id) FROM bibrec")
     if not len(c) or (not len(u) and int(u[0][0]) != 5) or (not len(r) or r[0][0] < 90): 
-        raise Exception("Your Invenio installation does not seem to have demo records loaded\n" +
-                        "Please install demo first:\n" + 
+        raise Exception("Your Invenio installation does not seem to be the demo site\n" +
+                        "Please check you have the demo (or install it):\n" + 
                         "/your/invenio/bin/inveniocfg --drop-demo-site --create-demo-site --load-demo-records --yes-i-know ")
         
 
