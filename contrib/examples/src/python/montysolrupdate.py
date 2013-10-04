@@ -87,7 +87,7 @@ JCC_SVN_TAG='MONTYSOLR_JCC_SVN_TAG' in os.environ and os.environ['MONTYSOLR_JCC_
 PYLUCENE_SVN_TAG='MONTYSOLR_PYLUCENE_SVN_TAG' in os.environ and os.environ['MONTYSOLR_PYLUCENE_SVN_TAG'] or JCC_SVN_TAG
 INVENIO_CONFIG='INVENIO_CONFIG' in os.environ and os.environ['INVENIO_CONFIG'] or ''
 INVENIO_COMMIT='INVENIO_COMMIT' in os.environ and os.environ['INVENIO_COMMIT'] or 'master'
-
+PYTHON_RELEASE = 'MONTYSOLR_PYTHON_RELEASE' in os.environ and os.environ['MONTYSOLR_PYTHON_RELEASE'] or '2' 
 # some ideas stolen from python release script
 
 if "check_output" not in dir( subprocess ): # duck punch it in!
@@ -840,7 +840,7 @@ def setup_python(options):
     
     if options.force_recompilation and os.path.exists('python'):
         run_cmd(['rm', '-fr', 'python'])
-    elif os.path.exists('python/RELEASE') and str(get_pid('python/RELEASE')) == str(JCC_SVN_TAG):
+    elif os.path.exists('python/RELEASE') and str(get_pid('python/RELEASE')) == str(PYTHON_RELEASE):
         return # python already installed
 
     with open("install_python.sh", "w") as inpython:
@@ -866,6 +866,7 @@ pip install lxml
 pip install simplejson
 pip install configobj
 pip install pyparsing==1.5.7
+pip install nameparser
 
 # verify installation
 python -c "import numpy,lxml,simplejson,configobj,pyparsing, MySQLdb, sqlalchemy"
@@ -874,7 +875,7 @@ deactivate
 echo "%(release)s" > python/RELEASE
 
 exit 0
-""" % {'python': sys.executable, 'release': JCC_SVN_TAG} )
+""" % {'python': sys.executable, 'release': PYTHON_RELEASE} )
         
     run_cmd(['chmod', 'u+x', 'install_python.sh'])
     run_cmd(['./install_python.sh'])
