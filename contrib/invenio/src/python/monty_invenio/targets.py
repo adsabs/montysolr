@@ -35,6 +35,15 @@ JArray_byte = j.JArray_byte #@UndefinedVariable
 #ArrayList = j.ArrayList #@UndefinedVariable
 
 
+def parse_human_name(message):
+    input = unicode(message.getParam("input"))
+    (wid, results) = api_calls.dispatch("parse_human_name", input)
+    if results:
+        out = HashMap() #.of_(String, JArray_int)
+        for k,v in results.items():
+            out.put(k, v)
+        message.setResults(out)
+
 def format_search_results(message):
     '''Returns the citation summary for the given recids. This method
     inserts the Invenio formatted citation summary directly into the
@@ -332,6 +341,7 @@ def montysolr_targets():
            'InvenioFormatter:sort_and_format', sort_and_format,
            'Invenio:diagnostic_test', diagnostic_test,
            '*:invenio_search', invenio_search,
+           '*:parse_human_name', parse_human_name,
            )
 
     num_cpus = 0
