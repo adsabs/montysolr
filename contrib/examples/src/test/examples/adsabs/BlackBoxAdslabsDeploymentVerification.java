@@ -24,6 +24,7 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		exampleInit();
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
+		MontySolrSetup.addTargetsToHandler("adsabs.targets");
 		//MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
 	}
 	

@@ -64,6 +64,7 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
 		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
+		MontySolrSetup.addTargetsToHandler("adsabs.targets");
 	}
 
 	private ArrayList<Integer> tempRecids;
