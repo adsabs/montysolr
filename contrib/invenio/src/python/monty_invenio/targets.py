@@ -341,7 +341,6 @@ def montysolr_targets():
            'InvenioFormatter:sort_and_format', sort_and_format,
            'Invenio:diagnostic_test', diagnostic_test,
            '*:invenio_search', invenio_search,
-           '*:parse_human_name', parse_human_name,
            )
 
     num_cpus = 0

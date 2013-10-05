@@ -18,6 +18,7 @@ import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
+import org.junit.BeforeClass;
 
 
 /**
@@ -43,6 +44,13 @@ import org.apache.lucene.search.spans.SpanPositionRangeQuery;
  */
 public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
+	@BeforeClass
+	public static void beforeTestAqpAdsabsSolrSearch() throws Exception {
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
+				+ "/contrib/adsabs/src/python");
+		MontySolrSetup.addTargetsToHandler("adsabs.targets");
+	}
+	
 	@Override
 	public String getSchemaFile() {
 		makeResourcesVisible(this.solrConfig.getResourceLoader(),
@@ -175,11 +183,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		assertQueryEquals(req("defType", "aqp", "q","^two"),
 				"spanPosRange(spanOr([author:two,, SpanMultiTermQueryWrapper(author:two,*)]), 0, 1)", 
 				SpanPositionRangeQuery.class);
-		assertQueryEquals(req("defType", "aqp", "q","one ^two, j, k"), 
-				"+all:one +spanPosRange(spanOr([author:two, j, k, SpanMultiTermQueryWrapper(author:two, j, k*), author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), author:two, j,, author:two, j, author:two,]), 0, 1)",
+		assertQueryEquals(req("defType", "aqp", "q","one ^two, j k"), 
+				"+all:one +spanPosRange(spanOr([author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), EmptySpanQuery(author:/two, j[^\\s]+ k/), EmptySpanQuery(author:/two, j[^\\s]+ k .*/), author:two, j, author:two,]), 0, 1)",
 				BooleanQuery.class);
-		assertQueryEquals(req("defType", "aqp", "q","one \"^author phrase\""), 
-				"+all:one +spanPosRange(spanOr([author:author phrase,, SpanMultiTermQueryWrapper(author:author phrase, *), author:author p, SpanMultiTermQueryWrapper(author:author p *), author:author]), 0, 1)",
+		assertQueryEquals(req("defType", "aqp", "q","one \"^author phrase\"", "qf", "title author"),
+				"+((author:one, author:one,*) | title:one) +spanPosRange(spanOr([author:phrase, author, SpanMultiTermQueryWrapper(author:phrase, author *), author:phrase, a, SpanMultiTermQueryWrapper(author:phrase, a *), author:phrase,]), 0, 1)",
 				BooleanQuery.class);
 		
 		
@@ -537,18 +545,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "| title:\"accomazzi alberto\")", 
         DisjunctionMaxQuery.class);
 	  
+	  // xxx will be removed from the author, but present in other fields
 	  assertQueryEquals(req("defType", "aqp", "q", "accomazzi, alberto, xxx", 
         "qf", "author^2.3 title abstract^0.4"), 
         "(((abstract:accomazzi abstract:alberto abstract:xxx)^0.4) " +
-        "| ((author:accomazzi, alberto, xxx author:accomazzi, alberto, xxx * author:accomazzi, a xxx author:accomazzi, a xxx * author:accomazzi, alberto, x author:accomazzi, alberto, x * author:accomazzi, a x author:accomazzi, a x * author:accomazzi, alberto, author:accomazzi, a author:accomazzi,)^2.3) " +
+        "| ((author:accomazzi, alberto author:accomazzi, a author:accomazzi,)^2.3) " +
         "| (title:accomazzi title:alberto title:xxx))",
         DisjunctionMaxQuery.class);
     
     assertQueryEquals(req("defType", "aqp", "q", "\"accomazzi, alberto, xxx.\"", 
-        "qf", "author^2.3 title abstract^0.4"), 
+        "qf", "author^2.3 title abstract^0.4"),
         "(abstract:\"accomazzi alberto xxx\"^0.4 " +
-        "| ((author:accomazzi, alberto, xxx author:accomazzi, alberto, xxx * author:accomazzi, a xxx author:accomazzi, a xxx * author:accomazzi, alberto, x author:accomazzi, alberto, x * author:accomazzi, a x author:accomazzi, a x * author:accomazzi, alberto, author:accomazzi, a author:accomazzi,)^2.3) " +
-        "| title:\"accomazzi alberto xxx\")", 
+        "| ((author:accomazzi, alberto author:accomazzi, a author:accomazzi,)^2.3) " +
+        "| title:\"accomazzi alberto xxx\")",
         DisjunctionMaxQuery.class);
     
     // now some esoteric cases of the comma parsing, comma should be appended

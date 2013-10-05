@@ -56,7 +56,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     //System.setProperty("tests.codec","SimpleText");
     MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
         + "/contrib/invenio/src/python");
+    MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
+        + "/contrib/adsabs/src/python");
     MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
+    MontySolrSetup.addTargetsToHandler("adsabs.targets");
 
   }
 

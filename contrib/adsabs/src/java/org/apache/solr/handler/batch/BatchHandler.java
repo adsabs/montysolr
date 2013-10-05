@@ -433,6 +433,7 @@ public class BatchHandler extends RequestHandlerBase {
 		}
 		catch(Exception e) {
 			queue.registerFailedBatch(providers.get("#failed"), data);
+			log.error("Error executing: " + locReq);
 			log.error(e.getLocalizedMessage());
 		}
 		finally {

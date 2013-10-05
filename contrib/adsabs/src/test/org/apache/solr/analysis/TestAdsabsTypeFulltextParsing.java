@@ -30,6 +30,7 @@ import org.apache.lucene.search.spans.SpanNearQuery;
 import java.io.File;
 import java.io.IOException;
 import org.adsabs.solr.AdsConfig.F;
+import org.junit.BeforeClass;
 
 /**
  * Tests that the fulltext is parsed properly, the ads_text type
@@ -103,7 +104,15 @@ import org.adsabs.solr.AdsConfig.F;
  * 
  */
 public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
-
+	
+	
+	@BeforeClass
+	public static void beforeTestAqpAdsabsSolrSearch() throws Exception {
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
+				+ "/contrib/adsabs/src/python");
+		MontySolrSetup.addTargetsToHandler("adsabs.targets");
+	}
+	
   @Override
   public String getSchemaFile() {
     makeResourcesVisible(this.solrConfig.getResourceLoader(),

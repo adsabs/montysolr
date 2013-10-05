@@ -54,45 +54,24 @@ def make_targets(*args, **kwargs):
     return targets
 
 
-def multiprocessing_aware(original_function):
-    """Decorator to make the api dispatch function 
-    multiprocessing aware
-    """
+def get_numcpus():
     from montysolr import config
     num_cpus = 0
     global api_calls
     # start multiprocessing with that many processes in the pool
     if str(config.MONTYSOLR_MAX_WORKERS) == '-1':
         try:
-            num_proc = multiprocessing.cpu_count()
+            num_cpus = multiprocessing.cpu_count()
         except:
-            num_proc = 1
+            num_cpus = 1
     elif int(config.MONTYSOLR_MAX_WORKERS) > 1:
         num_cpus = int(config.MONTYSOLR_MAX_WORKERS)
+    return num_cpus
+
+def multiprocess_aware(original_func):
+    def new_func(func_name, *args, **kwargs):
+        kwargs['__remote_call'] = True
+        return original_func(func_name, *args, **kwargs)
+    return new_func
     
-    if num_cpus > 1:
-        POOL = multiprocessing.Pool(processes=num_cpus)
-        def new_function(func_name, *args, **kwargs):
-            """Dispatches the call to a remote worker
-            @return: (worker_id, result)
-            """
-            g = original_function.__globals__
-            func_name_pre = '%s_local_pre' % func_name
-            func_name_post = '%s_local_post' % func_name
-            print 'MULTIPROCESSING'
-            if func_name_pre in g:
-                args = list(args)
-                g[func_name_pre](args, kwargs)
-                
-            kwargs['remote_call'] = True
-            handle = POOL.apply_async(original_function, args=(func_name, args, kwargs))
-            (worker_pid, result) = handle.get()
-            del kwargs['remote_call']
-        
-            if func_name_post in g:
-                result = g[func_name_post](result)
-        
-            return(worker_pid, result)
-        return new_function
-    else:
-        return original_function
+    

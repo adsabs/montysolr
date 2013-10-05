@@ -38,7 +38,9 @@ import org.apache.solr.search.SolrIndexSearcher;
 
 /**
  * Provider that dumps selected fields to disk.
- * The data is stored in CSV format.
+ * The data is stored in CSV format. It outputs
+ * values as they were analyzed for indexing
+ * (it doesn't output values that would be queried)
  */
 public class BatchProviderDumpIndexFields extends BatchProvider {
 	
@@ -57,7 +59,7 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 		SolrCore core = req.getCore();
 		IndexSchema schema = core.getSchema();
 		final HashSet<String> fieldsToLoad = new HashSet<String>();
-		final Analyzer analyzer = core.getSchema().getQueryAnalyzer();
+		final Analyzer analyzer = core.getSchema().getAnalyzer();
 
 		String q = params.get(CommonParams.Q, null);
 		if (q == null) {

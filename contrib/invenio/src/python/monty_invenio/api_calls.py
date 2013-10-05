@@ -16,7 +16,6 @@ from invenio import bibrank_citation_searcher as bcs
 
 
 from StringIO import StringIO as sIO
-from nameparser import HumanName
 
 def dispatch(func_name, *args, **kwargs):
     """Dispatches the call to the *local* worker
@@ -26,16 +25,6 @@ def dispatch(func_name, *args, **kwargs):
     out = globals()[func_name](*args, **kwargs)
     return [tid, out]
 
-
-def parse_human_name(input):
-    """Parses human names using python nameparse library
-    """
-    name = HumanName(input)
-    out = {}
-    for k in ('first', 'middle', 'last', 'suffix', 'title'):
-        if getattr(name, k):
-            out[k[0].upper() + k[1:]] = getattr(name, k)
-    return out 
 
 
 def get_recids_changes(last_recid, max_recs=10000, mod_date=None, table='bibrec'):
