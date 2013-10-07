@@ -316,6 +316,30 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+  	// #362 - smartly handle o' sulliva (done in the Pythonic name parser)
+  	// I'm not sure whether we should index the apostrophe, maybe it should
+  	// be replaced by space ?
+  	//setDebug(true);
+  	testAuthorQuery(
+        "\"o' sullivan\"", 
+        		"author:o'sullivan, author:o'sullivan,*",
+        		"//*[@numFound='0']",
+    		"\"o'sullivan\"", 
+        		"author:o'sullivan, author:o'sullivan,*",
+        		"//*[@numFound='0']"
+        		);
+  	testAuthorQuery(
+    		"\"o'sullivan\"", 
+        		"author:o'sullivan, author:o'sullivan,*",
+        		"//*[@numFound='0']",
+    		"\"o'sullivan\"",
+        		"author:o'sullivan, author:o'sullivan,*",
+        		"//*[@numFound='0']",
+    		"\"o'sullivan\"",
+        		"author:o'sullivan, author:o'sullivan,*",
+        		"//*[@numFound='0']"
+        		);
+  	
   	// what happens we receive very long string (non-author thing)
   	testAuthorQuery(
         "\"purpose of this review is to bridge the gap between\"", 

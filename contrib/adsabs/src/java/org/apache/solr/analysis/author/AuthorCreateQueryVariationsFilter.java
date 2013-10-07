@@ -73,6 +73,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
       this.termAtt.append(syn);
       this.posIncrAtt.setPositionIncrement(0);
       this.typeAtt.setType(AuthorUtils.AUTHOR_QUERY_VARIANT);
+      //System.out.println("var:" + termAtt.toString());
       return true;
     }
     
@@ -88,7 +89,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
     if ((tokenType==null || typeAtt.type().equals(tokenType)) && this.genVariations()) {
       this.current = this.captureState();
     }
-
+    //System.out.println("var:" + termAtt.toString());
     return true;
   }
 

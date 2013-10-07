@@ -29,11 +29,13 @@ public class AuthorUtils {
 	static Pattern n1 = Pattern.compile("[^\\w\\s\'\\p{L}\\p{Digit},_-]");
 	static Pattern n2 = Pattern.compile("\\s+");
 	static Pattern n3 = Pattern.compile("(?<!\\\\),\\s*");
+	static Pattern n4 = Pattern.compile("(?<=\\p{L})\\'\\s*");
 	public static String normalizeAuthor(String a) {
 	  a = n0.matcher(a).replaceAll(" ");
 		a = n1.matcher(a).replaceAll("");
 		a = n3.matcher(a).replaceAll(", ");
 		a = n2.matcher(a.trim()).replaceAll(" ");
+		a = n4.matcher(a.trim()).replaceAll("'");
 		
 		//a = a.toUpperCase();
 		if (!(a.contains(","))) // || a.contains(" ")

@@ -85,11 +85,29 @@ def _dispatch_remote(func_name, args, kwargs):
 
 
 
-
+def fix_name(input):
+    """
+    Very small changes to the name before we send it to the parser
+    i am trying to not change things; but it seemed excessive to 
+    put these tidbits into another java filter before the
+    Pythonic filter, so i put them here
+    
+     #362 - smartly handle o' sullivan (there is a space after ')
+     
+    """
+    if "' " in input:
+        while "' " in input:
+            start = input.find("' ")
+            end = start + 2
+            while end+1 < len(input) and input[end+1] == ' ':
+                end =+ 1 
+            input = input.replace(input[start:end], "'")
+    return input
+    
 def parse_human_name(input):
     """Parses human names using python nameparse library
     """
-    name = HumanName(input)
+    name = HumanName(fix_name(input))
     out = {}
     for k in ('first', 'middle', 'last', 'suffix', 'title'):
         if getattr(name, k):
