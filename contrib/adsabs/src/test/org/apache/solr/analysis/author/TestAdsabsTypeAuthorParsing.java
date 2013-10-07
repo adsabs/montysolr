@@ -316,6 +316,16 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+  	// what happens we receive very long string (non-author thing)
+  	testAuthorQuery(
+        "\"purpose of this review is to bridge the gap between\"", 
+        		"",
+        		"//*[@numFound='0']",
+        "purpose of this review is to bridge the gap between", 
+        		"",
+        		"//*[@numFound='0']"
+        		);
+  	
   	// making sure also other fields are being parsed properly
   	author_field = "first_author";
   	testAuthorQuery(

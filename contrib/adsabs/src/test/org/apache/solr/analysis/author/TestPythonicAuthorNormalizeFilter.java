@@ -46,6 +46,8 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
 		compare("Pinilla-Alonso", "Pinilla-Alonso,");
 		compare("Pinilla Alonso,", "Pinilla Alonso,");
 		compare("Pinilla-Alonso, Brava", "Pinilla-Alonso, Brava");
+		
+		compare("purpose of this review is to bridge the gap between", "between, purpose of this review is to bridge the gap");
 	}
 	
 	public void compare(String input, String... expected) throws Exception {

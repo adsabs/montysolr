@@ -72,6 +72,9 @@
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<!--  detect cases when we should bail-out and not attempt author search -->
+				<filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+				   maxlen="5" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
@@ -137,9 +140,14 @@
 			positionIncrementGap="0">
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<!-- deal with natural order queries (this is used only at query time) -->
+        <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<!--  detect cases when we should bail-out and not attempt author search -->
+        <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+           maxlen="5" />
 				<!-- generate ADS style extra search clauses (they will be used to find 
 					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk, 
 					p kolja" "adamcuk, p k" "adamcuk," (if plainSurname=true) -->
@@ -181,9 +189,14 @@
 			positionIncrementGap="0">
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<!-- deal with natural order queries (this is used only at query time) -->
+        <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<!--  detect cases when we should bail-out and not attempt author search -->
+        <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+           maxlen="5" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
@@ -238,9 +251,14 @@
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<!-- deal with natural order queries (this is used only at query time) -->
+        <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<!--  detect cases when we should bail-out and not attempt author search -->
+        <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+           maxlen="5" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
@@ -304,6 +322,8 @@
 		<fieldType name="author_short_name_rage" class="solr.TextField">
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<!-- deal with natural order queries (this is used only at query time) -->
+        <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!-- if necessary, we will transliterate in order to match more synonyms -->
 				<filter class="solr.analysis.author.AuthorTransliterationFactory" />
