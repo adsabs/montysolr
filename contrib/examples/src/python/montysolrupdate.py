@@ -786,8 +786,8 @@ def check_prerequisites(options):
         
     with changed_dir('montysolr'):
         run_cmd(['git', 'fetch'])
-        run_cmd(['git', 'reset', '--hard', 'origin/master'])
-        run_cmd(['git', 'checkout', 'master'])
+        #run_cmd(['git', 'reset', '--hard', 'origin/master'])
+        #run_cmd(['git', 'checkout', 'master'])
 
 
 def check_ant(options):
@@ -1133,7 +1133,7 @@ deactivate
         #    run_cmd(['rm', 'RELEASE'], strict=False)
         
         # get the target tag
-        run_cmd(['git', 'checkout', '-f', '-b', git_tag.ref], strict=False)
+        run_cmd(['git', 'checkout', '-f', '-B', git_tag.ref], strict=False)
         setup_build_properties()
         
         # nuke everything, start from scratch
