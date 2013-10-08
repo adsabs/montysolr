@@ -473,7 +473,9 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
   }
 
   public void setWorkerMessage(String msg) {
-    workerMessage.add(0, msg);
+  	synchronized (workerMessage) {
+  		workerMessage.add(0, msg);
+    }
   }
 
   public String getWorkerMessage() {
@@ -482,7 +484,13 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
       out.append(msg);
       out.append("\n");
     }
-    workerMessage.clear();
+    if (workerMessage.size() > 100) {
+    	synchronized (workerMessage) {
+    		for (int i=100; i<workerMessage.size();i++) {
+      		workerMessage.remove(i);
+      	}
+      }
+    };
     return out.toString();
   }
 
@@ -498,6 +506,8 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     SolrParams params = data.getReqParams();
     
     LocalSolrQueryRequest locReq = new LocalSolrQueryRequest(req.getCore(), params);
+    
+    long startTime = System.currentTimeMillis();
     
     try {
 	    if (data.handler.equals("#discover")) {
@@ -566,6 +576,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     }
     finally {
     	locReq.close();
+    	setWorkerMessage("Execution time: " + (System.currentTimeMillis() - startTime) + " ms.");
     }
     
   }
@@ -628,7 +639,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     String field = params.get("field", "recid");
     Integer lastRecid = params.getInt("last_recid", -1);
     String modDate = params.get("mod_date", null);
-    Boolean forceReindexing = params.getBool("force_reindexing");
+    Boolean forceReindexing = params.getBool("force_reindexing", false);
     Integer fetchSize = Math.min(params.getInt("fetch_size", 100000), 100000);
     // setting maxRecs to very large value means the worker cannot be stopped in time
     int maxRecs = Math.min(params.getInt("max_records", 100000), 1000000);
