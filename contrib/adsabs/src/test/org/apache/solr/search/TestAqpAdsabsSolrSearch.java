@@ -13,9 +13,11 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.PhraseQuery;
+import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.junit.BeforeClass;
@@ -370,6 +372,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 	  
+		//setDebug(true);
+		assertQueryEquals(req("defType", "aqp", "q", "title:*"), 
+        "title:*",
+        PrefixQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "title:?"), 
+        "title:?",
+        WildcardQuery.class);
 		
 		// #375
 		assertQueryEquals(req("defType", "aqp", "q", "author:\"Civano, F\" -author_facet_hier:(\"Civano, Fa\" OR \"Civano, Da\")"), 

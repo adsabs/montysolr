@@ -101,6 +101,9 @@ public class BatchHandlerRequestQueue {
 	public boolean isJobidFailed(String jobid) {
 		return jobs.containsKey(jobid) && jobs.get(jobid) < 0;
 	}
+	public boolean isJobidRunning(String jobid) {
+		return jobs.containsKey(jobid) && jobs.get(jobid) > 0;
+	}
 	private void increaseJobCounter(String jobid) {
 		jobs.put(jobid, jobs.get(jobid)!=null ? jobs.get(jobid)+1 : 1);
 	}

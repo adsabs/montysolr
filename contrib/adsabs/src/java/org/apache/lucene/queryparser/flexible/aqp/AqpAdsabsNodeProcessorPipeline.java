@@ -141,7 +141,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		add(new AqpBibcodeProcessor()); // finds bibcode and converts to AqpAdslabsIdentifier		
 		add(new AqpFuzzyModifierProcessor());
-		add(new WildcardQueryNodeProcessor());
+		//add(new WildcardQueryNodeProcessor());
 		
 		
 	  // expands to multiple fields if field=null (ie. unfielded search)

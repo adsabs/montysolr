@@ -825,6 +825,7 @@ def setup_ant(options):
         mv apache-ant-1.8.4 ant
         cd ant
         
+        export PATH=%(ant_home)s/bin:$PATH
         ant -f fetch.xml -Ddest=system
         echo "%(release)s" > RELEASE
         

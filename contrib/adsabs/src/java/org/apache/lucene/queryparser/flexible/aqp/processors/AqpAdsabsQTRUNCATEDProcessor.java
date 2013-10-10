@@ -6,6 +6,7 @@ import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.MatchAllDocsQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
@@ -43,13 +44,21 @@ public class AqpAdsabsQTRUNCATEDProcessor extends AqpQProcessor {
     
     if (input.contains("*?") || input.contains("?*")) {
       throw new QueryNodeException(new MessageImpl(
-          QueryParserMessages.INVALID_SYNTAX, "It is not allowed to put * next to ?"
+          QueryParserMessages.INVALID_SYNTAX, "It is not allowed to put '*' next to '?'"
               + input));
     }
     
     QueryConfigHandler config = getQueryConfigHandler();
-    if (input.equals("*") && config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD)
-        .equals(field)) {
+    if (input.equals("*")) {
+    	QueryNode fieldNode = node.getParent().getChildren().get(0);
+    	String unfieldedName = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD);
+    	if (fieldNode instanceof AqpANTLRNode 
+    			&& ((AqpANTLRNode) fieldNode).getTokenInput() != null 
+    			&& !((AqpANTLRNode) fieldNode).getTokenInput().equals(unfieldedName)) {
+    		return new PrefixWildcardQueryNode(((AqpANTLRNode) fieldNode).getTokenInput(),
+            "*", subChild.getTokenStart(),
+            subChild.getTokenEnd());
+    	}
       return new MatchAllDocsQueryNode();
     }
     

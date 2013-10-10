@@ -195,7 +195,6 @@ public class BatchHandler extends RequestHandlerBase {
 				return;
 			}
 			queue.start();
-			workerMessage.clear();
 			setBusy(true);
 			if (isAsynchronous()) {
 				runAsynchronously(req);
@@ -223,6 +222,9 @@ public class BatchHandler extends RequestHandlerBase {
 				}
 				else if (queue.isJobidFinished(jobid)) {
 					rsp.add("job-status", "finished");
+				}
+				else if (queue.isJobidRunning(jobid)) {
+					rsp.add("job-status", "running");
 				}
 				else {
 					rsp.add("job-status", "waiting");
@@ -404,14 +406,15 @@ public class BatchHandler extends RequestHandlerBase {
 		workerMessage.add(0, msg);
 	}
 
-	public String getWorkerMessage() {
-		StringBuilder out = new StringBuilder();
-		for (String msg: workerMessage) {
-			out.append(msg);
-			out.append("\n");
-		}
-		workerMessage.clear();
-		return out.toString();
+	public List<String> getWorkerMessage() {
+		if (workerMessage.size() > 100) {
+    	synchronized (workerMessage) {
+    		for (int i=100; i<workerMessage.size();i++) {
+      		workerMessage.remove(i);
+      	}
+      }
+    };
+		return workerMessage;
 	}
 
 	/*

@@ -34,6 +34,8 @@ import monty.solr.jni.PythonCall;
 import monty.solr.jni.PythonMessage;
 
 import org.apache.lucene.search.FieldCache;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -65,6 +67,8 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
   private String pythonFunctionName = "get_recids_changes";
   private String handlerParams = "commit=false&command=full-import&url=";
 	private String deleteHandlerName = "/delete";
+
+	private boolean strictMode;
   
   class RequestData {
 
@@ -275,6 +279,10 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     if (defs.get("sleepTime") != null) {
       sleepTime  = Long.parseLong((String) defs.get("sleepTime"));
     }
+    
+    if (defs.get("strict") != null) {
+      strictMode  = Boolean.parseBoolean((String) defs.get("strict"));
+    }
   }
 
   public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
@@ -311,7 +319,6 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
         return;
       }
       queue.start();
-      workerMessage.clear();
       setBusy(true);
       if (isAsynchronous()) {
         runAsynchronously(req);
@@ -433,12 +440,15 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
             runSynchronously(queue, request);
           }
         } catch (IOException e) {
-          setWorkerMessage("Worker error..." + e.getLocalizedMessage());
-          log.error(e.getLocalizedMessage());
+        	if (strictMode) {
+        		throw new SolrException(ErrorCode.SERVER_ERROR, e);
+        	}
+          setWorkerMessage("Worker error..." + e.getMessage());
+          log.error(e.getMessage());
           log.error(e.getStackTrace().toString());
         } catch (InterruptedException e) {
-          setWorkerMessage("Worker error..." + e.getLocalizedMessage());
-          log.error(e.getLocalizedMessage());
+          setWorkerMessage("Interrupted..." + e.getMessage());
+          log.error(e.getMessage());
           log.error(e.getStackTrace().toString());
         } finally {
           setBusy(false);
@@ -478,12 +488,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     }
   }
 
-  public String getWorkerMessage() {
-    StringBuilder out = new StringBuilder();
-    for (String msg: workerMessage) {
-      out.append(msg);
-      out.append("\n");
-    }
+  public List<String> getWorkerMessage() {
     if (workerMessage.size() > 100) {
     	synchronized (workerMessage) {
     		for (int i=100; i<workerMessage.size();i++) {
@@ -491,7 +496,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
       	}
       }
     };
-    return out.toString();
+    return workerMessage;
   }
 
   /*

@@ -56,24 +56,41 @@ public class TestFacetHierarchy {
 	}
 	
 	@Test
-	public void testFacetGenerationMultiValued() {
+	public void testFacetGeneration() {
 		
+	  // multi-valued
 		FacetHierarchy fh = new FacetHierarchyMV("a_hier", new String[] {"a", "aa"});
 		fh.addFacets(testRow);
 		List<String> newFacets = (List<String>) testRow.get("a_hier");
 		assertArrayEquals(
 				new String[] { "0/foo","0/bar","0/baz","1/foo/foo-foo","1/bar/bar-bar","1/baz/baz-baz"},
 				newFacets.toArray());
-	}
-	
-	@Test
-	public void testFacetGenerationSingleValued() {
-		FacetHierarchy fh = new FacetHierarchy("b_hier", new String[] {"b", "bb"});
+		
+		// single valued
+		fh = new FacetHierarchy("b_hier", new String[] {"b", "bb"});
 		fh.addFacets(testRow);
-		List<String> newFacets = (List<String>) testRow.get("b_hier");
+		newFacets = (List<String>) testRow.get("b_hier");
 		assertArrayEquals(
 				new String[] { "0/bleh", "1/bleh/bleh-blah" },
 				newFacets.toArray());
+		
+		// authors
+		fh = new FacetHierarchyMV("c_hier", new String[] {"c", "cc"});
+    fh.addFacets(testRow);
+    newFacets = (List<String>) testRow.get("c_hier");
+    assertArrayEquals(
+        new String[] { "0/Smith, J", "0/Jones, C", "1/Smith, J/Smith, John", "1/Jones, C/Jones, Chuck" },
+        newFacets.toArray());
+    
+    
+    fh = new FacetHierarchy("author_hier", new String[] {"author"});
+    testRow.clear();
+    testRow.put("author", "Kurtz, Michael J.");
+    fh.addFacets(testRow);
+    newFacets = (List<String>) testRow.get("author_hier");
+    assertArrayEquals(
+        new String[] { "0/Kurtz, M", "0/Kurtz, M/Kurtz, Michael J."  },
+        newFacets.toArray());
 	}
 	
 	@Test(expected=ClassCastException.class)
@@ -82,15 +99,6 @@ public class TestFacetHierarchy {
 		fh.addFacets(testRow);
 	}
 	
-	@Test
-	public void testFacetGenerationAuthors() {
-		FacetHierarchy fh = new FacetHierarchyMV("c_hier", new String[] {"c", "cc"});
-		fh.addFacets(testRow);
-		List<String> newFacets = (List<String>) testRow.get("c_hier");
-		assertArrayEquals(
-				new String[] { "0/Smith, J", "0/Jones, C", "1/Smith, J/Smith, John", "1/Jones, C/Jones, Chuck" },
-				newFacets.toArray());
-	}
 	
 	@Test
 	public void testFacetGenerationBadInput() {
@@ -101,31 +109,22 @@ public class TestFacetHierarchy {
 		} catch (RuntimeException e) {
 			assertEquals("source value arrays have inconsistent length", e.getMessage());
 		}
-	}	
-	
-	@Test
-	public void testFacetGenerationBadInput2() {
-		FacetHierarchy fh = new FacetHierarchyMV("n_hier", new String[] {"n", "nn"});
+
+		fh = new FacetHierarchyMV("n_hier", new String[] {"n", "nn"});
 		try {
 			fh.addFacets(testRow);
 		} catch (RuntimeException e) {
 			assertEquals("source was null", e.getMessage());
 		}
-	}
-	
-	@Test
-	public void testFacetGenerationBadInput3() {
-		FacetHierarchy fh = new FacetHierarchyMV("e_hier", new String[] {"e", "ee"});
+		
+		fh = new FacetHierarchyMV("e_hier", new String[] {"e", "ee"});
 		try {
 			fh.addFacets(testRow);
 		} catch (RuntimeException e) {
 			assertEquals("source value array contains empty strings", e.getMessage());
 		}
-	}
-	
-	@Test
-	public void testFacetGenerationBadInput4() {
-		FacetHierarchy fh = new FacetHierarchy("e_hier", new String[] {"f", "ff"});
+		
+		fh = new FacetHierarchy("e_hier", new String[] {"f", "ff"});
 		try {
 			fh.addFacets(testRow);
 		} catch (RuntimeException e) {

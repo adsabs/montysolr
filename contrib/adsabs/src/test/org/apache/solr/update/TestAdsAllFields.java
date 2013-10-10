@@ -21,6 +21,7 @@ package org.apache.solr.update;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.AdsDataSource;
 import org.apache.solr.handler.dataimport.Context;
@@ -519,7 +520,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "doi:\"doi:ŽŠČŘĎŤŇ.123456789\""), "//*[@numFound='1']");
     assertQ(req("q", "doi:\"doi:žščřďťň.123456789\""), "//*[@numFound='1']");
     assertQ(req("q", "doi:\"doi:žščŘĎŤŇ?123456789\""), "//*[@numFound='2']");
-    assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='2']");
+    assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='0']");
 
     //dumpDoc(null, "recid", "title", "keyword");
 
@@ -1014,6 +1015,17 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				
 				"//doc/lst[@name='[citations]']/int[@name='num_citations'][.='1']",
 				"//doc/lst[@name='[citations]']/arr[@name='citations']/str[1][.='2002rvmp....74...11']"
+				);
+    
+    // test we can search for all docs that have certain field
+    assertQ(req("q", "*:*"), 
+    		"//*[@numFound='34']"
+        );
+    assertQ(req("q", "reference:*"), 
+    		"//*[@numFound='9']"
+        );
+    assertQ(req("q", "id:?"), // but works only for text fields 
+				"//*[@numFound='3']"
 				);
     
     

@@ -44,8 +44,9 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 		int start = 0;
 		int end = 0;
 		
+		QueryNode sc = null;
 		if (node.getChildren().size() == 1) {
-			QueryNode sc = node.getChildren().get(0);
+			sc = node.getChildren().get(0);
       if (sc instanceof AqpANTLRNode) {
         input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) sc).getTokenInput()).toString();
         start = ((AqpANTLRNode) sc).getTokenStart();
@@ -59,7 +60,7 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 		}
 		else {
 			field = ((AqpANTLRNode) node.getChildren().get(0)).getTokenLabel();
-			QueryNode sc = node.getChildren().get(1);
+			sc = node.getChildren().get(1);
 			if (sc instanceof AqpANTLRNode) {
 				input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) sc).getTokenInput()).toString();
 				start = ((AqpANTLRNode) sc).getTokenStart();
@@ -88,7 +89,16 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 		}
 		*/
 		
-		return new AqpAdsabsIdentifierNode(field, input, start, end);
+		if (sc instanceof FieldQueryNode) {
+			((FieldQueryNode) sc).setField(field);
+			((FieldQueryNode) sc).setText(input);
+			((FieldQueryNode) sc).setBegin(start);
+			((FieldQueryNode) sc).setEnd(end);
+			return sc;
+		}
+		else {
+			return new AqpAdsabsIdentifierNode(field, input, start, end);
+		}
 		
 	}
 

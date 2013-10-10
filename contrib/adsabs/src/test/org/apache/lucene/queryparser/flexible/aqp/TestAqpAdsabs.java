@@ -390,6 +390,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		KeywordAnalyzer kwa = new KeywordAnalyzer();
 		assertQueryEquals("keyword:\"planets and satellites\"", wsa, "keyword:\"planets and satellites\"", PhraseQuery.class);
 		
+		assertQueryEquals("full:*", null, "full:*", WildcardQuery.class);
+		
 		assertQueryEquals("weak lensing", null, "+weak +lensing");
 		assertQueryEquals("+contact +binaries -eclipsing", null, "+contact +binaries -eclipsing");
 		assertQueryEquals("+contact +foo:binaries -eclipsing", null, "+contact +foo:binaries -eclipsing");
