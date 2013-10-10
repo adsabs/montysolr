@@ -402,7 +402,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     testDocOrder(topSet.scoreDocs, 11, 13, 15, 12);
     float[] gnscores = getScores(topSet.scoreDocs);
     
-    System.out.println("amean norm");
+    System.out.println("anmean norm");
     c = new SecondOrderCollectorCites(idField, refField);
     c.setFinalValueType(FinalValueType.ARITHM_MEAN_NORM);
     topSet = searcher.search(new SecondOrderQuery(bqa, null, c), 10);
@@ -412,7 +412,8 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractLuceneTestCas
     
     assertTrue(ascores[1] != gscores[1]);
     assertTrue(ascores[2] != gscores[2]);
-    assertTrue(anscores[0] < ascores[0]);
+    assertTrue(anscores[0] == 1.0f);
+    assertTrue(anscores[anscores.length-1] < ascores[ascores.length-1]);
     assertTrue(gnscores[0] < gscores[0]);
   }
 
