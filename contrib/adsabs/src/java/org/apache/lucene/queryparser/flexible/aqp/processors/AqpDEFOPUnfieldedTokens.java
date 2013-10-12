@@ -103,7 +103,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	private List<String> wildcardQTypes;
 	
 	public AqpDEFOPUnfieldedTokens() {
-		ignoreModifiers = Arrays.asList("+", "-");
+		ignoreModifiers = Arrays.asList("PLUS", "MINUS");
 		ignoreTModifiers = Arrays.asList("");
 		ignoreFields = Arrays.asList("");
 		catchQTypes = Arrays.asList("QNORMAL", "QTRUNCATED");
@@ -418,7 +418,12 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 			
 			if (node.isLeaf()) {
 				if (node instanceof AqpANTLRNode) {
-					data.put(level, ((AqpANTLRNode) node).getTokenInput()); 
+					data.put(level, 
+							((AqpANTLRNode) node).getTokenInput() 
+							!= null ?
+							((AqpANTLRNode) node).getTokenInput()
+							:
+							((AqpANTLRNode) node).getTokenName()); 
 				}
 				else {
 					data.put(level, "???");

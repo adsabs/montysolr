@@ -601,6 +601,10 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	assertQueryEquals("foo:(A B D E)", null, "foo:\"a b d e\"");
   	
   	assertQueryEquals("A B D E", null, "\"a b d e\"");
+  	
+  	assertQueryEquals("+A B D E", null, "\"a b d e\"");
+  	assertQueryEquals("+A B D E", null, "\"a b d e\"");
+  	assertQueryEquals("michael kurtz", null, "\"a b d e\"");
   }
   
 	public static junit.framework.Test suite() {
