@@ -52,6 +52,8 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
 		compare("o'sullivan", "o'sullivan,");
 		compare("o' john o'sullivan", "o'sullivan, o'john");
 		compare("o' john, o'sullivan", "o'john, o'sullivan");
+		compare("Joachim von Lubow", "von Lubow, Joachim");
+		compare("Gerard 't Hooft", "t' Hooft, Gerard");
 	}
 	
 	public void compare(String input, String... expected) throws Exception {

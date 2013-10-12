@@ -316,6 +316,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+    
   	// #362 - smartly handle o' sulliva (done in the Pythonic name parser)
   	// I'm not sure whether we should index the apostrophe, maybe it should
   	// be replaced by space ?
@@ -458,6 +459,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                    // 213	Pinilla-Alonso, Brava         				   
         );
 
+    
+    setDebug(true);
+    testAuthorQuery(
+    		"Lee, Harwin-*", 
+    		"author:lee, harwin-*",
+        "//*[@numFound='0']"
+        );
+    
     // bug: #255
     testAuthorQuery(
         "Lee, H-C", "author:lee, h c author:lee, h c* author:/lee, h[^\\s]+ c/ author:/lee, h[^\\s]+ c .*/ author:lee, h author:lee,",

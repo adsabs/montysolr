@@ -59,7 +59,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
 
   private volatile int counter = 0;
   private boolean asynchronous = true;
-  private volatile List<String> workerMessage = new ArrayList<String>();
+  private List<String> workerMessage = new ArrayList<String>();
 
   private long sleepTime = 300;
 

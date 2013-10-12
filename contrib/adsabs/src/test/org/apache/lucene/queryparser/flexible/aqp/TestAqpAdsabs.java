@@ -309,7 +309,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		Query q = null;
 		q = assertQueryEquals("te?t", null, "te?t", WildcardQuery.class);
 		
-		q = assertQueryEquals("test*", null, "test*", PrefixQuery.class);
+		q = assertQueryEquals("test*", null, "test*", WildcardQuery.class);
 	    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
 	    
 	    q = assertQueryEquals("test?", null, "test?", WildcardQuery.class);
@@ -341,7 +341,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("\"te*?t phrase\"", null, "te*?t phrase", WildcardQuery.class);
 		
 		
-		assertQueryEquals("*", null, "*", WildcardQuery.class);
+		assertQueryEquals("*", null, "*:*", MatchAllDocsQuery.class);
 		assertQueryEquals("*:*", null, "*:*", MatchAllDocsQuery.class);
 		
 		assertQueryEquals("?", null, "?", WildcardQuery.class);
@@ -358,8 +358,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("*t*a\\?", null, "*t*a?", WildcardQuery.class);
 		assertQueryEquals("*t*\\a", null, "*t*a", WildcardQuery.class);
 		
-		assertQueryEquals("title:*", null, "title:*", WildcardQuery.class);
-		assertQueryEquals("doi:*", null, "doi:*", WildcardQuery.class);
+		assertQueryEquals("title:*", null, "title:*", PrefixQuery.class);
+		assertQueryEquals("doi:*", null, "doi:*", PrefixQuery.class);
 		
 	}
 	
@@ -390,7 +390,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		KeywordAnalyzer kwa = new KeywordAnalyzer();
 		assertQueryEquals("keyword:\"planets and satellites\"", wsa, "keyword:\"planets and satellites\"", PhraseQuery.class);
 		
-		assertQueryEquals("full:*", null, "full:*", WildcardQuery.class);
+		assertQueryEquals("full:*", null, "full:*", PrefixQuery.class);
 		
 		assertQueryEquals("weak lensing", null, "+weak +lensing");
 		assertQueryEquals("+contact +binaries -eclipsing", null, "+contact +binaries -eclipsing");
@@ -593,6 +593,16 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
     
   }
 	
+  
+  public void testMultipleTokenConcatenation() throws Exception  {
+  	
+  	setDebug(true);
+  	// this should be concatenated into one
+  	assertQueryEquals("foo:(A B D E)", null, "foo:\"a b d e\"");
+  	
+  	assertQueryEquals("A B D E", null, "\"a b d e\"");
+  }
+  
 	public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabs.class);
     }

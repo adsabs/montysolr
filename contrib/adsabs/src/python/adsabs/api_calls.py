@@ -6,7 +6,7 @@ import sys
 import time
 
 from montysolr.utils import get_numcpus, multiprocess_aware
-from nameparser import HumanName
+from nameparser import HumanName, constants
 import multiprocessing
 
 
@@ -107,7 +107,13 @@ def fix_name(input):
 def parse_human_name(input):
     """Parses human names using python nameparse library
     """
-    name = HumanName(fix_name(input))
+    
+    #name = HumanName(fix_name(input))
+    prefixes = constants.PREFIXES
+    prefixes.add("'t")
+    name = HumanName(fix_name(input), prefixes_c=prefixes)
+
+
     out = {}
     for k in ('first', 'middle', 'last', 'suffix', 'title'):
         if getattr(name, k):

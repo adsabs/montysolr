@@ -48,19 +48,31 @@ public class AqpAdsabsQTRUNCATEDProcessor extends AqpQProcessor {
               + input));
     }
     
+    
+    // special exception, we don't want query '*' to be passed
+    // further on, it would be grabbed by edismax; and also
+    // if it was a fielded query 'field:*', we make of it a prefix query
     QueryConfigHandler config = getQueryConfigHandler();
     if (input.equals("*")) {
+    	if (node.getParent().getChildren().size() == 1) { // no field
+    		return new MatchAllDocsQueryNode();
+    	}
     	QueryNode fieldNode = node.getParent().getChildren().get(0);
     	String unfieldedName = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD);
-    	if (fieldNode instanceof AqpANTLRNode 
-    			&& ((AqpANTLRNode) fieldNode).getTokenInput() != null 
-    			&& !((AqpANTLRNode) fieldNode).getTokenInput().equals(unfieldedName)) {
-    		return new PrefixWildcardQueryNode(((AqpANTLRNode) fieldNode).getTokenInput(),
-            "*", subChild.getTokenStart(),
-            subChild.getTokenEnd());
+    	if (fieldNode instanceof AqpANTLRNode) {
+	    	if (((AqpANTLRNode) fieldNode).getTokenInput() != null &&
+	    			!((AqpANTLRNode) fieldNode).getTokenInput().equals(unfieldedName)) {
+	    		return new PrefixWildcardQueryNode(((AqpANTLRNode) fieldNode).getTokenInput(),
+	          "*", subChild.getTokenStart(),
+	          subChild.getTokenEnd());
+	    	}
     	}
-      return new MatchAllDocsQueryNode();
+    	else {
+    		return new MatchAllDocsQueryNode();
+    	}
+      
     }
+    
     
     return new WildcardQueryNode(field,
         EscapeQuerySyntaxImpl.discardEscapeChar(input), subChild.getTokenStart(),

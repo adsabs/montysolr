@@ -326,7 +326,8 @@ identifier
 	| PHRASE_ANYTHING  -> $identifier ^(QPHRASETRUNC PHRASE_ANYTHING)
 	| PHRASE -> $identifier ^(QPHRASE PHRASE)
 	| NUMBER  -> $identifier NUMBER
-	| STAR -> $identifier STAR)
+	| STAR -> $identifier ^(QANYTHING STAR)
+	)
 	;
 	
 coordinate

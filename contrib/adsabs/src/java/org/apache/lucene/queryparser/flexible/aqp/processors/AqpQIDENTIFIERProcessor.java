@@ -3,14 +3,17 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.MatchAllDocsQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
+import org.apache.lucene.search.PrefixQuery;
 
 /**
  * Converts QIDENTIFIER node into @{link {@link QuotedFieldQueryNode}. 
@@ -52,6 +55,10 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
         start = ((AqpANTLRNode) sc).getTokenStart();
         end = ((AqpANTLRNode) sc).getTokenEnd();
       }
+      else if (sc instanceof MatchAllDocsQueryNode) {
+				// XXX: we are missing the info about the token position, which may hurt us later
+				return new PrefixWildcardQueryNode(field, "*", -1, -1);
+			}
       else {
         input = ((FieldQueryNode) sc).getTextAsString();
         start = ((FieldQueryNode) sc).getBegin();
@@ -65,6 +72,10 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 				input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) sc).getTokenInput()).toString();
 				start = ((AqpANTLRNode) sc).getTokenStart();
 				end = ((AqpANTLRNode) sc).getTokenEnd();
+			}
+			else if (sc instanceof MatchAllDocsQueryNode) {
+				// XXX: we are missing the info about the token position, which may hurt us later
+				return new PrefixWildcardQueryNode(field, "*", -1, -1);
 			}
 			else {
 				input = ((FieldQueryNode) sc).getTextAsString();

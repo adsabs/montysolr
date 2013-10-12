@@ -163,6 +163,16 @@ public class AqpDEFOPMarkPlainNodes extends AqpQProcessor {
 	}
 	
 	private QueryNode getQNode(List<QueryNode> forMarking) {
+		// TODO: we need to pick the first field, but if there is 
+		// truncated query, we need to pick that one 
+		
+		// if there was a truncated node, return it first
+		for (QueryNode c: forMarking) {
+			AqpANTLRNode terminal = (AqpANTLRNode) getTerminalNode(c);
+			if (((AqpANTLRNode) terminal.getParent()).getTokenLabel().equals("QTRUNCATED")) {
+				return c;
+			}
+		}
 		for (QueryNode c: forMarking) {
 			AqpANTLRNode terminal = (AqpANTLRNode) getTerminalNode(c);
 			if (((AqpANTLRNode) terminal.getParent()).getTokenLabel().equals("QNORMAL")) {

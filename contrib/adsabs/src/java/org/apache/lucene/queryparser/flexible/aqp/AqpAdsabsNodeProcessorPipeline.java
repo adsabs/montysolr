@@ -33,6 +33,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQDELIMITER
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQTRUNCATEDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldMapperProcessorPostAnalysis;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPMarkPlainNodes;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPUnfieldedTokens;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQREGEXProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpUnfieldedSearchProcessor;
@@ -92,8 +93,10 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		// into the first token
 	  // this was the original behaviour, you can still activate:
 		// add(new AqpDEFOPMarkPlainNodes());
-		add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"),
-				Arrays.asList("author", "first_author")));
+		//add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"),
+		//		Arrays.asList("author", "first_author")));
+		
+		add(new AqpDEFOPUnfieldedTokens());
 		
 
 		/**
@@ -141,6 +144,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		add(new AqpBibcodeProcessor()); // finds bibcode and converts to AqpAdslabsIdentifier		
 		add(new AqpFuzzyModifierProcessor());
+		
+		//this
 		//add(new WildcardQueryNodeProcessor());
 		
 		

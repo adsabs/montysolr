@@ -35,7 +35,7 @@ public class AqpQPHRASEProcessor extends AqpQProcessor {
     String field = getDefaultFieldName();
 
     AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
-
+    
     return new QuotedFieldQueryNode(field,
         EscapeQuerySyntaxImpl.discardEscapeChar(subChild.getTokenInput()
             .substring(1, subChild.getTokenInput().length() - 1)),
