@@ -597,6 +597,11 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   public void testMultipleTokenConcatenation() throws Exception  {
   	
   	setDebug(true);
+  	assertQueryEquals("(author:\"accomazzi\" nasa)", null, "");
+  	assertQueryEquals("(author:\"accomazzi\" nasa)", null, "");
+  	assertQueryEquals("(author:\"accomazzi\" nasa)", null, "");
+  	
+  	
   	// this should be concatenated into one
   	assertQueryEquals("foo:(A B D E)", null, "foo:\"a b d e\"");
   	
