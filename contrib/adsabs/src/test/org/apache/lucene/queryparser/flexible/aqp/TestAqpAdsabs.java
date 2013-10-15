@@ -431,7 +431,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("this (+(((+(that)))))", null, "+this +that");
 		assertQueryEquals("this +((((+(that)))))", null, "+this +that");
 		assertQueryEquals("this +(+((((that)))))", null, "+this +that");
-		
+		assertQueryEquals("(this that)", null, "+this +that");
+		assertQueryEquals("(foo:this that)", null, "+foo:this +that");
 		
 		
 		
