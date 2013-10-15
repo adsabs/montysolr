@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.runtime.CommonToken;
-import org.apache.lucene.benchmark.byTask.tasks.SetPropTask;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
