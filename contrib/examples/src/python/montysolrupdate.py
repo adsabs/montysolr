@@ -1133,7 +1133,8 @@ deactivate
         #    run_cmd(['rm', 'RELEASE'], strict=False)
         
         # get the target tag
-        run_cmd(['git', 'checkout', '-f', '-B', git_tag.ref], strict=False)
+        run_cmd(['git', 'checkout', '-f', '-b', git_tag.ref], strict=False)
+        run_cmd(['git', 'reset', '--hard', git_tag.ref])
         setup_build_properties()
         
         # nuke everything, start from scratch
