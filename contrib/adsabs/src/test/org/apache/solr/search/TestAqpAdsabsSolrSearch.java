@@ -380,6 +380,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "title:?",
         WildcardQuery.class);
 		
+		// fun test of a crazy span query
+		assertQueryEquals(req("defType", "aqp", "q", "(consult* or advis*) NEAR4 (fee or retainer or salary or bonus)"), 
+        "spanNear([spanOr([SpanMultiTermQueryWrapper(all:consult*), SpanMultiTermQueryWrapper(all:advis*)]), spanOr([all:fee, all:retainer, all:salary, all:bonus])], 4, true)",
+        SpanNearQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "(consult* and advis*) NEAR4 (fee or retainer or salary or bonus)"), 
+        "spanNear([spanNear([SpanMultiTermQueryWrapper(all:consult*), SpanMultiTermQueryWrapper(all:advis*)], 4, true), spanOr([all:fee, all:retainer, all:salary, all:bonus])], 4, true)",
+        SpanNearQuery.class);
+		
 		// #375
 		assertQueryEquals(req("defType", "aqp", "q", "author:\"Civano, F\" -author_facet_hier:(\"Civano, Fa\" OR \"Civano, Da\")"), 
         "+(author:civano, f author:civano, f* author:civano,) -(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
@@ -677,7 +685,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		assertQueryParseException(req("defType", "aqp", "q", "arxivvvv:1002.1524"));
 		
 		
-		    
 	}
 	
 	public static junit.framework.Test suite() {
