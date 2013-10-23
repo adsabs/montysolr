@@ -106,7 +106,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	}
 	
 
-	public void testOperators() throws Exception {
+	public void testSpecialCases() throws Exception {
+		
+		
 		
 		// unbalanced brackets for functions
 		assertQueryEquals(req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy), date asc)"), 
@@ -234,7 +236,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false])", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, (foo bar))"), 
-        "SecondOrderQuery(all:foo all:bar, filter=null, collector=topn[5, outOfOrder=false])", 
+        "SecondOrderQuery(+all:foo +all:bar, filter=null, collector=topn[5, outOfOrder=false])", 
         SecondOrderQuery.class);
 		
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, edismax(dog OR cat))", "qf", "title^1 abstract^0.5"), 
@@ -373,6 +375,32 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	public void test() throws Exception {
 	  
 		//setDebug(true);
+  	// smarter handling of missing parentheses/brackets
+		
+		// this is default behaviour
+		assertQueryEquals(req("defType", "aqp", "q", "author:accomazzi, alberto property:refereed apj"), 
+        "+(author:accomazzi, author:accomazzi,*) +all:alberto +property:refereed +all:apj", 
+        BooleanQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "author:huchra supernova"), 
+        "+(author:huchra, author:huchra,*) +all:supernova", 
+        BooleanQuery.class);
+		
+		// now with the unfielded token strategy activated
+		assertQueryEquals(req("defType", "aqp",
+				"aqp.unfielded.tokens.strategy", "add",
+				"aqp.unfielded.tokens.new.type", "phrase",
+				"q", "author:accomazzi, alberto property:refereed apj"), 
+        "+((+(author:accomazzi, author:accomazzi,*) +all:alberto) (author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)) +((+property:refereed +all:apj) property:refereedapj)", 
+        BooleanQuery.class);
+		assertQueryEquals(req("defType", "aqp",
+				"aqp.unfielded.tokens.strategy", "add",
+				"aqp.unfielded.tokens.new.type", "phrase",
+				"q", "author:huchra supernova"), 
+        "(+(author:huchra, author:huchra,*) +all:supernova) (author:supernova, huchra author:supernova, huchra * author:supernova, h author:supernova, h * author:supernova,)", 
+        BooleanQuery.class);
+		
+		
+		// search for all docs with a field
 		assertQueryEquals(req("defType", "aqp", "q", "title:*"), 
         "title:*",
         PrefixQuery.class);
@@ -473,18 +501,29 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	  // that, we would have to parse the query ourselves; but after a long discussion
 	  // it was decided that we'll use OR for the unfielded searches, so it should be 
 	  // OK - if not, I have to rewrite edismax parsing logic myself
-    assertQueryEquals(req("defType", "aqp", "q", "pink elephant"), 
-        "all:pink all:syn::pinkish all:elephant", // "+(all:pink all:syn::pinkish) +all:elephant",
+	  // 22/10/13 - I've introduced a new strategy that emits both the
+	  // original query string and the phrase query, this is a workaround
+	  // for edismax
+    assertQueryEquals(req("defType", "aqp",
+    		"aqp.unfielded.tokens.strategy", "add",
+				"aqp.unfielded.tokens.new.type", "phrase",
+    		"q", "pink elephant"), 
+        "(+(all:pink all:syn::pinkish) +all:elephant) all:\"(pink syn::pinkish) elephant\"",
         BooleanQuery.class);
     assertQueryEquals(req("defType", "aqp", "q", "pink elephant",
+    		"aqp.unfielded.tokens.strategy", "add",
+				"aqp.unfielded.tokens.new.type", "phrase",
         "qf", "title keyword"),
-        "((title:pink title:syn::pinkish title:elephant) | (keyword:pink keyword:elephant))",
-        DisjunctionMaxQuery.class);
+        "(+((title:pink title:syn::pinkish) | keyword:pink) +(title:elephant | keyword:elephant)) (title:\"(pink syn::pinkish) elephant\" | keyword:\"pink elephant\")",
+        BooleanQuery.class);
     
-    // but when combined, the ADS's default AND should be visible
+    // when combined, the ADS's default AND operator should be visible +foo
     assertQueryEquals(req("defType", "aqp", "q", "pink elephant title:foo",
+    		"aqp.unfielded.tokens.strategy", "add",
+				"aqp.unfielded.tokens.new.type", "phrase",
         "qf", "title keyword"),
-        "+((title:pink title:syn::pinkish title:elephant) | (keyword:pink keyword:elephant)) +title:foo",
+        //"+((title:pink title:syn::pinkish title:elephant) | (keyword:pink keyword:elephant)) +title:foo",
+        "+((+((title:pink title:syn::pinkish) | keyword:pink) +(title:elephant | keyword:elephant)) (title:\"(pink syn::pinkish) elephant\" | keyword:\"pink elephant\")) +title:foo",
         BooleanQuery.class);
     
     

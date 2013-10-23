@@ -22,8 +22,12 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
@@ -59,6 +63,7 @@ import org.apache.lucene.util.LuceneTestCase;
 public class AqpTestAbstractCase extends LuceneTestCase {
 
   public int originalMaxClauses;
+  public Map<String, String>parserArgs;
   public boolean debugParser = false;
   protected String grammarName = "StandardLuceneGrammar";
   protected int noFailures = 0;
@@ -66,6 +71,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
   public void setUp() throws Exception {
     super.setUp();
     originalMaxClauses = BooleanQuery.getMaxClauseCount();
+    parserArgs = new HashMap<String, String>();
   }
 
   public static void fail(String message) {
@@ -111,6 +117,9 @@ public class AqpTestAbstractCase extends LuceneTestCase {
   public AqpQueryParser getParser() throws Exception {
     AqpQueryParser qp = AqpStandardLuceneParser.init(getGrammarName());
     qp.setDebug(this.debugParser);
+    for (Entry<String, String> e: parserArgs.entrySet()) {
+    	qp.setNamedParameter(e.getKey(), e.getValue());
+    }
     return qp;
   }
 

@@ -108,6 +108,9 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
 			return sc;
 		}
 		else {
+			if (input.equals("*")) {
+				return new PrefixWildcardQueryNode(field, input, start, end);
+			}
 			return new AqpAdsabsIdentifierNode(field, input, start, end);
 		}
 		

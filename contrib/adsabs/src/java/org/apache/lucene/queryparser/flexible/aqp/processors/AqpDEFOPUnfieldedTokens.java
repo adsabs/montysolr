@@ -8,15 +8,24 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.CharStream;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpImmutableGroupQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
-import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.standard.parser.ParseException;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.request.SolrQueryRequest;
 
 /**
  * 
@@ -102,20 +111,32 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	private String operationMode;
 	private List<String> wildcardQTypes;
 	
+	/*
+	 * Default constructor with sensible defaults
+	 */
 	public AqpDEFOPUnfieldedTokens() {
 		ignoreModifiers = Arrays.asList("PLUS", "MINUS");
 		ignoreTModifiers = Arrays.asList("");
-		ignoreFields = Arrays.asList("");
-		catchQTypes = Arrays.asList("QNORMAL", "QTRUNCATED");
+		ignoreFields = null; //Arrays.asList("*");
+		catchQTypes = Arrays.asList("QNORMAL", "QTRUNCATED", "QDELIMITER");
 		wildcardQTypes = Arrays.asList("QTRUNCATED");
-		operationMode = "add_replace";
+		operationMode = null; // null == wait for the request 
 	}
 	
-	public AqpDEFOPUnfieldedTokens(boolean modifyTree, 
+	public AqpDEFOPUnfieldedTokens( 
 			List<String> firstChildAllowedModifiers,
-			List<String> firstChildAllowedFields) {
+			List<String> firstChildAllowedFields,
+			List<String> ignoreFields,
+			List<String> catchQTypes,
+			List<String> wildcardQTypes,
+			String strategy
+			) {
 		this.ignoreModifiers = firstChildAllowedModifiers;
 		this.ignoreTModifiers = firstChildAllowedFields;
+		this.ignoreFields = ignoreFields;
+		this.catchQTypes = catchQTypes;
+		this.wildcardQTypes = wildcardQTypes;
+		this.operationMode = strategy;
 	}
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
@@ -158,12 +179,26 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 				else {
 					if (newGroup.size() > 1) {
 						decideInsertChild(newChildren, newGroup);
+						newGroup.clear();
+						if (ninfo.isBareNode(true)) {
+							newGroup.add(ninfo);
+						}
+						else {
+							newChildren.add(ninfo.getOriginalNode());
+						}
+						
 					}
-					else if (newGroup.size() == 1) {
-						newChildren.add(newGroup.get(0).getOriginalNode());
+					else {
+						if (newGroup.size() == 1) {
+							newChildren.add(newGroup.remove(0).getOriginalNode());
+						}
+						if (ninfo.isBareNode(true)) {
+							newGroup.add(ninfo);
+						}
+						else {
+							newChildren.add(ninfo.getOriginalNode());
+						}
 					}
-					newChildren.add(ninfo.getOriginalNode());
-					newGroup.clear();
 				}
 			}
 			
@@ -186,6 +221,10 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	
 	private void decideInsertChild(List<QueryNode> newChildren,
       List<NodeInfo> newGroup) throws CloneNotSupportedException, ParseException {
+		
+		if (operationMode == null) {
+			operationMode = getStrategy();
+		}
 	  
 		if (operationMode.equals("tag")) {
 			tagChildren(newGroup);
@@ -193,10 +232,10 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 				newChildren.add(ninfo.getOriginalNode());
 			}
 		}
-		else if (operationMode.equals("replace")) {
+		else if (operationMode.equals("join")) {
 			newChildren.add(createReplacementNode(newGroup));
 		}
-		else if (operationMode.equals("add_replace")) {
+		else if (operationMode.equals("add")) {
 			QueryNode replacementNode = createReplacementNode(newGroup);
 			QueryNode defopNode = cloneNode(newGroup.get(0).getOriginalNode().getParent());
 			
@@ -209,10 +248,14 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 			defopNode.set(defopChildren);
 			
 			ArrayList<QueryNode> orClauses = new ArrayList<QueryNode>();
-			orClauses.add(defopNode);
-			orClauses.add(replacementNode);
+			orClauses.add(new AqpImmutableGroupQueryNode(defopNode));
+			orClauses.add(new AqpImmutableGroupQueryNode(replacementNode));
 			AqpOrQueryNode orNode = new AqpOrQueryNode(orClauses);
+			//orNode.applyModifier(orNode.getChildren(), Modifier.MOD_NONE);
 			newChildren.add(orNode);
+		}
+		else {
+			throw new ParseException(new MessageImpl("Unknown strategy: " + operationMode));
 		}
 	  
   }
@@ -245,9 +288,12 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	  	((AqpANTLRNode) terminalParent).setTokenLabel("QTRUNCATED");
 	  }
 	  else {
-	  	((AqpANTLRNode) terminalNode).setTokenInput("\"" + newValue + "\"");
-	  	((AqpANTLRNode) terminalParent).setTokenName("QPHRASE");
-	  	((AqpANTLRNode) terminalParent).setTokenLabel("QPHRASE");
+	  	String tt = getNewTokenType();
+	  	if (tt.contains("QPHRASE")) {
+	  		((AqpANTLRNode) terminalNode).setTokenInput("\"" + newValue + "\"");
+	  	}
+	  	((AqpANTLRNode) terminalParent).setTokenName(tt);
+	  	((AqpANTLRNode) terminalParent).setTokenLabel(tt);
 	  }
 	  return firstNode;
   }
@@ -323,6 +369,55 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	  }
 	  return out;
   }
+	
+	private String getStrategy() {
+		QueryConfigHandler config = getQueryConfigHandler();
+		
+		String key = "aqp.unfielded.tokens.strategy";
+		
+		Map<String, String> args = getQueryConfigHandler().get(
+    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+		if (args.containsKey(key)) {
+			return args.get(key);
+		}
+		
+		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+		
+		SolrQueryRequest req = reqAttr.getRequest();
+		if (req == null)
+			return "tag";
+		SolrParams params = req.getParams();
+		return params.get(key, "tag");
+	}
+	
+	private String getNewTokenType() {
+		QueryConfigHandler config = getQueryConfigHandler();
+		String key = "aqp.unfielded.tokens.new.type";
+		
+		Map<String, String> args = getQueryConfigHandler().get(
+    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+		if (args.containsKey(key)) {
+			if (args.get(key).toLowerCase().contains("phrase")) {
+				return "QPHRASE";
+			}
+			else {
+				return "QNORMAL";
+			}
+		}
+		
+		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+		
+		SolrQueryRequest req = reqAttr.getRequest();
+		if (req == null)
+			return "QNORMAL";
+		SolrParams params = req.getParams();
+		if (params.get(key, "phrase").contains("phrase")) {
+			return "QPHRASE";
+		}
+		else {
+			return "QNORMAL";
+		}
+	}
 
 	private class NodeInfo {
 		private QueryNode originalNode;
@@ -371,7 +466,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 			
 	    if (modifier == "" || (isFirstInGroup && ignoreModifiers.contains(modifier))) {
 	    	if (tModifier == "" || (isFirstInGroup && ignoreTModifiers.contains(tModifier))) {
-	    		if (field == "" || (isFirstInGroup && ignoreFields.contains(field))) {
+	    		if (field == "" || (isFirstInGroup && (ignoreFields == null || ignoreFields.contains(field)))) {
 	    			if (catchQTypes.contains(qType)) {
 	    				return true;
 	    			}

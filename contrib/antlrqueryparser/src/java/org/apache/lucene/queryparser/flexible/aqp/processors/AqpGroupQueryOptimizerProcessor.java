@@ -3,6 +3,7 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpImmutableGroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
@@ -38,7 +39,7 @@ public class AqpGroupQueryOptimizerProcessor extends QueryNodeProcessorImpl
 
   @Override
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
-    if (node instanceof GroupQueryNode) {
+    if (node instanceof GroupQueryNode && !(node instanceof AqpImmutableGroupQueryNode)) {
       QueryNode immediateChild = node.getChildren().get(0);
       ClauseData data = harvestData(immediateChild);
       QueryNode changedNode = data.getLastChild();

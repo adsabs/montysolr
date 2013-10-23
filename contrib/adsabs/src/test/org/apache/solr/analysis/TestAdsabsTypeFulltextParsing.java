@@ -447,7 +447,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='5']");
     
     // non-phrase: by default do span search
-    assertQueryEquals(req("q", "hubble space telescope", "defType", "aqp"), 
+    assertQueryEquals(req("q", "hubble space telescope", "defType", "aqp",
+    		"aqp.unfielded.tokens.strategy", "join"), 
         "all:hubble all:syn::hubble space telescope all:syn::acr::hst all:space all:telescope", 
         BooleanQuery.class);
     assertQ(req("q", "hubble space telescope"), 

@@ -100,7 +100,14 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
      */
     final public static ConfigurationKey<Map<String, String>> FIELD_MAPPER_POST_ANALYSIS = ConfigurationKey
         .newInstance();
-
+    
+    
+    /**
+     * Named arguments that can be used in place of non-existant SOLR request
+     */
+    final public static ConfigurationKey<Map<String, String>> NAMED_PARAMETER = ConfigurationKey
+    		.newInstance();
+    
   }
 
   public AqpStandardQueryConfigHandler() {
@@ -120,7 +127,7 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
     set(ConfigurationKeys.FIELD_MAPPER, new HashMap<String, String>());
     set(ConfigurationKeys.FIELD_MAPPER_POST_ANALYSIS,
         new HashMap<String, String>());
-
+    set(ConfigurationKeys.NAMED_PARAMETER, new HashMap<String, String>());
   }
 
 }

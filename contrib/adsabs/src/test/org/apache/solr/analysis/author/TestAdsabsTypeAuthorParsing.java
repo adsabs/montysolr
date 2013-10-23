@@ -345,9 +345,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	testAuthorQuery(
         "\"purpose of this review is to bridge the gap between\"", 
         		"",
-        		"//*[@numFound='0']",
-        "purpose of this review is to bridge the gap between", 
-        		"",
         		"//*[@numFound='0']"
         		);
   	
@@ -433,25 +430,19 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                     // Pinilla-Alonso numFound=6
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                     // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer
-         "Pinilla-Alonso,", 
-         				   "author:pinilla alonso, author:pinilla alonso, *",
-                    "//*[@numFound='6']",
-                    // Pinilla-Alonso numFound=6
-                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
-                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer  
-			   "Pinilla-Alonso, B", 
+			   "\"Pinilla-Alonso, B\"", 
         				   "author:pinilla alonso, b author:pinilla alonso, b* author:pinilla alonso,",
                    "//*[@numFound='5']",
                    // Pinilla-Alonso numFound=6
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat   
-         "Pinilla Alonso, B.", 
+         "\"Pinilla Alonso, B.\"", 
         				   "author:pinilla alonso, b author:pinilla alonso, b* author:pinilla alonso,",
                    "//*[@numFound='5']",
                    // Pinilla-Alonso numFound=6
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat                      
-         "Pinilla-Alonso, Brava", 
+         "\"Pinilla-Alonso, Brava\"", 
                    "author:pinilla alonso, brava author:pinilla alonso, brava * author:pinilla alonso, b author:pinilla alonso, b * author:pinilla alonso,",
                    "//*[@numFound='4']"
                    // Pinilla-Alonso, Brava numFound=4
@@ -460,16 +451,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         );
 
     
-    setDebug(true);
-    testAuthorQuery(
-    		"Lee, Harwin-*", 
-    		"author:lee, harwin-*",
-        "//*[@numFound='0']"
-        );
     
     // bug: #255
     testAuthorQuery(
-        "Lee, H-C", "author:lee, h c author:lee, h c* author:/lee, h[^\\s]+ c/ author:/lee, h[^\\s]+ c .*/ author:lee, h author:lee,",
+        "\"Lee, H-C\"", "author:lee, h c author:lee, h c* author:/lee, h[^\\s]+ c/ author:/lee, h[^\\s]+ c .*/ author:lee, h author:lee,",
                     "//*[@numFound='3']",
                     // Lee, H-C numFound=3
                     // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C                            
@@ -477,28 +462,19 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                     "//*[@numFound='3']",
                     // "Lee, H-C" numFound=3
                     // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C
-        "Lee, H C", "author:lee, h c author:lee, h c* author:/lee, h[^\\s]+ c/ author:/lee, h[^\\s]+ c .*/ author:lee, h author:lee,",
-						        "//*[@numFound='3']",
-						        // "Lee, H-C" numFound=3
-						        // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C                    
-        "Lee, Harwin-C", "author:lee, harwin c author:lee, harwin c* author:lee, h c author:lee, h c* author:lee, harwin author:lee, h author:lee,",
-                    "//*[@numFound='4']",
-                    // Lee, Harwin-C numFound=4
-                    // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C          
-                    // 203 Lee, Harwin-Costa
         "\"Lee, Harwin C\"", "author:lee, harwin c author:lee, harwin c* author:lee, h c author:lee, h c* author:lee, harwin author:lee, h author:lee,",
                     "//*[@numFound='4']",
                     // Lee, Harwin C numFound=4
                     // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C          
                     // 203 Lee, Harwin-Costa                    
-        "Lee, Harwin-*", "author:lee, harwin-*",
+        "\"Lee, Harwin-*\"", "author:lee, harwin-*",
                     "//*[@numFound='0']",
                     // Lee, Harwin-* numFound=0
-        "Lee, Harwin*", "author:lee, harwin*",
+        "\"Lee, Harwin*\"", "author:lee, harwin*",
                     "//*[@numFound='2']",
                      // Lee, Harwin* numFound=2
                      // 202 Lee, Harwin-C          203  Lee, Harwin-Costa
-        "Lee, H*", "author:lee, h author:lee, h* author:lee,",
+        "\"Lee, H*\"", "author:lee, h author:lee, h* author:lee,",
                     "//*[@numFound='4']"
                      // Lee, Harwin-C numFound=4
                      // 200 Lee, H C               201  Lee, H-C               202  Lee, Harwin-C          

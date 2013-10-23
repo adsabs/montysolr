@@ -677,4 +677,35 @@ public class AqpQueryParser extends QueryParserHelper {
     getQueryConfigHandler().set(ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP,
         dateRes);
   }
+  
+  
+  /**
+   * Returns the string value of the {@link NAMED_PARAMETER} if set or
+   * null if nothing is there
+   * 
+   * @return the {@link NAMED_PARAMETER} value for the given key
+   */
+  public String getNamedParameter(String key) {
+    Map<String, String> map = getQueryConfigHandler().get(
+    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+    if (map.containsKey(key)) {
+    	return map.get(key);
+    }
+    return null;
+  }
+
+  /**
+   * Sets the {@link NAMED_PARAMETER}
+   * 
+   * @param key
+   *          name of the parameter; the value will depend on what 
+   *          processors are using and what they accept
+   * @param valu
+   *          string value
+   */
+  public void setNamedParameter(String key, String value) {
+  	Map<String, String> map = getQueryConfigHandler().get(
+    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+  	map.put(key, value);
+  }
 }

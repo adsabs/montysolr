@@ -93,7 +93,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		// into the first token
 	  // this was the original behaviour, you can still activate:
 		// add(new AqpDEFOPMarkPlainNodes());
-		//add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"),
+		// this was the 2nd strategy
+		// add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"),
 		//		Arrays.asList("author", "first_author")));
 		
 		add(new AqpDEFOPUnfieldedTokens());
