@@ -16,32 +16,27 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.ADSEscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
-import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
-import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.util.SolrPluginUtils;
 
 /**
- * This analyzer a WORKAROUND for the unfieded searches - edismax
+ * This analyzer is a WORKAROUND for the unfieded searches - edismax
  * does not know how to handle multi-token synonyms. And this problem
  * will be 'fully' solved only after I rewrite the whole edismax
  * into aqp (and I don't want to mess with that right now)
@@ -73,12 +68,15 @@ import org.apache.solr.util.SolrPluginUtils;
  * we index even multi-token as single words, so everything work as expected
  * even with edismax)
  * 
+ * To activate it, you MUST set:
+ * 	  aqp.unfielded.phrase.edismax.synonym.workaround = true
+ *    qf = list of edismax fields
  */
 
 public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorImpl {
 
 	private CharTermAttribute termAtt;
-	private float boostCorrection = 0.1f;
+	private float boostCorrection = 0.9f;
 	
 	public AqpAdsabsExtractMultisynonymsProcessor() {
 		// empty
@@ -91,6 +89,18 @@ public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorIm
 		if (config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
 				&& config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
 				.getRequest() != null) {
+			
+			Map<String, String> args = getQueryConfigHandler().get(
+	    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+			
+			if (!args.containsKey("aqp.unfielded.phrase.edismax.synonym.workaround")) {
+				return queryTree;
+			}
+			
+			if (args.containsKey("aqp.unfielded.phrase.edismax.synonym.workaround.boost.correction")) {
+				boostCorrection = Float.parseFloat(args.get("aqp.unfielded.phrase.edismax.synonym.workaround.boost.correction"));
+			}
+			
 			return super.process(queryTree);
 		}
 
@@ -138,7 +148,7 @@ public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorIm
 	  			for (String val: result) {
 	  				lst.add(new BoostQueryNode(
 	  						new AqpNonAnalyzedQueryNode(new FieldQueryNode(field, val, -1, -1)), 
-	  						boost!=null ? new BigDecimal(boost*boostCorrection).setScale(3, RoundingMode.HALF_EVEN).floatValue() : 0.0f));
+	  						boost!=null ? new BigDecimal(boost*boostCorrection).setScale(3, RoundingMode.HALF_EVEN).floatValue() : 1.0f));
 	  			}
 	  		}
 	  	}

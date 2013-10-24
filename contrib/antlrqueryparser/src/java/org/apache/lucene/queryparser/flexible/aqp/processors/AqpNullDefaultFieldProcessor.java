@@ -2,10 +2,13 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.List;
 
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
@@ -43,11 +46,18 @@ import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQuer
 public class AqpNullDefaultFieldProcessor extends QueryNodeProcessorImpl
     implements QueryNodeProcessor {
 
+	
   @Override
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
     if (node instanceof FieldQueryNode
         && ((FieldQueryNode) node).getField() == null) {
-      ((FieldQueryNode) node).setField("");
+    	String field = getDefaultFieldName();
+    	if (field != null) {
+    		((FieldQueryNode) node).setField(field);
+    	}
+    	else {
+    		((FieldQueryNode) node).setField("");
+    	}
     }
     return node;
   }
@@ -61,6 +71,18 @@ public class AqpNullDefaultFieldProcessor extends QueryNodeProcessorImpl
   protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
       throws QueryNodeException {
     return children;
+  }
+  
+  private String getDefaultFieldName() throws QueryNodeException {
+    QueryConfigHandler queryConfig = getQueryConfigHandler();
+    if (queryConfig != null) {
+      if (queryConfig
+          .has(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD)) {
+        return queryConfig
+            .get(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD);
+      }
+    }
+    return null;
   }
 
 }

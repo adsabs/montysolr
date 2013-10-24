@@ -379,25 +379,35 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		// this is default behaviour
 		assertQueryEquals(req("defType", "aqp", "q", "author:accomazzi, alberto property:refereed apj"), 
-        "+(author:accomazzi, author:accomazzi,*) +all:alberto +property:refereed +all:apj", 
+        "+(author:accomazzi, author:accomazzi,*) +unfielded_search:alberto +property:refereed +unfielded_search:apj",
         BooleanQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "author:huchra supernova"), 
-        "+(author:huchra, author:huchra,*) +all:supernova", 
+        "+(author:huchra, author:huchra,*) +unfielded_search:supernova", 
         BooleanQuery.class);
 		
-		// now with the unfielded token strategy activated
+		// with the special strategy
+		// i expect following: 
+		// edismax receives: 'author:accomazzi, alberto' and also 'author:"accomazzi, alberto"
+		//      ""         : 'property:refereed r s t'  and 'property:"refereed r s t"'
+		// author search does: "accomazzi, alberto"
 		assertQueryEquals(req("defType", "aqp",
-				"aqp.unfielded.tokens.strategy", "add",
-				"aqp.unfielded.tokens.new.type", "phrase",
-				"q", "author:accomazzi, alberto property:refereed apj"), 
-        "+((+(author:accomazzi, author:accomazzi,*) +all:alberto) (author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)) +((+property:refereed +all:apj) property:refereedapj)", 
+				"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+				"qf", "title keyword",
+				"q", "author:accomazzi, alberto property:refereed r s t"),
+				"+(((author:accomazzi, (title:alberto | keyword:alberto))~2) ((author:accomazzi, alberto author:accomazzi, a author:accomazzi,)~3)) +(((property:refereed (title:r | keyword:r) (title:s | keyword:s) (title:t | keyword:t))~4) property:refereedrst)",
         BooleanQuery.class);
+		// the same as above + enhanced by multisynonym
+		// i expect to see syn::r s t, syn::acr::rst
 		assertQueryEquals(req("defType", "aqp",
-				"aqp.unfielded.tokens.strategy", "add",
-				"aqp.unfielded.tokens.new.type", "phrase",
-				"q", "author:huchra supernova"), 
-        "(+(author:huchra, author:huchra,*) +all:supernova) (author:supernova, huchra author:supernova, huchra * author:supernova, h author:supernova, h * author:supernova,)", 
+				"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
+				"q", "author:accomazzi, alberto property:refereed r s t",
+				"qf", "title keyword^0.5"), 
+        "+(((author:accomazzi, (title:alberto | keyword:alberto^0.5))~2) ((author:accomazzi, alberto author:accomazzi, a author:accomazzi,)~3)) +(((property:refereed (title:r | keyword:r^0.5) (title:s | keyword:s^0.5) (title:t | keyword:t^0.5))~4) (title:syn::r s t title:syn::acr::rst property:refereedrst))", 
         BooleanQuery.class);
+		
 		
 		
 		// search for all docs with a field
@@ -410,7 +420,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		// fun test of a crazy span query
 		assertQueryEquals(req("defType", "aqp", "q", "(consult* or advis*) NEAR4 (fee or retainer or salary or bonus)"), 
-        "spanNear([spanOr([SpanMultiTermQueryWrapper(all:consult*), SpanMultiTermQueryWrapper(all:advis*)]), spanOr([all:fee, all:retainer, all:salary, all:bonus])], 4, true)",
+        "spanNear([spanOr([SpanMultiTermQueryWrapper(unfielded_search:consult*), SpanMultiTermQueryWrapper(unfielded_search:advis*)]), spanOr([unfielded_search:fee, unfielded_search:retainer, unfielded_search:salary, unfielded_search:bonus])], 4, true)",
         SpanNearQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "(consult* and advis*) NEAR4 (fee or retainer or salary or bonus)"), 
         "spanNear([spanNear([SpanMultiTermQueryWrapper(all:consult*), SpanMultiTermQueryWrapper(all:advis*)], 4, true), spanOr([all:fee, all:retainer, all:salary, all:bonus])], 4, true)",
@@ -527,38 +537,50 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         BooleanQuery.class);
     
     
-    // multi-token combined with single token, workaroudn for edismax is activated
-    // where there is a quote in the subquery string
-    assertQueryEquals(req("defType", "aqp", "q", "r s t",
+    // multi-token combined with single token
+    // the unfielded search should be exapnded with the phrase "x r s t"
+    // and "r s t" should be properly analyzed into: "x rst" OR "x r s t"
+    assertQueryEquals(req("defType", "aqp", 
+    		"q", "r s t",
+    		"aqp.unfielded.tokens.strategy", "add",
+				"aqp.unfielded.tokens.new.type", "phrase",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
         "qf", "title^0.9 keyword^0.7"),
-        "(((title:r title:syn::r s t title:syn::acr::rst title:s title:t)^0.9) " +
-        "| ((keyword:r keyword:s keyword:t)^0.7))", 
-        DisjunctionMaxQuery.class);
-    
-    assertQueryEquals(req("defType", "aqp", "q", "x r s t",
-        "qf", "title^0.9 keyword^0.7"),
-        "(((title:x title:r title:syn::r s t title:syn::acr::rst title:s title:t)^0.9) " +
-        "| ((keyword:x keyword:r keyword:s keyword:t)^0.7))", 
-        DisjunctionMaxQuery.class);
-    
-    assertQueryEquals(req("defType", "aqp", "q", "r s t x",
-        "qf", "title^0.9 keyword^0.7"),
-        "(((title:r title:syn::r s t title:syn::acr::rst title:s title:t title:x)^0.9) " +
-        "| ((keyword:r keyword:s keyword:t keyword:x)^0.7))", 
-        DisjunctionMaxQuery.class);
-    
-    assertQueryEquals(req("defType", "aqp", "q", "y r s t x",
-        "qf", "title^0.9 keyword^0.7"),
-        "(((title:y title:r title:syn::r s t title:syn::acr::rst title:s title:t title:x)^0.9) " +
-        "| ((keyword:y keyword:r keyword:s keyword:t keyword:x)^0.7))", 
-        DisjunctionMaxQuery.class);
-
-    
-    assertQueryEquals(req("defType", "aqp", "q", "\"r s t\"",
-        "qf", "title^0.9 keyword^0.7"),
-        "title:syn::r s t^0.09 title:syn::acr::rst^0.09 " + // workaround/fix - notice different boosts
-        "(title:\"(r syn::r s t syn::acr::rst) s t\"^0.9 | keyword:\"r s t\"^0.7)", // normal edismax 
+        "(+(title:r^0.9 | keyword:r^0.7) +(title:s^0.9 | keyword:s^0.7) +(title:t^0.9 | keyword:t^0.7)) " + // this is the normal +r +s +t 
+        "(title:syn::r s t^0.81 title:syn::acr::rst^0.81 (title:\"(r syn::r s t syn::acr::rst) s t\"^0.9 | keyword:\"r s t\"^0.7))",  // this was the expanded phrase, that got fixed by us
         BooleanQuery.class);
+    
+    assertQueryEquals(req("defType", "aqp", 
+    		"q", "x r s t",
+    		"aqp.unfielded.tokens.strategy", "add",
+				"aqp.unfielded.tokens.new.type", "phrase",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
+        "qf", "title^0.9 keyword^0.7"),
+        "(+(title:x^0.9 | keyword:x^0.7) +(title:r^0.9 | keyword:r^0.7) +(title:s^0.9 | keyword:s^0.7) +(title:t^0.9 | keyword:t^0.7)) " +
+        "(title:syn::r s t^0.81 title:syn::acr::rst^0.81 (title:\"x (r syn::r s t syn::acr::rst) s t\"^0.9 | keyword:\"x r s t\"^0.7))",
+        BooleanQuery.class);
+    
+    
+    // when using default edismax handler
+    // +(
+    // ((title:r^0.9 | keyword:r^0.7) 
+    //  (title:s^0.9 | keyword:s^0.7) 
+    //  (title:t^0.9 | keyword:t^0.7) 
+    //  (title:x^0.9 | keyword:x^0.7)
+    // )~4)
+    assertQueryEquals(req("defType", "aqp", 
+    		"q", "r s t x",
+        "qf", "title^0.9 keyword^0.7",
+    		"aqp.unfielded.tokens.strategy", "add",
+				"aqp.unfielded.tokens.new.type", "phrase",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true"
+        ),
+        "(+(title:r^0.9 | keyword:r^0.7) +(title:s^0.9 | keyword:s^0.7) +(title:t^0.9 | keyword:t^0.7) +(title:x^0.9 | keyword:x^0.7)) " +
+        "(title:syn::r s t^0.81 title:syn::acr::rst^0.81 (title:\"(r syn::r s t syn::acr::rst) s t x\"^0.9 | keyword:\"r s t x\"^0.7))",
+        //"(((title:r title:syn::r s t title:syn::acr::rst title:s title:t title:x)^0.9) " +
+        //"| ((keyword:r keyword:s keyword:t keyword:x)^0.7))", 
+        BooleanQuery.class);
+    
 
     
     

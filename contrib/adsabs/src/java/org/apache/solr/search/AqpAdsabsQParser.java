@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.lucene.document.FieldType.NumericType;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -150,6 +151,25 @@ public class AqpAdsabsQParser extends QParser {
 		config.set(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER, req.getSchema().getQueryAnalyzer());
 		
 		config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
+		
+		// pass the named parameters from solr request object
+		Map<String, String> namedParams = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+		if (params != null) {
+			for (Entry<String, Object> par: params.toNamedList()) {
+				String k = par.getKey();
+				if (k.startsWith("aqp.")) {
+					namedParams.put(k, (String) par.getValue());
+				}
+			}
+		}
+		if (localParams != null) {
+			for (Entry<String, Object> par: localParams.toNamedList()) {
+				String k = par.getKey();
+				if (k.startsWith("aqp.")) {
+					namedParams.put(k, (String) par.getValue());
+				}
+			}
+		}
 		
 		// special analyzers
 		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(0, new AqpSolrFunctionProvider());

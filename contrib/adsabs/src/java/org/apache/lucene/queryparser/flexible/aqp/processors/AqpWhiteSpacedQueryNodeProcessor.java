@@ -11,6 +11,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpWhiteSpacedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
@@ -36,62 +37,53 @@ import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQu
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 
 /**
- * This processor wraps fields with the 'null' value into edismax 
- * search. This is the solution for the unfielded search 
+ * This processor looks for {@link AqpWhiteSpacedQueryNode}
+ * and builds a {@link AqpFunctionQueryNode} out of it.
+ * This is the solution for unfielded search.
  * 
- * @see FieldableNode
- * @see MultiFieldQueryNodeProcessor
- * @see AnalyzerQueryNodeProcessor
- * @see AqpInvenioQueryParser
- * @see DefaultFieldAttribute
- *
+ * Your config should specify:
+ * 
+ * 		aqp.unfielded.tokens.function.name - name of the function
+ *            that receives the input  {@link AqpFunctionQueryNode}
  */
-public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implements
+public class AqpWhiteSpacedQueryNodeProcessor extends QueryNodeProcessorImpl implements
 		QueryNodeProcessor {
   
-  ADSEscapeQuerySyntaxImpl escaper = new ADSEscapeQuerySyntaxImpl();
   
 	@Override
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 
-	  if (node instanceof FieldQueryNode) {
+	  if (node instanceof AqpWhiteSpacedQueryNode) {
 	    
 		  QueryConfigHandler config = getQueryConfigHandler();
 		  
-		  if (!((FieldQueryNode) node).getField().equals(
-		      config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD))) {
-		    return node;
-		  }
-	    
 	    if (!config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)) {
 	      throw new QueryNodeException(new MessageImpl(
 	          "Invalid configuration",
 	          "Missing FunctionQueryBuilder provider"));
 	    }
 	    
-	    String funcName = "edismax_combined_aqp"; //"edismax_always_aqp"; //"edismax_combined_aqp";
+	    String funcName = getFuncName();
 	    String subQuery = ((FieldQueryNode) node).getTextAsString();
+	    String field = ((FieldQueryNode) node).getFieldAsString();
 	    
-	    if (node instanceof AqpNonAnalyzedQueryNode) {
-	      funcName = "edismax_nonanalyzed";
+	    if (field != null) {
+	    	subQuery = field + ":" + subQuery;
 	    }
-	    else {
-	      //subQuery = (String) escaper.escape(subQuery, Locale.getDefault(), EscapeQuerySyntax.Type.NORMAL);
+	    
+      if (node.getParent() instanceof SlopQueryNode) {
+      	subQuery = "(" + subQuery + ")";
+      	subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
+      	if (node.getParent().getParent() instanceof BoostQueryNode) {
+	      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent().getParent()).getValue();
+	      }
+      }
+      else if (node.getParent() instanceof BoostQueryNode) {
+      	subQuery = "(" + subQuery + ")";
+      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent()).getValue();
+      }
 	      
-	      if (node instanceof QuotedFieldQueryNode) {
-	      	subQuery = "\"" + subQuery + "\"";
-	      }
-	      if (node.getParent() instanceof SlopQueryNode) {
-	      	subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
-	      	if (node.getParent().getParent() instanceof BoostQueryNode) {
-		      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent().getParent()).getValue();
-		      }
-	      }
-	      else if (node.getParent() instanceof BoostQueryNode) {
-	      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent()).getValue();
-	      }
-	    }
 	    node.setTag("subQuery", subQuery);
 	    
 	    AqpFunctionQueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
@@ -99,18 +91,17 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	    
 	    if (builder == null) {
 	      throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
-	          "Unknown function \"" + funcName +"\"" ));
+	          "Unknown function: \"" + funcName +"\"" ));
 	    }
 	    
 	    
 	    List<OriginalInput> fValues = new ArrayList<OriginalInput>();
-	    fValues.add(new OriginalInput(subQuery, -1, -1));
+	    fValues.add(new OriginalInput(subQuery, ((AqpWhiteSpacedQueryNode) node).getBegin(), ((AqpWhiteSpacedQueryNode) node).getEnd()));
 	    return new AqpFunctionQueryNode(funcName, builder, fValues);
 		}
 		return node;
 	}
-	
-	
+
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
@@ -123,4 +114,14 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 		return children;
 	}
 	
+	private String getFuncName() {
+		
+		String key = "aqp.unfielded.tokens.function.name";
+		Map<String, String> args = getQueryConfigHandler().get(
+    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+		if (args.containsKey(key)) {
+			return args.get(key);
+		}
+		return "edismax_combined_aqp";
+	}
 }

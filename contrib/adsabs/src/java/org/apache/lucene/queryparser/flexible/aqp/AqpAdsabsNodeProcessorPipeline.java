@@ -63,6 +63,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASETRUNCProc
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQRANGEINProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTMODIFIERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTreeRewriteProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpWhiteSpacedQueryNodeProcessor;
 import org.apache.solr.search.AqpAdsabsQParser;
 
 /**
@@ -96,7 +97,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		// this was the 2nd strategy
 		// add(new AqpDEFOPMarkPlainNodes(true, Arrays.asList("+", "-"),
 		//		Arrays.asList("author", "first_author")));
-		
+		// and this is the best so far, it can nicely extend the query
+		// and is configurable through url params
 		add(new AqpDEFOPUnfieldedTokens());
 		
 
@@ -193,7 +195,9 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 			
 			// take the 'unfielded search' values and wrap them into edismax('xxxxx') call
 			// it will be executed/built in the 'build' phase (after processors finished)
-      add(new AqpUnfieldedSearchProcessor());
+      // add(new AqpUnfieldedSearchProcessor());
+      
+      add(new AqpWhiteSpacedQueryNodeProcessor());
       
       // TEMPORARY solution for the unfielded multi-token searches, edismax
       // does not know how to handle properly token expansions spanning several
@@ -237,7 +241,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		// author search: 'kurtz, michael' is expanded with "kurtz, michael *" ...
 	  // ADS has a 'very special' requirement for expanding the author search
 		// this expansion cannot be solved inside the analysis chain (because
-		// it depends on the context [knowing the original input]), so it is 
+		// it depends on the context [knowing the original input]), so it is here
 		add(new AqpAdsabsExpandAuthorSearchProcessor()); 
 		
 		
@@ -246,7 +250,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		
 	  // deals with the the-same-position tokens: 
-		// "(word | synonym) phrase query" -> "word phrase query" | synonym
+		// "(word | synonym) phrase query" becomes "word phrase query" | synonym
 		add(new AqpPostAnalysisProcessor()); 
 		
 		

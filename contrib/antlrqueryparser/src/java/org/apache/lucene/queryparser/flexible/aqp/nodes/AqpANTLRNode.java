@@ -188,6 +188,15 @@ public class AqpANTLRNode extends QueryNodeImpl {
     return tree.getStartIndex();
   }
 
+  /*
+   * I'm confused, this method added just now,
+   * there should be only one method for setting
+   */
+  public void setTokenStart(int start) {
+    tree.setStartIndex(start);
+    ((CommonToken) tree.getToken()).setCharPositionInLine(start);
+  }
+  
   public int getTokenEnd() {
     return tree.getStopIndex();
   }

@@ -99,7 +99,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
     
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS, new HashMap<String, int[]>());
-    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, "#$@&@nonexisting");
+    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, "#$@&@unfielded");
     set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE, "dummynonexxistingnullvalue");
     
     // This is not being initialized inside the standard config handler, which causes

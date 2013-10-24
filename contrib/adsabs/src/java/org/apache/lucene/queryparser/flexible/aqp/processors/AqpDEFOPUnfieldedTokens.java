@@ -8,24 +8,24 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.CharStream;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpImmutableGroupQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpWhiteSpacedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.parser.ParseException;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.request.SolrQueryRequest;
 
 /**
  * 
@@ -220,7 +220,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	}
 	
 	private void decideInsertChild(List<QueryNode> newChildren,
-      List<NodeInfo> newGroup) throws CloneNotSupportedException, ParseException {
+      List<NodeInfo> newGroup) throws CloneNotSupportedException, QueryNodeException {
 		
 		if (operationMode == null) {
 			operationMode = getStrategy();
@@ -232,11 +232,12 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 				newChildren.add(ninfo.getOriginalNode());
 			}
 		}
-		else if (operationMode.equals("join")) {
-			newChildren.add(createReplacementNode(newGroup));
+		else if (operationMode.equals("join")) { // concatenates into one single node
+			newChildren.add(createReplacementNode(newGroup, null));
 		}
-		else if (operationMode.equals("add")) {
-			QueryNode replacementNode = createReplacementNode(newGroup);
+		else if (operationMode.equals("add")) { // (original original...) OR (single node)
+			QueryNode replacementNode = createReplacementNode(newGroup, null);
+			
 			QueryNode defopNode = cloneNode(newGroup.get(0).getOriginalNode().getParent());
 			
 			
@@ -251,7 +252,21 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 			orClauses.add(new AqpImmutableGroupQueryNode(defopNode));
 			orClauses.add(new AqpImmutableGroupQueryNode(replacementNode));
 			AqpOrQueryNode orNode = new AqpOrQueryNode(orClauses);
-			//orNode.applyModifier(orNode.getChildren(), Modifier.MOD_NONE);
+			newChildren.add(orNode);
+		}
+		else if (operationMode.equals("multiply")) { // (single node) OR ("single node")
+			// this strategy is best for ADS as we want to support
+			// multi-token synonym replacement, edismax, and also 
+			// non-quoted strings should be searched in sensible field
+			AqpWhiteSpacedQueryNode normalNode = (AqpWhiteSpacedQueryNode) createReplacementNode(newGroup, "simple");
+			AqpWhiteSpacedQueryNode phraseNode = normalNode.cloneTree();
+			
+			phraseNode.setValue("\"" + phraseNode.getValue() + "\"");
+			
+			ArrayList<QueryNode> orClauses = new ArrayList<QueryNode>();
+			orClauses.add(normalNode);
+			orClauses.add(phraseNode);
+			AqpOrQueryNode orNode = new AqpOrQueryNode(orClauses);
 			newChildren.add(orNode);
 		}
 		else {
@@ -260,8 +275,40 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	  
   }
 
-	private QueryNode createReplacementNode(List<NodeInfo> newGroup) throws CloneNotSupportedException, ParseException {
+	private void fixTheFieldProblem(List<NodeInfo> newGroup) {
+	  NodeInfo firstNode = newGroup.get(0);
+	  String f = firstNode.getField();
+	  if (f != null) {
+	  	QueryNode n = firstNode.getOriginalNode();
+	  	removeField(n);
+	  }
+  }
+
+	private void removeField(QueryNode n) {
+	  if (!n.isLeaf() && n instanceof AqpANTLRNode) {
+	  	if (((AqpANTLRNode) n).getTokenLabel().equals("FIELD")) {
+		  	List<QueryNode> children = n.getChildren();
+		  	if (children.size() > 1) {
+		  		AqpANTLRNode f = (AqpANTLRNode) children.remove(0);
+		  		AqpANTLRNode c = (AqpANTLRNode) AqpQProcessor.getTerminalNode(children.get(0));
+		  		c.setTokenInput(f.getTokenInput() + ":" + c.getTokenInput());
+		  		c.setInputTokenStart(f.getInputTokenStart());
+		  		c.setTokenStart(f.getInputTokenStart());
+		  	}
+	  	}
+	  	for (QueryNode child: n.getChildren()) {
+	  		removeField(child);
+	  	}
+	  }
+	  
+  }
+
+	private QueryNode createReplacementNode(List<NodeInfo> newGroup, String tt) throws CloneNotSupportedException, QueryNodeException {
 	  String newValue = getConcatenatedValue(newGroup);
+	  String field = "";
+	  if (newGroup.get(0).getField() != null && newGroup.get(0).getField().length() > 0) 
+	  	field = newGroup.get(0).getField() + ":";
+	  
 	  boolean isWildcard = false;
 	  for (NodeInfo ninfo: newGroup) {
 			if (wildcardQTypes.contains(ninfo.getQType())) {
@@ -270,6 +317,13 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 			}
 		}
 	  
+	  if (tt == null)
+	  	tt = getNewTokenType();
+	  
+	  if (tt.equals("simple")) {
+	  	return new AqpWhiteSpacedQueryNode(
+	  			field != "" ?	newGroup.get(0).getField() : null , newValue, -1, -1);
+	  }
 	  
 	  // we'll reuse the first node (but make its copy)
 	  QueryNode firstNode = cloneNode(newGroup.get(0).getOriginalNode());
@@ -288,15 +342,17 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	  	((AqpANTLRNode) terminalParent).setTokenLabel("QTRUNCATED");
 	  }
 	  else {
-	  	String tt = getNewTokenType();
 	  	if (tt.contains("QPHRASE")) {
 	  		((AqpANTLRNode) terminalNode).setTokenInput("\"" + newValue + "\"");
 	  	}
 	  	((AqpANTLRNode) terminalParent).setTokenName(tt);
 	  	((AqpANTLRNode) terminalParent).setTokenLabel(tt);
 	  }
+	  
 	  return firstNode;
   }
+
+	
 
 	/*
 	 * Ufff....this is necessary, because the QueryNodeImpl is NOT
@@ -371,7 +427,6 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
   }
 	
 	private String getStrategy() {
-		QueryConfigHandler config = getQueryConfigHandler();
 		
 		String key = "aqp.unfielded.tokens.strategy";
 		
@@ -381,43 +436,27 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 			return args.get(key);
 		}
 		
-		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
-		
-		SolrQueryRequest req = reqAttr.getRequest();
-		if (req == null)
-			return "tag";
-		SolrParams params = req.getParams();
-		return params.get(key, "tag");
+		return "tag";
 	}
 	
 	private String getNewTokenType() {
-		QueryConfigHandler config = getQueryConfigHandler();
 		String key = "aqp.unfielded.tokens.new.type";
-		
 		Map<String, String> args = getQueryConfigHandler().get(
     		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
 		if (args.containsKey(key)) {
 			if (args.get(key).toLowerCase().contains("phrase")) {
 				return "QPHRASE";
 			}
+			else if (args.get(key).toLowerCase().contains("simple")) {
+				return "simple";
+			}
 			else {
 				return "QNORMAL";
 			}
 		}
-		
-		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
-		
-		SolrQueryRequest req = reqAttr.getRequest();
-		if (req == null)
-			return "QNORMAL";
-		SolrParams params = req.getParams();
-		if (params.get(key, "phrase").contains("phrase")) {
-			return "QPHRASE";
-		}
-		else {
-			return "QNORMAL";
-		}
+		return "simple";
 	}
+	
 
 	private class NodeInfo {
 		private QueryNode originalNode;
@@ -455,6 +494,9 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	    }
 	    
     }
+		public String getField() {
+			return field;
+		}
 		public QueryNode getOriginalNode() {
 	    return originalNode;
     }

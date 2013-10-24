@@ -571,9 +571,13 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	
   	KeywordAnalyzer wsa = new KeywordAnalyzer();
   	
+  	assertQueryEquals("What , happens,with commas ,,",
+  			null,
+  			"+what +happens +with +commas", 
+  			BooleanQuery.class);
+  	
   	// this instructs parser to concatenate unfielded values
   	parserArgs.put("aqp.unfielded.tokens.strategy", "join");
-  	
   	assertQueryEquals("What , happens,with commas ,,",
   			null,
   			"+what +happens +with +commas", 
@@ -655,8 +659,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	
     // this should add new token (which will be analyzed by analyzer and can produce st different)
   	parserArgs.put("aqp.unfielded.tokens.strategy", "add");
-  	parserArgs.remove("aqp.unfielded.tokens.new.type");
-  	
+  	parserArgs.put("aqp.unfielded.tokens.new.type", "normal");
   	assertQueryEquals("foo:(A)", null, "foo:a");
   	assertQueryEquals("foo:(A -B)", null, "+foo:a -foo:b");
   	assertQueryEquals("foo:(A B D E)", kwa, "(+foo:A +foo:B +foo:D +foo:E) foo:A B D E");
@@ -684,6 +687,13 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("author:huchra nasa", null, "(+author:huchra +nasa) author:\"huchra nasa\"");
 		assertQueryEquals("author:accomazzi property:refereed apj", null, "+author:accomazzi +((+property:refereed +apj) property:\"refereed apj\")");
    
+		// this is the best what we can do - it is similar to the strategy
+		// above, only that in SOLR the values can be analyzed properly by edismax
+		// in this test, lucene cant handle it well...
+		parserArgs.put("aqp.unfielded.tokens.strategy", "multiply");
+  	parserArgs.put("aqp.unfielded.tokens.new.type", "phrase");
+		assertQueryEquals("author:huchra nasa", kwa, "author:huchra nasa author:\"huchra nasa\"");
+		assertQueryEquals("author:accomazzi property:refereed apj", kwa, "+author:accomazzi +(property:refereed apj property:\"refereed apj\")");
   }
   
 	public static junit.framework.Test suite() {
