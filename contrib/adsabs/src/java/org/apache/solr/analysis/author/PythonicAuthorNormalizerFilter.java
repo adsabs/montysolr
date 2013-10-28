@@ -93,9 +93,11 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter implements
     		buffer.add(original);
     	}
     }
-
-    termAtt.setEmpty().append(buffer.remove(0));
-    typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
+    
+    if (buffer.size() > 0) {
+	    termAtt.setEmpty().append(buffer.remove(0));
+	    typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
+    }
     
     return true;
   }

@@ -37,6 +37,7 @@ import org.apache.lucene.queries.function.valuesource.ProductFloatFunction;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.solr.analysis.TokenizerChain;
@@ -970,6 +971,7 @@ class AqpExtendedDismaxQParser extends QParser {
     boolean bool2;
     float flt;
     int slop;
+		String querystr;
 
     @Override
     protected Query getFieldQuery(String field, String val, boolean quoted) throws ParseException {
@@ -979,6 +981,12 @@ class AqpExtendedDismaxQParser extends QParser {
       this.field = field;
       this.val = val;
       this.slop = getPhraseSlop(); // unspecified
+      if (quoted) {
+      	this.querystr = AqpQueryParserUtil.escape(val);
+      }
+      else {
+      	this.querystr = "\"" + val + "\"";
+      }
       return getAliasedQuery();
     }
 
@@ -990,6 +998,7 @@ class AqpExtendedDismaxQParser extends QParser {
       this.field = field;
       this.val = val;
       this.slop = slop;
+      this.querystr = "\"" + val + "\"" + "^" + slop;
       return getAliasedQuery();
     }
 
@@ -1002,6 +1011,7 @@ class AqpExtendedDismaxQParser extends QParser {
       this.type = QType.PREFIX;
       this.field = field;
       this.val = val;
+      this.querystr = "\"" + val + "*\"";
       return getAliasedQuery();
     }
 
@@ -1032,6 +1042,12 @@ class AqpExtendedDismaxQParser extends QParser {
       this.val2 = b;
       this.bool = startInclusive;
       this.bool2 = endInclusive;
+      this.querystr =  
+      	(startInclusive ? "{" : "[") + 
+      	val + " TO " + 
+      	val2 != null && val2.length() > 1 ? val2 : "*" +
+      	(endInclusive ? "}" : "]");
+      
       return getAliasedQuery();
     }
 
@@ -1049,6 +1065,7 @@ class AqpExtendedDismaxQParser extends QParser {
       this.type = QType.WILDCARD;
       this.field = field;
       this.val = val;
+      this.querystr = "\"" + val + "\"";
       return getAliasedQuery();
     }
 
@@ -1060,6 +1077,7 @@ class AqpExtendedDismaxQParser extends QParser {
       this.field = field;
       this.val = val;
       this.flt = minSimilarity;
+      this.querystr = "\"" + val + "\"" + "~" + minSimilarity;
       return getAliasedQuery();
     }
 
@@ -1162,17 +1180,63 @@ class AqpExtendedDismaxQParser extends QParser {
     	
     	LocalSolrQueryRequest localReq = null;
     	Query query = null;
+    	
+    	try {
+    	if (querystr != null && !field.equals(IMPOSSIBLE_FIELD_NAME)) {
+    		
+    		NamedList<String> nl = new NamedList<String>();
+      	nl.add("defType", "aqp");
+      	//nl.add("debugQuery", "true");
+      	nl.add("aqp.unfielded.tokens.strategy", "tag");
+      	nl.add(CommonParams.DF, field);
+      	nl.add(CommonParams.Q, val);
+      	localReq = new LocalSolrQueryRequest(req.getCore(), nl);
+      	QParser aqpParser = getParser(this.querystr, "aqp", localReq);
+      	query = aqpParser.parse();
+      	
+    		switch (type) {
+          case PHRASE:  // fallthrough
+          case FIELD:
+            if (query instanceof PhraseQuery) {
+              PhraseQuery pq = (PhraseQuery)query;
+              if (minClauseSize > 1 && pq.getTerms().length < minClauseSize) return null;
+              ((PhraseQuery)query).setSlop(slop);
+            } else if (query instanceof MultiPhraseQuery) {
+              MultiPhraseQuery pq = (MultiPhraseQuery)query;
+              if (minClauseSize > 1 && pq.getTermArrays().size() < minClauseSize) return null;
+              ((MultiPhraseQuery)query).setSlop(slop);
+            } else if (minClauseSize > 1) {
+              // if it's not a type of phrase query, it doesn't meet the minClauseSize requirements
+              return null;
+            }
+        }
+    		if (query != null) {
+    			// multi-synonym expansions (are synonyms!)
+        	if (query instanceof BooleanQuery) {
+        		BooleanQuery bq = new BooleanQuery();
+        		bq.add(query, Occur.SHOULD);
+        		query = bq;
+        	}
+    			return query;
+    		}
+    	}
+    	}
+    	catch (Exception e) {
+    		throw new RuntimeException(e);
+    	}
+    	finally {
+      	if (localReq != null) {
+      		localReq.close();
+      	}
+      }
+    	
       try {
+      	
+      	
+      	// the default mechanism - probably never executes now
         switch (type) {
         
           case PHRASE:  // fallthrough
-          	NamedList<String> nl = new NamedList<String>();
-          	nl.add(CommonParams.Q, field + ":" + "\"" + val + "\"");
-          	nl.add("defType", "aqp");
-          	nl.add("aqp.unfielded.tokens.strategy", "tag");
-          	localReq = new LocalSolrQueryRequest(req.getCore(), nl);
-          	QParser aqpParser = getParser(field + ":" + "\"" + val + "\"", "aqp", localReq);
-          	query = aqpParser.parse();
           case FIELD:
           	if (query == null) {
           		query = super.getFieldQuery(field, val, type == QType.PHRASE);
@@ -1189,12 +1253,6 @@ class AqpExtendedDismaxQParser extends QParser {
               // if it's not a type of phrase query, it doesn't meet the minClauseSize requirements
               return null;
             }
-            // multi-synonym expansions (are synonyms!)
-          	if (query instanceof BooleanQuery) {
-          		BooleanQuery bq = new BooleanQuery();
-          		bq.add(query, Occur.SHOULD);
-          		query = bq;
-          	}
             return query;
           case PREFIX: return super.getPrefixQuery(field, val);
           case WILDCARD: return super.getWildcardQuery(field, val);
@@ -1208,11 +1266,7 @@ class AqpExtendedDismaxQParser extends QParser {
         // for example, passing a string to a numeric field.
         return null;
       }
-      finally {
-      	if (localReq != null) {
-      		localReq.close();
-      	}
-      }
+      
     }
 
     private Analyzer noStopwordFilterAnalyzer(String fieldName) {
