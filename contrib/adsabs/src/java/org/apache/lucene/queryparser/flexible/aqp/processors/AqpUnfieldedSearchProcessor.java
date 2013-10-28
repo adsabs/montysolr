@@ -9,6 +9,7 @@ import org.apache.lucene.queryparser.flexible.aqp.ADSEscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
@@ -55,7 +56,7 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
 
-	  if (node instanceof FieldQueryNode) {
+	  if (node instanceof FieldQueryNode && !(node instanceof AqpAdsabsRegexQueryNode)) {
 	    
 		  QueryConfigHandler config = getQueryConfigHandler();
 		  

@@ -473,10 +473,17 @@ public class AqpAdsabsSubQueryProvider implements
       }
     }.configure(false)); // not analyzed
 		
+		parsers.put("adismax", new AqpSubqueryParserFull() {
+      public Query parse(FunctionQParser fp) throws ParseException {          
+        QParser q = fp.subQuery(fp.getString(), "adismax");
+        return q.getQuery();
+      }
+    }.configure(false)); // not analyzed
+		
 		parsers.put("edismax_nonanalyzed", new AqpSubqueryParserFull() { // used for nodes that were already analyzed
       public Query parse(FunctionQParser fp) throws ParseException {
         final String original = fp.getString();
-        QParser ep = fp.subQuery("xxx", ExtendedDismaxQParserPlugin.NAME);
+        QParser ep = fp.subQuery("xxx", "adismax");
         Query q = ep.getQuery();
         QParser fakeParser = new QParser(original, null, null, null) {
           @Override
@@ -491,7 +498,7 @@ public class AqpAdsabsSubQueryProvider implements
 		parsers.put("edismax_combined_aqp", new AqpSubqueryParserFull() { // will decide whether new aqp() parse is needed
       public Query parse(FunctionQParser fp) throws ParseException {
         final String original = fp.getString();
-        QParser eqp = fp.subQuery(original, ExtendedDismaxQParserPlugin.NAME);
+        QParser eqp = fp.subQuery(original, "adismax");
         Query q = eqp.getQuery();
         return simplify(reParse(q, fp, null));
       }
@@ -524,14 +531,15 @@ public class AqpAdsabsSubQueryProvider implements
       
       private String toBeAnalyzedAgain(TermQuery q) {
         String f = q.getTerm().field();
-        if (f.equals("author")) {
-          return "author";
-        }
+        //if (f.equals("author")) {
+        //  return "author";
+        //}
         return null;
         //return f; // always re-analyze
       }
       private Query reAnalyze(String field, String value, float boost) throws ParseException {
         QParser fParser = getParser();
+        System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
         QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
         Query q = aqp.getQuery();
         q.setBoost(boost);
@@ -541,7 +549,7 @@ public class AqpAdsabsSubQueryProvider implements
 		parsers.put("edismax_always_aqp", new AqpSubqueryParserFull() { // will use edismax to create top query, but the rest is done by aqp
       public Query parse(FunctionQParser fp) throws ParseException {
         final String original = fp.getString();
-        QParser eqp = fp.subQuery("xxx", ExtendedDismaxQParserPlugin.NAME);
+        QParser eqp = fp.subQuery("xxx", "adismax");
         fp.setString(original);
         Query q = eqp.getQuery();
         return simplify(reParse(q, fp, null));

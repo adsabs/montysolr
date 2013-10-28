@@ -195,14 +195,17 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 			
 			// take the 'unfielded search' values and wrap them into edismax('xxxxx') call
 			// it will be executed/built in the 'build' phase (after processors finished)
-      // add(new AqpUnfieldedSearchProcessor());
+      add(new AqpUnfieldedSearchProcessor());
       
+      // this takes the unfielded search (multi-token group)
       add(new AqpWhiteSpacedQueryNodeProcessor());
       
       // TEMPORARY solution for the unfielded multi-token searches, edismax
       // does not know how to handle properly token expansions spanning several
       // positions; so we extract these and add them next to the edismax generated query
-      add(new AqpAdsabsExtractMultisynonymsProcessor());
+      // 28/10/13 - I've finally modified edismax (to call our aqp) when building
+      // a query, so this is being taken care off by us
+      // add(new AqpAdsabsExtractMultisynonymsProcessor());
       
     }
 		

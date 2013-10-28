@@ -67,6 +67,9 @@ public class AqpWhiteSpacedQueryNodeProcessor extends QueryNodeProcessorImpl imp
 	    String funcName = getFuncName();
 	    String subQuery = ((FieldQueryNode) node).getTextAsString();
 	    String field = ((FieldQueryNode) node).getFieldAsString();
+	    if (field.equals(config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD))) {
+	    	field = null;
+	    }
 	    
 	    if (field != null) {
 	    	subQuery = field + ":" + subQuery;

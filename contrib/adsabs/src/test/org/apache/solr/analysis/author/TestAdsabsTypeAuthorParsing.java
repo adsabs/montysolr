@@ -24,6 +24,7 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -316,6 +317,33 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+  	
+  	setDebug(true);
+  	// test of unfielded parsing
+  	assertQ(req("defType", "aqp", "q", "author:Boser, S", 
+        "qf", "author^2 title _val_:\"literal(aqp)\"",
+        "aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
+				"aqp.unfielded.tokens.function.name", "edismax_combined_aqp"),
+				"//*[@numFound='4']"
+				);
+  	
+  	assertQ(req("defType", "aqp", "q", "first searcher warming", 
+        "qf", "author^2 title",
+        "aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
+				"aqp.unfielded.tokens.function.name", "edismax_combined_aqp"),
+				"//*[@numFound='0']"
+				);
+  	
+    // xxx will be removed from the author, but present in other fields
+	  assertQueryEquals(req("defType", "aqp", "q", "\"accomazzi, alberto, xxx.\"", "qf", "title author"), 
+        "((author:accomazzi, alberto author:accomazzi, a author:accomazzi,) | title:\"accomazzi alberto xxx\")",
+        DisjunctionMaxQuery.class);
+    
+    
     
   	// #362 - smartly handle o' sulliva (done in the Pythonic name parser)
   	// I'm not sure whether we should index the apostrophe, maybe it should

@@ -142,6 +142,8 @@ public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorIm
 	  	Map<String,Float> parsedQf = SolrPluginUtils.parseFieldBoosts(qf);
 	  	for (Entry<String, Float> entry: parsedQf.entrySet()) {
 	  		String field = entry.getKey();
+	  		if (field.charAt(0) == '_') // special fields
+	  			continue;
 	  		Float boost = entry.getValue();
 	  		ArrayList<String> result = extractMultiSpanTokens(field, subQuery);
 	  		if (result != null && result.size() > 0) {

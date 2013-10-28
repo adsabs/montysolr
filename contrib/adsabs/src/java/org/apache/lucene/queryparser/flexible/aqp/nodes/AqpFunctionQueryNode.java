@@ -115,7 +115,7 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 		StringBuffer bo = new StringBuffer();
 		bo.append("<function name=\"");
 		bo.append(this.name == null ? getBuilder().getClass() : this.name);
-		bo.append(" originalInput=\"" + originalInput + "\"");
+		bo.append("\" originalInput=\"" + originalInput + "\"");
 		bo.append("\">\n");
 		for (OriginalInput child: this.getFuncValues()) {
 			bo.append("<funcValue>" + child.toString() + "</funcValue>\n");
