@@ -1,7 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp.nodes;
 
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPUnfieldedTokens;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpUnfieldedSearchProcessor;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 
 /**
