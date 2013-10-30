@@ -105,6 +105,193 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 				+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
 	}
 	
+	
+	public void testUnfieldedSearch() throws Exception {
+		
+		/*
+		 * Unfielded search should be expanded automatically by edismax
+		 * 
+		 * However, edismax is not smart enough to deal properly with boolean clauses
+		 * and default operators, so I have decided to use the edismax on the "value"
+		 * level only. First, we parse the query, then we pass it to the 'adismax'
+		 * query parser (a modified edismax) to expand it; adismax will use aqp 
+		 * to build the individual queries - so it is best of both worlds
+		 *  
+		 */
+	  
+	  // first the individual elements explicitly (notice edismax differs from adismax)
+		assertQueryEquals(req("defType", "aqp", "q", "adismax(MÜLLER)", 
+	      "qf", "author^2.3 title abstract^0.4"), 
+        "((((abstract:acr::müller abstract:acr::muller))^0.4) | (((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*))^2.3) | ((title:acr::müller title:acr::muller)))", 
+        DisjunctionMaxQuery.class);
+	  assertQueryEquals(req("defType", "aqp", "q", "edismax(MÜLLER)", 
+	      "qf", "author^2.3 title abstract^0.4"), 
+        "(((abstract:acr::müller abstract:acr::muller)^0.4) | ((author:müller, author:mueller, author:muller,)^2.3) | (title:acr::müller title:acr::muller))", 
+        DisjunctionMaxQuery.class);
+
+	  
+	  // unfielded search should handle authors like adismax (with expansions)
+	  assertQueryEquals(req("defType", "aqp", "q", "MÜLLER", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "((((abstract:acr::müller abstract:acr::muller))^0.4) | (((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*))^2.3) | ((title:acr::müller title:acr::muller)))", 
+        DisjunctionMaxQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "\"forman, c\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "(abstract:\"forman c\"^0.4 | (((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,))^2.3) | title:\"forman c\")", 
+        DisjunctionMaxQuery.class);
+	  
+    // now add a normal element
+    assertQueryEquals(req("defType", "aqp", "q", "title:foo or MÜLLER", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "title:foo ((((abstract:acr::müller abstract:acr::muller))^0.4) | (((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*))^2.3) | ((title:acr::müller title:acr::muller)))", 
+        BooleanQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "title:foo or \"forman, c\"", 
+        "qf", "author^2.3 title abstract^0.4"), 
+        "title:foo (abstract:\"forman c\"^0.4 | (((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,))^2.3) | title:\"forman c\")", 
+        BooleanQuery.class);
+    
+
+		
+	  // this should not call edismax (because qf is missing)
+		assertQueryEquals(req("defType", "aqp", "q", "accomazzi", "df", "author"),
+				"author:accomazzi, author:accomazzi,*",
+				BooleanQuery.class);
+		
+		
+		/*
+		 *  Now various cases of multi-token unfielded searches (incl multi-token synonyms)
+		 *  and full author parse
+		 */
+
+	  // this is default behaviour, if you see 'all:' it means edismax didn't parse it
+		assertQueryEquals(req("defType", "aqp", "q", "author:accomazzi, alberto property:refereed apj"), 
+        "+(author:accomazzi, author:accomazzi,*) +all:alberto +property:refereed +all:apj",
+        BooleanQuery.class);
+		assertQueryEquals(req("defType", "aqp", "q", "author:huchra supernova"), 
+        "+(author:huchra, author:huchra,*) +all:supernova", 
+        BooleanQuery.class);
+
+		
+
+  	// smarter handling of missing parentheses/brackets	 with the special strategy
+		// i expect following: 
+		// edismax receives: 'author:accomazzi, alberto' and also 'author:"accomazzi, alberto"
+		//      ""         : 'property:refereed r s t'  and 'property:"refereed r s t"'
+		// author search ana: "accomazzi, alberto"
+		assertQueryEquals(req("defType", "aqp",
+				"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+				"qf", "title keyword",
+				"q", "author:accomazzi, alberto property:refereed r s t"),
+				"+(((((author:accomazzi, author:accomazzi,*)) (title:alberto | keyword:alberto))~2) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) +(((property:refereed (title:r | keyword:r) (title:s | keyword:s) (title:t | keyword:t))~4) property:refereedrst)",
+        BooleanQuery.class);
+		// the same as above + enhanced by multisynonym
+		// i expect to see syn::r s t, syn::acr::rst
+		assertQueryEquals(req("defType", "aqp",
+				"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
+				"q", "author:accomazzi, alberto property:refereed r s t",
+				"qf", "title keyword^0.5"), 
+        "+(((((author:accomazzi, author:accomazzi,*)) (title:alberto | keyword:alberto^0.5))~2) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) +(((property:refereed (title:r | keyword:r^0.5) (title:s | keyword:s^0.5) (title:t | keyword:t^0.5))~4) property:refereedrst)", 
+        BooleanQuery.class);
+
+		
+	  //#238 - single synonyms were caught by the multi-synonym component
+	  // also note:
+	  // the 'qf' is not set, but still edismax is responsible for parsing this query
+	  // and since edismax is using default OR (that is hardcoded!), we cannot change
+	  // that, we would have to parse the query ourselves; but after a long discussion
+	  // it was decided that we'll use OR for the unfielded searches, so it should be 
+	  // OK - if not, I have to rewrite edismax parsing logic myself
+	  // 22/10/13 - I've introduced a new strategy that emits both the
+	  // original query string and the phrase query, this is a workaround
+	  // for edismax
+    assertQueryEquals(req("defType", "aqp",
+    		"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+    		"q", "pink elephant"), 
+        "(((((all:pink all:syn::pinkish))) (all:elephant))~2) all:\"(pink syn::pinkish) elephant\"",
+        BooleanQuery.class);
+    
+    assertQueryEquals(req("defType", "aqp", "q", "pink elephant",
+    		"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+        "qf", "title keyword"),
+        "(((((title:pink title:syn::pinkish)) | keyword:pink) (title:elephant | keyword:elephant))~2) (title:\"(pink syn::pinkish) elephant\" | keyword:\"pink elephant\")",
+        BooleanQuery.class);
+    
+    // when combined, the ADS's default AND operator should be visible +foo
+    assertQueryEquals(req("defType", "aqp", "q", "pink elephant title:foo",
+    		"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+        "qf", "title keyword"),
+        "+((((((title:pink title:syn::pinkish)) | keyword:pink) (title:elephant | keyword:elephant))~2) (title:\"(pink syn::pinkish) elephant\" | keyword:\"pink elephant\")) +title:foo",
+        BooleanQuery.class);
+    
+    
+    // multi-token combined with single token
+    // the unfielded search should be exapnded with the phrase "x r s t"
+    // and "r s t" should be properly analyzed into: "x rst" OR "x r s t"
+    assertQueryEquals(req("defType", "aqp", 
+    		"q", "r s t",
+    		"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
+        "qf", "title^0.9 keyword^0.7"),
+        "(((title:r^0.9 | keyword:r^0.7) (title:s^0.9 | keyword:s^0.7) (title:t^0.9 | keyword:t^0.7))~3) ((((title:\"r s t\" (title:syn::r s t title:syn::acr::rst)))^0.9) | keyword:\"r s t\"^0.7)",
+        BooleanQuery.class);
+    
+    assertQueryEquals(req("defType", "aqp", 
+    		"q", "x r s t y",
+    		"aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple",
+				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
+        "qf", "title^0.9 keyword^0.7"),
+        "(((title:x^0.9 | keyword:x^0.7) (title:r^0.9 | keyword:r^0.7) (title:s^0.9 | keyword:s^0.7) (title:t^0.9 | keyword:t^0.7) (title:y^0.9 | keyword:y^0.7))~5) ((((title:\"x r s t y\" title:\"x (syn::r s t syn::acr::rst) ? ? y\"~2))^0.9) | keyword:\"x r s t y\"^0.7)",
+        BooleanQuery.class);
+
+    
+	  // author search, unfielded (which looks as one token) - it looks like that to
+    // adismax, but aqp will see two tokens...
+		// the result is crazy because of recursive parsing
+		// 1: accomazzi,alberto
+		// 2:   author:accomazzi,alberto -> author:accomazzi AND adismax(alberto)
+		// 3:      adismax(alberto) -> title:alberto OR author:alberto^2.3
+	  assertQueryEquals(req("defType", "aqp", "q", "accomazzi,alberto", 
+        "qf", "author^2.3 title",
+        "aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple"
+				),
+				"(" +
+				    "(((+(author:accomazzi, author:accomazzi,*) +((((author:alberto, author:alberto,*))^2.3) | title:alberto)))^2.3)" + // author:accomazzi AND (author:alberto OR title:alberto)
+				    " | (" + // OR
+				    "(+title:accomazzi +((((author:alberto, author:alberto,*))^2.3) | title:alberto))" + // title:accomazzi AND (author:alberto OR title:alberto)
+				")) " + // OR
+				"((((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))^2.3) | ((title:\"accomazzi alberto\" title:accomazzialberto)))", 
+        BooleanQuery.class);
+	  
+	  
+	  // see what happens during normal parsing
+  	// author search, unfielded (which looks as one token)	  
+	  assertQueryEquals(req("defType", "aqp", 
+	  		"q", "author:accomazzi,alberto"
+        ),
+        "+(author:accomazzi, author:accomazzi,*) +all:alberto", 
+        BooleanQuery.class);
+	  
+	  assertQueryEquals(req("defType", "aqp", "q", "author:accomazzi,alberto", 
+        "qf", "author^2.3 title",
+        "aqp.unfielded.tokens.strategy", "multiply",
+				"aqp.unfielded.tokens.new.type", "simple"
+				),
+        "(((+(author:accomazzi, author:accomazzi,*) +((((author:alberto, author:alberto,*))^2.3) | title:alberto)))~1) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)", 
+        BooleanQuery.class);
+	  
+	  
+
+		
+	}
 
 	public void testSpecialCases() throws Exception {
 		
@@ -191,7 +378,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 				"+all:one +spanPosRange(spanOr([author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), EmptySpanQuery(author:/two, j[^\\s]+ k/), EmptySpanQuery(author:/two, j[^\\s]+ k .*/), author:two, j, author:two,]), 0, 1)",
 				BooleanQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q","one \"^author phrase\"", "qf", "title author"),
-				"+((author:one, author:one,*) | title:one) +spanPosRange(spanOr([author:phrase, author, SpanMultiTermQueryWrapper(author:phrase, author *), author:phrase, a, SpanMultiTermQueryWrapper(author:phrase, a *), author:phrase,]), 0, 1)",
+				"+(((author:one, author:one,*)) | title:one) +spanPosRange(spanOr([author:phrase, author, SpanMultiTermQueryWrapper(author:phrase, author *), author:phrase, a, SpanMultiTermQueryWrapper(author:phrase, a *), author:phrase,]), 0, 1)",
 				BooleanQuery.class);
 		
 		
@@ -271,11 +458,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     assertQueryEquals(req("defType", "aqp", "q", "dog OR cat", "qf", "title^1 abstract^0.5"), //aqp
         "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
     
-    assertQueryEquals(req("defType", "aqp", "q", "edismax(dog cat)", "qf", "title^1 abstract^0.5"), //edismax (thinks it is a phrase?)
+    assertQueryEquals(req("defType", "aqp", "q", "edismax(dog cat)", "qf", "title^1 abstract^0.5"), //edismax 
         "((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat))~2", BooleanQuery.class);
     
+    assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5", "q.op", "OR"), //aqp
+        "(abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat)", BooleanQuery.class);
+    
     assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
-        "(((abstract:dog abstract:cat)^0.5) | (title:dog title:cat))", DisjunctionMaxQuery.class);
+        "+(abstract:dog^0.5 | title:dog) +(abstract:cat^0.5 | title:cat)", BooleanQuery.class);
     
     
     
@@ -374,59 +564,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	
 	public void test() throws Exception {
 	  
-		// this should not call edismax
-		assertQueryEquals(req("defType", "aqp", "q", "accomazzi", "df", "author"),
-				"author:accomazzi, author:accomazzi,*",
-				BooleanQuery.class);
-	
-	  assertQueryEquals(req("defType", "aqp", "q", "accomazzi,alberto", 
-        "qf", "author^2.3 title",
-        "aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-				"aqp.unfielded.phrase.edismax.synonym.workaround", "true"),
-				// the first branch - author:accomazzi,alberto
-        "((((author:accomazzi, alberto author:accomazzi, a author:accomazzi,))^2.3) | ((title:accomazzi title:alberto title:accomazzialberto))) " +
-        // the second branch - the phrase
-        "((((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))^2.3) | ((title:\"accomazzi alberto\" title:accomazzialberto)))", 
-        BooleanQuery.class);
-	  
-
-	  
-		// this is default behaviour, 
-		// if you see 'all:' it means edismax didn't parse it
-		assertQueryEquals(req("defType", "aqp", "q", "author:accomazzi, alberto property:refereed apj"), 
-        "+(author:accomazzi, author:accomazzi,*) +all:alberto +property:refereed +all:apj",
-        BooleanQuery.class);
-		assertQueryEquals(req("defType", "aqp", "q", "author:huchra supernova"), 
-        "+(author:huchra, author:huchra,*) +all:supernova", 
-        BooleanQuery.class);
-
-  	// smarter handling of missing parentheses/brackets		
-		// with the special strategy
-		// i expect following: 
-		// edismax receives: 'author:accomazzi, alberto' and also 'author:"accomazzi, alberto"
-		//      ""         : 'property:refereed r s t'  and 'property:"refereed r s t"'
-		// author search does: "accomazzi, alberto"
-		assertQueryEquals(req("defType", "aqp",
-				"aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-				"qf", "title keyword",
-				"q", "author:accomazzi, alberto property:refereed r s t"),
-				"+(((author:accomazzi, (title:alberto | keyword:alberto))~2) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) " +
-				"+(((property:refereed (title:r | keyword:r) (title:s | keyword:s) (title:t | keyword:t))~4) property:refereedrst)",
-        BooleanQuery.class);
-		// the same as above + enhanced by multisynonym
-		// i expect to see syn::r s t, syn::acr::rst
-		assertQueryEquals(req("defType", "aqp",
-				"aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
-				"q", "author:accomazzi, alberto property:refereed r s t",
-				"qf", "title keyword^0.5"), 
-        "+(((author:accomazzi, (title:alberto | keyword:alberto^0.5))~2) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) " +
-        "+(((property:refereed (title:r | keyword:r^0.5) (title:s | keyword:s^0.5) (title:t | keyword:t^0.5))~4) property:refereedrst)", 
-        BooleanQuery.class);
-		
+				
 		
 		
 		// search for all docs with a field
@@ -484,11 +622,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         RegexpQuery.class);
 	  
 	  // this is treated as regex, but because it is unfielded search
-	  // it ends up in the all field. Feature or a bug?
+	  // it ends up in the unfielded_search field. Feature or a bug?
 	  assertQueryEquals(req("defType", "aqp", "q", "/^Kurtz, M./"), 
         "unfielded_search:/^Kurtz, M./",
         RegexpQuery.class);
-	  // regex ignores unfielded queries
+	  // regex ignores unfielded queries even when qf is set
 	  assertQueryEquals(req("defType", "aqp", "q", "/^Kurtz, M./", "qf", "title^0.5 author^0.8"), 
         "unfielded_search:/^Kurtz, M./",
         RegexpQuery.class);
@@ -524,190 +662,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	  
 	  
 	  
-	  //#238 - single synonyms were caught by the multi-synonym component
-	  // also note:
-	  // the 'qf' is not set, but still edismax is responsible for parsing this query
-	  // and since edismax is using default OR (that is hardcoded!), we cannot change
-	  // that, we would have to parse the query ourselves; but after a long discussion
-	  // it was decided that we'll use OR for the unfielded searches, so it should be 
-	  // OK - if not, I have to rewrite edismax parsing logic myself
-	  // 22/10/13 - I've introduced a new strategy that emits both the
-	  // original query string and the phrase query, this is a workaround
-	  // for edismax
-    assertQueryEquals(req("defType", "aqp",
-    		"aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-    		"q", "pink elephant"), 
-        "(((((all:pink all:syn::pinkish))) (all:elephant))~2) all:\"(pink syn::pinkish) elephant\"",
-        BooleanQuery.class);
     
-    assertQueryEquals(req("defType", "aqp", "q", "pink elephant",
-    		"aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-        "qf", "title keyword"),
-        "(((((title:pink title:syn::pinkish)) | keyword:pink) (title:elephant | keyword:elephant))~2) (title:\"(pink syn::pinkish) elephant\" | keyword:\"pink elephant\")",
-        BooleanQuery.class);
-    
-    // when combined, the ADS's default AND operator should be visible +foo
-    assertQueryEquals(req("defType", "aqp", "q", "pink elephant title:foo",
-    		"aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-        "qf", "title keyword"),
-        "+((((((title:pink title:syn::pinkish)) | keyword:pink) (title:elephant | keyword:elephant))~2) (title:\"(pink syn::pinkish) elephant\" | keyword:\"pink elephant\")) +title:foo",
-        BooleanQuery.class);
-    
-    
-    // multi-token combined with single token
-    // the unfielded search should be exapnded with the phrase "x r s t"
-    // and "r s t" should be properly analyzed into: "x rst" OR "x r s t"
-    assertQueryEquals(req("defType", "aqp", 
-    		"q", "r s t",
-    		"aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
-        "qf", "title^0.9 keyword^0.7"),
-        "(((title:r^0.9 | keyword:r^0.7) (title:s^0.9 | keyword:s^0.7) (title:t^0.9 | keyword:t^0.7))~3) ((((title:\"r s t\" (title:syn::r s t title:syn::acr::rst)))^0.9) | keyword:\"r s t\"^0.7)",
-        BooleanQuery.class);
-    
-    assertQueryEquals(req("defType", "aqp", 
-    		"q", "x r s t y",
-    		"aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
-        "qf", "title^0.9 keyword^0.7"),
-        "(((title:x^0.9 | keyword:x^0.7) (title:r^0.9 | keyword:r^0.7) (title:s^0.9 | keyword:s^0.7) (title:t^0.9 | keyword:t^0.7) (title:y^0.9 | keyword:y^0.7))~5) ((((title:\"x r s t y\" title:\"x (syn::r s t syn::acr::rst) ? ? y\"))^0.9) | keyword:\"x r s t y\"^0.7)",
-        BooleanQuery.class);
-    
-    
-
-    
-    
-	  // author search, unfielded - just test it is there, the rest
-    // of unittests is in the dedicated class
-	  assertQueryEquals(req("defType", "aqp", "q", "accomazzi", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "(abstract:accomazzi^0.4 | ((author:accomazzi, author:accomazzi,*)^2.3) | title:accomazzi)", 
-        DisjunctionMaxQuery.class);
-	  
-	  assertQueryEquals(req("defType", "aqp", "q", "\"accomazzi\\,\"", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "(abstract:accomazzi^0.4 | ((author:accomazzi, author:accomazzi,*)^2.3) | title:accomazzi)", 
-        DisjunctionMaxQuery.class);
-	  
-	  // I have doubts about this one: (author:accomazzi, alberto author:accomazzi, a author:accomazzi,)~3
-	  // it requires that it finds all three forms
-	  assertQueryEquals(req("defType", "aqp", "q", "accomazzi,alberto", 
-        "qf", "author^2.3 title",
-        "aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-				"aqp.unfielded.phrase.edismax.synonym.workaround", "true"),
-				// the first branch - the author:accomazzi, alberto
-        "(" +
-         "((((author:accomazzi, alberto author:accomazzi, a author:accomazzi,)~3)" + // this will never match
-           " ((author:accomazzi, alberto author:accomazzi, a author:accomazzi,)~3))^2.3) " + //this will never match
-         "| " +
-         "(title:accomazzi title:alberto title:accomazzialberto)" +
-        ") " +
-        // the second branch - the phrase
-        "(((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)^2.3) | title:\"accomazzi (alberto accomazzialberto)\")", 
-        BooleanQuery.class);
-	  
-	  
-	  assertQueryEquals(req("defType", "aqp", "q", "accomazzi,alberto", 
-        "qf", "author^2.3 title",
-        "aqp.unfielded.tokens.strategy", "multiply",
-				"aqp.unfielded.tokens.new.type", "simple",
-				"aqp.unfielded.phrase.edismax.synonym.workaround", "true",
-				"aqp.unfielded.tokens.function.name", "edismax"),
-				// the first branch - the author:accomazzi, alberto
-        "(" +
-         "((((author:accomazzi, alberto author:accomazzi, a author:accomazzi,)~3)" + // this will never match
-           " ((author:accomazzi, alberto author:accomazzi, a author:accomazzi,)~3))^2.3) " + //this will never match
-         "| " +
-         "(title:accomazzi title:alberto title:accomazzialberto)" +
-        ") " +
-        // the second branch - the phrase
-        "(((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,)^2.3) | title:\"accomazzi (alberto accomazzialberto)\")", 
-        BooleanQuery.class);
-	  
-	  
-    
-		
-    
-    
-		/*
-		 * Unfielded search should be expanded automatically by edismax
-		 * 
-		 * However, edismax is not smart enough to deal properly with boolean clauses
-		 * and default operators, so I have decided to use the edismax on the "value"
-		 * level only. First, we parse the query, then we let the edismax 
-		 * expand it (actually, edismax will use the correct tokenizer chain
-		 * to process authors for example) XXX: verify, it does use all the 
-		 * elements of the processing chain - see forman, c => forman, christine
-		 * For that, the synonym translation must be set up correctly
-		 */
-	  
-	  // first the individual elements explicitly
-	  assertQueryEquals(req("defType", "aqp", "q", "edismax(MÜLLER)", 
-	      "qf", "author^2.3 title abstract^0.4"), 
-        "(((abstract:acr::müller abstract:acr::muller)^0.4) " +
-        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
-        "| (title:acr::müller title:acr::muller))", DisjunctionMaxQuery.class);
-	  assertQueryEquals(req("defType", "aqp", "q", "edismax(\"forman, c\")", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "(abstract:\"forman c\"^0.4 " +
-        "| ((author:forman, c author:forman,)^2.3) " +
-        "| title:\"forman c\")", DisjunctionMaxQuery.class);
-
-	  // unfielded search should produce the same structure (the parser for author is aqp-type)
-	  assertQueryEquals(req("defType", "aqp", "q", "MÜLLER", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "(((abstract:acr::müller abstract:acr::muller)^0.4) " +
-        "| ((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*)^2.3) " +
-        "| (title:acr::müller title:acr::muller))", DisjunctionMaxQuery.class);
-    assertQueryEquals(req("defType", "aqp", "q", "\"forman, c\"", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "(abstract:\"forman c\"^0.4 " +
-        "| ((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,)^2.3) " +
-        "| title:\"forman c\")", DisjunctionMaxQuery.class);
-	  
-    // now add a normal element
-    assertQueryEquals(req("defType", "aqp", "q", "title:foo or edismax(MÜLLER)", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (((abstract:acr::müller abstract:acr::muller)^0.4) " +
-        "| ((author:müller, author:mueller, author:muller,)^2.3) " +
-        "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
-    assertQueryEquals(req("defType", "aqp", "q", "title:foo or edismax(\"forman, c\")", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (abstract:\"forman c\"^0.4 " +
-        "| ((author:forman, c author:forman,)^2.3) " +
-        "| title:\"forman c\")", BooleanQuery.class);
-    
-    
-    // unfielded search should produce the same results
-    assertQueryEquals(req("defType", "aqp", "q", "title:foo or MÜLLER", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (((abstract:acr::müller abstract:acr::muller)^0.4) " +
-        "| ((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*)^2.3) " +
-        "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
-    assertQueryEquals(req("defType", "aqp", "q", "title:foo or \"forman, c\"", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (abstract:\"forman c\"^0.4 " +
-        "| ((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,)^2.3) " +
-        "| title:\"forman c\")", BooleanQuery.class);
-    
-    assertQueryEquals(req("defType", "aqp", "q", "title:foo or MÜLLER", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (((abstract:acr::müller abstract:acr::muller)^0.4) " +
-        "| ((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*)^2.3) " +
-        "| (title:acr::müller title:acr::muller))", BooleanQuery.class);
-    assertQueryEquals(req("defType", "aqp", "q", "title:foo or \"forman, c\"", 
-        "qf", "author^2.3 title abstract^0.4"), 
-        "title:foo (abstract:\"forman c\"^0.4 " +
-        "| ((author:forman, c author:jones, christine author:jones, c author:forman, christine author:forman, c* author:forman,)^2.3) " +
-        "| title:\"forman c\")", BooleanQuery.class);
-    
-		
+	  // identifiers
 		assertQueryEquals(req("defType", "aqp", "q", "identifier:2011A&A...536A..89G"), 
         "identifier:2011a&a...536a..89g", TermQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "identifier:2011A&A" + "\u2026" + "536A..89G"), 

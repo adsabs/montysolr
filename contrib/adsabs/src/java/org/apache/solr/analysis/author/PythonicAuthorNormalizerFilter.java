@@ -87,6 +87,10 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter implements
     			else if (parsedName.containsKey("First")) {
     				buffer.add(parsedName.get("First") + ","); // we treat it as surname
     			}
+    			else {
+    				//buffer.add(""); // else it was parsed as title and will be ignored
+    			}
+    			
     		}
     	}
     	else {
@@ -94,10 +98,12 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter implements
     	}
     }
     
-    if (buffer.size() > 0) {
-	    termAtt.setEmpty().append(buffer.remove(0));
-	    typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
+    if (buffer.size() ==0) {
+    	return false;
     }
+    
+    termAtt.setEmpty().append(buffer.remove(0));
+    typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
     
     return true;
   }

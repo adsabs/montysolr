@@ -26,6 +26,12 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     return qtypes;
   }
   
+  /*
+   * Purpose of this method is to remove the Boolean top clause (+)
+   * so that results of the query can be easier combined with
+   * other clauses, otherwise foo OR bar would be parsed as
+   * title:foo (+title:bar)
+   */
   public Query simplify(Query query) {
     if (query instanceof BooleanQuery) {
       List<BooleanClause>clauses = ((BooleanQuery) query).clauses();

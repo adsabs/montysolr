@@ -80,222 +80,222 @@ import org.apache.solr.servlet.SolrRequestParsers;
  */
 
 public class AqpAdsabsSubQueryProvider implements
-		AqpFunctionQueryBuilderProvider {
-	
+AqpFunctionQueryBuilderProvider {
+
 	public static Map<String, AqpSubqueryParser> parsers = new HashMap<String, AqpSubqueryParser>();
-	
-  //TODO: make configurable
+
+	//TODO: make configurable
 	static String[] citationSearchIdField = new String[]{"bibcode", "alternate_bibcode"};
 	static String citationSearchRefField = "reference";
-	
+
 	static {
 		parsers.put(LuceneQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), LuceneQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), LuceneQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
 		parsers.put(OldLuceneQParserPlugin.NAME, new AqpSubqueryParser() {
-	      public Query parse(FunctionQParser fp) throws ParseException {    		  
-    		  QParser q = fp.subQuery(fp.getString(), OldLuceneQParserPlugin.NAME);
-    		  return q.getQuery();
-    		  
-	      }
-	    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), OldLuceneQParserPlugin.NAME);
+				return q.getQuery();
+
+			}
+		});
 		parsers.put(FunctionQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), FunctionQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), FunctionQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
 		parsers.put(PrefixQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), PrefixQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), PrefixQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
 		parsers.put(BoostQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), BoostQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
-		parsers.put(DisMaxQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), DisMaxQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), BoostQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
+		parsers.put(DisMaxQParserPlugin.NAME, new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), DisMaxQParserPlugin.NAME);
+				return simplify(q.getQuery());
+			}
+		});
 		parsers.put(ExtendedDismaxQParserPlugin.NAME, new AqpSubqueryParserFull() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), ExtendedDismaxQParserPlugin.NAME);
-	    		  return simplify(q.getQuery());
-		      }
-		    }.configure(false)); // not analyzed
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), ExtendedDismaxQParserPlugin.NAME);
+				return simplify(q.getQuery());
+			}
+		});
 		parsers.put(FieldQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), FieldQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), FieldQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
 		parsers.put(RawQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {
-		    	  String qstr = fp.getString();
-		    	  if (!qstr.substring(0,2).equals("{!")) {
-		    		  throw new ParseException(
-		    				  "Raw query parser requires you to specify local params, eg: raw({!f=field}"+fp.getString()+")");
-		    	  }
-	    		  QParser q = fp.subQuery(qstr, RawQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {
+				String qstr = fp.getString();
+				if (!qstr.substring(0,2).equals("{!")) {
+					throw new ParseException(
+							"Raw query parser requires you to specify local params, eg: raw({!f=field}"+fp.getString()+")");
+				}
+				QParser q = fp.subQuery(qstr, RawQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
 		parsers.put(NestedQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), NestedQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), NestedQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
 		parsers.put(FunctionRangeQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), FunctionRangeQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), FunctionRangeQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
 		parsers.put(SpatialFilterQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), SpatialFilterQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), SpatialFilterQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
 		parsers.put(SpatialBoxQParserPlugin.NAME, new AqpSubqueryParser() {
-		      public Query parse(FunctionQParser fp) throws ParseException {    		  
-	    		  QParser q = fp.subQuery(fp.getString(), SpatialBoxQParserPlugin.NAME);
-	    		  return q.getQuery();
-		      }
-		    });
-		
-	  // coreads(Q) - what people read: MoreLikeThese(topn(200,classic_relevance(Q)))
+			public Query parse(FunctionQParser fp) throws ParseException {    		  
+				QParser q = fp.subQuery(fp.getString(), SpatialBoxQParserPlugin.NAME);
+				return q.getQuery();
+			}
+		});
+
+		// coreads(Q) - what people read: MoreLikeThese(topn(200,classic_relevance(Q)))
 		parsers.put("trending", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				QParser aqp = fp.subQuery(fp.getString(), "aqp");
 				Query innerQuery = aqp.parse();
-				
+
 				SolrQueryRequest req = fp.getReq();
 				SolrIndexSearcher searcher = req.getSearcher();
-				
+
 				// find the 200 most interesting papers and collect their readers
 				SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorTopN(200));
 				discoverMostReadQ.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
-				
+
 				final StringBuilder readers = new StringBuilder();
 				final HashSet<String> fieldsToLoad = new HashSet<String>();
 				final String fieldName = "reader";
 				fieldsToLoad.add(fieldName);
-				
+
 				try {
-	        searcher.search(discoverMostReadQ, new Collector() {
+					searcher.search(discoverMostReadQ, new Collector() {
 						private Document d;
 						private AtomicReader reader;
 						private boolean firstPassed = false;
-	        	@Override
-	          public void setScorer(Scorer scorer) throws IOException {
-	            //pass
-	          }
-	        	@Override
-	          public void collect(int doc) throws IOException {
-	        		d = reader.document(doc, fieldsToLoad);
-	            for (String val: d.getValues(fieldName)) {
-	            	if (firstPassed)
-	            		readers.append(" ");
-	            	readers.append(val);
-	            	firstPassed = true;
-	            }
-	          }
+						@Override
+						public void setScorer(Scorer scorer) throws IOException {
+							//pass
+						}
+						@Override
+						public void collect(int doc) throws IOException {
+							d = reader.document(doc, fieldsToLoad);
+							for (String val: d.getValues(fieldName)) {
+								if (firstPassed)
+									readers.append(" ");
+								readers.append(val);
+								firstPassed = true;
+							}
+						}
 
-	        	@Override
-	          public void setNextReader(AtomicReaderContext context)
-	              throws IOException {
-	            this.reader = context.reader();
-	          }
+						@Override
+						public void setNextReader(AtomicReaderContext context)
+						throws IOException {
+							this.reader = context.reader();
+						}
 
-	        	@Override
-	          public boolean acceptsDocsOutOfOrder() {
-	            return false;
-	          }
-	        });
-        } catch (IOException e) {
-	        throw new ParseException(e.getMessage());
-        }
-				
-        MoreLikeThisQuery mlt = new MoreLikeThisQueryFixed(readers.toString(), new String[] {fieldName}, 
-        		new WhitespaceAnalyzer(Version.LUCENE_40), fieldName);
-        SolrParams params = req.getParams();
-        
-        // configurable params
-        mlt.setMinTermFrequency(0);
-        mlt.setMinDocFreq(2);
-        mlt.setMaxQueryTerms(200);
-        mlt.setBoost(2.0f);
-        mlt.setPercentTermsToMatch(0.0f);
-        
-        //try {
-	      //  Query q = mlt.rewrite(req.getSearcher().getIndexReader());
-	      //  System.out.println(q);
-        //} catch (IOException e) {
-        //}
-        
-        return mlt;
+						@Override
+						public boolean acceptsDocsOutOfOrder() {
+							return false;
+						}
+					});
+				} catch (IOException e) {
+					throw new ParseException(e.getMessage());
+				}
+
+				MoreLikeThisQuery mlt = new MoreLikeThisQueryFixed(readers.toString(), new String[] {fieldName}, 
+						new WhitespaceAnalyzer(Version.LUCENE_40), fieldName);
+				SolrParams params = req.getParams();
+
+				// configurable params
+				mlt.setMinTermFrequency(0);
+				mlt.setMinDocFreq(2);
+				mlt.setMaxQueryTerms(200);
+				mlt.setBoost(2.0f);
+				mlt.setPercentTermsToMatch(0.0f);
+
+				//try {
+					//  Query q = mlt.rewrite(req.getSearcher().getIndexReader());
+				//  System.out.println(q);
+				//} catch (IOException e) {
+				//}
+
+				return mlt;
 			}
-		  }.configure(true)); // true=canBeAnalyzed
-		
+		});
+
 		parsers.put("pos", new AqpSubqueryParserFull() {
-      @Override
-      public Query parse(FunctionQParser fp) throws ParseException {
-      	Query query = fp.parseNestedQuery();
-      	int start = fp.parseInt();
-      	int end = start;
-      	
-      	if (fp.hasMoreArguments()) {
-  			  end = fp.parseInt();
-  		  }
-      	
-      	if (fp.hasMoreArguments()) {
-  			  throw new NestedParseException("Wrong number of arguments");
-  		  }
-      	
-      	assert start > 0;
-      	assert start <= end;
-      	
-      	SpanConverter converter = new SpanConverter();
-      	converter.setWrapNonConvertible(true);
-      	
-      	SpanQuery spanQuery;
-        try {
-	        spanQuery = converter.getSpanQuery(new SpanConverterContainer(query, 1, true));
-        } catch (QueryNodeException e) {
-	        ParseException ex = new ParseException(e.getMessage());
-	        ex.setStackTrace(e.getStackTrace());
-	        throw ex;
-        }
-      	
-      	return new SpanPositionRangeQuery(spanQuery, start-1, end); //lucene counts from zeroes
-      }
-    });
-		
+			@Override
+			public Query parse(FunctionQParser fp) throws ParseException {
+				Query query = fp.parseNestedQuery();
+				int start = fp.parseInt();
+				int end = start;
+
+				if (fp.hasMoreArguments()) {
+					end = fp.parseInt();
+				}
+
+				if (fp.hasMoreArguments()) {
+					throw new NestedParseException("Wrong number of arguments");
+				}
+
+				assert start > 0;
+				assert start <= end;
+
+				SpanConverter converter = new SpanConverter();
+				converter.setWrapNonConvertible(true);
+
+				SpanQuery spanQuery;
+				try {
+					spanQuery = converter.getSpanQuery(new SpanConverterContainer(query, 1, true));
+				} catch (QueryNodeException e) {
+					ParseException ex = new ParseException(e.getMessage());
+					ex.setStackTrace(e.getStackTrace());
+					throw ex;
+				}
+
+				return new SpanPositionRangeQuery(spanQuery, start-1, end); //lucene counts from zeroes
+			}
+		});
+
 		// ADS Classic toy-implementation of the relevance score
 		parsers.put("classic_relevance", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
-				
+
 				Query innerQuery = fp.parseNestedQuery();
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost"));
-	      }
-	    }.configure(true)); // true=canBeAnalyzed
+			}
+		});
 		parsers.put("cr", parsers.get("classic_relevance"));
-		
-		
-  	// topn(int, Q, [relevance|sort-spec]) - limit results to the best top N (by their ranking or sort order)
+
+
+		// topn(int, Q, [relevance|sort-spec]) - limit results to the best top N (by their ranking or sort order)
 		parsers.put("topn", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
 				int topN = -1;
@@ -305,63 +305,63 @@ public class AqpAdsabsSubQueryProvider implements
 				catch (NumberFormatException e) {
 					throw new ParseException("The function signature is topn(int, query, [sort order]). Error: " + e.getMessage());
 				}
-				
+
 				if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
 					throw new ParseException("Hmmm, the first argument of your operator must be a positive number.");
 				}
-				
+
 				QParser eqp = fp.subQuery(fp.parseId(), "aqp");
-        Query innerQuery = eqp.getQuery();
-        
-        if (innerQuery == null) {
-        	throw new ParseException("This query is empty: " + eqp.getString());
-        }
-        
-        String sortOrRank = "score"; 
-        if (fp.hasMoreArguments()) {
-        	sortOrRank = fp.parseId();
-        }
-				
-        sortOrRank = sortOrRank.toLowerCase();
-				
+				Query innerQuery = eqp.getQuery();
+
+				if (innerQuery == null) {
+					throw new ParseException("This query is empty: " + eqp.getString());
+				}
+
+				String sortOrRank = "score"; 
+				if (fp.hasMoreArguments()) {
+					sortOrRank = fp.parseId();
+				}
+
+				sortOrRank = sortOrRank.toLowerCase();
+
 				if (sortOrRank.contains("\"") || sortOrRank.contains("\'")) {
 					sortOrRank = sortOrRank.substring(1, sortOrRank.length()-1);
 				}
-				
-				
+
+
 				if (sortOrRank.equals("score")) {
 					return new SecondOrderQuery(innerQuery, null, 
 							new SecondOrderCollectorTopN(topN));
 				}
 				else {
 					Sort sortSpec = QueryParsing.parseSort(sortOrRank, fp.getReq());
-					
+
 					SolrIndexSearcher searcher = fp.getReq().getSearcher();
-					
+
 					TopFieldCollector collector;
-				  try {
-		        collector = TopFieldCollector.create(searcher.weightSort(sortSpec), topN, false, true, true, true);
-	        } catch (IOException e) {
-		        throw new ParseException("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
-	        }
-	        
-	        return new SecondOrderQuery(innerQuery, null, 
+					try {
+						collector = TopFieldCollector.create(searcher.weightSort(sortSpec), topN, false, true, true, true);
+					} catch (IOException e) {
+						throw new ParseException("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
+					}
+
+					return new SecondOrderQuery(innerQuery, null, 
 							new SecondOrderCollectorTopN(sortOrRank, topN, collector));
 				}
 			}
-		}.configure(false)); // true=canBeAnalyzed
-		
-	  // citations(P) - set of papers that have P in their reference list
+		});
+
+		// citations(P) - set of papers that have P in their reference list
 		parsers.put("citations", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorCitedBy(citationSearchIdField, citationSearchRefField), false);
-	      }
-	    }.configure(true)); // true=canBeAnalyzed
-		
-	  
+			}
+		});
+
+
 		// references(P) - set of papers that are in the reference list of P
 		parsers.put("references", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
@@ -370,8 +370,8 @@ public class AqpAdsabsSubQueryProvider implements
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorCitesRAM(citationSearchIdField, citationSearchRefField), false);
 			}
-		  }.configure(true)); // true=canBeAnalyzed
-		
+		});
+
 		// test for comparison with the citation query
 		parsers.put("joincitations", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
@@ -379,225 +379,225 @@ public class AqpAdsabsSubQueryProvider implements
 				SolrQueryRequest req = fp.getReq();
 				try {
 					// XXX: not sure if i can use several fields: citationSearchIdField
-	        return JoinUtil.createJoinQuery("bibcode", false, "reference", innerQuery, 
-	        		req.getSearcher(), ScoreMode.Avg);
-        } catch (IOException e) {
-        	throw new ParseException(e.getMessage());
-        }
+					return JoinUtil.createJoinQuery("bibcode", false, "reference", innerQuery, 
+							req.getSearcher(), ScoreMode.Avg);
+				} catch (IOException e) {
+					throw new ParseException(e.getMessage());
+				}
 			}
-		  }.configure(true)); // true=canBeAnalyzed
-		
+		});
+
 		parsers.put("joinreferences", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
 				try {
-	        return JoinUtil.createJoinQuery("reference", true, "bibcode", innerQuery, 
-	        		req.getSearcher(), ScoreMode.None); // will not work properly iff mode=Avg|Max
-        } catch (IOException e) {
-        	throw new ParseException(e.getMessage());
-        }
+					return JoinUtil.createJoinQuery("reference", true, "bibcode", innerQuery, 
+							req.getSearcher(), ScoreMode.None); // will not work properly iff mode=Avg|Max
+				} catch (IOException e) {
+					throw new ParseException(e.getMessage());
+				}
 			}
-		  }.configure(true)); // true=canBeAnalyzed
-		
-		
+		});
+
+
 		// useful() = what experts are citing; ADS Classic implementation
 		// is: references(topn(200, classic_relevance(Q)))
 		parsers.put("useful", new AqpSubqueryParserFull() { // this function values can be analyzed
-      public Query parse(FunctionQParser fp) throws ParseException {          
-        Query innerQuery = fp.parseNestedQuery();
-        
-        return  new SecondOrderQuery( // references
-			        		new SecondOrderQuery( // topn
-			        				new SecondOrderQuery(innerQuery, // classic_relevance
-			        						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost")), 
-	    						new SecondOrderCollectorTopN(200)),
-			    			new SecondOrderCollectorCitesRAM(citationSearchIdField, citationSearchRefField));
-        
-	      };
-    }.configure(true)); // true=canBeAnalyzed
-		
+			public Query parse(FunctionQParser fp) throws ParseException {          
+				Query innerQuery = fp.parseNestedQuery();
+
+				return  new SecondOrderQuery( // references
+						new SecondOrderQuery( // topn
+								new SecondOrderQuery(innerQuery, // classic_relevance
+										new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost")), 
+										new SecondOrderCollectorTopN(200)),
+										new SecondOrderCollectorCitesRAM(citationSearchIdField, citationSearchRefField));
+
+			};
+		});
+
 		// original implementation of useful() -- using special collector
-    parsers.put("useful2", new AqpSubqueryParserFull() { // this function values can be analyzed
-      public Query parse(FunctionQParser fp) throws ParseException {          
-        Query innerQuery = fp.parseNestedQuery();
-        SolrQueryRequest req = fp.getReq();
-        String boostField = "cite_read_boost";
-        return new SecondOrderQuery(innerQuery, null, 
-        		new SecondOrderCollectorOperatorExpertsCiting(citationSearchIdField, citationSearchRefField, boostField));
-      }
-      }.configure(true)); // true=canBeAnalyzed
-    
-    
-    // reviews() = what is cited by experts; ADS Classic implementation
+		parsers.put("useful2", new AqpSubqueryParserFull() { // this function values can be analyzed
+			public Query parse(FunctionQParser fp) throws ParseException {          
+				Query innerQuery = fp.parseNestedQuery();
+				SolrQueryRequest req = fp.getReq();
+				String boostField = "cite_read_boost";
+				return new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorOperatorExpertsCiting(citationSearchIdField, citationSearchRefField, boostField));
+			}
+		});
+
+
+		// reviews() = what is cited by experts; ADS Classic implementation
 		// is: citations(topn(200, classic_relevance(Q)))
 		parsers.put("reviews", new AqpSubqueryParserFull() { // this function values can be analyzed
-      public Query parse(FunctionQParser fp) throws ParseException {          
-        Query innerQuery = fp.parseNestedQuery();
-        
-        SecondOrderQuery outerQuery = new SecondOrderQuery( // citations
-			        		new SecondOrderQuery( // topn
-			        				new SecondOrderQuery(innerQuery, // classic_relevance
-			        						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost")), 
-	    						new SecondOrderCollectorTopN(200)),
-	    						new SecondOrderCollectorCitedBy(citationSearchIdField, citationSearchRefField));
-        outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
-        return outerQuery;
-	      };
-    }.configure(true)); // true=canBeAnalyzed
+			public Query parse(FunctionQParser fp) throws ParseException {          
+				Query innerQuery = fp.parseNestedQuery();
+
+				SecondOrderQuery outerQuery = new SecondOrderQuery( // citations
+						new SecondOrderQuery( // topn
+								new SecondOrderQuery(innerQuery, // classic_relevance
+										new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost")), 
+										new SecondOrderCollectorTopN(200)),
+										new SecondOrderCollectorCitedBy(citationSearchIdField, citationSearchRefField));
+				outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
+				return outerQuery;
+			};
+		});
 		parsers.put("instructive", parsers.get("reviews"));
-		
-    // original impl of reviews() = find papers that cite the most cited papers
-    parsers.put("reviews2", new AqpSubqueryParserFull() { // this function values can be analyzed
-      public Query parse(FunctionQParser fp) throws ParseException {          
-        Query innerQuery = fp.parseNestedQuery();
-        SolrQueryRequest req = fp.getReq();
-        String boostField = "cite_read_boost";
-        return new SecondOrderQuery(innerQuery, null, 
-        		new SecondOrderCollectorCitingTheMostCited(citationSearchIdField, citationSearchRefField, boostField));
-      }
-      }.configure(true)); // true=canBeAnalyzed
+
+		// original impl of reviews() = find papers that cite the most cited papers
+		parsers.put("reviews2", new AqpSubqueryParserFull() { // this function values can be analyzed
+			public Query parse(FunctionQParser fp) throws ParseException {          
+				Query innerQuery = fp.parseNestedQuery();
+				SolrQueryRequest req = fp.getReq();
+				String boostField = "cite_read_boost";
+				return new SecondOrderQuery(innerQuery, null, 
+						new SecondOrderCollectorCitingTheMostCited(citationSearchIdField, citationSearchRefField, boostField));
+			}
+		});
 		parsers.put("citis", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorCites(citationSearchIdField, citationSearchRefField), false);
-				
+
 			}
-		  }.configure(true)); // true=canBeAnalyzed
+		});
 		parsers.put("aqp", new AqpSubqueryParserFull() {
-      public Query parse(FunctionQParser fp) throws ParseException {          
-        QParser q = fp.subQuery(fp.getString(), "aqp");
-        return q.getQuery();
-      }
-    }.configure(false)); // not analyzed
-		
+			public Query parse(FunctionQParser fp) throws ParseException {          
+				QParser q = fp.subQuery(fp.getString(), "aqp");
+				return q.getQuery();
+			}
+		});
+
 		parsers.put("adismax", new AqpSubqueryParserFull() {
-      public Query parse(FunctionQParser fp) throws ParseException {          
-        QParser q = fp.subQuery(fp.getString(), "adismax");
-        return q.getQuery();
-      }
-    }.configure(false)); // not analyzed
-		
+			public Query parse(FunctionQParser fp) throws ParseException {          
+				QParser q = fp.subQuery(fp.getString(), "adismax");
+				return simplify(q.getQuery());
+			}
+		});
+
 		parsers.put("edismax_nonanalyzed", new AqpSubqueryParserFull() { // used for nodes that were already analyzed
-      public Query parse(FunctionQParser fp) throws ParseException {
-        final String original = fp.getString();
-        QParser ep = fp.subQuery("xxx", "adismax");
-        Query q = ep.getQuery();
-        QParser fakeParser = new QParser(original, null, null, null) {
-          @Override
-          public Query parse() throws ParseException {
-            String[] parts = getString().split(":");
-            return new TermQuery(new Term(parts[0], original));
-          }
-        };
-        return simplify(reParse(q, fakeParser, TermQuery.class));
-      }
-    }.configure(false)); // not analyzed
+			public Query parse(FunctionQParser fp) throws ParseException {
+				final String original = fp.getString();
+				QParser ep = fp.subQuery("xxx", "adismax");
+				Query q = ep.getQuery();
+				QParser fakeParser = new QParser(original, null, null, null) {
+					@Override
+					public Query parse() throws ParseException {
+						String[] parts = getString().split(":");
+						return new TermQuery(new Term(parts[0], original));
+					}
+				};
+				return simplify(reParse(q, fakeParser, TermQuery.class));
+			}
+		});
 		parsers.put("edismax_combined_aqp", new AqpSubqueryParserFull() { // will decide whether new aqp() parse is needed
-      public Query parse(FunctionQParser fp) throws ParseException {
-        final String original = fp.getString();
-        QParser eqp = fp.subQuery(original, "adismax");
-        Query q = eqp.getQuery();
-        return simplify(reParse(q, fp, null));
-      }
-      protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
-        ArrayList<Query> parts = query.getDisjuncts();
-        for (int i=0;i<parts.size();i++) {
-          Query oldQ = parts.get(i);
-          String field = null;
-          if (oldQ instanceof TermQuery) {
-            field = toBeAnalyzedAgain(((TermQuery) oldQ));
-          }
-          else if(oldQ instanceof BooleanQuery) {
-            List<BooleanClause>clauses = ((BooleanQuery) oldQ).clauses();
-            if (clauses.size()>0) {
-              Query firstQuery = clauses.get(0).getQuery();
-              if (firstQuery instanceof TermQuery) {
-                field = toBeAnalyzedAgain(((TermQuery) firstQuery));
-              }
-            }
-          }
-          if (field!=null) {
-            parts.set(i, reAnalyze(field, getParser().getString(), oldQ.getBoost()));
-          }
-          else {
-            parts.set(i, swimDeep(oldQ));
-          }
-        }
-        return query;
-      }
-      
-      private String toBeAnalyzedAgain(TermQuery q) {
-        String f = q.getTerm().field();
-        //if (f.equals("author")) {
-        //  return "author";
-        //}
-        return null;
-        //return f; // always re-analyze
-      }
-      private Query reAnalyze(String field, String value, float boost) throws ParseException {
-        QParser fParser = getParser();
-        System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
-        QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
-        Query q = aqp.getQuery();
-        q.setBoost(boost);
-        return q;
-      }
-    }.configure(false)); // not analyzed
+			public Query parse(FunctionQParser fp) throws ParseException {
+				final String original = fp.getString();
+				QParser eqp = fp.subQuery(original, "adismax");
+				Query q = eqp.getQuery();
+				return simplify(q);
+			}
+			protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
+				ArrayList<Query> parts = query.getDisjuncts();
+				for (int i=0;i<parts.size();i++) {
+					Query oldQ = parts.get(i);
+					String field = null;
+					if (oldQ instanceof TermQuery) {
+						field = toBeAnalyzedAgain(((TermQuery) oldQ));
+					}
+					else if(oldQ instanceof BooleanQuery) {
+						List<BooleanClause>clauses = ((BooleanQuery) oldQ).clauses();
+						if (clauses.size()>0) {
+							Query firstQuery = clauses.get(0).getQuery();
+							if (firstQuery instanceof TermQuery) {
+								field = toBeAnalyzedAgain(((TermQuery) firstQuery));
+							}
+						}
+					}
+					if (field!=null) {
+						parts.set(i, reAnalyze(field, getParser().getString(), oldQ.getBoost()));
+					}
+					else {
+						parts.set(i, swimDeep(oldQ));
+					}
+				}
+				return query;
+			}
+
+			private String toBeAnalyzedAgain(TermQuery q) {
+				String f = q.getTerm().field();
+				//if (f.equals("author")) {
+				//  return "author";
+				//}
+				return null;
+				//return f; // always re-analyze
+			}
+			private Query reAnalyze(String field, String value, float boost) throws ParseException {
+				QParser fParser = getParser();
+				System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
+				QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
+				Query q = aqp.getQuery();
+				q.setBoost(boost);
+				return q;
+			}
+		});
 		parsers.put("edismax_always_aqp", new AqpSubqueryParserFull() { // will use edismax to create top query, but the rest is done by aqp
-      public Query parse(FunctionQParser fp) throws ParseException {
-        final String original = fp.getString();
-        QParser eqp = fp.subQuery("xxx", "adismax");
-        fp.setString(original);
-        Query q = eqp.getQuery();
-        return simplify(reParse(q, fp, null));
-      }
-      protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
-        ArrayList<Query> parts = query.getDisjuncts();
-        for (int i=0;i<parts.size();i++) {
-          Query oldQ = parts.get(i);
-          String field = null;
-          if (oldQ instanceof TermQuery) {
-            field = ((TermQuery)oldQ).getTerm().field();
-          }
-          else if(oldQ instanceof BooleanQuery) {
-            List<BooleanClause>clauses = ((BooleanQuery) oldQ).clauses();
-            if (clauses.size()>0) {
-              Query firstQuery = clauses.get(0).getQuery();
-              if (firstQuery instanceof TermQuery) {
-                field = ((TermQuery) firstQuery).getTerm().field();
-              }
-            }
-          }
-          if (field!=null) {
-            parts.set(i, reAnalyze(field, getParser().getString(), oldQ.getBoost()));
-          }
-          else {
-            parts.set(i, swimDeep(oldQ));
-          }
-        }
-        return query;
-      }
-      
-      private Query reAnalyze(String field, String value, float boost) throws ParseException {
-        QParser fParser = getParser();
-        QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
-        Query q = aqp.getQuery();
-        q.setBoost(boost);
-        return q;
-      }
-    }.configure(false)); // not analyzed
-		
+			public Query parse(FunctionQParser fp) throws ParseException {
+				final String original = fp.getString();
+				QParser eqp = fp.subQuery("xxx", "adismax");
+				fp.setString(original);
+				Query q = eqp.getQuery();
+				return simplify(reParse(q, fp, null));
+			}
+			protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
+				ArrayList<Query> parts = query.getDisjuncts();
+				for (int i=0;i<parts.size();i++) {
+					Query oldQ = parts.get(i);
+					String field = null;
+					if (oldQ instanceof TermQuery) {
+						field = ((TermQuery)oldQ).getTerm().field();
+					}
+					else if(oldQ instanceof BooleanQuery) {
+						List<BooleanClause>clauses = ((BooleanQuery) oldQ).clauses();
+						if (clauses.size()>0) {
+							Query firstQuery = clauses.get(0).getQuery();
+							if (firstQuery instanceof TermQuery) {
+								field = ((TermQuery) firstQuery).getTerm().field();
+							}
+						}
+					}
+					if (field!=null) {
+						parts.set(i, reAnalyze(field, getParser().getString(), oldQ.getBoost()));
+					}
+					else {
+						parts.set(i, swimDeep(oldQ));
+					}
+				}
+				return query;
+			}
+
+			private Query reAnalyze(String field, String value, float boost) throws ParseException {
+				QParser fParser = getParser();
+				QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
+				Query q = aqp.getQuery();
+				q.setBoost(boost);
+				return q;
+			}
+		});
+
 		parsers.put("tweak", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
-				
+
 				String configuration = fp.parseId();
 				Query q = fp.parseNestedQuery();
-				
+
 				MultiMapSolrParams params = SolrRequestParsers.parseQueryString(configuration);
-				
+
 				if (params.get("collector_final_value", null) != null) {
 					String cfv = params.get("collector_final_value", "avg");
 					if (q instanceof SecondOrderQuery) {
@@ -610,26 +610,26 @@ public class AqpAdsabsSubQueryProvider implements
 						}
 					}
 				}
-        return q;
-      }
+				return q;
+			}
 		});
 	};
 
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
-		throws QueryNodeException {
-		
-		
+	throws QueryNodeException {
+
+
 		AqpSubqueryParser provider = parsers.get(funcName);
 		if (provider == null)
 			return null;
-			
+
 		AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
-		
+
 		SolrQueryRequest req = reqAttr.getRequest();
 		if (req == null)
 			return null;
-		
-		
+
+
 		SolrParams localParams = reqAttr.getLocalParams();
 		if (localParams == null) {
 			localParams = new ModifiableSolrParams();
@@ -637,14 +637,14 @@ public class AqpAdsabsSubQueryProvider implements
 		else {
 			localParams = new ModifiableSolrParams(localParams);
 		}
-		
+
 		if (localParams.get(QueryParsing.DEFTYPE, null) == null) {
 			((ModifiableSolrParams) localParams).set(QueryParsing.DEFTYPE, "aqp");
 		}
 		AqpFunctionQParser parser = new AqpFunctionQParser("", localParams, 
 				reqAttr.getParams(), req);
 		return new AqpSubQueryTreeBuilder(provider, parser);
-				
+
 	}
 
 	private void getSpan(QueryNode node, Integer[] span) {
@@ -654,11 +654,11 @@ public class AqpAdsabsSubQueryProvider implements
 	}
 
 	private void swimDeep(QueryNode node, Integer[] span) {
-		
+
 		if (node instanceof AqpANTLRNode) {
 			int i = ((AqpANTLRNode) node).getTokenStart();
 			int j = ((AqpANTLRNode) node).getTokenEnd();
-			
+
 			if(j>i) {
 				if (i != -1 && i < span[0]) {
 					span[0] = i;
@@ -673,7 +673,7 @@ public class AqpAdsabsSubQueryProvider implements
 				swimDeep(child, span);
 			}
 		}
-		
+
 	}
 
 }

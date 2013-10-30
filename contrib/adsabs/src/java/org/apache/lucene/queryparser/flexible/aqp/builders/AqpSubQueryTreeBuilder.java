@@ -37,11 +37,4 @@ public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
 		}
 	}
 
-  public boolean canBeAnalyzed() {
-    if (aqpValueSourceParser instanceof AqpSubqueryParser) {
-      return ((AqpSubqueryParser) aqpValueSourceParser).canBeAnalyzed();
-    }
-    return false;
-  }
-
 }

@@ -171,6 +171,10 @@ public class AqpAdsabsQParser extends QParser {
 			}
 		}
 		
+		if (namedParams.containsKey("aqp.df.fields")) {
+			qParser.setMultiFields(namedParams.get("aqp.df.fields").split(","));
+		}
+		
 		// special analyzers
 		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(0, new AqpSolrFunctionProvider());
 		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(1, new AqpAdsabsSubQueryProvider());

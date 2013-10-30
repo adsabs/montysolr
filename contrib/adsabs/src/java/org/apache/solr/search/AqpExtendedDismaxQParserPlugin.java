@@ -971,7 +971,6 @@ class AqpExtendedDismaxQParser extends QParser {
     boolean bool2;
     float flt;
     int slop;
-		String querystr;
 
     @Override
     protected Query getFieldQuery(String field, String val, boolean quoted) throws ParseException {
@@ -981,12 +980,6 @@ class AqpExtendedDismaxQParser extends QParser {
       this.field = field;
       this.val = val;
       this.slop = getPhraseSlop(); // unspecified
-      if (quoted) {
-      	this.querystr = AqpQueryParserUtil.escape(val);
-      }
-      else {
-      	this.querystr = "\"" + val + "\"";
-      }
       return getAliasedQuery();
     }
 
@@ -998,7 +991,6 @@ class AqpExtendedDismaxQParser extends QParser {
       this.field = field;
       this.val = val;
       this.slop = slop;
-      this.querystr = "\"" + val + "\"" + "^" + slop;
       return getAliasedQuery();
     }
 
@@ -1011,7 +1003,6 @@ class AqpExtendedDismaxQParser extends QParser {
       this.type = QType.PREFIX;
       this.field = field;
       this.val = val;
-      this.querystr = "\"" + val + "*\"";
       return getAliasedQuery();
     }
 
@@ -1042,12 +1033,6 @@ class AqpExtendedDismaxQParser extends QParser {
       this.val2 = b;
       this.bool = startInclusive;
       this.bool2 = endInclusive;
-      this.querystr =  
-      	(startInclusive ? "{" : "[") + 
-      	val + " TO " + 
-      	val2 != null && val2.length() > 1 ? val2 : "*" +
-      	(endInclusive ? "}" : "]");
-      
       return getAliasedQuery();
     }
 
@@ -1065,7 +1050,6 @@ class AqpExtendedDismaxQParser extends QParser {
       this.type = QType.WILDCARD;
       this.field = field;
       this.val = val;
-      this.querystr = "\"" + val + "\"";
       return getAliasedQuery();
     }
 
@@ -1077,10 +1061,31 @@ class AqpExtendedDismaxQParser extends QParser {
       this.field = field;
       this.val = val;
       this.flt = minSimilarity;
-      this.querystr = "\"" + val + "\"" + "~" + minSimilarity;
       return getAliasedQuery();
     }
-
+    
+    
+    private String getQueryStr() {
+    	switch (type) {
+	    	case PHRASE:
+	    		return field + ":" + "\"" + val + "\"" + (slop != 0 ? "~" + slop : "");
+	      case FIELD:
+	      	return field + ":" + AqpQueryParserUtil.escape(val) + (slop != 0 ? "^" + slop : "");
+	      case PREFIX:
+	      	return field + ":" + "\"" + val + "*\"";
+	      case WILDCARD: 
+	      	return field + ":" + "\"" + val + "\"";
+	      case FUZZY: 
+	      	return field + ":" + "\"" + val + "\"" + "~" + flt;
+	      case RANGE: 
+	      	return field + ":" + (bool ? "{" : "[") + 
+		      	val + " TO " + 
+		      	val2 != null && val2.length() > 1 ? val2 : "*" +
+		      	(bool2 ? "}" : "]");
+	    }	
+    	return field + ":" + AqpQueryParserUtil.escape(val);
+    }
+    
     /**
      * Delegates to the super class unless the field has been specified
      * as an alias -- in which case we recurse on each of
@@ -1182,16 +1187,20 @@ class AqpExtendedDismaxQParser extends QParser {
     	Query query = null;
     	
     	try {
-    	if (querystr != null && !field.equals(IMPOSSIBLE_FIELD_NAME)) {
+    	if (!field.equals(IMPOSSIBLE_FIELD_NAME)) {
     		
     		NamedList<String> nl = new NamedList<String>();
       	nl.add("defType", "aqp");
-      	//nl.add("debugQuery", "true");
-      	nl.add("aqp.unfielded.tokens.strategy", "tag");
-      	nl.add(CommonParams.DF, field);
-      	nl.add(CommonParams.Q, val);
+      	if (req.getParams().getBool("debugQuery", true)) {
+      		nl.add("debugQuery", "true");
+      	}
+      	//nl.add("aqp.df.fields", "title abstract^.7");
+      	nl.add("qf", req.getParams().get("qf", ""));
+      	String qs = getQueryStr();
+      	//nl.add(CommonParams.DF, field);
+      	nl.add(CommonParams.Q, qs);
       	localReq = new LocalSolrQueryRequest(req.getCore(), nl);
-      	QParser aqpParser = getParser(this.querystr, "aqp", localReq);
+      	QParser aqpParser = getParser(qs, "aqp", localReq);
       	query = aqpParser.parse();
       	
     		switch (type) {
@@ -1200,11 +1209,9 @@ class AqpExtendedDismaxQParser extends QParser {
             if (query instanceof PhraseQuery) {
               PhraseQuery pq = (PhraseQuery)query;
               if (minClauseSize > 1 && pq.getTerms().length < minClauseSize) return null;
-              ((PhraseQuery)query).setSlop(slop);
             } else if (query instanceof MultiPhraseQuery) {
               MultiPhraseQuery pq = (MultiPhraseQuery)query;
               if (minClauseSize > 1 && pq.getTermArrays().size() < minClauseSize) return null;
-              ((MultiPhraseQuery)query).setSlop(slop);
             } else if (minClauseSize > 1) {
               // if it's not a type of phrase query, it doesn't meet the minClauseSize requirements
               return null;
@@ -1213,9 +1220,14 @@ class AqpExtendedDismaxQParser extends QParser {
     		if (query != null) {
     			// multi-synonym expansions (are synonyms!)
         	if (query instanceof BooleanQuery) {
-        		BooleanQuery bq = new BooleanQuery();
-        		bq.add(query, Occur.SHOULD);
-        		query = bq;
+        		if (((BooleanQuery) query).getClauses().length == 0) {
+        			return null; // happens when token is a stopword
+        		}
+        		else if (((BooleanQuery) query).getClauses().length > 1) {
+	        		BooleanQuery bq = new BooleanQuery();
+	        		bq.add(query, Occur.SHOULD);
+	        		query = bq;
+        		}
         	}
     			return query;
     		}

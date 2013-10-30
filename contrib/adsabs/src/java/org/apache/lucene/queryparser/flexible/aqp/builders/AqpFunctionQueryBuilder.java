@@ -13,5 +13,4 @@ public interface AqpFunctionQueryBuilder extends QueryBuilder {
 	
 	//public ValueSourceParser getValueSourceParser();
 	
-	public boolean canBeAnalyzed();
 }

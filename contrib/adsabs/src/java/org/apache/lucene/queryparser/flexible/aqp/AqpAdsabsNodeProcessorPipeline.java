@@ -1,7 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
-import java.util.Arrays;
-
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.processors.NoChildOptimizationQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
@@ -19,20 +17,17 @@ import org.apache.lucene.queryparser.flexible.standard.processors.NumericRangeQu
 import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.TermRangeQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCarefulAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExpandAuthorSearchProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExtractMultisynonymsProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldNodePreAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQDELIMITERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsQTRUNCATEDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldMapperProcessorPostAnalysis;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPMarkPlainNodes;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPUnfieldedTokens;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQREGEXProcessor;
