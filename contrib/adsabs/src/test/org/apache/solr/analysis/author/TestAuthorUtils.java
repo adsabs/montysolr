@@ -35,6 +35,10 @@ public class TestAuthorUtils extends TestCase {
 		assertEquals("o sullivan, mike", AuthorUtils.normalizeAuthor("o'sullivan, mike"));
 		assertEquals("o sullivan, mike", AuthorUtils.normalizeAuthor("o' sullivan, mike"));
 		assertEquals("mc donald, co", AuthorUtils.normalizeAuthor("mc'donald, co(.)"));
+		assertEquals("GómezFoo, He ctor 29Q", AuthorUtils.normalizeAuthor("%$Gómez_Foo, He-ctor;  29Q."));
+		assertEquals("Gómez, Hector Q", AuthorUtils.normalizeAuthor("  Gómez,\n Hector    Q "));
+		
+		
 	}
 
 	public void testParseAuthor() throws Exception {

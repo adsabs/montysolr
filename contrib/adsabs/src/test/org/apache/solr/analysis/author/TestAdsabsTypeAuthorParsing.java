@@ -344,17 +344,42 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"author:o sullivan, author:o sullivan, *",
         		"//*[@numFound='0']"
         		);
+  	// funny author names
   	testAuthorQuery(
     		"\"o'sullivan\"", 
         		"author:o sullivan, author:o sullivan, *",
         		"//*[@numFound='0']",
-    		"\"o'sullivan\"",
-        		"author:o sullivan, author:o sullivan, *",
-        		"//*[@numFound='0']",
-    		"\"o'sullivan\"",
+    		"\"o' sullivan\"",
         		"author:o sullivan, author:o sullivan, *",
         		"//*[@numFound='0']"
         		);
+  	
+  	testAuthorQuery(
+    		"Dall\\'oglio",
+        		"author:dall oglio, author:dall oglio, *",
+        		"//*[@numFound='0']",
+    		"Antonella\\ Dall\\'Oglio",
+        		"author:dall oglio, antonella author:dall oglio, antonella * author:dall oglio, a author:dall oglio, a * author:dall oglio,",
+        		"//*[@numFound='0']"
+        		);
+  	
+  	testAuthorQuery(
+    		"\"t' Hooft, Sullivan\"",
+        		"author:t hooft, sullivan author:t hooft, sullivan * author:t hooft, s author:t hooft, s * author:t hooft,",
+        		"//*[@numFound='0']"
+        		);
+  	
+  	testAuthorQuery(
+    		"\"P'ING-TZU KAO\"",
+        		"author:kao, p ing tzu author:kao, p ing tzu * author:kao, p i tzu author:kao, p i tzu * author:kao, p ing t author:kao, p ing t * author:kao, p i t author:kao, p i t * author:kao, p author:kao,",
+        		"//*[@numFound='0']",
+        // hmmm - why this one generated regex? and the above didn't?
+    		"\"Kao, P'ing-Tzu\"",
+        		"author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p author:kao,",
+        		"//*[@numFound='0']"
+        		);
+  	
+  	
   	
   	// what happens we receive very long string (non-author thing)
   	testAuthorQuery(

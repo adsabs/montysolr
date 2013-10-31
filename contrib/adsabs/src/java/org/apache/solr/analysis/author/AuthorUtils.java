@@ -55,6 +55,12 @@ public class AuthorUtils {
 		return a;
 	}
 	
+	/**
+	 * this whole thing become obsolete when we included the python
+	 * name parser library (that does MUCH better job in parsing names)
+	 * 
+	 * TODO: kill AuthorUtils.parseAuthor 
+	 */
 	public static HashMap<String,String> parseAuthor(String a) {
 		return parseAuthor(a, true);
 	}
