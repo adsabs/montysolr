@@ -1191,7 +1191,7 @@ class AqpExtendedDismaxQParser extends QParser {
     		
     		NamedList<String> nl = new NamedList<String>();
       	nl.add("defType", "aqp");
-      	if (req.getParams().getBool("debugQuery", true)) {
+      	if (req.getParams().getBool("debugQuery", false)) {
       		nl.add("debugQuery", "true");
       	}
       	//nl.add("aqp.df.fields", "title abstract^.7");

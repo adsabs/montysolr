@@ -8,11 +8,15 @@ import org.apache.solr.schema.IndexSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Is called by the DIH to transform document, during the first
+ * call we'll  initialize facet configuration 
+ *
+ */
 public class FacetHierarchyTransformer extends Transformer {
 
-	private final static String FACET_HIERARCHY_FIELD_ATTR = "facetHierarchyField";
-	private final static String FACET_HIERARCHY_FIELD_NAMES_ATTR = "fields";
-	private final static String FACET_HIERARCHY_FIELD_MULTIVALUE_ATTR = "multiValuedSource";
+	private final static String FACET_HIERARCHY_ATTR = "facetHierarchyField";
+	private final static String FACET_HIERARCHY_INPUT_ATTR = "input";
 	private final static String FIELD_COLUMN_ATTR = "column";
 	
 	Logger log = LoggerFactory.getLogger(FacetHierarchyTransformer.class);
@@ -39,36 +43,36 @@ public class FacetHierarchyTransformer extends Transformer {
 	}
 	
 	private List<FacetHierarchy> getFacetHierarchiers(Context context) {
-		if (facetHierarchies != null)
-			return facetHierarchies;
-		facetHierarchies = createFacetHierarchies(context);
+		if (facetHierarchies == null) {
+			initializeFacetHierarchies(context);
+		}
 		return facetHierarchies;
 	}
 	
-	private List<FacetHierarchy> createFacetHierarchies(Context context) {
+	private void initializeFacetHierarchies(Context context) {
 		
 		List<Map<String, String>> allFields = context.getAllEntityFields();
-		List<FacetHierarchy> result = new ArrayList<FacetHierarchy>();
+		facetHierarchies = new ArrayList<FacetHierarchy>();
 		
 		for (Map<String, String> fieldDef : allFields) {
-			if ("true".equals(fieldDef.get(FACET_HIERARCHY_FIELD_ATTR))) {
-				String columnName = fieldDef.get(FIELD_COLUMN_ATTR);
-				boolean multiValueSource = "true".equals(fieldDef.get(FACET_HIERARCHY_FIELD_MULTIVALUE_ATTR));
+			if ("true".equals(fieldDef.get(FACET_HIERARCHY_ATTR))) {
 				
-				String[] sourceFields = fieldDef.get(FACET_HIERARCHY_FIELD_NAMES_ATTR).split(",");
-				if (sourceFields.length < 2) {
-					throw new RuntimeException("Facet hierarchy requires > 1 field");
-				}
+				String columnName = fieldDef.get(FIELD_COLUMN_ATTR);
+				assert columnName != null;
+				
+				
+				
+				String input = fieldDef.get(FACET_HIERARCHY_INPUT_ATTR);
+				assert input != null;
 				
 				FacetHierarchy fh = null;
-				if (multiValueSource) {
-					fh = new FacetHierarchyMV(columnName, sourceFields);
+				if (input.contains("+")) {
+					fh = new FacetHierarchyMV(columnName, fieldDef.get(FACET_HIERARCHY_INPUT_ATTR).split("+"));
 				} else {
-					fh = new FacetHierarchy(columnName, sourceFields);
+					fh = new FacetHierarchy(columnName, fieldDef.get(FACET_HIERARCHY_INPUT_ATTR).split(","));
 				}
-				result.add(fh);
+				facetHierarchies.add(fh);
 			}
 		}
-		return result;
 	}
 }

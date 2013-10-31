@@ -3,6 +3,7 @@ package org.apache.solr.handler.dataimport;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,123 +13,119 @@ import org.junit.Before;
 
 public class TestFacetHierarchy {
 	
-	HashMap<String,Object> testRow;
 
 	@Before
 	public void setUp() {
-		final List<String> a = new ArrayList<String>() {{ add("foo"); add("bar"); add("baz"); }};
-		final List<String> aa = new ArrayList<String>() {{ add("foo-foo"); add("bar-bar"); add("baz-baz"); }};
 		
-		final String b = "bleh";
-		final String bb = "bleh-blah";
+	}
+	
+	private void doTestNormalType(Object[] input, String...expected) {
+		doTest(false, input, expected);
+	}
+	
+	private void doTestJoinType(Object[] input, String...expected) {
+		doTest(true, input, expected);
+	}
+	
+	private void doTest(Boolean isJoinType, Object[] input, String...expected) {
 		
-		final List<String> c = new ArrayList<String>() {{ add("Smith, J"); add("Jones, C"); }};
-		final List<String> cc = new ArrayList<String>() {{ add("Smith, John"); add("Jones, Chuck"); }};
+		HashMap<String, Object> testRow = new HashMap<String, Object>();
+		testRow.put("id", 1);
+		String[] inputFields = new String[input.length];
+		for (int i=0; i<input.length; i++) {
+			testRow.put("input" + i, input[i]);
+			inputFields[i] = "input" + i;
+		}
 		
-		final List<String> d = new ArrayList<String>() {{ add("foo"); add("bar"); }};
-		final List<String> dd = new ArrayList<String>() {{ add("foo"); }};
+		if (isJoinType) {
+			FacetHierarchy fh = new FacetHierarchyMV("output", inputFields);
+			fh.addFacets(testRow);
+		}
+		else {
+			FacetHierarchy fh = new FacetHierarchy("output", inputFields);
+			fh.addFacets(testRow);
+		}
 		
-		final List<String> e = new ArrayList<String>() {{ add("foo"); add("bar"); }};
-		final List<String> ee = new ArrayList<String>() {{ add("foo"); add(""); }};
 		
-		final String f = "bar";
-		final String ff = "";
+		List<String> result = (List<String>) testRow.get("output");
+		if (expected == null) {
+			assertTrue("The facets were generated", result == null);
+		}
+		else {
+			assertTrue("The facets were not generated", result != null);
+			assertArrayEquals(
+					expected,
+					result.toArray());
+		}
 		
-		final List<String> n = null;
-		final List<String> nn = null;
-		
-		testRow = new HashMap<String,Object>() {{
-			put("a", a); 
-			put("aa", aa);
-			put("b", b);
-			put("bb", bb);
-			put("c", c);
-			put("cc", cc);
-			put("d", d);
-			put("dd", dd);
-			put("e", e);
-			put("ee", ee);
-			put("f", f);
-			put("ff", ff);
-			put("n", n);
-			put("nn", nn);
-		}};
 	}
 	
 	@Test
 	public void testFacetGeneration() {
 		
-	  // multi-valued
-		FacetHierarchy fh = new FacetHierarchyMV("a_hier", new String[] {"a", "aa"});
-		fh.addFacets(testRow);
-		List<String> newFacets = (List<String>) testRow.get("a_hier");
-		assertArrayEquals(
-				new String[] { "0/foo","0/bar","0/baz","1/foo/foo-foo","1/bar/bar-bar","1/baz/baz-baz"},
-				newFacets.toArray());
+		// test single-string inut
+		doTestNormalType(
+				new Object[] {"Kurtz, Michael J"},
+				"0/Kurtz, M", "1/Kurtz, M/Kurtz, Michael J"
+				);
 		
-		// single valued
-		fh = new FacetHierarchy("b_hier", new String[] {"b", "bb"});
-		fh.addFacets(testRow);
-		newFacets = (List<String>) testRow.get("b_hier");
-		assertArrayEquals(
-				new String[] { "0/bleh", "1/bleh/bleh-blah" },
-				newFacets.toArray());
+		// test multi-valued field
+		doTestNormalType(
+				new Object[] {Arrays.asList("Kurtz, Michael J")},
+				"0/Kurtz, M", "1/Kurtz, M/Kurtz, Michael J"
+				);
+		doTestNormalType(
+				new Object[] {Arrays.asList("Kurtz, Michael. J.")},
+				"0/Kurtz, M", "1/Kurtz, M/Kurtz, Michael J"
+				);
+		doTestNormalType(
+				new Object[] {Arrays.asList("Kurtz, M        J")},
+				"0/Kurtz, M", "1/Kurtz, M/Kurtz, M J"
+				);
+		doTestNormalType(
+				new Object[] {Arrays.asList("t' Hooft, van X")},
+				"0/T Hooft, V", "1/T Hooft, V/T Hooft, Van X"
+				);
+		// we want to have him in the second level too
+		doTestNormalType(
+				new Object[] {Arrays.asList("Moser, B")},
+				"0/Moser, B", "1/Moser, B/Moser, B"
+				);
 		
-		// authors
-		fh = new FacetHierarchyMV("c_hier", new String[] {"c", "cc"});
-    fh.addFacets(testRow);
-    newFacets = (List<String>) testRow.get("c_hier");
-    assertArrayEquals(
-        new String[] { "0/Smith, J", "0/Jones, C", "1/Smith, J/Smith, John", "1/Jones, C/Jones, Chuck" },
-        newFacets.toArray());
-    
-    
-    fh = new FacetHierarchy("author_hier", new String[] {"author"});
-    testRow.clear();
-    testRow.put("author", "Kurtz, Michael J.");
-    fh.addFacets(testRow);
-    newFacets = (List<String>) testRow.get("author_hier");
-    assertArrayEquals(
-        new String[] { "0/Kurtz, M", "0/Kurtz, M/Kurtz, Michael J."  },
-        newFacets.toArray());
+		// now test value concatenation
+		doTestJoinType(
+				new Object[] {Arrays.asList("foo", "bar"), Arrays.asList("woo", "too")},
+				"0/foo", "1/foo/woo", "0/bar", "1/bar/too"
+				);
+		doTestJoinType(
+				new Object[] {Arrays.asList("foo", "bar"), Arrays.asList("woo", "too"), Arrays.asList("zap", "tap")},
+				"0/foo", "1/foo/woo", "2/foo/woo/zap",
+				"0/bar", "1/bar/too", "2/bar/too/tap"
+				);
+		
+		// unbalanced case, should get at least st
+		doTestJoinType(
+				new Object[] {Arrays.asList("foo", "bar", "baz"), Arrays.asList("woo", "too")},
+				"0/foo", "1/foo/woo", "0/bar", "1/bar/too"
+				);
+		doTestJoinType(
+				new Object[] {Arrays.asList("foo", "bar"), Arrays.asList("woo")},
+				"0/foo", "1/foo/woo"
+				);
+		doTestJoinType(
+				new Object[] {Arrays.asList("foo", "bar"), null},
+				null
+				);
+		doTestJoinType(
+				new Object[] {Arrays.asList("foo", "bar"), null, Arrays.asList("woo", "too")},
+				null
+				);
+		doTestJoinType(
+				new Object[] {Arrays.asList("foo", "bar"), Arrays.asList("woo", "too"), Arrays.asList("zap" )},
+				"0/foo", "1/foo/woo", "2/foo/woo/zap"
+				);
+		
 	}
 	
-	@Test(expected=ClassCastException.class)
-	public void testFacetGenerationMixedMultiSingleValued() {
-		FacetHierarchy fh = new FacetHierarchy("ab_hier", new String[] {"b", "aa"});
-		fh.addFacets(testRow);
-	}
 	
-	
-	@Test
-	public void testFacetGenerationBadInput() {
-		
-		FacetHierarchy fh = new FacetHierarchyMV("d_hier", new String[] {"d", "dd"});
-		try {
-			fh.addFacets(testRow);
-		} catch (RuntimeException e) {
-			assertEquals("source value arrays have inconsistent length", e.getMessage());
-		}
-
-		fh = new FacetHierarchyMV("n_hier", new String[] {"n", "nn"});
-		try {
-			fh.addFacets(testRow);
-		} catch (RuntimeException e) {
-			assertEquals("source was null", e.getMessage());
-		}
-		
-		fh = new FacetHierarchyMV("e_hier", new String[] {"e", "ee"});
-		try {
-			fh.addFacets(testRow);
-		} catch (RuntimeException e) {
-			assertEquals("source value array contains empty strings", e.getMessage());
-		}
-		
-		fh = new FacetHierarchy("e_hier", new String[] {"f", "ff"});
-		try {
-			fh.addFacets(testRow);
-		} catch (RuntimeException e) {
-			assertEquals("source value array contains empty strings", e.getMessage());
-		}
-	}
 }

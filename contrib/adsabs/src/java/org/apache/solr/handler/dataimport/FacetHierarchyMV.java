@@ -8,10 +8,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
+
 
 /**
- * @author jluker
- *
+ *	Variation on the FacetHierarchy but instead of generating
+ *  variations of the field, this one will combine them
+ * 
+ * Input:
+ * sourceValues: [["foo", "bar"],["woo", "too"]]
+ * 
+ * Output:
+ * newFacets:  ["0/foo", "0/bar", "1/foo/woo", "1/bar/too"] *  
  */
 public class FacetHierarchyMV extends FacetHierarchy {
 	
@@ -22,66 +31,62 @@ public class FacetHierarchyMV extends FacetHierarchy {
 	@Override
 	public void addFacets(Map<String, Object> row) {
 		
-		List<String> newFacets = new ArrayList<String>();
-		List<List<String>> sourceValues = new ArrayList<List<String>>();
+		int smallestCommonDenominator = -1;
 		
-		int expectedSourceLength = -1;
-		for (List<String> fields : sourceFields) {
-			List<String> sv = new ArrayList<String>();
-			for (String sourceField : fields) {
-				List<String> rowValue = (List<String>) row.get(sourceField);
-				if (rowValue == null) {
-					throw new RuntimeException("source was null");
-				}
-				sv.addAll(rowValue);
-			}	
-			int len = sv.size();
-			if (expectedSourceLength == -1) {
-				expectedSourceLength = len;
-			} else if (len != expectedSourceLength) {
-				throw new RuntimeException("source value arrays have inconsistent length");
-			}
-			if (sv.contains("")) {
-				throw new RuntimeException("source value array contains empty strings");
-			}
-			sourceValues.add(sv);
-		}
+		ArrayList<List<String>> toInclude = new ArrayList<List<String>>();
+		for (String field : sourceFields) {
+			if (row.containsKey(field)) {
+				Object obj = row.get(field);
 				
-		generateFacets(sourceValues, newFacets);
-		row.put(columnName, newFacets);
+				if (obj == null) {
+					return; // give up
+				}
+				List<String> data = (List<String>) obj;
+				
+				if (smallestCommonDenominator == -1 || data.size() < smallestCommonDenominator) {
+					smallestCommonDenominator = data.size();
+				}
+				toInclude.add(data); // non-multivalued fields will cause Exception, that's fine
+			}
+		}
+		
+		// transform data from rows into cols
+		String[][] dataCols = new String[smallestCommonDenominator][toInclude.size()];
+		for (int i=0;i<smallestCommonDenominator;i++) {
+			for (int j=0;j<toInclude.size();j++) {
+				dataCols[i][j] = toInclude.get(j).get(i);
+			}
+		}
+		
+		ArrayList<String> newFacets = new ArrayList<String>();
+		
+		for (String[] parts: dataCols) {
+		
+			for (int depth = 0; depth < parts.length; depth++) {
+				
+				StringBuilder newFacet = new StringBuilder(); 
+				
+				for (int i = 0; i <= depth; i++) {
+					if (i == 0) {
+						newFacet.append(String.format("%d", depth));
+					}
+					newFacet.append("/");
+					newFacet.append(parts[i]);
+				}
+				
+				newFacets.add(newFacet.toString());
+			}
+		}
+		
+		if (newFacets.size() > 0) {
+			if (row.containsKey(columnName)) {
+				List<String> output = (List<String>) row.get(columnName);
+				output.addAll(newFacets);
+			}
+			else {
+				row.put(columnName, newFacets);
+			}
+		}
 	}
 	
-	/*
-	 * Creates new hierarchical-style facet values based on sourceValues.
-	 * sourceValue input is a list of lists; one list of values for each level of the hierarchy.
-	 * Example using a two-level hierarchy of author_norm -> author:
-	 * 
-	 * Input:
-	 * sourceValues: [["Smith, J", "Jones, B"],["Smith, James", "Jones, Brenda"]]
-	 * 
-	 * Output:
-	 * newFacets:  ["0/Smith, J", "0/Jones, B", "1/Smith, J/Smith, James", "1/Jones, B/Jones, Brenda"]
-	 * 
-	 * See: http://wiki.apache.org/solr/HierarchicalFaceting#A.27facet.prefix.27__Based_Drill_Down
-	 */
-	private void generateFacets(List<List<String>> sourceValues, List<String> newFacets) {
-		
-		for (int depth = 0; depth < sourceFields.size(); depth++) {
-			
-			String[] newFacetArray;
-			int len = sourceValues.get(0).size();
-			newFacetArray = new String[len];
-			
-			for (int i = 0; i <= depth; i++) {
-				List<String> sv = sourceValues.get(i);
-				for (int j = 0; j < sv.size(); j++) {
-					if (newFacetArray[j] == null) {
-						newFacetArray[j] = String.format("%d", depth);
-					}
-					newFacetArray[j] += String.format("/%s", sv.get(j));
-				}
-			}
-			newFacets.addAll(Arrays.asList(newFacetArray));
-		}
-	}
 }

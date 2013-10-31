@@ -22,6 +22,7 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.AdsDataSource;
 import org.apache.solr.handler.dataimport.Context;
@@ -150,7 +151,40 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     );
 
 
-
+    
+    /*
+     * /tvrh is available and serves title+abstract
+     */
+    assertQ(req(CommonParams.QT, "/tvrh", 
+    		"q", "abstract:nosky",
+    		"fl", "recid",
+    		"tv.all", "true",
+    		"tv.fl", "abstract",
+    		"indent", "true"
+    		),
+    		"//lst[@name='termVectors']/str[@name='uniqueKeyFieldName'][contains(text(),'id')]",
+    		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/int[@name='tf']",
+    		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/int[@name='df']",
+    		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/double[@name='tf-idf']",
+    		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/lst[@name='positions']/int[@name='position']",
+    		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/lst[@name='offsets']/int[@name='start']",
+    		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/lst[@name='offsets']/int[@name='end']",
+    		"//*[@numFound='1']");
+    assertQ(req(CommonParams.QT, "/tvrh", 
+    		"q", "title:nosky",
+    		"fl", "recid,title",
+    		"tv.all", "true",
+    		"tv.fl", "title",
+    		"indent", "true"
+    		),
+    		"//lst[@name='termVectors']/str[@name='uniqueKeyFieldName'][contains(text(),'id')]",
+    		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/int[@name='tf']",
+    		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/int[@name='df']",
+    		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/double[@name='tf-idf']",
+    		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/lst[@name='positions']/int[@name='position']",
+    		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/lst[@name='offsets']/int[@name='start']",
+    		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/lst[@name='offsets']/int[@name='end']",
+    		"//*[@numFound='1']");
     
 
     /*
@@ -351,10 +385,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "author_facet:\"Mosser, B\""), "//*[@numFound='1']");
 
     assertQ(req("q", "first_author_facet_hier:\"0/Cutri, R\""), "//*[@numFound='1']");
-		assertQ(req("q", "first_author_facet_hier:\"1/Cutri, R/Cutri, R. M.\""), "//*[@numFound='1']");
+		assertQ(req("q", "first_author_facet_hier:\"1/Cutri, R/Cutri, R M\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_facet_hier:\"0/Stumpe, M\""), "//*[@numFound='2']");
-		assertQ(req("q", "author_facet_hier:\"1/Stumpe, M/Stumpe, M. C.\""), "//*[@numFound='2']");
-		assertQ(req("q", "author_facet_hier:\"1//et al.\""), "//*[@numFound='0']");
+		assertQ(req("q", "author_facet_hier:\"1/Stumpe, M/Stumpe, M C\""), "//*[@numFound='2']");
+		assertQ(req("q", "author_facet_hier:\"0/Et al\""), "//*[@numFound='1']");
 		
     
     /*

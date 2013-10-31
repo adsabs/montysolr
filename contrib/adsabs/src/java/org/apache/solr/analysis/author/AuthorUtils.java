@@ -25,10 +25,18 @@ public class AuthorUtils {
 	public static final String AUTHOR_TRANSLITERATED = "AUTHOR_TRANSLITERATED";
 	public static final String AUTHOR_CURATED_SYN = "AUTHOR_CURATED_SYN";
 	
+	// to remove commas from behind initials B. => B
 	static Pattern n0 = Pattern.compile("(?<=\\b\\p{L})\\.(?=\\s*\\b)");
-	static Pattern n1 = Pattern.compile("[^\\w\\s\'\\p{L}\\p{Digit},_-]");
+	// these are the characters we allow for author names
+	// we keep any unicode character with its punctuation, digits,
+	// and some special characters
+	// original, which may miss diacritics: "(?<=\\b\\p{L})\\.(?=\\s*\\b)" \P{M}\p{M}*+	
+	static Pattern n1 = Pattern.compile("[^\\w\\s\\{N}\\p{L}\\p{M}*+,_-]");
+	// to normalize spaces
 	static Pattern n2 = Pattern.compile("\\s+");
+	// to normalize non escaped commas
 	static Pattern n3 = Pattern.compile("(?<!\\\\),\\s*");
+	
 	static Pattern n4 = Pattern.compile("(?<=\\p{L})\\'\\s*");
 	public static String normalizeAuthor(String a) {
 	  a = n0.matcher(a).replaceAll(" ");
@@ -96,7 +104,7 @@ public class AuthorUtils {
 		return new ArrayList<String>(synonyms);
 	}
 	
-	static String foldToAscii(String a) {
+	public static String foldToAscii(String a) {
 		char[] in = a.toCharArray();
 		char[] out = new char[in.length * 4];
 		int outPos = ASCIIFoldingFilter.foldToASCII(in, 0, out, 0, in.length);

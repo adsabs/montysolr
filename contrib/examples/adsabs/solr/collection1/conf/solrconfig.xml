@@ -799,9 +799,7 @@
        <str name="defType">aqp</str>
        <str name="aqp.unfielded.tokens.strategy">multiply</str>
        <str name="aqp.unfielded.tokens.new.type">simple</str>
-       <str name="aqp.unfielded.phrase.edismax.synonym.workaround">true</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
-       <bool name="debugQuery">false</bool>
        
      </lst>
     <!-- In addition to defaults, "appends" params can be specified
@@ -1357,8 +1355,11 @@
   <requestHandler name="/tvrh" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
       <bool name="tv">true</bool>
-      <str name="qf">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year</str>
-      <str name="defType">aqp</str>
+       <str name="qf">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year</str>
+       <str name="defType">aqp</str>
+       <str name="aqp.unfielded.tokens.strategy">multiply</str>
+       <str name="aqp.unfielded.tokens.new.type">simple</str>
+       <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
     </lst>
     <arr name="last-components">
       <str>tvComponent</str>
