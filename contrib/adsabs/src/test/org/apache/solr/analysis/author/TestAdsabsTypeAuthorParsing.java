@@ -338,21 +338,21 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	//setDebug(true);
   	testAuthorQuery(
         "\"o' sullivan\"", 
-        		"author:o'sullivan, author:o'sullivan,*",
+        		"author:o sullivan, author:o sullivan, *",
         		"//*[@numFound='0']",
     		"\"o'sullivan\"", 
-        		"author:o'sullivan, author:o'sullivan,*",
+        		"author:o sullivan, author:o sullivan, *",
         		"//*[@numFound='0']"
         		);
   	testAuthorQuery(
     		"\"o'sullivan\"", 
-        		"author:o'sullivan, author:o'sullivan,*",
+        		"author:o sullivan, author:o sullivan, *",
         		"//*[@numFound='0']",
     		"\"o'sullivan\"",
-        		"author:o'sullivan, author:o'sullivan,*",
+        		"author:o sullivan, author:o sullivan, *",
         		"//*[@numFound='0']",
     		"\"o'sullivan\"",
-        		"author:o'sullivan, author:o'sullivan,*",
+        		"author:o sullivan, author:o sullivan, *",
         		"//*[@numFound='0']"
         		);
   	

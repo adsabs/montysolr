@@ -30,24 +30,26 @@ public class AuthorUtils {
 	// these are the characters we allow for author names
 	// we keep any unicode character with its punctuation, digits,
 	// and some special characters
-	// original, which may miss diacritics: "(?<=\\b\\p{L})\\.(?=\\s*\\b)" \P{M}\p{M}*+	
-	static Pattern n1 = Pattern.compile("[^\\w\\s\\{N}\\p{L}\\p{M}*+,_-]");
+	// original, which may miss diacritics: "(?<=\\b\\p{L})\\.(?=\\s*\\b)" \P{M}\p{M}*+
+	// [^,\\-\\w\\s\\{N}\\p{L}\\p{M}*+]
+	static Pattern n1 = Pattern.compile("[^,\\-\\s\\p{N}\\p{L}\\p{M}]");
 	// to normalize spaces
 	static Pattern n2 = Pattern.compile("\\s+");
 	// to normalize non escaped commas
 	static Pattern n3 = Pattern.compile("(?<!\\\\),\\s*");
-	
+	// deal with word delimiters
 	static Pattern n4 = Pattern.compile("(?<=\\p{L})\\'\\s*");
 	public static String normalizeAuthor(String a) {
-	  a = n0.matcher(a).replaceAll(" ");
+		a = n4.matcher(a).replaceAll("-");
+		a = n0.matcher(a).replaceAll(" ");
 		a = n1.matcher(a).replaceAll("");
 		a = n3.matcher(a).replaceAll(", ");
 		a = n2.matcher(a.trim()).replaceAll(" ");
-		a = n4.matcher(a.trim()).replaceAll("'");
 		
-		//a = a.toUpperCase();
+		
 		if (!(a.contains(","))) // || a.contains(" ")
 		  a = a + ",";
+		// do this at the end, we want to see the space instead of '-'
 		a = a.replace('-', ' ');
 		
 		return a;
