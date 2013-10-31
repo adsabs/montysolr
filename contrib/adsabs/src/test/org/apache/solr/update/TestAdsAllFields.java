@@ -388,7 +388,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "first_author_facet_hier:\"1/Cutri, R/Cutri, R M\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_facet_hier:\"0/Stumpe, M\""), "//*[@numFound='2']");
 		assertQ(req("q", "author_facet_hier:\"1/Stumpe, M/Stumpe, M C\""), "//*[@numFound='2']");
-		assertQ(req("q", "author_facet_hier:\"0/Et al\""), "//*[@numFound='1']");
 		
     
     /*

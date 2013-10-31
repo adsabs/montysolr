@@ -67,9 +67,9 @@ public class FacetHierarchyTransformer extends Transformer {
 				
 				FacetHierarchy fh = null;
 				if (input.contains("+")) {
-					fh = new FacetHierarchyMV(columnName, fieldDef.get(FACET_HIERARCHY_INPUT_ATTR).split("+"));
+					fh = new FacetHierarchyMV(columnName, fieldDef.get(FACET_HIERARCHY_INPUT_ATTR).split("\\+"));
 				} else {
-					fh = new FacetHierarchy(columnName, fieldDef.get(FACET_HIERARCHY_INPUT_ATTR).split(","));
+					fh = new FacetHierarchy(columnName, fieldDef.get(FACET_HIERARCHY_INPUT_ATTR).split("\\,"));
 				}
 				facetHierarchies.add(fh);
 			}
