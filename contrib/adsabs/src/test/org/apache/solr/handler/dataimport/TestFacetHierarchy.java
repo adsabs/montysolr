@@ -53,6 +53,7 @@ public class TestFacetHierarchy {
 		}
 		else {
 			assertTrue("The facets were not generated", result != null);
+			//System.out.println(result);
 			assertArrayEquals(
 					expected,
 					result.toArray());
@@ -123,6 +124,52 @@ public class TestFacetHierarchy {
 		doTestJoinType(
 				new Object[] {Arrays.asList("foo", "bar"), Arrays.asList("woo", "too"), Arrays.asList("zap" )},
 				"0/foo", "1/foo/woo", "2/foo/woo/zap"
+				);
+		
+	}
+	
+	@Test
+	public void testFunnyInputs() {
+		
+		doTestNormalType(
+				new Object[] {Arrays.asList("'Smialkowski, A")},
+				"0/Smialkowski, A", "1/Smialkowski, A/Smialkowski, A"
+				);
+		// no second level repeat
+		doTestNormalType(
+				new Object[] {Arrays.asList("\"Scientific Team Of v. N. Sukachev If Climatic Changes Of Northern Asia. \"")},
+				"0/Scientific Team Of V N Sukachev If Climatic Changes Of Northern Asia,"
+				);
+		
+		doTestNormalType(
+				new Object[] {Arrays.asList("\"Aek\" Thanatipanonda, T")},
+				"0/Aek Thanatipanonda, T", "1/Aek Thanatipanonda, T/Aek Thanatipanonda, T"
+				);
+		
+		doTestNormalType(
+				new Object[] {Arrays.asList("'t Hooft, A")},
+				"0/T Hooft, A", "1/T Hooft, A/T Hooft, A"
+				);
+		
+		doTestNormalType(
+				new Object[] {Arrays.asList("(Bill) Peterson, W")},
+				"0/Bill Peterson, W", "1/Bill Peterson, W/Bill Peterson, W"
+				);
+		
+		doTestNormalType(
+				new Object[] {Arrays.asList("(Jan van der Laan, D")},
+				"0/Jan Van Der Laan, D", "1/Jan Van Der Laan, D/Jan Van Der Laan, D"
+				);		
+		
+		doTestNormalType(
+				new Object[] {Arrays.asList("(Jan) van der Laan, D")},
+				"0/Jan Van Der Laan, D", "1/Jan Van Der Laan, D/Jan Van Der Laan, D"
+				);
+		
+		// this is correct, there is O at the start!
+		doTestNormalType(
+				new Object[] {Arrays.asList("--O Renault, P")},
+				"0/O Renault, P", "1/O Renault, P/O Renault, P"
 				);
 		
 	}
