@@ -47,6 +47,7 @@ import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.util.LuceneTestCase.BadApple;
 import org.apache.lucene.util.Version;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
@@ -73,15 +74,17 @@ import org.apache.solr.search.SpatialFilterQParserPlugin;
 import org.apache.solr.servlet.SolrRequestParsers;
 
 
-/*
+/**
  * I know this is confusing. This is called in the building phase,
  * by that time all the parsing was already done. All the parsers
  * here return a QUERY
+ * 
+ * @see AqpFunctionQueryBuilderProvider
  */
-
 public class AqpAdsabsSubQueryProvider implements
 AqpFunctionQueryBuilderProvider {
 
+	
 	public static Map<String, AqpSubqueryParser> parsers = new HashMap<String, AqpSubqueryParser>();
 
 	//TODO: make configurable
@@ -89,12 +92,23 @@ AqpFunctionQueryBuilderProvider {
 	static String citationSearchRefField = "reference";
 
 	static {
+		
+		/* @api.doc
+		 * 
+		 * def lucene(query):
+		 * 		"""
+		 *    Default Lucene query parser
+		 * 		"""
+		 */
 		parsers.put(LuceneQParserPlugin.NAME, new AqpSubqueryParser() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				QParser q = fp.subQuery(fp.getString(), LuceneQParserPlugin.NAME);
 				return q.getQuery();
 			}
 		});
+		/**
+		 * comment XXX
+		 */
 		parsers.put(OldLuceneQParserPlugin.NAME, new AqpSubqueryParser() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				QParser q = fp.subQuery(fp.getString(), OldLuceneQParserPlugin.NAME);
@@ -174,6 +188,28 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 
+		/* @api.doc
+		 * 
+		 * def trending(query):
+		 * 		"""
+		 *    Finds the 200 most interesting papers first, then uses
+		 *    this initial set to collect *all* readers of these papers
+		 *    and then finds other docs these readers read.
+		 *    
+		 *    Technical note: we are using modified MoreLikeThis
+		 *    functionality, with the following parameters:
+		 *    
+		 *     - setMinTermFrequency(0)
+		 *		 - setMinDocFreq(2)
+		 *		 - setMaxQueryTerms(200)
+		 *     - setBoost(2.0f)
+		 *     - setPercentTermsToMatch(0.0f)
+		 *     
+		 *    @since 40.2.0.0 
+		 * 		
+		 * 		"""
+		 *    return "trending(%s)" % query
+		 */
 		// coreads(Q) - what people read: MoreLikeThese(topn(200,classic_relevance(Q)))
 		parsers.put("trending", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
@@ -249,6 +285,47 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 
+		
+		/* @api.doc
+		 * 
+		 * def pos(query, start, end=None):
+		 * 		"""
+		 *    Positional search; returns only documents that
+		 *    are in the given position (range).
+		 *    
+		 *    Example: 
+		 *    
+		 *    	```pos(author:accomazzi, 1)``` finds the papers
+		 *    			where 'accomazzi' is the first author
+		 *      
+		 *      ```pos(author:accomazzi, 1, 1)``` finds the papers
+		 *          where 'accomazzi' is the only author
+		 *          
+		 *      ```pos(author:accomazzi, 1, 5)``` finds the papers
+		 *          where 'accomazzi' is listed as 1st-5th author
+		 *      
+		 *    Technical note:
+		 *    
+		 *    This query will work only for indexes that contain
+		 *    positional information, such as: title, author. It
+		 *    will not work for other indexes, such as bibcode,
+		 *    keyword. Though we'll still allow you to query 
+		 *    them (even if it is useless).
+		 *    
+		 *    
+		 *    Syntax note:
+		 *    
+		 *    The old ADS Classic syntax was: ```^accomazzi$```
+		 *    where ```^``` means *first* and ```$``` means *last*.
+		 *    ADS Classic cannot search for position ranges, but
+		 *    the new system cannot search for the last (yet). It
+		 *    is low priority now. 
+		 *     
+		 *    @since 40.2.0.0 
+		 * 		
+		 * 		"""
+		 *    return "pos(%s, %s, %s)" % (query, start, end or start)
+		 */
 		parsers.put("pos", new AqpSubqueryParserFull() {
 			@Override
 			public Query parse(FunctionQParser fp) throws ParseException {
@@ -283,7 +360,53 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 
-		// ADS Classic toy-implementation of the relevance score
+		/* @api.doc
+		 * 
+		 * def classic_relevance(query):
+		 * 		"""
+		 *    Toy-implementation of the ADS Classic relevance score
+		 *    algorithm. You can wrap any query and obtain the 
+		 *    hits sorted in the ADS Classic ways (sort of)
+		 *    
+		 *    Technical note:
+		 *    
+		 *    This is inefficient and not to be used in production. 
+		 *    We apply the **boost factor** that was computed beforehand
+		 *    by ADS Classic to each document that matches. (We are not
+		 *    scoring docs that are not selected by Lucene). 
+		 *    The boost factor is inside ```cite_read_boost``` field - 
+		 *    we'll use cache to retrieve these values fast, 
+		 *    but it is still inefficient 
+		 *    
+		 *
+		 *    ADS Classic score is implemented as:
+		 * 
+		 *    ```new_score = (0.5 * norm(lucene_score)) + (0.5 * cite_read_boost)```
+		 * 
+		 *    where:
+		 *    
+		 *       norm(LS) = normalized score (in this case it will be a Lucene
+		 *                  score, normalized to be in the range 1-0, where 
+		 *                  1 = the first, best hit; LS/MaximumLuceneScore
+		 *                  
+		 *       cite_read_boost = the document boosts are combination of 
+		 *                  normalized reads and cites: 
+		 *                  ```cite_read_boost = log(1 + cites + norm_reads)```
+		 *                  
+		 *                  where:
+		 *                  
+		 *                  	```norm_reads``` are normalized values for 
+		 *                    reads over the past two years
+		 *                    
+		 *                    
+		 *     
+		 *    @experimental
+		 *    @synonym cr()
+		 *    @since 40.2.2.0 
+		 * 		
+		 * 		"""
+		 *    return "classic_relevance(%s)" % (query,)
+		 */
 		parsers.put("classic_relevance", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
 
@@ -295,7 +418,43 @@ AqpFunctionQueryBuilderProvider {
 		parsers.put("cr", parsers.get("classic_relevance"));
 
 
-		// topn(int, Q, [relevance|sort-spec]) - limit results to the best top N (by their ranking or sort order)
+		/* @api.doc
+		 * 
+		 * def topn(max, query, spec):
+		 * 		"""
+		 *    Limit results to the best top N (by their ranking or sort order)
+		 *    
+		 *    @param max
+		 *    	- integer, how many results should be considered
+		 *    @param query
+		 *    	- query object
+		 *    @param spec
+		 *    	- str, can be either 'relevance' or
+		 *        sort specification in the SOLR format
+		 *    
+		 *    Example: 
+		 *    
+		 *    	```topn(200, title:hubble)``` returns only the
+		 *         first 200 papers based on the relevancy score
+		 *         
+		 *      ```topn(200, citations(title:hubble), citation_count desc)``` 
+		 *         returns only the
+		 *         first 200 papers, but because the results are 
+		 *         sorted by number of citations, you will get the first
+		 *         200 most cited papers
+		 *         
+		 *      
+		 *    Technical note:
+		 *    
+		 *    We do not impose limit of hits that you can return with 
+		 *    this operator. But you must be aware that the query is
+		 *    going to be slower than normal queries.
+		 *    
+		 *    @since 40.2.2.0
+		 *    """
+		 *    return "topn(%s, %s, '%s')" % (int(max), query, spec or 'score')
+		 *    
+		 */
 		parsers.put("topn", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
 				int topN = -1;
@@ -351,7 +510,39 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 
-		// citations(P) - set of papers that have P in their reference list
+		/* @api.doc
+		 * 
+		 * def citations(query):
+		 * 		"""
+		 *    Finds set of papers that have **P** in their reference list
+		 *    
+		 *    'P' is the set of papers that will be selected by the query
+		 *    
+		 *    Example: 
+		 *    
+		 *    	```citations(title:hubble)``` returns papers (potentionally
+		 *         hundreds of thousands!) that are citing papers P
+		 *         
+		 *         
+		 *      ```citations(citations(author:huchra))``` returns papers 
+		 *         (potentionally millions!) that are citing papers that
+		 *         are citing papers written by 'huchra'
+		 *         
+		 *      
+		 *    Technical note:
+		 *    
+		 *    We have optimized this query so that it works well with 
+		 *    millions of hits. But don't expect miracles. 0.5M hits
+		 *    takes few hundred milliseconds; 2M hits will take seconds
+		 *    (but less than 10s, since that is the speed the old desktop
+		 *    did it)
+		 *    
+		 *    
+		 *    @since 40.1.0.0
+		 *    """
+		 *    return "citations(%s)" % (query,)
+		 *    
+		 */
 		parsers.put("citations", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
@@ -362,7 +553,35 @@ AqpFunctionQueryBuilderProvider {
 		});
 
 
-		// references(P) - set of papers that are in the reference list of P
+		/* @api.doc
+		 * 
+		 * def references(query):
+		 * 		"""
+		 *    Finds set of papers that **are** in the references list of **P** 
+		 *    
+		 *    'P' is the set of papers that will be selected by the query
+		 *    
+		 *    Example: 
+		 *    
+		 *    	```references(title:hubble)``` returns papers (potentionally
+		 *         few hundred) that are **cited by** papers that have 'hubble'
+		 *         in their title
+		 *         
+		 *         
+		 *      ```references(author:huchra)``` returns papers 
+		 *         that your favorite author cites
+		 *         
+		 *      
+		 *    Technical note:
+		 *    
+		 *    The same caveats as citations()
+		 *    
+		 *    
+		 *    @since 40.1.0.0
+		 *    """
+		 *    return "references(%s)" % (query,)
+		 *    
+		 */
 		parsers.put("references", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
@@ -614,7 +833,10 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 	};
-
+	
+	/**
+	 * comment ZZZZZ
+	 */
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
 	throws QueryNodeException {
 
