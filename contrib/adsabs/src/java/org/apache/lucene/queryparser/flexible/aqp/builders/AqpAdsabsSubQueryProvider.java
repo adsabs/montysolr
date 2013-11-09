@@ -591,7 +591,19 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 
-		// test for comparison with the citation query
+		/* @api.doc
+		 * 
+		 * def joincitations(query):
+		 * 		"""
+		 *    Equivalent of citations() but implemented using lucene block-join 
+		 *    
+		 *    
+		 *    @experimental
+		 *    @access devel
+		 *    @since 40.1.0.0
+		 *    """
+		 *    return "joincitations(%s)" % (query,) 
+		 */
 		parsers.put("joincitations", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
@@ -606,6 +618,20 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 
+		/* @api.doc
+		 * 
+		 * def joinreferences(query):
+		 * 		"""
+		 *    Equivalent of references() but implemented using lucene block-join 
+		 *    
+		 *    
+		 *    @experimental
+		 *    @access devel
+		 *    @since 40.1.0.0
+		 *    """
+		 *    return "joinreferences(%s)" % (query,)
+		 *     
+		 */
 		parsers.put("joinreferences", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
@@ -620,8 +646,24 @@ AqpFunctionQueryBuilderProvider {
 		});
 
 
-		// useful() = what experts are citing; ADS Classic implementation
-		// is: references(topn(200, classic_relevance(Q)))
+		/* @api.doc
+		 * 
+		 * def useful(query):
+		 * 		"""
+		 *    What experts are citing; this mimics the ADS Classic implementation
+		 *    ```references(topn(200, classic_relevance(Q)))```
+		 *    
+		 *    In other words, this will first find papers using the query, 
+		 *    it will re-score them using the ADS classic ranking formula,
+		 *    then selects 200 top papers. And then get **references from** these
+		 *    200 papers.
+		 *    
+		 *    @experimental
+		 *    @since 40.2.0.0
+		 *    """
+		 *    return "useful(%s)" % (query,)
+		 *     
+		 */
 		parsers.put("useful", new AqpSubqueryParserFull() { // this function values can be analyzed
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
@@ -636,7 +678,27 @@ AqpFunctionQueryBuilderProvider {
 			};
 		});
 
-		// original implementation of useful() -- using special collector
+		/* @api.doc
+		 * 
+		 * def useful2(query):
+		 * 		"""
+		 *    What experts are citing; original implementation of useful() 
+		 *    -- using special collector
+		 *    
+		 *    Technical details:
+		 *    
+		 *    This function will add the cite_read_boost factor (from the
+		 *    1st order set) to the score (of the 2nd order result set).
+		 *    If no boost factor is available, doc will be penalized by 
+		 *    having its score lowered by 20%
+		 *    
+		 *    @access devel
+		 *    @experimental
+		 *    @since 40.1.2.0
+		 *    """
+		 *    return "useful2(%s)" % (query,)
+		 *     
+		 */
 		parsers.put("useful2", new AqpSubqueryParserFull() { // this function values can be analyzed
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
@@ -648,8 +710,24 @@ AqpFunctionQueryBuilderProvider {
 		});
 
 
-		// reviews() = what is cited by experts; ADS Classic implementation
-		// is: citations(topn(200, classic_relevance(Q)))
+		/* @api.doc
+		 * 
+		 * def reviews(query):
+		 * 		"""
+		 *    What is cited by experts; this mimics the ADS Classic implementation
+		 *    is: ```citations(topn(200, classic_relevance(Q)))```
+		 *    
+		 *    In other words, this will first find papers using the query, 
+		 *    it will re-score them using the ADS classic ranking formula,
+		 *    then selects 200 top papers. And then get **citations for** these
+		 *    200 papers.
+		 *    
+		 *    @experimental
+		 *    @since 40.2.0.0
+		 *    """
+		 *    return "reviews(%s)" % (query,)
+		 *     
+		 */
 		parsers.put("reviews", new AqpSubqueryParserFull() { // this function values can be analyzed
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
@@ -664,6 +742,16 @@ AqpFunctionQueryBuilderProvider {
 				return outerQuery;
 			};
 		});
+		
+		
+		/* @api.doc
+		 * 
+		 * def instructive(query):
+		 * 		"""
+		 *    The synonym of @see reviews
+		 *    """
+		 *    return reviews(query)
+		 */
 		parsers.put("instructive", parsers.get("reviews"));
 
 		// original impl of reviews() = find papers that cite the most cited papers
