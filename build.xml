@@ -453,7 +453,6 @@ ant=${ant}
             <include name="**/invenio/build.xml"/>
             <include name="**/newseman/build.xml"/>
             <include name="**/adsabs/build.xml"/>
-          	<include name="**/examples/build.xml"/>
           </fileset>
         </apply>
     </target>
