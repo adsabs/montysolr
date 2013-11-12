@@ -362,7 +362,7 @@ AqpFunctionQueryBuilderProvider {
 
 		/* @api.doc
 		 * 
-		 * def classic_relevance(query):
+		 * def classic_relevance(query, ratio=0.5):
 		 * 		"""
 		 *    Toy-implementation of the ADS Classic relevance score
 		 *    algorithm. You can wrap any query and obtain the 
@@ -402,17 +402,27 @@ AqpFunctionQueryBuilderProvider {
 		 *     
 		 *    @experimental
 		 *    @synonym cr()
-		 *    @since 40.2.2.0 
+		 *    @since 40.2.2.0
+		 *    @since 40.3.0.1 - added parameter to configure ratio
 		 * 		
 		 * 		"""
-		 *    return "classic_relevance(%s)" % (query,)
+		 *    return "classic_relevance(%s, %0.2f)" % (query,ratio)
 		 */
 		parsers.put("classic_relevance", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {
 
 				Query innerQuery = fp.parseNestedQuery();
+				float ratio = 0.5f;
+				if (fp.hasMoreArguments()) {
+					ratio = fp.parseFloat();
+				}
+				
+				if (ratio < 0 || ratio > 1.0f) {
+					throw new ParseException("The ratio must be in the range 0.0-1.0");
+				}
+				
 				return new SecondOrderQuery(innerQuery, null, 
-						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost"));
+						new SecondOrderCollectorAdsClassicScoringFormula("cite_read_boost", ratio));
 			}
 		});
 		parsers.put("cr", parsers.get("classic_relevance"));
@@ -420,7 +430,7 @@ AqpFunctionQueryBuilderProvider {
 
 		/* @api.doc
 		 * 
-		 * def topn(max, query, spec):
+		 * def topn(max, query, spec=None):
 		 * 		"""
 		 *    Limit results to the best top N (by their ranking or sort order)
 		 *    
