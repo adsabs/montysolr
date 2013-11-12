@@ -34,10 +34,19 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	private AtomicReaderContext context;
 	private float[] boostCache;
 	private List<CollectorDoc> hitSet = new ArrayList<CollectorDoc>();
+	private float lucenePart;
+	private float adsPart;
 
+	public SecondOrderCollectorAdsClassicScoringFormula(String boostField, float ratio) {
+		this.boostField = boostField;
+		this.lucenePart = ratio;
+		this.adsPart = 1.0f - ratio;
+	}
+	
 	public SecondOrderCollectorAdsClassicScoringFormula(String boostField) {
 		this.boostField = boostField;
-		
+		this.lucenePart = 0.5f;
+		this.adsPart = 0.5f;
 	}
 	
 	@Override
@@ -92,7 +101,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 		try {
 			if (!organized) {
 				for (CollectorDoc hit: hits) {
-					hit.score = (0.5f * hit.score / highestLuceneScore) + (0.5f * getClassicBoostFactor(hit.doc));
+					hit.score = (this.lucenePart * hit.score / highestLuceneScore) + (this.adsPart * getClassicBoostFactor(hit.doc));
 				}
 			}
 		}
@@ -110,7 +119,8 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 
 	@Override
 	public String toString() {
-		return "adsrel[" + boostField + ", outOfOrder=" + this.acceptsDocsOutOfOrder() + "]";
+		return "adsrel[" + boostField + ", outOfOrder=" + this.acceptsDocsOutOfOrder() 
+		+ ", lucene=" + this.lucenePart + ", adsPart=" + this.adsPart + "]";
 	}
 
 }

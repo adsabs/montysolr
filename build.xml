@@ -445,16 +445,25 @@ ant=${ant}
     </target>
 	
 	<target name="test-contrib" >
-        <apply executable="${ant}" parallel="false" failonerror="true">
+        <apply executable="${ant}" parallel="false" failonerror="true" >
           <arg line="test"/>
           <arg value="-f"/>
           <fileset dir="${common.dir}/contrib">
             <include name="**/antlrqueryparser/build.xml"/>
             <include name="**/invenio/build.xml"/>
             <include name="**/newseman/build.xml"/>
-            <include name="**/adsabs/build.xml"/>
           </fileset>
         </apply>
+	  
+  	  <apply executable="${ant}" parallel="false" failonerror="true" >
+        <arg line="test"/>
+        <arg value="-f"/>
+  	    <arg line="-Dtests.file.encoding=UTF-8" />
+        <fileset dir="${common.dir}/contrib">
+          <include name="**/adsabs/build.xml"/>
+        </fileset>
+      </apply>
+	      
     </target>
 
 	

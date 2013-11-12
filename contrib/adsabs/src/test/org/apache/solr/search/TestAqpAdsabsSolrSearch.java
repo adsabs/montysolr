@@ -526,11 +526,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     
     // useful() - ads classic implementation 
     assertQueryEquals(req("defType", "aqp", "q", "useful(author:muller)"), 
-        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=references[cache:reference])", 
+        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=references[cache:reference])", 
         SecondOrderQuery.class);
     
     assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=references[cache:reference])", 
+        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=references[cache:reference])", 
         BooleanQuery.class);
     
     
@@ -544,11 +544,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     
     // reviews() - ADS classic impl
     assertQueryEquals(req("defType", "aqp", "q", "reviews(author:muller)"), 
-        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=citations[cache:reference<bibcode,alternate_bibcode>])", 
+        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=citations[cache:reference<bibcode,alternate_bibcode>])", 
         SecondOrderQuery.class);
     
     assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=citations[cache:reference<bibcode,alternate_bibcode>])", 
+        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=citations[cache:reference<bibcode,alternate_bibcode>])", 
         BooleanQuery.class);
     
     // reviews2() - original impl 
@@ -557,6 +557,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews2(author:muller OR title:body)"), 
         "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=citingMostCited[using:cite_read_boost<reference:bibcode,alternate_bibcode>])", BooleanQuery.class);
+    
+    // classic_relevance() - cr()
+    assertQueryEquals(req("defType", "aqp", "q", "classic_relevance(title:foo)"), 
+        "SecondOrderQuery(title:foo, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5])", SecondOrderQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "cr(title:foo)"), 
+        "SecondOrderQuery(title:foo, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5])", SecondOrderQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "cr(title:foo, 0.4)"), 
+        "SecondOrderQuery(title:foo, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.4, adsPart=0.6])", SecondOrderQuery.class);
     
 	}
 	
