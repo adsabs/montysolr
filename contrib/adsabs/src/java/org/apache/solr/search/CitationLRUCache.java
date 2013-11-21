@@ -17,19 +17,42 @@
 
 package org.apache.solr.search;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.DocTermOrds;
+import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.SlowCompositeReaderWrapper;
+import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.search.DocIdSetIterator;
+import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.util.Bits;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.IntField;
+import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.StrField;
+import org.apache.solr.schema.TextField;
+import org.apache.solr.schema.TrieIntField;
 
 
 /**
@@ -44,6 +67,8 @@ import org.apache.solr.common.util.SimpleOrderedMap;
  * capable of holding only partial (the most accessed) citation 
  * network in memory. However, the initial mapping (value<->lucene id)
  * will always be constructed in its entirety.
+ * 
+ * TODO: I should use DocValues after we move to >= vSolr42
  * 
  */
 public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,V> {
@@ -70,10 +95,31 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   private long warmupTime = 0;
 
   private Map<K,V> map;
-  private String description="LRU Cache";
+  private String description="Citation LRU Cache";
+
+	private String[] identifierFields = null;
+	private String[] identifierFieldsMultivalued = null;
+
+	// If we detect that you are mixing int and text fields
+	// we'll treat all values (mappings) as text values
+	private boolean treatIdentifiersAsText = false;
+
+	private List<String> textClasses;
+	private List<String> intClasses;
+	private List<String> textClassesMV;
+	private List<String> intClassesMV;
 
   public Object init(Map args, Object persistence, CacheRegenerator regenerator) {
     super.init(args, regenerator);
+    
+  	identifierFields  = ((String)args.get("identifierFields")).split(",");
+    assert (identifierFields != null && identifierFields.length > 0);
+    
+    textClasses = new ArrayList<String>();
+    intClasses = new ArrayList<String>();
+    textClassesMV = new ArrayList<String>();
+    intClassesMV = new ArrayList<String>();
+    
     String str = (String)args.get("size");
     final int limit = str==null ? 1024 : Integer.parseInt(str);
     str = (String)args.get("initialSize");
@@ -161,6 +207,42 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 
   public void warm(SolrIndexSearcher searcher, SolrCache<K,V> old) {
     if (regenerator==null) return;
+    
+    //TODO: call createIdentifiersToLuceneIdsMapping
+    
+    int unknownClasses = 0;
+    
+    IndexSchema schema = searcher.getCore().getSchema();
+  	for (String f: identifierFields) {
+  		SchemaField fieldInfo = schema.getField(f);
+  		FieldType type = fieldInfo.getType();
+  		Class<? extends FieldType> c = type.getClass();
+  		if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
+  			if (type.isMultiValued()) {
+  				textClassesMV.add(f);
+  			}
+  			else {
+  				textClasses.add(f);
+  			}
+  		}
+  		else if (c.isAssignableFrom(TrieIntField.class) || c.isAssignableFrom(IntField.class)) {
+  			if (type.isMultiValued()) {
+  				intClassesMV.add(f);
+  			}
+  			else {
+  				intClasses.add(f);
+  			}
+  		}
+  		else {
+  			unknownClasses += 1;
+  		}
+  	}
+  	
+  	assert unknownClasses == 0;
+  	if (textClasses.size() > 0 || textClassesMV.size() > 0) {
+  		treatIdentifiersAsText  = true;
+  	}
+    
     long warmingStartTime = System.currentTimeMillis();
     CitationLRUCache<K,V> other = (CitationLRUCache<K,V>)old;
 
@@ -240,11 +322,11 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
    * or if one of the values point at a deleted document
    */
   private boolean isModified(Bits liveDocs, Object cacheKey, Object cacheValue) {
-    if (liveDocs.get((Integer) cacheKey)) {
+    if (!liveDocs.get((Integer) cacheKey)) { // doc is deleted
       return true;
     }
     for (Integer luceneId: (Integer[]) cacheValue) {
-      if (!liveDocs.get(luceneId)) {
+      if (!liveDocs.get(luceneId) || luceneId == -1) { // some of the linked docs was deleted or unrecognized
         return true;
       }
     }
@@ -253,7 +335,116 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 
   public void close() {
   }
+  
+  
+  private AtomicReader getAtomicReader(IndexReader reader) throws IOException {
+			AtomicReader atomReader = SlowCompositeReaderWrapper.wrap(reader);
+			return atomReader;
+	}
+  
+  
+  @SuppressWarnings("unchecked")
+  private void createIdentifiersToLuceneIdsMapping(AtomicReader reader) throws IOException {
+		
+  	
+  	// load multiple values->idlucene mapping
+  	for (String idField: intClassesMV) {
+			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
+			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
+			if (termsEnum == null) {
+				continue;
+			}
+			DocsEnum docs = null;
+			Bits liveDocs = reader.getLiveDocs();
+			for (;;) {
+				BytesRef term = termsEnum.next();
+				if (term == null)
+					break;
+				
+				Integer t = FieldCache.DEFAULT_INT_PARSER.parseInt(term);
+				
+				docs = termsEnum.docs(liveDocs, docs, 0); // we don't need docFreq
+				int i = 0;
+				for (;;) {
+					Integer d = docs.nextDoc();
+					if (d == DocIdSetIterator.NO_MORE_DOCS) {
+						break;
+					}
+					if (treatIdentifiersAsText) {
+						put((K)(Integer.toString(t)), (V)d);
+					}
+					else {
+						put((K)t, (V)d);
+					}
+					i += 1;
+					if (i > 1) {
+						log.warn("The term {} is used by more than one document; your cache has problems", t);
+					}
+				}
+			}
+		}
+  	
+		for (String idField: textClassesMV) {
+			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
+			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
+			if (termsEnum == null) {
+				continue;
+			}
+			DocsEnum docs = null;
+			Bits liveDocs = reader.getLiveDocs();
+			for (;;) {
+				BytesRef term = termsEnum.next();
+				if (term == null)
+					break;
+				String t = term.utf8ToString();
+				
+				docs = termsEnum.docs(liveDocs, docs, 0); // we don't need docFreq
+				int i = 0;
+				for (;;) {
+					Integer d = docs.nextDoc();
+					if (d == DocIdSetIterator.NO_MORE_DOCS) {
+						break;
+					}
+					put((K)t, (V)d);
+					i += 1;
+					if (i > 1) {
+						log.warn("The term {} is used by more than one document; your cache has problems", t);
+					}
+				}
+			}
+		}
+		
+  	// load single valued ids into the mapping (should we check if they override
+		// already defined values?)
+		for (String idField: textClasses) {
+			DocTerms idMapping = FieldCache.DEFAULT.getTerms(reader, idField);
+			Integer i = 0;
+			BytesRef ret = new BytesRef();
+			while(i < idMapping.size()) {
+			  ret = idMapping.getTerm(i, ret);
+			  if (ret.length > 0) {
+			    map.put((K)ret.utf8ToString(), (V)i);
+			  }
+				i++;
+			}
+		}
+		for (String idField: intClasses) {
+			int[] idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
+			Integer i = 0;
+			while(i < idMapping.length) {
+				if (treatIdentifiersAsText) {
+					map.put((K)(Integer.toString(idMapping[i])), (V)i);
+				}
+				else {
+					map.put((K)((Integer)idMapping[i]), (V)i);
+				}
+				i++;
+			}
+		}
 
+		if (map.containsKey(null))	map.remove(null);
+		
+	}
 
   //////////////////////// SolrInfoMBeans methods //////////////////////
 

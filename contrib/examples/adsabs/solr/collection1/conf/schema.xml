@@ -872,7 +872,7 @@
 
 		<field name="aff" type="affiliation_text" indexed="true" stored="true"
 			multiValued="true" />
-		<field name="email" type="first_string" indexed="true" stored="true"
+		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"
 			multiValued="true" />
 
 		<field name="keyword" type="normalized_text_ascii" indexed="true"

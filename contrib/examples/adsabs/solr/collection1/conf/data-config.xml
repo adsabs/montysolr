@@ -141,7 +141,7 @@
             
         <field column="keyword695" name="keyword"        
             xpath="/collection/record/datafield[@tag='695']/subfield[@code='a']" />
-        <field column="keyword_norm653" name="keyword"        
+        <field column="keyword_norm653" name="keyword_norm"        
             xpath="/collection/record/datafield[@tag='695']/subfield[@code='b']" />  <!--  normalized version -->
             
         <field column="collaboration"        
