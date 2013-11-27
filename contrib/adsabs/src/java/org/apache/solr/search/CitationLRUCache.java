@@ -19,22 +19,19 @@ package org.apache.solr.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.DocTermOrds;
 import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexReaderContext;
 import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.DocIdSetIterator;
@@ -44,6 +41,7 @@ import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.schema.FieldType;
@@ -94,7 +92,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 
   private long warmupTime = 0;
 
-  private Map<K,V> map;
+  private LinkedHashMap<K,V> map;
   private String description="Citation LRU Cache";
 
 	private String[] identifierFields = null;
@@ -104,10 +102,10 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	// we'll treat all values (mappings) as text values
 	private boolean treatIdentifiersAsText = false;
 
-	private List<String> textClasses;
-	private List<String> intClasses;
-	private List<String> textClassesMV;
-	private List<String> intClassesMV;
+	private boolean incremental = false;
+
+	private String[] referenceFields;
+	private String[] citationFields;
 
   public Object init(Map args, Object persistence, CacheRegenerator regenerator) {
     super.init(args, regenerator);
@@ -115,10 +113,20 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	identifierFields  = ((String)args.get("identifierFields")).split(",");
     assert (identifierFields != null && identifierFields.length > 0);
     
-    textClasses = new ArrayList<String>();
-    intClasses = new ArrayList<String>();
-    textClassesMV = new ArrayList<String>();
-    intClassesMV = new ArrayList<String>();
+    
+    
+    incremental  = "true".equals(((String)args.get("incremental")));
+    
+    citationFields = new String[0];
+    referenceFields = new String[0];
+    
+    if (args.containsKey("referenceFields")) {
+    	referenceFields = ((String)args.get("referenceFields")).split(",");
+    }
+    if (args.containsKey("citationFields")) {
+    	citationFields = ((String)args.get("citationFields")).split(",");
+    }
+    
     
     String str = (String)args.get("size");
     final int limit = str==null ? 1024 : Integer.parseInt(str);
@@ -126,20 +134,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     final int initialSize = Math.min(str==null ? 1024 : Integer.parseInt(str), limit);
     description = generateDescription(limit, initialSize);
 
-    map = new LinkedHashMap<K,V>(initialSize, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry eldest) {
-          if (size() > limit) {
-            // increment evictions regardless of state.
-            // this doesn't need to be synchronized because it will
-            // only be called in the context of a higher level synchronized block.
-            evictions++;
-            stats.evictions.incrementAndGet();
-            return true;
-          }
-          return false;
-        }
-      };
+    map = new RelationshipLinkedHashMap<K,V>(initialSize, 0.75f, true, limit);
 
     if (persistence==null) {
       // must be the first time a cache of this type is being created
@@ -171,6 +166,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
 
   public V put(K key, V value) {
+  	System.out.println("put=" + key + ":" + value);
     synchronized (map) {
       if (getState() == State.LIVE) {
         stats.inserts.incrementAndGet();
@@ -198,6 +194,90 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
       return val;
     }
   }
+  
+  public int[] getCitations(K key) {
+  	synchronized (map) {
+  		V val = map.get(key);
+  		if (val==null)
+  			return null;
+  		
+      @SuppressWarnings("unchecked")
+      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
+      int[] values = relMap.getCitations((Integer)val);
+      
+      if (getState() == State.LIVE) {
+        // only increment lookups and hits if we are live.
+        lookups++;
+        stats.lookups.incrementAndGet();
+        if (values!=null) {
+          hits++;
+          stats.hits.incrementAndGet();
+        }
+      }
+      return values;
+    }
+  }
+  
+  public int[] getCitations(int docid) {
+    synchronized (map) {
+      @SuppressWarnings("unchecked")
+      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
+      int[] val = relMap.getCitations(docid);
+      
+      if (getState() == State.LIVE) {
+        // only increment lookups and hits if we are live.
+        lookups++;
+        stats.lookups.incrementAndGet();
+        if (val!=null) {
+          hits++;
+          stats.hits.incrementAndGet();
+        }
+      }
+      return val;
+    }
+  }
+  
+  public int[] getReferences(K key) {
+  	synchronized (map) {
+  		V val = map.get(key);
+  		if (val==null)
+  			return null;
+  		
+      @SuppressWarnings("unchecked")
+      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
+      int[] values = relMap.getReferences((Integer)val);
+      
+      if (getState() == State.LIVE) {
+        // only increment lookups and hits if we are live.
+        lookups++;
+        stats.lookups.incrementAndGet();
+        if (values!=null) {
+          hits++;
+          stats.hits.incrementAndGet();
+        }
+      }
+      return values;
+    }
+  }
+  
+  public int[] getReferences(int docid) {
+    synchronized (map) {
+      @SuppressWarnings("unchecked")
+      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
+      int[] val = relMap.getReferences(docid);
+      
+      if (getState() == State.LIVE) {
+        // only increment lookups and hits if we are live.
+        lookups++;
+        stats.lookups.incrementAndGet();
+        if (val!=null) {
+          hits++;
+          stats.hits.incrementAndGet();
+        }
+      }
+      return val;
+    }
+  }
 
   public void clear() {
     synchronized(map) {
@@ -206,58 +286,153 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
 
   public void warm(SolrIndexSearcher searcher, SolrCache<K,V> old) {
-    if (regenerator==null) return;
-    
-    //TODO: call createIdentifiersToLuceneIdsMapping
-    
-    int unknownClasses = 0;
-    
-    IndexSchema schema = searcher.getCore().getSchema();
-  	for (String f: identifierFields) {
-  		SchemaField fieldInfo = schema.getField(f);
-  		FieldType type = fieldInfo.getType();
-  		Class<? extends FieldType> c = type.getClass();
-  		if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
-  			if (type.isMultiValued()) {
-  				textClassesMV.add(f);
-  			}
-  			else {
-  				textClasses.add(f);
-  			}
-  		}
-  		else if (c.isAssignableFrom(TrieIntField.class) || c.isAssignableFrom(IntField.class)) {
-  			if (type.isMultiValued()) {
-  				intClassesMV.add(f);
-  			}
-  			else {
-  				intClasses.add(f);
-  			}
-  		}
-  		else {
-  			unknownClasses += 1;
-  		}
+  	try {
+	  	if (this.incremental ) {
+	  		warmIncrementally(searcher, old);
+	  	}
+	  	else {
+	      warmRebuildEverything(searcher, old);
+	  	}
+  	} 
+  	catch (IOException e) {
+    	throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);
+    }
+  }
+  
+  private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
+  	Map<String, List<String>> fields = getFields(searcher, this.identifierFields);
+  	if (fields.get("textFields").size() > 0 || fields.get("textFieldsMV").size() > 0) {
+  		synchronized (map) {
+  			treatIdentifiersAsText  = true;
+      }
+  	}
+
+  	// builds the mapping from document ID's to lucene docids
+  	unInvertedTheDamnThing(searcher.getAtomicReader(), fields, new KVSetter() {
+	  		@Override
+	  		@SuppressWarnings({ "unused", "unchecked" })
+	      public void set (int docbase, int docid, Object value) {
+	    		put((K) value, (V) (Integer) (docbase+docid));
+	    	}
+	  	}
+  	);
+  	
+  	if (this.referenceFields.length > 0 || this.citationFields.length > 0) {
+	  	final RelationshipLinkedHashMap relMap = (RelationshipLinkedHashMap) map;
+	  	relMap.initializeCitationCache(searcher.maxDoc());
+	  	
+	  	
+	  	unInvertedTheDamnThing(searcher.getAtomicReader(), getFields(searcher, this.referenceFields), 
+	  			new KVSetter() {
+			  		@Override
+			  		@SuppressWarnings({ "unused", "unchecked" })
+			      public void set (int docbase, int docid, Object value) {
+			  			synchronized (relMap) {
+			  				relMap.addReference(docbase+docid, value);
+	            }
+			    	}
+			  	}
+	  	);
+	  	
+	  	unInvertedTheDamnThing(searcher.getAtomicReader(), getFields(searcher, this.citationFields), 
+	  			new KVSetter() {
+			  		@Override
+			  		@SuppressWarnings({ "unused", "unchecked" })
+			      public void set (int docbase, int docid, Object value) {
+			  			synchronized (relMap) {
+			  				relMap.addCitation(docbase+docid, value);
+	            }
+			    	}
+			  	}
+	  	);
+	  	
+	  	if (this.citationFields.length == 0 && this.referenceFields.length > 0) {
+	  		relMap.inferCitationsFromReferences();
+	  	}
+	  	else if (this.citationFields.length > 0  && this.referenceFields.length == 0) {
+	  		relMap.inferReferencesFromCitations();
+	  	}
   	}
   	
-  	assert unknownClasses == 0;
-  	if (textClasses.size() > 0 || textClassesMV.size() > 0) {
-  		treatIdentifiersAsText  = true;
+  	
+  }
+  
+  private void warmIncrementally(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
+    if (regenerator==null) return;
+    
+    System.out.println("regenerator: " + regenerator);
+    
+    Map<String, List<String>> fields = getFields(searcher, this.identifierFields);
+    if (fields.get("textClasses").size() > 0 || fields.get("textClassesMV").size() > 0) {
+  		synchronized (map) {
+  			treatIdentifiersAsText  = true;
+      }
   	}
+
     
     long warmingStartTime = System.currentTimeMillis();
     CitationLRUCache<K,V> other = (CitationLRUCache<K,V>)old;
 
     // collect ids of documents that need to be reloaded/regenerated during this
     // warmup run
+    System.out.println("searcher: " + searcher.toString());
+    System.out.println("maxDoc: " + searcher.getIndexReader().maxDoc());
     FixedBitSet toRefresh = new FixedBitSet(searcher.getIndexReader().maxDoc());
     
+    System.out.println("version=" + searcher.getIndexReader().getVersion());
+    try {
+	    System.out.println("commit=" + searcher.getIndexReader().getIndexCommit());
+    } catch (IOException e2) {
+	    // TODO Auto-generated catch block
+	    e2.printStackTrace();
+    }
+    
+    for (IndexReaderContext c : searcher.getTopReaderContext().children()) {
+    	System.out.println("context=" + c.reader().getCombinedCoreAndDeletesKey());
+    }
+    
+    for (IndexReaderContext l : searcher.getIndexReader().leaves()) {
+    	System.out.println(l);
+    }
     
     Bits liveDocs = searcher.getAtomicReader().getLiveDocs();
-    if (liveDocs == null && other.map.size() > 0) { // everything is new, this could be fresh index or merged/optimized index too
-      other.map.clear(); // force regeneration
+    System.out.println(liveDocs == null ? "liveDocs=" + null : "liveDocs=" + liveDocs.length());
+    System.out.println("numDeletes=" + searcher.getAtomicReader().numDeletedDocs());
+    
+    
+    
+    if (liveDocs == null) { // everything is new, this could be fresh index or merged/optimized index too
+    	
+    	//searcher.getAtomicReader().getContext().children().size()
+    	
+      //other.map.clear(); // force regeneration
       toRefresh.set(0, toRefresh.length());
+      
+      // Build the mapping from indexed values into lucene ids
+      // this must always be available, so we build it no matter what...
+      // XXX: make it update only the necessary IDs (not the whole index)
+      unInvertedTheDamnThing(searcher.getAtomicReader(), fields, new KVSetter() {
+	  		@Override
+	  		@SuppressWarnings({ "unused", "unchecked" })
+	      public void set (int docbase, int docid, Object value) {
+	    		put((K) value, (V) (Integer) (docbase+docid));
+	    	}
+	  	}
+  	);
+      
     }
     else if (liveDocs != null) {
-      for (int i = 0; i < liveDocs.length(); i++) {
+    	
+    	Integer luceneId;
+      for (V v: other.map.values()) {
+      	luceneId = ((Integer) v);
+      	if (luceneId <= liveDocs.length() && !liveDocs.get(luceneId)) { // doc was either deleted or updated
+      		System.out.println("Found deleted: " + luceneId);
+      		// retrieve all citations/references for this luceneId and mark these docs to be refreshed
+      	}
+      }
+      
+      for (int i = 0; i < toRefresh.length(); i++) {
         if (liveDocs.get(i)) {
           toRefresh.set(i);
         }
@@ -265,10 +440,14 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     }
     
     
+    
+
+    
+    
     // warm entries
     if (isAutowarmingOn()) {
       Object[] keys,vals = null;
-
+      
       // Don't do the autowarming in the synchronized block, just pull out the keys and values.
       synchronized (other.map) {
         
@@ -316,20 +495,89 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     warmupTime = System.currentTimeMillis() - warmingStartTime;
   }
 
-  /*
+  
+
+	private Map<String, List<String>> getFields(SolrIndexSearcher searcher, String[] listOfFields) {
+  	
+  	HashMap<String, List<String>> out = new HashMap<String, List<String>>();
+  	out.put("textFields", new ArrayList<String>());
+  	out.put("textFieldsMV", new ArrayList<String>());
+  	out.put("intFields", new ArrayList<String>());
+  	out.put("intFieldsMV", new ArrayList<String>());
+  	
+  	
+    int unknownClasses = 0;
+    //boolean foundRequired = false;
+    
+    IndexSchema schema = searcher.getCore().getSchema();
+    
+    if (schema.getUniqueKeyField() == null) {
+    	throw new SolrException(ErrorCode.FORBIDDEN, "Sorry, your schema is missing unique key and thus you probably have many duplicates. I won't continue");
+    }
+    
+    //String unique = schema.getUniqueKeyField().getName();
+    
+  	for (String f: listOfFields) {
+  		SchemaField fieldInfo = schema.getField(f);
+  		FieldType type = fieldInfo.getType();
+  		
+  		//if (fieldInfo.isRequired()) {
+  		//	foundRequired = true;
+  		//}
+  		
+  		assert fieldInfo.stored() == true;
+  		
+  		Class<? extends FieldType> c = type.getClass();
+  		if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
+  			if (fieldInfo.multiValued()) {
+  				out.get("textFieldsMV").add(f);
+  			}
+  			else {
+  				out.get("textFields").add(f);
+  			}
+  		}
+  		else if (c.isAssignableFrom(TrieIntField.class) || c.isAssignableFrom(IntField.class)) {
+  			if (type.isMultiValued()) {
+  				out.get("intFieldsMV").add(f);
+  			}
+  			else {
+  				out.get("textFields").add(f);
+  			}
+  		}
+  		else {
+  			unknownClasses += 1;
+  		}
+  	}
+  	
+  	if (unknownClasses > 0 ) {
+  		throw new SolrException(ErrorCode.FORBIDDEN, "Cache can be built only from text/numeric fields");
+  	}
+  	
+  	//if (!foundRequired) {
+  	//	throw new SolrException(ErrorCode.FORBIDDEN, "At least one of the identifier fields must be type 'required'.");
+  	//}
+  	
+  	return out;
+	  
+  }
+
+	/*
    * Checks whether the cache needs to be rebuilt for this 
    * document, eg. if the key points to a deleted document
    * or if one of the values point at a deleted document
    */
   private boolean isModified(Bits liveDocs, Object cacheKey, Object cacheValue) {
-    if (!liveDocs.get((Integer) cacheKey)) { // doc is deleted
+  	/*
+  	if (!liveDocs.get((Integer) get((K)cacheKey))) { // doc is deleted
       return true;
     }
+    
     for (Integer luceneId: (Integer[]) cacheValue) {
       if (!liveDocs.get(luceneId) || luceneId == -1) { // some of the linked docs was deleted or unrecognized
         return true;
       }
     }
+    */
     return false;
   }
 
@@ -343,12 +591,27 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	}
   
   
+  private class KVSetter {
+  	@SuppressWarnings({ "unused", "unchecked" })
+    public void set (int docbase, int docid, Object value) {
+  		throw new NotImplementedException();
+  	}
+  }
+  /*
+   * Given the set of fields, we'll look inside them and retrieve (into memory)
+   * all values
+   */
   @SuppressWarnings("unchecked")
-  private void createIdentifiersToLuceneIdsMapping(AtomicReader reader) throws IOException {
-		
+  private void unInvertedTheDamnThing(AtomicReader reader, Map<String, 
+  		List<String>> fields, KVSetter setter) throws IOException {
+  	
+  	int docBase = reader.getContext().docBase;
+  	System.out.println("***REBUILDING***");
+  	System.out.println("Generating mapping from: " + reader.toString());
+  	System.out.println("docBase=" + docBase);
   	
   	// load multiple values->idlucene mapping
-  	for (String idField: intClassesMV) {
+  	for (String idField: fields.get("intFieldsMV")) {
 			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
 			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
 			if (termsEnum == null) {
@@ -366,25 +629,22 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 				docs = termsEnum.docs(liveDocs, docs, 0); // we don't need docFreq
 				int i = 0;
 				for (;;) {
-					Integer d = docs.nextDoc();
+					int d = docs.nextDoc();
 					if (d == DocIdSetIterator.NO_MORE_DOCS) {
 						break;
 					}
-					if (treatIdentifiersAsText) {
-						put((K)(Integer.toString(t)), (V)d);
-					}
-					else {
-						put((K)t, (V)d);
-					}
+					
+					setter.set(docBase, d, treatIdentifiersAsText ? Integer.toString(t) : t);
+					
 					i += 1;
-					if (i > 1) {
-						log.warn("The term {} is used by more than one document; your cache has problems", t);
-					}
+					//if (i > 1) {
+					//	log.warn("The term {} is used by more than one document {} ; your cache has problems", t, d+docBase);
+					//}
 				}
 			}
 		}
   	
-		for (String idField: textClassesMV) {
+		for (String idField: fields.get("textFieldsMV")) {
 			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
 			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
 			if (termsEnum == null) {
@@ -401,49 +661,43 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 				docs = termsEnum.docs(liveDocs, docs, 0); // we don't need docFreq
 				int i = 0;
 				for (;;) {
-					Integer d = docs.nextDoc();
+					int d = docs.nextDoc();
 					if (d == DocIdSetIterator.NO_MORE_DOCS) {
 						break;
 					}
-					put((K)t, (V)d);
+					
+					setter.set(docBase, d, t);
+					
 					i += 1;
-					if (i > 1) {
-						log.warn("The term {} is used by more than one document; your cache has problems", t);
-					}
+					//if (i > 1) {
+					//	log.warn("The term {} is used by more than one document {} ; your cache has problems", t, d+docBase);
+					//}
 				}
 			}
 		}
 		
-  	// load single valued ids into the mapping (should we check if they override
-		// already defined values?)
-		for (String idField: textClasses) {
+  	// load single valued ids 
+		for (String idField: fields.get("textFields")) {
 			DocTerms idMapping = FieldCache.DEFAULT.getTerms(reader, idField);
 			Integer i = 0;
 			BytesRef ret = new BytesRef();
 			while(i < idMapping.size()) {
 			  ret = idMapping.getTerm(i, ret);
 			  if (ret.length > 0) {
-			    map.put((K)ret.utf8ToString(), (V)i);
+			    setter.set(docBase, i, ret.utf8ToString()); // in this case, docbase will always be 0
 			  }
 				i++;
 			}
 		}
-		for (String idField: intClasses) {
+		for (String idField: fields.get("intFields")) {
 			int[] idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
 			Integer i = 0;
 			while(i < idMapping.length) {
-				if (treatIdentifiersAsText) {
-					map.put((K)(Integer.toString(idMapping[i])), (V)i);
-				}
-				else {
-					map.put((K)((Integer)idMapping[i]), (V)i);
-				}
+				setter.set(docBase, i, treatIdentifiersAsText ? Integer.toString(idMapping[i]) : idMapping[i]);
 				i++;
 			}
 		}
 
-		if (map.containsKey(null))	map.remove(null);
-		
 	}
 
   //////////////////////// SolrInfoMBeans methods //////////////////////
@@ -488,4 +742,214 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   public String toString() {
     return name() + getStatistics().toString();
   }
+  
+  public static class SimpleRegenerator implements CacheRegenerator {
+    public boolean regenerateItem(SolrIndexSearcher newSearcher,
+                                  SolrCache newCache,
+                                  SolrCache oldCache,
+                                  Object oldKey,
+                                  Object oldVal)
+      throws IOException {
+
+      newCache.put(oldKey,oldVal);
+      return true;
+    }
+  };
+  
+  /**
+   * Efficient resizable auto-expanding list holding <code>int</code> elements;
+   * implemented with arrays.
+   */
+  private static final class ArrayIntList {
+
+    private int[] elements;
+    private int size = 0;
+      
+    public ArrayIntList(int initialCapacity) {
+      elements = new int[initialCapacity];
+    }
+
+    public void add(int elem) {
+      if (size == elements.length) ensureCapacity(size + 1);
+      elements[size++] = elem;
+    }
+
+    public void add(int pos, int start, int end) {
+      if (size + 3 > elements.length) ensureCapacity(size + 3);
+      elements[size] = pos;
+      elements[size+1] = start;
+      elements[size+2] = end;
+      size += 3;
+    }
+    
+    public int[] getElements() {
+    	int[] out = new int[size];
+    	System.arraycopy(elements, 0, out, 0, size);
+    	return out;
+    }
+    
+    public int get(int index) {
+      if (index >= size) throwIndex(index);
+      return elements[index];
+    }
+    
+    public int size() {
+      return size;
+    }
+    
+    private void ensureCapacity(int minCapacity) {
+      int newCapacity = Math.max(minCapacity, (elements.length * 3) / 2 + 1);
+      int[] newElements = new int[newCapacity];
+      System.arraycopy(elements, 0, newElements, 0, size);
+      elements = newElements;
+    }
+
+    private void throwIndex(int index) {
+      throw new IndexOutOfBoundsException("index: " + index
+            + ", size: " + size);
+    }
+    
+    /** returns the first few positions (without offsets); debug only */
+    public String toString(int stride) {
+      int s = size() / stride;
+      int len = Math.min(10, s); // avoid printing huge lists
+      StringBuilder buf = new StringBuilder(4*len);
+      buf.append("[");
+      for (int i = 0; i < len; i++) {
+        buf.append(get(i*stride));
+        if (i < len-1) buf.append(", ");
+      }
+      if (len != s) buf.append(", ..."); // and some more...
+      buf.append("]");
+      return buf.toString();
+    }   
+  }
+  
+	public class RelationshipLinkedHashMap<K,V> extends LinkedHashMap {
+		int slimit;
+		List<ArrayIntList> references;
+		List<ArrayIntList> citations;
+  	
+		public RelationshipLinkedHashMap (int initialSize, float ratio, boolean accessOrder, int limit) {
+			super(initialSize, ratio, accessOrder);
+			slimit = limit;
+		}
+		
+    @Override
+    protected boolean removeEldestEntry(Map.Entry eldest) {
+      if (size() > slimit) {
+        // increment evictions regardless of state.
+        // this doesn't need to be synchronized because it will
+        // only be called in the context of a higher level synchronized block.
+      	evictions++;
+      	stats.evictions.incrementAndGet();
+        return true;
+      }
+      return false;
+    }
+    
+    
+    public int[] getReferences(int docid) {
+    	if (references.get(docid) != null) {
+    		ArrayIntList c = references.get(docid);
+    		if (c != null)
+    			return c.getElements();
+    	}
+    	return null;
+    }
+    
+    
+    public int[] getCitations(int docid) {
+    	if (citations.get(docid) != null) {
+    		ArrayIntList c = citations.get(docid);
+    		if (c != null)
+    			return c.getElements();
+    	}
+    	return null;
+    }
+    
+    public void initializeCitationCache(int maxDocSize) {
+    	references = new ArrayList<ArrayIntList>(maxDocSize);
+    	citations = new ArrayList<ArrayIntList>(maxDocSize);
+    	
+    	// i was hoping thi sis not necessary, but set(index, value)
+    	// throws errors otherwise
+    	for (int i=0;i<maxDocSize;i++) {
+    		references.add(null);
+    		citations.add(null);
+    	}
+    	
+    }
+    
+    public void addReference(int sourceDocid, Object value) {
+    	System.out.println("adding reference: " + sourceDocid + " = " + value);
+    	if (this.containsKey(value)) {
+    		_add(references, sourceDocid, (Integer) this.get(value));
+    	}
+    	else {
+    		_add(references, sourceDocid, -1);
+    	}
+    }
+    public void addReference(int sourceDocid, int targetDocid) {
+    	_add(references, sourceDocid, targetDocid);
+    }
+
+    public void addCitation(int sourceDocid, Object value) {
+    	System.out.println("adding citation: " + sourceDocid + " = " + value);
+    	if (this.containsKey(value)) {
+    		_add(citations, sourceDocid, (Integer) this.get(value));
+    	}
+    	else {
+    		_add(citations, sourceDocid, -1);
+    	}
+    }
+    
+    public void addCitation(int sourceDocid, int targetDocid) {
+    	_add(citations, sourceDocid, targetDocid);
+    }
+        
+    private void _add(List<ArrayIntList> target, int sourceDocid, int targetDocid) {
+    	
+    	System.out.println(sourceDocid + ":" + targetDocid);
+    	
+    	if (target.get(sourceDocid) == null) {
+    		ArrayIntList pointer = new ArrayIntList(1);
+    		pointer.add(targetDocid);
+    		target.set(sourceDocid, pointer);
+    	}
+    	else {
+    		target.get(sourceDocid).add(targetDocid);
+    	}
+    }
+    
+    public void inferCitationsFromReferences() {
+    	int i = -1;
+    	for (ArrayIntList refs : references) {
+    		i += 1;
+    		if (refs == null) {
+    			continue;
+    		}
+    		for (int j=0; j<refs.size();j++) {
+    			if (refs.get(j) == -1)
+    				continue;
+    			addCitation(refs.get(j),i);
+    		}
+    	}
+    }
+    
+    public void inferReferencesFromCitations() {
+    	int i = -1;
+    	for (ArrayIntList refs : citations) {
+    		i += 1;
+    		if (refs == null) {
+    			continue;
+    		}
+    		for (int j=0; j<refs.size();j++) {
+    			if (refs.get(j) == -1)
+    				continue;
+    			addReference(refs.get(j),i);
+    		}
+    	}
+    }
+  };
 }

@@ -119,6 +119,8 @@ public class TestCitationCache extends MontySolrAbstractLuceneTestCase {
 	
 	public void testCitationCache() throws Exception {
 		
+		int[] xxx = FieldCache.DEFAULT.getInts(DictionaryRecIdCache.INSTANCE.getAtomicReader(searcher.getIndexReader()),
+				"id", true);
 		
 		// what papers are referenced by each paper
 		Map<Integer, List<Integer>> cache1 = DictionaryRecIdCache.INSTANCE.getCache(UnInvertedMap.MULTIVALUED, 
