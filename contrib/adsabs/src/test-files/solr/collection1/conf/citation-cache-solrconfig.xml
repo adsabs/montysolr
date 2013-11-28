@@ -11,7 +11,7 @@
   <query>
     <cache name="citations-cache"
               class="solr.CitationLRUCache"
-              size="4096"
+              size="1024"
               initialSize="1024"
               autowarmCount="1024"
               regenerator="solr.CitationLRUCache$SimpleRegenerator"

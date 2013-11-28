@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.solr.search.CitationLRUCache;
 
 /**
  * Find the papers that are citing results of the search
@@ -16,57 +17,29 @@ import org.apache.lucene.index.AtomicReaderContext;
 public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderCollector {
 
   
-  private int[][] invertedIndex = null;
-  private String referenceField = null;
-  private String[] uniqueIdField = null;
-  private AtomicReaderContext context;
-  private CacheGetter cacheGetter;
+  private CacheWrapper cache;
   private String boostField;
+  private boolean initialized;
   private float[] boostCache;
 
 
-  public SecondOrderCollectorCitingTheMostCited(CacheGetter getter) {
+  public SecondOrderCollectorCitingTheMostCited(CacheWrapper cache, String boostField) {
     super();
-    assert getter != null;
-    cacheGetter = getter;
+    assert cache != null;
+    this.boostField = boostField;
+    initialized = false;
   }
   
-  /**
-   * If you use this constructor, then we'll construct the inverted
-   * cache for you - using the uniqueField to identify translation
-   * from the string value into lucene ids. And then from there we'll
-   * find out which documents are pointing at these other documents
-   * (referenceField must contain uniqueField values)
-   * 
-   * @param field
-   * @param cacheField
-   */
-  public SecondOrderCollectorCitingTheMostCited(String[] uniqueIdField, String referenceField, String boostField) {
-    super();
-    this.referenceField = referenceField;
-    this.uniqueIdField = uniqueIdField;
-    this.boostField = boostField;
-    assert this.referenceField != null && this.uniqueIdField != null;
-  }
   
   @Override
   public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-    if (invertedIndex == null) {
-      if (cacheGetter != null) {
-        invertedIndex = (int[][]) cacheGetter.getCache();
-      }
-      else {
-      invertedIndex = DictionaryRecIdCache.INSTANCE.
-        getCache(
-        		DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING,
-        		searcher, 
-            uniqueIdField, referenceField);
-      }
-      
-      boostCache = FieldCache.DEFAULT.getFloats(DictionaryRecIdCache.INSTANCE.getAtomicReader(((IndexSearcher) searcher).getIndexReader()), 
+  	cache.collectorInitialized(searcher, firstOrderWeight);
+    if (initialized == false) {
+      boostCache = FieldCache.DEFAULT.getFloats(cache.getAtomicReader(), 
           boostField, false);
+      initialized = true;
     }
-    if (invertedIndex == null || invertedIndex.length == 0 || boostCache.length == 0) {
+    if (boostCache.length == 0) {
     	return false;
     }
     return super.searcherInitialization(searcher, firstOrderWeight);
@@ -81,17 +54,21 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
 
   @Override
   public void collect(int doc) throws IOException {
-    if (invertedIndex[doc+docBase] == null) return;
+  	int[] related = cache.getLuceneDocIds(doc+docBase);
+  	
+    if (related == null) return;
     float s = scorer.score();
     
     // adjusted score of this paper
     s = s + (s * boostCache[doc+docBase]);
     
-    float freq = (float) invertedIndex[doc+docBase].length;
+    float freq = (float) related.length;
     
     // find docs that are citing us and set their score to the score of the paper they cite
     // later it will get turned into arithmetic mean 
-    for (int v: invertedIndex[doc+docBase]) {
+    for (int v: related) {
+    	if (v < 0)
+    		continue;
       hits.add(new CollectorDoc(v, s, -1, freq));
     }
     
@@ -106,13 +83,13 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   
   @Override
   public String toString() {
-    return "citingMostCited[using:" + boostField + "<" + referenceField  + ":" + fieldsToStr(uniqueIdField) + ">]";
+    //return "citingMostCited[using:" + boostField + "<" + referenceField  + ":" + fieldsToStr(uniqueIdField) + ">]";
+  	return "citingMostCited[using:" + boostField + "<" + cache.toString() + ">]";
   }
   
   /** Returns a hash code value for this object. */
   public int hashCode() {
-    return uniqueIdField.hashCode() ^ (invertedIndex !=null ? invertedIndex.hashCode() : 0) 
-      ^ referenceField.hashCode();
+    return cache.hashCode() ^ boostCache.hashCode();
   }
   
   /** Returns true iff <code>o</code> is equal to this. */
@@ -126,7 +103,6 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
 
   @Override
   public void setNextReader(AtomicReaderContext context) throws IOException {
-     this.context = context;
      this.docBase = context.docBase;
   }
   

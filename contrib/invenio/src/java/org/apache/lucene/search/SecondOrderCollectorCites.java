@@ -17,56 +17,42 @@ import org.apache.lucene.index.IndexReader;
  *    
  *    @see: SecondOrderCollectorCitesRAM for the implementation that
  *          uses un-inverted cache stored in RAM
+ *          
+ *    The CacheWrapper must provide the method that translates the 
+ *    field value into lucene docid.
+ *          
+ *    
  */
 
 public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
   Set<String> fieldsToLoad;
-	protected Map<String, Integer> valueToDocidCache = null;
-	protected String referenceField;
-	protected String[] uniqueIdField;
-	private AtomicReaderContext context;
+	protected String[] referenceField;
+	private CacheWrapper cache;
 	private IndexReader reader;
-	private CacheGetter cacheGetter;
 	
-	public SecondOrderCollectorCites(CacheGetter getter, String referenceField) {
+	public SecondOrderCollectorCites(CacheWrapper cache, String[] fieldsToLoad) {
 		super();
 		initFldSelector();
-		cacheGetter = getter;
-		this.referenceField = referenceField;
+		this.cache = cache;
+		this.referenceField = fieldsToLoad;
 		assert referenceField != null;
 		initFldSelector();
 	}
 	
-	public SecondOrderCollectorCites(String[] uniqueIdField, String referenceField) {
-		super();
-		valueToDocidCache = null;
-		this.uniqueIdField = uniqueIdField;
-		this.referenceField = referenceField;
-		initFldSelector();
-	}
 	
 	private void initFldSelector() {
 	  fieldsToLoad = new HashSet<String>();
-    fieldsToLoad.add(referenceField);
+	  for (String f: referenceField) {
+	  	fieldsToLoad.add(f);
+	  }
 	}
 	
 	
 	@SuppressWarnings("unchecked")
   @Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		if (valueToDocidCache == null) {
-		  if (cacheGetter != null) {
-		    valueToDocidCache = (Map<String, Integer>) cacheGetter.getCache();
-		  }
-		  else {
-  			valueToDocidCache = DictionaryRecIdCache.INSTANCE.
-  				getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, searcher, uniqueIdField);
-		  }
-		}
-		if (valueToDocidCache == null || valueToDocidCache.size() == 0) {
-			return false;
-		}
+		reader = searcher.getIndexReader();
 		return super.searcherInitialization(searcher, firstOrderWeight);
 	}
 	
@@ -85,11 +71,14 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		
 		float s = scorer.score();
 		
-		String[] vals = document.getValues(referenceField); 
-		for (String v: vals) {
-			v = v.toLowerCase();
-			if (valueToDocidCache.containsKey(v)) {
-				hits.add(new CollectorDoc(valueToDocidCache.get(v), s, -1, vals.length));
+		for (String f: referenceField) {
+			String[] vals = document.getValues(f); 
+			for (String v: vals) {
+				//v = v.toLowerCase();
+				int docid = cache.getLuceneDocId(doc+docBase, v);
+				if (docid == -1)
+					continue;
+				hits.add(new CollectorDoc(docid, s, -1, vals.length));
 			}
 		}
 	}
@@ -97,10 +86,8 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	@Override
 	public void setNextReader(AtomicReaderContext context)
 			throws IOException {
-		this.context = context;
 		this.reader = context.reader();
 		this.docBase = context.docBase;
-
 	}
 
 	@Override
@@ -116,7 +103,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return referenceField.hashCode() ^ (valueToDocidCache != null ? valueToDocidCache.size() : 0);
+		return 9645127 ^ referenceField.hashCode() ^ cache.hashCode();
 	}
 	
 	

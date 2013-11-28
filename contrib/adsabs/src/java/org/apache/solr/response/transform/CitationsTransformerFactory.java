@@ -22,10 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.DictionaryRecIdCache.Str2LuceneId;
-import org.apache.lucene.search.DictionaryRecIdCache.UnInvertedMap;
 import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.SolrDocument;
@@ -34,7 +31,7 @@ import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.SolrCache;
+import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.SolrIndexSearcher;
 
 /**
@@ -60,25 +57,16 @@ public class CitationsTransformerFactory extends TransformerFactory
   @Override
   public DocTransformer create(String field, SolrParams params, SolrQueryRequest req) {
   	
-    // TODO: once i have SolrCache implementation, just call the public 
-  	// methods of the cache and remove this
-  	
   	SolrIndexSearcher searcher = req.getSearcher();
+  	CitationLRUCache<Object,Integer> cache = (CitationLRUCache<Object,Integer>) searcher.getCache(cacheName);
+  	
+  	if (cache == null) {
+  		throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot find cache: " + cacheName);
+  	}
+  	
   	Map<Integer, List<Integer>> references = null;
   	int[][] citations = null;
   	
-		try {
-	    references = DictionaryRecIdCache.INSTANCE.getCache(UnInvertedMap.MULTIVALUED, 
-		    		searcher, 
-		    		new String[] {"bibcode", "alternate_bibcode"}, 
-		    		"reference");
-	    citations = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
-						searcher, 
-						new String[] {"bibcode", "alternate_bibcode"},
-						"reference");
-    } catch (IOException e) {
-    	throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get citation/references data", e);
-    }
   	
     DocTerms idMapping = null;
     if (params.getBool("resolve", false)) {
@@ -90,9 +78,7 @@ public class CitationsTransformerFactory extends TransformerFactory
     }
     
     return new CitationsTransform( field,
-    		//req.getSearcher().getCache(cacheName); TODO: use this in the future
-    		references, 
-    		citations,
+    		cache,
     		params.get("counts", "citations,references"),
     		params.get("values", ""),
     		idMapping
@@ -106,14 +92,10 @@ class CitationsTransform extends DocTransformer
 	private String[] counts;
 	private String[] values;
 	private DocTerms idMapping;
-	private SolrCache cache;
-	private Map<Integer, List<Integer>> references;
-	private int[][] citations;
+	private CitationLRUCache<Object,Integer> cache;
 
   public CitationsTransform( String display,
-  		//SolrCache cache,
-  		Map<Integer, List<Integer>> references,
-  		int[][] citations,
+  		CitationLRUCache<Object,Integer> cache,
   		String counts, String values, 
   		DocTerms idMapping )
   {
@@ -123,8 +105,6 @@ class CitationsTransform extends DocTransformer
     this.values = values.split("\\s*,\\s*");
     this.idMapping = idMapping;
     
-    this.references = references;
-    this.citations = citations;
     
   }
 
@@ -173,14 +153,18 @@ class CitationsTransform extends DocTransformer
 	private List<String> getCitationValues(SolrDocument doc, int docid) {
 		ArrayList<String> data = new ArrayList<String>();
 		BytesRef ret = new BytesRef();
-		if (citations.length >= docid && citations[docid] != null) {
-			for (Integer v: citations[docid]) {
+		int[] citations = cache.getCitations(docid);
+		
+		if (citations != null) {
+			for (int i=0;i<citations.length;i++) {
+				if (citations[i] < 0) // unresolved refs = -1
+					continue;
 				if (idMapping != null) {
-					ret = idMapping.getTerm(v, ret);
+					ret = idMapping.getTerm(citations[i], ret);
 					data.add(ret.utf8ToString());
 				}
 				else {
-					data.add(Integer.toString(v));
+					data.add(Integer.toString(citations[i]));
 				}
 			}
 		}
@@ -190,14 +174,18 @@ class CitationsTransform extends DocTransformer
 	private List<String> getReferenceValues(SolrDocument doc, int docid) {
 		ArrayList<String> data = new ArrayList<String>();
 		BytesRef ret = new BytesRef();
-		if (references.containsKey(docid)) {
-			for (Integer v: references.get(docid)) {
+		int[] references = cache.getReferences(docid);
+		
+		if (references != null) {
+			for (int i=0;i<references.length;i++) {
+				if (references[i] < 0) // unresolved refs = -1
+					continue;
 				if (idMapping != null) {
-					ret = idMapping.getTerm(v, ret);
+					ret = idMapping.getTerm(references[i], ret);
 					data.add(ret.utf8ToString());
 				}
 				else {
-					data.add(Integer.toString(v));
+					data.add(Integer.toString(references[i]));
 				}
 			}
 		}
@@ -205,17 +193,28 @@ class CitationsTransform extends DocTransformer
   }
 
 	private int getCitationCount(SolrDocument doc, int docid) {
-	  if (citations.length >= docid && citations[docid] != null) {
-	  	return citations[docid].length;
-	  }
-	  else {
-	  	return 0;
-	  }
+		int[] v = cache.getCitations(docid);
+		if (v != null) {
+			return _count(v);
+		}
+		else {
+			return 0;
+		}
+  }
+
+	private int _count(int[] v) {
+		int res = 0;
+		for (int x: v) {
+			if (x >= 0)
+				res++;
+		}
+		return res;
   }
 
 	private int getReferenceCount(SolrDocument doc, int docid) {
-		if (references.containsKey(docid)) {
-			return references.get(docid).size();
+		int[] v = cache.getReferences(docid);
+		if (v != null) {
+			return _count(v);
 		}
 		else {
 			return 0;

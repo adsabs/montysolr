@@ -3,12 +3,16 @@ package org.apache.solr.handler.batch;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import org.apache.lucene.search.DictionaryRecIdCache;
+import java.util.Iterator;
+
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.util.BytesRef;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.CitationLRUCache;
 
 /**
  * This dumps a CITEDBY data structure to disk
@@ -24,6 +28,7 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  String workDir = params.get("#workdir");
 	  String uniqueField = params.get("unique_field", "bibcode");
 	  String refField = params.get("ref_field", "reference");
+	  String cacheName = params.get("cache_name", "citations-cache");
 	  boolean returnDocids = params.getBool("return_docids", false);
 	  
 	  assert jobid != null && new File(workDir).canWrite();
@@ -33,25 +38,32 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  File jobFile = new File(workDir + "/" + jobid);
 		final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
 		
-	  DocTerms uniqueValueCache = FieldCache.DEFAULT.getTerms(req.getSearcher().getAtomicReader(), uniqueField);
+		CitationLRUCache<Object, Integer> cache = (CitationLRUCache<Object, Integer>) req.getSearcher().getCache(cacheName);
+    
+		if (cache == null) {
+      throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot find cache: " + cacheName);
+    }
+		
 	  
-	  int[][] invertedIndex = DictionaryRecIdCache.INSTANCE.
-				getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
-				req.getSearcher(), 
-				idFields, refField);
+	  
 
 	  BytesRef ret = new BytesRef();
 	  boolean first = true;
-	  int i=0;
+	  
+	  Iterator<int[][]> it = cache.getCitationsIterator();
 	  
 	  if (!returnDocids) {
-		  for (int[] referencedPapers: invertedIndex) {
-		  	if (referencedPapers!= null && referencedPapers.length > 0) {
-		  		uniqueValueCache.getTerm(i, ret);
+	    DocTerms uniqueValueCache = FieldCache.DEFAULT.getTerms(req.getSearcher().getAtomicReader(), uniqueField);
+	    int paperid = 0;
+	    while (it.hasNext()) {
+	      int[][] data = it.next();
+	      int[] references = data[0];
+		  	if (references != null && references.length > 0) {
+		  		uniqueValueCache.getTerm(paperid, ret);
 		  		out.write(ret.utf8ToString());
 		  		out.write("\t");
 		  		first=true;
-		  		for (int luceneDocId: referencedPapers) {
+		  		for (int luceneDocId: references) {
 			  		ret = uniqueValueCache.getTerm(luceneDocId, ret);
 					  if (ret.length > 0) {
 					  	if (!first) {
@@ -63,16 +75,20 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 		  		}
 		  		out.write("\n");
 		  	}
-		  	i++;
+		  	paperid++;
 		  }
 	  }
 	  else {
-	  	for (int[] referencedPapers: invertedIndex) {
-		  	if (referencedPapers!= null && referencedPapers.length > 0) {
-		  		out.write(Integer.toString(i));
+	    int paperid = 0;
+	    while (it.hasNext()) {
+	      int[][] data = it.next();
+        int[] references = data[0];
+        
+		  	if (references != null && references.length > 0) {
+		  		out.write(Integer.toString(paperid));
 		  		out.write("\t");
 		  		first=true;
-		  		for (int luceneDocId: referencedPapers) {
+		  		for (int luceneDocId: references) {
 				  	if (!first) {
 				  		out.write("\t");
 				  	}
@@ -81,7 +97,7 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 		  		}
 		  		out.write("\n");
 		  	}
-		  	i++;
+		  	paperid++;
 		  }
 	  }
 	  

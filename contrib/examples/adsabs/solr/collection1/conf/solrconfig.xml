@@ -544,14 +544,16 @@
               regenerator="com.mycompany.MyRegenerator"
               />
       -->
-    
     <cache name="citations-cache"
-              class="solr.CitationsLRUCache"
-              size="4096"
+              class="solr.CitationLRUCache"
+              size="1024"
               initialSize="1024"
               autowarmCount="1024"
-              regenerator="org.apache.lucene.document.Document.SolrPluginUtils.IdentityRegenerator"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              referenceFields="reference"
               />
+              
               
 
     <!-- Lazy Field Loading

@@ -11,54 +11,19 @@ import org.apache.lucene.index.AtomicReaderContext;
  */
 public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
-	
-	private int[][] invertedIndex = null;
-	private String referenceField = null;
-	private String[] uniqueIdField = null;
-  private AtomicReaderContext context;
-  private CacheGetter cacheGetter;
+	private CacheWrapper cache;
 
 
-	public SecondOrderCollectorCitedBy(CacheGetter getter) {
+	public SecondOrderCollectorCitedBy(CacheWrapper cache) {
 		super();
-		assert getter != null;
-		cacheGetter = getter;
+		assert cache != null;
+		this.cache = cache;
 	}
 	
-	/**
-	 * If you use this constructor, then we'll construct the inverted
-	 * cache for you - using the uniqueField to identify translation
-	 * from the string value into lucene ids. And then from there we'll
-	 * find out which documents are pointing at these other documents
-	 * (referenceField must contain uniqueField values)
-	 * 
-	 * @param field
-	 * @param cacheField
-	 */
-	public SecondOrderCollectorCitedBy(String[] uniqueIdField, String referenceField) {
-		super();
-		this.referenceField = referenceField;
-		this.uniqueIdField = uniqueIdField;
-		assert this.referenceField != null && this.uniqueIdField != null;
-	}
 	
 	@Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		if (invertedIndex == null) {
-		  if (cacheGetter != null) {
-		    invertedIndex = (int[][]) cacheGetter.getCache();
-		  }
-		  else {
-		  	invertedIndex = DictionaryRecIdCache.INSTANCE
-					.getCache(DictionaryRecIdCache.UnInvertedArray.MULTIVALUED_STRING, 
-						searcher, 
-				    uniqueIdField, referenceField);
-		  }
-		}
-		
-		if (invertedIndex == null || invertedIndex.length == 0) {
-			return false;
-		}
+		cache.collectorInitialized(searcher, firstOrderWeight);
 		return super.searcherInitialization(searcher, firstOrderWeight);
 	}
 	
@@ -71,11 +36,12 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
 	@Override
 	public void collect(int doc) throws IOException {
-		if (invertedIndex[doc+docBase] == null) return;
+		int[] v = cache.getLuceneDocIds(doc+docBase);
+		if (v == null) return;
 		float s = scorer.score();
-		float freq = (float) invertedIndex[doc+docBase].length;
-		for (int v: invertedIndex[doc+docBase]) {
-			hits.add(new CollectorDoc(v, s, -1, freq));
+		float freq = (float) v.length;
+		for (int citingDoc: v) {
+			hits.add(new CollectorDoc(citingDoc, s, -1, freq));
 		}
 		
 	}
@@ -89,13 +55,12 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "citations[cache:" + referenceField + "<" + fieldsToStr(uniqueIdField) + ">]";
+		return "citations[cache:" + cache.toString() + "]";
 	}
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return uniqueIdField.hashCode() ^ (invertedIndex !=null ? invertedIndex.hashCode() : 0) 
-			^ referenceField.hashCode();
+		return 8959545 ^ cache.hashCode();
 	}
 	
 	/** Returns true iff <code>o</code> is equal to this. */
@@ -109,7 +74,6 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
   @Override
   public void setNextReader(AtomicReaderContext context) throws IOException {
-     this.context = context;
      this.docBase = context.docBase;
   }
 	
