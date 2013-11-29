@@ -18,63 +18,27 @@ import org.apache.lucene.index.IndexableField;
 public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrderCollector {
 
   Set<String> fieldsToLoad;
-	protected Map<String, Integer> valueToDocidCache = null;
 	protected String referenceField;
 	protected String[] uniqueIdField;
 	protected String boostField;
-	private AtomicReaderContext context;
 	private IndexReader reader;
-	private CacheGetter cacheGetter;
+	private CacheWrapper cache;
 	
-	public SecondOrderCollectorOperatorExpertsCiting(CacheGetter getter, String referenceField) {
-		super();
-		initFldSelector();
-		cacheGetter = getter;
-		this.referenceField = referenceField;
-		assert referenceField != null;
-		initFldSelector();
-	}
 	
-	public SecondOrderCollectorOperatorExpertsCiting(String[] uniqueIdField, String referenceField, String boostField) {
+	public SecondOrderCollectorOperatorExpertsCiting(CacheWrapper cache, String referenceField, String boostField) {
 		super();
-		valueToDocidCache = null;
-		this.uniqueIdField = uniqueIdField;
+		
+		assert cache != null;
+		this.cache = cache;
+		
 		this.referenceField = referenceField;
 		this.boostField = boostField;
-		initFldSelector();
-	}
-	
-	private void initFldSelector() {
-	  fieldsToLoad = new HashSet<String>();
+		fieldsToLoad = new HashSet<String>();
     fieldsToLoad.add(referenceField);
     fieldsToLoad.add(boostField);
 	}
 	
 	
-	@SuppressWarnings("unchecked")
-  @Override
-	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		if (valueToDocidCache == null) {
-		  if (cacheGetter != null) {
-		    valueToDocidCache = (Map<String, Integer>) cacheGetter.getCache();
-		  }
-		  else {
-  			valueToDocidCache = DictionaryRecIdCache.INSTANCE.
-  				getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, searcher, uniqueIdField);
-		  }
-		}
-		if (valueToDocidCache == null || valueToDocidCache.size() == 0) {
-			return false;
-		}
-		return super.searcherInitialization(searcher, firstOrderWeight);
-	}
-	
-
-	@Override
-	public void setScorer(Scorer scorer) throws IOException {
-		this.scorer = scorer;
-
-	}
 
 	@Override
 	public void collect(int doc) throws IOException {
@@ -104,8 +68,9 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		//s = s / (vals.length + 100); // this would contribute only a part of the score to each citation
 		for (String v: vals) {
 			v = v.toLowerCase();
-			if (valueToDocidCache.containsKey(v)) {
-				hits.add(new CollectorDoc(valueToDocidCache.get(v), s, -1, vals.length));
+			int docid = cache.getLuceneDocId(doc, v);
+			if (docid > 0) {
+				hits.add(new CollectorDoc(docid, s, -1, vals.length));
 			}
 		}
 	}
@@ -113,10 +78,8 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	@Override
 	public void setNextReader(AtomicReaderContext context)
 			throws IOException {
-		this.context = context;
 		this.reader = context.reader();
 		this.docBase = context.docBase;
-
 	}
 
 	@Override
@@ -127,12 +90,12 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	@Override
 	public String toString() {
-		return "cites[using:" + referenceField + "<weightedBy:" + boostField + ">]";
+		return "expertcites[using:" + referenceField + ",weightedBy:" + boostField + "," + cache.toString() + "]";
 	}
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return referenceField.hashCode() ^ (valueToDocidCache != null ? valueToDocidCache.size() : 0);
+		return 435878 ^ referenceField.hashCode() ^ boostField.hashCode() ^ cache.hashCode();
 	}
 	
 	

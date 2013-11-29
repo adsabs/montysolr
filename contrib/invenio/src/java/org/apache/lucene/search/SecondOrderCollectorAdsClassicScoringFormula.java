@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.SlowCompositeReaderWrapper;
 
 /**
  * This is a toy example for testing the ADS Classic relevance
@@ -51,7 +52,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	
 	@Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		boostCache = FieldCache.DEFAULT.getFloats(DictionaryRecIdCache.INSTANCE.getAtomicReader(searcher.getIndexReader()), 
+		boostCache = FieldCache.DEFAULT.getFloats(SlowCompositeReaderWrapper.wrap(searcher.getIndexReader()), 
 				boostField, false);
 		return super.searcherInitialization(searcher, firstOrderWeight);
 	}

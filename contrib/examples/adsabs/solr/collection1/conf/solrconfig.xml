@@ -1811,34 +1811,6 @@
   
   
   
-    <!-- MontySolr:
-       The following request handler is the default one for Invenio
-       searches. It uses special parser which constructs a query made
-       of solr and solr-pythonic clauses. Each clause is then resolved
-       and results are combined in the chain you see inside 'components'
-       It is important that invenio-formatter comes right after the search.
-    -->
-
-  <requestHandler name="/invenio" class="solr.InvenioRequestHandler" default="false">
-    <arr name="components">
-      <str>query</str>
-      <str>invenio-formatter</str>
-      <str>facet</str>
-      <str>mlt</str>
-      <str>highlight</str>
-      <str>stats</str>
-      <str>debug</str>
-    </arr>
-    <!-- default values for query parameters -->
-     <lst name="defaults">
-       <str name="defType">iq</str>
-       <str name="iq.mode">maxinv</str>
-       <str name="iq.xfields">fulltext</str>
-       <str name="q.op">AND</str>
-       <str name="echoParams">explicit</str>
-     </lst>
-  </requestHandler>
-  
   <!-- Handler that keeps Invenio in-sync on request
   
     0: request -> /invenio/update

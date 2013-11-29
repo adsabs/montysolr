@@ -150,7 +150,7 @@ import org.slf4j.LoggerFactory;
 public class InvenioKeepRecidUpdated extends RequestHandlerBase implements PythonCall {
 	
 	public static final Logger log = LoggerFactory
-		.getLogger(InvenioRequestHandler.class);
+		.getLogger(InvenioKeepRecidUpdated.class);
 	
 	
 	

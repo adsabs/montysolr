@@ -13,42 +13,18 @@ import org.apache.lucene.index.AtomicReaderContext;
  */
 public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
-	protected Map<Integer, List<Integer>> docToDocidsCache = null;
-	protected String referenceField;
-	protected String[] uniqueIdField;
-  private AtomicReaderContext context;
-  private AtomicReader reader;
-  private CacheGetter cacheGetter;
+  private CacheWrapper cache;
 	
-  public SecondOrderCollectorCitesRAM(CacheGetter getter) {
+  public SecondOrderCollectorCitesRAM(CacheWrapper cache) {
     super();
-    cacheGetter = getter;
+    assert cache != null;
+		this.cache = cache;
   }
-	
-	public SecondOrderCollectorCitesRAM(String[] uniqueIdField, final String referenceField) {
-		super();
-		this.uniqueIdField = uniqueIdField;
-		this.referenceField = referenceField;
-	}
-	
 	
 	
 	@SuppressWarnings("unchecked")
   @Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		if (docToDocidsCache == null) {
-		  if (cacheGetter != null) {
-		    docToDocidsCache = (Map<Integer, List<Integer>>) cacheGetter.getCache();
-		  }
-		  else {
-  			docToDocidsCache = DictionaryRecIdCache.INSTANCE
-  				.getCache(DictionaryRecIdCache.UnInvertedMap.MULTIVALUED, searcher, 
-  				uniqueIdField, referenceField);
-		  }
-		}
-		if (docToDocidsCache == null || docToDocidsCache.size() == 0) {
-			return false;
-		}
 		return super.searcherInitialization(searcher, firstOrderWeight);
 	}
 	
@@ -61,6 +37,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
 	@Override
 	public void collect(int doc) throws IOException {
+		citations = cache.getLuceneDocIds(sourceDocid)
 		if (docToDocidsCache.containsKey(doc+docBase)) {
 			float s = scorer.score();
 			float freq = docToDocidsCache.get(doc+docBase).size();

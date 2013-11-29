@@ -36,6 +36,12 @@ SecondOrderCollector {
 			firstOrderScorerOutOfOrder = firstOrderWeight.scoresDocsOutOfOrder();
 		return true;
 	}
+	
+	@Override
+	public void setScorer(Scorer scorer) throws IOException {
+		this.scorer = scorer;
+
+	}
 
 	public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
 
