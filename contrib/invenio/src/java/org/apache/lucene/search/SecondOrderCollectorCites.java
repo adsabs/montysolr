@@ -27,26 +27,21 @@ import org.apache.lucene.index.IndexReader;
 public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
   Set<String> fieldsToLoad;
-	protected String[] referenceField;
 	private CacheWrapper cache;
 	private IndexReader reader;
 	
-	public SecondOrderCollectorCites(CacheWrapper cache, String[] fieldsToLoad) {
+	public SecondOrderCollectorCites(CacheWrapper cache, String[] referenceFields) {
 		super();
-		initFldSelector();
+		assert cache != null;
 		this.cache = cache;
-		this.referenceField = fieldsToLoad;
-		assert referenceField != null;
-		initFldSelector();
-	}
-	
-	
-	private void initFldSelector() {
-	  fieldsToLoad = new HashSet<String>();
-	  for (String f: referenceField) {
+		fieldsToLoad = new HashSet<String>();
+	  for (String f: referenceFields) {
 	  	fieldsToLoad.add(f);
 	  }
+	  assert fieldsToLoad.size() > 0;
 	}
+	
+	
 	
 	
 	@SuppressWarnings("unchecked")
@@ -71,10 +66,10 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		
 		float s = scorer.score();
 		
-		for (String f: referenceField) {
+		for (String f: fieldsToLoad) {
 			String[] vals = document.getValues(f); 
 			for (String v: vals) {
-				//v = v.toLowerCase();
+				v = v.toLowerCase();
 				int docid = cache.getLuceneDocId(doc+docBase, v);
 				if (docid == -1)
 					continue;
@@ -98,12 +93,12 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "references[field:" + referenceField + "]";
+		return "references[field:" + fieldsToLoad + "]";
 	}
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return 9645127 ^ referenceField.hashCode() ^ cache.hashCode();
+		return 9645127 ^ fieldsToLoad.hashCode() ^ cache.hashCode();
 	}
 	
 	

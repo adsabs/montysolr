@@ -37,13 +37,16 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
 	@Override
 	public void collect(int doc) throws IOException {
-		citations = cache.getLuceneDocIds(sourceDocid)
-		if (docToDocidsCache.containsKey(doc+docBase)) {
-			float s = scorer.score();
-			float freq = docToDocidsCache.get(doc+docBase).size();
-			for (int i: docToDocidsCache.get(doc+docBase)) {
-				hits.add(new CollectorDoc(i, s, -1, freq));
-			}
+		int[] citations = cache.getLuceneDocIds(doc+docBase);
+		if (citations == null) {
+			return;
+		}
+		float freq = citations.length;
+		float s = scorer.score();
+		for (int docid: citations) {
+			if (docid == -1)
+				continue;
+			hits.add(new CollectorDoc(docid, s, -1, freq));
 		}
 		
 	}
@@ -51,10 +54,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	@Override
   public void setNextReader(AtomicReaderContext context)
       throws IOException {
-    this.context = context;
-    this.reader = context.reader();
     this.docBase = context.docBase;
-
   }
 
 	@Override
@@ -65,13 +65,12 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "references[cache:" + referenceField + "]";
+		return "references[cache:" + cache.toString() + "]";
 	}
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-	  // when using docToDocidsCache.hashCode() java tries to compute hashCode of all objects inside
-		return referenceField.hashCode() ^ (docToDocidsCache!=null ? docToDocidsCache.size() : 0);
+		return 2938572 ^ cache.hashCode();
 	}
 	
 	

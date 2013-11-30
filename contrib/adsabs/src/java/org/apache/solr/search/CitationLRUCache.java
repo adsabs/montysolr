@@ -19,6 +19,7 @@ package org.apache.solr.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -327,6 +328,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	  		warmIncrementally(searcher, old);
 	  	}
 	  	else {
+	  		System.out.println("Rebuilding cache for:" + searcher);
 	      warmRebuildEverything(searcher, old);
 	  	}
   	} 
@@ -852,6 +854,10 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     private void throwIndex(int index) {
       throw new IndexOutOfBoundsException("index: " + index
             + ", size: " + size);
+    }
+    
+    public String toString() {
+    	return Arrays.toString(elements);
     }
     
     /** returns the first few positions (without offsets); debug only */

@@ -11,6 +11,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -23,8 +24,10 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.BytesRef;
 
 
 
@@ -96,9 +99,18 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		
 		String rWord = words[new Random().nextInt(words.length)];
 		
+		final int[] docidCache = FieldCache.DEFAULT.getInts(SlowCompositeReaderWrapper.wrap(reader), "recid", false);
+		
+		CacheWrapper cache = new SecondOrderCollectorCacheWrapper() {
+			@Override
+		  public int getLuceneDocId(int sourceDocid) {
+			  return docidCache[sourceDocid];
+		  }
+		};
+		
 		for (String word: words) {
 			TermQuery tq = new TermQuery(new Term("text", word));
-			InvenioQuery iq = new InvenioQuery(tq, "recid", "text", "fake_search");
+			InvenioQuery iq = new InvenioQuery(tq, cache, true, "fake_search");
 			assertEquals(iq.toString(), "<(ints,recid)text:" + word + ">");
 			
 			TopDocs hits = searcher.search(iq, 100);
@@ -139,6 +151,134 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 				this.docs.put(recid, ws);
 			}
 		}
+	}
+		
+	
+	public class InvenioQuery extends PythonQuery {
+
+			
+			public InvenioQuery(Query query, CacheWrapper cache,
+          boolean dieOnMissingIds, String fName) {
+	      super(query, cache, dieOnMissingIds, fName);
+      }
+			
+			@Override
+			public String getQueryAsString() {
+				return getInvenioQuery();
+			}
+			
+			public String getInvenioQuery() {
+				String qval = getInvenioQueryValue(new StringBuffer(), query).toString();
+				return qval;
+			}
+			
+			public String getField(String luceneField) {
+				return luceneField != null ? luceneField + ":" : "";
+			}
+			
+			public StringBuffer getInvenioQueryValue(StringBuffer out, Query query) {
+				if (query instanceof TermQuery) {
+					out.append(getField(((TermQuery) query).getTerm().field()));
+					out.append(((TermQuery) query).getTerm().text());
+				}
+				else if (query instanceof MatchAllDocsQuery) {
+					out.append("");
+				}
+				else if (query instanceof TermRangeQuery) {
+					TermRangeQuery q = (TermRangeQuery) query;
+					out.append(getField(q.getField()));
+					
+					//out.append(q.includesLower() ? '[' : '{'); // invenio doesn't understand these
+					BytesRef lt = q.getLowerTerm();
+					BytesRef ut = q.getUpperTerm();
+					if (lt == null) {
+						out.append('*');
+					} else {
+						out.append(lt.utf8ToString());
+					}
+
+					out.append("->");
+
+					if (ut == null) {
+						out.append('*');
+					} else {
+						out.append(ut.utf8ToString());
+					}
+				}
+				else if (query instanceof NumericRangeQuery) {
+					NumericRangeQuery q = (NumericRangeQuery) query;
+					out.append(getField(q.getField()));
+					
+					//out.append(q.includesLower() ? '[' : '{'); // invenio doesn't understand these
+					//TODO: verify Invneio is using int ranges only
+					Number lt = q.getMin();
+					Number ut = q.getMax();
+					if (lt == null) {
+						out.append("-999999");
+					} else {
+						out.append(lt.intValue());
+					}
+
+					out.append("->");
+
+					if (ut == null) {
+						out.append("999999");
+					} else {
+						out.append(ut.intValue());
+					}
+				} 
+				else if (query instanceof BooleanQuery) {
+					BooleanQuery q = (BooleanQuery) query;
+					List<BooleanClause>clauses = q.clauses();
+					out.append("(");
+					for (int i=0;i<clauses.size();i++) {
+						BooleanClause c = clauses.get(i);
+						Query qq = c.getQuery();
+						out.append(c.getOccur().toString());
+						out.append(" ");
+						getInvenioQueryValue(out, qq);
+					}
+					out.append(")");
+				} 
+				else if (query instanceof PrefixQuery) {
+					PrefixQuery q = (PrefixQuery) query;
+					Term prefix = q.getPrefix();
+					out.append(getField(q.getField()));
+					out.append(prefix.text());
+					out.append('*');
+				} 
+				else if (query instanceof WildcardQuery) {
+					WildcardQuery q = (WildcardQuery) query;
+					Term t = q.getTerm();
+					out.append(getField(q.getField()));
+					out.append(t.text());
+				} 
+				else if (query instanceof PhraseQuery) {
+					PhraseQuery q = (PhraseQuery) query;
+					Term[] terms = q.getTerms();
+					String slop = q.getSlop() > 0 ? "'" : "\"";
+					out.append(slop);
+					for (int i=0;i<terms.length;i++) {
+						if (i != 0) {
+							out.append(" ");
+						}
+						out.append(getField(terms[i].field()));
+						out.append(terms[i].text());
+					}
+					out.append(slop);
+				} 
+				else if (query instanceof FuzzyQuery) {
+					// do nothing
+				} 
+				else if (query instanceof ConstantScoreQuery) {
+					// do nothing
+				} else {
+					throw new IllegalStateException(query.toString());
+				}
+				
+				return out;
+			}
+			
 	}
 	
 	// Uniquely for Junit 3

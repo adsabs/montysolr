@@ -23,7 +23,6 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	
 	@Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		cache.collectorInitialized(searcher, firstOrderWeight);
 		return super.searcherInitialization(searcher, firstOrderWeight);
 	}
 	

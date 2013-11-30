@@ -28,8 +28,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,22 +42,21 @@ import monty.solr.jni.PythonCall;
 import monty.solr.jni.PythonMessage;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.lucene.search.DictionaryRecIdCache;
+import org.apache.lucene.search.CollectionStatistics;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.params.UpdateParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.handler.InvenioRequestHandler;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.handler.dataimport.DataImportHandler;
-import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.search.CitationLRUCache;
+import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +78,6 @@ import org.slf4j.LoggerFactory;
  * 		<p>
  * 		- <b>last_recid</b>: the recid of the reference record, it will be the
  * 			orientation point to find all newer changed/added/deleted recs
- * 			
- * 			If null, we find the highest <code>recid</code> from
- * 		    {@link DictionaryRecIdCache} using {@link IndexSchema}#getUniqueKeyField()
  * 			
  * 			If last_recid == -1, we start from the first document
  * 		<p>
@@ -332,6 +330,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 			if (lastRecid != null) message.setParam(LAST_RECID, lastRecid);
 			if (lastUpdate != null) message.setParam(LAST_UPDATE, lastUpdate);
 			
+			if (lastRecid == null && lastUpdate == null) {
+				message.setParam(LAST_UPDATE, getLastIndexUpdate(req));
+			}
+			
 			log.info("Retrieving changed recs: max_records=" + params.getInt(PARAM_BATCHSIZE) + 
 					" last_recid=" + lastRecid + " last_update=" + lastUpdate);
 			
@@ -356,6 +358,15 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
     }
 
 	
+	private String getLastIndexUpdate(SolrQueryRequest req) {
+	  SolrIndexSearcher searcher = req.getSearcher();
+	  // Invenio uses mod_date.strftime(format="%Y-%m-%d %H:%M:%S") -> '2013-11-29 16:40:33'
+	  SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+	  Date date = new Date(searcher.getOpenTime());
+	  return df.format(date);
+  }
+
+
 	public void setPythonFunctionName(String name) {
 		pythonFunctionName = name;
 	}

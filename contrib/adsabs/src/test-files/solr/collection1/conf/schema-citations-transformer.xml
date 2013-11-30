@@ -16,6 +16,8 @@
       required="false" multiValued="true"/>  
     <field name="reference" type="string" indexed="true" stored="true" 
       multiValued="true"/>
+    <field name="ireference" type="int" indexed="true" stored="true" 
+      multiValued="true"/>
     <field name="indexstamp" type="date" indexed="true" stored="true"
       default="NOW" multiValued="false" />
   </fields>
