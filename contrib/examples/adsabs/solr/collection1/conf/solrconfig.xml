@@ -1899,23 +1899,7 @@
     </lst>
   </requestHandler>
   
-  <!-- MontySolr:
-       This component is responsible for returning the citation
-       search results (in the html form, as produced by Invenio)
-       -->
-  <searchComponent name="invenio-formatter" class="solr.InvenioFormatter" >
-    <lst name="defaults">
-       <str name="idfield">recid</str>
-    </lst>
-  </searchComponent>
 
-  <!--  MontySolr/Invenio query parser -->
-  
-  <queryParser name="iq" class="solr.InvenioQParserPlugin">
-	<lst name="defaults">
-       <str name="idfield">recid</str>
-    </lst>
-  </queryParser>
   
   <requestHandler name="/dataimport" 
                   class="org.apache.solr.handler.dataimport.DataImportHandler"
