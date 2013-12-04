@@ -180,12 +180,12 @@ SecondOrderCollector {
 	protected void compactHits() {
 		switch (compactingType) {
 			case GEOM_MEAN_NORM:
-			  normalizeScores();
 				compactHitsGeomMean();
+				normalizeScores();
 				break;
 			case ARITHM_MEAN_NORM:
-			  normalizeScores();
 			  compactHitsArithmMean();
+			  normalizeScores();
 				break;
 			case GEOM_MEAN:
 				compactHitsGeomMean();
@@ -206,6 +206,11 @@ SecondOrderCollector {
 			case MIN_VALUE:
 				compactHitsMinValue();
 				break;
+			case AGRESTI_COULL:
+				compactHitsArithmMean();
+				normalizeScores();
+				applyAgrestiCoull();
+				break;
 			default:
 				compactHitsMaxValue();
 				break;
@@ -213,6 +218,18 @@ SecondOrderCollector {
 	}
 	
 	
+
+	protected void applyAgrestiCoull() {
+		if (hits.size() < 1)
+			return;
+		// add 2 upvotes and 2 downvotes to each result
+		// plus penalize the ones that have only few
+		// hits
+		for (CollectorDoc d: hits) {
+			d.score = ((d.score + 2.001f) / (d.freq + 4)) - (1.0f/(d.freq+0.001f));
+		}
+  }
+
 	protected void normalizeScores() {
 		if (hits.size() < 1)
 			return;
@@ -236,15 +253,19 @@ SecondOrderCollector {
 			return;
 		
 		CollectorDoc currDoc = hits.get(0);
-
+		
+		float seenTimes = 1.0f;
 		for (CollectorDoc d : hits) {
 			if (d.doc == currDoc.doc) {
-				if (d.score < currDoc.score)
+				if (d.score < currDoc.score) {
 					currDoc.score = d.score;
+				}
+				currDoc.freq = seenTimes++;
 				continue;
 			}
 			newHits.add(currDoc);
 			currDoc = d;
+			seenTimes = 1.0f;
 		}
 		
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
@@ -261,15 +282,19 @@ SecondOrderCollector {
 			return;
 		
 		CollectorDoc currDoc = hits.get(0);
-
+		
+		float seenTimes = 1.0f;
 		for (CollectorDoc d : hits) {
 			if (d.doc == currDoc.doc) {
-				if (d.score > currDoc.score)
+				if (d.score > currDoc.score) {
 					currDoc.score = d.score;
+				}
+				currDoc.freq = seenTimes++;
 				continue;
 			}
 			newHits.add(currDoc);
 			currDoc = d;
+			seenTimes = 1.0f;
 		}
 		
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
@@ -293,6 +318,7 @@ SecondOrderCollector {
 				seenTimes += 1.0f;
 				continue;
 			}
+			currDoc.freq = seenTimes;
 			currDoc.score = seenTimes;
 			newHits.add(currDoc);
 			currDoc = d;
@@ -301,6 +327,7 @@ SecondOrderCollector {
 		
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
 			currDoc.score = seenTimes;
+			currDoc.freq = seenTimes;
 			newHits.add(currDoc);
 		}
 		hits = newHits;
@@ -314,7 +341,7 @@ SecondOrderCollector {
 			return;
 		
 		CollectorDoc currDoc = hits.get(0);
-		int seenTimes = 0;
+		float seenTimes = 0.0f;
 		float score = 0.0f;
 
 		for (CollectorDoc d : hits) {
@@ -323,8 +350,10 @@ SecondOrderCollector {
 				seenTimes += 1;
 				continue;
 			}
-			if (seenTimes > 1)
+			if (seenTimes > 1) {
 				currDoc.score = (float) score/seenTimes;
+				currDoc.freq = seenTimes;
+			}
 			newHits.add(currDoc);
 			currDoc = d;
 			seenTimes = 1;
@@ -333,6 +362,7 @@ SecondOrderCollector {
 
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
 			currDoc.score = (float) score/seenTimes;
+			currDoc.freq = seenTimes;
 		}
 		newHits.add(currDoc);
 		hits = newHits;
@@ -346,21 +376,23 @@ SecondOrderCollector {
 			return;
 
 		CollectorDoc currDoc = hits.get(0);
-		int seenTimes = 0;
+		float seenTimes = 0.0f;
 		float score = 1.0f;
 
 		for (CollectorDoc d : hits) {
 			//System.out.println("seen=" + seenTimes + " score=" + score + " currDoc " + currDoc.toString() + " d " + d.toString());
 			if (d.doc == currDoc.doc) {
 				score *= d.score;
-				seenTimes += 1;
+				seenTimes += 1f;
 				continue;
 			}
 			// compute geometric mean (not arithmetic, as that is not good for comparison
 			// of normalized values
 
-			if (seenTimes > 1)
+			if (seenTimes > 1) {
 				currDoc.score = (float) Math.pow(score, 1.0f/seenTimes);
+				currDoc.freq = seenTimes;
+			}
 			//System.out.println("adding " + currDoc.toString());
 			newHits.add(currDoc);
 			currDoc = d;
@@ -370,6 +402,7 @@ SecondOrderCollector {
 
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
 			currDoc.score = (float) Math.pow(score, 1.0f/seenTimes);
+			currDoc.freq = seenTimes;
 		}
 		newHits.add(currDoc);
 

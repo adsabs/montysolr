@@ -23,54 +23,72 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	protected String boostField;
 	private IndexReader reader;
 	private CacheWrapper cache;
+	private float[] boostCache;
 	
-	
-	public SecondOrderCollectorOperatorExpertsCiting(CacheWrapper cache, String referenceField, String boostField) {
+	public SecondOrderCollectorOperatorExpertsCiting(CacheWrapper cache, String boostField) {
 		super();
 		
 		assert cache != null;
 		this.cache = cache;
-		
-		this.referenceField = referenceField;
 		this.boostField = boostField;
-		fieldsToLoad = new HashSet<String>();
-    fieldsToLoad.add(referenceField);
-    fieldsToLoad.add(boostField);
+		setFinalValueType(FinalValueType.AGRESTI_COULL);
 	}
 	
+	@Override
+  public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
+    boostCache = FieldCache.DEFAULT.getFloats(cache.getAtomicReader(), 
+        boostField, false);
+    if (boostCache.length == 0) {
+    	return false;
+    }
+    return super.searcherInitialization(searcher, firstOrderWeight);
+  }
 	
 
 	@Override
 	public void collect(int doc) throws IOException {
 		
-		Document document = reader.document(doc, fieldsToLoad);
+    // find references froum our doc 
+		int[] references = cache.getLuceneDocIds(doc+docBase);
 		
-		float s = scorer.score();
+		if (references == null) {
+			return;
+		}
 		
+		//Document document = reader.document(doc, fieldsToLoad);
+		
+		float s = 0.5f; // lucene score doesn't make sense for us;
+		
+		/*
 		// naive implementation (probably slow)
-		IndexableField bf = document.getField(boostField);
-		//if (bf==null) throw new IOException("Every document must have field: " + boostField);
-		
-		// TODO: we must find the proper values for this, that means to compute the statistics
-		// (find the local minimas, maximas) for this function; this is just guessing....
-		
-		
-    if (bf != null) {
+		// IndexableField bf = document.getField(boostField);
+		if (bf != null) {
       s = s + (s * bf.numericValue().floatValue());
     }
     else {
       // penalize docs without boost
       s = s * 0.8f;
     }
+    */
 		
-    // find documents that are cited by our doc (references)
-		String[] vals = document.getValues(referenceField);
+		
+		           
+		//if (bf==null) throw new IOException("Every document must have field: " + boostField);
+		
+		// TODO: we must find the proper values for this, that means to compute the statistics
+		// (find the local minimas, maximas) for this function; this is just guessing....
+		
+		
+		if (boostCache[doc+docBase] >  0.0f) {
+			s = s + boostCache[doc+docBase];
+		}
+		
+
 		//s = s / (vals.length + 100); // this would contribute only a part of the score to each citation
-		for (String v: vals) {
-			v = v.toLowerCase();
-			int docid = cache.getLuceneDocId(doc, v);
+		for (int docid: references) {
 			if (docid > 0) {
-				hits.add(new CollectorDoc(docid, s, -1, vals.length));
+				//System.out.println("expert: doc=" + (doc+docBase) + "(score:" + s + ") adding=" + docid + " (score:" + (s + boostCache[docid]) + ")" + " freq=" + references.length) ;
+				hits.add(new CollectorDoc(docid, s + boostCache[docid], -1, 1));
 			}
 		}
 	}
@@ -90,12 +108,12 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	@Override
 	public String toString() {
-		return "expertcites[using:" + referenceField + ",weightedBy:" + boostField + "," + cache.toString() + "]";
+		return "expertcites[weightedBy:" + boostField + "," + cache.toString() + "]";
 	}
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return 435878 ^ referenceField.hashCode() ^ boostField.hashCode() ^ cache.hashCode();
+		return 435878 ^ boostField.hashCode() ^ cache.hashCode();
 	}
 	
 	

@@ -328,7 +328,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	  		warmIncrementally(searcher, old);
 	  	}
 	  	else {
-	  		System.out.println("Rebuilding cache for:" + searcher);
+	  		//System.out.println("Rebuilding cache for:" + searcher);
 	      warmRebuildEverything(searcher, old);
 	  	}
   	} 

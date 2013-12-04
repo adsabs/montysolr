@@ -7,7 +7,8 @@ public interface SecondOrderCollector {
 
 	public enum FinalValueType {
 		ARITHM_MEAN, GEOM_MEAN, ABS_COUNT, MAX_VALUE, MIN_VALUE,
-		GEOM_MEAN_NORM, ARITHM_MEAN_NORM, ABS_COUNT_NORM;
+		GEOM_MEAN_NORM, ARITHM_MEAN_NORM, ABS_COUNT_NORM,
+		AGRESTI_COULL;
 	}
 
 	/**

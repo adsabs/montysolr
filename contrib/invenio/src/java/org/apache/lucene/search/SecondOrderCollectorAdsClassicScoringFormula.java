@@ -32,19 +32,20 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 
 	private String boostField;
 	private float highestLuceneScore;
-	private AtomicReaderContext context;
 	private float[] boostCache;
-	private List<CollectorDoc> hitSet = new ArrayList<CollectorDoc>();
 	private float lucenePart;
 	private float adsPart;
+	private CacheWrapper cache;
 
-	public SecondOrderCollectorAdsClassicScoringFormula(String boostField, float ratio) {
+	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, String boostField, float ratio) {
+		this.cache = cache;
 		this.boostField = boostField;
 		this.lucenePart = ratio;
 		this.adsPart = 1.0f - ratio;
 	}
 	
-	public SecondOrderCollectorAdsClassicScoringFormula(String boostField) {
+	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, String boostField) {
+		this.cache = cache;
 		this.boostField = boostField;
 		this.lucenePart = 0.5f;
 		this.adsPart = 0.5f;
@@ -52,8 +53,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	
 	@Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		boostCache = FieldCache.DEFAULT.getFloats(SlowCompositeReaderWrapper.wrap(searcher.getIndexReader()), 
-				boostField, false);
+		boostCache = FieldCache.DEFAULT.getFloats(cache.getAtomicReader(), boostField, false);
 		return super.searcherInitialization(searcher, firstOrderWeight);
 	}
 	
@@ -82,7 +82,6 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	@Override
 	public void setNextReader(AtomicReaderContext context)
 			throws IOException {
-		this.context = context;
 		this.docBase = context.docBase;
 
 	}
