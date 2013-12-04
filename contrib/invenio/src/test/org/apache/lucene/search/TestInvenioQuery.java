@@ -106,6 +106,14 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		  public int getLuceneDocId(int sourceDocid) {
 			  return docidCache[sourceDocid];
 		  }
+			@Override
+      public int internalHashCode() {
+	      return docidCache.hashCode();
+      }
+			@Override
+      public String internalToString() {
+	      return "~~recid~~";
+      }
 		};
 		
 		for (String word: words) {

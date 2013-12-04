@@ -1,6 +1,7 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -93,7 +94,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "references[field:" + fieldsToLoad + "]";
+		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", field:" + fieldsToLoad + ")";
 	}
 	
 	/** Returns a hash code value for this object. */

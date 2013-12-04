@@ -18,13 +18,12 @@ package org.apache.lucene.queryparser.flexible.aqp.config;
  * limitations under the License.
  */
 
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpInvenioMODIFIERProcessor;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.util.Attribute;
 
 
 /**
- * This attribute is used by {@link AqpInvenioMODIFIERProcessor} processor and
+ * This attribute is used by AqpInvenioMODIFIERProcessor processor and
  * must be defined in the {@link QueryConfigHandler}. This attribute tells the
  * processor what is the default field that contains mappings between the external
  * system IDs and lucene doc ids' <br/>

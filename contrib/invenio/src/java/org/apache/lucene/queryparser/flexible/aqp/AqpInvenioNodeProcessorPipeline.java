@@ -7,7 +7,6 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFIELDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFUZZYProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpGroupQueryOptimizerProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpInvenioMODIFIERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpInvenioQPHRASEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpNullDefaultFieldProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOPERATORProcessor;
@@ -46,7 +45,6 @@ public class AqpInvenioNodeProcessorPipeline extends QueryNodeProcessorPipeline 
 		add(new AqpDEFOPProcessor());
 		add(new AqpTreeRewriteProcessor());
 
-		add(new AqpInvenioMODIFIERProcessor());
 		add(new AqpOPERATORProcessor());
 		add(new AqpCLAUSEProcessor());
 		add(new AqpTMODIFIERProcessor());

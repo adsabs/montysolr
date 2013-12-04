@@ -108,7 +108,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	@Override
 	public String toString() {
-		return "expertcites[weightedBy:" + boostField + "," + cache.toString() + "]";
+		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", field:" + boostField + ")";
 	}
 	
 	/** Returns a hash code value for this object. */

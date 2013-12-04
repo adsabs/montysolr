@@ -157,6 +157,14 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 			public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 			  return (Integer) cache.get(sourceValue);
 		  }
+			@Override
+      public int internalHashCode() {
+        return cache.hashCode();
+      }
+			@Override
+      public String internalToString() {
+        return cache.name();
+      }
 		};
 		
 		CacheWrapper referencesWrapper = new SecondOrderCollectorCacheWrapper() {
@@ -176,6 +184,14 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 			  }
 			  return (Integer) v;
 		  }
+			@Override
+      public int internalHashCode() {
+        return cache.hashCode();
+      }
+			@Override
+      public String internalToString() {
+        return cache.name();
+      }
 		};
 		
   	

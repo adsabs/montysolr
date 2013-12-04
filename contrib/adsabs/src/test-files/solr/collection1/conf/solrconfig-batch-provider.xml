@@ -5,5 +5,15 @@
   <dataDir>${solr.data.dir:}</dataDir>
   <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
   <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
-  
+  <query>
+    <cache name="citations-cache"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              referenceFields="reference"
+              />
+  </query> 
 </config>

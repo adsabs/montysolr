@@ -54,7 +54,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "citations[cache:" + cache.toString() + "]";
+		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ")";
 	}
 	
 	/** Returns a hash code value for this object. */

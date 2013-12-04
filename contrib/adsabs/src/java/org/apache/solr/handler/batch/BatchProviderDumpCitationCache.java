@@ -89,6 +89,8 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 		  		out.write("\t");
 		  		first=true;
 		  		for (int luceneDocId: references) {
+		  			if (luceneDocId == -1)
+		  				continue;
 				  	if (!first) {
 				  		out.write("\t");
 				  	}

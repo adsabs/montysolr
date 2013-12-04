@@ -8,7 +8,9 @@ import java.util.Random;
 import org.antlr.runtime.BitSet;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.TestInvenioQuery.InvenioQuery;
 import org.apache.lucene.store.Directory;
 
 /**
@@ -39,6 +41,22 @@ public class TestInvenioQueryBitSet extends TestInvenioQuery {
 		String[] words = iDocs.words;
 		HashMap<String, ArrayList<String>> index = iDocs.index;
 		
+		final int[] docidCache = FieldCache.DEFAULT.getInts(SlowCompositeReaderWrapper.wrap(reader), "recid", false);
+		
+		CacheWrapper cache = new SecondOrderCollectorCacheWrapper() {
+			@Override
+		  public int getLuceneDocId(int sourceDocid) {
+			  return docidCache[sourceDocid];
+		  }
+			@Override
+      public int internalHashCode() {
+        return docidCache.hashCode();
+      }
+			@Override
+      public String internalToString() {
+        return "~~recid~~";
+      }
+		};
 		
 		String rWord = words[new Random().nextInt(words.length)];
 		
@@ -46,8 +64,8 @@ public class TestInvenioQueryBitSet extends TestInvenioQuery {
 		
 		for (String word: words) {
 			TermQuery tq = new TermQuery(new Term("text", word));
-			InvenioQuery iq = new InvenioQueryBitSet(tq, "recid", "text", "fake_search_intbitset");
-			assertEquals("<(intbitset,recid)text:" + word + ">", iq.toString());
+			PythonQueryBitSet iq = new PythonQueryBitSet(tq, cache, true, "fake_search");
+			//assertEquals("<(intbitset,recid)text:" + word + ">", iq.toString());
 			
 			TopDocs hits2 = searcher.search(tq, 100);
 			TopDocs hits = searcher.search(iq, 100);

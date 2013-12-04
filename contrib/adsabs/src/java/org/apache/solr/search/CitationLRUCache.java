@@ -101,6 +101,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	private String[] referenceFields;
 	private String[] citationFields;
 	private String[] identifierFields = null;
+	
+	private int sourceReaderHashCode = 0;
 
 	// If we detect that you are mixing int and text fields
 	// we'll treat all values (mappings) as text values
@@ -335,6 +337,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	catch (IOException e) {
     	throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);
     }
+  	sourceReaderHashCode = searcher.hashCode();
   }
   
   private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
@@ -790,6 +793,24 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     return name() + getStatistics().toString();
   }
   
+  @Override
+  public int hashCode() {
+  	return referenceFields.hashCode() ^ identifierFields.hashCode() ^ sourceReaderHashCode;
+  }
+  
+  public String identifierString() {
+  	StringBuffer out = new StringBuffer();
+  	out.append("CitationLRUCache(");
+  	out.append("idfields:");
+  	out.append(Arrays.toString(identifierFields));
+  	if (referenceFields.length > 0) {
+  		out.append(", valfields:");
+  		out.append(Arrays.toString(referenceFields));
+  	}
+  	out.append(")");
+  	return out.toString();
+  }
+  
   public static class SimpleRegenerator implements CacheRegenerator {
     public boolean regenerateItem(SolrIndexSearcher newSearcher,
                                   SolrCache newCache,
@@ -894,6 +915,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 			super(initialSize, ratio, accessOrder);
 			slimit = limit;
 			flimit = sizeInPercent;
+			references = new ArrayList<ArrayIntList>(0); // just to prevent NPE - normally, is
+    	citations = new ArrayList<ArrayIntList>(0);  // initialized in initializeCitationCache 
 		}
 		
 		
@@ -1027,7 +1050,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     }
     
     private class CitationDataIterator implements Iterator<int[][]> {
-	    int cursor;       // index of next element to return
+	    int cursor = 0;       // index of next element to return
 	    
 	    public boolean hasNext() {
         return cursor != citations.size();

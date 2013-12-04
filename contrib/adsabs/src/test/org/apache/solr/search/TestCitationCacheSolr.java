@@ -17,26 +17,11 @@
 package org.apache.solr.search;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.search.DictionaryRecIdCache;
-import org.apache.lucene.search.DictionaryRecIdCache.Str2LuceneId;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.SecondOrderCollectorTopN;
-import org.apache.lucene.search.SecondOrderQuery;
-import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.update.DirectUpdateHandler2;
-import org.apache.solr.update.UpdateHandler;
-import org.apache.solr.util.RefCounted;
 import org.junit.Test;
 
 public class TestCitationCacheSolr extends MontySolrAbstractTestCase {

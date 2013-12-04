@@ -4,7 +4,6 @@ import org.apache.lucene.index.AtomicReader;
 
 public interface CacheWrapper {
   
-  public void collectorInitialized(IndexSearcher searcher, Weight firstOrderWeight);
   
   public int getLuceneDocId(int sourceDocid);
   
@@ -20,6 +19,8 @@ public interface CacheWrapper {
    * Make sure to return a hashcode that reflect nature of this 
    * cache contents, but it is not too slow to be computed!
    */
-  public int hashCode();
+  public int internalHashCode();
+  
+  public String internalToString();
   
 }

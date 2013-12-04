@@ -2,9 +2,9 @@ package org.apache.lucene.queryparser.flexible.aqp;
 
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
-import org.apache.lucene.queryparser.flexible.aqp.builders.InvenioQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.PythonQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.InvenioQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.PythonQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
@@ -40,8 +40,8 @@ public class AqpInvenioQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(GroupQueryNode.class, new GroupQueryNodeBuilder());
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(AqpNonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
-		setBuilder(InvenioQueryNode.class,
-				new InvenioQueryNodeBuilder(this));
+		setBuilder(PythonQueryNode.class,
+				new PythonQueryNodeBuilder(this));
 		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
 		setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());
 		setBuilder(BoostQueryNode.class, new BoostQueryNodeBuilder());

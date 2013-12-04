@@ -84,8 +84,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   
   @Override
   public String toString() {
-    //return "citingMostCited[using:" + boostField + "<" + referenceField  + ":" + fieldsToStr(uniqueIdField) + ">]";
-  	return "citingMostCited[using:" + boostField + "<" + cache.toString() + ">]";
+  	return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", field:" + boostField + ")";
   }
   
   /** Returns a hash code value for this object. */

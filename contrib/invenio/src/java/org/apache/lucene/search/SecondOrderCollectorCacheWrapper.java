@@ -3,7 +3,7 @@ package org.apache.lucene.search;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.AtomicReader;
 
-public class SecondOrderCollectorCacheWrapper implements CacheWrapper {
+public abstract class SecondOrderCollectorCacheWrapper implements CacheWrapper {
 
 
 	@Override
@@ -22,11 +22,6 @@ public class SecondOrderCollectorCacheWrapper implements CacheWrapper {
 	  throw new NotImplementedException();
   }
 
-	@Override
-  public void collectorInitialized(IndexSearcher searcher,
-      Weight firstOrderWeight) {
-		throw new NotImplementedException();
-  }
 
 	@Override
   public int getLuceneDocId(int sourceDocid, Object sourceValue) {
@@ -37,7 +32,14 @@ public class SecondOrderCollectorCacheWrapper implements CacheWrapper {
   public int[] getLuceneDocIds(int sourceDocid, Object sourceValue) {
 		throw new NotImplementedException();
   }
-
-
-
+	
+	@Override
+	public String toString() {
+		return internalToString();
+	}
+	
+	@Override
+	public int hashCode() {
+		return internalHashCode();
+	}
 }

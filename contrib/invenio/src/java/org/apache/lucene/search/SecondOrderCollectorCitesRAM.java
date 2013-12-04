@@ -65,7 +65,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "references[cache:" + cache.toString() + "]";
+		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ")";
 	}
 	
 	/** Returns a hash code value for this object. */

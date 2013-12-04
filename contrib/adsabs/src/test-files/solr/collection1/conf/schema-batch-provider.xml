@@ -64,9 +64,11 @@
       
     <!-- for citation tests -->
     <field name="references" type="string" indexed="true" stored="true" multiValued="true"/>
-    <field name="breferences" type="string" indexed="true" stored="true" multiValued="true"/>
+    <field name="reference" type="string" indexed="true" stored="true" multiValued="true"/>
     
     <dynamicField name="*" type="text_ws" indexed="true"
       stored="true" />
   </fields>
+  <uniqueKey>id</uniqueKey>
+  
 </schema>
