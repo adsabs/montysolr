@@ -93,7 +93,7 @@
     </target>
     
     
-	<target name="test" depends="compile" >
+	<target name="test" depends="clean,compile" >
         <antcall target="common.test" inheritRefs="true"/>
     </target>
     

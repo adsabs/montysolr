@@ -10,7 +10,6 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 
 	@BeforeClass
 	public static void beforeTestSolrCitationQuery() throws Exception {
-		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/adsabs/src/python");
 		MontySolrSetup.addTargetsToHandler("adsabs.targets");
