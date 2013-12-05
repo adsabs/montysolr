@@ -8,6 +8,12 @@ import org.junit.BeforeClass;
 
 public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 	
+	@BeforeClass
+  public static void beforeTestSolrCitationQuery() throws Exception {
+    MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
+        + "/contrib/adsabs/src/python");
+    MontySolrSetup.addTargetsToHandler("adsabs.targets");
+  }
 	
 	public String getSchemaFile() {
 		makeResourcesVisible(this.solrConfig.getResourceLoader(),
