@@ -327,10 +327,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	// with expansion (python name parser was not applied there)
   	testAuthorQuery(
         "Maestro\\,\\ V", 
-        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"author:maestro, v author:maestro, v* author:maestro,",
         		"//*[@numFound='0']",
     		"V\\ Maestro", 
-        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"author:maestro, v author:maestro, v* author:maestro,",
         		"//*[@numFound='0']"
         		);
   	testAuthorQuery(
