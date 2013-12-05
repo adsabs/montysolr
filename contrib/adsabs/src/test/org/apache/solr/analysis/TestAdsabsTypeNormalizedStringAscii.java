@@ -25,6 +25,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TermQuery;
 import org.adsabs.solr.AdsConfig.F;
+import org.junit.BeforeClass;
 
 /**
  * Test for the normalized_string_ascii type
@@ -32,7 +33,13 @@ import org.adsabs.solr.AdsConfig.F;
  */
 public class TestAdsabsTypeNormalizedStringAscii extends MontySolrQueryTestCase {
 
-
+	@BeforeClass
+	public static void beforeTestAdsabsTypeNormalizedStringAscii() throws Exception {
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
+				+ "/contrib/adsabs/src/python");
+		MontySolrSetup.addTargetsToHandler("adsabs.targets");
+	}
+	
   @Override
   public String getSchemaFile() {
     makeResourcesVisible(this.solrConfig.getResourceLoader(),

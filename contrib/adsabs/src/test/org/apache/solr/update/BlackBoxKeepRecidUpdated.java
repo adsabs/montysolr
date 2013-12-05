@@ -54,9 +54,8 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
   @BeforeClass
   public static void beforeBlackBoxKeepRecidUpdated() throws Exception {
     System.setProperty("storeAll", "true");
-    MontySolrSetup.addBuildProperties("contrib/invenio");
     MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-        + "/contrib/invenio/src/python");
+        + "/contrib/adsabs/src/python");
     MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
     MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
   }
@@ -64,13 +63,13 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
   @Override
   public String getSchemaFile() {
     return MontySolrSetup.getMontySolrHome()
-    + "/contrib/invenio/src/test-files/solr/collection1/conf/schema-invenio-keeprecid-updater.xml";
+    + "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-invenio-keeprecid-updater.xml";
   }
 
   @Override
   public String getSolrConfigFile() {
     return MontySolrSetup.getMontySolrHome()
-    + "/contrib/invenio/src/test-files/solr/collection1/conf/solrconfig-invenio-keeprecid-updater.xml";
+    + "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-invenio-keeprecid-updater.xml";
   }
 
   public String getSolrHome() {
