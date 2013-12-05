@@ -1966,7 +1966,7 @@
   </requestHandler>
   
   <transformer name="citations" class="org.apache.solr.response.transform.CitationsTransformerFactory" >
-    <str name="cache-name">citation-cache</str>
+    <str name="cache-name">citations-cache</str>
     <str name="resolution-field">bibcode</str>
   </transformer>
   

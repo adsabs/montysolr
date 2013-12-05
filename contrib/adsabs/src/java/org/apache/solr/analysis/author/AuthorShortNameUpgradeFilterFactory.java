@@ -1,15 +1,10 @@
-/**
- * 
- */
 package org.apache.solr.analysis.author;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.HashSet;
@@ -18,7 +13,6 @@ import java.util.List;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.solr.analysis.PersistingMapTokenFilterFactory;
-import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.StrUtils;
 import org.apache.lucene.analysis.synonym.NewSolrSynonymParser;
 import org.apache.lucene.analysis.synonym.NewSynonymFilterFactory;
@@ -31,7 +25,11 @@ import org.slf4j.LoggerFactory;
 
 
 
-
+/**
+ * This is a trickster class - it modifies the synonym input on the fly, so that
+ * we don't need to bother with producing the multiplicated data from the 
+ * author synonyms. But obviously, this could introduce some bugs...
+ */
 public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilterFactory implements ResourceLoaderAware {
 
   public static final Logger log = LoggerFactory.getLogger(AuthorShortNameUpgradeFilterFactory.class);
@@ -104,6 +102,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
           
           try {
             while ((line = br.readLine()) != null) {
+            	//System.out.println(line);
               // modify the original on-the-fly
               if (line.length() == 0 || line.charAt(0) == '#') {
                 continue; // ignore empty lines and comments
@@ -153,7 +152,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
           }
           
           // pass the modified synonym to the builder to create a synonym map
-          super.add(new InputStreamReader(new ByteArrayInputStream(newBr.toString().getBytes()),
+          super.add(new InputStreamReader(new ByteArrayInputStream(newBr.toString().getBytes(Charset.forName("UTF-8"))),
               Charset.forName("UTF-8").newDecoder()));
 
         }

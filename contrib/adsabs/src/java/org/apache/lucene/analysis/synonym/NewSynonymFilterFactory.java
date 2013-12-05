@@ -17,6 +17,7 @@ package org.apache.lucene.analysis.synonym;
  * limitations under the License.
  */
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,6 +37,7 @@ import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.synonym.SynonymMap;
 import org.apache.lucene.analysis.util.*;
 import org.apache.lucene.util.CharsRef;
+import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.util.Version;
 
 /**
@@ -106,16 +108,16 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       if (synonyms == null)
         throw new IllegalArgumentException("Missing required argument 'synonyms'.");
       
-      CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder()
-        .onMalformedInput(CodingErrorAction.REPORT)
-        .onUnmappableCharacter(CodingErrorAction.REPORT);
+      CharsetDecoder decoder = IOUtils.CHARSET_UTF_8.newDecoder();
+      decoder.onMalformedInput(CodingErrorAction.REPORT)
+        		 .onUnmappableCharacter(CodingErrorAction.REPORT);
       
       SynonymParser parser = getParser(getAnalyzer(loader));
       
       File synonymFile = new File(synonyms);
       if (synonymFile.exists()) {
         decoder.reset();
-        parser.add(new InputStreamReader(loader.openResource(synonyms), decoder));
+        parser.add(new BufferedReader(new InputStreamReader(loader.openResource(synonyms), decoder)));
       } else {
         List<String> files = splitFileNames(synonyms);
         for (String file : files) {

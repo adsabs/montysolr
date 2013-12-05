@@ -24,11 +24,19 @@ import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.junit.BeforeClass;
 
 @SuppressCodecs("SimpleText")
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
-
+	
+	@BeforeClass
+	public static void beforeTestSecondOrderQueryTypesAds() throws Exception {
+		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
+        + "/contrib/adsabs/src/python");
+    MontySolrSetup.addTargetsToHandler("adsabs.targets");
+	}
+	
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()
 		    + "/contrib/adsabs/src/test-files/solr/collection1/conf/"

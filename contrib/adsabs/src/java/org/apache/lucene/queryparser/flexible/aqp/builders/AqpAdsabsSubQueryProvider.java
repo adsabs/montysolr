@@ -755,7 +755,7 @@ AqpFunctionQueryBuilderProvider {
 		 *    What experts are citing; this mimics the ADS Classic implementation
 		 *    ```references(topn(200, classic_relevance(Q)))```
 		 *    
-		 *    In other words, this will first find papers using the query, 
+		 *    In other words, this will first find papers using the inner query, 
 		 *    it will re-score them using the ADS classic ranking formula,
 		 *    then selects 200 top papers. And then get **references from** these
 		 *    200 papers.
@@ -775,14 +775,14 @@ AqpFunctionQueryBuilderProvider {
 				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
 				
 				
-				CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
+				CacheWrapper referencesWrapper = new SecondOrderCollectorCacheWrapper() {
 					@Override
 					public AtomicReader getAtomicReader() {
 						return req.getSearcher().getAtomicReader();
 					}
 					@Override
 				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getCitations(sourceDocid);
+					  return cache.getReferences(sourceDocid);
 				  }
 					
 					@SuppressWarnings("unchecked")
@@ -803,9 +803,9 @@ AqpFunctionQueryBuilderProvider {
 				return  new SecondOrderQuery( // references
 						new SecondOrderQuery( // topn
 								new SecondOrderQuery(innerQuery, // classic_relevance
-										new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, "cite_read_boost")), 
+										new SecondOrderCollectorAdsClassicScoringFormula(referencesWrapper, "cite_read_boost")), 
 										new SecondOrderCollectorTopN(200)),
-										new SecondOrderCollectorCitesRAM(citationsWrapper));
+										new SecondOrderCollectorCitesRAM(referencesWrapper));
 
 			};
 		});

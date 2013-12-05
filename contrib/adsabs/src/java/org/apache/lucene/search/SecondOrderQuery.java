@@ -95,16 +95,22 @@ public class SecondOrderQuery extends Query {
 			
 			Weight firstOrderWeight = firstOrderQuery.createWeight(searcher);
 			
+			//System.out.println("preparing: " + this.secondOrderCollector);
+			
 			// conduct search only if initialization of necessary caches went well
 			if (!alreadyExecuted && secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
 				//System.out.println("Executing: " + firstOrderQuery.toString());
 				searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
+				
+				//System.out.println("  searching: " + this.secondOrderCollector);
 				
 				// TODO: can we avoid being called (initialized) in a loop?
 				// this looks like a bad design (on my side) if it happens
 				// it happens when 2nd order operators are nested
 				alreadyExecuted = true;
 			}
+			
+			//System.out.println("done:" + this.secondOrderCollector);
 			
 			// no logging, we are basic lucene class
 			return new SecondOrderWeight(firstOrderWeight, secondOrderCollector);

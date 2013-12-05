@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -173,14 +174,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   @Override 
   public void setUp() throws Exception {
   	super.setUp();
-  	
-  	
-  	if (System.getProperty("file.encoding") != null && !"UTF-8".equals(Charset.forName(System.getProperty("file.encoding")).name())) {
-  		throw new IllegalAccessError("The file.encoding is:" + System.getProperty("file.encoding") + 
-  				" however it must be UTF-8. Because the synonym file will be written using UTF-8." +
-  				" But synonym filter will use file.encoding property when loading the data. Please" +
-  				" set -Dfile.encoding=UTF-8");
-  	}
   	
   	
     assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk,"));
