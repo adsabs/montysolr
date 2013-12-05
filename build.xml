@@ -1,6 +1,6 @@
 <project name="montysolr" default="usage">
 
-	<description>Java extensions for Invenio - Java search engine made python-friendly</description>
+	<description>Java extensions for Python - Java search engine made python-friendly</description>
 
 
 	<!--
@@ -405,16 +405,13 @@ ant=${ant}
     -->
 	
 	<target name="build-all" depends="get-solr,build-solr,build,jar,build-contrib"
-	        description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Invenio inside Solr"/>
+	        description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Python inside Solr"/>
 	    
     
     <target name="build-contrib" >
       
       <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
         <arg line="build-all -f ${common.dir}/contrib/antlrqueryparser/build.xml"/>
-      </exec>
-      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
-        <arg line="build-all -f ${common.dir}/contrib/invenio/build.xml"/>
       </exec>
       <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
         <arg line="build-all -f ${common.dir}/contrib/newseman/build.xml"/>
@@ -434,7 +431,6 @@ ant=${ant}
         <arg line="build-all"/>
         <arg value="-f"/>
         <fileset dir="${common.dir}/contrib">
-          <include name="**/invenio/build.xml"/>
           <include name="**/newseman/build.xml"/>
           <include name="**/adsabs/build.xml"/>
           <include name="**/examples/build.xml"/>
@@ -450,7 +446,6 @@ ant=${ant}
           <arg value="-f"/>
           <fileset dir="${common.dir}/contrib">
             <include name="**/antlrqueryparser/build.xml"/>
-            <include name="**/invenio/build.xml"/>
             <include name="**/newseman/build.xml"/>
           </fileset>
         </apply>
@@ -640,12 +635,12 @@ ant=${ant}
 
 
 	<target name="run-example"
-	   description="Assembles Invenio example and starts MontySolr (don't forget to do build-all first)"
+	   description="Assembles ADSABS example and starts MontySolr (don't forget to do build-all first)"
 	   depends="">
 
 		<exec executable="${ant}" dir="${common.dir}/contrib/examples" logerror="true" 
 			newenvironment="true">
-            <arg line="build-one run-configured -Dename=invenio -Dprofile=normal.profile" />
+            <arg line="build-one run-configured -Dename=adsabs -Dprofile=normal.profile" />
         </exec>
 
 	</target>

@@ -9,9 +9,6 @@ import org.apache.lucene.queryparser.flexible.standard.config.FieldDateResolutio
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
-import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpInvenioQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.config.InvenioQueryAttributeImpl;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.solr.search.AqpAdsabsQParser;
 import org.slf4j.Logger;
@@ -69,7 +66,6 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		addFieldConfigListener(new FieldDateResolutionFCListener(this));
 
 		// Default Values
-		set(AqpInvenioQueryConfigHandler.ConfigurationKeys.INVENIO_QUERY, new InvenioQueryAttributeImpl());
 		set(ConfigurationKeys.SOLR_REQUEST, new AqpRequestParamsImpl());
 		set(ConfigurationKeys.SOLR_LOGGER, log);
 		set(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG, new AqpFunctionQueryBuilderConfigImpl());

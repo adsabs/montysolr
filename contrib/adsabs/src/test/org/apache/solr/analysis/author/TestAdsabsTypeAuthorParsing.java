@@ -34,9 +34,11 @@ import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -171,6 +173,16 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   @Override 
   public void setUp() throws Exception {
   	super.setUp();
+  	
+  	
+  	if (System.getProperty("file.encoding") != null && !"UTF-8".equals(Charset.forName(System.getProperty("file.encoding")).name())) {
+  		throw new IllegalAccessError("The file.encoding is:" + System.getProperty("file.encoding") + 
+  				" however it must be UTF-8. Because the synonym file will be written using UTF-8." +
+  				" But synonym filter will use file.encoding property when loading the data. Please" +
+  				" set -Dfile.encoding=UTF-8");
+  	}
+  	
+  	
     assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk,"));
     assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M."));
     assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Marel"));
@@ -665,8 +677,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * upgraded && transliterated 
      * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
      */
+    //setDebug(true);
     testAuthorQuery(
-        "adAMčuk", expected + " author:adamguk, m author:adamčuk, m author:adamšuk, m", 
+        //"adAMčuk"
+    		"adAM\u010duk", expected + " author:adamguk, m author:adamčuk, m author:adamšuk, m", 
         "//*[@numFound='34']",
         // adamčuk numFound=34
         //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
@@ -720,7 +734,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
         //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
         //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
-        "adAMšuk", "author:adamšuk, author:adamšuk,* " +
+        
+        //"adAMšuk"
+        "adAM\u0161uk", "author:adamšuk, author:adamšuk,* " +
                    "author:adamshuk, author:adamshuk,* " +
                    "author:adamsuk, author:adamsuk,* " +
                    "author:adamguk, m author:adamčuk, m author:adamšuk, m", 
@@ -2224,7 +2240,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assert vals.length%3==0;
     for (int i=0;i<vals.length;i=i+3) {
       if (tp.debugParser) {
-      System.out.println("Running test for " + String.format("%s:%s", author_field, vals[i]));
+      System.out.println(escapeUnicode(vals[i]));
+      System.out.println("Running test for " + author_field + ":" + vals[i]);
       String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])));
       
       ArrayList<String> out = new ArrayList<String>();
@@ -2247,10 +2264,18 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       }
       System.out.println();
       }
-      assertQueryEquals(req("defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])),
-          vals[i+1],
-          null);
-      assertQ(req("fl", "id," + author_field, "rows", "100", "q", String.format("%s:%s", author_field, vals[i])), vals[i+2].split(";"));
+      boolean failed = true;
+      try {
+	      assertQueryEquals(req("defType", "aqp", "q", author_field + ":" + vals[i]),
+	          vals[i+1],
+	          null);
+	      assertQ(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]), vals[i+2].split(";"));
+	      failed = false;
+      }
+      finally {
+      	if (failed)
+      		System.out.println("Offending test case: " + escapeUnicode(vals[i]) + " expected: " + escapeUnicode(vals[i+1]));
+      }
     }
 
   }
@@ -2312,5 +2337,18 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     }
 
     return q;
+  }
+  
+  public String escapeUnicode(String input) {
+    StringBuilder b = new StringBuilder(input.length());
+    Formatter f = new Formatter(b);
+    for (char c : input.toCharArray()) {
+      if (c < 128) {
+        b.append(c);
+      } else {
+        f.format("\\u%04x", (int) c);
+      }
+    }
+    return b.toString();
   }
 }

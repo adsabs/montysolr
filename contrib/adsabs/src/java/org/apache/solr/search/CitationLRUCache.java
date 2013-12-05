@@ -20,7 +20,6 @@ package org.apache.solr.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -33,9 +32,6 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.DocTermOrds;
 import org.apache.lucene.index.DocsEnum;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexReaderContext;
-import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.FieldCache;
@@ -116,6 +112,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	
 
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public Object init(Map args, Object persistence, CacheRegenerator regenerator) {
     super.init(args, regenerator);
     
@@ -240,7 +237,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   		if (val==null)
   			return null;
   		
-      @SuppressWarnings("unchecked")
       RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
       int[] values = relMap.getCitations((Integer)val);
       
@@ -259,7 +255,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   
   public int[] getCitations(int docid) {
     synchronized (map) {
-      @SuppressWarnings("unchecked")
       RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
       int[] val = relMap.getCitations(docid);
       
@@ -282,7 +277,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   		if (val==null)
   			return null;
   		
-      @SuppressWarnings("unchecked")
       RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
       int[] values = relMap.getReferences((Integer)val);
       
@@ -301,7 +295,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   
   public int[] getReferences(int docid) {
     synchronized (map) {
-      @SuppressWarnings("unchecked")
       RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
       int[] val = relMap.getReferences(docid);
       
@@ -353,7 +346,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   			null,
   			new KVSetter() {
 	  		@Override
-	  		@SuppressWarnings({ "unused", "unchecked" })
+	  		@SuppressWarnings({ "unchecked" })
 	      public void set (int docbase, int docid, Object value) {
 	    		put((K) value, (V) (Integer) (docbase+docid));
 	    	}
@@ -361,7 +354,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	);
   	
   	if (this.referenceFields.length > 0 || this.citationFields.length > 0) {
-	  	final RelationshipLinkedHashMap relMap = (RelationshipLinkedHashMap) map;
+	  	@SuppressWarnings("rawtypes")
+      final RelationshipLinkedHashMap relMap = (RelationshipLinkedHashMap) map;
 	  	relMap.initializeCitationCache(searcher.maxDoc());
 	  	
 	  	
@@ -369,7 +363,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	  			null,
 	  			new KVSetter() {
 			  		@Override
-			  		@SuppressWarnings({ "unused", "unchecked" })
 			      public void set (int docbase, int docid, Object value) {
 			  			synchronized (relMap) {
 			  				relMap.addReference(docbase+docid, value);
@@ -382,7 +375,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	  			null,
 	  			new KVSetter() {
 			  		@Override
-			  		@SuppressWarnings({ "unused", "unchecked" })
 			      public void set (int docbase, int docid, Object value) {
 			  			synchronized (relMap) {
 			  				relMap.addCitation(docbase+docid, value);
@@ -432,13 +424,13 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	    //e2.printStackTrace();
     //}
     
-    for (IndexReaderContext c : searcher.getTopReaderContext().children()) {
-    	//System.out.println("context=" + c.reader().getCombinedCoreAndDeletesKey());
-    }
+//    for (IndexReaderContext c : searcher.getTopReaderContext().children()) {
+//    	//System.out.println("context=" + c.reader().getCombinedCoreAndDeletesKey());
+//    }
     
-    for (IndexReaderContext l : searcher.getIndexReader().leaves()) {
-    	//System.out.println(l);
-    }
+//    for (IndexReaderContext l : searcher.getIndexReader().leaves()) {
+//    	//System.out.println(l);
+//    }
     
     Bits liveDocs = searcher.getAtomicReader().getLiveDocs();
     //System.out.println(liveDocs == null ? "liveDocs=" + null : "liveDocs=" + liveDocs.length());
@@ -457,8 +449,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
       // this must always be available, so we build it no matter what...
       // XXX: make it update only the necessary IDs (not the whole index)
       unInvertedTheDamnThing(searcher.getAtomicReader(), fields, liveDocs, new KVSetter() {
-	  		@Override
-	  		@SuppressWarnings({ "unused", "unchecked" })
+	  		@SuppressWarnings("unchecked")
+        @Override
 	      public void set (int docbase, int docid, Object value) {
 	    		put((K) value, (V) (Integer) (docbase+docid));
 	    	}
@@ -633,7 +625,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   
   
   private class KVSetter {
-  	@SuppressWarnings({ "unused", "unchecked" })
     public void set (int docbase, int docid, Object value) {
   		throw new NotImplementedException();
   	}
@@ -642,7 +633,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
    * Given the set of fields, we'll look inside them and retrieve (into memory)
    * all values
    */
-  @SuppressWarnings("unchecked")
   private void unInvertedTheDamnThing(AtomicReader reader, Map<String, 
   		List<String>> fields, Bits liveDocs, KVSetter setter) throws IOException {
   	
@@ -765,6 +755,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     return "$URL: http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0/solr/core/src/java/org/apache/solr/search/LRUCache.java $";
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public NamedList getStatistics() {
     NamedList lst = new SimpleOrderedMap();
     synchronized (map) {
@@ -812,6 +803,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
   
   public static class SimpleRegenerator implements CacheRegenerator {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public boolean regenerateItem(SolrIndexSearcher newSearcher,
                                   SolrCache newCache,
                                   SolrCache oldCache,
@@ -842,14 +834,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
       elements[size++] = elem;
     }
 
-    public void add(int pos, int start, int end) {
-      if (size + 3 > elements.length) ensureCapacity(size + 3);
-      elements[size] = pos;
-      elements[size+1] = start;
-      elements[size+2] = end;
-      size += 3;
-    }
-    
     public int[] getElements() {
     	int[] out = new int[size];
     	System.arraycopy(elements, 0, out, 0, size);
@@ -882,6 +866,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     }
     
     /** returns the first few positions (without offsets); debug only */
+    @SuppressWarnings("unused")
     public String toString(int stride) {
       int s = size() / stride;
       int len = Math.min(10, s); // avoid printing huge lists
@@ -904,22 +889,23 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
    * will always grow to the maxdoc size, so that no 
    * evictions happen
    */
-	public class RelationshipLinkedHashMap<K,V> extends LinkedHashMap {
+	@SuppressWarnings("hiding")
+  public class RelationshipLinkedHashMap<K,V> extends LinkedHashMap<K,V> {
+    private static final long serialVersionUID = -356203002886265188L;
 		int slimit;
 		List<ArrayIntList> references;
 		List<ArrayIntList> citations;
-		private Float flimit;
   	
 		public RelationshipLinkedHashMap (int initialSize, float ratio, boolean accessOrder, 
 				int limit, Float sizeInPercent) {
 			super(initialSize, ratio, accessOrder);
 			slimit = limit;
-			flimit = sizeInPercent;
 			references = new ArrayList<ArrayIntList>(0); // just to prevent NPE - normally, is
     	citations = new ArrayList<ArrayIntList>(0);  // initialized in initializeCitationCache 
 		}
 		
 		
+    @SuppressWarnings("rawtypes")
     @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
     	return false;

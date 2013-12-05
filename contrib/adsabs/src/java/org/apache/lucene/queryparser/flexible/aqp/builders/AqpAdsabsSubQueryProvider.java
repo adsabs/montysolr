@@ -20,7 +20,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
 import org.apache.lucene.search.BooleanClause;
@@ -49,7 +48,6 @@ import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
-import org.apache.lucene.util.LuceneTestCase.BadApple;
 import org.apache.lucene.util.Version;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
@@ -269,7 +267,6 @@ AqpFunctionQueryBuilderProvider {
 
 				MoreLikeThisQuery mlt = new MoreLikeThisQueryFixed(readers.toString(), new String[] {fieldName}, 
 						new WhitespaceAnalyzer(Version.LUCENE_40), fieldName);
-				SolrParams params = req.getParams();
 
 				// configurable params
 				mlt.setMinTermFrequency(0);
@@ -425,6 +422,7 @@ AqpFunctionQueryBuilderProvider {
 				}
 				
 				final SolrQueryRequest req = fp.getReq();
+				@SuppressWarnings("rawtypes")
 				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
 				
 				
@@ -438,7 +436,8 @@ AqpFunctionQueryBuilderProvider {
 					  return cache.getCitations(sourceDocid);
 				  }
 					
-					@Override
+					@SuppressWarnings("unchecked")
+          @Override
 					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					  return (Integer) cache.get(sourceValue);
 				  }
@@ -591,6 +590,7 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				final SolrQueryRequest req = fp.getReq();
+				@SuppressWarnings("rawtypes")
 				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
 				
 				
@@ -604,7 +604,8 @@ AqpFunctionQueryBuilderProvider {
 					  return cache.getCitations(sourceDocid);
 				  }
 					
-					@Override
+					@SuppressWarnings("unchecked")
+          @Override
 					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					  return (Integer) cache.get(sourceValue);
 				  }
@@ -658,7 +659,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				final SolrQueryRequest req = fp.getReq();
-				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
+				@SuppressWarnings("rawtypes")
+        final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
 				
 				
 				CacheWrapper referencesWrapper = new SecondOrderCollectorCacheWrapper() {
@@ -671,7 +673,8 @@ AqpFunctionQueryBuilderProvider {
 					  return cache.getReferences(sourceDocid);
 				  }
 					
-					@Override
+					@SuppressWarnings("unchecked")
+          @Override
 					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					  return (Integer) cache.get(sourceValue);
 				  }
@@ -768,6 +771,7 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				final SolrQueryRequest req = fp.getReq();
+				@SuppressWarnings("rawtypes")
 				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
 				
 				
@@ -781,7 +785,8 @@ AqpFunctionQueryBuilderProvider {
 					  return cache.getCitations(sourceDocid);
 				  }
 					
-					@Override
+					@SuppressWarnings("unchecked")
+          @Override
 					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					  return (Integer) cache.get(sourceValue);
 				  }
@@ -845,7 +850,8 @@ AqpFunctionQueryBuilderProvider {
 					  return cache.getCitations(sourceDocid);
 				  }
 					
-					@Override
+					@SuppressWarnings("unchecked")
+          @Override
 					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					  return (Integer) cache.get(sourceValue);
 				  }
@@ -888,6 +894,7 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				final SolrQueryRequest req = fp.getReq();
+				@SuppressWarnings("rawtypes")
 				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
 				
 				
@@ -901,7 +908,8 @@ AqpFunctionQueryBuilderProvider {
 					  return cache.getCitations(sourceDocid);
 				  }
 					
-					@Override
+					@SuppressWarnings("unchecked")
+          @Override
 					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					  return (Integer) cache.get(sourceValue);
 				  }
@@ -943,6 +951,7 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				final SolrQueryRequest req = fp.getReq();
+				@SuppressWarnings("rawtypes")
 				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
 				
 				
@@ -956,7 +965,8 @@ AqpFunctionQueryBuilderProvider {
 					  return cache.getCitations(sourceDocid);
 				  }
 					
-					@Override
+					@SuppressWarnings("unchecked")
+          @Override
 					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					  return (Integer) cache.get(sourceValue);
 				  }
@@ -994,7 +1004,8 @@ AqpFunctionQueryBuilderProvider {
 					  return cache.getCitations(sourceDocid);
 				  }
 					
-					@Override
+					@SuppressWarnings("unchecked")
+          @Override
 					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					  return (Integer) cache.get(sourceValue);
 				  }
@@ -1197,11 +1208,13 @@ AqpFunctionQueryBuilderProvider {
 
 	}
 
+	/*
 	private void getSpan(QueryNode node, Integer[] span) {
 		List<QueryNode> children = node.getChildren();
 		swimDeep(children.get(0), span);
 		swimDeep(children.get(children.size()-1), span);
 	}
+	
 
 	private void swimDeep(QueryNode node, Integer[] span) {
 
@@ -1225,5 +1238,6 @@ AqpFunctionQueryBuilderProvider {
 		}
 
 	}
+	*/
 
 }

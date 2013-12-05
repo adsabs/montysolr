@@ -24,6 +24,7 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.solr.request.SolrQueryRequest;
 import org.junit.Test;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 
 	public String getSchemaFile() {
@@ -86,7 +87,6 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 	}
 	
 
-	@SuppressWarnings("unchecked")
   @Test
 	public void test() throws IOException, Exception {
 		
@@ -301,7 +301,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 		assertTrue( cache.get("b8").equals(10));
 		assertTrue( cache.get("b9").equals(11));
 		assertTrue( cache.get("b10").equals(9));
-		int[] xx = cache.getCitations("b8");
+		
 		assertArrayEquals("Wrong citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 10, 11}, cache.getCitations("b2"));
 		assertArrayEquals("Wrong citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}, cache.getCitations("b3"));
 		assertArrayEquals("Wrong references", new int[]{4, 2, 2}, cache.getReferences("b8"));		
