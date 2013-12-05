@@ -322,6 +322,28 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+  	//#487 - these author names should parse the same; Maestro, V was
+  	// picked by the python name parser (V removed); Boyjian had problems
+  	// with expansion (python name parser was not applied there)
+  	testAuthorQuery(
+        "Maestro\\,\\ V", 
+        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"//*[@numFound='0']",
+    		"V\\ Maestro", 
+        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"//*[@numFound='0']"
+        		);
+  	testAuthorQuery(
+        "Boyajian\\,\\ T", 
+        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"//*[@numFound='0']",
+    		"T\\ Boyajian", 
+        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"//*[@numFound='0']"
+        		);
+  	
+  	
+  	
   	// first is considered a title
   	testAuthorQuery(
         "first", 
@@ -332,7 +354,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	
     // 'xxx' will be removed from the author
 	  assertQueryEquals(req("defType", "aqp", "q", "author:\"accomazzi, alberto, xxx.\""), 
-        "author:accomazzi, alberto author:accomazzi, a author:accomazzi,",
+        "author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,",
         BooleanQuery.class);
     
     
@@ -374,11 +396,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"//*[@numFound='0']"
         		);
   	
+  	// hmmm.. these regexes must be slow; we should not generate them
+  	// also, before #487, the first query would generate:
+    //"author:kao, p ing tzu author:kao, p ing tzu * author:kao, p i tzu author:kao, p i tzu * author:kao, p ing t author:kao, p ing t * author:kao, p i t author:kao, p i t * author:kao, p author:kao,",
   	testAuthorQuery(
     		"\"P'ING-TZU KAO\"",
-        		"author:kao, p ing tzu author:kao, p ing tzu * author:kao, p i tzu author:kao, p i tzu * author:kao, p ing t author:kao, p ing t * author:kao, p i t author:kao, p i t * author:kao, p author:kao,",
+    		    "author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p author:kao,",
         		"//*[@numFound='0']",
-        // hmmm - why this one generated regex? and the above didn't?
     		"\"Kao, P'ing-Tzu\"",
         		"author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p author:kao,",
         		"//*[@numFound='0']"

@@ -65,6 +65,12 @@
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
+			
+			<!--  If you update the normalization components (ie. add new steps; especially
+			      at the beginning, then you should also review the code inside:
+			      AqpAdsabsExpandAuthorSearchProcessor.normalizeAuthorName()
+			 -->
+			       
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->

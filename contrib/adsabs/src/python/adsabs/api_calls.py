@@ -104,14 +104,17 @@ def fix_name(input):
             input = input.replace(input[start:end], "'")
     return input
     
+#name = HumanName(fix_name(input))
+prefixes = constants.PREFIXES
+prefixes.add("'t")
+suffixes = constants.SUFFIXES
+suffixes.remove('v')
+suffixes.remove('i')    
 def parse_human_name(input):
     """Parses human names using python nameparse library
     """
     
-    #name = HumanName(fix_name(input))
-    prefixes = constants.PREFIXES
-    prefixes.add("'t")
-    name = HumanName(fix_name(input), prefixes_c=prefixes)
+    name = HumanName(fix_name(input), prefixes_c=prefixes, suffixes_c=suffixes)
 
 
     out = {}

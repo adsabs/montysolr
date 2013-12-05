@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +9,13 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
+import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -25,7 +32,10 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.solr.analysis.author.AuthorNormalizeFilter;
+import org.apache.solr.analysis.author.AuthorNormalizeFilterFactory;
 import org.apache.solr.analysis.author.AuthorUtils;
+import org.apache.solr.analysis.author.PythonicAuthorNormalizeFilterFactory;
 
 /**
  * Looks at the QueryNode(s) and if they are author searches,
@@ -65,10 +75,14 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     
     if (node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE) != null) {
       String origValue = (String) node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE);
-      String normalized = AuthorUtils.normalizeAuthor(origValue);
-      NameInfo nameInfo = new NameInfo(normalized);
-      int[] level = new int[]{0}; //ugly, ugly
-      return expandNodes(node, nameInfo, level);
+      
+      //String normalized = AuthorUtils.normalizeAuthor(origValue);
+      for (String normalized: normalizeAuthorName(origValue)) {
+	      NameInfo nameInfo = new NameInfo(normalized);
+	      int[] level = new int[]{0}; //ugly, ugly
+	      node = expandNodes(node, nameInfo, level);
+      }
+      
     }
     return node;
   }
@@ -250,6 +264,48 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     return parts.length==longParts;
   }
   
+  /*
+   * This is a part of the first part of the author chain tokenizer;
+   * but it is very important, because without it, the search
+   * may be *slightly* different. So, whenever you update the tokenizer
+   * chain, you should always review also this method
+   */
+  
+  private TokenStreamComponents tsc = null;
+  private ReusableStringReader reader = null;
+  private List<String> normalizeAuthorName(String input) throws QueryNodeException {
+  	if (reader == null) { // well, nice try, but it will be always created new...
+  		TokenFilterFactory[] filters = new TokenFilterFactory[2];
+  		TokenizerFactory tokenizer = new KeywordTokenizerFactory();
+  		filters[1] = new AuthorNormalizeFilterFactory();
+  		filters[0] = new PythonicAuthorNormalizeFilterFactory();
+  		reader = new ReusableStringReader();
+    	Tokenizer tk = tokenizer.create( reader );
+      TokenStream ts = tk;
+      for (TokenFilterFactory filter : filters) {
+        ts = filter.create(ts);
+      }
+      tsc = new TokenStreamComponents(tk, ts);
+  	}
+  	
+    TokenStream ts = tsc.getTokenStream();
+    reader.setValue(input);
+  	try {
+	    ts.reset();
+	    List<String> out = new ArrayList<String>();
+	  	CharTermAttribute termAtt;
+	  	while (ts.incrementToken()) {
+	  		termAtt = ts.getAttribute(CharTermAttribute.class);
+	  		out.add(termAtt.toString());
+	  	}
+	  	return out;
+    } catch (IOException e) {
+	    throw new QueryNodeException(new MessageImpl("Error parsing: " + input, e));
+    }
+  	
+  	
+  }
+  
   class NameInfo {
     public String origName;
     public boolean lastPartWasAcronym;
@@ -268,6 +324,52 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
       
       noOfParts = parts.length;
       origName = name;
+    }
+  }
+  
+  static final class ReusableStringReader extends Reader {
+    private int pos = 0, size = 0;
+    private String s = null;
+    
+    void setValue(String s) {
+      this.s = s;
+      this.size = s.length();
+      this.pos = 0;
+    }
+    
+    @Override
+    public int read() {
+      if (pos < size) {
+        return s.charAt(pos++);
+      } else {
+        s = null;
+        return -1;
+      }
+    }
+    
+    @Override
+    public int read(char[] c, int off, int len) {
+      if (pos < size) {
+        len = Math.min(len, size-pos);
+        s.getChars(pos, pos+len, c, off);
+        pos += len;
+        return len;
+      } else {
+        s = null;
+        return -1;
+      }
+    }
+    
+    @Override
+    public void close() {
+      pos = size; // this prevents NPE when reading after close!
+      s = null;
+    }
+    
+    @Override
+    public void reset() {
+    	this.size = s.length();
+      this.pos = 0;
     }
   }
 
