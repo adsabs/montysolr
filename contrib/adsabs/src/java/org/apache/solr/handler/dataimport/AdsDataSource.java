@@ -6,14 +6,18 @@ import java.io.StringReader;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.solr.common.SolrException;
+import org.bson.BSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,6 +166,11 @@ public class AdsDataSource extends InvenioDataSource {
 		
 		DBCursor cursor = docs.find(mongoQuery, mongoFields);
 		Iterator<DBObject> it = cursor.iterator();
+		Object v;
+		String mongoField;
+		HashMap<String, Map<String, String>> collectionsToFetch = new HashMap<String, Map<String, String>>();
+		HashMap<String, Set<String>> collectionsToFetchFields = new HashMap<String, Set<String>>();
+		
 		while (it.hasNext()) {
 			DBObject doc = it.next();
 			String docId = (String) doc.get(mongoDocIdField);
@@ -169,11 +178,57 @@ public class AdsDataSource extends InvenioDataSource {
 			
 			Map<String, Object> row = new HashMap<String, Object>();
 			for (String column : fieldColumnMap.keySet()) {
-				row.put(column, doc.get(fieldColumnMap.get(column)));
+				mongoField = fieldColumnMap.get(column);
+				if (doc.containsField(mongoField)) {
+					v = doc.get(mongoField);
+					if (v instanceof BSONObject) {
+						BSONObject o = (BSONObject) v;
+						if (o.containsField("$ref")) {
+							// we'll collect the references to other collections and retrieve them in another big swoop
+							String colName = o.get("$ref").toString();
+							try {
+								collectionsToFetch.get(colName).put(o.get("$id").toString(), docId);
+								collectionsToFetchFields.get(colName).add(colName);
+							}
+							catch (NullPointerException e) {
+								collectionsToFetch.put(colName, new HashMap<String, String>());
+								collectionsToFetch.get(colName).put(o.get("$id").toString(), docId);
+								collectionsToFetchFields.put(colName, new HashSet<String>());
+								collectionsToFetchFields.get(colName).add(colName);
+							}
+						}
+						else {
+							row.put(column, v);
+						}
+					}
+					else {
+						row.put(column, v);
+					}
+				}
 			}
 			mongoCache.put(docId, row);
 		}
 		cursor.close();
+		
+		// now fetch the referenced collection
+		if (collectionsToFetch.size() > 0) {
+			for (Entry<String, Map<String,String>> entry: collectionsToFetch.entrySet()) {
+				String collectionName = entry.getKey();
+				BasicDBObject refMongoFields = new BasicDBObject();
+				for (String field: collectionsToFetchFields.get(collectionName)) {
+					ArrayList<String> idValues = new ArrayList<String>(entry.getValue().size());
+					for (String idVal: entry.getValue().values()) {
+						idValues.add(idVal);
+					}
+					refMongoFields.put(field, new BasicDBObject("$in", idValues));
+				}
+				cursor = docs.getCollection(collectionName).find(new BasicDBObject(), refMongoFields);
+				
+				// TODO - read the data and put them inside row
+				
+				cursor.close();
+			}
+		}
   }
 
 	@Override

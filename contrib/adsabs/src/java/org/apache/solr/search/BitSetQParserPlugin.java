@@ -17,11 +17,16 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BitSetQuery;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Query;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.Base64;
+import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.handler.RequestHandlerUtils;
+import org.apache.solr.handler.loader.ContentStreamLoader;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.SchemaField;
+import org.apache.solr.update.processor.UpdateRequestProcessor;
 
 public class BitSetQParserPlugin extends QParserPlugin {
 
@@ -51,12 +56,36 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 			@Override
 			public Query parse() throws ParseException {
+				
+				
+				// read the data - it can be either in the content stream xor directly
+				// in the open value (perhaps encoded, compressed etc)
 
-				// we must harvest lucene docids
-				AtomicReader reader = req.getSearcher().getAtomicReader();
-				BitSet bits = readBase64String(localParams.get(QueryParsing.V), 
-						localParams.get("compression", "none"),
-						localParams.getBool("little_endian", false));
+
+
+		      Iterable<ContentStream> streams = req.getContentStreams();
+		      if (streams == null) {
+		      	// we must harvest lucene docids
+						AtomicReader reader = req.getSearcher().getAtomicReader();
+						BitSet bits = readBase64String(localParams.get(QueryParsing.V), 
+								localParams.get("compression", "none"),
+								localParams.getBool("little_endian", false));
+						
+						if (data == null) {
+		        	throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "missing data");
+		        }
+						
+		      } else {
+		        for (ContentStream stream : streams) {
+		          documentLoader.load(req, rsp, stream, processor);
+		        }
+		        if (data == null) {
+		        	throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "empty content stream");
+		        }
+		      }
+			
+
+				
 
 				if (bits.cardinality() < 1)
 					return null;
