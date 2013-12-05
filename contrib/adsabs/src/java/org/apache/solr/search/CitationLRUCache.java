@@ -319,11 +319,11 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 
   public void warm(SolrIndexSearcher searcher, SolrCache<K,V> old) {
   	try {
+  		log.info("Warming cache (" + name() + "): " + searcher);
 	  	if (this.incremental ) {
 	  		warmIncrementally(searcher, old);
 	  	}
 	  	else {
-	  		//System.out.println("Rebuilding cache for:" + searcher);
 	      warmRebuildEverything(searcher, old);
 	  	}
   	} 
@@ -924,7 +924,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     
     
     public int[] getReferences(int docid) {
-    	if (references.get(docid) != null) {
+    	if (docid < references.size() && references.get(docid) != null) {
     		ArrayIntList c = references.get(docid);
     		if (c != null)
     			return c.getElements();
@@ -942,7 +942,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     }
     
     public int[] getCitations(int docid) {
-    	if (citations.get(docid) != null) {
+    	if (docid < citations.size() && citations.get(docid) != null) {
     		ArrayIntList c = citations.get(docid);
     		if (c != null)
     			return c.getElements();

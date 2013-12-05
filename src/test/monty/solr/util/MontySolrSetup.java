@@ -74,6 +74,17 @@ public class MontySolrSetup {
 	}
 	
 	
+	/*
+	 * Should be called by classes that manually called init()
+	 * If you get property violation exception from Lucene
+	 */
+	public static void deinit() {
+		System.clearProperty("montysolr.bridge");
+		System.clearProperty("montysolr.home");
+		System.clearProperty("montysolr.modulepath");
+		System.clearProperty("solr.test.sys.prop1");
+		System.clearProperty("solr.test.sys.prop2");
+  }
 	
 	public static void checkJCCPath() throws Exception {
 		
@@ -288,4 +299,7 @@ public class MontySolrSetup {
 		}
 		throw new Exception("The module.path must exist: " + modulePath);
 	}
+
+
+	
 }

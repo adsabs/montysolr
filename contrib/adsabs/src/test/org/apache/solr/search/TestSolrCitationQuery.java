@@ -10,6 +10,7 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 
 	@BeforeClass
 	public static void beforeTestSolrCitationQuery() throws Exception {
+		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
 		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
 				+ "/contrib/adsabs/src/python");
 		MontySolrSetup.addTargetsToHandler("adsabs.targets");
@@ -32,15 +33,18 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 
 
 	public void testSearch() throws Exception {
-
+		
+		//assertU(delQ("*:*"));
+		assertU(commit()); // if i remove this, the test will sometimes fail (i don't understand...)
 		assertU(adoc("id", "0", "bibcode", "A", "reference", "B", "reference", "C", "reference", "D"));
 		assertU(adoc("id", "1", "bibcode", "B", "reference", "X"));
 		assertU(adoc("id", "2", "bibcode", "C", "reference", "E", "reference", "F"));
 		assertU(adoc("id", "3", "bibcode", "D", "reference", "B"));
 		assertU(adoc("id", "4", "bibcode", "E"));
 		assertU(adoc("id", "5", "bibcode", "F"));
-		assertU(commit());
-
+		
+		assertU(commit("waitSearcher", "true")); // very weird, it is not waiting
+		
 		assertQ(req("q", "*:*"),
 				"//*[@numFound='6']"
 		);
@@ -79,6 +83,7 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 				"//result/doc/str[@name='bibcode']='C'",
 				"//result/doc/str[@name='bibcode']='D'"
 		);
+		
 
 	}
 

@@ -5,6 +5,8 @@ import java.io.Reader;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import monty.solr.util.MontySolrSetup;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
@@ -26,13 +28,31 @@ import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.Version;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 public class TestAqpAdsabs extends AqpTestAbstractCase {
-
+	
+	@BeforeClass
+  public static void beforeTestAqpAdsabs() throws Exception {
+		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/src/python");
+    MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
+        + "/contrib/adsabs/src/python");
+    MontySolrSetup.addTargetsToHandler("adsabs.targets");
+  }
+	
+	@AfterClass
+	public static void afterTestAqpAdsabs() throws Exception {
+		MontySolrSetup.deinit();
+	}
+	
 	public void setUp() throws Exception {
 		setGrammarName("ADS");
 		super.setUp();
 	}
+	
+	
 	
 	public AqpQueryParser getParser() throws Exception {
 		
