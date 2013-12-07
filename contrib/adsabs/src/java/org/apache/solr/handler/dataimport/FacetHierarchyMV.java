@@ -41,7 +41,21 @@ public class FacetHierarchyMV extends FacetHierarchy {
 				if (obj == null) {
 					return; // give up
 				}
-				List<String> data = (List<String>) obj;
+				
+				List<String> data;
+				if (obj instanceof List) {
+				  data = (List<String>) obj;
+				}
+				else if (obj instanceof Map) {
+					data = new ArrayList<String>();
+					for (String k: sourceKeys.get(field)) {
+						data.add((String) ((Map)obj).get(k));
+					}
+				}
+				else {
+					throw new SolrException(ErrorCode.BAD_REQUEST, "The received data is junk (cause i can't make sense of it): "  + obj);
+				}
+					
 				
 				if (smallestCommonDenominator == -1 || data.size() < smallestCommonDenominator) {
 					smallestCommonDenominator = data.size();

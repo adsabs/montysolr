@@ -1880,6 +1880,10 @@
       <!-- this parameter activates the logging/restart of failed imports -->
       <str name="writerImpl">org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter</str>
     </lst>
+    <lst name="invariants">
+       <str name="mongoPass">${montysolr.mongoPass:}</str>
+       <str name="mongoHost">${montysolr.mongoHost:adsx}</str>
+    </lst>
   </requestHandler>
 
   <requestHandler name="/invenio/import2" 
@@ -1893,6 +1897,10 @@
       <!-- this parameter activates the logging/restart of failed batches -->
       <str name="writerImpl">org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter</str>
     </lst>
+    <lst name="invariants">
+       <str name="mongoPass">${montysolr.mongoPass:}</str>
+       <str name="mongoHost">${montysolr.mongoHost:adsx}</str>
+    </lst>
   </requestHandler>
   
 
@@ -1904,6 +1912,10 @@
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
+    </lst>
+    <lst name="invariants">
+       <str name="mongoPass">${montysolr.mongoPass:}</str>
+       <str name="mongoHost">${montysolr.mongoHost:adsx}</str>
     </lst>
   </requestHandler>
   

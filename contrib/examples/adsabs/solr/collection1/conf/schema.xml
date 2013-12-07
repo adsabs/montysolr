@@ -956,6 +956,8 @@
 			multiValued="true" />
 		<field name="cite_read_boost" type="tfloat" indexed="true"
 			stored="true" multiValued="false" />
+		<field name="classic_factor" type="int" indexed="true" stored="true" />
+		<field name="simbad_object_ids" type="int" indexed="true" stored="true" multiValued="true"/>
 		<field name="citation_count" type="int" indexed="true" stored="true" />
 		<field name="read_count" type="tfloat" indexed="true" stored="true" />
 

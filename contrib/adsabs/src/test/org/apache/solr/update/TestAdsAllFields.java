@@ -33,6 +33,7 @@ import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,12 @@ import java.util.Properties;
  * 
  * The test is using demo-records from contrib/adsabs/src/test-files/ads-demo-records.xml
  * 
- * We mock MongoDB data and we do NOT use Invenio
+ * We mock MongoDB data and we do NOT use Invenio, but you may need to 
+ * set following:
+ * 
+ *   -Dmontysolr.mongoHost=adsx
+ *   -Dmontysolr.mongoPass=<password>
+ *   
  * 
  */
 
@@ -90,7 +96,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     try {
       newConfig = duplicateFile(new File(configFile));
       newDataConfig = duplicateModify(new File(dataConfig), 
-      		"mongoHost=\"adszee\"", String.format("mongoHost=\"%s\"", System.getProperty("tests.mongodb.host")),
       		"AdsDataSource", this.getClass().getCanonicalName() + "\\$MongoMockDataSource");
       replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
     } catch (IOException e) {
@@ -972,7 +977,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     // who cites us
     assertQ(req("q", "citations(*:*)"), 
     		"//*[@numFound='4']");
-    assertQ(req("q", "citations(id:10)"), 
+    assertQ(req("q", "citations(id:10)"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='11']");
     
@@ -1067,6 +1072,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
   	
   	@Override
     protected void initMongo(Context context, Properties initProps) {
+  		//super.initMongo(context, initProps); // for hack testing
   		return;
   	}
   	
@@ -1078,7 +1084,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
   	
   	@Override
   	protected void populateMongoCache(List<String> bibcodes) {
-  		
+  		//super.populateMongoCache(new ArrayList<String>(){{add("2009arXiv0909.1287I");add("1987PhRvD..36..277B");}}); // for hack testing
   		assert bibcodes.contains("1987PhRvD..36..277B");
   		assert bibcodes.contains("1991ApJ...371..665R");
   		assert bibcodes.contains("1976AJ.....81...67S");

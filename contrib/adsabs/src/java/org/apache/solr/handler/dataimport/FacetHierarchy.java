@@ -25,14 +25,24 @@ public class FacetHierarchy {
 	
 	String columnName; // under what name to insert results into a doc
 	List<String> sourceFields; // what fields to read data from
+	Map<String, String[]> sourceKeys; // what keys to read (in case the field is nested)
 	String splitBy = ",";
+	String splitKeys = ":";
 	
 	public FacetHierarchy(String columnName, String[] source) {
 		this.columnName = columnName;
 		this.sourceFields = new ArrayList<String>();
 		
 		for (String s : source) {
-			sourceFields.add(s);
+			String[] parts = s.split(splitKeys);
+			if (parts.length > 1) {
+				String[] keys = new String[parts.length-1];
+				for (int i=1; i<parts.length;i++) {
+					keys[i-1] = parts[i];
+				}
+				sourceKeys.put(parts[0], keys);
+			}
+			sourceFields.add(parts[0]);
 		}
 	}
 	
@@ -53,6 +63,9 @@ public class FacetHierarchy {
 				else if (obj instanceof String[]) {
 					generateFacets((String[]) obj, target);
 				}
+				else if (obj instanceof Map && sourceKeys.containsKey(field)) {
+					generateFacets((Map) obj, target, sourceKeys.get(field));
+				}
 			}
 		}
 		
@@ -69,6 +82,18 @@ public class FacetHierarchy {
 	}
 	
 	
+	@SuppressWarnings("rawtypes")
+  private void generateFacets(Map obj, ArrayList<String> target, String[] keysToRead) {
+		String[] vals = new String[keysToRead.length];
+		for (int i=0; i<keysToRead.length;i++) {
+			if (!obj.containsKey(keysToRead[i])) {
+				return; // refuse to proceed
+			}
+			vals[i] = keysToRead[i];
+		}
+	  generateFacets(vals, target);
+  }
+
 	/*
 	 * Input: "Smith, Jones" or ["Smith, Jones"]
 	 * Written: ["0/Smith, J", "1/Smith, J/Smith, James"]
