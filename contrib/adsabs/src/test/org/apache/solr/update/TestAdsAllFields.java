@@ -46,7 +46,7 @@ import java.util.Properties;
  * The test is using demo-records from contrib/adsabs/src/test-files/ads-demo-records.xml
  * 
  * We mock MongoDB data and we do NOT use Invenio, but you may need to 
- * set following:
+ * set following (to query against the database):
  * 
  *   -Dmontysolr.mongoHost=adsx
  *   -Dmontysolr.mongoPass=<password>
@@ -651,10 +651,19 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
      * grants
      * 
      */
-    //dumpDoc(null, "recid", "bibcode", "grant", "grant_ids", "grant_facet_hier", "reference");
+    //dumpDoc(null, "grants", "grant", "grant_facet_hier");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
   		"//*[@numFound='1']",
   		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+		assertQ(req("q", "grant:(NSF-AST 0618398)"),
+	  		"//*[@numFound='1']",
+	  		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+		assertQ(req("q", "grant:0618398"),
+	  		"//*[@numFound='1']",
+	  		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+		assertQ(req("q", "grant:NSF-AST"),
+	  		"//*[@numFound='1']",
+	  		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
 		assertQ(req("q", "grant_facet_hier:\"0/NSF-AST\""),
   		"//*[@numFound='1']",
   		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
@@ -783,13 +792,18 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='9218605']"
     ); 
-    // full
-    //dumpDoc(null, "recid", "full");
+    
+    // body
+    //dumpDoc(null, "recid", "body");
+    assertQ(req("q", "body:hashimoto"), 
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='3673891']"
+    );
+    // unfielded search
     assertQ(req("q", "hashimoto"), 
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='3673891']"
     );
-
 
     /*
      * citations()/references() queries (use special dummy records, field 999i)
@@ -1082,7 +1096,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
   		return; // do nothing
   	}
   	
-  	@Override
+  	@SuppressWarnings("serial")
+    @Override
   	protected void populateMongoCache(List<String> bibcodes) {
   		//super.populateMongoCache(new ArrayList<String>(){{add("2009arXiv0909.1287I");add("1987PhRvD..36..277B");}}); // for hack testing
   		assert bibcodes.contains("1987PhRvD..36..277B");
@@ -1091,9 +1106,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
   		assert bibcodes.contains("2009arXiv0909.1287I");
   		
   		HashMap<String, Object> row = new HashMap<String, Object>();
-  		row.put("grant", Arrays.asList("NSF-AST 0618398"));
-  		row.put("grant_agencies", Arrays.asList("NSF-AST"));
-  		row.put("grant_ids", Arrays.asList("0618398"));
+  		row.put("grants", new ArrayList<HashMap<String,String>>(){{
+  			add(new HashMap<String,String>(){{put("agency", "NSF-AST");put("grant", "0618398");}});
+  		}});
   		row.put("read_count", Arrays.asList(0.0f));
   		row.put("cite_read_boost", Arrays.asList(0.4104f));
   		row.put("reader", Arrays.asList("0xeeeeeeee", "1xeeeeeeee"));

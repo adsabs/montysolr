@@ -115,17 +115,17 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "AGARWAL, S;AGGARWAL, S",
           "AGUILAR CHIU, L A;AGUILAR, L A",
           "AITMUHAMBETOV, A A;AITMUKHAMBETOV, A A",
-          "AL MLEAKY, Y M;ALMLEAKY, Y M",
+          "AL MLEAKY, Y M; ALMLEAKY, Y M",
           "ALEXEENKO, V V;ALEXEYENKO, V V",
           "ALFONSO, JULIA;ALFONSO-GARZON, JULIA",
           "ALLEN, LYNNE;ALLEN, R LYNNE;JONES, LYNNE;JONES, R LYNNE", // until here copied from: /proj/ads/abstracts/config/author.syn.new
           "ARAGON SALAMANCA, A;ARAGON-SALAMANCA, A;ARAGON, A;SALAMANCA, A", // copied from: /proj/ads/abstracts/config/author.syn
-          "ADAMŠuk, m;ADAMGuk, m;ADAMČuk, m",  // hand-made additions
+          "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m",  // hand-made additions
           "MÜLLER, A WILLIAM;MÜLLER, A BILL",
           "MÜLLER, WILLIAM;MÜLLER, BILL",
           "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
-          "DE ZEEUW, TIM=>DE ZEEUW, P TIM;DE ZEEUW, P\\w* TIM\\b.*;DE ZEEUW,;DE ZEEUW, P\\w*",
-          "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,;DE ZEEUW, TIM\\b.*;DE ZEEUW, T"
+          "DE ZEEUW, TIM=>DE ZEEUW, P TIM",
+          "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,"
       }));
 
       // automatically harvested variations of author names (collected during indexing)

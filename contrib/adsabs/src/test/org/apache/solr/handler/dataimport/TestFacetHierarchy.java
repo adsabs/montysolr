@@ -11,6 +11,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.Before;
 
+@SuppressWarnings({ "serial", "unchecked","rawtypes" })
 public class TestFacetHierarchy {
 	
 
@@ -20,36 +21,74 @@ public class TestFacetHierarchy {
 	}
 	
 	private void doTestNormalType(Object[] input, String...expected) {
-		doTest(false, input, expected);
+		doTest(null, false, input, expected);
 	}
 	
 	private void doTestJoinType(Object[] input, String...expected) {
-		doTest(true, input, expected);
+		doTest(null, true, input, expected);
 	}
 	
-	private void doTest(Boolean isJoinType, Object[] input, String...expected) {
+	private void doGenericTest(String fieldsDefinition, Map input, String...expected) {
+		HashMap<String, Object> testRow = new HashMap<String, Object>();
+		testRow.put("id", 1);
+		testRow.putAll(input);
+		
+		FacetHierarchy fh = _getFacetTransformer(fieldsDefinition);
+		fh.addFacets(testRow);
+		
+		_compareResults(testRow, expected);
+	}
+	
+	private void doTest(String[] inputFields, Boolean isJoinType, Object[] input, String...expected) {
 		
 		HashMap<String, Object> testRow = new HashMap<String, Object>();
 		testRow.put("id", 1);
-		String[] inputFields = new String[input.length];
-		for (int i=0; i<input.length; i++) {
-			testRow.put("input" + i, input[i]);
-			inputFields[i] = "input" + i;
-		}
-		
-		if (isJoinType) {
-			FacetHierarchy fh = new FacetHierarchyMV("output", inputFields);
-			fh.addFacets(testRow);
+		if (inputFields == null) {
+			inputFields = new String[input.length];
+			for (int i=0; i<input.length; i++) {
+				testRow.put("input" + i, input[i]);
+				inputFields[i] = "input" + i;
+			}
 		}
 		else {
-			FacetHierarchy fh = new FacetHierarchy("output", inputFields);
-			fh.addFacets(testRow);
+			for (int i=0; i<input.length; i++) {
+				testRow.put(inputFields[i], input[i]);
+			}
 		}
 		
+		StringBuffer fieldsDefinition = new StringBuffer();
+		boolean firstPassed = false;
+		for (String f: inputFields) {
+			fieldsDefinition.append(firstPassed ? (isJoinType ? "+" : ",") : "");
+			fieldsDefinition.append(f);
+			firstPassed = true;
+		}
 		
+		FacetHierarchy fh = _getFacetTransformer(fieldsDefinition.toString());
+		fh.addFacets(testRow);
+		
+		_compareResults(testRow, expected);
+		
+	}
+	
+	private FacetHierarchy _getFacetTransformer(String facetDefinition) {
+		FacetHierarchy fh = null;
+		if (facetDefinition.contains("+")) {
+			fh = new FacetHierarchyMV("output", facetDefinition.split("\\+"));
+		} else {
+			fh = new FacetHierarchy("output", facetDefinition.split("\\,"));
+		}
+		return fh;
+	}
+	
+	private void _compareResults(HashMap<String, Object> testRow,
+      String[] expected) {
 		List<String> result = (List<String>) testRow.get("output");
 		if (expected == null) {
 			assertTrue("The facets were generated", result == null);
+		}
+		else if (expected.length == 0) {
+			assertTrue("The facets were generated", result == null || result.toArray().length == expected.length);
 		}
 		else {
 			assertTrue("The facets were not generated", result != null);
@@ -58,10 +97,11 @@ public class TestFacetHierarchy {
 					expected,
 					result.toArray());
 		}
-		
-	}
+  }
+
 	
-	@Test
+  
+  @Test
 	public void testFacetGeneration() {
 		
 		// test single-string inut
@@ -115,15 +155,51 @@ public class TestFacetHierarchy {
 				);
 		doTestJoinType(
 				new Object[] {Arrays.asList("foo", "bar"), null},
-				null
+				new String[]{}
 				);
 		doTestJoinType(
 				new Object[] {Arrays.asList("foo", "bar"), null, Arrays.asList("woo", "too")},
-				null
+				new String[]{}
 				);
 		doTestJoinType(
 				new Object[] {Arrays.asList("foo", "bar"), Arrays.asList("woo", "too"), Arrays.asList("zap" )},
 				"0/foo", "1/foo/woo", "2/foo/woo/zap"
+				);
+		
+		// nested values
+		doGenericTest(
+				"input:key1+input:key2",
+				new HashMap() {{
+					put("input", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+					}}); 
+				}},
+				"0/foo", "1/foo/bar"
+				);
+		doGenericTest(
+				"input:key1+input2:key1",
+				new HashMap() {{
+					put("input", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+					}});
+					put("input2", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","boo");put("key2","baz");}});
+					}});
+				}},
+				"0/foo", "1/foo/boo"
+				);
+		
+		doGenericTest(
+				"input:key1:key2,inputx:key1:key2",
+				new HashMap() {{
+					put("input", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+					}});
+					put("inputx", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","boo");put("key2","baz");}});
+					}});
+				}},
+				"0/Foo,", "0/Bar,", "0/Boo,", "0/Baz,"
 				);
 		
 	}

@@ -888,6 +888,8 @@
       	
 		<field name="keyword_norm" type="normalized_text_ascii" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"/>
+		<field name="keyword_schema" type="normalized_text_ascii" indexed="true"
+      stored="true" multiValued="true" omitNorms="true"/>
 		<field name="keyword_norm_wildcard" type="normalized_text_ascii" 
       indexed="false" stored="false" required="false" multiValued="false" />
       	
@@ -925,35 +927,127 @@
 		<field name="facility" type="normalized_text_ascii" indexed="true" stored="true"
       multiValued="true" omitNorms="true"/>
 			
-		<field name="grant" type="normalized_text_ascii" indexed="true" stored="true"
-      multiValued="true" omitNorms="true"/>
+		
 			
-		<!-- <field name="grant_id" type="string" indexed="false" stored="false" 
-			multiValued="true"/> <field name="grant_agencies" type="string" indexed="false" 
-			stored="false" multiValued="true"/> -->
+	  <!-- 
+	  @api.doc
+	  
+	  * grant 
+	     
+	     Field that contains both grant ids and grant agencies.
+	     
+	     @since 40.3.0.0
+	  
+	  * grant_facet_hier
+	  
+	     Hiearchical facet field which containst grant/grant_id.
+	     This field is not suitable for user queries, but rather
+	     for UI components.
+	     
+	  * grant_id
+	  
+	     Index with just the grant ids (e.g. 0618398). 
+	     
+	     @depracated - use grant instead
+	     
+	  * grant_agencies
+    
+       Index with just the grant agencies names (e.g. NASA). 
+       
+       @depracated - use grant instead
+	   -->
+	  <field name="grant" type="normalized_text_ascii" indexed="true" stored="true"
+      multiValued="true" omitNorms="true"/> 
 		<field name="grant_facet_hier" type="string" indexed="true"
 			stored="true" multiValued="true" />
 
-		<!-- this is just a fake field (for the moment) -->
+    
+    <!-- 
+    @api.doc
+    
+    * all
+    
+      This index contains values copied from several other fields (the fields
+      are added into one index for faster search). These values come from:
+      
+       - author_norm
+       - alternate_title
+       - bibcode
+       - doi
+       - identifier 
+    
+    -->
 		<field name="all" type="ads_text" indexed="true" stored="false"
 			multiValued="true" />
 
 
-		<!-- MontySolr: needed when InvneioParser is used in maxinv mode but now 
-			we don't use InvenioParser in that mode <dynamicField name="*" type="text" 
-			multiValued="true" /> -->
 
-		<!-- this is just a fake field, we use it to recognize (old-style) invenio 
-			queries -->
-		<dynamicField name="inv_*" type="ignored" indexed="false"
-			stored="false" multiValued="true" />
 
-		<!-- MontySolr: Fields where value is fetched from Mongo text -->
+		<!-- 
+		@api.doc
+		
+		* full
+		
+		  This is a virtual field, it doesn't have its own index, but 
+		  searches several other indexes
+		  
+		  @since 40.3.0.0 
+		  
+		* body
+		
+		  Contains extracted fulltext minus acknowledgements section
+		  
+		  @since 40.3.0.0 
+		  
+		* ack
+		
+		  Contains acknowledgements extracted from fulltexts (if it was
+		  possible to identify them).
+		  
+		 -->
 		<field name="full" type="ads_text" indexed="true" stored="true"
+      termVectors="true" termOffsets="true" termPositions="true" />
+		<field name="body" type="ads_text" indexed="true" stored="true"
 			termVectors="true" termOffsets="true" termPositions="true" />
 		<field name="ack" type="ads_text" indexed="true" stored="true" />
+		
+		<!-- 
+		@api.doc
+		
+		* reader
+		
+		  This index contains unique identifiers of readers that read the
+		  paper in the past 90 days.
+		  
+		 -->
 		<field name="reader" type="string" indexed="true" stored="true"
 			multiValued="true" />
+			
+		<!-- 
+    @api.doc
+    
+    * cite_read_boost
+    
+      Float values containing normalized (float) boost factors. These
+      can be used with functional queries to modify ranking of results. 
+      
+      Example:
+      
+        q={!func}product(product(0.5,$scaledQ),product(0.5,field('cite_read_boost')))
+        qq={!aqp}black hole
+        fq={!query v=$qq}
+        
+      @since 40.2.0.0
+        
+    * classic_factor
+    
+      Integer values containing the boost factor used by ADS Classic. In essence
+      log(1 + cites + norm_reads) where number of citations has been normalized
+      and the whole value is multiplied by 5000 and then cast to Integer.
+      
+      @since 40.3.0.0 
+      
+     -->
 		<field name="cite_read_boost" type="tfloat" indexed="true"
 			stored="true" multiValued="false" />
 		<field name="classic_factor" type="int" indexed="true" stored="true" />

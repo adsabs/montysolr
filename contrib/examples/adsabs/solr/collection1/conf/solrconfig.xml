@@ -801,7 +801,7 @@
        query handlers (e.g. tvrh - used by the word cloud)
        
         -->
-       <str name="qf">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year</str>
+       <str name="qf">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all body^0.1 year</str>
        <str name="defType">aqp</str>
        <str name="aqp.unfielded.tokens.strategy">multiply</str>
        <str name="aqp.unfielded.tokens.new.type">simple</str>
