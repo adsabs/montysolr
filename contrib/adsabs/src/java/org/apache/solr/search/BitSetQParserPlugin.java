@@ -57,7 +57,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 			@Override
 			public Query parse() throws ParseException {
 				
-				
+				/*
 				// read the data - it can be either in the content stream xor directly
 				// in the open value (perhaps encoded, compressed etc)
 
@@ -83,9 +83,13 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		        	throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "empty content stream");
 		        }
 		      }
-			
-
+			*/
 				
+			// we must harvest lucene docids
+				AtomicReader reader = req.getSearcher().getAtomicReader();
+				BitSet bits = readBase64String(localParams.get(QueryParsing.V), 
+						localParams.get("compression", "none"),
+						localParams.getBool("little_endian", false));
 
 				if (bits.cardinality() < 1)
 					return null;
