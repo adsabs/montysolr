@@ -67,7 +67,7 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		
 		// check we have gotten data from mongo
 		
-		assertQ(req("q", "full:a*"), "//*[@numFound>0]");
+		assertQ(req("q", "body:a*"), "//*[@numFound>0]");
 		assertQ(req("q", "read_count:[0.0 TO 100.0]"), "//*[@numFound>0]");
 		
 		// these queries will not find anything, but we can test the proper
