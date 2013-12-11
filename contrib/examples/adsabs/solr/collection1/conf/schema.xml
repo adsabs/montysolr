@@ -536,6 +536,8 @@
 			Invenio and user input into the solr format. The real date is stored in the 
 			field called 'date' and we require a properly formatted input to search there 
 			unittest: TestAdsabsTypeDateString -->
+			
+			
 		<fieldType name="date_string" class="solr.TextField"
 			positionIncrementGap="0">
 			<analyzer type="index">
@@ -547,9 +549,6 @@
 				<filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy" />
 			</analyzer>
 		</fieldType>
-
-
-
 
 
 
@@ -570,7 +569,9 @@
 			</analyzer>
 		</fieldType>
 
+
 		<!-- as opposed to doi_string, identifier is only ascii -->
+		
 		<fieldType name="identifier_normalized_string_ascii" class="solr.TextField">
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
@@ -589,6 +590,7 @@
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 		</fieldType>
+
 
 		<fieldType name="first_string" class="solr.TextField">
 			<analyzer type="index">
@@ -612,8 +614,8 @@
 
 
 		<!-- 
-		Normalize values, emit only ASCII version, lowercased
-		test: TestAdsabsTypeNormalizedTextAscii
+		  tokenized, normalized, emits only ASCII version, lowercased
+		  test: TestAdsabsTypeNormalizedTextAscii
 		 -->
 		<fieldType name="normalized_text_ascii" class="solr.TextField">
 			<analyzer type="index">
@@ -633,6 +635,28 @@
           replacement="" replace="all" />
 			</analyzer>
 		</fieldType>
+		
+		<!--copy of the chain above but without duplicates removal; this should be
+		    used for situations where papers has multiple values per field; but we
+		    want to keep them in order and not loss any. Example is author, which 
+		    has its own affiliation and email
+     -->
+		<fieldType name="normalized_text_ascii_nodedup" class="solr.TextField">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <filter class="solr.ASCIIFoldingFilterFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_)"
+          replacement="" replace="all" />
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <filter class="solr.ASCIIFoldingFilterFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_)"
+          replacement="" replace="all" />
+      </analyzer>
+    </fieldType>
 
     <!-- 
       Normalize values, emit only ASCII version, lowercased.
@@ -743,7 +767,7 @@
 
 	<fields>
 	
-	  <!-- conventions: all fields are ascii, we have several special fields
+	  <!-- conventions: all field names are ascii, we have several special fields
 	                    they are all identified through their suffix
 	                    
 	                    used by query parser to analyze a field when a specific
@@ -760,169 +784,309 @@
 	                    1 out)
 	   -->
 
-		<!-- The uniqueKey index must be implemented using StrField therefore we 
-			cannot use bibcode (and have it lowercased). And for the same reasons, we 
-			cannot have recid to be int. We are getting an error: QueryElevationComponent 
-			requires the schema to have a uniqueKeyField implemented using StrField -->
-		<field name="id" type="string" indexed="true" stored="true"
-			required="true" />
-		<field name="recid" type="int" indexed="true" stored="true"
-			required="true" />
-		<field name="bibcode" type="normalized_string_ascii" indexed="true"
-			stored="true" required="true" />
-		<field name="bibcode_wildcard" type="normalized_string_ascii" 
-		  indexed="false" stored="false" required="false" multiValued="false" />
+		
 			
+		<!-- 
+		@api.doc
+		
+		* id
+		
+		  Text field with unique string; ID of the document.
+		  
+		    Example query:
+		    
+		      id:5
+		  
+		* recid
+		
+		  Integer version of 'id' - this is more efficient for sorting,
+		  and range queries
+		  
+			  Example query:
+	        
+	        id:5
+		  
+	  * bibcode
+	  
+	    19-char long string (unique) - ADS identifier of a paper
+	    
+	       Example query:
+        
+           bibcode:1902Sci....15..393S
+		 -->
+		 
+		 <!-- The uniqueKey index must be implemented using StrField therefore we 
+      cannot use bibcode (and have it lowercased). And for the same reasons, we 
+      cannot have recid to be int. We are getting an error: QueryElevationComponent 
+      requires the schema to have a uniqueKeyField implemented using StrField -->
+      
+		<field name="id" type="string" indexed="true" stored="true"
+			required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="recid" type="int" indexed="true" stored="true"
+			required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="bibcode" type="normalized_string_ascii" indexed="true"
+			stored="true" required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		
+		<!-- 
+		@api.doc
+		
+		* doi
+		
+		  Digital object indentifier
+		  
+		* identifier
+		
+		  Identifier under which a paper can be found. This index holds values 
+		  from several other fields:
+		    
+		    - bibcode
+		    - doi
+		    - alternate_bibcode
+		  
+		    
+		* alternate_bibcode
+		
+		  When a paper is published, we may decide to assign a new bibcode to the
+		  old version of metatada. The alternate_bibcode can be used for queries
+		  that need to find it using the old (once-known) bibcode.
+		  
+		  This field is also useful for citation cache, because reference values
+		  (bibcodes) may contain old bibcodes.
+		  
+		  
+		* bibstem
+		
+		  Bibstems identify publication or publication and volume.
+		  
+		  Example query:
+		  
+		    bibstem:Sci
+        bibstem:Sci.....6
+		  
+		* bibstem_facet
+		
+		  Technical field, used for faceting by publication. It contains only 
+		  bibstems without volumes (eg. Sci)
+		  
+		 -->	
 
 		<field name="doi" type="doi_string" indexed="true" stored="true"
-			required="false" multiValued="true" />
-		<field name="doi_wildcard" type="doi_string" indexed="false"
-			stored="false" required="false" multiValued="true" />
+			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		
 
-		<field name="identifier" type="identifier_normalized_string_ascii"
-			indexed="true" stored="true" required="false" multiValued="true" />
-		<field name="alternate_bibcode" type="normalized_string_ascii"
-      indexed="true" stored="true" required="false" multiValued="true" />
+		<field name="identifier" type="identifier_normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="alternate_bibcode" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}"
-			multiValued="true" />
+			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
       
 		<field name="bibstem_facet" type="bibstem_facet" indexed="true"
-			stored="${storeAll:false}" />
+			stored="${storeAll:false}" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="pub" type="normalized_text_ascii" indexed="true"
-			stored="true" omitNorms="true" />
-		<field name="pub_wildcard" type="normalized_text_ascii" 
-      indexed="false" stored="false" required="false" multiValued="false" />
+
+    
+    <!-- 
+    @api.doc
+    
+    * pub
+    
+      Publication
       
-		<field name="pub_raw" type="normalized_text_ascii" indexed="true"
-			stored="${storeAll:false}" omitNorms="true" />
+    * pub_raw
+    
+      Full string from the "Journal field" of the ADS Record
+      
+    * page
+    
+      String value (possibly two) indicating page range. Not all values are
+      numeric!
+      
+    * year
+    
+      Year when the paper was published (warning, not all values are numeric)
+      
+    * volume
+    
+      Volume of a journal issue (if any) of the paper.
+      
+    * issue
+    
+      Issue number in which a paper was published.
+      
+    * issn
+    
+      ISSN of the publication (applies to journals - ie. periodical publications)
+          
+    * isbn
+    
+      ISBN of the publication (this applies to books)
+      
+    * lang
+      
+      In ADS this field contains a language of the main title. Currently, this value
+      is present in a very small portion of records (try searching for lang:*) 
+      
+      
+     -->
+		<field name="pub" type="normalized_text_ascii" indexed="true" stored="true" 
+		  omitNorms="true" />
+      
+		<field name="pub_raw" type="normalized_text_ascii" indexed="true"	stored="${storeAll:false}" 
+		  omitNorms="true" />
 
 		<field name="page" type="first_string" indexed="true" stored="true"
-			multiValued="true" />
-		<field name="year" type="first_string" stored="true" indexed="true"
-			multiValued="false" />
-		<field name="volume" type="normalized_string_ascii" stored="true"
-			indexed="true" multiValued="false" />
-		<field name="issue" type="normalized_string_ascii" stored="true"
-			indexed="true" multiValued="false" />
+			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="year" type="first_string" indexed="true" stored="true" 
+			multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="volume" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="issue" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-
-		<field name="issn" type="normalized_string_ascii" stored="true"
-			indexed="true" multiValued="true" />
-		<field name="issn_wildcard" type="normalized_string_ascii" 
-      indexed="false" stored="false" required="false" multiValued="false" />
-      
-		<field name="isbn" type="normalized_string_ascii" stored="true"
-			indexed="true" multiValued="true" />
-		<field name="isbn_wildcard" type="normalized_string_ascii" 
-      indexed="false" stored="false" required="false" multiValued="false" />
-      	
-		<field name="lang" type="normalized_string_ascii" stored="${storeAll:false}"
-			indexed="true" />
+		<field name="issn" type="normalized_string_ascii" indexed="true" stored="true"  
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="isbn" type="normalized_string_ascii" indexed="true" stored="true"
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		
+		<field name="lang" type="normalized_string_ascii" indexed="true" stored="${storeAll:false}"
+			omitNorms="true" omitTermFreqAndPositions="true"/>
 
 
 		<!-- We get pubdate from invenio, we turn that into a properly formatted 
 			date string and insert that into 'date' field (the DIH transformer does that) -->
-		<field name="date" type="tdate" stored="${storeAll:false}"
-			indexed="true" />
-		<field name="pubdate" type="date_string" stored="${storeAll:false}"
-			indexed="true" />
-		<field name="pubdate_sort" type="int" stored="${storeAll:false}"
-			indexed="true" />
+			
+		<field name="date" type="tdate" indexed="true" stored="${storeAll:false}"
+			omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="pubdate" type="date_string" indexed="true" stored="${storeAll:false}"
+			omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="pubdate_sort" type="int" indexed="true" stored="${storeAll:false}"
+			omitNorms="true" omitTermFreqAndPositions="true"/>
 
 
 		<field name="title" type="ads_text" indexed="true" stored="true" 
-            multiValued="true" termVectors="true" termOffsets="true" 
-            termPositions="true"/>
+      multiValued="true" termVectors="true" termOffsets="true" 
+      termPositions="true"/>
             
-		<field name="alternate_title" type="ads_text" indexed="true"
-			stored="true" multiValued="true" termVectors="true" />
+		<field name="alternate_title" type="ads_text" indexed="true" stored="true" 
+		  multiValued="true" termVectors="true" />
 
 		<field name="abstract" type="ads_text" indexed="true" stored="true"
 			termVectors="true" termOffsets="true" termPositions="true" />
 
 
-		<!-- 'collector' fields -->
-		<field name="a_100" type="author" indexed="false" stored="false"
-			multiValued="true" />
-		<field name="a_700" type="author" indexed="false" stored="false"
-			multiValued="true" />
-		<field name="a_100_norm" type="author" indexed="false" stored="false"
-			multiValued="true" />
-		<field name="a_700_norm" type="author" indexed="false" stored="false"
-			multiValued="true" />
 
 		<field name="author" type="author" indexed="true" stored="true"
-			multiValued="true" />
-		<field name="author_collector" type="author_collector" indexed="false"
-			stored="false" multiValued="true" />
-		<field name="author_norm" type="normalized_string_ascii"
-			indexed="true" stored="true" multiValued="true" />
-		<field name="author_facet" type="string" indexed="true"
-			stored="${storeAll:false}" multiValued="true" />
-		<field name="author_facet_hier" type="string" indexed="true"
-			stored="${storeAll:false}" multiValued="true" />
-		<field name="first_author_facet_hier" type="string" indexed="true"
-			stored="${storeAll:false}" multiValued="true" />
+			multiValued="true" omitNorms="true"/>
+			
+		<field name="author_norm" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true"/>
+			
+		<field name="author_facet" type="string" indexed="true" stored="${storeAll:false}" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="author_facet_hier" type="string" indexed="true" stored="${storeAll:false}" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="first_author_facet_hier" type="string" indexed="true" stored="${storeAll:false}" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<!-- tmp fix for markus, should be handled with positional search -->
 		<field name="first_author" type="author" indexed="true" stored="true" />
+		
 		<field name="first_author_norm" type="normalized_string_ascii"
 			indexed="true" stored="true" />
-		<field name="first_author_surname" type="first_string" indexed="true"
-			stored="true" />
-		<field name="author_surname" type="first_string" indexed="true"
-			stored="true" multiValued="true" />
-
-
+		
 		<field name="aff" type="affiliation_text" indexed="true" stored="true"
-			multiValued="true" />
+			multiValued="true" omitNorms="true"/>
+			
 		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"
-			multiValued="true" />
+			multiValued="true" omitNorms="true"/>
 
+    <!-- 
+    @api.doc
+    
+    * keyword
+    
+      Free-text keywords; this field also contains arxiv_class values.
+      This field ignores 
+      
+    * keyword_norm
+    
+      Controlled keywords, each entry will have a corresponding keyword_schema
+      value.
+      
+    * keyword_schema
+    
+      Schema for each controlled keyword.
+      
+      @since 40.4.0.0
+      
+    * keyword_facet
+    
+      This is the normalized version of a controlled keyword (if paper contains it).
+      Very often this value may be missing.
+     -->
 		<field name="keyword" type="normalized_text_ascii" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"/>
-		<field name="keyword_wildcard" type="normalized_text_ascii" 
-      indexed="false" stored="false" required="false" multiValued="false"/>
-      	
-		<field name="keyword_norm" type="normalized_text_ascii" indexed="true"
-			stored="true" multiValued="true" omitNorms="true"/>
-		<field name="keyword_schema" type="normalized_text_ascii" indexed="true"
-      stored="true" multiValued="true" omitNorms="true"/>
-		<field name="keyword_norm_wildcard" type="normalized_text_ascii" 
-      indexed="false" stored="false" required="false" multiValued="false" />
-      	
-		<field name="keyword_facet" type="string" indexed="true" stored="true"
-			multiValued="true" />
+			
+		<field name="keyword_norm" type="normalized_text_ascii_nodedup" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true"/>
+			
+		<field name="keyword_schema" type="normalized_text_ascii_nodedup" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true"/>
+      
+    <field name="keyword_facet" type="string" indexed="true" stored="true"
+      multiValued="true" omitNorms="true"/>
+      
+    <field name="arxiv_class" type="normalized_text_ascii" indexed="true" stored="true"
+      multiValued="true" omitNorms="true"/>
+      
+        
 
-		<field name="property" type="normalized_string_ascii" indexed="true"
-			stored="true" omitNorms="true" multiValued="true" />
-		<field name="database" type="normalized_string_ascii" indexed="true"
-			stored="true" omitNorms="true" multiValued="true" />
-		<field name="bibgroup" type="normalized_string_ascii" indexed="true"
-			stored="true" omitNorms="true" multiValued="true" />
-		<field name="bibgroup_facet" type="string" indexed="true"
-			stored="${storeAll:false}" omitNorms="true" multiValued="true" />
-		<field name="data" type="normalized_string_ascii" indexed="true"
-			stored="true" omitNorms="true" multiValued="true" />
-		<field name="data_facet" type="string" indexed="true"
-			stored="${storeAll:false}" omitNorms="true" multiValued="true" />
-		<field name="vizier" type="normalized_string_ascii" indexed="true"
-			stored="true" omitNorms="true" multiValued="true" />
-		<field name="vizier_facet" type="string" indexed="true"
-			stored="${storeAll:false}" omitNorms="true" multiValued="true" />
-		<field name="thesis" type="affiliation_text" indexed="true"
-			stored="true" />
-		<field name="comment" type="string" indexed="true" stored="${storeAll:false}" />
-		<field name="copyright" type="affiliation_text" indexed="true"
-			stored="true" />
+		<field name="property" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="database" type="normalized_string_ascii" indexed="true" stored="true"
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="bibgroup" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="bibgroup_facet" type="string" indexed="true"	stored="${storeAll:false}" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="data" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="data_facet" type="string" indexed="true"	stored="${storeAll:false}" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="vizier" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="vizier_facet" type="string" indexed="true"	stored="${storeAll:false}" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="thesis" type="affiliation_text" indexed="true"	stored="true" 
+		  omitNorms="true" />
+		  
+		<field name="comment" type="string" indexed="true" stored="${storeAll:false}" 
+		  omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="copyright" type="affiliation_text" indexed="true" stored="true" 
+		  omitNorms="true" />
 
-		<field name="reference" type="normalized_string_ascii" indexed="true"
-			stored="true" multiValued="true" />
-		<field name="reference_wildcard" type="normalized_string_ascii" 
-      indexed="false" stored="false" required="false" multiValued="false" />	
-
+		<field name="reference" type="normalized_string_ascii" indexed="true" stored="true" 
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 			
 		<field name="facility" type="normalized_text_ascii" indexed="true" stored="true"
       multiValued="true" omitNorms="true"/>
@@ -942,7 +1106,8 @@
 	  
 	     Hiearchical facet field which containst grant/grant_id.
 	     This field is not suitable for user queries, but rather
-	     for UI components.
+	     for UI components. Term frequencies and positions are
+	     deactivated.
 	     
 	  * grant_id
 	  
@@ -958,8 +1123,9 @@
 	   -->
 	  <field name="grant" type="normalized_text_ascii" indexed="true" stored="true"
       multiValued="true" omitNorms="true"/> 
+      
 		<field name="grant_facet_hier" type="string" indexed="true"
-			stored="true" multiValued="true" />
+			stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
     
     <!-- 
@@ -1005,11 +1171,13 @@
 		  possible to identify them).
 		  
 		 -->
-		<field name="full" type="ads_text" indexed="true" stored="true"
-      termVectors="true" termOffsets="true" termPositions="true" />
+		<field name="full" type="ads_text" indexed="false" stored="false"/>
+      
 		<field name="body" type="ads_text" indexed="true" stored="true"
 			termVectors="true" termOffsets="true" termPositions="true" />
+			
 		<field name="ack" type="ads_text" indexed="true" stored="true" />
+		
 		
 		<!-- 
 		@api.doc
@@ -1017,11 +1185,12 @@
 		* reader
 		
 		  This index contains unique identifiers of readers that read the
-		  paper in the past 90 days.
+		  paper in the past 90 days. This field does not have term frequncies
+		  and positions.
 		  
 		 -->
 		<field name="reader" type="string" indexed="true" stored="true"
-			multiValued="true" />
+			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 			
 		<!-- 
     @api.doc
@@ -1048,27 +1217,52 @@
       @since 40.3.0.0 
       
      -->
-		<field name="cite_read_boost" type="tfloat" indexed="true"
-			stored="true" multiValued="false" />
-		<field name="classic_factor" type="int" indexed="true" stored="true" />
-		<field name="simbad_object_ids" type="int" indexed="true" stored="true" multiValued="true"/>
-		<field name="citation_count" type="int" indexed="true" stored="true" />
-		<field name="read_count" type="tfloat" indexed="true" stored="true" />
+		<field name="cite_read_boost" type="tfloat" indexed="true" stored="true" 
+		  omitNorms="true" omitTermFreqAndPositions="true"/>
+			
+		<field name="classic_factor" type="int" indexed="true" stored="true" 
+		  omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="simbad_object_ids" type="int" indexed="true" stored="true" multiValued="true"
+		  omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="citation_count" type="int" indexed="true" stored="true" 
+		  omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="read_count" type="tfloat" indexed="true" stored="true" 
+		  omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<!-- values are a JSON string that is stored and used for search result 
-			display -->
+		<!-- 
+		  technical metadata; values are a JSON string that is stored and used for search result 
+			display 
+			-->
 		<field name="links_data" type="string" indexed="false" stored="true"
 			multiValued="true" />
+			
 		<field name="ids_data" type="string" indexed="false" stored="true"
 			multiValued="true" />
 
-		<!-- Uncommenting the following will create a "timestamp" field using a 
-			default value of "NOW" to indicate when each document was indexed. -->
+
+    <!-- 
+    @api.doc
+    
+    * indexstamp
+    
+      Each document contains a date when it was indexed. The format
+      is: YYYY-MM-DD'T'hh:mm:ss.SSS'Z' - ie. you can query with up to
+      millisecond granularity; note that your query string must be
+      complete and correct 
+      
+      Example query:
+        
+         indexstamp:[2013-03-04T22:01:32.809Z TO *]
+         
+     -->
 		<field name="indexstamp" type="date" indexed="true" stored="true"
 			default="NOW" multiValued="false" />
-
-		<!-- MontySolr: have some dynamic Pythonic fields -->
-		<!-- <dynamicField name="*_py" type="textgen_py" indexed="true" stored="true"/> -->
+			
+    <field name="_version_" type="long" indexed="true" stored="true" />
+    
 
 		<!-- uncomment the following to ignore any fields that don't already match 
 			an existing field name or dynamic field, rather than reporting them as an 
@@ -1077,23 +1271,67 @@
 		<!--dynamicField name="*" type="ignored" multiValued="true" / -->
 
 
-		<field name="_version_" type="long" indexed="true" stored="true" />
+		
+		<!-- 
+		=================================================
+		collector fields, used just for indexing
+		=================================================
+		 -->
+		
+    <field name="a_100" type="author" indexed="false" stored="false"
+            multiValued="true" />
+    <field name="a_700" type="author" indexed="false" stored="false"
+            multiValued="true" />
+    <field name="a_100_norm" type="author" indexed="false" stored="false"
+            multiValued="true" />
+    <field name="a_700_norm" type="author" indexed="false" stored="false"
+            multiValued="true" />
 
-		<!-- fields used for special purposes by query parser -->
+		<!-- 
+		=================================================
+		fields used for special purposes by query parser 
+		=================================================
+		-->
+		
+		<field name="bibcode_wildcard" type="normalized_string_ascii" 
+      indexed="false" stored="false" required="false" multiValued="false" />
+    
+    <field name="doi_wildcard" type="doi_string"
+      indexed="false" stored="false" required="false" multiValued="true" />
+        
+    <field name="pub_wildcard" type="normalized_text_ascii" 
+      indexed="false" stored="false" required="false" multiValued="false" />
+    
+    <field name="issn_wildcard" type="normalized_string_ascii" 
+      indexed="false" stored="false" multiValued="false"/>
+    
+    <field name="isbn_wildcard" type="normalized_string_ascii" 
+      indexed="false" stored="false" required="false" multiValued="false" />
+          
 		<field name="author_notrans" type="author_short_name_rage"
 			indexed="false" stored="false" />
+			
 		<field name="author_nosyn" type="author_short_name_rage"
 			indexed="false" stored="false" />
+			
 		<field name="author_notrans_nosyn" type="author_short_name_rage"
 			indexed="false" stored="false" />
+			
 		<field name="author_short_name_rage" type="author_short_name_rage"
 			indexed="false" stored="false" />
 
+    <field name="author_collector" type="author_collector" 
+      indexed="false" stored="false" multiValued="true" />
+    
+    <field name="reference_wildcard" type="normalized_string_ascii" 
+      indexed="false" stored="false" required="false" />  
+        
 		<!-- a field holding tokenizer chain for the unfield search (very important 
 			to have if you require multi-word token expansion and unfielded search expansion 
 			at the same time -->
-		<field name="unfielded_search" type="ads_text" indexed="false"
-			stored="false" multiValued="true" />
+			
+		<field name="unfielded_search" type="ads_text"
+			indexed="false" stored="false" multiValued="true" />
 
 	</fields>
 
@@ -1107,8 +1345,9 @@
 
 	<copyField source="id" dest="recid" />
 
+  <copyField source="arxiv_class" dest="keyword" />
 	<copyField source="keyword_norm" dest="keyword" />
-	<copyField source="keyword_norm" dest="keyword_facet" />
+	
 	<copyField source="bibgroup" dest="bibgroup_facet" />
 	<copyField source="data" dest="data_facet" />
 	<copyField source="vizier" dest="vizier_facet" />
@@ -1122,22 +1361,19 @@
 	<copyField source="a_100_norm" dest="author_facet" />
 	<copyField source="a_700_norm" dest="author_facet" />
 
-	<!-- all these author fields are useful only to Markus' resolver -->
 	<copyField source="a_100" dest="first_author" />
 	<copyField source="a_100_norm" dest="first_author_norm" />
-	<copyField source="a_100" dest="first_author_surname" />
-	<copyField source="a_700" dest="author_surname" />
 
 
   <copyField source="alternate_bibcode" dest="identifier" />
   
 	<copyField source="author_norm" dest="all" />
 	<copyField source="alternate_title" dest="all" />
-	<copyField source="alternate_title" dest="title" />
 	<copyField source="bibcode" dest="all" />
 	<copyField source="doi" dest="all" />
 	<copyField source="identifier" dest="all" />
-	
+  
+  <copyField source="alternate_title" dest="title" />	
 
 </schema>
 

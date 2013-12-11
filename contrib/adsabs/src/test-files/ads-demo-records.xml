@@ -29,6 +29,14 @@
             <subfield code="b">Nonexisting, F</subfield>
             <subfield code="e">regular</subfield>
             <subfield code="7">SIMBAD</subfield>
+            <subfield code="u">Affiliation for just 2nd of 3 authors</subfield>
+        </datafield>
+        <datafield ind1=" " ind2=" " tag="700">
+            <subfield code="a">Test Author, WithEmail</subfield>
+            <subfield code="b">Should be indexed,</subfield>
+            <subfield code="e">regular</subfield>
+            <subfield code="7">SIMBAD</subfield>
+            <subfield code="m">test@example.edu</subfield>
         </datafield>
         <datafield ind1=" " ind2=" " tag="245">
             <subfield code="a">WISE All-Sky Data Release (Cutri+ 2012)</subfield>

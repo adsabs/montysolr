@@ -19,6 +19,9 @@
             xsl="data-import.xsl"
             >
         
+        
+        <!--  see: http://labs.adsabs.harvard.edu/trac/ads-invenio/wiki/howtomarcADS -->
+                
         <field column="bibcode" 
             xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
         
@@ -120,11 +123,7 @@
         <field column="comment"        
             xpath="/collection/record/datafield[@tag='500']/subfield" />
         
-        <!-- we do not distinguist primary/secondary here, if we are to, 
-            the xpath will have to test for indicator: 1=Primary, 7=Secondary 
-        -->
-        <field column="arxiv_class"        
-            xpath="/collection/record/datafield[@tag='650']/subfield[@code='a']" />
+        
         
         <field column="facility"        
             xpath="/collection/record/datafield[@tag='693']/subfield[@code='f']" /> 
@@ -136,15 +135,25 @@
         <field column="object"        
             xpath="/collection/record/datafield[@tag='694']/subfield[@code='a']" />
         
-        <field column="keyword653" name="keyword"        
-            xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />  <!--  free-text version -->
-        <field column="keyword_norm653" name="keyword_norm"        
+        <!--  free-text keywords -->
+        
+        <field name="keyword" column="keywordA"       
+            xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />  <!--  free text keyword -->
+        <field name="keyword" column="keywordB"       
             xpath="/collection/record/datafield[@tag='653']/subfield[@code='b']" />  <!--  normalized version -->
+        
+        <field column="arxiv_class"        
+            xpath="/collection/record/datafield[@tag='650']/subfield[@code='a']" />
             
-        <field column="keyword695" name="keyword"        
+            
+        <!--  controlled keywords -->
+        <field column="keyword_norm"        
             xpath="/collection/record/datafield[@tag='695']/subfield[@code='a']" />
-        <field column="keyword_norm653" name="keyword_norm"        
-            xpath="/collection/record/datafield[@tag='695']/subfield[@code='b']" />  <!--  normalized version -->
+        <field column="keyword_schema"        
+            xpath="/collection/record/datafield[@tag='695']/subfield[@code='2']" />
+        <field column="keyword_facet"        
+            xpath="/collection/record/datafield[@tag='695']/subfield[@code='b']" />
+        
             
         <field column="collaboration"        
             xpath="/collection/record/datafield[@tag='710']/subfield[@code='t']" />
@@ -199,29 +208,6 @@
         <field column="reference"        
             xpath="/collection/record/datafield[@tag='999']/subfield[@code='i']" />
             
-        <!--  for indexing, we put all field inside the reference index, and also build a special index for 
-              the individual subfields -->
-        <!-- 
-        <field column="reference_doi"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='a']" />
-        <field column="reference_raw"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='b']" />
-            
-        <field column="ref_doi"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='a']" />
-        <field column="ref_string"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='b']" />
-        <field column="ref_score"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='e']" />
-        <field column="ref_source"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='f']" />
-        <field column="ref_bibcode"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='i']" />
-        <field column="ref_arxivid"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='r']" />    
-        --> 
-        <!-- field column="entdate" xpath="" / -->
-        <!-- field column="bibgroup" xpath="" / -->
             
         <field name="body" column="full" mongoField="true"/>
         
