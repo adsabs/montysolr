@@ -20,7 +20,11 @@
             >
         
         
-        <!--  see: http://labs.adsabs.harvard.edu/trac/ads-invenio/wiki/howtomarcADS -->
+        <!--  see: http://labs.adsabs.harvard.edu/trac/ads-invenio/wiki/howtomarcADS 
+          name = index field name
+          column = database filed (mongodb field; when 'name' is empty; will be used as index name)
+          mongoFieldName = in situations, when you want to set 'name' and 'column', but data are inside mongo
+        -->
                 
         <field column="bibcode" 
             xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
@@ -213,10 +217,12 @@
         
         <field column="ack" mongoField="true"/>
         
-        <field column="reader" mongoField="true" mongoFieldName="readers"/>
+        <field name="reader" mongoField="true" column="readers"/>
 
-        <field column="cite_read_boost" mongoField="true" mongoFieldName="boost"/>
-        <field column="classic_factor" mongoField="true" mongoFieldName="norm_cites"/>
+        <field name="cite_read_boost" mongoField="true" column="boost"/>
+        <field name="classic_factor" mongoField="true" column="norm_cites"/>
+        <field name="simbid" mongoField="true" column="simbad_object_ids"/>
+        <field name="citation" mongoField="true" column="citations"/>
         
         <field column="citation_count" mongoField="true" />
         <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />

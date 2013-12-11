@@ -402,7 +402,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		//dumpDoc(null, "recid", "aff");
 		assertQ(req("q", "aff:NASA"),
 				"//doc/int[@name='recid'][.='9218511']",
-		"//*[@numFound='1']"); // regardless of case
+				"//*[@numFound='1']"
+		);
+		assertQ(req("q", "aff:affiliation AND author:\"nonexisting, f\""),
+				"//doc/int[@name='recid'][.='9218920']",
+				"//*[@numFound='1']"
+		);
 		assertQ(req("q", "aff:SPACE"), "//*[@numFound='0']"); // be case sensitive with uppercased query terms
 		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']"); // same here
 		assertQ(req("q", "aff:kavli"), // otherwise case-insensitive
@@ -654,26 +659,43 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		//dumpDoc(null, "grants", "grant", "grant_facet_hier");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
 				"//*[@numFound='1']",
-		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
+		);
 		assertQ(req("q", "grant:(NSF-AST 0618398)"),
 				"//*[@numFound='1']",
-		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
+		);
 		assertQ(req("q", "grant:0618398"),
 				"//*[@numFound='1']",
-		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
+		);
 		assertQ(req("q", "grant:NSF-AST"),
 				"//*[@numFound='1']",
-		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
+		);
 		assertQ(req("q", "grant_facet_hier:\"0/NSF-AST\""),
 				"//*[@numFound='1']",
-		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
+		);
 		assertQ(req("q", "grant_facet_hier:1/NSF-AST/0618398"),
 				"//*[@numFound='1']",
-		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
+		);
 		assertQ(req("q", "grant_facet_hier:0/NSF-AST"),
 				"//*[@numFound='1']",
-		"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']");
-
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
+		);
+		
+		// test we can do phrase queries (even if values are not tokenized)
+		assertQ(req("q", "grant:\"NSF AST\""),
+				"//*[@numFound='1']",
+				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']"
+		);
+		assertQ(req("q", "grant_facet_hier:1/NSF AST/061839x"),
+				"//*[@numFound='1']",
+				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']"
+		);
+		
 
 		/*
 		 * title
@@ -885,6 +907,60 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
 		"//*[@numFound='2']");
 
+		
+		/*
+		 * classic_factor
+		 */
+		
+		//dumpDoc(null, "bibcode", "classic_factor");
+		assertQ(req("q", "classic_factor:5000"), 
+				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
+				"//*[@numFound='1']"
+		);
+		assertQ(req("q", "classic_factor:1500"), 
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+				"//*[@numFound='1']"
+		);
+		assertQ(req("q", "classic_factor:0"), 
+				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
+				"//*[@numFound='1']"
+		);
+		
+		/*
+		 * For some unknown reason cannot do range queries with 
+		 * integers and i wasn't ableto find out why...this query
+		 * just finds one document
+		 */
+		/*
+		assertQ(req("q", "classic_factor:[0 TO 5001]", "indent", "true", "debugQuery", "true"), 
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
+				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
+				"//*[@numFound='3']"
+		);
+		*/
+		
+		
+		/*
+		 * simbad_object_ids
+		 */
+	  //dumpDoc(null, "bibcode", "simbid");
+		assertQ(req("q", "simbid:2 AND simbid:3000000"), 
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+				"//*[@numFound='1']"
+		);
+		
+		/*
+		 * citations - added 10/12/13
+		 */
+		
+		assertQ(req("q", "citation:cxeeeeeee1 AND citation:cxeeeeeee0"), 
+				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
+				"//*[@numFound='1']"
+		);
+		
+		
+		
 		/*
 		 * pubdate - 17/12/2012 changed to be the date type
 		 * 
@@ -1111,13 +1187,20 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			}});
 			row.put("read_count", Arrays.asList(0.0f));
 			row.put("cite_read_boost", Arrays.asList(0.4104f));
+			row.put("norm_cites", Arrays.asList(1500));
+			row.put("simbad_object_ids", Arrays.asList(2, 3000000));
 			row.put("reader", Arrays.asList("0xeeeeeeee", "1xeeeeeeee"));
+			row.put("citations", Arrays.asList("cxeeeeeee0", "cxeeeeeee1"));
 			mongoCache.put("1987PhRvD..36..277B", row);
 
 			row = new HashMap<String, Object>();
+			row.put("grants", new ArrayList<HashMap<String,String>>(){{
+				add(new HashMap<String,String>(){{put("agency", "NSF AST");put("grant", "061839x");}});
+			}});
 			row.put("full", Arrays.asList("Some fulltext Hashimoto"));
 			row.put("read_count", Arrays.asList(19.0f));
 			row.put("cite_read_boost", Arrays.asList(0.4649f));
+			row.put("norm_cites", Arrays.asList(5000));
 			row.put("reader", Arrays.asList("0xeeeeeeee", "1xeeeeeeee", "2xeeeeeeee"));
 			mongoCache.put("1991ApJ...371..665R", row);
 
@@ -1126,6 +1209,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			row.put("read_count", Arrays.asList(15.0f));
 			row.put("cite_read_boost", Arrays.asList(0.373f));
 			row.put("reader", Arrays.asList("3xeeeeeeee"));
+			row.put("norm_cites", Arrays.asList(0));
 			mongoCache.put("1976AJ.....81...67S", row);
 
 			row = new HashMap<String, Object>();

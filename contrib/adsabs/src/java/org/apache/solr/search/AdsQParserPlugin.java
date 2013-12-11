@@ -15,12 +15,12 @@ import org.apache.solr.request.SolrQueryRequest;
  */
 public class AdsQParserPlugin extends QParserPlugin {
 	public static String NAME = "aqp";
-	
+
 	public void init(NamedList args) {
 		//System.out.println(args);
 	}
 
-	
+
 	public QParser createParser(String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req) {
 		try {

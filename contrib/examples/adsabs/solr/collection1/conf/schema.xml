@@ -1087,7 +1087,10 @@
 
 		<field name="reference" type="normalized_string_ascii" indexed="true" stored="true" 
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-			
+      
+	  <field name="citation" type="normalized_string_ascii" indexed="true" stored="true" 
+      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+      		
 		<field name="facility" type="normalized_text_ascii" indexed="true" stored="true"
       multiValued="true" omitNorms="true"/>
 			
@@ -1223,7 +1226,7 @@
 		<field name="classic_factor" type="int" indexed="true" stored="true" 
 		  omitNorms="true" omitTermFreqAndPositions="true"/>
 		  
-		<field name="simbad_object_ids" type="int" indexed="true" stored="true" multiValued="true"
+		<field name="simbid" type="int" indexed="true" stored="true" multiValued="true"
 		  omitNorms="true" omitTermFreqAndPositions="true"/>
 		  
 		<field name="citation_count" type="int" indexed="true" stored="true" 
