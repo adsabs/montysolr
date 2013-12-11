@@ -661,7 +661,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * grants
 		 * 
 		 */
-		dumpDoc(null, "grants", "grant", "grant_facet_hier");
+		//dumpDoc(null, "grants", "grant", "grant_facet_hier");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
 				"//*[@numFound='1']",
 				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
