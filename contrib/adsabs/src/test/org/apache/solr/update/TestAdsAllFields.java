@@ -25,18 +25,23 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.AdsDataSource;
+import org.apache.solr.handler.dataimport.AdsDataSource.MongoConnection;
 import org.apache.solr.handler.dataimport.Context;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 
+import com.mongodb.BasicDBObject;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -656,7 +661,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * grants
 		 * 
 		 */
-		//dumpDoc(null, "grants", "grant", "grant_facet_hier");
+		dumpDoc(null, "grants", "grant", "grant_facet_hier");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
 				"//*[@numFound='1']",
 				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
@@ -1161,9 +1166,41 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 	public static class MongoMockDataSource extends AdsDataSource {
 
 		@Override
-		protected void initMongo(Context context, Properties initProps) {
+		protected MongoConnection initMongo(Context context, Properties initProps) {
 			//super.initMongo(context, initProps); // for hack testing
-			return;
+			
+			MongoConnection mmc = new MongoConnection();
+			
+			String mongoDocIdField = initProps.getProperty(MONGO_DOC_ID);
+			HashMap<String, String> mongoFieldToColumn = new HashMap<String,String>();
+			BasicDBObject mongoFields = new BasicDBObject();
+			mongoFields.put("_id", 1);
+			mongoFields.put(mongoDocIdField, 1);
+			
+			List<Map<String, String>> fields = context.getAllEntityFields();
+			
+			for (Map<String, String> field : fields) {
+				if ("true".equals(field.get(MONGO_FIELD_ATTR))) {
+					String mongoFieldName = field.get(MONGO_FIELD_NAME_ATTR);
+					String columnName = field.get("column");
+					
+					if (mongoFieldName == null) {
+						mongoFieldName = columnName;
+					}
+					mongoFields.put(mongoFieldName, 1);
+					mongoFieldToColumn.put(mongoFieldName, columnName);
+				}
+			}
+			
+			
+			mmc.mongo = null;
+			mmc.db = null;
+			mmc.mainColl = null;
+			mmc.mongoDocIdField = mongoDocIdField;
+			mmc.mongoFieldToColumn = mongoFieldToColumn;
+			mmc.mongoFields = mongoFields;
+			mmc.mainIdField = "bibcode";
+			return mmc;
 		}
 
 
@@ -1171,6 +1208,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		public void close() {
 			return; // do nothing
 		}
+		
 
 		@SuppressWarnings("serial")
 		@Override
