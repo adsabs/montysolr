@@ -87,6 +87,8 @@ JCC_SVN_TAG='MONTYSOLR_JCC_SVN_TAG' in os.environ and os.environ['MONTYSOLR_JCC_
 PYLUCENE_SVN_TAG='MONTYSOLR_PYLUCENE_SVN_TAG' in os.environ and os.environ['MONTYSOLR_PYLUCENE_SVN_TAG'] or JCC_SVN_TAG
 INVENIO_CONFIG='INVENIO_CONFIG' in os.environ and os.environ['INVENIO_CONFIG'] or ''
 INVENIO_COMMIT='INVENIO_COMMIT' in os.environ and os.environ['INVENIO_COMMIT'] or 'master'
+START_ARGS='START_ARGS' in os.environ and os.environ['START_ARGS'] or ''
+START_JVMARGS='START_JVMARGS' in os.environ and os.environ['START_JVMARGS'] or ''
 PYTHON_RELEASE = 'MONTYSOLR_PYTHON_RELEASE' in os.environ and os.environ['MONTYSOLR_PYTHON_RELEASE'] or '2' 
 # some ideas stolen from python release script
 
@@ -1343,7 +1345,7 @@ def start_live_instance(options, instance_dir, port,
         fo.close()
         
         run_cmd(['chmod', 'u+x', 'automatic-run.sh'])
-        run_cmd(['bash', '-e', './automatic-run.sh', '&'])
+        run_cmd(['bash', '-e', './automatic-run.sh', '"%s"' % START_JVMARGS, '"%s"' % START_ARGS, '&'])
         
         kwargs = dict(max_wait=options.timeout)
         if options.check_diagnostics:
