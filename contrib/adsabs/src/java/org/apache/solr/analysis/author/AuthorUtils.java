@@ -4,6 +4,7 @@
 package org.apache.solr.analysis.author;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -117,6 +118,34 @@ public class AuthorUtils {
 		char[] out = new char[in.length * 4];
 		int outPos = ASCIIFoldingFilter.foldToASCII(in, 0, out, 0, in.length);
 		return String.copyValueOf(out).trim();
+	}
+	
+	/*
+	 * Splits name into parts (separated by comma and then by space)
+	 * The comma is retained; spaces between parts of names are removed
+	 * e.g 'john      , james' becomes: ['john,', 'james']
+	 */
+	public static String[] splitName(String name) {
+		if (name.indexOf(',') > -1) {
+			//System.out.println(name);
+			int comma = name.indexOf(',');
+			String[] nameParts = name.substring(comma+1).trim().split(" ");
+			if (nameParts[0].equals(""))
+				return new String[]{name.substring(0, comma).trim() + ","};
+			
+			String[] out = new String[nameParts.length+1];
+			out[0] = name.substring(0, comma).trim() + ",";
+			int i = 1;
+			for (String s: nameParts) {
+				out[i] = s;
+				i += 1;
+			}
+			//System.out.println(Arrays.toString(out));
+			return out;
+		}
+		else {
+			return name.split(" ");
+		}
 	}
 	
 	static String transliterateAccents(String a) {

@@ -7,6 +7,7 @@ import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -88,10 +89,19 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
    *  
    */
   public static class MakeAllShortNames extends NewSynonymFilterFactory.SynonymBuilderFactory {
-
+  	
+  	
+  	
     protected SynonymParser getParser(Analyzer analyzer) {
+    	char sep = ',';
+    	if (args.containsKey("format") && args.get("format").equals("semicolon")) {
+    		sep = ';';
+    	};
+    	
+    	final Character charSeparator = sep;
+    	
       return new NewSolrSynonymParser(true, true, analyzer) {
-
+      	
         public void add(Reader in) throws IOException, ParseException {
           LineNumberReader br = new LineNumberReader(in);
           StringBuffer newBr = new StringBuffer();
@@ -112,7 +122,8 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
               String[] sides = line.split("=>");
               if (sides.length > 1) { // explicit mapping
                 String[] names = getNames(sides[1]);
-                parts = sides[0].split(" ");
+                //System.out.println(Arrays.toString(names));
+                parts = AuthorUtils.splitName(sides[0]);
                 if (isLongForm(parts) && containsLongForm(names) > 0) {
                   for (String shortForm: getAllShortForms(parts)) {
                     if (seen.contains(shortForm)) continue;
@@ -129,7 +140,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
                 if (containsLongForm(names) > 1) {
                   String newLine = buildLine(names);
                   for (int i=0;i<names.length;i++) {
-                    parts = names[i].split(" ");
+                    parts = AuthorUtils.splitName(names[i]);
                     if (isLongForm(parts)) {
                       for (String shortForm: getAllShortForms(parts)) {
                         if (seen.contains(shortForm)) continue;
@@ -177,7 +188,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
         }
         
         private String[] getNames(String vals) {
-          List<String> nn = StrUtils.splitSmart(vals, ',');
+          List<String> nn = StrUtils.splitSmart(vals, charSeparator);
           String names[] = new String[nn.size()];
           int j = 0;
           for (String n: nn) {
@@ -186,6 +197,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
           }
           return names;
         }
+     // cause we subclass solrsynonym parser, we must output solr format
         private String buildLine(String[] names) {
           HashSet<String> set = new HashSet<String>();
           StringBuilder out = new StringBuilder();
@@ -193,7 +205,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
           
           for (String name: names) {
             
-            String[] p = name.split(" ");
+            String[] p = AuthorUtils.splitName(name);
             if (isLongForm(p)) {
               set.add(makeShortForm(p));
             }
@@ -209,10 +221,10 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
         
         
         private String unescape(String s) {
-          return s.replace("\\ ", " ").replace("\\,", ",");
+          return s.replace("\\ ", " ").replace("\\," + charSeparator, charSeparator.toString());
         }
         
-        
+        // cause we subclass solrsynonym parser, we must output solr format
         private String escape(String s) {
           return s.replace(" ", "\\ ").replace(",", "\\,");
         }
@@ -221,8 +233,10 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
         private String makeShortForm(String[] parts) {
           StringBuilder out = new StringBuilder();
           out.append(parts[0]);
+          
           for (int i=1;i<parts.length;i++) {
             out.append(" ");
+            //System.out.println("->" + parts[i]);
             out.append(parts[i].substring(0, 1));
           }
           return out.toString();
@@ -234,7 +248,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
         private int containsLongForm(String[] names) {
           int i = 0;
           for (String name: names) {
-            if (isLongForm(name.split(" "))) {
+            if (isLongForm(AuthorUtils.splitName(name))) {
               i++;
             }
           }
@@ -242,7 +256,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
         }
       };
     }
-
+    
   }
   
   /*
@@ -270,6 +284,14 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
   public static class MakeShortNames extends NewSynonymFilterFactory.SynonymBuilderFactory {
 
     protected SynonymParser getParser(Analyzer analyzer) {
+    	
+    	char sep = ',';
+    	if (args.containsKey("format") && args.get("format").equals("semicolon")) {
+    		sep = ';';
+    	};
+    	
+    	final Character charSeparator = sep;
+    	
       return new NewSolrSynonymParser(true, true, analyzer) {
 
         public void add(Reader in) throws IOException, ParseException {
@@ -288,7 +310,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
               String[] sides = line.split("=>");
               if (sides.length > 1) { // explicit mapping
                 String[] names = getNames(sides[1]);
-                parts = sides[0].split(" ");
+                parts = AuthorUtils.splitName(sides[0]);
                 if (isLongForm(parts) && containsLongForm(names) > 0) {
                   newBr.append(escape(makeShortForm(parts)) + "=>" +
                       sides[0] + "," +
@@ -301,7 +323,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
                 if (containsLongForm(names) > 1) {
                   String newLine = buildLine(names);
                   for (int i=0;i<names.length;i++) {
-                    parts = names[i].split(" ");
+                  	parts = AuthorUtils.splitName(sides[i]);
                     if (isLongForm(parts)) {
                       newBr.append(escape(makeShortForm(parts)) + "=>" +
                           newLine);
@@ -330,7 +352,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
         }
         
         private String[] getNames(String vals) {
-          List<String> nn = StrUtils.splitSmart(vals, ',');
+          List<String> nn = StrUtils.splitSmart(vals, charSeparator);
           String names[] = new String[nn.size()];
           int j = 0;
           for (String n: nn) {
@@ -346,7 +368,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
           
           for (String name: names) {
             
-            String[] p = name.split(" ");
+            String[] p = AuthorUtils.splitName(name);
             if (isLongForm(p)) {
               set.add(makeShortForm(p));
             }
@@ -362,7 +384,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
         
         
         private String unescape(String s) {
-          return s.replace("\\ ", " ").replace("\\,", ",");
+          return s.replace("\\ ", " ").replace("\\" + charSeparator, charSeparator.toString());
         }
         
         
@@ -392,7 +414,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
         private int containsLongForm(String[] names) {
           int i = 0;
           for (String name: names) {
-            if (isLongForm(name.split(" "))) {
+            if (isLongForm(AuthorUtils.splitName(name))) {
               i++;
             }
           }

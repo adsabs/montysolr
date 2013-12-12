@@ -18,14 +18,17 @@ package org.apache.lucene.analysis.synonym;
  */
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.text.ParseException;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -39,6 +42,7 @@ import org.apache.lucene.analysis.util.*;
 import org.apache.lucene.util.CharsRef;
 import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.util.Version;
+import org.apache.solr.common.util.StrUtils;
 
 /**
  * Factory for {@link SynonymFilter}.
@@ -156,6 +160,8 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
         return new NewSolrSynonymParser(true, expand, analyzer);
       } else if (format.equals("wordnet")) {
         return new NewWordnetSynonymParser(true, expand, analyzer);
+      } else if (format.equals("semicolon")) {
+        return new NewSemicolonSynonymParser(true, expand, analyzer);  
       } else {
         // TODO: somehow make this more pluggable
         throw new IllegalArgumentException("Unrecognized synonyms format: " + format);
@@ -340,6 +346,8 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       
     }
   }
+  
+  
   
   public static int countWords(CharsRef chars) {
     int wordCount = 1;

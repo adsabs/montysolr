@@ -107,7 +107,8 @@
 					acronymVariations="1" />
 				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk, 
 					k", "adamguk, k" -->
-				<filter class="solr.SynonymFilterFactory" synonyms="author_curated.synonyms"
+				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
+          synonyms="author_curated.synonyms" format="semicolon" 
 					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
@@ -162,8 +163,9 @@
 					acronymVariations="1" />
 				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk, 
 					k", "adamguk, k" -->
-				<filter class="solr.SynonymFilterFactory" synonyms="author_curated.synonyms"
-					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
+          synonyms="author_curated.synonyms" format="semicolon" 
+          ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitToken="false" />
@@ -291,8 +293,9 @@
 					acronymVariations="1" />
 				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk, 
 					k", "adamguk, k" -->
-				<filter class="solr.SynonymFilterFactory" synonyms="author_curated.synonyms"
-					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
+          synonyms="author_curated.synonyms" format="semicolon" 
+          ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitToken="false" />
@@ -336,10 +339,11 @@
 				<!-- we will use the standard synonym file (as used by the author type 
 					above) but import it in a special way -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+          format="semicolon"
 					synonyms="author_curated.synonyms" ignoreCase="true" expand="true"
 					tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$MakeAllShortNames"
-					inclOrig="true" />
+					inclOrig="true"/>
 				<!-- remove the transliterated variants, they were used only to discover 
 					synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"

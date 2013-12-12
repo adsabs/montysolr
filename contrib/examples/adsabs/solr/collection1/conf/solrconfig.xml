@@ -319,7 +319,7 @@
          searcher to be opened to make those changes visible.
       -->
      <autoCommit> 
-       <maxDocs>100000</maxDocs>  <!--ADSLABS:06/2012 -->
+       <maxDocs>40000</maxDocs>  <!--ADSLABS:06/2012 -->
        <maxTime>1800000</maxTime> <!--ADSLABS:06/2012 --> 
      </autoCommit>
 

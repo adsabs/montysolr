@@ -106,7 +106,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     try {
 
       // hand-curated synonyms
-      File curatedSynonyms = createTempFile(formatSynonyms(new String[]{
+      File curatedSynonyms = createTempFile(new String[]{
           "ABBOT, CHARLES GREELEY;ABBOTT, CHARLES GREELEY",
           "ABDEL AZIZ BAKRY, A;BAKRY, A",
           "ACHUTBHAN, P;ACHUTHAN, P",
@@ -125,8 +125,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "MÜLLER, WILLIAM;MÜLLER, BILL",
           "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
           "DE ZEEUW, TIM=>DE ZEEUW, P TIM",
-          "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,"
-      }));
+          "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,",
+          "grant, carolyn s; stern grant, carolyn; stern, carolyn p"
+      });
 
       // automatically harvested variations of author names (collected during indexing)
       // it will be enriched by the indexing
@@ -287,6 +288,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "232", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Boser, S"));
     assertU(adoc(F.ID, "233", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Boser,"));
     
+    assertU(adoc(F.ID, "300", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna,"));
+    assertU(adoc(F.ID, "301", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, Jewell"));
+    assertU(adoc(F.ID, "302", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, J"));
+    
     assertU(commit());
 
     // persist the transliteration map after new docs were indexed
@@ -321,6 +326,44 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   
   public void testAuthorParsingUseCases() throws Exception {
+  	
+  	// test the definition that is in the live synonym file
+  	// we use this for blackbox - to verify deployment is using
+  	// synonym translation
+  	testAuthorQuery(
+        "\"grant, carolyn s\"", 
+        		"author:grant, carolyn s " +
+        		"author:grant, carolyn s* " +
+        		"author:grant, c s " +
+        		"author:grant, c s* " +
+        		"author:grant, carolyn " +
+        		"author:grant, c " +
+        		"author:grant, " +
+        		"author:stern grant, carolyn " +
+        		"author:stern grant, c " +
+        		"author:stern grant, " +
+        		"author:stern, carolyn p " +
+        		"author:stern, carolyn p* " +
+        		"author:stern, c p " +
+        		"author:stern, c p* " +
+        		"author:stern, carolyn " +
+        		"author:stern, c " +
+        		"author:stern,",
+        		"//*[@numFound='0']"
+        		);
+        		
+  	
+  	testAuthorQuery(
+        "Gopal-Krishna", 
+        		"author:gopal krishna, author:gopal krishna,*",
+        		"//*[@numFound='3']",
+    		"\"Gopal Krishna,\"",
+        		"author:gopal krishna, author:gopal krishna,*",
+        		"//*[@numFound='3']",
+    		"\"Gopal Krishna\"",
+        		"author:krishna, gopal author:krishna, gopal * author:krishna, g author:krishna, g * author:krishna,",
+        		"//*[@numFound='0']"
+        		);
   	
   	//#487 - these author names should parse the same; Maestro, V was
   	// picked by the python name parser (V removed); Boyjian had problems
@@ -365,25 +408,28 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	//setDebug(true);
   	testAuthorQuery(
         "\"o' sullivan\"", 
-        		"author:o sullivan, author:o sullivan, *",
+        		"author:o sullivan, author:o sullivan,*",
         		"//*[@numFound='0']",
     		"\"o'sullivan\"", 
-        		"author:o sullivan, author:o sullivan, *",
+        		"author:o sullivan, author:o sullivan,*",
+        		"//*[@numFound='0']",
+    		"\"o' sullivan, ji\"", 
+        		"author:o sullivan, ji author:o sullivan, ji * author:o sullivan, j author:o sullivan, j * author:o sullivan,",
         		"//*[@numFound='0']"
         		);
   	// funny author names
   	testAuthorQuery(
     		"\"o'sullivan\"", 
-        		"author:o sullivan, author:o sullivan, *",
+        		"author:o sullivan, author:o sullivan,*",
         		"//*[@numFound='0']",
     		"\"o' sullivan\"",
-        		"author:o sullivan, author:o sullivan, *",
+        		"author:o sullivan, author:o sullivan,*",
         		"//*[@numFound='0']"
         		);
   	
   	testAuthorQuery(
     		"Dall\\'oglio",
-        		"author:dall oglio, author:dall oglio, *",
+        		"author:dall oglio, author:dall oglio,*",
         		"//*[@numFound='0']",
     		"Antonella\\ Dall\\'Oglio",
         		"author:dall oglio, antonella author:dall oglio, antonella * author:dall oglio, a author:dall oglio, a * author:dall oglio,",
@@ -446,13 +492,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // doesn't return any results, even though it should yield 2010Natur.468..940V.
     testAuthorQuery(
         "\"van Dokkum\"", 
-        				   "author:van dokkum, author:van dokkum, *",
+        				   "author:van dokkum, author:van dokkum,*",
                    "//*[@numFound='6']",
                    // "van Dokkum" numFound=6
                    // 220	van Dokkum             221	van Dokkum,            222	van Dokkum, H          
                    // 223	van Dokkum, Hector     224	van Dokkum, Hiatus     225	van Dokkum, Romulus    
         "\"van Dokkum,\"", 
-        				   "author:van dokkum, author:van dokkum, *",
+        				   "author:van dokkum, author:van dokkum,*",
                    "//*[@numFound='6']",
                    // "van Dokkum," numFound=6
                    // 220	van Dokkum             221	van Dokkum,            222	van Dokkum, H          
@@ -481,7 +527,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     //setDebug(true);
     testAuthorQuery(
          "Pinilla-Alonso", 
-        				   "author:pinilla alonso, author:pinilla alonso, *",
+        				   "author:pinilla alonso, author:pinilla alonso,*",
                    "//*[@numFound='6']",
                    // Pinilla-Alonso numFound=6
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
@@ -494,7 +540,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                     // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer
          "\"Pinilla Alonso,\"", 
-         				   "author:pinilla alonso, author:pinilla alonso, *",
+         				   "author:pinilla alonso, author:pinilla alonso,*",
                     "//*[@numFound='6']",
                     // Pinilla-Alonso numFound=6
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
@@ -2326,19 +2372,27 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     QParser qParser = getParser(req);
     String query = req.getParams().get(CommonParams.Q);
     Query q = qParser.parse();
-
+    
     String actual = q.toString("field");
     
-    String[] ex = expected.split("\\s*[a-z]+:");
+    String[] ex = expected.split("\\s*[a-z]+\\:");
     Arrays.sort(ex);
-    String[] ac = actual.split("\\s*[a-z]+:");
+    String[] ac = actual.split("\\s*[a-z]+\\:");
     Arrays.sort(ac);
     StringBuffer exs = new StringBuffer();
     for (String s: ex) {
+    	if (s.trim().equals(""))
+    		continue;
+    	if (exs.length() > 0)
+    		exs.append(" ");
       exs.append(s.trim());
     }
     StringBuffer acs = new StringBuffer();
     for (String s: ac) {
+    	if (s.trim().equals(""))
+    		continue;
+    	if (acs.length() > 0)
+    		acs.append(" ");
       acs.append(s.trim());
     }
     

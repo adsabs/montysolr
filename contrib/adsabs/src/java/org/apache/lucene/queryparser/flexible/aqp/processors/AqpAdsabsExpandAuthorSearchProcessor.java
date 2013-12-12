@@ -152,7 +152,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
         }
         
         String v = fqn.getTextAsString();
-        String[] nameParts = fqn.getTextAsString().split(" ");
+        String[] nameParts = AuthorUtils.splitName(fqn.getTextAsString());
         
         /*
         if (node instanceof WildcardQueryNode) { // only "kurtz, m*" cases are tolerated
@@ -319,7 +319,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
       
       // whether to add a space, ie. Kurtz, Michael J -> Kurtz, Michael J*
       // but Kurtz, Michael Julian -> Kurtz, Michael Julian *
-      parts = name.split(" ");
+      parts = AuthorUtils.splitName(name);
       lastPartWasAcronym = parts[parts.length-1].length() == 1;
       
       noOfParts = parts.length;
