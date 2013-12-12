@@ -83,12 +83,16 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		// index some (random) docs and check we got them
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		
+		data = direct.request("/montysolr_diagnostics", null);
+		assert data.contains("*:diagnostic_test");
+		System.out.println(data);
+		
 		InvenioKeepRecidUpdated handler = (InvenioKeepRecidUpdated) core.getRequestHandler("/invenio/update");
 		//handler.setAsynchronous(false);
 		
 		core.execute(handler, req("last_recid", "9000000",  
-				"maximport", "200",
-				"batchsize", "500"), 
+				"maximport", "20",
+				"batchsize", "50"), 
 				rsp);
 
 		// must wait for the landler to finish his threads

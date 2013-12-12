@@ -18,6 +18,8 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.core.CloseHook;
+import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.dataimport.AdsDataSource.MongoConnection;
 import org.bson.BSONObject;
 import org.slf4j.Logger;
@@ -87,12 +89,14 @@ public class AdsDataSource extends InvenioDataSource {
 		
 		String key = this.getClass().getSimpleName() + "#MongoConnection";
 		Object conn = context.getSessionAttribute(key, Context.SCOPE_SOLR_CORE);
+		
+		
 		if (conn instanceof MongoConnection) {
 			MongoConnection mc = (MongoConnection) conn;
 			return mc;
 		}
 		
-		MongoConnection mc = new MongoConnection();
+		final MongoConnection mc = new MongoConnection();
 		context.setSessionAttribute(key, mc, Context.SCOPE_SOLR_CORE);
 		
 		Map<String, Object> params = context.getRequestParameters();
@@ -160,6 +164,17 @@ public class AdsDataSource extends InvenioDataSource {
 		mc.mongoFieldToColumn = mongoFieldToColumn;
 		mc.mongoFields = mongoFields;
 		mc.mainIdField = mainIdField;
+		
+		context.getSolrCore().addCloseHook(new CloseHook() {
+      @Override
+      public void preClose(SolrCore core) {
+        mc.close();
+      }
+      @Override
+      public void postClose(SolrCore core) {
+      }
+    });
+		
 		return mc;
 	}
 	
@@ -228,64 +243,69 @@ public class AdsDataSource extends InvenioDataSource {
 		//mongoQuery.put(mongoDocIdField, new BasicDBObject("$in", new String[]{"2009arXiv0909.1287I","1987PhRvD..36..277B"}));
 		
 		DBCursor cursor = mc.get().mainColl.find(mongoQuery, mc.get().mongoFields);
-		Iterator<DBObject> it = cursor.iterator();
-		Object v;
 		HashMap<String, Map<Object, String>> collectionsToFetch = new HashMap<String, Map<Object, String>>();
 		HashMap<String, Map<String, String>> collectionsToFetchFields = new HashMap<String, Map<String, String>>();
 		
-		Map<String, String> mongoToColumn = mc.get().mongoFieldToColumn;
-		String mongoDocIdField = mc.get().mongoDocIdField;
-		String column;
-		
-		while (it.hasNext()) {
-			DBObject doc = it.next();
-			String docId = (String) doc.get(mongoDocIdField);
-			assert docId != null;
+		try {
+			Iterator<DBObject> it = cursor.iterator();
+			Object v;
 			
-			Map<String, Object> row = new HashMap<String, Object>();
+			Map<String, String> mongoToColumn = mc.get().mongoFieldToColumn;
+			String mongoDocIdField = mc.get().mongoDocIdField;
+			String column;
 			
-			for (String mongoField : doc.keySet()) {
-				column = mongoToColumn.get(mongoField);
+			while (it.hasNext()) {
+				DBObject doc = it.next();
+				String docId = (String) doc.get(mongoDocIdField);
+				assert docId != null;
 				
-				if (column == null)
-					continue;
+				Map<String, Object> row = new HashMap<String, Object>();
 				
-				v = doc.get(mongoField);
-				
-				if (v == null)
-					continue;
-				
-				if (v instanceof DBRef) { // 
-					DBRef o = (DBRef) v;
+				for (String mongoField : doc.keySet()) {
+					column = mongoToColumn.get(mongoField);
 					
-					// we'll collect the references to other collections and retrieve them in another big sweep
-					// later - cause getting them one by one is stupid/slow...
+					if (column == null)
+						continue;
 					
-					// we have to find out what fields are references; the ids of the references and then save
-					// the link between our original docs' <-> refd id. I know it is more work, but it is 
-					// defensive coding; I don't want to rely on the assumption that the references are always
-					// linked through the ID of the primary document. ...
+					v = doc.get(mongoField);
 					
-					//System.out.println(o.fetch());
-					String colName = o.getRef(); //("$ref").toString(); // in which collection the new value is
-					Object refObjId = o.getId(); //get("$id").toString(); // what ID in the new collection the object has
+					if (v == null)
+						continue;
 					
-					if (!collectionsToFetch.containsKey(colName)) {
-						collectionsToFetch.put(colName, new HashMap<Object, String>());
-						collectionsToFetchFields.put(colName, new HashMap<String, String>());
-					}
-					
-					collectionsToFetch.get(colName).put(refObjId, docId);
-					collectionsToFetchFields.get(colName).put(mongoField, column);
+					if (v instanceof DBRef) { // 
+						DBRef o = (DBRef) v;
 						
+						// we'll collect the references to other collections and retrieve them in another big sweep
+						// later - cause getting them one by one is stupid/slow...
+						
+						// we have to find out what fields are references; the ids of the references and then save
+						// the link between our original docs' <-> refd id. I know it is more work, but it is 
+						// defensive coding; I don't want to rely on the assumption that the references are always
+						// linked through the ID of the primary document. ...
+						
+						//System.out.println(o.fetch());
+						String colName = o.getRef(); //("$ref").toString(); // in which collection the new value is
+						Object refObjId = o.getId(); //get("$id").toString(); // what ID in the new collection the object has
+						
+						if (!collectionsToFetch.containsKey(colName)) {
+							collectionsToFetch.put(colName, new HashMap<Object, String>());
+							collectionsToFetchFields.put(colName, new HashMap<String, String>());
+						}
+						
+						collectionsToFetch.get(colName).put(refObjId, docId);
+						collectionsToFetchFields.get(colName).put(mongoField, column);
+							
+					}
+					else {
+						row.put(column, v);
+					}
 				}
-				else {
-					row.put(column, v);
-				}
+				mongoCache.put(docId, row);
 			}
-			mongoCache.put(docId, row);
 		}
-		cursor.close();
+		finally {
+			cursor.close();
+		}
 		
 		// now fetch data from referenced collection(s)
 		if (collectionsToFetch.size() > 0) {
@@ -308,17 +328,20 @@ public class AdsDataSource extends InvenioDataSource {
 				// get the values
 				cursor = mc.get().db.getCollection(collectionName).find(otherCollQuery, otherFields);
 				
-				// and insert them back into the solr doc (using the solr fieldname)
-				it = cursor.iterator();
-				while (it.hasNext()) {
-					DBObject newData = it.next();
-					Map<String, Object> docToUpdate = mongoCache.get(refId2DocId.get(newData.get("_id")));
-					for (String columnx : mongoField2SolrDocField.keySet()) {
-						docToUpdate.put(mongoField2SolrDocField.get(columnx), newData.get(columnx));
+				try {
+					// and insert them back into the solr doc (using the solr fieldname)
+					Iterator<DBObject> it = cursor.iterator();
+					while (it.hasNext()) {
+						DBObject newData = it.next();
+						Map<String, Object> docToUpdate = mongoCache.get(refId2DocId.get(newData.get("_id")));
+						for (String columnx : mongoField2SolrDocField.keySet()) {
+							docToUpdate.put(mongoField2SolrDocField.get(columnx), newData.get(columnx));
+						}
 					}
 				}
-				
-				cursor.close();
+				finally {
+					cursor.close();
+				}
 			}
 		}
   }
@@ -366,6 +389,11 @@ public class AdsDataSource extends InvenioDataSource {
 		public String mongoDocIdField;
 		public DBCollection mainColl;
 		public DB db;
+		
+		public void close() {
+			mongo.close();
+			return;
+		}
 
 	}
 	
