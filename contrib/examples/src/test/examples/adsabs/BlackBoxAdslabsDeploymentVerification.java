@@ -54,7 +54,7 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		data.contains("(author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*)^2.0");
 		data.contains("DisjunctionMaxQuery(");
 		
-		data = direct.request("/select?q=accomazzi&debugQuery=true&wt=json", null);
+		data = direct.request("/select?q=accomazzi&debugQuery=false&wt=json", null);
 		data.contains("abstract:accomazzi");
 		data.contains("title:accomazzi");
 		data.contains("full:accomazzi");
@@ -64,20 +64,19 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		
 		
 		// #231 - use 'aqp' as a default parser also for filter queries
-		assert direct.request("/select?q=*:*&fq={!aqp}author:\"Civano, F\"&debugQuery=false&wt=json", null)
+		assert direct.request("/select?q=*:*&fq={!aqp}author:\"Civano, F\"&debugQuery=true&wt=json", null)
     	.contains("author:civano, f author:civano, f* author:civano,");
 		
 		// check we are using synonym for translation
-		data = direct.request("/select?q=AAS&debugQuery=false&wt=json", null);
+		data = direct.request("/select?q=AAS&debugQuery=true&wt=json", null);
 		assert data.contains("title:syn::american astronomical society");
 		assert data.contains("title:acr::aas");
 		
-		data = direct.request("/select?q=aborigines&debugQuery=false&wt=json", null);
+		data = direct.request("/select?q=aborigines&debugQuery=true&wt=json", null);
 		assert data.contains("title:syn::aboriginal");
 		
-		data = direct.request("/select?q=\"STERN, CAROLYN P\"&debugQuery=false&wt=json", null);
+		data = direct.request("/select?q=\"STERN, CAROLYN P\"&debugQuery=true&wt=json", null);
 		assert data.contains("author:stern grant, c");
-		
 		
 		
 		

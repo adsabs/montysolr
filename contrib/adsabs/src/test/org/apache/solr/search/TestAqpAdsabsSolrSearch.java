@@ -88,7 +88,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			
 		  // hand-curated synonyms
       File curatedSynonyms = createTempFile(new String[]{
-          "JONES\\,\\ CHRISTINE,FORMAN\\,\\ CHRISTINE" // the famous post-synonym expansion
+          "JONES, CHRISTINE;FORMAN, CHRISTINE" // the famous post-synonym expansion
       });
       replaceInFile(newConfig, "synonyms=\"author_curated.synonyms\"", "synonyms=\"" + curatedSynonyms.getAbsolutePath() + "\"");
 			

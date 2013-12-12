@@ -108,7 +108,7 @@ public class AdsDataSource extends InvenioDataSource {
 		String mongoDocIdField;
 		BasicDBObject mongoFields;
 		Map<String,String> mongoFieldToColumn;
-		MongoClient mongo;
+		MongoClient mongo = null;
 		DB db;
 		DBCollection mainColl;
 		
@@ -125,6 +125,9 @@ public class AdsDataSource extends InvenioDataSource {
 			mainColl = db.getCollection(mongoCollectionName);
 			mainColl.findOne(); // check we indeed have a connection
 		} catch (Exception e) {
+			if (mongo != null) {
+				mongo.close();
+			}
 			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, e);
 		}
 		
@@ -323,6 +326,7 @@ public class AdsDataSource extends InvenioDataSource {
 	@Override
 	public void close() {
 		super.close();
+		mc = null;
 	}
 	
 	
