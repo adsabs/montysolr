@@ -787,7 +787,7 @@ def check_prerequisites(options):
         run_cmd(['git', 'clone', GITURL, 'montysolr'])
         
     with changed_dir('montysolr'):
-        run_cmd(['git', 'fetch'])
+        run_cmd(['git', 'fetch', '--all'])
         #run_cmd(['git', 'reset', '--hard', 'origin/master'])
         #run_cmd(['git', 'checkout', 'master'])
 
@@ -1136,7 +1136,7 @@ deactivate
         #    run_cmd(['rm', 'RELEASE'], strict=False)
         
         # get the target tag
-        run_cmd(['git', 'checkout', '-f', '-b', git_tag.ref], strict=False)
+        # run_cmd(['git', 'checkout', '-f', '-b', git_tag.ref], strict=False)
         run_cmd(['git', 'reset', '--hard', git_tag.ref])
         setup_build_properties()
         

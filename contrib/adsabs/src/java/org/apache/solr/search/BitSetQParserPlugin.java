@@ -18,14 +18,18 @@ import org.apache.lucene.search.BitSetQuery;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.Base64;
 import org.apache.solr.common.util.ContentStream;
+import org.apache.solr.common.util.ContentStreamBase;
+import org.apache.solr.common.util.ContentStreamBase.StringStream;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.handler.RequestHandlerUtils;
 import org.apache.solr.handler.loader.ContentStreamLoader;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.SchemaField;
+import org.apache.solr.search.BitSetQParserPlugin.DataProcessor;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 
 /*
@@ -65,34 +69,138 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 		return new QParser(qstr, localParams, params, req) {
 
+			private int maxAllowedGetSize;
+
 			@Override
 			public Query parse() throws ParseException {
 				
-				DataStream data = readData(req);
+				localParams = req.getParams();
 				
-				BitSet bits = convertDataStream(data, req);
+				List<DataProcessor> processors = new ArrayList<DataProcessor>();
 				
-				if (bits.cardinality() < 1)
+				Iterable<ContentStream> streams = req.getContentStreams();
+				if (streams != null) {
+					for (ContentStream cs: req.getContentStreams()) {
+						DataProcessor streamProcessor = getStreamProcessor(localParams, cs);
+						if (streamProcessor != null) {
+							processors.add(streamProcessor);
+						}
+					}
+				}
+				
+				String data;
+				// we also allow passing of data inside normal parametes (useful for testing)
+				if (localParams.get("f", null) != null) {
+					data = localParams.get(localParams.get("f"), null);
+					if (data != null) {
+						if (data.length() > maxAllowedGetSize) { // solr loaded it anyway, but at least we are educating people ;)
+							throw new SolrException(ErrorCode.FORBIDDEN, "The data you sent is too big for GET requests. Use data streams instead");
+						}
+						StringStream cs = new ContentStreamBase.StringStream(data);
+						cs.setContentType("big-query/" + localParams.get("type", "bitset") 
+								                           + "-" + localParams.get("encoding", "none")
+								                           + "; compression:" + localParams.get("compression", "none")
+								                           );
+						DataProcessor streamProcessor = getStreamProcessor(localParams, cs);
+						
+						if (streamProcessor != null) {
+							processors.add(streamProcessor);
+						}
+						
+					}
+				}
+				
+				if (processors.size() == 0) {
+					return null;
+				}
+				
+				String[] operator = localParams.get("operator","and").split(",");
+				if (operator.length > 1 && operator.length != processors.size()-1) {
+					throw new SolrException(ErrorCode.BAD_REQUEST, 
+							"There is " + processors.size() + " data strams, but inconsistent number of operators: " + localParams.get("operator","and"));
+				}
+				
+				BitSet topBits = null;
+				int i = 0;
+				for (DataProcessor processor : processors) {
+					
+					BitSet bits = processor.getBits();
+					
+					if (bits == null) {
+						if (operator.length > 0) {
+							i++;
+						}
+						continue;
+					}
+						
+					
+					if (topBits == null) {
+						topBits = bits;
+						continue;
+					}
+					
+					String op = operator[i];
+					if (op.equals("and")) {
+						topBits.and(bits);
+					}
+					else if (op.equals("or")) {
+						topBits.or(bits);
+					}
+					else if (op.equals("not")) {
+						topBits.andNot(bits);
+					}
+					else if (op.equals("xor")) {
+						topBits.xor(bits);
+					}
+					else {
+						throw new SolrException(ErrorCode.BAD_REQUEST, "Unknown bitset operator: " + op);
+					}
+					
+					if (operator.length > 0) {
+						i++;
+					}
+				}
+				
+				
+				if (topBits.cardinality() < 1)
 					return null;
 
-				return new BitSetQuery(bits);
+				return new BitSetQuery(topBits);
 
 			}
+
+			private DataProcessor getStreamProcessor(SolrParams localParams,
+          ContentStream cs) {
+	      // TODO Auto-generated method stub
+	      return null;
+      }
+
+			private DataProcessor getStreamProcessor(SolrParams localParams,
+          String contentType, String sourceInfo) {
+	      // TODO Auto-generated method stub
+	      return null;
+      }
+
+			private Object getProcessor(SolrQueryRequest req, String contentType) {
+	      // TODO Auto-generated method stub
+	      return null;
+      }
 		};
 	}
 	
+	
+	public static class DataProcessor {
+		
+		public BitSet getBits() {
+			return new BitSet();
+		}
+	}
+	/*
 	protected BitSet convertDataStream(DataStream data, SolrQueryRequest req) {
 		
+		localParams = req.getParams()
 		bits = fromByteArray(data, isLittleEndian ? LITTLE_ENDIAN_BIT_MASK : BIG_ENDIAN_BIT_MASK);
 		
-	// we must harvest lucene docids
-		AtomicReader reader = req.getSearcher().getAtomicReader();
-		BitSet bits = readBase64String(localParams.get(QueryParsing.V), 
-				localParams.get("compression", "none"),
-				localParams.getBool("little_endian", false));
-
-		if (bits.cardinality() < 1)
-			return null;
 
 		// TODO: add a mapper that can translate from a string 
 		// field into lucene ids
@@ -129,11 +237,17 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	  return null;
   }
 
+	*/
+	
 	public static class DataStream {
+
+		public DataStream(byte[] data, boolean bool) {
+	    // TODO Auto-generated constructor stub
+    }
 		
 	}
 
-	protected DataStream readData(SolrQueryRequest req) {
+	protected DataStream readData(SolrQueryRequest req) throws ParseException {
 		// read the data - it can be either in the content stream xor directly
 		// in the open value (perhaps encoded, compressed etc)
 		
@@ -144,8 +258,8 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		if (streams != null) {
 			for (ContentStream stream : streams) {
 				String ct = stream.getContentType();
-				if (ct != null && ct.toLowerCase().contains("text/bitset-data")) {
-					stream.g
+				if (ct != null && ct.toLowerCase().contains("bigquery/csv")) {
+					//pass
 				}
 			}
 			if (data == null) {

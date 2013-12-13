@@ -16,12 +16,20 @@
  */
 package org.apache.solr.search;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
+
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.solr.common.util.ContentStream;
+import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrQueryRequestBase;
 import org.junit.Test;
 
 public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
@@ -86,6 +94,20 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 		assertArrayEquals(byteData, bqp.unGZip(bqp.decodeBase64(gzipBase64string)));
 		assertEquals(data, bqp.fromByteArray(bqp.unGZip(bqp.decodeBase64(gzipBase64string))));
 
+		
+	// sending lucene doc-ids (just a test)
+		SolrQueryRequestBase req = (SolrQueryRequestBase) req("q","text:*", "fq", 
+				"{!bitset compression=none} xxx", "stream.body", "wooo hooo");
+		List<ContentStream> cs = new ArrayList<ContentStream>(1);
+    ContentStreamBase f = new ContentStreamBase.StringStream("id\n1\n2");
+    f.setContentType("bigquery/csv");
+    cs.add(f);
+		req.setContentStreams(cs);
+		
+		assertQ(req
+				,"//*[@numFound='2']"
+		);
+		
 		// sending lucene doc-ids (just a test)
 		assertQ(req("q","text:*", "fq", 
 				"{!bitset compression=none} " + bqp.encodeBase64(bqp.toByteArray(convert(new int[]{5,6,20,30}))))
