@@ -126,10 +126,10 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     citationFields = new String[0];
     referenceFields = new String[0];
     
-    if (args.containsKey("referenceFields")) {
+    if (args.containsKey("referenceFields") && ((String)args.get("referenceFields")).trim().length() > 0) {
     	referenceFields = ((String)args.get("referenceFields")).split(",");
     }
-    if (args.containsKey("citationFields")) {
+    if (args.containsKey("citationFields") && ((String)args.get("citationFields")).trim().length() > 0) {
     	citationFields = ((String)args.get("citationFields")).split(",");
     }
     
@@ -353,6 +353,10 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	  	}
   	);
   	
+  	if (this.referenceFields.length == 0 && this.citationFields.length == 0) {
+  		return;
+  	}
+  	
   	if (this.referenceFields.length > 0 || this.citationFields.length > 0) {
 	  	@SuppressWarnings("rawtypes")
       final RelationshipLinkedHashMap relMap = (RelationshipLinkedHashMap) map;
@@ -566,7 +570,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   		
   		Class<? extends FieldType> c = type.getClass();
   		if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
-  			if (fieldInfo.multiValued()) {
+  			if (fieldInfo.multiValued() || type.isMultiValued()) {
   				out.get("textFieldsMV").add(f);
   			}
   			else {
@@ -574,7 +578,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   			}
   		}
   		else if (c.isAssignableFrom(TrieIntField.class) || c.isAssignableFrom(IntField.class)) {
-  			if (type.isMultiValued()) {
+  			if (fieldInfo.multiValued() || type.isMultiValued()) {
   				out.get("intFieldsMV").add(f);
   			}
   			else {

@@ -132,13 +132,7 @@
         
         <field column="facility"        
             xpath="/collection/record/datafield[@tag='693']/subfield[@code='f']" /> 
-        <field column="instrument"        
-            xpath="/collection/record/datafield[@tag='693']/subfield[@code='i']" /> 
-        <field column="telescope"        
-            xpath="/collection/record/datafield[@tag='693']/subfield[@code='t']" />    
             
-        <field column="object"        
-            xpath="/collection/record/datafield[@tag='694']/subfield[@code='a']" />
         
         <!--  free-text keywords -->
         
@@ -160,9 +154,6 @@
             xpath="/collection/record/datafield[@tag='695']/subfield[@code='b']" />
         
             
-        <field column="collaboration"        
-            xpath="/collection/record/datafield[@tag='710']/subfield[@code='t']" />
-
         <!--  journal info -->
         <field column="pub"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='p']" />
@@ -181,12 +172,6 @@
         <field column="year"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='y']" />    
         
-        <!--  record date-stamps -->
-        <field column="created"        
-            xpath="/collection/record/datafield[@tag='961']/subfield[@code='x']" />
-
-        <field column="modified"        
-            xpath="/collection/record/datafield[@tag='961']/subfield[@code='c']" />
         
         <field column="property"
             xpath="/collection/record/datafield[@tag='980']/subfield[@code='p']"/>

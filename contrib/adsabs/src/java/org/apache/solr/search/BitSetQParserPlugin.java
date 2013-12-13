@@ -4,52 +4,64 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BitSetQuery;
+import org.apache.lucene.search.CacheWrapper;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SecondOrderCollectorCacheWrapper;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.Base64;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.ContentStreamBase.StringStream;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.handler.RequestHandlerUtils;
-import org.apache.solr.handler.loader.ContentStreamLoader;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.IntField;
 import org.apache.solr.schema.SchemaField;
-import org.apache.solr.search.BitSetQParserPlugin.DataProcessor;
+import org.apache.solr.schema.StrField;
+import org.apache.solr.schema.TextField;
+import org.apache.solr.schema.TrieIntField;
+import org.apache.solr.update.AddUpdateCommand;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.solr.handler.loader.CSVLoader;
 
 /*
- * Implementation note: I wanted to make this more flexible and use
- * the SOLR stream readers. But I'm pressed for time, so I cannot 
- * spend much energy here...
- * 
- * This plugin will do following:
- * 
- * 	1. read data
- *  2. decode data into bitsets
- *  3. create bitset query
+ * Flexible framework to query SOLR by (a large set)
+ * of ID's. This can be used to implement remote/fast
+ * bitset operations or to retrieve data that cannot
+ * be easily expressed using a query language; typically
+ * st like: id:1 OR id:2 OR id:3.............. id:n
  */
 public class BitSetQParserPlugin extends QParserPlugin {
 
 	public static String NAME = "bitset";
-	private String defaultField = null;
-	private List<String> allowedFields = new ArrayList<String>();
+	private Set<String> allowedFields = new HashSet<String>();
+	private static Map<String, String> cacheMapping = new HashMap<String, String>();
+	private int maxAllowedGetSize = 5000;
 
-	@Override
+	@SuppressWarnings("rawtypes")
+  @Override
 	public void init(NamedList args) {
 
 		NamedList defs = (NamedList) args.get("defaults");
@@ -57,187 +69,347 @@ public class BitSetQParserPlugin extends QParserPlugin {
 			defs = new NamedList();
 		}
 
-		if (defs.get("defaultField") != null) {
-			defaultField = (String) args.get("defaultField");
+		if (defs.get("cache-mapping") != null) {
+			for (String s: ((String)defs.get("cache-mapping")).split(",")) {
+				String[] parts = s.split(":");
+				if (parts.length == 2) {
+					cacheMapping.put(parts[0], parts[1]);
+				}
+				else {
+					throw new SolrException(ErrorCode.SERVER_ERROR, "Wrong mapping format: " + s);
+				}
+			}
 		}
-
+		
+		if (defs.get("allowed-fields") != null) {
+			for (String s: ((String) defs.get("allowed-fields")).split(",")) {
+				allowedFields.add(s);
+			}
+		}
+		
+		if (defs.get("max-allowed-get-size") != null) {
+			maxAllowedGetSize = Integer.parseInt((String) defs.get("max-allowed-get-size"));
+		}
 	}
 
 	@Override
 	public QParser createParser(String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req) {
-
+		
+		
 		return new QParser(qstr, localParams, params, req) {
 
-			private int maxAllowedGetSize;
-
 			@Override
-			public Query parse() throws ParseException {
-				
-				localParams = req.getParams();
-				
+			public Query parse() {
 				List<DataProcessor> processors = new ArrayList<DataProcessor>();
 				
-				Iterable<ContentStream> streams = req.getContentStreams();
-				if (streams != null) {
-					for (ContentStream cs: req.getContentStreams()) {
-						DataProcessor streamProcessor = getStreamProcessor(localParams, cs);
-						if (streamProcessor != null) {
-							processors.add(streamProcessor);
+				try {
+					
+					Iterable<ContentStream> streams = req.getContentStreams();
+					if (streams != null) {
+						for (ContentStream cs: req.getContentStreams()) {
+							DataProcessor streamProcessor = getStreamProcessor(cs);
+							if (streamProcessor != null) {
+								processors.add(streamProcessor);
+							}
 						}
 					}
-				}
-				
-				String data;
-				// we also allow passing of data inside normal parametes (useful for testing)
-				if (localParams.get("f", null) != null) {
-					data = localParams.get(localParams.get("f"), null);
-					if (data != null) {
+					
+					String data;
+					// we also allow passing of data inside normal parametes (useful for testing)
+					data = localParams.get(QueryParsing.V);
+					if (data != null && data.length() > 0) {
 						if (data.length() > maxAllowedGetSize) { // solr loaded it anyway, but at least we are educating people ;)
 							throw new SolrException(ErrorCode.FORBIDDEN, "The data you sent is too big for GET requests. Use data streams instead");
 						}
+						
 						StringStream cs = new ContentStreamBase.StringStream(data);
 						cs.setContentType("big-query/" + localParams.get("type", "bitset") 
 								                           + "-" + localParams.get("encoding", "none")
 								                           + "; compression:" + localParams.get("compression", "none")
 								                           );
-						DataProcessor streamProcessor = getStreamProcessor(localParams, cs);
+						DataProcessor streamProcessor = getStreamProcessor(cs);
 						
 						if (streamProcessor != null) {
 							processors.add(streamProcessor);
 						}
 						
 					}
-				}
-				
-				if (processors.size() == 0) {
-					return null;
-				}
-				
-				String[] operator = localParams.get("operator","and").split(",");
-				if (operator.length > 1 && operator.length != processors.size()-1) {
-					throw new SolrException(ErrorCode.BAD_REQUEST, 
-							"There is " + processors.size() + " data strams, but inconsistent number of operators: " + localParams.get("operator","and"));
-				}
-				
-				BitSet topBits = null;
-				int i = 0;
-				for (DataProcessor processor : processors) {
 					
-					BitSet bits = processor.getBits();
+					if (processors.size() == 0) {
+						return null;
+					}
 					
-					if (bits == null) {
+					String[] operator = localParams.get("operator","and").split(",");
+					if (operator.length > 1 && operator.length != processors.size()-1) {
+						throw new SolrException(ErrorCode.BAD_REQUEST, 
+								"There is " + processors.size() + " data strams, but inconsistent number of operators: " + localParams.get("operator","and"));
+					}
+					
+					BitSet topBits = null;
+					int i = 0;
+					for (DataProcessor processor : processors) {
+						
+						BitSet bits = processor.getBits();
+						
+						if (bits == null) {
+							if (operator.length > 0) {
+								i++;
+							}
+							continue;
+						}
+							
+						
+						if (topBits == null) {
+							topBits = bits;
+							continue;
+						}
+						
+						String op = operator[i];
+						if (op.equals("and")) {
+							topBits.and(bits);
+						}
+						else if (op.equals("or")) {
+							topBits.or(bits);
+						}
+						else if (op.equals("not")) {
+							topBits.andNot(bits);
+						}
+						else if (op.equals("xor")) {
+							topBits.xor(bits);
+						}
+						else {
+							throw new SolrException(ErrorCode.BAD_REQUEST, "Unknown bitset operator: " + op);
+						}
+						
 						if (operator.length > 0) {
 							i++;
 						}
-						continue;
-					}
-						
-					
-					if (topBits == null) {
-						topBits = bits;
-						continue;
 					}
 					
-					String op = operator[i];
-					if (op.equals("and")) {
-						topBits.and(bits);
-					}
-					else if (op.equals("or")) {
-						topBits.or(bits);
-					}
-					else if (op.equals("not")) {
-						topBits.andNot(bits);
-					}
-					else if (op.equals("xor")) {
-						topBits.xor(bits);
-					}
-					else {
-						throw new SolrException(ErrorCode.BAD_REQUEST, "Unknown bitset operator: " + op);
+					
+					if (topBits.cardinality() < 1)
+						return null;
+	
+					BitSetQuery q = new BitSetQuery(topBits);
+					
+					if (localParams.get("uniqueId", null) != null) {
+						q.setUUID(UUID.randomUUID().toString());
 					}
 					
-					if (operator.length > 0) {
-						i++;
-					}
+					return q;
 				}
-				
-				
-				if (topBits.cardinality() < 1)
-					return null;
-
-				return new BitSetQuery(topBits);
+				catch (Exception e) {
+					throw new SolrException(ErrorCode.SERVER_ERROR, e);
+				}
 
 			}
 
-			private DataProcessor getStreamProcessor(SolrParams localParams,
-          ContentStream cs) {
-	      // TODO Auto-generated method stub
+			private DataProcessor getStreamProcessor(ContentStream cs) throws Exception {
+				
+				// if 'streamId' is set, we may limit ourselves to grabbing only
+				// some streams
+	      if (localParams.get("streamId", null) != null) {
+	      	if (!cs.getContentType().contains(localParams.get("streamId"))) {
+	      		return null;
+	      	}
+	      }
+	      String ct = cs.getContentType();
+	      if (ct.contains("big-query/csv")) {
+	      	DataProcessor p = new DataProcessor(req);
+	      	
+	      	CSVLoader loader = new CSVLoader();
+	        loader.load(req, null, cs, p);
+	        return p;
+	      }
+	      else if (ct.contains("big-query/bitset")) {
+	      	
+	      	DataProcessor p = new DataProcessor(req) {
+	      		@Override
+	      		public BitSet getBits() {
+	      			// we must harvest lucene docids
+	    				AtomicReader reader = req.getSearcher().getAtomicReader();
+	    				byte[] data;
+              
+	    				try {
+	              data = readBase64String(localParams.get(QueryParsing.V), 
+	              		localParams.get("compression", "none"));
+              } catch (IOException e1) {
+	              throw new SolrException(ErrorCode.BAD_REQUEST, e1);
+              }
+              
+	    				BitSet bits = fromByteArray(data, 
+	    						localParams.getBool("little_endian", false)
+	    						?	LITTLE_ENDIAN_BIT_MASK : BIG_ENDIAN_BIT_MASK);
+	    				
+	    				// now, the bitset can contain lucene docids or it can be
+	    				// set of integer values that need translation into lucene
+	    				// docids; this depends on presence/absence of 'field' param
+	    				
+	    				if (localParams.get("field", null) != null) {
+	    					String fieldName = localParams.get("field");
+	    					SchemaField field = req.getSchema().getField(fieldName);
+
+	    					if (field.multiValued()) {
+	    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't use bitset with multi-valued fields");
+	    					}
+
+	    					if (allowedFields.size() > 0 && !allowedFields.contains(fieldName)) {
+	    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't search against field " + fieldName + " (reason: field forbidden#!@#!)");
+	    					}
+
+	    					
+	    					
+	    					FieldType ftype = field.getType();
+    						Class<? extends FieldType> c = ftype.getClass();
+    						boolean fieldIsInt = true;
+    						if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
+    							fieldIsInt = false;
+    						}
+    						else if (c.isAssignableFrom(TrieIntField.class) || c.isAssignableFrom(IntField.class)) {
+    							//pass
+    						}
+    						else {
+    							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
+    						}
+    						
+    						BitSet translatedBitSet = new BitSet(reader.maxDoc());
+    						
+    						
+	    					CacheWrapper cacheWrapper = super.getCache(fieldName);
+	    					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
+	    						for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
+	    					     if (fieldIsInt) {
+	    					    	 translatedBitSet.set(cacheWrapper.getLuceneDocId(0, i));
+	    					     }
+	    					     else {
+	    					    	 translatedBitSet.set(cacheWrapper.getLuceneDocId(0, Integer.toString(i)));
+	    					     }
+	    					  }
+	    						bits = translatedBitSet;
+	    					}
+	    					else {
+	    					
+	    						if (!fieldIsInt) {
+	    							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
+	    						}
+	    						
+		    					int[] cache;
+		    					try {
+		    						cache = FieldCache.DEFAULT.getInts(reader, fieldName, false);
+		    					} catch (IOException e) {
+		    						throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get a cache for field: " + fieldName + "\n" + e.getMessage());
+		    					}
+		    					int i = 0; // lucene docid
+		    					for (int docValue: cache) {
+		    						if (bits.get(docValue)) {
+		    							translatedBitSet.set(i);
+		    						}
+		    						i++;
+		    					}
+		    					bits = translatedBitSet;
+	    					}
+	    				}
+	    				return bits;
+	      		}
+	      	};
+	      	return p;
+	      }
+	      
 	      return null;
       }
 
-			private DataProcessor getStreamProcessor(SolrParams localParams,
-          String contentType, String sourceInfo) {
-	      // TODO Auto-generated method stub
-	      return null;
-      }
-
-			private Object getProcessor(SolrQueryRequest req, String contentType) {
-	      // TODO Auto-generated method stub
-	      return null;
-      }
 		};
 	}
 	
 	
-	public static class DataProcessor {
+	
+	public static class DataProcessor extends UpdateRequestProcessor {
 		
-		public BitSet getBits() {
-			return new BitSet();
+		private ArrayList<SolrInputDocument> docs;
+		SolrQueryRequest req;
+
+		public void processAdd(AddUpdateCommand cmd) throws IOException {
+	    docs.add(cmd.solrDoc);
+	  }
+		
+		public DataProcessor(SolrQueryRequest req) {
+	    super(null);
+	    docs = new ArrayList<SolrInputDocument>();
+	    this.req = req;
+    }
+
+		public BitSet getBits() throws ParseException {
+			
+			if (docs.size() == 0) {
+				return new BitSet(0);
+			}
+			
+			BitSet bs = new BitSet(req.getSearcher().maxDoc());
+			
+			SolrInputDocument d = docs.get(0);
+			// for csv, we can assume that every doc has the same fields (?)
+			Iterator<SolrInputField> fi = d.iterator();
+			
+			HashMap<String, CacheWrapper> translators = new HashMap<String, CacheWrapper>();
+			
+			while (fi.hasNext()) {
+				SolrInputField field = fi.next();
+				CacheWrapper cache = getCache(field.getName());
+				if (cache == null) {
+					throw new SolrException(ErrorCode.BAD_REQUEST, "Uff, uff, I have no idea how to map this field (" + field.getName() + ") values into docids! Call 911");
+				}
+				translators.put(field.getName(), cache);
+			}
+			
+			for (SolrInputDocument doc: docs) {
+				for (SolrInputField f: doc.values()) {
+					CacheWrapper c = translators.get(f.getName());
+					for (Object o: f.getValues()) {
+						bs.set(c.getLuceneDocId(0, o));
+					}
+				}
+			}
+			return bs;
+		}
+		
+		@SuppressWarnings("rawtypes")
+    public CacheWrapper getCache(String field) {
+			IndexSchema schema = req.getSchema();
+			
+			SolrCache sCache = null;
+			if (cacheMapping.containsKey(field)) {
+				sCache = req.getSearcher().getCache(cacheMapping.get(field));
+			}
+			else {
+				sCache = req.getSearcher().getCache(field);
+			}
+			
+			final SolrCache solrCache = sCache;
+			
+			if (solrCache == null) {
+				return null;
+			}
+			
+			return new SecondOrderCollectorCacheWrapper() {
+				@SuppressWarnings("unchecked")
+        @Override
+				public int getLuceneDocId(int sourceDocid, Object sourceValue) {
+				  return (Integer) solrCache.get(sourceValue);
+			  }
+
+				@Override
+        public int internalHashCode() {
+          return this.hashCode();
+        }
+
+				@Override
+        public String internalToString() {
+          return this.toString();
+        }
+			};
 		}
 	}
-	/*
-	protected BitSet convertDataStream(DataStream data, SolrQueryRequest req) {
-		
-		localParams = req.getParams()
-		bits = fromByteArray(data, isLittleEndian ? LITTLE_ENDIAN_BIT_MASK : BIG_ENDIAN_BIT_MASK);
-		
-
-		// TODO: add a mapper that can translate from a string 
-		// field into lucene ids
-		if (localParams.get("field", defaultField) != null) {
-			String fieldName = localParams.get("field", defaultField);
-			SchemaField field = req.getSchema().getField(fieldName);
-
-			if (field.multiValued()) {
-				throw new ParseException("I am sorry, you can't use bitset with multi-valued fields");
-			}
-
-			if (allowedFields.size() > 0 && !allowedFields.contains(fieldName)) {
-				throw new ParseException("I am sorry, you can't search against field " + fieldName + " (reason: #!@#!)");
-			}
-
-			BitSet translatedBitSet = new BitSet(reader.maxDoc());
-			int[] cache;
-			try {
-				cache = FieldCache.DEFAULT.getInts(reader, fieldName, false);
-			} catch (IOException e) {
-				throw new ParseException("Cannot get a cache for field: " + fieldName + "\n" + e.getMessage());
-			}
-			int i = 0; // lucene docid
-			for (int docValue: cache) {
-				if (bits.get(docValue)) {
-					translatedBitSet.set(i);
-				}
-				i++;
-			}
-
-			bits = translatedBitSet;
-
-		}
-	  return null;
-  }
-
-	*/
 	
 	public static class DataStream {
 
@@ -247,56 +419,18 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		
 	}
 
-	protected DataStream readData(SolrQueryRequest req) throws ParseException {
-		// read the data - it can be either in the content stream xor directly
-		// in the open value (perhaps encoded, compressed etc)
-		
-		SolrParams params = req.getParams();
-		Iterable<ContentStream> streams = req.getContentStreams();
-		byte[] data = null;
-		
-		if (streams != null) {
-			for (ContentStream stream : streams) {
-				String ct = stream.getContentType();
-				if (ct != null && ct.toLowerCase().contains("bigquery/csv")) {
-					//pass
-				}
-			}
-			if (data == null) {
-				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "empty content stream");
-			}
-
-		} 
-		else {
-			
-			// the data is inside the normal SOLR parameter
-			// they must always be base64 encoded (that is
-			// safety mechanism)
-			
-			AtomicReader reader = req.getSearcher().getAtomicReader();
-			data = readBase64String(params.get(QueryParsing.V), 
-					params.get("compression", "none"));
-
-			if (data == null) {
-				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "missing data");
-			}
-		}
-		
-		return new DataStream(data, params.getBool("little_endian", false));
-  }
 
 	protected byte[] readBase64String(String string, String compression) 
-	throws ParseException {
+	throws IOException {
 
 		byte[] data;
 		try {
 			data = decodeBase64(string.trim());
 		} catch (Exception e1) {
-			throw new ParseException(e1.getMessage());
+			throw new SolrException(ErrorCode.BAD_REQUEST, e1);
 		}
 
 		if (compression != null && !compression.equals("none")) {
-			try {
 				if (compression.equals("gzip")) {
 					data = unGZip(data);
 				}
@@ -307,11 +441,8 @@ public class BitSetQParserPlugin extends QParserPlugin {
 					// do nothing
 				}
 				else {
-					throw new ParseException("Unsupporeted compression: " + compression);
+					throw new SolrException(ErrorCode.BAD_REQUEST, "Unsupporeted compression: " + compression);
 				}
-			} catch (Exception e) {
-				throw new ParseException(e.getMessage());
-			}
 		}
 		return data;
 	}

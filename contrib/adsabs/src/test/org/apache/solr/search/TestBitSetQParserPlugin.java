@@ -16,7 +16,6 @@
  */
 package org.apache.solr.search;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -28,7 +27,6 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.junit.Test;
 
@@ -39,7 +37,9 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 				new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",
 			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
 		});
-		return "schema.xml";
+
+		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
+		"schema-minimal.xml";
 	}
 
 	public String getSolrConfigFile() {
@@ -48,17 +48,17 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 	}
 
 	public void createIndex() {
-		assertU(adoc("id","1", "text", "who"));
-		assertU(adoc("id","2", "text", "is stopword"));
-		assertU(adoc("id","3", "text", "able"));
-		assertU(adoc("id","4", "text", "to stopword"));
-		assertU(adoc("id","5", "text", "exchange"));
-		assertU(adoc("id","16", "text", "liberty"));
-		assertU(adoc("id","17", "text", "for stopword"));
-		assertU(adoc("id","18", "text", "safety"));
-		assertU(adoc("id","19", "text", "deserves"));
-		assertU(adoc("id","20", "text", "neither"));
-		assertU(commit());
+		assertU(adoc("id","1","recid","1", "text", "who"));
+		assertU(adoc("id","2","recid","2", "text", "is stopword"));
+		assertU(adoc("id","3","recid","3", "text", "able"));
+		assertU(adoc("id","4","recid","4", "text", "to stopword"));
+		assertU(adoc("id","5","recid","5", "text", "exchange"));
+		assertU(adoc("id","16","recid","16", "text", "liberty"));
+		assertU(adoc("id","17","recid","17", "text", "for stopword"));
+		assertU(adoc("id","18","recid","18", "text", "safety"));
+		assertU(adoc("id","19","recid","19", "text", "deserves"));
+		assertU(adoc("id","20","recid","20", "text", "neither"));
+		assertU(commit("waitSearcher", "true"));
 	}
 
 	@Override
@@ -95,23 +95,28 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 		assertEquals(data, bqp.fromByteArray(bqp.unGZip(bqp.decodeBase64(gzipBase64string))));
 
 		
-	// sending lucene doc-ids (just a test)
-		SolrQueryRequestBase req = (SolrQueryRequestBase) req("q","text:*", "fq", 
-				"{!bitset compression=none} xxx", "stream.body", "wooo hooo");
-		List<ContentStream> cs = new ArrayList<ContentStream>(1);
-    ContentStreamBase f = new ContentStreamBase.StringStream("id\n1\n2");
-    f.setContentType("bigquery/csv");
-    cs.add(f);
-		req.setContentStreams(cs);
+		
+	  // sending lucene doc-ids (just a test)
+		SolrQueryRequestBase req = (SolrQueryRequestBase) req("q","text:*", 
+				"fq","{!bitset compression=none}");
+		List<ContentStream> streams = new ArrayList<ContentStream>(1);
+    ContentStreamBase cs = new ContentStreamBase.StringStream("id\n5\n16");
+    cs.setContentType("big-query/csv");
+    streams.add(cs);
+		req.setContentStreams(streams);
 		
 		assertQ(req
-				,"//*[@numFound='2']"
+				,"//*[@numFound='2']",
+				"//doc/str[@name='id'][.='5']",
+				"//doc/str[@name='id'][.='16']"
 		);
 		
-		// sending lucene doc-ids (just a test)
+		// sending lucene doc-ids (these will not be translated)
 		assertQ(req("q","text:*", "fq", 
-				"{!bitset compression=none} " + bqp.encodeBase64(bqp.toByteArray(convert(new int[]{5,6,20,30}))))
-				,"//*[@numFound='2']"
+				"{!bitset compression=none} " + bqp.encodeBase64(bqp.toByteArray(convert(new int[]{4,5}))))
+				,"//*[@numFound='2']",
+				"//doc/str[@name='id'][.='5']",
+				"//doc/str[@name='id'][.='16']"
 		);
 
 		assertQ(req("q","text:*", "fq", "{!bitset field=id} " + base64string)
@@ -127,6 +132,14 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 		);
 
 		assertQ(req("q","text:*", "fq", "{!bitset compression=gzip field=id} " + gzipBase64string)
+				,"//*[@numFound='2']",
+				"//doc/str[@name='id'][.='5']",
+				"//doc/str[@name='id'][.='16']"
+		);
+		
+		// this is similar to the previous query, but the field is of type int
+		// and will use a different cache
+		assertQ(req("q","text:*", "fq", "{!bitset field=recid} " + base64string)
 				,"//*[@numFound='2']",
 				"//doc/str[@name='id'][.='5']",
 				"//doc/str[@name='id'][.='16']"
