@@ -53,6 +53,8 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 		assertU(adoc("id","3","recid","3", "text", "able"));
 		assertU(adoc("id","4","recid","4", "text", "to stopword"));
 		assertU(adoc("id","5","recid","5", "text", "exchange"));
+		assertU(commit("waitSearcher", "true"));
+		
 		assertU(adoc("id","16","recid","16", "text", "liberty"));
 		assertU(adoc("id","17","recid","17", "text", "for stopword"));
 		assertU(adoc("id","18","recid","18", "text", "safety"));
@@ -144,7 +146,17 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 				"//doc/str[@name='id'][.='5']",
 				"//doc/str[@name='id'][.='16']"
 		);
-
+		
+		// and finally non-sensical input
+	  // sending lucene doc-ids (these will not be translated)
+		assertQ(req("q","text:*", "fq", 
+				"{!bitset compression=none} " + bqp.encodeBase64(bqp.toByteArray(convert(new int[]{40,500}))))
+				,"//*[@numFound='0']"
+		);
+		assertQ(req("q","text:*", "fq", 
+				"{!bitset field=id} " + bqp.encodeBase64(bqp.toByteArray(convert(new int[]{40,500}))))
+				,"//*[@numFound='0']"
+		);
 	}
 
 

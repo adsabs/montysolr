@@ -19,6 +19,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.search.BitSetQuery;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.CacheWrapper;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Query;
@@ -137,7 +138,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 					}
 					
 					if (processors.size() == 0) {
-						return null;
+						return new BooleanQuery(); // match no docs
 					}
 					
 					String[] operator = localParams.get("operator","and").split(",");
@@ -189,7 +190,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 					
 					
 					if (topBits.cardinality() < 1)
-						return null;
+						return new BooleanQuery(); // match no docs
 	
 					BitSetQuery q = new BitSetQuery(topBits);
 					
@@ -280,10 +281,16 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
 	    						for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
 	    					     if (fieldIsInt) {
-	    					    	 translatedBitSet.set(cacheWrapper.getLuceneDocId(0, i));
+	    					    	 int v = cacheWrapper.getLuceneDocId(0, i);
+	    					    	 if (v == -1)
+	    					    		 continue;
+    					    		 translatedBitSet.set(v);
 	    					     }
 	    					     else {
-	    					    	 translatedBitSet.set(cacheWrapper.getLuceneDocId(0, Integer.toString(i)));
+	    					    	 int v = cacheWrapper.getLuceneDocId(0, Integer.toString(i));
+	    					    	 if (v == -1)
+	    					    		 continue;
+	    					    	 translatedBitSet.set(v);
 	    					     }
 	    					  }
 	    						bits = translatedBitSet;
@@ -302,7 +309,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		    					}
 		    					int i = 0; // lucene docid
 		    					for (int docValue: cache) {
-		    						if (bits.get(docValue)) {
+		    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
 		    							translatedBitSet.set(i);
 		    						}
 		    						i++;
@@ -366,7 +373,10 @@ public class BitSetQParserPlugin extends QParserPlugin {
 				for (SolrInputField f: doc.values()) {
 					CacheWrapper c = translators.get(f.getName());
 					for (Object o: f.getValues()) {
-						bs.set(c.getLuceneDocId(0, o));
+						int v = c.getLuceneDocId(0, o);
+						if (v == -1)
+							continue;
+						bs.set(v);
 					}
 				}
 			}
@@ -395,7 +405,12 @@ public class BitSetQParserPlugin extends QParserPlugin {
 				@SuppressWarnings("unchecked")
         @Override
 				public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-				  return (Integer) solrCache.get(sourceValue);
+					// extra checking necessary (we cannot be sure
+					// the id will be always correct....
+				  Object v = solrCache.get(sourceValue);
+				  if (v == null)
+				  	return -1;
+				  return (Integer) v;
 			  }
 
 				@Override
