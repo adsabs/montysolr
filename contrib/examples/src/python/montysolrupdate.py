@@ -1139,7 +1139,7 @@ deactivate
         # run_cmd(['git', 'checkout', '-f', '-b', git_tag.ref], strict=False)
         run_cmd(['git', 'fetch', '--all'])
         run_cmd(['git', 'stash'])
-        run_cmd(['git', 'reset', '--hard', 'origin/' + git_tag.ref])
+        run_cmd(['git', 'reset', '--hard', '/' in git_tag.ref and git_tag.ref or  ('origin/' + git_tag.ref)])
         setup_build_properties()
         
         # nuke everything, start from scratch
