@@ -326,6 +326,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	  	else {
 	      warmRebuildEverything(searcher, old);
 	  	}
+	  	log.info("Warming cache done (# entries:" + map.size() + "): " + searcher);
   	} 
   	catch (IOException e) {
     	throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);

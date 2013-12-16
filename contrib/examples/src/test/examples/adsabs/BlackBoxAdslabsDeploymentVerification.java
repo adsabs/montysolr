@@ -1,7 +1,5 @@
 package examples.adsabs;
 
-import java.io.File;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,10 +9,7 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
-import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
-import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.update.InvenioKeepRecidUpdated;
 import org.junit.BeforeClass;
