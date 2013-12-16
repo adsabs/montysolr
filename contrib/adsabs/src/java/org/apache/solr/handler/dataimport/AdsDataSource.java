@@ -3,25 +3,18 @@ package org.apache.solr.handler.dataimport;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.lang.ref.WeakReference;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.Set;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.core.CloseHook;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.handler.dataimport.AdsDataSource.MongoConnection;
-import org.bson.BSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +57,7 @@ public class AdsDataSource extends InvenioDataSource {
 	
 	
 	protected Map<String, Map<String, Object>> mongoCache = new HashMap<String, Map<String, Object>>();
-	private WeakReference<MongoConnection> mc;
+	private MongoConnection mc;
 	
 	/*
 	protected String mongoDocIdField;
@@ -81,7 +74,7 @@ public class AdsDataSource extends InvenioDataSource {
 	@Override
 	public void init(Context context, Properties initProps) {
 		super.init(context, initProps);
-		mc = new WeakReference<MongoConnection>(initMongo(context, initProps));
+		mc = initMongo(context, initProps);
 		
 	}
 	
@@ -93,7 +86,8 @@ public class AdsDataSource extends InvenioDataSource {
 		
 		if (conn instanceof MongoConnection) {
 			MongoConnection mc = (MongoConnection) conn;
-			return mc;
+			if (mc.db != null)
+				return mc;
 		}
 		
 		final MongoConnection mc = new MongoConnection();
@@ -187,7 +181,7 @@ public class AdsDataSource extends InvenioDataSource {
 		if (data != null) {
 			
 		  // do not bother if there are no mongo fields requested
-			if (mc.get().mongoFieldToColumn.size()==0) return data;
+			if (mc.mongoFieldToColumn.size()==0) return data;
 			
 			// otherwise parse the data, find bibcodes, query mongo
 			// and return string wrapped in stringreader, it is more
@@ -239,10 +233,10 @@ public class AdsDataSource extends InvenioDataSource {
 	protected void populateMongoCache(List<String> bibcodes) {
 		BasicDBObject mongoQuery = new BasicDBObject();
 		
-		mongoQuery.put(mc.get().mongoDocIdField, new BasicDBObject("$in", bibcodes));
+		mongoQuery.put(mc.mongoDocIdField, new BasicDBObject("$in", bibcodes));
 		//mongoQuery.put(mongoDocIdField, new BasicDBObject("$in", new String[]{"2009arXiv0909.1287I","1987PhRvD..36..277B"}));
 		
-		DBCursor cursor = mc.get().mainColl.find(mongoQuery, mc.get().mongoFields);
+		DBCursor cursor = mc.mainColl.find(mongoQuery, mc.mongoFields);
 		HashMap<String, Map<Object, String>> collectionsToFetch = new HashMap<String, Map<Object, String>>();
 		HashMap<String, Map<String, String>> collectionsToFetchFields = new HashMap<String, Map<String, String>>();
 		
@@ -250,8 +244,8 @@ public class AdsDataSource extends InvenioDataSource {
 			Iterator<DBObject> it = cursor.iterator();
 			Object v;
 			
-			Map<String, String> mongoToColumn = mc.get().mongoFieldToColumn;
-			String mongoDocIdField = mc.get().mongoDocIdField;
+			Map<String, String> mongoToColumn = mc.mongoFieldToColumn;
+			String mongoDocIdField = mc.mongoDocIdField;
 			String column;
 			
 			while (it.hasNext()) {
@@ -326,7 +320,7 @@ public class AdsDataSource extends InvenioDataSource {
 				
 				
 				// get the values
-				cursor = mc.get().db.getCollection(collectionName).find(otherCollQuery, otherFields);
+				cursor = mc.db.getCollection(collectionName).find(otherCollQuery, otherFields);
 				
 				try {
 					// and insert them back into the solr doc (using the solr fieldname)
@@ -354,7 +348,7 @@ public class AdsDataSource extends InvenioDataSource {
 	
 	
 	public Map<String, String> getFieldColumnMap() {
-		return mc.get().mongoFieldToColumn;
+		return mc.mongoFieldToColumn;
 	}
 
 	/*
@@ -374,7 +368,7 @@ public class AdsDataSource extends InvenioDataSource {
 	 */
 	public void transformRow(Map<String, Object> row) {
 		
-		String docId = (String) row.get(mc.get().mainIdField);
+		String docId = (String) row.get(mc.mainIdField);
 		if (mongoCache.containsKey(docId)) {
 			row.putAll(mongoCache.get(docId));
 		}
@@ -392,6 +386,13 @@ public class AdsDataSource extends InvenioDataSource {
 		
 		public void close() {
 			mongo.close();
+			mongo = null;
+			db = null;
+			mongoFields = null;
+			mongoFieldToColumn = null;
+			mongoDocIdField = null;
+			mainColl = null;
+			mainIdField = null;
 			return;
 		}
 
