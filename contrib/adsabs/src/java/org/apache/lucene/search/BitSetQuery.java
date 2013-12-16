@@ -34,6 +34,7 @@ import java.io.IOException;
 public class BitSetQuery extends Query {
 
 	private BitSet seekedDocs;
+	private String uuid;
 
 	public BitSetQuery(BitSet docs) {
 		super();
@@ -179,6 +180,17 @@ public class BitSetQuery extends Query {
 
 	@Override
 	public int hashCode() {
+		if (uuid != null) {
+			return uuid.hashCode();
+		}
 		return Float.floatToIntBits(getBoost()) ^ 0x1AA71190;
+	}
+	
+	public void setUUID(String uuid) {
+		this.uuid = uuid;
+	}
+	
+	public String getUUID(String uuid) {
+		return uuid;
 	}
 }

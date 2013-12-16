@@ -23,7 +23,6 @@ import org.apache.lucene.queryparser.flexible.standard.builders.MultiPhraseQuery
 import org.apache.lucene.queryparser.flexible.standard.builders.NumericRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.PhraseQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.PrefixWildcardQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.builders.SlopQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardBooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.TermRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.WildcardQueryNodeBuilder;
@@ -43,14 +42,14 @@ import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlopQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.IgnoreQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.aqp.builders.InvenioQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.PythonQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.InvenioQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.PythonQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 import org.apache.solr.search.AqpAdsabsQParser;
 
@@ -74,7 +73,7 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(AqpAdsabsRegexQueryNode.class, new AqpFieldQueryNodeRegexBuilder());
 		setBuilder(AqpNonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
-		setBuilder(InvenioQueryNode.class, new InvenioQueryNodeBuilder(this));
+		setBuilder(PythonQueryNode.class, new PythonQueryNodeBuilder(this));
 		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
 		setBuilder(SlowFuzzyQueryNode.class, new AqpSlowFuzzyQueryNodeBuilder());
 		setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());

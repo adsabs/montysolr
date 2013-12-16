@@ -3,11 +3,7 @@ package org.apache.solr.handler.batch;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Map;
-
-import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.search.DictionaryRecIdCache;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.util.Bits;
@@ -18,6 +14,7 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.CitationLRUCache;
 
 
 public class BatchProviderDumpBibcodes extends BatchProvider {
@@ -29,31 +26,38 @@ public class BatchProviderDumpBibcodes extends BatchProvider {
 	  SolrParams params = locReq.getParams();
 	  String jobid = params.get("jobid");
 	  String workDir = params.get("#workdir");
+	  String cacheName = params.get("cache_name", "citations-cache");
+	  
 	  File input = new File(workDir + "/" + jobid + ".input");
 	  if (!input.canRead()) {
 	  	throw new SolrException(ErrorCode.BAD_REQUEST, "No input data available, bark bark - " + input);
 	  }
 	  
 	  // we must harvest lucene docids
-	  AtomicReader reader = locReq.getSearcher().getAtomicReader();
-	  FixedBitSet bits = new FixedBitSet(reader.maxDoc());
 	  
 	  // normally, we should load the requested list of bibcodes
 	  // because it will be always smaller than the whole index
 	  // but since we are using the bibcodes in the second-order
 	  // search, the lookup cache is already available
 	  
-	  Map<String, Integer> bibcodes = DictionaryRecIdCache.INSTANCE.getCache(DictionaryRecIdCache.Str2LuceneId.MAPPING, 
-	  		locReq.getSearcher(), 
-	  		new String[]{"bibcode", "alternate_bibcode"});
+	  CitationLRUCache<Object, Integer> cache = (CitationLRUCache<Object, Integer>) locReq.getSearcher().getCache(cacheName);
 	  
+	  if (cache == null) {
+      throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot find cache: " + cacheName);
+    }
+	  
+	  FixedBitSet bits = new FixedBitSet(locReq.getSearcher().maxDoc());
+	  
+	 
 	  // construct a filter
 	  BufferedReader br = new BufferedReader(new FileReader(input));
 	  String line;
+	  Integer docid;
 	  while ((line = br.readLine()) != null) {
 	     line = line.toLowerCase().trim();
-	     if (bibcodes.containsKey(line)) {
-	    	 bits.set(bibcodes.get(line));
+	     docid = cache.get(line);
+	     if (docid != null) {
+	    	 bits.set(docid);
 	     }
 	  }
 	  br.close();

@@ -34,20 +34,44 @@ public class FacetHierarchyMV extends FacetHierarchy {
 		int smallestCommonDenominator = -1;
 		
 		ArrayList<List<String>> toInclude = new ArrayList<List<String>>();
-		for (String field : sourceFields) {
-			if (row.containsKey(field)) {
-				Object obj = row.get(field);
+		for (SourceField field : sourceFields) {
+			if (row.containsKey(field.name)) {
+				Object obj = row.get(field.name);
 				
 				if (obj == null) {
 					return; // give up
 				}
-				List<String> data = (List<String>) obj;
+				
+				List<String> data;
+				if (obj instanceof List) {
+					if (((List) obj).get(0) instanceof Map) {
+						Map<String, Object> sourceData = (Map<String, Object>) ((List) obj).get(0);
+						data = new ArrayList<String>();
+						for (String k: field.keys) {
+							if (!sourceData.containsKey(k)) {
+								return; //give up
+							}
+							data.add((String) sourceData.get(k));
+						}
+					}
+					else {
+						data = (List<String>) obj;
+					}
+				}
+				else {
+					throw new SolrException(ErrorCode.BAD_REQUEST, "The received data is junk (cause i can't make sense of it): "  + obj);
+				}
+					
 				
 				if (smallestCommonDenominator == -1 || data.size() < smallestCommonDenominator) {
 					smallestCommonDenominator = data.size();
 				}
 				toInclude.add(data); // non-multivalued fields will cause Exception, that's fine
 			}
+		}
+		
+		if (toInclude.size() == 0) {
+			return;
 		}
 		
 		// transform data from rows into cols

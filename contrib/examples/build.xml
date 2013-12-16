@@ -177,10 +177,6 @@
 
 	<target name="build-all-examples" description="Assembles all examples">
 		<exec executable="${prop.ant}" failonerror="true">
-			<arg line="build-one -Dename=invenio" />
-		</exec>
-
-		<exec executable="${prop.ant}" failonerror="true">
 			<arg line="build-one -Dename=adsabs" />
 		</exec>
 	</target>

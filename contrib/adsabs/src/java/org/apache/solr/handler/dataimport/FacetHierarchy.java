@@ -5,6 +5,7 @@ package org.apache.solr.handler.dataimport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -24,28 +25,44 @@ import org.slf4j.LoggerFactory;
 public class FacetHierarchy {
 	
 	String columnName; // under what name to insert results into a doc
-	List<String> sourceFields; // what fields to read data from
+	List<SourceField> sourceFields; // what fields to read data from
 	String splitBy = ",";
+	String splitKeys = ":";
 	
 	public FacetHierarchy(String columnName, String[] source) {
 		this.columnName = columnName;
-		this.sourceFields = new ArrayList<String>();
+		this.sourceFields = new ArrayList<SourceField>();
 		
 		for (String s : source) {
-			sourceFields.add(s);
+			String[] parts = s.split(splitKeys);
+			String[] keys = new String[parts.length-1];
+			if (parts.length > 1) {
+				for (int i=1; i<parts.length;i++) {
+					keys[i-1] = parts[i];
+				}
+			}
+			sourceFields.add(new SourceField(parts[0], keys));
 		}
 	}
 	
-	public void addFacets(Map<String, Object> row) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+  public void addFacets(Map<String, Object> row) {
 		
 		ArrayList<String> target = new ArrayList<String>();
 		
-		for (String field : sourceFields) {
-			if (row.containsKey(field)) {
-				Object obj = row.get(field);
+		for (SourceField field : sourceFields) {
+			if (row.containsKey(field.name)) {
+				Object obj = row.get(field.name);
 				
 				if (obj instanceof List) {
-					generateFacets((List<String>) obj, target);
+					if (((List) obj).get(0) instanceof Map) {
+						for (Map x: ((List<Map>) obj)) {
+							generateFacets(x, target, field.keys);
+						}
+					}
+					else {
+						generateFacets((List<String>) obj, target);
+					}
 				}
 				else if (obj instanceof String) {
 					generateFacets((String) obj, target);
@@ -69,9 +86,21 @@ public class FacetHierarchy {
 	}
 	
 	
+	@SuppressWarnings("rawtypes")
+  private void generateFacets(Map obj, ArrayList<String> target, String[] keysToRead) {
+		String[] vals = new String[keysToRead.length];
+		for (int i=0; i<keysToRead.length;i++) {
+			if (!obj.containsKey(keysToRead[i])) {
+				return; // refuse to proceed
+			}
+			vals[i] = (String) obj.get(keysToRead[i]);
+		}
+	  generateFacets(vals, target);
+  }
+
 	/*
 	 * Input: "Smith, Jones" or ["Smith, Jones"]
-	 * Written: ["0/Smith, J", "1/Smith, J/Smith, James"]
+	 * Written: ["0/Smith, J", "1/Smith, J/Smith, Jones"]
 	 */
 	
 	protected void generateFacets(List<String> input, List<String> target) {
@@ -177,5 +206,15 @@ public class FacetHierarchy {
 		return String.copyValueOf(chars);
 		
   }
+	
+	public static class SourceField {
+		public String name;
+		public String[] keys;
+		public SourceField(String n, String[] fs) {
+			name = n;
+			keys = fs;
+			assert n != null && fs != null;
+		}
+	}
 	
 }

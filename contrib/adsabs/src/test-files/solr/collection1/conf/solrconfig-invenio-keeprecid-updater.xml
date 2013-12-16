@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+
+
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
+    
+    
+    
+  <!-- Handler that keeps Invenio in-sync on request -->
+  <requestHandler name="/invenio_update" class="solr.InvenioKeepRecidUpdated" default="false" >
+    <lst name="defaults">
+        <str name="max_maximport">500</str>
+        <str name="propertiesFile">test.import</str>
+        
+    </lst>
+  </requestHandler>
+   
+  <requestHandler name="invenio_update.lazy" class="solr.InvenioKeepRecidUpdated" startup="lazy">
+    <lst name="defaults">
+      <int name="maximport">200</int>
+      <str name="inveniourl">${montysolr.inveniourl:http://insdev01.cern.ch/search}</str>
+    </lst>
+  </requestHandler>
+  
+  <requestHandler name="invenio_update.mock" class="solr.InvenioKeepRecidUpdated">
+    <lst name="defaults">
+      <int name="maximport">200</int>
+      <str name="inveniourl">${montysolr.inveniourl:http://insdev01.cern.ch/search}</str>
+      <str name="pythonFunctionName">get_changed_recids_mock</str>
+    </lst>
+  </requestHandler>
+  
+  <!--  MontySolr indexing handlers, the waiting-* handlers are
+      slighlty customized versions of the standard handlers  -->
+  <requestHandler name="/dataimport" class="org.apache.solr.handler.dataimport.DataImportHandler">
+    <lst name="defaults">
+      <str name="config">${montysolr.home:.}/contrib/adsabs/src/test-files/solr/collection1/conf/data-config-invenio-keeprecid-updater.xml</str>
+      <bool name="clean">false</bool>
+      <bool name="commit">false</bool>
+    </lst>
+  </requestHandler>
+  
+  <requestHandler name="/waiting-dataimport" class="org.apache.solr.handler.dataimport.WaitingDataImportHandler">
+    <lst name="defaults">
+      <str name="config">${montysolr.home:.}/contrib/adsabs/src/test-files/solr/collection1/conf/data-config-invenio-keeprecid-updater.xml</str>
+      <bool name="clean">false</bool>
+      <bool name="commit">false</bool>
+      <bool name="synchronous">true</bool>
+      <!-- <str name="writerImpl">NoRollbackWriter</str>-->
+    </lst>
+  </requestHandler>
+  
+  <requestHandler name="/invenio-doctor" class="org.apache.solr.update.InvenioDoctor">
+    <lst name="defaults">
+      <str name="handler">/waiting-dataimport</str>
+    </lst>
+  </requestHandler>
+  
+</config>

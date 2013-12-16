@@ -4,6 +4,10 @@
     <fieldType name="string" class="solr.StrField" />
     <fieldType name="int" class="solr.TrieIntField"
       precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+    <fieldType name="date" class="solr.TrieDateField" omitNorms="true"
+      precisionStep="0" positionIncrementGap="0" />
+    <fieldType name="float" class="solr.TrieFloatField"
+      precisionStep="0" omitNorms="true" positionIncrementGap="0" />
   </types>
   <fields>
     <field name="id" type="int" indexed="true" stored="true"
@@ -12,7 +16,20 @@
       required="false" />
     <field name="alternate_bibcode" type="string" indexed="true" stored="true"
       required="false" multiValued="true"/>  
-    <field name="reference" type="string" indexed="true" stored="true" multiValued="true"/>
+    <field name="reference" type="string" indexed="true" stored="true" 
+      multiValued="true"/>
+    <field name="ireference" type="int" indexed="true" stored="true" 
+      multiValued="true"/>
     
+    <field name="date" type="date" indexed="true" stored="true"
+      multiValued="false" />  
+    <field name="indexstamp" type="date" indexed="true" stored="true"
+      default="NOW" multiValued="false" />
+      
+    <dynamicField name="x*" type="string" indexed="true"
+      stored="true" multiValued="true" />
+    <dynamicField name="boost*" type="float" indexed="true"
+      stored="true" multiValued="true" />
   </fields>
+  <uniqueKey>id</uniqueKey>
 </schema>

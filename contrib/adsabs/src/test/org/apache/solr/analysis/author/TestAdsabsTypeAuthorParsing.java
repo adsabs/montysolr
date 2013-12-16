@@ -34,9 +34,12 @@ import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,7 +106,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     try {
 
       // hand-curated synonyms
-      File curatedSynonyms = createTempFile(formatSynonyms(new String[]{
+      File curatedSynonyms = createTempFile(new String[]{
           "ABBOT, CHARLES GREELEY;ABBOTT, CHARLES GREELEY",
           "ABDEL AZIZ BAKRY, A;BAKRY, A",
           "ACHUTBHAN, P;ACHUTHAN, P",
@@ -112,18 +115,19 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "AGARWAL, S;AGGARWAL, S",
           "AGUILAR CHIU, L A;AGUILAR, L A",
           "AITMUHAMBETOV, A A;AITMUKHAMBETOV, A A",
-          "AL MLEAKY, Y M;ALMLEAKY, Y M",
+          "AL MLEAKY, Y M; ALMLEAKY, Y M",
           "ALEXEENKO, V V;ALEXEYENKO, V V",
           "ALFONSO, JULIA;ALFONSO-GARZON, JULIA",
           "ALLEN, LYNNE;ALLEN, R LYNNE;JONES, LYNNE;JONES, R LYNNE", // until here copied from: /proj/ads/abstracts/config/author.syn.new
           "ARAGON SALAMANCA, A;ARAGON-SALAMANCA, A;ARAGON, A;SALAMANCA, A", // copied from: /proj/ads/abstracts/config/author.syn
-          "ADAMŠuk, m;ADAMGuk, m;ADAMČuk, m",  // hand-made additions
+          "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m",  // hand-made additions
           "MÜLLER, A WILLIAM;MÜLLER, A BILL",
           "MÜLLER, WILLIAM;MÜLLER, BILL",
           "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
-          "DE ZEEUW, TIM=>DE ZEEUW, P TIM;DE ZEEUW, P\\w* TIM\\b.*;DE ZEEUW,;DE ZEEUW, P\\w*",
-          "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,;DE ZEEUW, TIM\\b.*;DE ZEEUW, T"
-      }));
+          "DE ZEEUW, TIM=>DE ZEEUW, P TIM",
+          "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,",
+          "grant, carolyn s; stern grant, carolyn; stern, carolyn p"
+      });
 
       // automatically harvested variations of author names (collected during indexing)
       // it will be enriched by the indexing
@@ -171,6 +175,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   @Override 
   public void setUp() throws Exception {
   	super.setUp();
+  	
+  	
     assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk,"));
     assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M."));
     assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Marel"));
@@ -282,6 +288,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "232", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Boser, S"));
     assertU(adoc(F.ID, "233", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Boser,"));
     
+    assertU(adoc(F.ID, "300", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna,"));
+    assertU(adoc(F.ID, "301", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, Jewell"));
+    assertU(adoc(F.ID, "302", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, J"));
+    
     assertU(commit());
 
     // persist the transliteration map after new docs were indexed
@@ -317,6 +327,66 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+  	// test the definition that is in the live synonym file
+  	// we use this for blackbox - to verify deployment is using
+  	// synonym translation
+  	testAuthorQuery(
+        "\"grant, carolyn s\"", 
+        		"author:grant, carolyn s " +
+        		"author:grant, carolyn s* " +
+        		"author:grant, c s " +
+        		"author:grant, c s* " +
+        		"author:grant, carolyn " +
+        		"author:grant, c " +
+        		"author:grant, " +
+        		"author:stern grant, carolyn " +
+        		"author:stern grant, c " +
+        		"author:stern grant, " +
+        		"author:stern, carolyn p " +
+        		"author:stern, carolyn p* " +
+        		"author:stern, c p " +
+        		"author:stern, c p* " +
+        		"author:stern, carolyn " +
+        		"author:stern, c " +
+        		"author:stern,",
+        		"//*[@numFound='0']"
+        		);
+        		
+  	
+  	testAuthorQuery(
+        "Gopal-Krishna", 
+        		"author:gopal krishna, author:gopal krishna,*",
+        		"//*[@numFound='3']",
+    		"\"Gopal Krishna,\"",
+        		"author:gopal krishna, author:gopal krishna,*",
+        		"//*[@numFound='3']",
+    		"\"Gopal Krishna\"",
+        		"author:krishna, gopal author:krishna, gopal * author:krishna, g author:krishna, g * author:krishna,",
+        		"//*[@numFound='0']"
+        		);
+  	
+  	//#487 - these author names should parse the same; Maestro, V was
+  	// picked by the python name parser (V removed); Boyjian had problems
+  	// with expansion (python name parser was not applied there)
+  	testAuthorQuery(
+        "Maestro\\,\\ V", 
+        		"author:maestro, v author:maestro, v* author:maestro,",
+        		"//*[@numFound='0']",
+    		"V\\ Maestro", 
+        		"author:maestro, v author:maestro, v* author:maestro,",
+        		"//*[@numFound='0']"
+        		);
+  	testAuthorQuery(
+        "Boyajian\\,\\ T", 
+        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"//*[@numFound='0']",
+    		"T\\ Boyajian", 
+        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"//*[@numFound='0']"
+        		);
+  	
+  	
+  	
   	// first is considered a title
   	testAuthorQuery(
         "first", 
@@ -327,7 +397,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	
     // 'xxx' will be removed from the author
 	  assertQueryEquals(req("defType", "aqp", "q", "author:\"accomazzi, alberto, xxx.\""), 
-        "author:accomazzi, alberto author:accomazzi, a author:accomazzi,",
+        "author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,",
         BooleanQuery.class);
     
     
@@ -338,25 +408,28 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	//setDebug(true);
   	testAuthorQuery(
         "\"o' sullivan\"", 
-        		"author:o sullivan, author:o sullivan, *",
+        		"author:o sullivan, author:o sullivan,*",
         		"//*[@numFound='0']",
     		"\"o'sullivan\"", 
-        		"author:o sullivan, author:o sullivan, *",
+        		"author:o sullivan, author:o sullivan,*",
+        		"//*[@numFound='0']",
+    		"\"o' sullivan, ji\"", 
+        		"author:o sullivan, ji author:o sullivan, ji * author:o sullivan, j author:o sullivan, j * author:o sullivan,",
         		"//*[@numFound='0']"
         		);
   	// funny author names
   	testAuthorQuery(
     		"\"o'sullivan\"", 
-        		"author:o sullivan, author:o sullivan, *",
+        		"author:o sullivan, author:o sullivan,*",
         		"//*[@numFound='0']",
     		"\"o' sullivan\"",
-        		"author:o sullivan, author:o sullivan, *",
+        		"author:o sullivan, author:o sullivan,*",
         		"//*[@numFound='0']"
         		);
   	
   	testAuthorQuery(
     		"Dall\\'oglio",
-        		"author:dall oglio, author:dall oglio, *",
+        		"author:dall oglio, author:dall oglio,*",
         		"//*[@numFound='0']",
     		"Antonella\\ Dall\\'Oglio",
         		"author:dall oglio, antonella author:dall oglio, antonella * author:dall oglio, a author:dall oglio, a * author:dall oglio,",
@@ -369,11 +442,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"//*[@numFound='0']"
         		);
   	
+  	// hmmm.. these regexes must be slow; we should not generate them
+  	// also, before #487, the first query would generate:
+    //"author:kao, p ing tzu author:kao, p ing tzu * author:kao, p i tzu author:kao, p i tzu * author:kao, p ing t author:kao, p ing t * author:kao, p i t author:kao, p i t * author:kao, p author:kao,",
   	testAuthorQuery(
     		"\"P'ING-TZU KAO\"",
-        		"author:kao, p ing tzu author:kao, p ing tzu * author:kao, p i tzu author:kao, p i tzu * author:kao, p ing t author:kao, p ing t * author:kao, p i t author:kao, p i t * author:kao, p author:kao,",
+    		    "author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p author:kao,",
         		"//*[@numFound='0']",
-        // hmmm - why this one generated regex? and the above didn't?
     		"\"Kao, P'ing-Tzu\"",
         		"author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p author:kao,",
         		"//*[@numFound='0']"
@@ -417,13 +492,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // doesn't return any results, even though it should yield 2010Natur.468..940V.
     testAuthorQuery(
         "\"van Dokkum\"", 
-        				   "author:van dokkum, author:van dokkum, *",
+        				   "author:van dokkum, author:van dokkum,*",
                    "//*[@numFound='6']",
                    // "van Dokkum" numFound=6
                    // 220	van Dokkum             221	van Dokkum,            222	van Dokkum, H          
                    // 223	van Dokkum, Hector     224	van Dokkum, Hiatus     225	van Dokkum, Romulus    
         "\"van Dokkum,\"", 
-        				   "author:van dokkum, author:van dokkum, *",
+        				   "author:van dokkum, author:van dokkum,*",
                    "//*[@numFound='6']",
                    // "van Dokkum," numFound=6
                    // 220	van Dokkum             221	van Dokkum,            222	van Dokkum, H          
@@ -452,7 +527,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     //setDebug(true);
     testAuthorQuery(
          "Pinilla-Alonso", 
-        				   "author:pinilla alonso, author:pinilla alonso, *",
+        				   "author:pinilla alonso, author:pinilla alonso,*",
                    "//*[@numFound='6']",
                    // Pinilla-Alonso numFound=6
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
@@ -465,7 +540,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                     // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer
          "\"Pinilla Alonso,\"", 
-         				   "author:pinilla alonso, author:pinilla alonso, *",
+         				   "author:pinilla alonso, author:pinilla alonso,*",
                     "//*[@numFound='6']",
                     // Pinilla-Alonso numFound=6
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
@@ -665,8 +740,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * upgraded && transliterated 
      * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
      */
+    //setDebug(true);
     testAuthorQuery(
-        "adAMčuk", expected + " author:adamguk, m author:adamčuk, m author:adamšuk, m", 
+        //"adAMčuk"
+    		"adAM\u010duk", expected + " author:adamguk, m author:adamčuk, m author:adamšuk, m", 
         "//*[@numFound='34']",
         // adamčuk numFound=34
         //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
@@ -720,7 +797,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
         //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
         //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
-        "adAMšuk", "author:adamšuk, author:adamšuk,* " +
+        
+        //"adAMšuk"
+        "adAM\u0161uk", "author:adamšuk, author:adamšuk,* " +
                    "author:adamshuk, author:adamshuk,* " +
                    "author:adamsuk, author:adamsuk,* " +
                    "author:adamguk, m author:adamčuk, m author:adamšuk, m", 
@@ -2224,7 +2303,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assert vals.length%3==0;
     for (int i=0;i<vals.length;i=i+3) {
       if (tp.debugParser) {
-      System.out.println("Running test for " + String.format("%s:%s", author_field, vals[i]));
+      System.out.println(escapeUnicode(vals[i]));
+      System.out.println("Running test for " + author_field + ":" + vals[i]);
       String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])));
       
       ArrayList<String> out = new ArrayList<String>();
@@ -2247,10 +2327,18 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       }
       System.out.println();
       }
-      assertQueryEquals(req("defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])),
-          vals[i+1],
-          null);
-      assertQ(req("fl", "id," + author_field, "rows", "100", "q", String.format("%s:%s", author_field, vals[i])), vals[i+2].split(";"));
+      boolean failed = true;
+      try {
+	      assertQueryEquals(req("defType", "aqp", "q", author_field + ":" + vals[i]),
+	          vals[i+1],
+	          null);
+	      assertQ(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]), vals[i+2].split(";"));
+	      failed = false;
+      }
+      finally {
+      	if (failed)
+      		System.out.println("Offending test case: " + escapeUnicode(vals[i]) + " expected: " + escapeUnicode(vals[i+1]));
+      }
     }
 
   }
@@ -2284,19 +2372,27 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     QParser qParser = getParser(req);
     String query = req.getParams().get(CommonParams.Q);
     Query q = qParser.parse();
-
+    
     String actual = q.toString("field");
     
-    String[] ex = expected.split("\\s*[a-z]+:");
+    String[] ex = expected.split("\\s*[a-z]+\\:");
     Arrays.sort(ex);
-    String[] ac = actual.split("\\s*[a-z]+:");
+    String[] ac = actual.split("\\s*[a-z]+\\:");
     Arrays.sort(ac);
     StringBuffer exs = new StringBuffer();
     for (String s: ex) {
+    	if (s.trim().equals(""))
+    		continue;
+    	if (exs.length() > 0)
+    		exs.append(" ");
       exs.append(s.trim());
     }
     StringBuffer acs = new StringBuffer();
     for (String s: ac) {
+    	if (s.trim().equals(""))
+    		continue;
+    	if (acs.length() > 0)
+    		acs.append(" ");
       acs.append(s.trim());
     }
     
@@ -2312,5 +2408,18 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     }
 
     return q;
+  }
+  
+  public String escapeUnicode(String input) {
+    StringBuilder b = new StringBuilder(input.length());
+    Formatter f = new Formatter(b);
+    for (char c : input.toCharArray()) {
+      if (c < 128) {
+        b.append(c);
+      } else {
+        f.format("\\u%04x", (int) c);
+      }
+    }
+    return b.toString();
   }
 }

@@ -1,22 +1,32 @@
 <dataConfig>
     <dataSource type="AdsDataSource" 
-        mongoHost="adszee"
+        mongoHost="${dataimporter.request.mongoHost}"
         mongoPort="27017"
-        mongoDocIdField="bibcode" 
-        mongoDBName="solr4ads"
+        mongoDocIdField="_id"
+        mongoGetIdsFrom="bibcode"
+        mongoDBName="adsdata"
         mongoCollectionName="docs"
+        mongoUser="adsdata"
+        mongoPass="${dataimporter.request.mongoPass}"
         jdbcConfig="" />
     <document>
         <entity name="adsabs"
             pk="bibcode"
             url="${dataimporter.request.url}"
             processor="XPathEntityProcessor"
-	        transformer="TemplateTransformer,AdsDateTransformer,RegexTransformer,BibstemTransformer,MongoTransformer,FacetHierarchyTransformer"
+	          transformer="TemplateTransformer,AdsDateTransformer,RegexTransformer,BibstemTransformer,AdsDataTransformer,FacetHierarchyTransformer,MongoTransformer"
             forEach="/collection/record"
             flatten="false"
             xsl="data-import.xsl"
             >
         
+        
+        <!--  see: http://labs.adsabs.harvard.edu/trac/ads-invenio/wiki/howtomarcADS 
+          name = index field name
+          column = database filed (mongodb field; when 'name' is empty; will be used as index name)
+          mongoFieldName = in situations, when you want to set 'name' and 'column', but data are inside mongo
+        -->
+                
         <field column="bibcode" 
             xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
         
@@ -118,35 +128,32 @@
         <field column="comment"        
             xpath="/collection/record/datafield[@tag='500']/subfield" />
         
-        <!-- we do not distinguist primary/secondary here, if we are to, 
-            the xpath will have to test for indicator: 1=Primary, 7=Secondary 
-        -->
-        <field column="arxiv_class"        
-            xpath="/collection/record/datafield[@tag='650']/subfield[@code='a']" />
+        
         
         <field column="facility"        
             xpath="/collection/record/datafield[@tag='693']/subfield[@code='f']" /> 
-        <field column="instrument"        
-            xpath="/collection/record/datafield[@tag='693']/subfield[@code='i']" /> 
-        <field column="telescope"        
-            xpath="/collection/record/datafield[@tag='693']/subfield[@code='t']" />    
             
-        <field column="object"        
-            xpath="/collection/record/datafield[@tag='694']/subfield[@code='a']" />
         
-        <field column="keyword653" name="keyword"        
-            xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />  <!--  free-text version -->
-        <field column="keyword_norm653" name="keyword_norm"        
+        <!--  free-text keywords -->
+        
+        <field name="keyword" column="keywordA"       
+            xpath="/collection/record/datafield[@tag='653']/subfield[@code='a']" />  <!--  free text keyword -->
+        <field name="keyword" column="keywordB"       
             xpath="/collection/record/datafield[@tag='653']/subfield[@code='b']" />  <!--  normalized version -->
+        
+        <field column="arxiv_class"        
+            xpath="/collection/record/datafield[@tag='650']/subfield[@code='a']" />
             
-        <field column="keyword695" name="keyword"        
+            
+        <!--  controlled keywords -->
+        <field column="keyword_norm"        
             xpath="/collection/record/datafield[@tag='695']/subfield[@code='a']" />
-        <field column="keyword_norm653" name="keyword"        
-            xpath="/collection/record/datafield[@tag='695']/subfield[@code='b']" />  <!--  normalized version -->
+        <field column="keyword_schema"        
+            xpath="/collection/record/datafield[@tag='695']/subfield[@code='2']" />
+        <field column="keyword_facet"        
+            xpath="/collection/record/datafield[@tag='695']/subfield[@code='b']" />
+        
             
-        <field column="collaboration"        
-            xpath="/collection/record/datafield[@tag='710']/subfield[@code='t']" />
-
         <!--  journal info -->
         <field column="pub"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='p']" />
@@ -165,12 +172,6 @@
         <field column="year"        
             xpath="/collection/record/datafield[@tag='773']/subfield[@code='y']" />    
         
-        <!--  record date-stamps -->
-        <field column="created"        
-            xpath="/collection/record/datafield[@tag='961']/subfield[@code='x']" />
-
-        <field column="modified"        
-            xpath="/collection/record/datafield[@tag='961']/subfield[@code='c']" />
         
         <field column="property"
             xpath="/collection/record/datafield[@tag='980']/subfield[@code='p']"/>
@@ -197,47 +198,24 @@
         <field column="reference"        
             xpath="/collection/record/datafield[@tag='999']/subfield[@code='i']" />
             
-        <!--  for indexing, we put all field inside the reference index, and also build a special index for 
-              the individual subfields -->
-        <!-- 
-        <field column="reference_doi"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='a']" />
-        <field column="reference_raw"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='b']" />
             
-        <field column="ref_doi"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='a']" />
-        <field column="ref_string"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='b']" />
-        <field column="ref_score"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='e']" />
-        <field column="ref_source"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='f']" />
-        <field column="ref_bibcode"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='i']" />
-        <field column="ref_arxivid"        
-            xpath="/collection/record/datafield[@tag='999']/subfield[@code='r']" />    
-        --> 
-        <!-- field column="entdate" xpath="" / -->
-        <!-- field column="bibgroup" xpath="" / -->
-            
-        <field column="full" mongoField="true"/>
+        <field name="body" column="full" mongoField="true"/>
         
         <field column="ack" mongoField="true"/>
         
-        <field column="reader" mongoField="true" mongoFieldName="readers"/>
+        <field name="reader" mongoField="true" column="readers"/>
 
-        <field column="cite_read_boost" mongoField="true" />
+        <field name="cite_read_boost" mongoField="true" column="boost"/>
+        <field name="classic_factor" mongoField="true" column="norm_cites"/>
+        <field name="simbid" mongoField="true" column="simbad_object_ids"/>
+        <field name="citation" mongoField="true" column="citations"/>
+        
         <field column="citation_count" mongoField="true" />
         <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
-        <field column="facility" mongoField="true" /> 
+        
+        <!-- <field column="facility" mongoField="true" /> -->
+         
         <field column="grant" mongoField="true" mongoFieldName="grants" />
-        
-        
-        <!-- following two fields are not represented in the schema.
-             They are loaded from mongo only for the purpose of generating hierarchical facet -->
-        <field column="grant_agencies" mongoField="true" />
-        <field column="grant_ids" mongoField="true" />
         
         
         <!-- 
@@ -250,7 +228,7 @@
          -->
         <field facetHierarchyField="true" column="author_facet_hier" input="a_100,a_700" />
         <field facetHierarchyField="true" column="first_author_facet_hier" input="a_100" />
-        <field facetHierarchyField="true" column="grant_facet_hier" input="grant_agencies+grant_ids" />
+        <field facetHierarchyField="true" column="grant_facet_hier" input="grants:agency+grants:grant" />
         
         <!-- these fields are generated by the data-import.xsl -->
         <field column="links_data" xpath="/collection/record/linkfield"/>

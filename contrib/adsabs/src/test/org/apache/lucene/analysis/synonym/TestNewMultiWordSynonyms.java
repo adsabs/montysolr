@@ -23,6 +23,7 @@ import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.StringMockResourceLoader;
+import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.synonym.NewSynonymFilterFactory.SynonymParser;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
@@ -43,7 +44,67 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         "foo\0baz,fu ba");
   }
   
+  private StringMockResourceLoader getSemicolonSingleSyn() {
+    return new StringMockResourceLoader(
+        "žščřdťň, á;zscrdtn, a\n" +
+        "fůů, bar => foo, bar; fuu, bar\n" +
+        "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m\n"
+        );
+  }
   
+  private StringMockResourceLoader getSolrSingleSyn() {
+    return new StringMockResourceLoader(
+        "žščřdťň\\,\\ á,zscrdtn\\,\\ a\n" +
+        "fůů\\,\\ bar => foo\\,\\ bar, fuu\\,\\ bar\n"
+        );
+  }
+  
+  String O = TypeAttribute.DEFAULT_TYPE;
+  String S = SynonymFilter.TYPE_SYNONYM;
+  
+  
+  public void testSingleWordSolrSynonyms() throws IOException {
+    SynonymFilterFactory factory = new SynonymFilterFactory();
+    Map<String,String> args = new HashMap<String,String>();
+    args.put("synonyms", "synonyms.txt");
+    args.put("tokenizerFactory", KeywordTokenizerFactory.class.getCanonicalName().toString());
+    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
+    factory.init(args);
+    factory.inform(getSolrSingleSyn());
+    TokenStream ts = factory.create(new MockTokenizer(new StringReader("žščřdťň, á"), MockTokenizer.KEYWORD, false));
+    assertTokenStreamContents(ts, new String[] { "žščřdťň, á", "zscrdtn, a" },
+        new int[]    {0, 0}, //startOffset
+        new int[]    {10,10}, //endOffset
+        new String[] {S, S}, //type
+        new int[]    {1, 0}  //posIncr
+    );
+  }
+  
+  public void testSingleWordSemicolonSynonyms() throws IOException {
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
+    Map<String,String> args = new HashMap<String,String>();
+    args.put("synonyms", "synonyms.txt");
+    args.put("format", "semicolon");
+    args.put("tokenizerFactory", KeywordTokenizerFactory.class.getCanonicalName().toString());
+    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
+    factory.init(args);
+    factory.inform(getSemicolonSingleSyn());
+    TokenStream ts = factory.create(new MockTokenizer(new StringReader("žščřdťň, á"), MockTokenizer.KEYWORD, false));
+    assertTokenStreamContents(ts, new String[] { "žščřdťň, á", "zscrdtn, a" },
+        new int[]    {0, 0}, //startOffset
+        new int[]    {10,10}, //endOffset
+        new String[] {S, S}, //type
+        new int[]    {1, 0}  //posIncr
+    );
+    
+    ts = factory.create(new MockTokenizer(new StringReader("žščřdťň, á"), MockTokenizer.KEYWORD, false));
+    assertTokenStreamContents(ts, new String[] { "žščřdťň, á", "zscrdtn, a" },
+        new int[]    {0, 0}, //startOffset
+        new int[]    {10,10}, //endOffset
+        new String[] {S, S}, //type
+        new int[]    {1, 0}  //posIncr
+    );
+  }
   
   
   /*
@@ -83,8 +144,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
 
   
   public void testMultiWordSynonymsReplaceNullsCustomInclOrigAnalyzer() throws IOException {
-    String O = TypeAttribute.DEFAULT_TYPE;
-    String S = SynonymFilter.TYPE_SYNONYM;
+    
     
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
@@ -133,8 +193,6 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   }
   
   public void testMultiWordSynonymsReplaceNullsInclOrig() throws IOException {
-    String O = TypeAttribute.DEFAULT_TYPE;
-    String S = SynonymFilter.TYPE_SYNONYM;
     
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
@@ -185,8 +243,6 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   
   
   public void testMultiWordSynonymsNullReplaced() throws IOException {
-    String O = TypeAttribute.DEFAULT_TYPE;
-    String S = SynonymFilter.TYPE_SYNONYM;
     
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
@@ -238,8 +294,6 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   
   
   public void testMultiWordSynonymsDefault() throws IOException {
-    String O = TypeAttribute.DEFAULT_TYPE;
-    String S = SynonymFilter.TYPE_SYNONYM;
     
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
@@ -291,8 +345,6 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
    * before the synonyms
    */
   public void testMultiWordSynonymsInclOrig() throws IOException {
-    String O = TypeAttribute.DEFAULT_TYPE;
-    String S = SynonymFilter.TYPE_SYNONYM;
     
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();

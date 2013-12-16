@@ -9,9 +9,20 @@
     
   <queryParser name="bitset" class="solr.search.BitSetQParserPlugin">
     <lst name="defaults">
-      <str name="defaultField">id</str>
+      <str name="cache-mapping">id:test-cache,bibcode:test-cache</str>
     </lst>
   </queryParser>
   
+  <query>
+    <cache name="test-cache"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="id"
+              referenceFields=""
+              />
+  </query>
   
 </config>

@@ -319,7 +319,7 @@
          searcher to be opened to make those changes visible.
       -->
      <autoCommit> 
-       <maxDocs>100000</maxDocs>  <!--ADSLABS:06/2012 -->
+       <maxDocs>40000</maxDocs>  <!--ADSLABS:06/2012 -->
        <maxTime>1800000</maxTime> <!--ADSLABS:06/2012 --> 
      </autoCommit>
 
@@ -544,7 +544,17 @@
               regenerator="com.mycompany.MyRegenerator"
               />
       -->
-
+    <cache name="citations-cache"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              referenceFields="reference"
+              />
+              
+              
 
     <!-- Lazy Field Loading
 
@@ -613,8 +623,6 @@
       enable="${montysolr.enable.warming:true}">
       <arr name="queries">
         <lst><str name="q">new searcher warming</str></lst>
-        <lst><str name="q">references(recid:[0 TO 20])</str></lst>
-        <lst><str name="q">citations(recid:[0 TO 20])</str></lst>
         <lst><str name="q">author:&quot;John Doe&quot;</str></lst>
       </arr>
     </listener>
@@ -623,8 +631,6 @@
               enable="${montysolr.enable.warming:true}">
       <arr name="queries">
         <lst><str name="q">first searcher warming</str></lst>
-        <lst><str name="q">references(recid:[0 TO 20])</str></lst>
-        <lst><str name="q">citations(recid:[0 TO 20])</str></lst>
       </arr>
     </listener>
 
@@ -650,7 +656,7 @@
          Recommend values of 1-2 for read-only slaves, higher for
          masters w/o cache warming.
       -->
-    <maxWarmingSearchers>2</maxWarmingSearchers>
+    <maxWarmingSearchers>3</maxWarmingSearchers>
 
   </query>
 
@@ -795,7 +801,7 @@
        query handlers (e.g. tvrh - used by the word cloud)
        
         -->
-       <str name="qf">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year</str>
+       <str name="qf">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all body^0.1 year</str>
        <str name="defType">aqp</str>
        <str name="aqp.unfielded.tokens.strategy">multiply</str>
        <str name="aqp.unfielded.tokens.new.type">simple</str>
@@ -1355,7 +1361,7 @@
   <requestHandler name="/tvrh" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
       <bool name="tv">true</bool>
-       <str name="qf">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year</str>
+       <str name="qf">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all body^0.1 year</str>
        <str name="defType">aqp</str>
        <str name="aqp.unfielded.tokens.strategy">multiply</str>
        <str name="aqp.unfielded.tokens.new.type">simple</str>
@@ -1463,7 +1469,7 @@
        
        <str name="defType">edismax</str>
        <str name="qf">
-         text^0.5 features^1.0 name^1.2 sku^1.5 id^10.0 manu^1.1 cat^1.4
+         first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all body^0.1 year
        </str>
        <str name="q.alt">*:*</str>
        <str name="rows">10</str>
@@ -1801,34 +1807,6 @@
   
   
   
-    <!-- MontySolr:
-       The following request handler is the default one for Invenio
-       searches. It uses special parser which constructs a query made
-       of solr and solr-pythonic clauses. Each clause is then resolved
-       and results are combined in the chain you see inside 'components'
-       It is important that invenio-formatter comes right after the search.
-    -->
-
-  <requestHandler name="/invenio" class="solr.InvenioRequestHandler" default="false">
-    <arr name="components">
-      <str>query</str>
-      <str>invenio-formatter</str>
-      <str>facet</str>
-      <str>mlt</str>
-      <str>highlight</str>
-      <str>stats</str>
-      <str>debug</str>
-    </arr>
-    <!-- default values for query parameters -->
-     <lst name="defaults">
-       <str name="defType">iq</str>
-       <str name="iq.mode">maxinv</str>
-       <str name="iq.xfields">fulltext</str>
-       <str name="q.op">AND</str>
-       <str name="echoParams">explicit</str>
-     </lst>
-  </requestHandler>
-  
   <!-- Handler that keeps Invenio in-sync on request
   
     0: request -> /invenio/update
@@ -1902,6 +1880,10 @@
       <!-- this parameter activates the logging/restart of failed imports -->
       <str name="writerImpl">org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter</str>
     </lst>
+    <lst name="invariants">
+       <str name="mongoPass">${montysolr.mongoPass:}</str>
+       <str name="mongoHost">${montysolr.mongoHost:adsx}</str>
+    </lst>
   </requestHandler>
 
   <requestHandler name="/invenio/import2" 
@@ -1915,25 +1897,13 @@
       <!-- this parameter activates the logging/restart of failed batches -->
       <str name="writerImpl">org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter</str>
     </lst>
+    <lst name="invariants">
+       <str name="mongoPass">${montysolr.mongoPass:}</str>
+       <str name="mongoHost">${montysolr.mongoHost:adsx}</str>
+    </lst>
   </requestHandler>
   
-  <!-- MontySolr:
-       This component is responsible for returning the citation
-       search results (in the html form, as produced by Invenio)
-       -->
-  <searchComponent name="invenio-formatter" class="solr.InvenioFormatter" >
-    <lst name="defaults">
-       <str name="idfield">recid</str>
-    </lst>
-  </searchComponent>
 
-  <!--  MontySolr/Invenio query parser -->
-  
-  <queryParser name="iq" class="solr.InvenioQParserPlugin">
-	<lst name="defaults">
-       <str name="idfield">recid</str>
-    </lst>
-  </queryParser>
   
   <requestHandler name="/dataimport" 
                   class="org.apache.solr.handler.dataimport.DataImportHandler"
@@ -1942,6 +1912,10 @@
       <str name="config">data-config.xml</str>
       <bool name="clean">false</bool>
       <bool name="commit">false</bool>
+    </lst>
+    <lst name="invariants">
+       <str name="mongoPass">${montysolr.mongoPass:}</str>
+       <str name="mongoHost">${montysolr.mongoHost:adsx}</str>
     </lst>
   </requestHandler>
   
@@ -1955,7 +1929,7 @@
       <str name="defaultOperator">AND</str>
       <str name="fieldMap">arxiv identifier;</str>
       <str name="fieldMapPostAnalysis">pubdate date;</str>
-      <str name="unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
+      <str name="unfieldedSearch">first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all body^0.1 year</str>
     </lst>
   </requestHandler>
   
@@ -2000,8 +1974,15 @@
   </requestHandler>
   
   <transformer name="citations" class="org.apache.solr.response.transform.CitationsTransformerFactory" >
-    <str name="cache-name">citation-cache</str>
+    <str name="cache-name">citations-cache</str>
     <str name="resolution-field">bibcode</str>
   </transformer>
+  
+  <queryParser name="bitset" class="solr.search.BitSetQParserPlugin">
+    <lst name="defaults">
+      <str name="cache-mapping">bibcode:citations-cache</str>
+      <str name="allowed-fields">bibcode,recid</str>
+    </lst>
+  </queryParser>
   
 </config>

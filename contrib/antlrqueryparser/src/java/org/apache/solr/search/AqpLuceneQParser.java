@@ -110,7 +110,7 @@ public class AqpLuceneQParser extends QParser {
 		
 	}
 	
-
+	@Override
 	public Query parse() throws ParseException {
 		try {
 			return qParser.parse(getString(), null);

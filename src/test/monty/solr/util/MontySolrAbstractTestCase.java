@@ -122,7 +122,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	public File createTempFile(String...lines) throws IOException {
 		File tmpFile = File.createTempFile("montySolr-unittest", null);
 		if (lines.length > 0) {
-			FileOutputStream fi = FileUtils.openOutputStream(tmpFile);
+			//FileOutputStream fi = FileUtils.openOutputStream(tmpFile);
 			StringBuffer out = new StringBuffer();
 			for (String l: lines) {
 				out.append(l + "\n");
