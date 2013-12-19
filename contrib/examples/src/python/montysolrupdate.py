@@ -65,7 +65,7 @@ import re
 import subprocess
 import shutil
 import re
-import simplejson
+import json
 import urllib
 import time
 import socket 
@@ -494,8 +494,9 @@ def check_live_instance(options, instance_names):
             
             if instance_mode == 'r' and not writer_finished:
                 if os.path.exists('writer.finished'):
-                    print 'We are seeing the deployment crashed - restarting'
+                    print 'We are seeing the deployment crashed - restarting deployment...'
                     writer_finished = True
+                    run_cmd(['rm', 'writer.finished'])
                 else:
                     continue 
                 
@@ -518,11 +519,11 @@ def check_live_instance(options, instance_names):
                                            instance_mode=instance_mode)
             else:
                 print ('%s still getting itself ready, nothing to do yet...' % next_release)
-                if os.path.exists('writer.finished'):
-                    run_cmd(['rm', 'writer.finished'])
+                
             continue 
                 
-                
+        
+                         
         live_tag = get_release_tag(path='%s/RELEASE' % symbolic_name)
         
         
