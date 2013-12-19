@@ -488,7 +488,7 @@
     <filterCache class="solr.FastLRUCache"
                  size="${solr.cache.size:512}"
                  initialSize="${solr.cache.initial:512}"
-                 autowarmCount="0"/>
+                 autowarmCount="128"/>
 
     <!-- Query Result Cache
          
@@ -499,7 +499,7 @@
     <queryResultCache class="solr.LRUCache"
                      size="${solr.cache.size:512}"
                      initialSize="${solr.cache.initial:512}"
-                     autowarmCount="0"/>
+                     autowarmCount="128"/>
    
     <!-- Document Cache
 
@@ -511,7 +511,7 @@
     <documentCache class="solr.LRUCache"
                    size="${solr.cache.size:512}"
                    initialSize="${solr.cache.initial:512}"
-                   autowarmCount="0"/>
+                   autowarmCount="128"/>
     
     <!-- Field Value Cache
          
@@ -548,7 +548,7 @@
               class="solr.CitationLRUCache"
               size="1024"
               initialSize="1024"
-              autowarmCount="1024"
+              autowarmCount="512"
               regenerator="solr.CitationLRUCache$SimpleRegenerator"
               identifierFields="bibcode,alternate_bibcode"
               referenceFields="reference"
@@ -624,6 +624,7 @@
       <arr name="queries">
         <lst><str name="q">new searcher warming</str></lst>
         <lst><str name="q">author:&quot;John Doe&quot;</str></lst>
+        <lst><str name="q">{!aqp}citations(new searcher warming)</str></lst>
       </arr>
     </listener>
     <listener event="firstSearcher" 
@@ -631,6 +632,7 @@
               enable="${montysolr.enable.warming:true}">
       <arr name="queries">
         <lst><str name="q">first searcher warming</str></lst>
+        <lst><str name="q">{!aqp}citations(new searcher warming)</str></lst>
       </arr>
     </listener>
 
