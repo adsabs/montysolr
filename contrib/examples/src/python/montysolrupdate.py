@@ -686,7 +686,7 @@ def start_indexing(instance_dir, port):
 
 def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admin/ping'):
     url = tmpl % port
-    
+    i = 0
     max_time = time.time() + max_wait
     rsp = None
     while time.time() < max_time:
@@ -696,11 +696,13 @@ def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admi
                 return True
         except Exception, e:
             if rsp is None:
-                #traceback.print_exc(e)
-                print "Waiting for instance to come up at %s: %d sec." % (url, max_time - time.time(),) 
+                print "Waiting for instance to come up at %s: %d sec." % (url, max_time - time.time(),)
+            if i > 100:
+                traceback.print_exc(e) 
             if rsp is not None and 'error' in rsp:
                 error(str(rsp['error']).replace('\\n', "\n"))
         time.sleep(1)
+        i += 1
     return False
 
 def is_invenio_doctor_idle(port):
@@ -730,7 +732,7 @@ def make_request(q, url, kwargs):
         page = ''
         conn = urllib.urlopen(url, params)
         page = conn.read()
-        rsp = simplejson.loads(page)
+        rsp = json.loads(page)
         conn.close()
         q.put(rsp)
     except Exception, e:

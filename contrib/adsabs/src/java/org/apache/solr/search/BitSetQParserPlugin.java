@@ -144,7 +144,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 					String[] operator = localParams.get("operator","and").split(",");
 					if (operator.length > 1 && operator.length != processors.size()-1) {
 						throw new SolrException(ErrorCode.BAD_REQUEST, 
-								"There is " + processors.size() + " data strams, but inconsistent number of operators: " + localParams.get("operator","and"));
+								"There is " + processors.size() + " data streams, but inconsistent number of operators: " + localParams.get("operator","and"));
 					}
 					
 					BitSet topBits = null;
