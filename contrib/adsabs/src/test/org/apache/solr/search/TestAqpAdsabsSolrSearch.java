@@ -295,6 +295,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public void testSpecialCases() throws Exception {
 		
+		// virtual fields (their definition is in the solrconfig.xml)
+		assertQueryEquals(req("defType", "aqp", "q", "full:foo"), 
+				"abstract:foo^2.0 body:foo title:foo^2.0 ack:foo keyword:foo", 
+				BooleanQuery.class
+		);
+		assertQueryEquals(req("defType", "aqp", "q", "full:\"foo phrase\""), 
+				"abstract:\"foo phrase\"^2.0 body:\"foo phrase\" title:\"foo phrase\"^2.0 ack:\"foo phrase\" keyword:\"foo phrase\"", 
+				BooleanQuery.class
+		);
+		assertQueryEquals(req("defType", "aqp", "q", "abs:foo"), 
+				"abstract:foo title:foo keyword:foo", 
+				BooleanQuery.class
+		);
 		
 		
 		// unbalanced brackets for functions

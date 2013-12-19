@@ -407,6 +407,11 @@ public class BitSetQParserPlugin extends QParserPlugin {
 				public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					// extra checking necessary (we cannot be sure
 					// the id will be always correct....
+					
+					if (sourceValue instanceof String) {
+						sourceValue = ((String) sourceValue).toLowerCase().trim();
+					}
+					
 				  Object v = solrCache.get(sourceValue);
 				  if (v == null)
 				  	return -1;
@@ -420,7 +425,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 				@Override
         public String internalToString() {
-          return this.toString();
+          return solrCache.toString();
         }
 			};
 		}

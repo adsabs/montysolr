@@ -341,7 +341,15 @@ class ReqStringIO(sIO):
         
 
 def test_get_recids():
-    """This is used to manually run and compare results against the DB"""
+    """This is used to manually run and compare results against the DB
+    
+    note: to get mapping from recids into bibcodes:
+    
+    allinv = {}
+    for x in dbquery.run_sql('select t1.value,t2.id_bibrec from bib97x as t1 inner join bibrec_bib97x as t2 ON t1.id=t2.id_bibxxx WHERE t1.tag="970__a"'):    
+      allinv[int(x[1])] = x[0].lower()
+
+    """
     
     total = 0
     lastid=-1

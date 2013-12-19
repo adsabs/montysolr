@@ -55,6 +55,8 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 	    
 	    final public static ConfigurationKey<String> DUMMY_VALUE = ConfigurationKey.newInstance();
 	    
+	    final public static ConfigurationKey<Map<String,Map<String, Float>>> VIRTUAL_FIELDS = ConfigurationKey.newInstance();
+	    
 	}
 	
 	public AqpAdsabsQueryConfigHandler() {
@@ -101,5 +103,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
     // This is not being initialized inside the standard config handler, which causes
     // errors (even if the functionality is not used, wtf...)
     set(StandardQueryConfigHandler.ConfigurationKeys.MULTI_FIELDS, new CharSequence[0]);
+    
+    set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS, new HashMap<String, Map<String, Float>>());
 	}
 }

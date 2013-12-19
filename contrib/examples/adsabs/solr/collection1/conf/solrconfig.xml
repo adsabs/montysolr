@@ -1934,8 +1934,17 @@
   </requestHandler>
   
   <queryParser name="aqp" class="solr.AdsQParserPlugin">
+    
     <lst name="defaults">
-       <str name="idfield">recid</str>
+      <!--
+       Virtual fields will be translated into real-fields
+       Make sure you are never referencing virtual field
+       from inside another virtual field
+      -->
+       <lst name="virtual-fields">
+          <str name="full">title^2 abstract^2 body keyword ack</str>
+          <str name="abs">title abstract keyword</str>
+       </lst>
     </lst>
   </queryParser>
   

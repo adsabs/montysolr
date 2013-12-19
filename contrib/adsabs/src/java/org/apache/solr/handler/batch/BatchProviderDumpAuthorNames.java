@@ -35,6 +35,9 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
 		this.docsToCollect = docsToCollect;
 	}
 	
+	
+	
+	
 	public void run(SolrQueryRequest req, BatchHandlerRequestQueue queue) throws Exception {
 		
 		SolrCore core = req.getCore();
@@ -117,7 +120,8 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
 	
 	@Override
   public String getDescription() {
-	  return "Collect author names and save them to disk as synonym file";
+	  return "Collect author names and saves them to disk as synonym file";
   }
+
 
 }
