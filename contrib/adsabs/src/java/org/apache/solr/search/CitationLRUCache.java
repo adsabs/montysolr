@@ -316,8 +316,14 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
       map.clear();
     }
   }
-
+  
+  private boolean isWarming = false;
+  public boolean isWarmingOrWarmed() {
+  	return isWarming;
+  }
+  
   public void warm(SolrIndexSearcher searcher, SolrCache<K,V> old) {
+  	isWarming = true;
   	try {
   		log.info("Warming cache (" + name() + "): " + searcher);
 	  	if (this.incremental ) {

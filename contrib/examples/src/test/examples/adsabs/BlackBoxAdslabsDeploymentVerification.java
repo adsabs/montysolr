@@ -53,8 +53,9 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		
 	  // the first search is not auto-warmed (the code seems
 		// that seems like a SOLR bug (I checked the SolrIndexSearcher
-		// code and it is righ
-		assertU(commit());  
+		// code and it is right; so i created own function for 
+		// warming warm_cache()
+		// assertU(commit());  
 		
 		assertQ(req("q", "*:*"),"//*[@numFound='5']");
 		assertQ(req("q", "id:*"),"//*[@numFound='5']");

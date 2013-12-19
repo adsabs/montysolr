@@ -493,6 +493,10 @@ def check_live_instance(options, instance_names):
                 error("The next-release is present, but dead - we do not expect this!!!") 
             
             if instance_mode == 'r' and not writer_finished:
+                if os.path.exists('writer.finished'):
+                    print 'We are seeing the deployment crashed - restarting'
+                    writer_finished = True
+                else:
                     continue 
                 
             if instance_mode == 'r' or is_invenio_doctor_idle(port):
@@ -506,6 +510,7 @@ def check_live_instance(options, instance_names):
                 run_cmd(['ln', '-s', os.path.realpath(next_release_data), symbolic_name_data])
                 run_cmd(['rm', next_release])
                 run_cmd(['rm', next_release_data])
+                run_cmd(['touch', 'writer.finished'])
                 writer_finished=True
                 assert start_live_instance(options, symbolic_name, orig_port, 
                                            max_wait=options.timeout,
@@ -513,6 +518,8 @@ def check_live_instance(options, instance_names):
                                            instance_mode=instance_mode)
             else:
                 print ('%s still getting itself ready, nothing to do yet...' % next_release)
+                if os.path.exists('writer.finished'):
+                    run_cmd(['rm', 'writer.finished'])
             continue 
                 
                 
