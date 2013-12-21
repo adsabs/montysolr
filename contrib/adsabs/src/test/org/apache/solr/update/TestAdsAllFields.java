@@ -1218,6 +1218,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			assert bibcodes.contains("1991ApJ...371..665R");
 			assert bibcodes.contains("1976AJ.....81...67S");
 			assert bibcodes.contains("2009arXiv0909.1287I");
+			assert bibcodes.contains("2002RvMP....74...12");
 
 			HashMap<String, Object> row = new HashMap<String, Object>();
 			row.put("grants", new ArrayList<HashMap<String,String>>(){{
@@ -1256,8 +1257,28 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			row.put("reader", Arrays.asList("4xeeeeeeee", "1xeeeeeeee"));
 			mongoCache.put("2009arXiv0909.1287I", row);
 
-
-
+			
+			row = new HashMap<String, Object>();
+			row.put("citation", Arrays.asList("2002RvMP....74...11"));
+			mongoCache.put("2002RvMP....74...10", row);
+			
+			row = new HashMap<String, Object>();
+			row.put("citation", Arrays.asList("2002RvMP....74...10", "2002RvMP....74...15"));
+			mongoCache.put("2002RvMP....74...11", row);
+			
+			row = new HashMap<String, Object>();
+			row.put("citation", Arrays.asList("2002RvMP....74...13", "2002RvMP....74...15", "2002RvMP....74...10"));
+			mongoCache.put("2002RvMP....74...12", row);
+			
+			row = new HashMap<String, Object>();
+			row.put("citation", Arrays.asList("2002RvMP....74...15", "2002RvMP....74...XX"));
+			mongoCache.put("2002RvMP....74...13", row);
+			
+			row = new HashMap<String, Object>();
+			row.put("citation", Arrays.asList("2002RvMP....74...13"));
+			mongoCache.put("2002RvMP....74...14", row);
+			
+			
 		}
 	}
 

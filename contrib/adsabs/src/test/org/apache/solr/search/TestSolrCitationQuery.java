@@ -34,13 +34,28 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 	public void testSearch() throws Exception {
 		
 		//assertU(delQ("*:*"));
-		assertU(commit()); // if i remove this, the test will sometimes fail (i don't understand...)
-		assertU(adoc("id", "0", "bibcode", "A", "reference", "B", "reference", "C", "reference", "D"));
-		assertU(adoc("id", "1", "bibcode", "B", "reference", "X"));
-		assertU(adoc("id", "2", "bibcode", "C", "reference", "E", "reference", "F"));
-		assertU(adoc("id", "3", "bibcode", "D", "reference", "B"));
-		assertU(adoc("id", "4", "bibcode", "E"));
-		assertU(adoc("id", "5", "bibcode", "F"));
+		//assertU(commit()); // if i remove this, the test will sometimes fail (i don't understand...)
+		assertU(adoc("id", "0", "bibcode", "A", 
+				"reference", "B", "reference", "C", "reference", "D"
+				));
+		assertU(adoc("id", "1", "bibcode", "B", 
+				"reference", "X",
+				"citation", "A", "citation", "D"
+				));
+		assertU(adoc("id", "2", "bibcode", "C", 
+				"reference", "E", "reference", "F",
+				"citation", "A"
+				));
+		assertU(adoc("id", "3", "bibcode", "D", 
+				"reference", "B",
+				"citation", "A"
+				));
+		assertU(adoc("id", "4", "bibcode", "E",
+				"citation", "C"
+				));
+		assertU(adoc("id", "5", "bibcode", "F",
+				"citation", "C"
+				));
 		
 		assertU(commit("waitSearcher", "true")); // very weird, it is not waiting
 		
