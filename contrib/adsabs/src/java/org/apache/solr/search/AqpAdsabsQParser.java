@@ -56,7 +56,7 @@ public class AqpAdsabsQParser extends QParser {
 	private static String adsConfigName = "/ads-config";
 
 	public AqpAdsabsQParser(AqpQueryParser parser, String qstr, SolrParams localParams,
-			SolrParams params, SolrQueryRequest req)
+			SolrParams params, SolrQueryRequest req, SolrParserConfigParams defaultConfig)
 	throws QueryNodeParseException {
 
 		super(qstr, localParams, params, req);
@@ -212,7 +212,9 @@ public class AqpAdsabsQParser extends QParser {
 			ncm.put(field, new NumericConfig(4, NumberFormat.getNumberInstance(Locale.US), NumericType.INT));
 		}
 
-
+		
+		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS).putAll(defaultConfig.virtualFields);
+		
 		/*
     config.get(StandardQueryConfigHandler.ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP)
       .put("date", DateTools.Resolution.MONTH);

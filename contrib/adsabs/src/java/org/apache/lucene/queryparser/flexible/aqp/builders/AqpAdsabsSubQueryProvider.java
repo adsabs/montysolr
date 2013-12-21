@@ -1171,6 +1171,23 @@ AqpFunctionQueryBuilderProvider {
 				return q;
 			}
 		});
+		
+	  // helper method; SOLR is not warming up caches when index is opened first time
+		// so we have to do it ourselves
+		parsers.put("warm_cache", new AqpSubqueryParserFull() {
+			@SuppressWarnings("unchecked")
+      public Query parse(FunctionQParser fp) throws ParseException {
+
+				final SolrQueryRequest req = fp.getReq();
+				@SuppressWarnings("rawtypes")
+				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
+				if (!cache.isWarmingOrWarmed()) {
+					cache.warm(req.getSearcher(), cache);
+				}
+				return new BooleanQuery();
+			}
+		});
+			
 	};
 	
 	/**

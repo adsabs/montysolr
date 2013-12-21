@@ -65,7 +65,7 @@ import re
 import subprocess
 import shutil
 import re
-import simplejson
+import json
 import urllib
 import time
 import socket 
@@ -493,6 +493,11 @@ def check_live_instance(options, instance_names):
                 error("The next-release is present, but dead - we do not expect this!!!") 
             
             if instance_mode == 'r' and not writer_finished:
+                if os.path.exists('writer.finished'):
+                    print 'We are seeing the deployment crashed - restarting deployment...'
+                    writer_finished = True
+                    run_cmd(['rm', 'writer.finished'])
+                else:
                     continue 
                 
             if instance_mode == 'r' or is_invenio_doctor_idle(port):
@@ -506,6 +511,7 @@ def check_live_instance(options, instance_names):
                 run_cmd(['ln', '-s', os.path.realpath(next_release_data), symbolic_name_data])
                 run_cmd(['rm', next_release])
                 run_cmd(['rm', next_release_data])
+                run_cmd(['touch', 'writer.finished'])
                 writer_finished=True
                 assert start_live_instance(options, symbolic_name, orig_port, 
                                            max_wait=options.timeout,
@@ -513,9 +519,11 @@ def check_live_instance(options, instance_names):
                                            instance_mode=instance_mode)
             else:
                 print ('%s still getting itself ready, nothing to do yet...' % next_release)
+                
             continue 
                 
-                
+        
+                         
         live_tag = get_release_tag(path='%s/RELEASE' % symbolic_name)
         
         
@@ -678,7 +686,7 @@ def start_indexing(instance_dir, port):
 
 def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admin/ping'):
     url = tmpl % port
-    
+    i = 0
     max_time = time.time() + max_wait
     rsp = None
     while time.time() < max_time:
@@ -688,11 +696,13 @@ def check_instance_health(port, max_wait=30, tmpl='http://localhost:%s/solr/admi
                 return True
         except Exception, e:
             if rsp is None:
-                #traceback.print_exc(e)
-                print "Waiting for instance to come up at %s: %d sec." % (url, max_time - time.time(),) 
+                print "Waiting for instance to come up at %s: %d sec." % (url, max_time - time.time(),)
+            if i > 100:
+                traceback.print_exc(e) 
             if rsp is not None and 'error' in rsp:
                 error(str(rsp['error']).replace('\\n', "\n"))
         time.sleep(1)
+        i += 1
     return False
 
 def is_invenio_doctor_idle(port):
@@ -722,7 +732,7 @@ def make_request(q, url, kwargs):
         page = ''
         conn = urllib.urlopen(url, params)
         page = conn.read()
-        rsp = simplejson.loads(page)
+        rsp = json.loads(page)
         conn.close()
         q.put(rsp)
     except Exception, e:

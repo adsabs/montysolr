@@ -183,7 +183,7 @@ public class BitSetQuery extends Query {
 		if (uuid != null) {
 			return uuid.hashCode();
 		}
-		return Float.floatToIntBits(getBoost()) ^ 0x1AA71190;
+		return seekedDocs.hashCode() ^ Float.floatToIntBits(getBoost()) ^ 0x1AA71190;
 	}
 	
 	public void setUUID(String uuid) {

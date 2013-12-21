@@ -58,6 +58,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASETRUNCProc
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQRANGEINProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTMODIFIERProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTreeRewriteProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpVirtualFieldsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpWhiteSpacedQueryNodeProcessor;
 import org.apache.solr.search.AqpAdsabsQParser;
 
@@ -155,6 +156,9 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 	  add(new MultiFieldQueryNodeProcessor()); 
 		add(new AqpNullDefaultFieldProcessor());
 		
+		// expands virtual fields into real fields, that can be analyzed
+		// normal ways (it also adds boosts, if necessary)
+		add(new AqpVirtualFieldsQueryNodeProcessor());
 		
 		add(new FuzzyQueryNodeProcessor());
 		add(new MatchAllDocsQueryNodeProcessor());

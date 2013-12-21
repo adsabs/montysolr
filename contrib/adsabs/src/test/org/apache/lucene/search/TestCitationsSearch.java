@@ -139,9 +139,10 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		// get the cache
 		tempReq = req("test");
 		SolrIndexSearcher searcher = tempReq.getSearcher();
-		final CitationLRUCache cache = (CitationLRUCache) searcher.getCache("citations-cache");
 		
+		final CitationLRUCache cache = (CitationLRUCache) searcher.getCache("citations-cache-from-references");
 		
+		assert cache != null;
 		
 		CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
 			@Override
