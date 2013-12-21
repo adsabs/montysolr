@@ -123,8 +123,9 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
   	
   	
   	
-    final CitationLRUCache cache = (CitationLRUCache) tempReq.getSearcher().getCache("citations-cache");
+    final CitationLRUCache cache = (CitationLRUCache) tempReq.getSearcher().getCache("citations-cache-from-references");
 		
+		assert cache != null;
 		
 		CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
 			@Override

@@ -253,6 +253,10 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     }
   }
   
+  /*
+   * This is a helper method allowing you to retrieve
+   * what we have directly using lucene docid
+   */
   public int[] getCitations(int docid) {
     synchronized (map) {
       RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
@@ -293,6 +297,10 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     }
   }
   
+  /*
+   * This is a helper method allowing you to retrieve
+   * what we have directly using lucene docid
+   */
   public int[] getReferences(int docid) {
     synchronized (map) {
       RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
@@ -341,6 +349,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
   
   private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
+  	
   	Map<String, List<String>> fields = getFields(searcher, this.identifierFields);
   	if (fields.get("textFields").size() > 0 || fields.get("textFieldsMV").size() > 0) {
   		synchronized (map) {
@@ -688,6 +697,11 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 			}
 		}
   	
+  	/*
+  	 * Read every term
+  	 *    - for each term get all live documents
+  	 *    	- and do something with the pair: (docid, term)
+  	 */
 		for (String idField: fields.get("textFieldsMV")) {
 			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
 			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);

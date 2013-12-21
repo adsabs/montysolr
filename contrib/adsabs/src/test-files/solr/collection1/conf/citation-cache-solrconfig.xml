@@ -9,7 +9,7 @@
   
     
   <query>
-    <cache name="citations-cache"
+    <cache name="citations-cache-from-references"
               class="solr.CitationLRUCache"
               size="1024"
               initialSize="1024"
@@ -18,7 +18,27 @@
               identifierFields="bibcode,alternate_bibcode"
               referenceFields="reference"
               />
-    
+              
+    <cache name="citations-cache-from-citations"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              citationFields="citation"
+              />
+              
+    <cache name="citations-cache-from-both"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              citationFields="citation"
+              referenceFields="reference"
+              />
               
   </query>  
   

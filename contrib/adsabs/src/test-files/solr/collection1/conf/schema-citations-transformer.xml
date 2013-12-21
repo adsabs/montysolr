@@ -20,6 +20,8 @@
       multiValued="true"/>
     <field name="ireference" type="int" indexed="true" stored="true" 
       multiValued="true"/>
+    <field name="citation" type="string" indexed="true" stored="true" 
+      multiValued="true"/>
     
     <field name="date" type="date" indexed="true" stored="true"
       multiValued="false" />  
