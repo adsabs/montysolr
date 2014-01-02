@@ -211,7 +211,7 @@
         <field name="citation" mongoField="true" column="citations"/>
         
         <field column="citation_count" mongoField="true" />
-        <field column="read_count" mongoField="true" mongoFieldName="norm_read_count" />
+        <field column="read_count" mongoField="true" />
         
         <!-- <field column="facility" mongoField="true" /> -->
          
