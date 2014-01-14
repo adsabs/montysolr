@@ -661,7 +661,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * grants
 		 * 
 		 */
-		//dumpDoc(null, "grants", "grant", "grant_facet_hier");
+		//dumpDoc(null, "grant", "grant_facet_hier");
 		assertQ(req("q", "grant:\"NSF-AST 0618398\""),
 				"//*[@numFound='1']",
 				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']"
@@ -1165,11 +1165,20 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 	public static class MongoMockDataSource extends AdsDataSource {
 
+		boolean hackTesting = false; // if you want to test data from mongodb (do not expect the test passes)
+		
 		@Override
 		protected MongoConnection initMongo(Context context, Properties initProps) {
-			//super.initMongo(context, initProps); // for hack testing
+			MongoConnection mmc = null;
 			
-			MongoConnection mmc = new MongoConnection();
+			if (hackTesting) { // connect live to mongodb
+				mmc = super.initMongo(context, initProps);
+				if (mmc != null) {
+					return mmc;
+				}
+			}
+			
+			mmc = new MongoConnection();
 			
 			String mongoDocIdField = initProps.getProperty(MONGO_DOC_ID);
 			HashMap<String, String> mongoFieldToColumn = new HashMap<String,String>();
@@ -1213,7 +1222,19 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		@SuppressWarnings("serial")
 		@Override
 		protected void populateMongoCache(List<String> bibcodes) {
-			//super.populateMongoCache(new ArrayList<String>(){{add("2009arXiv0909.1287I");add("1987PhRvD..36..277B");}}); // for hack testing
+			if (hackTesting) {
+				super.populateMongoCache(new ArrayList<String>(){{add("2009arXiv0909.1287I");
+				add("1987PhRvD..36..277B");add("2013ApJ...762L..14R");}});
+				mongoCache.put("2002RvMP....74...12", mongoCache.get("2013ApJ...762L..14R"));
+				//System.out.println(mongoCache.get("2002RvMP....74...12"));
+				return;
+			}
+			
+			/*
+			 * Mocking MongoDB - but beware, the field names are not the 
+			 * index names; but column names (as specified in data-config.xml)
+			 */
+			
 			assert bibcodes.contains("1987PhRvD..36..277B");
 			assert bibcodes.contains("1991ApJ...371..665R");
 			assert bibcodes.contains("1976AJ.....81...67S");
@@ -1221,11 +1242,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			assert bibcodes.contains("2002RvMP....74...12");
 
 			HashMap<String, Object> row = new HashMap<String, Object>();
-			row.put("grants", new ArrayList<HashMap<String,String>>(){{
+			row.put("tmp_grant", new ArrayList<HashMap<String,String>>(){{
 				add(new HashMap<String,String>(){{put("agency", "NSF-AST");put("grant", "0618398");}});
+				add(new HashMap<String,String>(){{put("agency", "NASA-GSFC");put("grant", "NNX08AE49G");}});
 			}});
 			row.put("read_count", Arrays.asList(0.0f));
-			row.put("cite_read_boost", Arrays.asList(0.4104f));
+			row.put("boost", Arrays.asList(0.4104f));
 			row.put("norm_cites", Arrays.asList(1500));
 			row.put("simbad_object_ids", Arrays.asList(2, 3000000));
 			row.put("reader", Arrays.asList("0xeeeeeeee", "1xeeeeeeee"));
@@ -1233,12 +1255,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			mongoCache.put("1987PhRvD..36..277B", row);
 
 			row = new HashMap<String, Object>();
-			row.put("grants", new ArrayList<HashMap<String,String>>(){{
+			row.put("tmp_grant", new ArrayList<HashMap<String,String>>(){{
 				add(new HashMap<String,String>(){{put("agency", "NSF AST");put("grant", "061839x");}});
 			}});
 			row.put("full", Arrays.asList("Some fulltext Hashimoto"));
 			row.put("read_count", Arrays.asList(19.0f));
-			row.put("cite_read_boost", Arrays.asList(0.4649f));
+			row.put("boost", Arrays.asList(0.4649f));
 			row.put("norm_cites", Arrays.asList(5000));
 			row.put("reader", Arrays.asList("0xeeeeeeee", "1xeeeeeeee", "2xeeeeeeee"));
 			mongoCache.put("1991ApJ...371..665R", row);
@@ -1246,36 +1268,36 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 			row = new HashMap<String, Object>();
 			row.put("read_count", Arrays.asList(15.0f));
-			row.put("cite_read_boost", Arrays.asList(0.373f));
+			row.put("boost", Arrays.asList(0.373f));
 			row.put("reader", Arrays.asList("3xeeeeeeee"));
 			row.put("norm_cites", Arrays.asList(0));
 			mongoCache.put("1976AJ.....81...67S", row);
 
 			row = new HashMap<String, Object>();
 			row.put("read_count", Arrays.asList(1.0f));
-			row.put("cite_read_boost", Arrays.asList(0.2416f));
+			row.put("boost", Arrays.asList(0.2416f));
 			row.put("reader", Arrays.asList("4xeeeeeeee", "1xeeeeeeee"));
 			mongoCache.put("2009arXiv0909.1287I", row);
 
 			
 			row = new HashMap<String, Object>();
-			row.put("citation", Arrays.asList("2002RvMP....74...11"));
+			row.put("citations", Arrays.asList("2002RvMP....74...11"));
 			mongoCache.put("2002RvMP....74...10", row);
 			
 			row = new HashMap<String, Object>();
-			row.put("citation", Arrays.asList("2002RvMP....74...10", "2002RvMP....74...15"));
+			row.put("citations", Arrays.asList("2002RvMP....74...10", "2002RvMP....74...15"));
 			mongoCache.put("2002RvMP....74...11", row);
 			
 			row = new HashMap<String, Object>();
-			row.put("citation", Arrays.asList("2002RvMP....74...13", "2002RvMP....74...15", "2002RvMP....74...10"));
+			row.put("citations", Arrays.asList("2002RvMP....74...13", "2002RvMP....74...15", "2002RvMP....74...10"));
 			mongoCache.put("2002RvMP....74...12", row);
 			
 			row = new HashMap<String, Object>();
-			row.put("citation", Arrays.asList("2002RvMP....74...15", "2002RvMP....74...XX"));
+			row.put("citations", Arrays.asList("2002RvMP....74...15", "2002RvMP....74...XX"));
 			mongoCache.put("2002RvMP....74...13", row);
 			
 			row = new HashMap<String, Object>();
-			row.put("citation", Arrays.asList("2002RvMP....74...13"));
+			row.put("citations", Arrays.asList("2002RvMP....74...13"));
 			mongoCache.put("2002RvMP....74...14", row);
 			
 			

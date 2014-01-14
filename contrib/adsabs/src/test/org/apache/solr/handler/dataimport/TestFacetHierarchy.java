@@ -35,7 +35,7 @@ public class TestFacetHierarchy {
 		
 		FacetHierarchy fh = _getFacetTransformer(fieldsDefinition);
 		fh.addFacets(testRow);
-		
+		//System.out.println(testRow);
 		_compareResults(testRow, expected);
 	}
 	
@@ -66,7 +66,7 @@ public class TestFacetHierarchy {
 		
 		FacetHierarchy fh = _getFacetTransformer(fieldsDefinition.toString());
 		fh.addFacets(testRow);
-		
+		//System.out.println(testRow);
 		_compareResults(testRow, expected);
 		
 	}
@@ -176,6 +176,62 @@ public class TestFacetHierarchy {
 				}},
 				"0/foo", "1/foo/bar"
 				);
+		
+		doGenericTest(
+				"input:key1+input:key2",
+				new HashMap() {{
+					put("input", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+						add(new HashMap<String, String>(){{put("key1","boo");put("key2","baz");}});
+					}}); 
+				}},
+				"0/foo", "1/foo/bar", "0/boo", "1/boo/baz"
+				);
+		doGenericTest(
+				"input:key1,input:key2",
+				new HashMap() {{
+					put("input", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+						add(new HashMap<String, String>(){{put("key1","boo");put("key2","baz");}});
+					}}); 
+				}},
+				"0/Foo,", "0/Boo,", "0/Bar,", "0/Baz,"
+				);
+		
+		// the values are collected properly, the facet component will get ['foo', 'bar']
+		// however the facet treats each independently (there is an assumption that the 
+		// name is already concatenated. This is an example of complexity we are facing
+		// if we are doing the transformation at the index time. I'd like to move this
+		// logic out of solr; and just let solr index data (instead of transforming them)
+		doGenericTest(
+				"input:key1:key2,inputx:key1:key2",
+				new HashMap() {{
+					put("input", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+						add(new HashMap<String, String>(){{put("key1","boo");put("key2","baz");}});
+					}}); 
+					put("inputx", new ArrayList() {{
+						add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+						add(new HashMap<String, String>(){{put("key1","boo");put("key2","baz");}});
+					}});
+				}},
+				"0/Foo,", "0/Bar,", "0/Boo,", "0/Baz,", "0/Foo,", "0/Bar,", "0/Boo,", "0/Baz,"
+				);
+		doGenericTest( // list of lists
+				"input:key1+input:key2",
+				new HashMap() {{
+					put("input", new ArrayList() {{
+						add(new ArrayList() {{
+							add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+						}});
+						add(new ArrayList() {{
+							add(new HashMap<String, String>(){{put("key1","foo");put("key2","bar");}});
+						}});
+					}}); 
+				}},
+				"0/foo", "1/foo/bar", "0/foo", "1/foo/bar"
+				);
+		
 		doGenericTest(
 				"input:key1+input2:key1",
 				new HashMap() {{
@@ -201,6 +257,7 @@ public class TestFacetHierarchy {
 				}},
 				"0/Foo,", "0/Bar,", "0/Boo,", "0/Baz,"
 				);
+		
 		
 	}
 	

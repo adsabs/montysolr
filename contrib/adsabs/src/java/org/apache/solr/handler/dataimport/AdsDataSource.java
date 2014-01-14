@@ -246,7 +246,7 @@ public class AdsDataSource extends InvenioDataSource {
 			
 			Map<String, String> mongoToColumn = mc.mongoFieldToColumn;
 			String mongoDocIdField = mc.mongoDocIdField;
-			String column;
+			String indexFieldName;
 			
 			while (it.hasNext()) {
 				DBObject doc = it.next();
@@ -256,9 +256,9 @@ public class AdsDataSource extends InvenioDataSource {
 				Map<String, Object> row = new HashMap<String, Object>();
 				
 				for (String mongoField : doc.keySet()) {
-					column = mongoToColumn.get(mongoField);
+					indexFieldName = mongoToColumn.get(mongoField);
 					
-					if (column == null)
+					if (indexFieldName == null)
 						continue;
 					
 					v = doc.get(mongoField);
@@ -270,7 +270,7 @@ public class AdsDataSource extends InvenioDataSource {
 						DBRef o = (DBRef) v;
 						
 						// we'll collect the references to other collections and retrieve them in another big sweep
-						// later - cause getting them one by one is stupid/slow...
+						// later - cause getting them one by one (as mongodb does) is stupid&slow...
 						
 						// we have to find out what fields are references; the ids of the references and then save
 						// the link between our original docs' <-> refd id. I know it is more work, but it is 
@@ -287,11 +287,11 @@ public class AdsDataSource extends InvenioDataSource {
 						}
 						
 						collectionsToFetch.get(colName).put(refObjId, docId);
-						collectionsToFetchFields.get(colName).put(mongoField, column);
+						collectionsToFetchFields.get(colName).put(mongoField, indexFieldName);
 							
 					}
 					else {
-						row.put(column, v);
+						row.put(indexFieldName, v);
 					}
 				}
 				mongoCache.put(docId, row);

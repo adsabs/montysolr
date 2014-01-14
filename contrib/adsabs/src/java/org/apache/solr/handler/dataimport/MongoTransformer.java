@@ -8,14 +8,13 @@ import java.util.Map.Entry;
 import org.apache.solr.handler.dataimport.FacetHierarchy.SourceField;
 
 
-
-/**
- * This class is a workaround for modifying data
- * loaded from Mongo - it is hardcoded (but
- * I can do it better once we stabilize with 
- * regard to MongoDB import pipeline)
- *
+/*
+ * This class can be used to modify loaded mongo
+ * records. For example, to extracted nested fields.
+ * Remember, that it will see field names already
+ * transformed.
  */
+
 public class MongoTransformer extends Transformer {
 
 	
@@ -24,8 +23,15 @@ public class MongoTransformer extends Transformer {
 	@SuppressWarnings("serial")
   public MongoTransformer() {
 		super();
+		/**
+		 * a workaround for modifying data
+		 * loaded from Mongo - it is hardcoded (but
+		 * I can do it better once we stabilize with 
+		 * regard to MongoDB import pipeline)
+		 *
+		 */
 		mapToList = new HashMap<SourceField, String>() {{
-			put(new SourceField("grants", new String[]{"agency","grant"}), "grant");
+			put(new SourceField("tmp_grant", new String[]{"agency","grant"}), "grant");
 		}};
 	}
 	
@@ -48,8 +54,8 @@ public class MongoTransformer extends Transformer {
 	  			row.put(targetField, target);
 	  		}
 	  		if (target instanceof List) {
-	  			for (String k: sourceField.keys) {
-	  				for (Map sv: sourceValue) {
+  				for (Map sv: sourceValue) {
+  					for (String k: sourceField.keys) {
 		  				if (sv.containsKey(k)) {
 		  					target.add((String) sv.get(k));
 		  				}

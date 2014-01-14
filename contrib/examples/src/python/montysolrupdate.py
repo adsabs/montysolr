@@ -413,7 +413,7 @@ def check_live_instance(options, instance_names):
             writer_instance_name = instance_name
             
     if writer_counter > 1:
-        error("This script does not know how to handle sitatuion\n" + \
+        error("This script does not know how to handle situation\n" + \
               "when you have more than 1 writer, you should invoke\n" + \
               "the script for each set of writer+readers")
     if len(list_of_reader_instances) > 0 and writer_instance_name is None:
@@ -459,8 +459,10 @@ def check_live_instance(options, instance_names):
                     run_cmd(['mkdir', real_name_data])
                 else:
                     assert os.path.exists(real_name_data)
-                run_cmd(['ln', '-s', '%s/%s' % (base_path, real_name_data), "%s/%s/solr/data" % (base_path, symbolic_name)])
+                
                 run_cmd(['ln', '-s', real_name_data, symbolic_name_data])
+                run_cmd(['ln', '-s', '%s/%s' % (base_path, symbolic_name_data), "%s/%s/solr/data" % (base_path, symbolic_name)])
+                
                 assert start_live_instance(options, symbolic_name, 
                                            port=port, 
                                            max_wait=options.timeout,
@@ -1358,6 +1360,10 @@ def start_live_instance(options, instance_dir, port,
         
         run_cmd(['chmod', 'u+x', 'automatic-run.sh'])
         run_cmd(['bash', '-e', './automatic-run.sh', '"%s"' % START_JVMARGS, '"%s"' % START_ARGS, '&'])
+        
+        fo = open('manual-run.sh', 'w')
+        fo.write('bash -e ./automatic-run.sh "%s" "%s" &' % (START_JVMARGS, START_ARGS))
+        fo.close()
         
         kwargs = dict(max_wait=options.timeout)
         if options.check_diagnostics:
