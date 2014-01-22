@@ -1371,7 +1371,13 @@
 	<copyField source="a_100" dest="first_author" />
 	<copyField source="a_100_norm" dest="first_author_norm" />
 
-
+  <copyField source="tmp_aff_100" dest="aff" />
+  <copyField source="tmp_aff_700" dest="aff" />
+  
+  <copyField source="tmp_email_100" dest="email" />
+  <copyField source="tmp_email_700" dest="email" />
+  
+  
   <copyField source="alternate_bibcode" dest="identifier" />
   
 	<copyField source="author_norm" dest="all" />

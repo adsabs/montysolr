@@ -1,6 +1,7 @@
 package org.apache.solr.handler.dataimport;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 
 
@@ -22,7 +23,13 @@ public class AdsDataTransformer extends Transformer {
 	    ((AdsDataSource) context.getDataSource()).transformRow(row);
 	  }
 	  
-		return row;
+	  /*
+	   * and because the *stupid* DIH doesn't reflect order in which 
+	   * fields are defined in the data config.xml (ie. is not using linked hash map) 
+	   * the fields are just out in random order; so we must sort them
+	   */
+	  return new TreeMap<String,Object>(row);
+		//return row;
 	}
 
 }

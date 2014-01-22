@@ -27,6 +27,12 @@
           mongoFieldName = in situations, when you want to set 'name' and 'column', but data are inside mongo
         -->
                 
+        <!-- 
+        If the doc doesn't have 970 field, then we get parsing error
+        Full Import failed:java.lang.RuntimeException: java.lang.RuntimeException: org.apache.solr.handler.dataimport.DataImportHandlerException: Exception in applying XSL Transformeation Processing Document # 1
+        ...
+        Caused by: com.sun.org.apache.xml.internal.utils.WrappedRuntimeException: The element type "collection" must be terminated by the matching end-tag "</collection>".
+         -->
         <field column="bibcode" 
             xpath="/collection/record/datafield[@tag='970']/subfield[@code='a']" />
         
@@ -80,14 +86,14 @@
             and picks from it the two values, concatenates them and parses
             together for indexing
             -->
-        <field column="aff100" name="aff"       
+        <field column="tmp_aff_100"
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='u']" />
-        <field column="aff700" name="aff"        
+        <field column="tmp_aff_700"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='u']" />
             
-        <field column="email100" name="email"        
+        <field column="tmp_email_100"        
             xpath="/collection/record/datafield[@tag='100']/subfield[@code='m']" />
-        <field column="email700" name="email"        
+        <field column="tmp_email_700"        
             xpath="/collection/record/datafield[@tag='700']/subfield[@code='m']" />       
 
         <!--  245 is the original title, 242 is translation -->

@@ -49,10 +49,14 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.util.Version;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.AqpFunctionQParser;
 import org.apache.solr.search.BoostQParserPlugin;
 import org.apache.solr.search.CitationLRUCache;
@@ -346,6 +350,23 @@ AqpFunctionQueryBuilderProvider {
 
 				SpanConverter converter = new SpanConverter();
 				converter.setWrapNonConvertible(true);
+				
+				// a field can have a different positionIncrementGap
+				int positionIncrementGap = 1;
+				if (fp.getReq() != null) {
+					IndexSchema schema = fp.getReq().getSchema();
+					SchemaField field = schema.getField(query.toString().split(":")[0]);
+					if (field != null) {
+						FieldType fType = field.getType();
+						//if (!fType.isMultiValued()) {
+						//	throw new ParseException("The positional search doesn't make sense for: " + query);
+						//}
+						positionIncrementGap = fType.getAnalyzer().getPositionIncrementGap(field.getName());
+						if (positionIncrementGap == 0)
+							positionIncrementGap = 1;
+					}
+				}
+				
 
 				SpanQuery spanQuery;
 				try {
@@ -356,7 +377,7 @@ AqpFunctionQueryBuilderProvider {
 					throw ex;
 				}
 
-				return new SpanPositionRangeQuery(spanQuery, start-1, end); //lucene counts from zeroes
+				return new SpanPositionRangeQuery(spanQuery, (start-1)*positionIncrementGap , end*positionIncrementGap); //lucene counts from zeroes
 			}
 		});
 

@@ -417,14 +417,32 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']"); // same here
 		assertQ(req("q", "aff:kavli"), // otherwise case-insensitive
 				"//*[@numFound='1']",
-		"//doc/int[@name='recid'][.='9218511']"); 
+				"//doc/int[@name='recid'][.='9218511']"
+		); 
 		assertQ(req("q", "aff:Kavli"), 
 				"//*[@numFound='1']",
-		"//doc/int[@name='recid'][.='9218511']");
+				"//doc/int[@name='recid'][.='9218511']"
+		);
 		assertQ(req("q", "aff:46556"), 
-		"//*[@numFound='1']");
+				"//*[@numFound='1']"
+		);
 		assertQ(req("q", "aff:\"Notre Dame\""), 
-		"//*[@numFound='1']");
+				"//*[@numFound='1']"
+		);
+		
+		//the order needs to be preserved
+		//dumpDoc(null, "aff");
+		assert h.query(req("q", "bibcode:1993PhR...227...37K"))
+ 		.contains("<arr name=\"aff\">" +
+				"<str>0. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</str>" +
+				"<str>1. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</str>" +
+	      "<str>2. Institut für Kernphysik, Forschungszentrum Jülich, W-5170 Jülich, Germany</str>" +
+	      "<str>3. Harvard-Smithsonian Center for Astrophysics, Cambridge, MA 02138, USA</str>"
+     );
+		assertQ(req("q", "pos(aff:Jülich, 3) AND bibcode:1993PhR...227...37K"), 
+				"//*[@numFound='1']"
+		);
+		
 
 		/*
 		 * email
@@ -437,8 +455,20 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		// without an email)
 		assertQ(req("q", "email:test@example.edu AND author:\"Test Author, WithEmail\""),
 				"//doc/int[@name='recid'][.='9218920']",
-		"//*[@numFound='1']");
-
+				"//*[@numFound='1']"
+		);
+		
+		// order is important
+		assert h.query(req("q", "bibcode:1993PhR...227...37K"))
+ 		.contains("<arr name=\"email\">" +
+				"<str>au0@email.com</str>" +
+				"<str>au1@email.com</str>" +
+	      "<str>au2@email.com</str>" +
+	      "<str>au3@email.com</str>"
+     );
+		assertQ(req("q", "pos(email:au2@email.com, 3) AND bibcode:1993PhR...227...37K"), 
+				"//*[@numFound='1']"
+		);
 
 		/*
 		 * database & bibgroup
@@ -1150,7 +1180,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 		// test we can search for all docs that have certain field
 		assertQ(req("q", "*:*"), 
-				"//*[@numFound='34']"
+				"//*[@numFound>='34']"
 		);
 		assertQ(req("q", "reference:*"), 
 				"//*[@numFound='9']"
