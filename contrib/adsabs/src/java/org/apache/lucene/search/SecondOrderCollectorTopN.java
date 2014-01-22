@@ -77,7 +77,7 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return "topn[" + topN + ", outOfOrder=" + this.acceptsDocsOutOfOrder() + (detail!=null ? ", info=" + detail : "") + "]";
+		return this.getClass().getSimpleName() + "(" + topN + ", outOfOrder=" + this.acceptsDocsOutOfOrder() + (detail!=null ? ", info=" + detail : "") + ")";
 	}
 
 }

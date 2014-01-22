@@ -6,14 +6,12 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.SolrCache;
 
-public abstract class SolrCacheWrapper<T extends SolrCache> implements CacheWrapper {
+public abstract class SolrCacheWrapper<T extends SolrCache<?,?>> implements CacheWrapper {
 
-	@SuppressWarnings("rawtypes")
   protected SoftReference<T> cache;
 	private String str;
 	private int hashCode;
 	
-	@SuppressWarnings("rawtypes")
 	public SolrCacheWrapper( T cache) {
 		assert cache != null;
 	  this.cache = new SoftReference<T>(cache);
@@ -67,43 +65,40 @@ public abstract class SolrCacheWrapper<T extends SolrCache> implements CacheWrap
   }
 	
 	
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static class ReferencesCache extends SolrCacheWrapper {
+	public static class ReferencesCache extends SolrCacheWrapper<CitationLRUCache<Object, Integer>> {
 
-		public ReferencesCache(CitationLRUCache cache) {
+		public ReferencesCache(CitationLRUCache<Object, Integer> cache) {
 	    super(cache);
-	    
     }
 		
 		@Override
 	  public int[] getLuceneDocIds(int sourceDocid) {
-		  return ((CitationLRUCache) cache.get()).getReferences(sourceDocid);
+		  return cache.get().getReferences(sourceDocid);
 	  }
 		
     @Override
 		public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-    	Object v = ((CitationLRUCache) cache.get()).get(sourceValue);
+    	Object v = cache.get().get(sourceValue);
     	if (v == null)
     		return -1;
     	return (Integer) v;
 	  }
 	}
 	
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static class CitationsCache extends SolrCacheWrapper {
+	public static class CitationsCache extends SolrCacheWrapper<CitationLRUCache<Object, Integer>> {
 
-		public CitationsCache(CitationLRUCache cache) {
+		public CitationsCache(CitationLRUCache<Object, Integer> cache) {
 	    super(cache);
     }
 		
 		@Override
 	  public int[] getLuceneDocIds(int sourceDocid) {
-		  return ((CitationLRUCache) cache.get()).getCitations(sourceDocid);
+		  return cache.get().getCitations(sourceDocid);
 	  }
 		
 		@Override
 		public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-    	Object v = ((CitationLRUCache) cache.get()).get(sourceValue);
+    	Object v = cache.get().get(sourceValue);
     	if (v == null)
     		return -1;
     	return (Integer) v;

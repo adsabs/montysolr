@@ -312,13 +312,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		// unbalanced brackets for functions
 		assertQueryEquals(req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy), date asc)"), 
-        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=topn[201, outOfOrder=false, info=date asc])", 
+        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=SecondOrderCollectorTopN(201, outOfOrder=false, info=date asc))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy),   date asc   )"), 
-        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=topn[201, outOfOrder=false, info=date asc])", 
+        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=SecondOrderCollectorTopN(201, outOfOrder=false, info=date asc))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(201,(  ((\"foo bar\") AND database:astronomy)),date asc)"), 
-        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=topn[201, outOfOrder=false, info=date asc])", 
+        "SecondOrderQuery(+all:\"foo bar\" +database:astronomy, filter=null, collector=SecondOrderCollectorTopN(201, outOfOrder=false, info=date asc))", 
         SecondOrderQuery.class);
 		
 		
@@ -332,19 +332,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		// # 389		
 		// make sure the functional parsing is handling things well
 		assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo OR topn(10, title:bar OR title:baz))))"), 
-        "SecondOrderQuery(title:foo SecondOrderQuery(title:bar title:baz, filter=null, collector=topn[10, outOfOrder=false]), filter=null, collector=topn[200, outOfOrder=false])", 
+        "SecondOrderQuery(title:foo SecondOrderQuery(title:bar title:baz, filter=null, collector=SecondOrderCollectorTopN(10, outOfOrder=false)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo AND topn(10, title:bar OR title:baz))))"), 
-        "SecondOrderQuery(+title:foo +SecondOrderQuery(title:bar title:baz, filter=null, collector=topn[10, outOfOrder=false]), filter=null, collector=topn[200, outOfOrder=false])", 
+        "SecondOrderQuery(+title:foo +SecondOrderQuery(title:bar title:baz, filter=null, collector=SecondOrderCollectorTopN(10, outOfOrder=false)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(200, title:foo, date desc)"), 
-        "SecondOrderQuery(title:foo, filter=null, collector=topn[200, outOfOrder=false, info=date desc])", 
+        "SecondOrderQuery(title:foo, filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false, info=date desc))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(200, (title:foo), date desc)"), 
-        "SecondOrderQuery(title:foo, filter=null, collector=topn[200, outOfOrder=false, info=date desc])", 
+        "SecondOrderQuery(title:foo, filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false, info=date desc))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(200, \"foo bar\", \"date desc\")"), 
-        "SecondOrderQuery(all:\"foo bar\", filter=null, collector=topn[200, outOfOrder=false, info=date desc])", 
+        "SecondOrderQuery(all:\"foo bar\", filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false, info=date desc))", 
         SecondOrderQuery.class);
 		
 		
@@ -425,25 +425,25 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		//topn sorted - added 15Aug2013
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, date desc)"), 
-        "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false, info=date desc])", 
+        "SecondOrderQuery(*:*, filter=null, collector=SecondOrderCollectorTopN(5, outOfOrder=false, info=date desc))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc\")"), 
-        "SecondOrderQuery(author:civano, author:civano,*, filter=null, collector=topn[5, outOfOrder=false, info=date desc])", 
+        "SecondOrderQuery(author:civano, author:civano,*, filter=null, collector=SecondOrderCollectorTopN(5, outOfOrder=false, info=date desc))", 
         SecondOrderQuery.class);
 		
 		// topN - added Aug2013
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*)"), 
-        "SecondOrderQuery(*:*, filter=null, collector=topn[5, outOfOrder=false])", 
+        "SecondOrderQuery(*:*, filter=null, collector=SecondOrderCollectorTopN(5, outOfOrder=false))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, (foo bar))"), 
-        "SecondOrderQuery(+all:foo +all:bar, filter=null, collector=topn[5, outOfOrder=false])", 
+        "SecondOrderQuery(+all:foo +all:bar, filter=null, collector=SecondOrderCollectorTopN(5, outOfOrder=false))", 
         SecondOrderQuery.class);
 		
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, edismax(dog OR cat))", "qf", "title^1 abstract^0.5"), 
-        "SecondOrderQuery((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat), filter=null, collector=topn[5, outOfOrder=false])", 
+        "SecondOrderQuery((abstract:dog^0.5 | title:dog) (abstract:cat^0.5 | title:cat), filter=null, collector=SecondOrderCollectorTopN(5, outOfOrder=false))", 
         SecondOrderQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:accomazzi)"), 
-        "SecondOrderQuery(author:accomazzi, author:accomazzi,*, filter=null, collector=topn[5, outOfOrder=false])", 
+        "SecondOrderQuery(author:accomazzi, author:accomazzi,*, filter=null, collector=SecondOrderCollectorTopN(5, outOfOrder=false))", 
         SecondOrderQuery.class);
 		
     /*
@@ -539,45 +539,45 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     
     // useful() - ads classic implementation 
     assertQueryEquals(req("defType", "aqp", "q", "useful(author:muller)"), 
-        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", 
+        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", 
         SecondOrderQuery.class);
     
     assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", 
+        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", 
         BooleanQuery.class);
     
     
     // useful2() - original implementation 
     assertQueryEquals(req("defType", "aqp", "q", "useful2(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorOperatorExpertsCiting(cache:citations-cache, field:cite_read_boost))", SecondOrderQuery.class);
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
     
     assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful2(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorOperatorExpertsCiting(cache:citations-cache, field:cite_read_boost))", BooleanQuery.class);
+        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
     
     
     // reviews() - ADS classic impl
     assertQueryEquals(req("defType", "aqp", "q", "reviews(author:muller)"), 
-        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
+        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
         SecondOrderQuery.class);
     
     assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5]), filter=null, collector=topn[200, outOfOrder=false]), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
+        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
         BooleanQuery.class);
     
     // reviews2() - original impl 
     assertQueryEquals(req("defType", "aqp", "q", "reviews2(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorCitingTheMostCited(cache:citations-cache, field:cite_read_boost))", SecondOrderQuery.class);
+        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
     
     assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews2(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorCitingTheMostCited(cache:citations-cache, field:cite_read_boost))", BooleanQuery.class);
+        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
     
     // classic_relevance() - cr()
     assertQueryEquals(req("defType", "aqp", "q", "classic_relevance(title:foo)"), 
-        "SecondOrderQuery(title:foo, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5])", SecondOrderQuery.class);
+        "SecondOrderQuery(title:foo, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5))", SecondOrderQuery.class);
     assertQueryEquals(req("defType", "aqp", "q", "cr(title:foo)"), 
-        "SecondOrderQuery(title:foo, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5])", SecondOrderQuery.class);
+        "SecondOrderQuery(title:foo, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5))", SecondOrderQuery.class);
     assertQueryEquals(req("defType", "aqp", "q", "cr(title:foo, 0.4)"), 
-        "SecondOrderQuery(title:foo, filter=null, collector=adsrel[cite_read_boost, outOfOrder=false, lucene=0.4, adsPart=0.6])", SecondOrderQuery.class);
+        "SecondOrderQuery(title:foo, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.4, adsPart=0.6))", SecondOrderQuery.class);
     
 	}
 	

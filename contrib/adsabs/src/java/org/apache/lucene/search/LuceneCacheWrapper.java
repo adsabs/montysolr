@@ -15,8 +15,8 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 	int hashCode;
 	public Reference<T> cache;
 
-	@SuppressWarnings("rawtypes")
 	public LuceneCacheWrapper(Reference<T> cache) {
+		this.cache = cache;
 	  this.str = internalToString(); // we cache these values because cache may disappear
 	  this.hashCode = internalHashCode();
   }

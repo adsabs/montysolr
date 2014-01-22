@@ -74,7 +74,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   
   @Override
   public String toString() {
-  	return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", " + boostCache.toString() + ")";
+  	return this.getClass().getSimpleName() + "(cache=" + cache.toString() + ", boost=" + boostCache.toString() + ")";
   }
   
   /** Returns a hash code value for this object. */

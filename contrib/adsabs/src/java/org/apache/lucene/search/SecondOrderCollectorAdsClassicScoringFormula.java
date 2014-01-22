@@ -114,8 +114,9 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 
 	@Override
 	public String toString() {
-		return "adsrel[" + boostField + ", outOfOrder=" + this.acceptsDocsOutOfOrder() 
-		+ ", lucene=" + this.lucenePart + ", adsPart=" + this.adsPart + "]";
+		return this.getClass().getSimpleName() + "(cache=" + cache.toString() + ", boost=" + boostCache.toString() 
+		+ ", outOfOrder=" + this.acceptsDocsOutOfOrder() 
+		+ ", lucene=" + this.lucenePart + ", adsPart=" + this.adsPart + ")";
 	}
 
 }

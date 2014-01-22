@@ -100,7 +100,8 @@ SecondOrderCollector {
 	}
 
 	// a very naive implementation (TODO: search faster)
-	private Integer[] findRange(int startDoc, Integer lastDoc) {
+	@SuppressWarnings("unused")
+  private Integer[] findRange(int startDoc, Integer lastDoc) {
 		int low = 0;
 		int high = hits.size();
 		Integer[] out = new Integer[]{0,0};
@@ -136,7 +137,8 @@ SecondOrderCollector {
 
 	}
 
-	private int findClosestInclusive(int low, int high, int valToSearch) {
+	@SuppressWarnings("unused")
+  private int findClosestInclusive(int low, int high, int valToSearch) {
 		int i;
 		for (i=low;i<high;i++) {
 			int d = hits.get(i).doc;
@@ -150,7 +152,8 @@ SecondOrderCollector {
 		return -1;
 	}
 
-	private int binarySearch(int low, int high, int valToSearch) {
+	@SuppressWarnings("unused")
+  private int binarySearch(int low, int high, int valToSearch) {
 		while (low <= high) {
 			int mid = (low + high) >>> 1;
 			int midVal = hits.get(mid).doc;

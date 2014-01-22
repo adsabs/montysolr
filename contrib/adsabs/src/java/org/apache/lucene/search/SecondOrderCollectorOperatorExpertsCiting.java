@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
+import org.apache.solr.search.CitationLRUCache;
 
 /**
  * Finds papers that are cited by our search. And then adjusts the score so that
@@ -17,11 +18,10 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	protected String referenceField;
 	protected String[] uniqueIdField;
 	protected String boostField;
-	private IndexReader reader;
-	private SolrCacheWrapper cache;
+	private SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache;
 	private LuceneCacheWrapper<float[]> boostCache;
 	
-	public SecondOrderCollectorOperatorExpertsCiting(SolrCacheWrapper cache, LuceneCacheWrapper<float[]> boostWrapper) {
+	public SecondOrderCollectorOperatorExpertsCiting(SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache, LuceneCacheWrapper<float[]> boostWrapper) {
 		super();
 		
 		assert cache != null;
@@ -82,7 +82,6 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	@Override
 	public void setNextReader(AtomicReaderContext context)
 			throws IOException {
-		this.reader = context.reader();
 		this.docBase = context.docBase;
 	}
 
@@ -94,7 +93,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", " + boostCache.toString() + ")";
+		return this.getClass().getSimpleName() + "(cache=" + cache.toString() + ", boost=" + boostCache.toString() + ")";
 	}
 	
 	/** Returns a hash code value for this object. */

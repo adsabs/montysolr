@@ -32,8 +32,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SecondOrderCollector;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
-import org.apache.lucene.search.CacheWrapper;
-import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.SecondOrderCollectorAdsClassicScoringFormula;
 import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
@@ -51,8 +49,6 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.util.Version;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -425,9 +421,9 @@ AqpFunctionQueryBuilderProvider {
 					throw new ParseException("The ratio must be in the range 0.0-1.0");
 				}
 				
-				@SuppressWarnings("rawtypes")
-				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				@SuppressWarnings("unchecked")
+				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
 						fp.getReq().getSearcher().getAtomicReader());
@@ -568,9 +564,9 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
-				@SuppressWarnings("rawtypes")
-				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				@SuppressWarnings("unchecked")
+				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 								
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorCitedBy(citationsWrapper), false);
@@ -611,9 +607,9 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
-				@SuppressWarnings("rawtypes")
-				SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(
-						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				@SuppressWarnings("unchecked")
+        SolrCacheWrapper<CitationLRUCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
+						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				
 				return new SecondOrderQuery(innerQuery, null, 
@@ -698,9 +694,10 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
 				
-				@SuppressWarnings("rawtypes")
-				SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(
-						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				@SuppressWarnings("unchecked")
+        SolrCacheWrapper<CitationLRUCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
+						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+				
 				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
 						fp.getReq().getSearcher().getAtomicReader());
 				
@@ -739,9 +736,9 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
 				
-				@SuppressWarnings("rawtypes")
-				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				@SuppressWarnings("unchecked")
+				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				//TODO: make configurable the name of the field				
 				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
@@ -774,9 +771,9 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
 				
-				@SuppressWarnings("rawtypes")
-				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				@SuppressWarnings("unchecked")
+				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
 				
@@ -807,9 +804,10 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
 				
-				@SuppressWarnings("rawtypes")
-				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				@SuppressWarnings("unchecked")
+				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+				
 				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
 						fp.getReq().getSearcher().getAtomicReader());
 				
@@ -821,9 +819,9 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
-				@SuppressWarnings("rawtypes")
-				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				@SuppressWarnings("unchecked")
+				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorCites(citationsWrapper, new String[] {citationSearchRefField}), false);
@@ -916,7 +914,7 @@ AqpFunctionQueryBuilderProvider {
 				QParser eqp = fp.subQuery("xxx", "adismax");
 				fp.setString(original);
 				Query q = eqp.getQuery();
-				return simplify(reParse(q, fp, null));
+				return simplify(reParse(q, fp, (Class<?>)null));
 			}
 			protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
 				ArrayList<Query> parts = query.getDisjuncts();
