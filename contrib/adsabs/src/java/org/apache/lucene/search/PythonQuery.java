@@ -39,13 +39,13 @@ public class PythonQuery extends Query {
 	protected String pythonResponder = null;
 	
 	boolean dieOnMissingIds;
-	CacheWrapper cache;
+	SolrCacheWrapper cache;
 	
-	public PythonQuery(Query query, CacheWrapper cache, boolean dieOnMissingIds) {
+	public PythonQuery(Query query, SolrCacheWrapper cache, boolean dieOnMissingIds) {
 		this(query, cache, dieOnMissingIds, null);
 	}
 	
-	public PythonQuery(Query query, CacheWrapper cache, boolean dieOnMissingIds, String pythonResponder) {
+	public PythonQuery(Query query, SolrCacheWrapper cache, boolean dieOnMissingIds, String pythonResponder) {
 		super();
 		if (pythonResponder != null) {
 			this.pythonResponder = pythonResponder;

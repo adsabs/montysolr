@@ -144,48 +144,11 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		
 		assert cache != null;
 		
-		CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
-			@Override
-		  public int[] getLuceneDocIds(int sourceDocid) {
-			  return cache.getCitations(sourceDocid);
-		  }
-			
-			@Override
-			public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-			  return (Integer) cache.get(sourceValue);
-		  }
-			@Override
-      public int internalHashCode() {
-        return cache.hashCode();
-      }
-			@Override
-      public String internalToString() {
-        return cache.name();
-      }
-		};
+		@SuppressWarnings("rawtypes")
+		SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(cache);
 		
-		CacheWrapper referencesWrapper = new SecondOrderCollectorCacheWrapper() {
-			@Override
-		  public int[] getLuceneDocIds(int sourceDocid) {
-			  return cache.getReferences(sourceDocid);
-		  }
-			@Override
-			public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-			  Object v = cache.get(sourceValue);
-			  if (v == null) {
-			  	return -1;
-			  }
-			  return (Integer) v;
-		  }
-			@Override
-      public int internalHashCode() {
-        return cache.hashCode();
-      }
-			@Override
-      public String internalToString() {
-        return cache.name();
-      }
-		};
+		@SuppressWarnings("rawtypes")
+		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
 		
 		
 		

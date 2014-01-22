@@ -13,9 +13,9 @@ import org.apache.lucene.index.AtomicReaderContext;
  */
 public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
-  private CacheWrapper cache;
+  private SolrCacheWrapper cache;
 	
-  public SecondOrderCollectorCitesRAM(CacheWrapper cache) {
+  public SecondOrderCollectorCitesRAM(SolrCacheWrapper cache) {
     super();
     assert cache != null;
 		this.cache = cache;

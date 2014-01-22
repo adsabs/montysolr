@@ -1,14 +1,10 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexableField;
 
 /**
  * Finds papers that are cited by our search. And then adjusts the score so that
@@ -22,27 +18,17 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	protected String[] uniqueIdField;
 	protected String boostField;
 	private IndexReader reader;
-	private CacheWrapper cache;
-	private float[] boostCache;
+	private SolrCacheWrapper cache;
+	private LuceneCacheWrapper<float[]> boostCache;
 	
-	public SecondOrderCollectorOperatorExpertsCiting(CacheWrapper cache, String boostField) {
+	public SecondOrderCollectorOperatorExpertsCiting(SolrCacheWrapper cache, LuceneCacheWrapper<float[]> boostWrapper) {
 		super();
 		
 		assert cache != null;
 		this.cache = cache;
-		this.boostField = boostField;
+		this.boostCache = boostWrapper;
 		setFinalValueType(FinalValueType.AGRESTI_COULL);
 	}
-	
-	@Override
-  public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-    boostCache = FieldCache.DEFAULT.getFloats(cache.getAtomicReader(), 
-        boostField, false);
-    if (boostCache.length == 0) {
-    	return false;
-    }
-    return super.searcherInitialization(searcher, firstOrderWeight);
-  }
 	
 
 	@Override
@@ -78,9 +64,9 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		// TODO: we must find the proper values for this, that means to compute the statistics
 		// (find the local minimas, maximas) for this function; this is just guessing....
 		
-		
-		if (boostCache[doc+docBase] >  0.0f) {
-			s = s + boostCache[doc+docBase];
+		float bc = 0.0f;
+		if ((bc = boostCache.getFloat(doc+docBase)) >  0.0f) {
+			s = s + bc;
 		}
 		
 
@@ -88,7 +74,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		for (int docid: references) {
 			if (docid > 0) {
 				//System.out.println("expert: doc=" + (doc+docBase) + "(score:" + s + ") adding=" + docid + " (score:" + (s + boostCache[docid]) + ")" + " freq=" + references.length) ;
-				hits.add(new CollectorDoc(docid, s + boostCache[docid], -1, 1));
+				hits.add(new CollectorDoc(docid, s + boostCache.getFloat(docid), -1, 1));
 			}
 		}
 	}
@@ -108,7 +94,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", field:" + boostField + ")";
+		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", " + boostCache.toString() + ")";
 	}
 	
 	/** Returns a hash code value for this object. */

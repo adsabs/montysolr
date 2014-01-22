@@ -17,6 +17,8 @@
 package org.apache.solr.search;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Iterator;
 import monty.solr.util.MontySolrAbstractTestCase;
@@ -118,8 +120,119 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 		
 	}
 	
+	
+	public abstract class TestCache {
+		public int[] getLuceneDocIds(int sourceDocid) {
+			return null;
+	  }
+		
+		public int getLuceneDocId(int sourceDocid, Object sourceValue) {
+			return 0;
+	  }
+	}
+	
+	/*quick test to compare speed of soft-references vs strong references */
+	public void _testPerformance() {
+		SolrQueryRequest r = req("test");
+		SolrIndexSearcher searcher = r.getSearcher();
+		int maxIter = 100000;
+		
+		String cacheName;
+		
+		if (random().nextInt(2) == 0) {
+			cacheName = "citations-cache-from-citations";
+		}
+		else {
+			cacheName = "citations-cache-from-references";
+		}
+		
+		
+		System.out.println("We are testing: " + cacheName);
+		
+		try {
+			final CitationLRUCache cache = (CitationLRUCache) searcher.getCache(cacheName);
+			
+			
+			TestCache realCache = new TestCache() {
+			  public int[] getLuceneDocIds(int sourceDocid) {
+				  return cache.getReferences(sourceDocid);
+			  }
+				
+				public int getLuceneDocId(int sourceDocid, Object sourceValue) {
+				  return (Integer) cache.get(sourceValue);
+			  }
+			};
+			
+			final SoftReference<CitationLRUCache> softRef = new SoftReference<CitationLRUCache>(cache);
+			
+			TestCache softCache = new TestCache() {
+			  public int[] getLuceneDocIds(int sourceDocid) {
+				  return softRef.get().getReferences(sourceDocid);
+			  }
+				public int getLuceneDocId(int sourceDocid, Object sourceValue) {
+				  return (Integer) softRef.get().get(sourceValue);
+			  }
+			};
+			
+			final WeakReference<CitationLRUCache> weakRef = new WeakReference<CitationLRUCache>(cache);
+			
+			TestCache weakCache = new TestCache() {
+			  public int[] getLuceneDocIds(int sourceDocid) {
+				  return softRef.get().getReferences(sourceDocid);
+			  }
+				public int getLuceneDocId(int sourceDocid, Object sourceValue) {
+				  return (Integer) softRef.get().get(sourceValue);
+			  }
+			}; 
+			
+			
+			long start = System.currentTimeMillis();
+			
+			for (int i=0;i<maxIter;i++) {
+				_retrieve(realCache);
+			}
+			
+			long end = System.currentTimeMillis();
+			System.out.println("Normal cache time=" + (end-start) + " items=" + maxIter);
+	    
+			start = System.currentTimeMillis();
+			
+			for (int i=0;i<maxIter;i++) {
+				_retrieve(softCache);
+			}
+			
+			end = System.currentTimeMillis();
+			System.out.println("Soft cache time=" + (end-start) + " items=" + maxIter);
+			
+			start = System.currentTimeMillis();
+			
+			for (int i=0;i<maxIter;i++) {
+				_retrieve(softCache);
+			}
+			
+			end = System.currentTimeMillis();
+			System.out.println("Weak cache time=" + (end-start) + " items=" + maxIter);
+	    
+		}
+		finally {
+			r.close();
+		}
+	}
 
-  @Test
+  private void _retrieve(TestCache cache) {
+  	assert cache.getLuceneDocId(0, "b0") == 0;
+  	assert cache.getLuceneDocId(0, "b1") == 1;
+  	assert cache.getLuceneDocId(0, "b2") == 2;
+  	assert cache.getLuceneDocId(0, "b3") == 3;
+  	assert cache.getLuceneDocId(0, "b4") == 4;
+  	cache.getLuceneDocIds(0);
+  	cache.getLuceneDocIds(1);
+  	cache.getLuceneDocIds(2);
+  	cache.getLuceneDocIds(3);
+  	cache.getLuceneDocIds(4);
+  }
+
+	@Test
 	public void test() throws IOException, Exception {
 		
 		SolrQueryRequest r = req("test");

@@ -108,6 +108,7 @@ public class SecondOrderQuery extends Query {
 				// this looks like a bad design (on my side) if it happens
 				// it happens when 2nd order operators are nested
 				alreadyExecuted = true;
+				
 			}
 			
 			//System.out.println("done:" + this.secondOrderCollector);

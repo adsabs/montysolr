@@ -12,6 +12,7 @@ import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.TestInvenioQuery.InvenioQuery;
 import org.apache.lucene.store.Directory;
+import org.apache.solr.search.CitationLRUCache;
 
 /**
  * This is the mirror of {@link TestInvenioQuery} but 
@@ -31,7 +32,8 @@ public class TestInvenioQueryBitSet extends TestInvenioQuery {
 		}
 		return out;
 	}
-	public void testInvenioQuery() throws IOException {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+  public void testInvenioQuery() throws IOException {
 		
 		IndexedDocs iDocs = indexDocsPython(10);
 		Directory ramdir = indexDocsLucene(iDocs);
@@ -43,7 +45,7 @@ public class TestInvenioQueryBitSet extends TestInvenioQuery {
 		
 		final int[] docidCache = FieldCache.DEFAULT.getInts(SlowCompositeReaderWrapper.wrap(reader), "recid", false);
 		
-		CacheWrapper cache = new SecondOrderCollectorCacheWrapper() {
+		SolrCacheWrapper cache = new SolrCacheWrapper(new CitationLRUCache()) {
 			@Override
 		  public int getLuceneDocId(int sourceDocid) {
 			  return docidCache[sourceDocid];

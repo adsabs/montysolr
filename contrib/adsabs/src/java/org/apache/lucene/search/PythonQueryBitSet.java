@@ -9,11 +9,11 @@ public class PythonQueryBitSet extends PythonQuery {
 	private static final long serialVersionUID = -2624111746562481355L;
 	private float boost = 1.0f; // query boost factor
 
-	public PythonQueryBitSet(Query query, CacheWrapper cache, boolean dieOnMissingIds) {
+	public PythonQueryBitSet(Query query, SolrCacheWrapper cache, boolean dieOnMissingIds) {
 		super(query, cache, dieOnMissingIds);
 	}
 	
-	public PythonQueryBitSet(Query query, CacheWrapper cache, boolean dieOnMissingIds, String pythonFunctionName) {
+	public PythonQueryBitSet(Query query, SolrCacheWrapper cache, boolean dieOnMissingIds, String pythonFunctionName) {
 		super(query, cache, dieOnMissingIds, pythonFunctionName);
 	}
 	

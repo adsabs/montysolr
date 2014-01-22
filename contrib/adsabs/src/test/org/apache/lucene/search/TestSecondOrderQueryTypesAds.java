@@ -19,6 +19,8 @@ import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.QParser;
@@ -127,75 +129,40 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		
 		assert cache != null;
 		
-		CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
-			@Override
-			public AtomicReader getAtomicReader() {
-				return tempReq.getSearcher().getAtomicReader();
-			}
-			@Override
-		  public int[] getLuceneDocIds(int sourceDocid) {
-			  return cache.getCitations(sourceDocid);
-		  }
-			
-			@Override
-			public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-			  return (Integer) cache.get(sourceValue);
-		  }
-			@Override
-      public int internalHashCode() {
-        return cache.hashCode();
-      }
-			@Override
-      public String internalToString() {
-        return cache.name();
-      }
-		};
 		
-		CacheWrapper referencesWrapper = new SecondOrderCollectorCacheWrapper() {
-			@Override
-			public AtomicReader getAtomicReader() {
-				return tempReq.getSearcher().getAtomicReader();
-			}
-			@Override
-		  public int[] getLuceneDocIds(int sourceDocid) {
-			  return cache.getReferences(sourceDocid);
-		  }
-			@Override
-			public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-        Object v = cache.get(sourceValue);
-			  if (v == null) {
-			  	return -1;
-			  }
-			  return (Integer) v;
-		  }
-			@Override
-      public int internalHashCode() {
-        return cache.hashCode();
-      }
-			@Override
-      public String internalToString() {
-        return cache.name();
-      }
-		};
+		SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(cache);
+		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
+		
+		float[] boostConst = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
+          "boost_const", false);
+		float[] boost1 = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
+        "boost_1", false);
+		float[] boost2 = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
+        "boost_2", false);
+		
+    
+		LuceneCacheWrapper<float[]> boostConstant = LuceneCacheWrapper.getFloatCache("boost_const", boostConst);
+		LuceneCacheWrapper<float[]> boostOne = LuceneCacheWrapper.getFloatCache("boost_1", boost1);
+		LuceneCacheWrapper<float[]> boostTwo = LuceneCacheWrapper.getFloatCache("boost_2", boost2);
 		
   	
   	
 		// expecting 4 results with various order, simply based on the boost factor
-  	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, "boost_const"),
+  	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostConstant),
   			Arrays.asList(2, 3, 4, 5));
-  	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, "boost_1"),
+  	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostOne),
   			Arrays.asList(3, 2, 4, 5));
-  	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, "boost_2"),
+  	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostTwo),
   			Arrays.asList(5, 3, 2, 4));
   	
 
 
     // 5 is referenced from two docs, the rest only by one doc
-    testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, "boost_const"),
+    testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostConstant),
   			Arrays.asList(5,2,3,4));
-    testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, "boost_1"),
+    testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostOne),
   			Arrays.asList(5,3,2,4));
-    testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, "boost_2"),
+    testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostTwo),
   			Arrays.asList(5,3,2,4));
   	
   	
@@ -206,19 +173,19 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
   	
   	// the most cited papers (the score comes from the source that cites them; so there is no
   	// change in order
-  	testQ2("id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, "boost_const"),
+  	testQ2("id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostConstant),
   			Arrays.asList(8,10,11));
-  	testQ2("id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, "boost_1"),
+  	testQ2("id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostOne),
   			Arrays.asList(8,10,11));
-  	testQ2("id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, "boost_2"),
+  	testQ2("id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostTwo),
   			Arrays.asList(8,10,11));
   	
   	// 11 is referenced twice (but we should see no change in order)
-  	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, "boost_const"),
+  	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostConstant),
   			Arrays.asList(8,10,11));
-  	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, "boost_1"),
+  	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostOne),
   			Arrays.asList(8,10,11));
-  	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, "boost_2"),
+  	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostTwo),
   			Arrays.asList(8,10,11));
   	
   	
@@ -226,16 +193,16 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
     
     
     // ADS Classic scoring formula
-  	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, "boost_const"),
+  	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostConstant),
   			Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19, 20));
-  	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, "boost_1"),
+  	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostOne),
   			Arrays.asList(3, 7, 8, 9, 16, 17, 6, 18, 19, 0, 1, 2, 4, 10, 11, 20, 5));
-  	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, "boost_2"),
+  	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostTwo),
   			Arrays.asList(5, 0, 1, 10, 11, 3, 2, 4, 6, 7, 8, 9, 16, 17, 18, 19, 20));
   	
    // topN()
   	testQ2((Query) new SecondOrderQuery(new MatchAllDocsQuery(), 
-  			new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, "boost_2")), 
+  			new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostTwo)), 
   			new SecondOrderCollectorTopN(2, true),
   			Arrays.asList(5,0));
   	testQ2("*:*", new SecondOrderCollectorTopN(2, true),

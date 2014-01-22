@@ -23,7 +23,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.CacheWrapper;
 import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.SecondOrderCollectorCacheWrapper;
+import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -277,7 +277,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
     						BitSet translatedBitSet = new BitSet(reader.maxDoc());
     						
     						
-	    					CacheWrapper cacheWrapper = super.getCache(fieldName);
+	    					SolrCacheWrapper cacheWrapper = super.getCache(fieldName);
 	    					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
 	    						for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
 	    					     if (fieldIsInt) {
@@ -358,11 +358,11 @@ public class BitSetQParserPlugin extends QParserPlugin {
 			// for csv, we can assume that every doc has the same fields (?)
 			Iterator<SolrInputField> fi = d.iterator();
 			
-			HashMap<String, CacheWrapper> translators = new HashMap<String, CacheWrapper>();
+			HashMap<String, SolrCacheWrapper> translators = new HashMap<String, SolrCacheWrapper>();
 			
 			while (fi.hasNext()) {
 				SolrInputField field = fi.next();
-				CacheWrapper cache = getCache(field.getName());
+				SolrCacheWrapper cache = getCache(field.getName());
 				if (cache == null) {
 					throw new SolrException(ErrorCode.BAD_REQUEST, "Uff, uff, I have no idea how to map this field (" + field.getName() + ") values into docids! Call 911");
 				}
@@ -371,7 +371,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 			
 			for (SolrInputDocument doc: docs) {
 				for (SolrInputField f: doc.values()) {
-					CacheWrapper c = translators.get(f.getName());
+					SolrCacheWrapper c = translators.get(f.getName());
 					for (Object o: f.getValues()) {
 						int v = c.getLuceneDocId(0, o);
 						if (v == -1)
@@ -383,9 +383,8 @@ public class BitSetQParserPlugin extends QParserPlugin {
 			return bs;
 		}
 		
-		@SuppressWarnings("rawtypes")
-    public CacheWrapper getCache(String field) {
-			IndexSchema schema = req.getSchema();
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+    public SolrCacheWrapper getCache(String field) {
 			
 			SolrCache sCache = null;
 			if (cacheMapping.containsKey(field)) {
@@ -395,13 +394,12 @@ public class BitSetQParserPlugin extends QParserPlugin {
 				sCache = req.getSearcher().getCache(field);
 			}
 			
-			final SolrCache solrCache = sCache;
 			
-			if (solrCache == null) {
+			if (sCache == null) {
 				return null;
 			}
 			
-			return new SecondOrderCollectorCacheWrapper() {
+			return new SolrCacheWrapper<SolrCache>(sCache) {
 				@SuppressWarnings("unchecked")
         @Override
 				public int getLuceneDocId(int sourceDocid, Object sourceValue) {
@@ -412,7 +410,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 						sourceValue = ((String) sourceValue).toLowerCase().trim();
 					}
 					
-				  Object v = solrCache.get(sourceValue);
+				  Object v = cache.get().get(sourceValue);
 				  if (v == null)
 				  	return -1;
 				  return (Integer) v;
@@ -425,7 +423,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 				@Override
         public String internalToString() {
-          return solrCache.toString();
+          return cache.get().toString();
         }
 			};
 		}

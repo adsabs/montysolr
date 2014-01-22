@@ -8,15 +8,16 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 import org.apache.lucene.search.CacheWrapper;
+import org.apache.lucene.search.SolrCacheWrapper;
 
 public class PythonQueryNode extends QueryNodeImpl implements QueryNode {
 
 	private static final long serialVersionUID = 3935454544149998076L;
 	private boolean useIntBits;
-	private CacheWrapper cacheWrapper;
+	private SolrCacheWrapper cacheWrapper;
 	private String pythonFunctionName;
 	
-	public PythonQueryNode(QueryNode query, CacheWrapper cache) {
+	public PythonQueryNode(QueryNode query, SolrCacheWrapper cache) {
 		if (query == null) {
 			throw new QueryNodeError(new MessageImpl(
 					QueryParserMessages.PARAMETER_VALUE_NOT_SUPPORTED, "query",
@@ -76,11 +77,11 @@ public class PythonQueryNode extends QueryNodeImpl implements QueryNode {
 	 * lucene ids. This wrapper should provide that functionality
 	 * This should not be null
 	 */
-	public CacheWrapper getCacheWrapper() {
+	public SolrCacheWrapper getCacheWrapper() {
 	  return cacheWrapper;
   }
 	
-	public void setCacheWrapper(CacheWrapper cache) {
+	public void setCacheWrapper(SolrCacheWrapper cache) {
 		cacheWrapper = cache;
 	}
 

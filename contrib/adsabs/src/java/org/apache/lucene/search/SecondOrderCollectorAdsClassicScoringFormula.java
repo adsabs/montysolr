@@ -32,30 +32,25 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 
 	private String boostField;
 	private float highestLuceneScore;
-	private float[] boostCache;
 	private float lucenePart;
 	private float adsPart;
 	private CacheWrapper cache;
+	private LuceneCacheWrapper<float[]> boostCache;
 
-	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, String boostField, float ratio) {
+	public SecondOrderCollectorAdsClassicScoringFormula(SolrCacheWrapper cache, LuceneCacheWrapper<float[]> boostCache, float ratio) {
 		this.cache = cache;
-		this.boostField = boostField;
 		this.lucenePart = ratio;
 		this.adsPart = 1.0f - ratio;
+		this.boostCache = boostCache;
 	}
 	
-	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, String boostField) {
+	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, LuceneCacheWrapper<float[]> boostCache) {
 		this.cache = cache;
-		this.boostField = boostField;
 		this.lucenePart = 0.5f;
 		this.adsPart = 0.5f;
+		this.boostCache = boostCache;
 	}
 	
-	@Override
-	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		boostCache = FieldCache.DEFAULT.getFloats(cache.getAtomicReader(), boostField, false);
-		return super.searcherInitialization(searcher, firstOrderWeight);
-	}
 	
 	@Override
 	public void setScorer(Scorer scorer) throws IOException {
@@ -114,7 +109,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
   }
 	
 	private float getClassicBoostFactor(int doc) {
-	  return boostCache[doc];
+	  return boostCache.getFloat(doc);
   }
 
 	@Override

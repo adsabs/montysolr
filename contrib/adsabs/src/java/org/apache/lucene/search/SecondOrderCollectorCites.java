@@ -28,10 +28,10 @@ import org.apache.lucene.index.IndexReader;
 public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
   Set<String> fieldsToLoad;
-	private CacheWrapper cache;
+	private SolrCacheWrapper cache;
 	private IndexReader reader;
 	
-	public SecondOrderCollectorCites(CacheWrapper cache, String[] referenceFields) {
+	public SecondOrderCollectorCites(SolrCacheWrapper cache, String[] referenceFields) {
 		super();
 		assert cache != null;
 		this.cache = cache;
@@ -64,7 +64,6 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		//if (reader.isDeleted(doc)) return;
 		
 		Document document = reader.document(doc, fieldsToLoad);
-		
 		float s = scorer.score();
 		
 		for (String f: fieldsToLoad) {

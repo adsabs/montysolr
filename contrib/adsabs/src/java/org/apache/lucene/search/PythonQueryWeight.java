@@ -33,11 +33,11 @@ public class PythonQueryWeight extends Weight implements PythonCall {
 	protected String idField;
 	private int searcherCounter;
 	
-	CacheWrapper cache;
+	SolrCacheWrapper cache;
 	boolean dieOnMissingIds;
 
 
-	public PythonQueryWeight(IndexSearcher searcher, PythonQuery query, CacheWrapper cache, boolean dieOnMissingIds)
+	public PythonQueryWeight(IndexSearcher searcher, PythonQuery query, SolrCacheWrapper cache, boolean dieOnMissingIds)
 			throws IOException {
 		this.innerQuery = query.getInnerQuery();
 		this.weight = innerQuery.createWeight(searcher);

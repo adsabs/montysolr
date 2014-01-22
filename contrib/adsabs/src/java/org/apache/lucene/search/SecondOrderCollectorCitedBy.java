@@ -11,10 +11,10 @@ import org.apache.lucene.index.AtomicReaderContext;
  */
 public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
-	private CacheWrapper cache;
+	private SolrCacheWrapper cache;
 
 
-	public SecondOrderCollectorCitedBy(CacheWrapper cache) {
+	public SecondOrderCollectorCitedBy(SolrCacheWrapper cache) {
 		super();
 		assert cache != null;
 		this.cache = cache;

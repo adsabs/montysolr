@@ -29,6 +29,7 @@ import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.BytesRef;
+import org.apache.solr.search.CitationLRUCache;
 
 
 
@@ -88,7 +89,8 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 	    return ramdir;
 	}
 	
-	public void testInvenioQuery() throws IOException {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+  public void testInvenioQuery() throws IOException {
 		
 		IndexedDocs iDocs = indexDocsPython(10);
 		Directory ramdir = indexDocsLucene(iDocs);
@@ -102,7 +104,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 		
 		final int[] docidCache = FieldCache.DEFAULT.getInts(SlowCompositeReaderWrapper.wrap(reader), "recid", false);
 		
-		CacheWrapper cache = new SecondOrderCollectorCacheWrapper() {
+		SolrCacheWrapper cache = new SolrCacheWrapper(new CitationLRUCache()) {
 			@Override
 		  public int getLuceneDocId(int sourceDocid) {
 			  return docidCache[sourceDocid];
@@ -168,7 +170,7 @@ public class TestInvenioQuery extends MontySolrAbstractLuceneTestCase {
 	public class InvenioQuery extends PythonQuery {
 
 			
-			public InvenioQuery(Query query, CacheWrapper cache,
+			public InvenioQuery(Query query, SolrCacheWrapper cache,
           boolean dieOnMissingIds, String fName) {
 	      super(query, cache, dieOnMissingIds, fName);
       }

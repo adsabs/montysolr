@@ -26,14 +26,16 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.LuceneCacheWrapper;
 import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SecondOrderCollector;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.search.CacheWrapper;
+import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.SecondOrderCollectorAdsClassicScoringFormula;
-import org.apache.lucene.search.SecondOrderCollectorCacheWrapper;
+import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
 import org.apache.lucene.search.SecondOrderCollectorCitesRAM;
@@ -49,6 +51,8 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.util.Version;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -421,40 +425,15 @@ AqpFunctionQueryBuilderProvider {
 					throw new ParseException("The ratio must be in the range 0.0-1.0");
 				}
 				
-				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
+				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				
-				CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
-					@Override
-					public AtomicReader getAtomicReader() {
-						return req.getSearcher().getAtomicReader();
-					}
-					@Override
-				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getCitations(sourceDocid);
-				  }
-					
-					@SuppressWarnings("unchecked")
-          @Override
-					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-					  return (Integer) cache.get(sourceValue);
-				  }
-					@Override
-          public int internalHashCode() {
-	          return cache.hashCode();
-          }
-					@Override
-          public String internalToString() {
-	          return cache.name();
-          }
-				};
-				
-				
+				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
+						fp.getReq().getSearcher().getAtomicReader());
 				
 				return new SecondOrderQuery(innerQuery, null, 
-						new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, "cite_read_boost", ratio));
+						new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper, ratio));
 			}
 		});
 		parsers.put("cr", parsers.get("classic_relevance"));
@@ -589,36 +568,10 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
-				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
-				
-				
-				CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
-					@Override
-					public AtomicReader getAtomicReader() {
-						return req.getSearcher().getAtomicReader();
-					}
-					@Override
-				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getCitations(sourceDocid);
-				  }
-					
-					@SuppressWarnings("unchecked")
-          @Override
-					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-					  return (Integer) cache.get(sourceValue);
-				  }
-					@Override
-          public int internalHashCode() {
-	          return cache.hashCode();
-          }
-					@Override
-          public String internalToString() {
-	          return cache.name();
-          }
-				};
-				
+				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+								
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorCitedBy(citationsWrapper), false);
 			}
@@ -658,35 +611,10 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
-				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-        final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
+				SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(
+						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				
-				CacheWrapper referencesWrapper = new SecondOrderCollectorCacheWrapper() {
-					@Override
-					public AtomicReader getAtomicReader() {
-						return req.getSearcher().getAtomicReader();
-					}
-					@Override
-				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getReferences(sourceDocid);
-				  }
-					
-					@SuppressWarnings("unchecked")
-          @Override
-					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-					  return (Integer) cache.get(sourceValue);
-				  }
-					@Override
-          public int internalHashCode() {
-	          return cache.hashCode();
-          }
-					@Override
-          public String internalToString() {
-	          return cache.name();
-          }
-				};
 				
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorCitesRAM(referencesWrapper), false);
@@ -770,40 +698,16 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
 				
-				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
-				
-				
-				CacheWrapper referencesWrapper = new SecondOrderCollectorCacheWrapper() {
-					@Override
-					public AtomicReader getAtomicReader() {
-						return req.getSearcher().getAtomicReader();
-					}
-					@Override
-				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getReferences(sourceDocid);
-				  }
-					
-					@SuppressWarnings("unchecked")
-          @Override
-					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-					  return (Integer) cache.get(sourceValue);
-				  }
-					@Override
-          public int internalHashCode() {
-	          return cache.hashCode();
-          }
-					@Override
-          public String internalToString() {
-	          return cache.name();
-          }
-				};
+				SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(
+						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
+						fp.getReq().getSearcher().getAtomicReader());
 				
 				return  new SecondOrderQuery( // references
 						new SecondOrderQuery( // topn
 								new SecondOrderQuery(innerQuery, // classic_relevance
-										new SecondOrderCollectorAdsClassicScoringFormula(referencesWrapper, "cite_read_boost")), 
+										new SecondOrderCollectorAdsClassicScoringFormula(referencesWrapper, boostWrapper)), 
 										new SecondOrderCollectorTopN(200)),
 										new SecondOrderCollectorCitesRAM(referencesWrapper));
 
@@ -835,38 +739,15 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
 				
-				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-        final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
+				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				
-				CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
-					@Override
-					public AtomicReader getAtomicReader() {
-						return req.getSearcher().getAtomicReader();
-					}
-					@Override
-				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getCitations(sourceDocid);
-				  }
-					
-					@SuppressWarnings("unchecked")
-          @Override
-					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-					  return (Integer) cache.get(sourceValue);
-				  }
-					@Override
-          public int internalHashCode() {
-	          return cache.hashCode();
-          }
-					@Override
-          public String internalToString() {
-	          return cache.name();
-          }
-				};
-				//TODO: make configurable the name of the field
+				//TODO: make configurable the name of the field				
+				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
+
 				return new SecondOrderQuery(innerQuery, null, 
-						new SecondOrderCollectorOperatorExpertsCiting(citationsWrapper, "cite_read_boost"));
+						new SecondOrderCollectorOperatorExpertsCiting(citationsWrapper, boostWrapper));
 			}
 		});
 
@@ -893,40 +774,16 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
 				
-				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
+				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				
-				CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
-					@Override
-					public AtomicReader getAtomicReader() {
-						return req.getSearcher().getAtomicReader();
-					}
-					@Override
-				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getCitations(sourceDocid);
-				  }
-					
-					@SuppressWarnings("unchecked")
-          @Override
-					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-					  return (Integer) cache.get(sourceValue);
-				  }
-					@Override
-          public int internalHashCode() {
-	          return cache.hashCode();
-          }
-					@Override
-          public String internalToString() {
-	          return cache.name();
-          }
-				};
+				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
 				
 				SecondOrderQuery outerQuery = new SecondOrderQuery( // citations
 						new SecondOrderQuery( // topn
 								new SecondOrderQuery(innerQuery, // classic_relevance
-										new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, "cite_read_boost")), 
+										new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper)), 
 										new SecondOrderCollectorTopN(200)),
 										new SecondOrderCollectorCitedBy(citationsWrapper));
 				outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
@@ -950,74 +807,23 @@ AqpFunctionQueryBuilderProvider {
 			public Query parse(FunctionQParser fp) throws ParseException {          
 				Query innerQuery = fp.parseNestedQuery();
 				
-				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
+				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
+				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
+						fp.getReq().getSearcher().getAtomicReader());
 				
-				
-				CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
-					@Override
-					public AtomicReader getAtomicReader() {
-						return req.getSearcher().getAtomicReader();
-					}
-					@Override
-				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getCitations(sourceDocid);
-				  }
-					
-					@SuppressWarnings("unchecked")
-          @Override
-					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-					  return (Integer) cache.get(sourceValue);
-				  }
-					@Override
-          public int internalHashCode() {
-	          return cache.hashCode();
-          }
-					@Override
-          public String internalToString() {
-	          return cache.name();
-          }
-				};
-				
-				String boostField = "cite_read_boost";
 				return new SecondOrderQuery(innerQuery, null, 
-						new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostField));
+						new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostWrapper));
 			}
 		});
 		parsers.put("citis", new AqpSubqueryParserFull() {
 			public Query parse(FunctionQParser fp) throws ParseException {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
-				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-        final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
-				
-				
-				CacheWrapper citationsWrapper = new SecondOrderCollectorCacheWrapper() {
-					@Override
-					public AtomicReader getAtomicReader() {
-						return req.getSearcher().getAtomicReader();
-					}
-					@Override
-				  public int[] getLuceneDocIds(int sourceDocid) {
-					  return cache.getCitations(sourceDocid);
-				  }
-					
-					@SuppressWarnings("unchecked")
-          @Override
-					public int getLuceneDocId(int sourceDocid, Object sourceValue) {
-					  return (Integer) cache.get(sourceValue);
-				  }
-					@Override
-          public int internalHashCode() {
-	          return cache.hashCode();
-          }
-					@Override
-          public String internalToString() {
-	          return cache.name();
-          }
-				};
+				SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationLRUCache) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorCites(citationsWrapper, new String[] {citationSearchRefField}), false);
@@ -1088,7 +894,7 @@ AqpFunctionQueryBuilderProvider {
 			}
 
 			private String toBeAnalyzedAgain(TermQuery q) {
-				String f = q.getTerm().field();
+				//String f = q.getTerm().field();
 				//if (f.equals("author")) {
 				//  return "author";
 				//}

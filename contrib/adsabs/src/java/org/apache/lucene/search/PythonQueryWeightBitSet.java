@@ -24,7 +24,7 @@ public class PythonQueryWeightBitSet extends PythonQueryWeight implements Python
 	private static final long serialVersionUID = -4934126443764572711L;
 	
 	public PythonQueryWeightBitSet(IndexSearcher searcher, PythonQuery query,
-      CacheWrapper cache, boolean dieOnMissingIds) throws IOException {
+      SolrCacheWrapper cache, boolean dieOnMissingIds) throws IOException {
 	  super(searcher, query, cache, dieOnMissingIds);
 	  setPythonFunctionName("perform_request_search_bitset");
   }

@@ -17,28 +17,17 @@ import org.apache.solr.search.CitationLRUCache;
 public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderCollector {
 
   
-  private CacheWrapper cache;
-  private String boostField;
-  private float[] boostCache;
+  private SolrCacheWrapper cache;
+	private LuceneCacheWrapper boostCache;
 
 
-  public SecondOrderCollectorCitingTheMostCited(CacheWrapper cache, String boostField) {
+  public SecondOrderCollectorCitingTheMostCited(SolrCacheWrapper cache, LuceneCacheWrapper boostCache) {
     super();
     assert cache != null;
     this.cache = cache;
-    this.boostField = boostField;
+    this.boostCache = boostCache;
   }
   
-  
-  @Override
-  public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-    boostCache = FieldCache.DEFAULT.getFloats(cache.getAtomicReader(), 
-        boostField, false);
-    if (boostCache.length == 0) {
-    	return false;
-    }
-    return super.searcherInitialization(searcher, firstOrderWeight);
-  }
   
 
   @Override
@@ -58,8 +47,9 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
     // adjusted score of this paper
     // s = s + (s * boostCache[doc+docBase]);
     
-    if (boostCache[doc+docBase] >  0.0f) {
-			s = s + boostCache[doc+docBase];
+    float bc = 0.0f;
+    if ((bc = boostCache.getFloat(doc+docBase)) >  0.0f) {
+			s = s + bc;
 		}
     
     float freq = (float) related.length;
@@ -84,7 +74,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   
   @Override
   public String toString() {
-  	return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", field:" + boostField + ")";
+  	return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ", " + boostCache.toString() + ")";
   }
   
   /** Returns a hash code value for this object. */
