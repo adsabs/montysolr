@@ -355,7 +355,7 @@ AqpFunctionQueryBuilderProvider {
 				int positionIncrementGap = 1;
 				if (fp.getReq() != null) {
 					IndexSchema schema = fp.getReq().getSchema();
-					SchemaField field = schema.getField(query.toString().split(":")[0]);
+					SchemaField field = schema.getFieldOrNull(query.toString().split(":")[0]);
 					if (field != null) {
 						FieldType fType = field.getType();
 						//if (!fType.isMultiValued()) {

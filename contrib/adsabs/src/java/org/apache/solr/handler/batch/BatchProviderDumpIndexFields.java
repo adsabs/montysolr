@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -29,6 +30,7 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.QParser;
@@ -58,7 +60,7 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 	  
 		SolrCore core = req.getCore();
 		IndexSchema schema = core.getSchema();
-		final HashSet<String> fieldsToLoad = new HashSet<String>();
+		final HashMap<String, FieldType> fieldsToLoad = new HashMap<String, FieldType>();
 		final Analyzer analyzer = core.getSchema().getAnalyzer();
 
 		String q = params.get(CommonParams.Q, null);
@@ -73,7 +75,7 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 				if (field==null || !field.stored()) {
 					throw new SolrException(ErrorCode.BAD_REQUEST, "We cannot dump fields that do not exist or are not stored: " + ff);
 				}
-				fieldsToLoad.add(ff);
+				fieldsToLoad.put(ff, field.getType());
 			}
 		}
 
@@ -113,7 +115,7 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 			@Override
 			public void collect(int i) throws IOException {
 				Document d;
-				d = reader.document(i, fieldsToLoad);
+				d = reader.document(i, fieldsToLoad.keySet());
 				processed++;
 				document.clear();
 
@@ -124,13 +126,16 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 				}
 
 
-				for (String f: fieldsToLoad) {
+				for (Entry<String,FieldType> en: fieldsToLoad.entrySet()) {
 					List<String> tokens = new ArrayList<String>(500);
-					document.put(f, tokens);
-					String[] vals = d.getValues(f);
+					String fName = en.getKey();
+					FieldType fType = en.getValue();
+					
+					document.put(fName, tokens);
+					String[] vals = d.getValues(fName);
 					posIncrAtt = null;
 					for (String s: vals) {
-						TokenStream buffer = analyzer.tokenStream(f, new StringReader(s));
+						TokenStream buffer = analyzer.tokenStream(fName, new StringReader(fType.indexedToReadable(s)));
 
 						if (!buffer.hasAttribute(CharTermAttribute.class)) {
 							continue; // empty stream
@@ -146,16 +151,16 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 						if (posIncrAtt != null) {
 							while (buffer.incrementToken()) {
 								if (posIncrAtt.getPositionIncrement() == 0) {
-									tokens.set(tokens.size()-1, tokens.get(tokens.size()-1) + "|" + termAtt.toString());
+									tokens.set(tokens.size()-1, tokens.get(tokens.size()-1) + "|" + fType.indexedToReadable(termAtt.toString()));
 								}
 								else {
-									tokens.add(termAtt.toString());
+									tokens.add(fType.indexedToReadable(termAtt.toString()));
 								}
 							}
 						}
 						else {
 							while (buffer.incrementToken()) {
-								tokens.add(termAtt.toString());
+								tokens.add(fType.indexedToReadable(termAtt.toString()));
 							}
 						}
 					}
@@ -166,7 +171,7 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 				}
 				// bummer, it doesn't have api for newlines - according to quick googling
 				// control chars should be escaped in JSON, so this should be safe
-				out.write(JSONUtil.toJSON(document).replace("\n", " "));
+				out.write(JSONUtil.toJSON(document, 0).replace("\n", ""));
 			}
 			@Override
 			public void setNextReader(AtomicReaderContext context) {
