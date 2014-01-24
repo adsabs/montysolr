@@ -247,11 +247,15 @@
          The latest commit point should always be preserved regardless
          of the criteria.
     -->
-    <!-- 
+    
     <deletionPolicy class="solr.SolrDeletionPolicy">
-    -->
-      <!-- The number of commit points to be kept -->
-      <!-- <str name="maxCommitsToKeep">1</str> -->
+    
+      <!-- The number of commit points to be kept
+       
+           This should be raised to 2 when there is a possibility of
+           index corruption and disk space is available
+      -->
+      <str name="maxCommitsToKeep">${montysolr.maxCommitsToKeep:1}</str>
       <!-- The number of optimized commit points to be kept -->
       <!-- <str name="maxOptimizedCommitsToKeep">0</str> -->
       <!--
@@ -262,9 +266,9 @@
          <str name="maxCommitAge">30MINUTES</str>
          <str name="maxCommitAge">1DAY</str>
       -->
-    <!-- 
+     
     </deletionPolicy>
-    -->
+    
 
     <!-- Lucene Infostream
        
