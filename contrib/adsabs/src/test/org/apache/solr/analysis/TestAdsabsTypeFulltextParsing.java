@@ -206,6 +206,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "152", F.BIBCODE, "xxxxxxxxxx152", F.TYPE_ADS_TEXT, "nag5 5269"));
     
     assertU(adoc(F.ID, "318", F.BIBCODE, "xxxxxxxxxx318", F.TYPE_ADS_TEXT, "creation of a thesaurus"));
+    assertU(adoc(F.ID, "382", F.BIBCODE, "xxxxxxxxxx382", F.TYPE_ADS_TEXT, "xhtml <tags> should be <SUB>fooxx</SUB> <xremoved>"));
     assertU(commit());
   }
   
@@ -749,6 +750,14 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='11']",
         "//doc/str[@name='id'][.='12']",
     		"//doc/str[@name='id'][.='13']");
+    
+    /*
+     * Html tags should be removed
+     */
+    //dumpDoc(null, F.TYPE_ADS_TEXT);
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":xremoved"), "//*[@numFound='0']");
+    assertQ(req("q", F.TYPE_ADS_TEXT + ":xhtml"), "//*[@numFound='1']", 
+        "//doc/str[@name='id'][.='382']");
   }
 
 

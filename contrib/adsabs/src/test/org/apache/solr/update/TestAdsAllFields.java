@@ -431,18 +431,26 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		);
 		
 		//the order needs to be preserved
-		//dumpDoc(null, "aff");
+		dumpDoc(null, "aff");
 		assert h.query(req("q", "bibcode:1993PhR...227...37K"))
  		.contains("<arr name=\"aff\">" +
 				"<str>0. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</str>" +
-				"<str>1. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</str>" +
+				"<str>1. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA(91125), USA</str>" +
 	      "<str>2. Institut für Kernphysik, Forschungszentrum Jülich, W-5170 Jülich, Germany</str>" +
 	      "<str>3. Harvard-Smithsonian Center for Astrophysics, Cambridge, MA 02138, USA</str>"
      );
 		assertQ(req("q", "pos(aff:Jülich, 3) AND bibcode:1993PhR...227...37K"), 
 				"//*[@numFound='1']"
 		);
-		
+		assertQ(req("q", "aff:USA AND bibcode:1993PhR...227...37K"), 
+				"//*[@numFound='1']"
+		);
+		assertQ(req("q", "=aff:\"acr::usa\" AND bibcode:1993PhR...227...37K"), 
+				"//*[@numFound='1']"
+		);
+		assertQ(req("q", "=aff:\"acr::USA\" AND bibcode:1993PhR...227...37K"), 
+				"//*[@numFound='0']"
+		);
 
 		/*
 		 * email

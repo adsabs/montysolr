@@ -1323,17 +1323,17 @@ def start_live_instance(options, instance_dir, port,
         if options.test_scenario or not os.path.exists('solr/collection1/conf/solrconfig.xml.orig'):
             run_cmd(['cp', 'solr/collection1/conf/solrconfig.xml', 'solr/collection1/conf/solrconfig.xml.orig'])
             
-        if instance_mode =='w': # for master-writers
+        solrconfig = open('solr/collection1/conf/solrconfig.xml.orig', 'r').read()
+        
+        
+        if instance_mode =='w' and len(list_of_readers): # for master-writers
             # we must change also the solrconfig
-            if len(list_of_readers) <= 0:
-                error("When you use write-master, you must also specify a reader node")
                  
             list_of_nodes = []
             for n in list_of_readers:
                 reader_port = extract_port(n.split('#')[0])
                 list_of_nodes.append(' <str>http://localhost:%s/solr/ads-config?command=reopenSearcher</str>' % reader_port)
                 
-            solrconfig = open('solr/collection1/conf/solrconfig.xml.orig', 'r').read()
             
             solrconfig = solrconfig.replace('</updateHandler>',
                               """
@@ -1351,8 +1351,10 @@ def start_live_instance(options, instance_dir, port,
             
             with open('solr/collection1/conf/solrconfig.xml.new', 'w') as fi_solrconfig:
                 fi_solrconfig.write(solrconfig)
-            with open('solr/collection1/conf/solrconfig.xml', 'w') as fi_solrconfig:
-                fi_solrconfig.write(solrconfig)
+                
+                
+        with open('solr/collection1/conf/solrconfig.xml', 'w') as fi_solrconfig:
+            fi_solrconfig.write(solrconfig)
 
         fo = open('automatic-run.sh', 'w')
         fo.write(start)

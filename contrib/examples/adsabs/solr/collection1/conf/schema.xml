@@ -368,6 +368,8 @@
 			patterns? -->
 		<fieldType name="ads_text" class="solr.TextField">
 			<analyzer type="index">
+        <charFilter class="solr.HTMLStripCharFilterFactory"/>
+        
 				<!-- AA: rewrite these common astronomy compound names so that the WDFF 
 					will index both the short and long versions of them -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
@@ -447,6 +449,8 @@
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
+        <charFilter class="solr.HTMLStripCharFilterFactory"/>
+        
 				<!-- AA: as above, but we only have one canonical replacement for the 
 					expression -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
@@ -694,7 +698,8 @@
 		<fieldType name="affiliation_text" class="solr.TextField"
 			positionIncrementGap="100">
 			<analyzer type="index">
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <charFilter class="solr.HTMLStripCharFilterFactory"/>
+				<tokenizer class="solr.StandardTokenizerFactory" />
 				<filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$"
 					replacement="$2" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
@@ -706,10 +711,12 @@
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 				<filter class="solr.AcronymTokenFilterFactory" prefix="acr::"
 					setType="ACRONYM" />
+        <filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <charFilter class="solr.HTMLStripCharFilterFactory"/>
+				<tokenizer class="solr.StandardTokenizerFactory" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.WordDelimiterFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
@@ -719,6 +726,7 @@
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
 					prefix="acr::" setType="ACRONYM" />
+        <filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 		</fieldType>
