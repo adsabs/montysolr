@@ -431,7 +431,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		);
 		
 		//the order needs to be preserved
-		dumpDoc(null, "aff");
+		//dumpDoc(null, "aff");
 		assert h.query(req("q", "bibcode:1993PhR...227...37K"))
  		.contains("<arr name=\"aff\">" +
 				"<str>0. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</str>" +
@@ -974,14 +974,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * integers and i wasn't ableto find out why...this query
 		 * just finds one document
 		 */
-		/*
+		
 		assertQ(req("q", "classic_factor:[0 TO 5001]", "indent", "true", "debugQuery", "true"), 
 				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
 				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
 				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
 				"//*[@numFound='3']"
 		);
-		*/
+		
 		
 		
 		/*
@@ -992,6 +992,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
 				"//*[@numFound='1']"
 		);
+		assertQ(req("q", "simbid:[0 TO 90000]"), 
+				"//*[@numFound>='2']"
+		);
+		
 		
 		/*
 		 * citations - added 10/12/13
@@ -1307,6 +1311,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			row = new HashMap<String, Object>();
 			row.put("read_count", Arrays.asList(15.0f));
 			row.put("boost", Arrays.asList(0.373f));
+			row.put("simbad_object_ids", Arrays.asList(3, 3000001));
 			row.put("reader", Arrays.asList("3xeeeeeeee"));
 			row.put("norm_cites", Arrays.asList(0));
 			mongoCache.put("1976AJ.....81...67S", row);
