@@ -29,6 +29,7 @@ import monty.solr.util.MontySolrSetup;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
@@ -80,19 +81,40 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assertU(commit());
     
     BatchHandler handler;
-//    if (usually()) {
-//	    handler = new BatchHandler();
-//	    NamedList<String> nl = new NamedList<String>();
-//	    handler.init(nl); // default
-//    }
-//    else {
-//    	handler = (BatchHandler) h.getCore().getRequestHandler("/batch");
-//    }
-    handler = (BatchHandler) h.getCore().getRequestHandler("/batch");
+    
+    //if (true) {
+	    handler = new BatchHandler();
+	    NamedList<Object> defaults = new NamedList<Object>();
+	    defaults.add("allowed", ".*");
+	    defaults.add("asynchronous", true);
+	    defaults.add("workdir", "batch-handler");
+	    
+	    NamedList<Object> providers = new NamedList<Object>();
+	    providers.add("dump-index", "org.apache.solr.handler.batch.BatchProviderDumpIndexFields");
+	    providers.add("dump-index-use-bibcodes", "org.apache.solr.handler.batch.BatchProviderDumpBibcodes");
+	    providers.add("dump-freqs", "org.apache.solr.handler.batch.BatchProviderDumpTermFreqs");
+	    providers.add("dump-docs", "org.apache.solr.handler.batch.BatchProviderDumpIndex");
+	    providers.add("dump-citation-index", "org.apache.solr.handler.batch.BatchProviderDumpCitationCache");
+	    providers.add("find-freq-phrases", "org.apache.solr.handler.batch.BatchProviderFindWordGroups");
+	    providers.add("_test-params", "org.apache.solr.handler.batch.TestBatchRequestHandler$TestProvider");
+	    
+	    NamedList<Object> nl = new NamedList<Object>();
+	    nl.add("defaults", defaults);
+	    nl.add("providers", providers);
+	    handler.init(nl); // default
+    //}
+    //else {
+    //	handler = (BatchHandler) h.getCore().getRequestHandler("/batch");
+    //}
+    //handler = (BatchHandler) h.getCore().getRequestHandler("/batch");
     
     //while (true) {
-    	
-    SolrQueryRequest req = req("command", "dump-index", "q", "*:*",
+	    
+	  // ========================================
+	    
+	    
+    SolrQueryRequest req = req("command", "_test-params", 
+    		"q", "{!aqp} lang:(german OR english) AND *:*",
         "fields", "bibcode,title,author");
     SolrQueryResponse rsp = new SolrQueryResponse();
     
@@ -101,6 +123,42 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     req.close();
     
     String jobid = (String) rsp.getValues().get("jobid");
+    assert jobid != null;
+    
+    
+    req = req("command", "start");
+    rsp = new SolrQueryResponse();
+    core.execute(handler, req, rsp);
+    while (handler.isBusy()) {
+      Thread.sleep(300);
+    }
+    req.close();
+    
+    BatchHandlerRequestQueue thisQueue = queue.remove(0);
+    SolrParams thisParams = params.remove(0);
+    
+    assertEquals("{!aqp} lang:(german OR english) AND *:*", thisParams.get("q"));
+    assertEquals(true, thisParams.getBool("asynchronous"));
+    assertEquals("batch-handler", thisParams.get("workdir"));
+    assertEquals("bibcode,title,author", thisParams.get("fields"));
+    assertEquals(jobid, thisParams.get("jobid"));
+    
+    assert thisQueue.isJobidFailed(jobid) == false;
+    assert thisQueue.isJobidFinished(jobid) == true;
+    assert thisQueue.isJobidRegistered(jobid) == true;
+    assert thisQueue.isJobidRunning(jobid) == false;
+    
+	  // ========================================
+    	
+    req = req("command", "dump-index", "q", "*:*",
+        "fields", "bibcode,title,author");
+    rsp = new SolrQueryResponse();
+    
+    core = h.getCore();
+    core.execute(handler, req, rsp);
+    req.close();
+    
+    jobid = (String) rsp.getValues().get("jobid");
     assert jobid != null;
     
     
@@ -264,6 +322,24 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
   }
   
   
+  private static List<BatchHandlerRequestQueue> queue = new ArrayList<BatchHandlerRequestQueue>();
+  private static List<SolrParams> params = new ArrayList<SolrParams>();
+  
+  public static class TestProvider extends BatchProvider {
+
+		@Override
+    public void run(SolrQueryRequest locReq, BatchHandlerRequestQueue q)
+        throws Exception {
+	    params.add(locReq.getParams());
+	    queue.add(q);
+    }
+
+		@Override
+    public String getDescription() {
+	    return "Test provider";
+    }
+  	
+  }
 
   // Uniquely for Junit 3
   public static junit.framework.Test suite() {
