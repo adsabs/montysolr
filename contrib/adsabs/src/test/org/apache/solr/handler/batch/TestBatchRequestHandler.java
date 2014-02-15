@@ -30,7 +30,6 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.adsabs.solr.AdsConfig.F;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -45,9 +44,6 @@ import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.util.FileUtils;
-import org.apache.solr.util.FileUtilsTest;
-import org.junit.BeforeClass;
 
 @SuppressCodecs({"Lucene3x", "SimpleText"})
 public class TestBatchRequestHandler extends MontySolrQueryTestCase {
