@@ -17,11 +17,14 @@
 
 package org.apache.solr.handler.batch;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
@@ -29,6 +32,9 @@ import monty.solr.util.MontySolrSetup;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
@@ -39,12 +45,15 @@ import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.util.FileUtils;
+import org.apache.solr.util.FileUtilsTest;
 import org.junit.BeforeClass;
 
 @SuppressCodecs({"Lucene3x", "SimpleText"})
 public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 	
   private File generatedTransliterations;
+	private BatchHandler handler;
 
 
   public String getSchemaFile() {
@@ -80,7 +89,6 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "ǎguşan, Adrian, , Dr", F.TYPE_ADS_TEXT, "words are too weak..."));
     assertU(commit());
     
-    BatchHandler handler;
     
     //if (true) {
 	    handler = new BatchHandler();
@@ -90,13 +98,16 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 	    defaults.add("workdir", "batch-handler");
 	    
 	    NamedList<Object> providers = new NamedList<Object>();
+	    /*
 	    providers.add("dump-index", "org.apache.solr.handler.batch.BatchProviderDumpIndexFields");
 	    providers.add("dump-index-use-bibcodes", "org.apache.solr.handler.batch.BatchProviderDumpBibcodes");
 	    providers.add("dump-freqs", "org.apache.solr.handler.batch.BatchProviderDumpTermFreqs");
 	    providers.add("dump-docs", "org.apache.solr.handler.batch.BatchProviderDumpIndex");
 	    providers.add("dump-citation-index", "org.apache.solr.handler.batch.BatchProviderDumpCitationCache");
 	    providers.add("find-freq-phrases", "org.apache.solr.handler.batch.BatchProviderFindWordGroups");
+	    */
 	    providers.add("_test-params", "org.apache.solr.handler.batch.TestBatchRequestHandler$TestProvider");
+	    providers.add("_fail", "org.apache.solr.handler.batch.TestBatchRequestHandler$TestProviderFail");
 	    
 	    NamedList<Object> nl = new NamedList<Object>();
 	    nl.add("defaults", defaults);
@@ -113,26 +124,13 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 	  // ========================================
 	    
 	    
-    SolrQueryRequest req = req("command", "_test-params", 
+	  String jobid;
+	  
+    jobid = run(req("command", "_test-params", 
     		"q", "{!aqp} lang:(german OR english) AND *:*",
-        "fields", "bibcode,title,author");
-    SolrQueryResponse rsp = new SolrQueryResponse();
+        "fields", "bibcode,title,author"),
+        "foo\nzooo\nščř");
     
-    SolrCore core = h.getCore();
-    core.execute(handler, req, rsp);
-    req.close();
-    
-    String jobid = (String) rsp.getValues().get("jobid");
-    assert jobid != null;
-    
-    
-    req = req("command", "start");
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
-    }
-    req.close();
     
     BatchHandlerRequestQueue thisQueue = queue.remove(0);
     SolrParams thisParams = params.remove(0);
@@ -142,171 +140,98 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     assertEquals("batch-handler", thisParams.get("workdir"));
     assertEquals("bibcode,title,author", thisParams.get("fields"));
     assertEquals(jobid, thisParams.get("jobid"));
+    assertEquals("foo\nzooo\nščř", thisParams.get("#data"));
     
     assert thisQueue.isJobidFailed(jobid) == false;
     assert thisQueue.isJobidFinished(jobid) == true;
     assert thisQueue.isJobidRegistered(jobid) == true;
     assert thisQueue.isJobidRunning(jobid) == false;
     
+    String data = getResponse(req("command", "get-results", "jobid", jobid));
+    assert data.contains("test-handler jobid:" + jobid);
+    
 	  // ========================================
     	
-    req = req("command", "dump-index", "q", "*:*",
-        "fields", "bibcode,title,author");
-    rsp = new SolrQueryResponse();
+    // make it fail
     
-    core = h.getCore();
-    core.execute(handler, req, rsp);
-    req.close();
+    jobid = run(req("command", "_fail", 
+    		"q", "{!aqp} lang:(german OR english) AND *:*",
+        "fields", "bibcode,title,author"));
+    data = getResponse(req("command", "status", 
+    		"jobid", jobid, "wt", "json", "indent", "true"));
     
-    jobid = (String) rsp.getValues().get("jobid");
-    assert jobid != null;
+    assert thisQueue.isJobidFailed(jobid) == true;
+    assert thisQueue.isJobidFinished(jobid) == false;
+    assert thisQueue.isJobidRegistered(jobid) == true;
+    assert thisQueue.isJobidRunning(jobid) == false;
     
-    
-    req = req("command", "start");
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
-    }
-    req.close();
-    
-    req = req("command", "get-results", "jobid", jobid);
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
-    }
-    
-    StringWriter sw = new StringWriter(32000);
-    QueryResponseWriter responseWriter = core.getQueryResponseWriter(req);
-    responseWriter.write(sw,req,rsp);
-    req.close();
-    assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxxx\"],");
-    assert sw.toString().contains("\"title\":[\"head");
-    //System.out.println(sw.toString());
+    assert data.contains("Woooot!");
+    assert data.contains("org.apache.solr.handler.batch.TestBatchRequestHandler$TestProviderFail.run");
     
     
-    
-    // ======================
-    
-    req = req("command", "dump-freqs", "q", "*:*",
-        "fields", "bibcode,title,author");
-    rsp = new SolrQueryResponse();
-    
-    core.execute(handler, req, rsp);
-    req.close();
-    
-    jobid = (String) rsp.getValues().get("jobid");
-    assert jobid != null;
-    
-    
-    req = req("command", "start");
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
-    }
-    req.close();
-    
-    req = req("command", "get-results", "jobid", jobid);
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
-    }
-    
-    sw = new StringWriter(32000);
-    responseWriter = core.getQueryResponseWriter(req);
-    responseWriter.write(sw,req,rsp);
-    req.close();
-    
-    //System.out.println(sw.toString());
-    assert sw.toString().contains("angels\t3\t2");
-    
-    
-    //}
-    
-    // ==============================================
-    
-    req = req("command", "dump-index", "q", "id:7 OR id:9",
-        "fields", "bibcode,title,author");
-    rsp = new SolrQueryResponse();
-    
-    core = h.getCore();
-    core.execute(handler, req, rsp);
-    req.close();
-    
-    jobid= (String) rsp.getValues().get("jobid");
-    assert jobid != null;
-    
-    
-    req = req("command", "start");
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
-    }
-    req.close();
-    
-    req = req("command", "get-results", "jobid", jobid);
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
-    }
-    
-    sw = new StringWriter(32000);
-    responseWriter = core.getQueryResponseWriter(req);
-    responseWriter.write(sw,req,rsp);
-    req.close();
-    
-    assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxx7\"],");
-    assert sw.toString().contains("\"bibcode\":[\"xxxxxxxxxxxx9\"],");
-    
-    
-    //=================================================================
-    
+  }
+  
+  
+  private String getResponse(SolrQueryRequest req) throws IOException, InterruptedException {
+  	SolrQueryResponse rsp = new SolrQueryResponse();
+  	try {
+	    h.getCore().execute(handler, req, rsp);
+	    while (handler.isBusy()) {
+	      Thread.sleep(100);
+	    }
+	    
+	    StringWriter sw = new StringWriter(32000);
+	    QueryResponseWriter responseWriter = h.getCore().getQueryResponseWriter(req);
+	    responseWriter.write(sw,req,rsp);
+	    return sw.toString();
+  	}
+  	finally {
+  		req.close();
+  	}
+  }
 
-    // first create a job that needs data
-    req = req("command", "dump-index-use-bibcodes", "fields", "bibcode,title,author");
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    req.close();
-    jobid= (String) rsp.getValues().get("jobid");
-    assert jobid != null;
-    // now send data to be used for dumping
-    req = req("command", "receive-data", "jobid", jobid);
-    rsp = new SolrQueryResponse();
-    List<ContentStream> cs = new ArrayList<ContentStream>(1);
-    ContentStreamBase f = new ContentStreamBase.StringStream("xxxxxxxxxxxx7\nxxxxxxxxxxxx9");
-    cs.add(f);
-    ((LocalSolrQueryRequest)req).setContentStreams(cs);
-    core.execute(handler, req, rsp);
-    
-    // start processing
-    req = req("command", "start");
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
+  private String run(SolrQueryRequest req) throws InterruptedException {
+  	return run(req, null);
+  }
+  
+	private String run(SolrQueryRequest req, String data) throws InterruptedException {
+    SolrQueryResponse rsp = new SolrQueryResponse();
+    try {
+	    SolrCore core = h.getCore();
+	    core.execute(handler, req, rsp);
+	    req.close();
+	    
+	    String jobid = (String) rsp.getValues().get("jobid");
+	    assert jobid != null;
+	    
+	    if (data != null) {
+		    // now send data to be used for dumping
+		    req = req("command", "receive-data", "jobid", jobid);
+		    rsp = new SolrQueryResponse();
+		    List<ContentStream> cs = new ArrayList<ContentStream>(1);
+		    ContentStreamBase f = new ContentStreamBase.StringStream(data);
+		    cs.add(f);
+		    ((LocalSolrQueryRequest)req).setContentStreams(cs);
+		    core.execute(handler, req, rsp);
+		    while (handler.isBusy()) {
+		    	Thread.sleep(100);
+		    }
+		    req.close();
+	    }
+	    
+	    
+	    req = req("command", "start");
+	    rsp = new SolrQueryResponse();
+	    core.execute(handler, req, rsp);
+	    while (handler.isBusy()) {
+	      Thread.sleep(100);
+	    }
+	    req.close();
+	    return jobid;
     }
-    req.close();
-    
-    req = req("command", "get-results", "jobid", jobid);
-    rsp = new SolrQueryResponse();
-    core.execute(handler, req, rsp);
-    while (handler.isBusy()) {
-      Thread.sleep(300);
+    finally {
+    	req.close();
     }
-    
-    // get back results
-    sw = new StringWriter(32000);
-    responseWriter = core.getQueryResponseWriter(req);
-    responseWriter.write(sw,req,rsp);
-    req.close();
-    
-    assert sw.toString().contains("horses");
-    assert sw.toString().contains("angels");
   }
   
   private void checkFile(String... expected) throws IOException {
@@ -330,13 +255,44 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 		@Override
     public void run(SolrQueryRequest locReq, BatchHandlerRequestQueue q)
         throws Exception {
-	    params.add(locReq.getParams());
+			ModifiableSolrParams pars = new ModifiableSolrParams(locReq.getParams());
+			
+			String jobid = pars.get("jobid");
+		  String workDir = pars.get("#workdir");
+		  
+		  File input = new File(workDir + "/" + jobid + ".input");
+		  if (input.canRead()) {
+		  	pars.set("#file", input.toString());
+		  	pars.set("#data", new Scanner( input, "UTF-8" ).useDelimiter("\\A").next());
+		  	
+		  	File jobFile = new File(workDir + "/" + jobid);
+				BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
+				out.write("test-handler jobid:" + jobid);
+				out.close();
+		  }
+		  
+	    params.add(pars);
 	    queue.add(q);
     }
 
 		@Override
     public String getDescription() {
 	    return "Test provider";
+    }
+  	
+  }
+  
+  public static class TestProviderFail extends BatchProvider {
+
+		@Override
+    public void run(SolrQueryRequest locReq, BatchHandlerRequestQueue q)
+        throws Exception {
+			throw new SolrException(ErrorCode.BAD_REQUEST, "Woooot!");
+    }
+
+		@Override
+    public String getDescription() {
+	    return "Failing provider";
     }
   	
   }

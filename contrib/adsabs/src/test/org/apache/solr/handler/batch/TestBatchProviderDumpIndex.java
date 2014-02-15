@@ -31,12 +31,27 @@ public class TestBatchProviderDumpIndex extends BatchProviderTest {
 		req.close();
 		
 		checkFile(tmpDir + "/00000", 
-				"{\"id\":1.0,\"bibcode\":\"xxxxxxxxxxxx1\",\"title\":\"green wall\"}",
-				",{\"id\":5.0,\"bibcode\":\"xxxxxxxxxxxx5\",\"title\":\"no fight\"}",
-				",{\"id\":6.0,\"bibcode\":\"xxxxxxxxxxxx6\",\"title\":\"for peace\"}",
-				",{\"id\":7.0,\"bibcode\":\"xxxxxxxxxxxx7\",\"title\":\"no fight\"}",
-				",{\"id\":8.0,\"bibcode\":\"xxxxxxxxxxxx8\",\"title\":\"for peace\"}"
+				"{\"id\":1,\"bibcode\":\"xxxxxxxxxxxx1\",\"title\":\"green wall\"}",
+				",{\"id\":5,\"bibcode\":\"xxxxxxxxxxxx5\",\"title\":\"no fight\"}",
+				",{\"id\":6,\"bibcode\":\"xxxxxxxxxxxx6\",\"title\":\"for peace\"}",
+				",{\"id\":7,\"bibcode\":\"xxxxxxxxxxxx7\",\"title\":\"no fight\"}",
+				",{\"id\":8,\"bibcode\":\"xxxxxxxxxxxx8\",\"title\":\"for peace\"}"
 		);
+
+		// request set of fields
+		req = req("jobid", "00000", "#workdir", tmpDir, "fl", "id,bibcode");
+		provider = new BatchProviderDumpIndex();
+		provider.run(req, queue);
+		req.close();
+		
+		checkFile(tmpDir + "/00000", 
+				"{\"id\":1,\"bibcode\":\"xxxxxxxxxxxx1\"}",
+				",{\"id\":5,\"bibcode\":\"xxxxxxxxxxxx5\"}",
+				",{\"id\":6,\"bibcode\":\"xxxxxxxxxxxx6\"}",
+				",{\"id\":7,\"bibcode\":\"xxxxxxxxxxxx7\"}",
+				",{\"id\":8,\"bibcode\":\"xxxxxxxxxxxx8\"}"
+		);
+		
 	}
 	
 	

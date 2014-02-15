@@ -23,6 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -220,6 +222,7 @@ public class BatchHandler extends RequestHandlerBase {
 			if (queue.isJobidRegistered(jobid)) {
 				if (queue.isJobidFailed(jobid)) {
 					rsp.add("job-status", "failed");
+					rsp.add("error", queue.getErrorMessage(jobid));
 				}
 				else if (queue.isJobidFinished(jobid)) {
 					rsp.add("job-status", "finished");
@@ -314,11 +317,11 @@ public class BatchHandler extends RequestHandlerBase {
 		Map<String, String> rows = new LinkedHashMap<String, String>();
 
 
-		rows.put("queueSize", Integer.toString(queue.tbdQueue.size()));
-		rows.put("failedBatches", Integer.toString(queue.failedQueue.size()));
+		rows.put("queueSize", Integer.toString(queue.getTbdQueueSize()));
+		rows.put("failedBatches", Integer.toString(queue.getFailedQueueSize()));
 
-		rows.put("registeredRequests", Integer.toString(queue.queuedIn));
-		rows.put("restartedRequests", Integer.toString(queue.queuedOut));
+		rows.put("registeredRequests", Integer.toString(queue.getTotalQueueSize()));
+		rows.put("restartedRequests", Integer.toString(queue.getTotalFinishedSize()));
 
 		rsp.add("lastWorkerMessage", getLastWorkerMessage());
 
@@ -334,19 +337,9 @@ public class BatchHandler extends RequestHandlerBase {
 
 	private void printDetailedInfo(SolrQueryResponse rsp) {
 
+		rsp.add("toBeDone", queue.getQueueDetails(10, 1));
 
-		List<String> tbd = new ArrayList<String>();
-		rsp.add("toBeDone", tbd);
-		for (BatchHandlerRequestData rd: queue.tbdQueue.values()) {
-			tbd.add(rd.toString());
-		}
-
-
-		List<String> fb = new ArrayList<String>();
-		rsp.add("failedBatches", fb);
-		for (BatchHandlerRequestData rd: queue.failedQueue.values()) {
-			fb.add(rd.toString());
-		}
+		rsp.add("failedBatches", queue.getQueueDetails(10, 0));
 
 		rsp.add("allMessages", getWorkerMessage());
 	}
@@ -367,8 +360,7 @@ public class BatchHandler extends RequestHandlerBase {
 					}
 				} catch (Exception e) {
 					setWorkerMessage("Worker error..." + e.getLocalizedMessage());
-					log.error(e.getLocalizedMessage());
-					log.error(e.getStackTrace().toString());
+					log.error(getErrorStackTrace(e));
 				} finally {
 					setBusy(false);
 					request.close();
@@ -436,9 +428,11 @@ public class BatchHandler extends RequestHandlerBase {
 			queue.registerFinishedBatch(data);
 		}
 		catch(Exception e) {
+			String trace = getErrorStackTrace(e);
+			data.setMsg(trace);
 			queue.registerFailedBatch(providers.get("#failed"), data);
 			log.error("Error executing: " + locReq);
-			log.error(e.getLocalizedMessage());
+			log.error(trace);
 		}
 		finally {
 			locReq.close();
@@ -447,6 +441,11 @@ public class BatchHandler extends RequestHandlerBase {
 
 
 
+	private String getErrorStackTrace(Exception e) {
+		StringWriter sw = new StringWriter();
+		e.printStackTrace(new PrintWriter(sw));
+		return sw.toString();
+	}
 
 	public String getVersion() {
 		return "";

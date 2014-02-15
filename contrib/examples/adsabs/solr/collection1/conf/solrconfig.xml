@@ -2029,6 +2029,7 @@
       <str name="dump-index-use-bibcodes">org.apache.solr.handler.batch.BatchProviderDumpBibcodes</str>
       <str name="dump-freqs">org.apache.solr.handler.batch.BatchProviderDumpTermFreqs</str>
       <str name="dump-docs">org.apache.solr.handler.batch.BatchProviderDumpIndex</str>
+      <str name="dump-docs-by-query">org.apache.solr.handler.batch.BatchProviderDumpDocsByQuery</str>
       <str name="dump-citation-index">org.apache.solr.handler.batch.BatchProviderDumpCitationCache</str>
       <str name="find-freq-phrases">org.apache.solr.handler.batch.BatchProviderFindWordGroups</str>
     </lst>

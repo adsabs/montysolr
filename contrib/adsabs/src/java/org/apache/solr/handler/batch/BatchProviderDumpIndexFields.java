@@ -8,16 +8,17 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.Collector;
@@ -33,17 +34,18 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.SortableFloatField;
+import org.apache.solr.schema.TextField;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.SolrIndexSearcher;
 
 /**
- * Provider that dumps selected fields to disk.
- * The data is stored in CSV format. It outputs
- * values as they were analyzed for indexing
- * (it doesn't output values that would be queried)
+ * Provider that dumps selected fields to disk - it can analyze fields 
+ * and show their values (but only for text/string fields).
  */
+
 public class BatchProviderDumpIndexFields extends BatchProvider {
 	
 	private Filter filter = null;
@@ -69,6 +71,11 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 		}
 
 		String[] fields = params.getParams("fields");
+		
+		if (fields == null) {
+			throw new SolrException(ErrorCode.BAD_REQUEST, "'fields' parameter missssssing");
+		}
+		
 		for (String f: fields) {
 			for (String ff: f.split("( |,)")) {
 				SchemaField field = schema.getFieldOrNull(ff);
@@ -79,6 +86,8 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 			}
 		}
 
+		final boolean analyze = params.getBool("analyze", true);
+		
 		String defType = params.get(QueryParsing.DEFTYPE,QParserPlugin.DEFAULT_QTYPE);
 		QParser parser = QParser.getParser(q, defType, req);
 		Query query = parser.getQuery();
@@ -104,6 +113,7 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 			private AtomicReader reader;
 			private int processed = 0;
 			private CharTermAttribute termAtt;
+			private NumericTermAttribute numAtt;
 			private PositionIncrementAttribute posIncrAtt;
 			private Map<String, List<String>>document = new HashMap<String, List<String>>();
 
@@ -131,36 +141,61 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 					String fName = en.getKey();
 					FieldType fType = en.getValue();
 					
+					// test this field is analyzable as text field
+					boolean isText = fType.getClass().isAssignableFrom(StringField.class) 
+						|| fType.getClass().isAssignableFrom(TextField.class)
+						|| fType.getClass().isAssignableFrom(SortableFloatField.class)
+						; 
+					
+					//System.out.println(fName + " " + fType.getClass() + " isText " + isText);
+					
 					document.put(fName, tokens);
-					String[] vals = d.getValues(fName);
 					posIncrAtt = null;
-					for (String s: vals) {
-						TokenStream buffer = analyzer.tokenStream(fName, new StringReader(fType.indexedToReadable(s)));
-
-						if (!buffer.hasAttribute(CharTermAttribute.class)) {
-							continue; // empty stream
+					String[] vals = d.getValues(fName);
+					
+					if (!analyze) {
+						for (String s: vals) {
+							tokens.add(s);
 						}
-
-						termAtt = buffer.getAttribute(CharTermAttribute.class);
-
-						if (buffer.hasAttribute(PositionIncrementAttribute.class)) {
-							posIncrAtt = buffer.getAttribute(PositionIncrementAttribute.class);
-						}
-						buffer.reset();
-
-						if (posIncrAtt != null) {
-							while (buffer.incrementToken()) {
-								if (posIncrAtt.getPositionIncrement() == 0) {
-									tokens.set(tokens.size()-1, tokens.get(tokens.size()-1) + "|" + fType.indexedToReadable(termAtt.toString()));
-								}
-								else {
-									tokens.add(fType.indexedToReadable(termAtt.toString()));
-								}
+					}
+					else {
+					
+						if (!isText) {
+							for (String s: vals) {
+								tokens.add(s);
 							}
 						}
 						else {
-							while (buffer.incrementToken()) {
-								tokens.add(fType.indexedToReadable(termAtt.toString()));
+							for (String s: vals) {
+								
+								TokenStream buffer = analyzer.tokenStream(fName, new StringReader(fType.indexedToReadable(s)));
+								
+								if (!buffer.hasAttribute(CharTermAttribute.class)) {
+									continue; // empty stream
+								}
+		
+								termAtt = buffer.getAttribute(CharTermAttribute.class);
+		
+								if (buffer.hasAttribute(PositionIncrementAttribute.class)) {
+									posIncrAtt = buffer.getAttribute(PositionIncrementAttribute.class);
+								}
+								buffer.reset();
+		
+								if (posIncrAtt != null) {
+									while (buffer.incrementToken()) {
+										if (posIncrAtt.getPositionIncrement() == 0) {
+											tokens.set(tokens.size()-1, tokens.get(tokens.size()-1) + "|" + fType.indexedToReadable(termAtt.toString()));
+										}
+										else {
+											tokens.add(fType.indexedToReadable(termAtt.toString()));
+										}
+									}
+								}
+								else {
+									while (buffer.incrementToken()) {
+										tokens.add(fType.indexedToReadable(termAtt.toString()));
+									}
+								}
 							}
 						}
 					}

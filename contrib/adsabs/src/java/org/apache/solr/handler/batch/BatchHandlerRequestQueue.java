@@ -1,7 +1,9 @@
 package org.apache.solr.handler.batch;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,11 +12,12 @@ import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 
 public class BatchHandlerRequestQueue {
-	Map<String, BatchHandlerRequestData>tbdQueue = Collections.synchronizedMap(new LinkedHashMap<String, BatchHandlerRequestData>());
-	Map<String, BatchHandlerRequestData>failedQueue = Collections.synchronizedMap(new LinkedHashMap<String, BatchHandlerRequestData>());
-	Integer queuedIn = 0;
-	Integer queuedOut = 0;
-	Map<String, Integer> jobs = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
+	private Map<String, BatchHandlerRequestData>tbdQueue = Collections.synchronizedMap(new LinkedHashMap<String, BatchHandlerRequestData>());
+	private Map<String, BatchHandlerRequestData>failedQueue = Collections.synchronizedMap(new LinkedHashMap<String, BatchHandlerRequestData>());
+	private Integer queuedIn = 0;
+	private Integer queuedOut = 0;
+	private Map<String, Integer> jobs = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
+	private Map<String, String> failedJobs = Collections.synchronizedMap(new LinkedHashMap<String, String>());
 
 	private volatile boolean stopped;
 
@@ -37,7 +40,9 @@ public class BatchHandlerRequestQueue {
 
 		if (!failedQueue.containsKey(data.url)) {
 			BatchHandlerRequestData rd = new BatchHandlerRequestData(provider, data.getReqParams());
+			rd.setMsg(data.getMsg());
 			failedQueue.put(rd.url, rd);
+			failedJobs.put(jobid, rd.url);
 		}
 		jobs.put(jobid, -jobs.get(jobid));
 	}
@@ -110,4 +115,40 @@ public class BatchHandlerRequestQueue {
 	public void decreaseJobCounter(String jobid) {
 		jobs.put(jobid, jobs.get(jobid)-1);
 	}
+	public int getTbdQueueSize() {
+	  return tbdQueue.size();
+  }
+	public int getFailedQueueSize() {
+	  return failedQueue.size();
+  }
+	public int getTotalQueueSize() {
+	  return queuedIn;
+  }
+	public int getTotalFinishedSize() {
+	  return queuedOut;
+  }
+	
+	public List<String> getQueueDetails(int howMany, int type) {
+		ArrayList<String> out = new ArrayList<String>();
+		Map<String, BatchHandlerRequestData> queue = tbdQueue;
+		if (type == 0) {
+			queue = failedQueue;
+		}
+		int i = 0;
+		for (BatchHandlerRequestData d: queue.values()) {
+			out.add(d.toString());
+			i++;
+			if (i >= howMany) {
+				break;
+			}
+		}
+		return out;
+	}
+	
+	public Object getErrorMessage(String jobid) {
+	  if (!failedJobs.containsKey(jobid)) {
+	  	return "No message for jobid: " + jobid;
+	  }
+	  return failedQueue.get(failedJobs.get(jobid)).getMsg();
+  }
 }

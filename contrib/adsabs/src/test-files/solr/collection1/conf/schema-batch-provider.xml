@@ -4,6 +4,10 @@
     <fieldType name="string" class="solr.StrField" />
     <fieldType name="sfloat" class="solr.SortableFloatField"
       sortMissingLast="true" omitNorms="true" />
+    <fieldType name="int" class="solr.TrieIntField"
+      precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+    <fieldType name="date" class="solr.TrieDateField" omitNorms="true"
+      precisionStep="0" positionIncrementGap="0" />
 
 
     <!-- A text field that only splits on whitespace for exact matching of 
@@ -52,8 +56,12 @@
   <fields>
     <!-- for testing, a type that does a transform to see if it's correctly 
       done everywhere -->
-    <field name="id" type="sfloat" indexed="true" stored="true"
+    <field name="id" type="int" indexed="true" stored="true"
       required="true" />
+      
+    <field name="intf" type="int" indexed="true" stored="true"/>
+    <field name="floatf" type="sfloat" indexed="true" stored="true"/>
+      
     <field name="bibcode" type="string" indexed="true" stored="true"
       required="false" />
     <field name="text" type="text" indexed="true" stored="true" />

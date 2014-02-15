@@ -37,6 +37,10 @@ public class JSONDumper extends JSONWriter {
 	public static JSONDumper create(SolrQueryRequest req, File jobFile, Bits bitSet) throws IOException {
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		FileWriter writer = new FileWriter(jobFile);
+		
+		ReturnFields returnFields = new ReturnFields( req );
+    rsp.setReturnFields( returnFields );
+    
 		JSONDumper d = new JSONDumper(writer, req, rsp);
 		d.setBitset(bitSet);
 		return d;
