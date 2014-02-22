@@ -1,0 +1,12 @@
+/*-- HTML5 Boilerplate. -----------------------------------------------------*/
+
+@import "../bower_components/html5-boilerplate/css/normalize.css";
+@import "../bower_components/html5-boilerplate/css/main.css";
+
+/*-- Application stylesheets. -----------------------------------------------*/
+
+body {
+  min-width: 1020px;
+  color: #333333;
+  background-color: #fff;
+}

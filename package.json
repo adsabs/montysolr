@@ -1,0 +1,38 @@
+{
+  "name": "bloombeer",
+  "version": "0.1.0",
+  "devDependencies": {
+    "bbb": "~0.2.0",
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-cssmin": "~0.8.0",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-compress": "~0.5.2",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-processhtml": "~0.2.0",
+    "grunt-karma": "~0.6.2",
+    "grunt-karma-coveralls": "~2.0.2",
+    "karma-jasmine": "~0.1.0",
+    "karma-mocha": "~0.1.0",
+    "karma-qunit": "~0.1.0",
+    "karma-phantomjs-launcher": "~0.1.0",
+    "karma-coverage": "~0.1.0",
+    "almond": "~0.2.9",
+    "grunt-bower-task": "~0.3.4",
+    "grunt-contrib-requirejs": "~0.4.1",
+    "grunt-contrib-connect": "~0.6.0",
+    "grunt-express-server": "~0.4.13",
+    "grunt-contrib-watch": "~0.5.3",
+    "express": "~3.4.8",
+    "grunt-env": "~0.4.1"
+  },
+  "peerDependencies": {
+    "bower": "*",
+    "grunt-cli": "*",
+    "coveralls": "*"
+  },
+  "scripts": {
+    "test": "grunt test coveralls"
+  }
+}
