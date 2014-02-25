@@ -20,6 +20,7 @@ module.exports = function(grunt) {
     // Run your source code through JSHint's defaults.
     jshint: ['src/js/**/*.js'],
     
+    
 
     // This task uses James Burke's excellent r.js AMD builder to take all
     // modules and concatenate them into a single file.
@@ -113,13 +114,13 @@ module.exports = function(grunt) {
       },
     },
     
-    // start a development webserver 
+    // start a development webserver (if you want to keep it running, use the 'server'
+    // task
     express: {
       
       options: {
         // some defaults
         background:true,
-        delay: 50000
       },
       dev: {
         options: {
@@ -135,7 +136,7 @@ module.exports = function(grunt) {
       }
     },
     
-    // this will automatically reload webserver whenever a file is modified
+    // will automatically reload webserver whenever a file is modified
     watch: {
       dev: {
         files:  [ './src/js/**/*.js' ],
@@ -265,6 +266,8 @@ module.exports = function(grunt) {
       }
     },
     
+    // concatenates all javascript into one big minified file (of limited 
+    // use for now)
     uglify: {
       options: {
         banner: "/*! <%= pkg.name %> <%= grunt.template.today('yyyy-mm-dd') %> */\n"
@@ -317,12 +320,13 @@ module.exports = function(grunt) {
 
   // When running the default Grunt command, just lint the code.
   grunt.registerTask('default', [
-    'dev:env',
+    'env:dev',
     'clean',
     'jshint',
     'copy',
     'processhtml',
     'requirejs',
+    'compress'
     //'cssmin',
   ]);
   
