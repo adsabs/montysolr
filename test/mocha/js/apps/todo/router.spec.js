@@ -11,8 +11,8 @@ define(function(require) {
       expect(new Router()).to.be.an.instanceof(Backbone.Router);
     });
 
-    it("should run index method when history is started", function() {
-      Backbone.history.start();
+    it("should fail when history is started without todos initialized", function() {
+      chai.assert.throw(function() {Backbone.history.start();}, Error, "Cannot call method");
     });
   });
 });

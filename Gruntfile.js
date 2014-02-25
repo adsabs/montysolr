@@ -11,6 +11,7 @@ module.exports = function(grunt) {
     bower: {
       install: {
         options: {
+          // config: 'bower.json',
           targetDir: './src/libs'
         }
       }

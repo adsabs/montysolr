@@ -3,6 +3,10 @@
 
 
 require.config({
+    
+  // Initialize the application with the main application file
+  deps : window.mocha ? [ '../../../../test/mocha/todo.spec' ] : [ 'main' ],
+  
   paths: {
     
     // generic paths

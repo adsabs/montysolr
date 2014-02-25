@@ -18,6 +18,7 @@ define(function(require, exports, module) {
 
 			// Trigger a collection filter event, causing hiding/unhiding
 			// of Todo view items
+			// XXX: bad design, we are not exposing api
 			app.todos.trigger('filter');
 		}
 	});
