@@ -19,6 +19,7 @@ define(function(require) {
       chai.expect(this.hello()).to
         .be.a("string").and
         .equal("Hello world!");
+      
     });
   });
 });

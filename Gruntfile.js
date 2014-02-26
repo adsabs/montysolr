@@ -81,7 +81,7 @@ module.exports = function(grunt) {
           report: 'min'
         },
         files: {
-          'dist/foo': ['./dist/src/**/*.css', '!./dist/src/**/*.min.css'],
+          'dist/foo': ['./dist/src/**/*.css', '!./dist/src/**/*.min.css']
         }
       },
       test: {
@@ -103,14 +103,14 @@ module.exports = function(grunt) {
     // only for the express task (our webserver)
     env: {
       options: {
-        API_ENDPOINT: 'http://adswhy:9000/solr/select',
+        API_ENDPOINT: 'http://adswhy:9000/solr/select'
       },
       dev: {
-        HOMEDIR: 'src',
+        HOMEDIR: 'src'
         //DEBUG: 'express:*'
       },
       prod: {
-        HOMEDIR: 'dist',
+        HOMEDIR: 'dist'
       },
     },
     
@@ -120,18 +120,18 @@ module.exports = function(grunt) {
       
       options: {
         // some defaults
-        background:true,
+        background:true
       },
       dev: {
         options: {
           port: 8000,
-          script: 'server.js',
+          script: 'server.js'
         }
       },
       prod: {
         options: {
           port: 8001,
-          script: 'server.js',
+          script: 'server.js'
         }
       }
     },
@@ -141,6 +141,14 @@ module.exports = function(grunt) {
       dev: {
         files:  [ './src/js/**/*.js' ],
         tasks:  [ 'env:dev', 'express:dev' ],
+        options: {
+          spawn: false // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded
+        }
+      },
+      testing: {
+        files:  [ './src/js/**/*.js', './test/**/*.js' ],
+        //tasks:  [ 'env:dev', 'express:dev' ],
+        tasks: ['test'],
         options: {
           spawn: false // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded
         }
@@ -193,6 +201,11 @@ module.exports = function(grunt) {
       }
     },
 
+    // RC: I think i'll ditch karma, because it does some funny stuff;
+    // RC: instructions to use it with require.js suggest that we need
+    // RC: to write a separate file for our tests (which defeats the 
+    // RC: the purpose)
+    // RC: for the moment ignore this section
     // Unit testing is provided by Karma.  Change the two commented locations
     // below to either: mocha, jasmine, or qunit.
     karma: {
@@ -262,8 +275,17 @@ module.exports = function(grunt) {
 
     coveralls: {
       options: {
+        src: ['src/js/**/*.js'],
         coverage_dir: 'test/coverage/PhantomJS 1.9.2 (Linux)/'
       }
+    },
+    
+    mocha_phantomjs: {
+      options: {
+        'output': 'test/reports/testing.output'
+      },
+      all: ['test/mocha/**/*.html'],
+      todo: ['test/mocha/**/todo.spec.html']
     },
     
     // concatenates all javascript into one big minified file (of limited 
@@ -298,22 +320,23 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   
 
-  // Third-party tasks.
+  // karma tasks. (to ditch?)
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-karma-coveralls');
+  
+  // for testing
+  grunt.loadNpmTasks('grunt-mocha-phantomjs');
+  
+  // other 3rd party libs
   grunt.loadNpmTasks('grunt-processhtml');
 
-  
-  
-  // deactivated since the code is 'silly' it allows
-  // only for hardcoded targets
-  // grunt.loadNpmTasks('grunt-bbb-styles');
   
   // Bower tasks
   grunt.loadNpmTasks('grunt-bower-task');
 
   // Create an aliased test task.
-  grunt.registerTask('test', ['karma:run']);
+  grunt.registerTask('test', ['mocha_phantomjs:all']);
+  grunt.registerTask('test:watch', ['mocha_phantomjs:all', 'watch:testing']);
   
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment', ['bower']);
@@ -330,5 +353,5 @@ module.exports = function(grunt) {
     //'cssmin',
   ]);
   
-  grunt.registerTask('server', [ 'env:dev', 'express:dev', 'watch' ])
+  grunt.registerTask('server', [ 'env:dev', 'express:dev', 'watch:dev' ])
 };
