@@ -4,9 +4,9 @@
 
 require.config({
     
-  // Initialize the application with the main application file
-  //deps : window.mocha ? [ '../../../../test/mocha/todo.spec' ] : [ 'main' ],
-  deps: ['../../../../test/mocha/todo.spec'],
+  // Initialize the application with the main application file or if we run
+  // as a test, then load the test unittests
+  deps: window.mocha ? [ '../../../../test/mocha/todo.spec' ] : [ 'main' ],
   
   paths: {
     

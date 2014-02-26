@@ -51,7 +51,15 @@ home = process.env.HOMEDIR || './';
 app.use(express.static(__dirname + '/' + home));
 app.use(express.directory(__dirname + '/' + home));
 
+// map test dependencies so that we can run tests too
+app.use('/src', express.static(__dirname + '/' + home));
+app.use('/src', express.directory(__dirname + '/' + home));
 
+app.use('/test', express.static(__dirname + '/test'));
+app.use('/test', express.directory(__dirname + '/test'));
+
+app.use('/bower_components', express.static(__dirname + '/bower_components'));
+app.use('/bower_components', express.directory(__dirname + '/bower_components'));
 
 port = process.env.PORT || 3000;
 app.listen(port);
