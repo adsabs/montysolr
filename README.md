@@ -12,8 +12,8 @@ Things may change dramatically, be prepared.
 
 
 
-dev setup
-=========
+dev setup - linux
+=================
 
 If you don't have node.js, do this (or equivalent of your distribution):
 
@@ -29,6 +29,24 @@ Now (inside the project), run:
   
   # setup the project (libraries)
   $ grunt setup 
+```
+
+dev setup - mac OS X
+====================
+
+If you have mac port installed, this should work:
+
+```bash
+  $ sudo port install nodejs nodejs-devel npm
+```
+
+(grunt is not available from mac ports, see below)
+Inside the project's working directory, run:
+
+```bash
+  $ npm install grunt-cli
+  $ npm install
+  $ node_modules/grunt-cli/bin/grunt setup
 ```
 
 And you are ready to go!
@@ -212,12 +230,18 @@ http://labs.adsabs.harvard.edu/trac/ads-invenio/wiki/BackboneResources
 miscellanea
 ===========
 
-- you can run server.js from command line
+- you can run server.js from command line.  If you want to connect to our SOLR server, the easiest thing to do is to tunnel to adswhy:9000 like so:
 
   ```bash
-  $ SOLR_ENDPOINT=http://adswhy:9000/solr/select HOMEDIR=src node server.js ```
+  $ ssh -N -f -L 9000:adswhy.cfa.harvard.edu:9000 pogo3.cfa.harvard.edu
+  $ env API_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src node server.js 
+```
   
 - if you want to debug/edit in place node.js code, use supervisor (you need to install it first)
 
   ```bash
-  $ SOLR_ENDPOINT=http://adswhy:9000/solr/select HOMEDIR=src supervisor server.js ```
+  $ env SOLR_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js 
+```
+
+- you can see the search being routed to the SOLR api by accessing: http://localhost:3000/api/search, for instance:
+  http://localhost:3000/api/search?q=kurtz
