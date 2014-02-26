@@ -234,9 +234,14 @@ miscellanea
 
   ```bash
   $ ssh -N -f -L 9000:adswhy.cfa.harvard.edu:9000 pogo3.cfa.harvard.edu
-  $ env API_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src node server.js ```
+  $ env API_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src node server.js 
+```
   
 - if you want to debug/edit in place node.js code, use supervisor (you need to install it first)
 
   ```bash
-  $ env SOLR_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js ```
+  $ env SOLR_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js 
+```
+
+- you can see the search being routed to the SOLR api by accessing: http://localhost:3000/api/search, for instance:
+  http://localhost:3000/api/search?q=kurtz
