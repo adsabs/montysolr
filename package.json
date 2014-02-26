@@ -1,5 +1,5 @@
 {
-  "name": "bloombeer",
+  "name": "bumblebee",
   "version": "0.1.0",
   "devDependencies": {
     "bbb": "~0.2.0",
@@ -25,7 +25,8 @@
     "grunt-express-server": "~0.4.13",
     "grunt-contrib-watch": "~0.5.3",
     "express": "~3.4.8",
-    "grunt-env": "~0.4.1"
+    "grunt-env": "~0.4.1",
+    "grunt-mocha-phantomjs": "~0.4.2"
   },
   "peerDependencies": {
     "bower": "*",

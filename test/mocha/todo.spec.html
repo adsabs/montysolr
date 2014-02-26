@@ -1,0 +1,44 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+
+  <link rel="stylesheet" href="../../bower_components/mocha/mocha.css"/>
+
+</head>
+<body>
+  <div id="mocha"></div>
+  <div id="test"></div>
+
+  <!-- RC: I wasn't successful loading the test frameworks from require.js
+       but maybe it makes sense because the testing framework should 
+       be the global object responsible for handling everything -->
+       
+  <script src="../../bower_components/mocha/mocha.js"></script>
+  <script src="../../bower_components/chai/chai.js"></script>
+  <script src="../../bower_components/sinon/lib/sinon.js"></script>
+  
+  <!-- Setup the testing frameworks -->
+  <script>
+    // Chai
+    //var should = chai.should();
+    
+    /*globals mocha, expect, chai */
+    mocha.setup('bdd');
+    mocha.bail(false);
+    var expect = chai.expect;
+  </script>
+
+  <!-- Now start our application
+  
+       When we point to our application, we are using the same configuration; but the config must be 
+       configured properly to load the test runner -->
+       
+  <script data-main="../../src/js/apps/todo/config" src="../../bower_components/requirejs/require.js"></script>
+  
+  <!-- Test Fixtures. -->
+    <div id="fixtures"
+         style="display: none; visibility: hidden;"></div>
+         
+</body>
+</html>

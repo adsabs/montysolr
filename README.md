@@ -68,14 +68,25 @@ When applicable, take advantage of the headless testing framework! You can edit 
 have it automatically re-tested.
  
 ```bash
-  # start the karma (unit-testing service)
-  $ grunt karma
+  # run tests (it will reload automatically and report in terminal)
+  $ grunt test:watch
+  
+  # or if you want to just run it once
+  $ grunt test
 ```
 
-When you want to interact with the server:
+Tests can also be opened in a browser, you can zone-in on certain class of tests when editing,
+but you have to reload in your browser
+
+```bash
+   # open the test in a browser
+   $ chrome ./test/mocha/todo.spec.html
+```
+
+When you want to interact with the server (and see the application through web):
 
  ```bash
-  # start the webserver (it will reload automatically)
+  # start the webserver (it will automatically reload on code changes)
   $ grunt server
   ```
 
