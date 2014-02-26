@@ -113,7 +113,7 @@ This is the current file/folder structure, with short explanation:
    |-/bower_components
    |-/dist
    |-/node_modules
-   |-/src
+   |-/src/js     <-- our code lives here
    |---apps
    |-----discovery
    |-------img
@@ -123,7 +123,8 @@ This is the current file/folder structure, with short explanation:
    |---components
    |---libs
    |---modules
-   |---views
+   |---views   
+   |-/src/libs   <-- external dependencies
    |-/test
    |---mocha
    |-----apps
@@ -240,7 +241,7 @@ miscellanea
 - if you want to debug/edit in place node.js code, use supervisor (you need to install it first)
 
   ```bash
-  $ env SOLR_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js 
+  $ env API_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js 
 ```
 
 - you can see the search being routed to the SOLR api by accessing: http://localhost:3000/api/search, for instance:
