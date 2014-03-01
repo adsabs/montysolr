@@ -21,6 +21,7 @@ require.config({
 
     // bumblebee components
     'api_query': codeDir + 'js/components/api_query',
+    'solr_query': codeDir + 'js/components/query',
 
     // Almond is used to lighten the output filesize.
     "almond": codeDir + "libs/almond/almond",

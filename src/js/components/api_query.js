@@ -20,7 +20,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
         }
 
         tempVal =_.compact(tempVal);
-        if (_.isEmpty(tempVal)) {
+        if (_.isEmpty(tempVal) && options.unset !== true) {
           throw new Error('Empty values not allowed');
         }
 
@@ -56,6 +56,38 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
         if (!(_.isArray(tempVal))) {
           attrs[attr] = _.compact([tempVal]);
         }
+      }
+
+      Backbone.Model.prototype.set.call(this, attrs, options);
+    },
+
+
+    // adds values to existing (like set, but keeps the old vals)
+    add: function(key, val, options) {
+      var attrs;
+
+      if (key == null) return this;
+
+      // Handle both `"key", value` and `{key: value}` -style arguments.
+      if (typeof key === 'object') {
+        attrs = key;
+        options = val;
+      } else {
+        (attrs = {})[key] = val;
+      }
+
+      for (attr in attrs) {
+        var tempVal = attrs[attr];
+
+        // convert to array if necessary
+        if (!(_.isArray(tempVal))) {
+          tempVal = _.compact([tempVal]);
+        }
+        if (this.has(attr)) {
+          tempVal = _.clone(this.get(attr)).concat(tempVal);
+        }
+
+        attrs[attr] = tempVal;
       }
 
       Backbone.Model.prototype.set.call(this, attrs, options);

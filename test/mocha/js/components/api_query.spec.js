@@ -1,5 +1,5 @@
 define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
-  describe("API query object", function () {
+  describe("API params model object", function () {
       
     // Runs once before all tests start.
     before(function () {
@@ -9,7 +9,7 @@ define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
     after(function () {
     });
   
-    it("should return API query object", function() {
+    it("should return API params model", function() {
       expect(new ApiQuery()).to.be.an.instanceof(Backbone.Model);
 
     });
@@ -32,6 +32,12 @@ define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
       t.set('number', 8);
       expect(t.get('number')).to.eql([8]);
 
+      t.add('number', '9');
+      expect(t.get('number')).to.eql([8, '9']);
+
+      t.add({'string': 'baz', 'array': ['baz']});
+      expect(t.get('string')).to.eql(['bar', 'baz']);
+      expect(t.get('array')).to.eql(['bar', 'baz']);
 
       // test only strings/numbers are allowed
       assert.throw(function() {t.set('foo', {key: 'value'})}, Error);
