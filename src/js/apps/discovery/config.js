@@ -20,8 +20,10 @@ require.config({
   paths: {
 
     // bumblebee components
-    'api_query': codeDir + 'js/components/api_query',
-    'solr_query': codeDir + 'js/components/query',
+    // TODO: we should rethink the folder structure, when writing components
+    // one has to map them, if baseUrl was inside src/ this would not be needed
+    'js/components/multi_params': codeDir + 'js/components/multi_params',
+    'js/components/query': codeDir + 'js/components/query',
 
     // Almond is used to lighten the output filesize.
     "almond": codeDir + "libs/almond/almond",

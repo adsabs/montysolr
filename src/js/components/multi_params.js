@@ -2,7 +2,7 @@
 define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
 
 
-  var ApiQuery = Backbone.Model.extend({
+  var Model = Backbone.Model.extend({
 
     // we allow only strings and numbers; instead of sending
     // signal we throw a direct error
@@ -95,7 +95,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
 
     // synchronization is disabled
     sync: function() {
-      throw Error("ApiQuery cannot be saved to server");
+      throw Error("MultiParams cannot be saved to server");
     },
 
     // instead of url, we provide the complete url parameters that define
@@ -133,5 +133,5 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
 
   });
 
-  return ApiQuery;
+  return Model;
 });

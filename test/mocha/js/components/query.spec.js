@@ -1,4 +1,4 @@
-define(['solr_query', 'api_query', 'backbone'], function(SolrQuery, ApiQuery, Backbone) {
+define(['js/components/query', 'js/components/multi_params', 'backbone'], function(ApiQuery, MultiParams, Backbone) {
   describe("API params object", function () {
       
     // Runs once before all tests start.
@@ -10,17 +10,17 @@ define(['solr_query', 'api_query', 'backbone'], function(SolrQuery, ApiQuery, Ba
     });
   
     it("should return bare API params object", function() {
-      expect(new SolrQuery()).to.be.instanceof(Object);
-      expect(new SolrQuery()).not.to.be.instanceof(ApiQuery);
-      expect(new SolrQuery()).not.to.be.instanceof(Backbone.Model);
+      expect(new ApiQuery()).to.be.instanceof(Object);
+      expect(new ApiQuery()).not.to.be.instanceof(MultiParams);
+      expect(new ApiQuery()).not.to.be.instanceof(Backbone.Model);
 
-      expect(new SolrQuery().clone()).to.be.instanceof(Object);
-      expect(new SolrQuery().clone()).not.to.be.instanceof(ApiQuery);
-      expect(new SolrQuery().clone()).not.to.be.instanceof(Backbone.Model);
+      expect(new ApiQuery().clone()).to.be.instanceof(Object);
+      expect(new ApiQuery().clone()).not.to.be.instanceof(MultiParams);
+      expect(new ApiQuery().clone()).not.to.be.instanceof(Backbone.Model);
     });
     
     it("has methods for manipulating keys/values", function() {
-      var q = new SolrQuery({'foo': 'bar'});
+      var q = new ApiQuery({'foo': 'bar'});
       expect(q.get('foo')).to.eql(['bar']);
 
       q.set('foo', ['bar', 'baz']);
@@ -29,7 +29,7 @@ define(['solr_query', 'api_query', 'backbone'], function(SolrQuery, ApiQuery, Ba
       expect(q.toJSON()).to.eql({'foo': ['bar', 'baz']});
 
       expect(q.url()).to.eql('foo=bar&foo=baz');
-      expect(new SolrQuery().load('foo=bar&foo=baz').toJSON()).to.eql({'foo': ['bar', 'baz']});
+      expect(new ApiQuery().load('foo=bar&foo=baz').toJSON()).to.eql({'foo': ['bar', 'baz']});
 
       expect(q.clone()).to.not.equal(q);
       expect(q.clone().toJSON()).to.eql(q.toJSON());
@@ -64,14 +64,14 @@ define(['solr_query', 'api_query', 'backbone'], function(SolrQuery, ApiQuery, Ba
     });
     
     it("hides parameters, you cannot directly change them", function() {
-      expect(new SolrQuery().attributes).to.be.undefined;
-      expect(new SolrQuery().save).to.be.undefined;
-      expect(new SolrQuery().sync).to.be.undefined;
+      expect(new ApiQuery().attributes).to.be.undefined;
+      expect(new ApiQuery().save).to.be.undefined;
+      expect(new ApiQuery().sync).to.be.undefined;
     });
     
 
     it("can be made immutable and throws error on modification", function() {
-      var q = new SolrQuery({'foo': 'bar'});
+      var q = new ApiQuery({'foo': 'bar'});
       q.lock();
       expect(function() {q.set('foo', 'baz')}).to.throw("Query locked");
       expect(q.isLocked()).to.be.true;

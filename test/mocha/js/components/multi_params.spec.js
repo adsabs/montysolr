@@ -1,4 +1,4 @@
-define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
+define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbone) {
   describe("API params model object", function () {
       
     // Runs once before all tests start.
@@ -10,12 +10,12 @@ define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
     });
   
     it("should return API params model", function() {
-      expect(new ApiQuery()).to.be.an.instanceof(Backbone.Model);
+      expect(new MultiParams()).to.be.an.instanceof(Backbone.Model);
 
     });
     
     it("should store all values as arrays", function() {
-      var t = new ApiQuery();
+      var t = new MultiParams();
 
       t.set('string', 'bar');
       expect(t.get('string')).to.eql(['bar']);
@@ -46,7 +46,7 @@ define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
 
 
       // the validation can be surpressed
-      var Q2 = ApiQuery.extend({
+      var Q2 = MultiParams.extend({
         _validate: function(attrs, options) {
           return true;
         }
@@ -61,7 +61,7 @@ define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
     });
 
     it("can be overwritten, but provides old values", function() {
-      var t = new ApiQuery({'foo': ['boo', 'woo']});
+      var t = new MultiParams({'foo': ['boo', 'woo']});
       expect(t.get('foo')).to.eql(['boo', 'woo']);
       expect(t.previous('foo')).to.eql(undefined);
 
@@ -77,17 +77,17 @@ define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
     
 
     it("can be serialized and de-serialized (saved as string and reloaded)", function() {
-      var t = new ApiQuery({'foo': ['bar', 'baz'], 'boo': ['woo', 1]});
+      var t = new MultiParams({'foo': ['bar', 'baz'], 'boo': ['woo', 1]});
       expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
 
-      t = new ApiQuery({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
+      t = new MultiParams({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
       expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
 
       expect(t.parse('foo=bar&foo=baz&boo=woo&boo=1')).to.eql({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
     });
     
     it("can be cloned", function() {
-      var t = new ApiQuery({'foo': ['boo', 'woo']});
+      var t = new MultiParams({'foo': ['boo', 'woo']});
       var t2 = t.clone();
 
       expect(t).to.be.not.equal(t2);
@@ -99,10 +99,10 @@ define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
     });
 
     it("cannot be sync'ed to the server (it is state-less)", function() {
-      expect(function() {var t = new ApiQuery({'foo': 'bar'});t.sync()}).to.throw("ApiQuery cannot be saved to server");
-      expect(function() {var t = new ApiQuery({'foo': 'bar'});t.save()}).to.throw("ApiQuery cannot be saved to server");
-      expect(function() {var t = new ApiQuery({'foo': 'bar'});t.fetch()}).to.throw("ApiQuery cannot be saved to server");
-      expect(function() {var t = new ApiQuery({'foo': 'bar'});t.destroy()}).to.not.throw("ApiQuery cannot be saved to server");
+      expect(function() {var t = new MultiParams({'foo': 'bar'});t.sync()}).to.throw("MultiParams cannot be saved to server");
+      expect(function() {var t = new MultiParams({'foo': 'bar'});t.save()}).to.throw("MultiParams cannot be saved to server");
+      expect(function() {var t = new MultiParams({'foo': 'bar'});t.fetch()}).to.throw("MultiParams cannot be saved to server");
+      expect(function() {var t = new MultiParams({'foo': 'bar'});t.destroy()}).to.not.throw("MultiParams cannot be saved to server");
     })
 
   });

@@ -10,7 +10,7 @@ console.log('discovery tests');
 
 // These are the tests that we want to run for this app
 var tests = [
-  tbase + '/components/api_query.spec.js',
+  tbase + '/components/multi_params.spec.js',
   tbase + '/components/query.spec.js'
 ];
 

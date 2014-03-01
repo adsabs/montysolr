@@ -1,5 +1,5 @@
 
-define(['backbone', 'underscore', 'api_query'], function(Backbone, _, ApiQuery) {
+define(['backbone', 'underscore', 'js/components/multi_params'], function(Backbone, _, MultiParams) {
 
 
 
@@ -30,7 +30,7 @@ define(['backbone', 'underscore', 'api_query'], function(Backbone, _, ApiQuery) 
         return innerQuery.url();
       },
       clone: function() {
-        var q = new SolrQuery(new ApiQuery(innerQuery.toJSON()));
+        var q = new SolrQuery(new MultiParams(innerQuery.toJSON()));
         if (this.isLocked()) {
           q.lock();
         }
@@ -95,6 +95,6 @@ define(['backbone', 'underscore', 'api_query'], function(Backbone, _, ApiQuery) 
   // all power of the Backbone.Model
 
   return function(data) {
-    return new SolrQuery(new ApiQuery(data));
+    return new SolrQuery(new MultiParams(data));
   }
 });
