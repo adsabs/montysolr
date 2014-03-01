@@ -1,3 +1,4 @@
+// TODOExample
 // Application specific config (for require.js) it is also used
 // by Grunt when we build the app from command line.
 
@@ -13,7 +14,8 @@ require.config({
     // generic paths
     'libs': '../../../libs',
     'js': '../../../js',
-    
+
+
     // todo app files
     'todo-model': './models/todo',
     'todo-view': './views/todo-view',

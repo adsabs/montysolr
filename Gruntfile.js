@@ -111,7 +111,7 @@ module.exports = function(grunt) {
       },
       prod: {
         HOMEDIR: 'dist'
-      },
+      }
     },
     
     // start a development webserver (if you want to keep it running, use the 'server'
@@ -151,6 +151,21 @@ module.exports = function(grunt) {
         tasks: ['test'],
         options: {
           spawn: false // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded
+        }
+      },
+      // TODO: I should find a way to dynamically discover these names 'discovery' etc...
+      discovery: {
+        files:  [ './src/js/**/*.js', './test/**/*.js' ],
+        tasks: ['discovery:watch'],
+        options: {
+          spawn: false
+        }
+      },
+      todo: {
+        files:  [ './src/js/**/*.js', './test/**/*.js' ],
+        tasks: ['todo:watch'],
+        options: {
+          spawn: false
         }
       }
     },
@@ -201,78 +216,6 @@ module.exports = function(grunt) {
       }
     },
 
-    // RC: I think i'll ditch karma, because it does some funny stuff;
-    // RC: instructions to use it with require.js suggest that we need
-    // RC: to write a separate file for our tests (which defeats the 
-    // RC: the purpose)
-    // RC: for the moment ignore this section
-    // Unit testing is provided by Karma.  Change the two commented locations
-    // below to either: mocha, jasmine, or qunit.
-    karma: {
-      options: {
-        basePath: process.cwd(),
-        singleRun: true,
-        captureTimeout: 7000,
-        autoWatch: true,
-
-        reporters: ['progress', 'coverage'],
-        browsers: ['PhantomJS'],
-
-        // Change this to the framework you want to use.
-        frameworks: ['mocha'],
-
-        plugins: [
-          'karma-jasmine',
-          'karma-mocha',
-          'karma-qunit',
-          'karma-phantomjs-launcher',
-          'karma-coverage'
-        ],
-
-        preprocessors: {
-          'src/js/**/*.js': 'coverage'
-        },
-
-        coverageReporter: {
-          type: 'lcov',
-          dir: 'test/coverage'
-        },
-
-        files: [
-          // You can optionally remove this or swap out for a different expect.
-          'src/libs/chai/chai.js',
-          'src/libs/requirejs/require.js',
-          'test/runner.js',
-
-          {
-            pattern: 'src/js/**/*.*',
-            included: false
-          },
-          // Derives test framework from Karma configuration.
-          {
-            pattern: 'test/<%= karma.options.frameworks[0] %>/**/*.spec.js',
-            included: false
-          }
-          
-        ]
-      },
-
-      // This creates a server that will automatically run your tests when you
-      // save a file and display results in the terminal.
-      daemon: {
-        options: {
-          singleRun: false
-        }
-      },
-
-      // This is useful for running the tests just once.
-      run: {
-        options: {
-          singleRun: true
-        }
-      }
-    },
-
     coveralls: {
       options: {
         src: ['src/js/**/*.js'],
@@ -282,10 +225,12 @@ module.exports = function(grunt) {
     
     mocha_phantomjs: {
       options: {
+        //'reporter': 'progress',
         'output': 'test/reports/testing.output'
       },
       all: ['test/mocha/**/*.html'],
-      todo: ['test/mocha/**/todo.spec.html']
+      todo: ['test/mocha/**/todo.spec.html'],
+      discovery: ['test/mocha/**/discovery.spec.html']
     },
     
     // concatenates all javascript into one big minified file (of limited 
@@ -337,6 +282,9 @@ module.exports = function(grunt) {
   // Create an aliased test task.
   grunt.registerTask('test', ['mocha_phantomjs:all']);
   grunt.registerTask('test:watch', ['mocha_phantomjs:all', 'watch:testing']);
+  // Just for some projects
+  grunt.registerTask('todo:watch', ['mocha_phantomjs:todo', 'watch:todo']);
+  grunt.registerTask('discovery:watch', ['mocha_phantomjs:discovery', 'watch:discovery']);
   
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment', ['bower']);
