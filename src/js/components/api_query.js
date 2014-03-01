@@ -70,7 +70,13 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
     // this query (by default, all params are used and sorted) but this
     // implementation doesn't do anything fancy with them
     url: function() {
-      return $.param(this.attributes, true); // use traditional encoding
+      // sort keys alphabetically
+      var sorted = _.pairs(this.attributes).sort(function(a,b) {return (a[0] > b[0]) ? 1 : (a[0] < b[0] ? -1 : 0)});
+      // also sort values
+      var s = {};
+      sorted.map(function(item) { s[item[0]] = item[1].sort() });
+      // use traditional encoding
+      return $.param(s, true);
     },
 
     // re-construct the query from the url string, returns the json attributes

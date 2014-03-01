@@ -72,10 +72,10 @@ define(['api_query', 'backbone'], function(ApiQuery, Backbone) {
 
     it("can be serialized and de-serialized (saved as string and reloaded)", function() {
       var t = new ApiQuery({'foo': ['bar', 'baz'], 'boo': ['woo', 1]});
-      expect(t.url()).to.equal('foo=bar&foo=baz&boo=woo&boo=1');
+      expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
 
       t = new ApiQuery({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
-      expect(t.url()).to.equal('foo=bar&foo=baz&boo=woo&boo=1');
+      expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
 
       expect(t.parse('foo=bar&foo=baz&boo=woo&boo=1')).to.eql({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
     });
