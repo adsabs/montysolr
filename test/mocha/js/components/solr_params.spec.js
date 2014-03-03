@@ -1,21 +1,30 @@
-define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbone) {
-  describe("Multi Params (API)", function () {
+define(['js/components/solr_params', 'backbone'], function(SolrParams, Backbone) {
+  describe("SOLR Params (API)", function () {
       
-    // Runs once before all tests start.
-    before(function () {
+
+    it ("should treat certain fields specially", function() {
+      var t = new SolrParams({'q': ['full:foo', 'title:bar'], 'fq': ['database:astronomy', 'aff:xxx']});
+      // 'fq=aff:xxx&fq=database:astronomy&q=full:foo AND title:bar'
+      expect(t.url()).to.equal('fq=aff%3Axxx&fq=database%3Aastronomy&q=full%3Afoo+AND+title%3Abar');
+
+      // but the original values should remain untouched
+      expect(t.get('q')).to.eql(['full:foo', 'title:bar']);
+
+
     });
-  
-    // Runs once when all tests finish.
-    after(function () {
-    });
-  
+
+
+    // ------
+    // everything below is just a copy from the multi_params.spec.js
+    // ------
+
     it("should return API params model", function() {
-      expect(new MultiParams()).to.be.an.instanceof(Backbone.Model);
+      expect(new SolrParams()).to.be.an.instanceof(Backbone.Model);
 
     });
     
     it("should store all values as arrays", function() {
-      var t = new MultiParams();
+      var t = new SolrParams();
 
       t.set('string', 'bar');
       expect(t.get('string')).to.eql(['bar']);
@@ -46,7 +55,7 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
 
 
       // the validation can be surpressed
-      var Q2 = MultiParams.extend({
+      var Q2 = SolrParams.extend({
         _validate: function(attrs, options) {
           return true;
         }
@@ -61,7 +70,7 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
     });
 
     it("can be overwritten, but provides old values", function() {
-      var t = new MultiParams({'foo': ['boo', 'woo']});
+      var t = new SolrParams({'foo': ['boo', 'woo']});
       expect(t.get('foo')).to.eql(['boo', 'woo']);
       expect(t.previous('foo')).to.eql(undefined);
 
@@ -77,40 +86,32 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
     
 
     it("can be serialized and de-serialized (saved as string and reloaded)", function() {
-      var t = new MultiParams({'foo': ['bar', 'baz'], 'boo': ['woo', 1]});
+      var t = new SolrParams({'foo': ['bar', 'baz'], 'boo': ['woo', 1]});
       expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
 
-      t = new MultiParams({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
+      t = new SolrParams({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
       expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
 
       expect(t.parse('foo=bar&foo=baz&boo=woo&boo=1')).to.eql({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
     });
     
     it("can be cloned", function() {
-      var t = new MultiParams({'foo': ['boo', 'woo']});
+      var t = new SolrParams({'foo': ['boo', 'woo']});
       var t2 = t.clone();
 
       expect(t).to.be.not.equal(t2);
       expect(t.attributes).to.eql({'foo': ['boo', 'woo']});
       expect(t.attributes).to.eql(t2.attributes);
 
-      // and the old values are unchanged
-      t2.add('foo', 'zoo');
-      expect(t.attributes).to.eql({'foo': ['boo', 'woo']});
-      expect(t2.attributes).to.eql({'foo': ['boo', 'woo', 'zoo']});
-
       // and callbacks still work
       assert.throw(function() {t2.set('foo', {key: 'value'})}, Error);
-
-
-
     });
 
     it("cannot be sync'ed to the server (it is state-less)", function() {
-      expect(function() {var t = new MultiParams({'foo': 'bar'});t.sync()}).to.throw("MultiParams cannot be saved to server");
-      expect(function() {var t = new MultiParams({'foo': 'bar'});t.save()}).to.throw("MultiParams cannot be saved to server");
-      expect(function() {var t = new MultiParams({'foo': 'bar'});t.fetch()}).to.throw("MultiParams cannot be saved to server");
-      expect(function() {var t = new MultiParams({'foo': 'bar'});t.destroy()}).to.not.throw("MultiParams cannot be saved to server");
+      expect(function() {var t = new SolrParams({'foo': 'bar'});t.sync()}).to.throw("MultiParams cannot be saved to server");
+      expect(function() {var t = new SolrParams({'foo': 'bar'});t.save()}).to.throw("MultiParams cannot be saved to server");
+      expect(function() {var t = new SolrParams({'foo': 'bar'});t.fetch()}).to.throw("MultiParams cannot be saved to server");
+      expect(function() {var t = new SolrParams({'foo': 'bar'});t.destroy()}).to.not.throw("MultiParams cannot be saved to server");
     })
 
   });

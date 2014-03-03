@@ -101,9 +101,12 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
     // instead of url, we provide the complete url parameters that define
     // this query (by default, all params are used and sorted) but this
     // implementation doesn't do anything fancy with them
-    url: function() {
+    url: function(whatToSort) {
+      if (!whatToSort) {
+        whatToSort = this.attributes;
+      }
       // sort keys alphabetically
-      var sorted = _.pairs(this.attributes).sort(function(a,b) {return (a[0] > b[0]) ? 1 : (a[0] < b[0] ? -1 : 0)});
+      var sorted = _.pairs(whatToSort).sort(function(a,b) {return (a[0] > b[0]) ? 1 : (a[0] < b[0] ? -1 : 0)});
       // also sort values
       var s = {};
       sorted.map(function(item) { s[item[0]] = item[1].sort() });
@@ -132,6 +135,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
     }
 
   });
+
 
   return Model;
 });

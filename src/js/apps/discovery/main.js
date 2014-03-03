@@ -3,7 +3,7 @@
 console.log('loading: main.js');
 
 require(["config"], function() {
-  // Kick off the application.
+  // Kick off the application
   require(["app", "router"], function(app, Router) {
       console.log('app object:');
       console.log(app);

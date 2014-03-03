@@ -1,9 +1,23 @@
+/*
+A facade: api query exposing only the set of functions that we allow. This is
+the module that you want to load in the application (do not load the concrete
+implementaions, such as solr_params !)
 
-define(['backbone', 'underscore', 'js/components/multi_params'], function(Backbone, _, MultiParams) {
+Put in your config:
+ map: {
+   'your/module': {
+      'api_query_impl': 'js/components/specific_impl_of_the_api_query'
+   }
+ },
+
+ */
+
+
+define(['backbone', 'underscore', 'api_query_impl'], function(Backbone, _, ApiQueryImplementation) {
 
 
 
-  var SolrQuery = function(innerQ) {
+  var ApiQuery = function(innerQ) {
     var innerQuery = innerQ;
     var locked = false, _checkLock = function() {
       if (locked === true) {
@@ -30,7 +44,7 @@ define(['backbone', 'underscore', 'js/components/multi_params'], function(Backbo
         return innerQuery.url();
       },
       clone: function() {
-        var q = new SolrQuery(new MultiParams(innerQuery.toJSON()));
+        var q = new ApiQuery(new ApiQueryImplementation(innerQuery.toJSON()));
         if (this.isLocked()) {
           q.lock();
         }
@@ -95,6 +109,6 @@ define(['backbone', 'underscore', 'js/components/multi_params'], function(Backbo
   // all power of the Backbone.Model
 
   return function(data) {
-    return new SolrQuery(new MultiParams(data));
+    return new ApiQuery(new ApiQueryImplementation(data));
   }
 });

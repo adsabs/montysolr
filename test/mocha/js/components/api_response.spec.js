@@ -1,4 +1,4 @@
-define(['libs/components/api_response.js'], function(require) {
+define(['js/components/api_response.js'], function(require) {
   describe("API response object", function () {
       
     // Runs once before all tests start.

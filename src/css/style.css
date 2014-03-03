@@ -1,7 +1,7 @@
 /*-- HTML5 Boilerplate. -----------------------------------------------------*/
 
-@import "../bower_components/html5-boilerplate/css/normalize.css";
-@import "../bower_components/html5-boilerplate/css/main.css";
+@import "../libs/html5-boilerplate/css/normalize.css";
+@import "../libs/html5-boilerplate/css/main.css";
 
 /*-- Application stylesheets. -----------------------------------------------*/
 
