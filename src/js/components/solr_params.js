@@ -31,7 +31,6 @@ define(['js/components/multi_params', 'backbone', 'underscore', 'jquery'], funct
     defaultOperator: ' AND ',
     fieldProcessors: {
       '*': function(vals, self) {
-        console.log('lll' + vals.join(self.defaultOperator));
         return [vals.join(self.defaultOperator)];
       }
     },

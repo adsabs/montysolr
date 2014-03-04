@@ -1,4 +1,4 @@
-define(['js/components/api_response.js'], function(require) {
+define(['js/components/api_response', 'backbone'], function(ApiResponse, Backbone) {
   describe("API response object", function () {
       
     // Runs once before all tests start.
@@ -9,7 +9,18 @@ define(['js/components/api_response.js'], function(require) {
     after(function () {
     });
   
-    it("should return API response object");
+    it("should return API response object", function() {
+      expect(new ApiResponse()).to.be.an.instanceof(Object);
+      expect(ApiResponse.extend).to.be.OK;
+
+
+      var test = ApiResponse.extend({
+        foo: function() {
+          //pass;
+        }
+      });
+      expect(new test()).to.be.instanceof(ApiResponse);
+    });
     
     it("is immutable by default and throws errors on attempted modification");
     
