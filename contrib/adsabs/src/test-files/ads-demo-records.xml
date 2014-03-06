@@ -2761,7 +2761,7 @@
   </datafield>
 </record>
 <record>
-  <controlfield tag="001">4137903</controlfield>
+  <controlfield tag="001">4137904</controlfield>
   <controlfield tag="005">20140106213957.0</controlfield>
   <datafield tag="024" ind1="7" ind2=" ">
     <subfield code="a">10.1016/0370-1573(93)90055-I</subfield>
@@ -2839,7 +2839,7 @@
   </datafield>
 
   <datafield tag="970" ind1=" " ind2=" ">
-    <subfield code="a">1993PhR...227...37K</subfield>
+    <subfield code="a">1993PhR...227...37X</subfield>
     <subfield code="7">ADS metadata</subfield>
   </datafield>
 </record>

@@ -65,11 +65,12 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     assertU(addDocs("aff", "INAF - Osservatorio Astronomico di Brera, via E. Bianchi 46, I-23807 Merate, Italy;",
     		            "aff", "INAF - IASF Milano, via E. Bassini 15, I-20133 Milano, Italy"));
     assertU(addDocs("aff", "Instituto de Astrofísica de Andalucía (IAA-CSIC) foo:doo"));
-    assertU(addDocs("aff", "foo1", "aff", "foo2", "aff", "", "aff", "foo4"));
+    assertU(addDocs("aff", "foo1", "aff", "foo2", "aff", "-", "aff", "foo4"));
 
     assertU(commit());
     
     //dumpDoc(null, F.ID, "aff");
+    //System.err.println(h.query(req("q", "aff:foo1")));
     
     assertQ(req("q", "*:*"), "//*[@numFound>='2']");
     assertQ(req("q", "aff:xfoo"), "//*[@numFound='0']");
@@ -132,13 +133,14 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     		"//doc/str[@name='id'][.='3']"
     		);
 
-    assertQ(req("q", "aff:foo1"), 
-    		"//*[@numFound='1']", 
-    		"//doc/str[@name='aff'][0][.='foo1']",
-    		"//doc/str[@name='aff'][1][.='foo2']",
-            "//doc/str[@name='aff'][1][.='-']",
-            "//doc/str[@name='aff'][1][.='foo4']"
-    		);
+    
+    assert h.query(req("q", "aff:foo1"))
+ 		.contains("<arr name=\"aff\">" +
+				"<str>foo1</str>" +
+				"<str>foo2</str>" +
+                "<str>-</str>" +
+                "<str>foo4</str>"
+        );
     
   }
   

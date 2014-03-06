@@ -432,7 +432,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 		
 		//the order needs to be preserved
-		//dumpDoc(null, "aff");
+		//dumpDoc(null, "bibcode", "aff", "email");
+
 		assert h.query(req("q", "bibcode:1993PhR...227...37K"))
  		.contains("<arr name=\"aff\">" +
 				"<str>0. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</str>" +
@@ -992,13 +993,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']"
 		);
 		
-		/*
-		 * For some unknown reason cannot do range queries with 
-		 * integers and i wasn't ableto find out why...this query
-		 * just finds one document
-		 */
 		
-		assertQ(req("q", "classic_factor:[0 TO 5001]", "indent", "true", "debugQuery", "true"), 
+		assertQ(req("q", "classic_factor:[0 TO 5001]", "indent", "true"), 
 				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
 				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
 				"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']",
@@ -1076,7 +1072,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='3']",
 				"//doc/int[@name='recid'][.='20']",
 				"//doc/int[@name='recid'][.='21']",
-		"//doc/int[@name='recid'][.='24']");
+		        "//doc/int[@name='recid'][.='24']");
 
 		assertQ(req("q", "pubdate:1976-01-01"), 
 		"//*[@numFound='0']");

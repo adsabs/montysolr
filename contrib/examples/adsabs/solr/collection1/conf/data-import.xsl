@@ -7,7 +7,9 @@ and modifies certain fields to be always present (even if empty)
 -->
 
 <xsl:stylesheet version="1.0" xmlns:marc="http://www.loc.gov/MARC21/slim"
- xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+ xmlns="http://www.loc.gov/MARC21/slim"
+>
 	<xsl:output omit-xml-declaration="yes"/>
 	
    <xsl:template match="node()|@*">
@@ -25,6 +27,40 @@ and modifies certain fields to be always present (even if empty)
       </xsl:copy>
    </xsl:template>
 	
+   <!-- make sure every author has email (m) /affiliation (u) - even if just an empty string -->
+   <xsl:template match="marc:datafield[@tag='100' and not(marc:subfield[@code='u'])]">
+	  <xsl:copy>
+	   <xsl:apply-templates select="@*"/>
+		 <subfield code="u">-</subfield>
+	   <xsl:apply-templates select="node()"/>
+	  </xsl:copy>
+  </xsl:template>
+   <xsl:template match="marc:datafield[@tag='100' and not(marc:subfield[@code='m'])]">
+	  <xsl:copy>
+	   <xsl:apply-templates select="@*"/>
+		 <subfield code="m">-</subfield>
+	   <xsl:apply-templates select="node()"/>
+	  </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="marc:datafield[@tag='700' and not(marc:subfield[@code='u'])]">
+	  <xsl:copy>
+	   <xsl:apply-templates select="@*"/>
+		 <subfield code="u">-</subfield>
+	   <xsl:apply-templates select="node()"/>
+	  </xsl:copy>
+  </xsl:template>
+   <xsl:template match="marc:datafield[@tag='700' and not(marc:subfield[@code='m'])]">
+	  <xsl:copy>
+	   <xsl:apply-templates select="@*"/>
+		 <subfield code="m">-</subfield>
+	   <xsl:apply-templates select="node()"/>
+	  </xsl:copy>
+  </xsl:template>
+
+
+
+   <!--RC: why these empty instructions? remove? -->
    <xsl:template match="marc:datafield[@tag='260' and marc:subfield[@code='t']!='main-date']"/>
 
    <xsl:template match="marc:datafield[@tag='999' and marc:subfield[@code='e']!='1']"/>
