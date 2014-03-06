@@ -694,14 +694,18 @@
 		</fieldType>
 
 		
-
+    <!-- test: TestAdsabsTypeAffiliationText -->
+    
 		<fieldType name="affiliation_text" class="solr.TextField"
 			positionIncrementGap="100">
 			<analyzer type="index">
         <charFilter class="solr.HTMLStripCharFilterFactory"/>
-				<tokenizer class="solr.StandardTokenizerFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$"
-					replacement="$2" />
+        
+        <!-- tokenize on empty space, comma, semicolon, brackets
+         (but keep a hyphen connecting other  words) -->
+        <tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])(\s|,|;|\(|\))+(?!-)"
+          group="-1" />
+          
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.WordDelimiterFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
@@ -716,7 +720,10 @@
 			</analyzer>
 			<analyzer type="query">
         <charFilter class="solr.HTMLStripCharFilterFactory"/>
-				<tokenizer class="solr.StandardTokenizerFactory" />
+				<!-- tokenize on empty space, comma, semicolon, brackets
+         (but keep a hyphen connecting other  words) -->
+        <tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])(\s|,|;|\(|\))+(?!-)"
+          group="-1" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.WordDelimiterFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"

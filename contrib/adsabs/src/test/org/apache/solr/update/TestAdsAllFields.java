@@ -429,6 +429,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "aff:\"Notre Dame\""), 
 				"//*[@numFound='1']"
 		);
+
 		
 		//the order needs to be preserved
 		//dumpDoc(null, "aff");
@@ -436,9 +437,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
  		.contains("<arr name=\"aff\">" +
 				"<str>0. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</str>" +
 				"<str>1. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA(91125), USA</str>" +
-	      "<str>2. Institut für Kernphysik, Forschungszentrum Jülich, W-5170 Jülich, Germany</str>" +
-	      "<str>3. Harvard-Smithsonian Center for Astrophysics, Cambridge, MA 02138, USA</str>"
-     );
+	            "<str>2. Institut für Kernphysik, Forschungszentrum Jülich, W-5170 Jülich, Germany</str>" +
+                "<str>3. Harvard-Smithsonian Center for Astrophysics, Cambridge, MA 02138, USA</str>"
+        );
 		assertQ(req("q", "pos(aff:Jülich, 3) AND bibcode:1993PhR...227...37K"), 
 				"//*[@numFound='1']"
 		);
@@ -451,6 +452,17 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "=aff:\"acr::USA\" AND bibcode:1993PhR...227...37K"), 
 				"//*[@numFound='0']"
 		);
+
+
+        // gaps are important
+        assert h.query(req("q", "bibcode:1993PhR...227...37X"))
+ 		.contains("<arr name=\"aff\">" +
+				"<str>0. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</str>" +
+				"<str>-</str>" +
+	            "<str>2. Institut für Kernphysik, Forschungszentrum Jülich, W-5170 Jülich, Germany</str>" +
+                "<str>3. Harvard-Smithsonian Center for Astrophysics, Cambridge, MA 02138, USA</str>"
+        );
+
 
 		/*
 		 * email
@@ -465,18 +477,29 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='9218920']",
 				"//*[@numFound='1']"
 		);
+
+
 		
 		// order is important
 		assert h.query(req("q", "bibcode:1993PhR...227...37K"))
  		.contains("<arr name=\"email\">" +
 				"<str>au0@email.com</str>" +
 				"<str>au1@email.com</str>" +
-	      "<str>au2@email.com</str>" +
-	      "<str>au3@email.com</str>"
-     );
+                "<str>au2@email.com</str>" +
+                "<str>au3@email.com</str>"
+        );
 		assertQ(req("q", "pos(email:au2@email.com, 3) AND bibcode:1993PhR...227...37K"), 
 				"//*[@numFound='1']"
 		);
+        
+        // and gaps are important too
+		assert h.query(req("q", "bibcode:1993PhR...227...37X"))
+ 		.contains("<arr name=\"email\">" +
+				"<str>au0@email.com</str>" +
+				"<str>au1@email.com</str>" +
+                "<str>-</str>" +
+                "<str>au3@email.com</str>"
+        );
 
 		/*
 		 * database & bibgroup

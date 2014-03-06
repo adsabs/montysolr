@@ -2760,4 +2760,87 @@
     <subfield code="7">ADS metadata</subfield>
   </datafield>
 </record>
+<record>
+  <controlfield tag="001">4137903</controlfield>
+  <controlfield tag="005">20140106213957.0</controlfield>
+  <datafield tag="024" ind1="7" ind2=" ">
+    <subfield code="a">10.1016/0370-1573(93)90055-I</subfield>
+    <subfield code="2">DOI</subfield>
+    <subfield code="7">ELSEVIER</subfield>
+  </datafield>
+  <datafield tag="035" ind1=" " ind2=" ">
+    <subfield code="a">1993PhR...227...37X</subfield>
+    <subfield code="2">ADS bibcode</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="100" ind1=" " ind2=" ">
+    <subfield code="a">Kolbe, E.</subfield>
+    <subfield code="b">Kolbe, E</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">0. W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA</subfield>
+    <subfield code="7">ELSEVIER</subfield>
+    <subfield code="m">au0@email.com</subfield>
+  </datafield>
+  <datafield tag="245" ind1=" " ind2=" ">
+    <subfield code="a">
+      Inelastic neutrino scattering on nuclei and neutrino-nucleosynthesis
+    </subfield>
+    <subfield code="7">ELSEVIER</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">1993-05-00</subfield>
+    <subfield code="t">date-published</subfield>
+    <subfield code="7">ELSEVIER</subfield>
+  </datafield>
+  <datafield tag="260" ind1=" " ind2=" ">
+    <subfield code="c">1993-05-00</subfield>
+    <subfield code="t">main-date</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+  <datafield tag="300" ind1=" " ind2=" ">
+    <subfield code="a">10</subfield>
+    <subfield code="7">ELSEVIER</subfield>
+  </datafield>
+  <datafield tag="520" ind1=" " ind2=" ">
+    <subfield code="a">
+      Within the Continuum Random Phase Approximation we have calculated
+      neutral current cross sections for various neutrino-induced
+      particle reactions on selected nuclei. These cross sections are
+      important for the neutrino-nucleosynthesis in explosive supernova
+      burning. As a byproduct we find that neutrinos and antineutrinos
+      excite parts of the giant dipole resonance differently, with
+      scattering on
+      <SUP>16</SUP>
+      O showing the most noticeable deviations.
+    </subfield>
+    <subfield code="7">ELSEVIER</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Langanke, K.</subfield>
+    <subfield code="b">Langanke, K</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="7">ELSEVIER</subfield>
+    <subfield code="m">au1@email.com</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Krewald, S.</subfield>
+    <subfield code="b">Krewald, S</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">2. Institut für Kernphysik, Forschungszentrum Jülich, W-5170 Jülich, Germany</subfield>
+    <subfield code="7">ELSEVIER</subfield>
+  </datafield>
+  <datafield tag="700" ind1=" " ind2=" ">
+    <subfield code="a">Thielemann, F. -K.</subfield>
+    <subfield code="b">Thielemann, F</subfield>
+    <subfield code="e">regular</subfield>
+    <subfield code="u">3. Harvard-Smithsonian Center for Astrophysics, Cambridge, MA 02138, USA</subfield>
+    <subfield code="7">ELSEVIER</subfield>
+    <subfield code="m">au3@email.com</subfield>
+  </datafield>
+
+  <datafield tag="970" ind1=" " ind2=" ">
+    <subfield code="a">1993PhR...227...37K</subfield>
+    <subfield code="7">ADS metadata</subfield>
+  </datafield>
+</record>
 </collection>

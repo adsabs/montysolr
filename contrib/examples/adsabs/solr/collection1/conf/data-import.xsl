@@ -2,6 +2,7 @@
 <!--
 
 This stylesheet filters out unwanted values from the Invenio MARCXML
+and modifies certain fields to be always present (even if empty)
 
 -->
 
@@ -16,9 +17,9 @@ This stylesheet filters out unwanted values from the Invenio MARCXML
    </xsl:template>
 
 	<xsl:template match="marc:datafield[@tag='035']">
-	   <!-- First I create a new version of the field-->
+	   <!-- create a new version of the field-->
       <xsl:text disable-output-escaping="yes">&lt;</xsl:text>identifierfield<xsl:text disable-output-escaping="yes">&gt;</xsl:text>{&quot;identifier&quot;:&quot;<xsl:value-of select="marc:subfield[@code='a']" />&quot;, &quot;alternate_bibcode&quot;:&quot;<xsl:value-of select="marc:subfield[@code='y']" />&quot;, &quot;deleted_bibcode&quot;:&quot;<xsl:value-of select="marc:subfield[@code='z']" />&quot;, &quot;description&quot;:&quot;<xsl:value-of select="marc:subfield[@code='2']" />&quot;}<xsl:text disable-output-escaping="yes">&lt;</xsl:text>/identifierfield<xsl:text disable-output-escaping="yes">&gt;</xsl:text>
-      <!-- Then I copy it like I used to do it before -->
+      <!-- Then copy it -->
 		<xsl:copy>
       	<xsl:apply-templates select="node()|@*"/>
       </xsl:copy>

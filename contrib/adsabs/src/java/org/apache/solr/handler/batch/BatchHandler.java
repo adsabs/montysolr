@@ -180,7 +180,9 @@ public class BatchHandler extends RequestHandlerBase {
 						setWorkerMessage("Interrupting thread!");
 						thread.interrupt();
 					}
-					setBusy(false);
+					if (isBusy()) { // if we don't check, we can create problems
+						setBusy(false);
+					}
 				}
 			}).start();
 		}

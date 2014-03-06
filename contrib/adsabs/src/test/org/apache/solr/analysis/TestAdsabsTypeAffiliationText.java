@@ -61,12 +61,17 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
 
     assertU(addDocs("aff", "W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA"));
     assertU(addDocs("aff", "W.K. Kellogg <xfoo> Radiation Laboratory, California Institute of Technology, Pasadena, CA(91125), USA"));
+    assertU(addDocs("aff", "IMCCE/Observatoire de Paris"));
+    assertU(addDocs("aff", "INAF - Osservatorio Astronomico di Brera, via E. Bianchi 46, I-23807 Merate, Italy;",
+    		            "aff", "INAF - IASF Milano, via E. Bassini 15, I-20133 Milano, Italy"));
+    assertU(addDocs("aff", "Instituto de Astrofísica de Andalucía (IAA-CSIC) foo:doo"));
+    assertU(addDocs("aff", "foo1", "aff", "foo2", "aff", "", "aff", "foo4"));
 
     assertU(commit());
     
     //dumpDoc(null, F.ID, "aff");
     
-    assertQ(req("q", "*:*"), "//*[@numFound='2']");
+    assertQ(req("q", "*:*"), "//*[@numFound>='2']");
     assertQ(req("q", "aff:xfoo"), "//*[@numFound='0']");
 
     assertQueryEquals(req("q", "aff:\"Pasadena, CA 91125\"", "qt", "aqp"), 
@@ -83,6 +88,58 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     		"//doc/str[@name='id'][.='0']",
     		"//doc/str[@name='id'][.='1']"
     		);
+    
+    assertQ(req("q", "aff:IMCCE"), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='2']"
+    		);
+    
+    assertQ(req("q", "aff:imcce"), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='2']"
+    		);
+    
+    assertQ(req("q", "aff:IASF"), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='3']"
+    		);
+    
+    assertQ(req("q", "aff:iasf"), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='3']"
+    		);
+    
+    assertQ(req("q", "aff:IAA-CSIC"), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='4']"
+    		);
+    
+    assertQ(req("q", "aff:IAACSIC"), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='4']"
+    		);
+    assertQ(req("q", "aff:iaa-csic"), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='4']"
+    		);
+    
+    assertQ(req("q", "aff:\"INAF - IASF\""), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='3']"
+    		);
+    assertQ(req("q", "aff:\"inaf - iasf\""), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='id'][.='3']"
+    		);
+
+    assertQ(req("q", "aff:foo1"), 
+    		"//*[@numFound='1']", 
+    		"//doc/str[@name='aff'][0][.='foo1']",
+    		"//doc/str[@name='aff'][1][.='foo2']",
+            "//doc/str[@name='aff'][1][.='-']",
+            "//doc/str[@name='aff'][1][.='foo4']"
+    		);
+    
   }
   
 
