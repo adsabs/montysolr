@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
+import org.apache.solr.request.SolrQueryRequest;
 
 public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implements
 	QueryNodeProcessor  {
@@ -29,6 +32,20 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
 				
 			}
 			else {
+				
+				QueryNode child = synNode.getChild();
+				if (child instanceof FieldQueryNode) {
+   				// we may be in situation that this node had a modifier (= or #)
+					// which only modifies the analysis, but doesn't turn it off
+					
+					String field = ((FieldQueryNode) child).getFieldAsString() + "_nosyn";
+			    if (hasAnalyzer(field)) {
+			    	((FieldQueryNode) child).setField(field); // change the field to use a different analyzer...
+			    	return child;
+			    }
+				}
+			  
+		    
 				return applyNonAnalyzableToAllChildren(synNode.getChild());
 			}
 		}
@@ -59,6 +76,18 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
 	protected QueryNode expandSynonyms(AqpAdsabsSynonymQueryNode synNode) {
 		// I believe it is the job of the analyzers to expand the node, but it may depend...
 		return synNode.getChild();
+	}
+	
+	// TODO: consider merging with AqpAdsabsCarefulAnalyzerProcessor
+	// where this code was copied from
+	private boolean hasAnalyzer(String fieldName) {
+	  SolrQueryRequest req = this.getQueryConfigHandler()
+	  .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+    .getRequest();
+	  if (req != null && req.getSchema().hasExplicitField(fieldName)) {
+	    return true;
+	  }
+	  return false;
 	}
 
 	@Override

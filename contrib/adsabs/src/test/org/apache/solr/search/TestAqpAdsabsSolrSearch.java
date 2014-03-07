@@ -363,9 +363,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 				"spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 100)", 
 				SpanPositionRangeQuery.class);
 		
-		// notice the use of modifier '='
+		// notice the use of modifier '=' (if it is lowercased, it means _nosyn analyzer
+		// was used)
 		assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"Accomazzi, A\", 1)"), 
-				"spanPosRange(author:Accomazzi, A, 0, 1)", 
+				"spanPosRange(author:accomazzi, a, 0, 1)", 
 				SpanPositionRangeQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q", "pos(+author:\"Accomazzi, A\", 1, 1)"), 
 				"spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)", 
