@@ -138,35 +138,27 @@ module.exports = function(grunt) {
     
     // will automatically reload webserver whenever a file is modified
     watch: {
+      options: {
+        spawn: false, // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded
+        interrupt: true // necessary for windows
+      },
       dev: {
         files:  [ './src/js/**/*.js' ],
-        tasks:  [ 'env:dev', 'express:dev' ],
-        options: {
-          spawn: false // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded
-        }
+        tasks:  [ 'env:dev', 'express:dev' ]
       },
       testing: {
         files:  [ './src/js/**/*.js', './test/**/*.js' ],
-        //tasks:  [ 'env:dev', 'express:dev' ],
-        tasks: ['test'],
-        options: {
-          spawn: false // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded
-        }
+        tasks: ['test']
+
       },
       // TODO: I should find a way to dynamically discover these names 'discovery' etc...
       discovery: {
         files:  [ './src/js/**/*.js', './test/**/*.js' ],
-        tasks: ['discovery:watch'],
-        options: {
-          spawn: false
-        }
+        tasks: ['test']
       },
       todo: {
         files:  [ './src/js/**/*.js', './test/**/*.js' ],
-        tasks: ['todo:watch'],
-        options: {
-          spawn: false
-        }
+        tasks: ['todo:watch']
       }
     },
 
@@ -281,10 +273,8 @@ module.exports = function(grunt) {
 
   // Create an aliased test task.
   grunt.registerTask('test', ['mocha_phantomjs:all']);
-  grunt.registerTask('test:watch', ['mocha_phantomjs:all', 'watch:testing']);
-  // Just for some projects
-  grunt.registerTask('todo:watch', ['mocha_phantomjs:todo', 'watch:todo']);
-  grunt.registerTask('discovery:watch', ['mocha_phantomjs:discovery', 'watch:discovery']);
+  grunt.registerTask('test:watch', ['watch:testing']);
+
   
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment', ['bower']);

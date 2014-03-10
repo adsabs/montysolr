@@ -1,5 +1,5 @@
 define(['js/components/json_response', 'backbone', 'jquery'], function(Response, Backbone, $) {
-  describe("JSON response object (API)", function () {
+  describe("Main Response Object (API)", function () {
       
     // Runs once before all tests start.
     // test: http://adswhy:9000/solr/collection1/select?q=title%3Astar&fq=database%3Aastronomy&start=10&rows=5&fl=title%2Cbibcode%2Cauthor&wt=json&indent=true&hl=true&hl.fl=title&hl.simple.pre=%3Cem%3E&hl.simple.post=%3C%2Fem%3E&facet=true&facet.query=title%3Astar&facet.field=author

@@ -18,8 +18,8 @@ define(['underscore', 'backbone'], function(_, Backbone) {
     }
 
     this.attributes = attrs;
-
     this.initialize.apply(this, arguments);
+
   };
 
   _.extend(JSONResponse.prototype, {
