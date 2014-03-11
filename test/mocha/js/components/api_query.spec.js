@@ -1,5 +1,5 @@
 define(['js/components/api_query', 'js/components/multi_params', 'backbone'], function(ApiQuery, MultiParams, Backbone) {
-  describe("Query Object (API)", function () {
+  describe("ApiQuery (API)", function () {
       
     // Runs once before all tests start.
     before(function () {

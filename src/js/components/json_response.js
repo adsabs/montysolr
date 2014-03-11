@@ -12,6 +12,8 @@ define(['underscore', 'backbone'], function(_, Backbone) {
     options || (options = {});
     this.rid = _.uniqueId('r');
     this.readOnly = options.hasOwnProperty('readOnly') ? options.readOnly : true;
+    this._url = options.hasOwnProperty('url') ? options.url : null;
+
     if (options.parse) attrs = this.parse(attrs, options) || {};
     if (defaults = _.result(this, 'defaults')) {
       attrs = _.defaults({}, attrs, defaults);
@@ -30,6 +32,14 @@ define(['underscore', 'backbone'], function(_, Backbone) {
     // Return a copy of the model's `attributes` object.
     toJSON: function(options) {
       return this._clone(this.attributes);
+    },
+
+    // url string that identifies this object
+    url: function() {
+      if (this._url) {
+        return this._url;
+      }
+      return this.rid; // default is just to return response id
     },
 
     set: function(key, val, options) {
@@ -74,11 +84,16 @@ define(['underscore', 'backbone'], function(_, Backbone) {
       return parts;
     },
 
-    get: function(key, lastElem) {
+    has: function(key) {
+      return this.get(key, true);
+    },
+
+    get: function(key, justCheck) {
       // if key empty, return everything
       if (!key) {
         return this._clone(this.attributes);
       }
+
       var parts = this._split(key), found = [],
         pointer = this.attributes;
 
@@ -101,26 +116,40 @@ define(['underscore', 'backbone'], function(_, Backbone) {
             try {
               ix = parseInt(m);
               if (_.isNaN(ix) || pointer.length <= ix || ix < 0) {
+                if (justCheck) {
+                  return false;
+                }
                 throw new Error();
               }
               pointer = pointer[ix];
               found.push(m);
             }
             catch (e) {
+              if (justCheck) {
+                return false;
+              }
               throw new Error("Can't find: " + key + (found.length > 0 ? " (worked up to: " + found.join('.') + ")" : ""));
             }
 
           }
           else {
+            if (justCheck) {
+              return false;
+            }
             throw new Error("Can't find: " + key + (found.length > 0 ? " (worked up to: " + found.join('.') + ")" : ""));
           }
         }
         else {
+          if (justCheck) {
+            return false;
+          }
           throw new Error("Can't find: " + key + (found.length > 0 ? " (worked up to: " + found.join('.') + ")" : ""));
         }
       }
 
-
+      if (justCheck) {
+        return true;
+      }
       return this._clone(pointer);
 
     },
@@ -144,8 +173,16 @@ define(['underscore', 'backbone'], function(_, Backbone) {
       }
     },
 
-    isReadOnly: function() {
+    isLocked: function() {
       return this.readOnly;
+    },
+
+    lock: function() {
+      return this.readOnly = true;
+    },
+
+    unlock: function() {
+      return this.readOnly = false;
     }
 
   });

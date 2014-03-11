@@ -13,7 +13,8 @@ var tests = [
   tbase + '/components/multi_params.spec.js',
   tbase + '/components/solr_params.spec.js',
   tbase + '/components/api_query.spec.js',
-  tbase + '/components/json_response.spec.js'
+  tbase + '/components/json_response.spec.js',
+  tbase + '/components/api_response.spec.js'
 ];
 
 

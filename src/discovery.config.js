@@ -15,11 +15,11 @@ require.config({
   },
 
   // Configuration for the facades (you can pick specific implementation, just for your
-  // application)
-  // see http://requirejs.org/docs/api.html#config-map
+  // application) see http://requirejs.org/docs/api.html#config-map
   map: {
     '*': {
-      'api_query_impl': 'js/components/multi_params'
+      'api_query_impl': 'js/components/solr_params',
+      'api_response_impl': 'js/components/solr_response'
     }
   },
 

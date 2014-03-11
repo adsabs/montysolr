@@ -143,21 +143,21 @@ module.exports = function(grunt) {
         interrupt: true // necessary for windows
       },
       dev: {
-        files:  [ './src/js/**/*.js' ],
+        files:  [ './src/js/**/*.js', './src/*.js' ],
         tasks:  [ 'env:dev', 'express:dev' ]
       },
       testing: {
-        files:  [ './src/js/**/*.js', './test/**/*.js' ],
+        files:  [ './src/js/**/*.js', './test/**/*.js', './src/*.js' ],
         tasks: ['test']
 
       },
       // TODO: I should find a way to dynamically discover these names 'discovery' etc...
       discovery: {
-        files:  [ './src/js/**/*.js', './test/**/*.js' ],
+        files:  [ './src/js/**/*.js', './test/**/*.js', './src/*.js'],
         tasks: ['test']
       },
       todo: {
-        files:  [ './src/js/**/*.js', './test/**/*.js' ],
+        files:  [ './src/js/**/*.js', './test/**/*.js', './src/*.js' ],
         tasks: ['todo:watch']
       }
     },

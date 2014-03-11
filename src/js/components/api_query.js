@@ -44,7 +44,7 @@ define(['backbone', 'underscore', 'api_query_impl'], function(Backbone, _, ApiQu
         return innerQuery.url();
       },
       clone: function() {
-        var q = new ApiQuery(new ApiQueryImplementation(innerQuery.toJSON()));
+        var q = new ApiQuery(new innerQuery.constructor(innerQuery.toJSON()));
         if (this.isLocked()) {
           q.lock();
         }
@@ -108,7 +108,7 @@ define(['backbone', 'underscore', 'api_query_impl'], function(Backbone, _, ApiQu
   // despite the fact that the underlying instance has
   // all power of the Backbone.Model
 
-  return function(data) {
-    return new ApiQuery(new ApiQueryImplementation(data));
+  return function(data, options) {
+    return new ApiQuery(new ApiQueryImplementation(data, options));
   }
 });

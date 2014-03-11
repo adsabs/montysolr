@@ -98,9 +98,12 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       throw Error("MultiParams cannot be saved to server");
     },
 
-    // instead of url, we provide the complete url parameters that define
-    // this query (by default, all params are used and sorted) but this
-    // implementation doesn't do anything fancy with them
+    /*
+     * Return the url string encoding all parameters that made
+     * this query. The parameters will be sorted alphabetically
+     * by their keys and URL encoded so that they can be used
+     * in requests.
+     */
     url: function(whatToSort) {
       if (!whatToSort) {
         whatToSort = this.attributes;
@@ -114,7 +117,9 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       return $.param(s, true);
     },
 
-    // re-construct the query from the url string, returns the json attributes
+    /*
+     * Re-constructs the query from the url string, returns the json attributes
+     */
     parse: function(resp, options) {
       if (_.isString(resp)) {
         var attrs  = {};

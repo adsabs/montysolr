@@ -163,7 +163,10 @@ define(['js/components/json_response', 'backbone', 'jquery'], function(Response,
 
     it("provides a key under which this object can be cached/retrieved", function() {
       var rsp =  new Response(this.jsonData);
-      expect(rsp.rid).to.not.be.undefined;
+      expect(rsp.url()).to.not.be.undefined;
+
+      rsp =  new Response(this.jsonData, {'url': 'foo=bar&boo=bar'});
+      expect(rsp.url()).to.be.equal('foo=bar&boo=bar');
     });
     
     

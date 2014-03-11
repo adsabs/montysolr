@@ -1,45 +1,65 @@
 /*
- * A simple wrapper around the API response for ADS
- * This class is extended/enhanced by other implementations
- * (e.g. solr_response)
+ * A simple wrapper around the API response for ADS. The underlying
+ * implementation of the Response object can provide a specific
+ * logic, so don't be surprised if you see a different behaviour.
+ * But the API remains the same!
+ *
+ * To configure what implementation you want for your module, use this
+ * in the app config:
+ *
+ * map: {
+ *  'your/module': {
+ *    'api_response_impl': 'js/components/specific_impl_of_the_api_response'
+ *  }
+ * },
  */
 
-define(['underscore', 'backbone'], function(_, Backbone) {
+define(['underscore', 'backbone', 'api_response_impl'], function(_, Backbone, ApiResponseImplementation) {
 
-  var ApiResponse = function(attributes, options) {
-    var defaults;
-    var attrs = attributes || {};
-    options || (options = {});
-    this.cid = _.uniqueId('r');
-    this.attributes = {};
-    if (options.parse) attrs = this.parse(attrs, options) || {};
-    if (defaults = _.result(this, 'defaults')) {
-      attrs = _.defaults({}, attrs, defaults);
-    }
-    this.set(attrs, options);
-    this.initialize.apply(this, arguments);
+  var ApiResponse = function(data) {
+    var innerResponse = data;
+
+    return {
+      has: function(key) {
+        return innerResponse.has(key);
+      },
+      get: function(key) {
+        return innerResponse.get(key);
+      },
+      set: function(key, val, options) {
+        return innerResponse.set(key, val, options);
+      },
+      clone: function() {
+        return new ApiResponse(innerResponse.clone());
+      },
+      toJSON: function() {
+        return innerResponse.toJSON();
+      },
+      isLocked: function() {
+        return innerResponse.isLocked();
+      },
+      lock: function() {
+        return innerResponse.lock();
+      },
+      unlock: function() {
+        return innerResponse.unlock();
+      },
+      url: function() {
+        return innerResponse.url();
+      }
+
+    };
   };
 
-  _.extend(ApiResponse.prototype, {
-    // Initialize is an empty function by default. Override it with your own
-    // initialization logic.
-    initialize: function(){},
 
-    // Return a copy of the model's `attributes` object.
-    toJSON: function(options) {
-      return _.clone(this.attributes);
-    },
 
-    set: function(key, val, options) {
-      console.log(key, val, options);
-    }
+  // Facade pattern, we want to expose only limited API
+  // despite the fact that the underlying instance has
+  // all power of the Backbone.Model
 
-  });
-
-  // use the bb extend function for classes hierarchy
-  ApiResponse.extend = Backbone.Model.extend;
-
-  return ApiResponse;
+  return function(data, options) {
+    return new ApiResponse(new ApiResponseImplementation(data, options));
+  }
 
 });
 /**

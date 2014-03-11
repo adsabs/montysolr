@@ -1,5 +1,5 @@
-define(['js/components/json_response', 'backbone', 'jquery'], function(Response, Backbone, $) {
-  describe("Main Response Object (API)", function () {
+define(['js/components/api_response', 'backbone', 'jquery'], function(Response, Backbone, $) {
+  describe("ApiResponse Object (API)", function () {
       
     // Runs once before all tests start.
     // test: http://adswhy:9000/solr/collection1/select?q=title%3Astar&fq=database%3Aastronomy&start=10&rows=5&fl=title%2Cbibcode%2Cauthor&wt=json&indent=true&hl=true&hl.fl=title&hl.simple.pre=%3Cem%3E&hl.simple.post=%3C%2Fem%3E&facet=true&facet.query=title%3Astar&facet.field=author
@@ -81,38 +81,107 @@ define(['js/components/json_response', 'backbone', 'jquery'], function(Response,
       delete this.jsonData;
     });
   
-    it("should return API response object", function() {
-      expect(new Response()).to.be.an.instanceof(Object);
-      expect(Response.extend).to.be.OK;
+    it("should return simple API response object", function() {
+      expect(new Response(this.jsonData)).to.be.instanceof(Object);
+      expect(new Response(this.jsonData)).not.to.be.instanceof(Backbone.Model);
 
+      expect(new Response(this.jsonData).clone()).to.be.instanceof(Object);
+      expect(new Response(this.jsonData).clone()).not.to.be.instanceof(Backbone.Model);
 
-      var test = Response.extend({
-        foo: function() {
-          //pass;
-        }
-      });
-      expect(new test()).to.be.instanceof(Response);
-      
-      
+      // incorrect data causes error (for SOLR impl)
+      expect(function() {new Response({})}).to.throw(Error);
+      expect(Response.extend).to.be.undefined;
+      expect(new Response(this.jsonData).innerResponse).to.be.undefined;
+
     });
 
-    it('has simple api to retrieve values', function() {
+    it('has simple api to retrieve values (keys/values, of unlimited structure)', function() {
+      var rsp =  new Response(this.jsonData);
+
+      expect(rsp.get()).to.have.keys(['response', 'facet_counts', 'responseHeader', 'highlighting']);
+      expect(rsp.get(null)).to.have.keys(['response', 'facet_counts', 'responseHeader', 'highlighting']);
+
+      expect(rsp.get('response')).to.have.keys(['numFound', 'start', 'docs']);
+      expect(rsp.get('response.numFound')).to.be.equal(172978);
+
+      expect(rsp.get('responseHeader.status')).to.be.equal(0);
+      expect(rsp.get('responseHeader.params.facet')).to.be.equal('true');
+      expect(rsp.get('responseHeader.params["facet.query"]')).to.be.equal('title:star');
+      expect(rsp.get('responseHeader.params[\'facet.query\']')).to.be.equal('title:star');
+      expect(rsp.get('responseHeader.params.fl')).to.be.equal('title,bibcode,author');
+
+
+      expect(rsp.get('response.docs[0]')).to.have.keys(['author', 'bibcode', 'title']);
+      expect(rsp.get('response["docs"][0]')).to.have.keys(['author', 'bibcode', 'title']);
+      expect(rsp.get('response["docs"]["0"]')).to.have.keys(['author', 'bibcode', 'title']);
+
+
+      expect(function() {rsp.get('response["docs"]["0]')}).to.throw(Error);
+      expect(function() {rsp.get('response["docs"][10]')}).to.throw(Error);
+      expect(function() {rsp.get('response["docs"][-1]')}).to.throw(Error);
+
+      expect(rsp.get('facet_counts.facet_fields')).to.have.keys(['author']);
+      expect(rsp.get('facet_counts.facet_fields.author[0]')).to.be.equal('heber, u');
+      expect(rsp.get('facet_counts.facet_fields.author[1]')).to.be.equal(301);
     });
 
     it("is immutable by default and ignores modifications", function() {
       var rsp =  new Response(this.jsonData);
-      expect(rsp.get('response.docs[0]')).to.eql
+      expect(rsp.get()).to.have.keys(['response', 'facet_counts', 'responseHeader', 'highlighting']);
+
+      var data = rsp.get();
+      data.foo = ['foo'];
+
+      expect(data).to.have.keys(['response', 'facet_counts', 'responseHeader', 'highlighting', 'foo']);
+      expect(data.foo).to.be.eql(['foo']);
+      expect(rsp.get()).to.not.have.keys(['foo']);
+      expect(function() {rsp.set('response', ['foo'])}).to.throw(Error);
+
+      // however can be unlocked
+      rsp = new Response(this.jsonData);
+      expect(rsp.isLocked()).to.be.true;
+      rsp.unlock();
+      expect(rsp.isLocked()).to.be.false;
+
+      var data = rsp.get();
+      data.foo = ['foo'];
+      expect(rsp.get()).to.have.keys(['response', 'facet_counts', 'responseHeader', 'highlighting', 'foo']);
+
+      rsp.set('boo', 'bar');
+      expect(rsp.get('boo')).to.be.equal('bar');
+
     });
     
-    it("can accept any type of keys/values, of unlimited structure");
+
+    it("is not forgiving (accessing unknown keys is throwing error)", function() {
+      expect(function() {new Response(this.jsonData).get('foo.bar');}).to.throw(Error);
+      expect(new Response(this.jsonData).has('foo.bar')).to.be.false;
+    });
     
-    it("is forgiving (accessing unknown keys is not throwing error), but strict mode is possible");
+    it("can be serialized and de-serialized (saved as string and reloaded)", function() {
+      var rsp =  new Response(this.jsonData);
+      var rsp2 = rsp.clone();
+      expect(rsp.get()).to.be.eql(rsp2.get());
+
+      var rsp3 = new Response(JSON.parse(JSON.stringify(rsp.toJSON())));
+      expect(rsp.get()).to.be.eql(rsp3.get());
+    });
     
-    it("can be serialized and de-serialized (saved as string and reloaded)");
-    
-    it("contains the original query (but not the request itself)");
-    
-    it("provides a key under which this object can be cached/retrieved");
+    it("provides a key under which this object can be cached/retrieved", function() {
+
+
+      // default is to get params from the response
+      var rsp =  new Response(this.jsonData);
+      expect(rsp.url()).to.be.equal('facet=true&facet.field=author&facet.query=title%3Astar' +
+        '&fl=title%2Cbibcode%2Cauthor&fq=database%3Aastronomy&hl=true&hl.fl=title' +
+        '&hl.simple.post=%3C%2Fem%3E&hl.simple.pre=%3Cem%3E&indent=true&q=title%3Astar&rows=5' +
+        '&start=10&wt=json');
+
+      // but url can be set when response is created and it will be parsed (and ordered)
+      rsp =  new Response(this.jsonData, {'url': 'foo=bar&boo=bar'});
+      expect(rsp.url()).to.be.equal('boo=bar&foo=bar');
+
+    });
     
     
   });
