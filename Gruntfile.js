@@ -12,6 +12,7 @@ module.exports = function(grunt) {
       install: {
         options: {
           // config: 'bower.json',
+          cleanTargetDir: true,
           targetDir: './src/libs'
         }
       }

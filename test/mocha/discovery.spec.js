@@ -14,7 +14,9 @@ var tests = [
   tbase + '/components/solr_params.spec.js',
   tbase + '/components/api_query.spec.js',
   tbase + '/components/json_response.spec.js',
-  tbase + '/components/api_response.spec.js'
+  tbase + '/components/api_response.spec.js',
+  tbase + '/components/generic_module.spec.js',
+  tbase + '/services/pubsub.spec.js'
 ];
 
 

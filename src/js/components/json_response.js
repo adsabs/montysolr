@@ -6,6 +6,7 @@
 
 define(['underscore', 'backbone'], function(_, Backbone) {
 
+
   var JSONResponse = function(attributes, options) {
     var defaults;
     var attrs = attributes || {};
