@@ -31,7 +31,45 @@ define(['backbone', 'underscore', 'js/components/generic_module'], function(Back
     className: 'PubSub',
 
     _signals: [],
-    _providers: [],
+    _providers: {},
+
+    registerModule: function(module) {
+      if (!module instanceof GenericModule) {
+        throw new Error('We can register only instances of GenericModule');
+      }
+      // listen to the events of the module
+      this.listenTo(module, '[pubsub]', function() {this.trigger});
+      // give the module a chance to call the pubsub (but we don't give it access to pubsub)
+      var self = this;
+      module.register({
+        triggerPubSub: function() {
+          if (self._listeners.hasOwnProperty(this.mid)) {
+            return false; // pubsub has removed this module
+          }
+          self.trigger(arguments);
+        },
+        isRegistered: function() {
+          if (self._listeners.hasOwnProperty(this.mid)) {
+            return false; // pubsub has removed this module
+          }
+          return true;
+        }
+      });
+      // save the module
+      if (!this._providers.hasOwnProperty(module.mid)) {
+        this._providers[module.mid] = module;
+      }
+    },
+
+    unRegisterModule: function(module) {
+      if (!module instanceof GenericModule) {
+        throw new Error('We can register only instances of GenericModule');
+      }
+      // stop listening to events
+      this.stopListening(module);
+      // remove module from providers
+      delete this._providers[module.mid];
+    },
 
     /*
      * sends a signal 'onStart' to all listeners; the listeners
@@ -40,35 +78,57 @@ define(['backbone', 'underscore', 'js/components/generic_module'], function(Back
      * can serve them
      */
     onStart: function() {
-      var self = this;
-      this.trigger('onStart', function(attributes) {
-
-      })
+      this.trigger('[pubsub]:starting');
     },
-
-
 
     /*
      * Sends a signal 'onClose' meaning that this PubSub is going to
      * be shut down and no further messages will be accepted
      */
     onClose: function() {
+      this.trigger('[pubsub]:closing');
+      for (var k in _.keys(this._providers)) {
+        this.unRegisterModule(k);
+      }
+    },
 
+
+    subscribe: function(obj, name, callback, context) {
+      // I could use BB.listenTo() but
+      // the big problem with the following call:
+      //      obj.listenTo(this, name, callback);
+      // is that we are giving up (exposing) our
+      // pubsub; and coding defensively I DO NOT
+      // want that to happen; the listenTo()
+      // method is calling this.on(name, callback)
+      // but also keeps track of the object to which
+      // it is listening; so we can do that too
+
+      var subscribers = this._subscribers || (this._subscribers = {});
+      var id = obj._subscriberId || (obj._subscriberId = _.uniqueId('s'));
+      subscribers[id] = obj;
+
+      var events = this._events[name] || (this._events[name] = []);
+      events.push({callback: callback, context: context, ctx: context || this});
+
+      if (context) {
+        callback = _.bind(callback, context);
+      }
+      else if (obj) {
+        callback = _.bind(callback, obj);
+      }
+
+      this.on(name, callback);
+    },
+
+    unsubscribe: function(obj, name, callback) {
+      obj.stopListening(this, name, callback);
+    },
+
+    publish: function() {
+      this.trigger(arguments);
     }
 
-  });
-
-
-  // Enhance the pubsub with events, but hide those that we don't
-  // want to expose (they could be still accessed through the parent
-  // but let's not bother with that for now)
-  var error = _.bind(function() {throw new Error('PubSub forbids calling this method, use: trigger()/listenTo()')}, PubSub.prototype);
-
-  _.extend(PubSub.prototype, Backbone.Events, {
-    on: error,
-    off: error,
-    bind: error,
-    unbind: error
   });
 
 

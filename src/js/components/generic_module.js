@@ -6,7 +6,7 @@
 define(['backbone', 'underscore'], function(Backbone, _) {
 
   // A list of options to be attached directly to the module, if provided.
-  var moduleOptions = ['className'];
+  var moduleOptions = ['className', 'triggerPubSub', 'isRegistered'];
 
   var Module = function(attributes, options) {
     var defaults;
@@ -22,9 +22,19 @@ define(['backbone', 'underscore'], function(Backbone, _) {
     this.initialize.apply(this, arguments);
   };
 
-  _.extend(Module.prototype, {
+  // every module has the Events mixin
+  _.extend(Module.prototype, Backbone.Events, {
     className: 'GenericModule',
-    initialize: function() {}
+    initialize: function() {},
+    activate: function(options) {
+      _.extend(this, _.pick(options, moduleOptions));
+    },
+    triggerPubSub: function() {
+      throw new Error("This module is not yet registered with PubSub");
+    },
+    isRegistered: function() {
+      return false;
+    }
   });
 
   // give the module subclassing functionality

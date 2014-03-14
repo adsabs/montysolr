@@ -154,13 +154,29 @@ module.exports = function(grunt) {
       },
       // TODO: I should find a way to dynamically discover these names 'discovery' etc...
       discovery: {
-        files:  [ './src/js/**/*.js', './test/**/*.js', './src/*.js'],
-        tasks: ['test']
+        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js'],
+        tasks: ['mocha_phantomjs:discovery', 'watch:discovery']
       },
       todo: {
-        files:  [ './src/js/**/*.js', './test/**/*.js', './src/*.js' ],
-        tasks: ['todo:watch']
+        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js' ],
+        tasks: ['mocha_phantomjs:todo', 'watch:todo']
+      },
+      sandbox: {
+        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js'],
+        tasks: ['mocha_phantomjs:sandbox', 'watch:sandbox']
       }
+    },
+
+    // run tests inside the phamtomjs (headless browser)
+    mocha_phantomjs: {
+      options: {
+        //'reporter': 'progress',
+        'output': 'test/reports/testing.output'
+      },
+      all: ['test/mocha/**/*.html'],
+      todo: ['test/mocha/**/todo.spec.html'],
+      discovery: ['test/mocha/**/discovery.spec.html'],
+      sandbox: ['test/mocha/**/sandbox.spec.html']
     },
 
     // modify the html based on the instructions inside the html code
@@ -216,16 +232,7 @@ module.exports = function(grunt) {
       }
     },
     
-    mocha_phantomjs: {
-      options: {
-        //'reporter': 'progress',
-        'output': 'test/reports/testing.output'
-      },
-      all: ['test/mocha/**/*.html'],
-      todo: ['test/mocha/**/todo.spec.html'],
-      discovery: ['test/mocha/**/discovery.spec.html']
-    },
-    
+
     // concatenates all javascript into one big minified file (of limited 
     // use for now)
     uglify: {

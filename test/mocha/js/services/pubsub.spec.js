@@ -8,29 +8,71 @@ define(['js/components/generic_module', 'js/services/pubsub',
       expect(new PubSub()).to.be.an.instanceof(PubSub);
     });
 
-    it("has trigger/listenTo/once - but it doesn't have on/off/bin/unbind", function() {
+    it.skip("can register subscribers and allows them to send/receive messages", function() {
 
-      var spy = sinon.spy();
-      var allSpy = sinon.spy();
-      var pubs = new PubSub();
-      var eventer = _.extend({}, Backbone.Events);
+      var moduleSpy = sinon.spy();
+      var pubsubSpy = sinon.spy();
+
+      var pubsub = new PubSub();
+      var module = new GenericModule();
+
+      expect(function() {pubsub.registerModule({})}).to.throw(/We can register only instances of GenericModule/);
+      pubsub.registerModule(module);
+
 
       expect(spy.called).to.be.false;
 
-      eventer.listenTo(pubs, 'event:a', spy);
-      eventer.listenTo(pubs, allSpy);
+      module.listenTo(module, 'all', moduleSpy);
+      pubsub.listenTo(pubsub, 'all', pubsubSpy);
 
-      expect(pubs.trigger('event:0'));
-      expect(pubs.trigger('event:a'));
-      expect(pubs.trigger('event:b'));
+      module.trigger('module-only-event', {msg: 1});
+      expect(moduleSpy.calledWith('module-only-event', {msg: 1})).to.be.true;
 
-      expect(spy.called).to.be.true;
+    });
 
-      expect(function() {new PubSub().on('foo', function() {})}).to.throw(/PubSub forbids calling this method.*/);
-      expect(function() {new PubSub().bind('foo', function() {})}).to.throw(/PubSub forbids calling this method.*/);
+    it("has publish/subscribe/unsubscribe methods", function() {
+      var pubsub = new PubSub();
+      var module = new GenericModule();
+      var spy1 = sinon.spy();
+      var spy2 = sinon.spy();
+      var stopSpy = sinon.spy(module, "stopListening");
 
-      expect(function() {new PubSub().off('foo')}).to.throw(/PubSub forbids calling this method.*/);
-      expect(function() {new PubSub().unbind('foo')}).to.throw(/PubSub forbids calling this method.*/);
+      // subscribe to the topic (module object must be passed in)
+      expect(pubsub.subscribe(module, 'search:spy1', spy1)).to.be.OK;
+      expect(pubsub.subscribe(module, 'search:spy2', spy2)).to.be.OK;
+      expect(function() {pubsub.subscribe('search:spy1', spy1);}).to.throw(Error);
+      expect(function() {pubsub.subscribe(module, 'search:spy1');}).to.throw(Error);
+
+      // send a message
+      pubsub.publish('search:spy1', {foo: 'bar'});
+      expect(spy1.getCall(0).calledWith({foo: 'bar'})).to.be.true;
+      expect(spy2.called).to.be.false;
+
+      // unsubscribe
+      pubsub.unsubscribe(module, 'search:spy1');
+      pubsub.publish('search:spy1', {foo: '2'});
+      expect(spy1.calledWith({foo: '2'})).to.be.false;
+      expect(spy2.called).to.be.false;
+
+      // check the module is still subscribed
+      pubsub.publish('search:spy2', {foo: 'bar'});
+      expect(spy2.getCall(0).calledWith({foo: 'bar'})).to.be.true;
+
+      // detach all events and check no ghosts are left behind
+      pubsub.unsubscribe(module);
+      pubsub._listeners[module]
+
+      pubsub.subscribe(module, 'search:facet', spy2);
+      pubsub.publish('search:spy2', {foo: 'bar'});
+      pubsub.unsubscribe(module);
+
+      // module
+      module.subscribe('search:spy1', spy1);
+      module.subscribe('search:spy2', spy2);
+      module.unsubscribe('search:spy2');
+      module.unsubscribe();
+      module.publish('search:spy2', spy2);
+
     });
 
   });

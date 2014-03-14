@@ -6,7 +6,7 @@ require.config({
 
   // Initialize the application with the main application file or if we run
   // as a test, then load the test unittests
-  deps: window.mocha ? [ '../test/mocha/discovery.spec' ] : [ 'js/apps/discovery/main' ],
+  deps: window.mocha ? [ window.mocha.testToLoad ? window.mocha.testToLoad : '../test/mocha/discovery.spec' ] : [ 'js/apps/discovery/main' ],
 
   // Configuration we want to make available to modules of ths application
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
