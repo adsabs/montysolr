@@ -23,15 +23,19 @@
  * throug this PubSub (i.e. hide the possibility to unsubscribe)
  **/
 
-define(['backbone', 'underscore', 'js/components/generic_module'], function(Backbone, _, GenericModule) {
+define(['backbone', 'underscore', 'js/components/generic_module', 'js/components/pubsub_key'],
+  function(Backbone, _, GenericModule, PubSubKey) {
 
 
   var PubSub = GenericModule.extend({
 
     className: 'PubSub',
 
-    _signals: [],
-    _providers: {},
+    initialize: function(attributes, options) {
+      this._issuedKeys = {};
+      this.strict = true;
+      _.extend(this, _.pick(options || attributes, ['strict']));
+    },
 
     registerModule: function(module) {
       if (!module instanceof GenericModule) {
@@ -92,41 +96,70 @@ define(['backbone', 'underscore', 'js/components/generic_module'], function(Back
       }
     },
 
-
-    subscribe: function(obj, name, callback, context) {
-      // I could use BB.listenTo() but
-      // the big problem with the following call:
-      //      obj.listenTo(this, name, callback);
-      // is that we are giving up (exposing) our
-      // pubsub; and coding defensively I DO NOT
-      // want that to happen; the listenTo()
-      // method is calling this.on(name, callback)
-      // but also keeps track of the object to which
-      // it is listening; so we can do that too
-
-      var subscribers = this._subscribers || (this._subscribers = {});
-      var id = obj._subscriberId || (obj._subscriberId = _.uniqueId('s'));
-      subscribers[id] = obj;
-
-      var events = this._events[name] || (this._events[name] = []);
-      events.push({callback: callback, context: context, ctx: context || this});
-
-      if (context) {
-        callback = _.bind(callback, context);
+    _checkCaller: function(key, name, callback) {
+      if (_.isUndefined(key)) {
+        throw new Error("Every request must be accompanied by PubSubKey");
       }
-      else if (obj) {
-        callback = _.bind(callback, obj);
+      if (!(key instanceof PubSubKey)) {
+        throw new Error("Key must be instance of PubSubKey. " +
+          "(If you are trying to pass context, you can't do that. Instead, " +
+          "wrap your callback into: _.bind(callback, context))");
       }
-
-      this.on(name, callback);
+      if (this.strict) {
+        if (!this._issuedKeys.hasOwnProperty(key.getId())) {
+          throw new Error("Your key is not known to us, sorry, you can't use this queue.");
+        }
+        if (this._issuedKeys[key.getId()] !== key.getCreator()) {
+          throw new Error("Your key has wrong identity, sorry, you can't use this queue.");
+        }
+      }
     },
 
-    unsubscribe: function(obj, name, callback) {
-      obj.stopListening(this, name, callback);
+    subscribe: function(key, name, callback) {
+      this._checkCaller(key, name, callback);
+      this.on(name, callback, key); // the key becomes context
+    },
+
+    unsubscribe: function(key, name, callback) {
+      this._checkCaller(key, name, callback);
+      var context = key;
+      if (name && callback) {
+        this.off(name, callback, context);
+      }
+      else if (name || callback) {
+        this.off(name, callback, context);
+      }
+      else { // remove all events of this subscriber
+        var names = _.keys(this._events), name, events,ev, i, l, k, j;
+        for (i = 0, l = names.length; i < l; i++) {
+          name = names[i];
+          if (events = this._events[name]) {
+            var toRemove = [];
+            for (j = 0, k = events.length; j < k; j++) {
+              ev = events[j];
+              if (ev.context === context) {
+                toRemove.push(ev);
+              }
+            }
+            for (i=0, l = toRemove.length; i < l; i++) {
+              this.off(name, toRemove[i].callback, context);
+            }
+          }
+        }
+      }
+
     },
 
     publish: function() {
       this.trigger(arguments);
+    },
+
+    getPubSubKey: function() {
+      var k = PubSubKey.newInstance({creator: this});
+      if (this.strict) {
+        this._issuedKeys[k.getId()] = k.getCreator();
+      }
+      return k;
     }
 
   });

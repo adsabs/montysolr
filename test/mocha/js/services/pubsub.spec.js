@@ -1,5 +1,5 @@
-define(['js/components/generic_module', 'js/services/pubsub',
-  'backbone'], function(GenericModule, PubSub, Backbone) {
+define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pubsub_key',
+  'backbone'], function(GenericModule, PubSub, PubSubKey, Backbone) {
 
   describe("PubSub (Service)", function () {
       
@@ -8,72 +8,114 @@ define(['js/components/generic_module', 'js/services/pubsub',
       expect(new PubSub()).to.be.an.instanceof(PubSub);
     });
 
-    it.skip("can register subscribers and allows them to send/receive messages", function() {
+    it("provides keys", function() {
+      var p = new PubSub();
+      var k = p.getPubSubKey();
+      expect(k.getCreator()).to.be.equal(p);
+      expect(k.getId()).to.not.be.undefined;
 
-      var moduleSpy = sinon.spy();
-      var pubsubSpy = sinon.spy();
+      expect(p.getPubSubKey()).to.not.be.equal(p.getPubSubKey());
+    });
 
-      var pubsub = new PubSub();
-      var module = new GenericModule();
+    it("requires the key to subscribe/unsubscribe", function() {
+      var p = new PubSub();
+      var k = p.getPubSubKey();
+      var spy = sinon.spy();
 
-      expect(function() {pubsub.registerModule({})}).to.throw(/We can register only instances of GenericModule/);
-      pubsub.registerModule(module);
+      p.subscribe(k, 'event', spy);
+      p.trigger('event');
+      p.unsubscribe(k, 'event');
+      p.trigger('event');
 
+      expect(spy.callCount).to.be.equal(1);
 
-      expect(spy.called).to.be.false;
-
-      module.listenTo(module, 'all', moduleSpy);
-      pubsub.listenTo(pubsub, 'all', pubsubSpy);
-
-      module.trigger('module-only-event', {msg: 1});
-      expect(moduleSpy.calledWith('module-only-event', {msg: 1})).to.be.true;
+      expect(function() {p.subscribe({}, 'event', spy)}).to.throw(Error);
+      expect(function() {p.subscribe('event', spy)}).to.throw(Error);
+      expect(function() {p.unsubscribe({}, 'event', spy)}).to.throw(Error);
+      expect(function() {p.unsubscribe('event', spy)}).to.throw(Error);
 
     });
 
-    it("has publish/subscribe/unsubscribe methods", function() {
-      var pubsub = new PubSub();
-      var module = new GenericModule();
-      var spy1 = sinon.spy();
-      var spy2 = sinon.spy();
-      var stopSpy = sinon.spy(module, "stopListening");
+    it("checks the identity of the key in default (strict) mode", function() {
+      var p = new PubSub();
+      var p2 = new PubSub();
+      var k = p.getPubSubKey();
+      var k2 = p2.getPubSubKey();
+      var spy = sinon.spy();
 
-      // subscribe to the topic (module object must be passed in)
-      expect(pubsub.subscribe(module, 'search:spy1', spy1)).to.be.OK;
-      expect(pubsub.subscribe(module, 'search:spy2', spy2)).to.be.OK;
-      expect(function() {pubsub.subscribe('search:spy1', spy1);}).to.throw(Error);
-      expect(function() {pubsub.subscribe(module, 'search:spy1');}).to.throw(Error);
+      p.subscribe(k, 'event', spy);
+      expect(p._events['event'].length).to.be.equal(1);
 
-      // send a message
-      pubsub.publish('search:spy1', {foo: 'bar'});
-      expect(spy1.getCall(0).calledWith({foo: 'bar'})).to.be.true;
-      expect(spy2.called).to.be.false;
+      expect(function() {p.subscribe(k2, 'event', spy)}).to.throw(Error);
 
-      // unsubscribe
-      pubsub.unsubscribe(module, 'search:spy1');
-      pubsub.publish('search:spy1', {foo: '2'});
-      expect(spy1.calledWith({foo: '2'})).to.be.false;
-      expect(spy2.called).to.be.false;
-
-      // check the module is still subscribed
-      pubsub.publish('search:spy2', {foo: 'bar'});
-      expect(spy2.getCall(0).calledWith({foo: 'bar'})).to.be.true;
-
-      // detach all events and check no ghosts are left behind
-      pubsub.unsubscribe(module);
-      pubsub._listeners[module]
-
-      pubsub.subscribe(module, 'search:facet', spy2);
-      pubsub.publish('search:spy2', {foo: 'bar'});
-      pubsub.unsubscribe(module);
-
-      // module
-      module.subscribe('search:spy1', spy1);
-      module.subscribe('search:spy2', spy2);
-      module.unsubscribe('search:spy2');
-      module.unsubscribe();
-      module.publish('search:spy2', spy2);
+      // now in promiscuous mode
+      p = new PubSub({strict: false});
+      p.subscribe(k2, 'event', spy);
+      expect(p._events['event'].length).to.be.equal(1);
 
     });
+
+    it("protects callbacks of other modules", function() {
+
+      var pubsub = new PubSub();
+      var module1 = _.extend({}, Backbone.Events);
+      var module2 = {};
+
+      module1.key = pubsub.getPubSubKey();
+      module1.callback = sinon.spy();
+
+      module2.key = pubsub.getPubSubKey();
+      module2.callback = sinon.spy();
+
+      var spy1 = module1.callback, spy2 = module2.callback;
+
+      pubsub.subscribe(module1.key, 'event', module1.callback);
+      pubsub.subscribe(module2.key, 'event', module2.callback);
+      pubsub.trigger('event');
+
+      expect(spy1.callCount).to.be.equal(1);
+      expect(spy2.callCount).to.be.equal(1);
+
+      // remove only events of 1st module
+      pubsub.unsubscribe(module1.key, 'event');
+      pubsub.trigger('event');
+
+      // test it worked
+      expect(spy1.callCount).to.be.equal(1);
+      expect(spy2.callCount).to.be.equal(2);
+
+      // now unsubscribe all callbacks
+      pubsub.unsubscribe(module1.key);
+      pubsub.unsubscribe(module2.key);
+      pubsub.trigger('event');
+      expect(pubsub._events).to.be.empty;
+
+      // test it worked
+      expect(spy1.callCount).to.be.equal(1);
+      expect(spy2.callCount).to.be.equal(2);
+
+      // now put them back
+      pubsub.subscribe(module1.key, 'event', spy1);
+      pubsub.subscribe(module2.key, 'event', spy2);
+      pubsub.trigger('event');
+
+      // test it worked
+      expect(spy1.callCount).to.be.equal(2);
+      expect(spy2.callCount).to.be.equal(3);
+
+      // try detaching right callback, but wrong key
+      expect(pubsub._events['event'].length).to.be.equal(2);
+      pubsub.unsubscribe(module1.key, 'event', spy2);
+      pubsub.trigger('event');
+      expect(pubsub._events['event'].length).to.be.equal(2);
+
+      // it should still be there
+      expect(spy1.callCount).to.be.equal(3);
+      expect(spy2.callCount).to.be.equal(4);
+
+    });
+
+
 
   });
 });
