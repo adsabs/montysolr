@@ -23,9 +23,9 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       var spy = sinon.spy();
 
       p.subscribe(k, 'event', spy);
-      p.trigger('event');
+      p.publish(k, 'event');
       p.unsubscribe(k, 'event');
-      p.trigger('event');
+      p.publish(k, 'event');
 
       expect(spy.callCount).to.be.equal(1);
 
@@ -71,14 +71,14 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
 
       pubsub.subscribe(module1.key, 'event', module1.callback);
       pubsub.subscribe(module2.key, 'event', module2.callback);
-      pubsub.trigger('event');
+      pubsub.publish(module1.key, 'event');
 
       expect(spy1.callCount).to.be.equal(1);
       expect(spy2.callCount).to.be.equal(1);
 
       // remove only events of 1st module
       pubsub.unsubscribe(module1.key, 'event');
-      pubsub.trigger('event');
+      pubsub.publish(module1.key, 'event');
 
       // test it worked
       expect(spy1.callCount).to.be.equal(1);
@@ -87,7 +87,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       // now unsubscribe all callbacks
       pubsub.unsubscribe(module1.key);
       pubsub.unsubscribe(module2.key);
-      pubsub.trigger('event');
+      pubsub.publish(module1.key, 'event');
       expect(pubsub._events).to.be.empty;
 
       // test it worked
@@ -97,7 +97,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       // now put them back
       pubsub.subscribe(module1.key, 'event', spy1);
       pubsub.subscribe(module2.key, 'event', spy2);
-      pubsub.trigger('event');
+      pubsub.publish(module1.key, 'event');
 
       // test it worked
       expect(spy1.callCount).to.be.equal(2);
@@ -106,7 +106,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       // try detaching right callback, but wrong key
       expect(pubsub._events['event'].length).to.be.equal(2);
       pubsub.unsubscribe(module1.key, 'event', spy2);
-      pubsub.trigger('event');
+      pubsub.publish(module1.key, 'event');
       expect(pubsub._events['event'].length).to.be.equal(2);
 
       // it should still be there

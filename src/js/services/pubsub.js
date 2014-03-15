@@ -37,91 +37,69 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
       _.extend(this, _.pick(options || attributes, ['strict']));
     },
 
-    registerModule: function(module) {
-      if (!module instanceof GenericModule) {
-        throw new Error('We can register only instances of GenericModule');
-      }
-      // listen to the events of the module
-      this.listenTo(module, '[pubsub]', function() {this.trigger});
-      // give the module a chance to call the pubsub (but we don't give it access to pubsub)
-      var self = this;
-      module.register({
-        triggerPubSub: function() {
-          if (self._listeners.hasOwnProperty(this.mid)) {
-            return false; // pubsub has removed this module
-          }
-          self.trigger(arguments);
-        },
-        isRegistered: function() {
-          if (self._listeners.hasOwnProperty(this.mid)) {
-            return false; // pubsub has removed this module
-          }
-          return true;
-        }
-      });
-      // save the module
-      if (!this._providers.hasOwnProperty(module.mid)) {
-        this._providers[module.mid] = module;
-      }
-    },
 
-    unRegisterModule: function(module) {
-      if (!module instanceof GenericModule) {
-        throw new Error('We can register only instances of GenericModule');
-      }
-      // stop listening to events
-      this.stopListening(module);
-      // remove module from providers
-      delete this._providers[module.mid];
+    /*
+     * when pubsub is activated it will issue signal 'pubsub.starting'
+     * and it will check whether there are events that cannot possibly
+     * by handled by some listeners
+     */
+    start: function() {
+      this.trigger('pubsub.starting');
     },
 
     /*
-     * sends a signal 'onStart' to all listeners; the listeners
-     * get a chance to return back a list of signal they are expecting
-     * and we'll check whether this PubSub has implementations that
-     * can serve them
+     * Sends a signal 'pubsub.closing' to all listeners and then
+     * immediately shuts down the queue and removes any keys
      */
-    onStart: function() {
-      this.trigger('[pubsub]:starting');
+    close: function() {
+      this.trigger('pubsub:closing');
+      this.off();
+      this._issuedKeys = {};
     },
+
+
 
     /*
-     * Sends a signal 'onClose' meaning that this PubSub is going to
-     * be shut down and no further messages will be accepted
+     * subscribe() -> undefined or error
+     *
+     *  - key: instance of PubSubKey (it must be known
+     *         to this PubSub - so typically it is a key
+     *         issued by this PubSub)
+     *  - name: string, name of the event (can be name
+     *         accepted by Backbone)
+     *  - callback: a function to call (you cannot supply
+     *         context, so if the callback needs to be bound
+     *         use: _.bind(callback, context)
+     *
      */
-    onClose: function() {
-      this.trigger('[pubsub]:closing');
-      for (var k in _.keys(this._providers)) {
-        this.unRegisterModule(k);
-      }
-    },
-
-    _checkCaller: function(key, name, callback) {
-      if (_.isUndefined(key)) {
-        throw new Error("Every request must be accompanied by PubSubKey");
-      }
-      if (!(key instanceof PubSubKey)) {
-        throw new Error("Key must be instance of PubSubKey. " +
-          "(If you are trying to pass context, you can't do that. Instead, " +
-          "wrap your callback into: _.bind(callback, context))");
-      }
-      if (this.strict) {
-        if (!this._issuedKeys.hasOwnProperty(key.getId())) {
-          throw new Error("Your key is not known to us, sorry, you can't use this queue.");
-        }
-        if (this._issuedKeys[key.getId()] !== key.getCreator()) {
-          throw new Error("Your key has wrong identity, sorry, you can't use this queue.");
-        }
-      }
-    },
-
     subscribe: function(key, name, callback) {
-      this._checkCaller(key, name, callback);
+      this._checkKey(key, name, callback);
       this.on(name, callback, key); // the key becomes context
     },
 
+    /*
+     * unsubscribe() -> undefined or error
+     *
+     *  - key: instance of PubSubKey (it must be known
+     *         to this PubSub - so typically it is a key
+     *         issued by this PubSub)
+     *  - name: string, name of the event (can be name
+     *         accepted by Backbone)
+     *  - callback: a function to call (you cannot supply
+     *         context, so if the callback needs to be bound
+     *         use: _.bind(callback, context)
+     *
+     *  When you supply only:
+     *   - key: all callbacks registered under this key will
+     *          be removed
+     *   - key+name: all callbacks for this key (module) and
+     *         event will be removed
+     *   - key+name+callback: the most specific call, it will
+     *         remove only one callback (if it is there)
+     *
+     */
     unsubscribe: function(key, name, callback) {
-      this._checkCaller(key, name, callback);
+      this._checkKey(key, name, callback);
       var context = key;
       if (name && callback) {
         this.off(name, callback, context);
@@ -150,16 +128,67 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
 
     },
 
+    /*
+     * publish(key, event-name, arguments...) -> undef
+     *
+     * Publish the message with any set of arguments
+     * into the queue. No checking is done whether there
+     * are callbacks that can handle the event
+     */
     publish: function() {
-      this.trigger(arguments);
+      this._checkKey(arguments[0]);
+      var args = Array.prototype.slice.call(arguments, 1);
+      this.trigger.apply(this, args);
     },
 
+    /*
+     * getPubSubKey() -> PubSubKey
+     *
+     * Returns a new instance of PubSubKey - every
+     * subscriber must obtain one instance of the key
+     * and use it for all calls to publish/(un)subscribe
+     *
+     * If this queue is running in a strict mode, the
+     * keys will be remembered and they will be checked
+     * during the calls.
+     */
     getPubSubKey: function() {
       var k = PubSubKey.newInstance({creator: this});
       if (this.strict) {
         this._issuedKeys[k.getId()] = k.getCreator();
       }
       return k;
+    },
+
+    /*
+     * Says whether this PubSub is running in a strict mode
+     */
+    isStrict: function() {
+      return this.strict;
+    },
+
+    /*
+     * Checks the key - subscriber must supply it when calling
+     */
+    _checkKey: function(key, name, callback) {
+      if (this.strict) {
+
+        if (_.isUndefined(key)) {
+          throw new Error("Every request must be accompanied by PubSubKey");
+        }
+        if (!(key instanceof PubSubKey)) {
+          throw new Error("Key must be instance of PubSubKey. " +
+            "(If you are trying to pass context, you can't do that. Instead, " +
+            "wrap your callback into: _.bind(callback, context))");
+        }
+
+        if (!this._issuedKeys.hasOwnProperty(key.getId())) {
+          throw new Error("Your key is not known to us, sorry, you can't use this queue.");
+        }
+        if (this._issuedKeys[key.getId()] !== key.getCreator()) {
+          throw new Error("Your key has wrong identity, sorry, you can't use this queue.");
+        }
+      }
     }
 
   });
