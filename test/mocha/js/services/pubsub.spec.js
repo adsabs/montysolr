@@ -115,6 +115,75 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
 
     });
 
+    it("error in callback will not disrupt other callbacks", function() {
+      var pubsub = new PubSub({errWarningCount: 5});
+      var module = _.extend({}, Backbone.Events);
+      var k = pubsub.getPubSubKey();
+
+      var spy = sinon.spy();
+      var errspy = sinon.spy();
+
+      var r = 10; // num of triggers
+
+      pubsub.subscribe(k, 'pubsub.many_errors', errspy);
+      _.each(_.range(r), function(element, index, list) {
+        if (index === r/2) {
+          pubsub.subscribe(k, 'event', function() {throw new Error('foo');});
+        }
+        else {
+          pubsub.subscribe(k, 'event', function() {spy.apply(spy, [index].concat(_.toArray(arguments)));});
+        }
+      });
+
+      _.each(_.range(r), function(element, index, list) {
+        try {
+          //console.log('triggering:', index);
+          pubsub.publish(k, 'event', index);
+        }
+        catch(e) {
+          //console.log('failed for:', index, 'spy.callCount', spy.callCount);
+        }
+      });
+      //console.log(spy.args);
+      expect(spy.callCount).to.be.equal((r * r) - r);
+      expect(spy.calledWith(0, (r/2)-1)).to.be.true;
+      expect(spy.calledWith(0, r-1)).to.be.true;
+      expect(spy.calledWith(r-1, (r/2)-1)).to.be.true;
+      expect(spy.calledWith(r-1, r-1)).to.be.true;
+
+
+      // errors should be counted
+      expect(pubsub._errors[k.getId()]).to.be.equal(r);
+
+      // error handler should be called
+      expect(errspy.callCount).to.be.equal(r/5);
+      expect(errspy.firstCall.args[0]).to.be.equal(5);
+      expect(errspy.firstCall.args[1] instanceof Error).to.be.true;
+      expect(errspy.firstCall.args[2]).to.have.keys(['callback', 'context', 'ctx']);
+      expect(errspy.firstCall.args[2].ctx).to.equal(k);
+
+
+      // now set the pubsub to ignore error handling - errors
+      // should stop the queue
+      spy = sinon.spy();
+      pubsub.handleErrors = false;
+      _.each(_.range(r), function(element, index, list) {
+        try {
+          pubsub.publish(k, 'event', index);
+        }
+        catch(e) {
+        }
+      });
+      //console.log(spy.args);
+      expect(spy.callCount).to.be.equal(r/2 * r);
+      expect(spy.calledWith(0, (r/2)-1)).to.be.true;
+      expect(spy.calledWith(0, r-1)).to.be.true;
+      expect(spy.calledWith(r-1, (r/2)-1)).to.be.false;
+      expect(spy.calledWith(r-1, r-1)).to.be.false;
+
+
+    });
+
 
 
   });

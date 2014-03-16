@@ -1,7 +1,43 @@
 define(['backbone', 'underscore'], function(Backbone, _) {
 
   describe("BackBone.Events - test of problems (this test shows what we have to do to build robust PubSub)", function () {
-      
+
+    it("shows that BB events are synchronous and one bad egg can break the whole batch", function() {
+      var pubsub = _.extend({}, Backbone.Events);
+      var module = _.extend({}, Backbone.Events);
+      module._xid = 'module';
+      pubsub._xid = 'pubsub';
+
+      var spy = sinon.spy();
+      var r = 10; // num of triggers
+
+      _.each(_.range(r), function(element, index, list) {
+        if (index === r/2) {
+          pubsub.on('event', function() {throw new Error('foo');});
+        }
+        else {
+          pubsub.on('event', function() {spy.apply(spy, [index].concat(_.toArray(arguments)));});
+        }
+      });
+
+      _.each(_.range(r), function(element, index, list) {
+        try {
+          //console.log('triggering:', index);
+          pubsub.trigger('event', index);
+        }
+        catch(e) {
+          //console.log('failed for:', index, 'spy.callCount', spy.callCount);
+        }
+      });
+      //console.log(spy.args);
+      expect(spy.callCount).to.be.equal(r/2 * r);
+      expect(spy.calledWith(0, (r/2)-1)).to.be.true;
+      expect(spy.calledWith(0, r-1)).to.be.true;
+      expect(spy.calledWith(r-1, (r/2)-1)).to.be.false;
+      expect(spy.calledWith(r-1, r-1)).to.be.false;
+
+    });
+
     it("BB will not remove anonymous functions - and misbehaving modules could easily create them!", function() {
       var pubsub = _.extend({}, Backbone.Events);
       var module = _.extend({}, Backbone.Events);
@@ -215,7 +251,7 @@ define(['backbone', 'underscore'], function(Backbone, _) {
 
     pubsub.on('foo', f1, context1);
     pubsub.on('foo', f2, context2);
-    pubsub.trigger({hey: 'Joe!'});
+    pubsub.trigger('foo', {hey: 'Joe!'});
 
     // test it worked
     expect(s1.calledWith('bar', [{hey: 'Joe!'}]));

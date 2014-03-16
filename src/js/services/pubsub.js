@@ -17,24 +17,64 @@
  * All topics subscribed to are broadcasted using Backbone.Event. The modules/view have
  * no access to the Application object. The PubSub serves as a 'middleman'
  *
- * For the moment, this object is not protected, but it allows only to send
- * signals and to subscribe to the pubsub. In the future
- * we may consider just exposing API calls to send (trigger) events
- * throug this PubSub (i.e. hide the possibility to unsubscribe)
+ * For the moment, this object is not protected (you should implement) the facade
+ * that hides it. But it provides all necessary functionality to make it robust and
+ * secured. Ie. only modules with approprite keys can subscribe/publish/unscubscribe
+ *
+ * Also, errors are caught and counted. Actions can be fired to treat offending
+ * callbacks.
  **/
 
 define(['backbone', 'underscore', 'js/components/generic_module', 'js/components/pubsub_key'],
   function(Backbone, _, GenericModule, PubSubKey) {
 
+    // unfortunately, these methods are not part of the BB.Events class
+    // so we have to duplicate them iff we want to provide a queue which
+    // handles failed callbacks
 
-  var PubSub = GenericModule.extend({
+    // ------------------------ copied from BB ------------------------------------------
+    // Regular expression used to split event strings.
+    var eventSplitter = /\s+/;
+
+    // Implement fancy features of the Events API such as multiple event
+    // names `"change blur"` and jQuery-style event maps `{change: action}`
+    // in terms of the existing API.
+    var eventsApi = function(obj, action, name, rest) {
+      if (!name) return true;
+
+      // Handle event maps.
+      if (typeof name === 'object') {
+        for (var key in name) {
+          obj[action].apply(obj, [key, name[key]].concat(rest));
+        }
+        return false;
+      }
+
+      // Handle space separated event names.
+      if (eventSplitter.test(name)) {
+        var names = name.split(eventSplitter);
+        for (var i = 0, l = names.length; i < l; i++) {
+          obj[action].apply(obj, [names[i]].concat(rest));
+        }
+        return false;
+      }
+
+      return true;
+    };
+    // ------------------------ /copied from BB ------------------------------------------
+
+    var PubSub = GenericModule.extend({
 
     className: 'PubSub',
 
     initialize: function(attributes, options) {
       this._issuedKeys = {};
       this.strict = true;
-      _.extend(this, _.pick(options || attributes, ['strict']));
+      this.handleErrors = true;
+      this._errors = {};
+      this.errWarningCount = 10; // this many errors trigger warning
+      _.extend(this, _.pick(options || attributes, ['strict', 'handleErrors', 'errWarningCount']));
+      this.pubKey = this.getPubSubKey(); // the key the pubsub uses for itself
     },
 
 
@@ -44,7 +84,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
      * by handled by some listeners
      */
     start: function() {
-      this.trigger('pubsub.starting');
+      this.publish(this.pubKey, 'pubsub.starting');
     },
 
     /*
@@ -52,7 +92,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
      * immediately shuts down the queue and removes any keys
      */
     close: function() {
-      this.trigger('pubsub:closing');
+      this.publish(this.pubKey, 'pubsub.closing');
       this.off();
       this._issuedKeys = {};
     },
@@ -138,7 +178,15 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
     publish: function() {
       this._checkKey(arguments[0]);
       var args = Array.prototype.slice.call(arguments, 1);
-      this.trigger.apply(this, args);
+
+      // this is faster, default BB implementation
+      if (!this.handleErrors) {
+        return this.trigger.apply(this, args);
+      }
+      else { // safer, default
+        return this.triggerHandleErrors.apply(this, args);
+      }
+
     },
 
     /*
@@ -188,6 +236,46 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
         if (this._issuedKeys[key.getId()] !== key.getCreator()) {
           throw new Error("Your key has wrong identity, sorry, you can't use this queue.");
         }
+      }
+    },
+
+    // Copied and modified version of the BB trigger - we deal with errors
+    // and optionally execute stuff asynchronously
+    triggerHandleErrors: function(name) {
+
+      // almost the same as BB impl, but we call local triggerEvents
+      // that do error handling
+      if (!this._events) return this;
+      var args = Array.prototype.slice.call(arguments, 1);
+      if (!eventsApi(this, 'trigger', name, args)) return this;
+      var events = this._events[name];
+      var allEvents = this._events.all;
+
+      if (events) this.triggerEvents(events, args);
+      if (allEvents) this.triggerEvents(allEvents, arguments);
+
+      return this;
+    },
+
+    // A modified version of BB - errors will not disrupt the queue
+    triggerEvents: function(events, args) {
+      var ev, i = -1, l = events.length, a1 = args[0], a2 = args[1], a3 = args[2];
+      switch (args.length) {
+        case 0: while (++i < l) try{(ev = events[i]).callback.call(ev.ctx)} catch(e) {this.handleCallbackError(e, ev, args)}; return;
+        case 1: while (++i < l) try{(ev = events[i]).callback.call(ev.ctx, a1)} catch(e) {this.handleCallbackError(e, ev, args)}; return;
+        case 2: while (++i < l) try{(ev = events[i]).callback.call(ev.ctx, a1, a2)} catch(e) {this.handleCallbackError(e, ev, args)}; return;
+        case 3: while (++i < l) try{(ev = events[i]).callback.call(ev.ctx, a1, a2, a3)} catch(e) {this.handleCallbackError(e, ev, args)}; return;
+        default: while (++i < l) try{(ev = events[i]).callback.apply(ev.ctx, args)} catch(e) {this.handleCallbackError(e, ev, args)};
+      }
+    },
+
+    // the default implementation just counts the number of errors per module (key) and
+    // triggers pubsub.many_errors
+    handleCallbackError: function(e, event, args) {
+      var kid = event.ctx.getId();
+      var nerr = (this._errors[kid] = (this._errors[kid] || 0) + 1);
+      if (nerr % this.errWarningCount == 0) {
+        this.publish(this.pubKey, 'pubsub.many_errors', nerr, e, event, args);
       }
     }
 
