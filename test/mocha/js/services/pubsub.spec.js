@@ -1,4 +1,4 @@
-define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pubsub_key',
+define(['js/components/generic_module', '../../../../src/js/services/default_pubsub.js', 'js/components/pubsub_key',
   'backbone'], function(GenericModule, PubSub, PubSubKey, Backbone) {
 
   describe("PubSub (Service)", function () {
@@ -44,14 +44,17 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       var spy = sinon.spy();
 
       p.subscribe(k, 'event', spy);
-      expect(p._events['event'].length).to.be.equal(1);
+      p.publish(k, 'event');
+      expect(spy.callCount).to.be.equal(1);
 
       expect(function() {p.subscribe(k2, 'event', spy)}).to.throw(Error);
 
       // now in promiscuous mode
+      spy = sinon.spy();
       p = new PubSub({strict: false});
       p.subscribe(k2, 'event', spy);
-      expect(p._events['event'].length).to.be.equal(1);
+      p.publish(k, 'event');
+      expect(spy.callCount).to.be.equal(1);
 
     });
 
@@ -88,7 +91,6 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       pubsub.unsubscribe(module1.key);
       pubsub.unsubscribe(module2.key);
       pubsub.publish(module1.key, 'event');
-      expect(pubsub._events).to.be.empty;
 
       // test it worked
       expect(spy1.callCount).to.be.equal(1);
@@ -104,10 +106,8 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       expect(spy2.callCount).to.be.equal(3);
 
       // try detaching right callback, but wrong key
-      expect(pubsub._events['event'].length).to.be.equal(2);
       pubsub.unsubscribe(module1.key, 'event', spy2);
       pubsub.publish(module1.key, 'event');
-      expect(pubsub._events['event'].length).to.be.equal(2);
 
       // it should still be there
       expect(spy1.callCount).to.be.equal(3);
@@ -165,8 +165,21 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
 
       // now set the pubsub to ignore error handling - errors
       // should stop the queue
+
+      pubsub = new PubSub({errWarningCount: 5, handleErrors: false});
+      k = pubsub.getPubSubKey();
+      errspy = sinon.spy();
       spy = sinon.spy();
-      pubsub.handleErrors = false;
+
+      pubsub.subscribe(k, 'pubsub.many_errors', errspy);
+      _.each(_.range(r), function(element, index, list) {
+        if (index === r/2) {
+          pubsub.subscribe(k, 'event', function() {throw new Error('foo');});
+        }
+        else {
+          pubsub.subscribe(k, 'event', function() {spy.apply(spy, [index].concat(_.toArray(arguments)));});
+        }
+      });
       _.each(_.range(r), function(element, index, list) {
         try {
           pubsub.publish(k, 'event', index);
