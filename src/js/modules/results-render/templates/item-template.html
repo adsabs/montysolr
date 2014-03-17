@@ -1,0 +1,12 @@
+<li >
+    <p>{{title}}</p>
+    <p>{{author}}</p>
+    <p>{{bibcode}}</p>
+    <a class="view-more" href="">view more...</a>
+    <p style= "display:none" class="more-info">
+        {{#each highlights}}
+       {{@key}} :{{this}}
+        {{/each}}
+        <p/>
+    <br/>
+</li>

@@ -42,7 +42,18 @@ require.config({
 
     // 3rd party dependencies
     'jquery': 'libs/jquery/jquery',
-    'backbone': 'libs/backbone/backbone'
+    'backbone': 'libs/backbone/backbone',
+    'hbs': 'libs/require-handlebars-plugin/hbs',
+    'marionette' : 'libs/backbone.marionette/backbone.marionette',
+    'backbone.wreqr' : 'libs/backbone.wreqr/lib/backbone.wreqr',
+    'backbone.eventbinder' : 'libs/backbone.eventbinder/backbone.eventbinder',
+    'backbone.babysitter' : 'libs/backbone.babysitter/backbone.babysitter'
+
+  },
+
+  hbs : {
+    'templateExtension' : 'html'
+
   },
 
   shim: {
@@ -54,6 +65,13 @@ require.config({
 
       // This maps the global `Backbone` object to `require('backbone')`.
       exports: 'Backbone'
+    },
+
+    marionette : {
+
+      deps : ['jquery', 'underscore', 'backbone'],
+
+      exports : 'Marionette'
     }
   }
 });

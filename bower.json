@@ -10,7 +10,9 @@
     "requirejs": "~2.1.8",
     "todomvc-common": "~0.1.4",
     "backbone.localStorage": "~1.1.0",
-    "backbone.marionette": "~1.6.3"
+    "backbone.marionette": "~1.6.3",
+    "backbone.wreqr" : "1.1.0",
+    "require-handlebars-plugin":"0.8.0"
   },
   "devDependencies": {
     "chai": "~1.8.0",
