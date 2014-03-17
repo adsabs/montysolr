@@ -6,7 +6,7 @@
 define(['backbone', 'underscore'], function(Backbone, _) {
 
   // A list of options to be attached directly to the module, if provided.
-  var moduleOptions = ['className', 'triggerPubSub', 'isRegistered'];
+  var moduleOptions = ['className', 'activate'];
 
   var Module = function(attributes, options) {
     var defaults;
@@ -28,12 +28,6 @@ define(['backbone', 'underscore'], function(Backbone, _) {
     initialize: function() {},
     activate: function(options) {
       _.extend(this, _.pick(options, moduleOptions));
-    },
-    triggerPubSub: function() {
-      throw new Error("This module is not yet registered with PubSub");
-    },
-    isRegistered: function() {
-      return false;
     }
   });
 

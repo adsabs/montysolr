@@ -15,7 +15,7 @@
  *  var htmlInterface = new Facade(remoteInterface, htmlRemote);
  *
  */
-define(['underscore'], function(_) {
+define(['underscore', 'js/components/facade'], function(_, Facade) {
   'use strict';
 
   // The Facade encapsulates objectIn according to the description
@@ -53,8 +53,14 @@ define(['underscore'], function(_) {
           // Must be a function - bind is needed to enable use of methods other than those on the interface
           facade[method] = _.bind(p, objectIn);
         }
-        else if (_.isString(p) || _.isNumber(p) || _.isBoolean(p) || _.isDate(p) || _.isNull(p) || _.isRegex(p)) {
-          facade['get' + method.substring(0,1).toUpperCase() + method.substring(1)] = _.bind(function() {return this[method]}, objectIn);
+        else if (p.hasOwnProperty('__facade__') && p.__facade__) {
+          facade[method] = p;
+        }
+        else if (_.isUndefined(p)) {
+          //pass
+        }
+        else if (_.isString(p) || _.isNumber(p) || _.isBoolean(p) || _.isDate(p) || _.isNull(p) || _.isRegExp(p)) {
+          facade['get' + method.substring(0,1).toUpperCase() + method.substring(1)] = _.bind(function() {return this.ctx[this.name]}, {ctx:objectIn, name:method});
         }
         else {
           throw new Error("Sorry, you can't wrap '" + method + "': " + p);
@@ -63,6 +69,7 @@ define(['underscore'], function(_) {
       }
     }
 
+    facade.__facade__ = true;
     return facade;
   }
 

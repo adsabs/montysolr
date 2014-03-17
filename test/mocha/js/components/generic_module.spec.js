@@ -41,25 +41,12 @@ define(['js/components/generic_module', 'backbone'], function(GenericModule, Bac
 
     });
 
-    it("should have activate()/triggerPubSub()/isRegistered() methods", function() {
-      var module = new GenericModule();
+    it("should have activate() method", function() {
+
       var spy = sinon.spy();
-
-      // default impl
-      expect(function() {module.triggerPubSub('foo')}).to.throw(Error);
-      expect(module.isRegistered()).to.be.false;
-
-      // when module is activated (the method is ready)
-      module.activate({triggerPubSub: function() {spy.apply(spy, arguments)}});
-
-      expect(spy.called).to.be.false;
-      module.triggerPubSub('foo', 42);
-      expect(spy.called).to.be.true;
-      expect(spy.calledWith('foo', 42)).to.be.true;
-
-      module.activate({triggerPubSub: function() {spy.call(spy, this)}});
-      module.triggerPubSub('baaaaar');
-      expect(spy.calledWith(module)).to.be.true;
+      var module = new GenericModule({}, {activate: spy});
+      module.activate('foo');
+      expect(spy.calledWith('foo')).to.be.true;
 
     });
 

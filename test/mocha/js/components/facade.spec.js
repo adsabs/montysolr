@@ -13,7 +13,8 @@ define(['js/components/facade', 'underscore'], function(Facade, _) {
       var interface = {
         start: 'method to start',
         stop: 'method to stop',
-        valueX: 'variable copied over'
+        valueX: 'variable copied over',
+        facade: 'this should be allowed'
       };
 
       // An implelemntation of the interface
@@ -23,7 +24,8 @@ define(['js/components/facade', 'underscore'], function(Facade, _) {
         valueX: 'foo',
         private: 'bar',
         array: [1,2],
-        object: {foo: 'boo'}
+        object: {foo: 'boo'},
+        facade: new Facade()
       };
 
       var facade = new Facade(interface, imp );
@@ -35,6 +37,7 @@ define(['js/components/facade', 'underscore'], function(Facade, _) {
       expect(facade.stop({foo: 'baz'})).to.be.eql(imp);
       expect(spy.firstCall.args).to.be.eql(['start', [{foo:'bar'}]]);
       expect(spy.secondCall.args).to.be.eql(['stop', [{foo:'baz'}]]);
+      expect(facade.facade.__facade__).to.be.true;
 
       expect(function() {new Facade({array: 'should fail'}, imp)}).to.throw(Error);
       expect(function() {new Facade({object: 'should fail'}, imp)}).to.throw(Error);

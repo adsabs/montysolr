@@ -10,21 +10,21 @@ define(['underscore'], function(_) {
   var Mixin = {
 
     /*
-     * Core is the object that allows modules to get access to objects
+     * BeeHive is the object that allows modules to get access to objects
      * of the application (but we make sure these objects are protected
      * and only application can set/change them). This mixin gives objects
-     * functions to receive/query 'Core'
+     * functions to query 'BeeHive'
      */
-    Core: {
-      // called by parents (app) to give modules access to Core
-      initCore: function(core) {
-        this.Core = core;
+    BeeHive: {
+      // called by parents (app) to give modules access
+      setBeeHive: function(brundibar) {
+        this.BeeHive = brundibar;
       },
-      getCore: function() {
-        return this.Core;
+      getBeeHive: function() {
+        return this.BeeHive;
       },
-      hasCore: function() {
-        if (this.Core) {
+      hasBeeHive: function() {
+        if (this.BeeHive) {
           return true;
         }
         return false;
@@ -37,28 +37,17 @@ define(['underscore'], function(_) {
      * to send messages to/from.
      */
     PubSub: {
-      initPubSub: function() {
-        // we depend on presence of core
-        if (!(this.hasCore && this.hasCore())) {
-          throw new Error("Dependency error: PubSub needs Core");
-        }
-        if (this.hasPubSub()) {
-          throw new Error("Dependency error: Core must provide PubSub");
-        }
+      setPubSub: function(pubsub) {
+        this.PubSub = pubsub;
       },
       getPubSub: function() {
-        return this.getCore().getPubSub();
+        return this.PubSub;
       },
       hasPubSub: function() {
-        try {
-          if (!this.getCore().getPubSub()) {
-            return false;
-          }
+        if (this.PubSub) {
+          return true;
         }
-        catch (e) {
-          return false;
-        }
-        return true;
+        return false;
       }
     }
   };
