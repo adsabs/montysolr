@@ -18,7 +18,9 @@ var tests = [
   tbase + '/services/pubsub.spec.js',
   tbase + '/components/pubsub_key.spec.js',
   tbase + '/components/facade.spec.js',
-  tbase + '/components/beehive.spec.js'
+  tbase + '/components/beehive.spec.js',
+  tbase + '/widgets/results_render_module.spec.js'
+
 ];
 
 
