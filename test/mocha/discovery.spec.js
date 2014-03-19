@@ -17,7 +17,8 @@ var tests = [
   tbase + '/services/backbone.events.spec.js',
   tbase + '/services/pubsub.spec.js',
   tbase + '/components/pubsub_key.spec.js',
-  tbase + '/components/facade.spec.js'
+  tbase + '/components/facade.spec.js',
+  tbase + '/components/beehive.spec.js'
 ];
 
 

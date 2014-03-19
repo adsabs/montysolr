@@ -2,26 +2,29 @@
  * Created by rchyla on 3/16/14.
  */
 
-define(['backbone', 'underscore', 'js/components/facade', 'pubsub_service_impl'], function(Backbone, _, Facade, PubSubImplementation) {
+define(['backbone', 'underscore', 'js/mixins/hardened', 'pubsub_service_impl'], function(Backbone, _, Hardened, PubSubImplementation) {
 
-  if (_.isUndefined(PubSubImplementation)) {
-    PubSubImplementation = require('js/services/default_pubsub');
-  }
 
-  return function(options) {
+  var PubSub = PubSubImplementation.extend({
 
-    var allowed = _.pick(options, ['strict', 'handleErrors', 'errWarningCount']);
-
-    var interface = {
-      start: 'start the queue',
-      stop: 'close the queue',
+    /*
+     * Wraps itself into a Facade that can be shared with other modules
+     * (it is read-only); absolutely non-modifiable and provides the
+     * following callbacks:
+     *  - publish
+     *  - subscribe
+     *  - unsubscribe
+     *  - getPubSubKey
+     */
+    hardenedInterface:  {
       subscribe: 'register callback',
+      unsubscribe: 'deregister callback',
       publish: 'send data to the queue',
       getPubSubKey: 'get secret key'
-    };
+    }
+  });
 
-    return new Facade(interface, new PubSubImplementation({}, allowed));
+  _.extend(PubSub.prototype, Hardened);
 
-  }
-
+  return PubSub;
 });

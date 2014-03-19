@@ -3,33 +3,43 @@
  */
 
 define(['backbone', 'underscore',
-  'js/components/generic_module', 'js/mixins/dependon', 'js/components/facade'],
-  function(Backbone, _, GenericModule, Dependon, Facade) {
+  'js/components/generic_module', 'js/mixins/dependon', 'js/mixins/hardened', 'js/components/services_container'],
+  function(Backbone, _, GenericModule, Dependon, Hardened, ServicesContainer) {
 
   var hiveOptions = [];
   var BeeHive = GenericModule.extend({
 
     initialize: function(attrs, options) {
       _.extend(this, _.pick(options, hiveOptions));
+      this.Services = new ServicesContainer();
     },
-    // wraps BeeHive into a facade so that it can be shared with other
-    // components (without fear they will have access to private methods
-    // or will be changing something)
-    getProtectedInstance: function() {
-      var pubsubIface = {
-        publish: 'publishes message to the pubsub',
-        subscribe: 'attaches callbacks from the queue',
-        unsubscribe: 'detaches callbacks from the queue'
-      };
-      var Bee = new {};
-      Bee.Services = {
-        PubSub: new Facade(pubsubIface, this.PubSub)
-      };
 
+    close: function() {
+      this.Services.close();
+    },
+
+    addService: function(name, service) {
+      return this.Services.addService(name, service);
+    },
+
+    removeService: function(name) {
+      return this.Services.removeService(name);
+    },
+
+
+    /*
+     * Wraps itself into a Facade that can be shared with other modules
+     * (it is read-only); absolutely non-modifiable and provides the
+     * following callbacks and properties:
+     *  - Services
+     */
+    hardenedInterface:  {
+      Services: 'services container'
     }
+
   });
 
-  _.extend(BeeHive.prototype, Dependon.Beehive, Dependon.PubSub);
+  _.extend(BeeHive.prototype, Hardened);
 
   return BeeHive;
 });

@@ -37,35 +37,45 @@ define(['underscore', 'js/components/facade'], function(_, Facade) {
   };
 
   Facade.prototype.mixIn = function(description, objectIn, facade) {
-    var method;
+    var property, propertyValue;
 
     facade = facade || this;
 
-    for (method in description) {
-      if (description.hasOwnProperty(method)) {
-        if (! objectIn[method]) {
-          throw new Error(methodName + " not imlemented for this facade");
-        }
+    for (property in description) {
 
-        var p = objectIn[method];
+      propertyValue = description[property];
+
+      if (property in objectIn) {
+
+        var p = objectIn[property];
 
         if (typeof p == 'function') {
-          // Must be a function - bind is needed to enable use of methods other than those on the interface
-          facade[method] = _.bind(p, objectIn);
+          facade[property] = _.bind(p, objectIn);
         }
         else if (p.hasOwnProperty('__facade__') && p.__facade__) {
-          facade[method] = p;
+          facade[property] = p;
+        }
+        else if (_.isObject(p) && 'getHardenedInstance' in p) { // builds a facade
+          facade[property] = p.getHardenedInstance();
         }
         else if (_.isUndefined(p)) {
           //pass
         }
         else if (_.isString(p) || _.isNumber(p) || _.isBoolean(p) || _.isDate(p) || _.isNull(p) || _.isRegExp(p)) {
-          facade['get' + method.substring(0,1).toUpperCase() + method.substring(1)] = _.bind(function() {return this.ctx[this.name]}, {ctx:objectIn, name:method});
+          facade['get' + property.substring(0,1).toUpperCase() + property.substring(1)] = _.bind(function() {return this.ctx[this.name]}, {ctx:objectIn, name:property});
         }
         else {
-          throw new Error("Sorry, you can't wrap '" + method + "': " + p);
+          throw new Error("Sorry, you can't wrap '" + property + "': " + p);
         }
 
+      }
+      else {
+        if (typeof propertyValue == 'function') {
+          facade[property] = _.bind(propertyValue, objectIn);
+        }
+        else {
+          throw new Error("Unknown key: " + property + "(" + propertyValue + ")");
+        }
       }
     }
 

@@ -1,7 +1,7 @@
-define(['js/components/generic_module', '../../../../src/js/services/default_pubsub.js', 'js/components/pubsub_key',
-  'backbone'], function(GenericModule, PubSub, PubSubKey, Backbone) {
+define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pubsub_key', 'js/components/facade',
+  'backbone'], function(GenericModule, PubSub, PubSubKey, Facade, Backbone) {
 
-  describe("PubSub (Service)", function () {
+  describe("PubSub - default implementation (Service)", function () {
       
     it("should return PubSub object (generic module)", function() {
       expect(new PubSub()).to.be.an.instanceof(GenericModule);
@@ -194,6 +194,30 @@ define(['js/components/generic_module', '../../../../src/js/services/default_pub
       expect(spy.calledWith(r-1, (r/2)-1)).to.be.false;
       expect(spy.calledWith(r-1, r-1)).to.be.false;
 
+
+    });
+
+    it("provides a hardened version of itself", function() {
+      var pubsub = new PubSub();
+      var hardened = pubsub.getHardenedInstance();
+      expect(hardened.__facade__).equals(true);
+      expect(hardened.handleCallbackError).to.be.undefined;
+      expect(hardened.start).to.be.undefined;
+
+      var p = hardened;
+      var k = p.getPubSubKey();
+      var spy = sinon.spy();
+
+      p.subscribe(k, 'event', spy);
+      p.publish(k, 'event');
+      p.unsubscribe(k, 'event');
+      p.publish(k, 'event');
+
+      expect(spy.callCount).to.be.equal(1);
+
+      hardened = pubsub.getHardenedInstance({start: true, close: true});
+      expect(hardened.start).to.not.be.undefined;
+      expect(hardened.close).to.not.be.undefined;
 
     });
 
