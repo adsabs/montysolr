@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple test to show interaction between API Query, API Request, API Response, and UI Widgets</title>
+
+    <style type='text/css'>
+    <!--
+    .region {border: solid #000066 1px; width: 100%; display: block;
+        float: left;}
+    div#top-region { width: 100%;
+        height: 200px;}
+    div#middle-region { width: 100%;
+        height: 70%;}
+    div#api_query { width: 49%;
+        float: left;}
+    div#api_request { width: 49%;
+        float: right;}
+
+    --></style>
+
+
+    <script src="../bower_components/mocha/mocha.js"></script>
+    <script>
+        var mocha = {};
+        mocha.testToLoad = '../test/test-widgets.js';
+
+    </script>
+
+
+    <script data-main="../src/discovery.config" src="../bower_components/requirejs/require.js"></script>
+
+</head>
+<body>
+
+<div id="top-region" class="region">
+
+</div>
+
+<div id="middle-region" class="region">
+    middle region
+</div>
+
+</body>
+</html>
