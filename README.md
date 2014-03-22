@@ -51,12 +51,33 @@ Inside the project's working directory, run:
 
 And you are ready to go!
 
+```bash
+  # run some tests
+  $ grunt test:web
+
+  # open a browser and look on what is inside
+  $ open http://localhost:8000
+```
+
 
 To help you started, explore two demo applications: ./src/example.html (./src/js/apps/example) and 
 ./src/todo.html (./src/js/apps/todo)
 
+If you need to change some variables, do this:
 
-typical dev-cycle
+```bash
+  $ cp local-config.json.tmp local-config.json
+  $ edit...edit...save
+```
+
+Here, explanation of the config vars:
+
+  * port_development: when running tests, webserver will start on this port [default: 8000]
+  * port_development: port for webserver when running code from dist (ie. testing deployment) [default: 5000]
+  * api_endpoint: url of the ADS api service, see below for help on setting up a tunnel [default: http://localhost:9000/solr/select]
+
+
+Typical dev-cycle
 =================
 
  1. write tests
@@ -64,16 +85,24 @@ typical dev-cycle
  3. ```grunt deploy``` -- this will prepare the target (note: deploy is not yet ready)
 
 
-When applicable, take advantage of the headless testing framework! You can edit code and 
+Take advantage of the headless testing framework! You can edit code and
 have it automatically re-tested.
  
 ```bash
   # run tests (it will reload automatically and report in terminal)
-  $ grunt test:watch
+  $ grunt test:web
   
-  # or if you want to just run it once
-  $ grunt test
+  # or somewhat faster (but not good for cross site ajax calls)
+  $ grunt test:local
 ```
+
+By default, the PhantomJS will execute tests from: test/mocha/discovery.spec.html; you can
+run other tests like so:
+
+```bash
+  $ grunt test:web --testname=mocha/foo  # assuming test/mocha/foo.spec.html exists!
+```
+
 
 Tests can also be opened in a browser, you can zone-in on certain class of tests when editing,
 but you have to reload in your browser

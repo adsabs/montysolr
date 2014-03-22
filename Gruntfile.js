@@ -3,6 +3,9 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+
+    // if you create 'local-config.json' some variables can be overriden there
+    local: grunt.file.readJSON('local-config.json'),
     
     // Wipe out previous builds and test reporting.
     clean: ['dist/', 'test/reports'],
@@ -104,7 +107,7 @@ module.exports = function(grunt) {
     // only for the express task (our webserver)
     env: {
       options: {
-        API_ENDPOINT: 'http://adswhy:9000/solr/select'
+        API_ENDPOINT: '<%= local.api_endpoint || "http://localhost:9000/solr/select" %>'
       },
       dev: {
         HOMEDIR: 'src'
@@ -115,68 +118,71 @@ module.exports = function(grunt) {
       }
     },
     
-    // start a development webserver (if you want to keep it running, use the 'server'
-    // task
+    // start a development webserver (if you want to keep it running, run 'grunt server'
     express: {
-      
       options: {
         // some defaults
         background:true
       },
       dev: {
         options: {
-          port: 8000,
+          port: '<%= local.port_development || 8000 %>',
           script: 'server.js'
         }
       },
       prod: {
         options: {
-          port: 8001,
+          port: '<%= local.port_production || 5000 %>',
           script: 'server.js'
         }
       }
     },
     
-    // will automatically reload webserver whenever a file is modified
+    // **
+    // * Watch files for modifications and reload certain tasks on change;
+    // * if you try to run webserver or unittesting outside 'watch' tasks
+    // * (ie. before starting watch) the reloading will probably not work
+    // **
     watch: {
       options: {
+        atBegin: true,
         spawn: false, // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded
         interrupt: true // necessary for windows
       },
-      dev: {
-        files:  [ './src/js/**/*.js', './src/*.js' ],
+
+      server: {
+        files:  [ './src/js/**/*.js', './src/*.js', './src/*.html'],
         tasks:  [ 'env:dev', 'express:dev' ]
       },
-      testing: {
-        files:  [ './src/js/**/*.js', './test/**/*.js', './src/*.js' ],
-        tasks: ['test']
 
+      local_testing: {
+        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
+        tasks: ['mocha_phantomjs:local_testing', 'watch:local_testing']
       },
-      // TODO: I should find a way to dynamically discover these names 'discovery' etc...
-      discovery: {
-        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js'],
-        tasks: ['mocha_phantomjs:discovery', 'watch:discovery']
-      },
-      todo: {
-        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js' ],
-        tasks: ['mocha_phantomjs:todo', 'watch:todo']
-      },
-      sandbox: {
-        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js'],
-        tasks: ['mocha_phantomjs:sandbox', 'watch:sandbox']
+
+      web_testing: {
+        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
+        tasks: ['mocha_phantomjs:local_testing', 'watch:web_testing']
       }
     },
 
-    // run tests inside the phamtomjs (headless browser)
+    //**
+    //* PhantomJS is a headless browser that runs our tests, by default it runs <mocha/discovery>.spec.html
+    //* if you need to change the tested file: grunt --testname=foo ....
+    //**
     mocha_phantomjs: {
       options: {
         //'reporter': 'progress',
-        'output': 'test/reports/testing.output'
+        'output': 'test/reports/' + (grunt.option('testname') || 'mocha/discovery')
       },
-      all: ['test/mocha/**/*.html'],
-      todo: ['test/mocha/**/todo.spec.html'],
-      discovery: ['test/mocha/**/discovery.spec.html'],
-      sandbox: ['test/mocha/**/sandbox.spec.html']
+
+      local_testing: ['test/' + (grunt.option('testname') || 'mocha/discovery') + '.spec.html' ],
+
+      web_testing: {
+        options: {
+          urls: ['http://localhost:<%= local.port || 8000 %>/test/mocha/' + (grunt.option('testname') || 'discovery') + '.spec.html']
+        }
+      }
     },
 
     // modify the html based on the instructions inside the html code
@@ -266,8 +272,8 @@ module.exports = function(grunt) {
   
 
   // karma tasks. (to ditch?)
-  grunt.loadNpmTasks('grunt-karma');
-  grunt.loadNpmTasks('grunt-karma-coveralls');
+  // grunt.loadNpmTasks('grunt-karma');
+  // grunt.loadNpmTasks('grunt-karma-coveralls');
   
   // for testing
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
@@ -279,11 +285,6 @@ module.exports = function(grunt) {
   // Bower tasks
   grunt.loadNpmTasks('grunt-bower-task');
 
-  // Create an aliased test task.
-  grunt.registerTask('test', ['mocha_phantomjs:all']);
-  grunt.registerTask('test:watch', ['watch:testing']);
-
-  
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment', ['bower']);
 
@@ -298,6 +299,15 @@ module.exports = function(grunt) {
     'compress'
     //'cssmin',
   ]);
-  
-  grunt.registerTask('server', [ 'env:dev', 'express:dev', 'watch:dev' ])
+
+  // starts a web server (automatically reloading)
+  grunt.registerTask('server', [ 'env:dev', 'express:dev', 'watch:server' ]);
+
+  // runs tests in a web server (automatically reloading)
+  grunt.registerTask('test:web', ['env:dev', 'express:dev', 'watch:web_testing']);
+
+  // run tests locally
+  grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
+
+
 };
