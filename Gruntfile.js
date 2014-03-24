@@ -162,7 +162,7 @@ module.exports = function(grunt) {
 
       web_testing: {
         files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
-        tasks: ['mocha_phantomjs:local_testing', 'watch:web_testing']
+        tasks: ['express:dev', 'mocha_phantomjs:web_testing', 'watch:web_testing']
       }
     },
 
@@ -180,7 +180,7 @@ module.exports = function(grunt) {
 
       web_testing: {
         options: {
-          urls: ['http://localhost:<%= local.port || 8000 %>/test/mocha/' + (grunt.option('testname') || 'discovery') + '.spec.html']
+          urls: ['http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/discovery') + '.spec.html']
         }
       }
     },
@@ -304,7 +304,7 @@ module.exports = function(grunt) {
   grunt.registerTask('server', [ 'env:dev', 'express:dev', 'watch:server' ]);
 
   // runs tests in a web server (automatically reloading)
-  grunt.registerTask('test:web', ['env:dev', 'express:dev', 'watch:web_testing']);
+  grunt.registerTask('test:web', ['env:dev', 'watch:web_testing']);
 
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);

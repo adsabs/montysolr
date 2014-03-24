@@ -5,16 +5,11 @@
 
     <style type='text/css'>
     <!--
-    .region {border: solid #000066 1px; width: 100%; display: block;
-        float: left;}
+    .region {border: solid #000066 1px; width: 100%; display: block;}
     div#top-region { width: 100%;
         height: 200px;}
     div#middle-region { width: 100%;
         height: 70%;}
-    div#api_query { width: 49%;
-        float: left;}
-    div#api_request { width: 49%;
-        float: right;}
 
     --></style>
 
@@ -33,11 +28,18 @@
 <body>
 
 <div id="top-region" class="region">
-
+    <div id="top-region-left" class="region-left"></div>
+    <div id="top-region-right"> </div>
 </div>
 
 <div id="middle-region" class="region">
-    middle region
+    <div id="middle-region-left"></div>
+    <div id="middle-region-right"></div>
+</div>
+
+<div id="bottom-region" class="region">
+    <div id="bottom-region-left"></div>
+    <div id="bottom-region-right"></div>
 </div>
 
 </body>
