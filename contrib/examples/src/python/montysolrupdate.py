@@ -79,18 +79,19 @@ COMMASPACE = ', '
 SPACE = ' '
 tag_cre = re.compile(r'v?(\d+)\.(\d+)\.(\d+)\.(\d+)$')
 
-INSTDIR = 'MONTYSOLR_HOME' in os.environ and os.environ['MONTYSOLR_HOME'] or '/var/lib/montysolr'
-INSTNAME = 'MONTYSOLR_EXAMPLE_NAME' in os.environ and os.environ['MONTYSOLR_EXAMPLE_NAME'] or 'adsabs'
-GITURL = 'MONTYSOLR_GIT' in os.environ and os.environ['MONTYSOLR_GIT'] or 'https://github.com/romanchyla/montysolr.git' #where to get the latest code from
-NEW_INSTANCE_PORT_GAP = 'MONTYSOLR_URL_GAP' in os.environ and os.environ['MONTYSOLR_URL_GAP'] or 10 #when we build a new release, it will be started as orig_port+GAP
-JCC_SVN_TAG='MONTYSOLR_JCC_SVN_TAG' in os.environ and os.environ['MONTYSOLR_JCC_SVN_TAG'] or '1452473' #the version of JCC we rely on (Use the one from Jenkins)
-PYLUCENE_SVN_TAG='MONTYSOLR_PYLUCENE_SVN_TAG' in os.environ and os.environ['MONTYSOLR_PYLUCENE_SVN_TAG'] or JCC_SVN_TAG
-INVENIO_CONFIG='INVENIO_CONFIG' in os.environ and os.environ['INVENIO_CONFIG'] or ''
-INVENIO_COMMIT='INVENIO_COMMIT' in os.environ and os.environ['INVENIO_COMMIT'] or 'master'
-START_ARGS='START_ARGS' in os.environ and os.environ['START_ARGS'] or ''
-START_JVMARGS='START_JVMARGS' in os.environ and os.environ['START_JVMARGS'] or ''
-PYTHON_RELEASE = 'MONTYSOLR_PYTHON_RELEASE' in os.environ and os.environ['MONTYSOLR_PYTHON_RELEASE'] or '2' 
-# some ideas stolen from python release script
+INSTDIR = os.environ.get('MONTYSOLR_HOME','/var/lib/montysolr')
+INSTNAME = os.environ.get('MONTYSOLR_EXAMPLE_NAME','adsabs')
+GITURL = os.environ.get('MONTYSOLR_GIT','https://github.com/romanchyla/montysolr.git') #where to get the latest code from
+NEW_INSTANCE_PORT_GAP = os.environ.get('MONTYSOLR_URL_GAP',10) #when we build a new release, it will be started as orig_port+GAP
+JCC_SVN_TAG = os.environ.get('MONTYSOLR_JCC_SVN_TAG','1452473') #the version of JCC we rely on (Use the one from Jenkins)
+PYLUCENE_SVN_TAG = os.environ.get('MONTYSOLR_PYLUCENE_SVN_TAG',JCC_SVN_TAG)
+INVENIO_CONFIG = os.environ.get('INVENIO_CONFIG','')
+INVENIO_COMMIT = os.environ.get('INVENIO_COMMIT','master')
+START_ARGS = os.environ.get('START_ARGS','')
+START_JVMARGS = os.environ.get('START_JVMARGS','')
+PYTHON_RELEASE = os.environ.get('MONTYSOLR_PYTHON_RELEASE','2')
+ANT_HOME = os.environ.get('ANT_HOME','/usr/share/ant')
+JAVA_HOME = os.environ.get('JAVA_HOME','/usr/lib/jvm/java-7-openjdk-amd64')
 
 if "check_output" not in dir( subprocess ): # duck punch it in!
     def f(*popenargs, **kwargs):
@@ -146,10 +147,6 @@ def check_basics():
     
 
 def check_options(options):
-    for v in 'PATH,ANT_HOME,JAVA_HOME'.split(','):
-        if v not in os.environ:
-            error('%s not detected.' % v,
-              'Please set your enviroment variable')
             
     if options.force_recompilation:
         options.update = True
@@ -235,6 +232,9 @@ def get_arg_parser():
     p.add_option('-A', '--run_command_after',
                  default='', action='store',
                  help='Invoke this command AFTER run - use to restart/update instance')
+    p.add_option('--no-virtualenv',
+                 default=False, action='store_true',dest="no_venv",
+                 help="Don't run anything in a virtualenv")
     return p
 
 
@@ -843,7 +843,7 @@ def setup_ant(options):
         ant -f fetch.xml -Ddest=system
         echo "%(release)s" > RELEASE
         
-        """ % {'java_home': os.environ['JAVA_HOME'], 
+        """ % {'java_home': JAVA_HOME, 
                'ant_home': os.path.join(INSTDIR, "perpetuum/ant"),
                'release': JCC_SVN_TAG})
     
@@ -861,38 +861,52 @@ def setup_python(options):
         return # python already installed
 
     with open("install_python.sh", "w") as inpython:
-        inpython.write("""#!/bin/bash -e
+        header = '\n'.join([
+            '#!/bin/bash -e',
+            'echo "using python: %(python)s"',
+            '[ -d python ] || mkdir python',
+            'echo "0" > python/RELEASE',
+            '',
+            ])
+        venv_activate = '\n'.join([
+            'virtualenv --unzip-setuptools -p %(python)s python',
+            'source python/bin/activate',
+            'echo "done creating python virtualenv"',
+            '',
+            ])
+        modules = ' '.join([
+            'setuptools',
+            'sqlalchemy',
+            'mysql-python',
+            'numpy',
+            'lxml',
+            'simplejson',
+            'configobj',
+            'pyparsing==1.5.7',
+            'nameparser'
+            ])
+        core_commands = '\n'.join([
+            '#easy_install -U distribute==0.6.30',
+            '',
+            '# install needed modules; numpy needs libatlas-base-dev',
+            'pip install --upgrade %s' % modules,
+            '',
+            '# verify installation',
+            'python -c "import numpy,lxml,simplejson,configobj,pyparsing, MySQLdb, sqlalchemy"',
+            '',
+            ])
+        venv_deactivate = 'deactivate\n'
+        cleanup = '\n'.join([
+            'echo "%(release)s" > python/RELEASE',
+            'exit 0',
+            ])
 
-echo "using python: %(python)s"
+        if options.no_venv:
+            venv_activate,venv_deactivate = '',''
 
-virtualenv --unzip-setuptools -p %(python)s python
-echo "done creating python virtualenv"
-
-echo "0" > python/RELEASE
-source python/bin/activate
-
-easy_install -U distribute==0.6.30
-
-# install needed modules
-pip install sqlalchemy
-pip install mysql-python
-
-echo "Installing numpy, make sure you have the package libatlas-base-dev if you get errors"
-pip install numpy
-pip install lxml
-pip install simplejson
-pip install configobj
-pip install pyparsing==1.5.7
-pip install nameparser
-
-# verify installation
-python -c "import numpy,lxml,simplejson,configobj,pyparsing, MySQLdb, sqlalchemy"
-
-deactivate
-echo "%(release)s" > python/RELEASE
-
-exit 0
-""" % {'python': sys.executable, 'release': PYTHON_RELEASE} )
+        inpython.write(
+            (header+venv_activate+core_commands+venv_deactivate+cleanup)
+            % {'python': sys.executable, 'release': PYTHON_RELEASE} )
         
     run_cmd(['chmod', 'u+x', 'install_python.sh'])
     run_cmd(['./install_python.sh'])
@@ -906,29 +920,32 @@ def setup_jcc(options):
         return # already there
     
     with open("install_jcc.sh", "w") as inpython:
-        inpython.write("""#!/bin/bash -e
+        header = '#!/bin/bash -e\n'
+        venv_activate = 'source python/bin/activate\n'
+        core_commands = '\n'.join([
+            'svn co http://svn.apache.org/repos/asf/lucene/pylucene/trunk/jcc@%(JCC_SVN_TAG)s',
+            'cd jcc',
+            'echo "0" > RELEASE',
+            'export USE_DISTUTILS',
+            'export JCC_JDK=%(JAVA_HOME)s',
+            'python setup.py build',
+            'python setup.py bdist_egg',
+            'python setup.py install',
+            'echo "%(JCC_SVN_TAG)s" > RELEASE',
+            '',
+            '# verify installation',
+            'cd ..',
+            'python -c "import jcc;jcc.initVM();print jcc.__file__"',
+            '',
+            ])
+        venv_deactivate = 'deactivate\n'
+        if options.no_venv:
+            venv_activate,venv_deactivate = '',''
 
-source python/bin/activate
-
-svn co http://svn.apache.org/repos/asf/lucene/pylucene/trunk/jcc@%(JCC_SVN_TAG)s
-cd jcc
-echo "0" > RELEASE
-export USE_DISTUTILS
-export JCC_JDK=%(JAVA_HOME)s
-python setup.py build
-python setup.py bdist_egg
-python setup.py install
-echo "%(JCC_SVN_TAG)s" > RELEASE
-
-
-# verify installation
-cd ..
-python -c "import jcc;jcc.initVM();print jcc.__file__"
-
-
-deactivate
-exit 0
-""" % {'JAVA_HOME': os.environ['JAVA_HOME'], 'JCC_SVN_TAG' : JCC_SVN_TAG})
+        inpython.write(
+            (header+venv_activate+core_commands+venv_deactivate) 
+            % {'JAVA_HOME': JAVA_HOME, 'JCC_SVN_TAG' : JCC_SVN_TAG}
+            )
         
     run_cmd(['chmod', 'u+x', 'install_jcc.sh'])
     run_cmd(['bash', '-e', './install_jcc.sh'])
@@ -947,60 +964,61 @@ def setup_pylucene(options):
     run_cmd(['rm', 'pylucene/Makefile*'], strict=False)
     
     with open("install_pylucene.sh", "w") as infile:
-        infile.write("""#!/bin/bash -xe
+        header = '#!/bin/bash -xe\n'
+        venv_activate = 'source python/bin/activate\n'
+        venv_deactivate = 'deactivate\n'
+        core_commands = '\n'.join([
+            'export ANT_HOME=%(ant_home)s',
+            'export JAVA_HOME=%(java_home)s',
+            '',
+            'svn co http://svn.apache.org/repos/asf/lucene/pylucene/trunk@%(PYLUCENE_SVN_TAG)s pylucene',
+            'cd pylucene',
+            '',
+            'echo "0" > RELEASE',
+            '',
+            'if [ ! -f Makefile.copy ]; then',
+            '    cp Makefile Makefile.copy',
+            ''   ,
+            '    echo "VERSION=4.0-0',
+            'LUCENE_SVN_VER=HEAD',
+            'LUCENE_VER=4.0',
+            'LUCENE_SVN=http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0',
+            'PYLUCENE:=\$(shell pwd)',
+            'LUCENE_SRC=lucene-java-\$(LUCENE_VER)',
+            'LUCENE=\$(LUCENE_SRC)/lucene',
+            'PREFIX_PYTHON=/usr',
+            'ANT=%(ant_home)s/bin/ant',
+            'PYTHON=python',
+            'JCC=\$(PYTHON) -m jcc.__main__ --shared --use_full_names',
+            'NUM_FILES=3',
+            '" > Makefile',
+            '',
+            '    tail -n +25 Makefile.copy >> Makefile',
+            '',
+            '    # on stupid old centos, icupkg is outdated and since it took 2 hours of my life',
+            '    # i deactivate it from the build (we dont use it anyways....)',
+            ''    ,
+            "    sed 's/shell which icupkg/shell which icupkgooooo/' Makefile > Makefile.tmp",
+            '    mv Makefile.tmp Makefile',
+            '',
+            'fi',
+            '',
+            'make',
+            'make install',
+            '',
+            'echo "%(PYLUCENE_SVN_TAG)s" > RELEASE',
+            '',
+            '# verify installation',
+            'cd ..',
+            'python -c "import lucene;lucene.initVM();print lucene.__file__"',
+            ])
+        if options.no_venv:
+            venv_activate,venv_deactivate = '',''
 
-source python/bin/activate
 
-export ANT_HOME=%(ant_home)s
-export JAVA_HOME=%(java_home)s
-
-svn co http://svn.apache.org/repos/asf/lucene/pylucene/trunk@%(PYLUCENE_SVN_TAG)s pylucene
-cd pylucene
-
-echo "0" > RELEASE
-
-if [ ! -f Makefile.copy ]; then
-    cp Makefile Makefile.copy
-    
-    echo "VERSION=4.0-0
-LUCENE_SVN_VER=HEAD
-LUCENE_VER=4.0
-LUCENE_SVN=http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0
-PYLUCENE:=\$(shell pwd)
-LUCENE_SRC=lucene-java-\$(LUCENE_VER)
-LUCENE=\$(LUCENE_SRC)/lucene
-PREFIX_PYTHON=/usr
-ANT=%(ant_home)s/bin/ant
-PYTHON=python
-JCC=\$(PYTHON) -m jcc.__main__ --shared --use_full_names
-NUM_FILES=3
-" > Makefile
-    
-    tail -n +25 Makefile.copy >> Makefile
-    
-    # on stupid old centos, icupkg is outdated and since it took 2 hours of my life
-    # i deactivate it from the build (we don't use it anyways....)
-    
-    sed 's/shell which icupkg/shell which icupkgooooo/' Makefile > Makefile.tmp
-    mv Makefile.tmp Makefile
-
-fi
-
-
-make 
-make install
-
-echo "%(PYLUCENE_SVN_TAG)s" > RELEASE
-
-# verify installation
-cd ..
-python -c "import lucene;lucene.initVM();print lucene.__file__"
-
-
-deactivate
-exit 0
-""" % {'ant_home': os.environ['ANT_HOME'], 'PYLUCENE_SVN_TAG': PYLUCENE_SVN_TAG,
-       'java_home': os.environ['JAVA_HOME']})
+        infile.write(
+            (header+venv_activate+core_commands+venv_deactivate) 
+            % {'ant_home': ANT_HOME, 'PYLUCENE_SVN_TAG': PYLUCENE_SVN_TAG,'java_home': JAVA_HOME})
         
     run_cmd(['chmod', 'u+x', 'install_pylucene.sh'])
     run_cmd(['./install_pylucene.sh'])
@@ -1080,7 +1098,7 @@ exit 0
     run_cmd(['bash', '-e', './install_invenio.sh'])
 
 
-def setup_build_properties():
+def setup_build_properties(options):
     lines = []
     with open('build.properties.default', 'r') as infile:
         for line in infile:
@@ -1088,7 +1106,10 @@ def setup_build_properties():
             if len(line) > 0 and line[0] != '#':
                 parts = line.split('=', 1)
                 if parts[0] == 'python':
-                    lines.append('python=%s' % os.path.realpath(os.path.join(INSTDIR, "perpetuum", "python/bin/python")))
+                    if options.no_venv:
+                        lines.append('python=python')
+                    else:
+                        lines.append('python=%s' % os.path.realpath(os.path.join(INSTDIR, "perpetuum", "python/bin/python")))
                 elif parts[0] == 'jcc':
                     lines.append('jcc=%s' % {5:'-m jcc',6:'-m jcc.__main__',7:'-m jcc'}[sys.version_info[1]])
                 elif parts[0] == 'ant':
@@ -1103,44 +1124,47 @@ def setup_build_properties():
     
         
 
-def upgrade_montysolr(curr_tag, git_tag):
+def upgrade_montysolr(curr_tag, git_tag,options):
     
     
     with changed_dir('montysolr'):
         
         with open('build-montysolr.sh', 'w') as build_script:
-            build_script.write("""#!/bin/bash -e
+            header = '#!/bin/bash -e\n'
+            venv_activate = 'source ../python/bin/activate\n'
+            venv_deactivate = 'deactivate\n'
+            core_commands = '\n'.join([
+                'export JAVA_HOME=%(java_home)s',
+                'export ANT_HOME=%(ant_home)s',
+                '',
+                'case "$1" in',
+                '"nuke")',
+                '    if [ -f RELEASE ]; then',
+                '       rm RELEASE',
+                '    fi',
+                '    ant clean',
+                '    ant get-solr build-all',
+                '    ant test-python',
+                '    ;;',
+                '"minor" | "3")',
+                '    if [ -f RELEASE ]; then',
+                '       rm RELEASE',
+                '    fi',
+                '    ant get-solr build-all',
+                '    ant test-python',
+                '    ;;',
+                'esac',
+                '',
+                'ant build-contrib',
+                'ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s',
+                ])
+            if options.no_venv:
+                venv_activate,venv_deactivate='',''
 
-export JAVA_HOME=%(java_home)s
-export ANT_HOME=%(ant_home)s
-
-source ../python/bin/activate
-
-
-case "$1" in
-"nuke")
-    if [ -f RELEASE ]; then
-       rm RELEASE
-    fi
-    ant clean
-    ant get-solr build-all
-    ant test-python
-    ;;
-"minor" | "3")
-    if [ -f RELEASE ]; then
-       rm RELEASE
-    fi
-    ant get-solr build-all
-    ant test-python
-    ;;
-esac
-
-ant build-contrib
-ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s
-
-deactivate
-        """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
-        )
+            build_script.write(
+                (header+venv_activate+core_commands+venv_deactivate) 
+                % {'example': INSTNAME, 'java_home': JAVA_HOME, 'ant_home': ANT_HOME}
+            )
     
         run_cmd(['chmod', 'u+x', 'build-montysolr.sh'])
     
@@ -1152,7 +1176,7 @@ deactivate
         run_cmd(['git', 'fetch', '--all'])
         run_cmd(['git', 'stash'])
         run_cmd(['git', 'reset', '--hard', '/' in git_tag.ref and git_tag.ref or  ('origin/' + git_tag.ref)])
-        setup_build_properties()
+        setup_build_properties(options)
         
         # nuke everything, start from scratch
         if curr_tag.solr_ver != git_tag.solr_ver or curr_tag.major != git_tag.major:
@@ -1187,26 +1211,30 @@ def build_example(git_tag):
     
     with changed_dir('montysolr'):
         with open('build-example.sh', 'w') as build_script:
-            build_script.write("""#!/bin/bash -e
-
-example=${1:%(example)s}
-profile_names=${2:silent}
-export JAVA_HOME=%(java_home)s
-export ANT_HOME=%(ant_home)s
-
-source ../python/bin/activate
-
-ant -file contrib/examples/build.xml clean build-one -Dename=$example
-
-# generate run.sh for every profile 
-for profile_name in $profile_names
-do
-  ant -file contrib/examples/build.xml run-configured -Dename=$example -Dtarget=generate-run.sh -Dprofile=${profile_name}.profile
-  mv build/contrib/examples/${example}/run.sh build/contrib/examples/${example}/${profile_name}.run.sh
-done
-
-deactivate
-        """ % {'example': INSTNAME, 'java_home': os.environ['JAVA_HOME'], 'ant_home': os.environ['ANT_HOME']}
+            header = '#!/bin/bash -e\n'
+            venv_activate = 'source ../python/bin/activate\n'
+            venv_deactivate = 'deactivate\n'
+            core_commands = '\n'.join([
+                'example=${1:%(example)s}',
+                'profile_names=${2:silent}',
+                'export JAVA_HOME=%(java_home)s',
+                'export ANT_HOME=%(ant_home)s',
+                '',
+                'ant -file contrib/examples/build.xml clean build-one -Dename=$example',
+                '',
+                '# generate run.sh for every profile',
+                'for profile_name in $profile_names',
+                'do',
+                '  ant -file contrib/examples/build.xml run-configured -Dename=$example -Dtarget=generate-run.sh -Dprofile=${profile_name}.profile',
+                '  mv build/contrib/examples/${example}/run.sh build/contrib/examples/${example}/${profile_name}.run.sh',
+                'done',
+                '',
+                ])
+            if options.no_venv:
+                venv_activate,venv_deactivate='',''
+            build_script.write(
+                (header+venv_activate+core_commands+venv_deactivate)
+                % {'example': INSTNAME, 'java_home': JAVA_HOME, 'ant_home': ANT_HOME}
         )
         
         run_cmd(['chmod', 'u+x', './build-example.sh'])
@@ -1316,7 +1344,7 @@ def start_live_instance(options, instance_dir, port,
         
         start = re.sub(r'HOMEDIR=.*\n', 'HOMEDIR=%s\n' % os.path.realpath('.'), start)
         start = re.sub(r'--port\s+\d+', '--port %s' % port, start)
-        start = re.sub('\n([\t\s]+)(java -cp )', '\\1export PATH=%s/bin:$PATH\n\\1\\2' % os.environ['JAVA_HOME'], start)
+        start = re.sub('\n([\t\s]+)(java -cp )', '\\1export PATH=%s/bin:$PATH\n\\1\\2' % JAVA_HOME, start)
         
         # this is necessary only when in test run (and there we can be sure that the files were
         # overwritten when a new code was installed)
@@ -1445,7 +1473,7 @@ def main(argv):
                 if len(instance_names) > 0:
                     print("Compiled version is the latest, we'll just check the live instance(s)")
             elif curr_tag != git_tag:
-                upgrade_montysolr(curr_tag, git_tag)
+                upgrade_montysolr(curr_tag, git_tag,options)
         
         if len(instance_names) > 0:
             if options.stop or options.restart:
