@@ -114,6 +114,9 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
       },
 
       initialize : function(apiQuery){
+        if (!apiQuery || !('toJSON' in apiQuery)) {
+          apiQuery = new ApiQuery(); // empty
+        }
         this.collection = new KeyValueCollection(this.getData(apiQuery));
         this.view = new WidgetView({collection: this.collection});
         this.listenTo(this.view, 'load-api-query', this.update);
