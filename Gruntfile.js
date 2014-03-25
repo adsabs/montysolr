@@ -202,8 +202,7 @@ module.exports = function(grunt) {
     // src top level)
     copy: {
       release: {
-        files: [
-          {
+                files: [{
             expand: true,
             src: ['./src/**'],
             dest: 'dist/',
@@ -211,8 +210,7 @@ module.exports = function(grunt) {
               //grunt.verbose.writeln('src' + src);
               return dest + src.replace('/src/', '/');
             }
-          }
-        ]
+                }]
       }
     },
 
@@ -249,7 +247,31 @@ module.exports = function(grunt) {
         src: 'src/js/**/*.js',
         dest: 'dist/<%= pkg.name %>.min.js'
       }
+        },
+
+        less: {
+            development: {
+                files: {
+                    'src/styles/css/styles.css': 'src/styles/less/manifest.less',
+
     }
+            },
+            //     production: {
+            //         options: {
+            //             // paths: ["assets/css"],
+            //             // cleancss: true,
+            //             // modifyVars: {
+            //             //     imgPath: '"http://mycdn.com/path/to/images"',
+            //             //     bgColor: 'red'
+            //             // }
+            //         },
+            //         files: {
+            //             'src/styles/css/styles.css': 'src/styles/less/manifest.less',
+
+            //         }
+            //     }
+        }
+
   });
 
   // Basic environment config
@@ -258,6 +280,8 @@ module.exports = function(grunt) {
   // Grunt BBB tasks.
   grunt.loadNpmTasks('grunt-bbb-requirejs'); // we use 'list' target only, requirejs will get overriden
   
+
+
   // Grunt contribution tasks.
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -280,7 +304,7 @@ module.exports = function(grunt) {
   
   // other 3rd party libs
   grunt.loadNpmTasks('grunt-processhtml');
-
+    grunt.loadNpmTasks('grunt-contrib-less');
   
   // Bower tasks
   grunt.loadNpmTasks('grunt-bower-task');
