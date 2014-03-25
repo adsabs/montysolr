@@ -398,7 +398,7 @@ def check_live_instance(options, instance_names):
         options.test_scenario(example_tag)
     
     if example_tag != git_tag:
-        build_example(git_tag)
+        build_example(git_tag,options)
         example_tag = get_release_tag(path='montysolr/build/contrib/examples/%s/RELEASE' % INSTNAME)
     base_path = os.path.realpath('.') # git_tag.minor =  1; git_tag.text = '40.1.1.2'
     
@@ -1008,9 +1008,9 @@ def setup_pylucene(options):
             '',
             'echo "%(PYLUCENE_SVN_TAG)s" > RELEASE',
             '',
-            '# verify installation',
             'cd ..',
             'python -c "import lucene;lucene.initVM();print lucene.__file__"',
+            '',
             ])
         if options.no_venv:
             venv_activate,venv_deactivate = '',''
@@ -1157,6 +1157,7 @@ def upgrade_montysolr(curr_tag, git_tag,options):
                 '',
                 'ant build-contrib',
                 'ant -file contrib/examples/build.xml clean build-one -Dename=%(example)s',
+                ''
                 ])
             if options.no_venv:
                 venv_activate,venv_deactivate='',''
@@ -1207,7 +1208,7 @@ def upgrade_montysolr(curr_tag, git_tag,options):
         
             
 
-def build_example(git_tag):
+def build_example(git_tag,options):
     
     with changed_dir('montysolr'):
         with open('build-example.sh', 'w') as build_script:
@@ -1330,15 +1331,17 @@ def start_live_instance(options, instance_dir, port,
         start = fi.read()
         fi.close()
         
+        venv_activate = '' if options.no_venv else 'source ../python/bin/activate'
+
         lines = start.split("\n")
         lines.insert(1, """
         
         # File modified by: montysolrupdate.py
         # Base profile: %(profile)s.run.sh
         
-        source ../python/bin/activate
+        %(venv_activate)s
         export PYTHONPATH=`python -c "import sys;print ':'.join(sys.path)"`:$PYTHONPATH
-        """ % {'profile': profile_name}
+        """ % {'profile': profile_name, 'venv_activate':venv_activate}
         )
         start = '\n'.join(lines)
         
