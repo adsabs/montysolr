@@ -50,6 +50,9 @@ Inside the project's working directory, run:
 ```
 
 And you are ready to go!
+========================
+
+Set your editor to use spaces instead of tabs (width: 2)
 
 ```bash
   # run some tests
