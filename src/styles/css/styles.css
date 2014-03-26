@@ -5772,3 +5772,6 @@ button.close {
     display: none !important;
   }
 }
+#mocha-stats > li.progress {
+  height: 40px;
+}

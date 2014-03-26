@@ -28,7 +28,8 @@
     "grunt-env": "~0.4.1",
     "grunt-mocha-phantomjs": "~0.4.2",
     "grunt-include-bootstrap": "~0.1.1",
-    "grunt-contrib-less": "~0.11.0"
+        "grunt-contrib-less": "~0.11.0",
+        "grunt-install-dependencies": "~0.1.0"
   },
   "peerDependencies": {
     "bower": "*",

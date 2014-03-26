@@ -309,8 +309,11 @@ module.exports = function(grunt) {
   // Bower tasks
   grunt.loadNpmTasks('grunt-bower-task');
 
+    //npm install
+    grunt.loadNpmTasks('grunt-install-dependencies');
+
   // Create an aliased test task.
-  grunt.registerTask('setup', 'Sets up the development environment', ['bower']);
+    grunt.registerTask('setup', 'Sets up the development environment', ['install-dependencies', 'bower', 'less']);
 
   // When running the default Grunt command, just lint the code.
   grunt.registerTask('default', [
