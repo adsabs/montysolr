@@ -1,4 +1,10 @@
-
+/*
+ multi_params is a generic class to store any parameters;
+ it is backed by BB.Model and has all the functionality
+ the values are always stored as an array of values; so
+ even if you try to set strings, you will always have
+ list of strings
+ */
 define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
 
 

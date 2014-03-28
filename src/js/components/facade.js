@@ -79,7 +79,9 @@ define(['underscore', 'js/components/facade'], function(_, Facade) {
       }
     }
 
-    facade.__facade__ = true;
+    // .name is not supported in IE
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name
+    facade.__facade__ = objectIn.constructor ? (objectIn.constructor.name ? objectIn.constructor.name : true) : true;
     return facade;
   }
 
