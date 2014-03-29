@@ -1,7 +1,8 @@
 
 
-define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/api_request', 'js/mixins/dependon'],
-  function(_, $, GenericModule, ApiRequest, Mixin) {
+define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/api_request', 'js/mixins/dependon',
+  'js/components/api_response', 'js/components/api_query'],
+  function(_, $, GenericModule, ApiRequest, Mixin, ApiResponse, ApiQuery) {
 
   var Api = GenericModule.extend({
     url: '/api/1/',
@@ -9,12 +10,13 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     outstandingRequests: 0,
     done: function( data, textStatus, jqXHR ) {
       // TODO: check the status responses
-      var response = new ApiResponse($.parseJSON(data));
-      this.api.trigger('api-response', this.request, response);
+      var response = new ApiResponse(data);
+      response.setApiQuery(this.request.get('query'));
+      this.api.trigger('api-response', response);
     },
     fail: function( jqXHR, textStatus, errorThrown ) {
-      console.err('API call failed:', JSON.stringify(this.request.toJSON()));
-      this.api.trigger('api-error', this.request, jqXHR, textStatus, errorThrown);
+      console.error('API call failed:', JSON.stringify(this.request.toJSON()));
+      this.api.trigger('api-error', this.opts, jqXHR, textStatus, errorThrown);
     },
     always: function() {
       this.api.outstandingRequests--;
@@ -47,10 +49,19 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
 
     var self = this;
     var query = request.get('query');
+    if (query && !(query instanceof ApiQuery)) {
+      throw Error("Api.query must be instance of ApiQuery");
+    }
+
+    var u = this.url + (request.get('target') || '');
+    if (!u) {
+      throw Error("Sorry, dude, you can't use api without url");
+    }
+    u = u.replace(/\/\/+/, '/');
 
     var opts = {
       type: 'POST',
-      url: this.url + (request.get('target') || ''),
+      url: u,
       data: query ? query.toJSON() : {},
       dataType: 'json',
       cache: false,

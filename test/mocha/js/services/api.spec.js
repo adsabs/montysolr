@@ -3,12 +3,16 @@
  */
 
 define(['jquery', 'underscore',
-  'js/services/api', 'js/components/api_request', 'js/components/api_query'], function($, _, Api, ApiRequest, ApiQuery) {
+  'js/services/api', 'js/components/api_request', 'js/components/api_query', 'js/components/api_response'], function($, _, Api, ApiRequest, ApiQuery, ApiResponse) {
   describe("Api Service (API)", function() {
 
 
     beforeEach(function() {
       this.server = sinon.fakeServer.create();
+      this.server.respondWith("/api/1/search",
+        [200, { "Content-Type": "application/json" }, validResponse]);
+      this.server.respondWith("/api/1/error",
+        [200, { "Content-Type": "application/json" }, validResponse.substring(2)]);
       //sinon.stub($, 'ajax').yieldsTo('done', apiResponseOK);
     });
 
@@ -26,33 +30,23 @@ define(['jquery', 'underscore',
       var api = new Api();
       sinon.stub(api, 'trigger');
 
-      expect(api.request(new ApiRequest({target: 'foo'}))).to.be.OK;
+      expect(function() {api.request({query: 'q=foo'});}).to.throw(Error);
       this.server.respond();
-      expect(api.trigger.calledOnce).to.be.true;
-
-      expect(function() {api.request({url: './'});}).to.throw(Error);
       done();
     });
 
     it("should call appropriate callback upon arrival of data", function() {
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
-      sinon.stub(api, 'done');
-      sinon.stub(api, 'fail');
       sinon.stub(api, 'trigger');
 
-      var r = new ApiRequest({target: 'search', query: new ApiQuery({q: 'foo'}), sender: 'woo'});
-
-
-      this.server.respondWith("/api/1/search",
-        [200, { "Content-Type": "application/json" }, validResponse]);
-
-      api.request(r);
-
+      expect(api.request(new ApiRequest({target: 'search', query: new ApiQuery({q: 'foo'}), sender: 'woo'}))).to.be.OK;
       this.server.respond();
+      expect(api.trigger.calledOnce).to.be.true;
+      var a = api.trigger.firstCall.args;
+      expect(a[0]).to.be.equal('api-response');
+      expect(a[1]).to.be.instanceof(ApiResponse);
+      expect(a[1].getApiQuery()).to.be.instanceof(ApiQuery);
 
-      expect(api.done.calledOnce).to.be.true;
-      expect(api.fail.calledOnce).to.be.false;
-      console.log(api.trigger.args);
 
     });
 

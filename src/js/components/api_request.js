@@ -11,6 +11,14 @@ define(['underscore', 'backbone', 'js/components/api_query'], function(_, Backbo
     sender: _.isString
   };
 
+  var checker = {
+    target: function(s) {
+      if (s && s.substring(0,1) !== '/') {
+        return '/' + s;
+      }
+    }
+  };
+
   var ApiRequest = Backbone.Model.extend({
     _validate: function(attributes, options) {
       for (attr in attributes) {
@@ -21,9 +29,12 @@ define(['underscore', 'backbone', 'js/components/api_query'], function(_, Backbo
           throw new Error('Invalid attr: '+ attr);
         }
 
-
         if (!allowedAttrs[attr].call(allowedAttrs, tempVal)) {
           throw new Error('Invalid value:key ' + attr  + tempVal);
+        }
+
+        if (attr in checker) {
+          attributes[attr] = checker[attr].call(checker, tempVal);
         }
       }
       return true;

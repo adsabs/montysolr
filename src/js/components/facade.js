@@ -79,9 +79,14 @@ define(['underscore', 'js/components/facade'], function(_, Facade) {
       }
     }
 
-    // .name is not supported in IE
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name
-    facade.__facade__ = objectIn.constructor ? (objectIn.constructor.name ? objectIn.constructor.name : true) : true;
+    if (objectIn) {
+      // .name is not supported in IE
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/name
+      facade.__facade__ = objectIn.constructor ? (objectIn.constructor.name ? objectIn.constructor.name : true) : true;
+    }
+    else {
+      facade.__facade__ = true;
+    }
     return facade;
   }
 

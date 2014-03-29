@@ -82,16 +82,16 @@ define(['js/components/api_response', 'backbone', 'jquery'], function(Response, 
     });
   
     it("should return simple API response object", function() {
-      expect(new Response(this.jsonData)).to.be.instanceof(Object);
+      expect(new Response(this.jsonData)).to.be.instanceof(Response);
       expect(new Response(this.jsonData)).not.to.be.instanceof(Backbone.Model);
 
-      expect(new Response(this.jsonData).clone()).to.be.instanceof(Object);
+      expect(new Response(this.jsonData).clone()).to.be.instanceof(Response);
       expect(new Response(this.jsonData).clone()).not.to.be.instanceof(Backbone.Model);
 
       // incorrect data causes error (for SOLR impl)
       expect(function() {new Response({})}).to.throw(Error);
       expect(Response.extend).to.be.undefined;
-      expect(new Response(this.jsonData).innerResponse).to.be.undefined;
+      expect(new Response(this.jsonData).innerResponse.attributes).to.be.undefined;
 
     });
 

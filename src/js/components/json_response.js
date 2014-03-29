@@ -4,7 +4,7 @@
  * (e.g. solr_response)
  */
 
-define(['underscore', 'backbone'], function(_, Backbone) {
+define(['underscore', 'backbone', 'js/components/api_query'], function(_, Backbone, ApiQuery) {
 
 
   var JSONResponse = function(attributes, options) {
@@ -29,6 +29,19 @@ define(['underscore', 'backbone'], function(_, Backbone) {
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
     initialize: function(){},
+
+    getApiQuery: function() {
+      return this.apiQuery;
+    },
+    setApiQuery: function(q) {
+      if (!q) {
+        return;
+      }
+      if (!(q instanceof ApiQuery)) {
+        throw new Error("Only ApiQuery instances accepted");
+      }
+      this.apiQuery = q;
+    },
 
     // Return a copy of the model's `attributes` object.
     toJSON: function(options) {

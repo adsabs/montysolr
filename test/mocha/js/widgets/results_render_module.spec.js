@@ -146,7 +146,7 @@ define(['marionette', 'backbone', 'js/widgets/results-render/controller/results-
         });
 
 
-        it("should update automatically when update method is called and response object is provided", function(){
+        it.skip("should update automatically when update method is called and response object is provided", function(){
 
           var v = results.returnRenderedView()
 

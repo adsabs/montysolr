@@ -14,52 +14,50 @@
  * },
  */
 
-define(['underscore', 'backbone', 'api_response_impl'], function(_, Backbone, ApiResponseImplementation) {
+define(['underscore', 'backbone', 'api_response_impl', 'js/components/facade'], function(_, Backbone, ApiResponseImplementation, Facade) {
 
-  var ApiResponse = function(data) {
-    var innerResponse = data;
-
-    return {
-      has: function(key) {
-        return innerResponse.has(key);
-      },
-      get: function(key) {
-        return innerResponse.get(key);
-      },
-      set: function(key, val, options) {
-        return innerResponse.set(key, val, options);
-      },
-      clone: function() {
-        return new ApiResponse(innerResponse.clone());
-      },
-      toJSON: function() {
-        return innerResponse.toJSON();
-      },
-      isLocked: function() {
-        return innerResponse.isLocked();
-      },
-      lock: function() {
-        return innerResponse.lock();
-      },
-      unlock: function() {
-        return innerResponse.unlock();
-      },
-      url: function() {
-        return innerResponse.url();
-      }
-
-    };
+  var hardenedInterface =  {
+    set: 'set (replace existing)',
+    get: 'get values',
+    has: 'has a key',
+    toJSON: 'values back as JSON object',
+    clone: 'make a copy',
+    url: 'url string of the params',
+    isLocked: true,
+    lock: true,
+    unlock: true,
+    setApiQuery: 'sets the ApiQuery',
+    getApiQuery: 'gets the query'
   };
 
+  var ApiResponse = function(data, options) {
 
+    // Facade pattern, we want to expose only limited API
+    // despite the fact that the underlying instance has
+    // all power of the Backbone.Model
 
-  // Facade pattern, we want to expose only limited API
-  // despite the fact that the underlying instance has
-  // all power of the Backbone.Model
+    if (data instanceof ApiResponseImplementation) {
+      this.innerResponse = new Facade(hardenedInterface, data);
+    }
+    else {
+      this.innerResponse = new Facade(hardenedInterface, new ApiResponseImplementation(data, options));
+    }
+  };
 
-  return function(data, options) {
-    return new ApiResponse(new ApiResponseImplementation(data, options));
-  }
+  var toInsert = {};
+  _.each(_.keys(hardenedInterface), function(element, index, list) {
+    toInsert[element] = function() {return this.innerResponse[element].apply(this.innerResponse, arguments)};
+  });
+  _.extend(ApiResponse.prototype, toInsert, {
+    clone: function() {
+      var clone = this.innerResponse.clone.apply(arguments);
+      return new ApiResponse(clone);
+    }
+  });
+
+  return ApiResponse;
+  
+
 
 });
 /**
