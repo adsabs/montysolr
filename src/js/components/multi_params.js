@@ -9,6 +9,29 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
 
 
   var Model = Backbone.Model.extend({
+    locked: false,
+    _checkLock: function() {
+      if (this.locked === true) {
+        throw Error("Object locked for modifications");
+      }
+    },
+    isLocked: function() {
+      return this.locked;
+    },
+    lock: function() {
+      this.locked = true;
+    },
+    unlock: function() {
+      this.locked = false;
+    },
+    clone: function() {
+      if (this.isLocked()) {
+        var c = new this.constructor(this.attributes);
+        c.lock();
+        return c;
+      }
+      return new this.constructor(this.attributes);
+    },
 
     // we allow only strings and numbers; instead of sending
     // signal we throw a direct error
@@ -40,9 +63,11 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       return true;
     },
 
+
     // Every value is going to be multi-valued by default
     // in this way we can treat all objects in the same way
     set: function(key, val, options) {
+      this._checkLock();
       var attrs;
 
       if (key == null) return this;
@@ -67,9 +92,15 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       Backbone.Model.prototype.set.call(this, attrs, options);
     },
 
+    unset: function() {
+      this._checkLock();
+      Backbone.Model.prototype.unset.apply(this, arguments);
+    },
+
 
     // adds values to existing (like set, but keeps the old vals)
     add: function(key, val, options) {
+      this._checkLock();
       var attrs;
 
       if (key == null) return this;
@@ -123,8 +154,11 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       return $.param(s, true);
     },
 
-    /*
-     * Re-constructs the query from the url string, returns the json attributes
+    /**
+     * Parses string (urlparams) and returns it as an object
+     * @param resp
+     * @param options
+     * @returns {*}
      */
     parse: function(resp, options) {
       if (_.isString(resp)) {
@@ -143,6 +177,21 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
         return attrs;
       }
       return resp; // else return resp object
+    },
+
+    /**
+     * Re-constructs the query from the url string, returns the json attributes;
+     * cannot be used it the instance is locked
+     *
+     * @param query (String)
+     * @returns {Model}
+     */
+    load: function(query) {
+      this._checkLock();
+      var vals = this.parse(query);
+      this.clear();
+      this.set(vals);
+      return this;
     }
 
   });

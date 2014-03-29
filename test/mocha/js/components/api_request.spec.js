@@ -11,19 +11,19 @@ define(['js/components/api_request', 'js/components/multi_params', 'js/component
     });
   
     it("should return bare API params object", function() {
-      expect(new ApiRequest()).to.be.instanceof(Object);
-      expect(new ApiRequest()).to.be.instanceof(ApiRequest);
-      expect(new ApiRequest()).not.to.be.instanceof(MultiParams);
-      expect(new ApiRequest()).not.to.be.instanceof(Backbone.Model);
+      expect(new ApiRequest({target: 'foo'})).to.be.instanceof(Object);
+      expect(new ApiRequest({target: 'foo'})).to.be.instanceof(ApiRequest);
+      expect(new ApiRequest({target: 'foo'})).not.to.be.instanceof(MultiParams);
+      expect(new ApiRequest({target: 'foo'})).not.to.be.instanceof(Backbone.Model);
 
-      expect(new ApiRequest().clone()).to.be.instanceof(Object);
-      expect(new ApiRequest().clone()).to.be.instanceof(ApiRequest);
-      expect(new ApiRequest().clone()).not.to.be.instanceof(MultiParams);
-      expect(new ApiRequest().clone()).not.to.be.instanceof(Backbone.Model);
+      expect(new ApiRequest({target: 'foo'}).clone()).to.be.instanceof(Object);
+      expect(new ApiRequest({target: 'foo'}).clone()).to.be.instanceof(ApiRequest);
+      expect(new ApiRequest({target: 'foo'}).clone()).not.to.be.instanceof(MultiParams);
+      expect(new ApiRequest({target: 'foo'}).clone()).not.to.be.instanceof(Backbone.Model);
     });
     
     it("accepts only certain keys, throws errors on others", function() {
-      var r = new ApiRequest();
+      var r = new ApiRequest({target: 'foo'});
       expect(r.get('target')).to.eql(null);
       expect(r.set('target', 'bar')).to.be.OK;
       expect(r.get('target')).to.eql(['bar']);

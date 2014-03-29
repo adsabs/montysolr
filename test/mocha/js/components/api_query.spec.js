@@ -10,11 +10,11 @@ define(['js/components/api_query', 'js/components/multi_params', 'backbone'], fu
     });
   
     it("should return bare API params object", function() {
-      expect(new ApiQuery()).to.be.instanceof(Object);
+      expect(new ApiQuery()).to.be.instanceof(ApiQuery);
       expect(new ApiQuery()).not.to.be.instanceof(MultiParams);
       expect(new ApiQuery()).not.to.be.instanceof(Backbone.Model);
 
-      expect(new ApiQuery().clone()).to.be.instanceof(Object);
+      expect(new ApiQuery().clone()).to.be.instanceof(ApiQuery);
       expect(new ApiQuery().clone()).not.to.be.instanceof(MultiParams);
       expect(new ApiQuery().clone()).not.to.be.instanceof(Backbone.Model);
     });
@@ -73,11 +73,12 @@ define(['js/components/api_query', 'js/components/multi_params', 'backbone'], fu
     it("can be made immutable and throws error on modification", function() {
       var q = new ApiQuery({'foo': 'bar'});
       q.lock();
-      expect(function() {q.set('foo', 'baz')}).to.throw("Query locked");
+      expect(function() {q.set('foo', 'baz')}).to.throw("Object locked");
       expect(q.isLocked()).to.be.true;
       q.unlock();
       expect(q.isLocked()).to.be.false;
-      expect(q.set('foo', 'baz')).to.be.ok;
+      expect(q.set('foo', 'baz')).to.be.undefined;
+      expect(q.get('foo')).to.eql(['baz']);
     });
     
 

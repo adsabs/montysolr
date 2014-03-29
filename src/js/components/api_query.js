@@ -1,114 +1,70 @@
 /*
-A facade: api query exposing only the set of functions that we allow. This is
-the module that you want to load in the application (do not load the concrete
-implementaions, such as solr_params !)
+ A facade: api query exposing only the set of functions that we allow. This is
+ the module that you want to load in the application (do not load the concrete
+ implementaions, such as solr_params !)
 
-Put in your config:
+ Put in your config:
  map: {
-   'your/module': {
-      'api_query_impl': 'js/components/specific_impl_of_the_api_query'
-   }
+ 'your/module': {
+ 'api_query_impl': 'js/components/specific_impl_of_the_api_query'
+ }
  },
 
  */
 
 
-define(['backbone', 'underscore', 'api_query_impl'], function(Backbone, _, ApiQueryImplementation) {
+define(['backbone', 'underscore', 'api_query_impl', 'js/components/facade'], function(Backbone, _, ApiQueryImplementation, Facade) {
 
 
+  var hardenedInterface =  {
+    add: 'add values',
+    set: 'set (replace existing)',
+    get: 'get values',
+    has: 'has a key',
+    url: 'url string of the params',
+    load: 'loads query as a string',
+    clear: 'clears all values',
+    unset: 'removes a key',
+    toJSON: 'values back as JSON object',
+    clone: 'make a copy',
+    isLocked: true,
+    lock: true,
+    unlock: true,
+    pairs: 'get all values as pairs',
+    keys: 'as keys',
+    values: 'only values',
+    hasChanged: 'whether this object has modification (since its creation)',
+    previousAttributes: 'get all changed attributes',
+    previous: 'previous values for a given attribute'
 
-  var ApiQuery = function(innerQ) {
-    var innerQuery = innerQ;
-    var locked = false, _checkLock = function() {
-      if (locked === true) {
-        throw Error("Query locked for modifications");
-      }
-    };
-
-    return {
-      // This is our only extra method
-      add: function(key, val, options) {
-        _checkLock();
-        innerQuery.add(key, val, options);
-        return this;
-      },
-      set: function(key, val, options) {
-        _checkLock();
-        innerQuery.set(key, val, options);
-        return this;
-      },
-      get: function(key) {
-        return innerQuery.get(key);
-      },
-      url: function() {
-        return innerQuery.url();
-      },
-      clone: function() {
-        var q = new ApiQuery(new innerQuery.constructor(innerQuery.toJSON()));
-        if (this.isLocked()) {
-          q.lock();
-        }
-        return q;
-      },
-      load: function(query) {
-        _checkLock();
-        var vals = innerQuery.parse(query);
-        innerQuery.clear();
-        innerQuery.set(vals);
-        return this;
-      },
-      clear: function() {
-        _checkLock();
-        return innerQuery.clear();
-      },
-      has: function(key) {
-        return innerQuery.has(key);
-      },
-      unset: function(key) {
-        _checkLock();
-        innerQuery.unset(key);
-      },
-      toJSON: function() {
-        return innerQuery.toJSON();
-      },
-      isLocked: function() {
-        return locked;
-      },
-      lock: function() {
-        locked = true;
-      },
-      unlock: function() {
-        locked = false;
-      },
-      pairs: function() {
-        return innerQuery.pairs();
-      },
-      keys: function() {
-        return innerQuery.keys();
-      },
-      values: function() {
-        return innerQuery.values();
-      },
-      hasChanged: function(key) {
-        return innerQuery.hasChanged(key);
-      },
-      previousAttributes: function() {
-        return innerQuery.previousAttributes();
-      },
-      previous: function(attr) {
-        return innerQuery.previous(attr);
-      }
-
-    };
   };
 
+  var ApiQuery = function(data, options) {
+
+    // Facade pattern, we want to expose only limited API
+    // despite the fact that the underlying instance has
+    // all power of the Backbone.Model
+
+    if (data instanceof ApiQueryImplementation) {
+      this.innerQuery = new Facade(hardenedInterface, data);
+    }
+    else {
+      this.innerQuery = new Facade(hardenedInterface, new ApiQueryImplementation(data, options));
+    }
+  };
+
+  var toInsert = {};
+  _.each(_.keys(hardenedInterface), function(element, index, list) {
+    toInsert[element] = function() {return this.innerQuery[element].apply(this.innerQuery, arguments)};
+  });
+  _.extend(ApiQuery.prototype, toInsert, {
+    clone: function() {
+      var clone = this.innerQuery.clone.apply(arguments);
+      return new ApiQuery(clone);
+    }
+  });
+
+  return ApiQuery;
 
 
-  // Facade pattern, we want to expose only limited API
-  // despite the fact that the underlying instance has
-  // all power of the Backbone.Model
-
-  return function(data, options) {
-    return new ApiQuery(new ApiQueryImplementation(data, options));
-  }
 });

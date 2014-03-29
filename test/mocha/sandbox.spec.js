@@ -8,8 +8,8 @@ var abase = tbase + '/apps/discovery';
 
 // These are the tests that we want to run for this app
 var tests = [
-  tbase + '/widgets/api_response_widget.spec.js',
-  tbase + '/widgets/api_query_widget.spec.js'
+  tbase + '/components/api_query.spec.js'
+  //tbase + '/services/api.spec.js'
 ];
 
 
