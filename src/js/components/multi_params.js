@@ -149,7 +149,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       var sorted = _.pairs(whatToSort).sort(function(a,b) {return (a[0] > b[0]) ? 1 : (a[0] < b[0] ? -1 : 0)});
       // also sort values
       var s = {};
-      sorted.map(function(item) { s[item[0]] = item[1].sort() });
+      sorted.map(function(item) { s[item[0]] = (_.isArray(item[1]) ? item[1].sort() : item[1]) });
       // use traditional encoding
       return $.param(s, true);
     },
@@ -164,19 +164,49 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       if (_.isString(resp)) {
         var attrs  = {};
         resp = decodeURIComponent(resp);
-        var hashes = resp.slice(resp.indexOf('?') + 1).split('&');
-        for (var i = 0; i < hashes.length; i++) {
-          hash = hashes[i].split('=');
-          if (attrs[hash[0]] !== undefined) {
-            attrs[hash[0]].push(hash[1]);
-          }
-          else {
-            attrs[hash[0]] = [ hash[1] ];
-          }
+        if (resp.indexOf('?') > -1) {
+          attrs['#path'] = [resp.slice(0, resp.indexOf('?'))];
+          resp = resp.slice(resp.indexOf('?')+1);
         }
+        if (resp.indexOf('#') > -1) {
+          attrs['#hash'] = this._parse(resp.slice(resp.indexOf('#')+1));
+          resp = resp.slice(0, resp.indexOf('#'));
+        }
+        attrs['#query'] = this._parse(resp);
+
+        return this._checkParsed(attrs);
+      }
+      return this._checkParsed(resp); // else return resp object
+    },
+
+    _parse: function(resp) {
+      var attrs = {}, hash;
+      if (!resp.trim()) {
         return attrs;
       }
-      return resp; // else return resp object
+      var hashes = resp.slice(resp.indexOf('?') + 1).split('&');
+
+      for (var i = 0; i < hashes.length; i++) {
+        hash = hashes[i].split('=');
+        if (attrs[hash[0]] !== undefined) {
+          attrs[hash[0]].push(hash[1]);
+        }
+        else {
+          attrs[hash[0]] = [ hash[1] ];
+        }
+      }
+      return attrs;
+    },
+
+    // default behaviour is just to keep the query parameters
+    // after the string was parsed, you can override it to suit other needs
+    _checkParsed: function(attrs) {
+      if (_.isObject(attrs)) {
+        if ('#query' in attrs) {
+          return attrs['#query'];
+        }
+      }
+      return attrs;
     },
 
     /**

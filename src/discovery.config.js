@@ -20,6 +20,7 @@ require.config({
     '*': {
       'api_query_impl': 'js/components/solr_params',
       'api_response_impl': 'js/components/solr_response',
+      'api_request_impl': 'js/components/default_request',
       'pubsub_service_impl': 'js/services/default_pubsub'
     }
   },

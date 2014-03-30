@@ -11,8 +11,10 @@ define(['jquery', 'underscore',
       this.server = sinon.fakeServer.create();
       this.server.respondWith("/api/1/search",
         [200, { "Content-Type": "application/json" }, validResponse]);
-      this.server.respondWith("/api/1/error",
+      this.server.respondWith("/api/1/parseerror",
         [200, { "Content-Type": "application/json" }, validResponse.substring(2)]);
+      this.server.respondWith("/api/1/error",
+        [500, { "Content-Type": "application/json" }, validResponse.substring(2)]);
       //sinon.stub($, 'ajax').yieldsTo('done', apiResponseOK);
     });
 
@@ -38,17 +40,52 @@ define(['jquery', 'underscore',
     it("should call appropriate callback upon arrival of data", function() {
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
       sinon.stub(api, 'trigger');
+      var q = new ApiQuery({q: 'foo'});
 
-      expect(api.request(new ApiRequest({target: 'search', query: new ApiQuery({q: 'foo'}), sender: 'woo'}))).to.be.OK;
+      expect(api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}))).to.be.OK;
       this.server.respond();
       expect(api.trigger.calledOnce).to.be.true;
       var a = api.trigger.firstCall.args;
       expect(a[0]).to.be.equal('api-response');
       expect(a[1]).to.be.instanceof(ApiResponse);
       expect(a[1].getApiQuery()).to.be.instanceof(ApiQuery);
-
-
+      expect(a[1].getApiQuery()).to.eql(q);
     });
+
+    it("should call error handlers on failed request", function() {
+      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      sinon.stub(api, 'trigger');
+      var q = new ApiQuery({q: 'foo'});
+
+      expect(api.request(new ApiRequest({target: 'error', query: q, sender: 'woo'}))).to.be.OK;
+      this.server.respond();
+      expect(api.trigger.calledOnce).to.be.true;
+      var a = api.trigger.firstCall.args;
+      expect(a[0]).to.be.equal('api-error');
+      expect(a[1].api).to.be.eql(api);
+      expect(a[1].request).to.be.instanceof(ApiRequest);
+      expect(a[2].status).to.be.eql(500); //jqXHR
+      expect(a[3]).to.be.OK; //textStatus
+      expect(a[4]).to.be.equal('Internal Server Error'); //errorThrown
+    });
+
+    it("should call error handlers when response is not valid", function() {
+      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      sinon.stub(api, 'trigger');
+      var q = new ApiQuery({q: 'foo'});
+
+      expect(api.request(new ApiRequest({target: 'parseerror', query: q, sender: 'woo'}))).to.be.OK;
+      this.server.respond();
+      expect(api.trigger.calledOnce).to.be.true;
+      var a = api.trigger.firstCall.args;
+      expect(a[0]).to.be.equal('api-error');
+      expect(a[1].api).to.be.eql(api);
+      expect(a[1].request).to.be.instanceof(ApiRequest);
+      expect(a[2].status).to.be.eql(200); //jqXHR
+      expect(a[3]).to.be.OK; //textStatus
+      expect(a[4]).to.be.instanceof(Error); //errorThrown
+    });
+
 
 
     var validResponse = '{\

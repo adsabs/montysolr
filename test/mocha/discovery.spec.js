@@ -20,6 +20,8 @@ var tests = [
   tbase + '/components/facade.spec.js',
   tbase + '/components/beehive.spec.js',
   tbase + '/widgets/results_render_module.spec.js',
+  tbase + '/components/api_request.spec.js',
+  tbase + '/services/api.spec.js',
 
   tbase + '/widgets/api_response_widget.spec.js',
   tbase + '/widgets/api_query_widget.spec.js'

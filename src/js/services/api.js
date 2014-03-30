@@ -15,8 +15,8 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       this.api.trigger('api-response', response);
     },
     fail: function( jqXHR, textStatus, errorThrown ) {
-      console.error('API call failed:', JSON.stringify(this.request.toJSON()));
-      this.api.trigger('api-error', this.opts, jqXHR, textStatus, errorThrown);
+      console.warn('API call failed:', JSON.stringify(this.request.url()));
+      this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
     },
     always: function() {
       this.api.outstandingRequests--;
@@ -66,7 +66,7 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       dataType: 'json',
       cache: false,
       headers: {"X-BB-Api-Client-Version": this.clientVersion},
-      context: {request: request, opts: this, api: self }
+      context: {request: request, api: self }
     };
 
 

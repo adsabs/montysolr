@@ -2,44 +2,58 @@
  * Created by rchyla on 3/28/14.
  */
 
-define(['underscore', 'backbone', 'js/components/api_query'], function(_, Backbone, ApiQuery) {
+define(['underscore', 'backbone',
+  'js/components/facade',
+  'api_request_impl'],
+  function(_, Backbone, Facade, ApiRequestImpl) {
 
-  var allowedAttrs = {
-    url: _.isString,
-    query: function(v) {return v instanceof ApiQuery},
-    target: _.isString,
-    sender: _.isString
-  };
+    var hardenedInterface =  {
+      // add makes no sense with request
+      get: 'get a key',
+      set: 'set (replace existing)',
+      url: 'url string defining this request',
+      has: 'has a key',
+      load: 'loads request as a string',
+      clear: 'clears all values',
+      unset: 'removes a key',
+      toJSON: 'values back as JSON object',
+      clone: 'make a copy',
+      isLocked: true,
+      lock: true,
+      unlock: true,
+      pairs: 'get all values as pairs',
+      keys: 'as keys',
+      values: 'only values',
+      hasChanged: 'whether this object has modification (since its creation)',
+      previousAttributes: 'get all changed attributes',
+      previous: 'previous values for a given attribute'
+    };
 
-  var checker = {
-    target: function(s) {
-      if (s && s.substring(0,1) !== '/') {
-        return '/' + s;
+    var ApiRequest = function(data, options) {
+
+      // Facade pattern, we want to expose only limited API
+      // despite the fact that the underlying instance has
+      // all power of the Backbone.Model
+
+      if (data instanceof ApiRequestImpl) {
+        this.innerRequest = new Facade(hardenedInterface, data);
       }
-    }
-  };
-
-  var ApiRequest = Backbone.Model.extend({
-    _validate: function(attributes, options) {
-      for (attr in attributes) {
-
-        var tempVal = attributes[attr];
-
-        if (!(attr in allowedAttrs)) {
-          throw new Error('Invalid attr: '+ attr);
-        }
-
-        if (!allowedAttrs[attr].call(allowedAttrs, tempVal)) {
-          throw new Error('Invalid value:key ' + attr  + tempVal);
-        }
-
-        if (attr in checker) {
-          attributes[attr] = checker[attr].call(checker, tempVal);
-        }
+      else {
+        this.innerRequest = new Facade(hardenedInterface, new ApiRequestImpl(data, options));
       }
-      return true;
-    }
+    };
+
+    var toInsert = {};
+    _.each(_.keys(hardenedInterface), function(element, index, list) {
+      toInsert[element] = function() {return this.innerRequest[element].apply(this.innerRequest, arguments)};
+    });
+    _.extend(ApiRequest.prototype, toInsert, {
+      clone: function() {
+        var clone = this.innerRequest.clone.apply(this.innerRequest, arguments);
+        return new ApiRequest(clone);
+      }
+    });
+
+    return ApiRequest;
+
   });
-
-  return ApiRequest;
-});

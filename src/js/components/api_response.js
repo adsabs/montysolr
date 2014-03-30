@@ -50,7 +50,7 @@ define(['underscore', 'backbone', 'api_response_impl', 'js/components/facade'], 
   });
   _.extend(ApiResponse.prototype, toInsert, {
     clone: function() {
-      var clone = this.innerResponse.clone.apply(arguments);
+      var clone = this.innerResponse.clone.apply(this.innerResponse, arguments);
       return new ApiResponse(clone);
     }
   });
