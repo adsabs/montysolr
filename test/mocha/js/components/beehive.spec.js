@@ -57,39 +57,40 @@ define(['js/components/generic_module', 'js/mixins/dependon',
     it("knows how to create unique, write-protected version of itself", function() {
       beehive.addService('PubSub', new PubSub());
       var hardened = beehive.getHardenedInstance();
-      var all = sinon.spy();
 
       expect(hardened.Services.__facade__).to.be.OK;
       expect(hardened.__facade__).to.be.OK;
 
       // test we have the simplified interface
       var pubsub = beehive.Services.get('PubSub');
+      var all = sinon.spy();
       pubsub.on('all', all);
 
-      sinon.stub(pubsub, 'trigger');
-      sinon.stub(pubsub, 'on');
       var spy = sinon.spy();
 
       hardened.subscribe('event-foo', spy);
       hardened.publish('event-foo', [1,2,3]);
-      expect(pubsub.on.args[0]).to.eql(['event-foo', [1,2,3]]);
+      expect(all.args[0]).to.eql(['event-foo', [1,2,3]]);
+      expect(spy.args[0]).to.eql([[1,2,3]]);
 
       // event triggered from another module
       var hardenedX = beehive.getHardenedInstance();
       hardenedX.publish('event-foo', [4,5,6]);
-      expect(pubsub.on.args[1]).to.eql(['event-foo', [7]]);
+      expect(all.args[1]).to.eql(['event-foo', [4,5,6]]);
+      expect(spy.args[1]).to.eql([[4,5,6]]);
 
       hardened.unsubscribe('wrong-event');
 
       hardenedX.publish('event-foo', [7]);
-      expect(pubsub.on.args[2]).to.eql(['event-foo', [7]]);
+      expect(all.args[2]).to.eql(['event-foo', [7]]);
+      expect(spy.args[2]).to.eql([[7]]);
 
       hardened.unsubscribe('event-foo');
 
-      expect(pubsub.on.callCount).to.equal(3);
+      
       hardenedX.publish('event-foo', [8]);
-      expect(pubsub.on.callCount).to.equal(3);
-
+      expect(all.callCount).to.equal(4);
+      expect(spy.callCount).to.equal(3);
     });
 
 

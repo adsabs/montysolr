@@ -27,14 +27,15 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
       done();
     });
 
-    describe('Query Mediator (Scaffolding)', function(done) {
+    describe('Query Mediator (Scaffolding)', function() {
 
-      it("returns API object", function() {
+      it("returns API object", function(done) {
         expect(new QueryMediator()).to.be.instanceof(QueryMediator);
         expect(new QueryMediator()).to.be.instanceof(GenericModule);
+        done();
       });
 
-      it("has 'activate' function - which does the appropriate setup", function() {
+      it("has 'activate' function - which does the appropriate setup", function(done) {
         var qm = new QueryMediator();
         var pubsub = beehive.Services.get('PubSub');
 
