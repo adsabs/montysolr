@@ -179,6 +179,8 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
       this._checkKey(arguments[0]);
       var args = Array.prototype.slice.call(arguments, 1);
 
+      //console.log('publishing', arguments);
+
       // this is faster, default BB implementation
       if (!this.handleErrors) {
         return this.trigger.apply(this, args);

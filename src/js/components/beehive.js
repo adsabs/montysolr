@@ -14,16 +14,20 @@ define(['backbone', 'underscore',
       this.Services = new ServicesContainer();
     },
 
+    activate: function() {
+      this.Services.activate(arguments);
+    },
+
     close: function() {
-      this.Services.close();
+      this.Services.close(arguments);
     },
 
     addService: function(name, service) {
-      return this.Services.addService(name, service);
+      return this.Services.add(name, service);
     },
 
     removeService: function(name) {
-      return this.Services.removeService(name);
+      return this.Services.remove(name);
     },
 
 
@@ -37,9 +41,41 @@ define(['backbone', 'underscore',
       Services: 'services container'
     }
 
+
+
   });
 
-  _.extend(BeeHive.prototype, Hardened);
+  _.extend(BeeHive.prototype, Hardened, {
+    getHardenedInstance: function() {
+      var iface = _.clone(this.hardenedInterface);
+      if (this.Services.has('PubSub')) {
+
+        var ctx = {
+          key: this.Services.get('PubSub').getPubSubKey()
+        };
+        // purpose of these functions is to expose simplified
+        // api directly at the root of beehive; the key is
+        // is
+        iface['publish'] = function() {
+          var s = this.Services.get('PubSub');
+          arguments = _.toArray(arguments); arguments.unshift(ctx.key);
+          s.publish.apply(s, arguments);
+        };
+        iface['subscribe'] = function() {
+          var s = this.Services.get('PubSub');
+          arguments = _.toArray(arguments); arguments.unshift(ctx.key);
+          s.subscribe.apply(s, arguments);
+        };
+        iface['unsubscribe'] = function() {
+          var s = this.Services.get('PubSub');
+          arguments = _.toArray(arguments); arguments.unshift(ctx.key);
+          s.unsubscribe.apply(s, arguments);
+        };
+      }
+      return this._getHardenedInstance(iface, this);
+
+    }
+  });
 
   return BeeHive;
 });

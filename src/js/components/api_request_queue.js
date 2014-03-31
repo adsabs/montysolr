@@ -18,7 +18,7 @@
  *   be called for every queued request, instead of just the final one.
  *   Default: false
  **/
-define(['underscore', 'js/components/api_request'], function() (_, ApiRequest) {
+define(['underscore', 'js/components/api_request'], function(_, ApiRequest) {
 
 
   var ApiRequestQueue = ApiRequest.extend({
@@ -28,11 +28,8 @@ define(['underscore', 'js/components/api_request'], function() (_, ApiRequest) {
     successAllCallback: null,
     initialize: function(attrs, options) {
       _.extend(this, _.pick(attrs, ['successAllCallback']));
-    }
-  });
+    },
 
-
-  _.extend(ApiRequestQueue.prototype, {
     push: function(request) {
       if (!(request instanceof ApiRequest)) {
         throw Error("ApiRequestQueue works only with ApiRequest instances");

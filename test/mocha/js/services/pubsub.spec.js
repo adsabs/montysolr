@@ -221,6 +221,11 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
 
     });
 
+    it("exposes catalogue of global events", function() {
+      var pubsub = new PubSub();
+      expect(pubsub.NEW_QUERY).to.be.not.undefined;
+      expect(pubsub.NEW_RESPONSE).to.be.not.undefined;
+    });
 
 
   });

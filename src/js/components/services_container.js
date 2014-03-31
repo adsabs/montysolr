@@ -5,16 +5,25 @@
 define(['js/components/facade', 'js/components/generic_module', 'js/mixins/hardened', 'underscore'], function(Facade, GenericModule, Hardened, _) {
   var Services = GenericModule.extend({
     initialize: function(attrs, options) {
-      this._services = {};
+      this._services = _.has(options, 'services') ? options['services'] : {};
+    },
+
+    activate: function() {
+      for (var k in this._services) {
+        var s = this._services[k];
+        if ('activate' in s) {
+          s.activate(arguments);
+        }
+      }
     },
 
     close: function() {
       for (var service in this._services) {
-        this.removeService(service);
+        this.remove(service);
       }
     },
 
-    addService: function(name, service) {
+    add: function(name, service) {
       if (this._services.hasOwnProperty(name)) {
         throw new Error('The service: ' + name + ' is already registered, remove it first!');
       }
@@ -24,18 +33,24 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
       this._services[name] = service;
     },
 
-    removeService: function(name, service) {
+    remove: function(name, service) {
       if (this._services.hasOwnProperty(name)) {
         var s = this._services[name];
-        s.close();
+        if ('close' in s) {
+          s.close();
+        }
         delete this._services[name];
         return s;
       }
       return null;
     },
 
-    hasService: function(name) {
+    has: function(name) {
       return this._services.hasOwnProperty(name);
+    },
+
+    get: function(name) {
+      return this._services[name];
     }
 
   });
@@ -54,7 +69,9 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
           iface[service] = true;
         }
       }
-      return this._getHardenedInstance(iface, this._services);
+      var newContainer = new this.constructor(null, {'services': this._getHardenedInstance(iface, this._services)});
+      return this._getHardenedInstance({'get':true, 'has':true}, newContainer);
+
     }
   });
 
