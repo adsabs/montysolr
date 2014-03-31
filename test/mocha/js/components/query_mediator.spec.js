@@ -4,13 +4,14 @@
 
 define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/beehive',
         'js/services/pubsub', 'js/services/api', 'js/components/generic_module',
-        'js/components/pubsub_key', 'js/components/api_query'
+        'js/components/pubsub_key', 'js/components/api_query', 'js/components/api_request'
         ],
-  function(_, $, QueryMediator, BeeHive, PubSub, Api, GenericModule, PubSubKey, ApiQuery) {
+  function(_, $, QueryMediator, BeeHive, PubSub, Api, GenericModule, PubSubKey, ApiQuery, ApiRequest) {
 
     var beehive;
     beforeEach(function(done) {
       this.server = sinon.fakeServer.create();
+      this.server.autoRespond = true;
       this.server.respondWith("/api/1/search",
         [200, { "Content-Type": "application/json" }, validResponse]);
 
@@ -55,31 +56,39 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
       it("should mediate between modules; passing data back and forth", function(done) {
         var qm = new QueryMediator();
+        qm.activate(beehive);
 
-        // install spies
+        // install spies into pubsub
         var pubsub = beehive.Services.get('PubSub');
-        var pspy = sinon.spy();
-        pubsub.on('all', pspy);
+        var pubsubSpy = sinon.spy();
+        pubsub.on('all', pubsubSpy);
         var api = beehive.Services.get('Api');
-        var aspy = sinon.spy();
-        api.on('all', aspy);
+        var apiSpy = sinon.spy();
+        api.on('all', apiSpy);
 
 
         // fake UI widget that sends signals
         var M = GenericModule.extend({
           activate: function(beehive) {
             this.bee = beehive;
-            beehive.subscribe(beehive.WANTING_REQUEST, this._new_request);
-            beehive.subscribe(beehive.SENDING_RESPONSE, this._getting_response);
+            pubsub = beehive.Services.get('PubSub');
+            pubsub.subscribe(pubsub.WANTING_QUERY, _.bind(this._wanting_query, this));
+            pubsub.subscribe(pubsub.WANTING_REQUEST, _.bind(this._wanting_request, this));
+            pubsub.subscribe(pubsub.NEW_RESPONSE, _.bind(this._getting_response, this));
           },
           userAction: function(q) {
-            this.bee.publish(this.bee.NEW_QUERY, q);
+            var pubsub = this.bee.Services.get('PubSub');
+            pubsub.publish(pubsub.NEW_QUERY, q);
+          },
+          _wanting_query: function(q) {
+            var pubsub = this.bee.Services.get('PubSub');
+            q.add('q', this._mid);
+            pubsub.publish(pubsub.NEW_QUERY, q);
             this._q = q;
           },
-          _new_request: function(q) {
-            q.add('q', this._mid);
-            this.bee.publish(this.bee.NEW_REQUEST, new ApiRequest({target: 'search', query:q}));
-            this._q = q;
+          _wanting_request: function(q) {
+            var pubsub = this.bee.Services.get('PubSub');
+            pubsub.publish(pubsub.NEW_REQUEST, new ApiRequest({target: 'search', query:q}));
           },
           _getting_response: function(r) {
             // do something, display data etc
@@ -91,26 +100,35 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         var m1 = new M();
         var m2 = new M();
 
+        //sinon.stub(m1, '_new_request', m1._new_request);
+        //sinon.stub(m1, '_getting_response', m1._getting_response);
+        //sinon.stub(m2, '_new_request', m2._new_request);
+        //sinon.stub(m2, '_getting_response', m2._getting_response);
+
         // each component will be activated by the app
         var hardenedBee = beehive.getHardenedInstance();
-        m1.activate(hardenedBee);
-        m2.activate(hardenedBee);
+        m1.activate(beehive.getHardenedInstance());
+        m2.activate(beehive.getHardenedInstance());
 
         // create a fake query
         var q = new ApiQuery({'q': '*:*'});
 
-        // pretend user clicke and a new query is fired
+        // pretend user clicked and a new query is fired
         m1.userAction(q);
 
-        // whole chain of events should happen:
-        // - mediator gets: NEW_QUERY
-        // - mediator issues: WANTING_RESPONSE
-        // - m1 and m2 respond: NEW_RESPONSE
-        // - mediator gets: NEW_RESPONSE
-        //   - mediator calls api: request(apiRequest)
-        //   - api gets data and calls mediator's 'done' callback
-        //     - mediator gets data and issues: SENDING_RESPONSE
-        //       - m1 & m2 receive: apiResponse
+        /*
+         whole chain of events should happen:
+         - mediator gets: NEW_QUERY
+         - mediator issues: WANTING_REQUEST
+           - m1 and m2 respond: NEW_REQUEST
+         - mediator gets: NEW_RESPONSE
+           - mediator calls api: api.request(apiRequest)
+           - api gets data and calls mediator's 'done' callback
+             - mediator gets data and issues: SENDING_RESPONSE
+               - m1 & m2 receive: apiResponse
+        */
+
+
 
 
         done();

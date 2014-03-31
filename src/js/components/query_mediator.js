@@ -6,8 +6,8 @@
  * Mediator to coordinate UI-query exchange
  */
 
-define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/dependon'],
-  function(_, $, GenericModule, Mixins) {
+define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/dependon', 'js/components/api_response'],
+  function(_, $, GenericModule, Mixins, ApiResponse) {
 
   var QueryMediator = GenericModule.extend({
     /**
@@ -21,8 +21,8 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
       var pubsub = beehive.Services.get('PubSub');
       this.pubSubKey = pubsub.getPubSubKey();
 
-      pubsub.subscribe(this.pubSubKey, pubsub.NEW_QUERY, this._new_query);
-      pubsub.subscribe(this.pubSubKey, pubsub.NEW_REQUEST, this._new_request);
+      pubsub.subscribe(this.pubSubKey, pubsub.NEW_QUERY, _.bind(this._new_query, this));
+      pubsub.subscribe(this.pubSubKey, pubsub.NEW_REQUEST, _.bind(this._new_request, this));
     },
 
     /**
@@ -40,12 +40,14 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
       var ps = this.getBeeHive().Services.get('PubSub');
       var api = this.getBeeHive().Services.get('Api');
 
-      api.request(apiRequest, {done: this._new_response});
-      //ps.publish(this.pubSubKey, ps.WANTING_RESPONSE, apiRequest);
+      api.request(apiRequest,
+        {done: this._new_response, context: {request:apiRequest, pubsub: ps, key: this.pubSubKey}});
     },
-    _new_response: function(apiResponse) {
-      var ps = this.getBeeHive().Services.get('PubSub');
-      ps.publish(this.pubSubKey, ps.SENDING_RESPONSE, apiResponse);
+    _new_response: function(data, textStatus, jqXHR ) {
+      // TODO: check the status responses
+      var response = new ApiResponse(data);
+      response.setApiQuery(this.request.get('query'));
+      this.pubsub.publish(this.key, this.pubsub.NEW_RESPONSE, response);
     }
 
   });

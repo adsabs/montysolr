@@ -1,5 +1,6 @@
-define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pubsub_key', 'js/components/facade',
-  'backbone'], function(GenericModule, PubSub, PubSubKey, Facade, Backbone) {
+define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pubsub_key', 'js/components/pubsub_events',
+  'js/components/facade', 'backbone'],
+  function(GenericModule, PubSub, PubSubKey, PubSubEvents, Facade, Backbone) {
 
   describe("PubSub - default implementation (Service)", function () {
       
@@ -11,7 +12,8 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
     it("provides keys", function() {
       var p = new PubSub();
       var k = p.getPubSubKey();
-      expect(k.getCreator()).to.be.equal(p);
+      expect(p.pubKey).to.be.instanceof(PubSubKey);
+      expect(k.getCreator()).to.be.equal(p.pubKey);
       expect(k.getId()).to.not.be.undefined;
 
       expect(p.getPubSubKey()).to.not.be.equal(p.getPubSubKey());
@@ -199,34 +201,83 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
 
     it("provides a hardened version of itself", function() {
       var pubsub = new PubSub();
+      var all = sinon.spy();
+      pubsub.on('all', all);
+
       var hardened = pubsub.getHardenedInstance();
       expect(hardened.__facade__).equals(true);
       expect(hardened.handleCallbackError).to.be.undefined;
       expect(hardened.start).to.be.undefined;
 
+
+      expect(hardened.getCurrentPubSubKey()).to.be.instanceof(PubSubKey);
+      expect(hardened.getPubSubKey()).to.be.instanceof(PubSubKey);
+      expect(hardened.getPubSubKey()).to.be.not.equal(hardened.getCurrentPubSubKey());
+
       var p = hardened;
-      var k = p.getPubSubKey();
       var spy = sinon.spy();
 
-      p.subscribe(k, 'event', spy);
-      p.publish(k, 'event');
-      p.unsubscribe(k, 'event');
-      p.publish(k, 'event');
+      hardened.subscribe('event', spy);
+      hardened.publish('event', 'one');
+      hardened.unsubscribe('event');
+      hardened.publish('event', 'two');
 
       expect(spy.callCount).to.be.equal(1);
+      expect(spy.args[0]).to.be.eql(['one']);
 
+      all.reset();
+      spy = sinon.spy();
+      hardened.subscribe('event-foo', spy);
+
+      // it works for events triggered from another module
+      var hardenedX = pubsub.getHardenedInstance();
+      hardenedX.publish('event-foo', [4,5,6]);
+      expect(all.args[0]).to.eql(['event-foo', [4,5,6]]);
+      expect(spy.args[0]).to.eql([[4,5,6]]);
+
+      hardened.unsubscribe('wrong-event');
+
+      hardenedX.publish('event-foo', [7]);
+      expect(all.args[1]).to.eql(['event-foo', [7]]);
+      expect(spy.args[1]).to.eql([[7]]);
+
+      hardened.unsubscribe('event-foo');
+
+      hardenedX.publish('event-foo', [8]);
+      expect(all.callCount).to.equal(3);
+      expect(spy.callCount).to.equal(2);
+
+
+      // iface can be redefined
       hardened = pubsub.getHardenedInstance({start: true, close: true});
-      expect(hardened.start).to.not.be.undefined;
-      expect(hardened.close).to.not.be.undefined;
+      expect(hardened.start).to.be.defined;
+      expect(hardened.close).to.be.defined;
+      expect(hardened.publish).to.be.defined;
+      expect(hardened.subscribe).to.be.defined;
 
     });
 
     it("exposes catalogue of global events", function() {
       var pubsub = new PubSub();
-      expect(pubsub.NEW_QUERY).to.be.not.undefined;
-      expect(pubsub.NEW_RESPONSE).to.be.not.undefined;
+
+      for (var ev in PubSubEvents) {
+        expect(pubsub[ev]).to.be.equal(PubSubEvents[ev]);
+      }
+
+      var hardened = pubsub.getHardenedInstance();
+      for (var ev in PubSubEvents) {
+        expect(hardened[ev]).to.be.equal(PubSubEvents[ev]);
+      }
+
     });
 
+    it("undefined events are checked and thrown", function() {
+      var pubsub = new PubSub();
+      var hardened = pubsub.getHardenedInstance();
+
+      expect(function() {hardened.publish(undefined, sinon.spy())}).to.throw(Error);
+      expect(function() {pubsub.publish(undefined, sinon.spy())}).to.throw(Error);
+    });
 
   });
 });

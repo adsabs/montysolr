@@ -18,15 +18,20 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       console.warn('API call failed:', JSON.stringify(this.request.url()));
       this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
     },
-    always: function() {
-      this.api.outstandingRequests--;
-    },
     getNumOutstandingRequests: function() {
       return this.outstandingRequests;
+    },
+    initialize: function() {
+      this.always = _.bind(function() {this.outstandingRequests--;}, this);
     }
 
   });
 
+    _.extend(Api.prototype, {
+      always: function() {
+        this.outstandingRequests--;
+      }
+    });
 
   Api.prototype.ERROR = {
     INVALID_PASSWORD: 498,

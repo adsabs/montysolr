@@ -45,37 +45,7 @@ define(['backbone', 'underscore',
 
   });
 
-  _.extend(BeeHive.prototype, Hardened, {
-    getHardenedInstance: function() {
-      var iface = _.clone(this.hardenedInterface);
-      if (this.Services.has('PubSub')) {
-
-        var ctx = {
-          key: this.Services.get('PubSub').getPubSubKey()
-        };
-        // purpose of these functions is to expose simplified
-        // api directly at the root of beehive; the key is
-        // is
-        iface['publish'] = function() {
-          var s = this.Services.get('PubSub');
-          arguments = _.toArray(arguments); arguments.unshift(ctx.key);
-          s.publish.apply(s, arguments);
-        };
-        iface['subscribe'] = function() {
-          var s = this.Services.get('PubSub');
-          arguments = _.toArray(arguments); arguments.unshift(ctx.key);
-          s.subscribe.apply(s, arguments);
-        };
-        iface['unsubscribe'] = function() {
-          var s = this.Services.get('PubSub');
-          arguments = _.toArray(arguments); arguments.unshift(ctx.key);
-          s.unsubscribe.apply(s, arguments);
-        };
-      }
-      return this._getHardenedInstance(iface, this);
-
-    }
-  });
+  _.extend(BeeHive.prototype, Hardened);
 
   return BeeHive;
 });
