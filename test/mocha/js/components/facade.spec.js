@@ -16,7 +16,10 @@ define(['js/components/facade', 'underscore'], function(Facade, _) {
         valueX: 'variable copied over',
         facade: 'this should be allowed',
         methodX: function() {return this.hidden},
-        complexObject: ''
+        complexObject: '',
+        methodZ: function() {
+          return this.methodZValue;
+        }
       };
 
       // An implelemntation of the interface
@@ -31,7 +34,11 @@ define(['js/components/facade', 'underscore'], function(Facade, _) {
         hidden: 42,
         complexObject: {
           getHardenedInstance: function() { return {answer: function() {return 42;}}}
-        }
+        },
+        methodZ: function() {
+          throw new Error("This should have been redefined");
+        },
+        methodZValue: 42
       };
 
       var facade = new Facade(interface, imp );
@@ -48,6 +55,7 @@ define(['js/components/facade', 'underscore'], function(Facade, _) {
       expect(facade.hidden).to.be.undefined;
       expect(facade.complexObject.answer()).equals(42);
       expect(facade.complexObject.getHardenedInstance).to.be.undefined;
+      expect(facade.methodZ()).to.be.eql(42);
 
       expect(function() {new Facade({array: 'should fail'}, imp)}).to.throw(Error);
       expect(function() {new Facade({object: 'should fail'}, imp)}).to.throw(Error);

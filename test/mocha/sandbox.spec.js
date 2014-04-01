@@ -1,6 +1,6 @@
 
 // the base path of these tests is the location
-// of the src/js/apps/XXXXX/config.js so we need
+// of the application config.js so we need
 // to find relative homedir of tests
 
 var tbase = '../../test/mocha/js';
@@ -8,8 +8,11 @@ var abase = tbase + '/apps/discovery';
 
 // These are the tests that we want to run for this app
 var tests = [
-  tbase + '/widgets/search_bar_widget.spec.js',
-
+  //tbase + '/components/services_container.spec.js',
+  //tbase + '/services/api.spec.js',
+  //tbase + '/components/beehive.spec.js',
+  tbase + '/components/query_mediator.spec.js'
+  //tbase + '/services/pubsub.spec.js'
 ];
 
 
