@@ -55,7 +55,7 @@ define(['js/components/generic_module', 'js/mixins/dependon',
     });
 
 
-    it("knows how to create unique, write-protected version of itself", function() {
+    it("knows how to create unique, write-protected version of itself", function(done) {
       beehive.addService('PubSub', new PubSub());
       var hardened = beehive.getHardenedInstance();
 
@@ -74,7 +74,7 @@ define(['js/components/generic_module', 'js/mixins/dependon',
       expect(all.args[0].slice(0,2)).to.eql(['event-foo', [1,2,3]]);
       expect(spy.args[0].slice(0,1)).to.eql([[1,2,3]]);
 
-
+      done();
 
     });
 

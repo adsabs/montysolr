@@ -35,7 +35,7 @@ define(['underscore'], function(_) {
      */
     newInstance: function(options) {
       var private = {
-        id: _.has(options, 'id') ? options.id : _.uniqueId('psk'),
+        id: _.has(options, 'id') ? options.id : _.uniqueId(':psk'),
         creator: _.has(options, 'creator') ? options.creator : null
       };
       return new PubSubKey({

@@ -95,8 +95,8 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
     close: function() {
       this.publish(this.pubSubKey, this.CLOSING_GATES);
       this.off();
-      this._issuedKeys = {};
       this.publish(this.pubSubKey, this.CLOSED_FOR_BUSINESS);
+      this._issuedKeys = {};
     },
 
 
@@ -287,11 +287,12 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
     // the default implementation just counts the number of errors per module (key) and
     // triggers pubsub.many_errors
     handleCallbackError: function(e, event, args) {
-      console.warn('[PubSub] Error: ', e, event, args);
+      console.warn(e.stack);
+      console.warn('[PubSub] Error: ', event, args);
       var kid = event.ctx.getId();
       var nerr = (this._errors[kid] = (this._errors[kid] || 0) + 1);
       if (nerr % this.errWarningCount == 0) {
-        this.publish(this.pubSubKey, 'pubsub.many_errors', nerr, e, event, args);
+        this.publish(this.pubSubKey, this.BIG_FIRE, nerr, e, event, args);
       }
     }
 

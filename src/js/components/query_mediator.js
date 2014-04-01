@@ -10,6 +10,8 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
   function(_, $, GenericModule, Mixins, ApiResponse) {
 
   var QueryMediator = GenericModule.extend({
+    debug: false,
+
     /**
      * Starts listening on the PubSub
      *
@@ -29,9 +31,11 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
      * Happens at the beginnng of the new search cycle. This is the 'race started' signal
      */
     start_searching: function(apiQuery) {
-      console.log('QM: received query:', apiQuery.url());
+      if (this.debug)
+        console.log('[QM]: received query:', apiQuery.url());
+
       if (apiQuery.keys().length <= 0) {
-        console.warn('[QueryMediator] : received empty query (huh?!)');
+        console.warn('[QM] : received empty query (huh?!)');
         return;
       }
       var ps = this.getBeeHive().Services.get('PubSub');
@@ -42,7 +46,9 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
       ps.publish(this.mediatorPubSubKey, ps.INVITING_REQUEST, q);
     },
     get_requests: function(apiRequest, senderKey) {
-      console.log('QM: received request:', apiRequest.url(), senderKey.getId());
+      if (this.debug)
+        console.log('[QM]: received request:', apiRequest.url(), senderKey.getId());
+
       var ps = this.getBeeHive().Services.get('PubSub');
       var api = this.getBeeHive().Services.get('Api');
 
@@ -50,11 +56,16 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
         {done: this.deliver_response, context: {request:apiRequest, pubsub: ps, key: senderKey}});
     },
     deliver_response: function(data, textStatus, jqXHR ) {
-      console.log('QM: received response:', data);
+      if (this.debug)
+        console.log('[QM]: received response:', data);
+
       // TODO: check the status responses
       var response = new ApiResponse(data);
       response.setApiQuery(this.request.get('query'));
-      console.log('QM: sending response:', data);
+
+      if (this.debug)
+        console.log('[QM]: sending response:', data);
+
       this.pubsub.publish(this.key, this.pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
     }
 
