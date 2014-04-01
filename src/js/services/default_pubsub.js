@@ -114,7 +114,11 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
      */
     subscribe: function(key, name, callback) {
       this._checkKey(key, name, callback);
+      if (_.isUndefined(name)) {
+        throw new Error("You tried to subscribe to undefined event. Error between chair and keyboard?");
+      }
       this.on(name, callback, key); // the key becomes context
+      this.on(name+key.getId(), callback, key); // this is for individual responses
     },
 
     /*
@@ -178,8 +182,15 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
     publish: function() {
       this._checkKey(arguments[0]);
       var args = Array.prototype.slice.call(arguments, 1);
+      
+      if (args.length == 0 || _.isUndefined(args[0])) {
+        throw new Error("You tried to trigger undefined event. Error between chair and keyboard?");
+      }
 
-      //console.log('publishing', arguments);
+      // push the key back into the arguments (it identifies the sender)
+      args.push(arguments[0]);
+
+      //console.log('publishing', arguments, args);
 
       // this is faster, default BB implementation
       if (!this.handleErrors) {
@@ -203,7 +214,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
      * during the calls.
      */
     getPubSubKey: function() {
-      var k = PubSubKey.newInstance({creator: this});
+      var k = PubSubKey.newInstance({creator: this.pubKey}); // creator identifies issuer of the key
       if (this.strict) {
         this._issuedKeys[k.getId()] = k.getCreator();
       }
@@ -274,6 +285,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
     // the default implementation just counts the number of errors per module (key) and
     // triggers pubsub.many_errors
     handleCallbackError: function(e, event, args) {
+      console.warn('[PubSub] Error: ', e, event, args);
       var kid = event.ctx.getId();
       var nerr = (this._errors[kid] = (this._errors[kid] || 0) + 1);
       if (nerr % this.errWarningCount == 0) {

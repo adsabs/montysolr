@@ -49,10 +49,13 @@ define(['underscore', 'js/components/facade'], function(_, Facade) {
 
         var p = objectIn[property];
 
-        if (typeof p == 'function') {
+        if (typeof propertyValue == 'function') {  // redefining the method
+          facade[property] = _.bind(propertyValue, objectIn);
+        }
+        else if (typeof p == 'function') { // exposing the method
           facade[property] = _.bind(p, objectIn);
         }
-        else if (p.hasOwnProperty('__facade__') && p.__facade__) {
+        else if (p.hasOwnProperty('__facade__') && p.__facade__) { // exposing internal facade
           facade[property] = p;
         }
         else if (_.isObject(p) && 'getHardenedInstance' in p) { // builds a facade
@@ -61,7 +64,7 @@ define(['underscore', 'js/components/facade'], function(_, Facade) {
         else if (_.isUndefined(p)) {
           //pass
         }
-        else if (_.isString(p) || _.isNumber(p) || _.isBoolean(p) || _.isDate(p) || _.isNull(p) || _.isRegExp(p)) {
+        else if (_.isString(p) || _.isNumber(p) || _.isBoolean(p) || _.isDate(p) || _.isNull(p) || _.isRegExp(p)) { // build getter method
           facade['get' + property.substring(0,1).toUpperCase() + property.substring(1)] = _.bind(function() {return this.ctx[this.name]}, {ctx:objectIn, name:property});
         }
         else {

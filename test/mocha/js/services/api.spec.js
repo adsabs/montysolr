@@ -86,7 +86,36 @@ define(['jquery', 'underscore',
       expect(a[4]).to.be.instanceof(Error); //errorThrown
     });
 
+    it("should call 'always' handler (even if redefined)", function() {
+      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var spy = sinon.spy();
+      sinon.spy(api, 'always', api.always);
+      var q = new ApiQuery({q: 'foo'});
 
+      expect(api.getNumOutstandingRequests()).to.equal(0);
+      expect(api.request(new ApiRequest({target: 'parseerror', query: q}),
+        {always: spy})).to.be.OK;
+      expect(api.getNumOutstandingRequests()).to.equal(1);
+      this.server.respond();
+      expect(api.getNumOutstandingRequests()).to.equal(0);
+      expect(spy.callCount).to.be.equal(1);
+      expect(api.always.callCount).to.be.equal(1);
+    });
+
+    it("should call 'done' handler (even if redefined)", function() {
+      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var spy = sinon.spy();
+      sinon.spy(api, 'done', api.done);
+      var q = new ApiQuery({q: 'foo'});
+
+      expect(api.request(new ApiRequest({target: 'search', query: q}),
+        {done: spy})).to.be.OK;
+      this.server.respond();
+      expect(spy.callCount).to.be.equal(1);
+      expect(spy.args[0][0]).to.have.ownProperty('responseHeader'); // JSON data
+      expect(spy.args[0][2]).to.have.ownProperty('status'); // jqXHR object
+      expect(spy.thisValues[0]).to.have.ownProperty('api', 'request');
+    });
 
     var validResponse = '{\
       "responseHeader":{\
