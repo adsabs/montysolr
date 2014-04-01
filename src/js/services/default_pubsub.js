@@ -74,7 +74,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
       this._errors = {};
       this.errWarningCount = 10; // this many errors trigger warning
       _.extend(this, _.pick(options || attributes, ['strict', 'handleErrors', 'errWarningCount']));
-      this.pubKey = this.getPubSubKey(); // the key the pubsub uses for itself
+      this.pubSubKey = this.getPubSubKey(); // the key the pubsub uses for itself
     },
 
 
@@ -84,7 +84,8 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
      * by handled by some listeners
      */
     start: function() {
-      this.publish(this.pubKey, 'pubsub.starting');
+      this.publish(this.pubSubKey, this.OPENING_GATES);
+      this.publish(this.pubSubKey, this.OPEN_FOR_BUSINESS);
     },
 
     /*
@@ -92,9 +93,10 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
      * immediately shuts down the queue and removes any keys
      */
     close: function() {
-      this.publish(this.pubKey, 'pubsub.closing');
+      this.publish(this.pubSubKey, this.CLOSING_GATES);
       this.off();
       this._issuedKeys = {};
+      this.publish(this.pubSubKey, this.CLOSED_FOR_BUSINESS);
     },
 
 
@@ -214,7 +216,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
      * during the calls.
      */
     getPubSubKey: function() {
-      var k = PubSubKey.newInstance({creator: this.pubKey}); // creator identifies issuer of the key
+      var k = PubSubKey.newInstance({creator: this.pubSubKey}); // creator identifies issuer of the key
       if (this.strict) {
         this._issuedKeys[k.getId()] = k.getCreator();
       }
@@ -289,7 +291,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
       var kid = event.ctx.getId();
       var nerr = (this._errors[kid] = (this._errors[kid] || 0) + 1);
       if (nerr % this.errWarningCount == 0) {
-        this.publish(this.pubKey, 'pubsub.many_errors', nerr, e, event, args);
+        this.publish(this.pubSubKey, 'pubsub.many_errors', nerr, e, event, args);
       }
     }
 

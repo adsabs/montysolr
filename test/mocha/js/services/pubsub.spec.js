@@ -12,8 +12,8 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
     it("provides keys", function() {
       var p = new PubSub();
       var k = p.getPubSubKey();
-      expect(p.pubKey).to.be.instanceof(PubSubKey);
-      expect(k.getCreator()).to.be.equal(p.pubKey);
+      expect(p.pubSubKey).to.be.instanceof(PubSubKey);
+      expect(k.getCreator()).to.be.equal(p.pubSubKey);
       expect(k.getId()).to.not.be.undefined;
 
       expect(p.getPubSubKey()).to.not.be.equal(p.getPubSubKey());
