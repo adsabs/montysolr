@@ -49,7 +49,8 @@ require.config({
     'marionette' : 'libs/backbone.marionette/backbone.marionette',
     'backbone.wreqr' : 'libs/backbone.wreqr/lib/backbone.wreqr',
     'backbone.eventbinder' : 'libs/backbone.eventbinder/backbone.eventbinder',
-    'backbone.babysitter' : 'libs/backbone.babysitter/backbone.babysitter'
+    'backbone.babysitter' : 'libs/backbone.babysitter/backbone.babysitter',
+    'bootstrap': 'libs/bootstrap/bootstrap'
 
   },
 
@@ -59,6 +60,10 @@ require.config({
   },
 
   shim: {
+
+    'bootstrap' : {
+      deps: ['jquery']
+    },
     // This is required to ensure Backbone works as expected within the AMD
     // environment.
     'backbone': {
