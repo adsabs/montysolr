@@ -71,8 +71,8 @@ define(['js/components/generic_module', 'js/mixins/dependon',
       var hardenedPubsub = hardened.Services.get('PubSub');
       hardenedPubsub.subscribe('event-foo', spy);
       hardenedPubsub.publish('event-foo', [1,2,3]);
-      expect(all.args[0]).to.eql(['event-foo', [1,2,3]]);
-      expect(spy.args[0]).to.eql([[1,2,3]]);
+      expect(all.args[0].slice(0,2)).to.eql(['event-foo', [1,2,3]]);
+      expect(spy.args[0].slice(0,1)).to.eql([[1,2,3]]);
 
 
 

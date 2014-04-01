@@ -23,14 +23,16 @@ define([], function() {
      * It means: 'user did something', we need to start reacting. The OC
      * will build a new ApiQuery and send it together with this event
      */
-    NEW_QUERY: '[PubSub]:NEW_QUERY',
+    NEW_QUERY: '[PubSub]-New-Query',
+
+    UPDATED_QUERY: '[PubSub]-Update-Query',
 
     /**
      * Called by IC's (usually: Mediator) - this is a signal to *all* OC's
      * they should receive ApiQuery object, compare it against their
      * own query; find diff and create a new ApiQuery
      */
-    WANTING_QUERY: '[PubSub]:WANTING_QUERY',
+    WANTING_QUERY: '[PubSub]-Wanting-Query',
 
     /**
      * Called by IC's (usually: Mediator) - this is a signal to *all* OC's
@@ -38,12 +40,12 @@ define([], function() {
      * own query; find diff and create a new ApiResponse (asking for a data)
      * and send that back
      */
-    WANTING_REQUEST: '[PubSub]:WANTING_REQUEST',
+    WANTING_REQUEST: '[PubSub]-Wanting-Request',
 
     /**
      * Will be called by OC's, this is response to ApiQuery input.
      */
-    NEW_REQUEST: '[PubSub]:NEW_REQUEST',
+    NEW_REQUEST: '[PubSub]-New-Request',
 
     /**
      * Published by IC's - typically Mediator - when response has been retrieved
@@ -55,7 +57,7 @@ define([], function() {
      *  - input: ApiRequest
      *  - output: ApiResponse
      */
-    NEW_RESPONSE: '[PubSub]:NEW_RESPONSE'
+    NEW_RESPONSE: '[PubSub]-New-Response'
 
   };
 

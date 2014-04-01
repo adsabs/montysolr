@@ -118,6 +118,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
         throw new Error("You tried to subscribe to undefined event. Error between chair and keyboard?");
       }
       this.on(name, callback, key); // the key becomes context
+      this.on(name+key.getId(), callback, key); // this is for individual responses
     },
 
     /*
@@ -186,7 +187,10 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
         throw new Error("You tried to trigger undefined event. Error between chair and keyboard?");
       }
 
-      console.log('publishing', arguments, args);
+      // push the key back into the arguments (it identifies the sender)
+      args.push(arguments[0]);
+
+      //console.log('publishing', arguments, args);
 
       // this is faster, default BB implementation
       if (!this.handleErrors) {

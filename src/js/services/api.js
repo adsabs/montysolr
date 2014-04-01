@@ -8,6 +8,7 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     url: '/api/1/',
     clientVersion: 20140329,
     outstandingRequests: 0,
+
     done: function( data, textStatus, jqXHR ) {
       // TODO: check the status responses
       var response = new ApiResponse(data);
@@ -18,20 +19,14 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       console.warn('API call failed:', JSON.stringify(this.request.url()));
       this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
     },
-    getNumOutstandingRequests: function() {
-      return this.outstandingRequests;
-    },
     initialize: function() {
       this.always = _.bind(function() {this.outstandingRequests--;}, this);
+    },
+    getNumOutstandingRequests: function() {
+      return this.outstandingRequests;
     }
-
   });
 
-    _.extend(Api.prototype, {
-      always: function() {
-        this.outstandingRequests--;
-      }
-    });
 
   Api.prototype.ERROR = {
     INVALID_PASSWORD: 498,
@@ -95,14 +90,14 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     _.extend(opts, options);
 
 
-    var jqXhr = $.ajax(opts);
-    jqXHr = jqXhr.promise(jqXhr);
-
-
     this.outstandingRequests++;
-    jqXhr.always(this.always);
-    jqXhr.done(this.done);
-    jqXhr.fail(this.fail);
+
+    var jqXhr = $.ajax(opts)
+        .always(opts.always ? [this.always, opts.always] : this.always)
+        .done(opts.done || this.done)
+        .fail(opts.fail || this.fail);
+
+    jqXhr = jqXhr.promise(jqXhr);
 
     return jqXhr;
   };

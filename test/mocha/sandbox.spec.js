@@ -10,7 +10,7 @@ var abase = tbase + '/apps/discovery';
 var tests = [
   //tbase + '/components/services_container.spec.js',
   //tbase + '/services/api.spec.js',
-  tbase + '/components/beehive.spec.js',
+  //tbase + '/components/beehive.spec.js',
   tbase + '/components/query_mediator.spec.js'
   //tbase + '/services/pubsub.spec.js'
 ];

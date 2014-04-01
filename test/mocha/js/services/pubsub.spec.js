@@ -223,7 +223,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       hardened.publish('event', 'two');
 
       expect(spy.callCount).to.be.equal(1);
-      expect(spy.args[0]).to.be.eql(['one']);
+      expect(spy.args[0].slice(0,1)).to.be.eql(['one']);
 
       all.reset();
       spy = sinon.spy();
@@ -232,14 +232,14 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       // it works for events triggered from another module
       var hardenedX = pubsub.getHardenedInstance();
       hardenedX.publish('event-foo', [4,5,6]);
-      expect(all.args[0]).to.eql(['event-foo', [4,5,6]]);
-      expect(spy.args[0]).to.eql([[4,5,6]]);
+      expect(all.args[0].slice(0,2)).to.eql(['event-foo', [4,5,6]]);
+      expect(spy.args[0].slice(0,1)).to.eql([[4,5,6]]);
 
       hardened.unsubscribe('wrong-event');
 
       hardenedX.publish('event-foo', [7]);
-      expect(all.args[1]).to.eql(['event-foo', [7]]);
-      expect(spy.args[1]).to.eql([[7]]);
+      expect(all.args[1].slice(0,2)).to.eql(['event-foo', [7]]);
+      expect(spy.args[1].slice(0,1)).to.eql([[7]]);
 
       hardened.unsubscribe('event-foo');
 
