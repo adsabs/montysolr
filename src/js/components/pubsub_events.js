@@ -5,13 +5,16 @@
 /**
  * Catalogue of PubSub events; we assume this:
  *
- *  - IC = Inner City; the component lives in the 'Forbidden city'
+ *  - FC = the component lives in the 'Forbidden City'
  *         inside Application, typically this is a PubSub or Api, Mediator
  *         or any component with elevated access
  *
- *  - OC = Outer Sity: the suburbs of the application; these are typically
+ *  - OC = Outer City: the suburbs of the application; these are typically
  *         UI components (behind the wall), untrusted citizens of the
  *         BumbleBee state
+ *
+ *  WARNING: do not use spaces; events with spaces are considered to be
+ *        multiple events! (e.g. '[PubSub] New-Query' will be two events)
  *
  */
 
@@ -25,30 +28,21 @@ define([], function() {
      */
     NEW_QUERY: '[PubSub]-New-Query',
 
-    UPDATED_QUERY: '[PubSub]-Update-Query',
-
     /**
-     * Called by IC's (usually: Mediator) - this is a signal to *all* OC's
+     * Called by FC's (usually: Mediator) - this is a signal to *all* OC's
      * they should receive ApiQuery object, compare it against their
-     * own query; find diff and create a new ApiQuery
-     */
-    WANTING_QUERY: '[PubSub]-Wanting-Query',
-
-    /**
-     * Called by IC's (usually: Mediator) - this is a signal to *all* OC's
-     * they should receive ApiQuery object, compare it against their
-     * own query; find diff and create a new ApiResponse (asking for a data)
+     * own query; find diff and create a new ApiRequest (asking for a data)
      * and send that back
      */
-    WANTING_REQUEST: '[PubSub]-Wanting-Request',
+    INVITING_REQUEST: '[PubSub]-Inviting-Request',
 
     /**
      * Will be called by OC's, this is response to ApiQuery input.
      */
-    NEW_REQUEST: '[PubSub]-New-Request',
+    DELIVERING_REQUEST: '[PubSub]-New-Request',
 
     /**
-     * Published by IC's - typically Mediator - when response has been retrieved
+     * Published by FC's - typically Mediator - when a response has been retrieved
      * for a given ApiRequest.
      *
      * OC's should subscribe to this event when they want to receive data
@@ -57,7 +51,36 @@ define([], function() {
      *  - input: ApiRequest
      *  - output: ApiResponse
      */
-    NEW_RESPONSE: '[PubSub]-New-Response'
+    DELIVERING_RESPONSE: '[PubSub]-New-Response',
+
+
+    /**
+     * The walls of the FC are being closed; and no new requests will be served
+     */
+    CLOSING_GATES: '[PubSub]-Closing',
+
+    /**
+     * PubSub will not receive any requests any more
+     */
+    CLOSED_FOR_BUSINESS: '[PubSub]-Closed',
+
+    /**
+     * ForbiddenCity is about to receive requests
+     */
+    OPENING_GATES: '[PubSub]-Opening',
+
+    /**
+     * Called after PubSub became ready - it is fully operational
+     */
+    OPEN_FOR_BUSINESS: '[PubSub]-Ready',
+
+    /**
+     *  Set of error warnings issues by PubSub - or by some other FC's - to
+     *  deal with congestion or other problems
+     */
+    SMALL_FIRE: '[PubSub]-Problem',
+    BIG_FIRE: '[PubSub]-Big-Problem',
+    CITY_BURNING: '[PubSub]-Disaster'
 
   };
 

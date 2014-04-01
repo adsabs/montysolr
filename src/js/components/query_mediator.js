@@ -19,15 +19,14 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
     activate: function(beehive) {
       this.setBeeHive(beehive);
       var pubsub = beehive.Services.get('PubSub');
-      this.pubSubKey = pubsub.getPubSubKey();
+      this.mediatorPubSubKey = pubsub.getPubSubKey();
 
-      pubsub.subscribe(this.pubSubKey, pubsub.NEW_QUERY, _.bind(this.start_searching, this));
-      pubsub.subscribe(this.pubSubKey, pubsub.UPDATED_QUERY, _.bind(this.receive_modified_queries, this));
-      pubsub.subscribe(this.pubSubKey, pubsub.NEW_REQUEST, _.bind(this.get_requests, this));
+      pubsub.subscribe(this.mediatorPubSubKey, pubsub.NEW_QUERY, _.bind(this.start_searching, this));
+      pubsub.subscribe(this.mediatorPubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.get_requests, this));
     },
 
     /**
-     * Responds to the events arriving from PubSub
+     * Happens at the beginnng of the new search cycle. This is the 'race started' signal
      */
     start_searching: function(apiQuery) {
       console.log('QM: received query:', apiQuery.url());
@@ -36,23 +35,11 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
         return;
       }
       var ps = this.getBeeHive().Services.get('PubSub');
-      ps.publish(this.pubSubKey, ps.WANTING_QUERY, apiQuery.clone());
-    },
-    /**
-     * Receives queries from the OC's - these are the guys that should
-     * be searched. We can veto them here; or simply go ahead and
-     * ask for requests
-     *
-     * @param apiQuery
-     */
-    receive_modified_queries: function(apiQuery, senderKey) {
-      console.log('QM: received modified query:', apiQuery.url(), senderKey.getId());
-      if (apiQuery.keys().length <= 0) {
-        console.warn('[QueryMediator] : received empty query (huh?!)');
-        return;
-      }
-      var ps = this.getBeeHive().Services.get('PubSub');
-      ps.publish(this.pubSubKey, ps.WANTING_REQUEST+senderKey.getId(), apiQuery.clone());
+      // we will protect the query -- in the future i can consider removing 'unlock' to really
+      // cement the fact the query MUST NOT be changed (we want to receive a modified version)
+      var q = apiQuery.clone();
+      q.lock();
+      ps.publish(this.mediatorPubSubKey, ps.INVITING_REQUEST, q);
     },
     get_requests: function(apiRequest, senderKey) {
       console.log('QM: received request:', apiRequest.url(), senderKey.getId());
@@ -68,7 +55,7 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
       var response = new ApiResponse(data);
       response.setApiQuery(this.request.get('query'));
       console.log('QM: sending response:', data);
-      this.pubsub.publish(this.key, this.pubsub.NEW_RESPONSE+this.key.getId(), response);
+      this.pubsub.publish(this.key, this.pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
     }
 
   });

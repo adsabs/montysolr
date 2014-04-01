@@ -28,7 +28,7 @@ define(['marionette', 'hbs!./templates/search_bar_template', 'js/components/api_
         activate: function() {
 
             var pubsub = beehive.Services.get('PubSub');
-            this.pubSubKey = pubsub.getPubSubKey();
+            this.mediatorPubSubKey = pubsub.getPubSubKey();
         }
 
 

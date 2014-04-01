@@ -30,7 +30,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
     describe('Query Mediator (Scaffolding)', function() {
 
-      it("returns API object", function(done) {
+      it("returns QueryMediator object", function(done) {
         expect(new QueryMediator()).to.be.instanceof(QueryMediator);
         expect(new QueryMediator()).to.be.instanceof(GenericModule);
         done();
@@ -45,12 +45,11 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
         expect(qm.hasBeeHive()).to.be.true;
         expect(qm.getBeeHive()).to.be.equal(beehive);
-        expect(qm.pubSubKey).to.be.instanceof(PubSubKey);
+        expect(qm.mediatorPubSubKey).to.be.instanceof(PubSubKey);
 
-        expect(pubsub.subscribe.callCount).to.be.eql(3);
-        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.NEW_QUERY]);
-        expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.UPDATED_QUERY]);
-        expect(pubsub.subscribe.args[2].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.NEW_REQUEST]);
+        expect(pubsub.subscribe.callCount).to.be.eql(2);
+        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.NEW_QUERY]);
+        expect(pubsub.subscribe.args[2].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.DELIVERING_REQUEST]);
 
         done();
       });
@@ -74,27 +73,21 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
           activate: function(beehive) {
             this.bee = beehive;
             pubsub = beehive.Services.get('PubSub');
-            pubsub.subscribe(pubsub.WANTING_QUERY, _.bind(this.return_modified_query, this));
-            pubsub.subscribe(pubsub.WANTING_REQUEST, _.bind(this.return_request, this));
-            pubsub.subscribe(pubsub.NEW_RESPONSE, _.bind(this.receive_response, this));
+            pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.provide_request, this));
+            pubsub.subscribe(pubsub.DELIVERING_RESPONSE, _.bind(this.receive_response, this));
           },
           userAction: function(q) {
             console.log('User Action Worker:', this.mid, q.url());
             var pubsub = this.bee.Services.get('PubSub');
             pubsub.publish(pubsub.NEW_QUERY, q);
           },
-          return_modified_query: function(q) {
-            var pubsub = this.bee.Services.get('PubSub');
+          provide_request: function(q) {
+            q = q.clone();
             q.add('q', 'field:' + this.mid);
-            console.log('Returning query Worker:', this.mid, q.url());
-            pubsub.publish(pubsub.UPDATED_QUERY, q);
-            this._q = q;
-          },
-          return_request: function(q) {
             var pubsub = this.bee.Services.get('PubSub');
             var r = new ApiRequest({target: 'search', query:q});
             console.log('Returning Request Worker:', this.mid, r.url());
-            pubsub.publish(pubsub.NEW_REQUEST, r);
+            pubsub.publish(pubsub.DELIVERING_REQUEST, r);
           },
           receive_response: function(r) {
             console.log('Receiving Response Worker:', this.mid, r.toJSON());
@@ -135,9 +128,9 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         /*
          whole chain of events should happen:
          - mediator gets: NEW_QUERY
-         - mediator issues: WANTING_REQUEST
-           - m1 and m2 respond: NEW_REQUEST
-         - mediator gets: NEW_RESPONSE
+         - mediator issues: INVITING_REQUEST
+           - m1 and m2 respond: DELIVERING_REQUEST
+         - mediator gets: DELIVERING_RESPONSE
            - mediator calls api: api.request(apiRequest)
            - api gets data and calls mediator's 'done' callback
              - mediator gets data and issues: SENDING_RESPONSE
