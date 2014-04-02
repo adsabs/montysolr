@@ -8,7 +8,8 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         ],
   function(_, $, QueryMediator, BeeHive, PubSub, Api, GenericModule, PubSubKey, ApiQuery, ApiRequest) {
 
-    var beehive;
+
+    var beehive, debug = false;
     beforeEach(function(done) {
       this.server = sinon.fakeServer.create();
       this.server.autoRespond = true;
@@ -30,7 +31,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
     describe('Query Mediator (Scaffolding)', function() {
 
-      it("returns API object", function(done) {
+      it("returns QueryMediator object", function(done) {
         expect(new QueryMediator()).to.be.instanceof(QueryMediator);
         expect(new QueryMediator()).to.be.instanceof(GenericModule);
         done();
@@ -45,108 +46,129 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
         expect(qm.hasBeeHive()).to.be.true;
         expect(qm.getBeeHive()).to.be.equal(beehive);
-        expect(qm.pubSubKey).to.be.instanceof(PubSubKey);
+        expect(qm.mediatorPubSubKey).to.be.instanceof(PubSubKey);
 
-        expect(pubsub.subscribe.callCount).to.be.eql(3);
-        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.NEW_QUERY]);
-        expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.UPDATED_QUERY]);
-        expect(pubsub.subscribe.args[2].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.NEW_REQUEST]);
+        expect(pubsub.subscribe.callCount).to.be.eql(2);
+        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.NEW_QUERY]);
+        expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.DELIVERING_REQUEST]);
 
         done();
       });
 
       it("should mediate between modules; passing data back and forth", function(done) {
-        var qm = new QueryMediator();
+        var qm = new QueryMediator({'debug': debug});
         qm.activate(beehive);
 
-        // install spies into pubsub
+        // install spies into pubsub and api
         var pubsub = beehive.Services.get('PubSub');
-        var pubsubSpy = sinon.spy(function(){console.log('pubsub event:', arguments[0])});
+        var pubsubSpy = sinon.spy(function(){if (debug) {console.log('[pubsub:all]', arguments)}});
         pubsub.on('all', pubsubSpy);
         var api = beehive.Services.get('Api');
-        var apiSpy = sinon.spy(function(){console.log('api event:', arguments)});
+        var apiSpy = sinon.spy(function(){if (debug) {console.log('[api:all]', arguments)}});
         api.on('all', apiSpy);
 
+        // test counter for number of responses received
         var globalCounter = 0;
 
-        // fake UI widget that sends signals
+        // create fake UI widgets that simulate interaction with mediator
+        // they send signals and receive responses
         var M = GenericModule.extend({
           activate: function(beehive) {
             this.bee = beehive;
             pubsub = beehive.Services.get('PubSub');
-            pubsub.subscribe(pubsub.WANTING_QUERY, _.bind(this.return_modified_query, this));
-            pubsub.subscribe(pubsub.WANTING_REQUEST, _.bind(this.return_request, this));
-            pubsub.subscribe(pubsub.NEW_RESPONSE, _.bind(this.receive_response, this));
+            pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.sendRequest, this));
+            pubsub.subscribe(pubsub.DELIVERING_RESPONSE, _.bind(this.receiveResponse, this));
           },
           userAction: function(q) {
-            console.log('User Action Worker:', this.mid, q.url());
+            if (debug)
+              console.log('[' + this.mid + '] User Action:', q.url());
             var pubsub = this.bee.Services.get('PubSub');
             pubsub.publish(pubsub.NEW_QUERY, q);
           },
-          return_modified_query: function(q) {
-            var pubsub = this.bee.Services.get('PubSub');
+          sendRequest: function(q) {
+            q = q.clone();
+            q.unlock();
             q.add('q', 'field:' + this.mid);
-            console.log('Returning query Worker:', this.mid, q.url());
-            pubsub.publish(pubsub.UPDATED_QUERY, q);
-            this._q = q;
-          },
-          return_request: function(q) {
             var pubsub = this.bee.Services.get('PubSub');
             var r = new ApiRequest({target: 'search', query:q});
-            console.log('Returning Request Worker:', this.mid, r.url());
-            pubsub.publish(pubsub.NEW_REQUEST, r);
+
+            if (debug)
+              console.log('[' + this.mid + '] Returning Request:', r.url());
+            pubsub.publish(pubsub.DELIVERING_REQUEST, r);
+            this._q = q;
           },
-          receive_response: function(r) {
-            console.log('Receiving Response Worker:', this.mid, r.toJSON());
-            // do something, display data etc
+          receiveResponse: function(r) {
+            if (debug)
+              console.log('[' + this.mid + '] Receiving Response:', JSON.stringify(r.toJSON()));
+
+            // do something with response...
             expect(r.get('responseHeader.QTime')).to.equal(88);
-            // TODO: check the query
+            // check the query was the same
+            expect(r.getApiQuery().url()).to.equal(this._q.url());
+            // actually, even the same instance
+            expect(r.getApiQuery()).to.equal(this._q);
+
             globalCounter += 1;
-            console.log('globalCounter', globalCounter);
             if (globalCounter > 1) {
-              console.log('closing');
+              if (debug)
+                console.log('test: closing');
+              checkIt();
               done();
             }
           }
         });
 
+        // create components
         var m1 = new M();
         var m2 = new M();
 
-/*
-        sinon.spy(m1, '_wanting_query', m1._new_request);
-        sinon.spy(m1, '_wanting_request', m1._wanting_request);
-        sinon.spy(m1, '_getting_response', m1._getting_response);
+        // install spies into components
+        sinon.spy(m1, 'sendRequest', m1.sendRequest);
+        sinon.spy(m1, 'receiveResponse', m1.receiveResponse);
+        sinon.spy(m2, 'sendRequest', m2.sendRequest);
+        sinon.spy(m2, 'receiveResponse', m2.receiveResponse);
 
-        sinon.spy(m2, '_wanting_query', m2._new_request);
-        sinon.spy(m2, '_wanting_request', m2._wanting_request);
-        sinon.spy(m2, '_getting_response', m2._getting_response);
-*/
-        // each component will be activated by the app
+        // because of the spies, we must activate only now...
         m1.activate(beehive.getHardenedInstance());
         m2.activate(beehive.getHardenedInstance());
 
-        // create a fake query
-        var q = new ApiQuery({'q': '*:*'});
-
         // pretend user clicked and a new query is fired
+        var q = new ApiQuery({'q': '*:*'});
         m1.userAction(q);
 
         /*
          whole chain of events should happen:
-         - mediator gets: NEW_QUERY
-         - mediator issues: WANTING_REQUEST
-           - m1 and m2 respond: NEW_REQUEST
-         - mediator gets: NEW_RESPONSE
-           - mediator calls api: api.request(apiRequest)
-           - api gets data and calls mediator's 'done' callback
-             - mediator gets data and issues: SENDING_RESPONSE
-               - m1 & m2 receive: apiResponse
+         - user clicked: NEW_QUERY
+         - mediator issues: INVITING_REQUEST
+           - m1 and m2 respond with: DELIVERING_REQUEST
+         - mediator calls api: api.request(apiRequest)
+           - api gets data and sends them back to mediator
+           - mediator wraps it into ApiResponse and issues: DELIVERING_RESPONSE
+              - m1 & m2 receive the apiResponse (each for their own request only)
         */
 
+        // must be called after we have collected everything
+        var checkIt = function() {
+          // each was called once
+          expect(m1.sendRequest.callCount).to.be.equal(1);
+          expect(m2.sendRequest.callCount).to.be.equal(1);
 
+          // they received a clone of the query (but not the original)
+          expect(m1.sendRequest.args[0][0].url()).to.equal(q.url());
+          expect(m2.sendRequest.args[0][0].url()).to.equal(q.url());
+          expect(m1.sendRequest.args[0][0]).to.not.equal(q);
+          expect(m2.sendRequest.args[0][0]).to.not.equal(q);
+          // and it was 'locked'
+          expect(m1.sendRequest.args[0][0].isLocked()).to.be.true;
+          expect(m2.sendRequest.args[0][0].isLocked()).to.be.true;
 
-        console.log('done');
+          // each UI must receive only its own data
+          expect(m1.receiveResponse.callCount).to.be.equal(1);
+          expect(m2.receiveResponse.callCount).to.be.equal(1);
+        }
+
+        if (debug)
+          console.log('test: reached end');
       });
     });
 

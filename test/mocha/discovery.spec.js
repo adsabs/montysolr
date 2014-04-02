@@ -18,12 +18,13 @@ var tests = [
   tbase + '/components/pubsub_key.spec.js',
   tbase + '/components/facade.spec.js',
   tbase + '/components/beehive.spec.js',
-  tbase + '/widgets/results_render_module.spec.js',
   tbase + '/components/api_request.spec.js',
   tbase + '/services/api.spec.js',
   tbase + '/components/query_mediator.spec.js',
   tbase + '/components/services_container.spec.js',
 
+  // UI components
+  tbase + '/widgets/results_render_module.spec.js',
   tbase + '/widgets/search_bar_widget.spec.js',
   tbase + '/widgets/api_response_widget.spec.js',
   tbase + '/widgets/api_query_widget.spec.js'

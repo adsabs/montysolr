@@ -12,8 +12,8 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
     it("provides keys", function() {
       var p = new PubSub();
       var k = p.getPubSubKey();
-      expect(p.pubKey).to.be.instanceof(PubSubKey);
-      expect(k.getCreator()).to.be.equal(p.pubKey);
+      expect(p.pubSubKey).to.be.instanceof(PubSubKey);
+      expect(k.getCreator()).to.be.equal(p.pubSubKey);
       expect(k.getId()).to.not.be.undefined;
 
       expect(p.getPubSubKey()).to.not.be.equal(p.getPubSubKey());
@@ -127,10 +127,10 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
 
       var r = 10; // num of triggers
 
-      pubsub.subscribe(k, 'pubsub.many_errors', errspy);
+      pubsub.subscribe(k, pubsub.BIG_FIRE, errspy);
       _.each(_.range(r), function(element, index, list) {
         if (index === r/2) {
-          pubsub.subscribe(k, 'event', function() {throw new Error('foo');});
+          pubsub.subscribe(k, 'event', function() {throw new Error('Testing error handling: ignore me');});
         }
         else {
           pubsub.subscribe(k, 'event', function() {spy.apply(spy, [index].concat(_.toArray(arguments)));});
@@ -173,10 +173,10 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       errspy = sinon.spy();
       spy = sinon.spy();
 
-      pubsub.subscribe(k, 'pubsub.many_errors', errspy);
+      pubsub.subscribe(k, pubsub.BIG_FIRE, errspy);
       _.each(_.range(r), function(element, index, list) {
         if (index === r/2) {
-          pubsub.subscribe(k, 'event', function() {throw new Error('foo');});
+          pubsub.subscribe(k, 'event', function() {throw new Error('Testing error handling: ignore me');});
         }
         else {
           pubsub.subscribe(k, 'event', function() {spy.apply(spy, [index].concat(_.toArray(arguments)));});
