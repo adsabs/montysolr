@@ -68,7 +68,7 @@ require(['js/components/beehive', 'js/services/pubsub',
           var widget = new impl();
 
           if ('activate' in widget) {
-            widget.activate(beehive);
+            widget.activate(beehive.getHardenedInstance());
           }
           var el;
           if (region_id.substring(0,1) == '#') {

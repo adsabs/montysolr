@@ -1,6 +1,7 @@
 var express = require('express');
 var http = require('http');
 var url = require('url');
+var search_re = /\/1\/search/;
 var app = express();
 
 var API_ENDPOINT = process.env.API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
@@ -21,27 +22,32 @@ app.use(express.logger('dev'));
 // a simple 'proxy' that takes the query and fetches response
 // from the remote url; care is taken to pass only parameters
 // not to change the url path
-app.use('/api/search', function(req, res, next){
-    var r = url.parse(req.url);
-    
-    //console.log(r);
-    
-    if (r.pathname !== '/') {
-      res.send(503, {error: 'Unknown service: ' + req.url});
-    }
-    
-    var search = http.get(API_ENDPOINT + '?' + r.query, function(apiResponse) {
-        res.writeHead(apiResponse.statusCode, {'Content-Type': apiResponse.headers['content-type']});
-        apiResponse.on("data", function(chunk) {
-            res.write(chunk);
-        });
-        apiResponse.on("end", function(chunk) {
-            res.end();
-        });
-    })
-    .on('error', function(err) {
-        res.send(err.status || 500, {error: err.message});
-        console.log("Got error: " + err.message);
+app.use('/api', function (req, res, next) {
+  var r = url.parse(req.url);
+  var endpoint = API_ENDPOINT;
+
+  //console.log(r);
+
+  if (r.pathname.match(search_re)) {
+    // optionally swith endpoints
+  }
+  else {
+    res.send(503, {error: 'Unknown service: ' + req.url + ' Are you using the correct endpoint (/api/1/search etc...)?'});
+    return;
+  }
+
+
+  var search = http.get(endpoint + '?' + r.query, function (apiResponse) {
+    res.writeHead(apiResponse.statusCode, {'Content-Type': apiResponse.headers['content-type']});
+    apiResponse.on("data", function (chunk) {
+      res.write(chunk);
+    });
+    apiResponse.on("end", function (chunk) {
+      res.end();
+    });
+  }).on('error', function (err) {
+      res.send(err.status || 500, {error: err.message});
+      console.log("Got error: " + err.message);
     });
 });
 

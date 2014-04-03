@@ -3,16 +3,20 @@
  *
  * Simple widget for debugging API response; it allows to copy&paste
  * JSON input directly into the text area and have it loaded.
+ *
+ * It also listens to DELIVERING_RESPONSE event
  */
 
 define(['underscore', 'jquery', 'backbone', 'marionette',
   'js/components/api_response',
-  'hbs!./templates/widget-view'
+  'hbs!./templates/widget-view',
+  'js/components/pubsub_events'
 ],
 
   function(_, $, Backbone, Marionette,
            ApiResponse,
-           WidgetTemplate){
+           WidgetTemplate,
+           PubSubEvents){
 
     var Model = Backbone.Model.extend({ });
 
@@ -39,19 +43,19 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
       },
       _load: function(ev) {
         ev.preventDefault();
-        var data = $('textarea#api-response-input').val();
-        this.options.controller.update(data);
+        var data = this.$el.find('textarea#api-response-input').val();
+        this.options.controller.triggerMethod('load', data);
       },
       _run: function(ev) {
         ev.preventDefault();
         if (this._changed) {
           this._load(ev);
         }
-        this.options.controller.run(this.model.attributes);
+        this.options.controller.triggerMethod('run', this.model.attributes);
       },
       _error: function(msg) {
-        $('#api-response-error').empty();
-        $('#api-response-error').append(msg);
+        this.$el.find('#api-response-error').empty();
+        this.$el.find('#api-response-error').append(msg);
       }
     });
 
@@ -74,8 +78,8 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         return model;
       },
 
-      initialize : function(apiResponse){
-        this.model = this._getModel(apiResponse);
+      initialize : function(data){
+        this.model = this._getModel(data);
         this.view = new WidgetView({model: this.model, controller: this});
         return this;
       },
@@ -85,25 +89,55 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         return this.view.el
       },
 
-      update : function(apiResponse) {
+      onLoad : function(data) {
         try {
-          var m = this._getModel(apiResponse);
+          var m = this._getModel(data);
           this.model.set(m.attributes);
           this.view.render();
           this.view._error('');
         }
         catch(e) {
           if (this.view) {
-            console.error(e.message, apiResponse);
+            console.error(e.message, data);
             this.view._error(e.message);
           }
           throw e;
         }
       },
 
-      run: function(model) {
-        //console.log(model.R);
+      /**
+       * Called by the UI View when 'Run' is clicked; you can override
+       * the method to provide your own impl
+       *
+       * @param model
+       */
+      onRun: function(model) {
+        // do nothing
+      },
+
+      /**
+       * The methods below are only working if you activate the widget and
+       * pass it BeeHive
+       *
+       * @param beehive
+       */
+      activate: function(beehive) {
+        var pubsub = beehive.Services.get('PubSub');
+        pubsub.subscribe('all', _.bind(this.onAllPubSub, this));
+        this.pubsub = pubsub;
+      },
+
+      /**
+       * Catches and displays ApiResponse that has travelled through the
+       * PubSub queue
+       */
+      onAllPubSub: function() {
+        var event = arguments[0];
+        if (event == PubSubEvents.DELIVERING_RESPONSE) {
+          this.onLoad(arguments[1]);
+        }
       }
+
     });
 
     return WidgetController;

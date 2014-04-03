@@ -11,6 +11,10 @@ define(['js/components/api_request', 'js/components/multi_params', 'js/component
       expect(new ApiRequest({target: 'foo'}).clone()).to.be.instanceof(ApiRequest);
       expect(new ApiRequest({target: 'foo'}).clone()).not.to.be.instanceof(MultiParams);
       expect(new ApiRequest({target: 'foo'}).clone()).not.to.be.instanceof(Backbone.Model);
+
+      expect(new ApiRequest({target: 'foo'}).load('foo')).to.be.instanceof(ApiRequest);
+      expect(new ApiRequest({target: 'foo'}).load('foo')).not.to.be.instanceof(MultiParams);
+      expect(new ApiRequest({target: 'foo'}).load('foo')).not.to.be.instanceof(Backbone.Model);
     });
 
 

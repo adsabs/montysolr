@@ -17,6 +17,11 @@ define(['js/components/api_query', 'js/components/multi_params', 'backbone'], fu
       expect(new ApiQuery().clone()).to.be.instanceof(ApiQuery);
       expect(new ApiQuery().clone()).not.to.be.instanceof(MultiParams);
       expect(new ApiQuery().clone()).not.to.be.instanceof(Backbone.Model);
+
+      expect(new ApiQuery().load('q=foo')).to.be.instanceof(ApiQuery);
+      expect(new ApiQuery().load('q=foo')).not.to.be.instanceof(MultiParams);
+      expect(new ApiQuery().load('q=foo')).not.to.be.instanceof(Backbone.Model);
+
     });
     
     it("has methods for manipulating keys/values", function() {

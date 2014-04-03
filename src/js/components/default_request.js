@@ -122,7 +122,7 @@ define(['underscore', 'backbone',
 
         var target = whatToSort['target'];
 
-        var url = target ? (_.isArray(target) ? target.join('/') : target) : '/';
+        var url = target ? (_.isArray(target) ? target.join('/') : target) : '';
         if ('query' in whatToSort) {
           url += '?' + whatToSort['query'].url();
         }

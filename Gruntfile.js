@@ -151,7 +151,7 @@ module.exports = function(grunt) {
       },
 
       server: {
-        files:  [ './src/js/**/*.js', './src/*.js', './src/*.html'],
+        files:  [ './src/js/**/*.js', './src/*.js', './src/*.html', './server.js'],
         tasks:  [ 'env:dev', 'express:dev' ]
       },
 
