@@ -2,8 +2,10 @@
  * Created by rchyla on 3/19/14.
  */
 
-define(['js/widgets/api_response/widget', 'js/components/api_response', 'backbone', 'jquery'],
-  function(ApiResponseWidget, ApiResponse, Backbone, $) {
+define(['js/widgets/api_response/widget', 'js/components/api_response',
+  'backbone', 'jquery',
+  'js/components/beehive', 'js/services/pubsub'],
+  function(ApiResponseWidget, ApiResponse, Backbone, $, BeeHive, PubSub) {
   describe("ApiResponse Debugging Widget (UI)", function () {
 
       var jsonData = {
@@ -33,7 +35,7 @@ define(['js/widgets/api_response/widget', 'js/components/api_response', 'backbon
 
       it("should build a view of the ApiResponse values", function() {
         var W = ApiResponseWidget.extend({
-          run: sinon.spy()
+          onRun: sinon.spy()
         });
         var widget = new W(new ApiResponse(jsonData));
         var w = $(widget.render());
@@ -56,7 +58,7 @@ define(['js/widgets/api_response/widget', 'js/components/api_response', 'backbon
 
         // click on run
         ta.find('button#api-response-run').click();
-        expect(widget.run.callCount).to.be.equal(1);
+        expect(widget.onRun.callCount).to.be.equal(1);
 
         // now try loading erroneous data
         ta.find('#api-response-input').val('woo":"wah","responseHeader":{"params":{"q":"*:*"},"nested":{"one":"two"}}}');
@@ -73,6 +75,27 @@ define(['js/widgets/api_response/widget', 'js/components/api_response', 'backbon
         expect(ta.find('#api-response-error').text()).to.contain('');
 
       });
+
+    it("knows how to interact with pubsub", function(done) {
+
+      var beehive = new BeeHive();
+      var pubsub = new PubSub();
+      beehive.addService('PubSub', pubsub);
+
+      var widget = new ApiResponseWidget(new ApiResponse(jsonData));
+      widget.activate(beehive.getHardenedInstance());
+      var $w = $(widget.render());
+
+      expect($w.find('#api-response-result').val()).to.equal(
+        'new ApiResponse({"foo":"bar","responseHeader":{"params":{"q":"*:*"},"nested":{"one":"two"}}})');
+
+      // send a new response trough the pubsub, widget should catch it and display
+      pubsub.trigger(pubsub.DELIVERING_RESPONSE, new ApiResponse(_.extend(jsonData, {foo: 'bazz'})));
+      expect($w.find('#api-response-result').val()).to.equal(
+        'new ApiResponse({"foo":"bazz","responseHeader":{"params":{"q":"*:*"},"nested":{"one":"two"}}})');
+
+      done();
+    });
 
   });
 });

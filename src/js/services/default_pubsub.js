@@ -242,7 +242,8 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
         if (!(key instanceof PubSubKey)) {
           throw new Error("Key must be instance of PubSubKey. " +
             "(If you are trying to pass context, you can't do that. Instead, " +
-            "wrap your callback into: _.bind(callback, context))");
+            "wrap your callback into: _.bind(callback, context))" + "\n" +
+            "Perhaps the PubSub you are using is the non-protected version?");
         }
 
         if (!this._issuedKeys.hasOwnProperty(key.getId())) {

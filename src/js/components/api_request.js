@@ -51,6 +51,10 @@ define(['underscore', 'backbone',
       clone: function() {
         var clone = this.innerRequest.clone.apply(this.innerRequest, arguments);
         return new ApiRequest(clone);
+      },
+      load: function() {
+        var clone = this.innerRequest.load.apply(this.innerRequest, arguments);
+        return new ApiRequest(clone);
       }
     });
 

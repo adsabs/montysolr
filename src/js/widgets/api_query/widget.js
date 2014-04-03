@@ -4,13 +4,14 @@
 
 define(['underscore', 'jquery', 'backbone', 'marionette',
   'js/components/api_query',
+  'js/components/pubsub_events',
   'hbs!./templates/widget-view',
   'hbs!./templates/item-view'
 
 ],
 
   function(_, $, Backbone, Marionette,
-           ApiQuery,
+           ApiQuery, PubSubEvents,
            WidgetTemplate, ItemTemplate){
 
     // Model
@@ -35,22 +36,15 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         var newVal = $(ev.target).val();
 
         if (container.attr('name') == 'key' && attr.key != newVal) {
-          this.model.set('key', newVal);
+          this.trigger('key-changed', this.model, newVal);
         }
         else if (container.attr('name') == 'value' && attr.value != newVal) {
-          this.model.set('value', newVal);
+          this.trigger('value-changed', this.model, newVal);
         }
       },
       removeItem : function(ev){
         ev.preventDefault();
-        this.model.destroy();
-        // I'd prefer to call controller - instead of changing the model
-        // from inside the view; but this means one has to setup
-        // complicated controller->collection->view event chain
-        //var key = $(ev.target.parentElement.parentElement).find('td.key');
-        //if (key) {
-        //  this.trigger('remove-key', key.text());
-        //}
+        this.trigger('remove-clicked', this.model);
       }
     });
 
@@ -62,23 +56,24 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         'click button#api-query-load': 'loadApiQuery',
         'click button#api-query-add': 'addNewItem',
         'click button#api-query-run': 'runApiQuery',
-        'submit form': 'loadApiQuery',
-        'update-loader': 'updateLoader',
-        'remove-key': 'removeKey'
+        'submit form': 'loadApiQuery'
       },
       addNewItem: function(ev) {
-        ev.preventDefault();
-        this.trigger('add-new-item');
+        if (ev)
+          ev.preventDefault();
+        this.trigger('add-new-item', this);
       },
       loadApiQuery: function(ev) {
-        ev.preventDefault();
-        var data = $('input#api-query-input').val();
+        if (ev)
+          ev.preventDefault();
+        var data = this.$el.find('input#api-query-input').val();
         if (data && _.isString(data) && data.trim().length > 0) {
           this.trigger('load-api-query', data);
         }
       },
       runApiQuery: function(ev) {
-        ev.preventDefault();
+        if (ev)
+          ev.preventDefault();
         var q = new ApiQuery();
         _.map(this.collection.models, function(a) {
           var attr = a.attributes;
@@ -86,19 +81,84 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
             q.set(attr.key, attr.value.split('|'));
           }
         });
-        $('#api-query-result').text(q.url());
+        this.$el.find('#api-query-result').text(q.url());
         this.trigger('run-api-query', q);
       },
-      updateLoader: function(data) {
-        $('input#api-query-input').val(data);
+      updateInputBox: function(data) {
+        this.$el.find('input#api-query-input').val(data);
       },
       removeKey: function(data) {
         this.trigger('remove-key', data);
       }
+
     });
 
     var WidgetController = Marionette.Controller.extend({
 
+      initialize : function(apiQuery){
+        if (!apiQuery || !(apiQuery instanceof ApiQuery)) {
+          apiQuery = new ApiQuery(); // empty
+        }
+        this.collection = new KeyValueCollection(this.getData(apiQuery));
+        this.view = new WidgetView({collection: this.collection, model: new KeyValue({initialValue: apiQuery.url() || 'q=test'})});
+        this.listenTo(this.view, 'all', this.onAll);
+        return this;
+      },
+
+
+      render : function(){
+        this.view.render()
+        return this.view.el
+      },
+
+
+      onLoad : function(apiQuery) {
+        if (this.collection) {
+          this.collection.reset(this.getData(apiQuery))
+        }
+        else {
+          this.initialize(apiQuery);
+        }
+      },
+
+
+      /**
+       * This is the central function - listening to all events
+       * in this widget's views; and manipulating the models
+       * that back views
+       */
+      onAll: function() {
+        //console.log('onAll', arguments[0]);
+        var event = arguments[0];
+
+        if (event == 'itemview:remove-clicked') {
+          arguments[2].destroy();
+        }
+        else if (event == 'itemview:key-changed') {
+          arguments[2].set('key', arguments[3]);;
+        }
+        else if (event == 'itemview:value-changed') {
+          arguments[2].set('value', arguments[3]);;
+        }
+        else if (event == 'add-new-item') {
+          arguments[1].collection.add({key:'', value:''});
+        }
+        else if (event == 'load-api-query') {
+          this.onLoad(arguments[1]);
+        }
+        else if (event == 'run-api-query') {
+          this.view.updateInputBox(arguments[1].url()); // update the input box
+          this.onRun(arguments[1]);
+        }
+      },
+
+      /**
+       * Function to massage input values and return what we want to
+       * pass to the model
+       *
+       * @param apiQuery
+       * @returns {*|Array}
+       */
       getData: function(apiQuery) {
         if (!apiQuery) {
           throw Error("Wrong input!");
@@ -113,42 +173,41 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         return pairs;
       },
 
-      initialize : function(apiQuery){
-        if (!apiQuery || !('toJSON' in apiQuery)) {
-          apiQuery = new ApiQuery(); // empty
-        }
-        this.collection = new KeyValueCollection(this.getData(apiQuery));
-        this.view = new WidgetView({collection: this.collection});
-        this.listenTo(this.view, 'load-api-query', this.update);
-        this.listenTo(this.view, 'add-new-item', this.addNewItem);
-        this.listenTo(this.view, 'run-api-query', this.runApiQuery);
-        return this;
+      /**
+       * The methods below are only working if you activate the widget and
+       * pass it BeeHive
+       *
+       * @param beehive
+       */
+      activate: function(beehive) {
+        var pubsub = beehive.Services.get('PubSub');
+        pubsub.subscribe('all', _.bind(this.onAllPubSub, this));
+        this.pubsub = pubsub;
       },
 
-      render : function(){
-        this.view.render()
-        return this.view.el
-      },
-
-      returnView : function(){
-        return this.view
-      },
-
-      update : function(apiQuery) {
-        if (this.collection) {
-          this.collection.reset(this.getData(apiQuery))
-        }
-        else {
-          this.initialize(apiQuery);
+      /**
+       * Catches and displays ApiQuery that has travelled through the
+       * PubSub queue
+       */
+      onAllPubSub: function() {
+        var event = arguments[0];
+        if (event == PubSubEvents.NEW_QUERY || event == PubSubEvents.INVITING_REQUEST) {
+          console.log('[debug:ApiQueryWidget]', arguments[0]);
+          //this.onLoad(arguments[1]);
+          this.view.updateInputBox(arguments[1].url()); // update the input
         }
       },
 
-      addNewItem: function() {
-        this.collection.add({key:'', value:''});
-      },
-
-      runApiQuery: function(apiQuery) {
-        console.log('runApiQuery:', apiQuery);
+      /**
+       * Called by the UI View when 'Run' is clicked; you can override
+       * the method to provide your own impl
+       *
+       * @param ApiQuery
+       */
+      onRun: function(apiQuery) {
+        if (this.pubsub) {
+          this.pubsub.publish(this.pubsub.NEW_QUERY, apiQuery);
+        }
       }
 
     });

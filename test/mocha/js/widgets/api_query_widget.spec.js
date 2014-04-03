@@ -2,8 +2,8 @@
  * Created by rchyla on 3/19/14.
  */
 
-define(['js/widgets/api_query/widget', 'js/components/api_query', 'backbone', 'jquery'],
-  function(ApiQueryWidget, ApiQuery, Backbone, $) {
+define(['js/widgets/api_query/widget', 'js/components/api_query', 'js/services/pubsub', 'js/components/beehive', 'backbone', 'jquery'],
+  function(ApiQueryWidget, ApiQuery, PubSub, BeeHive, Backbone, $) {
   describe("ApiQuery Widget (UI)", function () {
 
       var clearMe = function() {
@@ -34,7 +34,7 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'backbone', 'j
         expect($(widget.render()).find('tr').length).to.be.equal(2);
 
 
-        widget.update(new ApiQuery().load('foo=bar'));
+        widget.onLoad(new ApiQuery().load('foo=bar'));
         html = $(widget.render()).html();
         expect($(widget.render()).find('tr').length).to.be.equal(1);
 
@@ -49,6 +49,9 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'backbone', 'j
       var widget = new ApiQueryWidget(q);
       var ta = $('#test-area');
       ta.append(widget.render());
+
+      // widget is initialized with the query
+      expect(ta.find('#api-query-input').val()).to.equal("boo=baz&foo=bar&woo=waz");
 
       // we have three items
       expect(ta.find('tr').length).to.be.equal(3);
@@ -84,10 +87,33 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'backbone', 'j
       ta.find('#api-query-load').click();
       // should have two elements
       expect(ta.find('tr').length).to.be.equal(2);
-      // TODO: have the query reload automatically
-      ta.find('#api-query-run').click();
-      expect(ta.find('#api-query-result').text()).to.equal("hey=joe&what=dydu");
 
+      ta.find('#api-query-run').click();
+      // result will be updated
+      expect(ta.find('#api-query-result').text()).to.equal("hey=joe&what=dydu");
+      // also input will
+      expect(ta.find('#api-query-input').val()).to.equal("hey=joe&what=dydu");
+    });
+
+    it("knows how to interact with pubsub", function(done) {
+
+      var beehive = new BeeHive();
+      var pubsub = new PubSub();
+      beehive.addService('PubSub', pubsub);
+
+      var q = new ApiQuery().load('foo=bar&boo=baz&woo=waz');
+      var widget = new ApiQueryWidget(q);
+      widget.activate(beehive.getHardenedInstance());
+      var $w = $(widget.render());
+
+      expect($w.find('#api-query-input').val()).to.equal("boo=baz&foo=bar&woo=waz");
+
+      // send a new response trough the pubsub, widget should catch it and display
+      pubsub.trigger(pubsub.NEW_QUERY, new ApiQuery({foo:'bar'}));
+
+      expect($w.find('#api-query-input').val()).to.equal("foo=bar");
+
+      done();
     });
 
   });

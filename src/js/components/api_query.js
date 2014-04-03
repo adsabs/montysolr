@@ -61,6 +61,10 @@ define(['backbone', 'underscore', 'api_query_impl', 'js/components/facade'], fun
     clone: function() {
       var clone = this.innerQuery.clone.apply(this.innerQuery, arguments);
       return new ApiQuery(clone);
+    },
+    load: function() {
+      var clone = this.innerQuery.load.apply(this.innerQuery, arguments);
+      return new ApiQuery(clone);
     }
   });
 

@@ -1,6 +1,7 @@
 var express = require('express');
 var http = require('http');
 var url = require('url');
+var search_re = /\/1\/search$/;
 var app = express();
 
 var API_ENDPOINT = process.env.API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
@@ -14,6 +15,9 @@ var API_ENDPOINT = process.env.API_ENDPOINT || "http://adswhy.cfa.harvard.edu:90
 app.use(app.router);
 
 
+app.use(express.json());       // to support JSON-encoded bodies
+app.use(express.urlencoded()); // to support URL-encoded bodies
+
 // log requests
 app.use(express.logger('dev'));
 
@@ -21,27 +25,44 @@ app.use(express.logger('dev'));
 // a simple 'proxy' that takes the query and fetches response
 // from the remote url; care is taken to pass only parameters
 // not to change the url path
-app.use('/api/search', function(req, res, next){
-    var r = url.parse(req.url);
-    
-    //console.log(r);
-    
-    if (r.pathname !== '/') {
-      res.send(503, {error: 'Unknown service: ' + req.url});
-    }
-    
-    var search = http.get(API_ENDPOINT + '?' + r.query, function(apiResponse) {
-        res.writeHead(apiResponse.statusCode, {'Content-Type': apiResponse.headers['content-type']});
-        apiResponse.on("data", function(chunk) {
-            res.write(chunk);
-        });
-        apiResponse.on("end", function(chunk) {
-            res.end();
-        });
-    })
-    .on('error', function(err) {
-        res.send(err.status || 500, {error: err.message});
-        console.log("Got error: " + err.message);
+app.use('/api', function (req, res, next) {
+  var r = url.parse(req.url);
+  var endpoint = API_ENDPOINT;
+  var end = url.parse(API_ENDPOINT);
+
+  console.log(req.body, r);
+
+  if (r.pathname.match(search_re)) {
+    // optionally swith endpoints
+  }
+  else {
+    res.send(503, {error: 'Unknown service: ' + req.url + ' Are you using the correct endpoint (/api/1/search etc...)?'});
+    return;
+  }
+
+  var options = {
+    hostname: end.hostname,
+    port: end.port,
+    path: end.pathname,
+    method: 'POST',
+    data: r.query || req.body
+  };
+
+  console.log(options);
+
+  //TODO: I'm doing something wrong - it is not making post request properly
+  //var search = http.request(options, function (apiResponse) {
+  var search = http.get(endpoint + '?' + r.query + '&wt=json', function (apiResponse) {
+    res.writeHead(apiResponse.statusCode, {'Content-Type': apiResponse.headers['content-type']});
+    apiResponse.on("data", function (chunk) {
+      res.write(chunk);
+    });
+    apiResponse.on("end", function (chunk) {
+      res.end();
+    });
+  }).on('error', function (err) {
+      res.send(err.status || 500, {error: err.message});
+      console.log("Got error: " + err.message);
     });
 });
 
