@@ -16,8 +16,9 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       this.api.trigger('api-response', response);
     },
     fail: function( jqXHR, textStatus, errorThrown ) {
-      console.warn('API call failed:', JSON.stringify(this.request.url()));
-      this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
+      console.warn('API call failed:', JSON.stringify(this.request.url()), jqXHR);
+      if (this.api)
+        this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
     },
     initialize: function() {
       this.always = _.bind(function() {this.outstandingRequests--;}, this);
@@ -60,9 +61,9 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     u = u.replace(/\/\/+/, '/');
 
     var opts = {
-      type: 'POST',
+      type: 'GET', //TODO: fix - we'll need to sent data in POST
       url: u,
-      data: query ? query.toJSON() : {},
+      data: query ? query.url() : {},
       dataType: 'json',
       cache: false,
       headers: {"X-BB-Api-Client-Version": this.clientVersion},

@@ -4,7 +4,7 @@
  * This is for interactive testing of UI widgets. You can load different modules
  * and attach them to DOM like so:
  *
- * http://localhost:8000/test/test-widgets.html?top-region-left=js/widgets/api_query/widget&top-region-right=js/widgets/api_response/widget
+ * http://localhost:8000/test/test-widgets.html?top-region-left=js/widgets/api_query/widget&top-region-right=js/widgets/api_request/widget&middle-region-left=js/widgets/api_response/widget
  *
  * Each widget must:
  *   - be instantiable without parameters
@@ -14,8 +14,8 @@
  *
  */
 
-require(['js/components/beehive', 'js/services/pubsub',
-  'jquery', 'underscore'], function(BeeHive, PubSub, $, _) {
+require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_mediator', 'js/services/api',
+  'jquery', 'underscore'], function(BeeHive, PubSub, QueryMediator, Api, $, _) {
 
   var d = window.location.search.substring(1);
 
@@ -25,6 +25,12 @@ require(['js/components/beehive', 'js/services/pubsub',
 
   var beehive = new BeeHive();
   beehive.addService('PubSub', new PubSub());
+  beehive.addService('Api', new Api());
+  var queryMediator = new QueryMediator();
+  queryMediator.activate(beehive);
+  // debugging info to console
+  beehive.Services.get('PubSub').on('all', function() {console.log('[all:PubSub]', arguments[0], arguments[1].url(), _.toArray(arguments).slice(2))});
+  beehive.Services.get('Api').on('all', function() {console.log('[all:Api]', arguments[0], _.toArray(arguments).slice(1))});
 
   var components = {};
   _.each(d.split('&'), function(element, index, list) {

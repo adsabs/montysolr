@@ -1,7 +1,7 @@
 var express = require('express');
 var http = require('http');
 var url = require('url');
-var search_re = /\/1\/search/;
+var search_re = /\/1\/search$/;
 var app = express();
 
 var API_ENDPOINT = process.env.API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
@@ -15,6 +15,9 @@ var API_ENDPOINT = process.env.API_ENDPOINT || "http://adswhy.cfa.harvard.edu:90
 app.use(app.router);
 
 
+app.use(express.json());       // to support JSON-encoded bodies
+app.use(express.urlencoded()); // to support URL-encoded bodies
+
 // log requests
 app.use(express.logger('dev'));
 
@@ -25,8 +28,9 @@ app.use(express.logger('dev'));
 app.use('/api', function (req, res, next) {
   var r = url.parse(req.url);
   var endpoint = API_ENDPOINT;
+  var end = url.parse(API_ENDPOINT);
 
-  //console.log(r);
+  console.log(req.body, r);
 
   if (r.pathname.match(search_re)) {
     // optionally swith endpoints
@@ -36,8 +40,19 @@ app.use('/api', function (req, res, next) {
     return;
   }
 
+  var options = {
+    hostname: end.hostname,
+    port: end.port,
+    path: end.pathname,
+    method: 'POST',
+    data: r.query || req.body
+  };
 
-  var search = http.get(endpoint + '?' + r.query, function (apiResponse) {
+  console.log(options);
+
+  //TODO: I'm doing something wrong - it is not making post request properly
+  //var search = http.request(options, function (apiResponse) {
+  var search = http.get(endpoint + '?' + r.query + '&wt=json', function (apiResponse) {
     res.writeHead(apiResponse.statusCode, {'Content-Type': apiResponse.headers['content-type']});
     apiResponse.on("data", function (chunk) {
       res.write(chunk);

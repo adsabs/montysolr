@@ -105,15 +105,6 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         }
       },
 
-      /**
-       * Called by the UI View when 'Run' is clicked; you can override
-       * the method to provide your own impl
-       *
-       * @param model
-       */
-      onRun: function(model) {
-        // do nothing
-      },
 
       /**
        * The methods below are only working if you activate the widget and
@@ -133,8 +124,21 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        */
       onAllPubSub: function() {
         var event = arguments[0];
-        if (event == PubSubEvents.DELIVERING_RESPONSE) {
+        if (event.indexOf(PubSubEvents.DELIVERING_RESPONSE) > -1) {
+          console.log('[debug:ApiResponseWidget]', arguments[0]);
           this.onLoad(arguments[1]);
+        }
+      },
+
+      /**
+       * Called by the UI View when 'Run' is clicked; you can override
+       * the method to provide your own impl
+       *
+       * @param model
+       */
+      onRun: function(model) {
+        if (this.pubsub) {
+          this.pubsub.publish(this.pubsub.DELIVERING_RESPONSE, model.R);
         }
       }
 

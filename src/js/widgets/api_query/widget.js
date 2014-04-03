@@ -100,7 +100,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
           apiQuery = new ApiQuery(); // empty
         }
         this.collection = new KeyValueCollection(this.getData(apiQuery));
-        this.view = new WidgetView({collection: this.collection, model: new KeyValue({initialValue: apiQuery.url()})});
+        this.view = new WidgetView({collection: this.collection, model: new KeyValue({initialValue: apiQuery.url() || 'q=test'})});
         this.listenTo(this.view, 'all', this.onAll);
         return this;
       },
@@ -121,15 +121,6 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         }
       },
 
-      /**
-       * Called by the UI View when 'Run' is clicked; you can override
-       * the method to provide your own impl
-       *
-       * @param model
-       */
-      onRun: function(model) {
-        // do nothing
-      },
 
       /**
        * This is the central function - listening to all events
@@ -201,8 +192,21 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
       onAllPubSub: function() {
         var event = arguments[0];
         if (event == PubSubEvents.NEW_QUERY || event == PubSubEvents.INVITING_REQUEST) {
+          console.log('[debug:ApiQueryWidget]', arguments[0]);
           //this.onLoad(arguments[1]);
           this.view.updateInputBox(arguments[1].url()); // update the input
+        }
+      },
+
+      /**
+       * Called by the UI View when 'Run' is clicked; you can override
+       * the method to provide your own impl
+       *
+       * @param ApiQuery
+       */
+      onRun: function(apiQuery) {
+        if (this.pubsub) {
+          this.pubsub.publish(this.pubsub.NEW_QUERY, apiQuery);
         }
       }
 

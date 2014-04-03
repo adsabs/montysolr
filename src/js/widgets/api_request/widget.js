@@ -154,11 +154,11 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         }
 
         var models = [];
-        var vals = {target: '', query: '', sender: ''};
+        var vals = {target: 'search', query: '', sender: ''};
         _.each(_.pairs(vals), function(element, index, list) {
           var k = element[0];
           var o = {key: k, value: v};
-          if (apiRequest.has(k)) {
+          if (apiRequest.has(k) && apiRequest.get(k)) {
             var v = apiRequest.get(k);
             if (_.isArray(v)) {
               o.value = v.join('|');
@@ -192,8 +192,15 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
       onAllPubSub: function() {
         var event = arguments[0];
         if (event == PubSubEvents.DELIVERING_REQUEST) {
+          console.log('[debug:ApiRequestWidget]', arguments[0]);
           this.onLoad(arguments[1]);
-          this.view.updateResultsText(arguments[1].url()); // update the input box
+          this.view.updateResultsText(arguments[1].url());
+        }
+        else if (event == PubSubEvents.INVITING_REQUEST) {
+          console.log('[debug:ApiRequestWidget]', arguments[0]);
+          var r = new ApiRequest({query: arguments[1], target: 'search'});
+          this.onLoad(r);
+          this.view.updateResultsText(r.url());
         }
       },
 
@@ -204,7 +211,9 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        * @param model
        */
       onRun: function(apiRequest) {
-        // do nothing
+        if (this.pubsub) {
+          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, apiRequest);
+        }
       }
 
     });
