@@ -13,7 +13,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
     beforeEach(function(done) {
       this.server = sinon.fakeServer.create();
       this.server.autoRespond = true;
-      this.server.respondWith("/api/1/search",
+      this.server.respondWith(/\/api\/1\/search.*/,
         [200, { "Content-Type": "application/json" }, validResponse]);
 
       beehive = new BeeHive();

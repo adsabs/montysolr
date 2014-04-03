@@ -9,11 +9,11 @@ define(['jquery', 'underscore',
 
     beforeEach(function() {
       this.server = sinon.fakeServer.create();
-      this.server.respondWith("/api/1/search",
+      this.server.respondWith(/\/api\/1\/search.*/,
         [200, { "Content-Type": "application/json" }, validResponse]);
-      this.server.respondWith("/api/1/parseerror",
+      this.server.respondWith(/\/api\/1\/parseerror.*/,
         [200, { "Content-Type": "application/json" }, validResponse.substring(2)]);
-      this.server.respondWith("/api/1/error",
+      this.server.respondWith(/\/api\/1\/error.*/,
         [500, { "Content-Type": "application/json" }, validResponse.substring(2)]);
       //sinon.stub($, 'ajax').yieldsTo('done', apiResponseOK);
     });
