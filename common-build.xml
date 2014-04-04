@@ -40,6 +40,7 @@
 	<property file="${user.home}/build.properties"/>
 	<property file="${basedir}/build.properties"/>
 	<property file="${common.dir}/build.properties"/>
+	<property name="montysolr.dependencies.dir" location="${common.dir}/build/solrjars-extracted" />
 
 	<tstamp>
 		<format property="current.year" pattern="yyyy"/>
@@ -249,18 +250,13 @@
 			<include name = "**/*.jar" />
 		</fileset>
 		<!-- lucene/solr jars -->
-		<fileset dir="${common.dir}/build/solr-download">
-			<include name = "**/dist/**/*.jar" />
-			<include name = "**/example/start.jar" />
+		<fileset dir="${common.dir}/build">
+			<include name = "*solrjars-extracted/*.jar" />
 		</fileset>
 		<!-- montysolr lib jars -->
 		<fileset dir="${common.dir}/lib">
 			<include name = "**/*.jar" />
 		</fileset>
-		<!-- location of JCC classes, found only when imported from main build.xml -->
-		<pathelement location="${jcc_egg}/jcc/classes" />
-		<!-- location of JCC classes, from the generated build.properties -->
-		<pathelement location="${prop.jcc_egg}/jcc/classes" />
 	</path>
 
 	<path id="common.demo.classpath">
@@ -276,15 +272,10 @@
 
 		<!-- these classes cannot be found in solr/lucene jars, they are needed
 	                 for proper compilation of unittests -->
+		<fileset dir="${common.dir}/build">
+      <include name="solrjars-extracted/test-framework/**.jar" />
+    </fileset>
 
-		<dirset dir="${common.dir}/build/solr-download">
-			<include name = "**/solr/build/solr-test-framework/classes/java"/>
-		</dirset>
-
-		<dirset dir="${common.dir}/build/solr-download">
-			<include name = "**/lucene/build/codecs/classes/java"/>
-			<include name = "**/lucene/build/test-framework/classes/java"/>
-		</dirset>
 		<path refid="common.classpath"/>
 	</path>
 
@@ -424,16 +415,19 @@
 
 	<target name="compile-core" depends="init"
           description="Compiles core classes">
+		<!-- deactivate: as we have everything in contribs
 		<compile
       srcdir="${src.dir}"
       destdir="${build.dir}/classes/java">
 			<classpath refid="classpath"/>
 		</compile>
+		-->
 
 		<!-- Copy the resources folder (if existent) -->
 		<copy todir="${build.dir}/classes/java">
 			<fileset dir="${src.dir}/../resources" erroronmissingdir="no"/>
 		</copy>
+		
 	</target>
 
 	<target name="compile" depends="compile-core">

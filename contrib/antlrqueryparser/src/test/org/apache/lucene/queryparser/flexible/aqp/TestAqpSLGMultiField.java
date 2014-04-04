@@ -24,19 +24,13 @@ import java.util.Map;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.EmptyTokenizer;
 import org.apache.lucene.analysis.MockAnalyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.Analyzer.PerFieldReuseStrategy;
-import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil;
-import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
-import org.apache.lucene.queryparser.flexible.standard.TestQPHelper;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
@@ -75,7 +69,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
       throws Exception {
     String[] fields = { "b", "t" };
     Occur occur[] = { Occur.SHOULD, Occur.SHOULD };
-    TestQPHelper.QPTestAnalyzer a = new TestQPHelper.QPTestAnalyzer();
+    QPTestAnalyzer a = new QPTestAnalyzer();
     AqpQueryParser mfqp = getParser();
     mfqp.setMultiFields(fields);
     mfqp.setAnalyzer(a);
@@ -216,7 +210,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     }
 
     // check also with stop words for this static form (qtxts[], fields[]).
-    TestQPHelper.QPTestAnalyzer stopA = new TestQPHelper.QPTestAnalyzer();
+    QPTestAnalyzer stopA = new QPTestAnalyzer();
     qp.setAnalyzer(stopA);
 
     String[] queries6 = { "((+stop))", "+((stop))" };

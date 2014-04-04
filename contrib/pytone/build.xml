@@ -33,6 +33,17 @@
 	  ==================================================================
 	     Initialization & maintenance
 	  ==================================================================
+	  
+	  TODO: include this (was removed from contrib.xml)
+	  <path id="base.classpath">
+	   <pathelement location="${prop.jcc_egg}/jcc/classes" />
+	  </path>
+	  
+	  (this was inside contrib.xml, definition of common.classpath)
+	  <!- - location of JCC classes, found only when imported from contrib/pytone build.xml - ->
+    <pathelement location="${jcc_egg}/jcc/classes" />
+    <!- - location of JCC classes, from the generated build.properties - ->
+    <pathelement location="${prop.jcc_egg}/jcc/classes" />
 	  -->
 	
 	<!--set default PYTHONPATH if the environemnt is empty -->
@@ -159,40 +170,7 @@
         <move file="${dist.dir}/EGG-INFO" tofile="${dist.dir}/${app.solr.name}.egg-info" />
     </target>
 	
-	<target name="try-lucene-jars" depends="check-solr-location" >
-		<!-- since on old ant we cannot ignore it -->
-		<mkdir dir="${solr.real.location}/dist" />
-
-		<path id="montysolr.classpath.testing">
-			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
-		</path>
-
-		<condition property="lucene.jars.exist" value="true">
-			<and>
-				<available classname="org.apache.lucene.spatial.tier.InvalidGeoException" classpath="${toString:montysolr.classpath.testing}" />
-			</and>
-		</condition>
-
-		<echo message="Are lucene jars available? ${lucene.jars.exist}" level="verbose" />
-	</target>
-
-	<target name="check-lucene-jars" depends="try-lucene-jars" unless="lucene.jars.exist">
-		<delete dir="${solr.real.location}/dist/montysolr-extracted" />
-		<mkdir dir="${solr.real.location}/dist/montysolr-extracted" />
-		<unzip dest="${solr.real.location}/dist/montysolr-extracted" overwrite="yes">
-			<fileset dir="${solr.real.location}/dist">
-				<include name="apache-solr*.war" />
-			</fileset>
-		</unzip>
-		<move todir="${solr.real.location}/dist/montysolr-extracted">
-			<fileset dir="${solr.real.location}/dist/montysolr-extracted/WEB-INF/lib">
-				<include name="**/**.jar"/>
-			</fileset>
-		</move>
-		<delete dir="${solr.real.location}/dist/montysolr-extracted" includeemptydirs="true">
-			<exclude name="**/**.jar"/>
-		</delete>
-	</target>
+	
 	
 	<target name="set-jar-paths">
 			<!--

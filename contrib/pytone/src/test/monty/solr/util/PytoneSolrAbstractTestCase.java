@@ -23,7 +23,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 
-public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
+public abstract class PytoneSolrAbstractTestCase extends AbstractSolrTestCase {
 
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {
@@ -58,7 +58,8 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	 */
 	public static void envInit() throws Exception {
 		//System.setProperty("storeAll", "true");
-		
+		PytoneSolrSetup.init("montysolr.java_bridge.SimpleBridge", 
+				MontySolrSetup.getMontySolrHome() + "/src/python");
 	}
 	
 	// normally we set this to point to default solr/example config

@@ -76,9 +76,9 @@
 		<fileset dir="${common.dir}/build/solr-download">
 			<include name="**/antlr-runtime*.jar"/>
 		</fileset>
-		<fileset dir="${prop.solr.home}">
-			<include name="solr/dist/**/lucene-queryparser*.jar"/>
-          <include name="lucene/build/sandbox/**.jar"/>
+		<fileset dir="${montysolr.dependencies.dir}">
+			<include name="**/lucene-queryparser*.jar"/>
+      <include name="**/lucene-sandbox*.jar"/>
     </fileset>
 	</path>
 
@@ -208,7 +208,7 @@
 	</target>
 
 	
-  <target name="test" depends="default,compile-all,compile-prerequisites" >
+  <target name="test" depends="default,compile-all" >
       <antcall target="common.test" inheritRefs="true"/>
   </target>
 
