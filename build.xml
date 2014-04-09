@@ -176,10 +176,12 @@ montysolr.version=${montysolr.version}
     
     <target name="build-contrib" >
       
-    	<ant target="build-all"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
-    	<ant target="build-all"  dir="${common.dir}/contrib/newseman"  inheritall="false" />
-    	<ant target="build-all"  dir="${common.dir}/contrib/adsabs"  inheritall="false" />
-  		<ant target="build-all"  dir="${common.dir}/contrib/examples"  inheritall="false" />
+    	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+    	<!--
+    	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/newseman"  inheritall="false" />
+    	-->
+    	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/adsabs"  inheritall="false" />
+  		<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/examples"  inheritall="false" />
     	
     	<!--
       <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
@@ -263,17 +265,21 @@ montysolr.version=${montysolr.version}
 	<target name="get-solr-usign-svn">
 		<mkdir dir="${solr.home}"/>
 		
-		<apply executable="svn" parallel="false" failonerror="true" failifexecutionfails="true" dir="${solr.home}">
-      <arg line="update --force" />
-			<arg line="checkout ${solr.svn}" />
-    </apply>
-	  
 		<!--
-		<exec executable="${python}" failifexecutionfails="true" dir="${solr.home}">
+		<exec executable="svn" failonerror="true" failifexecutionfails="true" dir="${solr.home}">
+      <arg line="update" />
+    </exec>
+		
+		<exec executable="svn" failonerror="true" failifexecutionfails="true" dir="${solr.home}">
+      <arg value="checkout" />
+			<arg value="${solr.svn}" />
+    </exec>
+		-->
+	  
+		<exec executable="python" failifexecutionfails="true" dir="${solr.home}">
 			<arg value="-c"/>
 			<arg value="import os;'${solr.version}'.lower().__contains__('svn') and (os.path.isdir('.svn') and os.system('svn update - -force') or os.system('svn checkout ${solr.svn} .'))"/>
 		</exec>
-		-->
 		
 		<antcall target="check-solr-location" />
 	</target>

@@ -367,7 +367,7 @@ COLON   : ':' ;  //this must NOT be fragment
 
 PLUS  : '+' ;
 
-MINUS : ('-'|'–');
+MINUS : ('-' | '\u2014'); // |'–'
 
 STAR  : '*' ;
 

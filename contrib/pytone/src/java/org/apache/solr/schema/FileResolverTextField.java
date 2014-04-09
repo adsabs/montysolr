@@ -1,8 +1,5 @@
-
-
 package org.apache.solr.schema;
 
-import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexableField;
 
 import java.util.HashMap;
