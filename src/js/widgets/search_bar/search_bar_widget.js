@@ -1,4 +1,4 @@
-define(['marionette', 'hbs!./templates/search_bar_template', 'js/components/api_query', 'bootstrap'], function(Marionette, SearchBarTemplate, ApiQuery) {
+define(['marionette', 'hbs!./templates/search_bar_template', 'js/components/api_query'], function(Marionette, SearchBarTemplate, ApiQuery) {
 
 
   var SearchBarView = Marionette.ItemView.extend({
@@ -47,21 +47,15 @@ define(['marionette', 'hbs!./templates/search_bar_template', 'js/components/api_
   var SearchBarWidget = Marionette.Controller.extend({
 
     initialize: function() {
-      _.bindAll(this, "storeQuery");
       this.view = new SearchBarView();
+      this.currentSystemQuery = new ApiQuery(); // empty
     },
 
     activate: function(beehive) {
 
       this.pubsub = beehive.Services.get('PubSub');
-      this.key = this.pubsub.getPubSubKey();
 
-      this.afterActivate();
-
-    },
-
-    afterActivate: function() {
-
+      _.bindAll(this, "storeQuery");
       this.pubsub.subscribe(this.pubsub.NEW_QUERY, this.storeQuery)
 
       this.listenTo(this.view, "new_query", function(q) {
@@ -78,8 +72,6 @@ define(['marionette', 'hbs!./templates/search_bar_template', 'js/components/api_
       this.currentSystemQuery = apiQuery;  
     },
 
-
-
     render: function() {
       return this.view.render().el;
     },
@@ -87,14 +79,12 @@ define(['marionette', 'hbs!./templates/search_bar_template', 'js/components/api_
     submitNewQuery: function(query) {
        var queryToSend = this.currentSystemQuery;
        queryToSend.set("q", query);
-      this.pubsub.publish(this.pubsub.NEW_QUERY, queryToSend)
+      this.pubsub.publish(this.pubsub.NEW_QUERY, queryToSend);
     }
   })
 
 
-  return SearchBarWidget
+  return SearchBarWidget;
 
 
-
-
-})
+});
