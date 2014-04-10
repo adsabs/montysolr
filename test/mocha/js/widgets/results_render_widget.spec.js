@@ -94,13 +94,9 @@ define(['marionette', 'backbone', 'js/widgets/results_render/results_render_widg
 
         expect(typeof widget.activate).to.equal("function");
 
-        expect(typeof widget.afterActivate).to.equal("function");
-
         expect(typeof widget.close).to.equal("function");
 
         expect(typeof widget.render).to.equal("function");
-
-        expect(typeof widget.activate).to.equal("function");
 
       });
 

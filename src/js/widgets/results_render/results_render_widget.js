@@ -73,15 +73,18 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
       activate: function(beehive) {
 
         this.pubsub = beehive.Services.get('PubSub');
-        this.key = this.pubsub.getPubSubKey();
 
-        this.afterActivate();
+		//bind all callback methods here
+        _.bindAll(this, "requestData", "receiveData");
+
+        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.requestData);
+        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.receiveData);
 
       },
 
       requestData: function(apiQuery) {
 
-        var newQuery = apiQuery;
+        var newQuery = apiQuery.clone();
 
         newQuery.set({
           "hl": "true",
@@ -97,7 +100,7 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       },
 
-      processData: function(apiResponse) {
+      receiveData: function(apiResponse) {
 
         this.collection.reset(apiResponse.toJSON(), {
           parse: true
@@ -105,19 +108,8 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       },
 
-      afterActivate: function() {
-
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.requestData);
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processData);
-
-        //get initial data (not sure if doing this correctly)
-
-
-      },
-
       initialize: function() {
-        //bind all callback methods here
-        _.bindAll(this, "requestData", "processData");
+        
         this.collection = new ListCollection();
         this.view = new ResultsListView({
           collection: this.collection
@@ -138,7 +130,7 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       }
 
-    })
+    });
 
     return ResultsListController;
 
