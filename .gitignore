@@ -19,5 +19,6 @@ bower_components
 src/libs
 test/coverage
 test/reports
+test/mocha/sandbox.spec.js
 
 .idea
