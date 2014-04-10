@@ -18,7 +18,10 @@ dev setup - linux
 If you don't have node.js, do this (or equivalent of your distribution):
 
 ```bash
-  $ sudo apt-get install node npm grunt-cli
+  $ sudo apt-get install node npm
+  $ sudo npm install -g grunt-cli
+  # if you don't have 'node' but 'nodejs' (on DEBIAN), you want to do:
+  $ sudo apt-get install nodejs-legacy
 ```
 
 Now (inside the project), run:

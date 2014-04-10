@@ -2,7 +2,6 @@
   "name": "bumblebee",
   "version": "0.1.0",
   "devDependencies": {
-    "bbb": "~0.2.0",
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.6.0",
     "grunt-contrib-cssmin": "~0.8.0",
@@ -11,11 +10,6 @@
     "grunt-contrib-compress": "~0.5.2",
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-processhtml": "~0.2.0",
-    "karma-jasmine": "~0.1.0",
-    "karma-mocha": "~0.1.0",
-    "karma-qunit": "~0.1.0",
-    "karma-phantomjs-launcher": "~0.1.0",
-    "karma-coverage": "~0.1.0",
     "almond": "~0.2.9",
     "grunt-bower-task": "~0.3.4",
     "grunt-contrib-requirejs": "~0.4.1",
@@ -26,8 +20,9 @@
     "grunt-env": "~0.4.1",
     "grunt-mocha-phantomjs": "~0.4.2",
     "grunt-include-bootstrap": "~0.1.1",
-        "grunt-contrib-less": "~0.11.0",
-        "grunt-install-dependencies": "~0.1.0"
+    "grunt-contrib-less": "~0.11.0",
+    "grunt-install-dependencies": "~0.1.0",
+    "grunt-bbb-requirejs": "0.1.0-alpha.8"
   },
   "peerDependencies": {
     "bower": "*",
@@ -36,5 +31,11 @@
   },
   "scripts": {
     "test": "grunt test coveralls"
+  },
+  "dependencies": {
+    "lodash": "~2.4.1",
+    "chalk": "~0.4.0",
+    "maxmin": "~0.1.0",
+    "less": "~1.7.0"
   }
 }
