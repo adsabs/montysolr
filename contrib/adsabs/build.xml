@@ -97,6 +97,16 @@
 	<target name="test" depends="clean,compile" >
         <antcall target="common.test" inheritRefs="true"/>
     </target>
+
+    <target name="quick-test" >
+        <compile srcdir="src/java" 
+            destdir="${build.dir}/classes/java">
+            <classpath refid="compile.classpath"/>
+            <classpath refid="additional.classpath"/>
+            <include name="**/**.java"/>
+        </compile>
+        <antcall target="common.test" inheritRefs="true"/>
+    </target>
     
     <target name="compile-prerequisites" depends="">
         

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import monty.solr.jni.MontySolrVM;
 import monty.solr.jni.PythonCall;
@@ -35,12 +36,15 @@ import org.apache.solr.common.SolrException.ErrorCode;
  * Input can contain several author names, but these need to be separated
  * by semicolon
  */
+
+
 public final class PythonicAuthorNormalizerFilter extends TokenFilter implements PythonCall {
 
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
   private String pythonFunctionName = "parse_human_name";
   private List<String> buffer = new ArrayList<String>();
+  private Pattern multiSpace = Pattern.compile("\\s\\s+");
   
   /**
    * @param input
@@ -60,8 +64,14 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter implements
     if (!input.incrementToken()) return false;
     
     String original = termAtt.toString();
-    
+    original = multiSpace.matcher(original).replaceAll(" ");
+
+    String newIndividual = null; 
+
     for (String individual: original.split(";")) {
+      individual = individual.trim();
+      newIndividual = individual;
+
     	PythonMessage message = MontySolrVM.INSTANCE
 	      .createMessage(pythonFunctionName)
 	      .setSender("PythonicAuthorNormalizerFilter")
@@ -74,7 +84,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter implements
     		@SuppressWarnings("unchecked")
         HashMap<String, String> parsedName = (HashMap<String,String>) result;
     		if (parsedName.containsKey("Last")) {
-    			buffer.add(parsedName.get("Last") + "," 
+    			newIndividual = (parsedName.get("Last") + "," 
     					+ (parsedName.containsKey("First") ? " " + parsedName.get("First") : "")
     					+ (parsedName.containsKey("Middle") ? " " + parsedName.get("Middle") : "")
     					);
@@ -85,16 +95,45 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter implements
     				throw new SolrException(ErrorCode.BAD_REQUEST, "We cannot reliably parse author name: " + individual);
     			}
     			else if (parsedName.containsKey("First")) {
-    				buffer.add(parsedName.get("First") + ","); // we treat it as surname
+    				newIndividual = (parsedName.get("First") + ","); // we treat it as surname
     			}
     			else {
-    				//buffer.add(""); // else it was parsed as title and will be ignored
+    				newIndividual = null; // else it was parsed as title and will be ignored
     			}
-    			
     		}
+
+        String ignSpaceIndividual = individual.replaceAll(" ", "");
+        String ignNewSpaceIndividual = newIndividual != null ? newIndividual.replaceAll(" ", "") : "";
+        
+        if (newIndividual == null) {
+          // we should ignore this input completely
+        }
+        else if (newIndividual.equals(individual) 
+          || newIndividual.equals(individual + ",") 
+          || ignNewSpaceIndividual.equals(ignSpaceIndividual) 
+          || ignNewSpaceIndividual.equals(ignSpaceIndividual + ",") 
+          ) {
+          buffer.add(newIndividual);  // no modifications, just add original
+        }
+        else { // some modifications happened
+          
+          // add original  
+          if (individual.indexOf(",") == -1) {
+            buffer.add(individual + ","); 
+          }
+          else {
+            buffer.add(individual);
+          }
+
+          if (newIndividual != null) {
+            buffer.add(newIndividual); // add modified version  
+          }
+          
+        }
+
     	}
     	else {
-    		buffer.add(original);
+    		buffer.add(individual);
     	}
     }
     

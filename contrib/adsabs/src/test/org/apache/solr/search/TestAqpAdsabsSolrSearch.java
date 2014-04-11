@@ -390,7 +390,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		assertQueryEquals(req("defType", "aqp", "q","one ^two, j k"), 
 				"+all:one +spanPosRange(spanOr([author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), EmptySpanQuery(author:/two, j[^\\s]+ k/), EmptySpanQuery(author:/two, j[^\\s]+ k .*/), author:two, j, author:two,]), 0, 1)",
 				BooleanQuery.class);
-		assertQueryEquals(req("defType", "aqp", "q","one \"^author phrase\"", "qf", "title author"),
+		assertQueryEquals(req("defType", "aqp", "q","one \"^phrase, author\"", "qf", "title author"),
 				"+(((author:one, author:one,*)) | title:one) +spanPosRange(spanOr([author:phrase, author, SpanMultiTermQueryWrapper(author:phrase, author *), author:phrase, a, SpanMultiTermQueryWrapper(author:phrase, a *), author:phrase,]), 0, 1)",
 				BooleanQuery.class);
 		

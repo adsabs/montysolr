@@ -361,8 +361,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"author:gopal krishna, author:gopal krishna,*",
         		"//*[@numFound='3']",
     		"\"Gopal Krishna\"",
-        		"author:krishna, gopal author:krishna, gopal * author:krishna, g author:krishna, g * author:krishna,",
-        		"//*[@numFound='0']"
+        		"gopal krishna, author:gopal krishna,* author:krishna, gopal author:krishna, gopal * author:krishna, gopal * author:krishna, g author:krishna, g * author:krishna, g * author:krishna, author:krishna,*",
+        		"//*[@numFound='3']"
         		);
   	
   	//#487 - these author names should parse the same; Maestro, V was
@@ -373,7 +373,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"author:maestro, v author:maestro, v* author:maestro,",
         		"//*[@numFound='0']",
     		"V\\ Maestro", 
-        		"author:maestro, v author:maestro, v* author:maestro,",
+            "author:v maestro, author:v maestro,* author:maestro, v author:maestro, v* author:maestro, v * author:maestro, author:maestro,*",
+        		//"author:maestro, v author:maestro, v* author:maestro,",
         		"//*[@numFound='0']"
         		);
   	testAuthorQuery(
@@ -381,7 +382,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"author:boyajian, t author:boyajian, t* author:boyajian,",
         		"//*[@numFound='0']",
     		"T\\ Boyajian", 
-        		"author:boyajian, t author:boyajian, t* author:boyajian,",
+        		"author:t boyajian, author:t boyajian,* author:boyajian, t author:boyajian, t* author:boyajian, t * author:boyajian, author:boyajian,*",
         		"//*[@numFound='0']"
         		);
   	
@@ -395,9 +396,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		);
   	
   	
-    // 'xxx' will be removed from the author
+    // 'xxx' will be removed from the author (at least in the modified version)
 	  assertQueryEquals(req("defType", "aqp", "q", "author:\"accomazzi, alberto, xxx.\""), 
-        "author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,",
+        "author:accomazzi, alberto, xxx author:accomazzi, alberto, xxx * author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, alberto, xxx * author:accomazzi, a xxx author:accomazzi, a xxx * author:accomazzi, a xxx * author:accomazzi, alberto, x author:accomazzi, alberto, x * author:accomazzi, alberto, x * author:accomazzi, a x author:accomazzi, a x * author:accomazzi, a x * author:accomazzi, alberto, author:accomazzi, alberto, * author:accomazzi, a author:accomazzi, a * author:accomazzi, author:accomazzi, alberto author:accomazzi, alberto *",
         BooleanQuery.class);
     
     
@@ -432,7 +433,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"author:dall oglio, author:dall oglio,*",
         		"//*[@numFound='0']",
     		"Antonella\\ Dall\\'Oglio",
-        		"author:dall oglio, antonella author:dall oglio, antonella * author:dall oglio, a author:dall oglio, a * author:dall oglio,",
+        		"author:antonella dall oglio, author:antonella dall oglio,* author:dall oglio, antonella author:dall oglio, antonella * author:dall oglio, antonella * author:dall oglio, a author:dall oglio, a * author:dall oglio, a * author:dall oglio, author:dall oglio,*",
         		"//*[@numFound='0']"
         		);
   	
@@ -447,7 +448,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     //"author:kao, p ing tzu author:kao, p ing tzu * author:kao, p i tzu author:kao, p i tzu * author:kao, p ing t author:kao, p ing t * author:kao, p i t author:kao, p i t * author:kao, p author:kao,",
   	testAuthorQuery(
     		"\"P'ING-TZU KAO\"",
-    		    "author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p author:kao,",
+            // before we were not returning original user input from pythonic normalizer
+    		    //"author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p author:kao,",
+            "author:p ing tzu kao, author:p ing tzu kao,* author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p ing tzu * author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p i tzu * author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p ing t * author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p i t * author:kao, p author:kao, p * author:kao, author:kao,*",
         		"//*[@numFound='0']",
     		"\"Kao, P'ing-Tzu\"",
         		"author:kao, p ing tzu author:kao, p ing tzu * author:/kao, p[^\\s]+ ing tzu/ author:/kao, p[^\\s]+ ing tzu .*/ author:kao, p i tzu author:kao, p i tzu * author:/kao, p[^\\s]+ i tzu/ author:/kao, p[^\\s]+ i tzu .*/ author:kao, p ing t author:kao, p ing t * author:/kao, p[^\\s]+ ing t/ author:/kao, p[^\\s]+ ing t .*/ author:kao, p i t author:kao, p i t * author:/kao, p[^\\s]+ i t/ author:/kao, p[^\\s]+ i t .*/ author:kao, p author:kao,",
@@ -533,9 +536,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                    // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                    // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer  
          "\"Pinilla Alonso\"", 
-         				    // we can't do magic here and i'd like to avoid generating all possible combinations
-         						"author:alonso, pinilla author:alonso, pinilla * author:alonso, p author:alonso, p * author:alonso,",
-                    "//*[@numFound='0']",
+         						"author:pinilla alonso, author:pinilla alonso,* author:alonso, pinilla author:alonso, pinilla * author:alonso, pinilla * author:alonso, p author:alonso, p * author:alonso, p * author:alonso, author:alonso,*",
+                    "//*[@numFound='6']",
                     // Pinilla-Alonso numFound=6
                     // 210	Pinilla-Alonso         211	Pinilla-Alonso,        212	Pinilla-Alonso, B      
                     // 213	Pinilla-Alonso, Brava  214	Pinilla-Alonso, Borat  215	Pinilla-Alonso, Amer
