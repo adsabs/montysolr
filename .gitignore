@@ -22,3 +22,5 @@ test/reports
 test/mocha/sandbox.spec.js
 
 .idea
+
+.vagrant

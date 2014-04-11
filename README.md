@@ -11,6 +11,15 @@ are wonderful gifts to humanity, IT IS OK TO MAKE MISTAKES. Please let no
 Things may change dramatically, be prepared.
 
 
+dev setup - vagrant (virtualbox)
+=================
+
+Port 8000 is forwarded directly to the host (8000:8000). This directory is synced to /vagrant/ on the guest.
+
+1. `vagrant up`
+1. `vagrant ssh`
+1. `cd /vagrant && grunt server`
+
 
 dev setup - linux
 =================
