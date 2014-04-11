@@ -27,9 +27,10 @@ dev setup - linux
 If you don't have node.js, do this (or equivalent of your distribution):
 
 ```bash
-  $ sudo apt-get install node npm
+  $ sudo apt-get install node npm phantomjs
   $ sudo npm install -g grunt-cli
-  # if you don't have 'node' but 'nodejs' (on DEBIAN), you want to do:
+
+  # if you don't have 'node' but 'nodejs' (on DEBIAN), you also need:
   $ sudo apt-get install nodejs-legacy
 ```
 
@@ -46,19 +47,30 @@ Now (inside the project), run:
 dev setup - mac OS X
 ====================
 
-If you have mac port installed, this should work:
+If you have mac port:
 
 ```bash
-  $ sudo port install nodejs nodejs-devel npm
+  $ sudo port install nodejs npm phantomjs
+  $ sudo npm install -g grunt-cli
+  $ npm install
+  $ grunt setup
 ```
 
-(grunt is not available from mac ports, see below)
-Inside the project's working directory, run:
+dev setup - windows
+===================
+
+Yes, you can develop even on Windows! ;-)
+
+1. install http://msysgit.github.io/
+2. install node.js http://nodejs.org/download/
+3. install http://phantomjs.org/download.html
+4. open Git Bash from Windows Start 
 
 ```bash
-  $ npm install grunt-cli
-  $ npm install
-  $ node_modules/grunt-cli/bin/grunt setup
+   $ cd bumblebee 
+   $ npm install -g grunt-cli 
+   $ npm install 
+   $ grunt setup 
 ```
 
 And you are ready to go!
@@ -74,22 +86,34 @@ Set your editor to use spaces instead of tabs (width: 2)
   $ open http://localhost:8000
 ```
 
-
-To help you started, explore two demo applications: ./src/example.html (./src/js/apps/example) and 
-./src/todo.html (./src/js/apps/todo)
-
-If you need to change some variables, do this:
-
-```bash
-  $ cp local-config.json.tmp local-config.json
-  $ edit...edit...save
-```
-
-Here, explanation of the config vars:
+If you need to change the way how build works, edit `local-config.js`
 
   * port_development: when running tests, webserver will start on this port [default: 8000]
   * port_development: port for webserver when running code from dist (ie. testing deployment) [default: 5000]
   * api_endpoint: url of the ADS api service, see below for help on setting up a tunnel [default: http://localhost:9000/solr/select]
+
+
+To help you get started, explore these examples: 
+
+  * ./src/example.html (./src/js/apps/example)
+    
+	very stupid application showing use of requirejs to load modules 
+	
+  * ./src/todo.html (./src/js/apps/todo)
+  
+    a complete port of the TODO application from todomvc.com (using requirejs)
+	
+  * for interactive development of widgets
+  
+	 http://localhost:8000/test/test-widgets.html?top-region-left=js/widgets/api_query/widget&top-region-right=js/widgets/api_request/widget&middle-region-left=js/widgets/api_response/widget
+	 
+	 notice that each components is identified by its path (without .js suffix) eg. `top-region=js/widgets/api_query/widget`
+  
+  * finally, the complete test suite of the discovery application 
+  
+     http://localhost:8000/test/mocha/discovery.spec.html
+
+
 
 
 Typical dev-cycle
