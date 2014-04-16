@@ -28,21 +28,23 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import monty.solr.jni.MontySolrVM;
-import monty.solr.jni.PythonCall;
-import monty.solr.jni.PythonMessage;
+
+
+
+
 
 import org.apache.commons.io.IOUtils;
-import org.apache.lucene.search.CollectionStatistics;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
@@ -55,8 +57,8 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.update.InvenioDB.BatchOfInvenioIds;
 import org.apache.solr.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,7 +147,7 @@ import org.slf4j.LoggerFactory;
  *  </code>   
  *  
  */
-public class InvenioKeepRecidUpdated extends RequestHandlerBase implements PythonCall {
+public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	
 	public static final Logger log = LoggerFactory
 		.getLogger(InvenioKeepRecidUpdated.class);
@@ -211,7 +213,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	
 	
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) 
-		throws IOException, InterruptedException
+		throws IOException, InterruptedException, SQLException
 			 {
 
 		if (isBusy()) {
@@ -231,17 +233,17 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		
 		long start = System.currentTimeMillis();
 		
-		Map<String, Object> dictData = null;
+		BatchOfInvenioIds invenioData = null;
 		
 		try {
-			dictData = retrieveRecids(prop, req, rsp);
+			invenioData = retrieveRecids(prop, req, rsp);
 		}
 		catch (RuntimeException e) {
 			setBusy(false);
 			throw e;
 		}
 		
-		if (dictData == null) {
+		if (invenioData == null) {
 			setBusy(false);
 			return;
 		}
@@ -249,10 +251,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		req.getContext().put(IKRU_PROPERTIES, prop);
 		
 		if (isAsynchronous()) {
-			runAsynchronously(dictData, req);
+			runAsynchronously(invenioData, req);
 		}
 		else {
-			runSynchronously(dictData, req);
+			runSynchronously(invenioData, req);
 			setBusy(false);
 		}
 		
@@ -280,82 +282,66 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	 * The method that discovers what was changed in Invenio DB
 	 */
 	@SuppressWarnings("unchecked")
-	protected Map<String, Object> retrieveRecids(Properties prop,
-			SolrQueryRequest req,
-            SolrQueryResponse rsp) {
-		
-		HashMap<String, Object> retData = new HashMap<String, Object>();
-		
-		SolrParams params = req.getParams();
-		
-		Integer lastRecid = null;
-		String lastUpdate = null;
-		if (prop.containsKey(LAST_RECID)) {
-			lastRecid = Integer.valueOf(prop.getProperty(LAST_RECID));
-		}
-		if (prop.containsKey(LAST_UPDATE)) {
-			lastUpdate = prop.getProperty(LAST_UPDATE);
-		}
-		
-		Map<String, int[]> dictData;
-		// we'll generate empty records (good just to have a mapping between invenio
-		// and lucene docids; necessary for search operations)
-		if (params.getBool("generate", false)) {
-			Integer max_recid = params.getInt(PARAM_MAX_RECID, 0);
-			if (max_recid == 0 || max_recid < lastRecid) {
-				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
-						"The max_recid parameter missing!");
-			}
-
-			dictData = new HashMap<String, int[]>();
-			int[] a = new int[max_recid - lastRecid];
-			for (int i = 0, ii = lastRecid + 1; ii < max_recid + 1; i++, ii++) {
-				a[i] = ii;
-			}
-			dictData.put("ADDED", a);
-			retData.put(LAST_UPDATE, null);
-			retData.put(LAST_RECID, max_recid);
-			
-		} else {
-			// get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
-			// int }
-			
-			PythonMessage message = MontySolrVM.INSTANCE
-					.createMessage(pythonFunctionName)
-					.setSender(this.getClass().getSimpleName())
-					.setParam("max_records", params.getInt(PARAM_BATCHSIZE))
-					.setParam("request", req)
-					.setParam("response", rsp);
-			
-			if (lastRecid != null) message.setParam(LAST_RECID, lastRecid);
-			if (lastUpdate != null) message.setParam(LAST_UPDATE, lastUpdate);
-			
-			if (lastRecid == null && lastUpdate == null) {
-				message.setParam(LAST_UPDATE, getLastIndexUpdate(req));
-			}
-			
-			log.info("Retrieving changed recs: max_records=" + params.getInt(PARAM_BATCHSIZE) + 
-					" last_recid=" + lastRecid + " last_update=" + lastUpdate);
-			
-			MontySolrVM.INSTANCE.sendMessage(message);
-
-			Object results = message.getResults();
-			if (results == null) {
-				rsp.add("message",
-						"No new/updated/deleted records inside Invenio.");
-				rsp.add("importStatus", "idle");
-				return null;
-			}
-			dictData = (HashMap<String, int[]>) results;
-			retData.put(LAST_UPDATE, (String) message.getParam(LAST_UPDATE));
-			retData.put(LAST_RECID, (Integer) message.getParam(LAST_RECID));
-			
-			log.info("Retrieved: last_update=" + retData.get(LAST_UPDATE) + 
-					" last_recid=" + retData.get(LAST_RECID));
-		}
-		retData.put("dictData", dictData);
-		return retData;
-    }
+	protected BatchOfInvenioIds retrieveRecids(Properties prop,
+	    SolrQueryRequest req,
+	    SolrQueryResponse rsp) throws SQLException {
+	  
+	  
+	  SolrParams params = req.getParams();
+	  
+	  Integer lastRecid = null;
+	  String lastUpdate = null;
+	  if (prop.containsKey(LAST_RECID)) {
+	    lastRecid = Integer.valueOf(prop.getProperty(LAST_RECID));
+	  }
+	  if (prop.containsKey(LAST_UPDATE)) {
+	    lastUpdate = prop.getProperty(LAST_UPDATE);
+	  }
+	  
+	  // we'll generate empty records (good just to have a mapping between invenio
+	  // and lucene docids; necessary for search operations)
+	  if (params.getBool("generate", false)) {
+	    Integer max_recid = params.getInt(PARAM_MAX_RECID, 0);
+	    if (max_recid == 0 || max_recid < lastRecid) {
+	      throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
+	          "The max_recid parameter missing!");
+	    }
+	    
+	    ArrayList<Integer> a = new ArrayList<Integer>(max_recid - lastRecid);
+	    for (int i = 0, ii = lastRecid + 1; ii < max_recid + 1; i++, ii++) {
+	      a.add(ii);
+	    }
+	    return new BatchOfInvenioIds(max_recid, null, a, new ArrayList<Integer>(), new ArrayList<Integer>());
+	    
+	  } else {
+	    
+	    BatchOfInvenioIds results;
+	    
+	    if (lastRecid == null && lastUpdate == null) {
+	      results =  InvenioDB.INSTANCE.getRecidsChanges(-1, params.getInt(PARAM_BATCHSIZE), getLastIndexUpdate(req));
+	    }
+	    else {
+	      results =  InvenioDB.INSTANCE.getRecidsChanges(lastRecid, params.getInt(PARAM_BATCHSIZE), lastUpdate);
+	    }
+	    
+	    log.info("Retrieving changed recs: max_records=" + params.getInt(PARAM_BATCHSIZE) + 
+	        " last_recid=" + lastRecid + " last_update=" + lastUpdate);
+	    
+	    
+	    if (results == null) {
+	      rsp.add("message",
+	          "No new/updated/deleted records inside Invenio.");
+	      rsp.add("importStatus", "idle");
+	      return null;
+	    }
+	    
+	    log.info("Retrieved: last_update=" + results.lastModDate + 
+	        " last_recid=" + results.lastRecid);
+	    
+	    return results;
+	  }
+	  
+	}
 
 	
 	private String getLastIndexUpdate(SolrQueryRequest req) {
@@ -376,10 +362,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	}
 
 	
-	private void runAsynchronously(Map<String, Object> dictData, 
+	private void runAsynchronously(BatchOfInvenioIds invenioData, 
 			SolrQueryRequest req) {
 		
-		final Map<String, Object> dataToProcess = dictData;
+		final BatchOfInvenioIds dataToProcess = invenioData;
 		final SolrQueryRequest localReq = new LocalSolrQueryRequest(req.getCore(), req.getParams());
 		localReq.getContext().put(IKRU_PROPERTIES, req.getContext().get(IKRU_PROPERTIES));
 		
@@ -441,86 +427,84 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	/*
 	 * The main method/logic
 	 */
-	private void runSynchronously(Map<String, Object> data, 
-			SolrQueryRequest req) 
-			throws MalformedURLException, IOException, InterruptedException {
-		
-		
-		log.info("=============================================================================");
-		log.info(data.toString());
-		log.info(req.toString());
-		log.info(req.getParamString());
-		log.info("=============================================================================");
-		
-		SolrParams params = req.getParams();
-		SolrCore core = req.getCore();
-		
-		String importurl = params.get(PARAM_IMPORT, null);
-		String updateurl = params.get(PARAM_UPDATE, null);
-		String deleteurl = params.get(PARAM_DELETE, null);
-		
-		
-		@SuppressWarnings("unchecked")
-		HashMap<String, int[]> dictData = (HashMap<String, int[]>) data.get("dictData");
-		Properties prop = (Properties) req.getContext().get(IKRU_PROPERTIES);
-		
-		if (dictData.containsKey(ADDED) && dictData.get(ADDED).length > 0) {
-			setWorkerMessage("Phase 1/3. Adding records: " + dictData.get(ADDED).length);
-			if (importurl != null) {
-				if (importurl.equals("blankrecords")) {
-					runProcessingAdded(dictData.get(ADDED), req);
-				}
-				else {
-					runProcessing(core, importurl, dictData.get(ADDED), req);
-				}
-			}
-		}
-		
-		if (dictData.containsKey(UPDATED) && dictData.get(UPDATED).length > 0) {
-			setWorkerMessage("Phase 2/3. Updating records: " + dictData.get(UPDATED).length);
-			if (updateurl != null) {
-				if (updateurl.equals("blankrecords")) {
-					runProcessingUpdated(dictData.get(UPDATED), req);
-				}
-				else {
-					runProcessing(core, updateurl, dictData.get(UPDATED), req);
-				}
-			}
-		}
-
-		if (dictData.containsKey(DELETED) && dictData.get(DELETED).length > 0 ) {
-			setWorkerMessage("Phase 3/3. deleting records: " + dictData.get(DELETED).length);
-			if (deleteurl != null) {
-				if (deleteurl.equals("blankrecords")) {
-					runProcessingDeleted(dictData.get(DELETED), req);
-				}
-				else {
-					runProcessing(core, deleteurl, dictData.get(DELETED), req);
-				}
-			}
-		}
-
-		// save the state into the properties (the modification date must be there
-		// in all situations 
-		prop.put(LAST_UPDATE, (String) data.get(LAST_UPDATE));
-		prop.put(LAST_RECID, String.valueOf((Integer) data.get(LAST_RECID)));
-		prop.remove(PARAM_BATCHSIZE);
-		prop.remove(PARAM_MAXIMPORT);
-		prop.remove(PARAM_TOKEN);
-		saveProperties(prop);
-		
-		
-		if (params.getBool(PARAM_COMMIT, false)) {
-			setWorkerMessage("Phase 3/3. Writing index...");
-			CommitUpdateCommand updateCmd = new CommitUpdateCommand(req, false);
-			req.getCore().getUpdateHandler().commit(updateCmd);
-		}
-	    
-    }
+	private void runSynchronously(BatchOfInvenioIds data, 
+	    SolrQueryRequest req) 
+	        throws MalformedURLException, IOException, InterruptedException {
+	  
+	  
+	  log.info("=============================================================================");
+	  log.info(req.toString());
+	  log.info(req.getParamString());
+	  log.info("=============================================================================");
+	  
+	  SolrParams params = req.getParams();
+	  SolrCore core = req.getCore();
+	  
+	  String importurl = params.get(PARAM_IMPORT, null);
+	  String updateurl = params.get(PARAM_UPDATE, null);
+	  String deleteurl = params.get(PARAM_DELETE, null);
+	  
+	  
+	  @SuppressWarnings("unchecked")
+	  Properties prop = (Properties) req.getContext().get(IKRU_PROPERTIES);
+	  
+	  if (data.added != null && data.added.size() > 0) {
+	    setWorkerMessage("Phase 1/3. Adding records: " + data.added.size());
+	    if (importurl != null) {
+	      if (importurl.equals("blankrecords")) {
+	        runProcessingAdded(data.added, req);
+	      }
+	      else {
+	        runProcessing(core, importurl, data.added, req);
+	      }
+	    }
+	  }
+	  
+	  if (data.updated != null && data.updated.size() > 0) {
+	    setWorkerMessage("Phase 2/3. Updating records: " + data.updated.size());
+	    if (updateurl != null) {
+	      if (updateurl.equals("blankrecords")) {
+	        runProcessingUpdated(data.updated, req);
+	      }
+	      else {
+	        runProcessing(core, updateurl, data.updated, req);
+	      }
+	    }
+	  }
+	  
+	  if (data.deleted != null && data.deleted.size() > 0 ) {
+	    setWorkerMessage("Phase 3/3. deleting records: " + data.deleted.size());
+	    if (deleteurl != null) {
+	      if (deleteurl.equals("blankrecords")) {
+	        runProcessingDeleted(data.deleted, req);
+	      }
+	      else {
+	        runProcessing(core, deleteurl, data.deleted, req);
+	      }
+	    }
+	  }
+	  
+	  // save the state into the properties (the modification date must be there
+	  // in all situations 
+	  prop.put(LAST_UPDATE, (String) data.lastModDate);
+	  prop.put(LAST_RECID, String.valueOf((Integer) data.lastRecid));
+	  prop.remove(PARAM_BATCHSIZE);
+	  prop.remove(PARAM_MAXIMPORT);
+	  prop.remove(PARAM_TOKEN);
+	  saveProperties(prop);
+	  
+	  
+	  if (params.getBool(PARAM_COMMIT, false)) {
+	    setWorkerMessage("Phase 3/3. Writing index...");
+	    CommitUpdateCommand updateCmd = new CommitUpdateCommand(req, false);
+	    req.getCore().getUpdateHandler().commit(updateCmd);
+	  }
+	  
+	}
 
 
 		
-	private void runProcessing(SolrCore core, String handlerUrl, int[] recids,
+	private void runProcessing(SolrCore core, String handlerUrl, List<Integer> recids,
 			SolrQueryRequest req) throws MalformedURLException, IOException, InterruptedException {
 		
 		
@@ -651,7 +635,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	 * When method-blankrecords we are creating/adding empty docs
 	 */
 	
-	protected void runProcessingAdded(int[] recids, SolrQueryRequest req) throws IOException {
+	protected void runProcessingAdded(List<Integer> recids, SolrQueryRequest req) throws IOException {
 		
 		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
@@ -661,18 +645,18 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		//addCmd.commitWithin = params.getInt(UpdateParams.COMMIT_WITHIN, -1);
 		//addCmd.setFlags(UpdateCommand.BUFFERING);
 		
-		if (recids.length > 0) {
-			for (int i = 0; i < recids.length; i++) {
+		if (recids.size() > 0) {
+			for (Integer id: recids) {
 			  addCmd.clear();
 			  addCmd.solrDoc = new SolrInputDocument();
-			  addCmd.solrDoc.addField(uniqField,	recids[i]);
+			  addCmd.solrDoc.addField(uniqField,	id);
 				updateHandler.addDoc(addCmd);
 			}
 		}
 			
 	}
 	
-	protected void runProcessingUpdated(int[] recids, SolrQueryRequest req) throws IOException {
+	protected void runProcessingUpdated(List<Integer> recids, SolrQueryRequest req) throws IOException {
 		IndexSchema schema = req.getSchema();
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		String uniqField = schema.getUniqueKeyField().getName();
@@ -682,17 +666,17 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		//addCmd.setFlags(UpdateCommand.BUFFERING);
 		
 
-      if (recids.length > 0) {
+      if (recids.size() > 0) {
 			
 //			Map<Integer, Integer> map = DictionaryRecIdCache.INSTANCE
 //					.getTranslationCache(req.getSearcher().getAtomicReader(), 
 //							uniqField);
 			
-			for (int i = 0; i < recids.length; i++) {
+			for (Integer id: recids) {
 //				if (!map.containsKey(recids[i])) {
 					addCmd.clear();
 					addCmd.solrDoc = new SolrInputDocument();
-					addCmd.solrDoc.addField(uniqField,	recids[i]);
+					addCmd.solrDoc.addField(uniqField,	id);
 					updateHandler.addDoc(addCmd);
 //				}
 //				else {
@@ -702,7 +686,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		}
 	}
 	
-	protected void runProcessingDeleted(int[] recids, SolrQueryRequest req) throws IOException {
+	protected void runProcessingDeleted(List<Integer> recids, SolrQueryRequest req) throws IOException {
 		UpdateHandler updateHandler = req.getCore().getUpdateHandler();
 		
 		DeleteUpdateCommand delCmd = new DeleteUpdateCommand(req);
@@ -710,10 +694,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		//delCmd.setFlags(UpdateCommand.BUFFERING);
 		
 
-    if (recids.length > 0) {
-			for (int i = 0; i < recids.length; i++) {
+    if (recids.size() > 0) {
+			for (Integer id: recids) {
 			  delCmd.clear();
-				delCmd.id = Integer.toString(recids[i]);
+				delCmd.id = Integer.toString(id);
 				updateHandler.delete(delCmd);
 			}
 		}
@@ -724,7 +708,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 	 * Internally calling dataimport handler
 	 */
 	protected void runProcessingInternally(SolrRequestHandler handler, 
-			int[] recids, SolrQueryRequest req, HashMap<String, String[]> hParams) 
+			List<Integer> recids, SolrQueryRequest req, HashMap<String, String[]> hParams) 
 		throws IOException, InterruptedException {
 		
 		SolrParams params = req.getParams();
@@ -755,7 +739,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 		}
 	}
 	
-	protected void runProcessingUpload(String handlerUrl, int[] recids, SolrQueryRequest req) 
+	protected void runProcessingUpload(String handlerUrl, List<Integer> recids, SolrQueryRequest req) 
 		throws MalformedURLException, IOException, InterruptedException {
 		SolrParams params = req.getParams();
 		Integer maximport = params.getInt(PARAM_MAXIMPORT, max_maximport );
@@ -861,6 +845,50 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase implements Pytho
 
 	}
 	
+	/**
+   * Will split array of intgs into query "recid:4->15 OR recid:78 OR recid:80->82"
+   */
+  public static List<String> getQueryIds(int maxspan, List<Integer> recids) {
+    
+    Collections.sort(recids);
+    
+    List<String> ret = new ArrayList<String>();
+    StringBuilder query;
+
+    int i = 0;
+    int l = recids.size();
+    
+    while (i < l) {
+      int delta = 1;
+      int last_id = 0;
+      query = new StringBuilder();
+      query.append("recid:" + recids.get(i));
+      for (i++; i < l; i++) {
+        if (delta >= maxspan) {
+          break;
+        }
+        if (recids.get(i) - 1 == recids.get(i-1)) {
+          last_id = recids.get(i);
+          delta += 1;
+          continue;
+        }
+        if (last_id > 0) {
+          query.append("->" + last_id);
+          last_id = 0;
+        }
+        query.append(" OR recid:" + recids.get(i));
+        delta += 1;
+      }
+
+      if (last_id > 0) {
+        query.append("->" + last_id);
+      }
+
+      ret.add(query.toString());
+    }
+    return ret;
+
+  }
 	
 	public String getVersion() {
 		return "";

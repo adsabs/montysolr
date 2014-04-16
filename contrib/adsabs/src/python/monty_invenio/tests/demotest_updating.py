@@ -176,7 +176,6 @@ def montysolr_targets():
                         wipeout_record=wipeout_record,
                         create_record=create_record,
                         delete_record=delete_record,
-                        
                         )
 
 

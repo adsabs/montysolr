@@ -19,8 +19,10 @@ package org.apache.solr.update;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,10 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import monty.solr.jni.MontySolrVM;
-import monty.solr.jni.PythonCall;
-import monty.solr.jni.PythonMessage;
 
 import org.apache.lucene.search.FieldCache;
 import org.apache.solr.common.SolrException;
@@ -47,11 +45,11 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.servlet.SolrRequestParsers;
+import org.apache.solr.update.InvenioDB.BatchOfInvenioIds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Collections;
 
-public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
+public class InvenioDoctor extends RequestHandlerBase {
 
   public static final Logger log = LoggerFactory.getLogger(InvenioDoctor.class);
 
@@ -64,11 +62,11 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
   private long sleepTime = 300;
 
   public static String handlerName = "/import";
-  private String pythonFunctionName = "get_recids_changes";
   private String handlerParams = "commit=false&command=full-import&url=";
 	private String deleteHandlerName = "/delete";
 
 	private boolean strictMode;
+
   
   class RequestData {
 
@@ -268,8 +266,8 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
       deleteHandlerName  = (String) defs.get("deleteHandler");
     }
     
-    if (defs.get("pythonFunctionName") != null) {
-      setPythonFunctionName((String) defs.get("pythonFunctionName"));
+    if (defs.get("tableToQuery") != null) {
+      InvenioDB.INSTANCE.setBibRecTableName(((String) defs.get("tableToQuery")));
     }
     
     if (defs.get("handlerParams") != null) {
@@ -286,7 +284,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
   }
 
   public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
-  throws IOException, InterruptedException {
+  throws IOException, InterruptedException, SQLException {
     
     SolrParams params = req.getParams();
     String command = params.get("command","info");
@@ -391,14 +389,13 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     ArrayList<Integer> tbd = new ArrayList<Integer>(missing.cardinality());
     rsp.add("missingRecs", tbd);
     
-    int j = 0;
     for (int i = missing.nextSetBit(0); i >= 0; i = missing.nextSetBit(i+1)) {
       tbd.add(i);
     }
     
     ArrayList<Integer> tbdel = new ArrayList<Integer>(toDelete.cardinality());
     rsp.add("toDeleteRecs", tbdel);
-    j = 0;
+    int j = 0;
     for (int i = toDelete.nextSetBit(0); i >= 0; i = toDelete.nextSetBit(i+1)) {
     	tbdel.add(i);
     }
@@ -448,6 +445,13 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
           log.error(e.getStackTrace().toString());
         } catch (InterruptedException e) {
           setWorkerMessage("Interrupted..." + e.getMessage());
+          log.error(e.getMessage());
+          log.error(e.getStackTrace().toString());
+        } catch (SQLException e) {
+          if (strictMode) {
+            throw new SolrException(ErrorCode.SERVER_ERROR, e);
+          }
+          setWorkerMessage("Worker error..." + e.getMessage());
           log.error(e.getMessage());
           log.error(e.getStackTrace().toString());
         } finally {
@@ -502,7 +506,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
   /*
    * The main call
    */
-  private void runSynchronously(RequestQueue queue, SolrQueryRequest req) throws InterruptedException, IOException {
+  private void runSynchronously(RequestQueue queue, SolrQueryRequest req) throws InterruptedException, IOException, SQLException {
 
     SolrCore core = req.getCore();
 
@@ -603,7 +607,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
 		}
   }
 
-	private void runDiscovery(SolrQueryRequest req) throws IOException {
+	private void runDiscovery(SolrQueryRequest req) throws IOException, SQLException {
     SolrParams params = req.getParams();
     if (params.get("last_recid", null) == null || params.getInt("last_recid", 0) == -1) {
       queue.setPresent(new BitSet());
@@ -633,12 +637,7 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
 
   private Map<Integer, Map<Integer, Integer>> tmpMap = new HashMap<Integer, Map<Integer,Integer>>();
   private BitSet[] discoverMissingRecords(BitSet present, BitSet missing, BitSet toDelete, 
-  		SolrQueryRequest req) throws IOException {
-    // get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
-    // int }
-    SolrQueryResponse rsp = new SolrQueryResponse();
-    
-    HashMap<String, int[]> dictData = null;
+  		SolrQueryRequest req) throws IOException, SQLException {
     
     SolrParams params = req.getParams();
     String field = params.get("field", "recid");
@@ -675,28 +674,21 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
     log.info("Checking database for changed records; last_recid={}", lastRecid);
     
     while (doneSoFar<maxRecs) {
-      PythonMessage message = MontySolrVM.INSTANCE
-        .createMessage(pythonFunctionName)
-        .setSender("InvenioKeepRecidUpdated")
-        .setParam("max_records", fetchSize)
-        .setParam("request", req)
-        .setParam("response", rsp)
-        .setParam("mod_date", modDate)
-        .setParam("last_recid", lastRecid);
-    
-      MontySolrVM.INSTANCE.sendMessage(message);
+      
+      BatchOfInvenioIds results = InvenioDB.INSTANCE.getRecidsChanges(lastRecid, fetchSize, modDate);
 
-      Object results = message.getResults();
       if (results == null) {
         finished = true;
         tmpMap.clear();
         break;
       }
-      dictData = (HashMap<String, int[]>) results;
       
-      for (String name: new String[]{"ADDED", "UPDATED"}) {
-        int[] coll = dictData.get(name);
-        doneSoFar += coll.length;
+      Object[] data = new List[]{results.added, results.updated};
+      
+      for (Object o:  data) {
+        @SuppressWarnings("unchecked")
+        List<Integer> coll = (List<Integer>) o;
+        doneSoFar += coll.size();
         for (int x: coll) {
           if (!forceReindexing && idToLuceneId.containsKey(x)) {
             present.set(x);
@@ -707,17 +699,16 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
         }
       }
       
-      int[] deleted = dictData.get("DELETED");
-      doneSoFar += deleted.length;
+      doneSoFar += results.deleted.size();
       
-      for (int x: deleted) {
+      for (int x: results.deleted) {
       	if (idToLuceneId.containsKey(x)) {
       		toDelete.set(x);
       	}
       }
       
-      lastRecid = (Integer) message.getParam("last_recid");
-      modDate = (String) message.getParam("mod_date");
+      lastRecid = results.lastRecid;
+      modDate = results.lastModDate;
       
       log.info("Checking database; restart_from={}; found={}", lastRecid, doneSoFar);
       
@@ -778,14 +769,6 @@ public class InvenioDoctor extends RequestHandlerBase implements PythonCall {
 
   public String getSource() {
     return "";
-  }
-
-  public void setPythonFunctionName(String name) {
-    pythonFunctionName = name;
-  }
-
-  public String getPythonFunctionName() {
-    return pythonFunctionName;
   }
 
 }
