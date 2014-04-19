@@ -1,6 +1,5 @@
 package org.apache.solr.update;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,14 +13,16 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.DeflaterInputStream;
-import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.solr.core.CloseHook;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.dataimport.Context;
+
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -49,8 +50,9 @@ import org.apache.commons.lang.StringEscapeUtils;
 public enum InvenioDB {
   INSTANCE;
   
-  private Connection connection = null;
+  private volatile Connection connection = null;
   private String tableToQuery;
+  private int openedStmts;
   
   public void setBibRecTableName(String table) {
     this.tableToQuery = table;
@@ -263,8 +265,8 @@ public enum InvenioDB {
     //# that we include all records that were modified in that one second to close the group
     //#if modified_records[-1][1].strftime(format="%Y-%m-%d %H:%M:%S") == mod_date:
     mRecs = getResultSet("SELECT id,modification_date, creation_date FROM `" + table +
-                    "` WHERE modification_date = '" + df.format(modified_records.get(modified_records.size()-1).modDate) + 
-                    "' AND id > " + modified_records.get(modified_records.size()-1).recid + " ORDER BY id ASC");
+        "` WHERE modification_date = '" + df.format(modified_records.get(modified_records.size()-1).modDate) + 
+        "' AND id > " + modified_records.get(modified_records.size()-1).recid + " ORDER BY id ASC");
     
     if (mRecs != null) {
       while (mRecs.next()) {
@@ -320,7 +322,7 @@ public enum InvenioDB {
     
     
     return new BatchOfInvenioIds(lastRecid, lastModDate, added, updated, deleted);
-                      
+    
   }
   
   /**
@@ -400,7 +402,7 @@ public enum InvenioDB {
         c = c.replace("recid:", "");
         if (c.contains("->")) {
           String[] ints = c.split("->");
-          ccs.add("(id_bibrec>=" + StringEscapeUtils.escapeSql(ints[0]) + " AND id_bibrec<=" + StringEscapeUtils.escapeSql(ints[0]) + ")");
+          ccs.add("(id_bibrec>=" + StringEscapeUtils.escapeSql(ints[0]) + " AND id_bibrec<=" + StringEscapeUtils.escapeSql(ints[1]) + ")");
         }
         else {
           ccs.add("(id_bibrec=" + StringEscapeUtils.escapeSql(c) + ")");
@@ -410,12 +412,14 @@ public enum InvenioDB {
       query.append(" (");
       boolean isFirst = true;
       for (String c: ccs) {
-        if (!isFirst) {
+        if (isFirst) {
+          query.append(c);
+          isFirst = false;
+        }
+        else {
+          query.append(" OR ");
           query.append(c);
         }
-        query.append(" OR ");
-        query.append(c);
-        isFirst = false;
       }
       query.append(")");
       
@@ -424,7 +428,10 @@ public enum InvenioDB {
       if (rs != null) {
         while (rs.next()) {
           
+          //IOUtils.copy(rs.getBinaryStream("value"), new FileOutputStream("/tmp/from.java"));
+          
           out.append(unZip(rs.getBinaryStream("value")));
+          
           out.append("\n");
         }
         closeResultSet(rs);
@@ -435,10 +442,11 @@ public enum InvenioDB {
     return out.toString();
   }
   
+  
   private String unZip(InputStream data) throws IOException {
-    DeflaterInputStream zipStream = new DeflaterInputStream(data);
+    InflaterInputStream zipStream = new InflaterInputStream(data);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
+    
     byte[] buffer = new byte[1024];
     int len;
     while ((len = zipStream.read(buffer)) > 0) {
@@ -447,6 +455,17 @@ public enum InvenioDB {
     data.close();
     zipStream.close();
     return baos.toString("UTF-8");
+  }
+  
+  public void close() {
+    if (this.connection != null) {
+      try {
+        this.connection.close();
+      } catch (SQLException e) {
+        System.err.println(e.getMessage());
+      }
+      this.connection = null;
+    }
   }
   
   private Connection connect() throws SQLException {
@@ -464,6 +483,7 @@ public enum InvenioDB {
       if (conn == null) {
         throw new SQLException("Cannot connect to Invenio DB: " + System.getProperty("montySolrInvenio"));
       }
+      this.connection = conn;
     }
     return this.connection;
   }
@@ -471,15 +491,26 @@ public enum InvenioDB {
   private Connection getConnection(String url) throws SQLException {
     Connection conn = DriverManager.getConnection(
         url != null ?
-        url 
-        :
-        "jdbc:mysql://localhost/test?" +
-        "user=monty&password=greatsqldb");
+            url 
+            :
+              "jdbc:drizzle://localhost/invenio?" +
+        "user=invenio&password=invenio");
+    Statement stmt = conn.createStatement();
+    stmt.execute("select count(*) from bibrec");
+    ResultSet rs = stmt.getResultSet();
+    while (rs.next()) {
+      //System.out.println(rs.getInt(1));
+    }
+    closeResultSet(rs);
+    
     return conn;
   }
   
   private void loadDriver(String name) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-      Class.forName(name != null ? "com.mysql.jdbc.Driver" : name).newInstance();
+    // mysql driver has a bug: http://bugs.mysql.com/bug.php?id=36565 (leaking threads)
+    //Class<?> clazz = Class.forName(name == null ? "com.mysql.jdbc.Driver" : name);
+    Class<?> clazz = Class.forName(name == null ? "org.drizzle.jdbc.DrizzleDriver" : name);
+    Object inst = clazz.newInstance();
   }
   
   private ResultSet getResultSet(String query, Object...args) throws SQLException {
@@ -499,7 +530,8 @@ public enum InvenioDB {
     }
     
     if (stmt.execute(query)) {
-        return stmt.getResultSet();
+      openedStmts += 1;
+      return stmt.getResultSet();
     }
     else {
       if (stmt != null) {
@@ -522,13 +554,14 @@ public enum InvenioDB {
       } catch (SQLException sqlEx) { } // ignore
       stmt = null;
     }
+    openedStmts -= 1;
   }
   
   class ModRec {
     private int recid;
     private Date createDate;
     private Object modDate;
-
+    
     public ModRec(int recid, Date cDate, Date mDate) {
       this.recid = recid;
       this.createDate = cDate;
@@ -542,7 +575,7 @@ public enum InvenioDB {
     public List<Integer> added;
     public List<Integer> updated;
     public List<Integer> deleted;
-
+    
     public BatchOfInvenioIds(int lastRecid, String lastModDate, List<Integer> added, List<Integer> updated, List<Integer> deleted) {
       this.lastRecid = lastRecid;
       this.lastModDate = lastModDate;
@@ -550,5 +583,17 @@ public enum InvenioDB {
       this.updated = updated;
       this.deleted = deleted;
     }
+  }
+  
+  public void init(Context context) {
+    context.getSolrCore().addCloseHook(new CloseHook() {
+      @Override
+      public void preClose(SolrCore core) {
+        InvenioDB.INSTANCE.close();
+      }
+      @Override
+      public void postClose(SolrCore core) {
+      }
+    });
   }
 }

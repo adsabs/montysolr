@@ -8,20 +8,19 @@ import java.net.URLEncoder;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.handler.dataimport.InvenioDataSource;
+import org.apache.solr.update.InvenioDB;
 import org.junit.BeforeClass;
 
 import examples.BlackAbstractLuceneTestCase;
 
 public class BlackBoxInvenioDataSource extends BlackAbstractLuceneTestCase {
 	
-	@BeforeClass
-	public static void beforeBlackBoxInvenioDataSource() throws Exception {
-		setEName("invenio");
-		exampleInit();
-		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
+	public void tearDown() throws Exception {
+	  InvenioDB.INSTANCE.close();
+	  super.tearDown();
 	}
-	
 	public void testImport() throws IOException {
+	  
 		InvenioDataSource handler = new InvenioDataSource();
 		Reader r;
 		String result;
@@ -53,7 +52,7 @@ public class BlackBoxInvenioDataSource extends BlackAbstractLuceneTestCase {
     result = convertToString(r);
     assert result.contains("<controlfield tag=\"001\">56</controlfield>");
     
-    System.out.println(URLEncoder.encode("python://whatever.here/there?p=" + java.net.URLEncoder.encode("recid:1744593->1745994", "UTF-8")));
+    //System.out.println(URLEncoder.encode("python://whatever.here/there?p=" + java.net.URLEncoder.encode("recid:1744593->1745994", "UTF-8")));
 	}
 	
 	

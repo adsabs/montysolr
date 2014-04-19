@@ -251,6 +251,10 @@
 		</fileset>
 		<!-- lucene/solr jars -->
 		<fileset dir="${common.dir}/build">
+			<include name = "*solrjars-extracted/lucene-test*.jar" />
+			<include name = "*solrjars-extracted/apache-solr-test*.jar" />
+		</fileset>
+		<fileset dir="${common.dir}/build">
 			<include name = "*solrjars-extracted/*.jar" />
 		</fileset>
 		<!-- montysolr lib jars -->

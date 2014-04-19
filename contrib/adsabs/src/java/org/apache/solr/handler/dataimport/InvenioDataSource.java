@@ -23,6 +23,7 @@ public class InvenioDataSource extends URLDataSource {
 	@Override
 	public void init(Context context, Properties initProps) {
 		super.init(context, initProps);
+		InvenioDB.INSTANCE.init(context);
 	}
 
 	@Override
