@@ -192,12 +192,15 @@ public enum InvenioDB {
     if (last_recid == null)
       last_recid = -1;
     
+    if (max_recs == null)
+      max_recs = 10000;
+    
     table = StringEscapeUtils.escapeSql(table);
     String search_op = ">";
     DateFormat df = new SimpleDateFormat("%Y-%m-%d %H:%M:%S");
     
     
-    if (mod_date == null) {
+    if (mod_date == null || mod_date.trim() == "") {
       if (last_recid == -1) {
         ResultSet mDate = getResultSet("SELECT modification_date FROM `" + table + "` ORDER BY modification_date ASC LIMIT 1");
         if (mDate.first()) {
@@ -240,6 +243,7 @@ public enum InvenioDB {
       }
     }
     
+    // now we have mod_date and/or last_recid and we'll retrieve changed recs since x....
     ResultSet mRecs = getResultSet("SELECT id,modification_date, creation_date FROM `" + table +
         "` WHERE modification_date " + search_op + " '" + mod_date + "' ORDER BY modification_date ASC, id ASC LIMIT " + max_recs);
     if (mRecs == null)
@@ -261,6 +265,7 @@ public enum InvenioDB {
     mRecs = getResultSet("SELECT id,modification_date, creation_date FROM `" + table +
                     "` WHERE modification_date = '" + df.format(modified_records.get(modified_records.size()-1).modDate) + 
                     "' AND id > " + modified_records.get(modified_records.size()-1).recid + " ORDER BY id ASC");
+    
     if (mRecs != null) {
       while (mRecs.next()) {
         modified_records.add(new ModRec(mRecs.getInt("id"), mRecs.getDate("creation_date"), mRecs.getDate("modification_date")));
@@ -289,7 +294,7 @@ public enum InvenioDB {
         "id_bibxxx=(SELECT id FROM bib98x WHERE VALUE='DELETED')");
     
     while(delRecs.next()) {
-      dels.add(delRecs.getInt(0));
+      dels.add(delRecs.getInt("id_bibrec"));
     }
     closeResultSet(delRecs);
     
