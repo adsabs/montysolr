@@ -73,7 +73,7 @@ public class MontySolrSetup {
 		} catch (IOException e) {
 			throw new IllegalStateException("Your montysolr installation does not have "
 					+ base + "/build.properties file! "
-					+ "You should fix this (by running ant build-all for the core)");
+					+ "You should fix this (by running 'ant build-all', or 'ant write-properties')");
 		}
 		return prop;
 	}
@@ -154,7 +154,7 @@ public class MontySolrSetup {
 	public static String getMontySolrHome() {
 		File base = new File(System.getProperty("user.dir"));
 		// File base = getFile("solr/conf").getAbsoluteFile();
-		while (!new File(base, "src/python").exists()) {
+		while (!new File(base, "contrib/adsabs").exists()) {
 			base = base.getParentFile();
 		}
 		return base.getAbsolutePath();

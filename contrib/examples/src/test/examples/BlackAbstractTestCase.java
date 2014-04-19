@@ -9,7 +9,6 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.servlet.DirectSolrConnection;
-import org.junit.BeforeClass;
 
 public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 
@@ -85,8 +84,6 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 	
 	// must redifine, because we want to use different python path
 	public static void envInit() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				getExampleHome() + "/python");
 	}
 	
 	public static void exampleInit() throws Exception {
@@ -97,8 +94,6 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		
 		envInit();
 		
-		MontySolrSetup.addToSysPath(getExampleHome() + "/python");
-		MontySolrSetup.addBuildProperties(base);
 	}
 	
 	public static String getConf(String conf) {

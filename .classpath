@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lucene-libs/lucene-test-framework-4.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-test-framework-4.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-test-framework-4.0-SNAPSHOT.jar" sourcepath="/lucene_solr_4_0/solr/test-framework/src/java"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/java"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/test"/>
 	<classpathentry kind="src" path="contrib/adsabs/src/java"/>
@@ -78,5 +78,6 @@
 	<classpathentry kind="lib" path="contrib/adsabs/lib/mysql-connector-java-5.0.8-bin.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/drizzle-jdbc-1.2-javadoc.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/drizzle-jdbc-1.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/lucene_solr_4_0"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

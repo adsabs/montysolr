@@ -44,9 +44,6 @@ public class BenchmarkAdsDataImport extends MontySolrQueryTestCase {
 	public static void beforeTestAdsDataImport() throws Exception {
 		// to use filesystem instead of ram
 		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-				+ "/contrib/invenio/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
 		
 	}
 	

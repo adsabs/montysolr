@@ -5,12 +5,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URLEncoder;
 
-import monty.solr.util.MontySolrSetup;
-
 import org.apache.solr.handler.dataimport.InvenioDataSource;
 import org.apache.solr.update.InvenioDB;
-import org.junit.BeforeClass;
-
 import examples.BlackAbstractLuceneTestCase;
 
 public class BlackBoxInvenioDataSource extends BlackAbstractLuceneTestCase {

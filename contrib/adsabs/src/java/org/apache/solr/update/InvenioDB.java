@@ -45,6 +45,9 @@ import org.apache.solr.handler.dataimport.Context;
  * this is a <b>throw away!</b> code - just a temporary replacement of the 
  * python functionality; the whole workflow of pulling data from the db
  * should be converted into queue/pushing -- so this will get removed!!!
+ * 
+ * NOTE: I HAVE to implement connection pool; current situation is not
+ * thread safe!
  */
 
 public enum InvenioDB {
