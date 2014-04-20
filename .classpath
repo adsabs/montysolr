@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lucene-libs/lucene-test-framework-4.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lucene-libs/lucene-test-framework-4.0-SNAPSHOT.jar" sourcepath="/lucene_solr_4_0/lucene/test-framework/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-test-framework-4.0-SNAPSHOT.jar" sourcepath="/lucene_solr_4_0/solr/test-framework/src/java"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/java"/>
+	<classpathentry kind="src" path="contrib/adsabs/src/jython"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/test"/>
 	<classpathentry kind="src" path="contrib/adsabs/src/java"/>
 	<classpathentry kind="src" path="contrib/adsabs/src/test"/>
@@ -79,5 +80,6 @@
 	<classpathentry kind="lib" path="contrib/adsabs/lib/drizzle-jdbc-1.2-javadoc.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/drizzle-jdbc-1.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/lucene_solr_4_0"/>
+	<classpathentry kind="lib" path="contrib/adsabs/lib/jython-standalone-2.7-b1.jar" sourcepath="contrib/adsabs/lib/jython-2.7-b1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
