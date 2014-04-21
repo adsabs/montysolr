@@ -32,12 +32,6 @@ import org.junit.BeforeClass;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 	
-	@BeforeClass
-	public static void beforeTestSecondOrderQueryTypesAds() throws Exception {
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-        + "/contrib/adsabs/src/python");
-    MontySolrSetup.addTargetsToHandler("adsabs.targets");
-	}
 	
 	public String getSchemaFile() {
 		return MontySolrSetup.getMontySolrHome()

@@ -19,7 +19,7 @@ public class JythonObjectFactory {
     PyObject importer = state.getBuiltins().__getitem__(Py.newString("__import__"));
     PyObject module = importer.__call__(Py.newString(moduleName));
     klass = module.__getattr__(className);
-    System.err.println("module=" + module + ",class=" + klass);
+    //System.err.println("module=" + module + ",class=" + klass);
   }
   
   // This constructor passes through to the other constructor

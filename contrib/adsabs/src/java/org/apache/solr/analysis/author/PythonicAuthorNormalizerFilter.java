@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import monty.solr.jni.MontySolrVM;
 import monty.solr.jni.PythonCall;
@@ -15,6 +16,8 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
+import org.jython.JythonObjectFactory;
+import org.jython.monty.interfaces.JythonNameParser;
 
 /*
  * This filter will call Python library: http://code.google.com/p/python-nameparser/
@@ -35,18 +38,20 @@ import org.apache.solr.common.SolrException.ErrorCode;
  * Input can contain several author names, but these need to be separated
  * by semicolon
  */
-public final class PythonicAuthorNormalizerFilter extends TokenFilter implements PythonCall {
+public final class PythonicAuthorNormalizerFilter extends TokenFilter {
 
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
-  private String pythonFunctionName = "parse_human_name";
   private List<String> buffer = new ArrayList<String>();
+  private JythonNameParser jythonParser;
   
   /**
    * @param input
    */
   public PythonicAuthorNormalizerFilter(TokenStream input) {
     super(input);
+    JythonObjectFactory factory = new JythonObjectFactory(JythonNameParser.class, "jython_name_parser", "HumanParser");
+    this.jythonParser = (JythonNameParser) factory.createObject();
   }
 
   @Override
@@ -62,17 +67,10 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter implements
     String original = termAtt.toString();
     
     for (String individual: original.split(";")) {
-    	PythonMessage message = MontySolrVM.INSTANCE
-	      .createMessage(pythonFunctionName)
-	      .setSender("PythonicAuthorNormalizerFilter")
-	      .setParam("input", individual);
-  
-    	MontySolrVM.INSTANCE.sendMessage(message);
+    	
+    	Map<String,String> parsedName = jythonParser.parse_human_name(individual);
 
-    	Object result = message.getResults();
-    	if (result != null) {
-    		@SuppressWarnings("unchecked")
-        HashMap<String, String> parsedName = (HashMap<String,String>) result;
+    	if (parsedName != null) {
     		if (parsedName.containsKey("Last")) {
     			buffer.add(parsedName.get("Last") + "," 
     					+ (parsedName.containsKey("First") ? " " + parsedName.get("First") : "")
@@ -106,15 +104,5 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter implements
     typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
     
     return true;
-  }
-
-	@Override
-  public void setPythonFunctionName(String name) {
-		pythonFunctionName = name;
-  }
-
-	@Override
-  public String getPythonFunctionName() {
-	  return pythonFunctionName;
   }
 }
