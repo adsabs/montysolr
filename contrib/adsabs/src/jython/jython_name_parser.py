@@ -1,24 +1,6 @@
 from org.jython.monty.interfaces import JythonNameParser
 
-from nameparser import parser as nameparser
-from nameparser import constants
-
-HumanName = nameparser.HumanName
-
-
-class Logger:
-  def info(self, *args, **kwargs):
-    pass
-  def error(self, *args, **kwargs):
-    pass
-  def debug(self, *args, **kwargs):
-    pass
-
-for h in nameparser.log.handlers:
-  log.removeHandler(h)
-    
-nameparser.log = Logger()
-nameparser.logging = None    
+from nameparser import HumanName, constants
 
 
 class HumanParser(JythonNameParser):
