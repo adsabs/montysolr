@@ -67,10 +67,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		// to use filesystem instead of ram
 		System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
 		//System.setProperty("tests.codec","SimpleText");
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-				+ "/contrib/adsabs/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
 
 	}
 

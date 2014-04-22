@@ -27,8 +27,8 @@ import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies.Conseque
 @ThreadLeakScope(Scope.SUITE)
 @ThreadLeakGroup(Group.MAIN)
 @ThreadLeakAction({Action.WARN, Action.INTERRUPT})
-@ThreadLeakLingering(linger = 20000) // Wait long for leaked threads to complete before failure. zk needs this.
-@ThreadLeakZombies(Consequence.IGNORE_REMAINING_TESTS)
+@ThreadLeakLingering(linger = 2000) // Wait long for leaked threads to complete before failure. zk needs this.
+@ThreadLeakZombies(Consequence.CONTINUE)
 @TimeoutSuite(millis = 2 * 3600)
 public class TestJythonWeakref extends Assert {
   

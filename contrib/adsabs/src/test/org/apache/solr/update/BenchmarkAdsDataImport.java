@@ -27,6 +27,7 @@ import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,7 +88,6 @@ public class BenchmarkAdsDataImport extends MontySolrQueryTestCase {
 	}
 
 
-	
 	public void testImport() throws Exception {
 		
 		

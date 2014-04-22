@@ -20,6 +20,12 @@ public abstract class MontySolrAbstractLuceneTestCase extends LuceneTestCase {
 	  System.clearProperty("solr.test.sys.prop2");
 	}
 	
+	public void tearDown() throws Exception {
+    System.clearProperty("python.cachedir.skip");
+    System.clearProperty("python.console.encoding");
+    super.tearDown();
+  }
+	
 	/**
 	 * Must be called first, so that we make sure 
 	 * properties are set (?)

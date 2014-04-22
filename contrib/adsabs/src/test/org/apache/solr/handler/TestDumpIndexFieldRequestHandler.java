@@ -29,19 +29,12 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
-import org.junit.BeforeClass;
 
 public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
 
 
   private File generatedTransliterations;
 
-  @BeforeClass
-	public static void beforeTestDumpIndexFieldRequestHandler() throws Exception {
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
-				+ "/contrib/adsabs/src/python");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
-	}
 
   @Override
   public String getSchemaFile() {

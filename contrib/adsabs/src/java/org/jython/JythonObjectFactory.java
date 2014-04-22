@@ -8,7 +8,9 @@ import org.python.core.PySystemState;
  * Jython Object Factory using PySystemState
  * from: http://www.jython.org/jythonbook/en/1.0/JythonAndJavaIntegration.html#more-efficient-version-of-loosely-coupled-object-factory
  */
+@SuppressWarnings("rawtypes")
 public class JythonObjectFactory {
+  
   
   private final Class interfaceType;
   private final PyObject klass;

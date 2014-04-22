@@ -33,25 +33,12 @@ import org.junit.BeforeClass;
 
 public class TestAqpAdsabs extends AqpTestAbstractCase {
 	
-	@BeforeClass
-  public static void beforeTestAqpAdsabs() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + "/src/python");
-    MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-        + "/contrib/adsabs/src/python");
-    MontySolrSetup.addTargetsToHandler("adsabs.targets");
-  }
 	
-	@AfterClass
-	public static void afterTestAqpAdsabs() throws Exception {
-		MontySolrSetup.deinit();
-	}
 	
 	public void setUp() throws Exception {
 		setGrammarName("ADS");
 		super.setUp();
 	}
-	
 	
 	
 	public AqpQueryParser getParser() throws Exception {

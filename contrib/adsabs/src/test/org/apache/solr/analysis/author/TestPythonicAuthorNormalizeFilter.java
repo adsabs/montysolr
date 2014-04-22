@@ -3,28 +3,14 @@ package org.apache.solr.analysis.author;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
-
 import monty.solr.util.MontySolrAbstractLuceneTestCase;
-import monty.solr.util.MontySolrSetup;
-
 import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.BaseTokenStreamTestCase;
-import org.apache.solr.analysis.author.AuthorNormalizeFilterFactory;
-import org.junit.BeforeClass;
 
 public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTestCase {
 	
-	
-	@BeforeClass
-	public static void beforeTestInvenioQuery() throws Exception {
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
-				+ "/contrib/adsabs/src/python");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
-	}
 	
 	public void test() throws Exception {
 		
