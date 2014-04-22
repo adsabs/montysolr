@@ -13,9 +13,11 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.zip.InflaterInputStream;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -599,4 +601,250 @@ public enum InvenioDB {
       }
     });
   }
+  
+  /**
+   * 
+   * def test_get_recids():
+    """This is used to manually run and compare results against the DB
+    
+    note: to get mapping from recids into bibcodes:
+    
+    allinv = {}
+    for x in dbquery.run_sql('select t1.value,t2.id_bibrec from bib97x as t1 inner join bibrec_bib97x as t2 ON t1.id=t2.id_bibxxx WHERE t1.tag="970__a"'):    
+      allinv[int(x[1])] = x[0].lower()
+
+    """
+    
+    total = 0
+    lastid=-1
+    moddate=None
+    dtotal=0
+    utotal=0
+    atotal=0
+    set_added = set()
+    set_deleted = set()
+    set_updated = set()
+    
+    while lastid is not None:
+        print lastid, moddate
+        if lastid == -1:
+            total = 0
+            row = 0
+        results = get_recids_changes(lastid, max_recs=1000000)
+        if results is None:
+            break
+        d, lastid, moddate = results
+        row = sum(len(x) for x in d.values())
+        total += row
+        deleted, updated, added = len(d['DELETED']), len(d['UPDATED']), len(d['ADDED'])
+        dtotal += deleted
+        utotal += updated
+        atotal += added
+        print "del=%s (%s) upd=%s (%s) add=%s (%s) row=%s total=%s" % (deleted, dtotal, updated, utotal, added, atotal, row, total)
+        set_updated.update(d['UPDATED'])
+        set_added.update(d['ADDED'])
+        set_deleted.update(d['DELETED'])
+    
+    totalrecs = dbquery.run_sql("select count(id) from bibrec")[0][0]
+    deleted_ids = [a[0] for a in list(dbquery.run_sql("""SELECT distinct(id_bibrec) FROM bibrec_bib98x WHERE id_bibxxx='%s' ORDER BY id_bibrec""", (197,)))]
+    
+    print "\ndatabse:"
+    print "totalrecs=", totalrecs
+    print "liverecs (%s-%s)= %s" % (totalrecs, len(deleted_ids), totalrecs-len(deleted_ids))
+    
+    print "\ndiscovered:"
+    trex = (sum((dtotal, utotal, atotal)))
+    print "totalrecs=%s (vefification=%s)" % (trex, len(set_updated) + len(set_added) + len(set_deleted))
+    print "liverecs (%s-%s)= %s" % (trex, dtotal, trex-dtotal)
+    
+    
+    print "\ndifference %s-%s=%s" % (totalrecs-len(deleted_ids), trex-dtotal, totalrecs-len(deleted_ids)-(trex-dtotal))
+    
+    deleted_ids = set(deleted_ids)
+    
+    lost_recs = {'in_del':[], 'in_upd':[], 'in_add':[], 'present_in_one':[], 'present_in_many':[], 'present_in_none':[]}
+    for r_del in deleted_ids:
+      counter = 0
+      if r_del in set_deleted:
+        lost_recs['in_del'].append(r_del)
+        counter += 1
+      if r_del in set_updated:
+        lost_recs['in_upd'].append(r_del)
+        counter += 1
+      if r_del in set_added:
+        lost_recs['in_add'].append(r_del)
+        counter += 1
+      if counter == 1:
+        lost_recs['present_in_one'].append(r_del)
+      elif counter > 1:
+        lost_recs['present_in_many'].append(r_del)
+      else:
+        lost_recs['present_in_none'].append(r_del)
+      
+    for k, v in lost_recs.items():
+      print "%s=%s" % (k, len(v))
+   * @throws SQLException 
+   */
+  public void testGetChangedRecids() throws SQLException {
+    Integer total = 1;
+    Integer lastid =-1;
+    String moddate = null;
+    Integer dtotal = 0;
+    Integer utotal = 0;
+    Integer atotal=0;
+    HashSet<Integer> set_added = new HashSet<Integer>();
+    HashSet<Integer> set_deleted = new HashSet<Integer>();
+    HashSet<Integer> set_updated = new HashSet<Integer>();
+    
+    Integer row = null;
+    BatchOfInvenioIds results;
+    Integer deleted, updated, added;
+    while (lastid != null) {
+      System.out.println(lastid + ", " + moddate);
+      if (lastid == -1) {
+        total = 0;
+        row = 0;
+      }
+      
+      results = getRecidsChanges(lastid, 100000, moddate);
+      
+      if (results == null)
+        break;
+      
+      deleted = (results.deleted != null ? results.deleted.size() : 0);
+      updated = (results.added != null ? results.added.size() : 0);
+      added  = (results.updated != null ? results.updated.size() : 0);
+      
+      row = deleted + updated + added;
+      total += row;
+      
+      dtotal += deleted;
+      atotal += added;
+      utotal += updated;
+      
+      System.out.println(String.format("del=%s (%s) upd=%s (%s) add=%s (%s) row=%s total=%s", 
+          deleted, dtotal, updated, utotal, added, atotal, row, total));
+    }
+    
+    ResultSet r = getResultSet("select count(id) from bibrec");
+    int totalrecs = r.getInt(1);
+    closeResultSet(r);
+    
+    HashSet<Integer> deleted_ids = new HashSet<Integer>();
+    r = getResultSet("select distinct(id_bibrec) from bibrec_bib98x where id_bibxxx=197 order by id_bibrec");
+    while (r.next()) {
+      deleted_ids.add(r.getInt(1));
+    }
+    closeResultSet(r);
+    
+    System.out.println("\ndatabase:");
+    System.out.println("totalrecs=" + totalrecs);
+    System.out.println(String.format("liverecs (%s-%s)= %s", totalrecs, deleted_ids.size(), totalrecs-deleted_ids.size()));
+    
+    int trex = dtotal + utotal + atotal;
+    System.out.println("\ndiscovered:");
+    System.out.println(String.format("totalrecs=%s (vefification=%s)", trex, set_updated.size() + set_added.size() + set_deleted.size()));
+    System.out.println(String.format("liverecs (%s-%s)= %s", trex, dtotal, trex-total));
+    
+    System.out.println(String.format("\ndifference %s-%s=%s", totalrecs-deleted_ids.size(), trex-dtotal, totalrecs-deleted_ids.size()-trex-dtotal));
+    
+    HashMap<String,List<Integer>> lost_recs = new HashMap<String, List<Integer>>();
+    for (String v: new String[]{"ind_del", "in_upd", "in_add", "present_in_one", "present_in_many", "present_in_none"}) {
+      lost_recs.put(v, new ArrayList<Integer>());
+    }
+    
+    for (Integer r_del: deleted_ids) {
+      int counter = 0;
+      if (set_deleted.contains(r_del)) {
+        lost_recs.get("in_del").add(r_del);
+        counter += 1;
+      }
+      if (set_deleted.contains(r_del)) {
+        lost_recs.get("in_upd").add(r_del);
+        counter += 1;
+      }
+      if (set_deleted.contains(r_del)) {
+        lost_recs.get("in_add").add(r_del);
+        counter += 1;
+      }
+      if (counter == 1) {
+        lost_recs.get("present_in_one").add(r_del);
+      }
+      else if (counter > 1) {
+        lost_recs.get("present_in_many").add(r_del);
+      }
+      else {
+        lost_recs.get("present_in_none").add(r_del);
+      }
+    }
+    
+    for (Entry<String,List<Integer>> es: lost_recs.entrySet()) {
+      System.out.println(String.format("%s=%s", es.getKey(), es.getValue().size()));
+    }
+  }
+  
+  
+  /**
+   * A helper function to create a tmp table that stores records we
+   * want to index; python ref impl:
+   * 
+   * def create_collection_bibrec(table_name, coll_name, step_size=10000, max_size=-1):
+    if table_name[0] != '_':
+        raise Exception("By convention, temporary tables must begin with '_'. I don't want to give you tools to screw st important")
+    
+    create_stmt = dbquery.run_sql("SHOW CREATE TABLE bibrec")[0][1].replace('bibrec', dbquery.real_escape_string(table_name))
+    dbquery.run_sql("DROP TABLE IF EXISTS `%s`" % dbquery.real_escape_string(table_name))
+    dbquery.run_sql(create_stmt)
+    
+    # now retrieve the collection
+    c = search_engine.get_collection_reclist(coll_name)
+    # reverse sort it
+    c = sorted(c, reverse=True)
+    
+    if len(c) < 0:
+        sys.stderr.write("The collection %s is empty!\n" % coll_name)
+    
+    c = list(c)
+    l = len(c)
+    if max_size > 0:
+        l = max_size
+    i = 0
+    sys.stderr.write("Copying bibrec data, patience please...\n")
+    while i < l:
+        dbquery.run_sql("INSERT INTO `%s` SELECT * FROM `bibrec` WHERE bibrec.id IN (%s)" % 
+                             (dbquery.real_escape_string(table_name), ','.join(map(str, c[i:i+step_size]))))
+        i = i + len(c[i:i+step_size])
+        #sys.stderr.write("%s\n" % i)
+        
+    sys.stderr.write("Total number of records: %s Copied: %s\n" % (len(c), min(l, len(c))))
+   * @throws Exception 
+   **/
+  public void create_collection_bibrec(String table_name, String coll_name, Integer step_size, Integer max_size) throws Exception {
+    if (table_name.substring(0, 1).equals("_")) {
+      throw new Exception("By convention, temporary tables must begin with '_'. I don't want to give you tools to screw st important");
+    }
+    
+    ResultSet r = getResultSet("SHOW CREATE TABLE bibrec");
+    if (!r.first()) {
+      throw new SQLException("Missing table bibrec");
+    }
+    String create_stmt = r.getString(1).replace("bibrec", StringEscapeUtils.escapeSql(table_name));
+    closeResultSet(r);
+    
+    r = getResultSet("DROP TABLE IF EXISTS `" + StringEscapeUtils.escapeSql(table_name) + "`");
+    if (r != null) {
+      closeResultSet(r);
+    }
+    
+    r = getResultSet(create_stmt);
+    if (r != null) {
+      closeResultSet(r);
+    }
+  }
+  
+  private void getCollectionRecids(String coll) throws SQLException {
+    ResultSet rs = getResultSet("SELECT nbrecs,reclist FROM collection WHERE name='" + StringEscapeUtils.escapeSql(coll) + "'");
+    
+  }
+
 }

@@ -16,6 +16,7 @@ import java.util.zip.DeflaterInputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.InflaterInputStream;
 
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.search.BitSetQuery;
@@ -507,7 +508,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 	private byte[] unZip(byte[] data) throws IOException {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
-		DeflaterInputStream zipStream = new DeflaterInputStream(bais);
+		InflaterInputStream zipStream = new InflaterInputStream(bais);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		byte[] buffer = new byte[1024];

@@ -78,10 +78,6 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
   public void setUp() throws Exception {
     System.setProperty("solr.directoryFactory", "StandardDirectoryFactory");
     super.setUp();
-
-    PythonMessage message = MontySolrVM.INSTANCE.createMessage("reset_records");
-    MontySolrVM.INSTANCE.sendMessage(message);
-
   }
 
 
