@@ -13,6 +13,8 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.zip.InflaterInputStream;
 
+import org.adsabs.InvenioBitSet;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.solr.core.CloseHook;
 import org.apache.solr.core.SolrCore;
@@ -820,6 +823,12 @@ public enum InvenioDB {
    * @throws Exception 
    **/
   public void create_collection_bibrec(String table_name, String coll_name, Integer step_size, Integer max_size) throws Exception {
+    
+    if (step_size == null)
+      step_size = 1000;
+    if (max_size == null)
+      max_size = -1;
+    
     if (table_name.substring(0, 1).equals("_")) {
       throw new Exception("By convention, temporary tables must begin with '_'. I don't want to give you tools to screw st important");
     }
@@ -840,11 +849,63 @@ public enum InvenioDB {
     if (r != null) {
       closeResultSet(r);
     }
+    
+    List<Integer> c = getCollectionRecids(coll_name);
+    if (c == null || c.size() == 0) {
+      throw new SQLException("No data for colleciton: " + coll_name);
+    }
+    
+    Collections.reverse(c);
+    
+    int l = max_size > 0 ? max_size : c.size();
+    int i = 0;
+    
+    System.err.println("Copying data, patience please...");
+    
+    while (i < l) {
+      StringBuilder ids = new StringBuilder();
+      boolean first = true;
+      int j = 0;
+      for (; j<i+step_size; j++) {
+        if (first) {
+          ids.append(c.get(j));
+          first = false;
+        }
+        else {
+          ids.append(",");
+          ids.append(c.get(j));
+        }
+      }
+      String q = String.format("INSERT INTO `%s` SELECT * FROM `bibrec` WHERE bibrec.id IN (%s)",
+          StringEscapeUtils.escapeSql(table_name),
+          ids.toString());
+      
+      r = getResultSet(q);
+      if (r != null) {
+        closeResultSet(r);
+      }
+      
+      i = i + j;
+    }
+    
   }
   
-  private void getCollectionRecids(String coll) throws SQLException {
+  private List<Integer> getCollectionRecids(String coll) throws SQLException {
     ResultSet rs = getResultSet("SELECT nbrecs,reclist FROM collection WHERE name='" + StringEscapeUtils.escapeSql(coll) + "'");
-    
+    try {
+      if (rs.next()) {
+        InvenioBitSet data = new InvenioBitSet(rs.getBytes("reclist"));
+        ArrayList<Integer> out = new ArrayList<Integer>(data.cardinality());
+        for (int i = data.nextSetBit(0); i >= 0; i = data.nextSetBit(i+1)) {
+          out.add(i);
+        }
+        return out;
+      }
+      return null;
+    }
+    finally {
+      closeResultSet(rs);
+    }
   }
 
 }
