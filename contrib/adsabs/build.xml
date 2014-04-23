@@ -67,6 +67,7 @@
         <fileset dir="lib">
             <include name="**/**.jar"/>
         </fileset>
+    	  <pathelement location="src/jython"/>
     </path>
     
     <path id="junit.classpath">

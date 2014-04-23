@@ -129,11 +129,9 @@
 				<include name="**/lib/*.jar" />
 			</fileset>
 
-			<!-- examples compiled classes, if any -->
+			<!-- examples compiled classes, if any 
 			<pathelement location="${build.dir}/classes/java" />
-
-			<!-- jcc classpath -->
-			<pathelement location="${prop.jcc_egg}/jcc/classes" />
+			-->
 
 			<!-- solr/dist jars -->
 			<fileset dir="${prop.solr.real.location}/dist">
@@ -157,7 +155,6 @@
 				<include name="**/classes/test" />
 			</dirset>
 			
-			<pathelement location="${prop.jcc_egg}/jcc/classes" />
 		</path>
 		
 		<path id="classpath">
