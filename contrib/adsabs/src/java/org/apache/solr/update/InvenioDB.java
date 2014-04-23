@@ -325,7 +325,7 @@ public enum InvenioDB {
       }
     }
     
-    String lastModDate = df.format(modified_records.get(modified_records.size()-1));
+    String lastModDate = df.format(modified_records.get(modified_records.size()-1).modDate);
     int lastRecid = modified_records.get(modified_records.size()-1).recid;
     
     
@@ -568,7 +568,7 @@ public enum InvenioDB {
   class ModRec {
     private int recid;
     private Date createDate;
-    private Object modDate;
+    private Date modDate;
     
     public ModRec(int recid, Date cDate, Date mDate) {
       this.recid = recid;

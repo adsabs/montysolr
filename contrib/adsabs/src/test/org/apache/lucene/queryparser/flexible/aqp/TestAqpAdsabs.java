@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
@@ -425,7 +426,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		assertQueryEquals("a -b", null, "+a -b");
 		assertQueryEquals("a +b", null, "+a +b");
-		assertQueryEquals("A – b", null, "+a -b");
+		assertQueryEquals("A–b", null, "+a +b"); // em dash is not an operator
 		assertQueryEquals("A + b", null, "+a +b");
 		
 		

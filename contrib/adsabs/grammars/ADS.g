@@ -367,7 +367,7 @@ COLON   : ':' ;  //this must NOT be fragment
 
 PLUS  : '+' ;
 
-MINUS : ('-' | '\u2014'); // |'–'
+MINUS : '-'; // decided not to catch long dashes: '–' | '\u2014' | '\u2012' | '\u2013'
 
 STAR  : '*' ;
 

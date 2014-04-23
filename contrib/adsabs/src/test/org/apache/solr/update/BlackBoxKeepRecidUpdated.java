@@ -111,14 +111,29 @@ public class BlackBoxKeepRecidUpdated extends MontySolrAbstractTestCase {
     List<Integer> deleted = handler.retrievedRecIds.deleted;
 
     assertTrue(handler.lastRecId == -1); // cause we havent indexed them
-    assertTrue(added.size() == 104);
+    assertTrue(added.size() >= 104);
     assertTrue(updated.size() == 0);
     assertTrue(deleted.size() == 0); // this can work only for fresh demo
 
+    
+    handler = new MyInvenioKeepRecidUpdated();
+    core.execute(handler, req("last_recid", "-1", 
+        "inveniourl", inveniourl,
+        "importurl", importurl,
+        "updateurl", updateurl,
+        "deleteurl", deleteurl,
+        "batchsize", "10"), rsp);
 
-
-
-
+    // must wait for the landler to finish his threads
+    while (handler.isBusy()) {
+      Thread.sleep(10);
+    }
+    
+    
+    assertTrue(handler.retrievedRecIds.added.size() == 10);
+    assertTrue(handler.retrievedRecIds.updated.size() == 0);
+    assertTrue(handler.retrievedRecIds.deleted.size() == 0); 
+    
   }
 
 
