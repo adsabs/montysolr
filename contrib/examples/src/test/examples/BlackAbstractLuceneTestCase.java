@@ -33,8 +33,6 @@ public abstract class BlackAbstractLuceneTestCase extends MontySolrAbstractLucen
 		
 		envInit();
 		
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() + "/" + base + "/python");
-		MontySolrSetup.addBuildProperties(base);
 	}
 	
 	public static String getEName() {
@@ -45,13 +43,6 @@ public abstract class BlackAbstractLuceneTestCase extends MontySolrAbstractLucen
 		ename = name;
 		base = path + ename;
 	}
-	
-	// must redifine, because we want to use different python path
-	public static void envInit() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + "/" + base + "/python");
-	}
-	
 	
 	
 }

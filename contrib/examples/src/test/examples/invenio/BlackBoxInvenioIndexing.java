@@ -3,9 +3,6 @@ package examples.invenio;
 import java.io.File;
 
 
-import monty.solr.jni.MontySolrVM;
-import monty.solr.jni.PythonMessage;
-
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.update.InvenioKeepRecidUpdated;
@@ -22,16 +19,6 @@ public class BlackBoxInvenioIndexing extends BlackAbstractTestCase {
   public static void beforeBlackBoxInvenioIndexing() throws Exception {
     setEName("adsabs");
     exampleInit();
-  }
-  
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    
-    // to have always the demo records as a fresh site
-    PythonMessage message = MontySolrVM.INSTANCE.createMessage("reset_records");
-    MontySolrVM.INSTANCE.sendMessage(message);
-    
   }
   
   public void testUpdates() throws Exception {

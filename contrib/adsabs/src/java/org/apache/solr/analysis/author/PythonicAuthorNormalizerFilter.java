@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import monty.solr.jni.MontySolrVM;
-import monty.solr.jni.PythonCall;
-import monty.solr.jni.PythonMessage;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;

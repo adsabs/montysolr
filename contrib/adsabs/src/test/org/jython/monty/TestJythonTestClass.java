@@ -32,8 +32,7 @@ public class TestJythonTestClass extends LuceneTestCase {
   }
   
   public void test() {
-    PythonInterpreter interp = new PythonInterpreter();
-    interp.exec("import weakref");
+//    PythonInterpreter interp = new PythonInterpreter();
 //    interp.exec("import sys; print sys.path");
 //    interp.exec("sys.path.append('/dvt/workspace/montysolr/contrib/adsabs/src/jython')");
 //    interp.exec("import sys; print sys.path");

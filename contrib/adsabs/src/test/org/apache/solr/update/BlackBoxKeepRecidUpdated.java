@@ -23,8 +23,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
-import monty.solr.jni.MontySolrVM;
-import monty.solr.jni.PythonMessage;
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 

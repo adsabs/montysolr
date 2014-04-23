@@ -1,6 +1,7 @@
 package org.jython.monty;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.python.util.PythonInterpreter;
@@ -31,7 +32,8 @@ import com.carrotsearch.randomizedtesting.annotations.ThreadLeakZombies.Conseque
 @ThreadLeakZombies(Consequence.CONTINUE)
 @TimeoutSuite(millis = 2 * 3600)
 public class TestJythonWeakref extends Assert {
-  
+
+  @Ignore
   @Test
   public void test() {
     PythonInterpreter interp = new PythonInterpreter();
