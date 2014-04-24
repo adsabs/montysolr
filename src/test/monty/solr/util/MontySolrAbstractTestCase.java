@@ -1,7 +1,6 @@
 package monty.solr.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -58,8 +57,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	 */
 	public static void envInit() throws Exception {
 		//System.setProperty("storeAll", "true");
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + "/src/python");
+		
 	}
 	
 	// normally we set this to point to default solr/example config

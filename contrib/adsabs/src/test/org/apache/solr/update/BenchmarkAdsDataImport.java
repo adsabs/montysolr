@@ -27,6 +27,7 @@ import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,9 +45,6 @@ public class BenchmarkAdsDataImport extends MontySolrQueryTestCase {
 	public static void beforeTestAdsDataImport() throws Exception {
 		// to use filesystem instead of ram
 		//System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-				+ "/contrib/invenio/src/python");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.tests.targets");
 		
 	}
 	
@@ -90,7 +88,6 @@ public class BenchmarkAdsDataImport extends MontySolrQueryTestCase {
 	}
 
 
-	
 	public void testImport() throws Exception {
 		
 		

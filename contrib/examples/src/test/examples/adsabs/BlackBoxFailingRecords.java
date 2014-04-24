@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import monty.solr.jni.MontySolrVM;
-import monty.solr.jni.PythonMessage;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.document.Document;
@@ -61,10 +59,6 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 	public static void beforeBlackBoxFailingRecords() throws Exception {
 		setEName("adsabs");
 		exampleInit();
-		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
 	}
 
 	private ArrayList<Integer> tempRecids;
@@ -88,15 +82,6 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 		tempRecids = new ArrayList<Integer>();
 	}
 
-	@Override
-	public void tearDown() throws Exception {
-		super.tearDown();
-		for (Integer r: tempRecids) {
-			PythonMessage message = MontySolrVM.INSTANCE.createMessage("wipeout_record")
-			    .setParam("recid", r);
-	    MontySolrVM.INSTANCE.sendMessage(message);
-		}
-	}
 
 	public void testImport() throws Exception {
 
@@ -339,6 +324,7 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
     );
 		 */
 
+		/*
 		// verify that deleted recs are discovered
 		//MontySolrVM.INSTANCE.evalCommand("sys.stderr.write(str(self._handler._db['*:create_record'].__module__))");
 		//MontySolrVM.INSTANCE.evalCommand("sys.stderr.write(sys.modules['monty_invenio.tests.demotest_updating'].__file__ + '\\n')");
@@ -360,7 +346,7 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 		assertU(commit());
 		assertQ(req("q", "recid:" + added), "//*[@numFound='1']");
 
-
+		
 		message = MontySolrVM.INSTANCE.createMessage("delete_record")
 				.setParam("recid", added)
 				.setParam("diff", 7);
@@ -376,7 +362,7 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 
 		assertU(commit());
 		assertQ(req("q", "recid:" + added), "//*[@numFound='0']");
-		
+		*/
 		
 		// now delete records inside solr and see whether the doctor can
 		// discover them and recover them

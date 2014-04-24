@@ -22,14 +22,15 @@ import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.ResourceLoader;
-import org.apache.lucene.analysis.util.StringMockResourceLoader;
 import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.synonym.NewSynonymFilterFactory.SynonymParser;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.CharsRef;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -391,5 +392,26 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     		new int[]    {1, 1, 0, 0, 0, 0, 1}  //posIncr
     );
     
+  }
+}
+
+class StringMockResourceLoader implements ResourceLoader {
+  String text;
+
+  public StringMockResourceLoader(String text) {
+    this.text = text;
+  }
+
+  public <T> T newInstance(String cname, Class<T> expectedType) {
+    try {
+      Class<? extends T> clazz = Class.forName(cname).asSubclass(expectedType);
+      return clazz.newInstance();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public InputStream openResource(String resource) throws IOException {
+    return new ByteArrayInputStream(text.getBytes("UTF-8"));
   }
 }

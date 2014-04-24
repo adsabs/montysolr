@@ -1,30 +1,29 @@
 package org.apache.solr.handler.dataimport;
 
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import monty.solr.jni.MontySolrVM;
-import monty.solr.jni.PythonCall;
-import monty.solr.jni.PythonMessage;
 
 import org.apache.solr.common.SolrException;
+import org.apache.solr.update.InvenioDB;
 import org.apache.solr.util.WebUtils;
 
-public class InvenioDataSource extends URLDataSource implements PythonCall {
+public class InvenioDataSource extends URLDataSource {
 	
-	
-	private String pyFuncName = "invenio_search";
 	
 	@Override
 	public void init(Context context, Properties initProps) {
 		super.init(context, initProps);
+		InvenioDB.INSTANCE.init(context);
 	}
 
 	@Override
@@ -55,20 +54,22 @@ public class InvenioDataSource extends URLDataSource implements PythonCall {
 				throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
 						e.getMessage());
 			}
-			PythonMessage message = MontySolrVM.INSTANCE
-				.createMessage(getPythonFunctionName())
-				//.setSender(this.getClass().getSimpleName())
-				.setParam("kwargs", params);
 			
-			MontySolrVM.INSTANCE.sendMessage(message);
-
-			Object results = message.getResults();
-			if (!(results instanceof String)) {
+			String results;
+      try {
+        results = InvenioDB.INSTANCE.getMarcXML(params);
+      } catch (SQLException e) {
+        throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
+      } catch (IOException e) {
+        throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, e);
+      }
+			
+			if (results == null) {
 				LOG.info("No new/updated/deleted records inside Invenio.");
 				return new StringReader("");
 			}
 			else {
-				return new StringReader((String) results);
+				return new StringReader(results);
 			}
 		}
 		else {
@@ -76,12 +77,4 @@ public class InvenioDataSource extends URLDataSource implements PythonCall {
 		}
 	}
 
-	public void setPythonFunctionName(String name) {
-		pyFuncName = name;
-		
-	}
-
-	public String getPythonFunctionName() {
-		return pyFuncName;
-	}
 }

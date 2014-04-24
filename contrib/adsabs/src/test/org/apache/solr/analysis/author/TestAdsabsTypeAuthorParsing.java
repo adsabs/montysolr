@@ -79,14 +79,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
 	private String author_field = "author";
 	
-  @BeforeClass
-  public static void beforeTestAdsDataImport() throws Exception {
-    // to use filesystem instead of ram
-    //System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
-  	MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
-				+ "/contrib/adsabs/src/python");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
-  }
 
   @Override
   public String getSchemaFile() {

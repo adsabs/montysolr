@@ -21,11 +21,7 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
-import org.apache.lucene.search.TermQuery;
-import org.adsabs.solr.AdsConfig.F;
-import org.junit.BeforeClass;
 
 /**
  * Test for the affiliation_text type
@@ -33,12 +29,6 @@ import org.junit.BeforeClass;
  */
 public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
 
-	@BeforeClass
-	public static void beforeTestAdsabsTypeNormalizedStringAscii() throws Exception {
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-				+ "/contrib/adsabs/src/python");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
-	}
 	
   @Override
   public String getSchemaFile() {

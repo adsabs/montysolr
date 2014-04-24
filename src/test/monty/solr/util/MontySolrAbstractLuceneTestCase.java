@@ -15,22 +15,25 @@ public abstract class MontySolrAbstractLuceneTestCase extends LuceneTestCase {
 
 	@AfterClass
 	public static void afterClassMontySolrTestCase() throws Exception {
-	  System.clearProperty("montysolr.bridge");
 	  System.clearProperty("montysolr.home");
-	  System.clearProperty("montysolr.modulepath");
 	  System.clearProperty("solr.test.sys.prop1");
 	  System.clearProperty("solr.test.sys.prop2");
 	}
 	
+	public void tearDown() throws Exception {
+    System.clearProperty("python.cachedir.skip");
+    System.clearProperty("python.console.encoding");
+    super.tearDown();
+  }
+	
 	/**
-	 * Must be called first, so that we make sure the Python 
-	 * interpreter is loaded
+	 * Must be called first, so that we make sure 
+	 * properties are set (?)
 	 * 
 	 * @throws Exception
 	 */
 	public static void envInit() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge", 
-				MontySolrSetup.getMontySolrHome() + "/src/python");
+		// do nonno
 	}
 	
 	

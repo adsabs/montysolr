@@ -18,6 +18,7 @@ package org.apache.lucene.queryparser.flexible.aqp;
  */
 
 import java.io.IOException;
+import java.io.Reader;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,8 +30,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.MockTokenizer;
+import org.apache.lucene.analysis.TokenFilter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -391,6 +399,8 @@ public class AqpTestAbstractCase extends LuceneTestCase {
   public void tearDown() throws Exception {
     BooleanQuery.setMaxClauseCount(originalMaxClauses);
     super.tearDown();
+    System.clearProperty("python.cachedir.skip");
+    System.clearProperty("python.console.encoding");
   }
 
   class DebuggingQueryNodeProcessorPipeline extends
@@ -433,6 +443,55 @@ public class AqpTestAbstractCase extends LuceneTestCase {
       System.out.println(queryTree.toString());
       return queryTree;
 
+    }
+  }
+  
+  public static final class QPTestAnalyzer extends Analyzer {
+
+    /** Filters MockTokenizer with StopFilter. */
+    @Override
+    public final TokenStreamComponents createComponents(String fieldName, Reader reader) {
+      Tokenizer tokenizer = new MockTokenizer(reader, MockTokenizer.SIMPLE, true);
+      return new TokenStreamComponents(tokenizer, new QPTestFilter(tokenizer));
+    }
+  }
+  
+  public static final class QPTestFilter extends TokenFilter {
+    private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
+    private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
+
+    /**
+     * Filter which discards the token 'stop' and which expands the token
+     * 'phrase' into 'phrase1 phrase2'
+     */
+    public QPTestFilter(TokenStream in) {
+      super(in);
+    }
+
+    boolean inPhrase = false;
+    int savedStart = 0, savedEnd = 0;
+
+    @Override
+    public boolean incrementToken() throws IOException {
+      if (inPhrase) {
+        inPhrase = false;
+        clearAttributes();
+        termAtt.setEmpty().append("phrase2");
+        offsetAtt.setOffset(savedStart, savedEnd);
+        return true;
+      } else
+        while (input.incrementToken()) {
+          if (termAtt.toString().equals("phrase")) {
+            inPhrase = true;
+            savedStart = offsetAtt.startOffset();
+            savedEnd = offsetAtt.endOffset();
+            termAtt.setEmpty().append("phrase1");
+            offsetAtt.setOffset(savedStart, savedEnd);
+            return true;
+          } else if (!termAtt.toString().equals("stop"))
+            return true;
+        }
+      return false;
     }
   }
 

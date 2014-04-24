@@ -4,22 +4,10 @@ import java.io.File;
 
 import monty.solr.util.MontySolrSetup;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 
 public class MontySolrTestCaseJ4 extends SolrTestCaseJ4 {
   
-  @BeforeClass
-  public static void beforeClassMontySolrTestCase() throws Exception {
-    MontySolrSetup.init("montysolr.java_bridge.SimpleBridge",
-        MontySolrSetup.getMontySolrHome() + "/src/python");
-  }
-
-  @AfterClass
-  public static void afterClassMontySolrTestCase() throws Exception {
-    
-  }
   
   public static String TEST_HOME() {
     return MontySolrSetup.getSolrHome();

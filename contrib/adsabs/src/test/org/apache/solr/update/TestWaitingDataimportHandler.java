@@ -17,7 +17,6 @@
 
 package org.apache.solr.update;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -26,20 +25,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.handler.dataimport.DataImportHandlerException;
 import org.apache.solr.handler.dataimport.FailSafeInvenioNoRollbackWriter;
-import org.apache.solr.handler.dataimport.NoRollbackWriter;
-import org.apache.solr.handler.dataimport.SolrWriter;
 import org.apache.solr.handler.dataimport.WaitingDataImportHandler;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.request.SolrRequestHandler;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.apache.solr.util.AbstractSolrTestCase;

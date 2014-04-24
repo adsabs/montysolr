@@ -23,10 +23,6 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 	public static void beforeBlackBoxAdslabsIndexing() throws Exception {
 		setEName("adsabs");
 		exampleInit();
-		MontySolrSetup.addTargetsToHandler("monty_invenio.targets");
-		MontySolrSetup.addTargetsToHandler("monty_invenio.schema.targets");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
-		//MontySolrSetup.addTargetsToHandler("monty_invenio.tests.demotest_updating");
 	}
 	
 	@Override

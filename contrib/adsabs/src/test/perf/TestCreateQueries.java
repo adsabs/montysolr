@@ -26,13 +26,6 @@ import org.junit.Test;
 
 public class TestCreateQueries extends MontySolrAbstractTestCase {
 	
-	@BeforeClass
-	public static void beforeTestCreateQueries() throws Exception {
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome() 
-				+ "/contrib/adsabs/src/python");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
-	}
-	
 	public String getSchemaFile() {
 		makeResourcesVisible(this.solrConfig.getResourceLoader(),
 				new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",

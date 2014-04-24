@@ -50,7 +50,7 @@
        syntax...
     -->       
   
-  <lib dir="../../lib" />
+  <lib dir="../lib" />
 
 
   <!-- A 'dir' option by itself adds any files found in the directory 
@@ -1973,9 +1973,6 @@
        <str name="mongoHost">${montysolr.mongoHost:adsx}</str>
     </lst>
   </requestHandler>
-  
-  <!-- checks the system and prints information from both Java and Python side -->
-  <requestHandler name="/montysolr_diagnostics" class="org.apache.solr.handler.PythonDiagnosticHandler" default="false" />
   
   
   <requestHandler name="/ads-config" class="solr.AdsConfigHandler" default="false">

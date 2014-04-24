@@ -37,9 +37,14 @@ import org.apache.lucene.queries.function.valuesource.ProductFloatFunction;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
-import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MultiPhraseQuery;
+import org.apache.lucene.search.PhraseQuery;
+import org.apache.lucene.search.Query;
 import org.apache.solr.analysis.TokenizerChain;
 import org.apache.solr.search.SolrQueryParser.MagicFieldName;
 import org.apache.solr.common.params.CommonParams;
@@ -1070,7 +1075,7 @@ class AqpExtendedDismaxQParser extends QParser {
 	    	case PHRASE:
 	    		return field + ":" + "\"" + val + "\"" + (slop != 0 ? "~" + slop : "");
 	      case FIELD:
-	      	return field + ":" + AqpQueryParserUtil.escape(val) + (slop != 0 ? "^" + slop : "");
+	      	return field + ":" + escape(val) + (slop != 0 ? "^" + slop : "");
 	      case PREFIX:
 	      	return field + ":" + "\"" + val + "*\"";
 	      case WILDCARD: 
@@ -1083,7 +1088,7 @@ class AqpExtendedDismaxQParser extends QParser {
 		      	val2 != null && val2.length() > 1 ? val2 : "*" +
 		      	(bool2 ? "}" : "]");
 	    }	
-    	return field + ":" + AqpQueryParserUtil.escape(val);
+    	return field + ":" + escape(val);
     }
     
     /**

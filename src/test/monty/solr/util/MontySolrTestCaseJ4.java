@@ -1,7 +1,5 @@
 package monty.solr.util;
 
-import monty.solr.jni.MontySolrVM;
-
 import org.apache.lucene.util.LuceneTestCase;
 import org.apache.solr.JSONTestUtil;
 import org.apache.solr.common.SolrException;
@@ -16,8 +14,6 @@ import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.TestHarness;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -31,10 +27,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
 
 /**
  * A junit4 Solr test harness that extends LuceneTestCaseJ4. Unlike
@@ -45,15 +37,6 @@ import java.util.Properties;
  */
 public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 
-	@BeforeClass
-	public static void beforeClassMontySolrTestCase() throws Exception {
-		MontySolrSetup.init("montysolr.java_bridge.SimpleBridge",
-				MontySolrSetup.getMontySolrHome() + "/src/python");
-	}
-
-	@AfterClass
-	public static void afterClassMontySolrTestCase() throws Exception {
-	}
 
 	@Override
 	public void setUp() throws Exception {

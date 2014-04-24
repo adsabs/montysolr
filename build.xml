@@ -12,7 +12,6 @@
 
 	<property name="montysolr.home" location="." />
 	<property name="src.dir.java" location="src/java" />
-	<property name="src.dir.python" location="src/python" />
 	<property name="build.dir" location="build" />
 	<property name="dist.dir" value="build/dist" />
 	<property name="classes.dir" value="build/classes/java" />
@@ -24,50 +23,20 @@
 	<property name="webdist.home" location="${webdist}" />
 	<property name="lib.dir" value="lib" />
 	<property name="app.name" value="montysolr_java" />
-    <property name="app.solr.name" value="solr_java" />	
+  <property name="app.solr.name" value="solr_java" />	
 	<property name="app.version" value="${montysolr.version}" />
 	<property name="jar.suffix" value="${app.name}-${app.version}.jar" />
 	<property name="ddash" value="--" />
 
     
-	<!--set default PYTHONPATH if the environemnt is empty -->
-	<property environment="env" />
-	<property name="env.PYTHONPATH" value="${dist.dir}${path.separator}${src.dir.python}${path.separator}"/>
-
 	<!--
-    these classes must be made available/known to JCC when we compile the wrapper
-    They will be made visible to Python, but are also used for generation of the jars.
-     -->
-	<property name="montysolr.classes" value="
-		monty.solr.jni.MontySolrBridge
-		monty.solr.jni.MontySolrVM
-		monty.solr.jni.PythonBridge
-		monty.solr.jni.PythonMessage
-		" />
-	<property name="jcc.build" value="${montysolr.classes}" />
-	<property name="jcc.packages" value=""/>
-    
-    <!--
     trunk (future 5) = http://svn.apache.org/repos/asf/lucene/dev/trunk
     4.x (future 4.1 etc) = http://svn.apache.org/repos/asf/lucene/dev/branches/branch_4x
     4.0 = http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0
     
     29/11/12 - tracking 4.0 (before it was trunk)
     //-->
-	<property name="solr.svn" value="http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0" />	
-
-	<!--
-    _build variables are there to add extra classes to the wrapper - some packages (either in lucene or for montysolr)
-    are not usable/visible, unless also these classes are present. So this is here to add these extra components to the build.
-    I tried registerining packages only, but it didn't work for v2.9, so i am listing classes directly
-    java.util.ArrayList
-    -->
-	<property name="jcc.build_also" value="
-		java.lang.Float
-		java.lang.System
-		java.lang.String
-		" />
-
+	<property name="solr.svn" value="http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0" />
 
 
 	<import file="common-build.xml"/>
@@ -93,7 +62,6 @@
 
 	<target name="config" depends="init">
 		<property name="montysolr.jar" value="${build.dir}/${final.name}.jar" />
-
 	</target>
 
 	<!-- Default target: usage.  Prints out instructions. -->
@@ -124,32 +92,12 @@
 		<mkdir dir="${classes.dir}" />
 		<mkdir dir="${build.dir}/jar" />
 
-		<exec executable="${python}" failonerror="false" errorproperty="test_import_errors" >
-			<arg value="-c"/>
-			<arg value="import jcc; import lucene; lucene.initVM()" />
-		</exec>
-
-		<condition property="import_ok">
-			<equals arg1="${test_import_errors}" arg2=""/>
-		</condition>
-
-		<fail unless="import_ok" message="${test_import_errors}${line.separator}Please install the required Python modules first (jcc, lucene)" />
-
-
-		<!-- retrieves the location of the jcc and stores in inside jcc_egg -->
-	    <exec executable="${python}" failonerror="true" outputproperty="jcc_egg" logerror="true">
-	        <arg value="-c"/>
-	        <arg value="import os, jcc; print os.path.dirname(os.path.dirname(jcc.__file__))" />
-	    </exec>
-	    
 	</target>
 
 
 	<target name="check_properties">
 		<condition property="propertiesOK">
 			<and>
-				<isset property="python" />
-				<isset property="jcc" />
 				<isset property="montysolr.version" />
 				<isset property="solr.version" />
 				<isset property="ant" />
@@ -180,59 +128,11 @@
       -->
 
 	<!-- this is needed for building targets -->
-	<target name="config-build" depends="config,check-solr-location,check-lucene-jars,set-jar-paths,write-properties" >
+	<target name="config-build" depends="config,check-solr-location,write-properties" >
 		<property name="_properties.written" value="true" />
 	</target>
 
 
-	<target name="set-jar-paths">
-		<!--
-              The part below will discover all the paths inside the directory (for the
-              given pattern) and the property with .path end element will look like
-              path1 [dash][dash]jar path2 [dash][dash]jar path3....
-
-              However, this is suboptimal for cases, when there are two versions of the
-              jar file in the folder, for example:
-               solr-core-1.4.1.jar
-               solr-core-1.4.2-dev.jar
-
-          We include them all. TODO: pick the newest file only
-          -->
-		<path id="solr.core.path">
-			<fileset dir="${solr.real.location}/dist" id="solr.core.jar" >
-				<filename name="*solr-core-*.jar"/>
-			</fileset>
-		</path>
-		<pathconvert property="solr.core.jar.string" pathsep=" --jar ">
-			<path refid="solr.core.path" />
-		</pathconvert>
-
-		<path id="solr.sorlj.path">
-			<fileset dir="${solr.real.location}/dist" id="solr.solrj.jar" >
-				<filename name="*solr-solrj-*.jar"/>
-			</fileset>
-		</path>
-		<pathconvert property="solr.solrj.jar.string" pathsep=" --jar ">
-			<path refid="solr.sorlj.path" />
-		</pathconvert>
-
-		<path id="montysolr.classpath">
-			<fileset dir="${build.dir}" includes="montysolr*.jar" />
-			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
-			<fileset dir="${solr.real.location}" includes="lib/**/*.jar" />
-			<fileset dir="${solr.real.location}" includes="example/lib/**/*.jar" />
-			<fileset dir="${solr.real.location}" includes="example/start.jar" />
-			<fileset dir="${lib.dir}" includes="**/*.jar" />
-		</path>
-	</target>
-
-	<!-- Compiles all java classes -->
-	<target name="compile" depends="config-build">
-		<compile srcdir="${src.dir.java}" destdir="${classes.dir}">
-			<classpath path="${jcc_egg}/jcc/classes"/>
-			<classpath refid="montysolr.classpath"/>
-		</compile>
-	</target>
 
 	<target name="test" depends="write-properties">
 		   <antcall target="common.test" inheritall="true" inheritrefs="true"/>
@@ -248,154 +148,20 @@
 message=Automatically generated by ant during compilation of MontySolr, do not change!
 solr.home=${solr.home}
 solr.real.location=${solr.real.location}
-jcc=${jcc}
-jcc_egg=${jcc_egg}
-python=${python}
+lucene.real.location=${lucene.real.location}		   	
 solr.version=${solr.version}    
 montysolr.version=${montysolr.version}
-ant=${ant}
 		   </echo>
 	</target>
 
 
 
 
-	<!--
-  ==================================================================
-     Testing Python Eggs
-  ==================================================================
-  -->
-	<target name="before-unzip">
-		<delete dir="${build.dir}/${app.name}.egg-info" failonerror="no" />
-		<delete dir="${build.dir}/EGG-INFO" failonerror="no" />
-	</target>
-
-	<!-- Unzip the egg into python-test to be loadable -->
-	<target name="unzip-egg" depends="config-build,before-unzip">
-		<delete dir="${dist.dir}/${app.name}" failonerror="yes" />
-		<unzip dest="${dist.dir}" overwrite="yes">
-			<fileset dir="${dist.dir}">
-				<include name="${app.name}*.egg" />
-			</fileset>
-		</unzip>
-		<move file="${dist.dir}/EGG-INFO" tofile="${dist.dir}/${app.name}.egg-info" />
-
-		<!-- write the current classpath into a text file -->
-		<echo file="${dist.dir}/${app.name}/classpath">${toString:montysolr.classpath}</echo>
-	</target>
-
-
-
-	<!-- Just a basic test to verify that our montysolr package is correctly compiled and contains the necessary classes -->
-	<target name="test-egg" depends="config-build">
-		<exec executable="${python}" dir="${dist.dir}" failonerror="true" logerror="true">
-			<arg value="-c" />
-			<arg value="import ${app.name} as X;X.initVM(X.CLASSPATH+'${path.separator}${toString:montysolr.classpath}',vmargs='-Dsolr.solr.home=/x/dev/workspace/test-solr/solr,-Dsolr.data.dir=/x/dev/workspace/test-solr/solr/data');assert (X.__file__ == 'montysolr/__init__.pyc')" />
-		</exec>
-	</target>
-
-
-
-	<!--
-	==================================================================
-     Embedding PythonVM in JavaVM
-    ==================================================================
-    -->
-
-	<!-- build solr for python -->
-	<target name="build-solr" depends="config-build,compile-solr-egg,unzip-solr-egg"
-	               description="Build separately the Python egg of Solr"/>
-    <target name="compile-solr-egg" depends="config-build">
-        <mkdir dir="${build.dir}" />
-        <delete dir="${build.dir}/build" failonerror="no" />
-
-        <echo message="You can watch Monty Python, this takes a while..." />
-
-        <exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
-            <env key="PYTHONPATH" value="${src.dir.python}${path.separator}${env.PYTHONPATH}" />
-
-            <!-- this is mac specific, i will yet have to find out how to make it os-specific,
-                 but it makes no problems to Ubuntu/SLC linux os'es so far -->
-            <env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
-
-
-            <arg line="${jcc}" />
-            <arg value="${ddash}shared" />
-        	<arg value="${ddash}use_full_names" />
-            <arg value="${ddash}version" />
-            <arg value="${app.version}" />
-            <arg value="${ddash}import"/>
-            <arg value="lucene" />
-            <arg line="${ddash}jar ${solr.core.jar.string}" />
-            <arg line="${ddash}jar ${solr.solrj.jar.string}" />
-            <arg value="${ddash}classpath" />
-            <arg value="${toString:montysolr.classpath}${path.separator}${jcc_egg}/jcc/classes/" />
-            <arg value="${ddash}package" />
-            <arg value="java.lang" />
-            <arg value="${ddash}python" />
-            <arg value="${app.solr.name}" />
-            <arg value="${ddash}build" />
-            <arg value="${ddash}bdist" />
-            <arg line="${ddash}files 5" />
-            <!-- We exclude the embedded classes because they are Jetty specific -->
-            <arg line="${ddash}exclude org.apache.solr.search.FunctionQParser
-                       ${ddash}exclude org.apache.solr.client.solrj.embedded.NoLog 
-                       ${ddash}exclude org.apache.solr.client.solrj.embedded.JettySolrRunner
-                       ${ddash}exclude org.apache.solr.update.processor.UniqFieldsUpdateProcessorFactory
-                       ${ddash}exclude org.apache.noggit.JSONParser
-                       ${ddash}exclude org.apache.solr.util.xslt.TransformerProvider
-                       ${ddash}rename org.apache.solr.handler.loader.ContentStreamLoader=LoaderContentStreamLoader
-                      " />
-        </exec>
-    </target>
-	
-	
-	<!-- Build MontySolr for Python -->
-	<target name="build" depends="config-build,compile-montysolr-egg,unzip-egg"
-		   description="Build MontySolr separately"/>
 
 	
-	<target name="compile-montysolr-egg" depends="compile,jar">
-		<mkdir dir="${build.dir}" />
-		<delete dir="${build.dir}/build" failonerror="no" />
+	
+	
 
-		<exec executable="${python}" dir="${build.dir}" failonerror="true" logerror="true">
-			<env key="PYTHONPATH" value="${src.dir.python}${path.separator}../${dist.dir}${path.separator}${env.PYTHONPATH}" />
-
-			<!-- this is mac specific, i will yet have to find out how to make it os-specific -->
-			<env key="JCC_LFLAGS" value="-framework${path.separator}JavaVM${path.separator}-framework${path.separator}Python" />
-
-			<arg line="${jcc}" />
-			<arg value="${ddash}shared" />
-			<arg value="${ddash}use_full_names" />
-			<arg value="${ddash}version" />
-			<arg value="${app.version}" />
-			<arg line="${jcc.build}" />
-			<arg line="${jcc.build_also}" />
-			<arg value="${ddash}import"/>
-			<arg value="lucene" />
-			<arg value="${ddash}import" />
-			<arg value="${app.solr.name}" />
-
-			<arg line="${jcc.packages}" />
-			<arg value="${ddash}package" />
-			<arg line="org.apache.solr.request" />
-			<arg value="${ddash}classpath" />
-			<arg value="${toString:montysolr.classpath}${path.separator}../${montysolr.jar}:${path.separator}${jcc_egg}/jcc/classes/" />
-			<arg value="${ddash}include" />
-			<arg value="${montysolr.jar}" />
-			<arg value="${ddash}python" />
-			<arg value="${app.name}" />
-			<arg value="${ddash}build" />
-			<arg value="${ddash}bdist" />
-
-			<!-- this can be activated if i want to distribute python together with the jcc, python code
-                 will be copied into the extension folder
-            <arg value="${ddash}module" />
-            <arg value="${src.dir.python}" />
-            -->
-		</exec>
-	</target>
 
 
     <!--
@@ -404,12 +170,17 @@ ant=${ant}
     ==================================================================
     -->
 	
-	<target name="build-all" depends="get-solr,build-solr,build,jar,build-contrib"
+	<target name="build-all" depends="get-solr,build-contrib,jar"
 	        description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Python inside Solr"/>
 	    
     
     <target name="build-contrib" >
       
+    	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+    	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/adsabs"  inheritall="false" />
+  		<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/examples"  inheritall="false" />
+    	
+    	<!--
       <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
         <arg line="build-all -f ${common.dir}/contrib/antlrqueryparser/build.xml"/>
       </exec>
@@ -422,7 +193,8 @@ ant=${ant}
       <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
         <arg line="build-all -f ${common.dir}/contrib/examples/build.xml"/>
       </exec>
-
+      -->
+  
       <!--
            seems that ant 1.8.x gets the order differently, huh... so we must make sure
            antlrqueryparser is built before the rest, so i can't use apply
@@ -441,12 +213,17 @@ ant=${ant}
     </target>
 	
 	<target name="test-contrib" >
+		
+		<ant target="test"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+    <ant target="test"  dir="${common.dir}/contrib/adsabs"  inheritall="false" />
+    <ant target="test"  dir="${common.dir}/contrib/examples"  inheritall="false" />
+		
+		<!--
         <apply executable="${ant}" parallel="false" failonerror="true" >
           <arg line="test"/>
           <arg value="-f"/>
           <fileset dir="${common.dir}/contrib">
             <include name="**/antlrqueryparser/build.xml"/>
-            <include name="**/newseman/build.xml"/>
           </fileset>
         </apply>
 	  
@@ -458,7 +235,8 @@ ant=${ant}
           <include name="**/adsabs/build.xml"/>
         </fileset>
       </apply>
-	      
+	   -->
+		
     </target>
 
 	
@@ -473,7 +251,7 @@ ant=${ant}
     
 	
 	<target name="get-solr"
-          depends="get-solr-usign-svn,check-solr-location,download-solr,build-solr-example">
+    depends="get-solr-usign-svn,check-solr-location,download-solr,build-solr-example,extract-solr-jars">
 	</target>
 
 	
@@ -482,9 +260,20 @@ ant=${ant}
 	<target name="get-solr-usign-svn">
 		<mkdir dir="${solr.home}"/>
 		
-		<exec executable="${python}" failifexecutionfails="true" dir="${solr.home}">
+		<!--
+		<exec executable="svn" failonerror="true" failifexecutionfails="true" dir="${solr.home}">
+      <arg line="update" />
+    </exec>
+		
+		<exec executable="svn" failonerror="true" failifexecutionfails="true" dir="${solr.home}">
+      <arg value="checkout" />
+			<arg value="${solr.svn}" />
+    </exec>
+		-->
+	  
+		<exec executable="python" failifexecutionfails="true" dir="${solr.home}">
 			<arg value="-c"/>
-			<arg value="import os;'${solr.version}'.lower().__contains__('svn') and (os.path.isdir('.svn') and os.system('svn update --force') or os.system('svn checkout ${solr.svn} .'))"/>
+			<arg value="import os;'${solr.version}'.lower().__contains__('svn') and (os.path.isdir('.svn') and os.system('svn update - -force') or os.system('svn checkout ${solr.svn} .'))"/>
 		</exec>
 		
 		<antcall target="check-solr-location" />
@@ -502,11 +291,11 @@ ant=${ant}
 		</condition>
 		
 		<condition property="solr.real.location" value="${solr.home}/solr">
-            <and>
-                <available file="${solr.home}/solr/example/README.txt"/>
-                <available file="${solr.home}/solr/contrib/contrib-build.xml"/>
-            </and>
-        </condition>
+        <and>
+            <available file="${solr.home}/solr/example/README.txt"/>
+            <available file="${solr.home}/solr/contrib/contrib-build.xml"/>
+        </and>
+    </condition>
 
 		<condition property="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr">
 			<and>
@@ -516,6 +305,8 @@ ant=${ant}
 		</condition>
 
 		<echo message="Did we find solr location? Path=${solr.real.location}"/>
+		
+		<property name="lucene.real.location" location="${solr.real.location}/../lucene" />
 	</target>
 
 
@@ -559,89 +350,91 @@ ant=${ant}
 		<untar dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}-src.tgz" compression="gzip"/>
 	</target>
 
-	<target name="build-solr-example" depends="check-solr-location">
+	<target name="build-solr-example" depends="check-solr-location,build-montysolr-dependencies">
 		<echo>Building the Solr example</echo>
 
-		<!--
-        Unfortunately, the ant task is having some problems with the basedir (ant 1.7)
-        <ant target="example"
-            dir="${build.dir}/solr-download/apache-solr-${solr.version}/"
-            inheritall="false"
-        />
-        -->
-
-		<exec executable="${ant}" dir="${solr.real.location}" logerror="true">
-			<env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
-			<arg value="example" />
-		</exec>
+      <!--
+          Ant used to have some problems with the basedir (ant 1.7)
+          <exec executable="${ant}" dir="${solr.real.location}" logerror="true">
+            <env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
+            <arg value="example" />
+          </exec>
+      -->
+      <ant target="example"	dir="${solr.real.location}"  inheritall="false" />
 	</target>
+	
+	<target name="build-montysolr-dependencies">
+		<ant target="build-modules" dir="${lucene.real.location}"  inheritall="false" />
+		<ant target="dist-contrib" dir="${solr.real.location}"  inheritall="false" />
+		<ant target="dist-test-framework" dir="${solr.real.location}"  inheritall="false" />
+	</target>
+	
+	<target name="check-solr-jars-exist" depends="check-solr-location" >
+    <!-- since on old ant we cannot ignore it -->
+    <mkdir dir="${solr.real.location}/dist" />
+		<mkdir dir="${build.dir}/solrjars-extracted" />
+
+    <path id="montysolr.classpath.testing">
+      <fileset dir="${build.dir}/solrjars-extracted" includes="**/*.jar" />
+    </path>
+
+    <condition property="solr.jars.exist" value="true">
+      <and>
+        <available classname="org.apache.lucene.spatial.tier.InvalidGeoException" classpath="${toString:montysolr.classpath.testing}" />
+      </and>
+    </condition>
+
+    <echo message="Are lucene jars available? ${solr.jars.exist}" level="verbose" />
+  </target>
+
+	<target name="extract-solr-jars" depends="check-solr-jars-exist" unless="solr.jars.exist">
+    <delete dir="${build.dir}/solrjars-extracted" />
+    <mkdir dir="${build.dir}/solrjars-extracted" />
+    <unzip dest="${build.dir}/solrjars-extracted" overwrite="yes">
+      <fileset dir="${solr.real.location}/dist">
+        <include name="apache-solr*.war" />
+      </fileset>
+    </unzip>
+    <move todir="${build.dir}/solrjars-extracted">
+      <fileset dir="${build.dir}/solrjars-extracted/WEB-INF/lib">
+        <include name="**/**.jar"/>
+      </fileset>
+    </move>
+    <delete dir="${build.dir}/solrjars-extracted" includeemptydirs="true">
+      <exclude name="**/**.jar"/>
+    </delete>
+		
+		<copy todir="${build.dir}/solrjars-extracted">
+      <fileset dir="${solr.real.location}/dist">
+        <include name="**/**.jar"/>
+      </fileset>
+    </copy>
+		
+		<copy todir="${build.dir}/solrjars-extracted" flatten="true">
+      <fileset dir="${lucene.real.location}/build">
+        <include name="**/**.jar"/>
+      </fileset>
+    </copy>
+		
+  </target>
 
 
 	
 	
-    <target name="unzip-solr-egg">
-        <!-- retrieves the location of the jcc -->
-        <exec executable="${python}" failonerror="true" outputproperty="_tmp_solr_err" dir="${build.dir}/dist" logerror="true">
-            <arg value="-c"/>
-            <arg value="import os,glob; print os.path.abspath(glob.glob('./${app.solr.name}*.egg')[0])" />
-        </exec>
-
-        <delete dir="${dist.dir}/${app.solr.name}.egg-info" failonerror="no" />
-        <delete dir="${dist.dir}/${app.solr.name}" failonerror="no" />
-
-        <unzip dest="${dist.dir}" overwrite="yes">
-            <fileset dir="${dist.dir}">
-                <include name="${app.solr.name}*.egg" />
-            </fileset>
-        </unzip>
-        <move file="${dist.dir}/EGG-INFO" tofile="${dist.dir}/${app.solr.name}.egg-info" />
-    </target>
-
-	
-	<target name="try-lucene-jars" depends="check-solr-location" >
-		<!-- since on old ant we cannot ignore it -->
-		<mkdir dir="${solr.real.location}/dist" />
-
-		<path id="montysolr.classpath.testing">
-			<fileset dir="${solr.real.location}/dist" includes="**/*.jar" />
-		</path>
-
-		<condition property="lucene.jars.exist" value="true">
-			<and>
-				<available classname="org.apache.lucene.spatial.tier.InvalidGeoException" classpath="${toString:montysolr.classpath.testing}" />
-			</and>
-		</condition>
-
-		<echo message="Are lucene jars available? ${lucene.jars.exist}" level="verbose" />
-	</target>
-
-	<target name="check-lucene-jars" depends="try-lucene-jars" unless="lucene.jars.exist">
-		<delete dir="${solr.real.location}/dist/montysolr-extracted" />
-		<mkdir dir="${solr.real.location}/dist/montysolr-extracted" />
-		<unzip dest="${solr.real.location}/dist/montysolr-extracted" overwrite="yes">
-			<fileset dir="${solr.real.location}/dist">
-				<include name="apache-solr*.war" />
-			</fileset>
-		</unzip>
-		<move todir="${solr.real.location}/dist/montysolr-extracted">
-			<fileset dir="${solr.real.location}/dist/montysolr-extracted/WEB-INF/lib">
-				<include name="**/**.jar"/>
-			</fileset>
-		</move>
-		<delete dir="${solr.real.location}/dist/montysolr-extracted" includeemptydirs="true">
-			<exclude name="**/**.jar"/>
-		</delete>
-	</target>
-
-
 	<target name="run-example"
 	   description="Assembles ADSABS example and starts MontySolr (don't forget to do build-all first)"
 	   depends="">
 
+		<subant target="build-one run-configured -Dename=adsabs -Dprofile=normal.profile" inheritall="false" failonerror="true" buildpath="${common.dir}/contrib/examples" >
+      <fileset dir="${solr.real.location}/.." includes="build.xml" />
+    </subant>
+		
+		<!--
 		<exec executable="${ant}" dir="${common.dir}/contrib/examples" logerror="true" 
 			newenvironment="true">
             <arg line="build-one run-configured -Dename=adsabs -Dprofile=normal.profile" />
         </exec>
+     -->
 
 	</target>
 
@@ -742,12 +535,58 @@ ant=${ant}
 	</target>
 
 
-	
-	<!-- poorman's way to run the python tests from inside ./src/python -->
-	<target name="test-python">
-	   <run-python-unittests python="${python}" python-path="${env.PYTHONPATH}${path.separator}${dist.dir}${path.separator}${src.dir.python}"
-	    srcdir="${common.dir}/src/python"
-	   />
+	<!-- to setup dev environment -->
+	<target name="eclipse" description="Sets up the dev project for Eclipse" depends="check-solr-location">
+	    <subant target="ivy-bootstrap" inheritall="false" failonerror="true" buildpath="${solr.real.location}/..">
+	      <fileset dir="${solr.real.location}/../lucene" includes="build.xml" />
+	    </subant>
+		
+		<!-- this will set the project for lucene/ we'll just copy the files and modify them-->
+		<subant target="eclipse" inheritall="false" failonerror="true" buildpath="${solr.real.location}/..">
+	      <fileset dir="${solr.real.location}/.." includes="build.xml" />
+	    </subant>
+		
+		<copy file="${solr.real.location}/../.project" tofile=".project" overwrite="false"/>
+	    <copy file="${solr.real.location}/../.classpath" tofile=".classpath" overwrite="true"/>
+	    <mkdir dir=".settings"/>
+	    <copy todir=".settings/" overwrite="true">
+	      <fileset dir="${solr.real.location}/../.settings" includes="*.prefs" />
+	    </copy>
+		
+		
 	</target>
+	
+	<target name="modify-eclipse" depends="check-solr-location">
+		<copy file="${solr.real.location}/../.classpath" tofile=".classpath" overwrite="true"/>
+		<!-- change path to point to the local solr checkout -->
+		<property name="_before" value="${solr.real.location}"/>
+		<property name="_up" location="${solr.real.location}/.."/>
+		<property name="_root" location="."/>
+		<script language="javascript">
+			<![CDATA[
+			var before = project.getProperty("_before");
+			var r = project.getProperty("_root");
+			var u = project.getProperty("_up");
+			var m = before.substring(0, u.length()).substring(r.length()+1).replace("\\", "/") + "/";
+			project.setProperty("solr.relative.location", m);
+			]]>
+		</script>
+		
+		<replace file=".classpath">
+		  <replacefilter token="path=&quot;" value="path=&quot;${solr.relative.location}"/>
+			<replacefilter token="output=&quot;" value="output=&quot;${solr.relative.location}"/>
+			
+		</replace>
+		
+		
+	</target>
+	
+	<target name="ex" depends="check-solr-location">
+		<ant target="example"
+		            dir="${solr.real.location}"
+		            inheritall="false" />
+  </target>
+	
+	
 	
 	</project>

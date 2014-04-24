@@ -19,120 +19,112 @@
 
 <project name="adsabs" default="default">
 
-    <description>
+	<description>
     ADS search engine extensions
     </description>
 
-    <import file="../contrib-build.xml" />
-    <import file="../antlrqueryparser/macros.xml" />
-    
-    <!-- with this we'll trick antlrqueryparser into generating grammars for us in our folder -->
-    <property name="aqp.grammardir" location="${common.dir}/contrib/${ant.project.name}/grammars"/>
-	
+	<import file="../contrib-build.xml" />
+	<import file="../antlrqueryparser/macros.xml" />
+
+	<!-- with this we'll trick antlrqueryparser into generating grammars for us in our folder -->
+	<property name="aqp.grammardir" location="${common.dir}/contrib/${ant.project.name}/grammars"/>
+
 	<property name="ads.grammars.dir" location="./grammars" />
-    <property name="ads.parser.dir" location="src/java/org/apache/lucene/queryparser/flexible/aqp/parser" />
-    
-    <condition property="aqp.grammar" value="ADS">
-        <not>
-            <isset property="grammar"/>
-        </not>
-    </condition>
-    <property name="aqp.grammar" value="${grammar}"/>
+	<property name="ads.parser.dir" location="src/java/org/apache/lucene/queryparser/flexible/aqp/parser" />
+
+	<condition property="aqp.grammar" value="ADS">
+		<not>
+			<isset property="grammar"/>
+		</not>
+	</condition>
+	<property name="aqp.grammar" value="${grammar}"/>
 
 
-    <import file="../antlrqueryparser/build.xml" />
-    
-    
-    <!-- don't overrdie run.classpath, compile.classpath and test.classpath
+	<import file="../antlrqueryparser/build.xml" />
+
+
+	<!-- don't overrdie run.classpath, compile.classpath and test.classpath
          they are defined inside contrib/antlrqueryparser -->
-	
+
 	<!-- oh well... i have to override it to include my own jars...-->
 	<path id="test.classpath">
 		<path refid="test.base.classpath"/>
-        <path refid="common.test.classpath"/>
-        <path refid="classpath"/>
-        <fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
-            <include name="**/antlr-runtime*.jar"/>
-        </fileset>
+		<path refid="common.test.classpath"/>
+		<path refid="classpath"/>
+		<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
+			<include name="**/antlr-runtime*.jar"/>
+		</fileset>
 		<fileset dir="lib">
-         <include name="**/luke*.jar"/>
-		     <include name="**/mongo*.jar"/>
-    </fileset>
+			<include name="**/luke*.jar"/>
+			<include name="**/mongo*.jar"/>
+			<include name="**/jython-standalone*.jar"/>
+		</fileset>
 	</path>
-    
-    <path id="additional.classpath">
-        <path refid="test.classpath"/>
-        <path refid="compile.classpath"/>
-        <fileset dir="lib">
-            <include name="**/**.jar"/>
-        </fileset>
-    </path>
-    
-    <path id="junit.classpath">
-        <path refid="common.junit.classpath"/>
-        <path refid="additional.classpath"/>
-    </path>
-    
 
-    <target name="clean">
-        <delete dir="${build.dir}" />
-        <clean-parser grammar-name="${aqp.grammar}" parser-dir="${ads.parser.dir}"/>
-        <clean-parser grammar-name="ADS" parser-dir="${ads.parser.dir}"/>
-    </target>
+	<path id="additional.classpath">
+		<path refid="test.classpath"/>
+		<path refid="compile.classpath"/>
+		<fileset dir="lib">
+			<include name="**/**.jar"/>
+		</fileset>
+		<pathelement location="src/jython"/>
+	</path>
 
-    <target name="compile-core" depends="compile,common.compile-core"/>
+	<path id="junit.classpath">
+		<path refid="common.junit.classpath"/>
+		<path refid="additional.classpath"/>
+	</path>
 
-    <target name="compile" depends="compile-prerequisites" unless="adsabs-grammar-done" >
-    	<antcall target="generate-antlr" />
-        <compile srcdir="src/java" 
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<clean-parser grammar-name="${aqp.grammar}" parser-dir="${ads.parser.dir}"/>
+		<clean-parser grammar-name="ADS" parser-dir="${ads.parser.dir}"/>
+	</target>
+
+	<target name="compile-core" depends="compile,common.compile-core"/>
+
+	<target name="compile" depends="compile-prerequisites" unless="adsabs-grammar-done" >
+		<antcall target="generate-antlr" />
+		<compile srcdir="src/java" 
             destdir="${build.dir}/classes/java">
-            <classpath refid="compile.classpath"/>
-            <classpath refid="additional.classpath"/>
-            <include name="**/**.java"/>
-        </compile>
-    	<property name="adsabs-grammar-done" value="true"/>
-    </target>
-    
-    
+			<classpath refid="compile.classpath"/>
+			<classpath refid="additional.classpath"/>
+			<include name="**/**.java"/>
+		</compile>
+		<property name="adsabs-grammar-done" value="true"/>
+	</target>
+
+
 	<target name="test" depends="clean,compile" >
-        <antcall target="common.test" inheritRefs="true"/>
-    </target>
+		<antcall target="common.test" inheritRefs="true"/>
+	</target>
 
-    <target name="quick-test" >
-        <compile srcdir="src/java" 
-            destdir="${build.dir}/classes/java">
-            <classpath refid="compile.classpath"/>
-            <classpath refid="additional.classpath"/>
-            <include name="**/**.java"/>
-        </compile>
-        <antcall target="common.test" inheritRefs="true"/>
-    </target>
-    
-    <target name="compile-prerequisites" depends="">
-        
-        <!-- we are using some classes from the parser test framework
+	<target name="compile-prerequisites" depends="">
+
+		<!-- we are using some classes from the parser test framework
              so we must compile them ourselves (not to depend on luck)
              
              But we'll put them into test so that it is not included
              inside generated jars
-        --> 
-        <compile srcdir="${common.dir}/contrib/antlrqueryparser/src/java" 
+        -->
+		<compile srcdir="${common.dir}/contrib/antlrqueryparser/src/java" 
             destdir="${build.dir}/classes/test">
-            <classpath refid="test.classpath"/>
-        	<classpath refid="additional.classpath"/>
-            <include name="**/**.java"/>
-        </compile>
-        
-        <compile srcdir="${common.dir}/contrib/antlrqueryparser/src/test" 
+			<classpath refid="test.classpath"/>
+			<classpath refid="additional.classpath"/>
+			<include name="**/**.java"/>
+		</compile>
+
+		<compile srcdir="${common.dir}/contrib/antlrqueryparser/src/test" 
             destdir="${build.dir}/classes/test">
-            <classpath refid="compile.classpath"/>
-            <classpath refid="test.classpath"/>
-        	<classpath refid="additional.classpath"/>
-            <include name="**/Build*.java"/>
-            <include name="**/*Abstract*.java"/>
-        </compile>
-    	
-    	
+			<classpath refid="compile.classpath"/>
+			<classpath refid="test.classpath"/>
+			<classpath refid="additional.classpath"/>
+			<include name="**/Build*.java"/>
+			<include name="**/*Abstract*.java"/>
+		</compile>
+
+		<!--
     	<compile srcdir="${prop.solr.home}/lucene/analysis/common/src/test" 
             destdir="${build.dir}/classes/test">
             <classpath refid="test.classpath"/>
@@ -147,12 +139,13 @@
           <classpath refid="test.classpath"/>
           <include name="**/Abstract*.java"/>
       </compile>
-    </target>
-    
-    <target name="build-all"  depends="clean,default">
-        
-    </target>
-    
+      -->
+	</target>
+
+	<target name="build-all"  depends="clean,default">
+
+	</target>
+
 	<target name="process-synonyms" depends="compile">
 		<echo>Processing synonyms...</echo>
 		<java classname="org.adsabs.solr.analysis.ProcessCuratedAuthorSynonyms">

@@ -12,7 +12,6 @@ import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.SecondOrderQuery;
@@ -20,7 +19,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
-import org.junit.BeforeClass;
 
 
 /**
@@ -46,12 +44,6 @@ import org.junit.BeforeClass;
  */
 public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
-	@BeforeClass
-	public static void beforeTestAqpAdsabsSolrSearch() throws Exception {
-		MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
-				+ "/contrib/adsabs/src/python");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
-	}
 	
 	@Override
 	public String getSchemaFile() {

@@ -25,7 +25,6 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TermQuery;
 import org.adsabs.solr.AdsConfig.F;
-import org.junit.BeforeClass;
 
 /**
  * Test for the normalized_text_ascii type
@@ -34,12 +33,6 @@ import org.junit.BeforeClass;
 public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
 	
-	@BeforeClass
-  public static void beforeTestAdsabsTypeNormalizedTextAscii() throws Exception {
-  	MontySolrSetup.addToSysPath(MontySolrSetup.getMontySolrHome()
-				+ "/contrib/adsabs/src/python");
-		MontySolrSetup.addTargetsToHandler("adsabs.targets");
-  }
 	
   @Override
   public String getSchemaFile() {
