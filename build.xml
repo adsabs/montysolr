@@ -425,16 +425,9 @@ montysolr.version=${montysolr.version}
 	   description="Assembles ADSABS example and starts MontySolr (don't forget to do build-all first)"
 	   depends="">
 
-		<subant target="build-one run-configured -Dename=adsabs -Dprofile=normal.profile" inheritall="false" failonerror="true" buildpath="${common.dir}/contrib/examples" >
-      <fileset dir="${solr.real.location}/.." includes="build.xml" />
-    </subant>
-		
-		<!--
-		<exec executable="${ant}" dir="${common.dir}/contrib/examples" logerror="true" 
-			newenvironment="true">
-            <arg line="build-one run-configured -Dename=adsabs -Dprofile=normal.profile" />
-        </exec>
-     -->
+		<exec executable="${ant}" dir="${common.dir}/contrib/examples" logerror="true"	newenvironment="true">
+      <arg line="build-one run-configured -Dename=adsabs -Dprofile=normal.profile" />
+    </exec>
 
 	</target>
 

@@ -331,13 +331,12 @@
 
 	<target name="run-bare" depends="populate-classpath,generate-run.sh">
 		<run-montysolr 
+			classpath="${prop.jcc_egg}"
 			classpathref="examples.classpath" 
 			ignore-environment="${example.ignore-environment}" 
 			pythonpath="${env.PYTHONPATH}" 
-			webroot="${build.dir}/${example.name}/webapps/solr.war" 
 			solr-home-dir="${build.dir}/${example.name}/solr" 
 			solr-data-dir="${build.dir}/${example.name}/solr/data" 
-			jcc-classpath="${prop.jcc_egg}" 
 			jvmargs="${env.MONTYSOLR_JVMARGS}" 
 			arguments="${env.MONTYSOLR_ARGS}" 
 			basedir="${build.dir}/${example.name}" />
