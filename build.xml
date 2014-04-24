@@ -96,7 +96,6 @@
 			<and>
 				<isset property="montysolr.version" />
 				<isset property="solr.version" />
-				<isset property="ant" />
 			</and>
 		</condition>
 	</target>
