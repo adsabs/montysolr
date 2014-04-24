@@ -3,29 +3,50 @@ define(['backbone', 'marionette',
 ], function(
   Backbone, Marionette, ApiQuery, ApiRequest) {
 
-  //a pub-sub enabled widget that will need to be overridden
+  /**
+   * A pubsub based widget that contains the basic functionality
+   * you may want to override certain methods and pass your
+   * own custom template:
+   *
+   * var newWidgetClass = BaseWidget.extend({
+   *   activate: function() { .....}
+   * });
+   *
+   * newWidgetInstance = newWidgetClass();
+   */
 
-  var BaseWidget = Backbone.Marionette.Controller.extend({
+  var BaseWidget = Marionette.Controller.extend({
 
-    initialize: function() {
-      _.bindAll(this, "updateCurrentQuery", "dispatchRequest", "processResponse")
+    initialize: function(options) {
+      // these methods are called by PubSub as handlers so we bind them to 'this' object
+      // to avoid any confusion
+      _.bindAll(this, "setCurrentQuery", "dispatchRequest", "processResponse")
+
       this._currentQuery = new ApiQuery();
+
+      // XXX: here the widget should do something with the views/models/templates
+      // to set everything up
     },
 
-    getCurrentQuery: function() {
-      return this._currentQuery.clone()
-    },
 
-    //will need to override this method to add custom event listeners
+    /**
+     * Called by Bumblebee application when a widget is about to be registered
+     * it receives a BeeHive object, that contais methods/attributes that a
+     * widget needs to communicate with the app
+     *
+     * This is the place where you want to subscribe to events
+     *
+     * @param beehive
+     */
     activate: function(beehive) {
       this.pubsub = beehive.Services.get('PubSub');
-      this.pubSubKey = this.pubsub.getPubSubKey();
 
+      //TODO: I don't understand why the widget listens to one signal twice
       //always need to keep currentQuery updated, so don't change this
-      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.updateCurrentQuery);
+      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
 
       if (this.subscribeCustomHandlers) {
-        this.subscribeCustomHandlers()
+        this.subscribeCustomHandlers(this.pubsub)
       } else {
         //custom dispatchRequest function goes here
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
@@ -36,36 +57,70 @@ define(['backbone', 'marionette',
 
     },
 
-    dispatchRequest: function() {
-      var apiRequest;
-      apiRequest = new ApiRequest({
-        query: this.customizeQuery()
-      });
-      this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, apiRequest)
+    /**
+     * Default callback to be called by PubSub on 'INVITING_REQUEST'
+     */
+    dispatchRequest: function(apiQuery) {
+      var q = this.customizeQuery(apiQuery);
+      if (q) {
+        var req = this.composeRequest(q);
+        if (req) {
+          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+        }
+      }
     },
 
+    /**
+     * Default callback to be called by PubSub on 'DELIVERING_RESPONSE'
+     * @param apiResponse
+     */
     processResponse: function(apiResponse) {
-      throw "you need to customize this widget "
-      console.log(apiResponse)
-
+      throw new Error("you need to customize this function");
     },
 
-    updateCurrentQuery: function(ApiQuery) {
-      this._currentQuery = ApiQuery;
+    /**
+     * This function should return a request IFF we want to get some
+     * data - it is called from 'dispatchRequest' event handler
+     *
+     * @param apiQuery
+     * @returns {ApiRequest}
+     */
+    composeRequest: function(apiQuery) {
+      return new ApiRequest({
+        target: 'search',
+        query: apiQuery
+      });
     },
 
-    /*all purpose function for making a new query
-  returns an apiQuery ready for newQuery event or 
-  for insertion into  apiRequest */
+    /**
+     * Defaualt callback to be called by PubSub on 'INVITING_REQUEST'
+     * XXX: seems like a problem to me (it should be called from inside
+     * 'dispatchRequest' imo)
+     *
+     * @param apiQuery
+     */
+    setCurrentQuery: function(apiQuery) {
+      var q = apiQuery.clone();
+      q.unlock();
+      this._currentQuery = q;
+    },
+
+    getCurrentQuery: function() {
+      return this._currentQuery;
+    },
+
+    /**
+     * all purpose function for making a new query
+     * returns an apiQuery ready for newQuery event or
+     * for insertion into  apiRequest
+     * */
     customizeQuery: function(queryParams) {
       var query = this.getCurrentQuery();
-
       if (queryParams) {
         _.each(queryParams, function(v, k) {
           query.set(k, v)
         });
       };
-
       return query
     },
 
@@ -75,7 +130,7 @@ define(['backbone', 'marionette',
 
     getView: function() {
       if (!this.view) {
-        throw "This widget doesn't have a view"
+        throw new Error("This widget doesn't have a view");
       } else {
         return this.view
       }
@@ -85,4 +140,4 @@ define(['backbone', 'marionette',
 
   return BaseWidget
 
-})
+});

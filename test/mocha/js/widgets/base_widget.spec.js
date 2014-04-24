@@ -31,17 +31,19 @@ define(['marionette', 'backbone', 'js/widgets/base/base_widget',
 
       it("always has an up-to-date apiQuery, accessible as a copy through .getCurrentQuery()", function(done) {
 
-        expect(widget._currentQuery).to.be.instanceof(ApiQuery)
+        expect(widget.getCurrentQuery()).to.be.instanceof(ApiQuery);
 
-        pubsub.publish(key, pubsub.INVITING_REQUEST, new ApiQuery({
+        var q =  new ApiQuery({
           q: "pluto",
           fl: "author"
-        }));
+        });
 
-        expect(widget._currentQuery.get("q")).to.eql(["pluto"]);
-        expect(widget._currentQuery.get("fl")).to.eql(["author"]);
+        pubsub.publish(key, pubsub.INVITING_REQUEST, q);
 
-        expect(widget.getCurrentQuery()).to.not.eql(widget._currentQuery);
+        expect(widget.getCurrentQuery().get("q")).to.eql(["pluto"]);
+        expect(widget.getCurrentQuery().get("fl")).to.eql(["author"]);
+
+        expect(widget.getCurrentQuery()).to.not.eql(q);
 
         done();
 
@@ -51,8 +53,6 @@ define(['marionette', 'backbone', 'js/widgets/base/base_widget',
         expect(widget.activate).to.be.instanceof(Function);
         expect(widget.close).to.be.instanceof(Function);
         expect(widget.getView).to.be.instanceof(Function);
-
-
       });
 
 
