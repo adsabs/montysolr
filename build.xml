@@ -422,7 +422,7 @@ montysolr.version=${montysolr.version}
 	   description="Assembles ADSABS example and starts MontySolr (don't forget to do build-all first)"
 	   depends="">
 
-		<exec executable="${ant}" dir="${common.dir}/contrib/examples" logerror="true"	newenvironment="true">
+		<exec executable="ant" dir="${common.dir}/contrib/examples" logerror="true"	newenvironment="true">
       <arg line="build-one -Dename=adsabs -Dprofile=normal.profile" />
     </exec>
 		
@@ -435,7 +435,7 @@ montysolr.version=${montysolr.version}
 
 	
 	<target name="get-solr-mirror" depends="init" unless="solr.real.location">
-		<exec executable="${python}" outputproperty="solr.mirror" failonerror="true" logerror="true">
+		<exec executable="python" outputproperty="solr.mirror" failonerror="true" logerror="true">
 			<arg value="-c" />
 			<arg  value="import urllib;t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));print l[0]"/>
 		</exec>

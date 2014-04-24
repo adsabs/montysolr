@@ -283,7 +283,7 @@
 		<antcall target="populate-classpath" />
 		
 		<!-- generate the run.sh using default profile (even if that may be wrong for now) --> 
-		<exec executable="${ant}" failonerror="true" dir="${basedir}">
+		<exec executable="ant" failonerror="true" dir="${basedir}">
 			<arg line="-Dename=${example.name} -Dignore-environment=true -Dprofile=${example.config} -Dtarget=generate-run.sh" />
 			<arg value="run-configured" />
 		</exec>
@@ -319,7 +319,7 @@
 
 		<antcall target="populate-classpath" />
 		
-		<exec executable="${ant}" failonerror="true">
+		<exec executable="ant" failonerror="true">
 			<env key="PYTHONPATH" value="${missing.PYTHONPATH}" />
 			<env key="MONTYSOLR_JVMARGS" value="${missing.MONTYSOLR_JVMARGS}" />
 			<env key="MONTYSOLR_ARGS" value="${missing.MONTYSOLR_ARGS}" />
