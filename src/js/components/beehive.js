@@ -8,7 +8,6 @@ define(['backbone', 'underscore',
 
   var hiveOptions = [];
   var BeeHive = GenericModule.extend({
-
     initialize: function(attrs, options) {
       _.extend(this, _.pick(options, hiveOptions));
       this.Services = new ServicesContainer();

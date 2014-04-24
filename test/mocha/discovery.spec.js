@@ -24,6 +24,8 @@ var tests = [
   tbase + '/components/services_container.spec.js',
 
   // UI components
+  tbase + '/widgets/base_widget.spec.js',
+  tbase + '/widgets/multi_callback_widget.spec.js',
   tbase + '/widgets/results_render_widget.spec.js',
   tbase + '/widgets/search_bar_widget.spec.js',
   tbase + '/widgets/api_response_widget.spec.js',
