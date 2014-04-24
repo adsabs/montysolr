@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>
+
+  </title>
+  <link rel="stylesheet" href="../bower_components/mocha/mocha.css" />
+  <link rel="stylesheet" href="../src/styles/css/styles.css" />
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12" id="header"><br/></div>
+      <div class="row">
+        <div class="col-xs-12" id="top"></div>
+      </div>
+      <div class="row">
+        <div class="col-xs-3" id="left"></div>
+        <div class="col-xs-6" id="middle"></div>
+        <div class="col-xs-3" id="right"></div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12" id="bottom"></div>
+      </div>
+    </div>
+
+
+    <script src="../bower_components/mocha/mocha.js"></script>
+    <script>
+    var mocha = {};
+    mocha.testToLoad = '../test/live-presentation.js';
+    </script>
+
+
+    <script data-main="../src/discovery.config" src="../bower_components/requirejs/require.js"></script>
+
+
+</body>
+
+</html>
