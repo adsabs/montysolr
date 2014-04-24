@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <project name="montysolr" default="usage">
 
 	<description>Java extensions for Python - Java search engine made python-friendly</description>
