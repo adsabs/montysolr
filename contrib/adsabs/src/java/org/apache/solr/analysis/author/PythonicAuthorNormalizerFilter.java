@@ -2,10 +2,9 @@ package org.apache.solr.analysis.author;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
@@ -40,11 +39,9 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
   private List<String> buffer = new ArrayList<String>();
+  private Pattern multiSpace = Pattern.compile("\\s\\s+");
   private JythonNameParser jythonParser;
   
-  /**
-   * @param input
-   */
   public PythonicAuthorNormalizerFilter(TokenStream input) {
     super(input);
     JythonObjectFactory factory = new JythonObjectFactory(JythonNameParser.class, "jython_name_parser", "HumanParser");

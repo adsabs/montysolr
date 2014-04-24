@@ -1,5 +1,5 @@
 ABOUT MONTYSOLR
----------------
+===============
 
 MontySolr is an open-source distribution of Solr (http://lucene.apache.org/solr)
 
@@ -13,7 +13,7 @@ It features:
   - batch processing for long-running tasks
   - bitset queries (to search/analyze millions of docs by sending their IDs)
   - author name disambiguation
-  - and much more which I'm lazy to type...
+  - and much more, I'm lazy to type...
   
   
 In the past MontySolr combined Java with extensions written in C++/Python but now 
@@ -22,16 +22,17 @@ that Jython support for JNI arrived, MontySolr switched to pure Java (April 2014
 
 
 INSTALLATION
---------------------------
+============
 
 You will need Java JDK (version 7), and 'ant' (v1.8 and newer) 
 
-``bash
+```bash
 
  $ git clone https://github.com/romanchyla/montysolr
  $ cd montysolr
  $ ant build-all
-``
+ $ ant build-distribution
+```
 
 MontySolr works on Linux/Mac/Windows. Releases are automatically tested/deployed
 see: https://github.com/romanchyla/montysolr/releases.

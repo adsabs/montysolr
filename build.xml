@@ -69,18 +69,13 @@
 	<target name="usage"
 	          description="Prints out instructions">
 		<echo message="Welcome to the MontySolr project!" />
-		<echo message="Use 'ant build-all' to compile MontySolr and prepare demos." />
-		<echo message="Use 'ant run-example' to run the example." />
+		<echo message="Use 'ant build-all' to compile MontySolr and all its modules" />
+		<echo message="Use 'ant build-example' to prepare standalone distribution." />
 
 		<echo message="And for developers:"/>
 		<echo message="Use 'ant clean' to clean compiled files." />
 		<echo message="Use 'ant compile' to compile the Java source code." />
-		<echo message="Use 'ant build' to compile only MontySolr as a Python module." />
-		<echo message="Use 'ant build-solr' to compile only Solr as a Python module." />
-		<echo message="TODOs:" />
-		<echo message="Use 'ant automatic-install' to install everything incl dependencies." />
-		<echo message="Use 'ant package' to generate zip, tgz, and maven artifacts for distribution." />
-		<echo message="Use 'ant test' to run unit tests." />
+		<echo message="Use 'ant test-all' to run unit tests." />
 	</target>
 
 
@@ -171,7 +166,8 @@ montysolr.version=${montysolr.version}
     ==================================================================
     -->
 	
-	<target name="build-all" depends="get-solr,build-contrib,jar"
+	
+	<target name="build-all" depends="get-solr,write-properties,build-contrib,jar"
 	        description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Python inside Solr"/>
 	    
     
@@ -422,13 +418,18 @@ montysolr.version=${montysolr.version}
 
 	
 	
-	<target name="run-example"
+	<target name="build-distribution"
 	   description="Assembles ADSABS example and starts MontySolr (don't forget to do build-all first)"
 	   depends="">
 
 		<exec executable="${ant}" dir="${common.dir}/contrib/examples" logerror="true"	newenvironment="true">
-      <arg line="build-one run-configured -Dename=adsabs -Dprofile=normal.profile" />
+      <arg line="build-one -Dename=adsabs -Dprofile=normal.profile" />
     </exec>
+		
+		<echo>
+		The distribution is ready in: ${build.dir}/contrib/examples/adsabs
+		You can start solr by: ${build.dir}/contrib/examples/adsabs/run.sh
+		</echo>
 
 	</target>
 

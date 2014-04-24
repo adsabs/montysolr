@@ -43,7 +43,6 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/wstx-asl-3.2.7.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/zookeeper-3.3.6.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/commons-lang-2.4.jar"/>
-	<classpathentry kind="lib" path="contrib/adsabs/lib/jzlib-1.0.7.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/luke-4.0.0-BETA.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-analysis-extras-4.0-SNAPSHOT.jar"/>
