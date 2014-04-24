@@ -166,9 +166,10 @@ montysolr.version=${montysolr.version}
     ==================================================================
     -->
 	
+	<target name="build" description="Builds main MontySOLR" depends="get-solr,write-properties,jar" />
 	
-	<target name="build-all" depends="get-solr,write-properties,build-contrib,jar"
-	        description="Build Python egg for Solr, and sorlpie egg to be embedded inside Java VM, this is what you need to run Python inside Solr"/>
+	<target name="build-all" depends="build,build-contrib"
+	        description="Build all modules"/>
 	    
     
     <target name="build-contrib" >
