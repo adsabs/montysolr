@@ -1,4 +1,4 @@
-package examples.invenio;
+package examples.adsabs;
 
 import java.io.BufferedReader;
 import java.io.IOException;

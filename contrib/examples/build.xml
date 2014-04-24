@@ -41,14 +41,14 @@
 	<property name="example.ignore-environment" value="${ignore-environment}" />
 
 
-	<condition property="example.jvmargs" value="-d64 -Xmx1024m -Dmontysolr.max_workers=4 -Dmontysolr.max_threads=200">
+	<condition property="example.jvmargs" value="-d64 -Xmx1024m">
 		<not>
 			<isset property="jvmargs" />
 		</not>
 	</condition>
 	<property name="example.jvmargs" value="${jvmargs}" />
 
-	<condition property="example.config" value="normal.properties">
+	<condition property="example.config" value="normal.profile">
 		<not>
 			<isset property="profile" />
 		</not>
@@ -177,6 +177,10 @@
 			<arg line="build-one -Dename=adsabs" />
 		</exec>
 	</target>
+	
+	<target name="jar-core" description="Packages the JAR file">
+    <!-- does nothing on purpose //-->
+  </target>
 
 	<target name="build-all" depends="jar">
 		<echo>
@@ -198,39 +202,17 @@
 			solr-example="${prop.solr.real.location}/example" />
 	    
 		<mkdir dir="${build.dir}/${example.name}/solr/lib" />
+		
+		<!-- existence of this folder prevents solr from using tmp (where UI Admin has problems) -->
 	  <mkdir dir="${build.dir}/${example.name}/work" />
 		
-		<!-- put core jar into example/lib -->
-		<copy todir="${build.dir}/${example.name}/lib" flatten="true" overwrite="true" verbose="yes">
-			<fileset dir="${common.dir}/build">
-				<include name="montysolr*.jar" />
-			</fileset>
-		</copy>
-
-	  
-		<!-- put contrib jars into example/solr/lib -->
-		<copy todir="${build.dir}/${example.name}/solr/lib" flatten="true" overwrite="true" verbose="false">
-			<fileset dir="${common.dir}/build/contrib">
-				<include name="*/montysolr*.jar" />
-			</fileset>
-		</copy>
-
-		<!-- put contrib lib/jars into example/solr/lib -->
-		<copy todir="${build.dir}/${example.name}/solr/lib" flatten="true" overwrite="true">
-			<fileset dir="${common.dir}/contrib">
-				<include name="**/lib/*.jar" />
-			</fileset>
-		</copy>
-
+		
+		<mkdir dir="${build.dir}/${example.name}/python" />
+    <mkdir dir="${build.dir}/${example.name}/jython" />
+		
 		<echo>Putting Python code together into: "${build.dir}/${example.name}/python</echo>
-		<copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true">
-			<fileset dir="${common.dir}/src/python">
-				<include name="**/*.py" />
-			</fileset>
-		</copy>
 
 		<!-- gather and copy the python code to example/python -->
-		<mkdir dir="${build.dir}/${example.name}/python" />
 		<copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true">
 			<fileset dir="${common.dir}/contrib">
 				<include name="**/src/python/**/*.py" />
@@ -238,55 +220,79 @@
 			<regexpmapper from=".*/src/python/(.*)" to="\1" />
 		</copy>
 
-		<!-- gather and copy the python wrappers to example/python -->
-		<mkdir dir="${build.dir}/${example.name}/python" />
-		<copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true">
-			<fileset dir="${common.dir}/build/dist">
-				<include name="**" />
-			</fileset>
-		</copy>
+		<echo>Putting Jython code together into: "${build.dir}/${example.name}/jython</echo>
 
-		<!-- set the python files not-readable so that i am not tempted to mess w/ them -->
+    <!-- gather and copy the python code to example/python -->
+    <copy todir="${build.dir}/${example.name}/jython" flatten="false" overwrite="true">
+      <fileset dir="${common.dir}/contrib">
+        <include name="**/src/jython/**/*.py" />
+      </fileset>
+      <regexpmapper from=".*/src/jython/(.*)" to="\1" />
+    </copy>
+
+		<!-- set the python/jython files not-readable so that i am not tempted to mess w/ them -->
 		<chmod perm="ugo-x">
 			<fileset dir="${build.dir}/${example.name}/python">
 				<include name="**" />
 			</fileset>
 		</chmod>
+		<chmod perm="ugo-x">
+      <fileset dir="${build.dir}/${example.name}/jython">
+        <include name="**" />
+      </fileset>
+    </chmod>
 
 	    
-		<!-- get external dependencies from solr and put them into example/solr/lib -->
-    <get-lucene-solr-package package="dataimporthandler" into="${build.dir}/${example.name}/solr/lib"/>
-    <get-lucene-solr-package package="sandbox" into="${build.dir}/${example.name}/solr/lib"/>
-	  <get-lucene-solr-package package="join" into="${build.dir}/${example.name}/solr/lib"/>
+		
+		<!-- include our jars (and other dependencies) directly into solr.war - this is not strictly
+		     necessary; however if we don't do that, we have to at least include our customizations
+		     to solr code (eg. DIH classes and query parser additions). So this was the simplest
+		     and hopefully 'best' way -->
+		
+		<unzip src="${build.dir}/${example.name}/webapps/solr.war" dest="${build.dir}/${example.name}/solrwar" />
+		
+		<!-- put montysolr jars into war -->
+    <copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true" verbose="yes">
+      <fileset dir="${common.dir}/build">
+        <include name="montysolr*.jar" />
+      	<include name="contrib/*/montysolr*.jar" />
+      </fileset>
+    </copy>
+
+    <!-- add selected libraries -->
+		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
+      <fileset dir="${montysolr.dependencies.dir}">
+        <include name="**/apache-solr-dataimporthandler*.jar" />
+        <include name="**/lucene-join*.jar" />
+        <include name="**/lucene-sandbox*.jar" />
+      </fileset>
+    </copy>
+    <copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
+      <fileset dir="${common.dir}/contrib">
+        <include name="**/lib/antlr-runtime*.jar" />
+      	<include name="**/lib/drizzle*.jar" />
+      	<include name="**/lib/jython-standalone*.jar" />
+      	<include name="**/lib/mongo-java-driver*.jar" />
+      </fileset>
+    </copy>
+		
+		<!-- zip the jar back -->
+		<zip destfile="${build.dir}/${example.name}/webapps/solr.war" basedir="${build.dir}/${example.name}/solrwar" />
 		
 	    
-		<!-- generate startup file for montysolr from start.jar and the main montysolr -->
-		<jar destfile="${build.dir}/${example.name}/monty.jar" filesetmanifest="merge" >
-			
-			<zipgroupfileset dir="${build.dir}/${example.name}/lib" includes="montysolr-montysolr*.jar" />
-			<zipgroupfileset dir="${build.dir}/${example.name}" includes="start.jar" />
-		    
-			<manifest >
-                <attribute name="Main-Class" value="monty.solr.Start" />
-			</manifest>
-		</jar>
-		
-		
-		<!-- TODO: to remove this after we stop using MontySolrJettyRunner -->
-        <mkdir dir="${build.dir}/${example.name}/solr/lib/solr-extracted"/>
-        <copy todir="${build.dir}/${example.name}/solr/lib/solr-extracted" overwrite="false" flatten="true">
-            <fileset dir="${common.dir}/build/solr-download">
-                <include name="apache-solr*/solr/dist/montysolr-extracted/*.jar" />
-            </fileset>
-        </copy>
-		
 		<antcall target="populate-classpath" />
 		
-		<!-- generate the run.sh using default profile (even if that may be wrong for now) -->
-		<exec executable="${prop.ant}" failonerror="true" dir="${basedir}">
+		<!-- generate the run.sh using default profile (even if that may be wrong for now) --> 
+		<exec executable="${ant}" failonerror="true" dir="${basedir}">
 			<arg line="-Dename=${example.name} -Dignore-environment=true -Dprofile=${example.config} -Dtarget=generate-run.sh" />
 			<arg value="run-configured" />
 		</exec>
+
+		<delete dir="${build.dir}/${example.name}/solrwar"/>
+    <delete dir="${build.dir}/${example.name}/example-DIH"/>
+    <delete dir="${build.dir}/${example.name}/exampledocs"/>
+		<delete dir="${build.dir}/${example.name}/" includes="build.xml ivy.xml"/>
+		
 		
 	</target>
 
@@ -309,17 +315,14 @@
 		<!-- i can't do ${example.name}.PYTHON without external lib
 		     eg. http://ant.apache.org/antlibs/props/index.html -->
 
-		<property prefix="xxx" file="${example.name}/${example.config}" />
+		<property prefix="missing" file="${example.name}/${example.config}" />
 
 		<antcall target="populate-classpath" />
 		
-		<exec executable="${prop.ant}" failonerror="true">
-			<env key="PYTHONPATH" value="${xxx.PYTHONPATH}" />
-			<env key="MONTYSOLR_HANDLER" value="${xxx.MONTYSOLR_HANDLER}" />
-			<env key="MONTYSOLR_TARGETS" value="${xxx.MONTYSOLR_TARGETS}" />
-			<env key="MONTYSOLR_MAX_WORKERS" value="${xxx.MONTYSOLR_MAX_WORKERS}" />
-			<env key="MONTYSOLR_JVMARGS" value="${xxx.MONTYSOLR_JVMARGS}" />
-			<env key="MONTYSOLR_ARGS" value="${xxx.MONTYSOLR_ARGS}" />
+		<exec executable="${ant}" failonerror="true">
+			<env key="PYTHONPATH" value="${missing.PYTHONPATH}" />
+			<env key="MONTYSOLR_JVMARGS" value="${missing.MONTYSOLR_JVMARGS}" />
+			<env key="MONTYSOLR_ARGS" value="${missing.MONTYSOLR_ARGS}" />
 			<arg line="-Dename=${example.name} -Dignore-environment=false" />
 			<arg value="${run.target}" />
 		</exec>
@@ -327,7 +330,7 @@
 
 
 	<target name="run-bare" depends="populate-classpath,generate-run.sh">
-		<run-montysolr classpath="${prop.jcc_egg}" 
+		<run-montysolr 
 			classpathref="examples.classpath" 
 			ignore-environment="${example.ignore-environment}" 
 			pythonpath="${env.PYTHONPATH}" 
@@ -344,11 +347,9 @@
 		<create-run.sh classpath="${prop.jcc_egg}" 
 			classpathref="examples.classpath" 
 			ignore-environment="${example.ignore-environment}" 
-			pythonpath="${env.PYTHONPATH}" 
-			webroot="${build.dir}/${example.name}/webapps/solr.war" 
+			pythonpath="${env.PYTHONPATH}"
 			solr-home-dir="${build.dir}/${example.name}/solr" 
 			solr-data-dir="${build.dir}/${example.name}/solr/data" 
-			jcc-classpath="${prop.jcc_egg}" 
 			jvmargs="${env.MONTYSOLR_JVMARGS}" 
 			arguments="${env.MONTYSOLR_ARGS}" 
 			basedir="${build.dir}/${example.name}" />
@@ -364,15 +365,12 @@
 	    <attribute name="classpath" />
 	    <attribute name="classpathref" />
 	    <attribute name="jvmargs" />
-	    <attribute name="webroot" />
-	    <attribute name="context" default="/solr" />
 	    <attribute name="arguments" default="" />
 	    <attribute name="solr-home-dir" />
 	    <attribute name="solr-data-dir" />
-	    <attribute name="jcc-classpath" default="${prop.jcc_egg}"/>
 	    <attribute name="ignore-environment" default="true" />
-	    <attribute name="montysolr-class" default="monty.solr.JettyRunner" />
 	    <attribute name="pythonpath" default="${build.dir}/${example.name}/python"/>
+		  <attribute name="jythonpath" default="${build.dir}/${example.name}/jython"/>
 	    <attribute name="basedir" default="${basedir}"/>
 	    <sequential>
 	        <echo file="@{basedir}/run.sh">#!/bin/bash
@@ -382,30 +380,25 @@
 	    #               
 	    #           basedir: @{basedir}
 	    #           ignore-environment: @{ignore-environment}
-	    #           classpathref: @{classpathref}
-	    #           classname: @{montysolr-class}
 
 	    JVMARGS=$1
 	    ARGS=$2
 	          
 	    export HOMEDIR=@@@          
 	    export PYTHONPATH=@{pythonpath}
-	    export MONTYSOLR_HANDLER=${env.MONTYSOLR_HANDLER}
-	    export MONTYSOLR_TARGETS=${env.MONTYSOLR_TARGETS}
-	    export MONTYSOLR_MAX_WORKERS=${env.MONTYSOLR_MAX_WORKERS}
+	    export JYTHONPATH=@{jythonpath}
 
+	    #          For reference (not needed by MontySOLR)
 	    export JCC_CP="@{classpath}"
 	    export JAVA_CP="${toString:@{classpathref}}"            
 	    export CP="$JCC_CP${path.separator}$JAVA_CP"            
 	                
-	    java -cp $CP \
-	                    -Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir} \
-	                    -Djava.library.path=@{jcc-classpath} \
-	                    @{jvmargs} $JVMARGS \
-	                    @{montysolr-class} \
-                        --webroot @{webroot} \
-                        --context @{context} \
-	                    @{arguments} $ARGS  &amp;
+	    java \
+	         -Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir} \
+	         -Dpython.path=$JYTHONPATH \
+	         @{jvmargs} $JVMARGS \
+	         -jar start.jar \
+	         @{arguments} $ARGS &amp;
 
 	    pid=$!
 	    echo "MontySolr pid=$pid"
@@ -416,9 +409,9 @@
 	                
 	                </echo>
 
-	        <replace file="@{basedir}/run.sh" token="@{basedir}" value="$HOMEDIR"/>
-	        <replace file="@{basedir}/run.sh" token="@@@" value="@{basedir}"/>
-	        <chmod file="@{basedir}/run.sh" perm="u+x" />
+        <replace file="@{basedir}/run.sh" token="@{basedir}" value="$HOMEDIR"/>
+        <replace file="@{basedir}/run.sh" token="@@@" value="@{basedir}"/>
+        <chmod file="@{basedir}/run.sh" perm="u+x" />
 
 	    </sequential>
 
@@ -428,15 +421,12 @@
 	    <attribute name="classpath" />
 	    <attribute name="classpathref" />
 	    <attribute name="jvmargs" />
-	    <attribute name="webroot" />
-	    <attribute name="context" default="/solr" />
 	    <attribute name="arguments" default="" />
 	    <attribute name="solr-home-dir" />
 	    <attribute name="solr-data-dir" />
-	    <attribute name="jcc-classpath" default="${prop.jcc_egg}"/>
 	    <attribute name="ignore-environment" default="true" />
-	    <attribute name="montysolr-class" default="monty.solr.JettyRunner" />
 	    <attribute name="pythonpath" default=""/>
+		  <attribute name="jythonpath" default=""/>
 	    <attribute name="basedir" default="${basedir}"/>
 
 	    <sequential>
@@ -444,21 +434,14 @@
 	                classpathref="@{classpathref}"
 	                fork="true"
 	                newenvironment="@{ignore-environment}"
-	                classname="@{montysolr-class}"
 	                dir="@{basedir}"
 	                >
 
 	            <env key="PYTHONPATH" path="@{pythonpath}" />
 	            <jvmarg line="-Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir}"/>
-	            <jvmarg line="-Djava.library.path=@{jcc-classpath}"/>
-	            <jvmarg line="@{jvmargs}"/>
-	            <arg value="--webroot"/>
-	            <arg value="@{webroot}"/>
-	            <arg value="--context"/>
-	            <arg value="@{context}"/>
+	            <jvmarg line="@{jvmargs} -jar start.jar"/>
 	            <arg line="@{arguments}"/>
 	        </java>
-
 	    </sequential>
 	</macrodef>
 	
@@ -488,7 +471,7 @@
 
 	        <echo>
 	                  Assembled @{example-name} at @{build-dir}/@{example-name}
-	               </echo>
+         </echo>
 
 	    </sequential>
 	</macrodef>

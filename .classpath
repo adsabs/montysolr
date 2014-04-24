@@ -12,7 +12,7 @@
 	<classpathentry kind="src" path="src/test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="build/solr-download/apache-solr-4.0.0-SVN/org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-core-4.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-core-4.0-SNAPSHOT.jar" sourcepath="/lucene_solr_4_0/solr/core/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-solrj-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/commons-codec-1.7.jar"/>
@@ -34,7 +34,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-memory-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-misc-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queries-4.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queryparser-4.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queryparser-4.0-SNAPSHOT.jar" sourcepath="/lucene_solr_4_0/lucene/queryparser/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-spatial-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-suggest-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/slf4j-api-1.6.4.jar"/>

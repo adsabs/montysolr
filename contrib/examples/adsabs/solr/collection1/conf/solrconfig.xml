@@ -50,7 +50,7 @@
        syntax...
     -->       
   
-  <lib dir="../../lib" />
+  <lib dir="../lib" />
 
 
   <!-- A 'dir' option by itself adds any files found in the directory 

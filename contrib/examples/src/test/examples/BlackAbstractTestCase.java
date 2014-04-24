@@ -99,7 +99,7 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 	public static String getConf(String conf) {
 		File f = new File(getExampleHome() + "/" + conf);
 		if (!f.exists()) {
-			throw new IllegalStateException("Not exists: " + f.toString());
+			throw new IllegalStateException("Not exists: " + f.toString() + "\nPerhaps you forgot to run 'ant build-one -Dename={example}'?");
 		}
 		return f.toString();
 	}
