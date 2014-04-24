@@ -20,7 +20,7 @@ define(['backbone', 'marionette',
     initialize: function(options) {
       // these methods are called by PubSub as handlers so we bind them to 'this' object
       // to avoid any confusion
-      _.bindAll(this, "setCurrentQuery", "dispatchRequest", "processResponse")
+      _.bindAll(this, "dispatchRequest", "processResponse")
 
       this._currentQuery = new ApiQuery();
 
@@ -41,10 +41,6 @@ define(['backbone', 'marionette',
     activate: function(beehive) {
       this.pubsub = beehive.Services.get('PubSub');
 
-      //TODO: I don't understand why the widget listens to one signal twice
-      //always need to keep currentQuery updated, so don't change this
-      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
-
       if (this.subscribeCustomHandlers) {
         this.subscribeCustomHandlers(this.pubsub)
       } else {
@@ -63,6 +59,7 @@ define(['backbone', 'marionette',
     dispatchRequest: function(apiQuery) {
       var q = this.customizeQuery(apiQuery);
       if (q) {
+        this.setCurrentQuery(q);
         var req = this.composeRequest(q);
         if (req) {
           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
@@ -115,12 +112,19 @@ define(['backbone', 'marionette',
      * for insertion into  apiRequest
      * */
     customizeQuery: function(queryParams) {
-      var query = this.getCurrentQuery();
-      if (queryParams) {
-        _.each(queryParams, function(v, k) {
-          query.set(k, v)
-        });
-      };
+      var query;
+      if (queryParams instanceof  ApiQuery) {
+        // do something here
+        query = queryParams;
+      }
+      else {
+        query = this.getCurrentQuery();
+        if (queryParams) {
+          _.each(queryParams, function(v, k) {
+            query.set(k, v)
+          });
+        };
+      }
       return query
     },
 

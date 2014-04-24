@@ -6,6 +6,15 @@ define(['backbone', 'marionette', 'js/components/api_query',
   function(
     Backbone, Marionette, ApiQuery, ApiRequest, BaseWidget) {
 
+    /**
+     * This widget is for situations when you want to register
+     * a special function that handles the input (api-response)
+     *
+     * You call it in two steps:
+     *
+     *  1. registerCallback(apiQuery.url(), function() {....})
+     *  2. dispatchRequest(apiQuery)
+     */
     var MultiCallbackWidget = BaseWidget.extend({
 
       /*Takes any additions to the query, a callback, and
@@ -18,7 +27,7 @@ define(['backbone', 'marionette', 'js/components/api_query',
         BaseWidget.prototype.initialize.call(this,options);
       },
 
-      /**\
+      /**
        * Here you register callbacks that should receive response
        * and handle it
        *
