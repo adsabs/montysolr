@@ -11,10 +11,14 @@ def create_collection_bibrec(table_name, coll_name, step_size=10000, maxsize=Non
     dbquery.run_sql("DROP TABLE IF EXISTS `%s`" % dbquery.real_escape_string(table_name))
     dbquery.run_sql(create_stmt)
     
+    print create_stmt
+
     #now retrieve the collection
     c = search_engine.get_collection_reclist(coll_name)
     if len(c) < 0:
         sys.stderr.write("The collection %s is empty!\n" % coll_name)
+    else:
+    	print 'collection has x recs:', len(c)
     
     c = list(c)
     l = len(c)
