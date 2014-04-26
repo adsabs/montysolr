@@ -16,6 +16,9 @@ import org.junit.BeforeClass;
 
 import examples.BlackAbstractTestCase;
 
+/*
+ * this needs INVENIO with ADS Data
+ */
 
 public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase{
 	

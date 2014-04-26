@@ -52,6 +52,7 @@ import examples.BlackAbstractTestCase;
  * is configured to recognize records that have bibcode inthe field
  * 970__a then we get only 22 recs from the Invenio demo.
  * 
+ * This needs Invenio with demo data 
  */
 public class BlackBoxInvenioDoctor extends BlackAbstractTestCase {
 

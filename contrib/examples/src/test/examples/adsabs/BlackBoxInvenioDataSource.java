@@ -9,6 +9,11 @@ import org.apache.solr.handler.dataimport.InvenioDataSource;
 import org.apache.solr.update.InvenioDB;
 import examples.BlackAbstractLuceneTestCase;
 
+/*
+ * 
+ * this needs Invenio with ADS data
+ */
+
 public class BlackBoxInvenioDataSource extends BlackAbstractLuceneTestCase {
 	
 	public void tearDown() throws Exception {
@@ -41,7 +46,7 @@ public class BlackBoxInvenioDataSource extends BlackAbstractLuceneTestCase {
 		// the query must be URLEncoded (double, if you look at it from the web)
 		r = handler.getData("python://whatever.here/there?p=" + java.net.URLEncoder.encode("recid:1744593->1745994", "UTF-8"));
 		result = convertToString(r);
-		assert !result.contains("<controlfield tag=\"001\">");
+		assert result.contains("<controlfield tag=\"001\">");
 		assert result.contains("</collection>");
 		
 		r = handler.getData("python://whatever.here/there?p=" + java.net.URLEncoder.encode("recid:1744593->1745994 OR recid:56->58", "UTF-8"));

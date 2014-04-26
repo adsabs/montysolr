@@ -144,7 +144,16 @@
 			</fileset>
 		</path>
 
+		<path id="classpath">
+      <path refid="common.test.classpath" />
+      <fileset dir="${common.dir}/build/contrib/examples/${example.name}/">
+          <include name="lib/*.jar" />
+          <include name="webapps/*.war" />
+      </fileset>
+    </path>
+
 		<path id="test.classpath">
+			<path refid="classpath"/>
 			<path refid="test.base.classpath"/>
 			<path refid="examples.classpath" />
 			<path refid="common.test.classpath" />
@@ -154,16 +163,13 @@
 			<dirset dir="${common.dir}/build/contrib">
 				<include name="**/classes/test" />
 			</dirset>
+			<dirset dir="${common.dir}/build/contrib">
+        <include name="**/classes/java" />
+      </dirset>
 			
 		</path>
 		
-		<path id="classpath">
-			<path refid="common.test.classpath" />
-			<!-- SOLR/example/lib classes -->
-            <fileset dir="${prop.solr.home}/solr/example/lib">
-                <include name="*.jar" />
-            </fileset>
-		</path>
+		
 		<echo>${classpath:toString}</echo>
 	</target>
 
