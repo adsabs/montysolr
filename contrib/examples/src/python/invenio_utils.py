@@ -37,4 +37,4 @@ def create_astro_collection():
 	create_collection_bibrec("_astro_bibrec", "Astronomy", step_size=1000)
 
 def create_astro_collection_short():	
-	create_collection_bibrec("_astro_bibrec", "Astronomy", step_size=1000, maxsize=100000)
+	create_collection_bibrec("_astro_bibrec_short", "Astronomy", step_size=1000, maxsize=100000)
