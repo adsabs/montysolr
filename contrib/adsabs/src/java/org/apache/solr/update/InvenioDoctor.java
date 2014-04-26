@@ -20,6 +20,7 @@ package org.apache.solr.update;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -284,7 +285,7 @@ public class InvenioDoctor extends RequestHandlerBase {
   }
 
   public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
-  throws IOException, InterruptedException, SQLException {
+  throws IOException, InterruptedException, SQLException, ParseException {
     
     SolrParams params = req.getParams();
     String command = params.get("command","info");
@@ -454,6 +455,13 @@ public class InvenioDoctor extends RequestHandlerBase {
           setWorkerMessage("Worker error..." + e.getMessage());
           log.error(e.getMessage());
           log.error(e.getStackTrace().toString());
+        } catch (ParseException e) {
+          if (strictMode) {
+            throw new SolrException(ErrorCode.SERVER_ERROR, e);
+          }
+          setWorkerMessage("Worker error..." + e.getMessage());
+          log.error(e.getMessage());
+          log.error(e.getStackTrace().toString());
         } finally {
           setBusy(false);
           request.close();
@@ -506,7 +514,7 @@ public class InvenioDoctor extends RequestHandlerBase {
   /*
    * The main call
    */
-  private void runSynchronously(RequestQueue queue, SolrQueryRequest req) throws InterruptedException, IOException, SQLException {
+  private void runSynchronously(RequestQueue queue, SolrQueryRequest req) throws InterruptedException, IOException, SQLException, ParseException {
 
     SolrCore core = req.getCore();
 
@@ -607,7 +615,7 @@ public class InvenioDoctor extends RequestHandlerBase {
 		}
   }
 
-	private void runDiscovery(SolrQueryRequest req) throws IOException, SQLException {
+	private void runDiscovery(SolrQueryRequest req) throws IOException, SQLException, ParseException {
     SolrParams params = req.getParams();
     if (params.get("last_recid", null) == null || params.getInt("last_recid", 0) == -1) {
       queue.setPresent(new BitSet());
@@ -637,7 +645,7 @@ public class InvenioDoctor extends RequestHandlerBase {
 
   private Map<Integer, Map<Integer, Integer>> tmpMap = new HashMap<Integer, Map<Integer,Integer>>();
   private BitSet[] discoverMissingRecords(BitSet present, BitSet missing, BitSet toDelete, 
-  		SolrQueryRequest req) throws IOException, SQLException {
+  		SolrQueryRequest req) throws IOException, SQLException, ParseException {
     
     SolrParams params = req.getParams();
     String field = params.get("field", "recid");

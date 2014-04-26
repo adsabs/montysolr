@@ -145,7 +145,7 @@
 		</path>
 
 		<path id="test.classpath">
-
+			<path refid="test.base.classpath"/>
 			<path refid="examples.classpath" />
 			<path refid="common.test.classpath" />
 

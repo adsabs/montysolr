@@ -62,6 +62,7 @@
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.TrimFilterFactory" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>

@@ -2,6 +2,7 @@ package org.apache.solr.handler.batch;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +80,7 @@ public class BatchProviderIndexInvenio extends BatchProvider {
 	}
 	
 	private Map<Integer, Map<Integer, Integer>> tmpMap = new HashMap<Integer, Map<Integer,Integer>>();
-  private void discoverMissingRecords(SolrQueryRequest req, BatchHandlerRequestQueue queue) throws IOException, SQLException {
+  private void discoverMissingRecords(SolrQueryRequest req, BatchHandlerRequestQueue queue) throws IOException, SQLException, ParseException {
   	
     // get recids from Invenio {'ADDED': int, 'UPDATED': int, 'DELETED':
     // int }

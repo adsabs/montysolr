@@ -53,7 +53,7 @@ import examples.BlackAbstractTestCase;
  * 970__a then we get only 22 recs from the Invenio demo.
  * 
  */
-public class BlackBoxFailingRecords extends BlackAbstractTestCase {
+public class BlackBoxInvenioDoctor extends BlackAbstractTestCase {
 
 	@BeforeClass
 	public static void beforeBlackBoxFailingRecords() throws Exception {
@@ -315,6 +315,7 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 
 		assertU(commit());
 		assertQ(req("q", "recid:77 OR recid:80"), "//*[@numFound='2']");
+		assertQ(req("q", "*:*", "fl", "recid,bibcode"), "//*[@numFound='28']");
 
 		/*
     assertQ(req("qt", "/invenio-doctor", "command", "detailed-info"), 
@@ -391,13 +392,13 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 
 		assertU(commit());
 
-		assertQ(req("q", "*:*"), "//*[@numFound='22']");
-		
+		assertQ(req("q", "*:*", "fl", "recid,bibcode"), "//*[@numFound='28']");
+		assertQ(req("q", "recid:77"), "//*[@numFound='1']");
 		
 		// check that force-reindexing will update recs
 		RefCounted<SolrIndexSearcher> searcher = h.getCore().getSearcher();
 		SolrIndexSearcher s = searcher.get();
-		Document doc77 = s.doc(s.search(new TermQuery(new Term("recid", "77")), 1).scoreDocs[0].doc);
+		Document doc77 = s.doc(s.search(new TermQuery(new Term("id", "77")), 1).scoreDocs[0].doc);
 		String is = doc77.get("indexstamp");
 		
 		req = req("command", "force-reindexing");
@@ -417,13 +418,19 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
     }
     assertU(commit());
     
-    Document doc77b = s.doc(s.search(new TermQuery(new Term("recid", "77")), 1).scoreDocs[0].doc);
+    //s.close();
+    searcher.decref();
+    
+    searcher = h.getCore().getSearcher();
+    s = searcher.get();
+    
+    Document doc77b = s.doc(s.search(new TermQuery(new Term("id", "77")), 1).scoreDocs[0].doc);
     String is2 = doc77b.get("indexstamp");
     
-    assertQ(req("q", "*:*"), "//*[@numFound='22']");
+    assertQ(req("q", "*:*"), "//*[@numFound='28']");
     assertTrue("Docs were not re-indexed", !is.equals(is2));
     
-		s.close();
+		//s.close();
 		searcher.decref();
 
 	}
@@ -464,6 +471,6 @@ public class BlackBoxFailingRecords extends BlackAbstractTestCase {
 
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {
-		return new junit.framework.JUnit4TestAdapter(BlackBoxFailingRecords.class);
+		return new junit.framework.JUnit4TestAdapter(BlackBoxInvenioDoctor.class);
 	}
 }

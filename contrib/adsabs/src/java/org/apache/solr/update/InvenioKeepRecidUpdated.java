@@ -29,6 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+
 
 
 
@@ -202,9 +205,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 			max_batchsize = Integer.valueOf((String) defs.get("max_batchsize"));
 		}
 		
-		if (defs.get("pythonFunctionName") != null) {
-			pythonFunctionName = (String) defs.get("pythonFunctionName");
-		}
+		if (defs.get("tableToQuery") != null) {
+      InvenioDB.INSTANCE.setBibRecTableName(((String) defs.get("tableToQuery")));
+    }
 		
 		if (defs.get("propertiesFile") != null) {
 			IKRU_PROPERTIES = (String) defs.get("propertiesFile");
@@ -213,7 +216,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	
 	
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) 
-		throws IOException, InterruptedException, SQLException
+		throws IOException, InterruptedException, SQLException, ParseException
 			 {
 
 		if (isBusy()) {
@@ -284,7 +287,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	@SuppressWarnings("unchecked")
 	protected BatchOfInvenioIds retrieveRecids(Properties prop,
 	    SolrQueryRequest req,
-	    SolrQueryResponse rsp) throws SQLException {
+	    SolrQueryResponse rsp) throws SQLException, ParseException {
 	  
 	  
 	  SolrParams params = req.getParams();
@@ -316,6 +319,9 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	  } else {
 	    
 	    BatchOfInvenioIds results;
+
+	    log.info("Retrieving changed recs: max_records=" + params.getInt(PARAM_BATCHSIZE) + 
+          " last_recid=" + lastRecid + " last_update=" + lastUpdate);
 	    
 	    if (lastRecid == null && lastUpdate == null) {
 	      results =  InvenioDB.INSTANCE.getRecidsChanges(-1, params.getInt(PARAM_BATCHSIZE), getLastIndexUpdate(req));
@@ -323,9 +329,6 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	    else {
 	      results =  InvenioDB.INSTANCE.getRecidsChanges(lastRecid, params.getInt(PARAM_BATCHSIZE), lastUpdate);
 	    }
-	    
-	    log.info("Retrieving changed recs: max_records=" + params.getInt(PARAM_BATCHSIZE) + 
-	        " last_recid=" + lastRecid + " last_update=" + lastUpdate);
 	    
 	    
 	    if (results == null) {
@@ -335,8 +338,8 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	      return null;
 	    }
 	    
-	    log.info("Retrieved: last_update=" + results.lastModDate + 
-	        " last_recid=" + results.lastRecid);
+	    log.info("Retrieved: last_update={} last_recid={}", 
+	        results.lastModDate, results.lastRecid);
 	    
 	    return results;
 	  }

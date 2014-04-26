@@ -28,11 +28,6 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		
-		// to have always the demo records as a fresh site
-		//PythonMessage message = MontySolrVM.INSTANCE.createMessage("reset_records");
-		//MontySolrVM.INSTANCE.sendMessage(message);
-		
 	}
 	
 	public void testUpdates() throws Exception {
@@ -110,9 +105,6 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		// index some (random) docs and check we got them
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		
-		data = direct.request("/montysolr_diagnostics", null);
-		assert data.contains("*:diagnostic_test");
-		System.out.println(data);
 		
 		InvenioKeepRecidUpdated handler = (InvenioKeepRecidUpdated) core.getRequestHandler("/invenio/update");
 		//handler.setAsynchronous(false);

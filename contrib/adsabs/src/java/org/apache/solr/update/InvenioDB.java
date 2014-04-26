@@ -10,7 +10,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Date;
+import java.sql.Time;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -188,13 +190,14 @@ public enum InvenioDB {
    * @param lastModDate
    * @param table
    * @throws SQLException 
+   * @throws ParseException 
    */
   
-  public BatchOfInvenioIds getRecidsChanges(Integer last_recid, Integer max_recs, String mod_date) throws SQLException {
+  public BatchOfInvenioIds getRecidsChanges(Integer last_recid, Integer max_recs, String mod_date) throws SQLException, ParseException {
     return this.getRecidsChanges(last_recid, max_recs, mod_date, this.getBibRecTableName());
   }
   
-  public BatchOfInvenioIds getRecidsChanges(Integer last_recid, Integer max_recs, String mod_date, String table) throws SQLException {
+  public BatchOfInvenioIds getRecidsChanges(Integer last_recid, Integer max_recs, String mod_date, String table) throws SQLException, ParseException {
     
     if (table == null) 
       table = "bibrec";
@@ -207,14 +210,14 @@ public enum InvenioDB {
     
     table = StringEscapeUtils.escapeSql(table);
     String search_op = ">";
-    DateFormat df = new SimpleDateFormat("%Y-%m-%d %H:%M:%S");
+    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     
     if (mod_date == null || mod_date.trim() == "") {
       if (last_recid == -1) {
         ResultSet mDate = getResultSet("SELECT modification_date FROM `" + table + "` ORDER BY modification_date ASC LIMIT 1");
         if (mDate.first()) {
-          mod_date = df.format(mDate.getDate("modification_date"));
+          mod_date = df.format(df.parse(mDate.getString("modification_date")));
           search_op = ">=";
           closeResultSet(mDate);
         }
@@ -227,7 +230,7 @@ public enum InvenioDB {
         ResultSet recDate = getResultSet("SELECT id, modification_date FROM `" + table + "` WHERE id = " + last_recid + " LIMIT 1");
         if (recDate.first()) {
           last_recid = recDate.getInt("id");
-          mod_date = df.format(recDate.getDate("modification_date"));
+          mod_date = df.format(df.parse(recDate.getString("modification_date")));
         }
         else {
           // find the closes match
@@ -238,15 +241,16 @@ public enum InvenioDB {
           
           recDate = getResultSet("SELECT id, modification_date FROM `" + table + "` WHERE id >= " + last_recid + " LIMIT 1");
           if (recDate.first()) {
-            System.err.println(String.format("Warning, the last_recid %s does not exist, we have found the closest higher id %s with mod_date: %s\n", last_recid, df.format(recDate.getDate("modification_date"))));
+            System.err.println(String.format("Warning, the last_recid %s does not exist, we have found the closest higher id %s with mod_date: %s\n", last_recid, df.format(df.parse(recDate.getString("modification_date")))));
           }
           else {
             // nothing is there
+            closeResultSet(recDate);
             return null;
           }
           
           last_recid = recDate.getInt("id");
-          mod_date = df.format(recDate.getDate("modification_date"));
+          mod_date = df.format(df.parse(recDate.getString("modification_date")));
           closeResultSet(recDate);
         }
         
@@ -261,7 +265,9 @@ public enum InvenioDB {
     
     ArrayList<ModRec> modified_records = new ArrayList<ModRec>(mRecs.getFetchSize());
     while (mRecs.next()) {
-      modified_records.add(new ModRec(mRecs.getInt("id"), mRecs.getDate("creation_date"), mRecs.getDate("modification_date")));
+      modified_records.add(new ModRec(mRecs.getInt("id"), 
+          df.parse(mRecs.getString("creation_date")), 
+          df.parse(mRecs.getString("modification_date"))));
     }
     closeResultSet(mRecs);
     
@@ -278,7 +284,7 @@ public enum InvenioDB {
     
     if (mRecs != null) {
       while (mRecs.next()) {
-        modified_records.add(new ModRec(mRecs.getInt("id"), mRecs.getDate("creation_date"), mRecs.getDate("modification_date")));
+        modified_records.add(new ModRec(mRecs.getInt("id"), df.parse(mRecs.getString("creation_date")), df.parse(mRecs.getString("modification_date"))));
       }
       closeResultSet(mRecs);
     }
@@ -507,7 +513,7 @@ public enum InvenioDB {
     stmt.execute("select count(*) from bibrec");
     ResultSet rs = stmt.getResultSet();
     while (rs.next()) {
-      //System.out.println(rs.getInt(1));
+      //System.out.println("connected to db with: " + rs.getInt(1));
     }
     closeResultSet(rs);
     
@@ -567,13 +573,13 @@ public enum InvenioDB {
   
   class ModRec {
     private int recid;
-    private Date createDate;
-    private Date modDate;
+    private java.util.Date createDate;
+    private java.util.Date modDate;
     
-    public ModRec(int recid, Date cDate, Date mDate) {
+    public ModRec(int recid, java.util.Date date, java.util.Date date2) {
       this.recid = recid;
-      this.createDate = cDate;
-      this.modDate = mDate;
+      this.createDate = date;
+      this.modDate = date2;
     }
   }
   
@@ -687,8 +693,9 @@ public enum InvenioDB {
     for k, v in lost_recs.items():
       print "%s=%s" % (k, len(v))
    * @throws SQLException 
+   * @throws ParseException 
    */
-  public void testGetChangedRecids() throws SQLException {
+  public void testGetChangedRecids() throws SQLException, ParseException {
     Integer total = 1;
     Integer lastid =-1;
     String moddate = null;
