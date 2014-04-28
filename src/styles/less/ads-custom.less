@@ -1,8 +1,175 @@
-#mocha-stats > li.progress {
-height: 40px;
+
+@import 'ads-variables';
+
+ #mocha-stats > li.progress {
+  height: 40px;
+}
+
+.buffer {
+  margin-top:10px;
+}
+
+.item-closed {
+  .glyphicon;
+  .glyphicon-chevron-right;
+  color: @gray-light
+}
+.item-open {
+  .glyphicon;
+  .glyphicon-chevron-down;
+  color: @gray-light;
+}
+.hide {
+  display:none;
+}
+
+.chosen {
+  background-color: lighten(@brand-success, 37%)
+}
+
+.just-authors {
+  display:inline-block
+}
+
+.results-list {
+  h5 {
+    margin-top : 0px;
+    margin-bottom : 5px;
+  }
+
+  label {
+  font-weight: initial
+  }
+}
+
+.field-options {
+  min-width:120px;
+  padding:7px;
+}
+.field-options div:hover {
+  background-color: lighten(@brand-info, 37%)
+  
+}
+
+.field-options span {
+  display:block
+}
+
+.no-show {
+  visibility : hidden
+}
+#results h5 {
+margin-top: -3px;
+margin-bottom:2px;
+}
+
+.facet-meta {
+  height: 25px;
+}
+
+.facet-widget label {
+  font-weight:normal
+}
+.child-facets {
+  padding-left:20px;
+}
+.facet-meta .dropdown {
+  position:relative;
+  top:-33px;
+  left:140px;
+}
+.facet-meta .dropdown-menu {
+  min-width: 120px !important;
+}
+.facet-meta .dropdown-menu p {
+  padding: 3px 5px 0px 5px;
+}
+.facet-meta .dropdown-menu label {
+  padding:0px 10px;
+  margin:0px;
+}
+.facet-widget {
+  max-width:400px;
+  max-height:500px;
+  margin: 10px;
+}
+.facet-body {
+  overflow-y:auto;
+  padding-left:10px;
+  max-height: 340px
+}
+.facet-body .selected {
+  color: @brand-primary
+}
+
+.logic-container label {
+  display:block
+}
+
+.chart .bar {
+  stroke: white;
+  fill: lighten(@brand-info, 20%);
+  &:hover {
+    fill : lighten(@brand-primary, 20%);
+  }
+}
+
+.chart .x-axis .active text {
+ fill : lighten(@brand-primary, 20%);
+   font :12px sans-serif;
+}
+
+.chart {
+  padding-bottom:70px;
+}
+.axis text {
+  font: 11px sans-serif;
 }
 
 
-.buffer {
-	margin-top:20px;
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.show-slider-data-first, .show-slider-data-second {
+  width: 66px;
+}
+
+
+.slider-data {
+  padding-top:10px;
+  position:relative;
+  right: 18px;
+}
+
+.sort-options {
+margin: 0px;
+padding-left:20px;
+}
+
+.sort-options label {
+  margin:0px;
+}
+
+.zoomable-graph {
+  .apply {
+  margin-top: 10px;
+  }
+
+}
+
+.draw-attention {
+ transition-property: background-color;
+  transition-duration: 3s;
+  background-color: lighten(@brand-warning, 10%)
+}
+
+.show-fields {
+  transition-property: background-color;
+  transition-duration: 3s;
+  background-color: none;
+
+  
 }

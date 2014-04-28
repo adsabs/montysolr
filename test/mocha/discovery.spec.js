@@ -31,7 +31,9 @@ var tests = [
   tbase + '/widgets/search_bar_widget.spec.js',
   tbase + '/widgets/api_response_widget.spec.js',
   tbase + '/widgets/api_query_widget.spec.js',
-  tbase + '/widgets/api_request_widget.spec.js'
+  tbase + '/widgets/api_request_widget.spec.js',
+  tbase + '/widgets/facet_widget.spec.js'
+
 
 ];
 

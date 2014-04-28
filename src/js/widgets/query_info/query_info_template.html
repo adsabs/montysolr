@@ -1,0 +1,16 @@
+<h4>Current Query Info</h4>
+ <div id="info-changeable hide">
+{{#if currentQuery}}
+<p><b>Query:</b> {{currentQuery}}</p>
+{{/if}}
+{{#if facets}}
+<p><b>Facets :</b> {{facets}}</p>
+{{/if}}
+{{#if sort}}
+<p><b>Sort :</b>{{sort}} </p>
+{{/if}}
+{{#if numFound}}
+<p><b>Total Number of Results:</b> {{numFound}}</p>
+{{/if}}
+
+ </div>

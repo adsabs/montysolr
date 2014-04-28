@@ -1,39 +1,40 @@
 <div class="row">
-    <div class="col-sm-8">
+    <div class="col-sm-8 col-sm-offset-1">
+    <form name="main-query">
         <div class="input-group">
             <div class="input-group-btn">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Search Fields
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu field-options">
+                <div type="div" class="btn btn-default dropdown-toggle show-fields" data-toggle="dropdown">Search Fields
+                    <div class="caret"></div>
+                </div>
+                <div class="dropdown-menu field-options">
                 <i class="glyphicon glyphicon-question-sign"></i>
-                    <li><span data-field="author">Author</span>
-                    </li>
-                    <li><span data-field="^author">First Author</span>
-                    </li>
-                    <li><span data-field="title">Title</span>
-                    </li>
-                    <li><span data-field="year">Year</span>
-                    </li>
-                    <li><span data-field="bibstem">Publication</span>
-                    </li>
-                    <li><span data-field="full">Fulltext</span>
-                    </li>
-                    <li class="divider"></li>
-                                    <i class="glyphicon glyphicon-question-sign"></i>
+                    <div class="btn btn-link btn-sm" data-field="author">Author</div>
+                    
+                    <div class="btn btn-link btn-sm"  data-field="first-author">First Author</div>
+                    
+                    <div class="btn btn-link btn-sm"  data-field="title">Title</div>
+                    
+                    <div class="btn btn-link btn-sm"  data-field="year">Year</div>
+                    
+                    <div class="btn btn-link btn-sm"  data-field="bibstem">Publication</div>
+                    
+                    <div class="btn btn-link btn-sm"  data-field="full">Fulltext</div>
+                    
+                    <span class="divider"></span>
+                     <i class="glyphicon glyphicon-question-sign"></i>
 
-                    <li><span data-field="operator-trending">Trending(...)</span>
-                    </li>
-                    <li><span data-field="operator-useful">Useful(...)</span>
-                    </li>
-                    <li><span data-field="operator-instructive">Instructive(...)</span>
-                    </li>
-                </ul>
+                    <div class="btn btn-link btn-sm"  data-field="operator-trending">Trending(...)</div>
+                    
+                    <div class="btn btn-link btn-sm"  data-field="operator-useful">Useful(...)</div>
+                    
+                    <div class="btn btn-link btn-sm"  data-field="operator-instructive">Instructive(...)</div>
+                    
+                </div>
             </div>
             <!-- /btn-group -->
-            <input type="text" class="form-control q">
+            <input type="text" class="form-control q" autofocus>
             <span class="input-group-addon btn btn-primary search-submit">Submit</span>
-
+    </form>
         </div>
         <!-- /input-group -->
     </div>

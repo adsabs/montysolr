@@ -2,7 +2,8 @@
  * Created by alex on 4/23/14.
  */
 define(['backbone', 'marionette', 'js/components/api_query',
-    'js/components/api_request', 'js/widgets/base/base_widget'],
+    'js/components/api_request', 'js/widgets/base/base_widget'
+  ],
   function(
     Backbone, Marionette, ApiQuery, ApiRequest, BaseWidget) {
 
@@ -22,11 +23,36 @@ define(['backbone', 'marionette', 'js/components/api_query',
        registers the callback, and returns the apiRequest so
        that you can send it to pubsub in response to INVITING_REQUEST*/
 
-      initialize : function(options){
+      initialize: function(options) {
+
+        _.bindAll(this, "dispatchRequest", "assignCallbackToResponse")
+
         this._queriesInProgress = {};
-        BaseWidget.prototype.initialize.call(this,options);
+        BaseWidget.prototype.initialize.call(this, options);
       },
 
+      /*function should not be overridden, can "subscribeCustomHandlers" in options to easily override*/
+      activate: function(beehive) {
+      this.pubsub = beehive.Services.get('PubSub');
+
+      if (this.subscribeCustomHandlers) {
+        this.subscribeCustomHandlers(this.pubsub)
+      } else {
+        //custom dispatchRequest function goes here
+        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
+
+        //custom handleResponse function goes here
+        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.assignCallbackToResponse);
+      }
+
+    }, /*to override*/
+      processResponse: function(apiResponse) {
+        //some parsing logic here
+        // reset collection: this.collection.reset(apiResponse)
+        throw new Error("you need to customize this function");
+      },
+
+      /** utility function **/
       /**
        * Here you register callbacks that should receive response
        * and handle it
@@ -35,6 +61,7 @@ define(['backbone', 'marionette', 'js/components/api_query',
        * @param callback
        * @param data
        */
+
       registerCallback: function(queryId, callback, data) {
         if (!_.isFunction(callback)) {
           throw new Error("Callback must be a function");
@@ -42,41 +69,75 @@ define(['backbone', 'marionette', 'js/components/api_query',
         if (this._queriesInProgress[queryId]) {
           throw new Error("There is already a callback for: " + queryId);
         }
-        this._queriesInProgress[queryId] = {callback: callback, data: data};
+        this._queriesInProgress[queryId] = {
+          //calling the callback in the widget context
+          callback: _.bind(callback, this),
+          data: data
+        };
       },
 
-      composeRequest: function(apiQuery) {
-        var apiRequest, queryId, callback;
+      /*a function to override or leave as is*/
+      //default response to "INVITING_REQUEST"
+      dispatchRequest: function(apiQuery) {
+        var id, req;
 
-        queryId = apiQuery.url();
-        callback = this._queriesInProgress[queryId];
+        this.setCurrentQuery(apiQuery);
 
-        if (!callback) {
-          console.warn("We have no callback, ignoring query: " + apiQuery);
-          return;
+        id = apiQuery.url();
+
+        //it's responding to INVITING_REQUEST, so just do default information request
+        this.registerCallback(id, this.processResponse)
+
+        req = this.composeRequest(apiQuery);
+        if (req) {
+          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
         }
 
+      },
+
+      /*very simple for multi-callback, just returns an apirequest when you give
+      it an apiquery
+      */
+
+      composeRequest : function(apiQuery){
         return new ApiRequest({
           target: 'search',
           query: apiQuery
-        });
+        })
       },
 
+
+      /*utility function*/
+      //this can be called anywhere in your code to register your own callback
+      dispatchSpecialRequest: function(params, callback, data) {
+        var newQuery, id, ApiRequest;
+
+        newQuery = this.composeQuery(params);
+        id = newQuery.url();
+
+        this.registerCallback(id, callback, data);
+
+        var req = this.composeRequest(newQuery);
+
+        this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+
+      },
+
+      /*utility function*/
       /*
        Companion function to composeRequest. It will call the
        callback with the just-received data. This function
        is probably the only one the widget will need
        to register to DELIVERING_RESPONSE
        */
-      processResponse: function(apiResponse) {
+      assignCallbackToResponse: function(apiResponse) {
         var id = apiResponse.getApiQuery().url();
         var parameters, callback;
 
         //find the callback based on the key of the query
         if (this._queriesInProgress[id]) {
           callback = this._queriesInProgress[id].callback;
-        }
-        else {
+        } else {
           console.warn("Widget received a response for which it has no callback: " + id);
           return;
         }
