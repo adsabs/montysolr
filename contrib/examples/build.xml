@@ -141,7 +141,7 @@
     <!-- does nothing on purpose //-->
   </target>
 
-	<target name="build-all" depends="jar">
+	<target name="build-all" depends="build-one">
 		<echo>
     	    Does nothing, because build-all is called from the main build and at that time we don't have all jars for contribs yet.
     	    Call build-all-examples instead 
@@ -314,7 +314,7 @@
 		<echo>Start script generated at ${build.dir}/${example.name}/run.sh</echo>
 	</target>
 
-	<target name="test" depends="populate-classpath,common.test" />
+	<target name="test" depends="build-one,populate-classpath,common.test" />
 	
 	<target name="compile-core" depends="populate-classpath,common.compile-core"/>
 	

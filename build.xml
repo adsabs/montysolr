@@ -172,11 +172,11 @@ montysolr.version=${montysolr.version}
 	    
     
     <target name="build-contrib" >
-      
-    	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
-    	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/adsabs"  inheritall="false" />
-  		<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/examples"  inheritall="false" />
-    	
+      <sequential>
+      	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+      	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/adsabs"  inheritall="false" />
+    		<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/examples"  inheritall="false" />
+    	</sequential>
     	<!--
       <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
         <arg line="build-all -f ${common.dir}/contrib/antlrqueryparser/build.xml"/>

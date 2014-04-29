@@ -96,7 +96,7 @@
 	</target>
 
 
-	<target name="test" depends="clean,compile" >
+	<target name="test" depends="clean,compile,jar" >
 		<antcall target="common.test" inheritRefs="true"/>
 	</target>
 
@@ -142,7 +142,7 @@
       -->
 	</target>
 
-	<target name="build-all"  depends="clean,default">
+	<target name="build-all"  depends="clean,default,jar">
 
 	</target>
 
