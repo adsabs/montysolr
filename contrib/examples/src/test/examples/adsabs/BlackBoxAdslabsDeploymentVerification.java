@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import monty.solr.util.MontySolrSetup;
-
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.core.SolrCore;
@@ -88,22 +86,6 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		data.contains("acc:accomazzi");
 		
 		
-		// #231 - use 'aqp' as a default parser also for filter queries
-		assert direct.request("/select?q=*:*&fq={!aqp}author:\"Civano, F\"&debugQuery=true&wt=json", null)
-    	.contains("author:civano, f author:civano, f* author:civano,");
-		
-		// check we are using synonym for translation
-		data = direct.request("/select?q=AAS&debugQuery=true&wt=json", null);
-		assert data.contains("title:syn::american astronomical society");
-		assert data.contains("title:acr::aas");
-		
-		data = direct.request("/select?q=aborigines&debugQuery=true&wt=json", null);
-		assert data.contains("title:syn::aboriginal");
-		
-		data = direct.request("/select?q=\"STERN, CAROLYN P\"&debugQuery=true&wt=json", null);
-		assert data.contains("author:stern grant, c");
-		
-		
 		
 		// index some (random) docs and check we got them
 		SolrQueryResponse rsp = new SolrQueryResponse();
@@ -143,6 +125,20 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		assertTrue("Something must be wrong because we didn't get any data from MongoDB", passed == true);
 		
 		
+	  // #231 - use 'aqp' as a default parser also for filter queries
+    assert direct.request("/select?q=*:*&fq={!aqp}author:\"Civano, F\"&debugQuery=true&wt=json", null)
+      .contains("author:civano, f author:civano, f* author:civano,");
+    
+    // check we are using synonym for translation
+    data = direct.request("/select?q=AAS&debugQuery=true&wt=json", null);
+    assert data.contains("title:syn::american astronomical society");
+    assert data.contains("title:acr::aas");
+    
+    data = direct.request("/select?q=aborigines&debugQuery=true&wt=json", null);
+    assert data.contains("title:syn::aboriginal");
+    
+    data = direct.request("/select?q=\"STERN, CAROLYN P\"&debugQuery=true&wt=json", null);
+    assert data.contains("author:stern grant, c");
 				
 	}
 	

@@ -18,28 +18,27 @@
  -->
 
 
-<project name="examples" default="default">
+<project name="examples" default="default" xmlns:ivy="antlib:org.apache.ivy.ant">
 
-	<description>
-    Examples for MontySolr
-    </description>
+	<description> Examples for MontySolr </description>
 
 	<import file="../contrib-build.xml" />
 
+	<!--                configuration of targets
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //-->
 	<condition property="example.name" value="adsabs">
 		<not>
 			<isset property="ename" />
 		</not>
 	</condition>
 	<property name="example.name" value="${ename}" />
-
+	
 	<condition property="example.ignore-environment" value="true">
 		<not>
 			<isset property="ignore-environment" />
 		</not>
 	</condition>
 	<property name="example.ignore-environment" value="${ignore-environment}" />
-
 
 	<condition property="example.jvmargs" value="-d64 -Xmx1024m">
 		<not>
@@ -67,8 +66,6 @@
          you can set them as:
          export MONTYSOLR_JVMARGS=-Djava.util.logging.config.file=./example/etc/test.logging.properties
 
-         If you are using python c-extensions, make sure they are compatible with the
-         java - if your java starts in 64bit mode, also the extensions must be available in 64bit
          By default, we run in 64bit mode: -d64
      //-->
 	<property environment="env" />
@@ -87,90 +84,46 @@
 		</exec>
 	</target>
 
-	<target name="populate-classpath">
+	<target name="populate-classpath" unless="classpath.populated">
+
+		<!-- 
+     we include only the classpaths that are inside 
+     the example, so that it can run without anything 
+     else -->
+		
+		<unzip src="${build.dir}/${example.name}/webapps/solr.war" dest="${build.dir}/${example.name}/solrwar" overwrite="off"/>
+		
 		<path id="examples.classpath">
-			<!-- 
-    		   we include only the classpaths that are inside 
-    		   the example, so that it can run without anything 
-    		   else -->
-
-			<!-- example libs -->
-			<fileset dir="${build.dir}/${example.name}">
-				<include name="lib/**/*.jar" />
+			<fileset dir="${build.dir}/${example.name}/">
+				<include name="solrwar/WEB-INF/lib/**/*.jar" />
 				<include name="solr/lib/**/*.jar" />
+				<include name="lib/**/*.jar" />
 			</fileset>
-
-			<!-- location of JCC classes -->
-			<pathelement location="${prop.jcc_egg}/jcc/classes" />
-
+			
+			<pathelement location="${build.dir}/${example.name}/jython"/>
 		</path>
 
 
-		<path id="old.examples.classpath">
-			<!-- all contrib compiled classes -->
-			<dirset dir="${common.dir}/build/contrib">
-				<include name="**/classes/java" />
-			</dirset>
-
-			<path refid="base.classpath" />
-
-			<!-- montysolr jars -->
-			<fileset dir="${common.dir}/lib">
-				<include name="**/*.jar" />
-			</fileset>
-
-			<!-- montysolr jars -->
-			<fileset dir="${common.dir}/build/jar">
-				<include name="**/*.jar" />
-			</fileset>
-
-			<!-- all contrib jars -->
-			<fileset dir="../">
-				<include name="**/lib/*.jar" />
-			</fileset>
-
-			<!-- examples compiled classes, if any 
-			<pathelement location="${build.dir}/classes/java" />
-			-->
-
-			<!-- solr/dist jars -->
-			<fileset dir="${prop.solr.real.location}/dist">
-				<include name="**/*.jar" />
-			</fileset>
-
-			<!-- example libs -->
-			<fileset dir="${build.dir}">
-				<include name="${example.name}/lib/**/*.jar" />
-			</fileset>
-		</path>
 
 		<path id="classpath">
-      <path refid="common.test.classpath" />
-      <fileset dir="${common.dir}/build/contrib/examples/${example.name}/">
-          <include name="lib/*.jar" />
-          <include name="webapps/*.war" />
-      </fileset>
+			<path refid="examples.classpath" />
     </path>
 
 		<path id="test.classpath">
-			<path refid="classpath"/>
+			<!-- MontySolr test classes -->
+      <pathelement location="${common.dir}/build/classes/test"/>
+			
+			<path refid="common.test.classpath" />
 			<path refid="test.base.classpath"/>
 			<path refid="examples.classpath" />
-			<path refid="common.test.classpath" />
-
-
-			<!-- all contrib test classes -->
-			<dirset dir="${common.dir}/build/contrib">
-				<include name="**/classes/test" />
-			</dirset>
-			<dirset dir="${common.dir}/build/contrib">
-        <include name="**/classes/java" />
-      </dirset>
-			
 		</path>
 		
+		<!--
+		<echo>classpath: ${toString:classpath}</echo>
+		<echo>test.classpath: ${toString:test.classpath}</echo>
+		-->
 		
-		<echo>${classpath:toString}</echo>
+		<property name="classpath.populated" value="true"/>
 	</target>
 
 
@@ -362,9 +315,9 @@
 	</target>
 
 	<target name="test" depends="populate-classpath,common.test" />
+	
 	<target name="compile-core" depends="populate-classpath,common.compile-core"/>
 	
-
 
 	<macrodef name="create-run.sh">
 	    <attribute name="classpath" />

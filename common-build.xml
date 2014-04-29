@@ -71,7 +71,7 @@
 	<property name="junit-location.jar" value="${common.dir}/lib/${junit.jar}"/>
 
 	<path id="junit-path">
-		<fileset dir="${common.dir}/lib">
+		<fileset dir="${montysolr.dependencies.dir}/test-framework/lib">
 			<include name="junit-*.jar" />
 			<include name="randomizedtesting-runner-*.jar" />
 		</fileset>

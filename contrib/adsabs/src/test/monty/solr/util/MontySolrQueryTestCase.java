@@ -1,6 +1,7 @@
 package monty.solr.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -8,8 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-
-import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -18,7 +17,6 @@ import org.apache.lucene.search.Query;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.AqpAdsabsQParser;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QueryParsing;
 import org.getopt.luke.DocReconstructor;
@@ -73,14 +71,29 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		
 	}
 	
+	
 	public QParser getParser(SolrQueryRequest req) throws ParseException, InstantiationException, IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
 		SolrParams params = req.getParams();
 		String query = params.get(CommonParams.Q);
 		String defType = params.get(QueryParsing.DEFTYPE);
 		QParser qParser = QParser.getParser(query, defType, req);
 		
-		if (qParser instanceof AqpAdsabsQParser) {
-			((AqpAdsabsQParser) qParser).getParser().setDebug(tp.debugParser);
+		// if of type AqpQueryParser - set the debug
+		try {
+  		Class<? extends QParser> clazz = qParser.getClass();
+  		Method getParser = clazz.getDeclaredMethod("getParser");
+  		if (getParser != null) {
+  		  Method setDebug = getParser.getReturnType().getDeclaredMethod("setDebug", boolean.class);
+  		  
+  		  Object arglist[] = new Object[1];
+  	    arglist[0] = this.tp.debugParser;
+  	    
+  		  Object parser = getParser.invoke(qParser);
+  		  setDebug.invoke(parser, arglist);
+  		}
+		}
+		catch (Exception e){
+		  // pass
 		}
 		return qParser;
 		
@@ -248,12 +261,12 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
   
   public String addDocs(String... fieldsAndValues) {
     ArrayList<String> fVals = new ArrayList<String>(Arrays.asList(fieldsAndValues));
-    if (fVals.indexOf(F.ID) == -1 || fVals.indexOf(F.ID)%2==1) {
-      fVals.add(F.ID);
+    if (fVals.indexOf("id") == -1 || fVals.indexOf("id")%2==1) {
+      fVals.add("id");
       fVals.add(Integer.toString(incrementId()));
     }
-    if (fVals.indexOf(F.BIBCODE) == -1 || fVals.indexOf(F.BIBCODE)%2==1) {
-      fVals.add(F.BIBCODE);
+    if (fVals.indexOf("bibcode") == -1 || fVals.indexOf("bibcode")%2==1) {
+      fVals.add("bibcode");
       String bibc = ("AAAAA........" + Integer.toString(idValue));
       fVals.add(bibc.substring(bibc.length()-13, bibc.length()));
     }

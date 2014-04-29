@@ -17,7 +17,7 @@
     limitations under the License.
  -->
 
-<project name="adsabs" default="default">
+<project name="adsabs" default="default" xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<description>
     ADS search engine extensions
@@ -155,5 +155,16 @@
 			<arg value="/tmp/syn.out"/>
 		</java>
 	</target>
+	
+	<target name="resolve" depends="ivy-availability-check,ivy-fail,ivy-configure">
+    <sequential>
+    <!-- jetty libs in lib/ -->
+    <ivy:retrieve conf="default" type="jar" log="download-only"/>
+    
+    <!-- servlet-api.jar -->
+    <ivy:retrieve conf="servlet" log="download-only" type="orbit"
+                  pattern="lib/servlet-api-3.0.jar"/>
+    </sequential>
+  </target>
 
 </project>

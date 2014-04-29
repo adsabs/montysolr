@@ -42,8 +42,6 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/spatial4j-0.3.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/wstx-asl-3.2.7.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/zookeeper-3.3.6.jar"/>
-	<classpathentry kind="lib" path="contrib/adsabs/lib/commons-lang-2.4.jar"/>
-	<classpathentry kind="lib" path="contrib/adsabs/lib/luke-4.0.0-BETA.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-analysis-extras-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-cell-4.0-SNAPSHOT.jar"/>
@@ -71,10 +69,10 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lib/junit4-ant-2.0.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lib/randomizedtesting-runner-2.0.1.jar"/>
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-3.4-complete.jar"/>
-	<classpathentry kind="lib" path="contrib/adsabs/lib/mysql-connector-java-5.0.8-bin.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/drizzle-jdbc-1.2-javadoc.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/drizzle-jdbc-1.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/lucene_solr_4_0"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/jython-standalone-2.7-b1.jar" sourcepath="contrib/adsabs/lib/jython-2.7-b1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/luke-4.0.0-BETA.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
