@@ -252,7 +252,11 @@
     <delete dir="${build.dir}/${example.name}/exampledocs"/>
 		<delete dir="${build.dir}/${example.name}/" includes="build.xml ivy.xml"/>
 		
-		
+		<echo>
+    The distribution is ready in: ${build.dir}/${example.name}
+    You can start solr by: ${build.dir}/${example.name}/run.sh
+    </echo>
+
 	</target>
 
 

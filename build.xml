@@ -425,11 +425,6 @@ montysolr.version=${montysolr.version}
 		<exec executable="ant" dir="${common.dir}/contrib/examples" logerror="true"	newenvironment="true">
       <arg line="build-one -Dename=adsabs -Dprofile=normal.profile" />
     </exec>
-		
-		<echo>
-		The distribution is ready in: ${build.dir}/contrib/examples/adsabs
-		You can start solr by: ${build.dir}/contrib/examples/adsabs/run.sh
-		</echo>
 
 	</target>
 

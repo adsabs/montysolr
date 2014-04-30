@@ -31,7 +31,6 @@ You will need Java JDK (version 7), and 'ant' (v1.8 and newer)
  $ git clone https://github.com/romanchyla/montysolr
  $ cd montysolr
  $ ant build-all
- $ ant build-distribution
 ```
 
 MontySolr works on Linux/Mac/Windows. Releases are automatically tested/deployed
