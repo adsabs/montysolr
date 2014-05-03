@@ -61,10 +61,11 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     u = u.replace(/\/\/+/, '/');
 
     var opts = {
-      type: 'GET', //TODO: fix - we'll need to sent data in POST
+      type: 'POST',
       url: u,
-      data: query ? query.url() : {},
       dataType: 'json',
+      data: query ? query.url() : "{}",
+      contentType: 'application/x-www-form-urlencoded',
       cache: false,
       headers: {"X-BB-Api-Client-Version": this.clientVersion},
       context: {request: request, api: self }
@@ -89,6 +90,7 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     // whatever is set above (so if sb wants to shoot himself/herself,
     // we gave them the weapon... ;-))
     _.extend(opts, options);
+
 
 
     this.outstandingRequests++;

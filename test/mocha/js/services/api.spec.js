@@ -5,8 +5,6 @@
 define(['jquery', 'underscore',
   'js/services/api', 'js/components/api_request', 'js/components/api_query', 'js/components/api_response'], function($, _, Api, ApiRequest, ApiQuery, ApiResponse) {
   describe("Api Service (API)", function() {
-
-
     beforeEach(function() {
       this.server = sinon.fakeServer.create();
       this.server.respondWith(/\/api\/1\/search.*/,
@@ -185,5 +183,43 @@ define(['jquery', 'underscore',
         "139757":{\
           "title":["<em>Star</em> Streams"]}}}';
 
+  });
+
+  describe("API Service - using live server (API)", function() {
+
+    var isApiAvailable = function() {
+      liveServerReady = false;
+      $.ajax({
+        type: "GET",
+        url: "/api/1/search",
+        data: "q=*:*",
+        dataType: "json",
+        async: false,
+        success: function(data) {
+          if (data.responseHeader)
+            liveServerReady = true;
+        }
+      });
+      return liveServerReady;
+    };
+
+    this.pending = !isApiAvailable();
+
+    it("should retrieve data from server using GET and POST (default)", function(done) {
+      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var q = new ApiQuery({q: 'foo'});
+      var spy = sinon.spy();
+
+      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: spy, type: "GET", async: false});
+      expect(spy.lastCall.args[0].response.numFound).to.be.gt(1);
+
+      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: spy, type: "POST", async: false});
+      expect(spy.lastCall.args[0].response.numFound).to.be.gt(1);
+
+      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: spy, async: false});
+      expect(spy.lastCall.args[0].response.numFound).to.be.gt(1);
+
+      done();
+    });
   });
 });
