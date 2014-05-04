@@ -22,7 +22,8 @@
     "grunt-include-bootstrap": "~0.1.1",
     "grunt-contrib-less": "~0.11.0",
     "grunt-install-dependencies": "~0.1.0",
-    "grunt-bbb-requirejs": "0.1.0-alpha.8"
+    "grunt-bbb-requirejs": "0.1.0-alpha.8",
+    "needle": "~0.7.1"
   },
   "peerDependencies": {
     "bower": "*",

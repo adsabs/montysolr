@@ -1,6 +1,9 @@
 var express = require('express');
 var http = require('http');
 var url = require('url');
+var needle = require('needle');
+var querystring = require('querystring');
+
 var search_re = /\/1\/search$/;
 var app = express();
 
@@ -30,7 +33,7 @@ app.use('/api', function (req, res, next) {
   var endpoint = API_ENDPOINT;
   var end = url.parse(API_ENDPOINT);
 
-  console.log(req.body, r);
+  console.log('/api', req.body, r);
 
   if (r.pathname.match(search_re)) {
     // optionally swith endpoints
@@ -40,30 +43,35 @@ app.use('/api', function (req, res, next) {
     return;
   }
 
+  if (req.body)
+    req.body.wt = 'json';
+
   var options = {
     hostname: end.hostname,
     port: end.port,
     path: end.pathname,
     method: 'POST',
-    data: r.query || req.body
+    data: r.query ? r.query + '&wt=json' : req.body
   };
 
-  console.log(options);
+  console.log(end.hostname + ':' + end.port + end.pathname, options);
 
-  //TODO: I'm doing something wrong - it is not making post request properly
-  //var search = http.request(options, function (apiResponse) {
-  var search = http.get(endpoint + '?' + r.query + '&wt=json', function (apiResponse) {
-    res.writeHead(apiResponse.statusCode, {'Content-Type': apiResponse.headers['content-type']});
-    apiResponse.on("data", function (chunk) {
-      res.write(chunk);
+  var n = needle.post(end.hostname + ':' + end.port + end.pathname,
+    options.data,
+    {parse: false, headers: req.headers},
+    function (err, apiResponse, body) {
+      if (err) {
+        console.log("Got error: " + err.message);
+        res.send(err.status || 500, {error: err.message});
+      }
+      else {
+        res.writeHead(apiResponse.statusCode, {'Content-Type': apiResponse.headers['content-type']});
+        res.write(body);
+        res.end();
+      }
     });
-    apiResponse.on("end", function (chunk) {
-      res.end();
-    });
-  }).on('error', function (err) {
-      res.send(err.status || 500, {error: err.message});
-      console.log("Got error: " + err.message);
-    });
+
+
 });
 
 
