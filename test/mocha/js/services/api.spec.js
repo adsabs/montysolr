@@ -210,14 +210,15 @@ define(['jquery', 'underscore',
       var q = new ApiQuery({q: 'foo'});
       var spy = sinon.spy();
 
-      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: spy, type: "GET", async: false});
-      expect(spy.lastCall.args[0].response.numFound).to.be.gt(1);
+      var f = function() {expect(arguments[0].response.numFound).to.be.gt(1)};
 
-      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: spy, type: "POST", async: false});
-      expect(spy.lastCall.args[0].response.numFound).to.be.gt(1);
+      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f, type: "GET"});
 
-      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: spy, async: false});
-      expect(spy.lastCall.args[0].response.numFound).to.be.gt(1);
+      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f, type: "POST"});
+
+      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f});
+
+      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'})).done(f);
 
       done();
     });
