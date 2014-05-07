@@ -20,6 +20,8 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
   var d = window.location.search.substring(1);
 
   if (!d) {
+    console.log('You need to supply list of plugins in the url');
+    window.location.search = "top-region-left=js/widgets/api_query/widget&top-region-right=js/widgets/api_request/widget&middle-region-left=js/widgets/api_response/widget";
     return;
   }
 
