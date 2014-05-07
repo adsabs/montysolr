@@ -11,7 +11,11 @@ require.config({
   // Configuration we want to make available to modules of ths application
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
   'config': {
-
+    'app': {
+      regions: {
+        foo: 'baz'
+      }
+    }
   },
 
   // Configuration for the facades (you can pick specific implementation, just for your
