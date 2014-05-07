@@ -11,6 +11,9 @@ define(['js/components/application', 'module'], function(Application, module) {
           },
           objects: {
             User: 'js/components/user'
+          },
+          modules: {
+            QM: 'js/components/query_mediator'
           }
         },
         widgets: {
@@ -40,6 +43,7 @@ define(['js/components/application', 'module'], function(Application, module) {
         expect(beehive.getService('Api').request).to.be.defined;
         expect(beehive.getService('PubSub').publish).to.be.defined;
         expect(beehive.getObject('User')).to.be.defined;
+        expect(app.getModule('QM')).to.be.defined;
 
         expect(app.getWidget('ApiResponse')).to.be.defined;
         expect(app.getWidget('ApiResponse')).to.not.be.equal(app.getWidget('ApiResponse2'));
@@ -78,6 +82,11 @@ define(['js/components/application', 'module'], function(Application, module) {
       defer.done(function() {
         expect(app.getAllWidgets().length).to.be.equal(2);
         expect(app.getAllPlugins().length).to.be.equal(1);
+
+        expect(app.isActivated()).to.be.equal(false);
+        app.activate();
+        expect(app.isActivated()).to.be.equal(true);
+
         done();
       });
 

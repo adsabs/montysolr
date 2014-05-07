@@ -1,4 +1,44 @@
-
+/**
+ * Application object contains methods for asynochronous loading of other modules
+ * It will load BeeHive by default, and it recognizes the following types of
+ * objects
+ *
+ *  core:
+ *    modules - any module you want to load and give it access to the full
+ *              BeeHive (these guys are loaded first)
+ *    services - these instances will be inserted into Beehive.Services
+ *              (loaded after modules)
+ *    objects - these will be inserted into BeeHive.Objects
+ *              (loaded after services)
+ *
+ *  plugins - any object you want to instantiate
+ *  widgets - any visual object you want to instantiate
+ *
+ *
+ *  this is the normal workflow
+ *
+ *  var app = new Application();
+ *  var promise = app.loadModules({
+ *       core: {
+ *         services: {
+ *           PubSub: 'js/services/pubsub',
+ *           Api: 'js/services/api'
+ *         },
+ *         modules: {
+ *           QueryMediator: 'js/components/query_mediator'
+ *         }
+ *       },
+ *       widgets: {
+ *         YearFacet: 'js/widgets/facets/factory'
+ *       }
+ *     });
+ *   promise.done(function() {
+ *     app.activate();
+ *     //....continue setting up layout etc
+ *   });
+ *
+ *
+ */
 
 define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], function(_, $, Backbone, module, BeeHive) {
 
@@ -33,7 +73,11 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
 
 
     initialize: function(config, options) {
+      // these are core (elevated access)
       this.__beehive = new BeeHive();
+      this.__modules = new Container();
+
+      // these are barbarians behind the gates
       this.__widgets = new Container();
       this.__plugins = new Container();
     },
@@ -64,7 +108,7 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
 
       var core = config['core'];
       if (core) {
-        _.each(['services', 'objects'], function(name) {
+        _.each(['modules', 'services', 'objects'], function(name) {
           if (core[name]) {
             promise = self._loadModules(name, core[name]);
             if (promise)
@@ -128,6 +172,11 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
         hasKey = _.bind(beehive.hasObject, beehive);
         removeKey = _.bind(beehive.removeObject, beehive);
         addKey = _.bind(beehive.addObject, beehive);
+      }
+      else if (section == 'modules') {
+        hasKey = _.bind(this.hasModule, this);
+        removeKey = _.bind(function(key) {this.__modules.remove(key)}, this);
+        addKey = _.bind(function(key, module) {this.__modules.add(key, module)}, this);
       }
       else if (section == 'widgets') {
         hasKey = _.bind(this.hasWidget, this);
@@ -232,7 +281,44 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
       this.getBeeHive().close();
     },
     activate: function(options) {
-      this.getBeeHive().activate();
+      var beehive = this.getBeeHive();
+
+      // services are activated without beehive
+      beehive.activate();
+
+      // modules receive elevated beehive object
+      _.each(this.getAllModules(), function(el) {
+        var plugin = el[1];
+        if ('activate' in plugin) {
+          plugin.activate(beehive);
+        }
+      });
+
+      // all the rest receive hardened beehive
+      _.each(this.getAllPlugins(), function(el) {
+        var plugin = el[1];
+        if ('activate' in plugin) {
+          plugin.activate(beehive.getHardenedInstance());
+        }
+      });
+      _.each(this.getAllWidgets(), function(el) {
+        var plugin = el[1];
+        if ('activate' in plugin) {
+          plugin.activate(beehive.getHardenedInstance());
+        }
+      });
+      this.__activated = true;
+    },
+
+    isActivated: function() {
+      return this.__activated || false;
+    },
+
+    hasModule: function(name) {
+      return this.__modules.has(name);
+    },
+    getModule: function(name) {
+      return this.__modules.get(name);
     },
 
     hasWidget: function(name) {
@@ -248,6 +334,9 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
       return this.__plugins.get(name);
     },
 
+    getAllModules: function() {
+      return _.pairs(this.__modules.container);
+    },
     getAllPlugins: function() {
       return _.pairs(this.__plugins.container);
     },
