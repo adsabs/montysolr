@@ -7,9 +7,8 @@ define(function(require, exports, module) {
   var _ = require("underscore");
   var $ = require("jquery");
   var Backbone = require("backbone");
-  console.log(_);
-  console.log($);
-  console.log(Backbone);
+
+  console.log(module.config());
   console.log('finished loading reqs');
   
   // Alias the module for easier identification.
@@ -18,8 +17,5 @@ define(function(require, exports, module) {
   // The root path to run the application through.
   app.root = "/js/apps/discovery";
   
-  var test = require('js/modules/hello');
-  console.log(test);
-  test.showName('world');
-  
+
 });

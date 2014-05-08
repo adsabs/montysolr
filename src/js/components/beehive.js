@@ -11,14 +11,25 @@ define(['backbone', 'underscore',
     initialize: function(attrs, options) {
       _.extend(this, _.pick(options, hiveOptions));
       this.Services = new ServicesContainer();
+      this.Objects = new ServicesContainer();
     },
 
     activate: function() {
       this.Services.activate(arguments);
+      this.Objects.activate(arguments);
     },
 
     close: function() {
       this.Services.close(arguments);
+      this.Objects.close(arguments);
+    },
+
+    getService: function(name) {
+      return this.Services.get(name);
+    },
+
+    hasService: function(name) {
+      return this.Services.has(name);
     },
 
     addService: function(name, service) {
@@ -29,6 +40,22 @@ define(['backbone', 'underscore',
       return this.Services.remove(name);
     },
 
+    getObject: function(name) {
+      return this.Objects.get(name);
+    },
+
+    hasObject: function(name) {
+      return this.Objects.has(name);
+    },
+
+    addObject: function(name, service) {
+      return this.Objects.add(name, service);
+    },
+
+    removeObject: function(name) {
+      return this.Objects.remove(name);
+    },
+
 
     /*
      * Wraps itself into a Facade that can be shared with other modules
@@ -37,7 +64,8 @@ define(['backbone', 'underscore',
      *  - Services
      */
     hardenedInterface:  {
-      Services: 'services container'
+      Services: 'services container',
+      Objects: 'objects container'
     }
 
 

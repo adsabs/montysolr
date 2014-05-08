@@ -91,8 +91,6 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     // we gave them the weapon... ;-))
     _.extend(opts, options);
 
-
-
     this.outstandingRequests++;
 
     var jqXhr = $.ajax(opts)
