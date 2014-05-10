@@ -23,8 +23,8 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
   private List<String> tokenTypes;
   private boolean emitTokens;
 
-  public void init(Map<String, String> args) {
-    super.init(args);
+  public AuthorCollectorFactory(Map<String, String> args) {
+    super(args);
     if (args.containsKey("tokenTypes")) {
       tokenTypes = StrUtils.splitSmart(args.get("tokenTypes"), ",", false);
     }

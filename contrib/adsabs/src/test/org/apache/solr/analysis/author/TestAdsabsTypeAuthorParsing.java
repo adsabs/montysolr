@@ -288,8 +288,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     // persist the transliteration map after new docs were indexed
     // and reload synonym chain harvested during indexing
-    Analyzer iAnalyzer = h.getCore().getSchema().getAnalyzer();
-    Analyzer qAnalyzer = h.getCore().getSchema().getQueryAnalyzer();
+    Analyzer iAnalyzer = h.getCore().getLatestSchema().getAnalyzer();
+    Analyzer qAnalyzer = h.getCore().getLatestSchema().getQueryAnalyzer();
 
     TokenStream iAuthor = iAnalyzer.tokenStream("author", new StringReader(""));
     TokenStream qAuthor = qAnalyzer.tokenStream("author", new StringReader(""));
@@ -2342,7 +2342,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     return new junit.framework.JUnit4TestAdapter(TestAdsabsTypeAuthorParsing.class);
   }
 
-  /** Validates a query matches some XPath test expressions and closes the query */
+  /* XXX:rca - it was not used, to remove?
+   * 
+   *
   public void assertQ(String message, SolrQueryRequest req, String... tests) {
     try {
       String m = (null == message) ? "" : message + " ";
@@ -2359,6 +2361,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       throw new RuntimeException("Exception during query", e2);
     }
   }
+  */
 
   public Query assertQueryEquals(SolrQueryRequest req, String expected, Class<?> clazz)
   throws Exception {

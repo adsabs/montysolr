@@ -21,16 +21,20 @@ public class AcronymTokenFilterFactory extends TokenFilterFactory {
     private String prefix = null;
     private String tokenType = null;
 
-    @Override
-    public void init(Map<String,String> args) {
-        super.init(args);
+    public AcronymTokenFilterFactory(Map<String,String> args) {
+        super(args);
         assureMatchVersion();
-        this.emitBoth = this.getBoolean("emitBoth", true);
+        this.emitBoth = this.getBoolean(args, "emitBoth", true);
         if (args.containsKey("prefix")) {
         	prefix = (String) args.get("prefix");
+        	args.remove("prefix");
         }
         if (args.containsKey("setType")) {
         	tokenType = (String) args.get("setType");
+        	args.remove("setType");
+        }
+        if (!args.isEmpty()) {
+          throw new IllegalArgumentException("Unknown parameter(s): " + args);
         }
     }
 

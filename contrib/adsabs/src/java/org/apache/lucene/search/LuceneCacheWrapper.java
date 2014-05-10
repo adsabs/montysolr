@@ -6,6 +6,7 @@ import java.lang.ref.SoftReference;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.search.FieldCache.Floats;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 
@@ -54,9 +55,9 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 		throw new NotImplementedException();
 	}
 	
-	public static LuceneCacheWrapper<float[]> getFloatCache(String fieldName, AtomicReader reader)  {
+	public static LuceneCacheWrapper<Floats> getFloatCache(String fieldName, AtomicReader reader)  {
 		
-		float[] data;
+		Floats data;
     try {
       data = FieldCache.DEFAULT.getFloats(reader, fieldName, false);
     } catch (IOException e) {
@@ -64,18 +65,20 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
     }
     
 		final String fName = fieldName;
-		LuceneCacheWrapper<float[]> newCache = new LuceneCacheWrapper<float[]>(new SoftReference<float[]>(data)) {
+		LuceneCacheWrapper<Floats> newCache = new LuceneCacheWrapper<Floats>(new SoftReference<Floats>(data)) {
 			@Override
 		  public String internalToString() {
 				return "float[] " + fName;
 		  }
 			@Override
 			public float getFloat(int docid) {
-				float[] c = cache.get();
-				if (docid < c.length) {
-					return c[docid]; 
-				}
-				return -1.0f;
+				Floats c = cache.get();
+				// XXX: rca - this was the old logic; what happens if docid is bigger than current index?
+				//if (docid < c.length) {
+				//	return c[docid]; 
+				//}
+				//return -1.0f;
+				return c.get(docid);
 			}
 		};
 		
@@ -83,21 +86,23 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 		
 	}
 
-	public static LuceneCacheWrapper<float[]> getFloatCache(String fieldName, float[] data)  {
+	public static LuceneCacheWrapper<Floats> getFloatCache(String fieldName, Floats data)  {
 		
 		final String fName = fieldName;
-		LuceneCacheWrapper<float[]> newCache = new LuceneCacheWrapper<float[]>(new SoftReference<float[]>(data)) {
+		LuceneCacheWrapper<Floats> newCache = new LuceneCacheWrapper<Floats>(new SoftReference<Floats>(data)) {
 			@Override
 		  public String internalToString() {
 				return "float[] " + fName;
 		  }
 			@Override
 			public float getFloat(int docid) {
-				float[] c = cache.get();
-				if (docid < c.length) {
-					return c[docid]; 
-				}
-				return -1.0f;
+			  Floats c = cache.get();
+        // XXX: rca - this was the old logic; what happens if docid is bigger than current index?
+        //if (docid < c.length) {
+        //  return c[docid]; 
+        //}
+        //return -1.0f;
+        return c.get(docid);
 			}
 		};
 		

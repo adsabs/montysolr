@@ -27,9 +27,11 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -42,6 +44,7 @@ import org.apache.lucene.analysis.util.*;
 import org.apache.lucene.util.CharsRef;
 import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.util.Version;
+import org.apache.lucene.util.AttributeSource.AttributeFactory;
 import org.apache.solr.common.util.StrUtils;
 
 /**
@@ -59,6 +62,13 @@ import org.apache.solr.common.util.StrUtils;
  * If the LUCENE-4499 gets committed, we can remove these NewSynonym... classes.
  */
 public class NewSynonymFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
+  protected Map<String,String> args;
+
+  protected NewSynonymFilterFactory(Map<String,String> args) {
+    super(args);
+    this.args = args;
+  }
+
   private SynonymMap map;
   private boolean ignoreCase;
   
@@ -71,7 +81,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   
   //@Override
   public void inform(ResourceLoader loader) throws IOException {
-    final boolean ignoreCase = getBoolean("ignoreCase", false); 
+    final boolean ignoreCase = getBoolean(args, "ignoreCase", false); 
     this.ignoreCase = ignoreCase;
 
     String bf = args.get("builderFactory");
@@ -99,8 +109,15 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   
   public static class SynonymBuilderFactory extends TokenizerFactory implements ResourceLoaderAware {
     
+    protected Map<String,String> args;
+
+    protected SynonymBuilderFactory(Map<String,String> args) {
+      super(args);
+      this.args = args;
+    }
+
     @Override
-    public Tokenizer create(Reader input) {
+    public Tokenizer create(AttributeFactory factory, Reader input) {
       // TODO : this could be used to parse the source data (right now Solr and WordNet synonym
       // parser do it
       throw new IllegalAccessError("Not implemented");
@@ -112,7 +129,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       if (synonyms == null)
         throw new IllegalArgumentException("Missing required argument 'synonyms'.");
       
-      CharsetDecoder decoder = IOUtils.CHARSET_UTF_8.newDecoder();
+      CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
       decoder.onMalformedInput(CodingErrorAction.REPORT)
         		 .onUnmappableCharacter(CodingErrorAction.REPORT);
       
@@ -134,7 +151,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     }
     
     protected Analyzer getAnalyzer(ResourceLoader loader) throws IOException {
-      final boolean ignoreCase = getBoolean("ignoreCase", false); 
+      final boolean ignoreCase = getBoolean(args, "ignoreCase", false); 
 
       String tf = args.get("tokenizerFactory");
 
@@ -143,8 +160,8 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       return new Analyzer() {
         @Override
         protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-          Tokenizer tokenizer = factory == null ? new WhitespaceTokenizer(Version.LUCENE_40, reader) : factory.create(reader);
-          TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_40, tokenizer) : tokenizer;
+          Tokenizer tokenizer = factory == null ? new WhitespaceTokenizer(Version.LUCENE_48, reader) : factory.create(reader);
+          TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_48, tokenizer) : tokenizer;
           return new TokenStreamComponents(tokenizer, stream);
         }
       };
@@ -153,7 +170,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     protected SynonymParser getParser(Analyzer analyzer) {
       
       String format = args.get("format");
-      boolean expand = getBoolean("expand", true);
+      boolean expand = getBoolean(args, "expand", true);
       
       if (format == null || format.equals("solr")) {
         // TODO: expose dedup as a parameter?
@@ -171,9 +188,8 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     
     // (there are no tests for this functionality)
     private TokenizerFactory loadTokenizerFactory(ResourceLoader loader, String cname) throws IOException {
-      TokenizerFactory tokFactory = loader.newInstance(cname, TokenizerFactory.class);
-      tokFactory.setLuceneMatchVersion(luceneMatchVersion);
-      tokFactory.init(args);
+      TokenizerFactory tokFactory = TokenizerFactory.forName(cname, this.args);
+      tokFactory.setExplicitLuceneMatchVersion(true);
       if (tokFactory instanceof ResourceLoaderAware) {
         ((ResourceLoaderAware) tokFactory).inform(loader);
       }
@@ -188,13 +204,12 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   }
   
   private SynonymBuilderFactory loadBuilderFactory(ResourceLoader loader, String cname) throws IOException {
-    SynonymBuilderFactory builderFactory = loader.newInstance(cname, SynonymBuilderFactory.class);
-    builderFactory.setLuceneMatchVersion(luceneMatchVersion);
-    builderFactory.init(args);
+    TokenizerFactory builderFactory = TokenizerFactory.forName(cname, args);
+    builderFactory.setExplicitLuceneMatchVersion(true);
     if (builderFactory instanceof ResourceLoaderAware) {
       ((ResourceLoaderAware) builderFactory).inform(loader);
     }
-    return builderFactory;
+    return (SynonymBuilderFactory) builderFactory;
   }
   
   
@@ -216,6 +231,10 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 2: telescope
    */
   public static class AlwaysIncludeOriginal extends SynonymBuilderFactory {
+    protected AlwaysIncludeOriginal(Map<String,String> args) {
+      super(args);
+    }
+
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
@@ -239,6 +258,10 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * retain proximity queries and phrases.
    */
   public static class BestEffort extends SynonymBuilderFactory {
+    protected BestEffort(Map<String,String> args) {
+      super(args);
+    }
+
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
@@ -263,6 +286,10 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 4: was
    */
   public static class MultiTokenReplaceNulls extends SynonymBuilderFactory {
+    protected MultiTokenReplaceNulls(Map<String,String> args) {
+      super(args);
+    }
+
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
@@ -285,7 +312,12 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 
    */
   public static class BestEffortSearchLowercase extends SynonymBuilderFactory {
-  	boolean inclOrig = false;
+  	private Map<String,String> args;
+    protected BestEffortSearchLowercase(Map<String,String> args) {
+      super(args);
+      this.args = args;
+    }
+    boolean inclOrig = false;
     public void inform(ResourceLoader loader) throws IOException {
       args.put("ignoreCase", "false");
       inclOrig = args.containsKey("inclOrig") ? ((String) args.get("inclOrig")).equals("true") : false;
@@ -322,7 +354,12 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 
    */
   public static class BestEffortIgnoreCaseSelectively extends SynonymBuilderFactory {
-  	boolean inclOrig = false;
+  	private Map<String,String> args;
+    protected BestEffortIgnoreCaseSelectively(Map<String,String> args) {
+      super(args);
+      this.args = args;
+    }
+    boolean inclOrig = false;
     public void inform(ResourceLoader loader) throws IOException {
       args.put("ignoreCase", "false");
       inclOrig = args.containsKey("inclOrig") ? ((String) args.get("inclOrig")).equals("true") : false;

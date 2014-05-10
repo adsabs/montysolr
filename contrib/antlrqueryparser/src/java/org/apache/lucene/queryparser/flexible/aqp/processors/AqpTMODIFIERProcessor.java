@@ -74,7 +74,7 @@ public class AqpTMODIFIERProcessor extends QueryNodeProcessorImpl implements
         }
         currentChildren = masterChild.getChildren();
         currentChildren.add(currentChild);
-        // masterChild.set(currentChildren);
+        masterChild.set(currentChildren);
         masterChild = children.get(i);
       }
 

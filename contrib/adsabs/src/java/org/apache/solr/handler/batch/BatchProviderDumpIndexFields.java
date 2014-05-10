@@ -61,9 +61,9 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 	  String workDir = params.get("#workdir");
 	  
 		SolrCore core = req.getCore();
-		IndexSchema schema = core.getSchema();
+		IndexSchema schema = core.getLatestSchema();
 		final HashMap<String, FieldType> fieldsToLoad = new HashMap<String, FieldType>();
-		final Analyzer analyzer = core.getSchema().getAnalyzer();
+		final Analyzer analyzer = core.getLatestSchema().getAnalyzer();
 
 		String q = params.get(CommonParams.Q, null);
 		if (q == null) {
@@ -96,7 +96,7 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 
 		HashMap<String, String> descr = new HashMap<String, String>();
 		descr.put("query", query.toString());
-		descr.put("indexDir", se.getIndexDir());
+		descr.put("indexDir", se.getPath());
 		descr.put("indexVersion", se.getVersion());
 		descr.put("maxDoc", Integer.toString(se.maxDoc()));
 		descr.put("date", new Date().toString()); 

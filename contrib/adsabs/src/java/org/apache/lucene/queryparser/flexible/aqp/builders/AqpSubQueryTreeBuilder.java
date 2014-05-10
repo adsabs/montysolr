@@ -1,6 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
@@ -9,6 +8,7 @@ import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.Query;
 import org.apache.solr.search.AqpFunctionQParser;
+import org.apache.solr.search.SyntaxError;
 
 public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
   implements AqpFunctionQueryBuilder {
@@ -28,7 +28,7 @@ public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
 				functionQueryParser.setString(((AqpFunctionQueryNode) node).getOriginalInput().value);
 			}
 			return aqpValueSourceParser.parse(functionQueryParser);
-		} catch (ParseException e) {
+		} catch (SyntaxError e) {
 			QueryNodeException ex = new QueryNodeException(new MessageImpl(e.getMessage()));
 			ex.setStackTrace(e.getStackTrace());
 			throw ex;

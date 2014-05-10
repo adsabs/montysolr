@@ -820,8 +820,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   public void testBoost() throws Exception {
     CharacterRunAutomaton stopSet = new CharacterRunAutomaton(
         BasicAutomata.makeString("on"));
-    Analyzer oneStopAnalyzer = new MockAnalyzer(random(), MockTokenizer.SIMPLE,
-        true, stopSet, true);
+    Analyzer oneStopAnalyzer = new MockAnalyzer(random(), MockTokenizer.SIMPLE, true);
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(oneStopAnalyzer);
 

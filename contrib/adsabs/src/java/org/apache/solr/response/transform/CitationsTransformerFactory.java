@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
@@ -68,10 +68,10 @@ public class CitationsTransformerFactory extends TransformerFactory
   	int[][] citations = null;
   	
   	
-    DocTerms idMapping = null;
+    BinaryDocValues idMapping = null;
     if (params.getBool("resolve", false)) {
     	try {
-	      idMapping = FieldCache.DEFAULT.getTerms(searcher.getAtomicReader(), resolutionField);
+	      idMapping = FieldCache.DEFAULT.getTerms(searcher.getAtomicReader(), resolutionField, false);
       } catch (IOException e) {
 	      throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get data for resolving field: " + resolutionField, e);
       }
@@ -91,13 +91,13 @@ class CitationsTransform extends DocTransformer
   final String name;
 	private String[] counts;
 	private String[] values;
-	private DocTerms idMapping;
+	private BinaryDocValues idMapping;
 	private CitationLRUCache<Object,Integer> cache;
 
   public CitationsTransform( String display,
   		CitationLRUCache<Object,Integer> cache,
   		String counts, String values, 
-  		DocTerms idMapping )
+  		BinaryDocValues idMapping )
   {
     this.name = display;
     this.cache = cache;
@@ -160,7 +160,7 @@ class CitationsTransform extends DocTransformer
 				if (citations[i] < 0) // unresolved refs = -1
 					continue;
 				if (idMapping != null) {
-					ret = idMapping.getTerm(citations[i], ret);
+					idMapping.get(citations[i], ret);
 					data.add(ret.utf8ToString());
 				}
 				else {
@@ -181,7 +181,7 @@ class CitationsTransform extends DocTransformer
 				if (references[i] < 0) // unresolved refs = -1
 					continue;
 				if (idMapping != null) {
-					ret = idMapping.getTerm(references[i], ret);
+					idMapping.get(references[i], ret);
 					data.add(ret.utf8ToString());
 				}
 				else {

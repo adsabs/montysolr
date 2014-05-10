@@ -127,7 +127,7 @@ public class FixedDataImportHandler extends RequestHandlerBase implements
     }
     SolrParams params = req.getParams();
     NamedList defaultParams = (NamedList) initArgs.get("defaults");
-    RequestInfo requestParams = new RequestInfo(getParamsMap(fixWI(params)), contentStream);
+    RequestInfo requestParams = new RequestInfo(req, getParamsMap(fixWI(params)), contentStream);
     String command = requestParams.getCommand();
    
     

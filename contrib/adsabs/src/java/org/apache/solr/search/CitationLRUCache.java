@@ -30,12 +30,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DocTermOrds;
 import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.FieldCache.DocTerms;
+import org.apache.lucene.search.FieldCache.Ints;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.FixedBitSet;
@@ -566,7 +567,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     int unknownClasses = 0;
     //boolean foundRequired = false;
     
-    IndexSchema schema = searcher.getCore().getSchema();
+    IndexSchema schema = searcher.getCore().getLatestSchema();
     
     if (schema.getUniqueKeyField() == null) {
     	throw new SolrException(ErrorCode.FORBIDDEN, "Sorry, your schema is missing unique key and thus you probably have many duplicates. I won't continue");
@@ -666,7 +667,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	
   	// load multiple values->idlucene mapping
   	for (String idField: fields.get("intFieldsMV")) {
-			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
+			DocTermOrds unInvertedIndex = new DocTermOrds(reader, liveDocs, idField);
 			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
 			if (termsEnum == null) {
 				continue;
@@ -703,7 +704,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	 *    	- and do something with the pair: (docid, term)
   	 */
 		for (String idField: fields.get("textFieldsMV")) {
-			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
+			DocTermOrds unInvertedIndex = new DocTermOrds(reader, liveDocs, idField);
 			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
 			if (termsEnum == null) {
 				continue;
@@ -733,16 +734,16 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 		
   	// load single valued ids 
 		for (String idField: fields.get("textFields")) {
-			DocTerms idMapping = FieldCache.DEFAULT.getTerms(reader, idField);
+			BinaryDocValues idMapping = FieldCache.DEFAULT.getTerms(reader, idField, false); // XXX:rca - should we use 'true'?
 			Integer i = 0;
 			BytesRef ret = new BytesRef();
-			while(i < idMapping.size()) {
+			while(i < reader.maxDoc()) {
 				if (liveDocs != null && !(i < liveDocs.length() && liveDocs.get(i))) {
 					//System.out.println("skipping: " + i);
 					i++;
 					continue;
 				}
-			  ret = idMapping.getTerm(i, ret);
+			  idMapping.get(i, ret);
 			  if (ret.length > 0) {
 			    setter.set(docBase, i, ret.utf8ToString()); // in this case, docbase will always be 0
 			  }
@@ -750,15 +751,15 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 			}
 		}
 		for (String idField: fields.get("intFields")) {
-			int[] idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
+			Ints idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
 			Integer i = 0;
-			while(i < idMapping.length) {
+			while(i < reader.maxDoc()) {
 				if (liveDocs != null && !(i < liveDocs.length() && liveDocs.get(i))) {
 					//System.out.println("skipping: " + i);
 					i++;
 					continue;
 				}
-				setter.set(docBase, i, treatIdentifiersAsText ? Integer.toString(idMapping[i]) : idMapping[i]);
+				setter.set(docBase, i, treatIdentifiersAsText ? Integer.toString(idMapping.get(i)) : idMapping.get(i));
 				i++;
 			}
 		}

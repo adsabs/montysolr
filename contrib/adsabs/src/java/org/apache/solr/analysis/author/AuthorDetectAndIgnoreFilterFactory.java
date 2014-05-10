@@ -18,13 +18,15 @@ public class AuthorDetectAndIgnoreFilterFactory extends TokenFilterFactory {
 	
 	private Integer maxlen;
 
-	public void init(Map<String, String> args) {
-    super.init(args);
+	public AuthorDetectAndIgnoreFilterFactory(Map<String, String> args) {
+    super(args);
     maxlen = -1;
     if (args.containsKey("maxlen")) {
-    	maxlen = Integer.parseInt(args.get("maxlen"));
+    	maxlen = Integer.parseInt(args.remove("maxlen"));
     }
-    
+    if (!args.isEmpty()) {
+      throw new IllegalArgumentException("Unknown parameter(s): " + args);
+    }
   }
 	
 	public AuthorDetectAndIgnoreFilter create(TokenStream input) {

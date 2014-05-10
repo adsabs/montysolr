@@ -327,7 +327,7 @@ public class DumpIndexField extends RequestHandlerBase {
       queue.registerFailedBatch(data);
       return;
     }
-    SchemaField field = core.getSchema().getFieldOrNull(data.sourceField);
+    SchemaField field = core.getLatestSchema().getFieldOrNull(data.sourceField);
     
     if (field==null || !field.stored()) {
       data.msg("We cannot dump fields that are not stored: " + data.sourceField);
@@ -335,9 +335,9 @@ public class DumpIndexField extends RequestHandlerBase {
       return;
     }
     
-    final Analyzer analyzer = core.getSchema().getQueryAnalyzer();
+    final Analyzer analyzer = core.getLatestSchema().getQueryAnalyzer();
     
-    SchemaField targetField = core.getSchema().getFieldOrNull(data.targetField);
+    SchemaField targetField = core.getLatestSchema().getFieldOrNull(data.targetField);
     
     if (targetField == null) {
       data.msg("We cannot find analyzer for: " + data.targetField);

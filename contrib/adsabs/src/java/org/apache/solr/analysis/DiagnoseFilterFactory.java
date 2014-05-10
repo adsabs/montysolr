@@ -12,29 +12,35 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
 
 public class DiagnoseFilterFactory extends TokenFilterFactory {
-
-    public void init(Map<String, String> args) {
-	    super.init(args);
-	}
-	  
-	/* (non-Javadoc)
-	 * @see org.apache.solr.analysis.TokenFilterFactory#create(org.apache.lucene.analysis.TokenStream)
-	 */
-	public DiagnoseFilter create(TokenStream input) {
-		return new DiagnoseFilter(input);
-	}
-
+  
+  public DiagnoseFilterFactory(Map<String,String> args) {
+    super(args);
+    if (!args.isEmpty()) {
+      throw new IllegalArgumentException("Unknown parameter(s): " + args);
+    }
+  }
+  
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.apache.solr.analysis.TokenFilterFactory#create(org.apache.lucene.analysis
+   * .TokenStream)
+   */
+  public DiagnoseFilter create(TokenStream input) {
+    return new DiagnoseFilter(input);
+  }
+  
 }
 
 final class DiagnoseFilter extends TokenFilter {
-
+  
   private int numTokens = 0;
   
   private final PositionIncrementAttribute posIncrAtt;
   private final TypeAttribute typeAtt;
   private final CharTermAttribute termAtt;
   private final OffsetAttribute offsetAtt;
-
   
   public DiagnoseFilter(TokenStream input) {
     super(input);
@@ -43,24 +49,25 @@ final class DiagnoseFilter extends TokenFilter {
     termAtt = addAttribute(CharTermAttribute.class);
     offsetAtt = addAttribute(OffsetAttribute.class);
   }
-
   
-  
-
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.apache.lucene.analysis.TokenStream#incrementToken()
    */
   @Override
   public boolean incrementToken() throws IOException {
-
+    
     if (!input.incrementToken()) return false;
     
-    System.out.println("term=" + termAtt.toString() + " pos=" + posIncrAtt.getPositionIncrement() + " type=" + typeAtt.type() + " offsetStart=" + offsetAtt.startOffset() + " offsetEnd=" + offsetAtt.endOffset());
+    System.out.println("term=" + termAtt.toString() + " pos="
+        + posIncrAtt.getPositionIncrement() + " type=" + typeAtt.type()
+        + " offsetStart=" + offsetAtt.startOffset() + " offsetEnd="
+        + offsetAtt.endOffset());
     
     return true;
   }
-
-
+  
   @Override
   public void reset() throws IOException {
     super.reset();

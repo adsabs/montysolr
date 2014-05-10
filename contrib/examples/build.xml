@@ -162,7 +162,7 @@
 	    
 		<mkdir dir="${build.dir}/${example.name}/solr/lib" />
 		
-		<!-- existence of this folder prevents solr from using tmp (where UI Admin has problems) -->
+		<!-- existence of this folder prevents solr from using tmp (and UI admin going blank) -->
 	  <mkdir dir="${build.dir}/${example.name}/work" />
 		
 		

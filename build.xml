@@ -34,10 +34,11 @@
     trunk (future 5) = http://svn.apache.org/repos/asf/lucene/dev/trunk
     4.x (future 4.1 etc) = http://svn.apache.org/repos/asf/lucene/dev/branches/branch_4x
     4.0 = http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0
+    4.8 = http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_8
     
     29/11/12 - tracking 4.0 (before it was trunk)
     //-->
-	<property name="solr.svn" value="http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0" />
+	<property name="solr.svn" value="http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_8" />
 
 
 	<import file="common-build.xml"/>
@@ -389,7 +390,7 @@ montysolr.version=${montysolr.version}
     <mkdir dir="${build.dir}/solrjars-extracted" />
     <unzip dest="${build.dir}/solrjars-extracted" overwrite="yes">
       <fileset dir="${solr.real.location}/dist">
-        <include name="apache-solr*.war" />
+        <include name="*solr*.war" />
       </fileset>
     </unzip>
     <move todir="${build.dir}/solrjars-extracted">

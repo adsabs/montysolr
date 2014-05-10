@@ -231,6 +231,11 @@ public class SpanConverter {
         public boolean isPayloadAvailable() throws IOException {
 	        return false;
         }
+
+        @Override
+        public long cost() {
+          return 0;
+        }
 	    	
 	    };
 		}
@@ -298,10 +303,10 @@ public class SpanConverter {
 			//pass
     }
 
-		@Override
-    public Scorer scorer(AtomicReaderContext context, boolean scoreDocsInOrder,
-        boolean topScorer, Bits acceptDocs) throws IOException {
-	    return null;
+    @Override
+    public Scorer scorer(AtomicReaderContext context, Bits acceptDocs)
+        throws IOException {
+      return null;
     }
 		
 	}

@@ -128,7 +128,7 @@ class AqpExtendedDismaxQParser extends QParser {
 
 
   @Override
-  public Query parse() throws ParseException {
+  public Query parse() throws SyntaxError {
     SolrParams localParams = getLocalParams();
     SolrParams params = getParams();
     
@@ -527,7 +527,7 @@ class AqpExtendedDismaxQParser extends QParser {
   }
 
   @Override
-  public Query getHighlightQuery() throws ParseException {
+  public Query getHighlightQuery() throws SyntaxError {
     return parsedUserQuery == null ? altUserQuery : parsedUserQuery;
   }
 

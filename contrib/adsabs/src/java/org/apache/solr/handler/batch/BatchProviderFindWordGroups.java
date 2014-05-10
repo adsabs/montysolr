@@ -58,7 +58,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  
 	  
 	  SolrIndexSearcher searcher = locReq.getSearcher();
-	  IndexSchema schema = locReq.getCore().getSchema();
+	  IndexSchema schema = locReq.getCore().getLatestSchema();
 	  
 	  File jobFile = new File(workDir + "/" + params.get("jobid"));
 		final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);

@@ -91,7 +91,7 @@ public class BitSetQuery extends Query {
 		}
 
 		@Override
-		public float freq() {
+		public int freq() {
 			return 1;
 		}
 
@@ -100,6 +100,11 @@ public class BitSetQuery extends Query {
 			doc = target-1;
 			return nextDoc();
 		}
+
+    @Override
+    public long cost() {
+      return this.seekedDocs.cardinality();
+    }
 	}
 
 	private class MatchAllDocsWeight extends Weight {
@@ -132,8 +137,7 @@ public class BitSetQuery extends Query {
 		}
 
 		@Override
-		public Scorer scorer(AtomicReaderContext context, boolean scoreDocsInOrder,
-				boolean topScorer, Bits acceptDocs) throws IOException {
+		public Scorer scorer(AtomicReaderContext context, Bits acceptDocs) throws IOException {
 			return new MatchAllScorer(context.reader(), acceptDocs, this, queryWeight, seekedDocs, context.docBase);
 		}
 

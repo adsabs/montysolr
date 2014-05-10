@@ -37,10 +37,12 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
  *
  */
 public class SelectiveLowerCaseFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
-  @Override
-  public void init(Map<String,String> args) {
-    super.init(args);
+  public SelectiveLowerCaseFilterFactory(Map<String,String> args) {
+    super(args);
     assureMatchVersion();
+    if (!args.isEmpty()) {
+      throw new IllegalArgumentException("Unknown parameters: " + args);
+    }
   }
 
   public SelectiveLowerCaseFilter create(TokenStream input) {

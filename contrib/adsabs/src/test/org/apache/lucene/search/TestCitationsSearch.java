@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
@@ -23,6 +24,7 @@ import org.apache.lucene.util.NumericUtils;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.junit.BeforeClass;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationsSearch extends MontySolrAbstractTestCase {
@@ -30,15 +32,19 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 	private boolean debug = false;
 	private SolrQueryRequest tempReq;
 	
-	public String getSchemaFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
-			"schema-citations-transformer.xml";
-	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
-			"citation-cache-solrconfig.xml";
-	}
+	@BeforeClass
+  public static void beforeClass() throws Exception {
+    System.setProperty("solr.allow.unsafe.resourceloading", "true");
+    schemaString = MontySolrSetup.getMontySolrHome()
+        + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
+        + "schema-citations-transformer.xml";
+      
+    configString = MontySolrSetup.getMontySolrHome()
+          + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
+          + "citation-cache-solrconfig.xml";
+    initCore(configString, schemaString);
+  }
+	
 
 	@Override
 	public void setUp() throws Exception {

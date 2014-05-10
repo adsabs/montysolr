@@ -13,7 +13,6 @@ import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -26,6 +25,7 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.FieldCache.Floats;
 import org.apache.lucene.search.LuceneCacheWrapper;
 import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.Query;
@@ -41,7 +41,6 @@ import org.apache.lucene.search.SecondOrderCollectorCitingTheMostCited;
 import org.apache.lucene.search.SecondOrderCollectorOperatorExpertsCiting;
 import org.apache.lucene.search.SecondOrderCollectorTopN;
 import org.apache.lucene.search.SecondOrderQuery;
-import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopFieldCollector;
 import org.apache.lucene.search.join.JoinUtil;
@@ -49,7 +48,6 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.util.Version;
-import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -74,8 +72,10 @@ import org.apache.solr.search.QParser;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.RawQParserPlugin;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SortSpec;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
+import org.apache.solr.search.SyntaxError;
 import org.apache.solr.servlet.SolrRequestParsers;
 
 
@@ -106,7 +106,7 @@ AqpFunctionQueryBuilderProvider {
 		 * 		"""
 		 */
 		parsers.put(LuceneQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), LuceneQParserPlugin.NAME);
 				return q.getQuery();
 			}
@@ -115,53 +115,53 @@ AqpFunctionQueryBuilderProvider {
 		 * comment XXX
 		 */
 		parsers.put(OldLuceneQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), OldLuceneQParserPlugin.NAME);
 				return q.getQuery();
 
 			}
 		});
 		parsers.put(FunctionQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), FunctionQParserPlugin.NAME);
 				return q.getQuery();
 			}
 		});
 		parsers.put(PrefixQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), PrefixQParserPlugin.NAME);
 				return q.getQuery();
 			}
 		});
 		parsers.put(BoostQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), BoostQParserPlugin.NAME);
 				return q.getQuery();
 			}
 		});
 		parsers.put(DisMaxQParserPlugin.NAME, new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), DisMaxQParserPlugin.NAME);
 				return simplify(q.getQuery());
 			}
 		});
 		parsers.put(ExtendedDismaxQParserPlugin.NAME, new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), ExtendedDismaxQParserPlugin.NAME);
 				return simplify(q.getQuery());
 			}
 		});
 		parsers.put(FieldQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), FieldQParserPlugin.NAME);
 				return q.getQuery();
 			}
 		});
 		parsers.put(RawQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 				String qstr = fp.getString();
 				if (!qstr.substring(0,2).equals("{!")) {
-					throw new ParseException(
+					throw new SyntaxError(
 							"Raw query parser requires you to specify local params, eg: raw({!f=field}"+fp.getString()+")");
 				}
 				QParser q = fp.subQuery(qstr, RawQParserPlugin.NAME);
@@ -169,25 +169,25 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		parsers.put(NestedQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), NestedQParserPlugin.NAME);
 				return q.getQuery();
 			}
 		});
 		parsers.put(FunctionRangeQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), FunctionRangeQParserPlugin.NAME);
 				return q.getQuery();
 			}
 		});
 		parsers.put(SpatialFilterQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), SpatialFilterQParserPlugin.NAME);
 				return q.getQuery();
 			}
 		});
 		parsers.put(SpatialBoxQParserPlugin.NAME, new AqpSubqueryParser() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser q = fp.subQuery(fp.getString(), SpatialBoxQParserPlugin.NAME);
 				return q.getQuery();
 			}
@@ -217,7 +217,7 @@ AqpFunctionQueryBuilderProvider {
 		 */
 		// coreads(Q) - what people read: MoreLikeThese(topn(200,classic_relevance(Q)))
 		parsers.put("trending", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				QParser aqp = fp.subQuery(fp.getString(), "aqp");
 				Query innerQuery = aqp.parse();
 
@@ -266,11 +266,11 @@ AqpFunctionQueryBuilderProvider {
 						}
 					});
 				} catch (IOException e) {
-					throw new ParseException(e.getMessage());
+					throw new SyntaxError(e.getMessage(), e);
 				}
 
 				MoreLikeThisQuery mlt = new MoreLikeThisQueryFixed(readers.toString(), new String[] {fieldName}, 
-						new WhitespaceAnalyzer(Version.LUCENE_40), fieldName);
+						new WhitespaceAnalyzer(Version.LUCENE_48), fieldName);
 
 				// configurable params
 				mlt.setMinTermFrequency(0);
@@ -332,7 +332,7 @@ AqpFunctionQueryBuilderProvider {
 		 */
 		parsers.put("pos", new AqpSubqueryParserFull() {
 			@Override
-			public Query parse(FunctionQParser fp) throws ParseException {
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 				Query query = fp.parseNestedQuery();
 				int start = fp.parseInt();
 				int end = start;
@@ -359,7 +359,7 @@ AqpFunctionQueryBuilderProvider {
 					if (field != null) {
 						FieldType fType = field.getType();
 						//if (!fType.isMultiValued()) {
-						//	throw new ParseException("The positional search doesn't make sense for: " + query);
+						//	throw new SyntaxError("The positional search doesn't make sense for: " + query);
 						//}
 						positionIncrementGap = fType.getAnalyzer().getPositionIncrementGap(field.getName());
 						if (positionIncrementGap == 0)
@@ -372,7 +372,7 @@ AqpFunctionQueryBuilderProvider {
 				try {
 					spanQuery = converter.getSpanQuery(new SpanConverterContainer(query, 1, true));
 				} catch (QueryNodeException e) {
-					ParseException ex = new ParseException(e.getMessage());
+					SyntaxError ex = new SyntaxError(e.getMessage(), e);
 					ex.setStackTrace(e.getStackTrace());
 					throw ex;
 				}
@@ -430,7 +430,7 @@ AqpFunctionQueryBuilderProvider {
 		 *    return "classic_relevance(%s, %0.2f)" % (query,ratio)
 		 */
 		parsers.put("classic_relevance", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 
 				Query innerQuery = fp.parseNestedQuery();
 				float ratio = 0.5f;
@@ -439,14 +439,14 @@ AqpFunctionQueryBuilderProvider {
 				}
 				
 				if (ratio < 0 || ratio > 1.0f) {
-					throw new ParseException("The ratio must be in the range 0.0-1.0");
+					throw new SyntaxError("The ratio must be in the range 0.0-1.0");
 				}
 				
 				@SuppressWarnings("unchecked")
 				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
+				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
 						fp.getReq().getSearcher().getAtomicReader());
 				
 				return new SecondOrderQuery(innerQuery, null, 
@@ -494,24 +494,24 @@ AqpFunctionQueryBuilderProvider {
 		 *    
 		 */
 		parsers.put("topn", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 				int topN = -1;
 				try {
 					topN = fp.parseInt();
 				}
 				catch (NumberFormatException e) {
-					throw new ParseException("The function signature is topn(int, query, [sort order]). Error: " + e.getMessage());
+					throw new SyntaxError("The function signature is topn(int, query, [sort order]). Error: " + e.getMessage());
 				}
 
 				if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
-					throw new ParseException("Hmmm, the first argument of your operator must be a positive number.");
+					throw new SyntaxError("Hmmm, the first argument of your operator must be a positive number.");
 				}
 
 				QParser eqp = fp.subQuery(fp.parseId(), "aqp");
 				Query innerQuery = eqp.getQuery();
 
 				if (innerQuery == null) {
-					throw new ParseException("This query is empty: " + eqp.getString());
+					throw new SyntaxError("This query is empty: " + eqp.getString());
 				}
 
 				String sortOrRank = "score"; 
@@ -531,15 +531,15 @@ AqpFunctionQueryBuilderProvider {
 							new SecondOrderCollectorTopN(topN));
 				}
 				else {
-					Sort sortSpec = QueryParsing.parseSort(sortOrRank, fp.getReq());
+					SortSpec sortSpec = QueryParsing.parseSortSpec(sortOrRank, fp.getReq());
 
 					SolrIndexSearcher searcher = fp.getReq().getSearcher();
 
 					TopFieldCollector collector;
 					try {
-						collector = TopFieldCollector.create(searcher.weightSort(sortSpec), topN, false, true, true, true);
+						collector = TopFieldCollector.create(searcher.weightSort(sortSpec.getSort()), topN, false, true, true, true);
 					} catch (IOException e) {
-						throw new ParseException("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
+						throw new SyntaxError("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
 					}
 
 					return new SecondOrderQuery(innerQuery, null, 
@@ -582,7 +582,7 @@ AqpFunctionQueryBuilderProvider {
 		 *    
 		 */
 		parsers.put("citations", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
@@ -625,7 +625,7 @@ AqpFunctionQueryBuilderProvider {
 		 *    
 		 */
 		parsers.put("references", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
@@ -652,7 +652,7 @@ AqpFunctionQueryBuilderProvider {
 		 *    return "joincitations(%s)" % (query,) 
 		 */
 		parsers.put("joincitations", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
 				try {
@@ -660,7 +660,7 @@ AqpFunctionQueryBuilderProvider {
 					return JoinUtil.createJoinQuery("bibcode", false, "reference", innerQuery, 
 							req.getSearcher(), ScoreMode.Avg);
 				} catch (IOException e) {
-					throw new ParseException(e.getMessage());
+					throw new SyntaxError(e.getMessage());
 				}
 			}
 		});
@@ -680,14 +680,14 @@ AqpFunctionQueryBuilderProvider {
 		 *     
 		 */
 		parsers.put("joinreferences", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
 				try {
 					return JoinUtil.createJoinQuery("reference", true, "bibcode", innerQuery, 
 							req.getSearcher(), ScoreMode.None); // will not work properly iff mode=Avg|Max
 				} catch (IOException e) {
-					throw new ParseException(e.getMessage());
+					throw new SyntaxError(e.getMessage());
 				}
 			}
 		});
@@ -712,14 +712,14 @@ AqpFunctionQueryBuilderProvider {
 		 *     
 		 */
 		parsers.put("useful", new AqpSubqueryParserFull() { // this function values can be analyzed
-			public Query parse(FunctionQParser fp) throws ParseException {          
+			public Query parse(FunctionQParser fp) throws SyntaxError {          
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
         SolrCacheWrapper<CitationLRUCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
+				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
 						fp.getReq().getSearcher().getAtomicReader());
 				
 				return  new SecondOrderQuery( // references
@@ -754,7 +754,7 @@ AqpFunctionQueryBuilderProvider {
 		 *     
 		 */
 		parsers.put("useful2", new AqpSubqueryParserFull() { // this function values can be analyzed
-			public Query parse(FunctionQParser fp) throws ParseException {          
+			public Query parse(FunctionQParser fp) throws SyntaxError {          
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
@@ -762,7 +762,7 @@ AqpFunctionQueryBuilderProvider {
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				//TODO: make configurable the name of the field				
-				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
+				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
 
 				return new SecondOrderQuery(innerQuery, null, 
 						new SecondOrderCollectorOperatorExpertsCiting(citationsWrapper, boostWrapper));
@@ -789,14 +789,14 @@ AqpFunctionQueryBuilderProvider {
 		 *     
 		 */
 		parsers.put("reviews", new AqpSubqueryParserFull() { // this function values can be analyzed
-			public Query parse(FunctionQParser fp) throws ParseException {          
+			public Query parse(FunctionQParser fp) throws SyntaxError {          
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
 				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
+				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
 				
 				SecondOrderQuery outerQuery = new SecondOrderQuery( // citations
 						new SecondOrderQuery( // topn
@@ -822,14 +822,14 @@ AqpFunctionQueryBuilderProvider {
 
 		// original impl of reviews() = find papers that cite the most cited papers
 		parsers.put("reviews2", new AqpSubqueryParserFull() { // this function values can be analyzed
-			public Query parse(FunctionQParser fp) throws ParseException {          
+			public Query parse(FunctionQParser fp) throws SyntaxError {          
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
 				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<float[]> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
+				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
 						fp.getReq().getSearcher().getAtomicReader());
 				
 				return new SecondOrderQuery(innerQuery, null, 
@@ -837,7 +837,7 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		parsers.put("citis", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
@@ -850,27 +850,27 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		parsers.put("aqp", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {          
+			public Query parse(FunctionQParser fp) throws SyntaxError {          
 				QParser q = fp.subQuery(fp.getString(), "aqp");
 				return q.getQuery();
 			}
 		});
 
 		parsers.put("adismax", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {          
+			public Query parse(FunctionQParser fp) throws SyntaxError {          
 				QParser q = fp.subQuery(fp.getString(), "adismax");
 				return simplify(q.getQuery());
 			}
 		});
 
 		parsers.put("edismax_nonanalyzed", new AqpSubqueryParserFull() { // used for nodes that were already analyzed
-			public Query parse(FunctionQParser fp) throws ParseException {
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 				final String original = fp.getString();
 				QParser ep = fp.subQuery("xxx", "adismax");
 				Query q = ep.getQuery();
 				QParser fakeParser = new QParser(original, null, null, null) {
 					@Override
-					public Query parse() throws ParseException {
+					public Query parse() throws SyntaxError {
 						String[] parts = getString().split(":");
 						return new TermQuery(new Term(parts[0], original));
 					}
@@ -879,13 +879,13 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		parsers.put("edismax_combined_aqp", new AqpSubqueryParserFull() { // will decide whether new aqp() parse is needed
-			public Query parse(FunctionQParser fp) throws ParseException {
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 				final String original = fp.getString();
 				QParser eqp = fp.subQuery(original, "adismax");
 				Query q = eqp.getQuery();
 				return simplify(q);
 			}
-			protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
+			protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
 				ArrayList<Query> parts = query.getDisjuncts();
 				for (int i=0;i<parts.size();i++) {
 					Query oldQ = parts.get(i);
@@ -920,7 +920,7 @@ AqpFunctionQueryBuilderProvider {
 				return null;
 				//return f; // always re-analyze
 			}
-			private Query reAnalyze(String field, String value, float boost) throws ParseException {
+			private Query reAnalyze(String field, String value, float boost) throws SyntaxError {
 				QParser fParser = getParser();
 				System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
 				QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
@@ -930,14 +930,14 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		parsers.put("edismax_always_aqp", new AqpSubqueryParserFull() { // will use edismax to create top query, but the rest is done by aqp
-			public Query parse(FunctionQParser fp) throws ParseException {
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 				final String original = fp.getString();
 				QParser eqp = fp.subQuery("xxx", "adismax");
 				fp.setString(original);
 				Query q = eqp.getQuery();
 				return simplify(reParse(q, fp, (Class<?>)null));
 			}
-			protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
+			protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
 				ArrayList<Query> parts = query.getDisjuncts();
 				for (int i=0;i<parts.size();i++) {
 					Query oldQ = parts.get(i);
@@ -964,7 +964,7 @@ AqpFunctionQueryBuilderProvider {
 				return query;
 			}
 
-			private Query reAnalyze(String field, String value, float boost) throws ParseException {
+			private Query reAnalyze(String field, String value, float boost) throws SyntaxError {
 				QParser fParser = getParser();
 				QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
 				Query q = aqp.getQuery();
@@ -974,7 +974,7 @@ AqpFunctionQueryBuilderProvider {
 		});
 
 		parsers.put("tweak", new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws ParseException {
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 
 				String configuration = fp.parseId();
 				Query q = fp.parseNestedQuery();
@@ -989,7 +989,7 @@ AqpFunctionQueryBuilderProvider {
 							collector.setFinalValueType(SecondOrderCollector.FinalValueType.valueOf(cfv));
 						}
 						catch (IllegalArgumentException e) {
-							throw new ParseException("Wrong parameter: " + e.getMessage());
+							throw new SyntaxError("Wrong parameter: " + e.getMessage(), e);
 						}
 					}
 				}
@@ -1001,7 +1001,7 @@ AqpFunctionQueryBuilderProvider {
 		// so we have to do it ourselves
 		parsers.put("warm_cache", new AqpSubqueryParserFull() {
 			@SuppressWarnings("unchecked")
-      public Query parse(FunctionQParser fp) throws ParseException {
+      public Query parse(FunctionQParser fp) throws SyntaxError {
 
 				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")

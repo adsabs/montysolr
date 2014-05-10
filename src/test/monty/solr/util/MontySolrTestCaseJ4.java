@@ -188,13 +188,6 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 
 	private static String factoryProp;
 
-	public static void createTempDir() {
-		String cname = getSimpleClassName();
-		dataDir = new File(TEMP_DIR, "solrtest-" + cname + "-"
-				+ System.currentTimeMillis());
-		dataDir.mkdirs();
-	}
-
 	public static void initCore() throws Exception {
 		log.info("####initCore");
 

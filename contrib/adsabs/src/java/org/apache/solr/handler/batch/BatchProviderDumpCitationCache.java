@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.Iterator;
 
+import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.FieldCache.DocTerms;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -53,18 +53,18 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  Iterator<int[][]> it = cache.getCitationsIterator();
 	  
 	  if (!returnDocids) {
-	    DocTerms uniqueValueCache = FieldCache.DEFAULT.getTerms(req.getSearcher().getAtomicReader(), uniqueField);
+	    BinaryDocValues uniqueValueCache = FieldCache.DEFAULT.getTerms(req.getSearcher().getAtomicReader(), uniqueField, false);
 	    int paperid = 0;
 	    while (it.hasNext()) {
 	      int[][] data = it.next();
 	      int[] references = data[0];
 		  	if (references != null && references.length > 0) {
-		  		uniqueValueCache.getTerm(paperid, ret);
+		  		uniqueValueCache.get(paperid, ret);
 		  		out.write(ret.utf8ToString());
 		  		out.write("\t");
 		  		first=true;
 		  		for (int luceneDocId: references) {
-			  		ret = uniqueValueCache.getTerm(luceneDocId, ret);
+			  		uniqueValueCache.get(luceneDocId, ret);
 					  if (ret.length > 0) {
 					  	if (!first) {
 					  		out.write("\t");

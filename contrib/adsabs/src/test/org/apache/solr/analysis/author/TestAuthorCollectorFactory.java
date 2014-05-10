@@ -31,7 +31,7 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     args.put("tokenTypes", AuthorUtils.AUTHOR_TRANSLITERATED);
     args.put("emitTokens", "false");
     
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
+    factory.setExplicitLuceneMatchVersion(true);
     factory.init(args);
     factory.inform(new ClasspathResourceLoader(getClass()));
 

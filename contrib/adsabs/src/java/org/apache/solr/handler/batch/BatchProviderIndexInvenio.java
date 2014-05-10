@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.Ints;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
@@ -97,7 +98,7 @@ public class BatchProviderIndexInvenio extends BatchProvider {
     int maxRecs = Math.min(params.getInt("max_records", 100000), 1000000);
     
     
-    int[] existingRecs = FieldCache.DEFAULT.getInts(req.getSearcher().getAtomicReader(), field, false);
+    Ints existingRecs = FieldCache.DEFAULT.getInts(req.getSearcher().getAtomicReader(), field, false);
     Map<Integer, Integer> idToLuceneId;
     
     if (tmpMap.containsKey(existingRecs.hashCode())) {
@@ -105,9 +106,10 @@ public class BatchProviderIndexInvenio extends BatchProvider {
     }
     else {
     	tmpMap.clear();
-    	idToLuceneId = new HashMap<Integer, Integer>(existingRecs.length);
-    	for (int i=0;i<existingRecs.length;i++) {
-        idToLuceneId.put(existingRecs[i], i);
+    	int m = req.getSearcher().maxDoc();
+    	idToLuceneId = new HashMap<Integer, Integer>(m);
+    	for (int i=0;i<m;i++) {
+        idToLuceneId.put(existingRecs.get(i), i);
       }
     }
     

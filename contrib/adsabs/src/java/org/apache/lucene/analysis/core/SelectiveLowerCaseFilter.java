@@ -55,14 +55,9 @@ public final class SelectiveLowerCaseFilter extends TokenFilter {
       if (termIsAcronym(termAtt.toString())) {
         return true; // skip lowercasing
       }
-      final char[] buffer = termAtt.buffer();
-      final int length = termAtt.length();
-      for (int i = 0; i < length;) {
-       i += Character.toChars(
-               Character.toLowerCase(
-                   charUtils.codePointAt(buffer, i)), buffer, i);
-      }
+      charUtils.toLowerCase(termAtt.buffer(), 0, termAtt.length());
       return true;
+      
     } else
       return false;
   }

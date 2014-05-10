@@ -38,7 +38,7 @@ public class BatchProviderDumpTermFreqs extends BatchProvider {
 
 		SolrCore core = req.getCore();
 		SolrParams params = req.getParams();
-		IndexSchema schema = core.getSchema();
+		IndexSchema schema = core.getLatestSchema();
 	  String jobid = params.get("jobid");
 	  String workDir = params.get("#workdir");
 	  

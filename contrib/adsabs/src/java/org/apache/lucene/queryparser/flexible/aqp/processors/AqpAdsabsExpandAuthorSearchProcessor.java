@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
-import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
@@ -32,7 +32,6 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
-import org.apache.solr.analysis.author.AuthorNormalizeFilter;
 import org.apache.solr.analysis.author.AuthorNormalizeFilterFactory;
 import org.apache.solr.analysis.author.AuthorUtils;
 import org.apache.solr.analysis.author.PythonicAuthorNormalizeFilterFactory;
@@ -276,7 +275,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
   private List<String> normalizeAuthorName(String input) throws QueryNodeException {
   	if (reader == null) { // well, nice try, but it will be always created new...
   		TokenFilterFactory[] filters = new TokenFilterFactory[2];
-  		TokenizerFactory tokenizer = new KeywordTokenizerFactory();
+  		TokenizerFactory tokenizer = new KeywordTokenizerFactory(new HashMap<String,String>());
   		filters[1] = new AuthorNormalizeFilterFactory();
   		filters[0] = new PythonicAuthorNormalizeFilterFactory();
   		reader = new ReusableStringReader();

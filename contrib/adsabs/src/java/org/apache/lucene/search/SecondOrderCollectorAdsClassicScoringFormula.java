@@ -3,9 +3,11 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.SlowCompositeReaderWrapper;
+import org.apache.lucene.search.FieldCache.Floats;
 
 /**
  * This is a toy example for testing the ADS Classic relevance
@@ -35,16 +37,16 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	private float lucenePart;
 	private float adsPart;
 	private CacheWrapper cache;
-	private LuceneCacheWrapper<float[]> boostCache;
+	private LuceneCacheWrapper<Floats> boostCache;
 
-	public SecondOrderCollectorAdsClassicScoringFormula(SolrCacheWrapper cache, LuceneCacheWrapper<float[]> boostCache, float ratio) {
+	public SecondOrderCollectorAdsClassicScoringFormula(SolrCacheWrapper cache, LuceneCacheWrapper<Floats> boostCache, float ratio) {
 		this.cache = cache;
 		this.lucenePart = ratio;
 		this.adsPart = 1.0f - ratio;
 		this.boostCache = boostCache;
 	}
 	
-	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, LuceneCacheWrapper<float[]> boostCache) {
+	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, LuceneCacheWrapper<Floats> boostCache) {
 		this.cache = cache;
 		this.lucenePart = 0.5f;
 		this.adsPart = 0.5f;

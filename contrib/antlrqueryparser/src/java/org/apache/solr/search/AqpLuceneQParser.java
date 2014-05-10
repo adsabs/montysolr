@@ -111,14 +111,14 @@ public class AqpLuceneQParser extends QParser {
 	}
 	
 	@Override
-	public Query parse() throws ParseException {
+	public Query parse() throws SyntaxError {
 		try {
 			return qParser.parse(getString(), null);
 		} catch (QueryNodeException e) {
-			throw new ParseException(e.getMessage());
+			throw new SyntaxError(e.getMessage(), e);
 		}
 		catch (SolrException e1) {
-			throw new ParseException(e1.getMessage());
+			throw new SyntaxError(e1.getMessage(), e1);
 		}
 	}
 

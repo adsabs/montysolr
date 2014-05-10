@@ -2,6 +2,7 @@ package org.apache.solr.handler.batch;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -45,7 +46,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
     
     BatchHandlerRequestData data = queue.pop();
     
-    SchemaField field = core.getSchema().getFieldOrNull(sourceField);
+    SchemaField field = core.getLatestSchema().getFieldOrNull(sourceField);
     
     if (field==null || !field.stored()) {
       data.setMsg("We cannot dump fields that are not stored: " + sourceField);
@@ -53,9 +54,9 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
       return;
     }
     
-    final Analyzer analyzer = core.getSchema().getQueryAnalyzer();
+    final Analyzer analyzer = core.getLatestSchema().getQueryAnalyzer();
     
-    SchemaField tField = core.getSchema().getFieldOrNull(targetField);
+    SchemaField tField = core.getLatestSchema().getFieldOrNull(targetField);
     
     if (tField == null) {
       data.setMsg("We cannot find analyzer for: " + targetField);
@@ -63,7 +64,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
       return;
     }
     
-    AuthorNormalizeFilterFactory factory = new AuthorNormalizeFilterFactory();
+    AuthorNormalizeFilterFactory factory = new AuthorNormalizeFilterFactory(new HashMap<String, String>());
     final String targetAnalyzer = targetField;
     
     DirectoryReader ir = req.getSearcher().getIndexReader();

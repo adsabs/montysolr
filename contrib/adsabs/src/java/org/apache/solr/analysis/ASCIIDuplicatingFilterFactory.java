@@ -17,6 +17,8 @@ package org.apache.solr.analysis;
  * limitations under the License.
  */
 
+import java.util.Map;
+
 import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
 import org.apache.lucene.analysis.util.MultiTermAwareComponent;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
@@ -32,6 +34,13 @@ import org.apache.lucene.analysis.TokenStream;
  *
  */
 public class ASCIIDuplicatingFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
+  protected ASCIIDuplicatingFilterFactory(Map<String,String> args) {
+    super(args);
+    if (!args.isEmpty()) {
+      throw new IllegalArgumentException("Unknown parameter(s): " + args);
+    }
+  }
+
   public OnChangeDuplicatingFilter create(TokenStream input) {
     return new OnChangeDuplicatingFilter(new ASCIIFoldingFilter(new DuplicatingFilter(input)));
   }

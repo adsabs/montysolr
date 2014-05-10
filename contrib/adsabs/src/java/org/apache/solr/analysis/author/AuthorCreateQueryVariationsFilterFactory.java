@@ -14,33 +14,36 @@ public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory
   private boolean shortenMultiname = false;
   private boolean lookAtPayloadForOrigAuthor = false;
 
-  @Override
-  public void init(Map<String,String> args) {
-    super.init(args);
+  public AuthorCreateQueryVariationsFilterFactory(Map<String,String> args) {
+    super(args);
     
     if (args.containsKey("acronymVariations")) {
-      acronymVariations = Integer.parseInt(args.get("acronymVariations"));
+      acronymVariations = Integer.parseInt(args.remove("acronymVariations"));
     }
 
     if (args.containsKey("plainSurname")) {
-      plainSurname = args.get("plainSurname").equals("true");
+      plainSurname = args.remove("plainSurname").equals("true");
     }
     
     if (args.containsKey("addWildcards")) {
-      addWildcards = args.get("addWildcards").equals("true");
+      addWildcards = args.remove("addWildcards").equals("true");
     }
     
     if (args.containsKey("addShortenedMultiName")) {
-      shortenMultiname = args.get("addShortenedMultiName").equals("true");
+      shortenMultiname = args.remove("addShortenedMultiName").equals("true");
     }
     
     if (args.containsKey("lookAtPayloadForOrigAuthor")) {
-      lookAtPayloadForOrigAuthor = args.get("lookAtPayloadForOrigAuthor").equals("true");
+      lookAtPayloadForOrigAuthor = args.remove("lookAtPayloadForOrigAuthor").equals("true");
     }
     
     if (args.containsKey("tokenType")) {
-      tokenType = args.get("tokenType");
+      tokenType = args.remove("tokenType");
       if (tokenType.equals("null")) tokenType = null;
+    }
+    
+    if (!args.isEmpty()) {
+      throw new IllegalArgumentException("Unknown parameter(s): " + args);
     }
   }
 

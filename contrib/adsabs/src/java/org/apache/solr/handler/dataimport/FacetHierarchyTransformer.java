@@ -29,7 +29,7 @@ public class FacetHierarchyTransformer extends Transformer {
 			try {
 				fh.addFacets(row);
 			} catch (RuntimeException e) {
-				IndexSchema schema = context.getSolrCore().getSchema();
+				IndexSchema schema = context.getSolrCore().getLatestSchema();
 				String idFieldName = schema.getUniqueKeyField().getName();
 				log.debug(
 						"There was a problem generating hierarchical facets for record {}: {}",
