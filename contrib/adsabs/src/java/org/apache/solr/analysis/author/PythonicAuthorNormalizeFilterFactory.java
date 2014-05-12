@@ -8,7 +8,7 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
 public class PythonicAuthorNormalizeFilterFactory extends TokenFilterFactory {
 	
 	
-	protected PythonicAuthorNormalizeFilterFactory(Map<String,String> args) {
+	public PythonicAuthorNormalizeFilterFactory(Map<String,String> args) {
     super(args);
     if (!args.isEmpty()) {
       throw new IllegalArgumentException("Unknown parameter(s): " + args);

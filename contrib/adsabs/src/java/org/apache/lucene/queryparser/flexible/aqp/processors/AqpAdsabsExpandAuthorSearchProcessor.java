@@ -276,8 +276,8 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
   	if (reader == null) { // well, nice try, but it will be always created new...
   		TokenFilterFactory[] filters = new TokenFilterFactory[2];
   		TokenizerFactory tokenizer = new KeywordTokenizerFactory(new HashMap<String,String>());
-  		filters[1] = new AuthorNormalizeFilterFactory();
-  		filters[0] = new PythonicAuthorNormalizeFilterFactory();
+  		filters[1] = new AuthorNormalizeFilterFactory(new HashMap<String, String>());
+  		filters[0] = new PythonicAuthorNormalizeFilterFactory(new HashMap<String, String>());
   		reader = new ReusableStringReader();
     	Tokenizer tk = tokenizer.create( reader );
       TokenStream ts = tk;
