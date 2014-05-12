@@ -1,4 +1,10 @@
-define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_request', './views/facet-item-views', '../multi_callback/paginated_multi_callback_widget', 'js/components/paginator'], function (Backbone, Marionette, ApiQuery, ApiRequest, FacetItemViews, PaginatedMultiCallbackWidget, Paginator) {//needed for the hierarchical processResponse
+define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_request', './views/facet-item-views',
+  'js/widgets/multi_callback/paginated_multi_callback_widget', 'js/components/paginator'],
+  function (Backbone, Marionette, ApiQuery, ApiRequest, FacetItemViews, PaginatedMultiCallbackWidget, Paginator) {//needed for the hierarchical processResponse
+
+  //XXX:rca - this should really be separated into two files
+  // - basic_facet_widget
+  // - hierarchical_widget
 
   var BaseFacetWidget = PaginatedMultiCallbackWidget.extend({
 
@@ -21,11 +27,13 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
       }
 
       catch (e) {
+        // XXX:rca - will fail only if options.view.collection is missing - yo ushould test explicitly for undefined objects
         throw new Error("Facet widget controller is missing one or more key configuration variables")
       }
 
       this.solrPath = options.solrPath || "facet_counts.facet_fields";
 
+      // XXX:rca - why would I be passing the function in options? we should use .extend() for that
       if (options.processResponse) {
         this.processResponse = options.processResponse
       }
@@ -45,6 +53,14 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
       PaginatedMultiCallbackWidget.prototype.initialize.call(this, options)
     },
 
+    /*
+    If you look into the super class's dispatchRequest() you will
+    see it is doing the same thing as this method. This begs the question:
+
+    why 'dispatchBasicRequest() exists? its code should be inside 'dispatchRequest'
+      instead
+
+     */
     dispatchRequest: function (apiQuery) {
 
       //resetting pagination because this function is called
@@ -61,6 +77,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
     },
 
+    // XXX:rca - pls try to remove (refactor)
     dispatchFollowUpRequest: function () {
       console.log("dispatching follow up request")
 
@@ -76,6 +93,10 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
       var id, req, customQuery;
 
+      // XXX:rca - my previous boss called these things 'Bulgarian constants'
+      // i don't know why, but it meant some 'hardcoded variables' that pretend
+      // to be constants ;-) Maybe you should put them into Paginator and
+      // make clear it is a constant
       if (this.solrPath === "facet_counts.facet_fields") {
         var d = {
           "facet"         : "true",
@@ -99,7 +120,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
       //it's responding to INVITING_REQUEST or requesting moreinfo, so just do default information request
       this.registerCallback(id, this.processResponse, {
         view: this.view
-      })
+      });
 
       req = this.composeRequest(customQuery);
       if (req) {
@@ -108,9 +129,12 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
       }
     },
 
+    // XXX:rca - I'm trying to understand what it does: 'deliverApply' ? :-)
+    // shall we try some less cryptic method names? eg. onApplySelection
+
     deliverApplySubmitQuery: function () {
 
-      var changed, currentFQ, finalFQ, newQuery;
+      var changed, currentFQ, finalFQ, newQuery, facetQuery;
 
       currentFQ = this.getCurrentQuery().get("fq");
 
@@ -134,6 +158,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
     },
 
+    // XXX:rca - dtto
     deliverSelectLogicSubmitQuery: function () {
 
       var facetQuery, selected, logic;
@@ -188,7 +213,23 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
      adding to a collection. Useful for main queries and hierarchical queries.
      This is just the basic version for checkbox views, otherwise override*/
 
+    /*
+    XXX:rca - so this is VERY confusing - if you follow the chain of inheritance, you will
+    see that the BasicWidget registers 'processResponse' method as a method
+    that communicates with PubSub; but here you are using the same method to pass additional
+    data (it will never be called with this data by PubSub)
+
+    I propose that you always keep the signature (and if we need to change the method signature
+    we change it everywhere (this is just to keep our sanity - api is a 'contract' and javascript
+    is loose; so we must be careful)
+
+    ...and rename this method to something else (it should be used only inside the widget;
+    it is not facing PubSub)
+
+     */
     processResponse: function (apiResponse, data) {
+
+      // TODO: pass collection data (instead of the view)
       view = data.view
 
       //starting assumption is that the collection could fetch more facets if it wanted to
@@ -237,7 +278,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
             title: " " + t + " (" + facets[i + 1] + ")",
             //totally un-touched original value
             //prefacing slashes removed for when val is used in faceting
-            value: f,
+            value: f
           };
 
           //in case of hierarchical vals, also provide val without slashes
@@ -296,7 +337,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
     },
 
     updateChildCollection: function (apiResponse, view, extra) {
-
+      // XXX:rca - the same issue as the processResponse above
       this.processResponse(apiResponse, view, extra)
 
     },

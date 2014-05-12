@@ -1,8 +1,8 @@
 define(['backbone', 'marionette',
   'js/components/api_query', 'js/components/api_request',
-  '../../mixins/widget_mixin_method'
+  'js/mixins/widget_mixin_method'
 ], function(
-  Backbone, Marionette, ApiQuery, ApiRequest, widgetMixin) {
+  Backbone, Marionette, ApiQuery, ApiRequest, WidgetMixin) {
 
   /**
    * A pubsub based widget with basic functionality. For
@@ -78,12 +78,16 @@ define(['backbone', 'marionette',
      */
     dispatchRequest: function(apiQuery) {
 
-      this.setCurrentQuery(apiQuery);
+      //XXX:rca: IFF st changed query before calling 'dispatch' then this
+      // would be OK; but if st is changing query inside 'composeRequest'
+      // then this usage is not OK. Because it is setting query and then
+      // refusing to act on it (it is possible)
 
+      this.setCurrentQuery(apiQuery);
       var req = this.composeRequest();
-        if (req) {
-          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-        }
+      if (req) {
+        this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+      }
     },
 
     /**
@@ -105,6 +109,15 @@ define(['backbone', 'marionette',
      * @returns {ApiRequest}
      */
     composeRequest: function(params) {
+      /*
+      XXX:rca: i have objections to this (api inconsistency) - the previous signature was
+       apiQuery; which is a clear what it contains, but params could
+       be anything. I'd like to see composeRequest to receive ApiQuery
+       and do whatever is necessary - the query can be changed before
+       composeRequest is called. What was the reason for reverting
+       this functionality?
+
+       */
       if (params){
           var q = this.composeQuery(params);
       }
@@ -115,16 +128,21 @@ define(['backbone', 'marionette',
          var q = this.composeQuery();
       };
 
-      return new ApiRequest({
-        target: 'search',
-        query: q
-      });
+      if (q) {
+        return new ApiRequest({
+          target: 'search',
+          query: q
+        });
+      }
     },
 
     /**
      * Defaualt callback to be called by PubSub on 'INVITING_REQUEST'
+     *
      * XXX: seems like a problem to me (it should be called from inside
      * 'dispatchRequest' imo)
+     * XXX: rca: who commented. was it me? probably...but now I'm disagreeing
+     *   with myself :-)
      *
      * @param apiQuery
      */
@@ -135,7 +153,7 @@ define(['backbone', 'marionette',
     },
 
     getCurrentQuery: function() {
-      return this._currentQuery.clone();
+      return this._currentQuery.clone(); // XXX:rca: this closing seems excessive
     },
 
     /**
@@ -167,7 +185,7 @@ define(['backbone', 'marionette',
       }
     }
 
-  }, {mixin : widgetMixin});
+  }, {mixin : WidgetMixin});
 
   return BaseWidget
 

@@ -1,4 +1,10 @@
- define(['backbone', 'marionette',
+
+//XXX:rca - if you think of facet containers as containers, then they are simply
+// views that contain other 'arbitrary' views; then you can remove the imports hbs!../templates/logic-facet-container
+// and make sure that the factory method is setting appropriate view *inside* container
+// and remove the imports from here
+
+define(['backbone', 'marionette',
      'hbs!../templates/base-facet-container', 'hbs!../templates/logic-facet-container',
      'hbs!../templates/facet-tooltip', 'hbs!../templates/empty-facet', 'bootstrap'
    ],
@@ -14,7 +20,7 @@
      BaseContainerModel = Backbone.Model.extend({
        defaults: function() {
          return {
-           title: undefined,
+           title: undefined
          }
        }
      });
@@ -53,7 +59,7 @@
 
        events: {
          "click .main-caret": "toggleFacet",
-         "click .show-more": "showExtraItems",
+         "click .show-more": "showExtraItems"
        },
 
        showExtraItems: function() {
@@ -137,7 +143,7 @@
          return {
            singleLogic: [
              "limit to",
-             "exclude",
+             "exclude"
            ],
            multiLogic: [
              "and",
@@ -146,7 +152,7 @@
            ],
            selected: undefined,
 
-           title: undefined,
+           title: undefined
          }
        }
      });
@@ -221,7 +227,7 @@
          if (numSelected === 1) {
            this.$(".dropdown-menu").html(facetTooltipTemplate({
              single: true,
-             logic: this.model.get("singleLogic"),
+             logic: this.model.get("singleLogic")
            }));
 
            this.$(".dropdown").addClass("open");
@@ -231,7 +237,7 @@
           if(multiLogic === "fullSet"){
             /*any multiple selection automatically grabs the full set */
             this.$(".dropdown-menu").html(facetTooltipTemplate({
-             fullSet: true,
+             fullSet: true
            }))
           }
           else {

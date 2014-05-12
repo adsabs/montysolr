@@ -109,6 +109,10 @@ define(['backbone', 'marionette', 'js/components/api_query',
 
       /*utility function*/
       //this can be called anywhere in your code to register your own callback
+
+      // XXX:rca - when you use 'special' in the name, you should know that
+      // whoever is reading it later will be very confused; pls find a better
+      // 'easy to understand' name for it
       dispatchSpecialRequest: function(params, callback, data) {
         var newQuery, id, ApiRequest;
 
@@ -130,6 +134,10 @@ define(['backbone', 'marionette', 'js/components/api_query',
        is probably the only one the widget will need
        to register to DELIVERING_RESPONSE
        */
+      //XXX:rca - i'm perplexed; this was before 'processResponse'
+      // why now the change of name? (btw: this names suggests st
+      // else than it does - it doesn't assign a callback, it calls
+      // it)
       assignCallbackToResponse: function(apiResponse) {
         var id = apiResponse.getApiQuery().url();
         var parameters, callback;

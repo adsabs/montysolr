@@ -1,3 +1,7 @@
+
+//XXX:rca - I really like that you have this 'messy-view-code' separated from controllers (the stuff here is very
+// UI dependent -- actually, it is absolutely married to a template; the templates should really be
+// inside 'views/' and then you can use hbs!./templates imports)
 define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
     'hbs!../templates/facet-slider', 'hbs!../templates/facet-graph', '../facet-collection', 'jquery-ui'
   ],
@@ -130,8 +134,8 @@ define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
       },
 
       events: {
-        "change input": "toggleHighlight",
-      },
+        "change input": "toggleHighlight"
+      }
 
     };
 

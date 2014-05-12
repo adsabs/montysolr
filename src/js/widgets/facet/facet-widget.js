@@ -1,4 +1,7 @@
-  define(['./views/facet-container-views',
+
+// XXX:rca - let's call this whole file 'facet_factory' and eventually document the options ;-)
+
+define(['./views/facet-container-views',
       './views/facet-item-views',
       './facet-collection', './facet-controllers'
     ], function(facetContainerViews, facetItemViews, IndividualFacetCollection, FacetControllers){
@@ -6,7 +9,7 @@
       var BaseFacetWidget = FacetControllers.BaseFacetWidget,
           HierarchicalFacetWidget = FacetControllers.HierarchicalFacetWidget;
 
-    var facetFactory = {
+    var FacetFactory = {
       makeBasicCheckboxFacet: function (options) {
         //required config
         if (!(options.facetName && options.userFacingName)) {
@@ -40,7 +43,7 @@
           model           : containerModel,
           itemView        : facetItemViews.CheckboxOneLevelView,
           defaultNumFacets: options.defaultNumFacets,
-          openByDefault   : options.openByDefault,
+          openByDefault   : options.openByDefault
         });
 
         var widget = new BaseFacetWidget({
@@ -87,7 +90,7 @@
           model        : containerModel,
           itemView     : facetItemViews.CheckboxHierarchicalView,
           openByDefault: options.openByDefault,
-          defaultNumFacets: options.defaultNumFacets,
+          defaultNumFacets: options.defaultNumFacets
 
         });
 
@@ -166,5 +169,5 @@
         return widget
       }
     };
-    return facetFactory
+    return FacetFactory
   })
