@@ -3,7 +3,7 @@ define(['backbone', 'marionette',
     'js/components/beehive', 'js/services/pubsub',
     'js/components/api_query', 'js/components/api_response',
     'js/widgets/facet/views/facet-container-views', 'js/widgets/facet/views/facet-item-views',
-    'js/widgets/facet/facet-collection', 'js/widgets/facet/facet-controllers'
+    'js/widgets/facet/facet-collection', '../../../../src/js/widgets/facet/base-facet-controller'
   ],
 
   function (Backbone, Marionette, Test1, Test2, BeeHive, PubSub, ApiQuery, ApiResponse, FacetContainerViews, FacetItemViews, IndividualFacetCollection, FacetControllers) {

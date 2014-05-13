@@ -105,7 +105,7 @@ define(['backbone', 'marionette',
      * This function should return a request IFF we want to get some
      * data - it is called from 'dispatchRequest' event handler
      *
-     * @param apiQuery
+     * @param object with params to add
      * @returns {ApiRequest}
      */
     composeRequest: function(params) {
@@ -137,12 +137,6 @@ define(['backbone', 'marionette',
     },
 
     /**
-     * Defaualt callback to be called by PubSub on 'INVITING_REQUEST'
-     *
-     * XXX: seems like a problem to me (it should be called from inside
-     * 'dispatchRequest' imo)
-     * XXX: rca: who commented. was it me? probably...but now I'm disagreeing
-     *   with myself :-)
      *
      * @param apiQuery
      */
@@ -171,7 +165,6 @@ define(['backbone', 'marionette',
         };
       return query
     },
-
 
     onClose: function() {
       this.view.close();

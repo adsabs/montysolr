@@ -1,9 +1,6 @@
 
-//XXX:rca - I really like that you have this 'messy-view-code' separated from controllers (the stuff here is very
-// UI dependent -- actually, it is absolutely married to a template; the templates should really be
-// inside 'views/' and then you can use hbs!./templates imports)
-define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
-    'hbs!../templates/facet-slider', 'hbs!../templates/facet-graph', '../facet-collection', 'jquery-ui'
+define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
+    'hbs!./templates/facet-slider', 'hbs!./templates/facet-graph', '../facet-collection', 'jquery-ui'
   ],
   function(Marionette, d3, facetItemCheckboxTemplate, facetSliderTemplate, facetGraphTemplate, IndividualFacetCollection) {
 
@@ -143,180 +140,180 @@ define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
     var ZoomableGraphView = BaseItem.extend({
 
 
-        initialize: function(options) {
+      initialize: function(options) {
 
-          try {
+        try {
           //need to pass x-axis title in for sorting
           this.xAxisTitle = options.xAxisTitle;
           this.parentTitle = options.title;
 
-          }
-          catch(e){
-            throw new Error("Missing key information: x axis title or graph title")
-          }
+        }
+        catch(e){
+          throw new Error("Missing key information: x axis title or graph title")
+        }
 
-          this.yAxisTtitle = options.yAxisTitle || "size";
+        this.yAxisTtitle = options.yAxisTitle || "size";
 
-          //some variables need to be accessible for the sort function
-          this.currentData = {
-            x: undefined,
-            xAxis: undefined,
-            binnedData: undefined,
-            xLabels : undefined
+        //some variables need to be accessible for the sort function
+        this.currentData = {
+          x: undefined,
+          xAxis: undefined,
+          binnedData: undefined,
+          xLabels : undefined
+        };
+
+        //setting some constants for the graph
+        this.bins = 12; //will be around 12, depending on remainders
+        this.margin = {
+          top: 10,
+          right: 10,
+          bottom: 5,
+          left: 55
+        };
+        this.fullWidth = 350;
+        this.fullHeight = 200;
+
+        this.width = this.fullWidth - this.margin.left - this.margin.right;
+        this.height = this.fullHeight - this.margin.top - this.margin.bottom;
+
+        /*filling in blank x values between real values so as to get a more consistent graph,
+         and getting rid of blank values on the left and right side of graph.
+         It seems like this will always be desirable but possibly not.  (Can we get solr to do it?)*/
+        try {
+          var data = this.model.toJSON().graphInfo;
+        }
+        catch(e){
+          throw new Error("Graph widget has no model or else an incorrect model")
+        }
+
+        var dataYears = _.pluck(data, "x")
+        var yearRange = [];
+        var valRange = this.model.get("value");
+
+        for (var i = valRange[0]; i <= valRange[1]; i++) {
+          (function(i){
+            yearRange.push(i)
+          })(i)
+        };
+
+        _.each(yearRange, function(d){
+          //it's a zero value, we must add it
+          if (!_.contains(dataYears, d)) {
+            data.push({x: d, y: 0})
           };
+        })
 
-          //setting some constants for the graph
-          this.bins = 12; //will be around 12, depending on remainders
-          this.margin = {
-            top: 10,
-            right: 10,
-            bottom: 5,
-            left: 55
+        data = _.sortBy(data, function (d) {
+          return d.x
+        });
+
+        //save to widget
+        this.graphData = data;
+
+      },
+
+      //pass in xAxisTitle,
+      serializeData : function(){
+        var data = {};
+        data.xAxisTitle = this.xAxisTitle.toLowerCase();
+        data.title = this.parentTitle;
+        return data
+      },
+
+      className: "zoomable-graph",
+
+      events: {
+        "click .apply": "submitFacet",
+        "blur input[type=text]": "triggerGraphChange",
+        "change .sort-options input": "triggerSortChange"
+      },
+
+      template: facetGraphTemplate,
+
+      submitFacet: function() {
+        this.model.set("newValue", this.$(".slider").slider("values"))
+
+      },
+
+      triggerGraphChange: function() {
+        var val1, val2;
+        val1 = this.$(".show-slider-data-first").val();
+        val2 = this.$(".show-slider-data-second").val();
+
+        this.$(".slider").slider("values", [val1, val2]);
+
+        this.graphChange(val1, val2)
+
+      },
+
+      triggerSortChange: function(e) {
+
+        if (this.animate === true){
+          return
+        }
+        this.animate = true;
+        var that = this;
+        var data, x, xAxis, innerChart, sortVal;
+        var transition, delay, x0;
+
+        sortVal = $(e.target).val();
+        if (sortVal==="size"){
+          //if people redraw the graph by narrowing it
+          this.sizeSort = true;
+        }
+        else {
+          this.sizeSort = false;
+        };
+
+        data = this.currentData.binnedData;
+        x = this.currentData.x;
+        xAxis = this.currentData.xAxis;
+        xLabels = this.currentData.xLabels;
+        innerChart = d3.select(this.el).select(".inner-chart");
+
+        //from http://bl.ocks.org/mbostock/3885705
+        x0 = x.domain(data.sort(sortVal == "size" ? function(a, b) {
+          return a.y - b.y;
+        } : function(a, b) {
+          var retrieveNum = function(s) {
+            var l = s.split("-");
+            return parseInt(l[l.length - 1])
           };
-          this.fullWidth = 350;
-          this.fullHeight = 200;
-
-          this.width = this.fullWidth - this.margin.left - this.margin.right;
-          this.height = this.fullHeight - this.margin.top - this.margin.bottom;
-
-          /*filling in blank x values between real values so as to get a more consistent graph,
-          and getting rid of blank values on the left and right side of graph.
-        It seems like this will always be desirable but possibly not.  (Can we get solr to do it?)*/
-          try {
-            var data = this.model.toJSON().graphInfo;
-          }
-          catch(e){
-            throw new Error("Graph widget has no model or else an incorrect model")
-          }
-
-          var dataYears = _.pluck(data, "x")
-          var yearRange = [];
-          var valRange = this.model.get("value");
-
-          for (var i = valRange[0]; i <= valRange[1]; i++) {
-            (function(i){
-               yearRange.push(i)
-            })(i)
-          };
-
-          _.each(yearRange, function(d){
-            //it's a zero value, we must add it
-            if (!_.contains(dataYears, d)) {
-              data.push({x: d, y: 0})
-            };
-          })
-
-          data = _.sortBy(data, function (d) {
-              return d.x
-            });
-          
-          //save to widget 
-          this.graphData = data;
-
-        },
-
-        //pass in xAxisTitle,
-        serializeData : function(){
-          var data = {};
-          data.xAxisTitle = this.xAxisTitle.toLowerCase();
-          data.title = this.parentTitle;
-          return data
-        },
-
-        className: "zoomable-graph",
-
-        events: {
-          "click .apply": "submitFacet",
-          "blur input[type=text]": "triggerGraphChange",
-          "change .sort-options input": "triggerSortChange"
-        },
-
-        template: facetGraphTemplate,
-
-        submitFacet: function() {
-          this.model.set("newValue", this.$(".slider").slider("values"))
-
-        },
-
-        triggerGraphChange: function() {
-          var val1, val2;
-          val1 = this.$(".show-slider-data-first").val();
-          val2 = this.$(".show-slider-data-second").val();
-
-          this.$(".slider").slider("values", [val1, val2]);
-
-          this.graphChange(val1, val2)
-
-        },
-
-        triggerSortChange: function(e) {
-
-          if (this.animate === true){
-            return
-          }
-          this.animate = true;
-          var that = this;
-          var data, x, xAxis, innerChart, sortVal;
-          var transition, delay, x0;
-
-          sortVal = $(e.target).val();
-          if (sortVal==="size"){
-             //if people redraw the graph by narrowing it
-            this.sizeSort = true;
-          }
-          else {
-            this.sizeSort = false;
-          };
-
-          data = this.currentData.binnedData;
-          x = this.currentData.x;
-          xAxis = this.currentData.xAxis;
-          xLabels = this.currentData.xLabels;
-          innerChart = d3.select(this.el).select(".inner-chart");
-
-          //from http://bl.ocks.org/mbostock/3885705
-          x0 = x.domain(data.sort(sortVal == "size" ? function(a, b) {
-                return a.y - b.y;
-              } : function(a, b) {
-                var retrieveNum = function(s) {
-                  var l = s.split("-");
-                  return parseInt(l[l.length - 1])
-                };
-            return d3.ascending(retrieveNum(a.x), retrieveNum(b.x));
-          })
+          return d3.ascending(retrieveNum(a.x), retrieveNum(b.x));
+        })
           .map(function(d) {
             return d.x;
           }))
-      .copy();
+          .copy();
 
-      transition = innerChart.transition().duration(2000); 
+        transition = innerChart.transition().duration(2000);
 
-      delay = function(d, i) {
-        return i *50
-      };
+        delay = function(d, i) {
+          return i *50
+        };
 
-      transition.selectAll(".bar")
-      .delay(delay)
-      .attr("transform", function(d) {
-        return "translate(" + x0(d.x) + ",0)";
-      });
+        transition.selectAll(".bar")
+          .delay(delay)
+          .attr("transform", function(d) {
+            return "translate(" + x0(d.x) + ",0)";
+          });
 
-      transition.select(".x-axis")
-      .call(xAxis)
-      .selectAll("g")
-      .delay(function(d,i){
-        // find d's position in d axis list
-        var pos = xLabels.indexOf(d)
-        return pos *50
-      })
-      .selectAll("text")
-      .style("text-anchor", "end")
-      .attr("dx", "-.8em")
-      .attr("dy", ".15em");
+        transition.select(".x-axis")
+          .call(xAxis)
+          .selectAll("g")
+          .delay(function(d,i){
+            // find d's position in d axis list
+            var pos = xLabels.indexOf(d)
+            return pos *50
+          })
+          .selectAll("text")
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em");
 
-      //adjust this later, need a timeout otherwise weird stuff happenss
-      setTimeout(function(){that.animate = false}, data.length*100);
-    },
+        //adjust this later, need a timeout otherwise weird stuff happenss
+        setTimeout(function(){that.animate = false}, data.length*100);
+      },
 
       buildSlider: function() {
 
@@ -324,7 +321,7 @@ define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
 
         var data = _.clone(this.graphData);
         min = data[0].x,
-        max = data[data.length - 1].x;
+          max = data[data.length - 1].x;
 
         this.$(".slider").slider({
           range: true,
@@ -380,7 +377,7 @@ define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
         innerChart = d3.select(this.el).select(".inner-chart")
 
         xLabels = _.pluck(data, "x"),
-        maxVal = d3.max(_.pluck(data, "y"));
+          maxVal = d3.max(_.pluck(data, "y"));
 
         x = d3.scale.ordinal()
           .domain(xLabels)
@@ -447,8 +444,8 @@ define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
           .call(yAxis);
 
         /*add hover event listener
-        have to do this again because delegated events don't
-        work with svg :( */
+         have to do this again because delegated events don't
+         work with svg :( */
 
         this.$(".bar")
           .on("mouseover", function() {
@@ -479,7 +476,7 @@ define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
           indexList, binnedX, binnedY;
 
         if (data.length <= binNum) {
-            this.binSize = 1;
+          this.binSize = 1;
 
           data = _.map(data, function(d, i) {
             return {
@@ -577,7 +574,7 @@ define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
         this.currentData.binnedData = data;
 
         xLabels = _.pluck(data, "x"),
-        maxVal = d3.max(_.pluck(data, "y"));
+          maxVal = d3.max(_.pluck(data, "y"));
 
         x = d3.scale.ordinal()
           .domain(xLabels)
@@ -688,25 +685,25 @@ define(['marionette', 'd3', 'hbs!../templates/facet-item-checkbox',
         this.buildSlider()
       }
 
-  });
+    });
 
 
-var CheckboxHierarchicalView = BaseHierarchicalItem.extend(checkboxMultiselectMixin).extend({
-  template: facetItemCheckboxTemplate
-});
-var CheckboxOneLevelView = BaseItem.extend(checkboxMultiselectMixin).extend({
-  template: facetItemCheckboxTemplate
-});
+    var CheckboxHierarchicalView = BaseHierarchicalItem.extend(checkboxMultiselectMixin).extend({
+      template: facetItemCheckboxTemplate
+    });
+    var CheckboxOneLevelView = BaseItem.extend(checkboxMultiselectMixin).extend({
+      template: facetItemCheckboxTemplate
+    });
 
 
-var ItemViews = {
-  CheckboxHierarchicalView: CheckboxHierarchicalView,
-  CheckboxOneLevelView: CheckboxOneLevelView,
-  ZoomableGraphView: ZoomableGraphView
-}
+    var ItemViews = {
+      CheckboxHierarchicalView: CheckboxHierarchicalView,
+      CheckboxOneLevelView: CheckboxOneLevelView,
+      ZoomableGraphView: ZoomableGraphView
+    }
 
 
-return ItemViews
+    return ItemViews
 
 
-})
+  })

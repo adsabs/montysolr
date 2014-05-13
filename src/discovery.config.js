@@ -62,7 +62,7 @@ require.config({
   },
 
   hbs : {
-    'templateExtension' : 'html'
+    'templateExtension' : 'html',
 
   },
 

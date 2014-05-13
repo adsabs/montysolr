@@ -5,8 +5,8 @@
 // and remove the imports from here
 
 define(['backbone', 'marionette',
-     'hbs!../templates/base-facet-container', 'hbs!../templates/logic-facet-container',
-     'hbs!../templates/facet-tooltip', 'hbs!../templates/empty-facet', 'bootstrap'
+     'hbs!./templates/base-facet-container', 'hbs!./templates/logic-facet-container',
+     'hbs!./templates/facet-tooltip', 'hbs!./templates/empty-facet', 'bootstrap'
    ],
    function(Backbone, Marionette, baseFacetTemplate, logicFacetTemplate,
      facetTooltipTemplate, emptyFacetTemplate) {
