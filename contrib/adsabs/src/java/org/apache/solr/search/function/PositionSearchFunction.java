@@ -93,7 +93,7 @@ public class PositionSearchFunction extends ValueSource {
 		TreeSet<Term> extractedTerms = new TreeSet<Term>();
 		subQuery.extractTerms(extractedTerms);
 		for (Term term : extractedTerms) {
-			termContexts.put(term, TermContext.build(ctx, term, true));
+			termContexts.put(term, TermContext.build(ctx, term));
 		}
 
 		List<AtomicReaderContext> leaves = ctx.leaves();

@@ -25,6 +25,7 @@ import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SyntaxError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -286,7 +287,7 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 			return this.query.hashCode();
 		}
 		
-		public void resolveFound(SolrIndexSearcher searcher, QParser parser) throws ParseException, IOException {
+		public void resolveFound(SolrIndexSearcher searcher, QParser parser) throws SyntaxError, IOException {
 			parser.setString(query);
 			TopDocs hits = searcher.search(parser.parse(), 1);
 			totalHits = hits.totalHits;
@@ -351,7 +352,7 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 		return out.toString();
 	}
 
-	private void resolveIfNecessary(String fieldName, Set<FormattedQuery> seen) throws ParseException, IOException {
+	private void resolveIfNecessary(String fieldName, Set<FormattedQuery> seen) throws SyntaxError, IOException {
 		
 		HashSet<FormattedQuery> toRemove = new HashSet<FormattedQuery>();
 		SolrIndexSearcher searcher = req.getSearcher();
@@ -372,7 +373,7 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 	    		try {
 	    			q.resolveFound(searcher, parser);
 	    		}
-	    		catch (ParseException e1) {
+	    		catch (SyntaxError e1) {
 	  				log.info("Removing invalid query: " + q.query);
 	  				log.info(e1.getMessage());
 	  				toRemove.add(q);

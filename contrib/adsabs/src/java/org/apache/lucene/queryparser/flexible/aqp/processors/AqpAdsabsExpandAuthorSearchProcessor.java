@@ -12,6 +12,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
@@ -32,9 +33,11 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.solr.analysis.author.AuthorNormalizeFilter;
 import org.apache.solr.analysis.author.AuthorNormalizeFilterFactory;
 import org.apache.solr.analysis.author.AuthorUtils;
 import org.apache.solr.analysis.author.PythonicAuthorNormalizeFilterFactory;
+import org.apache.solr.analysis.author.PythonicAuthorNormalizerFilter;
 
 /**
  * Looks at the QueryNode(s) and if they are author searches,
@@ -270,26 +273,20 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
    * chain, you should always review also this method
    */
   
-  private TokenStreamComponents tsc = null;
-  private ReusableStringReader reader = null;
+  Analyzer authorNameAnalyzer = new Analyzer() {
+      @Override
+       public TokenStreamComponents createComponents(String fieldName, Reader reader) {
+         Tokenizer source = new KeywordTokenizer(reader);
+         TokenStream filter = new PythonicAuthorNormalizerFilter(source);
+         filter = new AuthorNormalizeFilter(filter);
+         return new TokenStreamComponents(source, filter);
+       }
+    };
+    
   private List<String> normalizeAuthorName(String input) throws QueryNodeException {
-  	if (reader == null) { // well, nice try, but it will be always created new...
-  		TokenFilterFactory[] filters = new TokenFilterFactory[2];
-  		TokenizerFactory tokenizer = new KeywordTokenizerFactory(new HashMap<String,String>());
-  		filters[1] = new AuthorNormalizeFilterFactory(new HashMap<String, String>());
-  		filters[0] = new PythonicAuthorNormalizeFilterFactory(new HashMap<String, String>());
-  		reader = new ReusableStringReader();
-    	Tokenizer tk = tokenizer.create( reader );
-      TokenStream ts = tk;
-      for (TokenFilterFactory filter : filters) {
-        ts = filter.create(ts);
-      }
-      tsc = new TokenStreamComponents(tk, ts);
-  	}
-  	
-    TokenStream ts = tsc.getTokenStream();
-    reader.setValue(input);
+    
   	try {
+  	  TokenStream ts = authorNameAnalyzer.tokenStream("foo", input);
 	    ts.reset();
 	    List<String> out = new ArrayList<String>();
 	  	CharTermAttribute termAtt;
@@ -297,6 +294,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
 	  		termAtt = ts.getAttribute(CharTermAttribute.class);
 	  		out.add(termAtt.toString());
 	  	}
+	  	ts.close();
 	  	return out;
     } catch (IOException e) {
 	    throw new QueryNodeException(new MessageImpl("Error parsing: " + input, e));

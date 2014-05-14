@@ -24,11 +24,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -95,15 +97,18 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   }
   
   
-  public static class SynonymParser extends SynonymMap.Builder {
+  public static class SynonymParser extends SynonymMap.Parser {
 
-    public SynonymParser(boolean dedup) {
-      super(dedup);
+    public SynonymParser(boolean dedup, Analyzer analyzer) {
+      super(dedup, analyzer);
     }
 
     public void add(Reader in) throws IOException, ParseException {
       throw new IllegalAccessError("You must override this method");
     }
+
+    @Override
+    public void parse(Reader in) throws IOException, ParseException {}
   }
   
   
@@ -111,7 +116,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     
     protected Map<String,String> args;
 
-    protected SynonymBuilderFactory(Map<String,String> args) {
+    public SynonymBuilderFactory(Map<String,String> args) {
       super(args);
       this.args = args;
     }
@@ -188,10 +193,15 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     
     // (there are no tests for this functionality)
     private TokenizerFactory loadTokenizerFactory(ResourceLoader loader, String cname) throws IOException {
-      TokenizerFactory tokFactory = TokenizerFactory.forName(cname, this.args);
-      tokFactory.setExplicitLuceneMatchVersion(true);
-      if (tokFactory instanceof ResourceLoaderAware) {
-        ((ResourceLoaderAware) tokFactory).inform(loader);
+      Class<? extends TokenizerFactory> clazz = loader.findClass(cname, TokenizerFactory.class);
+      TokenizerFactory tokFactory;
+      try {
+        tokFactory = clazz.getConstructor(Map.class).newInstance(new HashMap<String, String>());
+        if (tokFactory instanceof ResourceLoaderAware) {
+          ((ResourceLoaderAware) tokFactory).inform(loader);
+        }
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
       return tokFactory;
     }
@@ -203,14 +213,20 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
 
   }
   
-  private SynonymBuilderFactory loadBuilderFactory(ResourceLoader loader, String cname) throws IOException {
-    TokenizerFactory builderFactory = TokenizerFactory.forName(cname, args);
-    builderFactory.setExplicitLuceneMatchVersion(true);
-    if (builderFactory instanceof ResourceLoaderAware) {
-      ((ResourceLoaderAware) builderFactory).inform(loader);
-    }
-    return (SynonymBuilderFactory) builderFactory;
-  }
+  
+ //(there are no tests for this functionality)
+ private SynonymBuilderFactory loadBuilderFactory(ResourceLoader loader, String cname) throws IOException {
+   Class<? extends SynonymBuilderFactory> clazz = loader.findClass(cname, SynonymBuilderFactory.class);
+   try {
+     SynonymBuilderFactory tokFactory = clazz.getConstructor(Map.class).newInstance(args);
+     if (tokFactory instanceof ResourceLoaderAware) {
+       ((ResourceLoaderAware) tokFactory).inform(loader);
+     }
+     return tokFactory;
+   } catch (Exception e) {
+     throw new RuntimeException(e);
+   }
+ }
   
   
   /*
@@ -231,7 +247,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 2: telescope
    */
   public static class AlwaysIncludeOriginal extends SynonymBuilderFactory {
-    protected AlwaysIncludeOriginal(Map<String,String> args) {
+    public AlwaysIncludeOriginal(Map<String,String> args) {
       super(args);
     }
 
@@ -286,7 +302,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 4: was
    */
   public static class MultiTokenReplaceNulls extends SynonymBuilderFactory {
-    protected MultiTokenReplaceNulls(Map<String,String> args) {
+    public MultiTokenReplaceNulls(Map<String,String> args) {
       super(args);
     }
 
@@ -313,7 +329,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    */
   public static class BestEffortSearchLowercase extends SynonymBuilderFactory {
   	private Map<String,String> args;
-    protected BestEffortSearchLowercase(Map<String,String> args) {
+    public BestEffortSearchLowercase(Map<String,String> args) {
       super(args);
       this.args = args;
     }
@@ -355,7 +371,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    */
   public static class BestEffortIgnoreCaseSelectively extends SynonymBuilderFactory {
   	private Map<String,String> args;
-    protected BestEffortIgnoreCaseSelectively(Map<String,String> args) {
+    public BestEffortIgnoreCaseSelectively(Map<String,String> args) {
       super(args);
       this.args = args;
     }

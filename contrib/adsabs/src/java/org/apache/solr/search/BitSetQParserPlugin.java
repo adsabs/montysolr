@@ -22,6 +22,7 @@ import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.search.BitSetQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.Ints;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.solr.common.SolrException;
@@ -300,19 +301,30 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
 	    						}
 	    						
-		    					int[] cache;
+		    					Ints cache;
 		    					try {
 		    						cache = FieldCache.DEFAULT.getInts(reader, fieldName, false);
 		    					} catch (IOException e) {
 		    						throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get a cache for field: " + fieldName + "\n" + e.getMessage());
 		    					}
-		    					int i = 0; // lucene docid
-		    					for (int docValue: cache) {
-		    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
-		    							translatedBitSet.set(i);
-		    						}
-		    						i++;
+		    					
+		    					/*
+                  int i = 0; // lucene docid
+                  for (int docValue: cache) {
+                    if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
+                      translatedBitSet.set(i);
+                    }
+                    i++;
+                  }
+                  */
+		    					
+		    					int maxDoc = reader.maxDoc();
+		    					for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
+		    				    if (i > maxDoc)
+		    				      break;
+		    				    translatedBitSet.set(cache.get(i));
 		    					}
+	    					
 		    					bits = translatedBitSet;
 	    					}
 	    				}

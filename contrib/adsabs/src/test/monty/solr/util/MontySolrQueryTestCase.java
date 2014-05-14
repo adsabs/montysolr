@@ -14,51 +14,39 @@ import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
 import org.apache.lucene.search.Query;
+import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QueryParsing;
+import org.apache.solr.search.SyntaxError;
 import org.getopt.luke.DocReconstructor;
 import org.getopt.luke.DocReconstructor.Reconstructed;
 import org.getopt.luke.GrowableStringArray;
+import org.junit.BeforeClass;
 
 
 public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 
-	protected AqpTestAbstractCase tp = null;
+	protected static AqpTestAbstractCase tp = new AqpTestAbstractCase() {
+    @Override
+    public void setUp() throws Exception {
+      super.setUp();
+    }
+    
+    @Override
+    public void tearDown() throws Exception {
+      super.tearDown();
+    }
+  };
+  
   private int idValue = 0;
-	
-	@Override
-	public String getSchemaFile() {
-		throw new IllegalAccessError("You must override this method");
-	}
-
-	@Override
-	public String getSolrConfigFile() {
-		throw new IllegalAccessError("You must override this method");
-	} 
+  
 	
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		
-		final MontySolrQueryTestCase that = this;
-		
-		tp = new AqpTestAbstractCase() {
-			
-			@Override
-			public void setUp() throws Exception {
-				super.setUp();
-			}
-			
-			@Override
-			public void tearDown() throws Exception {
-				super.tearDown();
-			}
-			
-			
-		};
 		tp.setUp();
 	}
 	
@@ -72,7 +60,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 	}
 	
 	
-	public QParser getParser(SolrQueryRequest req) throws ParseException, InstantiationException, IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
+	public QParser getParser(SolrQueryRequest req) throws SyntaxError, InstantiationException, IllegalAccessException, SecurityException, IllegalArgumentException, NoSuchMethodException, InvocationTargetException {
 		SolrParams params = req.getParams();
 		String query = params.get(CommonParams.Q);
 		String defType = params.get(QueryParsing.DEFTYPE);
@@ -99,7 +87,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		
 	}
 	
-	public SolrQueryRequest req(String... q) {
+	public static SolrQueryRequest req(String... q) {
 	  boolean clean = true;
 	  for (String x: q) {
 	    if (q.equals("debugQuery")) {
@@ -116,7 +104,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 	    nq[i++] = tp.debugParser ? "true" : "false";
 	    q = nq;
 	  }
-    return super.req(q);
+    return SolrTestCaseJ4.req(q);
   }
 	
 	public Query assertQueryEquals(SolrQueryRequest req, String expected, Class<?> clazz)
@@ -143,7 +131,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 	public void assertQueryParseException(SolrQueryRequest req) throws Exception {
 		try {
 			getParser(req).parse();
-		} catch (ParseException expected) {
+		} catch (SyntaxError expected) {
 			return;
 		}
 		tp.debugFail("ParseException expected, not thrown");

@@ -38,7 +38,6 @@ public final class AuthorCollectorFilter extends TokenFilter {
   private Set<String> tokenBuffer;
   private Set<String> tokenTypes;
   private String authorInput;
-  private int resetCounter;
 
   public AuthorCollectorFilter(TokenStream input, WriteableSynonymMap synMap) {
     super(input);
@@ -47,7 +46,6 @@ public final class AuthorCollectorFilter extends TokenFilter {
     tokenBuffer = new LinkedHashSet<String>();
     tokenTypes = new HashSet<String>();
     this.synMap = synMap;
-    resetCounter = 0;
   }
 
 
@@ -56,7 +54,6 @@ public final class AuthorCollectorFilter extends TokenFilter {
    */
   @Override
   public boolean incrementToken() throws IOException {
-    resetCounter = 0;
 
     if (!input.incrementToken()) {
       return false;
@@ -103,11 +100,18 @@ public final class AuthorCollectorFilter extends TokenFilter {
   @Override
   public void reset() throws IOException {
     super.reset();
+  }
+  
+  @Override
+  public void end() throws IOException {
+    super.end();
     addTokensToSynMap();
-    resetCounter++;
-    if (resetCounter > 2) {
-      synMap.persist();
-    }
+  }
+  
+  @Override
+  public void close() throws IOException {
+    synMap.persist();
+    super.close();
   }
 
   public void setEmitTokens(boolean b) {

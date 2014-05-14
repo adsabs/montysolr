@@ -40,7 +40,7 @@ import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.LuceneTestCase;
-import org.apache.lucene.util._TestUtil;
+import org.apache.lucene.util.TestUtil;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.junit.BeforeClass;
 
@@ -77,7 +77,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		dir = newDirectory();
 		RandomIndexWriter writer = new RandomIndexWriter(random(), dir,
 				newIndexWriterConfig(TEST_VERSION_CURRENT, new MultiFieldAnalyzer())
-				.setMaxBufferedDocs(_TestUtil.nextInt(random(), 50, 1000)));
+				.setMaxBufferedDocs(TestUtil.nextInt(random(), 50, 1000)));
 
 		Document doc = new Document();
 		FieldType customType = new FieldType(store ? TextField.TYPE_STORED : TextField.TYPE_NOT_STORED);
@@ -125,7 +125,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 
 			//surname
 			do {
-				surname = _TestUtil.randomSimpleString(random()).toLowerCase().replace(",", "").trim();
+				surname = TestUtil.randomSimpleString(random()).toLowerCase().replace(",", "").trim();
 			} while (surname.length() == 0);
 
 			name.append(surname);
@@ -135,9 +135,9 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 			n0.setStringValue(surname);
 
 			//#initials
-			int noi = _TestUtil.nextInt(random(), 0, 4);
+			int noi = TestUtil.nextInt(random(), 0, 4);
 			for (int j = 0; j < noi; j++) {
-				String namePart = names[_TestUtil.nextInt(random(), 0, names.length-1)];
+				String namePart = names[TestUtil.nextInt(random(), 0, names.length-1)];
 				name.append(namePart);
 				name.append(" ");
 				wild.append(namePart);
@@ -419,7 +419,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 			Document doc = reader.document(docs.scoreDocs[0].doc);
 			String original = doc.get("original").toString();
 			String[] parts = original.split("\\,? ");
-			int howMany = _TestUtil.nextInt(random(), 0, parts.length-1); // how many initials
+			int howMany = TestUtil.nextInt(random(), 0, parts.length-1); // how many initials
 			data.add(new TestCase(original, parts, howMany));
 		}
 		return data;
@@ -463,7 +463,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	}
 
 	private Query[] buildQueries(String[] parts) throws UnsupportedEncodingException {
-		int howMany = _TestUtil.nextInt(random(), 0, parts.length-1); // how many initials
+		int howMany = TestUtil.nextInt(random(), 0, parts.length-1); // how many initials
 		Query[] queries = new Query[9];
 		queries[0] = getRegexQuery(parts, howMany, false);
 		queries[1] = getRegexpQuery(parts, howMany, false);
@@ -595,7 +595,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private int[] getRandomIds(int i) {
 		int[] randomIds = new int[Math.min(numDocs, i)];
 		for (int j = 0; j < randomIds.length; j++) {
-			randomIds[j] = _TestUtil.nextInt(random(), 0, numDocs-1);
+			randomIds[j] = TestUtil.nextInt(random(), 0, numDocs-1);
 		}
 		return randomIds;
 	}

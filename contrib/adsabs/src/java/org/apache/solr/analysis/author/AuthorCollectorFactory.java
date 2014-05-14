@@ -26,18 +26,20 @@ public class AuthorCollectorFactory extends PersistingMapTokenFilterFactory {
   public AuthorCollectorFactory(Map<String, String> args) {
     super(args);
     if (args.containsKey("tokenTypes")) {
-      tokenTypes = StrUtils.splitSmart(args.get("tokenTypes"), ",", false);
+      tokenTypes = StrUtils.splitSmart(args.remove("tokenTypes"), ",", false);
     }
     else {
       throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "The tokenType parameter missing");
     }
     emitTokens = false;
     if (args.containsKey("emitTokens")) {
-      if (((String) args.get("emitTokens")).equals("true")) {
+      if (((String) args.remove("emitTokens")).equals("true")) {
         emitTokens = true;
       }
     }
-    
+    if (!args.isEmpty()) {
+      throw new IllegalArgumentException("Unknown parameter(s): " + args);
+    }
   }
 
   /* (non-Javadoc)

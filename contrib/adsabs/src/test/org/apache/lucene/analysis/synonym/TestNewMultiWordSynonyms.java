@@ -65,12 +65,11 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   
   
   public void testSingleWordSolrSynonyms() throws IOException {
-    SynonymFilterFactory factory = new SynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("tokenizerFactory", KeywordTokenizerFactory.class.getCanonicalName().toString());
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
+    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSolrSingleSyn());
     TokenStream ts = factory.create(new MockTokenizer(new StringReader("žščřdťň, á"), MockTokenizer.KEYWORD, false));
     assertTokenStreamContents(ts, new String[] { "žščřdťň, á", "zscrdtn, a" },
@@ -82,13 +81,12 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   }
   
   public void testSingleWordSemicolonSynonyms() throws IOException {
-    NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("format", "semicolon");
     args.put("tokenizerFactory", KeywordTokenizerFactory.class.getCanonicalName().toString());
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
+    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSemicolonSingleSyn());
     TokenStream ts = factory.create(new MockTokenizer(new StringReader("žščřdťň, á"), MockTokenizer.KEYWORD, false));
     assertTokenStreamContents(ts, new String[] { "žščřdťň, á", "zscrdtn, a" },
@@ -117,6 +115,10 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
    * 2: telescope
    */
   public static class TestParserReplaceNullsInclOrig extends NewSynonymFilterFactory.SynonymBuilderFactory {
+    public TestParserReplaceNullsInclOrig(Map<String,String> args) {
+      super(args);
+    }
+
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
@@ -131,11 +133,10 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
    * @since solr 1.4
    */
   public void testMultiWordSynonyms() throws IOException {
-    SynonymFilterFactory factory = new SynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
+    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(new StringMockResourceLoader("a b c,d"));
     TokenStream ts = factory.create(new MockTokenizer(new StringReader("a e"), MockTokenizer.WHITESPACE, false));
     // This fails because ["e","e"] is the value of the token stream
@@ -147,14 +148,13 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   public void testMultiWordSynonymsReplaceNullsCustomInclOrigAnalyzer() throws IOException {
     
     
-    NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     args.put("builderFactory", NewSynonymFilterFactory.BestEffortSearchLowercase.class.getName());
     
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
+    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
@@ -195,15 +195,14 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   
   public void testMultiWordSynonymsReplaceNullsInclOrig() throws IOException {
     
-    NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("ignoreCase", "true");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     args.put("builderFactory", TestParserReplaceNullsInclOrig.class.getName());
     
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
+    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
@@ -245,15 +244,14 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   
   public void testMultiWordSynonymsNullReplaced() throws IOException {
     
-    NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("ignoreCase", "false");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     args.put("builderFactory", NewSynonymFilterFactory.MultiTokenReplaceNulls.class.getName());
     
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
+    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
@@ -296,13 +294,12 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   
   public void testMultiWordSynonymsDefault() throws IOException {
     
-    NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
+    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
@@ -347,15 +344,13 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
    */
   public void testMultiWordSynonymsInclOrig() throws IOException {
     
-    NewSynonymFilterFactory factory = new NewSynonymFilterFactory();
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("ignoreCase", "true");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     args.put("builderFactory", NewSynonymFilterFactory.AlwaysIncludeOriginal.class.getName());
-    
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
+    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+    NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
@@ -413,5 +408,14 @@ class StringMockResourceLoader implements ResourceLoader {
 
   public InputStream openResource(String resource) throws IOException {
     return new ByteArrayInputStream(text.getBytes("UTF-8"));
+  }
+
+  @Override
+  public <T> Class<? extends T> findClass(String cname, Class<T> expectedType) {
+    try {
+      return Class.forName(cname, true, Thread.currentThread().getContextClassLoader()).asSubclass(expectedType);
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot load class: " + cname, e);
+    }
   }
 }

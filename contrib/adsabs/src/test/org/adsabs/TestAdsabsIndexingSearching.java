@@ -27,6 +27,7 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.adsabs.solr.AdsConfig.F;
+import org.junit.BeforeClass;
 
 
 /**
@@ -42,21 +43,23 @@ import org.adsabs.solr.AdsConfig.F;
  **/
 public class TestAdsabsIndexingSearching extends MontySolrQueryTestCase {
 
-	public String getSchemaFile() {
-		
-	    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-	    	});
-		
-		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
-	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
-	}
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    System.setProperty("solr.allow.unsafe.resourceloading", "true");
+    schemaString = MontySolrSetup.getMontySolrHome()
+        + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+      
+    configString = MontySolrSetup.getMontySolrHome()
+        + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+    
+    /*makeResourcesVisible(???,
+        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+                  MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+      });*/
+    
+    initCore(configString, schemaString);
+  }
+  
 
 	public void test() throws Exception {
 		
@@ -64,7 +67,7 @@ public class TestAdsabsIndexingSearching extends MontySolrQueryTestCase {
 		EmbeddedSolrServer embedded = getEmbeddedServer();
 		
 		// checking the schema
-		IndexSchema schema = h.getCore().getSchema();
+		IndexSchema schema = h.getCore().getLatestSchema();
 		
 		
 		SchemaField field = schema.getField("id");

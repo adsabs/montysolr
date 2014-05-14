@@ -22,6 +22,7 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.PhraseQuery;
+import org.junit.BeforeClass;
 
 /**
  * Test for the affiliation_text type
@@ -29,23 +30,26 @@ import org.apache.lucene.search.PhraseQuery;
  */
 public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
 
-	
-  @Override
-  public String getSchemaFile() {
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    System.setProperty("solr.allow.unsafe.resourceloading", "true");
+    
+    /*
     makeResourcesVisible(this.solrConfig.getResourceLoader(),
         new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
       MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
     });
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
-
+    */
+    
+    schemaString = MontySolrSetup.getMontySolrHome()
+        + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+      
+    configString = MontySolrSetup.getMontySolrHome()
+        + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+    
+    initCore(configString, schemaString);
   }
-
-  public String getSolrConfigFile() {
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
-  }
-
+  
 
   public void test() throws Exception {
 

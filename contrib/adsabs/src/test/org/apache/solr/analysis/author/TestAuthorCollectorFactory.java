@@ -23,7 +23,7 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
   
   public void testCollector() throws IOException, InterruptedException {
     
-    AuthorCollectorFactory factory = new AuthorCollectorFactory();
+    
     
     File tmpFile = File.createTempFile("variants", ".tmp");
     Map<String,String> args = new HashMap<String,String>();
@@ -31,12 +31,12 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     args.put("tokenTypes", AuthorUtils.AUTHOR_TRANSLITERATED);
     args.put("emitTokens", "false");
     
+    AuthorCollectorFactory factory = new AuthorCollectorFactory(args);
     factory.setExplicitLuceneMatchVersion(true);
-    factory.init(args);
     factory.inform(new ClasspathResourceLoader(getClass()));
 
-    AuthorNormalizeFilterFactory normFactory = new AuthorNormalizeFilterFactory();
-    AuthorTransliterationFactory transliteratorFactory = new AuthorTransliterationFactory();
+    AuthorNormalizeFilterFactory normFactory = new AuthorNormalizeFilterFactory(new HashMap<String,String>());
+    AuthorTransliterationFactory transliteratorFactory = new AuthorTransliterationFactory(new HashMap<String,String>());
     
     //create the synonym writer for the test MÜLLER, BILL 
     TokenStream stream = new PatternTokenizer(new StringReader("MÜLLER, BILL"), Pattern.compile(";"), -1);
@@ -46,7 +46,7 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     while (ts.incrementToken() != false) {
       //pass
     }
-    ts.reset();
+    ts.end();
 
     WriteableSynonymMap synMap = factory.getSynonymMap();
     assertTrue(synMap.containsKey("MULLER, BILL"));
@@ -85,7 +85,7 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     while (ts.incrementToken() != false) {
       //pass
     }
-    ts.reset();
+    ts.end();
 
     assertFalse(synMap.containsKey("MÜLLER, BILL"));
     assertFalse(synMap.containsKey("MÜller, Bill"));
@@ -101,7 +101,8 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     while (ts.incrementToken() != false) {
       //pass
     }
-
+    ts.end();
+    
     // now test the map is correctly written to disk
     synMap.persist();
     checkOutput(tmpFile, 
@@ -137,10 +138,8 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     System.gc();
     */
     
-    // trick the filter into persisting itself
-    ts.reset();
-    ts.reset();
-    ts.reset();
+    // persist the map
+    ts.close();
     
     checkOutput(tmpFile, 
         "MULLER\\,\\ BILL=>MÜLLER\\,\\ BILL",

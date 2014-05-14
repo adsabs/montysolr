@@ -36,10 +36,6 @@ implements ResourceLoaderAware {
     if (args.containsKey("syntax")) {
       this.syntax = args.remove("syntax");
     }
-    
-    if (!args.isEmpty()) {
-      throw new IllegalArgumentException("Unknown parameter(s): " + args);
-    }
   }
   
   public void inform(ResourceLoader loader) {

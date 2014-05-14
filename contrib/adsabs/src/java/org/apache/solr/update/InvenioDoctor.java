@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.Ints;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -656,8 +657,8 @@ public class InvenioDoctor extends RequestHandlerBase {
     // setting maxRecs to very large value means the worker cannot be stopped in time
     int maxRecs = Math.min(params.getInt("max_records", 100000), 1000000);
     
-    
-    int[] existingRecs = FieldCache.DEFAULT.getInts(req.getSearcher().getAtomicReader(), field, false);
+    int maxLen = req.getSearcher().maxDoc();
+    Ints existingRecs = FieldCache.DEFAULT.getInts(req.getSearcher().getAtomicReader(), field, false);
     Map<Integer, Integer> idToLuceneId;
     
     if (tmpMap.containsKey(existingRecs.hashCode())) {
@@ -665,15 +666,15 @@ public class InvenioDoctor extends RequestHandlerBase {
     }
     else {
     	tmpMap.clear();
-    	idToLuceneId = new HashMap<Integer, Integer>(existingRecs.length);
-    	for (int i=0;i<existingRecs.length;i++) {
-        idToLuceneId.put(existingRecs[i], i);
+    	idToLuceneId = new HashMap<Integer, Integer>(maxLen);
+    	for (int i=0;i<maxLen;i++) {
+        idToLuceneId.put(existingRecs.get(i), i);
       }
     }
     
     
-    if (present == null) present = new BitSet(existingRecs.length);
-    if (missing == null) missing = new BitSet(existingRecs.length);
+    if (present == null) present = new BitSet(maxLen);
+    if (missing == null) missing = new BitSet(maxLen);
     
     int doneSoFar = 0;
     
