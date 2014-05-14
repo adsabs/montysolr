@@ -32,7 +32,7 @@ define(['backbone', 'marionette', 'js/widgets/base/base_widget',
           1. the one that changes the query: ie. changeQuery()
           2. the one that builds request: ie. composeRequest()
        */
-      var req = BaseWidget.prototype.initialize.apply(this, arguments);
+      var req = BaseWidget.prototype.composeRequest.apply(this, arguments);
       if (!req)
         return;
 

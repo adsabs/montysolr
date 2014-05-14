@@ -2114,8 +2114,8 @@ fieldset[disabled] .btn-primary.active {
 }
 .btn-success {
   color: #ffffff;
-  background-color: #74d18a;
-  border-color: #61cb7a;
+  background-color: #61ca7a;
+  border-color: #4ec46a;
 }
 .btn-success:hover,
 .btn-success:focus,
@@ -2123,8 +2123,8 @@ fieldset[disabled] .btn-primary.active {
 .btn-success.active,
 .open .dropdown-toggle.btn-success {
   color: #ffffff;
-  background-color: #55c770;
-  border-color: #3bb358;
+  background-color: #42c060;
+  border-color: #359f4e;
 }
 .btn-success:active,
 .btn-success.active,
@@ -2146,11 +2146,11 @@ fieldset[disabled] .btn-success:active,
 .btn-success.disabled.active,
 .btn-success[disabled].active,
 fieldset[disabled] .btn-success.active {
-  background-color: #74d18a;
-  border-color: #61cb7a;
+  background-color: #61ca7a;
+  border-color: #4ec46a;
 }
 .btn-success .badge {
-  color: #74d18a;
+  color: #61ca7a;
   background-color: #ffffff;
 }
 .btn-info {
@@ -2196,8 +2196,8 @@ fieldset[disabled] .btn-info.active {
 }
 .btn-warning {
   color: #ffffff;
-  background-color: #ffb733;
-  border-color: #ffae19;
+  background-color: #ffea33;
+  border-color: #ffe719;
 }
 .btn-warning:hover,
 .btn-warning:focus,
@@ -2205,8 +2205,8 @@ fieldset[disabled] .btn-info.active {
 .btn-warning.active,
 .open .dropdown-toggle.btn-warning {
   color: #ffffff;
-  background-color: #ffa90a;
-  border-color: #db8e00;
+  background-color: #ffe60a;
+  border-color: #dbc500;
 }
 .btn-warning:active,
 .btn-warning.active,
@@ -2228,11 +2228,11 @@ fieldset[disabled] .btn-warning:active,
 .btn-warning.disabled.active,
 .btn-warning[disabled].active,
 fieldset[disabled] .btn-warning.active {
-  background-color: #ffb733;
-  border-color: #ffae19;
+  background-color: #ffea33;
+  border-color: #ffe719;
 }
 .btn-warning .badge {
-  color: #ffb733;
+  color: #ffea33;
   background-color: #ffffff;
 }
 .btn-danger {
@@ -4288,11 +4288,11 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   background-color: #165189;
 }
 .label-success {
-  background-color: #74d18a;
+  background-color: #61ca7a;
 }
 .label-success[href]:hover,
 .label-success[href]:focus {
-  background-color: #4ec46a;
+  background-color: #3eba5c;
 }
 .label-info {
   background-color: #2fa4e7;
@@ -4302,11 +4302,11 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   background-color: #178acc;
 }
 .label-warning {
-  background-color: #ffb733;
+  background-color: #ffea33;
 }
 .label-warning[href]:hover,
 .label-warning[href]:focus {
-  background-color: #ffa500;
+  background-color: #ffe500;
 }
 .label-danger {
   background-color: #ff4c49;
@@ -4536,7 +4536,7 @@ a.thumbnail.active {
   animation: progress-bar-stripes 2s linear infinite;
 }
 .progress-bar-success {
-  background-color: #74d18a;
+  background-color: #61ca7a;
 }
 .progress-striped .progress-bar-success {
   background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
@@ -4550,7 +4550,7 @@ a.thumbnail.active {
   background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 .progress-bar-warning {
-  background-color: #ffb733;
+  background-color: #ffea33;
 }
 .progress-striped .progress-bar-warning {
   background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
@@ -5812,7 +5812,7 @@ button.close {
   display: none;
 }
 .chosen {
-  background-color: #ffffff;
+  background-color: #9fc8f0;
 }
 .just-authors {
   display: inline-block;
@@ -5883,7 +5883,7 @@ button.close {
 }
 .chart .bar {
   stroke: white;
-  fill: #8accf2;
+  fill: #87d79a;
 }
 .chart .bar:hover {
   fill: #549ee4;
@@ -5926,10 +5926,20 @@ button.close {
 .draw-attention {
   transition-property: background-color;
   transition-duration: 3s;
-  background-color: #ffc966;
+  background-color: #ffef66;
 }
 .show-fields {
   transition-property: background-color;
   transition-duration: 3s;
   background-color: none;
+}
+.inactive-style {
+  color: #999999;
+}
+.active-style {
+  color: #1d6bb5;
+}
+.search-submit {
+  background-color: #1d6bb5 !important;
+  color: #ffffff !important;
 }

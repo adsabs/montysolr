@@ -29,7 +29,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
      * put into your apiquery*/
 
 
-    dispatchRequest        : function (apiQuery) {
+    dispatchRequest : function (apiQuery) {
 
       var id, req, customQuery;
       this.setCurrentQuery(apiQuery);

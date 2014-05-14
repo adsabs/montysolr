@@ -185,6 +185,8 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
     },
 
       dispatchRequest: function(apiQuery) {
+        console.log("I got a response")
+
         //resetting collection's knowledge of pagination
         this.collection.orderNum = 1;
 
@@ -193,6 +195,7 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
       },
 
       processResponse: function(apiResponse) {
+
         if (this.paginator.isInitial()) {
           //it's the first set of results
           this.collection.reset(apiResponse.toJSON(), {

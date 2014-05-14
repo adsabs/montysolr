@@ -31,6 +31,8 @@ define(['backbone', 'marionette',
 
     initialize: function(options) {
 
+      options = options ||  {};
+
       // these methods are called by PubSub as handlers so we bind them to 'this' object
       // to avoid any confusion
       _.bindAll(this, "dispatchRequest", "processResponse")

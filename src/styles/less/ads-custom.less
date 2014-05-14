@@ -1,7 +1,7 @@
 
 @import 'ads-variables';
 
- #mocha-stats > li.progress {
+#mocha-stats > li.progress {
   height: 40px;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .chosen {
-  background-color: lighten(@brand-success, 37%)
+  background-color: lighten(@brand-primary, 37%)
 }
 
 .just-authors {
@@ -38,7 +38,7 @@
   }
 
   label {
-  font-weight: initial
+    font-weight: initial
   }
 }
 
@@ -48,7 +48,7 @@
 }
 .field-options div:hover {
   background-color: lighten(@brand-info, 37%)
-  
+
 }
 
 .field-options span {
@@ -59,8 +59,8 @@
   visibility : hidden
 }
 #results h5 {
-margin-top: -3px;
-margin-bottom:2px;
+  margin-top: -3px;
+  margin-bottom:2px;
 }
 
 .facet-meta {
@@ -108,15 +108,15 @@ margin-bottom:2px;
 
 .chart .bar {
   stroke: white;
-  fill: lighten(@brand-info, 20%);
+  fill: lighten(@brand-success, 10%);
   &:hover {
-    fill : lighten(@brand-primary, 20%);
+    fill : lighten(@brand-primary, 20%)
   }
 }
 
 .chart .x-axis .active text {
- fill : lighten(@brand-primary, 20%);
-   font :12px sans-serif;
+  fill : lighten(@brand-primary, 20%);
+  font :12px sans-serif;
 }
 
 .chart {
@@ -145,8 +145,8 @@ margin-bottom:2px;
 }
 
 .sort-options {
-margin: 0px;
-padding-left:20px;
+  margin: 0px;
+  padding-left:20px;
 }
 
 .sort-options label {
@@ -155,13 +155,13 @@ padding-left:20px;
 
 .zoomable-graph {
   .apply {
-  margin-top: 10px;
+    margin-top: 10px;
   }
 
 }
 
 .draw-attention {
- transition-property: background-color;
+  transition-property: background-color;
   transition-duration: 3s;
   background-color: lighten(@brand-warning, 10%)
 }
@@ -171,5 +171,19 @@ padding-left:20px;
   transition-duration: 3s;
   background-color: none;
 
-  
+
+}
+
+.inactive-style {
+  color: @gray-light
+}
+
+.active-style {
+  color: @component-active-bg
+}
+
+//weird stuff going on with input-addon overriding css
+.search-submit {
+  background-color: @brand-primary !important;
+  color: @body-bg  !important
 }

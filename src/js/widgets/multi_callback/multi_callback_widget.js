@@ -25,7 +25,7 @@ define(['backbone', 'marionette', 'js/components/api_query',
 
       initialize: function(options) {
 
-        _.bindAll(this, "dispatchRequest", "assignCallbackToResponse")
+        _.bindAll(this, "dispatchRequest", "callResponseCallback")
 
         this._queriesInProgress = {};
         BaseWidget.prototype.initialize.call(this, options);
@@ -42,15 +42,10 @@ define(['backbone', 'marionette', 'js/components/api_query',
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
 
         //custom handleResponse function goes here
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.assignCallbackToResponse);
+        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.callResponseCallback);
       }
 
-    }, /*to override*/
-      processResponse: function(apiResponse) {
-        //some parsing logic here
-        // reset collection: this.collection.reset(apiResponse)
-        throw new Error("you need to customize this function");
-      },
+    },
 
       /** utility function **/
       /**
@@ -110,10 +105,7 @@ define(['backbone', 'marionette', 'js/components/api_query',
       /*utility function*/
       //this can be called anywhere in your code to register your own callback
 
-      // XXX:rca - when you use 'special' in the name, you should know that
-      // whoever is reading it later will be very confused; pls find a better
-      // 'easy to understand' name for it
-      dispatchSpecialRequest: function(params, callback, data) {
+      dispatchSupplementalRequest: function(params, callback, data) {
         var newQuery, id, ApiRequest;
 
         newQuery = this.composeQuery(params);
@@ -131,14 +123,11 @@ define(['backbone', 'marionette', 'js/components/api_query',
       /*
        Companion function to composeRequest. It will call the
        callback with the just-received data. This function
-       is probably the only one the widget will need
+       is the only one the widget will need
        to register to DELIVERING_RESPONSE
        */
-      //XXX:rca - i'm perplexed; this was before 'processResponse'
-      // why now the change of name? (btw: this names suggests st
-      // else than it does - it doesn't assign a callback, it calls
-      // it)
-      assignCallbackToResponse: function(apiResponse) {
+
+     callResponseCallback: function(apiResponse) {
         var id = apiResponse.getApiQuery().url();
         var parameters, callback;
 

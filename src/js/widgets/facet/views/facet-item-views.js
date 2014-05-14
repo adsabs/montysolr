@@ -1,12 +1,35 @@
+define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox', 'hbs!./templates/facet-slider', 'hbs!./templates/facet-graph', '../facet-collection', 'jquery-ui'
+  ], function (Marionette, d3, facetItemCheckboxTemplate, facetSliderTemplate, facetGraphTemplate, IndividualFacetCollection) {
 
-define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
-    'hbs!./templates/facet-slider', 'hbs!./templates/facet-graph', '../facet-collection', 'jquery-ui'
-  ],
-  function(Marionette, d3, facetItemCheckboxTemplate, facetSliderTemplate, facetGraphTemplate, IndividualFacetCollection) {
+    Buffer = function (maxLength) {
+      this.commands = [];
+      this.maxLength = maxLength
+    };
+
+    Buffer.prototype.add = function (fn, data) {
+      // Adds a command to the buffer, and executes it if it's
+      // the only command to be ran.
+      var commands = this.commands;
+      if (commands.length <= this.maxLength) {
+        commands.push({fn: fn, data: data});
+      }
+      else {
+        commands.shift();
+        commands.push({fn: fn, data: data});
+
+      }
+      if (this.commands.length == 1) fn(data, next);
+
+      // Moves onto the next command in the buffer.
+      function next() {
+        commands.shift();
+        if (commands.length) commands[0].fn(commands[0].data, next);
+      }
+    }
 
     var BaseItem = Marionette.ItemView.extend({
 
-      className : "item-view hide"
+      className: "item-view hide"
 
       //most widgets are hidden by default until parent container view
       //explicitly shows them
@@ -15,16 +38,12 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
 
     var BaseHierarchicalItem = Marionette.CompositeView.extend({
 
-      className : "item-view hide",
+      className: "item-view hide",
 
       itemViewContainer: ".child-facets",
 
-      events : {
-        "click .show-more": "showExtraItems"
-      },
 
-      initialize: function(options) {
-        console.log("new hierarchical view created with cid", this.cid, this.model.attributes)
+      initialize: function (options) {
 
         //first, give the requesting facet a collection of its own
         this.collection = new IndividualFacetCollection([], {});
@@ -32,45 +51,59 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         this.events["click .facet-caret"] = "toggleChildren";
         this.events["click .show-more"] = "showExtraItems"
 
-        this.listenTo(this.collection, "re-rendering", this.onAdd)
+        this.on("itemview:selected", this.highlightParentFacet)
+        this.on("itemview:unselected", this.unHighlightParentFacet)
+      },
+
+      highlightParentFacet: function () {
+        this.$(".facet-caret").eq(0).addClass("active-style")
+        this.trigger("selected")
+
+      },
+
+      unHighlightParentFacet: function () {
+        //unhighlight the parent, if necessary
+        if(this.$(".child-facets selected").length === 0 ){
+          this.$(".facet-caret").eq(0).removeClass("active-style")
+          this.trigger("unselected")
+        }
+
       },
 
       defaultNumFacets: Marionette.getOption(this, "defaultNumFacets") || 5,
 
-      onAdd : function(){
+      onCompositeCollectionResetAdd: function () {
 
-        //show initial number of facets
-        var visible = 0;
-        var $childFacets = this.$(".child-facets .item-view")
-        if ($childFacets.length) {
+        if (this.collection.models.length) {
+          //show initial number of facets
+          var visible = 0;
+          var $childFacets = this.$(".child-facets .item-view")
+          if ($childFacets.length) {
 
-          while (visible < this.defaultNumFacets) {
+            while (visible < this.defaultNumFacets) {
 
-            $childFacets.eq(visible).removeClass("hide");
-            visible++
+              $childFacets.eq(visible).removeClass("hide");
+              visible++
+            }
+          }
+
+          //unhide "show more" button if necessary
+          if ($childFacets.filter(".hide").length) {
+            //this confirms there are more facets to be shown, so present it as an option
+            this.$(".child-facets + .show-more").removeClass("hide")
           }
         }
-
-        var $childFacets = this.$(".child-facets .item-view");
-        console.log(this, this.collection.moreFacets, $childFacets.length, this.defaultNumFacets )
-
-        //unhide "show more" button if necessary
-        if (this.collection.moreFacets && !($childFacets.length < this.defaultNumFacets)) {
-          //this confirms there are more facets to be shown, so present it as an option
-          this.$(".child-facets + .show-more").removeClass("hide")
-        }
-
       },
 
       //adding the hier flag for hierarchical view
-      serializeData: function() {
+      serializeData : function () {
         var m = this.model.toJSON();
         m.hier = true;
         return m
       },
 
       //function to show or hide children
-      toggleChildren: function(e) {
+      toggleChildren : function (e) {
 
         e.stopPropagation();
         var $target = $(e.target)
@@ -78,15 +111,20 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         if ($target.hasClass("item-open")) {
           //just close the facet
           $target.removeClass("item-open").addClass("item-closed")
-          $($target.siblings()[1]).addClass("hide")
+          //hiding .child-facets
 
-        } else {
+
+        }
+        else {
           if (this.collection && this.collection.models.length) {
             //reopening the toggle since the collection already has data
             $target.removeClass("item-closed").addClass("item-open")
-            $($target.siblings()[1]).removeClass("hide")
+            $($target.siblings()[1]).removeClass("hide");
+            $($target.siblings()[2]).removeClass("hide")
 
-          } else {
+
+          }
+          else {
             //request facets
             this.trigger("requestChildData", this);
 
@@ -98,15 +136,14 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         }
       },
 
-      showExtraItems: function(e) {
+      showExtraItems: function (e) {
         e.stopPropagation();
-        var $target = $(e.target);
 
-        this.$(".item-view.hide").slice(0, this.defaultNumFacets ).removeClass("hide");
+        this.$(".item-view.hide").slice(0, this.defaultNumFacets).removeClass("hide");
 
         //because some facets are pruned, this might be triggered earlier than you would think
-        if(!(this.$(".item-view.hide").length >= this.defaultNumFacets * 2)){
-          if(this.collection.moreFacets === true){
+        if (!(this.$(".item-view.hide").length >= this.defaultNumFacets * 2)) {
+          if (this.collection.moreFacets === true) {
             console.log("requesting more data")
             this.trigger("requestChildData")
           }
@@ -123,52 +160,56 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
     var checkboxMultiselectMixin = {
 
       //when someone clicks a checkbox
-      toggleHighlight: function(e) {
+      toggleHighlight: function (e) {
+        e.stopPropagation();
         $(e.target).parent().toggleClass("selected");
         this.model.set({
           "selected": !this.model.get("selected")
         })
+        if (this.model.get("selected")) {
+          this.trigger("selected");
+        }
+        else {
+          this.trigger("unselected")
+        }
       },
 
       events: {
-        "change input": "toggleHighlight"
-      }
+        "change input": "toggleHighlight",
+      },
 
     };
 
-
     var ZoomableGraphView = BaseItem.extend({
 
+      initialize   : function (options) {
 
-      initialize: function(options) {
+        _.bindAll(this, "triggerSortChange")
 
         try {
           //need to pass x-axis title in for sorting
           this.xAxisTitle = options.xAxisTitle;
           this.parentTitle = options.title;
 
-        }
-        catch(e){
+        } catch (e) {
           throw new Error("Missing key information: x axis title or graph title")
         }
 
-        this.yAxisTtitle = options.yAxisTitle || "size";
-
         //some variables need to be accessible for the sort function
         this.currentData = {
-          x: undefined,
-          xAxis: undefined,
+          x         : undefined,
+          xAxis     : undefined,
           binnedData: undefined,
-          xLabels : undefined
+          xLabels   : undefined
         };
 
         //setting some constants for the graph
         this.bins = 12; //will be around 12, depending on remainders
         this.margin = {
-          top: 10,
-          right: 10,
+          top   : 10,
+          right : 10,
           bottom: 5,
-          left: 55
+          left  : 55
         };
         this.fullWidth = 350;
         this.fullHeight = 200;
@@ -181,8 +222,7 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
          It seems like this will always be desirable but possibly not.  (Can we get solr to do it?)*/
         try {
           var data = this.model.toJSON().graphInfo;
-        }
-        catch(e){
+        } catch (e) {
           throw new Error("Graph widget has no model or else an incorrect model")
         }
 
@@ -191,16 +231,18 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         var valRange = this.model.get("value");
 
         for (var i = valRange[0]; i <= valRange[1]; i++) {
-          (function(i){
+          (function (i) {
             yearRange.push(i)
           })(i)
-        };
+        }
+        ;
 
-        _.each(yearRange, function(d){
+        _.each(yearRange, function (d) {
           //it's a zero value, we must add it
           if (!_.contains(dataYears, d)) {
             data.push({x: d, y: 0})
-          };
+          }
+          ;
         })
 
         data = _.sortBy(data, function (d) {
@@ -213,7 +255,7 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
       },
 
       //pass in xAxisTitle,
-      serializeData : function(){
+      serializeData: function () {
         var data = {};
         data.xAxisTitle = this.xAxisTitle.toLowerCase();
         data.title = this.parentTitle;
@@ -223,19 +265,19 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
       className: "zoomable-graph",
 
       events: {
-        "click .apply": "submitFacet",
-        "blur input[type=text]": "triggerGraphChange",
-        "change .sort-options input": "triggerSortChange"
+        "click .apply"              : "submitFacet",
+        "blur input[type=text]"     : "triggerGraphChange",
+        "change .sort-options input": "addSortChangeToQueue"
       },
 
       template: facetGraphTemplate,
 
-      submitFacet: function() {
+      submitFacet: function () {
         this.model.set("newValue", this.$(".slider").slider("values"))
 
       },
 
-      triggerGraphChange: function() {
+      triggerGraphChange: function () {
         var val1, val2;
         val1 = this.$(".show-slider-data-first").val();
         val2 = this.$(".show-slider-data-second").val();
@@ -246,24 +288,26 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
 
       },
 
-      triggerSortChange: function(e) {
+      addSortChangeToQueue: function (e) {
+        this.sortAnimationQueue = this.sortAnimationQueue || new Buffer(1)
+        console.log("change request",this.sortAnimationQueue.commands )
 
-        if (this.animate === true){
-          return
-        }
-        this.animate = true;
-        var that = this;
+        this.sortAnimationQueue.add(this.triggerSortChange, e)
+      },
+
+      triggerSortChange: function (e, next) {
+
         var data, x, xAxis, innerChart, sortVal;
         var transition, delay, x0;
 
         sortVal = $(e.target).val();
-        if (sortVal==="size"){
+        if (sortVal === "size") {
           //if people redraw the graph by narrowing it
           this.sizeSort = true;
         }
         else {
           this.sizeSort = false;
-        };
+        }
 
         data = this.currentData.binnedData;
         x = this.currentData.x;
@@ -272,75 +316,70 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         innerChart = d3.select(this.el).select(".inner-chart");
 
         //from http://bl.ocks.org/mbostock/3885705
-        x0 = x.domain(data.sort(sortVal == "size" ? function(a, b) {
+        x0 = x.domain(data.sort(sortVal == "size" ? function (a, b) {
           return a.y - b.y;
-        } : function(a, b) {
-          var retrieveNum = function(s) {
+        } : function (a, b) {
+          var retrieveNum = function (s) {
             var l = s.split("-");
             return parseInt(l[l.length - 1])
           };
           return d3.ascending(retrieveNum(a.x), retrieveNum(b.x));
-        })
-          .map(function(d) {
+        }).map(function (d) {
             return d.x;
-          }))
-          .copy();
+          })).copy();
 
         transition = innerChart.transition().duration(2000);
 
-        delay = function(d, i) {
-          return i *50
+        delay = function (d, i) {
+          return i * 50
         };
 
-        transition.selectAll(".bar")
-          .delay(delay)
-          .attr("transform", function(d) {
+        transition.selectAll(".bar").delay(delay).attr("transform", function (d) {
             return "translate(" + x0(d.x) + ",0)";
-          });
+          })
 
-        transition.select(".x-axis")
-          .call(xAxis)
-          .selectAll("g")
-          .delay(function(d,i){
+        transition.select(".x-axis").call(xAxis).selectAll("g").delay(function (d, i) {
             // find d's position in d axis list
             var pos = xLabels.indexOf(d)
-            return pos *50
-          })
-          .selectAll("text")
+            return pos * 50
+          }).selectAll("text")
           .style("text-anchor", "end")
           .attr("dx", "-.8em")
-          .attr("dy", ".15em");
+          .attr("dy", ".15em")
+          .each("end", function (d, i) {
+            if (i === data.length -1 ) {
+              setTimeout(next, 100)
+            }
+          });
 
-        //adjust this later, need a timeout otherwise weird stuff happenss
-        setTimeout(function(){that.animate = false}, data.length*100);
       },
 
-      buildSlider: function() {
+      buildSlider: function () {
 
         var that = this;
 
         var data = _.clone(this.graphData);
-        min = data[0].x,
-          max = data[data.length - 1].x;
+        min = data[0].x, max = data[data.length - 1].x;
 
         this.$(".slider").slider({
-          range: true,
-          min: min,
-          max: max,
+          range : true,
+          min   : min,
+          max   : max,
           values: [min, max],
-          stop: function(event, ui) {
-            var ui1 = ui.values[0],
-              ui2 = ui.values[1];
+          stop  : function (event, ui) {
+            var ui1 = ui.values[0], ui2 = ui.values[1];
             if (!(ui1 === min && ui2 === max)) {
-              that.$(".apply").removeClass("no-show")
-            } else {
-              that.$(".apply").addClass("no-show")
+              that.$(".apply").removeClass("no-show");
+              that.trigger("facet:active")
+            }
+            else {
+              that.$(".apply").addClass("no-show");
+              that.trigger("facet:inactive");
             }
             that.graphChange(ui1, ui2)
           },
-          slide: function(event, ui) {
-            var ui1 = ui.values[0],
-              ui2 = ui.values[1];
+          slide : function (event, ui) {
+            var ui1 = ui.values[0], ui2 = ui.values[1];
             that.$(".show-slider-data-first").val(ui1)
             that.$(".show-slider-data-second").val(ui2)
           }
@@ -350,17 +389,16 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         this.$(".show-slider-data-second").val(max);
       },
 
-      graphChange: function(val1, val2) {
+      graphChange: function (val1, val2) {
 
         var that = this;
 
-        var data, standardWidth, innerChart, x, xLabels,
-          y, xAxis, yAxis, bar;
+        var data, standardWidth, innerChart, x, xLabels, y, xAxis, yAxis, bar;
 
         data = _.clone(this.graphData);
 
         //now getting rid of anything outside of the new bounds
-        data = _.filter(data, function(d, i) {
+        data = _.filter(data, function (d, i) {
           return (d.x >= val1 && d.x <= val2)
         })
 
@@ -369,87 +407,60 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         this.currentData.binnedData = data;
 
         if (this.sizeSort === true) {
-          data = _.sortBy(data, function(d) {
+          data = _.sortBy(data, function (d) {
             return d.y
           });
-        };
+        }
+        ;
 
         innerChart = d3.select(this.el).select(".inner-chart")
 
-        xLabels = _.pluck(data, "x"),
-          maxVal = d3.max(_.pluck(data, "y"));
+        xLabels = _.pluck(data, "x"), maxVal = d3.max(_.pluck(data, "y"));
 
-        x = d3.scale.ordinal()
-          .domain(xLabels)
-          .rangeRoundBands([0, this.width], .1)
+        x = d3.scale.ordinal().domain(xLabels).rangeRoundBands([0, this.width], .1)
 
         //store for sort
         this.currentData.x = x;
         this.currentData.xLabels = xLabels;
 
-        y = d3.scale.linear()
-          .domain([0, maxVal])
-          .range([this.height, 0]);
+        y = d3.scale.linear().domain([0, maxVal]).range([this.height, 0]);
 
-        xAxis = d3.svg.axis()
-          .scale(x)
-          .ticks(5)
-          .orient("bottom");
+        xAxis = d3.svg.axis().scale(x).ticks(5).orient("bottom");
 
         //store for sort
         this.currentData.xAxis = xAxis;
 
-        yAxis = d3.svg.axis()
-          .scale(y)
-          .orient("left")
-          .tickFormat(d3.format(".2s"));
+        yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format(".2s"));
 
-        bar = innerChart.selectAll(".bar")
-          .data(data);
+        bar = innerChart.selectAll(".bar").data(data);
 
         bar.exit().remove();
 
-        bar.enter().append("g")
-          .classed("bar", true)
-          .append("rect")
+        bar.enter().append("g").classed("bar", true).append("rect")
 
         //update selection is within bar
-        bar.attr("transform", function(d) {
+        bar.attr("transform", function (d) {
           return "translate(" + x(d.x) + ",0)";
-        })
-          .transition()
-          .select("rect")
-          .attr("y", function(d) {
+        }).transition().select("rect").attr("y", function (d) {
             return y(d.y);
-          })
-          .attr("height", function(d) {
+          }).attr("height", function (d) {
             return that.height - y(d.y);
-          })
-          .attr("width", function(d) {
+          }).attr("width", function (d) {
             return x.rangeBand() * d.width / that.binSize
           });
 
-        d3.select(this.el).select(".x-axis")
-          .call(xAxis)
-          .selectAll("text")
-          .style("text-anchor", "end")
-          .attr("dx", "-.8em")
-          .attr("dy", ".15em")
-          .attr("transform", function(d) {
+        d3.select(this.el).select(".x-axis").call(xAxis).selectAll("text").style("text-anchor", "end").attr("dx", "-.8em").attr("dy", ".15em").attr("transform", function (d) {
             return "rotate(-65)"
           });
 
-        d3.select(this.el).select(".y-axis")
-          .transition()
-          .call(yAxis);
+        d3.select(this.el).select(".y-axis").transition().call(yAxis);
 
         /*add hover event listener
          have to do this again because delegated events don't
          work with svg :( */
 
-        this.$(".bar")
-          .on("mouseover", function() {
-            var sorted = _.sortBy($(this).parent().find(".bar"), function(d) {
+        this.$(".bar").on("mouseover", function () {
+            var sorted = _.sortBy($(this).parent().find(".bar"), function (d) {
               return parseInt($(d).attr("transform").match(/\((\d+),/)[1])
             });
             var i = sorted.indexOf(this)
@@ -458,9 +469,8 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
 
           });
 
-        this.$(".bar")
-          .on("mouseout", function(i) {
-            var sorted = _.sortBy($(this).parent().find(".bar"), function(d) {
+        this.$(".bar").on("mouseout", function (i) {
+            var sorted = _.sortBy($(this).parent().find(".bar"), function (d) {
               return parseInt($(d).attr("transform").match(/\((\d+),/)[1])
             });
             var i = sorted.indexOf(this)
@@ -471,22 +481,22 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
       },
 
       //takes current data and binNum, returns correctly binned data
-      binData: function(data, binNum) {
-        var extraBar, remainder, binSize,
-          indexList, binnedX, binnedY;
+      binData    : function (data, binNum) {
+        var extraBar, remainder, binSize, indexList, binnedX, binnedY;
 
         if (data.length <= binNum) {
           this.binSize = 1;
 
-          data = _.map(data, function(d, i) {
+          data = _.map(data, function (d, i) {
             return {
-              x: "" + d.x,
-              y: d.y,
+              x    : "" + d.x,
+              y    : d.y,
               width: 1
             }
           })
           return data
-        };
+        }
+        ;
 
         extraBar = undefined;
 
@@ -508,12 +518,13 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
 
         for (var i = 0; i < binNum; i++) {
           indexList.push(binSize)
-        };
+        }
+        ;
         if (extraBar) {
           indexList.push(extraBar)
         }
 
-        _.each(indexList, function(d, i) {
+        _.each(indexList, function (d, i) {
           var val = 0;
           var dateRange = [];
           while (d >= 1) {
@@ -527,25 +538,26 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
           binnedY.push(val)
         })
 
-        binnedX = _.map(binnedX, function(d, i) {
+        binnedX = _.map(binnedX, function (d, i) {
           if (d.length > 1) {
             return {
-              x: d[0] + "-" + d[d.length - 1],
+              x    : d[0] + "-" + d[d.length - 1],
               width: d.length
             }
-          } else {
+          }
+          else {
             //a remainder bar
             return {
-              x: d[0] + "",
+              x    : d[0] + "",
               width: 1
             }
           }
         })
 
-        data = _.map(binnedX, function(d, i) {
+        data = _.map(binnedX, function (d, i) {
           return {
-            x: d.x,
-            y: binnedY[i],
+            x    : d.x,
+            y    : binnedY[i],
             width: d.width
           }
         });
@@ -553,19 +565,18 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         return data
       },
 
-      buildGraph: function() {
+      buildGraph: function () {
 
         var that = this;
 
-        var data, xLabels, x,
-          y, xAxis, yAxis, chart, innerChart, bar;
+        var data, xLabels, x, y, xAxis, yAxis, chart, innerChart, bar;
 
         data = _.clone(this.graphData);
 
         data = this.binData(data, this.bins);
 
         //initial sort
-        data = _.sortBy(data, function(d) {
+        data = _.sortBy(data, function (d) {
           var l = d.x.split("-");
           return parseInt(l[l.length - 1])
         });
@@ -573,94 +584,65 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
         //store for sort
         this.currentData.binnedData = data;
 
-        xLabels = _.pluck(data, "x"),
-          maxVal = d3.max(_.pluck(data, "y"));
+        xLabels = _.pluck(data, "x"), maxVal = d3.max(_.pluck(data, "y"));
 
-        x = d3.scale.ordinal()
-          .domain(xLabels)
-          .rangeRoundBands([0, this.width], .1);
+        x = d3.scale.ordinal().domain(xLabels).rangeRoundBands([0, this.width], .1);
 
         //store for sort
         this.currentData.x = x;
         this.currentData.xLabels = xLabels;
 
+        y = d3.scale.linear().domain([0, maxVal]).range([this.height, 0])
 
-        y = d3.scale.linear()
-          .domain([0, maxVal])
-          .range([this.height, 0])
-
-        xAxis = d3.svg.axis()
-          .scale(x)
-          .orient("bottom");
+        xAxis = d3.svg.axis().scale(x).orient("bottom");
 
         //store for sort
         this.currentData.xAxis = xAxis;
 
-        yAxis = d3.svg.axis()
-          .scale(y)
-          .orient("left")
-          .tickFormat(d3.format(".2s"));
+        yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format(".2s"));
 
-        chart = d3.select(this.el).select(".chart")
-          .attr("width", this.fullWidth)
-          .attr("height", this.fullHeight);
+        chart = d3.select(this.el).select(".chart").attr("width", this.fullWidth).attr("height", this.fullHeight);
 
-        innerChart = chart.append("g")
-          .classed("inner-chart", true)
-          .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+        innerChart = chart.append("g").classed("inner-chart", true).attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-        bar = innerChart.selectAll("g")
-          .data(data)
-          .enter().append("g")
-          .classed("bar", true)
-          .attr("transform", function(d) {
+        bar = innerChart.selectAll("g").data(data).enter().append("g").classed("bar", true).attr("transform", function (d) {
             return "translate(" + x(d.x) + ",0)";
           });
 
-        bar.append("rect")
-          .attr("y", function(d) {
+        bar.append("rect").attr("y", function (d) {
             return y(d.y);
-          })
-          .attr("height", function(d) {
+          }).attr("height", function (d) {
             return that.height - y(d.y);
-          })
-          .attr("width", function(d) {
+          }).attr("width", function (d) {
             console.log(that.binSize, x.rangeBand(), d.width)
             return x.rangeBand() * d.width / that.binSize
           });
 
-        innerChart.append("g")
-          .classed({
-            "axis": true,
+        innerChart.append("g").classed({
+            "axis"  : true,
             "x-axis": true
-          })
-          .attr("transform", "translate(0," + this.height + ")")
-          .call(xAxis)
-          .selectAll("text")
-          .style("text-anchor", "end")
-          .attr("dx", "-.8em")
-          .attr("dy", ".15em")
-          .attr("transform", function(d) {
+          }).attr("transform", "translate(0," + this.height + ")").call(xAxis).selectAll("text").style("text-anchor", "end").attr("dx", "-.8em").attr("dy", ".15em").attr("transform", function (d) {
             return "rotate(-65)"
           });
 
-        innerChart.append("g")
-          .classed({
-            "axis": true,
+        innerChart.append("g").classed({
+            "axis"  : true,
             "y-axis": true
-          })
-          .call(yAxis);
+          }).call(yAxis);
 
         //for sorting later
-        _.each(d3.select(this.el).selectAll(".bar")[0], function(d, i ){d._i = i})
-        _.each(d3.select(this.el).select(".x-axis").selectAll(".tick")[0], function(d, i ){d._i = i})
+        _.each(d3.select(this.el).selectAll(".bar")[0], function (d, i) {
+          d._i = i
+        })
+        _.each(d3.select(this.el).select(".x-axis").selectAll(".tick")[0], function (d, i) {
+          d._i = i
+        })
 
         //add hover event listener
 
-        this.$(".bar")
-          .on("mouseover", function() {
+        this.$(".bar").on("mouseover", function () {
             //get index
-            var sorted = _.sortBy($(this).parent().find(".bar"), function(d) {
+            var sorted = _.sortBy($(this).parent().find(".bar"), function (d) {
               return parseInt($(d).attr("transform").match(/\((\d+),/)[1])
             });
             var i = sorted.indexOf(this);
@@ -669,9 +651,8 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
 
           });
 
-        this.$(".bar")
-          .on("mouseout", function(i) {
-            var sorted = _.sortBy($(this).parent().find(".bar"), function(d) {
+        this.$(".bar").on("mouseout", function (i) {
+            var sorted = _.sortBy($(this).parent().find(".bar"), function (d) {
               return parseInt($(d).attr("transform").match(/\((\d+),/)[1])
             });
             var i = sorted.indexOf(this)
@@ -680,13 +661,12 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
           })
       },
 
-      onRender: function() {
+      onRender: function () {
         this.buildGraph();
         this.buildSlider()
       }
 
     });
-
 
     var CheckboxHierarchicalView = BaseHierarchicalItem.extend(checkboxMultiselectMixin).extend({
       template: facetItemCheckboxTemplate
@@ -695,15 +675,13 @@ define(['marionette', 'd3', 'hbs!./templates/facet-item-checkbox',
       template: facetItemCheckboxTemplate
     });
 
-
     var ItemViews = {
       CheckboxHierarchicalView: CheckboxHierarchicalView,
-      CheckboxOneLevelView: CheckboxOneLevelView,
-      ZoomableGraphView: ZoomableGraphView
+      CheckboxOneLevelView    : CheckboxOneLevelView,
+      ZoomableGraphView       : ZoomableGraphView
     }
-
 
     return ItemViews
 
-
   })
+

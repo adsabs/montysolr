@@ -24,34 +24,51 @@ define(['backbone', 'marionette',
          }
        }
      });
-
      BaseContainer = Backbone.Marionette.CompositeView.extend({
 
-       initialize: function(options) {
+       initialize: function (options) {
 
-         if (options && options.itemViewOptions) {
-           this.itemViewOptions = options.itemViewOptions
-         };
+         options = options || {};
 
-         if (options && options.defaultNumFacets) {
-           this.defaultNumFacets = options.defaultNumFacets
-         };
+         this.itemViewOptions = options.itemViewOptions || {};
 
-         if (options && options.openByDefault == true) {
+         this.defaultNumFacets = options.defaultNumFacets || 5;
+
+         this.itemViewOptions.defaultNumFacets = this.defaultNumFacets;
+
+         if (options.openByDefault == true) {
            //open up the body of the facet and point caret down
-           this.onRender = function() {
+           this.onRender = function () {
              this.toggleFacet();
            }
-         };
+         }
 
          //for hierarchical child views
-         this.on("all", function(e) {
+         this.on("all", function (e) {
            //  somewhere in the hierarchy of children views, a new view
            //  with a new collection has been added
            if (e.match("requestChildData")) {
              var view = arguments[arguments.length - 1];
              this.trigger("hierarchicalDataRequest", view);
            }
+
+           //so that there is special styling when a facet might be applied
+           this.on("itemview:selected", function () {
+             this.$(".facet-meta i").addClass("active-style")
+
+           });
+
+           this.on("itemview:unselected", function () {
+             //specifically for logic dropdowns
+             //only remove if there is no more selected
+             if (this.$(".selected").length === 0){
+               this.$(".logic-dropdown i").addClass("inactive-style").removeClass("active-style");
+
+               this.$(".facet-meta i").removeClass("active-style");
+
+             }
+
+           })
          });
        },
 
@@ -59,20 +76,20 @@ define(['backbone', 'marionette',
 
        events: {
          "click .main-caret": "toggleFacet",
-         "click .show-more": "showExtraItems"
+         "click .show-more" : "showExtraItems",
        },
 
-       showExtraItems: function() {
-         this.$(".item-view.hide").slice(0, this.defaultNumFacets ).removeClass("hide");
+       showExtraItems: function () {
+         this.$(".item-view.hide").slice(0, this.defaultNumFacets).removeClass("hide");
 
          //because some facets are pruned, this might be triggered earlier than you would think
-         if(!(this.$(".item-view.hide").length >= this.defaultNumFacets * 2)){
+         if (!(this.$(".item-view.hide").length >= this.defaultNumFacets * 2)) {
            this.trigger("moreDataRequested")
          }
 
        },
 
-       toggleFacet: function(e) {
+       toggleFacet: function (e) {
 
          $caret = this.$(".main-caret");
 
@@ -82,8 +99,8 @@ define(['backbone', 'marionette',
            this.$(".logic-dropdown").addClass("hide");
            this.$(".facet-body").addClass("hide");
 
-
-         } else {
+         }
+         else {
            $caret.removeClass("item-closed");
            $caret.addClass("item-open");
            this.$(".logic-dropdown").removeClass("hide");
@@ -91,33 +108,34 @@ define(['backbone', 'marionette',
 
          }
        },
-       template: baseFacetTemplate,
+       template   : baseFacetTemplate,
 
        className: "facet-widget",
 
        itemViewContainer: ".facet-items",
 
-       defaultNumFacets: 5,
+       onCompositeCollectionResetAdd: function () {
 
-       onCompositeCollectionRendered : function(){
-       //show initial number of facets
-         var visible = 0;
-         var $childFacets = this.$(".item-view")
-         if($childFacets.length){
+         if (this.collection.models.length) {
+           //show initial number of facets
+           var visible = 0;
+           var $childFacets = this.$(".item-view")
+           if ($childFacets.length) {
 
-           while (visible < this.defaultNumFacets){
+             while (visible < this.defaultNumFacets) {
 
-             $childFacets.eq(visible).removeClass("hide");
-             visible++
+               $childFacets.eq(visible).removeClass("hide");
+               visible++
+             }
+
            }
+           //unhide "show more" button if necessary
+           if ($childFacets.filter(".hide").length) {
+             //this confirms there are more facets to be shown, so present it as an option
+             this.$(".facet-items + .show-more").removeClass("hide")
+           }
+         }
 
-         }
-         console.log(this, this.collection.moreFacets, $childFacets.length, this.defaultNumFacets )
-       //unhide "show more" button if necessary
-         if(this.collection.moreFacets && !($childFacets.length < this.defaultNumFacets) ){
-           //this confirms there are more facets to be shown, so present it as an option
-           this.$(".facet-items + .show-more").removeClass("hide")
-         }
        }
 
 
@@ -125,44 +143,40 @@ define(['backbone', 'marionette',
 
      ChangeApplyContainer = BaseContainer.extend({
 
-       initialize: function(options) {
+       initialize: function (options) {
          //a change in the "newValue" attribute for any model
          //in the collection will trigger an autosubmit
          this.listenTo(this.collection, "change:newValue", this.submitFacet);
          BaseContainer.prototype.initialize.call(this, options);
        },
 
-       submitFacet: function() {
+       submitFacet: function () {
          this.trigger("changeApplySubmit")
        }
 
      }),
 
-     SelectLogicModel = BaseContainerModel.extend({
-       defaults: function() {
-         return {
-           singleLogic: [
-             "limit to",
-             "exclude"
-           ],
-           multiLogic: [
-             "and",
-             "or",
-             "exclude"
-           ],
-           selected: undefined,
+       SelectLogicModel = BaseContainerModel.extend({
+         defaults: function () {
+           return {
+             singleLogic: [
+               "limit to", "exclude", ],
+             multiLogic : [
+               "and", "or", "exclude"
+             ],
+             selected   : undefined,
 
-           title: undefined
+             title: undefined,
+           }
          }
-       }
-     });
+       });
 
      SelectLogicContainer = BaseContainer.extend({
 
-       initialize: function(options) {
+       initialize: function (options) {
 
          //clear out logic template when collection is reset
-         this.listenTo(this.collection, "reset", function() {
+         this.listenTo(this.collection, "reset", function () {
            this.$(".dropdown-menu").html(facetTooltipTemplate({
              noneSelected: true
            }))
@@ -174,14 +188,14 @@ define(['backbone', 'marionette',
 
        },
 
-       events: function() {
+       events: function () {
          var addEvents;
          addEvents = {
-           "click .dropdown-toggle": "toggleLogic",
-           "click .dropdown-menu .close": "closeLogic",
+           "click .dropdown-toggle"       : "toggleLogic",
+           "click .dropdown-menu .close"  : "closeLogic",
            //for this container, any click on a logic input emits an immediate
            //new query event
-           "change .facet-item": "showLogic",
+           "change .facet-item"           : "showLogic",
            "change .logic-container input": "changeLogicAndSubmit"
 
          };
@@ -190,7 +204,7 @@ define(['backbone', 'marionette',
 
        template: logicFacetTemplate,
 
-       changeLogicAndSubmit: function(e) {
+       changeLogicAndSubmit: function (e) {
          //close the logic dropdown
          this.closeLogic();
          var val = $(e.target).val();
@@ -200,61 +214,73 @@ define(['backbone', 'marionette',
          this.trigger("SelectLogicSubmit")
        },
 
-       closeLogic: function() {
+       closeLogic: function () {
          this.$(".dropdown").removeClass("open")
 
        },
-       showLogic: function() {
+       showLogic : function () {
          var numSelected;
          numSelected = this.handleLogic();
          if (numSelected > 0) {
            this.$(".dropdown").addClass("open")
-         } else {
+           this.$(".logic-dropdown i").removeClass("inactive-style")
+         }
+         else {
            this.$(".dropdown").removeClass("open")
          }
        },
 
-       toggleLogic: function() {
+       toggleLogic: function () {
          this.$(".dropdown").toggleClass("open")
        },
 
-       handleLogic: function(model) {
+       handleLogic: function () {
 
          var selected = this.$("input:checked")
          var numSelected = selected.length;
+
+         if (numSelected >= 1) {
+           //highlight title
+           this.trigger("itemview:facet:active")
+         }
+         ;
 
          //open the dropdown
          if (numSelected === 1) {
            this.$(".dropdown-menu").html(facetTooltipTemplate({
              single: true,
-             logic: this.model.get("singleLogic")
+             logic : this.model.get("singleLogic")
            }));
 
            this.$(".dropdown").addClass("open");
 
-         } else if (numSelected > 1) {
-          var multiLogic = this.model.get("multiLogic");
-          if(multiLogic === "fullSet"){
-            /*any multiple selection automatically grabs the full set */
-            this.$(".dropdown-menu").html(facetTooltipTemplate({
-             fullSet: true
-           }))
-          }
-          else {
-            this.$(".dropdown-menu").html(facetTooltipTemplate({
-             multiLogic: true,
-             logic: multiLogic
-           }))
+         }
+         else if (numSelected > 1) {
+           var multiLogic = this.model.get("multiLogic");
+           if (multiLogic === "fullSet") {
+             /*any multiple selection automatically grabs the full set */
+             this.$(".dropdown-menu").html(facetTooltipTemplate({
+               fullSet: true,
+             }))
+           }
+           else {
+             this.$(".dropdown-menu").html(facetTooltipTemplate({
+               multiLogic: true,
+               logic     : multiLogic
+             }))
 
-          }  
-          this.$(".dropdown").addClass("open");
+           }
+           this.$(".dropdown").addClass("open");
 
-         } else {
+         }
+         else {
 
            this.$(".dropdown-menu").html(facetTooltipTemplate({
              noneSelected: true
            }))
-           this.$(".dropdown").removeClass("open")
+           this.$(".dropdown").removeClass("open");
+           //deactivating styles
+           this.trigger("itemview:facet:inactive")
 
          }
          return numSelected
@@ -262,12 +288,11 @@ define(['backbone', 'marionette',
 
      });
 
-
      return {
        SelectLogicContainer: SelectLogicContainer,
        ChangeApplyContainer: ChangeApplyContainer,
-       SelectLogicModel: SelectLogicModel,
-       BaseContainerModel: BaseContainerModel
+       SelectLogicModel    : SelectLogicModel,
+       BaseContainerModel  : BaseContainerModel
      }
 
-   })
+})
