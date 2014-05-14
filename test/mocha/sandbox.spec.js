@@ -14,7 +14,7 @@ var tests = [
   //tbase + '/components/query_mediator.spec.js'
   //tbase + '/services/pubsub.spec.js'
 
-  tbase + '/components/application.spec.js'
+  tbase + '/widgets/breadcrumb_widget.spec.js'
 ];
 
 

@@ -124,6 +124,31 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
     },
 
     /*
+     * subscribeOnce() -> undefined or error
+     *
+     *  Just like subscribe, but it will be removed by PubSub once
+     *  it has been called
+     *
+     *  - key: instance of PubSubKey (it must be known
+     *         to this PubSub - so typically it is a key
+     *         issued by this PubSub)
+     *  - name: string, name of the event (can be name
+     *         accepted by Backbone)
+     *  - callback: a function to call (you cannot supply
+     *         context, so if the callback needs to be bound
+     *         use: _.bind(callback, context)
+     *
+     */
+    subscribeOnce: function(key, name, callback) {
+      this._checkKey(key, name, callback);
+      if (_.isUndefined(name)) {
+        throw new Error("You tried to subscribe to undefined event. Error between chair and keyboard?");
+      }
+      this.once(name, callback, key); // the key becomes context
+      this.once(name+key.getId(), callback, key); // this is for individual responses
+    },
+
+    /*
      * unsubscribe() -> undefined or error
      *
      *  - key: instance of PubSubKey (it must be known
