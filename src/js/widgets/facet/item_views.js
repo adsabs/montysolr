@@ -17,10 +17,10 @@ define(['./item_view', './hierarchical_item_view', 'hbs!./templates/item-checkbo
         "selected": !this.model.get("selected")
       });
       if (this.model.get("selected")) {
-        this.trigger("selected");
+        this.trigger("select");
       }
       else {
-        this.trigger("unselected")
+        this.trigger("unselect")
       }
     },
 

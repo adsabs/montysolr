@@ -17,22 +17,23 @@ define(['marionette', 'd3', 'hbs!./templates/item-checkbox', 'hbs!./templates/sl
       this.events["click .facet-caret"] = "toggleChildren";
       this.events["click .show-more"] = "showExtraItems"
 
-      this.on("itemview:selected", this.highlightParentFacet)
-      this.on("itemview:unselected", this.unHighlightParentFacet)
+      this.on("itemview:select", this.highlightParentFacet)
+      this.on("itemview:unselect", this.unHighlightParentFacet)
     },
 
     highlightParentFacet: function () {
       this.$(".facet-caret").eq(0).addClass("active-style")
-      this.trigger("selected")
+      this.trigger("select")
 
     },
 
     unHighlightParentFacet: function () {
       //unhighlight the parent, if necessary
-      if(this.$(".child-facets selected").length === 0 ){
+      if(this.$(".child-facets .selected").length === 0 ){
         this.$(".facet-caret").eq(0).removeClass("active-style")
-        this.trigger("unselected")
       }
+      this.trigger("unselect")
+
 
     },
 
@@ -78,6 +79,7 @@ define(['marionette', 'd3', 'hbs!./templates/item-checkbox', 'hbs!./templates/sl
         //just close the facet
         $target.removeClass("item-open").addClass("item-closed")
         //hiding .child-facets
+        this.$(".facet-body").addClass("hide");
 
 
       }
@@ -85,8 +87,8 @@ define(['marionette', 'd3', 'hbs!./templates/item-checkbox', 'hbs!./templates/sl
         if (this.collection && this.collection.models.length) {
           //reopening the toggle since the collection already has data
           $target.removeClass("item-closed").addClass("item-open")
-          $($target.siblings()[1]).removeClass("hide");
-          $($target.siblings()[2]).removeClass("hide")
+          this.$(".facet-body").removeClass("hide");
+
 
 
         }
@@ -96,7 +98,7 @@ define(['marionette', 'd3', 'hbs!./templates/item-checkbox', 'hbs!./templates/sl
 
           $target.removeClass("item-closed").addClass("item-open");
 
-          $($target.siblings()[1]).removeClass("hide")
+          this.$(".facet-body").removeClass("hide");
 
         }
       }
