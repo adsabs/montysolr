@@ -1,28 +1,50 @@
 define(['backbone', 'marionette',
-  'js/components/api_query', 'js/components/api_request'
+  'js/components/api_query', 'js/components/api_request',
+  'js/mixins/widget_mixin_method'
 ], function(
-  Backbone, Marionette, ApiQuery, ApiRequest) {
+  Backbone, Marionette, ApiQuery, ApiRequest, WidgetMixin) {
 
   /**
-   * A pubsub based widget that contains the basic functionality
-   * you may want to override certain methods and pass your
-   * own custom template:
+   * A pubsub based widget with basic functionality. For
+   *  a basic widget, you would only need to customize the composeRequest
+   *  and processResponse functions for pubsub functionality. If you pass in a "defaultFields"
+   *  object to the constructor, e.g.:
+   *  defaultFields = {fl:"title,author", sort:"ascending"}
+   *
+   *  you don't even need to customize composeRequest for basic functionality.
+   *  You would also probably want to write your own initialize method that creates
+   *  instances of any views, collections or models your widget will need, e.g.:
    *
    * var newWidgetClass = BaseWidget.extend({
-   *   activate: function() { .....}
+   *   initialize : function(options){
+   *      BaseWidget.prototype.initialize.call(this, options)
+   *    },
+   *   composeRequest : function(){},
+   *   processRequest : function(){}
    * });
    *
    * newWidgetInstance = newWidgetClass();
    */
 
+
   var BaseWidget = Marionette.Controller.extend({
 
     initialize: function(options) {
+
+      options = options ||  {};
+
       // these methods are called by PubSub as handlers so we bind them to 'this' object
       // to avoid any confusion
       _.bindAll(this, "dispatchRequest", "processResponse")
 
       this._currentQuery = new ApiQuery();
+      if (options.defaultFields){
+        this.defaultFields = options.defaultFields
+      }
+
+      if (options.subscribeCustomHandlers){
+        this.subscribeCustomHandlers = options.subscribeCustomHandlers
+      };
 
       // XXX: here the widget should do something with the views/models/templates
       // to set everything up
@@ -57,13 +79,16 @@ define(['backbone', 'marionette',
      * Default callback to be called by PubSub on 'INVITING_REQUEST'
      */
     dispatchRequest: function(apiQuery) {
-      var q = this.customizeQuery(apiQuery);
-      if (q) {
-        this.setCurrentQuery(q);
-        var req = this.composeRequest(q);
-        if (req) {
-          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-        }
+
+      //XXX:rca: IFF st changed query before calling 'dispatch' then this
+      // would be OK; but if st is changing query inside 'composeRequest'
+      // then this usage is not OK. Because it is setting query and then
+      // refusing to act on it (it is possible)
+
+      this.setCurrentQuery(apiQuery);
+      var req = this.composeRequest();
+      if (req) {
+        this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
       }
     },
 
@@ -72,6 +97,9 @@ define(['backbone', 'marionette',
      * @param apiResponse
      */
     processResponse: function(apiResponse) {
+      //need to put some parsing logic here
+      // reset collection: 
+      //this.collection.reset(apiResponse)
       throw new Error("you need to customize this function");
     },
 
@@ -79,20 +107,38 @@ define(['backbone', 'marionette',
      * This function should return a request IFF we want to get some
      * data - it is called from 'dispatchRequest' event handler
      *
-     * @param apiQuery
+     * @param object with params to add
      * @returns {ApiRequest}
      */
-    composeRequest: function(apiQuery) {
-      return new ApiRequest({
-        target: 'search',
-        query: apiQuery
-      });
+    composeRequest: function(params) {
+      /*
+      XXX:rca: i have objections to this (api inconsistency) - the previous signature was
+       apiQuery; which is a clear what it contains, but params could
+       be anything. I'd like to see composeRequest to receive ApiQuery
+       and do whatever is necessary - the query can be changed before
+       composeRequest is called. What was the reason for reverting
+       this functionality?
+
+       */
+      if (params){
+          var q = this.composeQuery(params);
+      }
+      else if (this.defaultFields){
+         var q = this.composeQuery(this.defaultFields);
+      }
+      else {
+         var q = this.composeQuery();
+      };
+
+      if (q) {
+        return new ApiRequest({
+          target: 'search',
+          query: q
+        });
+      }
     },
 
     /**
-     * Defaualt callback to be called by PubSub on 'INVITING_REQUEST'
-     * XXX: seems like a problem to me (it should be called from inside
-     * 'dispatchRequest' imo)
      *
      * @param apiQuery
      */
@@ -103,28 +149,22 @@ define(['backbone', 'marionette',
     },
 
     getCurrentQuery: function() {
-      return this._currentQuery;
+      return this._currentQuery.clone(); // XXX:rca: this closing seems excessive
     },
 
     /**
-     * all purpose function for making a new query
-     * returns an apiQuery ready for newQuery event or
-     * for insertion into  apiRequest
+     * All purpose function for making a new query. It returns an apiQuery ready for
+     * newQuery event or  for insertion into  apiRequest.
      * */
-    customizeQuery: function(queryParams) {
+    composeQuery: function(queryParams) {
       var query;
-      if (queryParams instanceof  ApiQuery) {
-        // do something here
-        query = queryParams;
-      }
-      else {
-        query = this.getCurrentQuery();
+
+      query = this.getCurrentQuery();
         if (queryParams) {
           _.each(queryParams, function(v, k) {
             query.set(k, v)
           });
         };
-      }
       return query
     },
 
@@ -140,7 +180,7 @@ define(['backbone', 'marionette',
       }
     }
 
-  });
+  }, {mixin : WidgetMixin});
 
   return BaseWidget
 

@@ -12,9 +12,13 @@ var tests = [
   //tbase + '/services/api.spec.js',
   //tbase + '/components/beehive.spec.js',
   //tbase + '/components/query_mediator.spec.js'
-  //tbase + '/services/pubsub.spec.js'
+  //tbase + '/services/pubsub.spec.js',
+  // tbase + '/widgets/results_render_widget.spec.js',
+  tbase + '/widgets/facet_widget.spec.js',
 
-  tbase + '/components/application.spec.js'
+
+
+  // tbase + '/widgets/app_test.spec.js'
 ];
 
 

@@ -54,12 +54,15 @@ require.config({
     'backbone.wreqr' : 'libs/backbone.wreqr/lib/backbone.wreqr',
     'backbone.eventbinder' : 'libs/backbone.eventbinder/backbone.eventbinder',
     'backbone.babysitter' : 'libs/backbone.babysitter/backbone.babysitter',
-    'bootstrap': 'libs/bootstrap/bootstrap'
+    'bootstrap': 'libs/bootstrap/bootstrap',
+    'jquery-ui' : 'libs/jqueryui/jquery-ui',
+    'd3':'libs/d3/d3',
+    'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent'
 
   },
 
   hbs : {
-    'templateExtension' : 'html'
+    'templateExtension' : 'html',
 
   },
 

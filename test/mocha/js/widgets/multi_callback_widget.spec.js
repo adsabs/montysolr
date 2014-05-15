@@ -64,7 +64,7 @@ define(['marionette', 'backbone', 'js/widgets/base/base_widget',
         var testApiResponse = new ApiResponse(Test1);
         testApiResponse.setApiQuery(q.clone());
 
-        widget.processResponse(testApiResponse);
+        widget.assignCallbackToResponse(testApiResponse);
 
         expect(t).to.equal(1);
 
