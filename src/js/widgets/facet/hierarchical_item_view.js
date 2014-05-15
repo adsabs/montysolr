@@ -1,5 +1,5 @@
 define(['marionette', 'd3', 'hbs!./templates/item-checkbox', 'hbs!./templates/slider', 'hbs!./templates/graph', './collection', 'jquery-ui'
-], function (Marionette, d3, FacetItemCheckboxTemplate, FacetSliderTemplate, FacetGraphTemplate, IndividualFacetCollection) {
+], function (Marionette, d3, FacetItemCheckboxTemplate, FacetSliderTemplate, FacetGraphTemplate, FacetCollection) {
 
 
   var BaseHierarchicalItemView = Marionette.CompositeView.extend({
