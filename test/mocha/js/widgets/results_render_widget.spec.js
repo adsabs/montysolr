@@ -1,21 +1,37 @@
-define(['marionette', 'backbone', 'js/widgets/results_render/results_render_widget', 'js/components/api_response', 'js/components/api_query', './test_json/test1', './test_json/test2', 'js/components/beehive', 'js/services/pubsub'],
-  function(Marionette, Backbone, ResultsListController, ApiResponse, ApiQuery, Test1, Test2, BeeHive, PubSub) {
+define(['marionette',
+    'backbone',
+    'js/widgets/results/widget',
+    'js/components/api_response',
+    'js/components/api_query',
+    './test_json/test1',
+    './test_json/test2',
+    'js/components/beehive',
+    'js/services/pubsub'],
+  function (Marionette,
+            Backbone,
+            ResultsListController,
+            ApiResponse,
+            ApiQuery,
+            Test1,
+            Test2,
+            BeeHive,
+            PubSub) {
 
-    describe("Render Results (UI Widget)", function() {
+    describe("Render Results (UI Widget)", function () {
 
       var r, beehive, pubsub, key, widget;
 
       var requestCounter = 0;
 
 
-      beforeEach(function() {
+      beforeEach(function () {
 
         beehive = new BeeHive();
         pubsub = new PubSub();
         beehive.addService('PubSub', pubsub);
         key = pubsub.getPubSubKey();
 
-        widget = new ResultsListController({pagination: {rows: 40, start:0}});
+        widget = new ResultsListController({pagination: {rows: 40, start: 0}});
 
         widget.activate(beehive.getHardenedInstance());
 
@@ -25,12 +41,13 @@ define(['marionette', 'backbone', 'js/widgets/results_render/results_render_widg
         //so test pubsub will always respond to a delivering_request with test data
         //test data will alternate each time it is called
 
-        var requestCallback = function(request) {
+        var requestCallback = function (request) {
           if (requestCounter % 2 === 0) {
             var a = new ApiResponse(Test1);
           } else {
             var a = new ApiResponse(Test2);
-          };
+          }
+          ;
           a.setApiQuery(request.get("query"));
           pubsub.publish(key, pubsub.DELIVERING_RESPONSE, a);
           requestCounter++;
@@ -41,23 +58,23 @@ define(['marionette', 'backbone', 'js/widgets/results_render/results_render_widg
 
       });
 
-      afterEach(function() {
+      afterEach(function () {
         $("#test").empty();
         r, beehive, pubsub, key, widget = undefined;
 
       });
 
-      it("should update automatically when pubsub publishes an INVITING_REQUEST event", function(done) {
+      it("should update automatically when pubsub publishes an INVITING_REQUEST event", function (done) {
 
         //get widget to request info
         pubsub.publish(key, pubsub.INVITING_REQUEST, new ApiQuery({
           q: "star"
-        }))
+        }));
 
-        console.log($(".bib"))
+        console.log($(".bib"));
 
         //find bibcode rendered
-        expect($(".bib").eq(0).text()).to.equal("2013arXiv1305.3460H")
+        expect($(".bib").eq(0).text()).to.equal("2013arXiv1305.3460H");
 
 
         pubsub.publish(key, pubsub.INVITING_REQUEST, new ApiQuery({
@@ -66,14 +83,14 @@ define(['marionette', 'backbone', 'js/widgets/results_render/results_render_widg
 
         //find new first bib to confirm re-render
 
-        expect($(".bib").eq(0).text()).to.equal("2006IEDL...27..896K")
+        expect($(".bib").eq(0).text()).to.equal("2006IEDL...27..896K");
 
         done();
 
       });
 
 
-      it("should join highlights with their records on a model by model basis", function() {
+      it("should join highlights with their records on a model by model basis", function () {
 
         pubsub.publish(key, pubsub.INVITING_REQUEST, new ApiQuery({
           q: "star"
@@ -84,14 +101,14 @@ define(['marionette', 'backbone', 'js/widgets/results_render/results_render_widg
       });
 
 
-      it("should consist of a Marionette Controller with a Marionette Composite View as its main view", function() {
+      it("should consist of a Marionette Controller with a Marionette Composite View as its main view", function () {
 
         expect(widget).to.be.instanceof(Backbone.Marionette.Controller);
         expect(widget.view).to.be.instanceof(Backbone.Marionette.CompositeView);
 
       });
 
-      it("should show highlights (if there are any) when a user clicks on 'show more'", function() {
+      it("should show highlights (if there are any) when a user clicks on 'show more'", function () {
 
         pubsub.publish(key, pubsub.INVITING_REQUEST, new ApiQuery({
           q: "star"

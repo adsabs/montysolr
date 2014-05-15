@@ -64,7 +64,7 @@ define(['backbone', 'marionette', 'js/widgets/base/base_widget',
      * */
     dispatchFollowUpRequest: function () {
 
-      var fieldsAndPag = _.extend(this.defaultFields, this.paginator.run())
+      var fieldsAndPag = _.extend(this.defaultQueryArguments, this.paginator.run())
 
       var req = this.composeRequest(fieldsAndPag);
       if (req) {

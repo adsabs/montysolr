@@ -115,8 +115,6 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
 
     var SearchBarWidget = BaseWidget.extend({
 
-      subscribeCustomHandlers: function() {},
-
       initialize: function(options) {
         this.view = new SearchBarView();
         this.listenTo(this.view, "new_query", this.submitNewQuery);

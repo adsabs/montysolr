@@ -36,7 +36,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
       this.pagination.start = this.pagination.initialStart;
 
-      var d = this.defaultFields();
+      var d = this.defaultQueryArguments();
 
       _.extend(d, this.paginator.run());
       customQuery = this.composeQuery(d)
@@ -58,7 +58,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
      * MyController.listenTo(MyController.View, "moreInfoRequested", "dispatchFollowUpRequest")*/
     dispatchFollowUpRequest: function () {
 
-      var d = this.defaultFields;
+      var d = this.defaultQueryArguments;
 
       _.extend(d, this.paginator.run());
 
