@@ -1,4 +1,6 @@
-define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_request', './views/facet-item-views', 'js/widgets/multi_callback/paginated_multi_callback_widget', 'js/components/paginator'], function (Backbone, Marionette, ApiQuery, ApiRequest, FacetItemViews, PaginatedMultiCallbackWidget, Paginator) {//needed for the hierarchical processResponse
+define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_request', './item_views',
+  'js/widgets/multi_callback/paginated_multi_callback_widget', 'js/components/paginator'],
+  function (Backbone, Marionette, ApiQuery, ApiRequest, FacetItemViews, PaginatedMultiCallbackWidget, Paginator) {
 
   var BaseFacetWidget = PaginatedMultiCallbackWidget.extend({
 

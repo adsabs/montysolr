@@ -1,7 +1,7 @@
 require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_mediator', 'js/services/api',
   'jquery', 'underscore',
   'js/widgets/search_bar/search_bar_widget', 'js/widgets/results_render/results_render_widget',
-  'js/widgets/facet/facet-factory', 'js/widgets/query_info/query_info_widget'
+  '../src/js/widgets/facet/factory', 'js/widgets/query_info/query_info_widget'
 ], function(BeeHive, PubSub, QueryMediator, Api, $, _, SearchBar, ResultsRender, facetFactory, QueryInfoWidget) {
 
 

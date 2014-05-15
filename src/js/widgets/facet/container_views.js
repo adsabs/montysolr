@@ -5,15 +5,15 @@
 // and remove the imports from here
 
 define(['backbone', 'marionette',
-     'hbs!./templates/base-facet-container', 'hbs!./templates/logic-facet-container',
-     'hbs!./templates/facet-tooltip', 'hbs!./templates/empty-facet', 'bootstrap'
+     'hbs!./templates/base-container', 'hbs!./templates/logic-container',
+     'hbs!./templates/tooltip', 'hbs!./templates/empty', 'bootstrap'
    ],
-   function(Backbone, Marionette, baseFacetTemplate, logicFacetTemplate,
-     facetTooltipTemplate, emptyFacetTemplate) {
+   function(Backbone, Marionette, BaseFacetContainer, LogicFacetContainer,
+     FacetTooltipTemplate, EmptyFacetTemplate) {
 
      //if there is an error
      NoFacetsView = Backbone.Marionette.ItemView.extend({
-       template: emptyFacetTemplate
+       template: EmptyFacetTemplate
      });
 
      //this holds the title of the facet as it should be shown in the ui
@@ -108,7 +108,7 @@ define(['backbone', 'marionette',
 
          }
        },
-       template   : baseFacetTemplate,
+       template   : BaseFacetContainer,
 
        className: "facet-widget",
 
@@ -177,7 +177,7 @@ define(['backbone', 'marionette',
 
          //clear out logic template when collection is reset
          this.listenTo(this.collection, "reset", function () {
-           this.$(".dropdown-menu").html(facetTooltipTemplate({
+           this.$(".dropdown-menu").html(FacetTooltipTemplate({
              noneSelected: true
            }))
          });
@@ -202,7 +202,7 @@ define(['backbone', 'marionette',
          return _.extend(_.clone(BaseContainer.prototype.events), addEvents)
        },
 
-       template: logicFacetTemplate,
+       template: LogicFacetContainer,
 
        changeLogicAndSubmit: function (e) {
          //close the logic dropdown
@@ -247,7 +247,7 @@ define(['backbone', 'marionette',
 
          //open the dropdown
          if (numSelected === 1) {
-           this.$(".dropdown-menu").html(facetTooltipTemplate({
+           this.$(".dropdown-menu").html(FacetTooltipTemplate({
              single: true,
              logic : this.model.get("singleLogic")
            }));
@@ -259,12 +259,12 @@ define(['backbone', 'marionette',
            var multiLogic = this.model.get("multiLogic");
            if (multiLogic === "fullSet") {
              /*any multiple selection automatically grabs the full set */
-             this.$(".dropdown-menu").html(facetTooltipTemplate({
+             this.$(".dropdown-menu").html(FacetTooltipTemplate({
                fullSet: true,
              }))
            }
            else {
-             this.$(".dropdown-menu").html(facetTooltipTemplate({
+             this.$(".dropdown-menu").html(FacetTooltipTemplate({
                multiLogic: true,
                logic     : multiLogic
              }))
@@ -275,7 +275,7 @@ define(['backbone', 'marionette',
          }
          else {
 
-           this.$(".dropdown-menu").html(facetTooltipTemplate({
+           this.$(".dropdown-menu").html(FacetTooltipTemplate({
              noneSelected: true
            }))
            this.$(".dropdown").removeClass("open");

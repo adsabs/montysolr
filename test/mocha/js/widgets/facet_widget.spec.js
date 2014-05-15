@@ -2,8 +2,8 @@ define(['backbone', 'marionette',
     './test_json/test1', './test_json/test2',
     'js/components/beehive', 'js/services/pubsub',
     'js/components/api_query', 'js/components/api_response',
-    'js/widgets/facet/views/facet-container-views', 'js/widgets/facet/views/facet-item-views',
-    'js/widgets/facet/facet-collection', '../../../../src/js/widgets/facet/base-facet-controller'
+    'js/widgets/facet/container_views', 'js/widgets/facet/item_views',
+    'js/widgets/facet/collection', 'js/widgets/facet/base_controller'
   ],
 
   function (Backbone, Marionette, Test1, Test2, BeeHive, PubSub, ApiQuery, ApiResponse, FacetContainerViews, FacetItemViews, IndividualFacetCollection, FacetControllers) {
@@ -22,7 +22,7 @@ define(['backbone', 'marionette',
               }
             ];
 
-            var c = new IndividualFacetCollection(fakeFacetData);
+            var c = new FacetCollection(fakeFacetData);
 
             sc = new FacetItemViews.CheckboxOneLevelView({model: c.models[0]});
             el = sc.render().el;
@@ -66,7 +66,7 @@ define(['backbone', 'marionette',
               }
             ];
 
-            var c = new IndividualFacetCollection(fakeFacetData);
+            var c = new FacetCollection(fakeFacetData);
 
             hc = new FacetItemViews.CheckboxHierarchicalView({model: c.models[0]});
             el = hc.render().el;
@@ -84,7 +84,7 @@ define(['backbone', 'marionette',
           it("should have the necessary attributes for composite functionality", function () {
             expect(hc).to.have.property("$itemViewContainer");
             //should initialize its own empty collection
-            expect(hc.collection).to.be.instanceof(IndividualFacetCollection)
+            expect(hc.collection).to.be.instanceof(FacetCollection)
           })
 
         });
@@ -107,7 +107,7 @@ define(['backbone', 'marionette',
                 y: 300
               }
             ]
-            var fakeModel = new IndividualFacetCollection({
+            var fakeModel = new FacetCollection({
               graphInfo: fakeGraphData,
               value    : [2000, 2004]
             }).models[0];
@@ -171,7 +171,7 @@ define(['backbone', 'marionette',
               }
             ];
 
-            var c = new IndividualFacetCollection(fakeFacetData);
+            var c = new FacetCollection(fakeFacetData);
             changeApply = new FacetContainerViews.ChangeApplyContainer({
               collection: c,
               model     : new Backbone.Model({title: "testTitle"}),
@@ -211,7 +211,7 @@ define(['backbone', 'marionette',
               }
             ];
 
-            var c = new IndividualFacetCollection(fakeFacetData);
+            var c = new FacetCollection(fakeFacetData);
             var containerModel = new SelectLogicModel({
               title: "testTitle",
               value: "testTitleVal",
@@ -272,7 +272,7 @@ define(['backbone', 'marionette',
           }
         ];
 
-        var c = new IndividualFacetCollection(fakeFacetData);
+        var c = new FacetCollection(fakeFacetData);
 
         it("should have text preprocessing functions for raw solr data", function () {
           expect(c).to.have.property("titleCase");
@@ -297,7 +297,7 @@ define(['backbone', 'marionette',
 
           before(function () {
 
-            var fakeModel = new IndividualFacetCollection({
+            var fakeModel = new FacetCollection({
             }).models[0];
 
             var fakeFacetData = [
@@ -310,7 +310,7 @@ define(['backbone', 'marionette',
 
             var fakeContainerView = new FacetContainerViews.ChangeApplyContainer({
               model     : fakeModel,
-              collection: new IndividualFacetCollection(fakeFacetData),
+              collection: new FacetCollection(fakeFacetData),
               itemView  : FacetItemViews.CheckboxOneLevelView,
               facetName : "TestFacet"
 
@@ -358,7 +358,7 @@ define(['backbone', 'marionette',
               }
             ];
 
-           var fakeCollection =  new IndividualFacetCollection(fakeFacetData);
+           var fakeCollection =  new FacetCollection(fakeFacetData);
 
             var fakeContainerView = new FacetContainerViews.ChangeApplyContainer({
               model     : fakeModel,

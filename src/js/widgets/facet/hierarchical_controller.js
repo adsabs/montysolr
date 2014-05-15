@@ -1,7 +1,6 @@
 define(['backbone', 'marionette', 'js/components/api_query',
-    'js/components/api_request',  './base-facet-controller', 'js/components/paginator'],
-  function (Backbone, Marionette, ApiQuery, ApiRequest,
-    BaseFacetController,  Paginator ){
+    'js/components/api_request',  './base_controller', 'js/components/paginator'],
+  function (Backbone, Marionette, ApiQuery, ApiRequest, BaseFacetController,  Paginator ){
 
 // has extra methods for requesting child data of facets
 var HierarchicalFacetController = BaseFacetController.extend({

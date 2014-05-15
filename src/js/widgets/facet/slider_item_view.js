@@ -1,8 +1,8 @@
-define(['marionette', 'd3', 'jquery-ui', 'hbs!./templates/facet-slider'], function(Marionette, d3, $, facetSliderTemplate) {
+define(['marionette', 'd3', 'jquery-ui', 'hbs!./templates/slider'], function(Marionette, d3, $, FacetSliderTemplate) {
 
 
     var FacetSliderView = Marionette.ItemView.extend({
-        template: facetSliderTemplate,
+        template: FacetSliderTemplate,
 
         events: {
             "slide .graph-slider": "showGraph",

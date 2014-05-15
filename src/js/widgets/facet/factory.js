@@ -1,10 +1,10 @@
 
-define(['./views/facet-container-views',
-      './views/facet-item-views',
-      './facet-collection', './base-facet-controller',
-      './hierarchical-facet-controller',
-    ], function(facetContainerViews, facetItemViews, IndividualFacetCollection,
-  BaseFacetWidget, HierarchicalFacetWidget){
+define(['./container_views',
+      './item_views',
+      './collection', './base_controller',
+      './hierarchical_controller'
+    ], function(FacetContainerViews, FacetItemViews, IndividualFacetCollection,
+  BaseFacetController, HierarchicalFacetController){
 
 
     var FacetFactory = {
@@ -33,19 +33,19 @@ define(['./views/facet-container-views',
           multiLogic : options.multiLogic
         });
 
-        var coll = new IndividualFacetCollection([], {
+        var coll = new FacetCollection([], {
           preprocess: options.preprocess
         });
 
-        var containerview = new facetContainerViews.SelectLogicContainer({
+        var containerview = new FacetContainerViews.SelectLogicContainer({
           collection      : coll,
           model           : containerModel,
-          itemView        : facetItemViews.CheckboxOneLevelView,
+          itemView        : FacetItemViews.CheckboxOneLevelView,
           defaultNumFacets: options.defaultNumFacets,
           openByDefault   : options.openByDefault
         });
 
-        var widget = new BaseFacetWidget({
+        var widget = new BaseFacetController({
           view         : containerview,
           facetName    : options.facetName,
           extractFacets: options.extractFacets
@@ -80,20 +80,20 @@ define(['./views/facet-container-views',
           multiLogic : options.multiLogic
         });
 
-        var coll = new IndividualFacetCollection([], {
+        var coll = new FacetCollection([], {
           preprocess: options.preprocess
         });
 
-        var containerview = new facetContainerViews.SelectLogicContainer({
+        var containerview = new FacetContainerViews.SelectLogicContainer({
           collection   : coll,
           model        : containerModel,
-          itemView     : facetItemViews.CheckboxHierarchicalView,
+          itemView     : FacetItemViews.CheckboxHierarchicalView,
           openByDefault: options.openByDefault,
           defaultNumFacets: options.defaultNumFacets
 
         });
 
-        var widget = new HierarchicalFacetWidget({
+        var widget = new HierarchicalFacetController({
           //levelDepth is zero-indexed
           levelDepth   : options.levelDepth || 1,
           view         : containerview,
@@ -120,12 +120,12 @@ define(['./views/facet-container-views',
         var containerModel = new BaseContainerModel({
           title: options.userFacingName
         });
-        var coll = new IndividualFacetCollection();
+        var coll = new FacetCollection();
 
-        var containerview = new facetContainerViews.ChangeApplyContainer({
+        var containerview = new FacetContainerViews.ChangeApplyContainer({
           collection     : coll,
           model          : containerModel,
-          itemView       : facetItemViews.ZoomableGraphView,
+          itemView       : FacetItemViews.ZoomableGraphView,
           openByDefault  : options.openByDefault,
           //so that the html template for the graph can use these values
           itemViewOptions: {
@@ -134,7 +134,7 @@ define(['./views/facet-container-views',
           }
         });
 
-        var widget = new BaseFacetWidget({
+        var widget = new BaseFacetController({
           unpaginated    : true,
           view           : containerview,
           facetName      : options.facetName,
