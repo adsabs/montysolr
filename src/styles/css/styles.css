@@ -2196,8 +2196,8 @@ fieldset[disabled] .btn-info.active {
 }
 .btn-warning {
   color: #ffffff;
-  background-color: #ffea33;
-  border-color: #ffe719;
+  background-color: #ffde4d;
+  border-color: #ffd933;
 }
 .btn-warning:hover,
 .btn-warning:focus,
@@ -2205,8 +2205,8 @@ fieldset[disabled] .btn-info.active {
 .btn-warning.active,
 .open .dropdown-toggle.btn-warning {
   color: #ffffff;
-  background-color: #ffe60a;
-  border-color: #dbc500;
+  background-color: #ffd624;
+  border-color: #f5c800;
 }
 .btn-warning:active,
 .btn-warning.active,
@@ -2228,11 +2228,11 @@ fieldset[disabled] .btn-warning:active,
 .btn-warning.disabled.active,
 .btn-warning[disabled].active,
 fieldset[disabled] .btn-warning.active {
-  background-color: #ffea33;
-  border-color: #ffe719;
+  background-color: #ffde4d;
+  border-color: #ffd933;
 }
 .btn-warning .badge {
-  color: #ffea33;
+  color: #ffde4d;
   background-color: #ffffff;
 }
 .btn-danger {
@@ -4302,11 +4302,11 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   background-color: #178acc;
 }
 .label-warning {
-  background-color: #ffea33;
+  background-color: #ffde4d;
 }
 .label-warning[href]:hover,
 .label-warning[href]:focus {
-  background-color: #ffe500;
+  background-color: #ffd51a;
 }
 .label-danger {
   background-color: #ff4c49;
@@ -4550,7 +4550,7 @@ a.thumbnail.active {
   background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 .progress-bar-warning {
-  background-color: #ffea33;
+  background-color: #ffde4d;
 }
 .progress-striped .progress-bar-warning {
   background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
@@ -5812,7 +5812,7 @@ button.close {
   display: none;
 }
 .chosen {
-  background-color: #9fc8f0;
+  background-color: #e6f4fc;
 }
 .just-authors {
   display: inline-block;
@@ -5926,7 +5926,7 @@ button.close {
 .draw-attention {
   transition-property: background-color;
   transition-duration: 3s;
-  background-color: #ffef66;
+  background-color: #ffe780;
 }
 .show-fields {
   transition-property: background-color;

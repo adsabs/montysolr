@@ -197,7 +197,7 @@ define(['marionette', 'd3', './item_view', 'hbs!./templates/graph'],
         return d.x;
       })).copy();
 
-      transition = innerChart.transition().duration(2000);
+      transition = innerChart.transition().duration(800);
 
       delay = function (d, i) {
         return i * 50
@@ -540,4 +540,3 @@ define(['marionette', 'd3', './item_view', 'hbs!./templates/graph'],
   return ZoomableGraphView;
 
 });
-

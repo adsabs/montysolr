@@ -30,6 +30,7 @@ define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/log
       });
 
       this.on("itemview:select", this.handleLogic);
+      this.on("itemview:unselect", this.handleLogic);
 
       BaseFacetContainerView.prototype.initialize.call(this, options);
 
@@ -42,7 +43,6 @@ define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/log
         "click .dropdown-menu .close": "closeLogic",
         //for this container, any click on a logic input emits an immediate
         //new query event
-        "change .facet-item": "showLogic",
         "change .logic-container input": "changeLogicAndSubmit"
 
       };
@@ -65,17 +65,7 @@ define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/log
       this.$(".dropdown").removeClass("open")
 
     },
-    showLogic: function () {
-      var numSelected;
-      numSelected = this.handleLogic();
-      if (numSelected > 0) {
-        this.$(".dropdown").addClass("open")
-        this.$(".logic-dropdown i").removeClass("inactive-style")
-      }
-      else {
-        this.$(".dropdown").removeClass("open")
-      }
-    },
+
 
     toggleLogic: function () {
       this.$(".dropdown").toggleClass("open")
@@ -87,10 +77,19 @@ define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/log
       var numSelected = selected.length;
 
       if (numSelected >= 1) {
-        //highlight title
-        this.trigger("itemview:facet:active")
+        //highlight filter
+        this.$("i.glyphicon-filter").removeClass("inactive-style").addClass("active-style")
+        //highlight caret
+        this.$("i.main-caret").addClass("active-style")
+
       }
-      ;
+      else {
+        //unhighlight filter
+        this.$("i.glyphicon-filter").removeClass("active-style").addClass("inactive-style")
+        //unhighlight caret
+        this.$("i.main-caret").removeClass("active-style")
+
+      }
 
       //open the dropdown
       if (numSelected === 1) {
@@ -126,8 +125,6 @@ define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/log
           noneSelected: true
         }))
         this.$(".dropdown").removeClass("open");
-        //deactivating styles
-        this.trigger("itemview:facet:inactive")
 
       }
       return numSelected
