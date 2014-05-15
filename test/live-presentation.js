@@ -1,8 +1,8 @@
 require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_mediator', 'js/services/api',
   'jquery', 'underscore',
   'js/widgets/search_bar/search_bar_widget', 'js/widgets/results_render/results_render_widget',
-  '../src/js/widgets/facet/factory', 'js/widgets/query_info/query_info_widget'
-], function(BeeHive, PubSub, QueryMediator, Api, $, _, SearchBar, ResultsRender, facetFactory, QueryInfoWidget) {
+  'js/widgets/facet/factory', 'js/widgets/query_info/query_info_widget'
+], function(BeeHive, PubSub, QueryMediator, Api, $, _, SearchBar, ResultsRender, FacetFactory, QueryInfoWidget) {
 
 
   var beehive = new BeeHive();
@@ -15,54 +15,54 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
 
   var s = new SearchBar();
   var r = new ResultsRender({pagination: {rows: 40, start:0}});
-  var c = facetFactory.makeGraphFacet({
+  var c = FacetFactory.makeGraphFacet({
     facetName: "citation_count",
     userFacingName: "Citations",
     xAxisTitle: "Citation Count",
     openByDefault: true,
   });
 
-  var a = facetFactory.makeHierarchicalCheckboxFacet({
+  var a = FacetFactory.makeHierarchicalCheckboxFacet({
     facetName: "author",
     userFacingName: "Authors",
     openByDefault: true,
     preprocess: ["titleCase", "removeSlash"]
   })
-  var keywords = facetFactory.makeBasicCheckboxFacet({
+  var keywords = FacetFactory.makeBasicCheckboxFacet({
     facetName: "keyword",
     userFacingName: "Keywords",
     openByDefault: false,
     preprocess: ["titleCase", "removeSlash"]
   })
 
-  var database = facetFactory.makeBasicCheckboxFacet({
+  var database = FacetFactory.makeBasicCheckboxFacet({
     facetName: "database",
     userFacingName: "Databases",
     openByDefault: true,
     preprocess: "titleCase",
   })
-  var data = facetFactory.makeBasicCheckboxFacet({
+  var data = FacetFactory.makeBasicCheckboxFacet({
     facetName: "data",
     userFacingName: "Data",
     openByDefault: false,
     preprocess: "allCaps",
   })
 
-  var vizier = facetFactory.makeBasicCheckboxFacet({
+  var vizier = FacetFactory.makeBasicCheckboxFacet({
     facetName: "vizier",
     userFacingName: "Vizier Tables",
     openByDefault: false,
     preprocess: "allCaps",
   })
 
-  var pub = facetFactory.makeBasicCheckboxFacet({
+  var pub = FacetFactory.makeBasicCheckboxFacet({
     facetName: "bibstem",
     userFacingName: "Publications",
     openByDefault: false,
     preprocess: "allCaps",
     multiLogic: ["or", "exclude"]
   })
-  var bibgroup = facetFactory.makeBasicCheckboxFacet({
+  var bibgroup = FacetFactory.makeBasicCheckboxFacet({
     facetName: "bibgroup",
     userFacingName: "Bib Groups",
     openByDefault: false,
@@ -70,7 +70,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
     multiLogic: ["or", "exclude"]
   })
 
-  var grants = facetFactory.makeHierarchicalCheckboxFacet({
+  var grants = FacetFactory.makeHierarchicalCheckboxFacet({
     facetName: "grant",
     userFacingName: "Grants",
     openByDefault: false,
@@ -78,7 +78,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
     multiLogic: ["or", "exclude"]
   })
 
-  var refereed = facetFactory.makeBasicCheckboxFacet({
+  var refereed = FacetFactory.makeBasicCheckboxFacet({
     facetName: "property",
     userFacingName: "Refereed Status",
     openByDefault: true,
@@ -97,7 +97,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
     }
   })
 
-  var y = facetFactory.makeGraphFacet({
+  var y = FacetFactory.makeGraphFacet({
     facetName: "year",
     userFacingName: "Year",
     xAxisTitle: "Year",
