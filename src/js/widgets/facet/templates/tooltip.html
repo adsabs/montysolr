@@ -1,0 +1,43 @@
+{{# if noneSelected}}
+<div class="logic-container">
+	<button type="button" class="close" >&times;</button>
+	<p>To filter your search, select one or more items.</p>
+
+{{else}}
+{{#if single}}
+<div class="logic-container">
+	<button type="button" class="close" >&times;</button>
+
+		{{#each logic }}
+		<label>
+			<input name="facet" value="{{this}}" type="radio"> {{this}} 
+		</label>
+	{{/each}}
+</div>
+{{/if}}
+
+
+{{#if fullSet}}
+<div class="logic-container">
+	<button type="button" class="close" >&times;</button>
+	<p>You have selected all results. Try selecting only one entry.</p>
+</div>
+
+{{/if}}
+
+{{#if multiLogic}}
+<div class="logic-container">
+		<button type="button" class="close" >&times;</button>
+		<p>Join terms with:</p>
+	{{#each logic }}
+		<label>
+			<input name="facet" value="{{this}}" type="radio"> {{this}} 
+		</label>
+	{{/each}}
+</div>	               
+{{/if}}
+
+{{/if}}
+
+
+

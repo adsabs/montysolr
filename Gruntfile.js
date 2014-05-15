@@ -6,10 +6,10 @@ module.exports = function(grunt) {
 
     // if you create 'local-config.json' some variables can be overriden there
     local: grunt.file.readJSON('local-config.json'),
-    
+
     // Wipe out previous builds and test reporting.
     clean: ['dist/', 'test/reports'],
-    
+
     // This will install libraries (client-side dependencies)
     bower: {
       install: {
@@ -23,15 +23,15 @@ module.exports = function(grunt) {
 
     // Run your source code through JSHint's defaults.
     jshint: ['src/js/**/*.js'],
-    
-    
+
+
 
     // This task uses James Burke's excellent r.js AMD builder to take all
     // modules and concatenate them into a single file.
     requirejs: {
-      
+
       baseUrl: 'src/js', // this is needed just for the 'stupid' list task
-      
+
       options: {
         //baseUrl: 'src/js',
         //mainConfigFile: 'src/js/config.js',
@@ -39,11 +39,11 @@ module.exports = function(grunt) {
         baseUrl: 'src/js'
         //appDir:'src/js'
       },
-      
+
       release: {
         options: {
           generateSourceMaps: true,
-          
+
           optimize: 'uglify2',
 
           // Since we bootstrap with nested `require` calls this option allows
@@ -62,7 +62,7 @@ module.exports = function(grunt) {
         }
       }
     },
-    
+
 
     // Minfiy the distribution CSS. This is of limited value to us, for two
     // reasons: 1) css imports are not working 2) the task doesn't seem to
@@ -72,11 +72,11 @@ module.exports = function(grunt) {
         // without this the imports are simply eaten (though css-clean
         // added support for imports, it doesn't seem to work
         options: {
-           processImport: false
+          processImport: false
         },
         files: {
           //cwd: 'dist',
-          'dist/css/style.min.css' : ['src/css/*.css', 'src/js/apps/**/css/*.css']
+          'dist/css/style.min.css': ['src/css/*.css', 'src/js/apps/**/css/*.css']
         }
       },
       minify: {
@@ -102,7 +102,7 @@ module.exports = function(grunt) {
         }
       }
     },
-    
+
     // sets up some environment variables; these are important
     // only for the express task (our webserver)
     env: {
@@ -117,12 +117,12 @@ module.exports = function(grunt) {
         HOMEDIR: 'dist'
       }
     },
-    
+
     // start a development webserver (if you want to keep it running, run 'grunt server'
     express: {
       options: {
         // some defaults
-        background:true
+        background: true
       },
       dev: {
         options: {
@@ -137,7 +137,7 @@ module.exports = function(grunt) {
         }
       }
     },
-    
+
     // **
     // * Watch files for modifications and reload certain tasks on change;
     // * if you try to run webserver or unittesting outside 'watch' tasks
@@ -151,18 +151,23 @@ module.exports = function(grunt) {
       },
 
       server: {
-        files:  [ './src/js/**/*.js', './src/*.js', './src/*.html', './server.js'],
-        tasks:  [ 'env:dev', 'express:dev' ]
+        files: ['./src/js/**/*.js', './src/*.js', './src/*.html', './server.js'],
+        tasks: ['env:dev', 'express:dev']
       },
 
       local_testing: {
-        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
+        files: ['./src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
         tasks: ['mocha_phantomjs:local_testing', 'watch:local_testing']
       },
 
       web_testing: {
-        files:  [ './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
+        files: ['./src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
         tasks: ['express:dev', 'mocha_phantomjs:web_testing', 'watch:web_testing']
+      },
+      less_compile: {
+        files: ['*.less'],
+        tasks: ['less']
+
       }
     },
 
@@ -176,7 +181,7 @@ module.exports = function(grunt) {
         'output': 'test/reports/' + (grunt.option('testname') || 'mocha/discovery')
       },
 
-      local_testing: ['test/' + (grunt.option('testname') || 'mocha/discovery') + '.spec.html' ],
+      local_testing: ['test/' + (grunt.option('testname') || 'mocha/discovery') + '.spec.html'],
 
       web_testing: {
         options: {
@@ -202,15 +207,15 @@ module.exports = function(grunt) {
     // src top level)
     copy: {
       release: {
-                files: [{
-            expand: true,
-            src: ['./src/**'],
-            dest: 'dist/',
-            rename: function(dest,src) {
-              //grunt.verbose.writeln('src' + src);
-              return dest + src.replace('/src/', '/');
-            }
-                }]
+        files: [{
+          expand: true,
+          src: ['./src/**'],
+          dest: 'dist/',
+          rename: function(dest, src) {
+            //grunt.verbose.writeln('src' + src);
+            return dest + src.replace('/src/', '/');
+          }
+        }]
       }
     },
 
@@ -235,7 +240,7 @@ module.exports = function(grunt) {
         coverage_dir: 'test/coverage/PhantomJS 1.9.2 (Linux)/'
       }
     },
-    
+
 
     // concatenates all javascript into one big minified file (of limited 
     // use for now)
@@ -247,39 +252,39 @@ module.exports = function(grunt) {
         src: 'src/js/**/*.js',
         dest: 'dist/<%= pkg.name %>.min.js'
       }
-        },
+    },
 
-        less: {
-            development: {
-                files: {
-                    'src/styles/css/styles.css': 'src/styles/less/manifest.less',
+    less: {
+      development: {
+        files: {
+          'src/styles/css/styles.css': 'src/styles/less/manifest.less',
 
-    }
-            },
-            //     production: {
-            //         options: {
-            //             // paths: ["assets/css"],
-            //             // cleancss: true,
-            //             // modifyVars: {
-            //             //     imgPath: '"http://mycdn.com/path/to/images"',
-            //             //     bgColor: 'red'
-            //             // }
-            //         },
-            //         files: {
-            //             'src/styles/css/styles.css': 'src/styles/less/manifest.less',
-
-            //         }
-            //     }
         }
+      },
+      //     production: {
+      //         options: {
+      //             // paths: ["assets/css"],
+      //             // cleancss: true,
+      //             // modifyVars: {
+      //             //     imgPath: '"http://mycdn.com/path/to/images"',
+      //             //     bgColor: 'red'
+      //             // }
+      //         },
+      //         files: {
+      //             'src/styles/css/styles.css': 'src/styles/less/manifest.less',
+
+      //         }
+      //     }
+    }
 
   });
 
   // Basic environment config
   grunt.loadNpmTasks('grunt-env');
-  
+
   // Grunt BBB tasks.
   grunt.loadNpmTasks('grunt-bbb-requirejs'); // we use 'list' target only, requirejs will get overriden
-  
+
 
 
   // Grunt contribution tasks.
@@ -293,27 +298,27 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-express-server');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  
+
 
   // karma tasks. (to ditch?)
   // grunt.loadNpmTasks('grunt-karma');
   // grunt.loadNpmTasks('grunt-karma-coveralls');
-  
+
   // for testing
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
-  
+
   // other 3rd party libs
   grunt.loadNpmTasks('grunt-processhtml');
-    grunt.loadNpmTasks('grunt-contrib-less');
-  
+  grunt.loadNpmTasks('grunt-contrib-less');
+
   // Bower tasks
   grunt.loadNpmTasks('grunt-bower-task');
 
-    //npm install
-    grunt.loadNpmTasks('grunt-install-dependencies');
+  //npm install
+  grunt.loadNpmTasks('grunt-install-dependencies');
 
   // Create an aliased test task.
-    grunt.registerTask('setup', 'Sets up the development environment', ['install-dependencies', 'bower', 'less']);
+  grunt.registerTask('setup', 'Sets up the development environment', ['install-dependencies', 'bower', 'less']);
 
   // When running the default Grunt command, just lint the code.
   grunt.registerTask('default', [
@@ -328,7 +333,7 @@ module.exports = function(grunt) {
   ]);
 
   // starts a web server (automatically reloading)
-  grunt.registerTask('server', [ 'env:dev', 'express:dev', 'watch:server' ]);
+  grunt.registerTask('server', ['env:dev',  "less", 'express:dev', 'watch:server', 'watch:less_compile']);
 
   // runs tests in a web server (automatically reloading)
   grunt.registerTask('test:web', ['env:dev', 'watch:web_testing']);

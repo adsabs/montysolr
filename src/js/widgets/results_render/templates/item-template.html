@@ -1,44 +1,54 @@
-<div class="row">
-  <div class="col-md-2 col-xs-3">
-    <label >{{order_num}}
-      <input type="checkbox" value={{bibcode}} name="bibcode">
-    </label>
-  </div>
-  <div class="col-md-4 buffer">
-    <a href="#abs/{{bibcode}}">
-      <p class="text-primary bib">{{bibcode}}</p>
-    </a>
-  </div>
-  <div class="col-md-3 col-xs-4">
-    <p title="citation count">
-      <small>cited by:</small>{{citation_count}}</p>
-  </div>
-  <div class="col-md-3">
-    [options go here]
-  </div>
-</div>
-<div class="row ">
-  <div class="col-md-10 col-md-offset-2">
-    <a href="#abs/{{bibcode}}">
-      <h5>{{{title}}}</h5>
-    </a>
-    <ul id="just-authors" class="list-inline">
-      {{#each author}}
-      <li class="article-author">{{this}};</li>
-      {{/each}}
-    </ul>
-    <span class="view-more">view more...</span>
-    <div class="more-info hide">
-      {{#if highlights}}
-      <ul>
-        {{#each highlights}}
-        <li>{{this}}</li>
-        {{/each}}
-      </ul>
-      {{else}}
-      <p>No snippets available</p>
-      {{/if}}
+  <div class="buffer">
+    <div class="row ">
+      <div class="col-md-1">
+        <label>
+          <input type="checkbox" value={{bibcode}} name="bibcode"> {{orderNum}}
+        </label>
+      </div>
+      <div class="col-md-8">
+        <a href="#abs/{{bibcode}}">
+          <h5>{{{title}}}</h5>
+        </a>
+        <ul class="list-inline just-authors">
+          {{#each authorFormatted}}
+          <li class="article-author">{{this}}</li>
+          {{/each}}
+        </ul>
+        {{#if extraAuthors}}
+        <span>and {{extraAuthors}} more</span>
+        {{/if}}
+      </div>
+       <div class="col-md-3">
+        [options go here]
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 col-md-offset-1">
+          <p class="text-primary bib">{{bibcode}}</p>
+    </div>
+      <div class="col-md-4">
+        <p title="citation count">
+        {{#if citation_count}}
+         cited by: {{citation_count}}</p>
+         {{/if}}
+      </div>
+      <div class="col-md-3">
+        <button class="view-more btn btn-info btn-xs">more info</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <div class="more-info panel panel-info hide">
+          {{#if highlights}}
+          <ul>
+            {{#each highlights}}
+            <li>{{{this}}}</li>
+            {{/each}}
+          </ul>
+          {{else}}
+          <p>No snippets available</p>
+          {{/if}}
+        </div>
+      </div>
     </div>
   </div>
-
-</div>

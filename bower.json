@@ -14,7 +14,10 @@
     "backbone.wreqr": "1.0.0",
     "require-handlebars-plugin": "0.8.0",
     "bootstrap-js-components": "~3.1.1",
-    "bootstrap": "~3.1.1"
+    "bootstrap": "~3.1.1",
+    "jqueryui": "~1.10.4",
+    "d3": "~3.4.6",
+    "jquery-hoverIntent": "*"
   },
   "devDependencies": {
     "chai": "~1.8.0",

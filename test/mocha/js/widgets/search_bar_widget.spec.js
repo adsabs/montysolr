@@ -11,11 +11,13 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget', 'js/components/beeh
       beehive.addService('PubSub', pubsub);
       key = pubsub.getPubSubKey();
 
-      widget = new SearchBarWidget;
+      widget = new SearchBarWidget();
       widget.activate(beehive.getHardenedInstance());
-      w = widget.render();
+      w = widget.getView().render().el;
 
       $("#test").append(w)
+
+      console.log(w)
 
       done();
 
@@ -55,13 +57,14 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget', 'js/components/beeh
     });
 
 
-    it("should allow the user to click to add fielded search words to search bar", function() {
-
-      $("btn btn-default dropdown-toggle").click();
-      $("span[data-field=author]").click();
-      expect($(".q").val().trim()).to.equal("author:\"\"");
-
-    })
+//    it("should allow the user to click to add fielded search words to search bar", function() {
+//
+//      $("div.btn.dropdown-toggle").click();
+//      $("div[data-field=author]").hoverIntent();
+//      $("div[data-field=author]").click();
+//      expect($(".q").val().trim()).to.equal("author:\"\"");
+//
+//    })
 
   });
 
