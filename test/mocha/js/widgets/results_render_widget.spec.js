@@ -71,8 +71,6 @@ define(['marionette',
           q: "star"
         }));
 
-        console.log($(".bib"));
-
         //find bibcode rendered
         expect($(".bib").eq(0).text()).to.equal("2013arXiv1305.3460H");
 
@@ -82,9 +80,7 @@ define(['marionette',
         }));
 
         //find new first bib to confirm re-render
-
         expect($(".bib").eq(0).text()).to.equal("2006IEDL...27..896K");
-
         done();
 
       });
@@ -122,4 +118,4 @@ define(['marionette',
 
     })
 
-  })
+  });
