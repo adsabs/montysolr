@@ -86,7 +86,7 @@ define(['backbone', 'marionette',
       // refusing to act on it (it is possible)
 
       this.setCurrentQuery(apiQuery);
-      var req = this.composeRequest();
+      var req = this.composeRequest(this.getCurrentQuery());
       if (req) {
         this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
       }

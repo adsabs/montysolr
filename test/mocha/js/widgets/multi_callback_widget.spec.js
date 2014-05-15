@@ -8,68 +8,68 @@ define(['marionette', 'backbone', 'js/widgets/base/base_widget',
 
     describe("MultiCallback Widget (UI Widget)", function() {
 
-      var r, beehive, pubsub, key, widget;
+      var beehive, pubsub, widget;
 
       beforeEach(function() {
 
         beehive = new BeeHive();
         pubsub = new PubSub();
         beehive.addService('PubSub', pubsub);
-        key = pubsub.getPubSubKey();
 
         widget = new MultiCallbackWidget();
-
         widget.activate(beehive.getHardenedInstance());
 
       });
 
       afterEach(function() {
-        r, beehive, pubsub, key, widget = undefined;
+        beehive, pubsub, widget = undefined;
 
       });
 
       it("inherits from base widget", function(){
-        expect(widget).to.be.instanceof(BaseWidget)
+        expect(widget).to.be.instanceof(BaseWidget);
+        expect(widget).to.be.instanceof(MultiCallbackWidget);
       });
 
 
-      it("has a composeRequest function that lets you update the current \
-        query, registers a callback to the widget and returns\
-         the new apiRequest", function(done){
+      it("has standard PubSub facing methods: dispatchRequest/processResponse", function(done){
 
         var q = new ApiQuery({q: "pluto"});
+        var response = new ApiResponse({foo: 'bar', responseHeader: { params: { q: '*:*'}}});
+        response.setApiQuery(q.clone());
 
-        var fakeFunction = function(data){
-          return "you passed " + data;
-        };
+        var spy = sinon.spy();
+        sinon.spy(widget, 'composeRequest');
 
-        widget.registerCallback(q.url(), fakeFunction);
-        var apiRequest = widget.composeRequest(q);
-        var key = apiRequest.get("query").url();
+        widget.registerCallback(q.url(), spy);
+        widget.dispatchRequest(q);
 
-        expect(apiRequest).to.be.instanceof(ApiRequest);
-        expect(apiRequest.get("query").get("q")).to.eql(["pluto"]);
-        expect(widget._queriesInProgress[key].callback("a test")).to.eql("you passed a test");
+        expect(widget.composeRequest.calledOnce).to.be.true;
+
+        // now pretend we are calling it from pubsub
+        widget.processResponse(response);
+
+        expect(spy.calledOnce).to.be.true;
+
+        // call it again (the callback was removed and nothing should happen)
+        widget.processResponse(response);
+        expect(spy.calledOnce).to.be.true;
+
+
+        // test the helper method
+        widget.dispatch(q, spy, {one: 2});
+        expect(widget.composeRequest.calledTwice).to.be.true;
+
+        widget.processResponse(response);
+        expect(spy.calledTwice).to.be.true;
+        expect(spy.lastCall.args[0]).to.be.equal(response);
+        expect(spy.lastCall.args[1]).to.be.eql({one: 2});
 
         done();
 
-      })
+      });
 
-      it("has a assignResponse function that will pass data from DELIVERING_RESPONSE to a callback", function(){
 
-        var t = 0;
-        var q = new ApiQuery({q:"star"});
-        widget.registerCallback(q.url(), function(){t+=1});
+    });
 
-        var testApiResponse = new ApiResponse(Test1);
-        testApiResponse.setApiQuery(q.clone());
-
-        widget.assignCallbackToResponse(testApiResponse);
-
-        expect(t).to.equal(1);
-
-      })
-
-    })
-
-  })
+  });
