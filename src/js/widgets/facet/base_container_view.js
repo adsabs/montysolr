@@ -37,6 +37,14 @@ define(['backbone', 'marionette',
           }
         }
 
+
+        // XXX:rca - this is what I was worried about; this mechanism
+        // is not flexible enough; it relies on a complicated chain
+        // of delegation (passing events from the nested views
+        // towards the controller). This will be a nightmare to
+        // to maintain. Besides, I don't see a code that would
+        // de-register this listener when the container is closed
+
         //for hierarchical child views
         this.on("all", function (e) {
           //  somewhere in the hierarchy of children views, a new view
@@ -45,6 +53,9 @@ define(['backbone', 'marionette',
             var view = arguments[arguments.length - 1];
             this.trigger("hierarchicalDataRequest", view);
           }
+
+          // XXX:rca - does this keep adding listeners multiple
+          // times?
 
           //so that there is special styling when a facet might be applied
           this.on("itemview:selected", function () {

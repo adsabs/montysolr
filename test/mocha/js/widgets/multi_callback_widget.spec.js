@@ -1,5 +1,5 @@
 define(['marionette', 'backbone', 'js/widgets/base/base_widget',
-    'js/widgets/multi_callback/multi_callback_widget',
+    'js/widgets/base/multi_callback_widget',
     'js/components/api_response', 'js/components/api_request',
     'js/components/api_query', './test_json/test1', './test_json/test2',
     'js/components/beehive', 'js/services/pubsub'],

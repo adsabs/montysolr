@@ -124,6 +124,6 @@ define(['backbone', 'marionette', 'js/components/api_query',
 
     });
 
-    return MultiCallbackWidget
+    return MultiCallbackWidget;
 
   });

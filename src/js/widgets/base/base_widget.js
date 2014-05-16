@@ -104,7 +104,7 @@ define(['backbone', 'marionette',
       var q = apiQuery.clone();
       q.unlock();
       if (this.defaultQueryArguments) {
-        // TODO: finish adding default values
+        q = this.composeQuery(this.defaultQueryArguments, q);
       }
       return q;
     },

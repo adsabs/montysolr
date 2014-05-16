@@ -58,8 +58,8 @@ define([
         })
 
         it("should provide two methods of applying facets to current search depending on type of facet", function () {
-          expect(base).to.have.property("deliverApplySubmitQuery")
-          expect(base).to.have.property("deliverSelectLogicSubmitQuery")
+          expect(base).to.have.property("onFacetApplySubmit")
+          expect(base).to.have.property("onContainerLogicSelected")
         })
 
         it("should inherit and provide methods of contacting pubsub")

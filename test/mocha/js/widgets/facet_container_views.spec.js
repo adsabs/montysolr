@@ -99,7 +99,7 @@ define(['js/widgets/facet/base_container_view',
       expect($("#test").find(".dropdown-menu").text()).match(/\s*limit to\s*/);
 
     });
-    it("should issue a 'selectLogicSubmit' event when user chooses logic option", function () {
+    it("should issue a 'containerLogicSelected' event when user chooses logic option", function () {
       $("#test").append(el);
 
       logicSelect.$(".logic-container input[type=radio]").eq(0).trigger("change");

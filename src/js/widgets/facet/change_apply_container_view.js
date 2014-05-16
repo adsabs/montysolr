@@ -8,8 +8,11 @@ define(['./base_container_view'], function (BaseContainerView) {
       BaseContainerView.prototype.initialize.call(this, options);
     },
 
+    // XXX:rca - this mechanism is not maintainable; better to
+    // listen to all signals inside controller and decide what
+    // to do with them
     submitFacet: function () {
-      this.trigger("changeApplySubmit")
+      this.trigger("changeApplySubmit");
     }
 
   });
