@@ -20,6 +20,9 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
       t.set('string', 'bar');
       expect(t.get('string')).to.eql(['bar']);
 
+      t.set('array', [[['bar'], 'baz']]);
+      expect(t.get('array')).to.eql(['bar', 'baz']);
+
       t.set('array', ['bar']);
       expect(t.get('array')).to.eql(['bar']);
 
@@ -28,6 +31,9 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
 
       t.set({'foo': 'bar'});
       expect(t.get('foo')).to.eql(['bar']);
+
+      t.set('number', 0);
+      expect(t.get('number')).to.eql([0]);
 
       t.set('number', 8);
       expect(t.get('number')).to.eql([8]);
@@ -41,7 +47,6 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
 
       // test only strings/numbers are allowed
       assert.throw(function() {t.set('foo', {key: 'value'})}, Error);
-      assert.throw(function() {t.set('foo', [['foo']])}, Error);
       assert.throw(function() {t.set('foo', null)}, Error);
 
 

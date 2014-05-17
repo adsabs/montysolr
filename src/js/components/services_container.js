@@ -12,7 +12,7 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
       for (var k in this._services) {
         var s = this._services[k];
         if ('activate' in s) {
-          s.activate(arguments);
+          s.activate.apply(s, arguments);
         }
       }
     },

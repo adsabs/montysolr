@@ -10,6 +10,8 @@ define([], function () {
     this.initialStart = options.start || 0;
     this.startName = options.startName || "start";
     this.rowsName = options.rowsName || "rows";
+    this.cycle = 0;
+    this.maxNum = -1;
   };
 
   _.extend(Paginator.prototype, {
@@ -22,24 +24,42 @@ define([], function () {
      * @returns {*}
      */
     run: function (apiQuery) {
-      var currentPagination = {};
-      currentPagination[this.startName] = "" + this.start;
-      currentPagination[this.rowsName] = "" + this.rows;
+      if (!this.hasMore()) {
+        return apiQuery;
+      }
+
+      apiQuery.set(this.startName, this.start);
+      apiQuery.set(this.rowsName, this.rows);
+
+      // increment the actual value
       this.start += this.rows;
 
-      _.each(currentPagination, function (v, k) {
-        apiQuery.set(k, v);
-      });
+      if (this.maxNum > 0 && this.maxNum < this.start)
+        this.start = this.maxNum;
 
+      this.cycle += 1;
       return apiQuery;
     },
 
-    reset: function () {
-      this.start = this.initialStart;
+    reset: function (initialStart) {
+      this.start = initialStart || this.initialStart;
+      this.maxNum = -1;
+      this.cycle = 0;
     },
 
-    isInitial: function () {
-      return this.start === (this.initialStart + this.rows);
+    getCycle: function() {
+      return this.cycle;
+    },
+
+    setMaxNum: function(maxNum) {
+      this.maxNum = maxNum;
+    },
+
+    hasMore: function() {
+      if (this.maxNum == -1 || this.maxNum > this.start) {
+        return true;
+      }
+      return false;
     }
 
   });

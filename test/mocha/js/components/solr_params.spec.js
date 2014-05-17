@@ -32,6 +32,9 @@ define(['js/components/solr_params', 'backbone'], function(SolrParams, Backbone)
       t.set('array', ['bar']);
       expect(t.get('array')).to.eql(['bar']);
 
+      t.set('array', [['bar']]);
+      expect(t.get('array')).to.eql(['bar']);
+
       t.set('array with empty element', ['bar', '']);
       expect(t.get('array with empty element')).to.eql(['bar']);
 
@@ -50,7 +53,6 @@ define(['js/components/solr_params', 'backbone'], function(SolrParams, Backbone)
 
       // test only strings/numbers are allowed
       assert.throw(function() {t.set('foo', {key: 'value'})}, Error);
-      assert.throw(function() {t.set('foo', [['foo']])}, Error);
       assert.throw(function() {t.set('foo', null)}, Error);
 
 

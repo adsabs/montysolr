@@ -44,11 +44,12 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
         // remove empty strings
         var tempVal = attributes[attr];
 
+        tempVal = _.without(_.flatten(tempVal), "", false, null, undefined, NaN);
+
         if (!_.isArray(tempVal)) {
           throw new Error('Values were not converted to an Array');
         }
 
-        tempVal =_.compact(tempVal);
         if (_.isEmpty(tempVal) && options.unset !== true) {
           throw new Error('Empty values not allowed');
         }
@@ -85,7 +86,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
 
         // convert to array if necessary
         if (!(_.isArray(tempVal))) {
-          attrs[attr] = _.compact([tempVal]);
+          attrs[attr] = _.flatten([tempVal]);
         }
       }
 
@@ -118,7 +119,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
 
         // convert to array if necessary
         if (!(_.isArray(tempVal))) {
-          tempVal = _.compact([tempVal]);
+          tempVal = _.flatten([tempVal]);
         }
         if (this.has(attr)) {
           tempVal = _.clone(this.get(attr)).concat(tempVal);

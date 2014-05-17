@@ -53,7 +53,7 @@ define(['backbone', 'marionette',
       _.bindAll(this, "dispatchRequest", "processResponse");
 
       this._currentQuery = new ApiQuery();
-      this.defaultQueryArguments = options.defaultQueryArguments || {};
+      this.defaultQueryArguments = this.defaultQueryArguments || options.defaultQueryArguments || {};
 
       // XXX: here the widget should do something with the views/models/templates
       // to set everything up
@@ -86,7 +86,6 @@ define(['backbone', 'marionette',
 
       var q = this.customizeQuery(apiQuery);
       if (q) {
-        this.setCurrentQuery(q);
         var req = this.composeRequest(q);
         if (req) {
           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
@@ -114,6 +113,10 @@ define(['backbone', 'marionette',
      * @param apiResponse
      */
     processResponse: function (apiResponse) {
+
+      var q = apiResponse.getApiQuery();
+      this.setCurrentQuery(q);
+
       //need to put some parsing logic here
       // reset collection: 
       //this.collection.reset(apiResponse)
@@ -190,6 +193,11 @@ define(['backbone', 'marionette',
       } else {
         return this.view
       }
+    },
+
+    render : function(){
+      this.view.render();
+      return this.view.el;
     }
 
   }, {mixin: WidgetMixin});

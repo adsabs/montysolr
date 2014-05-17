@@ -16,7 +16,7 @@ define(['backbone', 'underscore',
 
     activate: function() {
       this.Services.activate(arguments);
-      this.Objects.activate(arguments);
+      this.Objects.activate(this);
     },
 
     close: function() {
