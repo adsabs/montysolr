@@ -174,15 +174,15 @@ define(['marionette',
 
         var widget = new ResultsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
+        widget.render();
 
-        widget.render()
-        $('#test-area').append(widget.el);
+        //$('#test-area').append(widget.render().el);
 
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
           q: "star"
         }));
 
-        var v = widget.view
+        var v = widget.getView();
 
         expect(v.$('.more-info:last').hasClass("hide")).to.equal(true);
         v.$("#show-results-snippets").click();
