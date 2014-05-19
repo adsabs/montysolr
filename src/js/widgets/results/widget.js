@@ -113,8 +113,6 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
       initialize: function (options) {
         this.displayNum = options.displayNum;
         this.paginator = options.paginator;
-
-        this.listenTo(this.collection, "reset", this.showSnippetButton);
       },
 
       id: "search-results",
@@ -136,7 +134,7 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
       itemViewContainer: ".results-list",
       events: {
         "click #load-more-results": "fetchMore",
-        "click #show-results-snippets": "showSnippets"
+        "click #show-results-snippets": "showDetails"
       },
 
       template: ResultsContainerTemplate,
@@ -160,18 +158,24 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
         this.$('.load-more').show();
       },
 
-      showSnippetButton : function(){
-        this.$("#show-results-snippets").removeClass("hide")
+      toggleDetailsButton : function(visible){
+        if (visible) {
+          this.$("#show-results-snippets").removeClass('hide');
+        }
+        else {
+          this.$("#show-results-snippets").addClass('hide');
+        }
+
       },
 
-      showSnippets: function () {
-      this.$(".more-info").toggleClass("hide");
-      if (this.$(".more-info").hasClass("hide")) {
-        this.$("#show-results-snippets").text("show snippets")
-      } else {
-        this.$("#show-results-snippets").text("hide snippets")
+      showDetails: function () {
+        this.$(".more-info").toggleClass("hide");
+        if (this.$(".more-info").hasClass("hide")) {
+          this.$("#show-results-snippets").text("show details");
+        } else {
+          this.$("#show-results-snippets").text("hide details");
+        }
       }
-    }
 
     });
 
@@ -197,7 +201,7 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
           displayNum: this.displayNum || this.paginator.rows / 2
         });
         this.listenTo(this.view, "all", this.onAllInternalEvents);
-        //this.listenTo(this.view.collection, "all", this.onAllInternalEvents);
+        this.listenTo(this.view.collection, "all", this.onAllInternalEvents);
 
         this.resetPagination = true;
       },
@@ -258,10 +262,20 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       onAllInternalEvents: function(ev, arg1, arg2) {
 
-        //console.log(ev);
+        console.log(ev);
 
         if (ev == 'composite:rendered') {
           this.view.disableLoadMore();
+        }
+        else if (ev == 'reset') {
+          console.log('inside reset');
+          if (this.collection.models.length > 0) {
+            this.view.toggleDetailsButton(true);
+          }
+          else {
+            this.view.toggleDetailsButton(false);
+          }
+
         }
         else if (ev == "fetchMore") {
 
