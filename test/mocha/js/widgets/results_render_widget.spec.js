@@ -170,23 +170,25 @@ define(['marionette',
 
 
 
-      it("should show highlights (if there are any) when a user clicks on 'show more'", function () {
+      it("should show highlights (if there are any) when a user clicks on 'show details'", function () {
 
         var widget = new ResultsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
+        widget.render();
 
-        var $w = $(widget.render());
-        $('#test-area').append($w);
+        //$('#test-area').append(widget.render().el);
 
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
           q: "star"
         }));
 
-        expect($w.find('.more-info:last').is(':visible')).to.be.equal(false);
-        $w.find(".view-more:last").click();
-        expect($w.find('.more-info:last').is(':visible')).to.be.equal(true);
-        $w.find(".view-more:last").click();
-        expect($w.find('.more-info:last').is(':visible')).to.be.equal(false);
+        var v = widget.getView();
+
+        expect(v.$('.more-info:last').hasClass("hide")).to.equal(true);
+        v.$("#show-results-snippets").click();
+        expect(v.$('.more-info:last').hasClass("hide")).to.be.equal(false);
+        v.$("#show-results-snippets").click();
+        expect(v.$('.more-info:last').hasClass("hide")).to.be.equal(true);
       })
 
     })

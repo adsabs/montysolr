@@ -99,28 +99,11 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
       },
 
       events: {
-        'click .view-more': 'toggleExtraInfo',
         'change input[name=bibcode]': 'toggleSelect'
       },
 
-      toggleSelect: function (e) {
-        if (this.$el.hasClass("chosen")) {
-          this.$el.removeClass("chosen")
-
-        } else {
-          this.$el.addClass("chosen")
-        }
-
-      },
-
-      toggleExtraInfo: function (e) {
-        e.preventDefault();
-        this.$(".more-info").toggleClass("hide");
-        if (this.$(".more-info").hasClass("hide")) {
-          this.$(".view-more").text("more info")
-        } else {
-          this.$(".view-more").text("hide info")
-        }
+      toggleSelect: function () {
+       this.$el.toggleClass("chosen")
       }
 
     });
@@ -150,8 +133,10 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       itemViewContainer: ".results-list",
       events: {
-        "click .load-more button": "fetchMore"
+        "click #load-more-results": "fetchMore",
+        "click #show-results-snippets": "showDetails"
       },
+
       template: ResultsContainerTemplate,
 
       fetchMore: function () {
@@ -171,6 +156,25 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       enableLoadMore: function(text) {
         this.$('.load-more').show();
+      },
+
+      toggleDetailsButton : function(visible){
+        if (visible) {
+          this.$("#show-results-snippets").removeClass('hide');
+        }
+        else {
+          this.$("#show-results-snippets").addClass('hide');
+        }
+
+      },
+
+      showDetails: function () {
+        this.$(".more-info").toggleClass("hide");
+        if (this.$(".more-info").hasClass("hide")) {
+          this.$("#show-results-snippets").text("show details");
+        } else {
+          this.$("#show-results-snippets").text("hide details");
+        }
       }
 
     });
@@ -197,7 +201,7 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
           displayNum: this.displayNum || this.paginator.rows / 2
         });
         this.listenTo(this.view, "all", this.onAllInternalEvents);
-        //this.listenTo(this.view.collection, "all", this.onAllInternalEvents);
+        this.listenTo(this.view.collection, "all", this.onAllInternalEvents);
 
         this.resetPagination = true;
       },
@@ -258,10 +262,20 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       onAllInternalEvents: function(ev, arg1, arg2) {
 
-        //console.log(ev);
+        console.log(ev);
 
         if (ev == 'composite:rendered') {
           this.view.disableLoadMore();
+        }
+        else if (ev == 'reset') {
+          console.log('inside reset');
+          if (this.collection.models.length > 0) {
+            this.view.toggleDetailsButton(true);
+          }
+          else {
+            this.view.toggleDetailsButton(false);
+          }
+
         }
         else if (ev == "fetchMore") {
 
