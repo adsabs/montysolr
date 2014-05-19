@@ -99,28 +99,11 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
       },
 
       events: {
-        'click .view-more': 'toggleExtraInfo',
         'change input[name=bibcode]': 'toggleSelect'
       },
 
-      toggleSelect: function (e) {
-        if (this.$el.hasClass("chosen")) {
-          this.$el.removeClass("chosen")
-
-        } else {
-          this.$el.addClass("chosen")
-        }
-
-      },
-
-      toggleExtraInfo: function (e) {
-        e.preventDefault();
-        this.$(".more-info").toggleClass("hide");
-        if (this.$(".more-info").hasClass("hide")) {
-          this.$(".view-more").text("more info")
-        } else {
-          this.$(".view-more").text("hide info")
-        }
+      toggleSelect: function () {
+       this.$el.toggleClass("chosen")
       }
 
     });
@@ -130,6 +113,8 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
       initialize: function (options) {
         this.displayNum = options.displayNum;
         this.paginator = options.paginator;
+
+        this.listenTo(this.collection, "reset", this.showSnippetButton);
       },
 
       id: "search-results",
@@ -150,8 +135,10 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       itemViewContainer: ".results-list",
       events: {
-        "click .load-more button": "fetchMore"
+        "click #load-more-results": "fetchMore",
+        "click #show-results-snippets": "showSnippets"
       },
+
       template: ResultsContainerTemplate,
 
       fetchMore: function () {
@@ -171,7 +158,20 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       enableLoadMore: function(text) {
         this.$('.load-more').show();
+      },
+
+      showSnippetButton : function(){
+        this.$("#show-results-snippets").removeClass("hide")
+      },
+
+      showSnippets: function () {
+      this.$(".more-info").toggleClass("hide");
+      if (this.$(".more-info").hasClass("hide")) {
+        this.$("#show-results-snippets").text("show snippets")
+      } else {
+        this.$("#show-results-snippets").text("hide snippets")
       }
+    }
 
     });
 
