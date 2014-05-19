@@ -17,11 +17,11 @@ define(['underscore', 'backbone',
   var MinimalPubsub = function() {
     this.beehive = null;
     this.pubsub = null;
-    this.initialize(arguments);
+    this.initialize.apply(this, arguments);
   };
 
   _.extend(MinimalPubsub.prototype, Backbone.Events, PubSubEvents,  {
-    initialize: function() {
+    initialize: function(options) {
       this.beehive = new BeeHive();
       this.pubsub = new PubSub();
       this.beehive.addService('PubSub', this.pubsub);
@@ -35,6 +35,7 @@ define(['underscore', 'backbone',
       this.beehive.activate();
       this.key = this.pubsub.getPubSubKey();
       this.listen();
+      _.extend(this, options);
     },
 
     listen: function() {
@@ -46,8 +47,10 @@ define(['underscore', 'backbone',
     },
 
     logAll: function(ev) {
-      var args = Array.prototype.slice.call(arguments, 1);
-      console.log('[PubSub]', ev, args);
+      if (this.verbose) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        console.log('[PubSub]', ev, args);
+      }
     },
 
     publish: function() {

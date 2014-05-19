@@ -114,12 +114,10 @@ define(['backbone', 'marionette',
      */
     processResponse: function (apiResponse) {
 
+      // in your widget, you should always set the current query like this
       var q = apiResponse.getApiQuery();
       this.setCurrentQuery(q);
 
-      //need to put some parsing logic here
-      // reset collection: 
-      //this.collection.reset(apiResponse)
       throw new Error("you need to customize this function");
     },
 

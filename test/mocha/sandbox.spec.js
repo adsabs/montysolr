@@ -9,9 +9,9 @@ var abase = tbase + '/apps/discovery';
 // These are the tests that we want to run for this app
 var tests = [
 
-    tbase + '/widgets/results_render_widget.spec.js',
-    //tbase + '/widgets/base_widget.spec.js',
-    //tbase + '/widgets/multi_callback_widget.spec.js',
+    //tbase + '/widgets/results_render_widget.spec.js',
+    tbase + '/widgets/base_widget.spec.js',
+    tbase + '/widgets/multi_callback_widget.spec.js',
     //tbase + '/widgets/facet_widget.spec.js',
     //tbase + '/widgets/facet_container_views.spec.js',
     //tbase + '/widgets/facet_item_views.spec.js',
