@@ -2,9 +2,7 @@ define([
     'jquery',
     'backbone',
     'marionette',
-    'js/bugutils/minimal_pubsub',
     'js/widgets/facet/base_container_view',
-    'js/widgets/facet/item_views',
     'js/widgets/facet/model',
     'js/widgets/facet/collection',
     'js/widgets/facet/item_view'
@@ -12,9 +10,7 @@ define([
   function ($,
             Backbone,
             Marionette,
-            MinimalPubsub,
             FacetBaseContainerView,
-            ItemViews,
             FacetModel,
             FacetCollection,
             BaseItemView
@@ -22,27 +18,8 @@ define([
 
     describe("Facet Base Container View (UI)", function () {
 
-      var minsub;
-
-      beforeEach(function () {
-        minsub = new (MinimalPubsub.extend({
-          request: function (apiRequest) {
-            return {
-              "responseHeader": {
-                "status": 0,
-                "QTime": 543,
-                "params": {
-                  "q": "star"
-                }
-              }
-            };
-          }
-        }))({verbose: false});
-      });
 
       afterEach(function () {
-        minsub.close();
-        return;
         var ta = $('#test-area');
         if (ta) {
           ta.empty();
@@ -57,7 +34,7 @@ define([
 
       it("by default it shows nothing", function() {
         var view = new FacetBaseContainerView({
-          itemView: ItemViews.CheckboxOneLevelView
+          itemView: BaseItemView
         });
         var $v = $(view.render().el);
         expect($v.find('.facet-name').length).to.be.equal(1);
@@ -77,7 +54,7 @@ define([
         var view = new FacetBaseContainerView({
           itemView: BaseItemView,
           model: new FacetBaseContainerView.ContainerModelClass({title: "Facet Title"}),
-          collection: new FacetCollection(),
+          collection: new FacetCollection()
         });
 
         // this would normally be done by a controller
