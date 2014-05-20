@@ -1,12 +1,14 @@
-{{#if hier}}
-<i class="item-closed facet-caret"></i>
-{{/if}}
-<label>
-    <input type="checkbox" class="facet-item">{{title}}
-</label>
-{{#if hier}}
-<div class="facet-body">
-    <div class="child-facets"></div>
-    <button class="btn btn-xs btn-link show-more hide">more</button>
-</div>
-{{/if}}
+    {{#if hier}}
+    <i class="item-closed facet-caret"></i>
+    {{/if}}
+
+    <label>
+        <input type="checkbox" class="facet-item" value="{{value}}">{{title}}
+    </label>
+
+    {{#if more}}
+    <div class="facet-body">
+        <div class="child-facets"></div>
+        <button class="btn btn-xs btn-link show-more hide">more</button>
+    </div>
+    {{/if}}

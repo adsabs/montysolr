@@ -1,12 +1,19 @@
 
-define(['marionette'], function(Marionette) {
+define(['marionette', 'hbs!./templates/item-checkbox'],
+  function(Marionette, ItemCheckBoxTemplate) {
 
   var BaseItemView = Marionette.ItemView.extend({
 
-    className: "item-view hide"
+    /**
+     * The view will be inside div.[className]
+     */
+    className: "item-view",
 
-    //most widgets are hidden by default until parent container view
-    //explicitly shows them
+    /**
+     * You will need to provide the template of your choice
+     * for the view to work
+     */
+    template: ItemCheckBoxTemplate
 
   });
 

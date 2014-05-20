@@ -64,7 +64,7 @@ define(['js/widgets/facet/base_container_view',
         ];
 
         var c = new FacetCollection(fakeFacetData);
-        var containerModel = new SelectLogicContainerView.prototype.ModelClass({
+        var containerModel = new SelectLogicContainerView.ContainerModelClass({
           title: "testTitle",
           value: "testTitleVal"
 

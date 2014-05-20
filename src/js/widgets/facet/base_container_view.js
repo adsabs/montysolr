@@ -3,7 +3,7 @@ define(['backbone', 'marionette',
   ],
   function(Backbone, Marionette, BaseFacetContainer, EmptyFacetTemplate) {
 
-    //if there is an error
+    //if there is an error, show this
     var NoFacetsView = Backbone.Marionette.ItemView.extend({
       template: EmptyFacetTemplate
     });
@@ -16,135 +16,158 @@ define(['backbone', 'marionette',
         }
       }
     });
+
     var BaseContainerView = Backbone.Marionette.CompositeView.extend({
 
-      ModelClass: BaseContainerModel,
+      /**
+       * Template for the container
+       */
+      template: BaseFacetContainer,
+
+      /**
+       * This will be the class in which the view is going to be wrapped
+       */
+      className: "facet-widget",
+
+      /**
+       * The container nested inside className object
+       */
+      itemViewContainer: ".facet-items",
+
+      /**
+       * What to use when there is no collection yet
+       */
+      emptyView: NoFacetsView,
+
+
+      /**
+       * events and callbacks this container provides
+       */
+      events: {
+        //"click .main-caret": "toggleFacet",
+        "click .facet-name > h5": "toggleFacet",
+        "click .show-more": "showExtraItems"
+      },
+
+      // if we want to do some setup, ths is the way to go
+      //constructor: function(){
+      //  // do something here....
+      //  BackBone.Marionette.CompositeView.prototype.constructor.apply(this, arguments);
+      //},
 
       initialize: function (options) {
 
         options = options || {};
 
-        this.itemViewOptions = options.itemViewOptions || {};
+        this.itemViewOptions = Marionette.getOption(this, "itemViewOptions") || {};
+        this.openByDefault = Marionette.getOption(this, "openByDefault");
+        this.showOptions = Marionette.getOption(this, "showOptions");
 
-        this.defaultNumFacets = options.defaultNumFacets || 5;
+        this._states = [];
+      },
 
-        this.itemViewOptions.defaultNumFacets = this.defaultNumFacets;
 
-        if (options.openByDefault == true) {
-          //open up the body of the facet and point caret down
-          this.onRender = function () {
-            this.toggleFacet();
-          }
+      /**
+       * Called right after the view has been rendered
+       */
+      onRender: function() {
+        if (this.openByDefault) {
+          this.toggleFacet();
         }
-
-
-        // XXX:rca - this is what I was worried about; this mechanism
-        // is not flexible enough; it relies on a complicated chain
-        // of delegation (passing events from the nested views
-        // towards the controller). This will be a nightmare to
-        // to maintain. Besides, I don't see a code that would
-        // de-register this listener when the container is closed
-
-        //for hierarchical child views
-        this.on("all", function (e) {
-          //  somewhere in the hierarchy of children views, a new view
-          //  with a new collection has been added
-          if (e.match("requestChildData")) {
-            var view = arguments[arguments.length - 1];
-            this.trigger("hierarchicalDataRequest", view);
-          }
-
-          // XXX:rca - does this keep adding listeners multiple
-          // times?
-
-          //so that there is special styling when a facet might be applied
-          this.on("itemview:selected", function () {
-            this.$(".facet-meta i").addClass("active-style")
-
-          });
-
-          this.on("itemview:unselected", function () {
-            //specifically for logic dropdowns
-            //only remove if there is no more selected
-            if (this.$(".selected").length === 0) {
-              this.$(".logic-dropdown i").addClass("inactive-style").removeClass("active-style");
-
-              this.$(".facet-meta i").removeClass("active-style");
-
-            }
-
-          })
-        });
-      },
-
-      emptyView: NoFacetsView,
-
-      events: {
-        "click .main-caret": "toggleFacet",
-        "click .show-more": "showExtraItems",
-      },
-
-      showExtraItems: function () {
-        this.$(".item-view.hide").slice(0, this.defaultNumFacets).removeClass("hide");
-
-        //because some facets are pruned, this might be triggered earlier than you would think
-        if (!(this.$(".item-view.hide").length >= this.defaultNumFacets * 2)) {
-          this.trigger("moreDataRequested")
+        if (this.showOptions) {
+          this.$(".facet-options").removeClass("hide");
         }
-
       },
 
+      /**
+       * Opens/closes the facet body - revealing whatever is inside
+       *
+       * @param e
+       */
       toggleFacet: function (e) {
-
-        $caret = this.$(".main-caret");
-
+        var $caret = this.$(".main-caret");
         if ($caret.hasClass("item-open")) {
           $caret.removeClass("item-open");
           $caret.addClass("item-closed");
-          this.$(".logic-dropdown").addClass("hide");
           this.$(".facet-body").addClass("hide");
-
         }
         else {
           $caret.removeClass("item-closed");
           $caret.addClass("item-open");
-          this.$(".logic-dropdown").removeClass("hide");
           this.$(".facet-body").removeClass("hide");
-
         }
       },
-      template: BaseFacetContainer,
 
-      className: "facet-widget",
-
-      itemViewContainer: ".facet-items",
-
-      onCompositeCollectionResetAdd: function () {
-
-        if (this.collection.models.length) {
-          //show initial number of facets
-          var visible = 0;
-          var $childFacets = this.$(".item-view")
-          if ($childFacets.length) {
-
-            while (visible < this.defaultNumFacets) {
-
-              $childFacets.eq(visible).removeClass("hide");
-              visible++
-            }
-
-          }
-          //unhide "show more" button if necessary
-          if ($childFacets.filter(".hide").length) {
-            //this confirms there are more facets to be shown, so present it as an option
-            this.$(".facet-items + .show-more").removeClass("hide")
+      /**
+       * This is the entry point for controllers to provide
+       * feedback to the user; the container will receive a
+       * {SanityMessage} and can act upon it
+       */
+      handleSanity: function(sanity) {
+        if (sanity.ok) {
+          if (this._states.length > 0) {
+            var self = this;
+            _.each(this._states, function(state) {
+              self.revertState(state);
+            });
+            this._states = [];
           }
         }
+        else if (sanity.error) {
+          this.handleError(sanity.error);
+        }
+        else if (sanity.waiting) {
+          this.handleWaiting();
+        }
+        else {
+          throw new Error("Unknown sanity msg: ", sanity);
+        }
+      },
 
+      /**
+       * By default, this widget will indicate error by changing its
+       * color
+       *
+       * @param err
+       */
+      handleError: function(err) {
+        if (err && err.msg) {
+          this.$('.facet-name > h5').attr('title', err.msg);
+        }
+        this.$('.facet-name').addClass('error');
+        this._states.push(500);
+      },
+
+      /**
+       * The widget has requested data and is waiting for them to
+       * arrive (we should indicate it)
+       */
+      handleWaiting: function() {
+        // XXX:alex - we should do something better (like go into background;
+        // overlay it....)
+        this.$('.facet-body').addClass('waiting');
+        this._states.push(300);
+      },
+
+      revertState: function(state) {
+
+        if (state == 300) {
+          this.$('.facet-body').removeClass('waiting');
+        }
+        else if (state == 500) {
+          this.$('.facet-name').removeClass('error');
+          this.$('.facet-name > h5').attr('title', "");
+        }
       }
 
-
     });
+
+    /**
+     * This is our own convention to include the model class associated
+     * with this container; it can be overriden and is used by factory
+     * constructors only (ie. not inside Marionette)
+     */
+    BaseContainerView.ContainerModelClass = BaseContainerModel;
 
     return BaseContainerView;
 });

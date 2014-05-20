@@ -41,7 +41,7 @@ define([
        processed facets in processResponse)
        */
 
-      var containerModel = new SelectLogicContainerView.prototype.ModelClass({
+      var containerModel = new SelectLogicContainerView.ContainerModelClass({
         title: options.userFacingName,
         value: options.facetName,
         singleLogic: options.singleLogic,
@@ -89,7 +89,7 @@ define([
        processed facets in processResponse)
        */
 
-      var containerModel = new SelectLogicContainerView.prototype.ModelClass({
+      var containerModel = new SelectLogicContainerView.ContainerModelClass({
         title: options.userFacingName,
         singleLogic: options.singleLogic,
         multiLogic: options.multiLogic
@@ -132,7 +132,7 @@ define([
        options.level: how deep does the hierarchy go
        */
 
-      var containerModel = new BaseContainerView.prototype.ModelClass({
+      var containerModel = new BaseContainerView.ContainerModelClass({
         title: options.userFacingName
       });
       var coll = new FacetCollection();

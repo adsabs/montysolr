@@ -262,13 +262,12 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       onAllInternalEvents: function(ev, arg1, arg2) {
 
-        console.log(ev);
+        //console.log(ev);
 
         if (ev == 'composite:rendered') {
           this.view.disableLoadMore();
         }
         else if (ev == 'reset') {
-          console.log('inside reset');
           if (this.collection.models.length > 0) {
             this.view.toggleDetailsButton(true);
           }

@@ -1,7 +1,7 @@
 define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/logic-container'],
   function (BaseFacetContainerView, FacetTooltipTemplate, LogicFacetContainerTemplate) {
 
-    var SelectLogicModel = BaseFacetContainerView.prototype.ModelClass.extend({
+    var SelectLogicModel = BaseFacetContainerView.ContainerModelClass.extend({
       defaults: function () {
         return {
           singleLogic: [
@@ -17,8 +17,6 @@ define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/log
     });
 
     var SelectLogicContainerView = BaseFacetContainerView.extend({
-
-      ModelClass: SelectLogicModel,
 
       initialize: function (options) {
 
@@ -130,6 +128,8 @@ define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/log
       }
 
     });
+
+    SelectLogicContainerView.ContainerModelClass = SelectLogicModel;
 
     return SelectLogicContainerView;
 
