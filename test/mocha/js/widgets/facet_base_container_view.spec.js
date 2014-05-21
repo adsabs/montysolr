@@ -5,7 +5,8 @@ define([
     'js/widgets/facet/base_container_view',
     'js/widgets/facet/model',
     'js/widgets/facet/collection',
-    'js/widgets/facet/item_view'
+    'js/widgets/facet/item_view',
+    'js/widgets/facet/collection_view'
   ],
   function ($,
             Backbone,
@@ -13,7 +14,8 @@ define([
             FacetBaseContainerView,
             FacetModel,
             FacetCollection,
-            BaseItemView
+            BaseItemView,
+            FacetCollectionView
     ) {
 
     describe("Facet Base Container View (UI)", function () {
@@ -77,7 +79,6 @@ define([
         $v.find('.facet-name > h5 > .main-caret').click();
         expect($v.find('.facet-body').hasClass('hide')).to.be.true;
 
-        $('#test-area').append(view.render().el);
       });
 
       it("can be started opened", function() {
@@ -119,6 +120,27 @@ define([
         expect(view.revertState.callCount).to.be.equal(2);
         expect($v.find('.facet-body').hasClass('waiting')).to.be.false;
         expect($v.find('.facet-name').hasClass('error')).to.be.false;
+
+      });
+
+      it("accepts other collectionviews and plays nicely with them", function() {
+        var c = new FacetCollection();
+        c.add(new FacetModel({title: 'foo', value: 'bar'}));
+        c.add(new FacetModel({title: 'woo', value: 'baz'}));
+
+        var view = new FacetBaseContainerView({
+          itemView: FacetBaseContainerView,
+          model: new FacetBaseContainerView.ContainerModelClass({title: "Facet Title"}),
+          collection: c,
+          openByDefault: true
+        });
+
+        // TODO:rca - make the collection view nested inside the container
+        // and provide the selector functionality
+
+        var $v = $(view.render().el);
+        console.log($v.html());
+        $('#test-area').append(view.render().el);
 
       });
 
