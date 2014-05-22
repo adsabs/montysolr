@@ -1,4 +1,4 @@
-define(['marionette', 'd3', './item_view', 'hbs!./templates/graph'],
+define(['marionette', 'd3', 'js/widgets/base/item_view', 'hbs!./templates/graph'],
   function (Marionette, d3, BaseItemView, FacetGraphTemplate) {
 
   var Buffer = function (maxLength) {

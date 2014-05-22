@@ -10,7 +10,7 @@ var abase = tbase + '/apps/discovery';
 var tests = [
 
     //tbase + '/widgets/facet_widget.spec.js',
-    tbase + '/widgets/facet_base_container_view.spec.js',
+    tbase + '/widgets/base_container_view.spec.js',
     //tbase + '/widgets/facet_container_views.spec.js',
     //tbase + '/widgets/facet_item_views.spec.js',
     //tbase + '/widgets/facet_controllers.spec.js'

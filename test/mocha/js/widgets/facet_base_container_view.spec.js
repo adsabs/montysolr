@@ -5,7 +5,7 @@ define([
     'js/widgets/facet/base_container_view',
     'js/widgets/facet/model',
     'js/widgets/facet/collection',
-    'js/widgets/facet/item_view',
+    'js/widgets/base/item_view',
     'js/widgets/facet/collection_view'
   ],
   function ($,

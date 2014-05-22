@@ -30,12 +30,13 @@ var tests = [
   tbase + '/widgets/results_render_widget.spec.js',
   tbase + '/widgets/search_bar_widget.spec.js',
   tbase + '/widgets/api_response_widget.spec.js',
+
   tbase + '/widgets/api_query_widget.spec.js',
   tbase + '/widgets/api_request_widget.spec.js',
   tbase + '/widgets/facet_widget.spec.js',
-  tbase + '/widgets/facet_container_views.spec.js',
-  tbase + '/widgets/facet_item_views.spec.js',
-  tbase + '/widgets/facet_controllers.spec.js'
+  //tbase + '/widgets/facet_container_views.spec.js',
+  //tbase + '/widgets/facet_item_views.spec.js',
+  //tbase + '/widgets/facet_controllers.spec.js'
 
 
 ];
