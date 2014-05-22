@@ -1,7 +1,7 @@
 /**
  * Created by alex on 5/10/14.
  */
-define([], function () {
+define(['underscore'], function (_) {
 
   var Paginator = function (options) {
 

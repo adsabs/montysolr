@@ -3,15 +3,13 @@ define([
     'backbone',
     'marionette',
     'js/widgets/base/container_view',
-    'js/widgets/base/item_view',
-    'js/widgets/base/collection_view'
+    'js/widgets/base/item_view'
   ],
   function ($,
             Backbone,
             Marionette,
             BaseContainerView,
-            BaseItemView,
-            CollectionView
+            BaseItemView
     ) {
 
     describe("Facet Base Container View (UI)", function () {
@@ -163,40 +161,8 @@ define([
         expect($v.find('.widget-body:eq(0)').hasClass('hide')).to.be.true;
         expect($v.find('.widget-body:eq(1)').hasClass('hide')).to.be.false;
         expect($v.find('.widget-body:eq(2)').hasClass('hide')).to.be.true;
-      });
 
-      it("accepts other collectionviews ", function() {
-        var c = new Backbone.Collection(null, {model: wModel});
-        c.add(new Backbone.Model({title: 'foo', value: 'bar'}));
-        c.add(new Backbone.Model({title: 'woo', value: 'baz'}));
-
-        // we'll render container inside container - the nested one will be collapsed
-        // by default
-        var view = new BaseContainerView({
-          itemView: CollectionView,
-          model: new BaseContainerView.ContainerModelClass({title: "Widget Title"}),
-          collection: c,
-          openByDefault: true
-        });
-
-        var $v = $(view.render().el);
-
-
-        expect($v.find('.widget-body:eq(0)').hasClass('hide')).to.be.false;
-        expect($v.find('.widget-body:eq(1)').hasClass('hide')).to.be.true;
-        expect($v.find('.widget-body:eq(2)').hasClass('hide')).to.be.true;
-
-        // click the nested first container
-        $v.find('.widget-name:eq(1) > h5').click();
-        expect($v.find('.widget-body:eq(0)').hasClass('hide')).to.be.false;
-        expect($v.find('.widget-body:eq(1)').hasClass('hide')).to.be.false;
-        expect($v.find('.widget-body:eq(2)').hasClass('hide')).to.be.true;
-
-        // collapse the top container
-        $v.find('.widget-name:eq(0) > h5').click();
-        expect($v.find('.widget-body:eq(0)').hasClass('hide')).to.be.true;
-        expect($v.find('.widget-body:eq(1)').hasClass('hide')).to.be.false;
-        expect($v.find('.widget-body:eq(2)').hasClass('hide')).to.be.true;
+        //$('#test-area').append(view.render().el);
       });
 
     });

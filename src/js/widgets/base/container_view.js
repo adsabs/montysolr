@@ -46,7 +46,7 @@ define(['backbone', 'marionette',
       events: {
         //"click .main-caret": "toggleFacet",
         "click .widget-name:first > h5": "toggleWidget",
-        "click .show-more:first": "showExtraItems"
+        "click .show-more:first": "onShowMore"
       },
 
       // if we want to do some setup, ths is the way to go
@@ -96,6 +96,13 @@ define(['backbone', 'marionette',
           $caret.addClass("item-open");
           this.$(".widget-body:first").removeClass("hide");
         }
+      },
+
+      /**
+       * If user clicked on show-more, this will be called
+       */
+      onShowMore: function() {
+        // does nothing
       },
 
       /**

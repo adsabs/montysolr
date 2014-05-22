@@ -6,9 +6,10 @@
 
 define(['marionette', 'backbone', 'js/components/api_request', 'js/components/api_query',
     'js/widgets/base/paginated_base_widget', 'hbs!./templates/item-template',
-    'hbs!./templates/results-container-template'],
+    'hbs!./templates/results-container-template', 'js/mixins/widget_pagination'],
 
-  function (Marionette, Backbone, ApiRequest, ApiQuery, PaginatedBaseWidget, ItemTemplate, ResultsContainerTemplate) {
+  function (Marionette, Backbone, ApiRequest, ApiQuery, PaginatedBaseWidget, ItemTemplate, ResultsContainerTemplate,
+    WidgetPagination) {
 
     var ItemModel = Backbone.Model.extend({
 
@@ -252,14 +253,6 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
         }
       },
 
-      _adjustMaxDisplay: function(currentLen, toDisplay) {
-        var allowedMax = this.maxDisplayNum-currentLen;
-        if (allowedMax < toDisplay) {
-          return allowedMax;
-        }
-        return toDisplay;
-      },
-
       onAllInternalEvents: function(ev, arg1, arg2) {
 
         //console.log(ev);
@@ -278,64 +271,20 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
         }
         else if (ev == "fetchMore") {
 
-          if (this.paginator.hasMore()) {
-
-            // sanity check - there is a maximum that we'll allow to display
-            // even if we may load slightly more
-            var realDisplayLength = this.collection.models.length - arg1;
-
-            if (realDisplayLength >= this.maxDisplayNum) {
-              this.view.disableLoadMore("Reached max " + this.maxDisplayNum);
-              return;
-            }
-
-
-            if (arg1 > 0) { // we have some docs (hidden)
-              var toDisplay = this.displayNum;
-              if (arg1 > this.displayNum) { // if it is more then necessary, we just display them
-                this.view.displayMore(this._adjustMaxDisplay(realDisplayLength, toDisplay));
-                return;
-              }
-              else {
-                var cachedDisplay = this._adjustMaxDisplay(realDisplayLength, this.paginator.rows - this.displayNum);
-                this.view.displayMore(cachedDisplay); // display one part from the hidden items
-                realDisplayLength += cachedDisplay;
-                toDisplay = this._adjustMaxDisplay(realDisplayLength, toDisplay - (this.paginator.rows - this.displayNum));
-              }
-            }
-
-
-            //console.log('toDisplay', toDisplay);
-
-            if (toDisplay > 0) {
-
-              // we'll wait 50 mills after the first item was added to the collection
-              // and then show the remaining items
-              this.view.once('after:item:added', function() {
-                var self = this;
-                setTimeout(function(){
-                  //console.log('DisplayMore', toDisplay);
-                  self.view.displayMore(toDisplay)}, 50)},
-                this);
-            }
-
-            if (toDisplay + realDisplayLength >= this.maxDisplayNum) {
-              this.view.disableLoadMore("Reached max " + this.maxDisplayNum);
-            }
-
+          var p = this.handlePagination(this.displayNum, this.maxDisplayNum, arg1, this.paginator, this.view, this.collection);
+          if (p && p.before) {
+            p.before();
             // ask for more data
             this.resetPagination = false;
             this.dispatchRequest(this.getCurrentQuery());
-
-          }
-          else {
-            this.view.displayMore(arg1);
-            this.view.disableLoadMore();
           }
         }
       }
 
     });
+
+    // add mixins
+    _.extend(ResultsWidget.prototype, WidgetPagination);
 
     return ResultsWidget;
 
