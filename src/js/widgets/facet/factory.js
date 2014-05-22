@@ -1,6 +1,6 @@
 define([
   './model',
-  './base_container_view', 
+  './container_view',
   './logic_container_view',
   './change_apply_container_view',
   './hierarchical_item_view',

@@ -2,16 +2,14 @@ define(['underscore', 'backbone',
   'js/components/query_mediator',
   'js/services/pubsub',
   'js/components/beehive',
-  'js/components/pubsub_events',
-  'js/components/api_response'], function(
+  'js/components/pubsub_events'
+], function(
   _,
   BackBone,
   QueryMediator,
   PubSub,
   BeeHive,
-  PubSubEvents,
-  ApiResponse
-
+  PubSubEvents
   ) {
 
   var MinimalPubsub = function() {
@@ -22,12 +20,14 @@ define(['underscore', 'backbone',
 
   _.extend(MinimalPubsub.prototype, Backbone.Events, PubSubEvents,  {
     initialize: function(options) {
+      this.requestCounter = 0;
       this.beehive = new BeeHive();
       this.pubsub = new PubSub();
       this.beehive.addService('PubSub', this.pubsub);
       var self = this;
       this.beehive.addService('Api', {
         request: function(req, context) {
+          self.requestCounter += 1;
           var response = self.request.apply(self, arguments);
           context.done.call(context.context, response);
         }});

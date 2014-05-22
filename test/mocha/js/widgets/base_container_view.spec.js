@@ -12,7 +12,7 @@ define([
             BaseItemView
     ) {
 
-    describe("Facet Base Container View (UI)", function () {
+    describe("Widget Base Container View (UI)", function () {
 
       var wModel = Backbone.Model.extend({
         defaults: function () {
@@ -165,5 +165,38 @@ define([
         //$('#test-area').append(view.render().el);
       });
 
+      it("can handle clicks inside options", function() {
+        var c = new Backbone.Collection(null, {model: wModel});
+        c.add(new Backbone.Model({title: 'foo', value: 'bar'}));
+        c.add(new Backbone.Model({title: 'foo', value: 'baz'}));
+
+        var Modified = BaseContainerView.extend({
+          onRender: function() {
+            this._onRender();
+            this.$(".widget-options.bottom").append($('<a>Load More</a>'));
+          },
+          onLoadMore: function(ev) {
+            //console.log('load more');
+          }
+        });
+
+        var view = new Modified({
+          itemView: BaseItemView,
+          model: new BaseContainerView.ContainerModelClass({title: "Widget Title"}),
+          collection: c,
+          openByDefault: true,
+          showOptions: true
+        });
+
+        sinon.spy(view, 'onLoadMore');
+
+        var $v = $(view.render().el);
+        $v.find('.widget-options.bottom > a').click();
+
+        expect(view.onLoadMore.called).to.be.true;
+
+      });
     });
+
+
   });

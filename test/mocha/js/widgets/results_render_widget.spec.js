@@ -26,10 +26,8 @@ define(['marionette',
           request: function(apiRequest) {
             this.requestCounter++;
             if (this.requestCounter % 2 === 0) {
-              console.log('two');
               return Test2;
             } else {
-              console.log('one');
               return Test1;
             }
           }

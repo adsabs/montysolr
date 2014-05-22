@@ -46,7 +46,8 @@ define(['backbone', 'marionette',
       events: {
         //"click .main-caret": "toggleFacet",
         "click .widget-name:first > h5": "toggleWidget",
-        "click .show-more:first": "onShowMore"
+        "click .widget-options.top:first": "onClickOptions",
+        "click .widget-options.bottom:first": "onClickOptions"
       },
 
       // if we want to do some setup, ths is the way to go
@@ -71,11 +72,16 @@ define(['backbone', 'marionette',
        * Called right after the view has been rendered
        */
       onRender: function() {
+        this._onRender();
+      },
+
+      _onRender: function() {
         if (this.openByDefault) {
           this.toggleWidget();
         }
         if (this.showOptions) {
           this.$(".widget-options:first").removeClass("hide");
+          this.$(".widget-options.bottom:first").removeClass("hide");
         }
       },
 
@@ -98,11 +104,21 @@ define(['backbone', 'marionette',
         }
       },
 
-      /**
-       * If user clicked on show-more, this will be called
-       */
-      onShowMore: function() {
-        // does nothing
+
+      onClickOptions: function(ev) {
+        if (ev && ev.target) {
+          var $el = $(ev.target);
+          var text = $el.text().trim();
+          var tgt = $el.attr('target');
+          ev.preventDefault();
+          if (tgt) {
+            this.triggerMethod(tgt, ev);
+          }
+          else if (text) {
+            this.triggerMethod(text.replace(' ', ''), ev);
+          }
+        }
+
       },
 
       /**
