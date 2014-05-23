@@ -1,15 +1,48 @@
+/**
+ * A minimal request-response chain; this can be used in simple applications or
+ * for testing purposes (ie. unittests) like this:
+ *
+ *
+ * var minsub = new (MinimalPubsub.extend({
+ *         request: function(apiRequest) {
+ *           return {some: 'foo'}
+ *         }
+ *         }))({verbose: false});
+ *
+ *
+ * // and the rest is standard mantra...
+ *
+ * var widget = new MyNewWidget();
+ * widget.activate(minsub.beehive.getHardenedInstance());
+ *
+ * minsub.publish(minsub.NEW_QUERY, new ApiQuery({q: 'star'}));
+ *
+ *
+ * You just need to implement a request method, which returns a JSON
+ * object (MinSub will wrap that object into ApiResponse) and
+ * deliver to the requesting application
+ *
+ * Options:
+ *
+ *    - verbose: true/false
+ *        will log into the console what is going on
+ *
+ */
+
 define(['underscore', 'backbone',
   'js/components/query_mediator',
   'js/services/pubsub',
   'js/components/beehive',
-  'js/components/pubsub_events'
+  'js/components/pubsub_events',
+  'js/components/api_query'
 ], function(
   _,
   BackBone,
   QueryMediator,
   PubSub,
   BeeHive,
-  PubSubEvents
+  PubSubEvents,
+  ApiQuery
   ) {
 
   var MinimalPubsub = function() {
@@ -79,6 +112,10 @@ define(['underscore', 'backbone',
         console.log('[Api]', 'request', apiRequest, params);
       }
       return {};
+    },
+
+    createQuery: function(data) {
+      return new ApiQuery(data);
     }
 
   });

@@ -7,7 +7,7 @@ define([
   './zoomable_graph_view',
   './item_views',
   './collection', 
-  './base_controller',
+  './widget',
   './hierarchical_controller'
 ], function (
   FacetModel,
@@ -25,7 +25,7 @@ define([
   var FacetFactory = {
     makeBasicCheckboxFacet: function (options) {
       //required config
-      if (!(options.facetName && options.userFacingName)) {
+      if (!(options.facetField && options.userFacingName)) {
         throw new Error("Required configuration variables were not passed")
       }
 
@@ -43,7 +43,7 @@ define([
 
       var containerModel = new SelectLogicContainerView.ContainerModelClass({
         title: options.userFacingName,
-        value: options.facetName,
+        value: options.facetField,
         singleLogic: options.singleLogic,
         multiLogic: options.multiLogic
       });
@@ -62,7 +62,7 @@ define([
 
       var widget = new BaseController({
         view: containerview,
-        facetName: options.facetName,
+        facetName: options.facetField,
         extractFacets: options.extractFacets
 
       })
@@ -72,7 +72,7 @@ define([
 
     makeHierarchicalCheckboxFacet: function (options) {
       //required config
-      if (!(options.facetName && options.userFacingName)) {
+      if (!(options.facetField && options.userFacingName)) {
         throw new Error("Required configuration variables were not passed")
       }
       ;
@@ -112,7 +112,7 @@ define([
         //levelDepth is zero-indexed
         levelDepth: options.levelDepth || 1,
         view: containerview,
-        facetName: options.facetName,
+        facetName: options.facetField,
         extractFacets: options.extractFacets
       })
 
@@ -121,7 +121,7 @@ define([
 
     makeGraphFacet: function (options) {
       //required config
-      if (!(options.facetName && options.userFacingName && options.xAxisTitle)) {
+      if (!(options.facetField && options.userFacingName && options.xAxisTitle)) {
         throw new Error("Required configuration variables were not passed")
       }
       ;
@@ -152,14 +152,14 @@ define([
       var widget = new BaseController({
         unpaginated: true,
         view: containerview,
-        facetName: options.facetName,
+        facetName: options.facetField,
 
       })
 
       widget.processResponse = function (apiResponse, data) {
         view = data.view;
         coll = view.collection;
-        var facets = apiResponse.get(this.solrPath + "." + this.facetName);
+        var facets = apiResponse.get(this.solrPath + "." + this.facetField);
         var facetsCol = [];
         _.each(facets, function (f, i) {
           if (i % 2 === 0) {

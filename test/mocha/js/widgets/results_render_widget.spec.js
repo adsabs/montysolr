@@ -29,7 +29,7 @@ define(['marionette',
               return Test1;
             }
           }
-          }))({verbose: true});
+          }))({verbose: false});
       });
 
       afterEach(function() {

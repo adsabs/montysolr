@@ -65,6 +65,27 @@ define(['backbone', 'marionette', 'js/components/api_query',
         return true;
       },
 
+
+      /**
+       * Checks the register of callbqacks and returns the one that was registered
+       * for this query
+       *
+       * @param queryId
+       * @returns {*}
+       */
+      getCallback: function(queryId) {
+        if (this._queriesInProgress[queryId]) {
+          return this._queriesInProgress[queryId];
+        }
+        if (this.defaultCallback) {
+          return {callback: this.defaultCallback, data: undefined};
+        }
+      },
+
+      removeCallback: function(queryId) {
+        delete this._queriesInProgress[queryId];
+      },
+
       /**
        * Listens to INVITING_REQUEST signals from PubSub
        * (but unless there is a callback registered under ApiQuery.url()
@@ -78,10 +99,10 @@ define(['backbone', 'marionette', 'js/components/api_query',
         var apiRequest, queryId, callback;
 
         queryId = apiQuery.url();
-        callback = this._queriesInProgress[queryId];
+        callback = this.getCallback(queryId);
 
         if (!callback) {
-          console.warn("We have no callback, ignoring query: " + apiQuery);
+          console.warn("We have no callback, ignoring query: ", apiQuery);
           return;
         }
 
@@ -104,22 +125,19 @@ define(['backbone', 'marionette', 'js/components/api_query',
         var parameters, callback;
 
         //find the callback based on the key of the query
-        if (this._queriesInProgress[id]) {
-          callback = this._queriesInProgress[id].callback;
+        var call = this.getCallback(id);
+        if (call) {
+          callback = call.callback;
         }
         else {
           console.warn("Widget received a response for which it has no callback: " + id);
           return;
         }
 
-        if (this._queriesInProgress[id] && this._queriesInProgress[id]["data"]) {
-          parameters = this._queriesInProgress[id]["data"];
-        }
+        callback.call(this, apiResponse, call.data);
 
         //remove the callback from this.queriesInProgress
-        delete this._queriesInProgress[id];
-
-        callback(apiResponse, parameters);
+        this.removeCallback(id);
       }
 
     });

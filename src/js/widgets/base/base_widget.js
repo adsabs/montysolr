@@ -53,7 +53,10 @@ define(['backbone', 'marionette',
       _.bindAll(this, "dispatchRequest", "processResponse");
 
       this._currentQuery = new ApiQuery();
-      this.defaultQueryArguments = this.defaultQueryArguments || options.defaultQueryArguments || {};
+      this.defaultQueryArguments = this.defaultQueryArguments || {};
+      if (options.defaultQueryArguments) {
+        this.defaultQueryArguments = _.extend(this.defaultQueryArguments, options.defaultQueryArguments);
+      }
 
       // XXX: here the widget should do something with the views/models/templates
       // to set everything up
@@ -196,6 +199,19 @@ define(['backbone', 'marionette',
     render : function(){
       this.view.render();
       return this.view.el;
+    },
+
+    /**
+     * A standard method, called by widgets when they want to
+     * check default widget compomenets
+     */
+    _checkStandardWidgetOptions: function(options) {
+      if (typeof options.view === "undefined") {
+        throw new Error("Missing view")
+      }
+      if (typeof options.view.collection === "undefined") {
+        throw new Error("Missing view.collection");
+      }
     }
 
   }, {mixin: WidgetMixin});
