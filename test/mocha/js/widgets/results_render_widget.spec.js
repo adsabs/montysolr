@@ -22,16 +22,14 @@ define(['marionette',
       beforeEach(function() {
 
         minsub = new (MinimalPubsub.extend({
-          requestCounter: 0,
           request: function(apiRequest) {
-            this.requestCounter++;
             if (this.requestCounter % 2 === 0) {
               return Test2;
             } else {
               return Test1;
             }
           }
-          }))({verbose: false});
+          }))({verbose: true});
       });
 
       afterEach(function() {

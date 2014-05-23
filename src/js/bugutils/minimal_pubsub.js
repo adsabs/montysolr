@@ -20,6 +20,9 @@ define(['underscore', 'backbone',
 
   _.extend(MinimalPubsub.prototype, Backbone.Events, PubSubEvents,  {
     initialize: function(options) {
+      if (options.verbose) {
+        console.log('[MinSub]', 'starting');
+      }
       this.requestCounter = 0;
       this.beehive = new BeeHive();
       this.pubsub = new PubSub();
@@ -29,6 +32,9 @@ define(['underscore', 'backbone',
         request: function(req, context) {
           self.requestCounter += 1;
           var response = self.request.apply(self, arguments);
+          if (self.verbose) {
+            console.log('[MinSub]', 'request', self.requestCounter, response);
+          }
           context.done.call(context.context, response);
         }});
       this.beehive.addObject('QueryMediator', new QueryMediator());
@@ -43,6 +49,9 @@ define(['underscore', 'backbone',
     },
 
     close: function(){
+      if (this.verbose) {
+        console.log('[MinSub]', 'closing');
+      }
       this.beehive.close();
     },
 
@@ -66,7 +75,9 @@ define(['underscore', 'backbone',
     },
 
     request: function(apiRequest, params) {
-      console.log('[Api]', apiRequest, params);
+      if (this.verbose) {
+        console.log('[Api]', 'request', apiRequest, params);
+      }
       return {};
     }
 
