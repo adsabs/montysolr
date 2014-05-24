@@ -50,6 +50,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       expect(spy.callCount).to.be.equal(1);
 
       expect(function() {p.subscribe(k2, 'event', spy)}).to.throw(Error);
+      expect(function() {p.publish(k2, 'event', 'foo')}).to.throw(Error);
 
       // now in promiscuous mode
       spy = sinon.spy();

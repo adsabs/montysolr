@@ -74,7 +74,8 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
       this._errors = {};
       this.errWarningCount = 10; // this many errors trigger warning
       _.extend(this, _.pick(options || attributes, ['strict', 'handleErrors', 'errWarningCount']));
-      this.pubSubKey = this.getPubSubKey(); // the key the pubsub uses for itself
+      this.pubSubKey = PubSubKey.newInstance({creator: {}}); // this.getPubSubKey(); // the key the pubsub uses for itself
+      this._issuedKeys[this.pubSubKey.getId()] = this.pubSubKey.getCreator();
     },
 
 
@@ -243,6 +244,9 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
     getPubSubKey: function() {
       var k = PubSubKey.newInstance({creator: this.pubSubKey}); // creator identifies issuer of the key
       if (this.strict) {
+        if (this._issuedKeys[k.getId()]) {
+          throw Error("The key with id", k.getId(), "has been already registered!");
+        }
         this._issuedKeys[k.getId()] = k.getCreator();
       }
       return k;

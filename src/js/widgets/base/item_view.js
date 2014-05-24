@@ -26,7 +26,8 @@ define(['marionette', 'hbs!./templates/item-checkbox'],
     },
 
     onClick: function(ev) {
-      this.trigger('itemClicked', this.model);
+      this.model.set('selected', ev.target.checked);
+      this.trigger('itemClicked'); // we don't need to pass data because marionette includes 'this'
     }
 
   });

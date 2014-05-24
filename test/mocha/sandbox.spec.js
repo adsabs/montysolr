@@ -14,6 +14,7 @@ var tests = [
     //tbase + '/widgets/base_container_view.spec.js',
     //tbase + '/widgets/facet_container_view.spec.js',
 
+    tbase + '/components/api_query_updater.spec.js',
     tbase + '/widgets/facet_widget.spec.js',
     //tbase + '/widgets/multi_callback_widget.spec.js',
     //tbase + '/widgets/facet_item_views.spec.js',

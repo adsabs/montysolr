@@ -83,6 +83,16 @@ define(['backbone', 'marionette',
     },
 
     /**
+     * You should use this method when you want to initiaze global search action
+     * (ie. send a query to the pubsub)
+     *
+     * @param apiQuery
+     */
+    dispatchNewQuery: function(apiQuery) {
+      this.pubsub.publish(this.pubsub.NEW_QUERY, apiQuery);
+    },
+
+    /**
      * Default callback to be called by PubSub on 'INVITING_REQUEST'
      */
     dispatchRequest: function (apiQuery) {

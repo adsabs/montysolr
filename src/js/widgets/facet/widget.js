@@ -2,9 +2,11 @@
 
 define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_request', './item_views',
     'js/widgets/base/paginated_multi_callback_widget', 'js/components/paginator',
-     'js/mixins/widget_pagination'],
+     'js/mixins/widget_pagination',
+     'js/components/api_query_updater'],
   function (Backbone, Marionette, ApiQuery, ApiRequest, FacetItemViews, PaginatedMultiCallbackWidget, Paginator,
-    WidgetPagination) {
+    WidgetPagination,
+    ApiQueryUpdater) {
 
     var BaseFacetWidget = PaginatedMultiCallbackWidget.extend({
 
@@ -15,10 +17,17 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
         this.view = options.view;
         this.collection = options.view.collection;
-        this.facetField = options.facetField;
+
+
+        PaginatedMultiCallbackWidget.prototype.initialize.call(this, options)
 
         this.listenTo(this.view, "all", this.onAllInternalEvents);
-        PaginatedMultiCallbackWidget.prototype.initialize.call(this, options)
+        if (! this.defaultQueryArguments['facet.field']) {
+          throw new Error("Required parameter defaultQueryArguments[facet.field] is missing");
+        }
+        this.facetField = this.defaultQueryArguments['facet.field'];
+        this.queryUpdater = new ApiQueryUpdater(this.facetField);
+
       },
 
 
@@ -130,15 +139,9 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
       },
 
 
-      onMoreDataRequested: function () {
-        throw new Error('wtf!');
-      },
-
-
-
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
-        //console.log(ev);
+        console.log(ev);
         if (ev === 'changeApplySubmit') {
           throw new Error('OK');
         }
@@ -156,6 +159,32 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
             this._dispatchRequest(this.getCurrentQuery());
           }
         }
+        else if (ev == 'itemview:itemClicked') {
+          var model = arg1.model; // <- the view in question
+          this.handleConditionApplied(model);
+        }
+      },
+
+
+      handleConditionApplied: function(model) {
+        var q = this.getCurrentQuery();
+        var value = model.get('value');
+
+        if (value) {
+          var paginator = this.findPaginator(q).paginator;
+
+          q = q.clone();
+          value = this.queryUpdater.escapeInclWhitespace(value);
+          if (model.get('selected')) {
+            this.queryUpdater.updateQuery('q', q, value, 'AND', 'add');
+          }
+          else {
+            this.queryUpdater.updateQuery('q', q, value, 'AND', 'remove');
+          }
+
+          this.dispatchNewQuery(paginator.cleanQuery(q));
+        }
+
       },
 
       // XXX:rca - this should really have been inside the view
