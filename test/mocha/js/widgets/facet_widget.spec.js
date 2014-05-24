@@ -46,7 +46,7 @@ define([
         minsub.close();
         var ta = $('#test-area');
         if (ta) {
-          //ta.empty();
+          ta.empty();
         }
       });
 
@@ -59,7 +59,10 @@ define([
             maxDisplayNum: 10,
             openByDefault: true,
             showOptions: true
-          })
+          }),
+         defaultQueryArguments: {
+           'facet.field': 'foo'
+         }
         });
 
         expect(w).to.be.instanceof(FacetWidget);
@@ -124,14 +127,15 @@ define([
           })
         });
 
-        //sinon.spy(widget.getView(), "dispatchRequest");
-        //sinon.spy(widget.getView(), "processResponse");
+        sinon.spy(widget, "_dispatchRequest");
+        sinon.spy(widget, "processResponse");
+        sinon.spy(widget, "dispatchNewQuery");
 
         widget.activate(minsub.beehive.getHardenedInstance());
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
-        //$('#test-area').append($w);
+        $('#test-area').append($w);
 
         // options are there and visible
         expect($w.find('.widget-options.bottom').hasClass('hide')).to.be.false;
@@ -146,6 +150,22 @@ define([
             expect($w.find('.item-view').filter('.hide').length).to.be.equal(4);
             expect(widget.collection.models[0].get('title')).to.be.equal('0/Head, J');
             expect(widget.collection.models[5].get('title')).to.be.equal('0/Wang, J');
+
+            expect(widget._dispatchRequest.callCount).to.be.equal(2);
+            expect(widget.processResponse.callCount).to.be.equal(2);
+
+            // select one item - this should trigger new query
+            $w.find('.item-view:eq(5) input').click();  // XXX for some reason this works only if it is appended to the page
+            expect(widget.dispatchNewQuery.callCount).to.be.equal(1);
+            expect(widget.dispatchNewQuery.args[0][0].get('q')).to.be.eql(['star', '0\\/Wang,\\ J']);
+            expect(widget.processResponse.callCount).to.be.equal(3);
+
+
+            // which updates the view
+            expect($w.find('.widget-options.bottom').hasClass('hide')).to.be.false;
+            expect($w.find('.item-view').length).to.be.equal(5);
+            expect($w.find('.item-view').not('.hide').length).to.be.equal(3);
+
             done();
           }
         ,50);
@@ -171,7 +191,7 @@ define([
           expect(c).to.have.property("allCaps");
           expect(c).to.have.property("removeSlash");
 
-        })
+        });
         it("should initiate a facet model with appropriate default values", function () {
           //for change-apply containers
           expect(c.models[0].attributes).to.include.key("newValue");
@@ -185,4 +205,4 @@ define([
 
     })
 
-  })
+  });

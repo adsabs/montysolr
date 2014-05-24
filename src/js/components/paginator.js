@@ -1,5 +1,17 @@
 /**
  * Created by alex on 5/10/14.
+ * Updated by roman on 5/17/14
+ *
+ * The Paginator object updates the ApiQuery by setting the new pagination
+ * parameters (or replacing the existing ones). It is typically used by
+ * a widget before a new query is sent to the Forbidden City
+ *
+ * The paginator should be 'reset' if it is dealing with a totally new
+ * query.
+ *
+ * Paginator doesn't know how many total results there are until
+ * you call 'setMaxNum' -- this typically happens after the first
+ * batch of results arrives from server (the widget must call 'setMaxNum')
  */
 define(['underscore'], function (_) {
 
@@ -61,6 +73,16 @@ define(['underscore'], function (_) {
         return true;
       }
       return false;
+    },
+
+    /**
+     * Removes any notion of pagination from the ApiQuery
+     * @returns {ApiQuery}
+     */
+    cleanQuery: function(apiQuery) {
+      apiQuery.unset(this.startName);
+      apiQuery.unset(this.rowsName);
+      return apiQuery;
     }
 
   });
