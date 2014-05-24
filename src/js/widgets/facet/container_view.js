@@ -1,9 +1,15 @@
 define(['backbone', 'marionette',
     'js/widgets/base/container_view',
     'js/mixins/widget_pagination',
-    'js/components/paginator'
+    'js/components/paginator',
+    'js/widgets/base/item_view'
   ],
-  function (Backbone, Marionette, ContainerView, WidgetPagination, Paginator) {
+  function (Backbone,
+            Marionette,
+            ContainerView,
+            WidgetPagination,
+            Paginator,
+            BaseItemView) {
 
     var FacetContainerView = ContainerView.extend({
 
@@ -18,6 +24,7 @@ define(['backbone', 'marionette',
       },
 
       //id: "search-results",
+      itemView: BaseItemView,
       itemViewContainer: ".widget-body",
 
       itemViewOptions: function (model, index) {
@@ -39,7 +46,7 @@ define(['backbone', 'marionette',
 
       onRender: function() {
         this._onRender();
-        if (this.collection.models.length >= this.displayNum) {
+        if (this.collection && this.collection.models.length >= this.displayNum) {
           this.enableShowMore();
         }
       },

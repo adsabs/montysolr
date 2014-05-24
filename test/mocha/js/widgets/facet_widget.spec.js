@@ -38,7 +38,7 @@ define([
         minsub.close();
         var ta = $('#test-area');
         if (ta) {
-          ta.empty();
+          //ta.empty();
         }
       });
 
@@ -56,6 +56,11 @@ define([
 
         expect(w).to.be.instanceof(FacetWidget);
         expect(w).to.be.instanceof(FacetWidgetSuperClass);
+
+        // it is empty by default (this is inconsistent! because view.render() returns obj and not obj.el)
+        $w = $(w.render());
+        expect($w.find('h5').text()).to.be.equal('Facet Title');
+        expect($w.find('.widget-body').text().trim()).to.be.equal('No content to display.');
       });
 
       it("should throw errors when you instantiate it without proper variables", function() {
@@ -84,6 +89,8 @@ define([
         sinon.spy(widget, "processResponse");
 
         widget.activate(minsub.beehive.getHardenedInstance());
+
+        $('#test-area').append(widget.render());
 
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
         expect(widget.dispatchRequest.called).to.be.true;

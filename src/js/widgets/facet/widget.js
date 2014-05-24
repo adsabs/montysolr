@@ -99,7 +99,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
         var fValue, fNum;
         var preprocessorChain = this.getPreprocessorChain();
 
-        for (var i=0; i<l; i+2) {
+        for (var i=0; i<l; i=i+2) {
 
           fValue = facets[i];
           fNum = facets[i+1];
@@ -114,7 +114,6 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           }
 
           var modifiedValue = preprocessorChain.call(this, fValue);
-
           var d = {
             title: " " + modifiedValue + " (" + fNum + ")",
             value: fValue,
@@ -135,12 +134,13 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           console.log("resetting the collection")
           coll.reset(facetsCol);
           coll.needsReset = false;
-          view.triggerMethod("composite:collection:reset:add")
+          //view.triggerMethod("composite:collection:reset:add")
 
         }
         else {
           coll.add(facetsCol);
-          view.triggerMethod("composite:collection:reset:add")
+          console.log(coll.length);
+          //view.triggerMethod("composite:collection:reset:add")
         }
       },
 
