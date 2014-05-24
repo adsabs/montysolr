@@ -23,7 +23,7 @@ define(['underscore'], function (_) {
      *    - properly initialized instance of 'Paginator'
      * @param view
      *    - must contain methods: 
-     *        disableLoadMore([msg])
+     *        disableShowMore([msg])
      *        displayMore(num)
      *        
      * @param collection
@@ -49,8 +49,8 @@ define(['underscore'], function (_) {
         throw new Error("Wrong arguments");
       }
 
-      if (!(paginator && paginator.hasMore && view && view.displayMore && view.disableLoadMore)) {
-        throw new Error("Your paginator and/or view are missing important methods");
+      if (!(paginator && paginator.hasMore && view && view.displayMore && view.disableShowMore)) {
+        throw new Error("Your paginator (hasMore) and/or view are missing important methods (displayMore/disableShowMore)");
       }
 
       if (!(collection && collection.models)) {
@@ -65,7 +65,7 @@ define(['underscore'], function (_) {
         var realDisplayLength = collection.models.length - numOfLoadedButHiddenItems;
 
         if (realDisplayLength >= maxDisplayNum) {
-          view.disableLoadMore("Reached max " + this.maxDisplayNum);
+          view.disableShowMore("Reached max " + this.maxDisplayNum);
           return;
         }
 
@@ -77,10 +77,10 @@ define(['underscore'], function (_) {
             return;
           }
           else {
-            var cachedDisplay = _adjustMaxDisplay(realDisplayLength, paginator.rows - displayNum);
+            var cachedDisplay = _adjustMaxDisplay(realDisplayLength, numOfLoadedButHiddenItems);
             this.view.displayMore(cachedDisplay); // display one part from the hidden items
             realDisplayLength += cachedDisplay;
-            toDisplay = _adjustMaxDisplay(realDisplayLength, toDisplay - (paginator.rows - displayNum));
+            toDisplay = _adjustMaxDisplay(realDisplayLength, toDisplay-cachedDisplay);
           }
         }
 
@@ -104,14 +104,14 @@ define(['underscore'], function (_) {
         }
 
         if (toDisplay + realDisplayLength >= maxDisplayNum) {
-          view.disableLoadMore("Reached max " + maxDisplayNum);
+          view.disableShowMore("Reached max " + maxDisplayNum);
         }
 
         return output;
       }
       else {
         view.displayMore(numOfLoadedButHiddenItems);
-        view.disableLoadMore();
+        view.disableShowMore();
       }
 
     }

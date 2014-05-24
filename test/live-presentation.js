@@ -101,7 +101,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
     facetField: "year",
     userFacingName: "Year",
     xAxisTitle: "Year",
-    openByDefault: true,
+    openByDefault: true
   });
 
   queryInfo.activate(beehive.getHardenedInstance())
@@ -121,26 +121,26 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
 
 
 
-  $("#top").append(s.getView().render().el)
+  $("#top").append(s.render().el)
 
-  $("#middle").append(r.getView().render().el)
+  $("#middle").append(r.render().el)
 
-  $("#left").append(a.getView().render().el)
-  $("#left").append(database.getView().render().el)
-  $("#left").append(refereed.getView().render().el)
-  $("#left").append(keywords.getView().render().el)
-  $("#left").append(pub.getView().render().el)
-  $("#left").append(bibgroup.getView().render().el)
-  $("#left").append(data.getView().render().el)
-  $("#left").append(vizier.getView().render().el)
-  $("#left").append(grants.getView().render().el)
-
-
+  $("#left").append(a.render().el)
+  $("#left").append(database.render().el)
+  $("#left").append(refereed.render().el)
+  $("#left").append(keywords.render().el)
+  $("#left").append(pub.render().el)
+  $("#left").append(bibgroup.render().el)
+  $("#left").append(data.render().el)
+  $("#left").append(vizier.render().el)
+  $("#left").append(grants.render().el)
 
 
-  $("#right").append(queryInfo.getView().render().el)
-  $("#right").append(y.getView().render().el)
-  $("#right").append(c.getView().render().el)
+
+
+  $("#right").append(queryInfo.render().el)
+  $("#right").append(y.render().el)
+  $("#right").append(c.render().el)
 
 
 

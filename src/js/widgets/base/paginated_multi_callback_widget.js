@@ -11,7 +11,13 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
         this.paginator = options.paginator || new Paginator({"start": options.start, "rows": options.rows,
           "startName": options.startName, "rowsName": options.rowsName});
         this._paginators = {};
-        MultiCallbackWidget.prototype.initialize.call(this, options)
+        MultiCallbackWidget.prototype.initialize.call(this, options);
+      },
+
+      dispatchRequest: function(apiQuery) {
+        var pag = this.findPaginator(apiQuery);
+        pag.paginator.reset();
+        this._dispatchRequest(apiQuery);
       },
 
       /**
@@ -26,7 +32,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           q = this.composeQuery(this.defaultQueryArguments, q);
         }
         var pag = this.findPaginator(q);
-        var newQ = this.paginator.run(q);
+        var newQ = pag.paginator.run(q);
         this.reAssignPaginator(pag.key, newQ.url());
         return newQ;
       },

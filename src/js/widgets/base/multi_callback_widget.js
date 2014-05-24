@@ -121,7 +121,8 @@ define(['backbone', 'marionette', 'js/components/api_query',
        * @param apiResponse
        */
       processResponse: function(apiResponse) {
-        var id = apiResponse.getApiQuery().url();
+        var q = apiResponse.getApiQuery();
+        var id = q.url();
         var parameters, callback;
 
         //find the callback based on the key of the query
@@ -138,6 +139,7 @@ define(['backbone', 'marionette', 'js/components/api_query',
 
         //remove the callback from this.queriesInProgress
         this.removeCallback(id);
+        this.setCurrentQuery(q);
       }
 
     });

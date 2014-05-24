@@ -1,8 +1,10 @@
 
 
 define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_request', './item_views',
-    'js/widgets/base/paginated_multi_callback_widget', 'js/components/paginator'],
-  function (Backbone, Marionette, ApiQuery, ApiRequest, FacetItemViews, PaginatedMultiCallbackWidget, Paginator) {
+    'js/widgets/base/paginated_multi_callback_widget', 'js/components/paginator',
+     'js/mixins/widget_pagination'],
+  function (Backbone, Marionette, ApiQuery, ApiRequest, FacetItemViews, PaginatedMultiCallbackWidget, Paginator,
+    WidgetPagination) {
 
     var BaseFacetWidget = PaginatedMultiCallbackWidget.extend({
 
@@ -15,75 +17,47 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
         this.collection = options.view.collection;
         this.facetField = options.facetField;
 
-        //telling widget how to use pagination variables
-        this.start = 0, this.rows = 15;
-        this.startName = "facet.offset";
-        this.rowsName = "facet.limit";
-
-
-        this.solrPath = options.solrPath || "facet_counts.facet_fields";
-        if (this.solrPath === "facet_counts.facet_fields") {
-          this.requestParams = function () {
-            return  {"facet": "true",
-              "facet.field": this.facetField,
-              "facet.mincount": "1"
-            }
-          }
-        }
-
-        //deliver info to pubsub after one of two main submit events (depending on facet type)
-        this.listenTo(this.view, "changeApplySubmit", this.onFacetApplySubmit);
-        this.listenTo(this.view, "containerLogicSelected", this.onContainerLogicSelected);
-        this.listenTo(this.view, "moreDataRequested", this.onMoreDataRequested);
-
+        this.listenTo(this.view, "all", this.onAllInternalEvents);
         PaginatedMultiCallbackWidget.prototype.initialize.call(this, options)
       },
 
 
-      dispatchRequest: function (apiQuery) {
+      _dispatchRequest: function (apiQuery) {
         var q = this.customizeQuery(apiQuery);
         if (q) {
           var qid = q.url();
-          this.registerCallback(qid, this.processFacetResponse, {collection: this.collection});
+          this.registerCallback(qid, this.processFacetResponse, {collection: this.collection, view: this.view});
           var req = this.composeRequest(q);
           if (req) {
             this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-            this.collection.needsReset = true; //XXX:rca ???
           }
         }
       },
 
-      /*takes raw solr info, returns an array of dicts suitable for
-       adding to a collection. Useful for main queries and hierarchical queries.
-       This is just the basic version for checkbox views, otherwise override*/
-
-      /*
-       XXX:rca - so this is VERY confusing - if you follow the chain of inheritance, you will
-       see that the BasicWidget registers 'processResponse' method as a method
-       that communicates with PubSub; but here you are using the same method to pass additional
-       data (it will never be called with this data by PubSub)
-
-       I propose that you always keep the signature (and if we need to change the method signature
-       we change it everywhere (this is just to keep our sanity - api is a 'contract' and javascript
-       is loose; so we must be careful)
-
-       ...and rename this method to something else (it should be used only inside the widget;
-       it is not facing PubSub)
-
+      /**
+       * Default (generic) method for handling single-level facets; it knows how to page
+       * through results
+       *
+       * @param apiResponse
+       * @param data
        */
       processFacetResponse: function (apiResponse, data) {
         //starting assumption is that the collection could fetch more facets if it wanted to
 
         var query = apiResponse.getApiQuery();
+        var paginator = this.findPaginator(query).paginator;
+
         var fField = query.get('facet.field');
 
         if (!fField) {
           throw Error('The query contains no facet.field parameter!');
         }
 
+        var view = data.view;
         var coll = data.collection;
         var facetPath = "facet_counts.facet_fields." + fField;
 
+        // no data for us
         if (!apiResponse.has(facetPath)) {
           coll.reset();
           return;
@@ -104,18 +78,9 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           fValue = facets[i];
           fNum = facets[i+1];
 
-          // XXX:rca i don't believe this is correct (it must depend on the query)
-
-          /*if it's hierarchical, drop solr data points that aren't at this level
-           (I don't know why they are included)
-           also drop facets that occur 0 times (this is mainly for hierarchical facets)*/
-          if (typeof coll.level === "number" && fValue.indexOf('/') > -1 && coll.level !== parseInt(fValue.split('/')[0])) {
-            return;
-          }
-
           var modifiedValue = preprocessorChain.call(this, fValue);
           var d = {
-            title: " " + modifiedValue + " (" + fNum + ")",
+            title: modifiedValue,
             value: fValue,
             count: fNum,
             modified: modifiedValue
@@ -130,17 +95,19 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           view.itemView = FacetItemViews.CheckboxOneLevelView;
         }
 
-        if (coll.needsReset) {
-          console.log("resetting the collection")
+        // check whether we were fetching more data or we were getting fresh data
+        if (paginator.getCycle() <= 1) {
           coll.reset(facetsCol);
-          coll.needsReset = false;
-          //view.triggerMethod("composite:collection:reset:add")
-
-        }
-        else {
+          paginator.setMaxNum(apiResponse.get('response.numFound')); // XXX:rca - facets will have a different counter
+          if (paginator.maxNum > view.displayNum) {
+            view.enableShowMore();
+          }
+          else {
+            view.disableShowMore();
+          }
+        } else {
+          //it's in response to "load more"
           coll.add(facetsCol);
-          console.log(coll.length);
-          //view.triggerMethod("composite:collection:reset:add")
         }
       },
 
@@ -169,6 +136,27 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
 
 
+      //deliver info to pubsub after one of two main submit events (depending on facet type)
+      onAllInternalEvents: function(ev, arg1, arg2) {
+        //console.log(ev);
+        if (ev === 'changeApplySubmit') {
+          throw new Error('OK');
+        }
+        else if (ev === 'containerLogicSelected') {
+
+        }
+        else if (ev === 'moreDataRequested') {
+
+        }
+        else if (ev == "fetchMore") {
+          var pag = this.findPaginator(this.getCurrentQuery());
+          var p = this.handlePagination(this.view.displayNum, this.view.maxDisplayNum, arg1, pag.paginator, this.view, this.collection);
+          if (p && p.before) {
+            p.before();
+            this._dispatchRequest(this.getCurrentQuery());
+          }
+        }
+      },
 
       // XXX:rca - this should really have been inside the view
       // the view should extract the data and pass them to the
@@ -251,6 +239,9 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
       }
 
     });
+
+    // add mixins
+    _.extend(BaseFacetWidget.prototype, WidgetPagination);
 
     return BaseFacetWidget
 

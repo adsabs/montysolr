@@ -41,6 +41,7 @@ define(['underscore'], function (_) {
       return apiQuery;
     },
 
+
     reset: function (initialStart) {
       this.start = initialStart || this.initialStart;
       this.maxNum = -1;

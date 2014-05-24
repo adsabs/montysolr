@@ -151,11 +151,11 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
 
       //XXX:alex - we need something better, I have no idea how to render templates
       // and if jquery modifications are OK
-      disableLoadMore: function(text) {
+      disableShowMore: function(text) {
         this.$('.load-more').hide();
       },
 
-      enableLoadMore: function(text) {
+      enableShowMore: function(text) {
         this.$('.load-more').show();
       },
 
@@ -240,10 +240,10 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
           });
           this.paginator.setMaxNum(apiResponse.get('response.numFound'));
           if (this.paginator.maxNum > this.displayNum) {
-            this.view.enableLoadMore();
+            this.view.enableShowMore();
           }
           else {
-            this.view.disableLoadMore();
+            this.view.disableShowMore();
           }
         } else {
           //it's in response to "load more"
@@ -258,7 +258,7 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
         //console.log(ev);
 
         if (ev == 'composite:rendered') {
-          this.view.disableLoadMore();
+          this.view.disableShowMore();
         }
         else if (ev == 'reset') {
           if (this.collection.models.length > 0) {

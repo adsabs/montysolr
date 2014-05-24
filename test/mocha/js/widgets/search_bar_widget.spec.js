@@ -13,7 +13,7 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget', 'js/components/beeh
 
       widget = new SearchBarWidget();
       widget.activate(beehive.getHardenedInstance());
-      w = widget.getView().render().el;
+      var w = widget.render().el;
 
       $("#test").append(w)
 
