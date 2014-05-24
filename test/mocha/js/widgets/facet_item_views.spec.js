@@ -114,7 +114,7 @@ define([
           }).models[0];
 
           var graphView = new ZoomableGraphView({
-            facetName     : "test",
+            facetField     : "test",
             userFacingName: "Year Test",
             xAxisTitle    : "Year",
             model         : fakeModel

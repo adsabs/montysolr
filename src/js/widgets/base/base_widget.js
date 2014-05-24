@@ -53,7 +53,10 @@ define(['backbone', 'marionette',
       _.bindAll(this, "dispatchRequest", "processResponse");
 
       this._currentQuery = new ApiQuery();
-      this.defaultQueryArguments = this.defaultQueryArguments || options.defaultQueryArguments || {};
+      this.defaultQueryArguments = this.defaultQueryArguments || {};
+      if (options.defaultQueryArguments) {
+        this.defaultQueryArguments = _.extend(this.defaultQueryArguments, options.defaultQueryArguments);
+      }
 
       // XXX: here the widget should do something with the views/models/templates
       // to set everything up
@@ -83,7 +86,10 @@ define(['backbone', 'marionette',
      * Default callback to be called by PubSub on 'INVITING_REQUEST'
      */
     dispatchRequest: function (apiQuery) {
+      this._dispatchRequest(apiQuery);
+    },
 
+    _dispatchRequest: function(apiQuery) {
       var q = this.customizeQuery(apiQuery);
       if (q) {
         var req = this.composeRequest(q);
@@ -92,7 +98,6 @@ define(['backbone', 'marionette',
         }
       }
     },
-
 
     /**
      * Default action to modify ApiQuery (called from inside dispatchRequest)
@@ -193,9 +198,29 @@ define(['backbone', 'marionette',
       }
     },
 
+    /**
+     * Convention inside Backbone and Marionette is to return 'this'
+     * - since 'this' usually refers to a 'View', we'll return the
+     * view here
+     *
+     * @returns {view}
+     */
     render : function(){
       this.view.render();
-      return this.view.el;
+      return this.view;
+    },
+
+    /**
+     * A standard method, called by widgets when they want to
+     * check default widget compomenets
+     */
+    _checkStandardWidgetOptions: function(options) {
+      if (typeof options.view === "undefined") {
+        throw new Error("Missing view")
+      }
+      if (typeof options.view.collection === "undefined") {
+        throw new Error("Missing view.collection");
+      }
     }
 
   }, {mixin: WidgetMixin});

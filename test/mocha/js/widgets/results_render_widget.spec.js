@@ -22,14 +22,10 @@ define(['marionette',
       beforeEach(function() {
 
         minsub = new (MinimalPubsub.extend({
-          requestCounter: 0,
           request: function(apiRequest) {
-            this.requestCounter++;
             if (this.requestCounter % 2 === 0) {
-              console.log('two');
               return Test2;
             } else {
-              console.log('one');
               return Test1;
             }
           }
@@ -60,7 +56,7 @@ define(['marionette',
       it("hides Load more if there is no data", function() {
         var widget = new ResultsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
-        var $w = $(widget.render());
+        var $w = $(widget.render().el);
 
         expect($w.find('.load-more').css('display')).to.be.equal('none');
 
@@ -74,7 +70,7 @@ define(['marionette',
 
         var widget = new ResultsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
-        var $w = $(widget.render());
+        var $w = $(widget.render().el);
 
         //get widget to request info
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
@@ -104,7 +100,7 @@ define(['marionette',
         });
         widget.activate(minsub.beehive.getHardenedInstance());
 
-        var $w = $(widget.render());
+        var $w = $(widget.render().el);
         $('#test-area').append($w);
 
         //get widget to request info
@@ -155,7 +151,7 @@ define(['marionette',
 
         var widget = new ResultsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
-        var $w = $(widget.render());
+        var $w = $(widget.render().el);
 
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
           q: "star"
@@ -182,7 +178,7 @@ define(['marionette',
           q: "star"
         }));
 
-        var v = widget.getView();
+        var v = widget.render();
 
         expect(v.$('.more-info:last').hasClass("hide")).to.equal(true);
         v.$("#show-results-snippets").click();

@@ -3,7 +3,7 @@
  * made from combination of different options
  */
 
-define(['./item_view', './hierarchical_item_view', 'hbs!./templates/item-checkbox'
+define(['js/widgets/base/item_view', './hierarchical_item_view', 'hbs!./templates/item-checkbox'
 ], function (BaseItemView, BaseHierarchicalItemView, ItemCheckBoxTemplate) {
 
 

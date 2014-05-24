@@ -7,7 +7,7 @@ define([
     'js/widgets/facet/collection',
     'js/widgets/facet/change_apply_container_view',
     'js/widgets/facet/hierarchical_controller',
-    'js/widgets/facet/base_controller',
+    'js/widgets/facet/widget',
     'js/widgets/facet/item_views'
   ],
   function (Marionette, FacetCollection, ChangeApplyContainerView, HierarchicalFacetController, BaseFacetController, AdditionalViews) {
@@ -35,13 +35,13 @@ define([
             model     : fakeModel,
             collection: new FacetCollection(fakeFacetData),
             itemView  : AdditionalViews.CheckboxOneLevelView,
-            facetName : "TestFacet"
+            facetField : "TestFacet"
 
           })
 
           base = new BaseFacetController({
             view     : fakeContainerView,
-            facetName: "test"
+            facetField: "test"
           })
 
         })
@@ -87,14 +87,14 @@ define([
             model     : fakeModel,
             collection: fakeCollection,
             itemView  : AdditionalViews.CheckboxHierarchicalView,
-            facetName : "TestFacet"
+            facetField : "TestFacet"
           })
 
           fakeHierRequest = sinon.stub(HierarchicalFacetController.prototype, "requestChildData");
 
           hierarchical = new HierarchicalFacetController({
             view     : fakeContainerView,
-            facetName: "test"
+            facetField: "test"
           });
 
 

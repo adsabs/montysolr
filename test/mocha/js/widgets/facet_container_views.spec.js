@@ -2,7 +2,7 @@
  * Created by rchyla on 2014-05-14.
  */
 
-define(['js/widgets/facet/base_container_view',
+define(['../../../../src/js/widgets/facet/container_view',
     'js/widgets/facet/change_apply_container_view',
     'js/widgets/facet/logic_container_view',
     'js/widgets/facet/collection',

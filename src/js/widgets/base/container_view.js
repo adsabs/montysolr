@@ -1,11 +1,11 @@
 define(['backbone', 'marionette',
-    'hbs!./templates/base-container', 'hbs!./templates/empty', 'bootstrap'
+    'hbs!./templates/widget-container', 'hbs!./templates/empty'
   ],
-  function(Backbone, Marionette, BaseFacetContainer, EmptyFacetTemplate) {
+  function(Backbone, Marionette, WidgetContainerTemplate, EmptyTemplate) {
 
     //if there is an error, show this
-    var NoFacetsView = Backbone.Marionette.ItemView.extend({
-      template: EmptyFacetTemplate
+    var EmptyView = Backbone.Marionette.ItemView.extend({
+      template: EmptyTemplate
     });
 
     //this holds the title of the facet as it should be shown in the ui
@@ -22,22 +22,22 @@ define(['backbone', 'marionette',
       /**
        * Template for the container
        */
-      template: BaseFacetContainer,
+      template: WidgetContainerTemplate,
 
       /**
        * This will be the class in which the view is going to be wrapped
        */
-      className: "facet-widget",
+      className: "widget-container",
 
       /**
        * The container nested inside className object
        */
-      itemViewContainer: ".facet-items",
+      itemViewContainer: ".widget-body",
 
       /**
        * What to use when there is no collection yet
        */
-      emptyView: NoFacetsView,
+      emptyView: EmptyView,
 
 
       /**
@@ -45,8 +45,9 @@ define(['backbone', 'marionette',
        */
       events: {
         //"click .main-caret": "toggleFacet",
-        "click .facet-name > h5": "toggleFacet",
-        "click .show-more": "showExtraItems"
+        "click .widget-name:first > h5": "toggleWidget",
+        "click .widget-options.top:first": "onClickOptions",
+        "click .widget-options.bottom:first": "onClickOptions"
       },
 
       // if we want to do some setup, ths is the way to go
@@ -71,11 +72,16 @@ define(['backbone', 'marionette',
        * Called right after the view has been rendered
        */
       onRender: function() {
+        this._onRender();
+      },
+
+      _onRender: function() {
         if (this.openByDefault) {
-          this.toggleFacet();
+          this.toggleWidget();
         }
         if (this.showOptions) {
-          this.$(".facet-options").removeClass("hide");
+          this.$(".widget-options:first").removeClass("hide");
+          this.$(".widget-options.bottom:first").removeClass("hide");
         }
       },
 
@@ -84,18 +90,35 @@ define(['backbone', 'marionette',
        *
        * @param e
        */
-      toggleFacet: function (e) {
-        var $caret = this.$(".main-caret");
+      toggleWidget: function (e) {
+        var $caret = this.$(".main-caret:first");
         if ($caret.hasClass("item-open")) {
           $caret.removeClass("item-open");
           $caret.addClass("item-closed");
-          this.$(".facet-body").addClass("hide");
+          this.$(".widget-body:first").addClass("hide");
         }
         else {
           $caret.removeClass("item-closed");
           $caret.addClass("item-open");
-          this.$(".facet-body").removeClass("hide");
+          this.$(".widget-body:first").removeClass("hide");
         }
+      },
+
+
+      onClickOptions: function(ev) {
+        if (ev && ev.target) {
+          var $el = $(ev.target);
+          var text = $el.text().trim();
+          var tgt = $el.attr('target');
+          ev.preventDefault();
+          if (tgt) {
+            this.triggerMethod(tgt, ev);
+          }
+          else if (text) {
+            this.triggerMethod(text.replace(' ', ''), ev);
+          }
+        }
+
       },
 
       /**
@@ -132,9 +155,9 @@ define(['backbone', 'marionette',
        */
       handleError: function(err) {
         if (err && err.msg) {
-          this.$('.facet-name > h5').attr('title', err.msg);
+          this.$('.widget-name:first > h5').attr('title', err.msg);
         }
-        this.$('.facet-name').addClass('error');
+        this.$('.widget-name:first').addClass('error');
         this._states.push(500);
       },
 
@@ -145,18 +168,18 @@ define(['backbone', 'marionette',
       handleWaiting: function() {
         // XXX:alex - we should do something better (like go into background;
         // overlay it....)
-        this.$('.facet-body').addClass('waiting');
+        this.$('.widget-body').addClass('waiting');
         this._states.push(300);
       },
 
       revertState: function(state) {
 
         if (state == 300) {
-          this.$('.facet-body').removeClass('waiting');
+          this.$('.widget-body:first').removeClass('waiting');
         }
         else if (state == 500) {
-          this.$('.facet-name').removeClass('error');
-          this.$('.facet-name > h5').attr('title', "");
+          this.$('.widget-name:first').removeClass('error');
+          this.$('.widget-name:first > h5').attr('title', "");
         }
       }
 

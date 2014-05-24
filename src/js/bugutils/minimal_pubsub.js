@@ -1,17 +1,48 @@
+/**
+ * A minimal request-response chain; this can be used in simple applications or
+ * for testing purposes (ie. unittests) like this:
+ *
+ *
+ * var minsub = new (MinimalPubsub.extend({
+ *         request: function(apiRequest) {
+ *           return {some: 'foo'}
+ *         }
+ *         }))({verbose: false});
+ *
+ *
+ * // and the rest is standard mantra...
+ *
+ * var widget = new MyNewWidget();
+ * widget.activate(minsub.beehive.getHardenedInstance());
+ *
+ * minsub.publish(minsub.NEW_QUERY, new ApiQuery({q: 'star'}));
+ *
+ *
+ * You just need to implement a request method, which returns a JSON
+ * object (MinSub will wrap that object into ApiResponse) and
+ * deliver to the requesting application
+ *
+ * Options:
+ *
+ *    - verbose: true/false
+ *        will log into the console what is going on
+ *
+ */
+
 define(['underscore', 'backbone',
   'js/components/query_mediator',
   'js/services/pubsub',
   'js/components/beehive',
   'js/components/pubsub_events',
-  'js/components/api_response'], function(
+  'js/components/api_query'
+], function(
   _,
   BackBone,
   QueryMediator,
   PubSub,
   BeeHive,
   PubSubEvents,
-  ApiResponse
-
+  ApiQuery
   ) {
 
   var MinimalPubsub = function() {
@@ -22,13 +53,21 @@ define(['underscore', 'backbone',
 
   _.extend(MinimalPubsub.prototype, Backbone.Events, PubSubEvents,  {
     initialize: function(options) {
+      if (options.verbose) {
+        console.log('[MinSub]', 'starting');
+      }
+      this.requestCounter = 0;
       this.beehive = new BeeHive();
       this.pubsub = new PubSub();
       this.beehive.addService('PubSub', this.pubsub);
       var self = this;
       this.beehive.addService('Api', {
         request: function(req, context) {
+          self.requestCounter += 1;
           var response = self.request.apply(self, arguments);
+          if (self.verbose) {
+            console.log('[MinSub]', 'request', self.requestCounter, response);
+          }
           context.done.call(context.context, response);
         }});
       this.beehive.addObject('QueryMediator', new QueryMediator());
@@ -43,6 +82,9 @@ define(['underscore', 'backbone',
     },
 
     close: function(){
+      if (this.verbose) {
+        console.log('[MinSub]', 'closing');
+      }
       this.beehive.close();
     },
 
@@ -66,8 +108,14 @@ define(['underscore', 'backbone',
     },
 
     request: function(apiRequest, params) {
-      console.log('[Api]', apiRequest, params);
+      if (this.verbose) {
+        console.log('[Api]', 'request', apiRequest, params);
+      }
       return {};
+    },
+
+    createQuery: function(data) {
+      return new ApiQuery(data);
     }
 
   });

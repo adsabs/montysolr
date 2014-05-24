@@ -16,54 +16,54 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
   var s = new SearchBar();
   var r = new ResultsRender({pagination: {rows: 40, start:0}});
   var c = FacetFactory.makeGraphFacet({
-    facetName: "citation_count",
+    facetField: "citation_count",
     userFacingName: "Citations",
     xAxisTitle: "Citation Count",
     openByDefault: true,
   });
 
   var a = FacetFactory.makeHierarchicalCheckboxFacet({
-    facetName: "author",
+    facetField: "author",
     userFacingName: "Authors",
     openByDefault: true,
     preprocess: ["titleCase", "removeSlash"]
   })
   var keywords = FacetFactory.makeBasicCheckboxFacet({
-    facetName: "keyword",
+    facetField: "keyword",
     userFacingName: "Keywords",
     openByDefault: false,
     preprocess: ["titleCase", "removeSlash"]
   })
 
   var database = FacetFactory.makeBasicCheckboxFacet({
-    facetName: "database",
+    facetField: "database",
     userFacingName: "Databases",
     openByDefault: true,
     preprocess: "titleCase",
   })
   var data = FacetFactory.makeBasicCheckboxFacet({
-    facetName: "data",
+    facetField: "data",
     userFacingName: "Data",
     openByDefault: false,
     preprocess: "allCaps",
   })
 
   var vizier = FacetFactory.makeBasicCheckboxFacet({
-    facetName: "vizier",
+    facetField: "vizier",
     userFacingName: "Vizier Tables",
     openByDefault: false,
     preprocess: "allCaps",
   })
 
   var pub = FacetFactory.makeBasicCheckboxFacet({
-    facetName: "bibstem",
+    facetField: "bibstem",
     userFacingName: "Publications",
     openByDefault: false,
     preprocess: "allCaps",
     multiLogic: ["or", "exclude"]
   })
   var bibgroup = FacetFactory.makeBasicCheckboxFacet({
-    facetName: "bibgroup",
+    facetField: "bibgroup",
     userFacingName: "Bib Groups",
     openByDefault: false,
     preprocess: "allCaps",
@@ -71,7 +71,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
   })
 
   var grants = FacetFactory.makeHierarchicalCheckboxFacet({
-    facetName: "grant",
+    facetField: "grant",
     userFacingName: "Grants",
     openByDefault: false,
     preprocess: ["allCaps", "removeSlash"],
@@ -79,7 +79,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
   })
 
   var refereed = FacetFactory.makeBasicCheckboxFacet({
-    facetName: "property",
+    facetField: "property",
     userFacingName: "Refereed Status",
     openByDefault: true,
     multiLogic: "fullSet",
@@ -98,10 +98,10 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
   })
 
   var y = FacetFactory.makeGraphFacet({
-    facetName: "year",
+    facetField: "year",
     userFacingName: "Year",
     xAxisTitle: "Year",
-    openByDefault: true,
+    openByDefault: true
   });
 
   queryInfo.activate(beehive.getHardenedInstance())
@@ -121,26 +121,26 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
 
 
 
-  $("#top").append(s.getView().render().el)
+  $("#top").append(s.render().el)
 
-  $("#middle").append(r.getView().render().el)
+  $("#middle").append(r.render().el)
 
-  $("#left").append(a.getView().render().el)
-  $("#left").append(database.getView().render().el)
-  $("#left").append(refereed.getView().render().el)
-  $("#left").append(keywords.getView().render().el)
-  $("#left").append(pub.getView().render().el)
-  $("#left").append(bibgroup.getView().render().el)
-  $("#left").append(data.getView().render().el)
-  $("#left").append(vizier.getView().render().el)
-  $("#left").append(grants.getView().render().el)
-
-
+  $("#left").append(a.render().el)
+  $("#left").append(database.render().el)
+  $("#left").append(refereed.render().el)
+  $("#left").append(keywords.render().el)
+  $("#left").append(pub.render().el)
+  $("#left").append(bibgroup.render().el)
+  $("#left").append(data.render().el)
+  $("#left").append(vizier.render().el)
+  $("#left").append(grants.render().el)
 
 
-  $("#right").append(queryInfo.getView().render().el)
-  $("#right").append(y.getView().render().el)
-  $("#right").append(c.getView().render().el)
+
+
+  $("#right").append(queryInfo.render().el)
+  $("#right").append(y.render().el)
+  $("#right").append(c.render().el)
 
 
 

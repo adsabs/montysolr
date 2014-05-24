@@ -1,4 +1,4 @@
-define(['./base_container_view', 'hbs!./templates/tooltip', 'hbs!./templates/logic-container'],
+define(['js/widgets/base/container_view', 'hbs!./templates/tooltip', 'hbs!./templates/logic-container'],
   function (BaseFacetContainerView, FacetTooltipTemplate, LogicFacetContainerTemplate) {
 
     var SelectLogicModel = BaseFacetContainerView.ContainerModelClass.extend({

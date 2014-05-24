@@ -1,4 +1,4 @@
-define(['./base_container_view'], function (BaseContainerView) {
+define(['./container_view'], function (BaseContainerView) {
   var ChangeApplyContainerView = BaseContainerView.extend({
 
     initialize: function (options) {

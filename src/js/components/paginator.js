@@ -1,17 +1,17 @@
 /**
  * Created by alex on 5/10/14.
  */
-define([], function () {
+define(['underscore'], function (_) {
 
   var Paginator = function (options) {
 
-    this.start = options.start || 0;
-    this.rows = options.rows || 20;
-    this.initialStart = options.start || 0;
-    this.startName = options.startName || "start";
-    this.rowsName = options.rowsName || "rows";
-    this.cycle = 0;
-    this.maxNum = -1;
+    this.start = options.start || 0; // the beginning offset
+    this.rows = options.rows || 20;  // how many to fetch in one go
+    this.initialStart = options.start || 0; // useful for reset
+    this.startName = options.startName || "start"; // name of the parameter for offset
+    this.rowsName = options.rowsName || "rows"; // name of the parameter for num of items to fetch
+    this.cycle = 0; // counter of how many times we were called
+    this.maxNum = -1; // set from outside to limit how many items there are to fetch (for this query)
   };
 
   _.extend(Paginator.prototype, {
@@ -40,6 +40,7 @@ define([], function () {
       this.cycle += 1;
       return apiQuery;
     },
+
 
     reset: function (initialStart) {
       this.start = initialStart || this.initialStart;
