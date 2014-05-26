@@ -10,7 +10,7 @@
 
 		{{#each logic }}
 		<label>
-			<input name="facet" value="{{this}}" type="radio"> {{this}} 
+			<input name="operator" value="{{this}}" type="radio"> {{this}}
 		</label>
 	{{/each}}
 </div>
@@ -31,13 +31,10 @@
 		<p>Join terms with:</p>
 	{{#each logic }}
 		<label>
-			<input name="facet" value="{{this}}" type="radio"> {{this}} 
+			<input name="operator" value="{{this}}" type="radio"> {{this}}
 		</label>
 	{{/each}}
 </div>	               
 {{/if}}
 
 {{/if}}
-
-
-

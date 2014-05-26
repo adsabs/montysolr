@@ -141,7 +141,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
-        console.log(ev);
+        //console.log(ev);
         if (ev === 'changeApplySubmit') {
           throw new Error('OK');
         }
@@ -181,10 +181,8 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           else {
             this.queryUpdater.updateQuery('q', q, value, 'AND', 'remove');
           }
-
           this.dispatchNewQuery(paginator.cleanQuery(q));
         }
-
       },
 
       // XXX:rca - this should really have been inside the view

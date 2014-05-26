@@ -28,6 +28,22 @@ define(['underscore', 'js/components/api_query', 'js/components/api_query_update
       expect(u.escapeInclWhitespace('hey \\+-!():^[]"{}~*?|&/')).to.equal('hey\\ \\\\\\+\\-\\!\\(\\)\\:\\^\\[\\]\\"\\{\\}\\~\\*\\?\\|\\&\\/');
     });
 
+    it("can save tmp values into the apiquery (these get forgotten)", function() {
+      var q = new ApiQuery({'q': 'bar'});
+      var u = new ApiQueryUpdater('q');
+
+      expect(q.url()).to.be.equal('q=bar');
+
+      u.saveTmpEntry(q, 'foo', [1,2,3]);
+      expect(u.hasTmpEntry(q, 'foo')).to.be.true;
+      expect(u.hasTmpEntry(q, 'foos')).to.be.false;
+      expect(u.getTmpEntry(q, 'foo')).to.be.eql([1,2,3]);
+
+      var q2 = q.clone();
+      expect(q2.__tmpStorage).to.be.undefined;
+
+    });
+
   });
 
 });

@@ -5,7 +5,8 @@ define([
     'js/widgets/facet/container_view',
     'js/widgets/facet/model',
     'js/widgets/facet/collection',
-    'js/widgets/base/item_view'
+    'js/widgets/base/item_view',
+    'hbs!js/widgets/facet/templates/logic-container'
   ],
   function ($,
             Backbone,
@@ -13,7 +14,8 @@ define([
             FacetContainerView,
             FacetModel,
             FacetCollection,
-            BaseItemView
+            BaseItemView,
+            LogicSelectionContainerTemplate
     ) {
 
     describe("Facet Base Container View (UI)", function () {
@@ -21,7 +23,7 @@ define([
       afterEach(function () {
         var ta = $('#test-area');
         if (ta) {
-          //ta.empty();
+          ta.empty();
         }
       });
 
@@ -81,6 +83,67 @@ define([
         expect($v.find('a[target="ShowMore"]').text()).to.be.equal('');
 
         done();
+      });
+
+
+      it("can show multiple logic selection boxes and handle them", function() {
+        var view = new FacetContainerView({
+          itemView: BaseItemView,
+          model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
+          collection: new FacetCollection(),
+          displayNum: 3,
+          maxDisplayNum: 10,
+          openByDefault: true,
+          showOptions: true,
+          template: LogicSelectionContainerTemplate,
+          logicOptions: {single: ["limit to", "exclude"], multiple: ["and", "or", "exclude"]}
+        });
+
+        sinon.spy(view, 'refreshLogicTooltip');
+        sinon.spy(view, 'enableLogic');
+        sinon.spy(view, 'closeLogic');
+
+        var fired = sinon.spy();
+        view.on('containerLogicSelected', fired);
+
+        var $v = $(view.render().el);
+        $('#test-area').append(view.render().el);
+
+        view.collection.add(new Backbone.Model({title: 'foo1', value: 'bar1'}));
+        view.collection.add(new Backbone.Model({title: 'foo2', value: 'bar2'}));
+        view.collection.add(new Backbone.Model({title: 'foo3', value: 'bar3'}));
+
+        expect(view.refreshLogicTooltip.callCount).to.be.equal(2);
+        expect(view.enableLogic.callCount).to.be.equal(2);
+        expect(view.closeLogic.callCount).to.be.equal(2);
+
+        // selecting one of the options should activate the tooltip
+        $v.find('.widget-item:first').click();
+
+        expect($v.find('.logic-container').is(':visible')).to.be.true;
+        expect($v.find('.logic-container > label:eq(0) > input').val()).to.eql('limit to');
+        expect($v.find('.logic-container > label:eq(1) > input').val()).to.eql('exclude');
+
+        // selecting from the optins triggers onLogic()
+
+        $v.find('.logic-container label:first input').attr('checked', 'checked').trigger('change');
+
+        expect($v.find('.logic-container').is(':visible')).to.be.false;
+        expect(fired.callCount).to.be.equal(1);
+        expect(fired.args[0][0]).to.be.equal('limit to');
+
+        // selecting two options, activates tooltip with different options
+        $v.find('.widget-item:eq(2)').click();
+
+        expect($v.find('.logic-container').is(':visible')).to.be.true;
+        expect($v.find('.logic-container > label:eq(0) > input').val()).to.eql('and');
+        expect($v.find('.logic-container > label:eq(1) > input').val()).to.eql('or');
+        expect($v.find('.logic-container > label:eq(2) > input').val()).to.eql('exclude');
+
+        // resetting the collection should close the tooltip
+        view.collection.reset();
+        expect($v.find('.logic-container').is(':visible')).to.be.false;
+
       });
 
     });

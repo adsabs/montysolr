@@ -152,6 +152,51 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
       return sb.join('');
     },
 
+
+    /**
+     * Attaches to the ApiQuery object a storage of tmp values; these are
+     * not affecting anything inside the query; but the query is carrying them
+     * around as long as it was not cloned() etc
+     *
+     * @param key
+     * @param value
+     */
+    saveTmpEntry: function(apiQuery, key, value) {
+      var storage = this._getTmpStorage(apiQuery);
+      var oldVal;
+      if (key in storage) {
+        oldVal = storage[key];
+      }
+      storage[key] = value;
+      return oldVal;
+    },
+
+    removeTmpEntry: function(apiQuery, key, value) {
+      var storage = this._getTmpStorage(apiQuery, true);
+      delete storage[key];
+    },
+
+    getTmpEntry: function(apiQuery, key) {
+      var storage = this._getTmpStorage(apiQuery, true);
+      if (key in storage) {
+        return storage[key];
+      }
+    },
+
+    hasTmpEntry: function(apiQuery, key) {
+      var storage = this._getTmpStorage(apiQuery);
+      return key in storage;
+    },
+
+    _getTmpStorage: function(apiQuery, weakMode) {
+      if (!apiQuery.hasOwnProperty('__tmpStorage')) {
+        if (weakMode)
+          return {};
+        apiQuery.__tmpStorage = {};
+      }
+      return apiQuery.__tmpStorage;
+    },
+
     _n: function(name) {
       return '__' + this.context + '_' + name;
     },
