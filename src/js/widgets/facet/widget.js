@@ -141,14 +141,11 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
-        //console.log(ev);
-        if (ev === 'changeApplySubmit') {
+        console.log(ev);
+        if (ev == 'changeApplySubmit') {
           throw new Error('OK');
         }
-        else if (ev === 'containerLogicSelected') {
-
-        }
-        else if (ev === 'moreDataRequested') {
+        else if (ev == 'moreDataRequested') {
 
         }
         else if (ev == "fetchMore") {
@@ -163,24 +160,63 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           var model = arg1.model; // <- the view in question
           this.handleConditionApplied(model);
         }
+        else if (ev == 'containerLogicSelected') {
+          this.handleLogicalSelection(arg1);
+        }
       },
 
 
       handleConditionApplied: function(model) {
+
         var q = this.getCurrentQuery();
-        var value = model.get('value');
 
-        if (value) {
-          var paginator = this.findPaginator(q).paginator;
+        if (this.view.logicOptions) { // we'll just save the values and wait for the operator
 
-          q = q.clone();
-          value = this.queryUpdater.escapeInclWhitespace(value);
+          var selectedItems = this.queryUpdater.getTmpEntry(q, 'SelectedItems', {});
           if (model.get('selected')) {
-            this.queryUpdater.updateQuery('q', q, value, 'AND', 'add');
+            selectedItems[model.cid] = model.get('value');
           }
           else {
-            this.queryUpdater.updateQuery('q', q, value, 'AND', 'remove');
+            delete selectedItems[model.cid];
           }
+        }
+        else {
+
+          var value = model.get('value');
+
+          if (value) {
+            var paginator = this.findPaginator(q).paginator;
+
+            q = q.clone();
+            value = this.queryUpdater.escapeInclWhitespace(value);
+            if (model.get('selected')) {
+              this.queryUpdater.updateQuery('q', q, value, 'AND', 'add');
+            }
+            else {
+              this.queryUpdater.updateQuery('q', q, value, 'AND', 'remove');
+            }
+            this.dispatchNewQuery(paginator.cleanQuery(q));
+          }
+        }
+      },
+
+      handleLogicalSelection: function(operator) {
+        var q = this.getCurrentQuery();
+        var paginator = this.findPaginator(q).paginator;
+        var conditions = this.queryUpdater.getTmpEntry(q, 'SelectedItems');
+        var self = this;
+
+        if (conditions && _.keys(conditions).length > 0) {
+          conditions = _.values(conditions);
+          _.each(conditions, function(c, i, l) {
+            l[i] = self.queryUpdater.escapeInclWhitespace(c);
+          });
+
+          q = q.clone();
+          if (operator == 'and' || operator == 'limit to') {
+            this.queryUpdater.updateQuery('q', q, conditions, 'OR', 'add');
+          }
+
           this.dispatchNewQuery(paginator.cleanQuery(q));
         }
       },

@@ -6,7 +6,8 @@ define([
     'js/widgets/facet/widget',
     'js/widgets/base/paginated_multi_callback_widget',
     'js/widgets/facet/container_view',
-    'js/widgets/facet/collection'
+    'js/widgets/facet/collection',
+    'hbs!js/widgets/facet/templates/logic-container'
   ],
 
   function (FacetCollection,
@@ -16,7 +17,9 @@ define([
     FacetWidget,
     FacetWidgetSuperClass,
     FacetContainerView,
-    FacetCollection) {
+    FacetCollection,
+    LogicSelectionContainerTemplate
+    ) {
 
     describe("Facet Widget (UI)", function () {
 
@@ -110,7 +113,7 @@ define([
 
       });
 
-      it("interacts with the view", function(done) {
+      it("interacts with the view (sets a new query)", function(done) {
         var widget = new FacetWidget({
           defaultQueryArguments: {
             "facet": "true",
@@ -124,6 +127,7 @@ define([
             maxDisplayNum: 10,
             openByDefault: true,
             showOptions: true
+
           })
         });
 
@@ -171,6 +175,44 @@ define([
         ,50);
 
       });
+
+      it("handles logical selection", function(done) {
+
+        var widget = new FacetWidget({
+          defaultQueryArguments: {
+            "facet": "true",
+            "facet.field": "author_facet_hier",
+            "facet.mincount": "1"
+          },
+          view: new FacetContainerView({
+            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
+            collection: new FacetCollection(),
+            displayNum: 3,
+            maxDisplayNum: 10,
+            openByDefault: true,
+            showOptions: true,
+            template: LogicSelectionContainerTemplate,
+            logicOptions: {single: ["limit to", "exclude"], multiple: ["and", "or", "exclude"]}
+          })
+        });
+        sinon.spy(widget, "dispatchNewQuery");
+
+        widget.activate(minsub.beehive.getHardenedInstance());
+        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
+
+        var $w = $(widget.render().el);
+        $('#test-area').append($w);
+
+        $w.find('.item-view:first input').click();
+        $w.find('.logic-container label:first input').attr('checked', 'checked').trigger('change');
+
+        // TODO: check the query?
+        // we expect to see a new query
+        expect(widget.dispatchNewQuery.called).to.be.true;
+
+        done();
+      });
+
 
 
       describe("facet collection", function () {

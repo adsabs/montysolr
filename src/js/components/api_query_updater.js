@@ -162,7 +162,7 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
      * @param value
      */
     saveTmpEntry: function(apiQuery, key, value) {
-      var storage = this._getTmpStorage(apiQuery);
+      var storage = this._getTmpStorage(apiQuery, true);
       var oldVal;
       if (key in storage) {
         oldVal = storage[key];
@@ -171,15 +171,26 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
       return oldVal;
     },
 
-    removeTmpEntry: function(apiQuery, key, value) {
+    removeTmpEntry: function(apiQuery, key) {
       var storage = this._getTmpStorage(apiQuery, true);
       delete storage[key];
     },
 
-    getTmpEntry: function(apiQuery, key) {
-      var storage = this._getTmpStorage(apiQuery, true);
+    getTmpEntry: function(apiQuery, key, defaultValue) {
+      var storage;
+      if (defaultValue) {
+        storage = this._getTmpStorage(apiQuery, true);
+      }
+      else {
+        storage = this._getTmpStorage(apiQuery, false);
+      }
+
       if (key in storage) {
         return storage[key];
+      }
+      else {
+        storage[key] = defaultValue;
+        return defaultValue;
       }
     },
 
@@ -188,13 +199,14 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
       return key in storage;
     },
 
-    _getTmpStorage: function(apiQuery, weakMode) {
-      if (!apiQuery.hasOwnProperty('__tmpStorage')) {
-        if (weakMode)
+    _getTmpStorage: function(apiQuery, createIfNotExists) {
+      var n = this._n('__tmpStorage');
+      if (!apiQuery.hasOwnProperty(n)) {
+        if (!createIfNotExists)
           return {};
-        apiQuery.__tmpStorage = {};
+        apiQuery[n] = {};
       }
-      return apiQuery.__tmpStorage;
+      return apiQuery[n];
     },
 
     _n: function(name) {
