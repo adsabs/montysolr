@@ -51,7 +51,6 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
        * @param data
        */
       processFacetResponse: function (apiResponse, data) {
-        //starting assumption is that the collection could fetch more facets if it wanted to
 
         var query = apiResponse.getApiQuery();
         var paginator = this.findPaginator(query).paginator;
@@ -141,12 +140,9 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
 
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
-        console.log(ev);
+        //console.log(ev);
         if (ev == 'changeApplySubmit') {
           throw new Error('OK');
-        }
-        else if (ev == 'moreDataRequested') {
-
         }
         else if (ev == "fetchMore") {
           var pag = this.findPaginator(this.getCurrentQuery());
@@ -157,7 +153,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           }
         }
         else if (ev == 'itemview:itemClicked') {
-          var model = arg1.model; // <- the view in question
+          var model = arg1.model;
           this.handleConditionApplied(model);
         }
         else if (ev == 'containerLogicSelected') {
@@ -213,6 +209,8 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           });
 
           q = q.clone();
+
+          // XXX:rca - extend the updater to support 'exclude' and 'OR' operations
           if (operator == 'and' || operator == 'limit to') {
             this.queryUpdater.updateQuery('q', q, conditions, 'OR', 'add');
           }
@@ -221,9 +219,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
         }
       },
 
-      // XXX:rca - this should really have been inside the view
-      // the view should extract the data and pass them to the
-      // controller
+      // XXX:rca - these were the old Alex's methods
       onFacetApplySubmit: function () {
 
         var changed, currentFQ, finalFQ, newQuery, facetQuery;

@@ -1,8 +1,12 @@
 
-define(['marionette', 'hbs!./templates/item-checkbox'],
-  function(Marionette, ItemCheckBoxTemplate) {
+define(['marionette', 'hbs!./templates/item-tree'],
+  function(Marionette, ItemTreeTemplate) {
 
-  var BaseItemView = Marionette.ItemView.extend({
+  var TreeView = Marionette.CompositeView.extend({
+
+    initialize: function() {
+      this.collection = this.model.nodes;
+    },
 
     /**
      * The view will be inside div.[className]
@@ -19,7 +23,7 @@ define(['marionette', 'hbs!./templates/item-checkbox'],
      * You will need to provide the template of your choice
      * for the view to work
      */
-    template: ItemCheckBoxTemplate,
+    template: ItemTreeTemplate,
 
     events: {
       'click .widget-item': "onClick"
@@ -33,5 +37,5 @@ define(['marionette', 'hbs!./templates/item-checkbox'],
 
   });
 
-  return BaseItemView;
+  return TreeView;
 });

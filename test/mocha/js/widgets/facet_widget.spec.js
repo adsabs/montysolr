@@ -7,7 +7,8 @@ define([
     'js/widgets/base/paginated_multi_callback_widget',
     'js/widgets/facet/container_view',
     'js/widgets/facet/collection',
-    'hbs!js/widgets/facet/templates/logic-container'
+    'hbs!js/widgets/facet/templates/logic-container',
+    'js/widgets/base/tree_view'
   ],
 
   function (FacetCollection,
@@ -18,7 +19,8 @@ define([
     FacetWidgetSuperClass,
     FacetContainerView,
     FacetCollection,
-    LogicSelectionContainerTemplate
+    LogicSelectionContainerTemplate,
+    TreeView
     ) {
 
     describe("Facet Widget (UI)", function () {
@@ -213,6 +215,39 @@ define([
         done();
       });
 
+
+      it("knows to handle hierarchial views", function(done) {
+
+        var widget = new FacetWidget({
+          defaultQueryArguments: {
+            "facet": "true",
+            "facet.field": "author_facet_hier",
+            "facet.mincount": "1"
+          },
+          view: new FacetContainerView({
+            itemView: TreeView,
+            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
+            collection: new FacetCollection(),
+            displayNum: 3,
+            maxDisplayNum: 10,
+            openByDefault: true,
+            showOptions: true,
+            template: LogicSelectionContainerTemplate,
+            logicOptions: {single: ["limit to", "exclude"], multiple: ["and", "or", "exclude"]}
+          })
+        });
+        sinon.spy(widget, "dispatchNewQuery");
+
+        widget.activate(minsub.beehive.getHardenedInstance());
+        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
+
+        var $w = $(widget.render().el);
+        console.log($w.html());
+        $('body').append($w);
+        window.widget = widget;
+
+        done();
+      });
 
 
       describe("facet collection", function () {
