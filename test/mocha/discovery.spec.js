@@ -26,17 +26,20 @@ var tests = [
   tbase + '/components/api_query_updater.spec.js',
 
   // UI components
+  tbase + '/widgets/base_tree_view.spec.js',
   tbase + '/widgets/base_container_view.spec.js',
-  tbase + '/widgets/facet_container_view.spec.js',
   tbase + '/widgets/base_widget.spec.js',
+
   tbase + '/widgets/multi_callback_widget.spec.js',
   tbase + '/widgets/results_render_widget.spec.js',
+
+  tbase + '/widgets/facet_container_view.spec.js',
   tbase + '/widgets/facet_widget.spec.js',
 
-    tbase + '/widgets/search_bar_widget.spec.js',
-    tbase + '/widgets/api_response_widget.spec.js',
-    tbase + '/widgets/api_query_widget.spec.js',
-    tbase + '/widgets/api_request_widget.spec.js',
+  tbase + '/widgets/search_bar_widget.spec.js',
+  tbase + '/widgets/api_response_widget.spec.js',
+  tbase + '/widgets/api_query_widget.spec.js',
+  tbase + '/widgets/api_request_widget.spec.js',
 
   //tbase + '/widgets/facet_container_views.spec.js',
   //tbase + '/widgets/facet_item_views.spec.js',

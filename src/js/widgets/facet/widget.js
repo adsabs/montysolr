@@ -1,12 +1,21 @@
 
 
-define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_request', './item_views',
-    'js/widgets/base/paginated_multi_callback_widget', 'js/components/paginator',
-     'js/mixins/widget_pagination',
-     'js/components/api_query_updater'],
-  function (Backbone, Marionette, ApiQuery, ApiRequest, FacetItemViews, PaginatedMultiCallbackWidget, Paginator,
-    WidgetPagination,
-    ApiQueryUpdater) {
+define(['backbone',
+        'marionette',
+    'js/components/api_query',
+    'js/components/api_request',
+    'js/widgets/base/paginated_multi_callback_widget',
+    'js/components/paginator',
+    'js/mixins/widget_pagination',
+    'js/components/api_query_updater'],
+  function (Backbone,
+            Marionette,
+            ApiQuery,
+            ApiRequest,
+            PaginatedMultiCallbackWidget,
+            Paginator,
+            WidgetPagination,
+            ApiQueryUpdater) {
 
     var BaseFacetWidget = PaginatedMultiCallbackWidget.extend({
 
@@ -91,17 +100,14 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
             title: modifiedValue,
             value: fValue,
             count: fNum,
-            modified: modifiedValue
+            modified: modifiedValue,
+            children: []
           };
 
           facetsCol.push(d)
 
         };
 
-        //if we've reached the end of the hierarchy, change the itemview for the parent view
-        if (data.lastLevel === true) {
-          view.itemView = FacetItemViews.CheckboxOneLevelView;
-        }
 
         // check whether we were fetching more data or we were getting fresh data
         if (paginator.getCycle() <= 1) {
@@ -141,10 +147,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
         //console.log(ev);
-        if (ev == 'changeApplySubmit') {
-          throw new Error('OK');
-        }
-        else if (ev == "fetchMore") {
+        if (ev == "fetchMore") {
           var pag = this.findPaginator(this.getCurrentQuery());
           var p = this.handlePagination(this.view.displayNum, this.view.maxDisplayNum, arg1, pag.paginator, this.view, this.collection);
           if (p && p.before) {
@@ -156,11 +159,63 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
           var model = arg1.model;
           this.handleConditionApplied(model);
         }
+        else if (ev == 'itemview:treeClicked') { // hierarchical view
+          var model = arg1.model;
+          this.handleTreeExpansion(arg1); // see if we need to fetch deeper data
+          this.handleConditionApplied(model);
+        }
         else if (ev == 'containerLogicSelected') {
           this.handleLogicalSelection(arg1);
         }
       },
 
+
+      handleTreeExpansion: function(view) {
+        var model = view.model;
+        var children = view.collection;
+
+        if (!children || children._finished) {
+          return; // do nothing
+        }
+
+        // we need to fetch data one level deeper
+        var q = this.getCurrentQuery();
+        q = q.clone();
+
+        q = this.composeQuery(_.clone(this.defaultQueryArguments), q);
+
+        var val = model.get('value');
+
+        if (!val) {
+          return; // nothing to do
+        }
+
+        var elems = val.split('/');
+        var nextLevel = parseInt(elems[0]) + 1;
+
+        q.set('facet.prefix', this.queryUpdater.escapeInclWhitespace(nextLevel + "/" + elems.slice(1).join('/')));
+
+        var self = this;
+        var paginator = this.findPaginator(q).paginator;
+
+        q = paginator.cleanQuery(q);
+        this.registerCallback(q.url(), function(apiResponse) {
+          self.processFacetResponse(apiResponse, {view: view, collection: children});
+        });
+
+        var req = this.composeRequest(q);
+        if (req) {
+          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+          setTimeout(function() {
+            if (children.length == 0) {
+              view.triggerMethod('NoMoreDataOnThisLevel');
+            }
+          }, 5000);
+        }
+
+
+        children._finished = true;
+      },
 
       handleConditionApplied: function(model) {
 
@@ -219,7 +274,8 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
         }
       },
 
-      // XXX:rca - these were the old Alex's methods
+      // XXX:rca - these were the old Alex's methods; i'll remove them once it is
+      // clear all functionality has been incorporated...
       onFacetApplySubmit: function () {
 
         var changed, currentFQ, finalFQ, newQuery, facetQuery;

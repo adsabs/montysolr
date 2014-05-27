@@ -227,7 +227,7 @@ define([
           view: new FacetContainerView({
             itemView: TreeView,
             model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
-            collection: new FacetCollection(),
+            collection: new TreeView.CollectionClass(),
             displayNum: 3,
             maxDisplayNum: 10,
             openByDefault: true,
@@ -236,15 +236,21 @@ define([
             logicOptions: {single: ["limit to", "exclude"], multiple: ["and", "or", "exclude"]}
           })
         });
-        sinon.spy(widget, "dispatchNewQuery");
+        sinon.spy(widget, "handleTreeExpansion");
+        sinon.spy(widget, "processFacetResponse");
 
         widget.activate(minsub.beehive.getHardenedInstance());
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
-        console.log($w.html());
-        $('body').append($w);
-        window.widget = widget;
+        $('#test-area').append($w);
+
+        expect($w.find('input').length).to.be.gt(0);
+
+        $w.find('.widget-item:first').click();
+        expect(widget.handleTreeExpansion.called).to.be.true;
+        expect(widget.processFacetResponse.called).to.be.true;
+        expect(widget.processFacetResponse.args[1][0].getApiQuery().get('facet.prefix')).to.be.eql(['1\\/Head,\\ J']);
 
         done();
       });

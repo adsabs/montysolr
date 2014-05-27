@@ -13,6 +13,7 @@ var tests = [
     //tbase + '/widgets/results_render_widget.spec.js',
     //tbase + '/widgets/base_container_view.spec.js',
 
+    tbase + '/widgets/base_tree_view.spec.js',
     tbase + '/widgets/facet_container_view.spec.js',
 
     tbase + '/components/api_query_updater.spec.js',
