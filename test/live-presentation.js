@@ -2,7 +2,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
   'jquery', 'underscore',
   'js/widgets/search_bar/search_bar_widget', 'js/widgets/results/widget',
   'js/widgets/facet/factory', 'js/widgets/query_info/query_info_widget'
-], function(BeeHive, PubSub, QueryMediator, Api, $, _, SearchBar, ResultsRender, FacetFactory, QueryInfoWidget) {
+], function(BeeHive, PubSub, QueryMediator, Api, $, _, SearchBar, ResultsWidget, FacetFactory, QueryInfoWidget) {
 
 
   var beehive = new BeeHive();
@@ -13,76 +13,69 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
 
   var queryInfo = new QueryInfoWidget();
 
-  var s = new SearchBar();
-  var r = new ResultsRender({pagination: {rows: 40, start:0}});
-  var c = FacetFactory.makeGraphFacet({
+  var searchBar = new SearchBar();
+  var results = new ResultsWidget({pagination: {rows: 40, start:0}});
+  var citationsGraphWidget = FacetFactory.makeGraphFacet({
     facetField: "citation_count",
-    userFacingName: "Citations",
+    facetTitle: "Citations",
     xAxisTitle: "Citation Count",
-    openByDefault: true,
+    openByDefault: true
   });
 
-  var a = FacetFactory.makeHierarchicalCheckboxFacet({
-    facetField: "author",
-    userFacingName: "Authors",
+  var authorFacets = FacetFactory.makeHierarchicalCheckboxFacet({
+    facetField: "author_facet_hier",
+    facetTitle: "Authors",
     openByDefault: true,
-    preprocess: ["titleCase", "removeSlash"]
-  })
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
+  });
   var keywords = FacetFactory.makeBasicCheckboxFacet({
-    facetField: "keyword",
-    userFacingName: "Keywords",
+    facetField: "keyword_facet",
+    facetTitle: "Keywords",
     openByDefault: false,
-    preprocess: ["titleCase", "removeSlash"]
-  })
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
+  });
 
   var database = FacetFactory.makeBasicCheckboxFacet({
     facetField: "database",
-    userFacingName: "Databases",
-    openByDefault: true,
-    preprocess: "titleCase",
-  })
+    facetTitle: "Databases",
+    openByDefault: true
+  });
   var data = FacetFactory.makeBasicCheckboxFacet({
-    facetField: "data",
-    userFacingName: "Data",
-    openByDefault: false,
-    preprocess: "allCaps",
-  })
+    facetField: "data_facet",
+    facetTitle: "Data",
+    openByDefault: false
+  });
 
   var vizier = FacetFactory.makeBasicCheckboxFacet({
-    facetField: "vizier",
-    userFacingName: "Vizier Tables",
-    openByDefault: false,
-    preprocess: "allCaps",
-  })
+    facetField: "vizier_facet",
+    facetTitle: "Vizier Tables",
+    openByDefault: false
+  });
 
   var pub = FacetFactory.makeBasicCheckboxFacet({
-    facetField: "bibstem",
-    userFacingName: "Publications",
+    facetField: "bibstem_facet",
+    facetTitle: "Publications",
     openByDefault: false,
-    preprocess: "allCaps",
-    multiLogic: ["or", "exclude"]
-  })
+    logicOptions: {single: null, multiple: ["or", "exclude"]}
+  });
   var bibgroup = FacetFactory.makeBasicCheckboxFacet({
-    facetField: "bibgroup",
-    userFacingName: "Bib Groups",
+    facetField: "bibgroup_facet",
+    facetTitle: "Bib Groups",
     openByDefault: false,
-    preprocess: "allCaps",
-    multiLogic: ["or", "exclude"]
-  })
+    logicOptions: {single: null, multiple: ["or", "exclude"]}
+  });
 
   var grants = FacetFactory.makeHierarchicalCheckboxFacet({
-    facetField: "grant",
-    userFacingName: "Grants",
+    facetField: "grant_facet_hier",
+    facetTitle: "Grants",
     openByDefault: false,
-    preprocess: ["allCaps", "removeSlash"],
-    multiLogic: ["or", "exclude"]
-  })
+    logicOptions: {single: null, multiple: ["or", "exclude"]}
+  });
 
   var refereed = FacetFactory.makeBasicCheckboxFacet({
     facetField: "property",
-    userFacingName: "Refereed Status",
+    facetTitle: "Refereed Status",
     openByDefault: true,
-    multiLogic: "fullSet",
     extractFacets: function(facets) {
       var returnList = [];
       _.each(facets, function(d,i ){
@@ -95,55 +88,51 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
       })
       return returnList
     }
-  })
+  });
 
-  var y = FacetFactory.makeGraphFacet({
+  var yearGraph = FacetFactory.makeGraphFacet({
     facetField: "year",
-    userFacingName: "Year",
+    facetTitle: "Year",
     xAxisTitle: "Year",
     openByDefault: true
   });
 
-  queryInfo.activate(beehive.getHardenedInstance())
-  s.activate(beehive.getHardenedInstance())
-  r.activate(beehive.getHardenedInstance())
-  c.activate(beehive.getHardenedInstance())
-  a.activate(beehive.getHardenedInstance())
-  y.activate(beehive.getHardenedInstance())
-  database.activate(beehive.getHardenedInstance())
-  keywords.activate(beehive.getHardenedInstance())
-  pub.activate(beehive.getHardenedInstance())
-  bibgroup.activate(beehive.getHardenedInstance())
-  data.activate(beehive.getHardenedInstance())
-  vizier.activate(beehive.getHardenedInstance())
-  grants.activate(beehive.getHardenedInstance())
-  refereed.activate(beehive.getHardenedInstance())
+  queryInfo.activate(beehive.getHardenedInstance());
+  searchBar.activate(beehive.getHardenedInstance());
+  results.activate(beehive.getHardenedInstance());
+  citationsGraphWidget.activate(beehive.getHardenedInstance());
+  authorFacets.activate(beehive.getHardenedInstance());
+  yearGraph.activate(beehive.getHardenedInstance());
+  database.activate(beehive.getHardenedInstance());
+  keywords.activate(beehive.getHardenedInstance());
+  pub.activate(beehive.getHardenedInstance());
+  bibgroup.activate(beehive.getHardenedInstance());
+  data.activate(beehive.getHardenedInstance());
+  vizier.activate(beehive.getHardenedInstance());
+  grants.activate(beehive.getHardenedInstance());
+  refereed.activate(beehive.getHardenedInstance());
 
 
 
-  $("#top").append(s.render().el)
+  $("#top").append(searchBar.render().el)
 
-  $("#middle").append(r.render().el)
+  $("#middle").append(results.render().el)
 
-  $("#left").append(a.render().el)
-  $("#left").append(database.render().el)
-  $("#left").append(refereed.render().el)
-  $("#left").append(keywords.render().el)
-  $("#left").append(pub.render().el)
-  $("#left").append(bibgroup.render().el)
-  $("#left").append(data.render().el)
-  $("#left").append(vizier.render().el)
-  $("#left").append(grants.render().el)
-
-
-
-
-  $("#right").append(queryInfo.render().el)
-  $("#right").append(y.render().el)
-  $("#right").append(c.render().el)
+  $("#left").append(authorFacets.render().el);
+  $("#left").append(database.render().el);
+  $("#left").append(refereed.render().el);
+  $("#left").append(keywords.render().el);
+  $("#left").append(pub.render().el);
+  $("#left").append(bibgroup.render().el);
+  $("#left").append(data.render().el);
+  $("#left").append(vizier.render().el);
+  $("#left").append(grants.render().el);
 
 
 
 
+  $("#right").append(queryInfo.render().el);
+  $("#right").append(yearGraph.render().el);
+  $("#right").append(citationsGraphWidget.render().el);
 
-})
+});

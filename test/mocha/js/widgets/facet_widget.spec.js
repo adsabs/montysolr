@@ -1,5 +1,4 @@
 define([
-    'js/widgets/facet/collection',
     'js/bugutils/minimal_pubsub',
     './test_json/test1',
     './test_json/test2',
@@ -11,7 +10,7 @@ define([
     'js/widgets/base/tree_view'
   ],
 
-  function (FacetCollection,
+  function (
     MinimalPubsub,
     test1,
     test2,
