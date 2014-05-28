@@ -1,0 +1,69 @@
+<article>
+    <div id="abstract-metadata">
+        <dl>
+
+            {{#if authorAff.length}}
+            <dt>Authors
+                {{#if hasAffiliation}}<button class="btn btn-default btn-sm" id="toggle-aff"> Show affiliations</button>
+                {{/if}}
+            </dt>
+            <dd>
+
+                <div id="authors-and-aff">
+                    <ul class="list-inline">
+                    {{#each authorAff}}
+                    {{#if @last}}
+                    <li class="author">{{this.[0]}}</li>
+                    <li class="affiliation hide">(<i>{{this.[1]}}</i>)</li>
+                    {{else}}
+                    <li class="author">{{this.[0]}}</li>
+                    <li class="affiliation hide">(<i>{{this.[1]}}</i>)</li>;
+                    {{/if}}
+                    {{/each}}
+                    </ul>
+                </div>
+                {{/if}}
+            </dd>
+            {{#if pub}}
+            <dt>Publication</dt>
+            <dd>
+                <div id="article-publication">{{pub}}</div>
+            </dd>
+            {{/if}}
+            {{#if pubdate}}
+            <dt>Publication Date</dt>
+            <dd>
+                <div id="article-pubdate">{{pubdate}}</div>
+            </dd>
+            {{/if}}
+
+        </dl>
+
+
+    </div>
+
+    {{#if abstract}}
+    <h5>Abstract</h5>
+    <div id="abstract-content">
+        {{abstract}}
+    </div>
+    {{/if}}
+
+    {{#if keyword}}
+    <div id="keywords">
+        <dt>Keywords</dt>
+        <dd>
+            <ul class="list-inline">
+            {{#each keyword}}
+            {{#if @last}}
+            <li>{{this}}</li>
+            {{else}}
+            <li>{{this}};</li>
+            {{/if}}
+            {{/each}}
+            </ul>
+        </dd>
+    </div>
+    {{/if}}
+
+</article>

@@ -9,14 +9,14 @@
     "jquery": "~2.0.3",
     "requirejs": "~2.1.8",
     "backbone.localStorage": "~1.1.0",
-    "backbone.marionette": "~1.6.3",
     "backbone.wreqr": "1.0.0",
     "require-handlebars-plugin": "0.8.0",
     "bootstrap-js-components": "~3.1.1",
     "bootstrap": "~3.1.1",
     "jqueryui": "~1.10.4",
     "d3": "~3.4.6",
-    "jquery-hoverIntent": "*"
+    "jquery-hoverIntent": "*",
+    "marionette": "~1.8.6"
   },
   "devDependencies": {
     "chai": "~1.8.0",
@@ -26,6 +26,6 @@
     "sinon": "http://sinonjs.org/releases/sinon-1.9.0.js"
   },
   "resolutions": {
-    "jquery": "~2.0.3"
+    "jquery": "2.x"
   }
 }

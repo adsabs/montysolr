@@ -1,8 +1,31 @@
-require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_mediator', 'js/services/api',
-  'jquery', 'underscore',
-  'js/widgets/search_bar/search_bar_widget', 'js/widgets/results/widget',
-  'js/widgets/facet/factory', 'js/widgets/query_info/query_info_widget'
-], function(BeeHive, PubSub, QueryMediator, Api, $, _, SearchBar, ResultsWidget, FacetFactory, QueryInfoWidget) {
+require([
+  'jquery',
+  'underscore',
+  'js/components/beehive',
+  'js/services/pubsub',
+  'js/components/query_mediator',
+  'js/services/api',
+  'js/widgets/search_bar/search_bar_widget',
+  'js/widgets/results/widget',
+  'js/widgets/facet/factory',
+  'js/widgets/query_info/query_info_widget',
+  'js/widgets/abstract/widget',
+  'js/widgets/contents_manager/widget'
+
+], function(
+  $,
+  _,
+  BeeHive,
+  PubSub,
+  QueryMediator,
+  Api,
+  SearchBar,
+  ResultsWidget,
+  FacetFactory,
+  QueryInfoWidget,
+  AbstractWidget,
+  LayoutWidget
+  ) {
 
 
   var beehive = new BeeHive();
@@ -12,6 +35,9 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
   queryMediator.activate(beehive);
 
   var queryInfo = new QueryInfoWidget();
+
+  var abstract = new AbstractWidget();
+  var layout = new LayoutWidget({widgetTitleMapping : {'abstract' : {widget: abstract, default : true}}});
 
   var searchBar = new SearchBar();
   var results = new ResultsWidget({pagination: {rows: 40, start:0}});
@@ -100,6 +126,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
     openByDefault: true
   });
 
+  abstract.activate(beehive.getHardenedInstance());
   queryInfo.activate(beehive.getHardenedInstance());
   searchBar.activate(beehive.getHardenedInstance());
   results.activate(beehive.getHardenedInstance());
@@ -117,9 +144,10 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
 
 
 
-  $("#top").append(searchBar.render().el)
+  $("#top").append(searchBar.render().el);
 
-  $("#middle").append(results.render().el)
+  $("#middle").append(results.render().el);
+  $("#middle").append(layout.render().el);
 
   $("#left").append(authorFacets.render().el);
   $("#left").append(database.render().el);
