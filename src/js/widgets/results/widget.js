@@ -274,6 +274,8 @@ define(['marionette', 'backbone', 'js/components/api_request', 'js/components/ap
           var p = this.handlePagination(this.displayNum, this.maxDisplayNum, arg1, this.paginator, this.view, this.collection);
           if (p && p.before) {
             p.before();
+          }
+          if (p && p.runQuery) {
             // ask for more data
             this.resetPagination = false;
             this.dispatchRequest(this.getCurrentQuery());

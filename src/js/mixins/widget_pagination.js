@@ -8,7 +8,11 @@ define(['underscore'], function (_) {
   var PaginatorInteraction = {
 
     /**
-     * 
+     * This method will automatically paginate through results, provided
+     * your view contains the right methods and the paginator instance
+     * is available
+     *
+     *
      * @param displayNum
      *    - int, how many items to load during this step
      * @param maxDisplayNum
@@ -84,7 +88,7 @@ define(['underscore'], function (_) {
           }
         }
 
-        var output = {};
+        var output = {runQuery: false};
         //console.log('toDisplay', toDisplay);
 
         if (toDisplay > 0) {
@@ -100,11 +104,14 @@ define(['underscore'], function (_) {
               },
               view);
           }
-
         }
+
 
         if (toDisplay + realDisplayLength >= maxDisplayNum) {
           view.disableShowMore("Reached max " + maxDisplayNum);
+        }
+        else {
+          output.runQuery = true;
         }
 
         return output;

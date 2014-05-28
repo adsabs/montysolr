@@ -113,7 +113,7 @@ define([
         view.collection.add(new Backbone.Model({title: 'foo2', value: 'bar2'}));
         view.collection.add(new Backbone.Model({title: 'foo3', value: 'bar3'}));
 
-        expect(view.refreshLogicTooltip.callCount).to.be.equal(2);
+        expect(view.refreshLogicTooltip.callCount).to.be.equal(6);
         expect(view.enableLogic.callCount).to.be.equal(2);
         expect(view.closeLogic.callCount).to.be.equal(2);
 

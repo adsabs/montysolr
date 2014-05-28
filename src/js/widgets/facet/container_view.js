@@ -33,11 +33,18 @@ define(['backbone', 'marionette',
             throw new Error('logicOptions should be null or an object with single/multiple keys and arrays of strings inside');
           }
 
+          this.on('all', function(ev) {
+            if (ev.indexOf('itemClicked') > -1
+              || ev.indexOf('collection:rendered') > -1
+              || ev.indexOf('treeClicked') > -1) {
+              this.refreshLogicTooltip();
+            }
+          });
 
-          this.on("itemview:itemClicked", this.refreshLogicTooltip);
+          //this.on("itemview:itemClicked", this.refreshLogicTooltip);
 
           //clear out logic template when collection is reset
-          this.on("composite:collection:rendered", this.refreshLogicTooltip);
+          //this.on("composite:collection:rendered", this.refreshLogicTooltip);
 
           // for debugging
           //this.on('all', function(ev) {console.log(ev, arguments)});
@@ -53,7 +60,8 @@ define(['backbone', 'marionette',
         addEvents = {
           "click .dropdown-toggle": "enableLogic",
           "click .dropdown-menu .close": "closeLogic",
-          "change .logic-container input": "onLogic"
+          "change .logic-container input": "onLogic",
+          "click .logic-container input": "onLogic"
         };
         return _.extend(_.clone(ContainerView.prototype.events), addEvents);
       },

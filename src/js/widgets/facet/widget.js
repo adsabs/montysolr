@@ -37,6 +37,8 @@ define(['backbone',
         this.facetField = this.defaultQueryArguments['facet.field'];
         this.queryUpdater = new ApiQueryUpdater(this.facetField);
 
+        this.responseProcessors = options['responseProcessors'] || this.responseProcessors || [];
+
       },
 
 
@@ -112,9 +114,16 @@ define(['backbone',
         // check whether we were fetching more data or we were getting fresh data
         if (paginator.getCycle() <= 1) {
           coll.reset(facetsCol);
-          paginator.setMaxNum(apiResponse.get('response.numFound')); // XXX:rca - facets will have a different counter
-          if (paginator.maxNum > view.displayNum) {
+          paginator.setMaxNum(apiResponse.get('response.numFound')); // this is not useful, cuz facets have a different counter
+          if (facetsCol.length == paginator.rows) { // we got a full batch (so we'll assume there is more)
             view.enableShowMore();
+
+            // set into the nested hierarchical view the query that was used to get the data
+            // will be needed for paging
+            if (view.setCurrentQuery) {
+              view.setCurrentQuery(query);
+            }
+
           }
           else {
             view.disableShowMore();
@@ -130,11 +139,11 @@ define(['backbone',
           return this._preprocessor;
         }
         var func;
-        if (_.isArray(this.preprocess)) {
-          func = _.compose(this.preprocess);
+        if (_.isArray(this.responseProcessors)) {
+          func = _.compose.apply(_, this.responseProcessors);
         }
-        else if (typeof this.preprocess === 'function') {
-          func = this.preprocess;
+        else if (typeof this.responseProcessors === 'function') {
+          func = this.responseProcessors;
         }
         else {
           func = function(v) {return v};
@@ -147,22 +156,39 @@ define(['backbone',
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
         //console.log(ev);
-        if (ev == "fetchMore") {
-          var pag = this.findPaginator(this.getCurrentQuery());
-          var p = this.handlePagination(this.view.displayNum, this.view.maxDisplayNum, arg1, pag.paginator, this.view, this.collection);
+        if (ev.indexOf("fetchMore") > -1) {
+          var numOfLoadedButHidden = arguments[arguments.length-2];
+          var data = arguments[arguments.length-1];
+          var paginator, view, collection, q;
+          if (data && data.view) {
+            q = data.query || this.getCurrentQuery();
+            view = data.view;
+            collection = data.collection;
+            paginator = this.findPaginator(q).paginator;
+          }
+          else {
+            numOfLoadedButHidden = data;
+            q = this.getCurrentQuery();
+            view = this.view;
+            collection = this.collection;
+            paginator = this.findPaginator(q).paginator;
+          }
+          var p = this.handlePagination(this.view.displayNum, this.view.maxDisplayNum, numOfLoadedButHidden, paginator, view, collection);
           if (p && p.before) {
             p.before();
-            this._dispatchRequest(this.getCurrentQuery());
+          }
+          if (p && p.runQuery) {
+            this._dispatchRequest(q);
           }
         }
-        else if (ev == 'itemview:itemClicked') {
-          var model = arg1.model;
-          this.handleConditionApplied(model);
+        else if (ev.substring(ev.length-20) == 'itemview:itemClicked') {
+          var view = arguments[arguments.length-1];
+          this.handleConditionApplied(view.model);
         }
-        else if (ev == 'itemview:treeClicked') { // hierarchical view
-          var model = arg1.model;
-          this.handleTreeExpansion(arg1); // see if we need to fetch deeper data
-          this.handleConditionApplied(model);
+        else if (ev.substring(ev.length-20) == 'itemview:treeClicked') { // hierarchical view
+          var view = arguments[arguments.length-1];
+          this.handleTreeExpansion(view); // see if we need to fetch deeper data
+          this.handleConditionApplied(view.model);
         }
         else if (ev == 'containerLogicSelected') {
           this.handleLogicalSelection(arg1);
@@ -171,6 +197,10 @@ define(['backbone',
 
 
       handleTreeExpansion: function(view) {
+
+        //XXX:rca - this is a hack
+        view.displayNum = this.displayNum;
+
         var model = view.model;
         var children = view.collection;
 
@@ -193,12 +223,12 @@ define(['backbone',
         var elems = val.split('/');
         var nextLevel = parseInt(elems[0]) + 1;
 
-        q.set('facet.prefix', this.queryUpdater.escapeInclWhitespace(nextLevel + "/" + elems.slice(1).join('/')));
+        q.set('facet.prefix', nextLevel + "/" + elems.slice(1).join('/'));
 
         var self = this;
         var paginator = this.findPaginator(q).paginator;
 
-        q = paginator.cleanQuery(q);
+        q = paginator.run(q);
         this.registerCallback(q.url(), function(apiResponse) {
           self.processFacetResponse(apiResponse, {view: view, collection: children});
         });

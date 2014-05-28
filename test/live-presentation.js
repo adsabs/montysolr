@@ -26,7 +26,10 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
     facetField: "author_facet_hier",
     facetTitle: "Authors",
     openByDefault: true,
-    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
+    responseProcessors: [
+      function(v) {var vv = v.split('/'); return vv[vv.length-1]}
+    ]
   });
   var keywords = FacetFactory.makeBasicCheckboxFacet({
     facetField: "keyword_facet",
@@ -37,7 +40,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
 
   var database = FacetFactory.makeBasicCheckboxFacet({
     facetField: "database",
-    facetTitle: "Databases",
+    facetTitle: "Collections",
     openByDefault: true
   });
   var data = FacetFactory.makeBasicCheckboxFacet({
@@ -132,7 +135,7 @@ require(['js/components/beehive', 'js/services/pubsub', 'js/components/query_med
 
 
   $("#right").append(queryInfo.render().el);
-  $("#right").append(yearGraph.render().el);
-  $("#right").append(citationsGraphWidget.render().el);
+  //$("#right").append(yearGraph.render().el);
+  //$("#right").append(citationsGraphWidget.render().el);
 
 });

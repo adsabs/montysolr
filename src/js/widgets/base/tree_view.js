@@ -20,6 +20,8 @@ define(['marionette', 'hbs!./templates/item-tree'],
 
       initialize: function () {
         this.collection = this.model.children;
+        this.displayNum = Marionette.getOption(this, "displayNum") || 5;
+        this.maxDisplayNum = Marionette.getOption(this, "maxDisplayNum") || 200;
       },
 
       /**
@@ -33,6 +35,15 @@ define(['marionette', 'hbs!./templates/item-tree'],
         }
       },
 
+      itemViewOptions: function (model, index) {
+        if (index < this.displayNum) {
+          return {hide: false};
+        }
+        else {
+          return {hide: true};
+        }
+      },
+
       itemViewContainer: ".item-children",
 
       /**
@@ -43,7 +54,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
 
       events: {
         'click .widget-item': "onClick",
-        'click .show-more': 'onShowMore'
+        'click .show-more:last': 'onShowMore'
       },
 
       onClick: function (ev) {
@@ -53,17 +64,31 @@ define(['marionette', 'hbs!./templates/item-tree'],
         this.trigger('treeClicked'); // we don't need to pass data because marionette includes 'this'
       },
 
+      setCurrentQuery: function(q) {
+        this._q = q;
+      },
+
+      getCurrentQuery: function() {
+        return this._q;
+      },
+
+      displayMore: function(howMany) {
+        //show hidden data
+        this.$('.item-children:first').children().filter('.hide').slice(0, howMany).removeClass("hide");
+      },
+
       enableShowMore: function() {
-        this.$('.show-more').removeClass('hide');
+        this.$('.show-more:last').removeClass('hide');
       },
 
       disableShowMore: function() {
-        this.$('.show-more').addClass('hide');
+        this.$('.show-more:last').addClass('hide');
       },
 
-      onShowMore: function() {
+      onShowMore: function(ev) {
         ev.stopPropagation();
-        console.log('on show more');
+        this.trigger('fetchMore', this.$('.item-children:first').children().filter('.hide').length,
+          {view: this, collection: this.collection, query: this.getCurrentQuery()});
       }
 
 

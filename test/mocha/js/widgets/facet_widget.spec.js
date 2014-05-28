@@ -205,7 +205,11 @@ define([
         $('#test-area').append($w);
 
         $w.find('.item-view:first input').click();
-        $w.find('.logic-container label:first input').attr('checked', 'checked').trigger('change');
+        expect($w.find('input[value="limit to"]').is(':visible')).to.be.true;
+
+        $w.find('input[value="limit to"]').attr('checked', 'checked').trigger('change');
+        //i don't understand why it is not closing (it does when i click manually)
+        //expect($w.find('input[value="limit to"]').is(':visible')).to.be.false;
 
         // TODO: check the query?
         // we expect to see a new query
@@ -249,8 +253,36 @@ define([
         $w.find('.widget-item:first').click();
         expect(widget.handleTreeExpansion.called).to.be.true;
         expect(widget.processFacetResponse.called).to.be.true;
-        expect(widget.processFacetResponse.args[1][0].getApiQuery().get('facet.prefix')).to.be.eql(['1\\/Head,\\ J']);
+        expect(widget.processFacetResponse.args[1][0].getApiQuery().get('facet.prefix')).to.be.eql(['1/Head, J']);
 
+        done();
+      });
+
+      it("accepts chain of value processors", function(done) {
+        var widget = new FacetWidget({
+          defaultQueryArguments: {
+            "facet": "true",
+            "facet.field": "author_facet_hier",
+            "facet.mincount": "1"
+          },
+          view: new FacetContainerView({
+            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
+            collection: new FacetCollection(),
+            displayNum: 3,
+            maxDisplayNum: 10,
+            openByDefault: true,
+            showOptions: true
+          }),
+          responseProcessors: [
+            function(v) {return 'x/' + v},
+            function(v) {vv = v.split('/'); return vv[vv.length-1]}
+          ]
+        });
+
+        widget.activate(minsub.beehive.getHardenedInstance());
+        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
+
+        expect(widget.collection.models[0].get('title')).to.be.equal('x/Head, J');
         done();
       });
 

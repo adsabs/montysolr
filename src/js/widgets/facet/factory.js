@@ -4,14 +4,16 @@ define([
   'js/widgets/facet/container_view',
   'hbs!js/widgets/facet/templates/logic-container',
   'js/widgets/base/tree_view',
-  'js/widgets/base/base_widget'
+  'js/widgets/base/base_widget',
+  'js/components/paginator'
 ], function (
   FacetCollection,
   FacetWidget,
   FacetContainerView,
   LogicSelectionContainerTemplate,
   TreeView,
-  BaseWidget
+  BaseWidget,
+  Paginator
   ) {
 
 
@@ -47,10 +49,11 @@ define([
       var containerOptions = {
         model: new FacetContainerView.ContainerModelClass({title: options.facetTitle}),
         collection: new FacetCollection(),
-        displayNum: 15,
+        displayNum: 5,
         maxDisplayNum: 100,
         openByDefault: false,
-        showOptions: true
+        showOptions: true,
+        fl: 'id'
       };
 
       containerOptions = _.extend(containerOptions,
@@ -60,14 +63,19 @@ define([
         containerOptions.template = LogicSelectionContainerTemplate;
       }
 
-      var widget = new FacetWidget({
+      var controllerOptions = {
         defaultQueryArguments: {
           "facet": "true",
           "facet.field": options.facetField,
           "facet.mincount": "1"
         },
-        view: new FacetContainerView(containerOptions)
-      });
+        view: new FacetContainerView(containerOptions),
+        paginator: new Paginator({start: 0, rows: 40, startName: "facet.offset", rowsName: "facet.limit"})
+      };
+
+      var controllerOptions = _.extend(controllerOptions, _.pick(options, ['responseProcessors']));
+
+      var widget = new FacetWidget(controllerOptions);
       return widget;
     },
 
@@ -87,7 +95,7 @@ define([
       var containerOptions = {
         model: new FacetContainerView.ContainerModelClass({title: options.facetTitle}),
         collection: new FacetCollection(),
-        displayNum: 15,
+        displayNum: 5,
         maxDisplayNum: 100,
         openByDefault: false,
         showOptions: true,
@@ -102,14 +110,21 @@ define([
         containerOptions.template = LogicSelectionContainerTemplate;
       }
 
-      var widget = new FacetWidget({
+      var controllerOptions = {
         defaultQueryArguments: {
           "facet": "true",
           "facet.field": options.facetField,
-          "facet.mincount": "1"
+          "facet.mincount": "1",
+          "facet.limit": 40,
+          fl: 'id'
         },
-        view: new FacetContainerView(containerOptions)
-      });
+        view: new FacetContainerView(containerOptions),
+        paginator: new Paginator({start: 0, rows: 40, startName: "facet.offset", rowsName: "facet.limit"})
+      };
+
+      var controllerOptions = _.extend(controllerOptions, _.pick(options, ['responseProcessors']));
+
+      var widget = new FacetWidget(controllerOptions);
       return widget;
     },
 
