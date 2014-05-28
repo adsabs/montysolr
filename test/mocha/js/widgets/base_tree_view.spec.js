@@ -25,7 +25,11 @@ define([
         var coll = new TreeView.CollectionClass();
 
         coll.add(new TreeView.ModelClass({title: 'foo', value: 'bar' , 'children': []}));
-        coll.add(new TreeView.ModelClass({title: 'boo', value: 'baz' , 'children': []}));
+        coll.add(new TreeView.ModelClass({title: 'boo', value: 'bab' , 'children': []}));
+        coll.add(new TreeView.ModelClass({title: 'doo', value: 'bad' , 'children': []}));
+        coll.add(new TreeView.ModelClass({title: 'woo', value: 'baw' , 'children': []}));
+        coll.add(new TreeView.ModelClass({title: 'zoo', value: 'baz' , 'children': []}));
+        coll.add(new TreeView.ModelClass({title: 'ooo', value: 'bao' , 'children': []}));
 
         var view = new BaseContainerView({
           itemView: TreeView,
@@ -38,11 +42,11 @@ define([
         view.on('all', spy);
 
         var $v = $(view.render().el);
-        $('#test-area').append($v);
+        $('body').append($v);
 
-        expect($v.find('.widget-body > div.item-view').length).to.be.equal(2);
+        expect($v.find('.widget-body > div.item-view').length).to.be.equal(6);
         expect($($v.find('.widget-body > .item-view > input:eq(0)')).val()).to.be.equal('bar');
-        expect($($v.find('.widget-body > .item-view > input:eq(1)')).val()).to.be.equal('baz');
+        expect($($v.find('.widget-body > .item-view > input:eq(1)')).val()).to.be.equal('bab');
 
         view.collection.models[0].children.add(
           new TreeView.ModelClass({title: 'hey', value: 'joe' , 'children': []}));

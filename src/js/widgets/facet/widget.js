@@ -42,11 +42,12 @@ define(['backbone',
       },
 
 
-      _dispatchRequest: function (apiQuery) {
+      _dispatchRequest: function (apiQuery, data) {
         var q = this.customizeQuery(apiQuery);
+        data = data || {};
         if (q) {
           var qid = q.url();
-          this.registerCallback(qid, this.processFacetResponse, {collection: this.collection, view: this.view});
+          this.registerCallback(qid, this.processFacetResponse, {collection: data.collection || this.collection, view: data.view || this.view});
           var req = this.composeRequest(q);
           if (req) {
             this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
@@ -65,6 +66,10 @@ define(['backbone',
 
         var query = apiResponse.getApiQuery();
         var paginator = this.findPaginator(query).paginator;
+
+        if (this.setCurrentQuery) {
+          this.setCurrentQuery(query);
+        }
 
         var fField = query.get('facet.field');
 
@@ -178,7 +183,7 @@ define(['backbone',
             p.before();
           }
           if (p && p.runQuery) {
-            this._dispatchRequest(q);
+            this._dispatchRequest(q, {collection: collection, view: view});
           }
         }
         else if (ev.substring(ev.length-20) == 'itemview:itemClicked') {
@@ -187,8 +192,11 @@ define(['backbone',
         }
         else if (ev.substring(ev.length-20) == 'itemview:treeClicked') { // hierarchical view
           var view = arguments[arguments.length-1];
-          this.handleTreeExpansion(view); // see if we need to fetch deeper data
           this.handleConditionApplied(view.model);
+        }
+        else if (ev.indexOf('treeNodeDisplayed') > -1) {
+          var view = arguments[arguments.length-1];
+          this.handleTreeExpansion(view); // see if we need to fetch deeper data
         }
         else if (ev == 'containerLogicSelected') {
           this.handleLogicalSelection(arg1);

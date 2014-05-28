@@ -117,6 +117,9 @@ define(['backbone', 'marionette', 'js/components/api_query',
        * it gets the response and routes it to the appropriate
        * callback (which was registered before)
        *
+       * WARNING: the widget is responsible for calling
+       * setCurrentQuery() inside his callback
+       *
        * @see dispatch()
        * @param apiResponse
        */
@@ -135,11 +138,12 @@ define(['backbone', 'marionette', 'js/components/api_query',
           return;
         }
 
+
         callback.call(this, apiResponse, call.data);
 
         //remove the callback from this.queriesInProgress
         this.removeCallback(id);
-        this.setCurrentQuery(q);
+
       }
 
     });

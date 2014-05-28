@@ -70,7 +70,7 @@ define([
           "facet.mincount": "1"
         },
         view: new FacetContainerView(containerOptions),
-        paginator: new Paginator({start: 0, rows: 40, startName: "facet.offset", rowsName: "facet.limit"})
+        paginator: new Paginator({start: 0, rows: 20, startName: "facet.offset", rowsName: "facet.limit"})
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options, ['responseProcessors']));
@@ -115,11 +115,12 @@ define([
           "facet": "true",
           "facet.field": options.facetField,
           "facet.mincount": "1",
-          "facet.limit": 40,
+          "facet.limit": 20,
+          "facet.prefix": "0/",
           fl: 'id'
         },
         view: new FacetContainerView(containerOptions),
-        paginator: new Paginator({start: 0, rows: 40, startName: "facet.offset", rowsName: "facet.limit"})
+        paginator: new Paginator({start: 0, rows: 20, startName: "facet.offset", rowsName: "facet.limit"})
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options, ['responseProcessors']));
