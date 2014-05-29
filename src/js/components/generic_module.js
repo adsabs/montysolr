@@ -11,7 +11,7 @@ define(['backbone', 'underscore'], function(Backbone, _) {
   var Module = function(attributes, options) {
     var defaults;
     var attrs = attributes || {};
-    options || (options = {});
+    options = options || {};
     this.mid = _.uniqueId('module');
     this.attributes = {};
     _.extend(this, _.pick(options, moduleOptions));
@@ -19,7 +19,7 @@ define(['backbone', 'underscore'], function(Backbone, _) {
     if (defaults = _.result(this, 'defaults')) {
       attrs = _.defaults({}, attrs, defaults);
     }
-    this.initialize.apply(this, arguments);
+    this.initialize.call(this, attrs, options);
   };
 
   // every module has the Events mixin

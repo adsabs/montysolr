@@ -349,6 +349,22 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
         throw new Error("After removing empty values, no condition was left");
       }
       return condition;
+    },
+
+    /**
+     * Cleans up the *clone* of the apiQuery by removing all the entries
+     * that are inserted into ApiQuery by the query updater.
+     *
+     * @param apiQuery
+     */
+    clean: function(apiQuery) {
+      var q = {};
+      _.each(apiQuery.keys(), function(key) {
+        if (!(key.substring(0, 2) == '__')) {
+          q[key] = apiQuery.get(key);
+        }
+      });
+      return new ApiQuery(q);
     }
 
   });

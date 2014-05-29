@@ -170,6 +170,42 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         if (debug)
           console.log('test: reached end');
       });
+
+
+      it("has getCacheKey function", function() {
+        var qm = new QueryMediator();
+        var req = new ApiRequest({target: 'search', query:new ApiQuery({'q': 'pluto'})});
+
+        req.get('query').set('__x', 'foo');
+        expect(req.url()).to.be.equal('search?__x=foo&q=pluto');
+        var key = qm.getCacheKey(req);
+        expect(req.url()).to.be.equal('search?__x=foo&q=pluto');
+        expect(key).to.be.equal('search?q=pluto');
+
+      });
+
+      it("should use cache (if configured)", function(done) {
+        var qm = new QueryMediator({}, {cache: {}});
+        var pubsub = beehive.Services.get('PubSub');
+        var key = pubsub.getPubSubKey();
+        var key2 = pubsub.getPubSubKey();
+
+        sinon.stub(pubsub, 'subscribe');
+        sinon.stub(qm, 'onApiResponse');
+        sinon.stub(qm, 'onApiRequestFailure');
+
+        qm.activate(beehive);
+
+        var req = new ApiRequest({target: 'search', query:new ApiQuery({'q': 'pluto'})});
+
+        qm.receiveRequests(req, key);
+        qm.receiveRequests(req, key2);
+
+        expect(qm.onApiResponse.callCount, 2);
+        //expect(qm._cache);
+
+        done();
+      });
     });
 
 

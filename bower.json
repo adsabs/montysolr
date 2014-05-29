@@ -16,7 +16,8 @@
     "jqueryui": "~1.10.4",
     "d3": "~3.4.6",
     "jquery-hoverIntent": "*",
-    "marionette": "~1.8.6"
+    "marionette": "~1.8.6",
+    "dsjslib" : "https://github.com/monmohan/dsjslib.git#v0.6.6"
   },
   "devDependencies": {
     "chai": "~1.8.0",

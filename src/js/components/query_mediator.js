@@ -6,11 +6,35 @@
  * Mediator to coordinate UI-query exchange
  */
 
-define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/dependon', 'js/components/api_response'],
-  function(_, $, GenericModule, Mixins, ApiResponse) {
+define(['underscore',
+    'jquery',
+    'cache',
+    'js/components/generic_module',
+    'js/mixins/dependon',
+    'js/components/api_response',
+    'js/components/api_query_updater'],
+  function(
+    _,
+    $,
+    Cache,
+    GenericModule,
+    Mixins,
+    ApiResponse,
+    ApiQueryUpdater) {
+
 
   var QueryMediator = GenericModule.extend({
     debug: false,
+
+    initialize: function(attrs, options) {
+      if (options.cache) {
+        this._cache = new Cache(_.extend({
+          'maximumSize': 50,
+          'expiresAfterWrite':600
+        }, options.cache));
+      }
+      this.queryUpdater = new ApiQueryUpdater('QueryMediator');
+    },
 
     /**
      * Starts listening on the PubSub
@@ -23,14 +47,14 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
       var pubsub = beehive.Services.get('PubSub');
       this.mediatorPubSubKey = pubsub.getPubSubKey();
 
-      pubsub.subscribe(this.mediatorPubSubKey, pubsub.NEW_QUERY, _.bind(this.start_searching, this));
-      pubsub.subscribe(this.mediatorPubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.get_requests, this));
+      pubsub.subscribe(this.mediatorPubSubKey, pubsub.NEW_QUERY, _.bind(this.startSearchCycle, this));
+      pubsub.subscribe(this.mediatorPubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
     },
 
     /**
      * Happens at the beginnng of the new search cycle. This is the 'race started' signal
      */
-    start_searching: function(apiQuery) {
+    startSearchCycle: function(apiQuery) {
       if (this.debug)
         console.log('[QM]: received query:', apiQuery.url());
 
@@ -45,17 +69,52 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
       q.lock();
       ps.publish(this.mediatorPubSubKey, ps.INVITING_REQUEST, q);
     },
-    get_requests: function(apiRequest, senderKey) {
+
+    receiveRequests: function(apiRequest, senderKey) {
       if (this.debug)
         console.log('[QM]: received request:', apiRequest.url(), senderKey.getId());
 
       var ps = this.getBeeHive().Services.get('PubSub');
       var api = this.getBeeHive().Services.get('Api');
 
-      api.request(apiRequest,
-        {done: this.deliver_response, context: {request:apiRequest, pubsub: ps, key: senderKey}});
+      if (this._cache) {
+        var requestKey = this.getCacheKey(apiRequest);
+        var resp = this._cache.getSync(requestKey);
+        var self = this;
+        if (resp && resp.done) { // it is a promise object
+          resp.done(function() {
+            self.onApiResponse.apply({request:apiRequest, pubsub: ps, key: senderKey}, arguments);
+          });
+          resp.done(function(arguments) {
+            self.onApiRequestFailure.apply({request:apiRequest, pubsub: ps, key: senderKey}, arguments);
+          });
+        }
+        else if (resp) { // it is a data
+          self.onApiResponse.apply({request:apiRequest, pubsub: ps, key: senderKey}, resp);
+        }
+        else { // new query
+          var promise = api.request(apiRequest, {
+            done: this.onApiResponse,
+            fail: this.onApiRequestFailure,
+            context: {request:apiRequest, pubsub: ps, key: senderKey}
+          });
+          promise.done(function() {
+            self._cache.put(requestKey, arguments);
+          });
+        }
+      }
+      else {
+        api.request(apiRequest, {
+          done: this.onApiResponse,
+          fail: this.onApiRequestFailure,
+          context: {request:apiRequest, pubsub: ps, key: senderKey}
+        });
+      }
+
     },
-    deliver_response: function(data, textStatus, jqXHR ) {
+
+
+    onApiResponse: function(data, textStatus, jqXHR ) {
       if (this.debug)
         console.log('[QM]: received response:', data);
 
@@ -67,6 +126,26 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/depen
         console.log('[QM]: sending response:', data);
 
       this.pubsub.publish(this.key, this.pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
+    },
+
+    onApiRequestFailure: function( jqXHR, textStatus, errorThrown ) {
+      var query = this.request.get('query');
+      if (query) {
+        console.warn(jqXHR, textStatus, errorThrown);
+      }
+    },
+
+    /**
+     * Creates a unique, cleaned key from the request and the apiQuery
+     * @param apiRequest
+     */
+    getCacheKey: function(apiRequest) {
+      var oldQ = apiRequest.get('query');
+      var newQ = this.queryUpdater.clean(oldQ);
+      apiRequest.set('query', newQ);
+      var key = apiRequest.url();
+      apiRequest.set('query', oldQ);
+      return key;
     }
 
   });

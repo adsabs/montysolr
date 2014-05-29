@@ -44,6 +44,19 @@ define(['underscore', 'js/components/api_query', 'js/components/api_query_update
 
     });
 
+    it("can clean the apiquery", function() {
+      var q = new ApiQuery({'q': 'bar'});
+      var u = new ApiQueryUpdater('q');
+      u.updateQuery('q', q, 'baz', 'AND', 'add');
+      expect(q.get('__q_conditions_q')).to.eql(['AND', 'baz']);
+
+      var q2 = u.clean(q);
+
+      expect(q.get('__q_conditions_q')).to.eql(['AND', 'baz']);
+      expect(q2.get('__q_conditions_q')).to.eql(undefined);
+      expect(q2.url()).to.be.eql('q=bar+AND+baz');
+    });
+
   });
 
 });

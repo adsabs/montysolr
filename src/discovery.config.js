@@ -57,7 +57,8 @@ require.config({
     'bootstrap': 'libs/bootstrap/bootstrap',
     'jquery-ui' : 'libs/jqueryui/jquery-ui',
     'd3':'libs/d3/d3',
-    'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent'
+    'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
+    'cache': 'libs/dsjslib/lib/Cache'
 
   },
 
@@ -86,6 +87,10 @@ require.config({
       deps : ['jquery', 'underscore', 'backbone'],
 
       exports : 'Marionette'
+    },
+
+    cache: {
+      exports: 'Cache'
     }
   }
 });
