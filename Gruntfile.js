@@ -25,6 +25,12 @@ module.exports = function(grunt) {
     jshint: ['src/js/**/*.js'],
 
 
+    exec: {
+      // this is necessary to make the library AMD compatible
+      convert_dsjslib: {
+        cmd: 'node node_modules/requirejs/bin/r.js -convert src/libs/dsjslib src/libs/dsjslib'
+      }
+    },
 
     // This task uses James Burke's excellent r.js AMD builder to take all
     // modules and concatenate them into a single file.
@@ -298,6 +304,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-express-server');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-exec');
 
 
   // karma tasks. (to ditch?)
@@ -318,7 +325,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-install-dependencies');
 
   // Create an aliased test task.
-  grunt.registerTask('setup', 'Sets up the development environment', ['install-dependencies', 'bower', 'less']);
+  grunt.registerTask('setup', 'Sets up the development environment',
+    ['install-dependencies', 'bower', 'exec:convert_dsjslib', 'less']);
 
   // When running the default Grunt command, just lint the code.
   grunt.registerTask('default', [

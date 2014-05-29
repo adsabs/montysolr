@@ -6,11 +6,16 @@
  * Mediator to coordinate UI-query exchange
  */
 
-define(['underscore', 'jquery', 'js/components/generic_module', 'js/mixins/dependon', 'js/components/api_response'],
-  function(_, $, GenericModule, Mixins, ApiResponse) {
+define(['underscore', 'jquery', 'cache', 'js/components/generic_module', 'js/mixins/dependon', 'js/components/api_response'],
+  function(_, $, Cache, GenericModule, Mixins, ApiResponse) {
+
 
   var QueryMediator = GenericModule.extend({
     debug: false,
+
+    initialize: function() {
+      this.cache = new Cache({});
+    },
 
     /**
      * Starts listening on the PubSub

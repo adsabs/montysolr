@@ -220,6 +220,8 @@ define(['backbone', 'marionette',
       return this.view;
     },
 
+
+
     /**
      * A standard method, called by widgets when they want to
      * check default widget compomenets
