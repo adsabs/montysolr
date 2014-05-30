@@ -44,7 +44,6 @@ define(['backbone', 'marionette',
        * events and callbacks this container provides
        */
       events: {
-        //"click .main-caret": "toggleFacet",
         "click .widget-name:first > h5": "toggleWidget",
         "click .widget-options.top:first": "onClickOptions",
         "click .widget-options.bottom:first": "onClickOptions"
@@ -79,10 +78,10 @@ define(['backbone', 'marionette',
         if (this.openByDefault) {
           this.toggleWidget();
         }
-        if (this.showOptions) {
-          this.$(".widget-options:first").removeClass("hide");
-          this.$(".widget-options.bottom:first").removeClass("hide");
-        }
+//        if (this.showOptions) {
+//          this.$(".widget-options:first").removeClass("hide");
+//          this.$(".widget-options.bottom:first").removeClass("hide");
+//        }
       },
 
       /**
@@ -91,16 +90,22 @@ define(['backbone', 'marionette',
        * @param e
        */
       toggleWidget: function (e) {
-        var $caret = this.$(".main-caret:first");
+        if (e){
+          e.stopPropagation();
+        }
+        var $caret = this.$(".main-caret");
         if ($caret.hasClass("item-open")) {
           $caret.removeClass("item-open");
           $caret.addClass("item-closed");
-          this.$(".widget-body:first").addClass("hide");
+          this.$(".widget-body").addClass("hide");
+          this.$(".widget-options").addClass("hide")
         }
         else {
           $caret.removeClass("item-closed");
           $caret.addClass("item-open");
-          this.$(".widget-body:first").removeClass("hide");
+          this.$(".widget-body").removeClass("hide");
+          this.$(".widget-options").removeClass("hide")
+
         }
       },
 

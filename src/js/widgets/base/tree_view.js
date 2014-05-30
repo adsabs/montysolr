@@ -65,12 +65,27 @@ define(['marionette', 'hbs!./templates/item-tree'],
 
       events: {
         'click .widget-item': "onClick",
-        'click .show-more:last': 'onShowMore'
+        'click .item-caret ': "toggleChildren",
+        'click .show-more': 'onShowMore'
+      },
+
+      toggleChildren : function(e){
+        e.stopPropagation();
+        this.$('.item-body').toggleClass('hide');
+        if (this.$(".item-caret").hasClass("item-open")){
+          this.$(".item-caret").removeClass("item-open").addClass("item-closed")
+        }
+        else {
+          this.$(".item-caret").removeClass("item-closed").addClass("item-open")
+
+        }
+
       },
 
       onClick: function (ev) {
+        console.log("onclick mofo")
         ev.stopPropagation();
-        this.$('.item-children:first').toggleClass('hide');
+        this.$('.item-children').toggleClass('hide');
         this.model.set('selected', $(ev.target).is(':checked'));
         this.trigger('itemClicked'); // we don't need to pass data because marionette includes 'this'
       },
@@ -106,6 +121,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
 
       enableShowMore: function() {
         this.$('.show-more:last').removeClass('hide');
+        this.$('.item-caret').removeClass('hide');
       },
 
       disableShowMore: function() {
@@ -114,7 +130,6 @@ define(['marionette', 'hbs!./templates/item-tree'],
 
       onShowMore: function(ev) {
         ev.stopPropagation();
-        this.$('.item-children:first').removeClass('hide');
         this.trigger('fetchMore', this.$('.item-children:first').children().filter('.hide').length,
           {view: this, collection: this.collection, query: this.getCurrentQuery()});
       }

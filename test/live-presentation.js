@@ -67,18 +67,24 @@ require([
   var database = FacetFactory.makeBasicCheckboxFacet({
     facetField: "database",
     facetTitle: "Collections",
-    openByDefault: true
+    openByDefault: true,
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
+
   });
   var data = FacetFactory.makeBasicCheckboxFacet({
     facetField: "data_facet",
     facetTitle: "Data",
-    openByDefault: false
+    openByDefault: false,
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
+
   });
 
   var vizier = FacetFactory.makeBasicCheckboxFacet({
     facetField: "vizier_facet",
     facetTitle: "Vizier Tables",
-    openByDefault: false
+    openByDefault: false,
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
+
   });
 
   var pub = FacetFactory.makeBasicCheckboxFacet({
@@ -116,7 +122,9 @@ require([
         }
       })
       return returnList
-    }
+    },
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
+
   });
 
   var yearGraph = FacetFactory.makeGraphFacet({

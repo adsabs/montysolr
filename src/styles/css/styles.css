@@ -5828,9 +5828,6 @@ button.close {
   min-width: 120px;
   padding: 7px;
 }
-.field-options div:hover {
-  background-color: #d8eefb;
-}
 .field-options span {
   display: block;
 }
@@ -5841,41 +5838,50 @@ button.close {
   margin-top: -3px;
   margin-bottom: 2px;
 }
-.facet-meta {
+.s-widget-meta {
   height: 25px;
 }
-.facet-widget label {
+.s-widget-name {
+  cursor: pointer !important;
+}
+.s-widget label {
   font-weight: normal;
+  margin: 0px;
 }
-.child-facets {
-  padding-left: 20px;
+.s-item-children {
+  padding-left: 5%;
 }
-.facet-meta .dropdown {
+.s-logic-dropdown {
   position: relative;
   top: -33px;
   left: 140px;
 }
-.facet-meta .dropdown-menu {
-  min-width: 120px !important;
+.s-dropdown-menu {
+  padding: 15%;
+  min-width: 88px;
 }
-.facet-meta .dropdown-menu p {
+.s-widget-options {
+  height: 0px;
+}
+.s-widget-meta .dropdown-menu p {
   padding: 3px 5px 0px 5px;
 }
-.facet-meta .dropdown-menu label {
+.s-widget-meta .dropdown-menu label {
   padding: 0px 10px;
   margin: 0px;
 }
-.facet-widget {
+.s-widget {
   max-width: 400px;
   max-height: 500px;
   margin: 10px;
 }
-.facet-body {
+.s-widget-body {
   overflow-y: auto;
   padding-left: 10px;
   max-height: 340px;
+  padding-left: 5%;
 }
-.facet-body .selected {
+.s-widget-body .selected {
   color: #1d6bb5;
 }
 .logic-container label {
@@ -5946,7 +5952,7 @@ button.close {
 .contents-nav {
   width: 100%;
   margin: auto;
-  color: black;
+  color: #4d4d4d;
   cursor: pointer;
   list-style: none;
   height: 42px;
@@ -5956,13 +5962,13 @@ button.close {
   text-decoration: none;
 }
 .contents-nav:hover {
-  font-weight: 500;
+  color: #222222;
 }
 .contents-nav-active {
   position: relative;
   background: #88b7d5;
   background-color: #c1e4f8;
-  border: 1px solid #1a99e2;
+  border: 1px solid #5db8ec;
 }
 .contents-nav-active:after,
 .contents-nav-active:before {
@@ -5983,7 +5989,7 @@ button.close {
 }
 .contents-nav-active:before {
   border-color: rgba(204, 204, 204, 0);
-  border-left-color: #1a99e2;
+  border-left-color: #0097ed;
   border-width: 21px;
   margin-top: -21px;
 }
