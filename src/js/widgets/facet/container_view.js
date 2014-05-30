@@ -6,12 +6,12 @@ define(['backbone', 'marionette',
     'hbs!./templates/tooltip'
   ],
   function (Backbone,
-            Marionette,
-            ContainerView,
-            WidgetPagination,
-            Paginator,
-            BaseItemView,
-            FacetTooltipTemplate
+    Marionette,
+    ContainerView,
+    WidgetPagination,
+    Paginator,
+    BaseItemView,
+    FacetTooltipTemplate
     ) {
 
     var FacetContainerView = ContainerView.extend({
