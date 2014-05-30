@@ -160,14 +160,14 @@ define(['underscore',
     onApiResponse: function(data, textStatus, jqXHR ) {
       var qm = this.qm;
       if (qm.debug)
-        console.log('[QM]: received response:', data);
+        console.log('[QM]: received response:', JSON.stringify(data).substring(0, 1000));
 
       // TODO: check the status responses
       var response = new ApiResponse(data);
       response.setApiQuery(this.request.get('query'));
 
       if (qm.debug)
-        console.log('[QM]: sending response:', data);
+        console.log('[QM]: sending response:', this.key.getId());
 
       var pubsub = qm.getBeeHive().Services.get('PubSub');
 

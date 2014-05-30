@@ -115,27 +115,26 @@ define(['backbone',
 
         };
 
+        // set into the nested hierarchical view the query that was used to get the data
+        // will be needed for paging
+        if (view.setCurrentQuery) {
+          view.setCurrentQuery(query);
+        }
 
         // check whether we were fetching more data or we were getting fresh data
         if (paginator.getCycle() <= 1) {
           coll.reset(facetsCol);
           paginator.setMaxNum(apiResponse.get('response.numFound')); // this is not useful, cuz facets have a different counter
-          if (facetsCol.length == paginator.rows) { // we got a full batch (so we'll assume there is more)
-            view.enableShowMore();
-
-            // set into the nested hierarchical view the query that was used to get the data
-            // will be needed for paging
-            if (view.setCurrentQuery) {
-              view.setCurrentQuery(query);
-            }
-
-          }
-          else {
-            view.disableShowMore();
-          }
         } else {
           //it's in response to "load more"
           coll.add(facetsCol);
+        }
+
+        if (facetsCol.length > 0) { // we got a full batch (so we'll assume there is more)
+          view.enableShowMore();
+        }
+        else {
+          view.disableShowMore();
         }
       },
 

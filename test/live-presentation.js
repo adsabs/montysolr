@@ -31,7 +31,7 @@ require([
   var beehive = new BeeHive();
   beehive.addService('PubSub', new PubSub());
   beehive.addService('Api', new Api());
-  var queryMediator = new QueryMediator();
+  var queryMediator = new QueryMediator({cache:true, debug:true});
   queryMediator.activate(beehive);
 
   var queryInfo = new QueryInfoWidget();

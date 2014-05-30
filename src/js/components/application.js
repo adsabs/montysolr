@@ -159,7 +159,16 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
       var beehive = this.getBeeHive();
       var key, module;
       var hasKey, addKey, removeKey, createInstance;
-      createInstance = function(module) {return new module()};
+
+      createInstance = function(key, module) {
+        if (module.prototype) {
+          return new module()
+        }
+        if (module && module.hasOwnProperty(key)) {
+          return module[key];
+        }
+        return module;
+      };
 
       //console.log('registering', section, modules);
 
@@ -198,7 +207,7 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
           console.warn("Removing (existing) object into [" + section + "]: " + key);
           removeKey(key);
         }
-        addKey(key, createInstance(module));
+        addKey(key, createInstance(key, module));
       })
     },
 
