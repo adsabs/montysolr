@@ -67,13 +67,13 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
 
     className: 'PubSub',
 
-    initialize: function(attributes, options) {
+    initialize: function(options) {
       this._issuedKeys = {};
       this.strict = true;
       this.handleErrors = true;
       this._errors = {};
       this.errWarningCount = 10; // this many errors trigger warning
-      _.extend(this, _.pick(options || attributes, ['strict', 'handleErrors', 'errWarningCount']));
+      _.extend(this, _.pick(options, ['strict', 'handleErrors', 'errWarningCount']));
       this.pubSubKey = PubSubKey.newInstance({creator: {}}); // this.getPubSubKey(); // the key the pubsub uses for itself
       this._issuedKeys[this.pubSubKey.getId()] = this.pubSubKey.getCreator();
     },

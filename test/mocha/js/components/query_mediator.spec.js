@@ -17,7 +17,9 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         [200, { "Content-Type": "application/json" }, validResponse]);
 
       beehive = new BeeHive();
-      beehive.addService('Api', new Api());
+      var api = new Api();
+      sinon.spy(api, 'request');
+      beehive.addService('Api', api);
       beehive.addService('PubSub', new PubSub());
       done();
     });
@@ -185,7 +187,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
       });
 
       it("should use cache (if configured)", function(done) {
-        var qm = new QueryMediator({}, {cache: {}});
+        var qm = new QueryMediator({cache: {}});
         var pubsub = beehive.Services.get('PubSub');
         var key = pubsub.getPubSubKey();
         var key2 = pubsub.getPubSubKey();
@@ -196,12 +198,33 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
         qm.activate(beehive);
 
-        var req = new ApiRequest({target: 'search', query:new ApiQuery({'q': 'pluto'})});
+        var q = new ApiQuery({'q': 'pluto'});
+        var req = new ApiRequest({target: 'search', query:q});
 
         qm.receiveRequests(req, key);
         qm.receiveRequests(req, key2);
 
         expect(qm.onApiResponse.callCount, 2);
+        var api = beehive.Services.get('Api');
+        expect(api.request.callCount).to.be.equal(1);
+
+
+        for (var i=0; i<10; i++) {
+          qm.receiveRequests(req, pubsub.getPubSubKey());
+        }
+        expect(qm.onApiResponse.callCount, 12);
+        expect(api.request.callCount).to.be.equal(1);
+
+        q.set('__boo', 'hey');
+        qm.receiveRequests(req, key2);
+        expect(qm.onApiResponse.callCount, 13);
+        expect(api.request.callCount).to.be.equal(1);
+
+        q.set('fq', 'hey');
+        qm.receiveRequests(req, key2);
+        expect(qm.onApiResponse.callCount, 14);
+        expect(api.request.callCount).to.be.equal(2);
+
         //expect(qm._cache);
 
         done();
@@ -276,6 +299,5 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
           "title":["<em>Star</em> Charts"]},\
         "139757":{\
           "title":["<em>Star</em> Streams"]}}}';
-
 
 });

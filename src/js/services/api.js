@@ -29,17 +29,6 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
   });
 
 
-  Api.prototype.ERROR = {
-    INVALID_PASSWORD: 498,
-    ACCOUNT_NOT_FOUND: 495, // Account not found during signin
-    ALREADY_LOGGED_IN: 493, // Already signed during signup
-    REQUIRES_LOGIN: 491,
-    TOO_MANY_CHARACTERS: 486,
-    NOT_FOUND: 404,
-    SERVER_ERROR: 503
-  };
-
-
 
   Api.prototype.request = function(request, options) {
 

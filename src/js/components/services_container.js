@@ -4,7 +4,7 @@
 
 define(['js/components/facade', 'js/components/generic_module', 'js/mixins/hardened', 'underscore'], function(Facade, GenericModule, Hardened, _) {
   var Services = GenericModule.extend({
-    initialize: function(attrs, options) {
+    initialize: function(options) {
       this._services = _.has(options, 'services') ? options['services'] : {};
     },
 
@@ -69,7 +69,7 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
           iface[service] = true;
         }
       }
-      var newContainer = new this.constructor(null, {'services': this._getHardenedInstance(iface, this._services)});
+      var newContainer = new this.constructor({'services': this._getHardenedInstance(iface, this._services)});
       return this._getHardenedInstance({'get':true, 'has':true}, newContainer);
 
     }

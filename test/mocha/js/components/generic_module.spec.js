@@ -44,7 +44,7 @@ define(['js/components/generic_module', 'backbone'], function(GenericModule, Bac
     it("should have activate() method", function() {
 
       var spy = sinon.spy();
-      var module = new GenericModule({}, {activate: spy});
+      var module = new GenericModule({activate: spy});
       module.activate('foo');
       expect(spy.calledWith('foo')).to.be.true;
 

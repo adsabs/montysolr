@@ -13,10 +13,10 @@
  */
 
 
-define(['backbone', 'underscore', 'api_query_impl', 'js/components/facade'], function(Backbone, _, ApiQueryImplementation, Facade) {
+define(['backbone', 'underscore', 'api_query_impl', 'js/components/facade'], function (Backbone, _, ApiQueryImplementation, Facade) {
 
 
-  var hardenedInterface =  {
+  var hardenedInterface = {
     add: 'add values',
     set: 'set (replace existing)',
     get: 'get values',
@@ -39,7 +39,7 @@ define(['backbone', 'underscore', 'api_query_impl', 'js/components/facade'], fun
 
   };
 
-  var ApiQuery = function(data, options) {
+  var ApiQuery = function (data, options) {
 
     // Facade pattern, we want to expose only limited API
     // despite the fact that the underlying instance has
@@ -54,15 +54,17 @@ define(['backbone', 'underscore', 'api_query_impl', 'js/components/facade'], fun
   };
 
   var toInsert = {};
-  _.each(_.keys(hardenedInterface), function(element, index, list) {
-    toInsert[element] = function() {return this.innerQuery[element].apply(this.innerQuery, arguments)};
+  _.each(_.keys(hardenedInterface), function (element, index, list) {
+    toInsert[element] = function () {
+      return this.innerQuery[element].apply(this.innerQuery, arguments)
+    };
   });
   _.extend(ApiQuery.prototype, toInsert, {
-    clone: function() {
+    clone: function () {
       var clone = this.innerQuery.clone.apply(this.innerQuery, arguments);
       return new ApiQuery(clone);
     },
-    load: function() {
+    load: function () {
       var clone = this.innerQuery.load.apply(this.innerQuery, arguments);
       return new ApiQuery(clone);
     }

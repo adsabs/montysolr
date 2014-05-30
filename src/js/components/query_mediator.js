@@ -26,7 +26,7 @@ define(['underscore',
   var QueryMediator = GenericModule.extend({
     debug: false,
 
-    initialize: function(attrs, options) {
+    initialize: function(options) {
       if (options.cache) {
         this._cache = new Cache(_.extend({
           'maximumSize': 50,
@@ -85,11 +85,12 @@ define(['underscore',
           resp.done(function() {
             self.onApiResponse.apply({request:apiRequest, pubsub: ps, key: senderKey}, arguments);
           });
-          resp.done(function(arguments) {
+          resp.fail(function() {
+            self._cache.invalidate(requestKey);
             self.onApiRequestFailure.apply({request:apiRequest, pubsub: ps, key: senderKey}, arguments);
           });
         }
-        else if (resp) { // it is a data
+        else if (resp) { // we already have data
           self.onApiResponse.apply({request:apiRequest, pubsub: ps, key: senderKey}, resp);
         }
         else { // new query
@@ -101,6 +102,7 @@ define(['underscore',
           promise.done(function() {
             self._cache.put(requestKey, arguments);
           });
+          this._cache.put(requestKey, promise);
         }
       }
       else {
@@ -130,9 +132,11 @@ define(['underscore',
 
     onApiRequestFailure: function( jqXHR, textStatus, errorThrown ) {
       var query = this.request.get('query');
-      if (query) {
-        console.warn(jqXHR, textStatus, errorThrown);
+      if (this.debug) {
+        console.warn('[QM]: failing request', jqXHR, textStatus, errorThrown);
       }
+      var feedback = new ApiFeedback();
+      this.pubsub.publish(this.key, this.pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
     },
 
     /**

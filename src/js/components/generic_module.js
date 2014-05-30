@@ -8,18 +8,12 @@ define(['backbone', 'underscore'], function(Backbone, _) {
   // A list of options to be attached directly to the module, if provided.
   var moduleOptions = ['className', 'activate'];
 
-  var Module = function(attributes, options) {
+  var Module = function(options) {
     var defaults;
-    var attrs = attributes || {};
     options = options || {};
     this.mid = _.uniqueId('module');
-    this.attributes = {};
     _.extend(this, _.pick(options, moduleOptions));
-
-    if (defaults = _.result(this, 'defaults')) {
-      attrs = _.defaults({}, attrs, defaults);
-    }
-    this.initialize.call(this, attrs, options);
+    this.initialize.call(this, options);
   };
 
   // every module has the Events mixin

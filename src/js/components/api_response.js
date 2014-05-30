@@ -14,9 +14,9 @@
  * },
  */
 
-define(['underscore', 'backbone', 'api_response_impl', 'js/components/facade'], function(_, Backbone, ApiResponseImplementation, Facade) {
+define(['underscore', 'backbone', 'api_response_impl', 'js/components/facade'], function (_, Backbone, ApiResponseImplementation, Facade) {
 
-  var hardenedInterface =  {
+  var hardenedInterface = {
     set: 'set (replace existing)',
     get: 'get values',
     has: 'has a key',
@@ -30,7 +30,7 @@ define(['underscore', 'backbone', 'api_response_impl', 'js/components/facade'], 
     getApiQuery: 'gets the query'
   };
 
-  var ApiResponse = function(data, options) {
+  var ApiResponse = function (data, options) {
 
     // Facade pattern, we want to expose only limited API
     // despite the fact that the underlying instance has
@@ -45,18 +45,19 @@ define(['underscore', 'backbone', 'api_response_impl', 'js/components/facade'], 
   };
 
   var toInsert = {};
-  _.each(_.keys(hardenedInterface), function(element, index, list) {
-    toInsert[element] = function() {return this.innerResponse[element].apply(this.innerResponse, arguments)};
+  _.each(_.keys(hardenedInterface), function (element, index, list) {
+    toInsert[element] = function () {
+      return this.innerResponse[element].apply(this.innerResponse, arguments)
+    };
   });
   _.extend(ApiResponse.prototype, toInsert, {
-    clone: function() {
+    clone: function () {
       var clone = this.innerResponse.clone.apply(this.innerResponse, arguments);
       return new ApiResponse(clone);
     }
   });
 
   return ApiResponse;
-  
 
 
 });
