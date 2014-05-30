@@ -12,7 +12,8 @@ define(['underscore',
     'js/components/generic_module',
     'js/mixins/dependon',
     'js/components/api_response',
-    'js/components/api_query_updater'],
+    'js/components/api_query_updater',
+    'js/components/api_feedback'],
   function(
     _,
     $,
@@ -20,11 +21,11 @@ define(['underscore',
     GenericModule,
     Mixins,
     ApiResponse,
-    ApiQueryUpdater) {
+    ApiQueryUpdater,
+    ApiFeedback) {
 
 
   var QueryMediator = GenericModule.extend({
-    debug: false,
 
     initialize: function(options) {
       if (options.cache) {
@@ -33,7 +34,13 @@ define(['underscore',
           'expiresAfterWrite':600
         }, options.cache));
       }
+      this.debug = options.debug || false;
       this.queryUpdater = new ApiQueryUpdater('QueryMediator');
+      this.failedRequestsCache = new Cache({
+        maximumSize: 100,
+        expiresAfterWrite: 600
+      });
+      this.maxRetries = options.maxRetries || 3;
     },
 
     /**
@@ -70,6 +77,13 @@ define(['underscore',
       ps.publish(this.mediatorPubSubKey, ps.INVITING_REQUEST, q);
     },
 
+    /**
+     * This method harvest requests from the PubSub and passes them to the Api. We do check
+     * the local cache and also prepare context for the done/fail callbacks
+     *
+     * @param apiRequest
+     * @param senderKey
+     */
     receiveRequests: function(apiRequest, senderKey) {
       if (this.debug)
         console.log('[QM]: received request:', apiRequest.url(), senderKey.getId());
@@ -77,30 +91,56 @@ define(['underscore',
       var ps = this.getBeeHive().Services.get('PubSub');
       var api = this.getBeeHive().Services.get('Api');
 
+      var requestKey = this.getCacheKey(apiRequest);
+      var maxTry = this.failedRequestsCache.getSync(requestKey) || 0;
+
+      if (maxTry >= this.maxRetries) {
+        this.onApiRequestFailure.apply({request:apiRequest, key: senderKey, requestKey:requestKey, qm: this},
+          [{status: ApiFeedback.CODES.TOO_MANY_FAILURES}, 'Error', 'This request has reached maximum number of failures (wait before retrying)']);
+        return;
+      }
+
+
       if (this._cache) {
-        var requestKey = this.getCacheKey(apiRequest);
+
         var resp = this._cache.getSync(requestKey);
         var self = this;
-        if (resp && resp.done) { // it is a promise object
+
+        if (resp && resp.promise) { // it is a promise object
+          //console.log('promise1', resp);
           resp.done(function() {
-            self.onApiResponse.apply({request:apiRequest, pubsub: ps, key: senderKey}, arguments);
+            //console.log('promise1:done', resp);
+            self._cache.put(requestKey, arguments);
+            self.onApiResponse.apply(
+              {request:apiRequest, key: senderKey, requestKey:requestKey, qm: self }, arguments);
           });
           resp.fail(function() {
+            //console.log('promise1:fail', resp);
             self._cache.invalidate(requestKey);
-            self.onApiRequestFailure.apply({request:apiRequest, pubsub: ps, key: senderKey}, arguments);
+            self.onApiRequestFailure.apply(
+              {request:apiRequest, pubsub: ps, key: senderKey, requestKey:requestKey,
+                qm: self }, arguments);
           });
         }
         else if (resp) { // we already have data
-          self.onApiResponse.apply({request:apiRequest, pubsub: ps, key: senderKey}, resp);
+          //console.log('cached2', resp);
+          self.onApiResponse.apply(
+            {request:apiRequest, key: senderKey, requestKey:requestKey, qm: self }, resp);
         }
         else { // new query
+          //console.log('newQ3');
           var promise = api.request(apiRequest, {
-            done: this.onApiResponse,
-            fail: this.onApiRequestFailure,
-            context: {request:apiRequest, pubsub: ps, key: senderKey}
-          });
-          promise.done(function() {
-            self._cache.put(requestKey, arguments);
+            done: function() {
+              self._cache.put(requestKey, arguments);
+              //console.log('done3', 'set', requestKey, this._cache);
+              self.onApiResponse.apply(this, arguments);
+            },
+            fail: function() {
+              self._cache.invalidate(requestKey);
+              //console.log('fail3', 'invalidate', requestKey, this._cache);
+              self.onApiRequestFailure.apply(this, arguments);
+            },
+            context: {request:apiRequest, key: senderKey, requestKey:requestKey, qm: self }
           });
           this._cache.put(requestKey, promise);
         }
@@ -109,7 +149,7 @@ define(['underscore',
         api.request(apiRequest, {
           done: this.onApiResponse,
           fail: this.onApiRequestFailure,
-          context: {request:apiRequest, pubsub: ps, key: senderKey}
+          context: {request:apiRequest, key: senderKey, requestKey:requestKey, qm: this }
         });
       }
 
@@ -117,26 +157,50 @@ define(['underscore',
 
 
     onApiResponse: function(data, textStatus, jqXHR ) {
-      if (this.debug)
+      var qm = this.qm;
+      if (qm.debug)
         console.log('[QM]: received response:', data);
 
       // TODO: check the status responses
       var response = new ApiResponse(data);
       response.setApiQuery(this.request.get('query'));
 
-      if (this.debug)
+      if (qm.debug)
         console.log('[QM]: sending response:', data);
 
-      this.pubsub.publish(this.key, this.pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
+      var pubsub = qm.getBeeHive().Services.get('PubSub');
+
+      pubsub.publish(this.key, pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
+      if (qm.failedRequestsCache.getIfPresent(this.requestKey)) {
+        qm.failedRequestsCache.invalidate(this.requestKey);
+      }
+
     },
 
     onApiRequestFailure: function( jqXHR, textStatus, errorThrown ) {
+      var qm = this.qm;
       var query = this.request.get('query');
-      if (this.debug) {
+      if (qm.debug) {
         console.warn('[QM]: failing request', jqXHR, textStatus, errorThrown);
       }
-      var feedback = new ApiFeedback();
-      this.pubsub.publish(this.key, this.pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
+
+      var errCount = qm.failedRequestsCache.getSync(this.requestKey) || 0;
+      qm.failedRequestsCache.put(this.requestKey, errCount+1);
+
+      var feedback = new ApiFeedback({code:503, msg:textStatus});
+      try {
+        feedback.setCode(jqXHR.status);
+      }
+      catch(e) {
+        console.error(e.stack);
+      }
+
+      if (this.request) {
+        feedback.setApiRequest(this.request);
+      }
+      var pubsub = qm.getBeeHive().Services.get('PubSub');
+      pubsub.publish(this.key, pubsub.DELIVERING_FEEDBACK+this.key.getId(), feedback);
+
     },
 
     /**

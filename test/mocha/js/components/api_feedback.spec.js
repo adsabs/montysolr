@@ -15,7 +15,7 @@ define([
 
     it("has Error codes", function() {
       var f = new ApiFeedback();
-      expect(f.CODES.SERVER_ERROR).to.be.equal(503);
+      expect(ApiFeedback.CODES.SERVER_ERROR).to.be.equal(503);
     });
 
     it("has code and msg", function() {

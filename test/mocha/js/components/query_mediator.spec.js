@@ -187,14 +187,14 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
       });
 
       it("should use cache (if configured)", function(done) {
-        var qm = new QueryMediator({cache: {}});
+        var qm = new QueryMediator({cache: {}, debug:false});
         var pubsub = beehive.Services.get('PubSub');
         var key = pubsub.getPubSubKey();
         var key2 = pubsub.getPubSubKey();
 
-        sinon.stub(pubsub, 'subscribe');
-        sinon.stub(qm, 'onApiResponse');
-        sinon.stub(qm, 'onApiRequestFailure');
+        sinon.spy(pubsub, 'subscribe');
+        sinon.spy(qm, 'onApiResponse');
+        sinon.spy(qm, 'onApiRequestFailure');
 
         qm.activate(beehive);
 
@@ -225,7 +225,64 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         expect(qm.onApiResponse.callCount, 14);
         expect(api.request.callCount).to.be.equal(2);
 
-        //expect(qm._cache);
+        this.server.respond();
+        api.request.reset();
+
+        // errors should not be cached
+        this.server.responses[0].response[0] = 503;
+        //this.server.respondWith(/\/api\/1\/search.*/,
+        //  [503, { "Content-Type": "application/json" }, validResponse]);
+
+
+        q.set('fq', 'bey');
+        qm.receiveRequests(req, key2);
+        this.server.respond();
+        expect(qm.onApiResponse.callCount, 14);
+        expect(qm.onApiRequestFailure.callCount, 1);
+        expect(api.request.callCount).to.be.equal(1);
+
+
+        //this.server.respondWith(/\/api\/1\/search.*/,
+        //  [200, { "Content-Type": "application/json" }, validResponse]);
+        this.server.responses[0].response[0] = 200;
+
+        qm.receiveRequests(req, key2);
+        this.server.respond();
+        expect(qm.onApiResponse.callCount, 15);
+        expect(qm.onApiRequestFailure.callCount, 1);
+        expect(api.request.callCount).to.be.equal(2);
+
+        // but this this will be served from  cache
+        qm.receiveRequests(req, key);
+        this.server.respond();
+        expect(qm.onApiResponse.callCount, 16);
+        expect(qm.onApiRequestFailure.callCount, 1);
+        expect(api.request.callCount).to.be.equal(2);
+
+
+
+        // constant failures should trigger safety mechanism of max-retries
+        this.server.responses[0].response[0] = 503;
+        q.set('fq', 'ha');
+        qm.onApiResponse.reset();
+        qm.onApiRequestFailure.reset();
+        api.request.reset();
+
+        for (var i=0;i<3;i++) {
+          qm.receiveRequests(req, key2);
+          this.server.respond();
+          expect(qm.onApiResponse.callCount, 0);
+          expect(qm.onApiRequestFailure.callCount, i+1);
+          expect(api.request.callCount).to.be.equal(i+1);
+        }
+
+        for (var i=0;i<3;i++) {
+          qm.receiveRequests(req, key2);
+          this.server.respond();
+          expect(qm.onApiResponse.callCount, 0);
+          expect(qm.onApiRequestFailure.callCount, 4+i);
+          expect(api.request.callCount).to.be.equal(3);
+        }
 
         done();
       });

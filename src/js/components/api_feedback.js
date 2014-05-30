@@ -10,7 +10,7 @@ define([
       this.setCode(this.code);
     };
 
-    ApiFeedback.prototype.CODES = {
+    ApiFeedback.CODES = {
       INVALID_PASSWORD: 498,
       ACCOUNT_NOT_FOUND: 495, // Account not found during signin
       ALREADY_LOGGED_IN: 493, // Already signed during signup
@@ -18,12 +18,13 @@ define([
       TOO_MANY_CHARACTERS: 486,
       NOT_FOUND: 404,
       SERVER_ERROR: 503,
+      TOO_MANY_FAILURES: 580,
       ALL_FINE: 200,
       KEEP_WAITING: 190
     };
 
     var _codes = {};
-    _.each(_.pairs(ApiFeedback.prototype.CODES), function (p) {
+    _.each(_.pairs(ApiFeedback.CODES), function (p) {
       _codes[p[1]] = p[0];
     });
 
@@ -31,7 +32,8 @@ define([
       hardenedInterface: {
         code: 'integer value of the code',
         msg: 'string message',
-        toJSON: 'for cloning'
+        toJSON: 'for cloning',
+        getApiRequest: 'to get the original request'
 
       },
       initialize: function () {
@@ -44,6 +46,17 @@ define([
           throw new Error("This code is not in the list ApiCodes - please extend js/components/api_feedback first:", this.code);
         }
         this.code = c;
+      },
+      setApiRequest: function(apiRequest) {
+        this.req = apiRequest;
+      },
+      getApiRequest: function() {
+        return this.req;
+      },
+
+
+      setMsg: function(msg) {
+        this.msg = msg;
       }
     }, Hardened);
 

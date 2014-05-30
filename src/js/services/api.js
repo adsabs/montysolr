@@ -36,7 +36,6 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       throw Error("Api.request accepts only instances of ApiRequest");
     }
 
-
     var self = this;
     var query = request.get('query');
     if (query && !(query instanceof ApiQuery)) {

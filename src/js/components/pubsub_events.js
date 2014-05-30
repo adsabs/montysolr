@@ -80,9 +80,16 @@ define([], function() {
      */
     SMALL_FIRE: '[PubSub]-Problem',
     BIG_FIRE: '[PubSub]-Big-Problem',
-    CITY_BURNING: '[PubSub]-Disaster'
+    CITY_BURNING: '[PubSub]-Disaster',
+
+
+    /**
+     * A message containing feedback from the FC; traveling towards OC
+     * The feedback will be instance of ApiFeedback
+     */
+    DELIVERING_FEEDBACK: '[FC]-FeedBack'
 
   };
 
   return PubSubEvents;
-})
+});
