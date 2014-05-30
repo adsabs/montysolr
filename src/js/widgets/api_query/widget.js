@@ -100,7 +100,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
           apiQuery = new ApiQuery(); // empty
         }
         this.collection = new KeyValueCollection(this.getData(apiQuery));
-        this.view = new WidgetView({collection: this.collection, model: new KeyValue({initialValue: apiQuery.url() || 'q=test'})});
+        this.view = new WidgetView({collection: this.collection, model: new KeyValue({initialValue: apiQuery.url() || 'q=planet'})});
         this.listenTo(this.view, 'all', this.onAll);
         return this;
       },

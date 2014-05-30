@@ -55,7 +55,7 @@ require(['js/components/application', 'js/components/beehive', 'js/services/pubs
     app.activate();
 
     // print debugging info to console
-    app.getBeeHive().getService('PubSub').on('all', function() {console.log('[all:PubSub]', arguments[0], arguments[1].url(), _.toArray(arguments).slice(2))});
+    app.getBeeHive().getService('PubSub').on('all', function() {console.log('[all:PubSub]', arguments[0], JSON.stringify(arguments[1].toJSON()), arguments[2].getId(), _.toArray(arguments).slice(3))});
     app.getBeeHive().getService('Api').on('all', function() {console.log('[all:Api]', arguments[0], _.toArray(arguments).slice(1))});
 
     // manually render all widgets (we'll discover their parent element)
@@ -90,7 +90,14 @@ require(['js/components/application', 'js/components/beehive', 'js/services/pubs
       else {
         el = $('#' +widget_name);
       }
-      el.append(widget.render());
+      var ww = widget.render();
+      if (ww.el) {
+        el.append(ww.el);
+      }
+      else {
+        el.append(ww);
+      }
+
       $(parent).append(el);
 
     });

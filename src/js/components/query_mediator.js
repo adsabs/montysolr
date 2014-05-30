@@ -160,7 +160,7 @@ define(['underscore',
     onApiResponse: function(data, textStatus, jqXHR ) {
       var qm = this.qm;
       if (qm.debug)
-        console.log('[QM]: received response:', JSON.stringify(data));
+        console.log('[QM]: received response:', JSON.stringify(data).substring(0, 1000));
 
       // TODO: check the status responses
       var response = new ApiResponse(data);
