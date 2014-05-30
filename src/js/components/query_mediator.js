@@ -32,7 +32,7 @@ define(['underscore',
         this._cache = new Cache(_.extend({
           'maximumSize': 50,
           'expiresAfterWrite':600
-        }, options.cache));
+        }, _.isObject(options.cache) ? options.cache : {}));
       }
       this.debug = options.debug || false;
       this.queryUpdater = new ApiQueryUpdater('QueryMediator');
@@ -41,6 +41,7 @@ define(['underscore',
         expiresAfterWrite: 600
       });
       this.maxRetries = options.maxRetries || 3;
+      this.recoveryDelayInMs = options.recoveryDelayInMs || 700;
     },
 
     /**
@@ -187,6 +188,10 @@ define(['underscore',
       var errCount = qm.failedRequestsCache.getSync(this.requestKey) || 0;
       qm.failedRequestsCache.put(this.requestKey, errCount+1);
 
+      if (qm.tryToRecover.apply(this, arguments)) {
+        console.warn("[QM]: attempting recovery");
+      }
+
       var feedback = new ApiFeedback({code:503, msg:textStatus});
       try {
         feedback.setCode(jqXHR.status);
@@ -198,9 +203,63 @@ define(['underscore',
       if (this.request) {
         feedback.setApiRequest(this.request);
       }
+
       var pubsub = qm.getBeeHive().Services.get('PubSub');
       pubsub.publish(this.key, pubsub.DELIVERING_FEEDBACK+this.key.getId(), feedback);
 
+    },
+
+    /**
+     * Method that receives the same arguments as the error callback. It can try to
+     * recover (re-issue) the request. Note: it doesn't need to check whether the
+     * recovery is needed - if we are here, it means 'do what you can to recover'
+     *
+     * This method MUST return 'true' when the request was resent. If it doesn't
+     * return 'true' the sender will be notified about the error.
+     *
+     * If it returns a Feedback object, the sender will be notified using it
+     *
+     * @param jqXHR
+     * @param textStatus
+     * @param errorThrown
+     */
+    tryToRecover: function(jqXHR, textStatus, errorThrown) {
+      var qm = this.qm; // QueryMediator
+      var senderKey = this.key;
+      var request = this.request;
+      var requestKey = this.requestKey;
+
+      var status = jqXHR.status;
+      if (status) {
+        switch(status) {
+          case 408: // proxy timeout
+          case 504: // gateway timeout
+          case 503: // service unavailable
+            setTimeout(function() {
+              // we can remove the entry from the cache, because
+              // if they eventually succeed, sender will receive
+              // its data (because the promise object inside the
+              // cache contains the function to call delivery
+              if (qm._cache) {
+                var resp = qm._cache.getSync(requestKey);
+                if (resp && resp.promise) {
+                  qm._cache.invalidate(requestKey);
+                }
+                else if (resp) {
+                  // it must have succeeded, good!
+                  return;
+                }
+              }
+              // re-send the query
+              qm.receiveRequests.call(qm, request, senderKey);
+            }, qm.recoveryDelayInMs);
+            return true;
+            break;
+
+          default:
+            //TBD
+        }
+      }
     },
 
     /**

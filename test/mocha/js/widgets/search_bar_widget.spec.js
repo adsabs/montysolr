@@ -17,7 +17,7 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget', 'js/components/beeh
 
       $("#test").append(w)
 
-      console.log(w)
+      //console.log(w)
 
       done();
 

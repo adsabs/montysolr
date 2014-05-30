@@ -4,12 +4,11 @@
 define(['marionette', 'backbone', 'js/widgets/tabs/tabs_widget'], function (Marionette, Backbone, TabsWidget) {
   describe("Tabs (UI Widget)", function () {
 
-    var tabs
-
+    var tabs;
     var removeCount = 0;
 
 
-    beforeEach(function () {
+    beforeEach(function (done) {
       view1 = new Backbone.View()
       view1.render = function () {
         this.$el.html("<p>this is view 1</p>")
@@ -34,34 +33,35 @@ define(['marionette', 'backbone', 'js/widgets/tabs/tabs_widget'], function (Mari
       ]})
 
       $("#test").append(tabs.render().el)
-
+      done();
     })
 
-    afterEach(function(){
+    afterEach(function(done){
       $("#test").empty();
-    })
+      done();
+    });
 
-    it("should display the default view on render", function () {
-      expect($("#test div.active p").text()).to.match(/this is view 1/)
+    it("should display the default view on render", function (done) {
+      expect($("#test div.active p").text()).to.match(/this is view 1/);
+      done();
 
-    })
+    });
 
-    it("should react to a click on another tab by displaying its view", function () {
+    it("should react to a click on another tab by displaying its view", function (done) {
       $("#test li:not(.active) a").click();
 
-      expect($("#test div.active p").text()).to.match(/this is view 2/)
+      expect($("#test div.active p").text()).to.match(/this is view 2/);
+      done();
 
+    });
 
-    })
+    it("should close (Marionette) or remove (Backbone) all views when it itself is closed", function(done){
 
-    it("should close (Marionette) or remove (Backbone) all views when it itself is closed", function(){
+     tabs.close();
 
-     tabs.close()
+     expect(removeCount).to.equal(2);
+     done();
+    });
 
-     expect(removeCount).to.equal(2)
-    })
-
-  })
-
-  return {};
+  });
 });

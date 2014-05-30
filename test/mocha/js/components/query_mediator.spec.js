@@ -8,30 +8,30 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         ],
   function(_, $, QueryMediator, BeeHive, PubSub, Api, GenericModule, PubSubKey, ApiQuery, ApiRequest) {
 
-
     var beehive, debug = false;
-    beforeEach(function(done) {
-      this.server = sinon.fakeServer.create();
-      this.server.autoRespond = true;
-      this.server.respondWith(/\/api\/1\/search.*/,
-        [200, { "Content-Type": "application/json" }, validResponse]);
-
-      beehive = new BeeHive();
-      var api = new Api();
-      sinon.spy(api, 'request');
-      beehive.addService('Api', api);
-      beehive.addService('PubSub', new PubSub());
-      done();
-    });
-
-    afterEach(function(done) {
-      beehive.close();
-      beehive = null;
-      this.server.restore();
-      done();
-    });
-
     describe('Query Mediator (Scaffolding)', function() {
+
+
+      beforeEach(function(done) {
+        this.server = sinon.fakeServer.create();
+        this.server.autoRespond = true;
+        this.server.respondWith(/\/api\/1\/search.*/,
+          [200, { "Content-Type": "application/json" }, validResponse]);
+
+        beehive = new BeeHive();
+        var api = new Api();
+        sinon.spy(api, 'request');
+        beehive.addService('Api', api);
+        beehive.addService('PubSub', new PubSub());
+        done();
+      });
+
+      afterEach(function(done) {
+        beehive.close();
+        beehive = null;
+        this.server.restore();
+        done();
+      });
 
       it("returns QueryMediator object", function(done) {
         expect(new QueryMediator()).to.be.instanceof(QueryMediator);
@@ -174,7 +174,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
       });
 
 
-      it("has getCacheKey function", function() {
+      it("has getCacheKey function", function(done) {
         var qm = new QueryMediator();
         var req = new ApiRequest({target: 'search', query:new ApiQuery({'q': 'pluto'})});
 
@@ -183,7 +183,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         var key = qm.getCacheKey(req);
         expect(req.url()).to.be.equal('search?__x=foo&q=pluto');
         expect(key).to.be.equal('search?q=pluto');
-
+        done();
       });
 
       it("should use cache (if configured)", function(done) {
@@ -229,7 +229,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         api.request.reset();
 
         // errors should not be cached
-        this.server.responses[0].response[0] = 503;
+        this.server.responses[0].response[0] = 502;
         //this.server.respondWith(/\/api\/1\/search.*/,
         //  [503, { "Content-Type": "application/json" }, validResponse]);
 
@@ -262,7 +262,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
 
         // constant failures should trigger safety mechanism of max-retries
-        this.server.responses[0].response[0] = 503;
+        this.server.responses[0].response[0] = 502;
         q.set('fq', 'ha');
         qm.onApiResponse.reset();
         qm.onApiRequestFailure.reset();
@@ -285,6 +285,67 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         }
 
         done();
+      });
+
+      it("knows to recover from certain error situations (such as hangup)", function(done) {
+        var qm = new QueryMediator({cache: true, debug:false, recoveryDelayInMs: 50});
+        var pubsub = beehive.Services.get('PubSub');
+        var api = beehive.Services.get('Api');
+
+        var key = pubsub.getPubSubKey();
+        var key2 = pubsub.getPubSubKey();
+
+        sinon.spy(qm, 'onApiResponse');
+        sinon.spy(qm, 'onApiRequestFailure');
+        sinon.spy(qm, 'tryToRecover');
+
+        qm.activate(beehive);
+
+        this.server.autoRespond = false;
+
+        var q = new ApiQuery({'q': 'pluto'});
+        var req = new ApiRequest({target: 'search', query:q});
+
+        this.server.responses[0].response[0] = 503;
+        qm.receiveRequests(req, key);
+        this.server.respond(); // first request
+
+        expect(api.request.callCount).to.be.equal(1);
+        expect(qm.onApiResponse.callCount, 0);
+        expect(qm.onApiRequestFailure.callCount, 1);
+        expect(qm.tryToRecover.callCount, 1);
+
+        this.server.respond(); // first re-try
+        var self = this;
+
+        setTimeout(function() {
+
+          expect(api.request.callCount).to.be.equal(2);
+          expect(qm.onApiResponse.callCount, 0);
+          expect(qm.onApiRequestFailure.callCount, 2);
+          expect(qm.tryToRecover.callCount, 2);
+
+          self.server.respond(); // second re-try
+
+          setTimeout(function() {
+            expect(api.request.callCount).to.be.equal(3);
+            expect(qm.onApiResponse.callCount, 0);
+            expect(qm.onApiRequestFailure.callCount, 3);
+            expect(qm.tryToRecover.callCount, 3);
+
+            self.server.respond(); // all next requests should be ignored
+            self.server.respond(); // all next requests should be ignored
+
+            expect(api.request.callCount).to.be.equal(3);
+            expect(qm.onApiResponse.callCount, 0);
+            expect(qm.onApiRequestFailure.callCount, 5);
+            expect(qm.tryToRecover.callCount, 3);
+            done();
+          }, 50);
+
+        }, 50);
+
+
       });
     });
 

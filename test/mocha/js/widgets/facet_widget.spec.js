@@ -22,7 +22,7 @@ define([
     TreeView
     ) {
 
-    describe("Facet Widget (UI)", function () {
+    describe("Facet Widget - base (UI)", function () {
 
       // modify the test to contain only 5 pairs of facet values
       _.each([test1, test2], function(o) {
@@ -32,9 +32,12 @@ define([
       });
 
 
-      var minsub;
-      beforeEach(function() {
-
+      var minsub, testId;
+      beforeEach(function(done) {
+        //var testId = 'test' + Math.random().toString(16).split('.')[1];
+        //var testEl = $('<div id="' +  testId + '">hello</div>');
+        testId = '#test-area';
+        //$('#test-area').append(testEl);
         minsub = new (MinimalPubsub.extend({
           request: function(apiRequest) {
             if (this.requestCounter % 2 === 0) {
@@ -44,17 +47,20 @@ define([
             }
           }
         }))({verbose: false});
+        done();
       });
 
-      afterEach(function() {
-        minsub.close();
-        var ta = $('#test-area');
+      afterEach(function(done) {
+
+        var ta = $(testId);
         if (ta) {
           ta.empty();
         }
+        minsub.close();
+        done();
       });
 
-      it("should return FacetWidget", function() {
+      it("should return FacetWidget", function(done) {
         var w = new FacetWidget({
           view: new FacetContainerView({
             model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
@@ -75,6 +81,7 @@ define([
         $w = $(w.render().el);
         expect($w.find('h5').text()).to.be.equal('Facet Title');
         expect($w.find('.widget-body').text().trim()).to.be.equal('No content to display.');
+        done();
       });
 
       it("should throw errors when you instantiate it without proper variables", function() {
@@ -104,7 +111,7 @@ define([
 
         widget.activate(minsub.beehive.getHardenedInstance());
 
-        //$('#test-area').append(widget.render());
+        //$(testId).append(widget.render());
 
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
         expect(widget.dispatchRequest.called).to.be.true;
@@ -140,7 +147,7 @@ define([
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
-        $('#test-area').append($w);
+        $(testId).append($w);
 
         // options are there and visible
         expect($w.find('.widget-options.bottom').hasClass('hide')).to.be.false;
@@ -173,7 +180,7 @@ define([
 
             done();
           }
-        ,50);
+        ,100);
 
       });
 
@@ -202,7 +209,7 @@ define([
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
-        $('#test-area').append($w);
+        $(testId).append($w);
 
         $w.find('.item-view:first input').click();
         expect($w.find('input[value="limit to"]').is(':visible')).to.be.true;
@@ -246,7 +253,7 @@ define([
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
-        $('#test-area').append($w);
+        $(testId).append($w);
 
         expect($w.find('input').length).to.be.gt(0);
 

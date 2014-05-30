@@ -6,27 +6,29 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'js/services/p
   function(ApiQueryWidget, ApiQuery, PubSub, BeeHive, Backbone, $) {
   describe("ApiQuery Widget (UI)", function () {
 
-      var clearMe = function() {
+      var clearMe = function(done) {
         var ta = $('#test-area');
         if (ta) {
           ta.empty();
         }
+        done();
       }
       beforeEach(clearMe);
       afterEach(clearMe);
 
-      it("can returns object of ApiQueryWidget", function() {
+      it("can returns object of ApiQueryWidget", function(done) {
         expect(new ApiQueryWidget()).to.be.instanceof(ApiQueryWidget);
+        done();
       });
 
-      it("should build a view of the ApiQuery values", function() {
+      it("should build a view of the ApiQuery values", function(done) {
         var q = new ApiQuery().load('foo=bar&foo=baz');
         var widget = new ApiQueryWidget(q);
-        var html = $(widget.render()).html();
+        var html = $(widget.render());
 
-        expect(html).to.contain('<tr><td class="key"><input type="text" name="key" value="foo"></td>');
-        expect(html).to.contain('<td class="value"><input type="text" name="value" value="bar|baz"></td>');
-        expect(html).to.contain('<td> <a class="remove">remove</a></td></tr>');
+        expect(html.find('input[value="foo"]').length).to.be.eql(1); //contain('<tr><td class="key"><input type="text" name="key" value="foo"></td>');
+        expect(html.find('input[value="bar|baz"]').length).to.be.eql(1); //.to.contain('<td class="value"><input type="text" name="value" value="bar|baz"></td>');
+        expect(html.find('a.remove').length).to.be.eql(1); //contain('<td> <a class="remove">remove</a></td></tr>');
         expect($(widget.render()).find('tr').length).to.be.equal(1);
 
         widget.initialize(new ApiQuery().load('foo=bar&boo=baz'));
@@ -39,12 +41,13 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'js/services/p
         expect($(widget.render()).find('tr').length).to.be.equal(1);
 
         widget = new ApiQueryWidget(new ApiQuery());
-        html = $(widget.render()).html();
-        expect(html).to.not.contain('<a class="remove">remove</a></td></tr>');
+        html = $(widget.render());
+        expect(html.find('a.remove').length).to.eql(0);//to.not.contain('<a class="remove">remove</a></td></tr>');
         expect($(widget.render()).find('tr').length).to.be.equal(0);
+        done();
       });
 
-    it("has interactive features: load/add-new-iterm/remove/run", function() {
+    it("has interactive features: load/add-new-iterm/remove/run", function(done) {
       var q = new ApiQuery().load('foo=bar&boo=baz&woo=waz');
       var widget = new ApiQueryWidget(q);
       var ta = $('#test-area');
@@ -93,6 +96,7 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'js/services/p
       expect(ta.find('#api-query-result').text()).to.equal("hey=joe&what=dydu");
       // also input will
       expect(ta.find('#api-query-input').val()).to.equal("hey=joe&what=dydu");
+      done();
     });
 
     it("knows how to interact with pubsub", function(done) {

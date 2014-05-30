@@ -6,20 +6,22 @@ define(['js/widgets/api_request/widget', 'js/components/api_request', 'js/compon
   function (ApiRequestWidget, ApiRequest, ApiQuery, PubSub, BeeHive, Backbone, $) {
     describe("ApiRequest Debugging Widget (UI)", function () {
 
-      var clearMe = function () {
+      var clearMe = function (done) {
         var ta = $('#test-area');
         if (ta) {
           ta.empty();
         }
-      }
+        done();
+      };
       beforeEach(clearMe);
       afterEach(clearMe);
 
-      it("can returns object of ApiRequestWidget", function () {
+      it("can returns object of ApiRequestWidget", function (done) {
         expect(new ApiRequestWidget()).to.be.instanceof(ApiRequestWidget);
+        done();
       });
 
-      it("should build a view of the ApiRequest values", function () {
+      it("should build a view of the ApiRequest values", function (done) {
         var req = new ApiRequest().load('foo?q=one#sender=boo&sender=woo');
         var widget = new ApiRequestWidget(req);
         var $ta = $('#test-area');
@@ -30,10 +32,10 @@ define(['js/widgets/api_request/widget', 'js/components/api_request', 'js/compon
         expect($ta.find('tr:nth-child(1) >> input[name=value]').val()).to.equal('foo');
         expect($ta.find('tr:nth-child(2) >> input[name=value]').val()).to.equal('q=one');
         expect($ta.find('tr:nth-child(3) >> input[name=value]').val()).to.equal('boo|woo');
-
+        done();
       });
 
-      it("has interactive features: load/modify/run", function () {
+      it("has interactive features: load/modify/run", function (done) {
         var req = new ApiRequest().load('foo?q=one#sender=boo&sender=woo');
         var widget = new ApiRequestWidget(req);
         var $ta = $('#test-area');
@@ -63,6 +65,7 @@ define(['js/widgets/api_request/widget', 'js/components/api_request', 'js/compon
         expect($ta.find('#api-request-result').text()).to.equal("foo/bar?q=three#sender=booz");
         // also input will
         expect($ta.find('#api-request-input').val()).to.equal("foo/bar?q=three#sender=booz");
+        done();
       });
 
       it("knows how to interact with pubsub", function (done) {

@@ -19,7 +19,7 @@ define(['marionette',
     describe("Render Results (UI Widget)", function () {
 
       var minsub;
-      beforeEach(function() {
+      beforeEach(function(done) {
 
         minsub = new (MinimalPubsub.extend({
           request: function(apiRequest) {
@@ -30,30 +30,34 @@ define(['marionette',
             }
           }
           }))({verbose: false});
+        done();
       });
 
-      afterEach(function() {
+      afterEach(function(done) {
         minsub.close();
         var ta = $('#test-area');
         if (ta) {
           ta.empty();
         }
+        done();
       });
 
 
-      it("returns ResultsWidget object", function() {
+      it("returns ResultsWidget object", function(done) {
         expect(new ResultsWidget()).to.be.instanceof(ResultsWidget);
         expect(new ResultsWidget()).to.be.instanceof(PaginatedBaseWidget);
+        done();
       });
 
-      it("should consist of a Marionette Controller with a Marionette Composite View as its main view", function () {
+      it("should consist of a Marionette Controller with a Marionette Composite View as its main view", function (done) {
 
         expect(new ResultsWidget()).to.be.instanceof(Marionette.Controller);
         expect(new ResultsWidget().view).to.be.instanceof(Marionette.CompositeView);
 
+        done();
       });
 
-      it("hides Load more if there is no data", function() {
+      it("hides Load more if there is no data", function(done) {
         var widget = new ResultsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
         var $w = $(widget.render().el);
@@ -63,6 +67,7 @@ define(['marionette',
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({q: "star"}));
 
         expect($w.find('.load-more').css('display')).to.be.equal('block');
+        done();
 
       });
 
@@ -140,9 +145,9 @@ define(['marionette',
               expect($('.results-item').length).to.be.equal(20);
               expect($('.results-item').not('.hide').length).to.be.equal(19);
               expect($('.results-item').filter('.hide').length).to.be.equal(1);
-              done()}, 50);
+              done()}, 100);
           },
-        50);
+        100);
 
       });
 
@@ -166,7 +171,7 @@ define(['marionette',
 
 
 
-      it("should show highlights (if there are any) when a user clicks on 'show details'", function () {
+      it("should show highlights (if there are any) when a user clicks on 'show details'", function (done) {
 
         var widget = new ResultsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
@@ -185,6 +190,7 @@ define(['marionette',
         expect(v.$('.more-info:last').hasClass("hide")).to.be.equal(false);
         v.$("#show-results-snippets").click();
         expect(v.$('.more-info:last').hasClass("hide")).to.be.equal(true);
+        done();
       })
 
     })

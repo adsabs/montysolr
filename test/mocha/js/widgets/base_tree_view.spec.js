@@ -42,7 +42,7 @@ define([
         view.on('all', spy);
 
         var $v = $(view.render().el);
-        $('body').append($v);
+        $('#test-area').append($v);
 
         expect($v.find('.widget-body > div.item-view').length).to.be.equal(6);
         expect($($v.find('.widget-body > .item-view > input:eq(0)')).val()).to.be.equal('bar');

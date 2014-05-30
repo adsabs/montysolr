@@ -70,7 +70,7 @@ define(['underscore', 'backbone',
           }
           context.done.call(context.context, response);
         }});
-      this.beehive.addObject('QueryMediator', new QueryMediator());
+      this.beehive.addObject('QueryMediator', new QueryMediator({cache:false, recoveryDelayInMs: 0}));
       this.beehive.activate();
       this.key = this.pubsub.getPubSubKey();
       this.listen();

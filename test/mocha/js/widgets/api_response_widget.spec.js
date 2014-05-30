@@ -20,20 +20,22 @@ define(['js/widgets/api_response/widget', 'js/components/api_response',
         }
       };
 
-      var clearMe = function() {
+      var clearMe = function(done) {
         var ta = $('#test-area');
         if (ta) {
           ta.empty();
         }
-      }
+        done();
+      };
       beforeEach(clearMe);
       afterEach(clearMe);
 
-      it("can returns object of ApiResponseWidget", function() {
+      it("can returns object of ApiResponseWidget", function(done) {
         expect(new ApiResponseWidget()).to.be.instanceof(ApiResponseWidget);
+        done();
       });
 
-      it("should build a view of the ApiResponse values", function() {
+      it("should build a view of the ApiResponse values", function(done) {
         var W = ApiResponseWidget.extend({
           onRun: sinon.spy()
         });
@@ -73,7 +75,7 @@ define(['js/widgets/api_response/widget', 'js/components/api_response',
         ta.find('#api-response-input').val('{"woo":"wah","responseHeader":{"params":{"q":"*:*"},"nested":{"one":"two"}}}');
         ta.find('button#api-response-load').click();
         expect(ta.find('#api-response-error').text()).to.contain('');
-
+        done();
       });
 
     it("knows how to interact with pubsub", function(done) {
