@@ -5,7 +5,8 @@ define([
   'hbs!js/widgets/facet/templates/logic-container',
   'js/widgets/base/tree_view',
   'js/widgets/base/base_widget',
-  'js/components/paginator'
+  'js/components/paginator',
+  'js/widgets/facet/zoomable_graph_view'
 ], function (
   FacetCollection,
   FacetWidget,
@@ -13,7 +14,8 @@ define([
   LogicSelectionContainerTemplate,
   TreeView,
   BaseWidget,
-  Paginator
+  Paginator,
+  ZoomableGraphView
   ) {
 
 
@@ -73,7 +75,9 @@ define([
         paginator: new Paginator({start: 0, rows: 20, startName: "facet.offset", rowsName: "facet.limit"})
       };
 
-      var controllerOptions = _.extend(controllerOptions, _.pick(options, ['responseProcessors']));
+      var controllerOptions = _.extend(controllerOptions, _.pick(options,
+        ['responseProcessors', 'defaultQueryArguments', 'extractionProcessors']));
+
 
       var widget = new FacetWidget(controllerOptions);
       return widget;
@@ -94,7 +98,6 @@ define([
 
       var containerOptions = {
         model: new FacetContainerView.ContainerModelClass({title: options.facetTitle}),
-        collection: new FacetCollection(),
         displayNum: 5,
         maxDisplayNum: 100,
         openByDefault: false,
@@ -123,86 +126,111 @@ define([
         paginator: new Paginator({start: 0, rows: 20, startName: "facet.offset", rowsName: "facet.limit"})
       };
 
-      var controllerOptions = _.extend(controllerOptions, _.pick(options, ['responseProcessors']));
+      var controllerOptions = _.extend(controllerOptions, _.pick(options,
+           ['responseProcessors', 'defaultQueryArguments', 'extractionProcessors']));
 
       var widget = new FacetWidget(controllerOptions);
       return widget;
     },
 
-    makeGraphFacet: function(options) {
-      return new BaseWidget();
-    }
 
 
-    /* TBD
-
-     optional config variables:
-     options.solrPath
-     options.openByDefault (true/false; default false)
-     options.level: how deep does the hierarchy go
-
+    /**
+     * Factory method to create single level paging facets; required
+     * arguments:
+     *    facetField
+     *    facetTitle
+     *    xAxisTitle
+     *
+     * Optional arguments:
+     *
+     *    displayNum = how many items to display
+     *    maxDisplayNum = maximum to display
+     *    openByDefault = default is false
+     *    showOptions = [false]; show the containers options
+     *    logicOptions = object {'single': [....], 'multiple': [...]}
+     *          when present, the facet allows for selection of logical
+     *          operators - these will be applied to the selected items
+     *          'single' is for situations when only one item is selected
+     *          'multiple' applies to more than one item
+     *
+     * @param options
+     * @returns {BaseFacetWidget}
+     */
     makeGraphFacet: function (options) {
       //required config
-      if (!(options.facetField && options.userFacingName && options.xAxisTitle)) {
-        throw new Error("Required configuration variables were not passed")
+      if (!(options.facetField && options.facetTitle && options.xAxisTitle)) {
+        throw new Error("Required configuration variables were not passed");
       }
-      ;
+
+      var containerOptions = {
+        model: new FacetContainerView.ContainerModelClass({title: options.facetTitle}),
+        collection: new FacetCollection(),
+        displayNum: 5,
+        maxDisplayNum: 100,
+        openByDefault: false,
+        showOptions: true,
+        itemView: ZoomableGraphView
+      };
+
+      containerOptions = _.extend(containerOptions,
+        _.pick(options, ['displayNum', 'maxDisplayNum', 'openByDefault', 'showOptions']));
 
 
-      var containerModel = new BaseContainerView.ContainerModelClass({
-        title: options.userFacingName
-      });
-      var coll = new FacetCollection();
-
-      var containerview = new ChangeApplyContainerView({
-        collection: coll,
-        model: containerModel,
-        itemView: ZoomableGraphView,
-        openByDefault: options.openByDefault,
+      var controllerOptions = {
+        defaultQueryArguments: {
+          "facet": "true",
+          "facet.field": options.facetField,
+          "facet.mincount": "1",
+          "facet.limit": 100,
+          fl: 'id'
+        },
+        view: new FacetContainerView(containerOptions),
         //so that the html template for the graph can use these values
         itemViewOptions: {
-          xAxisTitle: options.xAxisTitle,
-          title: options.userFacingName
+          xAxisTitle: options.facetTitle,
+          title: options.facetTitle
+        }
+      };
+
+      var controllerOptions = _.extend(controllerOptions, _.pick(options,
+          ['defaultQueryArguments']));
+
+      var GraphWidget = BaseWidget.extend({
+        facetField: options.facetField,
+        processResponse: function (apiResponse) {
+          var view = this.view;
+          var coll = this.collection;
+          var facets = apiResponse.get("facet_counts.facet_fields." + this.facetField);
+          var facetsCol = [];
+          _.each(facets, function (f, i) {
+            if (i % 2 === 0) {
+              facetsCol.push({
+                //"title"
+                x: parseInt(f),
+                //"value"
+                y: parseInt(facets[i + 1])
+              })
+            }
+          }, this);
+
+          facetsCol = _.sortBy(facetsCol, function (d) {
+            return d.x
+          });
+
+          coll.reset({
+            "graphInfo": facetsCol,
+            "value": [facetsCol[0].x, facetsCol[facetsCol.length - 1].x]
+          });
+
         }
       });
 
-      var widget = new BaseController({
-        unpaginated: true,
-        view: containerview,
-        facetName: options.facetField,
 
-      })
 
-      widget.processResponse = function (apiResponse, data) {
-        view = data.view;
-        coll = view.collection;
-        var facets = apiResponse.get(this.solrPath + "." + this.facetField);
-        var facetsCol = [];
-        _.each(facets, function (f, i) {
-          if (i % 2 === 0) {
-            facetsCol.push({
-              //"title"
-              x: parseInt(f),
-              //"value"
-              y: parseInt(facets[i + 1])
-            })
-          }
-        }, this);
+      return new GraphWidget(controllerOptions);
 
-        facetsCol = _.sortBy(facetsCol, function (d) {
-          return d.x
-        });
-
-        coll.reset({
-          "graphInfo": facetsCol,
-          "value": [facetsCol[0].x, facetsCol[facetsCol.length - 1].x]
-        });
-
-      };
-
-      return widget
     }
-    */
   };
   return FacetFactory
-})
+});

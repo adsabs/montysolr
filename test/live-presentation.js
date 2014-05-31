@@ -104,26 +104,44 @@ require([
     facetField: "grant_facet_hier",
     facetTitle: "Grants",
     openByDefault: false,
-    logicOptions: {single: null, multiple: ["or", "exclude"]}
+    logicOptions: {single: null, multiple: ["or", "exclude"]},
+    responseProcessors: [
+      function(v) {var vv = v.split('/'); return vv[vv.length-1]}
+    ]
   });
 
   var refereed = FacetFactory.makeBasicCheckboxFacet({
     facetField: "property",
     facetTitle: "Refereed Status",
     openByDefault: true,
-    extractFacets: function(facets) {
-      var returnList = [];
-      _.each(facets, function(d,i ){
-        if (d ==="refereed"){
-          returnList.push("Refereed", facets[i+1])
-        }
-        else if (d ==="notrefereed"){
-           returnList.push("Non-Refereed", facets[i+1])
-        }
-      })
-      return returnList
+    defaultQueryArguments: {
+      "facet": "true",
+      "facet.mincount": "1",
+      "fl": "id",
+      "facet.query": 'property:refereed'
     },
-    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
+    // this is optimization, we'll execute only one query (we don't even facet on
+    // other values). There is a possibility is is OK (but could also be wrong;
+    // need to check)
+    extractionProcessors:
+      function(apiResponse) {
+      var returnList = [];
+      if (apiResponse.has('facet_counts.facet_queries')) {
+        var queries = apiResponse.get('facet_counts.facet_queries');
+        var v, found = 0;
+        _.each(_.keys(queries), function(k) {
+          v = queries[k];
+          if (k.indexOf(':refereed') > -1) {
+            found = v;
+            returnList.push("refereed", v);
+          }
+        });
+
+        returnList.push('notrefereed', apiResponse.get('response.numFound') - found);
+        return returnList;
+      }
+    },
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['invalid choice']}
 
   });
 
@@ -171,7 +189,7 @@ require([
 
 
   $("#right").append(queryInfo.render().el);
-  //$("#right").append(yearGraph.render().el);
-  //$("#right").append(citationsGraphWidget.render().el);
+  $("#right").append(yearGraph.render().el);
+  $("#right").append(citationsGraphWidget.render().el);
 
 });

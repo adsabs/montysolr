@@ -1,5 +1,5 @@
-define(['marionette', 'd3', 'js/widgets/base/item_view', 'hbs!./templates/graph'],
-  function (Marionette, d3, BaseItemView, FacetGraphTemplate) {
+define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 'hbs!./templates/graph'],
+  function (Marionette, d3, $, $ui, BaseItemView, FacetGraphTemplate) {
 
   var Buffer = function (maxLength) {
     this.commands = [];
@@ -53,15 +53,16 @@ define(['marionette', 'd3', 'js/widgets/base/item_view', 'hbs!./templates/graph'
 
     initialize   : function (options) {
 
-      _.bindAll(this, "triggerSortChange")
+      _.bindAll(this, "triggerSortChange");
 
-      try {
-        //need to pass x-axis title in for sorting
+      if (!(options.xAxisTitle && options.title)) {
+        //throw new Error("Missing key information: x axis title or graph title")
+        this.xAxisTitle = "value";
+        this.parentTitle = "";
+      }
+      else {
         this.xAxisTitle = options.xAxisTitle;
         this.parentTitle = options.title;
-
-      } catch (e) {
-        throw new Error("Missing key information: x axis title or graph title")
       }
 
       //some variables need to be accessible for the sort function
@@ -159,7 +160,7 @@ define(['marionette', 'd3', 'js/widgets/base/item_view', 'hbs!./templates/graph'
 
     addSortChangeToQueue: function (e) {
       this.sortAnimationQueue = this.sortAnimationQueue || new Buffer(1)
-      console.log("change request",this.sortAnimationQueue.commands )
+      //console.log("change request",this.sortAnimationQueue.commands )
 
       this.sortAnimationQueue.add(this.triggerSortChange, e)
     },

@@ -24,10 +24,12 @@ var tests = [
   tbase + '/widgets/api_query_widget.spec.js',
   tbase + '/widgets/api_request_widget.spec.js',
   tbase + '/widgets/tabs_widget.spec.js',
+  tbase + '/widgets/facet_zoomable_graph_view.spec.js',
+
   //tbase + '/widgets/contents_manager_widget.spec.js'
 
   //tbase + '/widgets/facet_container_views.spec.js',
-  //tbase + '/widgets/facet_item_views.spec.js',
+
   //tbase + '/widgets/facet_controllers.spec.js'
 
 ];

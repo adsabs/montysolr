@@ -33,10 +33,11 @@ var tests = [
     //tbase + '/widgets/facet_widget.spec.js',
     //tbase + '/components/query_mediator.spec.js'
     //tbase + '/widgets/multi_callback_widget.spec.js',
-    //tbase + '/widgets/facet_item_views.spec.js',
+    //tbase + '/widgets/facet_zoomable_graph_view.spec.js',
     //tbase + '/widgets/facet_controllers.spec.js'
-    tbase + '/widgets/facet_hier_widget.spec.js'
-
+    //tbase + '/widgets/facet_hier_widget.spec.js'
+    //tbase + '/widgets/facet_zoomable_graph_view.spec.js'
+    tbase + '/widgets/facet_graph_widget.spec.js'
 
 ];
 

@@ -5,6 +5,10 @@
  * This widget here constitues one complete test with different stages of
  * the query
  *
+ * TODO: paging is wrong (last item; new query)
+ * TODO: when it reaches last item; it starts to show first level again
+ * TODO: optimization (set number of levels to bother asking for data)
+ *
  */
 define([
     'underscore',

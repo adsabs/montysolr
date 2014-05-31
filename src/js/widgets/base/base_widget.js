@@ -58,8 +58,10 @@ define(['backbone', 'marionette',
         this.defaultQueryArguments = _.extend(this.defaultQueryArguments, options.defaultQueryArguments);
       }
 
-      // XXX: here the widget should do something with the views/models/templates
-      // to set everything up
+      if (options.view) {
+        this.view = options.view;
+        this.collection = options.view.collection;
+      }
     },
 
 

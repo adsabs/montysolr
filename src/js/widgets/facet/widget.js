@@ -31,13 +31,19 @@ define(['backbone',
         PaginatedMultiCallbackWidget.prototype.initialize.call(this, options)
 
         this.listenTo(this.view, "all", this.onAllInternalEvents);
-        if (! this.defaultQueryArguments['facet.field']) {
-          throw new Error("Required parameter defaultQueryArguments[facet.field] is missing");
-        }
-        this.facetField = this.defaultQueryArguments['facet.field'];
+
+        this.facetField = options.facetField || this.defaultQueryArguments['facet.field'] || _.uniqueId('facets');
         this.queryUpdater = new ApiQueryUpdater(this.facetField);
 
         this.responseProcessors = options['responseProcessors'] || this.responseProcessors || [];
+        this.extractionProcessors = options['extractionProcessors'] || this.extractionProcessors || [];
+
+        this._extractor = undefined;
+        this._preprocessor = undefined;
+
+        if (! (this.defaultQueryArguments['facet.field'] || this.getExtractorChain())) {
+          throw new Error("Required parameter defaultQueryArguments[facet.field] or extractionProcessor is missing");
+        }
 
       },
 
@@ -70,17 +76,8 @@ define(['backbone',
         paginator.setMaxNum(this.maxDisplayNum || 100); // even if not good for facets; it is important that maxNum be > -1
         console.log('setting maxNum    ', paginator.maxNum, query.url());
 
-        var fField = query.get('facet.field');
-
-        if (!fField) {
-          throw Error('The query contains no facet.field parameter!');
-        }
-
         var view = data.view;
         var coll = data.collection;
-        var facetPath = "facet_counts.facet_fields." + fField;
-
-
 
         // XXX:rca - this is a hack (to make the nested views use the same
         // parameters as the parent view
@@ -96,15 +93,28 @@ define(['backbone',
           this.setCurrentQuery(query);
         }
 
-        // no data for us
-        if (!apiResponse.has(facetPath)) {
-          //coll.reset();
-          return;
+
+        var facets;
+        var extractor = this.getExtractorChain();
+
+        if (extractor) {
+          facets = extractor(apiResponse);
+        }
+        else {
+          var fField = query.get('facet.field');
+
+          if (!fField) {
+            throw Error('The query contains no facet.field parameter!');
+          }
+          var facetPath = "facet_counts.facet_fields." + fField;
+          facets = apiResponse.get(facetPath);
         }
 
-        var facets = apiResponse.get(facetPath);
-        if (this.extractFacets) {
-          facets = this.extractFacets(facets);
+        // no data for us
+        if (!facets) {
+          console.warn('No facet data for:', this.facetField);
+          //coll.reset();
+          return;
         }
 
         var facetsCol = [];
@@ -117,7 +127,11 @@ define(['backbone',
           fValue = facets[i];
           fNum = facets[i+1];
 
-          var modifiedValue = preprocessorChain.call(this, fValue);
+          var modifiedValue = fValue;
+          if (preprocessorChain) {
+            modifiedValue = preprocessorChain.call(this, fValue);
+          }
+
           var d = {
             title: modifiedValue,
             value: fValue,
@@ -131,15 +145,17 @@ define(['backbone',
         };
 
 
-        coll.add(facetsCol);
-
-        // check whether we were fetching more data or we were getting fresh data
         if (paginator.getCycle() <= 1) {
+          coll.reset(facetsCol);
+        }
+        else {
+          coll.add(facetsCol);
+        }
 
-          // for the first level display only (nested levels are triggered through toggleChildren)
-          if (this.view === view) {
-            view.displayMore(this.view.displayNum);
-          }
+
+        // for the first level display only (nested levels are triggered through toggleChildren)
+        if (paginator.getCycle() <= 1 && this.view === view) {
+          view.displayMore(this.view.displayNum);
         }
 
         if (facetsCol.length > 0) { // we got a full batch (so we'll assume there is more)
@@ -151,20 +167,31 @@ define(['backbone',
       },
 
       getPreprocessorChain: function() {
-        if (this._preprocessor) {
-          return this._preprocessor;
+        if (this._preprocessor === undefined) {
+          this._preprocessor = this._buildChain(this.responseProcessors);
         }
+
+        return this._preprocessor;
+      },
+
+      getExtractorChain: function() {
+        if (this._extractor === undefined) {
+          this._extractor = this._buildChain(this.extractionProcessors);
+        }
+        return this._extractor;
+      },
+
+      _buildChain: function(processors) {
         var func;
-        if (_.isArray(this.responseProcessors)) {
-          func = _.compose.apply(_, this.responseProcessors);
+        if (_.isArray(processors) && processors.length > 0) {
+          func = _.compose.apply(_, processors);
         }
-        else if (typeof this.responseProcessors === 'function') {
-          func = this.responseProcessors;
+        else if (typeof processors === 'function') {
+          func = processors;
         }
         else {
-          func = function(v) {return v};
+          func = null;
         }
-        this._preprocessor = func;
         return func;
       },
 

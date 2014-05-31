@@ -63,9 +63,9 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
         if (df.split("-")[0] === "operator") {
           //cache it for mouseleave events
           if (currentVal !== "") {
-            newVal = df.split("-")[1] + ":(" + currentVal + ")";
+            newVal = df.split("-")[1] + "(" + currentVal + ")";
           } else {
-            newVal = df.split("-")[1] + ":( )";
+            newVal = df.split("-")[1] + "( )";
           }
           this.$(".q").val(newVal);
 

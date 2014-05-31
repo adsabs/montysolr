@@ -5809,19 +5809,7 @@ button.close {
   content: "\e114";
 }
 .item-end {
-  position: relative;
-  top: 1px;
-  display: inline-block;
-  font-family: 'Glyphicons Halflings';
-  font-style: normal;
-  font-weight: normal;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   color: #999999;
-}
-.item-end:before {
-  content: "\e014";
 }
 .hide {
   display: none;
@@ -6011,4 +5999,14 @@ button.close {
 .table-of-contents {
   height: 100%;
   margin-right: 25%;
+}
+.results-item .panel-info {
+  border-color: white;
+}
+.results-item .panel-info em {
+  font-weight: bold;
+  font-size: larger;
+}
+.results-item .panel-info li {
+  display: block;
 }

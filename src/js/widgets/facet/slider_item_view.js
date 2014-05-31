@@ -58,7 +58,7 @@ define(['marionette', 'd3', 'jquery-ui', 'hbs!./templates/slider'], function(Mar
 
         makeGraphSlider: function() {
             this.$(".slider").addClass("graph-slider");
-            this.$(".graph").append("<div class=\"chart\"></div")
+            this.$(".graph").append("<div class=\"chart\"></div>")
 
             var graphDiv = d3.select(".chart");
 
