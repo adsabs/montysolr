@@ -82,7 +82,7 @@ define(['underscore'], function (_) {
           }
           else {
             var cachedDisplay = _adjustMaxDisplay(realDisplayLength, numOfLoadedButHiddenItems);
-            this.view.displayMore(cachedDisplay); // display one part from the hidden items
+            view.displayMore(cachedDisplay); // display one part from the hidden items
             realDisplayLength += cachedDisplay;
             toDisplay = _adjustMaxDisplay(realDisplayLength, toDisplay-cachedDisplay);
           }

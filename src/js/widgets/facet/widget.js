@@ -67,9 +67,8 @@ define(['backbone',
         var query = apiResponse.getApiQuery();
         var paginator = this.findPaginator(query).paginator;
 
-        if (this.setCurrentQuery) {
-          this.setCurrentQuery(query);
-        }
+        paginator.setMaxNum(this.maxDisplayNum || 100); // even if not good for facets; it is important that maxNum be > -1
+        console.log('setting maxNum    ', paginator.maxNum, query.url());
 
         var fField = query.get('facet.field');
 
@@ -81,9 +80,25 @@ define(['backbone',
         var coll = data.collection;
         var facetPath = "facet_counts.facet_fields." + fField;
 
+
+
+        // XXX:rca - this is a hack (to make the nested views use the same
+        // parameters as the parent view
+        view.displayNum = this.view.displayNum;
+        view.maxDisplayNum = this.view.maxDisplayNum;
+
+        // set into the nested hierarchical view the query that was used to get the data
+        // will be needed for paging
+        if (view.setCurrentQuery) {
+          view.setCurrentQuery(query);
+        }
+        else {
+          this.setCurrentQuery(query);
+        }
+
         // no data for us
         if (!apiResponse.has(facetPath)) {
-          coll.reset();
+          //coll.reset();
           return;
         }
 
@@ -115,18 +130,16 @@ define(['backbone',
 
         };
 
-        // set into the nested hierarchical view the query that was used to get the data
-        // will be needed for paging
-        if (view.setCurrentQuery) {
-          view.setCurrentQuery(query);
-        }
 
         coll.add(facetsCol);
-        
+
         // check whether we were fetching more data or we were getting fresh data
         if (paginator.getCycle() <= 1) {
 
-          paginator.setMaxNum(apiResponse.get('response.numFound')); // this is not useful, cuz facets have a different counter
+          // for the first level display only (nested levels are triggered through toggleChildren)
+          if (this.view === view) {
+            view.displayMore(this.view.displayNum);
+          }
         }
 
         if (facetsCol.length > 0) { // we got a full batch (so we'll assume there is more)
@@ -204,9 +217,6 @@ define(['backbone',
 
       handleTreeExpansion: function(view) {
 
-        //XXX:rca - this is a hack
-        view.displayNum = this.displayNum;
-
         var model = view.model;
         var children = view.collection;
 
@@ -228,8 +238,8 @@ define(['backbone',
 
         var elems = val.split('/');
         var nextLevel = parseInt(elems[0]) + 1;
-
-        q.set('facet.prefix', nextLevel + "/" + elems.slice(1).join('/'));
+        var prefix = nextLevel + "/" + elems.slice(1).join('/') + '/';
+        q.set('facet.prefix', prefix);
 
         var self = this;
         var paginator = this.findPaginator(q).paginator;

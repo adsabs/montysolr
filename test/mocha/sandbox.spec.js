@@ -6,6 +6,19 @@
 var tbase = '../../test/mocha/js';
 var abase = tbase + '/apps/discovery';
 
+// discover components that should be loaded dynamically
+var additional = [];
+if (window.location && window.location.search) {
+  var elems = window.location.search.split('&');
+  if (elems.length > 0) {
+    for (var i=0; i<elems.length;i++) {
+      var kv = elems[i].split('=');
+      additional.push(tbase + kv[1].trim());
+    }
+  }
+}
+
+
 // These are the tests that we want to run for this app
 var tests = [
 
@@ -18,15 +31,16 @@ var tests = [
 
     //tbase + '/components/api_query_updater.spec.js',
     //tbase + '/widgets/facet_widget.spec.js',
-      tbase + '/components/query_mediator.spec.js'
+    //tbase + '/components/query_mediator.spec.js'
     //tbase + '/widgets/multi_callback_widget.spec.js',
     //tbase + '/widgets/facet_item_views.spec.js',
     //tbase + '/widgets/facet_controllers.spec.js'
-
+    tbase + '/widgets/facet_hier_widget.spec.js'
 
 
 ];
 
+tests = tests.concat(additional);
 
 // Run test on command line or in browser
 require(tests, function() {

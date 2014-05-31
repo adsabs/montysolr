@@ -5808,6 +5808,21 @@ button.close {
 .item-open:before {
   content: "\e114";
 }
+.item-end {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #999999;
+}
+.item-end:before {
+  content: "\e014";
+}
 .hide {
   display: none;
 }
@@ -5968,7 +5983,7 @@ button.close {
   position: relative;
   background: #88b7d5;
   background-color: #c1e4f8;
-  border: 1px solid #5db8ec;
+  border: 1px solid #6abeee;
 }
 .contents-nav-active:after,
 .contents-nav-active:before {

@@ -26,32 +26,13 @@ define(['marionette', 'hbs!./templates/item-tree'],
       },
 
 
-      className: function () {
-        if (Marionette.getOption(this, "hide") === true) {
-          return "hide item-view";
-        } else {
-          return "item-view";
-        }
-      },
+      className: "hide item-view",
 
-      /**
-       * When the items are displayed, the view will trigger a signal
-       * to ask for more data (discover if there are any children under
-       * this item)
-       */
-      itemViewOptions: function (model, index) {
-        if (index < this.displayNum) {
-          return {hide: false};
-        }
-        else {
-          return {hide: true};
-        }
-      },
 
       onRender: function(view) {
         // give controller chance to load more data (the children of this view)
         if (!view.$el.hasClass('hide')) {
-          view.trigger('treeNodeDisplayed');
+          //view.trigger('treeNodeDisplayed');
         }
       },
 
@@ -70,20 +51,25 @@ define(['marionette', 'hbs!./templates/item-tree'],
       },
 
       toggleChildren : function(e){
-        e.stopPropagation();
-        this.$('.item-body').toggleClass('hide');
-        if (this.$(".item-caret").hasClass("item-open")){
-          this.$(".item-caret").removeClass("item-open").addClass("item-closed")
+        if (e) {
+          e.stopPropagation();
+        }
+
+        this.$('.item-body:first').toggleClass('hide');
+        if (this.$(".item-caret:first").hasClass("item-open")){
+          this.$(".item-caret:first").removeClass("item-open").addClass("item-closed")
         }
         else {
-          this.$(".item-caret").removeClass("item-closed").addClass("item-open")
+          if (this.$el.children('.item-body').find('.item-view:first').hasClass('hide')) {
+            this.displayMore(this.displayNum);
+          }
+          this.$(".item-caret:first").removeClass("item-closed").addClass("item-open")
 
         }
 
       },
 
       onClick: function (ev) {
-        console.log("onclick mofo")
         ev.stopPropagation();
         this.$('.item-children').toggleClass('hide');
         this.model.set('selected', $(ev.target).is(':checked'));
@@ -120,11 +106,16 @@ define(['marionette', 'hbs!./templates/item-tree'],
       },
 
       enableShowMore: function() {
+        this.$('.item-caret:first').removeClass('hide');
         this.$('.show-more:last').removeClass('hide');
-        this.$('.item-caret').removeClass('hide');
       },
 
       disableShowMore: function() {
+        this.$('.item-caret:first').removeClass('hide');
+        if (this.collection.length == 0) {
+          this.$(".item-caret:first").removeClass("item-open").removeClass("item-closed").addClass('item-end');
+          return;
+        }
         this.$('.show-more:last').addClass('hide');
       },
 

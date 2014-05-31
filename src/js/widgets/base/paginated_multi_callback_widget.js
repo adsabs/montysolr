@@ -40,6 +40,7 @@ define(['backbone', 'marionette', 'js/components/api_query', 'js/components/api_
       findPaginator: function(apiQuery) {
         var key = apiQuery.url();
         if (!this._paginators[key]) {
+          console.log('creating new paginator', key)
           this._paginators[key] = new Paginator(this.paginator);
         }
         return {key: key, paginator: this._paginators[key]};

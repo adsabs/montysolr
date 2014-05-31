@@ -96,12 +96,20 @@ define(['backbone', 'marionette',
       },
 
       onShowMore: function() {
-        this.trigger('fetchMore', this.$(".item-view.hide").length);
+        this.trigger('fetchMore', this.$(".widget-body:first").children('.item-view.hide').length);
       },
 
       displayMore: function(howMany) {
         //show hidden data
-        this.$(".item-view").filter(".hide").slice(0, howMany).removeClass("hide");
+        var hidden = this.$('.widget-body:first').children('.item-view').filter('.hide');
+        this.$('.widget-body:first').children('.item-view').filter('.hide').slice(0,howMany).removeClass('hide');
+        if (hidden.length > 0) {
+          var offset = this.collection.models.length - hidden.length;
+          var max = this.children.length-offset;
+          for (var i=0;i<howMany && i<max;i++) {
+            this.children.findByIndex(offset+i).trigger('treeNodeDisplayed');
+          }
+        }
       },
 
       disableShowMore: function(text) {
