@@ -27,14 +27,19 @@ define(['js/components/multi_params', 'backbone', 'underscore', 'jquery'], funct
 
   var SolrParams = MultiParams.extend({
 
-    fieldsToConcatenate: ['q'],
-    defaultOperator: ' AND ',
+    fieldsToConcatenate: [],
+    defaultOperator: ' ',
     fieldProcessors: {
       '*': function(vals, self) {
         return [vals.join(self.defaultOperator)];
       }
     },
 
+    initialize: function(attributes, options) {
+      if (options) {
+        _.extend(this, _.pick(options, ['fieldsToConcatenate', 'defaultOperator', 'fieldProcessors']));
+      }
+    },
 
     url: function(resp, options) {
 

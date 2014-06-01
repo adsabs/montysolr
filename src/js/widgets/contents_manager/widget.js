@@ -83,7 +83,6 @@ define(['backbone', 'marionette', 'js/widgets/base/base_widget', 'hbs!./template
 
     template : navContainerTemplate,
     itemView : NavItemView,
-
     itemViewContainer : ".table-of-contents ul"
 
   });
@@ -118,6 +117,7 @@ define(['backbone', 'marionette', 'js/widgets/base/base_widget', 'hbs!./template
 
   var LayoutWidget = Marionette.Layout.extend({
 
+    className: 'multi-view',
     template : layoutTemplate,
 
     //dict of widget constructors

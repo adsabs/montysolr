@@ -10,10 +10,30 @@ require.config({
 
   // Configuration we want to make available to modules of ths application
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
-  'config': {
-    'app': {
-      regions: {
-        foo: 'baz'
+  config: {
+    'js/apps/discovery/main': {
+      core: {
+        services: {
+          'Api': 'js/services/api',
+          'PubSub': 'js/services/pubsub'
+        },
+        objects: {
+          User: 'js/components/user',
+          DynamicConfig: 'discovery.vars',
+          QueryMediator: 'js/components/query_mediator'
+        },
+        modules: {
+          FacetFactory: 'js/widgets/facet/factory',
+          LayoutBuilder: 'js/widgets/contents_manager/widget'
+        }
+      },
+      widgets: {
+        SearchBar: 'js/widgets/search_bar/search_bar_widget',
+        Results: 'js/widgets/results/widget',
+        Abstract: 'js/widgets/abstract/widget',
+        QueryInfo: 'js/widgets/query_info/query_info_widget'
+      },
+      plugins: {
       }
     }
   },
@@ -35,7 +55,6 @@ require.config({
     // to the config (the module that bootstraps our application; look at the html)
     // as a convention, all modules should be loaded using 'symbolic' names
     'config': './discovery.config',
-    'app': 'js/apps/discovery/app',
     'main': 'js/apps/discovery/main',
     'router': 'js/apps/discovery/router',
 

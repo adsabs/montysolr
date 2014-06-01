@@ -484,7 +484,7 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 
       }).attr("height", function (d) {
         return that.height - y(d.y);
       }).attr("width", function (d) {
-        console.log(that.binSize, x.rangeBand(), d.width)
+        //console.log(that.binSize, x.rangeBand(), d.width)
         return x.rangeBand() * d.width / that.binSize
       });
 

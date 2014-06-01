@@ -122,6 +122,10 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
         BaseWidget.prototype.initialize.call(this, options)
       },
 
+      processResponse: function(apiResponse) {
+        this.setCurrentQuery(apiResponse.getApiQuery());
+      },
+
       submitNewQuery: function(query) {
         var newQuery = new ApiQuery({
           q: query

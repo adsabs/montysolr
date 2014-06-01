@@ -6,16 +6,68 @@ define(['underscore', 'js/components/api_query', 'js/components/api_query_update
       expect(new ApiQueryUpdater('foo')).to.be.instanceof(ApiQueryUpdater);
       expect(function(){new ApiQueryUpdater()}).to.throw.Error;
     });
-    
-    it("can update existing query (any parameter) - both 'add' and 'replace'", function() {
+
+    it("supports limit/exclude operations", function() {
       var q = new ApiQuery({'q': 'bar'});
       var u = new ApiQueryUpdater('q');
 
-      u.updateQuery('q', q, 'baz', 'AND', 'add');
-      expect(q.get('q')).to.be.eql(['bar', 'baz']);
+      u.updateQuery(q, 'q', 'limit', 'baz', 'AND');
+      expect(q.get('q')).to.be.eql(['(bar AND baz)']);
+      expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['AND', 'bar', 'baz']);
+
+      u.updateQuery(q, 'q', 'exclude', 'bar', 'AND');
+      expect(q.get('q')).to.be.eql(['baz']);
       expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['AND', 'baz']);
 
-      u.updateQuery('q', q, 'baz', 'AND', 'remove');
+
+    });
+
+    it.skip("can update existing query:add/replace (any field)", function() {
+      var q;
+      var u = new ApiQueryUpdater('q');
+
+      // simple case; when starting with one string
+      // bar + AND baz -> (bar AND baz)
+      q = new ApiQuery({'q': 'bar'});
+      u.updateQuery(q, 'q', 'add', 'baz', 'AND');
+      expect(q.get('q')).to.be.eql(['(bar AND baz)']);
+      expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['AND', 'bar', 'baz']);
+
+      // bar + AND baz vaz -> (bar AND baz AND vaz)
+      q = new ApiQuery({'q': 'bar'});
+      u.updateQuery(q, 'q', 'add', ['baz', 'vaz'], 'AND');
+      expect(q.get('q')).to.be.eql(['(bar AND baz AND vaz)']);
+      expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['AND', 'bar', 'baz', 'vaz']);
+
+      // (bar AND baz AND vaz) + OR foo -> (bar AND baz AND vaz) OR foo
+      u.updateQuery(q, 'q', 'add', 'foo', 'OR');
+      expect(q.get('q')).to.be.eql(['((bar AND baz AND vaz) OR foo)']);
+      expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['OR', '(bar AND baz AND vaz)', 'foo']);
+
+      // duplicate value
+      u.updateQuery(q, 'q', 'add', 'foo', 'OR');
+      expect(q.get('q')).to.be.eql(['((bar AND baz AND vaz) OR foo)']);
+      expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['OR', '(bar AND baz AND vaz)', 'foo']);
+
+      // duplicate + new value
+      u.updateQuery(q, 'q', 'add', ['foo', 'boo'], 'OR');
+      expect(q.get('q')).to.be.eql(['((bar AND baz AND vaz) OR foo OR boo)']);
+      expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['OR', '(bar AND baz AND vaz)', 'foo', 'boo']);
+
+      // remove value of the same operator
+      u.updateQuery(q, 'q', 'remove', ['foo'], 'OR');
+      expect(q.get('q')).to.be.eql(['((bar AND baz AND vaz) OR boo)']);
+      expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['OR', '(bar AND baz AND vaz)', 'boo']);
+
+      // remove value (different operator) - should trigger boolean logic action
+      u.updateQuery(q, 'q', 'remove', 'woo', 'AND');
+      expect(q.get('q')).to.be.eql(['(((bar AND baz AND vaz) OR boo)) NOT woo)']);
+      expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['OR', '(bar AND baz AND vaz)', 'boo']);
+
+      // apply two exclusions
+      u.updateQuery(q, 'q', 'remove', ['woo', 'too'], 'NOT');
+
+      u.updateQuery(q, 'q', 'baz', 'AND', 'remove');
       expect(q.get('q')).to.be.eql(['bar']);
       expect(u._getExistingVals(q, u._n('conditions_q'))).to.eql(['AND']);
     });
@@ -47,7 +99,7 @@ define(['underscore', 'js/components/api_query', 'js/components/api_query_update
     it("can clean the apiquery", function() {
       var q = new ApiQuery({'q': 'bar'});
       var u = new ApiQueryUpdater('q');
-      u.updateQuery('q', q, 'baz', 'AND', 'add');
+      u.updateQuery(q, 'q', 'baz', 'AND', 'add');
       expect(q.get('__q_conditions_q')).to.eql(['AND', 'baz']);
 
       var q2 = u.clean(q);

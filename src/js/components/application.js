@@ -183,6 +183,7 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
         addKey = _.bind(beehive.addObject, beehive);
       }
       else if (section == 'modules') {
+        createInstance = function(key, module) {return module};
         hasKey = _.bind(this.hasModule, this);
         removeKey = _.bind(function(key) {this.__modules.remove(key)}, this);
         addKey = _.bind(function(key, module) {this.__modules.add(key, module)}, this);
@@ -321,6 +322,13 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
 
     isActivated: function() {
       return this.__activated || false;
+    },
+
+    hasObject: function(name) {
+      return this.getBeeHive().hasObject(name);
+    },
+    getObject: function(name) {
+      return this.getBeeHive().getObject(name);
     },
 
     hasModule: function(name) {

@@ -87,7 +87,14 @@ define([], function() {
      * A message containing feedback from the FC; traveling towards OC
      * The feedback will be instance of ApiFeedback
      */
-    DELIVERING_FEEDBACK: '[FC]-FeedBack'
+    DELIVERING_FEEDBACK: '[FC]-FeedBack',
+
+
+    /**
+     * A message from the router requesting showing citizens of the
+     * city
+     */
+    DISPLAY_DOCUMENTS: '[Router]-Display-Documents'
 
   };
 

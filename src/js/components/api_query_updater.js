@@ -24,8 +24,8 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
     this.context = contextIdentifier;
     this.defaultOperator = ' ';
     this.operators = [' ', 'AND', 'OR', 'NOT', 'NEAR'];
-    this.defaultMode = 'add';
-    this.operationModes = ['add', 'remove'];
+    this.defaultMode = 'limit';
+    this.operationModes = ['limit', 'exclude'];
     this.impossibleString = "\uFFFC\uFFFC\uFFFC";
     _.extend(this, options);
   };
@@ -47,10 +47,14 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
      * @param operator
      *      String: this will serve as concatenator for the conditions
      */
-    updateQuery: function(field, apiQuery, queryCondition, operator, mode) {
+    updateQuery: function(apiQuery, field, mode, queryCondition, operator) {
 
       if (!field || !_.isString(field)) {
         throw new Error("You must tell us what parameter to update in the ApiQuery");
+      }
+
+      if (!(apiQuery.has(field))) {
+        throw new Error("This field: " + field + " is empty");
       }
 
       queryCondition = this._sanitizeConditionAsArray(queryCondition);
@@ -59,8 +63,8 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
 
       //globalOperator = this._sanitizeOperator(globalOperator);
 
-
-      var n = this._n('conditions_q');
+      // local name
+      var n = this._n('conditions_'+field);
 
       var oldConditionAsString, newConditionAsString, newConditions, existingConditions;
 
@@ -83,27 +87,28 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
         existingConditions = [operator]; // first value is always operator
       }
 
-      if (mode == 'add') {
+      if (mode == 'limit') {
         // join the old and the new conditoins (remove the duplicates)
         newConditions = _.union(existingConditions, queryCondition);
         newConditionAsString = this._buildQueryFromConditions(newConditions);
       }
-      else if (mode == 'remove') {
+      else if (mode == 'exclude') {
         newConditions = _.difference(existingConditions, queryCondition);
-        newConditionAsString = ''; // we'll be deleting
+        newConditionAsString = this._buildQueryFromConditions(newConditions);
       }
       else {
         throw new Error("Unsupported mode: ", mode);
       }
 
 
-
+      // create copy of the field
       var q = _.clone(apiQuery.get('q'));
 
+      // try to find the pre-condition and replace it with a new value
       if (this._modifyArrayReplaceString(q, oldConditionAsString, newConditionAsString)) {
         apiQuery.set('q', q);
       }
-      else {
+      else { // we didn't find it, so let's add a new value to the field
         this._modifyArrayAddString(q, newConditionAsString); //add to the existing query
         apiQuery.set('q', q);
       }
@@ -220,7 +225,7 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
         throw new Error("Violation of contract: first condition is always an operator");
       }
       var op = conditions[0];
-      return conditions.slice(1).join(op);
+      return '(' + conditions.slice(1).join(op) + ')';
     },
 
     /**

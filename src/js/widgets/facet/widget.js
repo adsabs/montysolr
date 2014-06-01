@@ -74,7 +74,7 @@ define(['backbone',
         var paginator = this.findPaginator(query).paginator;
 
         paginator.setMaxNum(this.maxDisplayNum || 100); // even if not good for facets; it is important that maxNum be > -1
-        console.log('setting maxNum    ', paginator.maxNum, query.url());
+        //console.log('setting maxNum    ', paginator.maxNum, query.url());
 
         var view = data.view;
         var coll = data.collection;
@@ -314,10 +314,10 @@ define(['backbone',
             q = q.clone();
             value = this.queryUpdater.escapeInclWhitespace(value);
             if (model.get('selected')) {
-              this.queryUpdater.updateQuery('q', q, value, 'AND', 'add');
+              this.queryUpdater.updateQuery(q, 'q', value, 'AND', 'add');
             }
             else {
-              this.queryUpdater.updateQuery('q', q, value, 'AND', 'remove');
+              this.queryUpdater.updateQuery(q, 'q', value, 'AND', 'remove');
             }
             this.dispatchNewQuery(paginator.cleanQuery(q));
           }

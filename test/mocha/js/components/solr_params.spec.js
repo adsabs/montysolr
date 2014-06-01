@@ -3,7 +3,10 @@ define(['js/components/solr_params', 'backbone'], function(SolrParams, Backbone)
       
 
     it ("should treat certain fields specially", function() {
-      var t = new SolrParams({'q': ['full:foo', 'title:bar'], 'fq': ['database:astronomy', 'aff:xxx']});
+      var t = new SolrParams(
+        {'q': ['full:foo', 'title:bar'], 'fq': ['database:astronomy', 'aff:xxx']},
+        {fieldsToConcatenate: ['q'], defaultOperator: ' AND '}
+      );
       // 'fq=aff:xxx&fq=database:astronomy&q=full:foo AND title:bar'
       expect(t.url()).to.equal('fq=database%3Aastronomy&fq=aff%3Axxx&q=full%3Afoo+AND+title%3Abar');
 
