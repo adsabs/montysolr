@@ -5,7 +5,7 @@ define(['js/components/solr_params', 'backbone'], function(SolrParams, Backbone)
     it ("should treat certain fields specially", function() {
       var t = new SolrParams({'q': ['full:foo', 'title:bar'], 'fq': ['database:astronomy', 'aff:xxx']});
       // 'fq=aff:xxx&fq=database:astronomy&q=full:foo AND title:bar'
-      expect(t.url()).to.equal('fq=aff%3Axxx&fq=database%3Aastronomy&q=full%3Afoo+AND+title%3Abar');
+      expect(t.url()).to.equal('fq=database%3Aastronomy&fq=aff%3Axxx&q=full%3Afoo+AND+title%3Abar');
 
       // but the original values should remain untouched
       expect(t.get('q')).to.eql(['full:foo', 'title:bar']);
@@ -89,10 +89,10 @@ define(['js/components/solr_params', 'backbone'], function(SolrParams, Backbone)
 
     it("can be serialized and de-serialized (saved as string and reloaded)", function() {
       var t = new SolrParams({'foo': ['bar', 'baz'], 'boo': ['woo', 1]});
-      expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
+      expect(t.url()).to.equal('boo=woo&boo=1&foo=bar&foo=baz');
 
       t = new SolrParams({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
-      expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
+      expect(t.url()).to.equal('boo=woo&boo=1&foo=bar&foo=baz');
 
       expect(t.parse('foo=bar&foo=baz&boo=woo&boo=1')).to.eql({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
     });

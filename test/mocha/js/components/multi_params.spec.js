@@ -83,12 +83,14 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
 
     it("can be serialized and de-serialized (saved as string and reloaded)", function() {
       var t = new MultiParams({'foo': ['bar', 'baz'], 'boo': ['woo', 1]});
-      expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
+      expect(t.url()).to.equal('boo=woo&boo=1&foo=bar&foo=baz');
 
-      t = new MultiParams({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
-      expect(t.url()).to.equal('boo=1&boo=woo&foo=bar&foo=baz');
+      t = new MultiParams({'foo': ['baz', 'bar'], 'boo': ['woo', '1']});
+      expect(t.url()).to.equal('boo=woo&boo=1&foo=baz&foo=bar');
 
+      // the order needs to be preserved
       expect(t.parse('foo=bar&foo=baz&boo=woo&boo=1')).to.eql({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
+      expect(t.parse('foo=baz&foo=bar&boo=1&boo=woo')).to.eql({'foo': ['baz', 'bar'], 'boo': ['1', 'woo']});
     });
     
     it("can be cloned", function() {

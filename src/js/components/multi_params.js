@@ -148,11 +148,16 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       }
       // sort keys alphabetically
       var sorted = _.pairs(whatToSort).sort(function(a,b) {return (a[0] > b[0]) ? 1 : (a[0] < b[0] ? -1 : 0)});
+
+      // June1:rca - I need to preserve order of values (becuaes of the query modifications/updates) the logic
+      // just requires us to be careful and we need order to be preserved when the query is cloned
+
       // also sort values
-      var s = {};
-      sorted.map(function(item) { s[item[0]] = (_.isArray(item[1]) ? item[1].sort() : item[1]) });
+      // var s = {};
+      // sorted.map(function(item) { s[item[0]] = (_.isArray(item[1]) ? item[1].sort() : item[1]) });
+
       // use traditional encoding
-      return $.param(s, true);
+      return $.param(_.object(sorted), true);
     },
 
     /**
