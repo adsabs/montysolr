@@ -2,26 +2,46 @@
 <html lang="en">
 
 <head>
+  <base href="http://adslabs.org/test/"/>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>Bumplebee discovery</title>
+  <title>Bumblebee discovery</title>
 
-  <!-- Application styles. -->
-  <!-- build:[href] /styles.min.css -->
-  <link rel="stylesheet" href="./styles/css/styles.css">
-  <!-- /build -->
+  <link rel="stylesheet" href="./styles/css/styles.css" />
 </head>
 
 <body>
-  <!-- Application container. -->
-  <main role="main" id="main"></main>
 
-  <!-- Application source. -->
-  <!-- build:[src] /source.min.js -->
-  <script data-main="./discovery.config" src="libs/requirejs/require.js"></script>
-  <!-- /build -->
+  <div>
+    <div class="row">
+      <div class="col-md-12" id="header" style="height:20px;"><br/></div>
+      <div class="row">
+        <div class="col-md-12" id="top" style="margin-bottom:20px"></div>
+      </div>
+      <div class="row">
+        <div class="col-md-2 col-sm-4 hidden-xs" id="left"></div>
+        <div class="col-md-6  col-sm-8  col-sm-offset-0 col-xs-offset-1" id="middle"></div>
+        <div class="col-md-4 hidden-sm hidden-xs" id="right"></div>
+      </div>
+      <div class="row">
+        <div class="col-md-12" id="bottom"></div>
+      </div>
+    </div>
+
+
+    <script src="./libs/mocha/mocha.js"></script>
+    <script>
+    var mocha = {};
+    mocha.testToLoad = './test/live-presentation.js';
+    </script>
+
+
+    <script data-main="./discovery.config" src="./libs/requirejs/require.js"></script>
+
+
 </body>
 
 </html>
+
