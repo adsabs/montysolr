@@ -68,14 +68,14 @@ require([
     facetField: "database",
     facetTitle: "Collections",
     openByDefault: true,
-    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
 
   });
   var data = FacetFactory.makeBasicCheckboxFacet({
     facetField: "data_facet",
     facetTitle: "Data",
     openByDefault: false,
-    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
 
   });
 
@@ -83,7 +83,7 @@ require([
     facetField: "vizier_facet",
     facetTitle: "Vizier Tables",
     openByDefault: false,
-    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
+    logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
 
   });
 
@@ -91,20 +91,20 @@ require([
     facetField: "bibstem_facet",
     facetTitle: "Publications",
     openByDefault: false,
-    logicOptions: {single: null, multiple: ["or", "exclude"]}
+    logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]}
   });
   var bibgroup = FacetFactory.makeBasicCheckboxFacet({
     facetField: "bibgroup_facet",
     facetTitle: "Bib Groups",
     openByDefault: false,
-    logicOptions: {single: null, multiple: ["or", "exclude"]}
+    logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]}
   });
 
   var grants = FacetFactory.makeHierarchicalCheckboxFacet({
     facetField: "grant_facet_hier",
     facetTitle: "Grants",
     openByDefault: false,
-    logicOptions: {single: null, multiple: ["or", "exclude"]},
+    logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]},
     responseProcessors: [
       function(v) {var vv = v.split('/'); return vv[vv.length-1]}
     ]
