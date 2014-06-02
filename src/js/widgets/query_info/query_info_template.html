@@ -12,5 +12,8 @@
 {{#if numFound}}
 <p><b>Total Number of Results:</b> {{numFound}}</p>
 {{/if}}
+{{#if citations}}
+<p><b>Total Number of Citations:</b> {{citations.sum}} (<span title="Something for nerds among us: mu={{citations.mean}}, stdev={{citations.stddev}}, missingCount={{citations.missing}}, max={{citations.max}}, min={{citations.min}}">*</span>)</p>
+{{/if}}
 
  </div>

@@ -247,7 +247,7 @@ define(["config", 'module'], function(config, module) {
 
       var yearGraph = FacetFactory.makeGraphFacet({
         facetField: "year",
-        facetTitle: "Year",
+        facetTitle: "Articles per year",
         xAxisTitle: "Year",
         openByDefault: true
       });

@@ -9,7 +9,8 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
       defaults: {
         currentQuery: undefined,
         numFound: undefined,
-        currentSort: undefined
+        currentSort: undefined,
+        citations: undefined
       }
     })
 
@@ -30,6 +31,11 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
     });
 
     var Widget = BaseWidget.extend({
+
+      defaultQueryArguments: {
+        stats: 'true',
+        'stats.field': 'citation_count'
+      },
 
       initialize: function(options) {
         this.view = new queryDisplayView();
@@ -55,7 +61,7 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
         this.view.model.set("facets", filters);
         this.view.model.set("sort", q.get("sort"));
         this.view.model.set("numFound", numFound);
-
+        this.view.model.set("citations", apiResponse.get('stats.stats_fields.citation_count'));
         this.view.render();
 
         this.view.$("#info-changeable").fadeIn()

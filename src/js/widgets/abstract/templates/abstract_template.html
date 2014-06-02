@@ -14,21 +14,31 @@
                     <ul class="list-inline">
                     {{#each authorAff}}
                     {{#if @last}}
-                    <li class="author">{{this.[0]}}</li>
-                    <li class="affiliation hide">(<i>{{this.[1]}}</i>)</li>
+                    <li class="author">{{this.[0]}} <span class="affiliation hide">(<i>{{this.[1]}}</i>)</span></li>
+
                     {{else}}
-                    <li class="author">{{this.[0]}}</li>
-                    <li class="affiliation hide">(<i>{{this.[1]}}</i>)</li>;
+                    <li class="author">{{this.[0]}} <span class="affiliation hide">(<i>{{this.[1]}}</i>);</span></li>
+
                     {{/if}}
                     {{/each}}
                     </ul>
                 </div>
                 {{/if}}
             </dd>
-            {{#if pub}}
+
+            {{#if doi}}
+            <dt>DOI</dt>
+            <dd>
+                <div id="doi">{{doi}}</div>
+            </dd>
+            {{/if}}
+
+            <br/>
+
+            {{#if pub_raw}}
             <dt>Publication</dt>
             <dd>
-                <div id="article-publication">{{pub}}</div>
+                <div id="article-publication">{{pub_raw}}</div>
             </dd>
             {{/if}}
             {{#if pubdate}}
@@ -38,33 +48,40 @@
             </dd>
             {{/if}}
 
+            <br/>
+
+            {{#if abstract}}
+            <dt>Abstract</dt>
+            <dd>
+                <div id="abstract-content">
+                    {{abstract}}
+                </div>
+            </dd>
+
+            {{/if}}
+
+            {{#if keyword}}
+            <div id="keywords">
+                <dt>Keywords</dt>
+                <dd>
+                    <ul class="list-inline">
+                        {{#each keyword}}
+                        {{#if @last}}
+                        <li>{{this}}</li>
+                        {{else}}
+                        <li>{{this}};</li>
+                        {{/if}}
+                        {{/each}}
+                    </ul>
+                </dd>
+            </div>
+            {{/if}}
+
+
         </dl>
 
 
     </div>
 
-    {{#if abstract}}
-    <h5>Abstract</h5>
-    <div id="abstract-content">
-        {{abstract}}
-    </div>
-    {{/if}}
-
-    {{#if keyword}}
-    <div id="keywords">
-        <dt>Keywords</dt>
-        <dd>
-            <ul class="list-inline">
-            {{#each keyword}}
-            {{#if @last}}
-            <li>{{this}}</li>
-            {{else}}
-            <li>{{this}};</li>
-            {{/if}}
-            {{/each}}
-            </ul>
-        </dd>
-    </div>
-    {{/if}}
 
 </article>

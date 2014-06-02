@@ -6010,3 +6010,6 @@ button.close {
 .results-item .panel-info li {
   display: block;
 }
+button#toggle-aff {
+  float: right;
+}

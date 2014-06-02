@@ -15,7 +15,9 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
           pub: undefined,
           pubdate: undefined,
           keywords: undefined,
-          bibcode: undefined
+          bibcode: undefined,
+          pub_raw: undefined,
+          doi: undefined
         }
       },
 
@@ -38,7 +40,9 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
           pub: doc.pub,
           pubdate: doc.pubdate,
           keyword: doc.keyword,
-          bibcode: doc.bibcode
+          bibcode: doc.bibcode,
+          pub_raw: doc.pub_raw,
+          doi: doc.doi
         }
       }
     });
@@ -95,7 +99,7 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
       },
 
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,year'
+        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,year,doi,pub_raw'
       },
 
       onDisplayDocuments: function (bibcode) {
