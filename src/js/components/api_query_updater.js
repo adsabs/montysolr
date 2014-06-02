@@ -25,7 +25,7 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
     this.defaultOperator = ' ';
     this.operators = [' ', 'AND', 'OR', 'NOT', 'NEAR'];
     this.defaultMode = 'limit';
-    this.operationModes = ['limit', 'exclude'];
+    this.operationModes = ['limit', 'exclude', 'expand'];
     this.impossibleString = "\uFFFC\uFFFC\uFFFC";
     _.extend(this, options);
   };
@@ -47,24 +47,44 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
      * @param operator
      *      String: this will serve as concatenator for the conditions
      */
-    updateQuery: function(apiQuery, field, mode, queryCondition, operator) {
+    updateQuery: function(apiQuery, field, mode, queryCondition) {
 
       if (!field || !_.isString(field)) {
         throw new Error("You must tell us what parameter to update in the ApiQuery");
       }
 
-      if (!(apiQuery.has(field))) {
-        throw new Error("This field: " + field + " is empty");
+      queryCondition = this._sanitizeConditionAsArray(queryCondition);
+      mode = this._sanitizeMode(mode);
+
+      var operator;
+      if (mode == 'limit') {
+        operator = 'AND';
+      }
+      else if (mode == 'exclude') {
+        operator = 'NOT';
+      }
+      else if (mode == 'expand') {
+        operator = 'OR';
+      }
+      else {
+        throw new Error("Unsupported mode/operator:", mode);
       }
 
-      queryCondition = this._sanitizeConditionAsArray(queryCondition);
-      operator = this._sanitizeOperator(operator);
-      mode = this._sanitizeMode(mode);
+      if (!(apiQuery.has(field))) {
+        var conditions = [operator].concat(queryCondition);
+        apiQuery.set(field, this._buildQueryFromConditions(conditions));
+        apiQuery.set(this._n(field), conditions);
+        return;
+      }
+
 
       //globalOperator = this._sanitizeOperator(globalOperator);
 
       // local name
-      var n = this._n('conditions_'+field);
+      var n = this._n(field);
+
+      // create copy of the field
+      var q = _.clone(apiQuery.get(field));
 
       var oldConditionAsString, newConditionAsString, newConditions, existingConditions;
 
@@ -77,44 +97,89 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
         // we must treat it as a new query
         if (existingConditions[0] !== operator) {
           this._closeExistingVals(apiQuery, n);
-          return this.updateQuery(field, apiQuery, queryCondition, operator);
+          return this.updateQuery(apiQuery, field, mode, queryCondition);
         }
 
         oldConditionAsString = this._buildQueryFromConditions(existingConditions);
       }
       else {
-        oldConditionAsString = this.impossibleString;
         existingConditions = [operator]; // first value is always operator
+        if (q.length == 1 && q[0].indexOf(' ') > -1) { //simple string
+          oldConditionAsString = q[0];
+          existingConditions.push(q[0]);
+        }
+        else {
+          oldConditionAsString = this.impossibleString;
+        }
+
       }
 
-      if (mode == 'limit') {
+      // 'limit' means that the broader query will become 'narrower'
+      // by gaining more AND'ed 'conditions'
+      // 'expand' means that the query is becoming broader by gaining
+      // more conditions (these are OR'ed)
+      if (mode == 'limit' || mode == 'expand') {
+
         // join the old and the new conditoins (remove the duplicates)
+        // we are basically trying to update the existing query
+        // by adding more conditions into the same clause
+
         newConditions = _.union(existingConditions, queryCondition);
         newConditionAsString = this._buildQueryFromConditions(newConditions);
+
+        var testq = _.clone(q);
+        // try to find the pre-condition and replace it with a new value
+        if (this._modifyArrayReplaceString(testq, oldConditionAsString, newConditionAsString)) {
+          apiQuery.set(field, testq); //success
+          // save the values inside the query (so that we can use them if we are called next time)
+          apiQuery.set(n, newConditions);
+          return;
+        }
+
+      }
+
+
+      // 'exclude' means that we are ADDING more conditions to the query; the query
+      // was broader; not it will explicitly 'exclude' some documents; again - there
+      // can also be 'exclude' conditions; so if possible, we'll enlarge their number
+
+      if (mode == 'exclude') {
+
+
+        var modifiedExisting = _.clone(existingConditions);
+        modifiedExisting[0] = 'OR';
+        oldConditionAsString = ' NOT ' + this._buildQueryFromConditions(modifiedExisting);
+
+        newConditions = _.union(existingConditions, queryCondition);
+        var modifiedConditions = _.clone(newConditions);
+        modifiedConditions[0] = 'OR';
+        newConditionAsString = ' NOT ' + this._buildQueryFromConditions(modifiedConditions);
+
+        var testq = _.clone(q);
+        // try to find the pre-condition and replace it with a new value
+        if (this._modifyArrayReplaceString(testq, oldConditionAsString, newConditionAsString)) {
+          apiQuery.set(field, testq); //success
+          // save the values inside the query (so that we can use them if we are called next time)
+          apiQuery.set(n, newConditions);
+          return;
+        }
+      }
+
+
+      // we didn't find an old query that could be updated, so this means that we have
+      // to add a new logical condition to the existing query string.
+
+      if (mode == 'limit') {
+        newConditions = this._modifyArrayAddString(q, queryCondition, 'AND');
       }
       else if (mode == 'exclude') {
-        newConditions = _.difference(existingConditions, queryCondition);
-        newConditionAsString = this._buildQueryFromConditions(newConditions);
+        newConditions = this._modifyArrayAddString(q, queryCondition, 'NOT');
       }
-      else {
-        throw new Error("Unsupported mode: ", mode);
+      else if (mode == 'expand') {
+        newConditions = this._modifyArrayAddString(q, queryCondition, 'OR');
       }
-
-
-      // create copy of the field
-      var q = _.clone(apiQuery.get('q'));
-
-      // try to find the pre-condition and replace it with a new value
-      if (this._modifyArrayReplaceString(q, oldConditionAsString, newConditionAsString)) {
-        apiQuery.set('q', q);
-      }
-      else { // we didn't find it, so let's add a new value to the field
-        this._modifyArrayAddString(q, newConditionAsString); //add to the existing query
-        apiQuery.set('q', q);
-      }
-
-      // save the values inside the query (so that we can use them if we are called next time)
       apiQuery.set(n, newConditions);
+      apiQuery.set(field, q);
 
     },
 
@@ -178,7 +243,9 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
 
     removeTmpEntry: function(apiQuery, key) {
       var storage = this._getTmpStorage(apiQuery, true);
+      var val = storage[key];
       delete storage[key];
+      return val;
     },
 
     getTmpEntry: function(apiQuery, key, defaultValue) {
@@ -225,6 +292,9 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
         throw new Error("Violation of contract: first condition is always an operator");
       }
       var op = conditions[0];
+      if (op != ' ') {
+        op = ' ' + op + ' ';
+      }
       return '(' + conditions.slice(1).join(op) + ')';
     },
 
@@ -265,17 +335,19 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
     /**
      * Adds the new value into the array
      * @param arr
-     * @param text
+     * @param conditions
      * @private
      */
-    _modifyArrayAddString: function(arr, text) {
-      if (!text) {
-        throw new Error("Your string is empty, you fool");
+    _modifyArrayAddString: function(arr, conditions, operator) {
+      // will always add to the latest string
+      if ((arr.length == 0 || arr[arr.length-1].trim() == '' )&& (operator == 'NOT' || operator == 'NEAR')) {
+        throw new Error('Invalid operation; cannot apply NOT/NEAR on single clause');
       }
-      // we'll add the value (even to 'q' - this is ok as along as proper procedure of 'finalization' is applied
-      // we cannot easily extend the existing strings (because we could break the logic)
-      arr.push(text);
+      var newQ = arr[arr.length-1];
 
+      var newConditions = [operator, newQ].concat(conditions);
+      arr[arr.length-1] = this._buildQueryFromConditions(newConditions);
+      return newConditions;
     },
 
     /**

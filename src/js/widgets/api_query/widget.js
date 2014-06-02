@@ -108,7 +108,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
 
       render : function(){
         this.view.render()
-        return this.view.el
+        return this.view;
       },
 
 

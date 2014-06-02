@@ -198,7 +198,18 @@ define([
 
       var GraphWidget = BaseWidget.extend({
         facetField: options.facetField,
+        //XXX:rca hack - facet.prefix should be cleaned up by QM
+        customizeQuery: function(apiQuery) {
+          var q = apiQuery.clone();
+          q.unlock();
+          q.unset('facet.prefix');
+          if (this.defaultQueryArguments) {
+            q = this.composeQuery(this.defaultQueryArguments, q);
+          }
+          return q;
+        },
         processResponse: function (apiResponse) {
+          //console.log(JSON.stringify(apiResponse.getApiQuery().toJSON()));
           var view = this.view;
           var coll = this.collection;
           var facets = apiResponse.get("facet_counts.facet_fields." + this.facetField);
@@ -213,6 +224,11 @@ define([
               })
             }
           }, this);
+
+          if (facetsCol.length == 0) {
+            coll.reset();
+            return;
+          }
 
           facetsCol = _.sortBy(facetsCol, function (d) {
             return d.x

@@ -132,16 +132,22 @@ define(['backbone', 'marionette',
         return $sm;
       },
 
-      enableLogic: function() {
+      enableLogic: function(ev) {
+        if (ev)
+          ev.stopPropagation();
         this.$(".widget-options.top > .dropdown").removeClass("hide");
         this.$(".widget-options.top > .dropdown").toggleClass("open");
       },
 
-      closeLogic: function () {
+      closeLogic: function (ev) {
+        if (ev)
+          ev.stopPropagation();
         this.$(".widget-options.top > .dropdown").removeClass("open");
       },
 
       onLogic: function(ev) {
+        if (ev)
+          ev.stopPropagation();
         //close the logic dropdown
         this.closeLogic();
         var val = $(ev.target).val();

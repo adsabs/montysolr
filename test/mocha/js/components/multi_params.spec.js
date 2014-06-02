@@ -85,12 +85,29 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
       var t = new MultiParams({'foo': ['bar', 'baz'], 'boo': ['woo', 1]});
       expect(t.url()).to.equal('boo=woo&boo=1&foo=bar&foo=baz');
 
+      t = new MultiParams({'foo': '{!type=aqp fq=title v=$vv}', 'vv': 'title:foo'});
+      expect(t.url()).to.equal('foo=%7B!type%3Daqp+fq%3Dtitle+v%3D%24vv%7D&vv=title%3Afoo');
+
+      t = new MultiParams().load('foo=%7B!type%3Daqp+fq%3Dtitle+v%3D%24vv%7D&vv=title%3Afoo');
+      expect(t.get('foo')).to.be.eql(['{!type=aqp fq=title v=$vv}']);
+      expect(t.get('vv')).to.be.eql(['title:foo']);
+
       t = new MultiParams({'foo': ['baz', 'bar'], 'boo': ['woo', '1']});
       expect(t.url()).to.equal('boo=woo&boo=1&foo=baz&foo=bar');
 
       // the order needs to be preserved
       expect(t.parse('foo=bar&foo=baz&boo=woo&boo=1')).to.eql({'foo': ['bar', 'baz'], 'boo': ['woo', '1']});
       expect(t.parse('foo=baz&foo=bar&boo=1&boo=woo')).to.eql({'foo': ['baz', 'bar'], 'boo': ['1', 'woo']});
+
+      t = t.load('facet=true&facet.field=author_facet_hier&facet.mincount=1&facet.prefix=0%2F&fl=id&fq=%7B!type%3Daqp+v%3D%24fq_author_facet_hier%7D&fq_author_facet_hier=(0%5C%2FWang%2C%5C+J+AND+0%5C%2FLee%2C%5C+J)&q=star');
+
+      expect(t.get('fq_author_facet_hier')).to.eql(['(0\\/Wang,\\ J AND 0\\/Lee,\\ J)']);
+      expect(t.get('fq')).to.be.eql(["{!type=aqp v=$fq_author_facet_hier}"]);
+
+      var t2 = t.clone();
+      expect(t2.get('fq_author_facet_hier')).to.eql(['(0\\/Wang,\\ J AND 0\\/Lee,\\ J)']);
+      expect(t2.get('fq')).to.be.eql(["{!type=aqp v=$fq_author_facet_hier}"]);
+
     });
     
     it("can be cloned", function() {

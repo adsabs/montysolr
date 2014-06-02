@@ -156,6 +156,9 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       // var s = {};
       // sorted.map(function(item) { s[item[0]] = (_.isArray(item[1]) ? item[1].sort() : item[1]) });
 
+      // we have to double encode certain elements
+      //sorted = _.map(sorted, function(pair) { return [pair[0], _.map(pair[1], function(v) {return (v.indexOf && v.indexOf('=') > -1) ? encodeURIComponent(v) : v })]});
+
       // use traditional encoding
       return $.param(_.object(sorted), true);
     },
@@ -169,7 +172,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
     parse: function(resp, options) {
       if (_.isString(resp)) {
         var attrs  = {};
-        resp = decodeURIComponent(resp);
+        resp = decodeURI(resp);
         if (resp.indexOf('?') > -1) {
           attrs['#path'] = [resp.slice(0, resp.indexOf('?'))];
           resp = resp.slice(resp.indexOf('?')+1);
@@ -192,13 +195,17 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       }
       var hashes = resp.slice(resp.indexOf('?') + 1).split('&');
 
+      //resp = decodeURIComponent(resp);
+      var key,value;
       for (var i = 0; i < hashes.length; i++) {
         hash = hashes[i].split('=');
-        if (attrs[hash[0]] !== undefined) {
-          attrs[hash[0]].push(hash[1]);
+        key = decodeURIComponent(hash[0].split('+').join(' ')); // optimized: .replace(/\+/g, " ")
+        value = decodeURIComponent(hash[1].split('+').join(' '));
+        if (attrs[key] !== undefined) {
+          attrs[key].push(value);
         }
         else {
-          attrs[hash[0]] = [ hash[1] ];
+          attrs[key] = [ value ];
         }
       }
       return attrs;

@@ -31,7 +31,8 @@ require.config({
         SearchBar: 'js/widgets/search_bar/search_bar_widget',
         Results: 'js/widgets/results/widget',
         Abstract: 'js/widgets/abstract/widget',
-        QueryInfo: 'js/widgets/query_info/query_info_widget'
+        QueryInfo: 'js/widgets/query_info/query_info_widget',
+        QueryDebugInfo: 'js/widgets/api_query/widget'
       },
       plugins: {
       }

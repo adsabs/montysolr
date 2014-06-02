@@ -41,7 +41,7 @@ define([
 
       onNewQuery: function(apiQuery) {
         this.switchViews('search');
-        this.navigate('search/' + apiQuery.url());
+        this.navigate('search/' + encodeURI(apiQuery.url()));
       },
 
       switchViews: function (name) {

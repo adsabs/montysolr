@@ -41,7 +41,18 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
         var numFound = apiResponse.get("response.numFound");
 
         this.view.model.set("currentQuery", q.get("q"));
-        this.view.model.set("facets", q.get("fq"));
+
+        var filters = [];
+        _.each(q.keys(), function(k) {
+          if (k.substring(0,2) == 'fq') {
+            _.each(q.get(k), function(v) {
+              if (v.indexOf('{!') == -1) {
+                filters.push(v);
+              }
+            });
+          }
+        });
+        this.view.model.set("facets", filters);
         this.view.model.set("sort", q.get("sort"));
         this.view.model.set("numFound", numFound);
 

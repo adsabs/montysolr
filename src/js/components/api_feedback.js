@@ -16,6 +16,7 @@ define([
       ALREADY_LOGGED_IN: 493, // Already signed during signup
       REQUIRES_LOGIN: 491,
       TOO_MANY_CHARACTERS: 486,
+      BAD_REQUEST: 400,
       NOT_FOUND: 404,
       INTERNAL_SERVER_ERROR: 500,
       BAD_GATEWAY: 502,

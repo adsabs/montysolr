@@ -134,14 +134,17 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
 
         var r = apiResponse.toJSON();
         var d, self = this;
-        _.each(r.response.docs, function (doc) {
-          d = self.model.parse(doc);
-          self._docs[d.bibcode] = d;
-        });
+        if (r.response && r.response.docs) {
+          _.each(r.response.docs, function (doc) {
+            d = self.model.parse(doc);
+            self._docs[d.bibcode] = d;
+          });
 
-        if (apiResponse.has('responseHeader.params.__show')) {
-          this.onDisplayDocuments(apiResponse.get('responseHeader.params.__show'));
+          if (apiResponse.has('responseHeader.params.__show')) {
+            this.onDisplayDocuments(apiResponse.get('responseHeader.params.__show'));
+          }
         }
+
       }
 
     });
