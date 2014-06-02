@@ -109,11 +109,20 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
       submitQuery: function() {
         var query = (this.$(".q").val());
         this.trigger("new_query", query)
+      },
+
+      setQueryBox: function(val) {
+        (this.$(".q").val(val));
       }
 
     })
 
     var SearchBarWidget = BaseWidget.extend({
+
+      defaultQueryArguments: {
+        sort: 'date desc',
+        fl: 'id'
+      },
 
       initialize: function(options) {
         this.view = new SearchBarView();
@@ -123,15 +132,17 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
       },
 
       processResponse: function(apiResponse) {
-        this.setCurrentQuery(apiResponse.getApiQuery());
+        var q = apiResponse.getApiQuery();
+        this.setCurrentQuery(q);
+        this.view.setQueryBox(q.get('q').join(' '));
       },
 
       submitNewQuery: function(query) {
         var newQuery = new ApiQuery({
           q: query
-        })
+        });
 
-        this.pubsub.publish(this.pubsub.NEW_QUERY, newQuery);
+        this.pubsub.publish(this.pubsub.NEW_QUERY, this.customizeQuery(newQuery));
       }
     })
 
