@@ -339,7 +339,7 @@ define(['backbone',
 
           conditions = _.values(conditions);
           _.each(conditions, function(c, i, l) {
-            l[i] = self.queryUpdater.escapeInclWhitespace(c.value);
+            l[i] = self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value);
           });
 
           q = q.clone();
@@ -358,7 +358,7 @@ define(['backbone',
 
           var fq = '{!type=aqp v=$' + fieldName +'}';
           var fqs = q.get('fq');
-          if (!fqs) {
+          if (!fqs || fqs.length == 0) {
             q.set('fq', [fq]);
           }
           else {

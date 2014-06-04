@@ -120,7 +120,7 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
     var SearchBarWidget = BaseWidget.extend({
 
       defaultQueryArguments: {
-        sort: 'date desc',
+        //sort: 'date desc',
         fl: 'id'
       },
 
