@@ -51,10 +51,16 @@ app.use('/api', function (req, res, next) {
     port: end.port,
     path: end.pathname,
     method: 'POST',
-    data: r.query ? r.query + '&wt=json' : req.body
+    data: r.query ? r.query + '&wt=json' : querystring.stringify(req.body)
   };
 
-  console.log(end.hostname + ':' + end.port + end.pathname, options);
+  if (!r.query) {
+    req.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    //req.headers['Content-Type'] = 'application/json';
+    //req.headers['Content-Length'] = options.data.length;
+  }
+
+  console.log(end.hostname + ':' + end.port + end.pathname, options, req.headers);
 
   var n = needle.post(end.hostname + ':' + end.port + end.pathname,
     options.data,
