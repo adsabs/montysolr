@@ -43,8 +43,21 @@ app.use('/api', function (req, res, next) {
     return;
   }
 
-  if (req.body)
+  // prevent getting fulltext data
+  if (req.body) {
     req.body.wt = 'json';
+    if (req.body.fl) {
+      var fields = req.body.fl.split(',');
+      if (fields.indexOf('body') > -1) {
+        fields[fields.indexOf('body')] = 'body_';
+        req.body.fl = fields.join(',');
+      }
+    }
+    else { // in this case solr would return everything
+      req.body.fl = 'id';
+    }
+  }
+
 
   var options = {
     hostname: end.hostname,
