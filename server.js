@@ -43,19 +43,25 @@ app.use('/api', function (req, res, next) {
     return;
   }
 
+  var payload;
+  if (r.query) {
+    payload = querystring.parse(r.query);
+  }
+  else {
+    payload = req.body;
+  }
+
   // prevent getting fulltext data
-  if (req.body) {
-    req.body.wt = 'json';
-    if (req.body.fl) {
-      var fields = req.body.fl.split(',');
-      if (fields.indexOf('body') > -1) {
-        fields[fields.indexOf('body')] = 'body_';
-        req.body.fl = fields.join(',');
-      }
+  payload.wt = 'json';
+  if (payload.fl) {
+    var fields = payload.fl.split(',');
+    if (fields.indexOf('body') > -1) {
+      fields[fields.indexOf('body')] = 'body_';
+      payload.fl = fields.join(',');
     }
-    else { // in this case solr would return everything
-      req.body.fl = 'id';
-    }
+  }
+  else { // in this case solr would return everything
+    payload.fl = 'id';
   }
 
 
@@ -64,7 +70,7 @@ app.use('/api', function (req, res, next) {
     port: end.port,
     path: end.pathname,
     method: 'POST',
-    data: r.query ? r.query + '&wt=json' : querystring.stringify(req.body)
+    data: querystring.stringify(payload)
   };
 
   if (!r.query) {
@@ -77,7 +83,7 @@ app.use('/api', function (req, res, next) {
 
   var n = needle.post(end.hostname + ':' + end.port + end.pathname,
     options.data,
-    {parse: false, headers: req.headers},
+    {parse: false, headers: req.headers, timeout:0},
     function (err, apiResponse, body) {
       if (err) {
         console.log("Got error: " + err.message);
