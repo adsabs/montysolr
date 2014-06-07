@@ -339,7 +339,7 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			
 			// measure how long a string the query covers
 			List<List<Integer>> paths = path.getAllPaths();
-			int[] measured = measurePaths(paths);
+			int[] measured = measurePathsInclGaps(paths);
 			
 			// we'll consider only the queries that cover the max distance
 			int max = 0;
@@ -352,8 +352,11 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			
 			// retrieve only the queries made of query elements that cover the longest distance
 			for (int i=0;i<measured.length;i++) {
-				if (measured[i] != max) 
-					continue;
+				if (measured[i] != max) {
+				  //System.out.println("ignoring:" + measured[i] + " " + paths.get(i).toString());
+				  continue;
+				}
+					
 				List<List<QueryNode>> oneQuery = new ArrayList<List<QueryNode>>();
 				retrieveQueryElements(oneQuery, paths.get(i), 0);
 				assert oneQuery.size() == paths.get(i).size() / 2;
@@ -411,6 +414,37 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			}
 			return measuredPaths;
 		}
+		
+		/**
+		 * Measure the length that the path covers; but penalize gaps;
+		 * eg. if there is a gap between tokens bigger than 2; the total
+		 * length will be decreased
+		 * 
+		 * @param paths
+		 * @return
+		 */
+		private int[] measurePathsInclGaps(List<List<Integer>> paths) {
+      int[] measuredPaths = new int[paths.size()];
+      int pathLength = 0;
+      for (int j=0; j<measuredPaths.length; j++) {
+        List<Integer> path = paths.get(j);
+        assert path.size() % 2 == 0;
+        pathLength = path.get(path.size()-1) - path.get(0);
+        int gaps = 0;
+        // measure the gaps between tokens
+        for (int i=1;i<path.size()-1; i=i+2) {
+          int g = path.get(i+1) - path.get(i);
+          gaps += g;
+          if (g <= 2) {
+            gaps -= g;
+          }
+        }
+        
+        // total length the 
+        measuredPaths[j] = pathLength - gaps;
+      }
+      return measuredPaths;
+    }
 	}
 	
 	
