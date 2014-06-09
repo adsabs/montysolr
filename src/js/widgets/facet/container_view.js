@@ -16,7 +16,8 @@ define(['backbone', 'marionette',
 
     var FacetContainerView = ContainerView.extend({
 
-      initialize: function () {
+      initialize: function (options) {
+        console.log("options yo", options)
         ContainerView.prototype.initialize.call(this, arguments);
         this.displayNum = Marionette.getOption(this, "displayNum") || 5;
         this.maxDisplayNum = Marionette.getOption(this, "maxDisplayNum") || 200;
@@ -49,6 +50,7 @@ define(['backbone', 'marionette',
           // for debugging
           //this.on('all', function(ev) {console.log(ev, arguments)});
         }
+
       },
 
       //id: "search-results",
@@ -61,24 +63,28 @@ define(['backbone', 'marionette',
           "click .dropdown-toggle": "enableLogic",
           "click .dropdown-menu .close": "closeLogic",
           "change .logic-container input": "onLogic",
-          "click .logic-container input": "onLogic"
+          "click .logic-container input": "onLogic",
+          "click .apply": "onApply"
         };
         return _.extend(_.clone(ContainerView.prototype.events), addEvents);
       },
 
       itemViewOptions: function (model, index) {
+//       merging in options from factory stage
+        additionalOptions = Marionette.getOption(this, "additionalItemViewOptions");
+        console.log("additional", additionalOptions)
         //if this is the initial round, hide fetchnum - displaynum
         if (this.paginator && this.paginator.getCycle() <= 1) {
           if (index < this.displayNum) {
-            return {hide: false};
+            return _.extend({hide: false}, additionalOptions);
           }
           else {
-            return {hide: true};
+            return _.extend({hide: true}, additionalOptions);
           }
         }
         else {
           //otherwise, keep the defaults (as set by the template)
-          return {};
+          return additionalOptions;
         }
       },
 
@@ -144,6 +150,7 @@ define(['backbone', 'marionette',
           ev.stopPropagation();
         this.$(".widget-options.top > .dropdown").removeClass("open");
       },
+
 
       onLogic: function(ev) {
         if (ev)

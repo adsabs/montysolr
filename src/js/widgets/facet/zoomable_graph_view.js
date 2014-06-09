@@ -27,28 +27,6 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 
     }
   };
 
-  var checkboxMultiselectMixin = {
-
-    //when someone clicks a checkbox
-    toggleHighlight: function (e) {
-      e.stopPropagation();
-      $(e.target).parent().toggleClass("selected");
-      this.model.set({
-        "selected": !this.model.get("selected")
-      })
-      if (this.model.get("selected")) {
-        this.trigger("selected");
-      }
-      else {
-        this.trigger("unselected")
-      }
-    },
-
-    events: {
-      "change input": "toggleHighlight"
-    }
-  };
-
   var ZoomableGraphView = BaseItemView.extend({
 
     initialize   : function (options) {
