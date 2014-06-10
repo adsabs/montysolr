@@ -53,7 +53,6 @@ public class AqpAdsabsQParser extends QParser {
 	.getLogger(AqpAdsabsQParser.class);
 
 	private AqpQueryParser qParser;
-	private static String adsConfigName = "/ads-config";
 
 	public AqpAdsabsQParser(AqpQueryParser parser, String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req, SolrParserConfigParams defaultConfig)
@@ -76,34 +75,50 @@ public class AqpAdsabsQParser extends QParser {
 
 		QueryConfigHandler config = qParser.getQueryConfigHandler();
 
+    // get the named parameters from solr request object (they will be passed further on)
+    Map<String, String> namedParams = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+    if (params != null) {
+      for (Entry<String, Object> par: params.toNamedList()) {
+        String k = par.getKey();
+        if (k.startsWith("aqp.")) {
+          namedParams.put(k, (String) par.getValue());
+        }
+      }
+    }
+    if (localParams != null) {
+      for (Entry<String, Object> par: localParams.toNamedList()) {
+        String k = par.getKey();
+        if (k.startsWith("aqp.")) {
+          namedParams.put(k, (String) par.getValue());
+        }
+      }
+    }
 
-
-		AdsConfigHandler extra = (AdsConfigHandler) req.getCore().getRequestHandler(adsConfigName);
-
-
-		if (extra == null) {
-			throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
-					"Configuration error, ads-config resource missing");
-		}
-		SolrParams parserConfig = extra.getParams("queryParser");
 
 		qParser.setAnalyzer(schema.getAnalyzer());
 
 		String defaultField = getParam(CommonParams.DF);
-		if (defaultField == null) {
-			defaultField = parserConfig.get("defaultField", getReq().getSchema().getDefaultSearchFieldName());
+		if (defaultField == null && namedParams.containsKey("aqp.defaultField")) {
+			defaultField = namedParams.get("aqp.defaultField");
 		}
-
+		//else {
+		//  defaultField = getReq().getSchema().getDefaultSearchFieldName();
+		//}
 		if (defaultField != null) {
 			config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, defaultField);
 		}
 
 		// if defaultField was set, this will be useless
-		config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, "unfielded_search");
+		if (namedParams.containsKey("aqp.unfieldedSearchField"))
+		  config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, namedParams.get("aqp.unfieldedSearchField"));
 
+		// default operator
 		String opParam = getParam(QueryParsing.OP);
-		if (opParam == null) {
-			opParam = parserConfig.get("defaultOperator", getReq().getSchema().getQueryParserDefaultOperator());
+		if (opParam == null && namedParams.containsKey("aqp.defaultOperator")) {
+			opParam = namedParams.get("aqp.defaultOperator");
+		}
+		else {
+		  opParam = getReq().getSchema().getQueryParserDefaultOperator();
 		}
 
 		if (opParam != null) {
@@ -114,23 +129,24 @@ public class AqpAdsabsQParser extends QParser {
 			"The defaultOperator is set to null");
 		}
 
+		
 		Map<String, String> fieldMap;
-		for (String fName: new String[]{"fieldMap", "fieldMapPostAnalysis"}) {
-			if (fName.equals("fieldMap")) { // booo
+		for (String fName: new String[]{"aqp.fieldMap", "aqp.fieldMapPostAnalysis"}) {
+			if (fName.equals("aqp.fieldMap")) { // booo
 				fieldMap = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER);
 			}
 			else {
 				fieldMap = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER_POST_ANALYSIS);
 			}
 
-			if (parserConfig.get(fName, null) != null) {
-				String[] fields = parserConfig.get(fName).split(";");
+			if (namedParams.containsKey(fName)) {
+				String[] fields = namedParams.get(fName).split(";");
 				String ffs[];
 				for (String f: fields) {
 					ffs = f.split("\\s+");
 					if (ffs.length < 2) {
 						throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
-								"Configuration error inside " + adsConfigName + ", in the section: " + fName);
+								"Configuration error in the section: " + fName);
 					}
 					String target = ffs[ffs.length-1];
 					for (int i=0;i<ffs.length-1;i++) {
@@ -152,24 +168,6 @@ public class AqpAdsabsQParser extends QParser {
 
 		config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
 
-		// pass the named parameters from solr request object
-		Map<String, String> namedParams = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
-		if (params != null) {
-			for (Entry<String, Object> par: params.toNamedList()) {
-				String k = par.getKey();
-				if (k.startsWith("aqp.")) {
-					namedParams.put(k, (String) par.getValue());
-				}
-			}
-		}
-		if (localParams != null) {
-			for (Entry<String, Object> par: localParams.toNamedList()) {
-				String k = par.getKey();
-				if (k.startsWith("aqp.")) {
-					namedParams.put(k, (String) par.getValue());
-				}
-			}
-		}
 
 		if (namedParams.containsKey("aqp.df.fields")) {
 			qParser.setMultiFields(namedParams.get("aqp.df.fields").split(","));

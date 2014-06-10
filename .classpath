@@ -25,8 +25,8 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-dataimporthandler-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-dataimporthandler-extras-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-langid-4.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-solrj-4.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-test-framework-4.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-solrj-4.0-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/solr/solrj/src/java"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-test-framework-4.0-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/solr/test-framework/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-uima-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/apache-solr-velocity-4.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/commons-cli-1.2.jar"/>

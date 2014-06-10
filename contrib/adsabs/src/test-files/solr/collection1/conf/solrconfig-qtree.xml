@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	You under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
+
+<!-- a basic solrconfig that tests can use when they want simple minimal 
+	solrconfig/schema DO NOT ADD THINGS TO THIS CONFIG! -->
+<config>
+	<luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+	<dataDir>${solr.data.dir:}</dataDir>
+	<directoryFactory name="DirectoryFactory"	class="${solr.directoryFactory:solr.RAMDirectoryFactory}" />
+	<searchComponent name="qtree"	class="org.apache.solr.handler.component.AqpQueryTree" />
+	<requestHandler name="/qtree" class="solr.StandardRequestHandler">
+		<lst name="defaults">
+			<str name="echoParams">explicit</str>
+			<int name="rows">10</int>
+			<str name="defType">aqp</str>
+		</lst>
+		<arr name="components">
+			<str>qtree</str>
+		</arr>
+	</requestHandler>
+	
+	<queryParser name="aqp" class="solr.AdsQParserPlugin">
+    
+    <lst name="defaults">
+      <!--
+       Virtual fields will be translated into real-fields
+       Make sure you are never referencing virtual field
+       from inside another virtual field
+      -->
+       <lst name="virtual-fields">
+          <str name="full">title^2 abstract^2 body keyword ack</str>
+          <str name="abs">title abstract keyword</str>
+       </lst>
+       
+    </lst>
+  </queryParser>
+  
+
+</config>
