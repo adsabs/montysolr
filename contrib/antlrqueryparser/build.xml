@@ -221,7 +221,7 @@
 			    Note: the ${dotprop.svg_generator} must exist and be executable
 			    You can fix the path in ${common.dir}/contrib/antlrqueryparser/build.properties
 		</echo>
-		<generate-html python-executable="${prop.python}"
+		<generate-html python-executable="${dotprop.python}"
 			  python-generator="${aqp.generate.py}"
 			  grammar-name="${aqp.grammar}"
 			  build-dir="${build.dir}"
