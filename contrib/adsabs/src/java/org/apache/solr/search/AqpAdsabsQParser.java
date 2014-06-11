@@ -75,8 +75,18 @@ public class AqpAdsabsQParser extends QParser {
 
 		QueryConfigHandler config = qParser.getQueryConfigHandler();
 
-    // get the named parameters from solr request object (they will be passed further on)
+
     Map<String, String> namedParams = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+    
+    // get the parameters from the parser configuration (and pass them on)
+    for (Entry<String, String> par: defaultConfig.params.entrySet()) {
+      String k = par.getKey();
+      if (k.startsWith("aqp.")) {
+        namedParams.put(k, (String) par.getValue());
+      }
+    }
+    
+    // get the named parameters from solr request object (they will be passed further on)
     if (params != null) {
       for (Entry<String, Object> par: params.toNamedList()) {
         String k = par.getKey();
@@ -98,29 +108,34 @@ public class AqpAdsabsQParser extends QParser {
 		qParser.setAnalyzer(schema.getAnalyzer());
 
 		String defaultField = getParam(CommonParams.DF);
-		if (defaultField == null && namedParams.containsKey("aqp.defaultField")) {
-			defaultField = namedParams.get("aqp.defaultField");
+		if (defaultField == null) {
+		  if (namedParams.containsKey("aqp.defaultField")) {
+		    defaultField = namedParams.get("aqp.defaultField");
+		  }
+		  else {
+	      defaultField = getReq().getSchema().getDefaultSearchFieldName();
+	    }
 		}
-		//else {
-		//  defaultField = getReq().getSchema().getDefaultSearchFieldName();
-		//}
+		
 		if (defaultField != null) {
 			config.set(AqpStandardQueryConfigHandler.ConfigurationKeys.DEFAULT_FIELD, defaultField);
 		}
-
+		
 		// if defaultField was set, this will be useless
 		if (namedParams.containsKey("aqp.unfieldedSearchField"))
 		  config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD, namedParams.get("aqp.unfieldedSearchField"));
 
 		// default operator
 		String opParam = getParam(QueryParsing.OP);
-		if (opParam == null && namedParams.containsKey("aqp.defaultOperator")) {
-			opParam = namedParams.get("aqp.defaultOperator");
+		if (opParam == null) {
+		  if (namedParams.containsKey("aqp.defaultOperator")) {
+		    opParam = namedParams.get("aqp.defaultOperator");
+		  }
+		  else {
+	      opParam = getReq().getSchema().getQueryParserDefaultOperator();
+	    }
 		}
-		else {
-		  opParam = getReq().getSchema().getQueryParserDefaultOperator();
-		}
-
+		
 		if (opParam != null) {
 			qParser.setDefaultOperator("AND".equals(opParam.toUpperCase()) ? Operator.AND
 					: Operator.OR);
