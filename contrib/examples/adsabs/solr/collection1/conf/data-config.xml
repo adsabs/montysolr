@@ -1,7 +1,7 @@
 <dataConfig>
     <dataSource type="AdsDataSource" 
         mongoHost="${dataimporter.request.mongoHost}"
-        mongoPort="27017"
+        mongoPort="${dataimporter.request.mongoPort}"
         mongoDocIdField="_id"
         mongoGetIdsFrom="bibcode"
         mongoDBName="adsdata"

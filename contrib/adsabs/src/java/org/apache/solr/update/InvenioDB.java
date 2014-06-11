@@ -528,6 +528,7 @@ public enum InvenioDB {
   }
   
   private ResultSet getResultSet(String query, Object...args) throws SQLException {
+    //System.err.println(query);
     
     Connection conn = connect();
     Statement stmt = null;

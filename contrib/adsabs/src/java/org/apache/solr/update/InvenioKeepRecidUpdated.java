@@ -350,7 +350,7 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 	private String getLastIndexUpdate(SolrQueryRequest req) {
 	  SolrIndexSearcher searcher = req.getSearcher();
 	  // Invenio uses mod_date.strftime(format="%Y-%m-%d %H:%M:%S") -> '2013-11-29 16:40:33'
-	  SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+	  SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	  Date date = new Date(searcher.getOpenTime());
 	  return df.format(date);
   }

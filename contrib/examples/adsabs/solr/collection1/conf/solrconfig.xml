@@ -1938,6 +1938,7 @@
     <lst name="invariants">
        <str name="mongoPass">${montysolr.mongoPass:}</str>
        <str name="mongoHost">${montysolr.mongoHost:adsx}</str>
+       <str name="mongoPort">${montysolr.mongoPort:27017}</str>
     </lst>
   </requestHandler>
 

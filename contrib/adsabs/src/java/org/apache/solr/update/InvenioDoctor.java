@@ -758,6 +758,9 @@ public class InvenioDoctor extends RequestHandlerBase {
       queue.registerNewBatch(handler, rParam.toString());
     }
     
+    // invoke handler to save the last modified recid
+    if (ids.length > 0)
+      queue.registerNewBatch("/invenio/update", "last_recid="+ids[ids.length-1]+"&batchsize=1");
   }
 
 

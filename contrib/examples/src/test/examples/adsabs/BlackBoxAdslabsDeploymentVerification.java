@@ -35,6 +35,8 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		SolrCore core = h.getCore();
 		String data;
 		
+		//data = direct.request("/invenio/update?wt=json", null);
+		
 		// add some empty docs
 		assertU(adoc("id","1","recid","1", "bibcode", "b1"));
 		assertU(adoc("id","2","recid","2", "bibcode", "b2"));
