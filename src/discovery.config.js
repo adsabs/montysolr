@@ -78,7 +78,8 @@ require.config({
     'jquery-ui' : 'libs/jqueryui/jquery-ui',
     'd3':'libs/d3/d3',
     'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
-    'cache': 'libs/dsjslib/lib/Cache'
+    'cache': 'libs/dsjslib/lib/Cache',
+    'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder'
 
   },
 
@@ -103,14 +104,17 @@ require.config({
     },
 
     marionette : {
-
       deps : ['jquery', 'underscore', 'backbone'],
-
       exports : 'Marionette'
     },
 
     cache: {
       exports: 'Cache'
+    },
+
+    'jquery-querybuilder': {
+      deps: ['jquery'],
+      exports: 'QueryBuilder'
     }
   }
 });

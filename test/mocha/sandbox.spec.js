@@ -37,8 +37,9 @@ var tests = [
     //tbase + '/widgets/facet_controllers.spec.js'
     //tbase + '/widgets/facet_hier_widget.spec.js'
     //tbase + '/widgets/facet_zoomable_graph_view.spec.js'
-    tbase + '/widgets/list_ot_things_widget.spec.js',
-    tbase + '/widgets/results_render_widget.spec.js'
+    //tbase + '/widgets/list_ot_things_widget.spec.js',
+    //tbase + '/widgets/results_render_widget.spec.js'
+    tbase + '/components/query_builder/plugin.spec.js'
 
 ];
 
