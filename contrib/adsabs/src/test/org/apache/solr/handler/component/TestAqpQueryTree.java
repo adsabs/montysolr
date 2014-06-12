@@ -81,6 +81,5 @@ public class TestAqpQueryTree extends MontySolrQueryTestCase {
     
     assert response.contains(s);
     
-    
   }
 }

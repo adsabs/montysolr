@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.sql.Date;
 import java.sql.Time;
@@ -63,6 +64,7 @@ public enum InvenioDB {
   private volatile Connection connection = null;
   private String tableToQuery;
   private int openedStmts;
+  private int errors;
   
   public void setBibRecTableName(String table) {
     this.tableToQuery = table;
@@ -529,31 +531,43 @@ public enum InvenioDB {
   
   private ResultSet getResultSet(String query, Object...args) throws SQLException {
     //System.err.println(query);
-    
-    Connection conn = connect();
-    Statement stmt = null;
-    
-    if (args.length > 0) {
-      PreparedStatement stmtx = conn.prepareStatement(query);
-      for (int i=0; i<args.length;i++) {
-        stmtx.setObject(i, args[i]);
+    try {
+      Connection conn = connect();
+      Statement stmt = null;
+      
+      if (args.length > 0) {
+        PreparedStatement stmtx = conn.prepareStatement(query);
+        for (int i=0; i<args.length;i++) {
+          stmtx.setObject(i, args[i]);
+        }
+        stmt = stmtx;
       }
-      stmt = stmtx;
+      else {
+        stmt = conn.createStatement();
+      }
+      
+      if (stmt.execute(query)) {
+        openedStmts += 1;
+        this.errors = 0;
+        return stmt.getResultSet();
+      }
+      else {
+        if (stmt != null) {
+          stmt.close();
+        }
+        return null;
+      }
     }
-    else {
-      stmt = conn.createStatement();
+    catch (SQLNonTransientConnectionException e) {
+      if (this.errors > 5)
+        throw e;
+      
+      this.errors += 1;
+      this.close();       // try reconnecting
+      return getResultSet(query, args);
     }
     
-    if (stmt.execute(query)) {
-      openedStmts += 1;
-      return stmt.getResultSet();
-    }
-    else {
-      if (stmt != null) {
-        stmt.close();
-      }
-      return null;
-    }
+    
   }
   
   private void closeResultSet(ResultSet rs) throws SQLException {
