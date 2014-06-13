@@ -331,7 +331,7 @@ public class InvenioDoctor extends RequestHandlerBase {
       queue.registerNewBatch("#discover", params.get("params", ""));
     }
     else if(command.equals("force-reindexing")) {
-      queue.registerNewBatch("#discover", "force_reindexing=true");
+      queue.registerNewBatch("#discover", "force_reindexing=true&" + params.get("params", ""));
     }
     else {
       rsp.add("message", "Unknown command: " + command);
@@ -623,6 +623,15 @@ public class InvenioDoctor extends RequestHandlerBase {
       queue.setToDelete(new BitSet());
       setWorkerMessage("Resetting list of missing records (new search will be done)");
     }
+    else {
+      if (queue.getMissing() == null)
+        queue.setMissing(new BitSet());
+      if (queue.getPresent() == null)
+        queue.setPresent(new BitSet());
+      if (queue.getToDelete() == null)
+        queue.setToDelete(new BitSet());
+    }
+    
     
     BitSet[] data = discoverMissingRecords(queue.getPresent(), queue.getMissing(), 
     		queue.getToDelete(), req);
