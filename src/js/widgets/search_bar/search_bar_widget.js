@@ -1,7 +1,7 @@
 define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
-    'hbs!./templates/search_bar_template', 'bootstrap', 'hoverIntent'
+    'hbs!./templates/search_bar_template', 'hbs!./templates/search_form_template', 'bootstrap', 'hoverIntent'
   ],
-  function(Marionette, ApiQuery, BaseWidget, SearchBarTemplate) {
+  function(Marionette, ApiQuery, BaseWidget, SearchBarTemplate, SearchFormTemplate) {
 
     $.fn.selectRange = function(start, end) {
       if (!end) end = start;
@@ -28,6 +28,7 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
       },
 
       onRender: function() {
+        this.$("#search-form-container").append(SearchFormTemplate)
         this.$(".field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
 
       },
@@ -39,15 +40,31 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
           this.checkSubmit(e);
           this.highlightFields(e);
         },
-        "blur .q": "unHighlightFields"
+        "blur .q": "unHighlightFields",
+        "click #search-form-container": function(e){e.stopPropagation()},
+        "click #search-form-container .title" : "toggleFormSection",
+        "click .show-form" : "specifyFormWidth"
       },
 
+      specifyFormWidth : function(){
+
+      this.$("#search-form-container").width(this.$(".input-group").width());
+
+  },
+
+      toggleFormSection : function(e){
+        var $p = $(e.target).parent()
+        $p.next().toggleClass("hide")
+        $p.toggleClass("search-form-header-active")
+      },
+
+
       highlightFields : function(){
-        this.$(".show-fields").addClass("draw-attention")
+        this.$(".show-form").addClass("draw-attention")
       },
 
       unHighlightFields : function(){
-        this.$(".show-fields").removeClass("draw-attention")
+        this.$(".show-form").removeClass("draw-attention")
       },
 
       tempFieldInsert: function(e) {
