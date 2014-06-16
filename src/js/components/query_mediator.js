@@ -30,15 +30,15 @@ define(['underscore',
     initialize: function(options) {
       if (options.cache) {
         this._cache = new Cache(_.extend({
-          'maximumSize': 50,
-          'expiresAfterWrite':600
+          'maximumSize': 100,
+          'expiresAfterWrite':60*30 // 30 mins
         }, _.isObject(options.cache) ? options.cache : {}));
       }
       this.debug = options.debug || false;
       this.queryUpdater = new ApiQueryUpdater('QueryMediator');
       this.failedRequestsCache = new Cache({
         maximumSize: 100,
-        expiresAfterWrite: 600
+        expiresAfterWrite: 60*30 // 30 mins
       });
       this.maxRetries = options.maxRetries || 3;
       this.recoveryDelayInMs = options.recoveryDelayInMs || 700;
