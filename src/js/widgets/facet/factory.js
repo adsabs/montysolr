@@ -163,6 +163,12 @@ define([
         throw new Error("Required configuration variables were not passed");
       }
 
+      var GraphContainerView = FacetContainerView.extend({
+        itemViewOptions: function (model, index) {
+          return _.extend({xAxisTitle: options.facetTitle, title: options.facetTitle}, FacetContainerView.prototype.itemViewOptions.apply(this, arguments));
+        }
+      });
+
       var containerOptions = {
         model: new FacetContainerView.ContainerModelClass({title: options.facetTitle}),
         collection: new FacetCollection(),
@@ -185,12 +191,7 @@ define([
           "facet.limit": 100,
           fl: 'id'
         },
-        view: new FacetContainerView(containerOptions),
-        //so that the html template for the graph can use these values
-        itemViewOptions: {
-          xAxisTitle: options.facetTitle,
-          title: options.facetTitle
-        }
+        view: new GraphContainerView(containerOptions)
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options,

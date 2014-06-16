@@ -16,7 +16,7 @@ define(['backbone', 'marionette',
 
     var FacetContainerView = ContainerView.extend({
 
-      initialize: function () {
+      initialize: function (options) {
         ContainerView.prototype.initialize.call(this, arguments);
         this.displayNum = Marionette.getOption(this, "displayNum") || 5;
         this.maxDisplayNum = Marionette.getOption(this, "maxDisplayNum") || 200;
@@ -49,6 +49,7 @@ define(['backbone', 'marionette',
           // for debugging
           //this.on('all', function(ev) {console.log(ev, arguments)});
         }
+
       },
 
       //id: "search-results",
@@ -61,7 +62,8 @@ define(['backbone', 'marionette',
           "click .dropdown-toggle": "enableLogic",
           "click .dropdown-menu .close": "closeLogic",
           "change .logic-container input": "onLogic",
-          "click .logic-container input": "onLogic"
+          "click .logic-container input": "onLogic",
+          "click .apply": "onApply"
         };
         return _.extend(_.clone(ContainerView.prototype.events), addEvents);
       },
@@ -144,6 +146,7 @@ define(['backbone', 'marionette',
           ev.stopPropagation();
         this.$(".widget-options.top > .dropdown").removeClass("open");
       },
+
 
       onLogic: function(ev) {
         if (ev)
