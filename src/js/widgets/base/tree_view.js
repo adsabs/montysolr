@@ -55,7 +55,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
       },
 
       addCount : function(e){
-        e.preventDefault();
+        e.stopPropagation();
         var val;
         val = this.model.get("count")
         this.$(".facet-amount").html("&nbsp;(" + val + ")" );
@@ -64,7 +64,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
       },
 
       returnName : function(e){
-        e.preventDefault();
+        e.stopPropagation();
         this.$(".facet-amount").empty();
         this.$("i.item-caret").removeClass("draw-attention-text")
 
