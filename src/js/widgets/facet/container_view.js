@@ -69,6 +69,8 @@ define(['backbone', 'marionette',
       },
 
       itemViewOptions: function (model, index) {
+//       merging in options from factory stage
+        additionalOptions = Marionette.getOption(this, "additionalItemViewOptions");
         //if this is the initial round, hide fetchnum - displaynum
         if (this.paginator && this.paginator.getCycle() <= 1) {
           if (index < this.displayNum) {

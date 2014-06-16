@@ -191,13 +191,14 @@ define([
           "facet.limit": 100,
           fl: 'id'
         },
-        view: new GraphContainerView(containerOptions)
+        view: new FacetContainerView(containerOptions)
+        //so that the html template for the graph can use these values
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options,
           ['defaultQueryArguments']));
 
-      var GraphWidget = BaseWidget.extend({
+      var GraphWidget = FacetWidget.extend({
         facetField: options.facetField,
         //XXX:rca hack - facet.prefix should be cleaned up by QM
         customizeQuery: function(apiQuery) {

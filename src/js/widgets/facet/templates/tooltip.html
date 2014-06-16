@@ -1,12 +1,10 @@
 {{# if noneSelected}}
 <div class="logic-container">
-	<button type="button" class="close" >&times;</button>
 	<i>To filter your search, select one or more items.</i>
 
 {{else}}
 {{#if single}}
 <div class="logic-container">
-	<button type="button" class="close" >&times;</button>
 		{{#each logic }}
 		<label>
 			<input name="operator" value="{{this}}" type="radio"> {{this}}
@@ -18,7 +16,6 @@
 
 {{#if fullSet}}
 <div class="logic-container">
-	<button type="button" class="close" >&times;</button>
 	<i>You have selected all results. Try selecting only one entry.</i>
 </div>
 
@@ -26,7 +23,6 @@
 
 {{#if multiLogic}}
 <div class="logic-container">
-    <button type="button" class="close" >&times;</button>
 	{{#each logic }}
 		<label>
 			<input name="operator" value="{{this}}" type="radio"> {{this}}

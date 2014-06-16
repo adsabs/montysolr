@@ -34,6 +34,8 @@ define(['marionette', 'hbs!./templates/item-tree'],
         if (!view.$el.hasClass('hide')) {
           //view.trigger('treeNodeDisplayed');
         }
+        var percent = this.model.get("count") / this.model.get("total")
+        this.$(".size-graphic").width(percent*100 +"%")
       },
 
       itemViewContainer: ".item-children",
@@ -47,7 +49,26 @@ define(['marionette', 'hbs!./templates/item-tree'],
       events: {
         'click .widget-item': "onClick",
         'click .item-caret ': "toggleChildren",
-        'click .show-more': 'onShowMore'
+        'click .show-more': 'onShowMore',
+        'mouseenter label' : "addCount",
+        'mouseleave label' : "returnName"
+      },
+
+      addCount : function(e){
+        e.preventDefault();
+        var val;
+        val = this.model.get("count")
+        this.$(".facet-amount").html("&nbsp;(" + val + ")" );
+        this.$(".item-caret").addClass("draw-attention-text")
+
+      },
+
+      returnName : function(e){
+        e.preventDefault();
+        this.$(".facet-amount").empty();
+        this.$("i.item-caret").removeClass("draw-attention-text")
+
+
       },
 
       toggleChildren : function(e){
@@ -72,6 +93,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
       onClick: function (ev) {
         ev.stopPropagation();
         this.$('.item-children').toggleClass('hide');
+        this.$("label").toggleClass("s-facet-selected");
         this.model.set('selected', $(ev.target).is(':checked'));
         this.trigger('itemClicked'); // we don't need to pass data because marionette includes 'this'
       },
@@ -123,6 +145,13 @@ define(['marionette', 'hbs!./templates/item-tree'],
         ev.stopPropagation();
         this.trigger('fetchMore', this.$('.item-children:first').children().filter('.hide').length,
           {view: this, collection: this.collection, query: this.getCurrentQuery()});
+      },
+
+      serializeData : function() {
+        var j = this.model.toJSON();
+        j.title =  "&nbsp;" + this.model.get("title").replace(/\s+/g, "&nbsp;").replace(/–|-/g, "&ndash;")
+        return j
+
       }
 
 
