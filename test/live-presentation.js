@@ -41,6 +41,7 @@ require([
 
   var searchBar = new SearchBar();
   var results = new ResultsWidget({pagination: {rows: 40, start:0}});
+
   var citationsGraphWidget = FacetFactory.makeGraphFacet({
     facetField: "citation_count",
     facetTitle: "Citations",

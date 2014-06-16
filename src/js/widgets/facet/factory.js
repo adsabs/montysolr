@@ -170,7 +170,11 @@ define([
         maxDisplayNum: 100,
         openByDefault: false,
         showOptions: true,
-        itemView: ZoomableGraphView
+        itemView: ZoomableGraphView,
+        additionalItemViewOptions: {
+        xAxisTitle: options.facetTitle,
+        title: options.facetTitle
+        }
       };
 
       containerOptions = _.extend(containerOptions,
@@ -187,10 +191,6 @@ define([
         },
         view: new FacetContainerView(containerOptions),
         //so that the html template for the graph can use these values
-        itemViewOptions: {
-          xAxisTitle: options.facetTitle,
-          title: options.facetTitle
-        }
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options,

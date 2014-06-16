@@ -5789,6 +5789,7 @@ button.close {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #999999;
+  font-size: 13px;
 }
 .item-closed:before {
   content: "\e080";
@@ -5804,6 +5805,7 @@ button.close {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #999999;
+  font-size: 13px;
 }
 .item-open:before {
   content: "\e114";
