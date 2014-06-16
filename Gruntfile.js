@@ -326,7 +326,7 @@ module.exports = function(grunt) {
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
-    ['install-dependencies', 'bower', 'exec:convert_dsjslib', 'less']);
+    ['install-dependencies', 'bower-setup', 'less']);
 
   // When running the default Grunt command, just lint the code.
   grunt.registerTask('default', [
@@ -349,5 +349,6 @@ module.exports = function(grunt) {
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
 
+  grunt.registerTask('bower-setup', ['bower', 'exec:convert_dsjslib']);
 
 };
