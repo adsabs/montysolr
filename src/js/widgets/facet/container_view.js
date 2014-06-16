@@ -17,7 +17,6 @@ define(['backbone', 'marionette',
     var FacetContainerView = ContainerView.extend({
 
       initialize: function (options) {
-        console.log("options yo", options)
         ContainerView.prototype.initialize.call(this, arguments);
         this.displayNum = Marionette.getOption(this, "displayNum") || 5;
         this.maxDisplayNum = Marionette.getOption(this, "maxDisplayNum") || 200;
@@ -70,21 +69,18 @@ define(['backbone', 'marionette',
       },
 
       itemViewOptions: function (model, index) {
-//       merging in options from factory stage
-        additionalOptions = Marionette.getOption(this, "additionalItemViewOptions");
-        console.log("additional", additionalOptions)
         //if this is the initial round, hide fetchnum - displaynum
         if (this.paginator && this.paginator.getCycle() <= 1) {
           if (index < this.displayNum) {
-            return _.extend({hide: false}, additionalOptions);
+            return {hide: false};
           }
           else {
-            return _.extend({hide: true}, additionalOptions);
+            return {hide: true};
           }
         }
         else {
           //otherwise, keep the defaults (as set by the template)
-          return additionalOptions;
+          return {};
         }
       },
 
