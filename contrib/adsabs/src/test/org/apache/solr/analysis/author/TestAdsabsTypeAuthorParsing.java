@@ -80,13 +80,27 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 	private String author_field = "author";
 	
 
-  @Override
-  public String getSchemaFile() {
-    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-    });
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = getSchemaFile();
 
+		
+		configString = MontySolrSetup.getMontySolrHome()
+			    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
+	}
+	
+  public static String getSchemaFile() {
+    
     /*
      * Make a copy of the schema.xml, and create our own synonym translation rules
      */
@@ -294,24 +308,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     TokenStream iAuthor = iAnalyzer.tokenStream("author", new StringReader(""));
     TokenStream qAuthor = qAnalyzer.tokenStream("author", new StringReader(""));
 
-    iAuthor.reset();
-    iAuthor.reset();
-    iAuthor.reset();
 
-    qAuthor.reset();
-    qAuthor.reset();
-    qAuthor.reset();
-
+    iAuthor.close();
+    qAuthor.close();
+    
     // TODO: force reload of the synonym map
     //h.getCoreContainer().reload("collection1");
-
-  }
-
-  @Override
-  public String getSolrConfigFile() {
-
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
 
   }
 

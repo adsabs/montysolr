@@ -23,6 +23,7 @@ import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.NumericRangeQuery;
 import org.adsabs.solr.AdsConfig.F;
+import org.junit.BeforeClass;
 
 /**
  * Test for the date_string type
@@ -30,22 +31,25 @@ import org.adsabs.solr.AdsConfig.F;
  */
 public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 
+	@BeforeClass
+	public static void beforeClass() throws Exception {
 
-  @Override
-  public String getSchemaFile() {
-    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-    });
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+			MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		});
 
-  }
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
+			    + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
 
-  public String getSolrConfigFile() {
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
-  }
+		configString = MontySolrSetup.getMontySolrHome()
+			    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+				+ "/example/solr");
+	}
+	
 
 
   public void test() throws Exception {

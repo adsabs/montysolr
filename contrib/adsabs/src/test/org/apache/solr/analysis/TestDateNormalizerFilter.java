@@ -1,6 +1,8 @@
 package org.apache.solr.analysis;
 
 import java.io.StringReader;
+import java.util.HashMap;
+
 import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
@@ -9,7 +11,7 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 public class TestDateNormalizerFilter extends BaseTokenStreamTestCase {
 	
 	public void test() throws Exception {
-		ASCIIDuplicatingFilterFactory factory = new ASCIIDuplicatingFilterFactory();
+		ASCIIDuplicatingFilterFactory factory = new ASCIIDuplicatingFilterFactory(new HashMap<String,String>());
 		
 		TokenStream stream = factory.create(new MockTokenizer(new StringReader("čtyřista čtyřicet čtyři"), 
 		    MockTokenizer.WHITESPACE, false));

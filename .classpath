@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-test-framework-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/lucene/test-framework/src/java"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr-test-framework-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/solr/test-framework/src/java"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/java"/>
 	<classpathentry kind="src" path="contrib/adsabs/src/jython"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/test"/>
@@ -15,7 +17,6 @@
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-3.4-complete.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/jython-standalone-2.7-b1.jar" sourcepath="contrib/adsabs/lib/jython-2.7-b1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/luke-4.0.0-BETA.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/apache-solr-4.0.0-SVN"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/commons-io-2.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/slf4j-api-1.7.6.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/slf4j-log4j12-1.7.6.jar"/>
@@ -65,7 +66,6 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-sandbox-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-spatial-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-suggest-4.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-test-framework-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/noggit-0.5.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/org.restlet-2.1.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/org.restlet.ext.servlet-2.1.1.jar"/>
@@ -73,15 +73,14 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-analysis-extras-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-cell-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-clustering-4.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr-core-4.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr-dataimporthandler-4.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr-core-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/solr/core/src/java"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr-dataimporthandler-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/solr/contrib/dataimporthandler/src"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-dataimporthandler-extras-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-langid-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-map-reduce-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-morphlines-cell-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-morphlines-core-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-solrj-4.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr-test-framework-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-uima-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-velocity-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/spatial4j-0.4.1.jar"/>
@@ -92,6 +91,25 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lib/randomizedtesting-runner-2.1.3.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lucene-libs/lucene-test-framework-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/noggit-0.5.jar"/>
-	<classpathentry kind="lib" path="/apache-solr-4.0.0-SVN/solr/solrj/lib/noggit-0.5.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/jcl-over-slf4j-1.7.6.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/jul-to-slf4j-1.7.6.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/httpclient-4.3.1.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/httpcore-4.3.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/httpmime-4.3.1.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/wstx-asl-3.2.7.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/zookeeper-3.4.6.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-continuation-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-deploy-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-http-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-io-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-jmx-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-security-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-server-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-servlet-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-util-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-webapp-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-xml-8.1.10.v20130312.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/servlet-api-3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

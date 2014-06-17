@@ -3,7 +3,10 @@ package org.apache.solr.analysis.author;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import monty.solr.util.MontySolrAbstractLuceneTestCase;
+
 import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.Tokenizer;
@@ -55,7 +58,7 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
 	public void compare(String input, String... expected) throws Exception {
 		Reader reader = new StringReader(input);
 		Tokenizer tokenizer = new KeywordTokenizer(reader);
-		PythonicAuthorNormalizeFilterFactory factory = new PythonicAuthorNormalizeFilterFactory();
+		PythonicAuthorNormalizeFilterFactory factory = new PythonicAuthorNormalizeFilterFactory(new HashMap<String,String>());
 		TokenStream stream = factory.create(tokenizer);
 		stream.reset();
 		CharTermAttribute termAtt = stream.getAttribute(CharTermAttribute.class);

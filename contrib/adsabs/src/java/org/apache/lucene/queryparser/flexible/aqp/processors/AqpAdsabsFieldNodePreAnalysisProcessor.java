@@ -66,13 +66,22 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
         // first parse the date with the appropriate analyzer
         String value = fieldNode.getTextAsString();
         Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
-        TokenStream source;
+        TokenStream source = null;
         try {
           source = analyzer.tokenStream(field, new StringReader(value));
           source.reset();
           source.incrementToken();
         } catch (IOException e1) {
           throw new RuntimeException(e1);
+        }
+        finally {
+	      if (source != null) {
+	        try {
+	    	  source.close();
+	        } catch (IOException e) {
+              // ignore
+            }
+	      }
         }
         
         Date date = null;

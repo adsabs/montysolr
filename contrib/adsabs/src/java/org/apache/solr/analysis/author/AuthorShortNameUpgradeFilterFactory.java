@@ -97,7 +97,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
   	
   	
   	
-    protected MakeAllShortNames(Map<String,String> args) {
+    public MakeAllShortNames(Map<String,String> args) {
       super(args);
     }
 
@@ -292,7 +292,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
    */
   public static class MakeShortNames extends NewSynonymFilterFactory.SynonymBuilderFactory {
 
-    protected MakeShortNames(Map<String,String> args) {
+    public MakeShortNames(Map<String,String> args) {
       super(args);
     }
 

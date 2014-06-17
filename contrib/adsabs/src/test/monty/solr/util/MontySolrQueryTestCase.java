@@ -270,7 +270,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
   }
 
   
-  public String[] formatSynonyms(String[] strings) {
+  public static String[] formatSynonyms(String[] strings) {
     String[] newLines = new String[strings.length];
     int nl = 0;
     for (String line : strings) {

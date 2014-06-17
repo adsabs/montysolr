@@ -414,6 +414,13 @@ montysolr.version=${montysolr.version}
       </fileset>
     </copy>
 		
+		<!-- this is required for running tests (that load jetty) -->
+		<copy todir="${build.dir}/solrjars-extracted/example-lib" flatten="false">
+      <fileset dir="${solr.real.location}/example/lib">
+        <include name="**/**.jar"/>
+      </fileset>
+    </copy>
+		
   </target>
 
 

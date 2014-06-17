@@ -89,9 +89,9 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	 * 
 	 * @param loader
 	 */
-	public static void makeResourcesVisible(SolrResourceLoader loader, String...paths) {
+	public static void makeResourcesVisible(ClassLoader loader, String...paths) {
 		try {
-			URLClassLoader innerLoader = (URLClassLoader) loader.getClassLoader();
+			URLClassLoader innerLoader = (URLClassLoader) loader;
 			Class<?> classLoader = URLClassLoader.class;
 			Class[] params = new Class[]{ URL.class };  
 			Method method = classLoader.getDeclaredMethod( "addURL", params);
@@ -117,7 +117,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		return new DirectSolrConnection(h.getCore());
 	}
 	
-	public File createTempFile(String...lines) throws IOException {
+	public static File createTempFile(String...lines) throws IOException {
 		File tmpFile = File.createTempFile("montySolr-unittest", null);
 		if (lines.length > 0) {
 			//FileOutputStream fi = FileUtils.openOutputStream(tmpFile);
@@ -130,17 +130,17 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		return tmpFile;
 	}
 	
-	public File duplicateFile(File origFile) throws IOException {
+	public static File duplicateFile(File origFile) throws IOException {
 		File tmpFile = createTempFile();
 		FileUtils.copyFile(origFile, tmpFile);
 		return tmpFile;
 	}
 	
-	public int replaceInFile(File target, String toFind, String replacement) throws IOException {
+	public static int replaceInFile(File target, String toFind, String replacement) throws IOException {
 		return replaceInFile(target, Pattern.compile(toFind), replacement);
 	}
 
-	public int replaceInFile(File target, Pattern toFind, String replacement) throws IOException {
+	public static int replaceInFile(File target, Pattern toFind, String replacement) throws IOException {
 		int matches = 0;
 		String contents = FileUtils.readFileToString(target);
 		Matcher matcher = toFind.matcher(contents);
@@ -153,7 +153,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 		return matches;
 	}
 	
-	public File duplicateModify(File sourceFile, String...searchReplace) {
+	public static File duplicateModify(File sourceFile, String...searchReplace) {
 	  assert searchReplace.length%2==0;
     File newFile;
     try {

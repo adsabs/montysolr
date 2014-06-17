@@ -66,7 +66,7 @@ import org.apache.solr.common.util.StrUtils;
 public class NewSynonymFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
   protected Map<String,String> args;
 
-  protected NewSynonymFilterFactory(Map<String,String> args) {
+  public NewSynonymFilterFactory(Map<String,String> args) {
     super(args);
     this.args = args;
   }

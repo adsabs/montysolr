@@ -3,6 +3,8 @@ package org.apache.solr.analysis.author;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.HashMap;
+
 import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.analysis.TokenFilter;
@@ -30,7 +32,7 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 		Tokenizer tokenizer = new KeywordTokenizer(reader);
 		
 	  	
-		AuthorTransliterationFactory factory = new AuthorTransliterationFactory();
+		AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
 		
 		TokenStream stream = factory.create(new TestFilter(tokenizer));
 		

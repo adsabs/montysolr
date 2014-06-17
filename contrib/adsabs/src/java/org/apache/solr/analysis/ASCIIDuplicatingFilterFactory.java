@@ -34,7 +34,7 @@ import org.apache.lucene.analysis.TokenStream;
  *
  */
 public class ASCIIDuplicatingFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
-  protected ASCIIDuplicatingFilterFactory(Map<String,String> args) {
+  public ASCIIDuplicatingFilterFactory(Map<String,String> args) {
     super(args);
     if (!args.isEmpty()) {
       throw new IllegalArgumentException("Unknown parameter(s): " + args);
