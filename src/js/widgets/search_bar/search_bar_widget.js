@@ -29,13 +29,13 @@ define(['marionette', 'js/components/api_query', 'js/widgets/base/base_widget',
 
       onRender: function() {
         this.$("#search-form-container").append(SearchFormTemplate)
-        this.$(".field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
+        this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
 
       },
 
       events: {
         "click .search-submit": "submitQuery",
-        "click .field-options div": "addField",
+        "click #field-options div": "addField",
         "keypress .q": function(e){
           this.checkSubmit(e);
           this.highlightFields(e);
