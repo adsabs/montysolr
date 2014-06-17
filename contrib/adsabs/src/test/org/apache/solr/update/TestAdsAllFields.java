@@ -62,27 +62,30 @@ import java.util.Properties;
 //@SuppressCodecs({"Lucene3x"})
 public class TestAdsAllFields extends MontySolrQueryTestCase {
 
+	
 	@BeforeClass
-	public static void beforeTestAdsDataImport() throws Exception {
+	public static void beforeClass() throws Exception {
 		// to use filesystem instead of ram
-		System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
-		//System.setProperty("tests.codec","SimpleText");
+		// System.setProperty("solr.directoryFactory","solr.SimpleFSDirectoryFactory");
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
+					+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
 
+		
+		configString = getSolrConfigFile();
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
 	}
 
-	@Override
-	public String getSchemaFile() {
-		makeResourcesVisible(this.solrConfig.getResourceLoader(),
-				new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-		});
-		String configFile = MontySolrSetup.getMontySolrHome()
-		+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
-		return configFile;
-	}
 
-	@Override
-	public String getSolrConfigFile() {
+	public static String getSolrConfigFile() {
 	  
 		String configFile = MontySolrSetup.getMontySolrHome()
 		+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
@@ -97,7 +100,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		try {
 			newConfig = duplicateFile(new File(configFile));
 			newDataConfig = duplicateModify(new File(dataConfig), 
-					"AdsDataSource", this.getClass().getCanonicalName() + "\\$MongoMockDataSource");
+					"AdsDataSource", TestAdsAllFields.class.getCanonicalName() + "\\$MongoMockDataSource");
 			replaceInFile(newConfig, "data-config.xml", newDataConfig.getAbsolutePath());
 		} catch (IOException e) {
 			e.printStackTrace();

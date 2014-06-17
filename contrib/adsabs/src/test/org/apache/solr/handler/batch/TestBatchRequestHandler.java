@@ -44,6 +44,7 @@ import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
+import org.junit.BeforeClass;
 
 @SuppressCodecs({"Lucene3x", "SimpleText"})
 public class TestBatchRequestHandler extends MontySolrQueryTestCase {
@@ -51,20 +52,25 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
   private File generatedTransliterations;
 	private BatchHandler handler;
 
-
-  public String getSchemaFile() {
-  	makeResourcesVisible(this.solrConfig.getResourceLoader(),
-        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-    });
-  	return MontySolrSetup.getMontySolrHome()
-  	    + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
-  }
-  
-  public String getSolrConfigFile() {
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
-  }
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
+  	      + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+		
+		configString = MontySolrSetup.getMontySolrHome()
+          + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
+	}
+	
 
 
   public void test() throws Exception {

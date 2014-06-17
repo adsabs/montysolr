@@ -31,25 +31,26 @@ import org.junit.Test;
 
 public class TestAqpLuceneQParserPlugin extends MontySolrAbstractTestCase {
 	
-	public String getSchemaFile() {
-		makeResourcesVisible(this.solrConfig.getResourceLoader(),
-				new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",
-			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-		});
-		return "schema-minimal.xml";
-	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
-		"solrconfig-extended-lucene-qparser.xml";
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" 
+		      + "schema-minimal.xml";
+		
+		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" 
+					+ "solrconfig-extended-lucene-qparser.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
 	}
 	
-	/*
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    initCore("solrconfig-extended-lucene-qparser.xml","schema.xml");
-  }
-  */
+	
 
 	public void createIndex() {
 		assertU(adoc("id","1", "text", "who"));

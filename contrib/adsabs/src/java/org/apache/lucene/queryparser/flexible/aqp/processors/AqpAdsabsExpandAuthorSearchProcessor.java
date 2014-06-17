@@ -234,13 +234,16 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
   
   private String[] getSynonyms(String origInput) throws IOException {
     Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
-    TokenStream source;
+    TokenStream source = null;
     try {
       source = analyzer.tokenStream("author_short_name_rage", new StringReader(origInput));
       source.reset();
     } catch (IOException e1) {
+    	if (source != null)
+        source.close();
       throw new RuntimeException(e1);
     }
+    
     
     CharTermAttribute termAtt = source.getAttribute(CharTermAttribute.class);
     
@@ -248,11 +251,13 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     while (source.incrementToken()) {
       synonyms.add(termAtt.toString());
     }
+    source.close();
     
     if (synonyms.size()<2) { // the first one is the original
       return null;
     }
     synonyms.remove(0);
+    
     return synonyms.toArray(new String[synonyms.size()]);
   }
   

@@ -54,7 +54,6 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 	public void tearDown() throws Exception {
 		
 		tp.tearDown();
-		tp = null;
 		super.tearDown();
 		
 	}

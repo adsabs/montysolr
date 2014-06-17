@@ -29,19 +29,34 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.junit.BeforeClass;
 
 public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
 
 
-  private File generatedTransliterations;
+  private static File generatedTransliterations;
+
+  @BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = getSchemaFile();
+
+		
+		configString = MontySolrSetup.getMontySolrHome()
+			    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
+	}
 
 
-  @Override
-  public String getSchemaFile() {
-    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-    });
+  public static String getSchemaFile() {
 
     /*
      * For purposes of the test, we make a copy of the schema.xml,
@@ -69,10 +84,6 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
     return newSchema.getAbsolutePath();
   }
 
-  public String getSolrConfigFile() {
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
-  }
 
 
   public void test() throws Exception {

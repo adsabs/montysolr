@@ -21,6 +21,7 @@ package org.apache.solr.search.function;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.util.AbstractSolrTestCase;
+import org.junit.BeforeClass;
 
 /**
  *
@@ -28,16 +29,20 @@ import org.apache.solr.util.AbstractSolrTestCase;
  **/
 public class PositionSearchTest extends AbstractSolrTestCase {
 
-	public String getSchemaFile() {
-	  
-		return MontySolrSetup.getMontySolrHome()
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
 				+ "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-fieldpos.xml";
-	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
+		
+		configString = MontySolrSetup.getMontySolrHome()
 				+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-fieldpos.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
+	
+	
 	
 	public String getSolrHome() {
     System.clearProperty("solr.solr.home"); // always force recomputing the solr.home
