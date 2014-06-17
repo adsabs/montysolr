@@ -191,8 +191,7 @@ define([
           "facet.limit": 100,
           fl: 'id'
         },
-        view: new FacetContainerView(containerOptions)
-        //so that the html template for the graph can use these values
+        view: new GraphContainerView(containerOptions)
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options,
