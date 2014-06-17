@@ -45,6 +45,11 @@ public class TestAdsabsIndexingSearching extends MontySolrQueryTestCase {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
+  	makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+			MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		  MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		});
+  	
     System.setProperty("solr.allow.unsafe.resourceloading", "true");
     schemaString = MontySolrSetup.getMontySolrHome()
         + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
@@ -52,12 +57,8 @@ public class TestAdsabsIndexingSearching extends MontySolrQueryTestCase {
     configString = MontySolrSetup.getMontySolrHome()
         + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
     
-    /*makeResourcesVisible(???,
-        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-                  MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-      });*/
-    
-    initCore(configString, schemaString);
+    initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
   }
   
 

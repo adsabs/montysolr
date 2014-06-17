@@ -196,6 +196,8 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 										tokens.add(fType.indexedToReadable(termAtt.toString()));
 									}
 								}
+								
+								buffer.close();
 							}
 						}
 					}

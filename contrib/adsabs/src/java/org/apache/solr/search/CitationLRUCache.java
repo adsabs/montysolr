@@ -32,10 +32,12 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DocTermOrds;
+import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.CacheEntry;
 import org.apache.lucene.search.FieldCache.Ints;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
@@ -732,9 +734,11 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 			}
 		}
 		
+		
   	// load single valued ids 
 		for (String idField: fields.get("textFields")) {
-			BinaryDocValues idMapping = FieldCache.DEFAULT.getTerms(reader, idField, false); // XXX:rca - should we use 'true'?
+			BinaryDocValues idMapping = getCacheReuseExisting(reader, idField);
+			
 			Integer i = 0;
 			BytesRef ret = new BytesRef();
 			while(i < reader.maxDoc()) {
@@ -766,6 +770,50 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 
 	}
 
+  private BinaryDocValues getCacheReuseExisting(AtomicReader reader, String idField) throws IOException {
+  	
+  	Boolean sorted = false;
+  	if (idField.indexOf(':') > -1) {
+  		String[] parts = idField.split(":");
+  		idField = parts[0];
+  		if (parts[1].indexOf("sort") > -1)
+  			sorted = true;
+  	}
+  	
+  	// first try discover if there exists a cache already that we can reuse
+  	CacheEntry[] caches = FieldCache.DEFAULT.getCacheEntries();
+		if (caches != null) {
+			for (int i=0; i < caches.length; i++) {
+				
+				CacheEntry c = caches[i];
+				String key = c.getFieldName();
+				Object readerKey = c.getReaderKey();
+				
+				if (idField.equals(key) && readerKey.toString().equals(reader.getCoreCacheKey().toString())) {
+					Object v = c.getValue();
+					if (v instanceof BinaryDocValues) {
+						return (BinaryDocValues) v;
+					}
+				}
+				
+			}
+		}
+		
+		BinaryDocValues idMapping;
+		
+		// because sorting components will create the cache anyway; we can avoid duplicating data
+		// if we create a cache duplicate, the tests will complain about cache insanity (and rightly so)
+		if (sorted) {
+			//System.out.println("creating new sorted: " + idField);
+			idMapping = FieldCache.DEFAULT.getTermsIndex(reader, idField);
+		}
+		else {
+			//System.out.println("creating new: " + idField);
+		  idMapping = FieldCache.DEFAULT.getTerms(reader, idField, false); // XXX:rca - should we use 'true'?
+		}
+		return idMapping;
+		
+  }
   //////////////////////// SolrInfoMBeans methods //////////////////////
 
 

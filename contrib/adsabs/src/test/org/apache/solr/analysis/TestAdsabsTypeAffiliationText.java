@@ -32,14 +32,14 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
+  	
+  	makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+  		    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+  	
     System.setProperty("solr.allow.unsafe.resourceloading", "true");
     
-    /*
-    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-    });
-    */
     
     schemaString = MontySolrSetup.getMontySolrHome()
         + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
@@ -47,7 +47,8 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     configString = MontySolrSetup.getMontySolrHome()
         + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
     
-    initCore(configString, schemaString);
+    initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
   }
   
 

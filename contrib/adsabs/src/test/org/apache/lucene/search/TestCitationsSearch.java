@@ -34,6 +34,11 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
   public static void beforeClass() throws Exception {
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+					MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+		
     System.setProperty("solr.allow.unsafe.resourceloading", "true");
     schemaString = MontySolrSetup.getMontySolrHome()
         + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
@@ -42,7 +47,9 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
     configString = MontySolrSetup.getMontySolrHome()
           + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
           + "citation-cache-solrconfig.xml";
-    initCore(configString, schemaString);
+    
+    initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
   }
 	
 

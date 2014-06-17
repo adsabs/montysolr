@@ -61,7 +61,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-memory-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-misc-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queries-4.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queryparser-4.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queryparser-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/lucene/queryparser/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-replicator-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-sandbox-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-spatial-4.8-SNAPSHOT.jar"/>

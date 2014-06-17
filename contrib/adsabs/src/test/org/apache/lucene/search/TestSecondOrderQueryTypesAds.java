@@ -45,7 +45,9 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
     configString = MontySolrSetup.getMontySolrHome()
           + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
           + "citation-cache-solrconfig.xml";
-    initCore(configString, schemaString);
+    
+    initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
   }
   
 	private SolrQueryRequest tempReq;

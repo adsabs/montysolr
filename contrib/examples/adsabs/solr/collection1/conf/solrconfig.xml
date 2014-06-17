@@ -554,7 +554,7 @@
               initialSize="1024"
               autowarmCount="512"
               regenerator="solr.CitationLRUCache$SimpleRegenerator"
-              identifierFields="bibcode,alternate_bibcode"
+              identifierFields="bibcode:sorted,alternate_bibcode"
               citationFields="citation"
               />
               
