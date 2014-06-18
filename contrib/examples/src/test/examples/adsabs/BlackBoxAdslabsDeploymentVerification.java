@@ -9,7 +9,6 @@ import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.update.InvenioKeepRecidUpdated;
 import org.junit.BeforeClass;
 
 import examples.BlackAbstractTestCase;
@@ -90,39 +89,13 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		// index some (random) docs and check we got them
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		
-		
-		InvenioKeepRecidUpdated handler = (InvenioKeepRecidUpdated) core.getRequestHandler("/invenio/update");
-		//handler.setAsynchronous(false);
-		
-		core.execute(handler, req("last_recid", "9000000",  
-				"maximport", "20",
-				"batchsize", "50"), 
-				rsp);
 
-		// must wait for the landler to finish his threads
-		while (handler.isBusy()) {
-			Thread.sleep(100);
-		}
+		// TODO: index somthing
 		assertU(commit("waitSearcher", "true"));
 		
 		
 		
 		
-		// check we have gotten at least some data from mongo		
-		assertQ(req("q", "*:*", "fl", "title"), "//*[@numFound>'0']");
-		
-		boolean passed = false;
-		for (String field: new String[] {"body", "ack", "reader", "simbid"} ) {
-			try {
-				assertQ(req("q", field + ":*"), "//*[@numFound>0]");
-				passed = true;
-				break;
-			}
-			catch (Exception e) {
-				//pass
-			}
-		}
-		assertTrue("Something must be wrong because we didn't get any data from MongoDB", passed == true);
 		
 		
 	  // #231 - use 'aqp' as a default parser also for filter queries

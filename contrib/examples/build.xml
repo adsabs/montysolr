@@ -221,7 +221,7 @@
     <!-- add selected libraries -->
 		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
       <fileset dir="${montysolr.dependencies.dir}">
-        <include name="**/apache-solr-dataimporthandler*.jar" />
+        <!--<include name="**/apache-solr-dataimporthandler*.jar" />-->
         <include name="**/lucene-join*.jar" />
         <include name="**/lucene-sandbox*.jar" />
       </fileset>
@@ -229,9 +229,7 @@
     <copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
       <fileset dir="${common.dir}/contrib">
         <include name="**/lib/antlr-runtime*.jar" />
-      	<include name="**/lib/drizzle*.jar" />
       	<include name="**/lib/jython-standalone*.jar" />
-      	<include name="**/lib/mongo-java-driver*.jar" />
       </fileset>
     </copy>
 		

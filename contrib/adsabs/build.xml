@@ -56,7 +56,6 @@
 		</fileset>
 		<fileset dir="lib">
 			<include name="**/luke*.jar"/>
-			<include name="**/mongo*.jar"/>
 			<include name="**/jython-standalone*.jar"/>
 		</fileset>
 	</path>

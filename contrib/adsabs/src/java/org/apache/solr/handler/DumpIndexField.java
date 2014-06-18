@@ -17,6 +17,9 @@ package org.apache.solr.handler;
  * limitations under the License.
  */
 
+/**
+ * XXX: convert to batch processor and remove from here
+ */
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;

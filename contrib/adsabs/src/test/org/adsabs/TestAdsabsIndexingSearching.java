@@ -102,23 +102,68 @@ public class TestAdsabsIndexingSearching extends MontySolrQueryTestCase {
 		
 		
 		// check authors are correctly indexed/searched
-		assertU(adoc("id", "0", "bibcode", "b1", F.AUTHOR, "Dall'oglio, Antonella"));
-		assertU(adoc("id", "1", "bibcode", "b2", F.AUTHOR, "VAN DER KAMP, A; Von Accomazzi, Alberto, III, Dr.;Kao, P'ing-Tzu"));
-		assertU(adoc("id", "2", "bibcode", "b3", F.AUTHOR, "'t Hooft, Furst Middle"));
-		assertU(adoc("id", "3", "bibcode", "b4", F.AUTHOR, "O, Paul S.; Last, Furst Middle More"));
-		assertU(adoc("id", "4", "bibcode", "b5", F.AUTHOR, "O, Paul S.", F.AUTHOR, "Last, Furst Middle More"));
-		assertU(adoc("id", "5", "bibcode", "b6", F.AUTHOR, "van Tiggelen, Bart A., Jr."));
-		assertU(adoc("id", "6", "bibcode", "b7", F.AUTHOR, "Łuczak, Andrzej;John Doe Jr;Mac Low, Furst Middle;'t Hooft, Furst Middle"));
-		assertU(adoc("id", "7", "bibcode", "b8", F.AUTHOR, "Łuczak, Andrzej", F.AUTHOR, "John Doe Jr", 
-				F.AUTHOR, "Mac Low, Furst Middle", F.AUTHOR, "'t Hooft, Furst Middle"));
+		assertU(adoc("id", "0", "bibcode", "b1", "author", "Dall'oglio, Antonella"));
+		assertU(adoc("id", "1", "bibcode", "b2", "author", "VAN DER KAMP, A; Von Accomazzi, Alberto, III, Dr.;Kao, P'ing-Tzu"));
+		assertU(adoc("id", "2", "bibcode", "b3", "author", "'t Hooft, Furst Middle"));
+		assertU(adoc("id", "3", "bibcode", "b4", "author", "O, Paul S.; Last, Furst Middle More"));
+		assertU(adoc("id", "4", "bibcode", "b5", "author", "O, Paul S.", "author", "Last, Furst Middle More"));
+		assertU(adoc("id", "5", "bibcode", "b6", "author", "van Tiggelen, Bart A., Jr."));
+		assertU(adoc("id", "6", "bibcode", "b7", "author", "Łuczak, Andrzej;John Doe Jr;Mac Low, Furst Middle;'t Hooft, Furst Middle"));
+		assertU(adoc("id", "7", "bibcode", "b8", "author", "Łuczak, Andrzej", "author", "John Doe Jr", 
+				"author", "Mac Low, Furst Middle", "author", "'t Hooft, Furst Middle"));
 		
+		assertU(adoc("id", "8", "bibcode", "b9", 
+				"author", "t' Hooft, van X",
+				"author", "Anders, John Michael",
+				"author", "Einstein, A",
+				"author_facet_hier", "0/T Hooft, V", 
+				"author_facet_hier", "1/T Hooft, V/T Hooft, Van X",
+				"author_facet_hier", "0/Anders, J M", 
+				"author_facet_hier", "1/Anders, J M/Anders, John Michael",
+				"author_facet_hier", "0/Einstein, A", 
+				"aff", "Hooft affiliation",
+				"aff", "-",
+				"aff", "Einstein affiliation, Zurych",
+				"email", "-",
+				"email", "anders@email.com",
+				"email", "-"
+				));
 		
+		String json = "{\"add\": {"
+		+ "\"doc\": {" +
+				"\"id\": 100" +
+			  ", \"recid\": 100" +
+				", \"bibcode\": \"2014JNuM..455...10B\"" +
+			  
+				// order and length must be the same for author,aff, email
+				// missing value must be indicated by '-'
+				", \"author\": [\"t' Hooft, van X\", \"Anders, John Michael\", \"Einstein, A\"]" +
+				", \"aff\": [\"Hoof affiliation\", \"-\", \"Einstein institute, Zurych, Switzerland\"]" +
+				", \"email\": [\"-\", \"anders@email.com\", \"-\"]" +
+				
+				// author_facet_hier must be generated (solr doesn't modify it)
+				", \"author_facet_hier\": [\"0/T Hooft, V\", \"1/T Hooft, V/T Hooft, Van X\", \"0/Anders, J M\", \"1/Anders, J M/Anders, John Michael\", \"0/Einstein, A\"]" +
+				
+				// must be: "yyyy-MM-dd|yyyy-MM|yyyy"
+				", \"pubdate\": \"2013-08-05\"" +
+				
+				// Field that contains both grant ids and grant agencies.
+				", \"grant\": [\"NASA\", \"123456-78\"]" +
+				// grant_agency/grant_id
+				", \"grant_facet_hier\": [\"0/NASA\", \"1/NASA/123456-78\"]" +
+			"}" +
+		"}}";
+		updateJ(json, null);
 		assertU(commit("waitSearcher", "true"));
 		
-		assertQ("should find one", req("defType", "aqp", "debugQuery", "true",
+		
+		assertQ("should find one", req("defType", "aqp",
+        "q", "bibcode:2014JNuM..455...10B") ,"//result[@numFound=1]" );
+		
+		assertQ("should find one", req("defType", "aqp",
         "q", "author:Last") ,"//result[@numFound=1]" );
 		
-		assertQ("should find one", req("defType", "aqp", "debugQuery", "true",
+		assertQ("should find one", req("defType", "aqp",
 				"q", "author:Antonella Dall'oglio") ,"//result[@numFound=1]" );
 		
 		

@@ -80,7 +80,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-map-reduce-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-morphlines-cell-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-morphlines-core-4.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr-solrj-4.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr-solrj-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/solr/solrj/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-uima-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-velocity-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/spatial4j-0.4.1.jar"/>
