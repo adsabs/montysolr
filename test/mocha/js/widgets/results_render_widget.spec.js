@@ -18,7 +18,7 @@ define(['marionette',
 
     describe("Render Results (UI Widget)", function () {
 
-      var minsub;
+      var minsub, widget, $w;
       beforeEach(function(done) {
 
         minsub = new (MinimalPubsub.extend({
@@ -30,6 +30,15 @@ define(['marionette',
             }
           }
           }))({verbose: false});
+
+        widget = new ResultsWidget();
+        widget.activate(minsub.beehive.getHardenedInstance());
+        $w = $(widget.render().el);
+
+        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
+          q: "star"
+        }));
+
         done();
       });
 
@@ -52,19 +61,23 @@ define(['marionette',
 
       it("should join highlights with their records on a model by model basis", function (done) {
 
-        var widget = new ResultsWidget();
-        widget.activate(minsub.beehive.getHardenedInstance());
-        var $w = $(widget.render().el);
-
-        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-          q: "star"
-        }));
 
         expect(widget.collection.get("4189917").get("details").highlights[0]).to.eql("External triggers of <em>star</em> formation.");
 
         expect($w.find('.more-info:last > ul > li:first').html()).to.eql("Diffuse high-energy radiation from regions of massive <em>star</em> formation.");
         done();
       });
+
+      it("should show three authors with semicolons in the correct places and, if there are more, show the number of the rest", function(){
+
+        var $parentRow = $($w.find("input[value='2002CeMDA..82..113F']").parents().eq(4))
+
+        expect($parentRow.find("ul.just-authors li:first").text()).to.equal("Fellhauer, M.;");
+        expect($parentRow.find("ul.just-authors li:eq(2)").text()).to.equal("Kroupa, P.");
+        expect($parentRow.find("ul.just-authors").siblings().eq(0).text()).to.equal("and 1 more");
+
+
+      })
 
 
     })

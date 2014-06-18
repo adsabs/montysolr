@@ -5778,6 +5778,17 @@ button.close {
 .buffer {
   margin-top: 10px;
 }
+.unselectable {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  /*
+    Introduced in IE 10.
+    See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+  */
+  -ms-user-select: none;
+  user-select: none;
+}
 .item-closed {
   position: relative;
   top: 1px;
@@ -5934,15 +5945,28 @@ button.close {
 .zoomable-graph .apply {
   margin-top: 10px;
 }
+li.article-author {
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
 .draw-attention {
   transition-property: background-color;
   transition-duration: 3s;
-  background-color: #ffe780;
+  background-color: #ffe98a;
 }
-.show-fields {
+.show-form {
   transition-property: background-color;
   transition-duration: 3s;
   background-color: none;
+}
+.open .show-form {
+  background-color: #ffe98a !important;
+}
+.show-form:hover {
+  background-color: #ffd51a;
+}
+.open .show-form:hover {
+  background-color: #ffd51a !important;
 }
 .inactive-style {
   color: #999999;
@@ -6014,4 +6038,46 @@ button.close {
 }
 button#toggle-aff {
   float: right;
+}
+.search-dropdown {
+  position: relative;
+  left: 88%;
+  top: -32px;
+  z-index: 1000;
+}
+.search-dropdown ul.dropdown-menu {
+  position: absolute;
+  left: -88%;
+  padding: 5px 10px;
+}
+.search-dropdown #search-dropdown-icon {
+  font-size: 16px;
+  color: #3e91e0;
+}
+.search-dropdown #search-dropdown-icon:hover {
+  color: #1d6bb5;
+}
+.search-dropdown .search-form-header .title {
+  font-size: 15px;
+}
+.search-dropdown .search-form-header .title:hover {
+  color: #165189;
+}
+.search-form-title {
+  font-size: 14px;
+  display: inline !important;
+}
+.search-form-header {
+  font-size: 14px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.search-form-header-active .title {
+  color: #2178cb;
+}
+.search-form-header-active .title:hover {
+  color: #2885dd !important;
+}
+.search-form-section {
+  padding: 10px;
 }

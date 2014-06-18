@@ -9,6 +9,21 @@
   margin-top:10px;
 }
 
+
+.unselectable {
+  user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+
+  /*
+    Introduced in IE 10.
+    See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+  */
+  -ms-user-select: none;
+  user-select: none;
+}
+
 .item-closed {
   .glyphicon;
   .glyphicon-chevron-right;
@@ -181,18 +196,40 @@
 
 //end facets
 
+//results list
+
+li.article-author {
+  padding-left:2px !important;
+  padding-right:2px !important;
+
+}
+
+
+//general
+
 .draw-attention {
   transition-property: background-color;
   transition-duration: 3s;
-  background-color: lighten(@brand-warning, 10%)
+  background-color: lighten(@brand-warning, 12%)
 }
 
-.show-fields {
+.show-form {
   transition-property: background-color;
   transition-duration: 3s;
   background-color: none;
 
+}
 
+.open .show-form {
+  background-color: lighten(@brand-warning, 12%) !important
+}
+
+.show-form:hover {
+  background-color: darken(@brand-warning, 10%)
+}
+
+.open .show-form:hover {
+  background-color: darken(@brand-warning, 10%) !important
 }
 
 .inactive-style {
@@ -277,4 +314,61 @@
 }
 button#toggle-aff {
   float: right;
+}
+
+.search-dropdown {
+  position: relative;
+  left: 88%;
+  top: -32px;
+  z-index: 1000;
+
+  ul.dropdown-menu {
+    position: absolute;
+    left: -88%;
+    padding: 5px 10px;
+
+  }
+
+  #search-dropdown-icon {
+    font-size:16px;
+    color: lighten(@brand-primary, 15%);
+  }
+
+  #search-dropdown-icon:hover{
+    color: @brand-primary;
+  }
+
+  .search-form-header .title {
+    font-size:15px;
+  }
+
+  .search-form-header .title:hover {
+    color: darken(@brand-primary, 10%)
+
+  }
+}
+
+.search-form-title {
+  font-size: 14px;
+  display: inline !important;
+}
+
+.search-form-header {
+ font-size:14px;
+ padding: 2px 8px;
+  cursor: pointer;
+
+}
+
+.search-form-header-active .title {
+    color: lighten(@brand-primary, 5%);
+}
+
+
+.search-form-header-active .title:hover {
+  color: lighten(@brand-primary, 10%) !important;
+}
+
+.search-form-section {
+  padding: 10px;
 }

@@ -1,4 +1,6 @@
-define(['jquery', 'js/widgets/search_bar/search_bar_widget', 'js/components/beehive', 'js/services/pubsub', 'js/components/api_query'], function($, SearchBarWidget, BeeHive, PubSub, ApiQuery) {
+define(['jquery', 'js/widgets/search_bar/search_bar_widget',
+  'js/components/beehive', 'js/services/pubsub', 'js/components/api_query', 'hoverIntent'],
+  function($, SearchBarWidget, BeeHive, PubSub, ApiQuery) {
 
 
   describe("Search Bar (UI Widget)", function() {
@@ -17,7 +19,6 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget', 'js/components/beeh
 
       $("#test").append(w)
 
-      //console.log(w)
 
       done();
 
@@ -56,15 +57,28 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget', 'js/components/beeh
 
     });
 
+    it("should allow the user to open and close a dropdown menu from the search bar", function(){
+      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(false);
+      widget.view.$(".show-form").click();
+      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(true);
+      widget.view.$(".show-form").click();
+      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(false);
 
-//    it("should allow the user to click to add fielded search words to search bar", function() {
-//
-//      $("div.btn.dropdown-toggle").click();
-//      $("div[data-field=author]").hoverIntent();
-//      $("div[data-field=author]").click();
-//      expect($(".q").val().trim()).to.equal("author:\"\"");
-//
-//    })
+    })
+
+
+    it("should allow the user to click to add fielded search words to search bar", function() {
+
+//      can't easily trigger hoverIntent so calling the method directly
+      var e = {};
+      e.preventDefault = function(){};
+      e.target = document.querySelector("#field-options div[data-field=author]");
+
+      widget.view.tempFieldInsert(e)
+      widget.view.$("#field-options div[data-field=author]").click();
+      expect($(".q").val().trim()).to.equal("author:\"\"");
+
+    })
 
   });
 
