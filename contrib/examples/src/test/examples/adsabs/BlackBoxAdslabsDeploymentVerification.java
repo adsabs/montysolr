@@ -3,7 +3,7 @@ package examples.adsabs;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.core.SolrCore;
@@ -40,6 +40,10 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		assertU(adoc("id","3","recid","3", "bibcode", "b3"));
 		assertU(adoc("id","4","recid","4", "bibcode", "b4"));
 		assertU(adoc("id","5","recid","5", "bibcode", "b5", "alternate_bibcode", "x5"));
+		
+		assertU(adoc("id","6","recid","6", "bibcode", "b6"));
+		assertU(adoc("id","6","recid","6", "bibcode", "b6", "title", "all-sky", "abstract", "all-sky"));
+		
 		assertU(commit("waitSearcher", "true"));
 		
 	  // the first search is not auto-warmed (the code seems
@@ -112,7 +116,55 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
     
     data = direct.request("/select?q=\"STERN, CAROLYN P\"&debugQuery=true&wt=json", null);
     assert data.contains("author:stern grant, c");
+    
+    /*
+		 * /tvrh is available and serves title+abstract
+		 */
+		assertQ(req(CommonParams.QT, "/tvrh", 
+				"q", "abstract:all-sky",
+				"fl", "recid",
+				"tv.all", "true",
+				"tv.fl", "abstract",
+				"indent", "true"
+		),
+		"//lst[@name='termVectors']/str[@name='uniqueKeyFieldName'][contains(text(),'id')]",
+		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/int[@name='tf']",
+		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/int[@name='df']",
+		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/double[@name='tf-idf']",
+		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/lst[@name='positions']/int[@name='position']",
+		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/lst[@name='offsets']/int[@name='start']",
+		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='nosky']/lst[@name='offsets']/int[@name='end']",
+		"//*[@numFound='1']");
+		assertQ(req(CommonParams.QT, "/tvrh", 
+				"q", "title:all-sky",
+				"fl", "recid,title",
+				"tv.all", "true",
+				"tv.fl", "title",
+				"indent", "true"
+		),
+		"//lst[@name='termVectors']/str[@name='uniqueKeyFieldName'][contains(text(),'id')]",
+		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/int[@name='tf']",
+		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/int[@name='df']",
+		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/double[@name='tf-idf']",
+		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/lst[@name='positions']/int[@name='position']",
+		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/lst[@name='offsets']/int[@name='start']",
+		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='nosky']/lst[@name='offsets']/int[@name='end']",
+		"//*[@numFound='1']");
 				
+		
+		// test we can retrieve citations data (from the cache)
+		assertQ(req("q", "id:10", 
+				"fl", "recid,[citations values=citations,references resolve=true]",
+				"indent", "true"), 
+				"//*[@numFound='1']",
+				"//doc/lst[@name='[citations]']/int[@name='num_references'][.='2']",
+				"//doc/lst[@name='[citations]']/arr[@name='references']/str[1][.='2002rvmp....74...11']",
+				"//doc/lst[@name='[citations]']/arr[@name='references']/str[2][.='2002rvmp....74...12']",
+
+				"//doc/lst[@name='[citations]']/int[@name='num_citations'][.='1']",
+				"//doc/lst[@name='[citations]']/arr[@name='citations']/str[1][.='2002rvmp....74...11']"
+		);
+
 	}
 	
 	
