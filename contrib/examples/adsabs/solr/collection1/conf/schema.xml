@@ -840,11 +840,11 @@
       cannot have recid to be int. We are getting an error: QueryElevationComponent 
       requires the schema to have a uniqueKeyField implemented using StrField -->
       
-		<field name="id" type="string" indexed="true" stored="true"
+		<field name="id" type="string" indexed="true" stored="true" multiValued="false"
 			required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-		<field name="recid" type="int" indexed="true" stored="true"
-			required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-		<field name="bibcode" type="normalized_string_ascii" indexed="true"
+		<field name="recid" type="int" indexed="true" stored="true" multiValued="false"
+			required="false" omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="bibcode" type="normalized_string_ascii" indexed="true" multiValued="false"
 			stored="true" required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 			
 		
@@ -986,7 +986,7 @@
 		<field name="date" type="tdate" indexed="true" stored="${storeAll:false}"
 			omitNorms="true" omitTermFreqAndPositions="true"/>
 			
-		<field name="pubdate" type="date_string" indexed="true" stored="${storeAll:false}"
+		<field name="pubdate" type="date_string" indexed="true" stored="true"
 			omitNorms="true" omitTermFreqAndPositions="true"/>
 			
 		<field name="pubdate_sort" type="int" indexed="true" stored="${storeAll:false}"
@@ -1394,7 +1394,9 @@
   <copyField source="tmp_email_700" dest="email" />
   
   
+  <copyField source="bibcode" dest="identifier" />
   <copyField source="alternate_bibcode" dest="identifier" />
+  <copyField source="doi" dest="identifier" />
   
 	<copyField source="author_norm" dest="all" />
 	<copyField source="alternate_title" dest="all" />
