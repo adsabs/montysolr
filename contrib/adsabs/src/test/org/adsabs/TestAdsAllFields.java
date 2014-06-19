@@ -41,7 +41,7 @@ import org.junit.BeforeClass;
  *    KEEP IT FREE FROM DEPENDENCIES!!!
  *
  **/
-public class TestAdsabsIndexingSearching extends MontySolrQueryTestCase {
+public class TestAdsAllFields extends MontySolrQueryTestCase {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
