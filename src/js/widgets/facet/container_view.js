@@ -33,7 +33,7 @@ define(['backbone', 'marionette',
             throw new Error('logicOptions should be null or an object with single/multiple keys and arrays of strings inside');
           }
 
-          this.on('all', function(ev) {
+          this.on('all', function(ev, info) {
             if (ev.indexOf('itemClicked') > -1
               || ev.indexOf('collection:rendered') > -1
               || ev.indexOf('treeClicked') > -1) {
@@ -70,19 +70,19 @@ define(['backbone', 'marionette',
 
       itemViewOptions: function (model, index) {
 //       merging in options from factory stage
-        additionalOptions = Marionette.getOption(this, "additionalItemViewOptions");
+        additionalOptions = Marionette.getOption(this, "additionalItemViewOptions") || {};
         //if this is the initial round, hide fetchnum - displaynum
         if (this.paginator && this.paginator.getCycle() <= 1) {
           if (index < this.displayNum) {
-            return {hide: false};
+            return _.extend({hide: false}, additionalOptions);
           }
           else {
-            return {hide: true};
+            return _.extend({hide: true}, additionalOptions);
           }
         }
         else {
           //otherwise, keep the defaults (as set by the template)
-          return {};
+          return additionalOptions;
         }
       },
 
@@ -96,6 +96,20 @@ define(['backbone', 'marionette',
           this.refreshLogicTooltip();
           this.enableLogic();
           this.closeLogic();
+        }
+        if (this.model.get("title") === "Authors"){
+          var self = this;
+          setTimeout(function(){
+            for (var i = 0; i < self.displayNum; i ++){
+
+              if (self.children.findByIndex(i).collection.length > 0){
+              // show the first entry with children
+                self.children.findByIndex(i).$(".item-caret").click();
+                break
+              }
+            }
+          }, 2500)
+          //open up first author facet for demonstration purposes
         }
       },
 
@@ -123,14 +137,18 @@ define(['backbone', 'marionette',
 
       enableShowMore: function(text) {
         var $sm = this._getShowMore();
-        $sm.text('Show More');
+        $sm.text('show more');
       },
 
       _getShowMore: function() {
         var $o = this.$('.widget-options.bottom:first');
-        var $sm = $o.find('a[target="ShowMore"]');
-        if (! $sm.length) {
-          $sm = $('<a title="Show more facets" target="ShowMore"></a>');
+        console.log($o.html())
+        var $sm = $o.find("button[data-target=ShowMore]");
+        console.log($sm)
+        if (!$sm.length) {
+          console.log("show more", $sm)
+
+          $sm = $('<button class="btn btn-xs btn-link" data-target="ShowMore">show more</button>');
           $o.append($sm);
         }
         return $sm;

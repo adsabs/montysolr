@@ -124,7 +124,6 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 
     submitFacet: function () {
       this.model.set("value", this.$(".slider").slider("values").join("-"));
       this.trigger('itemClicked');
-      console.log("i triggered itemClicked")
     },
 
     triggerGraphChange: function () {

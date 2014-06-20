@@ -6,10 +6,12 @@ define(['marionette', 'bootstrap', 'hbs!./templates/tabs_inner', 'hbs!./template
     var TabsWidget = Marionette.ItemView.extend({
 
       // expects in options a list of views like this:
-      // {tabs: [{title : (title for tab) , view: (actual view), id : (unique id)}, {default : true/false} (a tab widget has only one default tab)]}
+      // {tabs: [{title : (title for tab) , widget: (actual widget), id : (unique id)}, {default : true/false} (a tab widget has only one default tab)]}
 
       initialize: function (options) {
         this.tabs = options.tabs || [];
+//      convenience if you have to activate them
+        this.widgets = _.map(this.tabs, function(t,i){return t.widget});
       },
 
       //overriding marionette render method
@@ -33,7 +35,7 @@ define(['marionette', 'bootstrap', 'hbs!./templates/tabs_inner', 'hbs!./template
         this.$el.html($tempEl.html());
 
         _.each(this.tabs, function(t){
-         this.$("#"+ t.id).append(t.view.render().el)
+         this.$("#"+ t.id).append(t.widget.getView().render().el)
         }, this);
 
         this.bindUIElements();

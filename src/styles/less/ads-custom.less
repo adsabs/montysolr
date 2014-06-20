@@ -1,8 +1,23 @@
 @import 'ads-variables';
+@import 'mixins';
 
-// tests 
+//tests
+
 #mocha-stats > li.progress {
   height: 40px;
+}
+
+//bootstrap overrides
+
+.form-control:focus {
+  border-color: @brand-info;
+  border-radius : border-radius(0px);
+}
+
+// overriding button link focus
+.btn-link:focus {
+  outline:none;
+  cursor: pointer;
 }
 
 
@@ -10,7 +25,6 @@
 
 #s-facet-container {
   //  background-color: lighten(#f4f4f4, 2%) !important;
-  padding: 5px;
   border-top: 1px solid darken(#f4f4f4, 10%);
   min-height: 500px;
   -webkit-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
@@ -31,13 +45,13 @@
 }
 
 #s-right-col-container {
-  padding: 8px;
   border-top: 1px solid darken(#f4f4f4, 10%);
   min-height: 500px;
   border-top: 1px solid darken(#f4f4f4, 10%);
   -webkit-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
   -moz-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
   box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  padding:10px;
 }
 
 #left-column, #right-column, #middle-column {
@@ -65,14 +79,10 @@
   -moz-user-select: none;
   -khtml-user-select: none;
   -webkit-user-select: none;
-
-  /*
-    Introduced in IE 10.
-    See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
-  */
   -ms-user-select: none;
   user-select: none;
 }
+
 .hide {
   display: none;
 }
@@ -82,17 +92,6 @@
 }
 
 
-.item-closed {
-  .glyphicon;
-  .glyphicon-chevron-right;
-  color: @gray-light
-}
-
-.item-open {
-  .glyphicon;
-  .glyphicon-chevron-down;
-  color: @gray-light;
-}
 
 
 .draw-attention {
@@ -101,32 +100,90 @@
   background-color: lighten(@brand-warning, 12%)
 }
 
-.show-form {
-  .draw-attention-text {
-    transition-property: color;
-    transition-duration: 2.5s;
-    color: darken(@brand-warning, 5%) !important;
+
+.s-item-closed {
+  color: @gray-light;
+  .glyphicon;
+  .glyphicon-chevron-right;
+}
+
+.s-item-open {
+  color: @gray-light;
+  .glyphicon;
+  .glyphicon-chevron-down;
+
+}
+
+/*facets */
+
+.s-child-facet-item-closed {
+  display:inline-block;
+  width: 5px;
+  height: 5px;
+  .glyphicon;
+  .glyphicon-arrow-right;
+  color: darken(@brand-warning, 18%);
+  margin-left: 2px;
+  cursor: pointer;
+  z-index:1;
+
+}
+
+.s-child-facet-item-open {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  .glyphicon;
+  .glyphicon-share-alt;
+  color: darken(@brand-warning, 18%);
+  transform:rotate(90deg);
+  -ms-transform:rotate(90deg); /* IE 9 */
+  -webkit-transform:rotate(90deg); /* Opera, Chrome, and Safari */
+  margin-left: 4%;
+  margin-top: 3px;
+  cursor: pointer;
+  z-index:1;
+}
+
+.item-open {
+  .s-item-open
+}
+
+.item-closed {
+  .s-item-closed
+}
+
+//rules for item open and closed styling
+.tree {
+  .item-open {
+    .s-child-facet-item-open;
   }
-
-  .show-fields {
-    transition-property: background-color;
-    transition-duration: 2.5s;
-    background-color: none;
-
+  .item-closed {
+    .s-child-facet-item-closed;
   }
 }
 
-  // results list css
+.s-item-children .size-graphic-container {
+  width: 74%
+}
+
+
+// results list css
 
   .just-authors {
     display: inline-block
   }
 
   .results-list {
-    h5 {
+
+    margin-top: 20px;
+    h4 {
       margin-top: 0px;
-      margin-bottom: 5px;
+      margin-bottom: 10px;
+      font-size:16px;
+      font-weight:500;
     }
+
 
     label {
       font-weight: initial
@@ -158,179 +215,217 @@
   }
 
   // end results list css
-
-  //facet csss
-
-  .size-graphic {
-    display: inline-block;
-    height: 18px;
-    margin-bottom: 4px;
-    background-color: lighten(@brand-info, 23%);
-    overflow: visible;
-    color: black;
-  }
-
   .size-graphic-container {
-    width: 87%;
+    width: 77%;
     display: inline-block;
     background-color: lighten(@brand-info, 37%);
     height: 18px;
-    margin-left: 3px;
+    margin-left: 2px;
     margin-bottom: 4px;
     font-weight: 500;
     cursor: pointer;
+    white-space: nowrap;
 
   }
+//facets
+
+.size-graphic {
+  display: inline-block;
+  background-color: lighten(@brand-info, 23%);
+  overflow: visible;
+  color: black;
+   font-size : 13px !important;
+}
+
+.size-graphic-container {
+  width: 77%;
+  display: inline-block;
+  background-color: lighten(@brand-info, 37%);
+  height: 18px;
+  margin-left: 2px;
+  margin-bottom: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+
+}
+
+.s-facet-selected {
+  .size-graphic {
+    color: white;
+    background-color: darken(@brand-info, 30%);
+  }
+  .size-graphic-container {
+    background-color: darken(@brand-info, 20%);
+  }
+}
+
+.s-widget .item-caret:hover {
+
+  color: darken(@brand-warning, 5%);
+  cursor: pointer;
+}
+
+.s-widget label {
+  font-weight: normal;
+  margin: 0px;
+  width: 100%;
+  display: inline-block;
+}
+
+.tree label {
+  width: 92% !important;
+  display:inline;
+
+}
+
+.tree .show-more button {
+  margin-left: 50%;
+}
+
+
+.s-widget-meta {
+  cursor: pointer !important;
+  height: 25px;
+}
+
+.s-item-children {
+  padding-left: 10%;
+
+  .size-graphic {
+    background-color: lighten(@brand-additional, 8%);
+
+  }
+
+  .size-graphic-container {
+    background-color: lighten(@brand-additional, 20%);
+  }
+
 
   .s-facet-selected {
     .size-graphic {
-      color: white;
-      background-color: darken(@brand-primary, 10%);
+      background-color: darken(@brand-additional, 24%);
     }
+
     .size-graphic-container {
-      background-color: lighten(@brand-primary, 10%);
+      background-color:darken(@brand-additional, 4%);
+
     }
   }
+}
 
-  .s-widget .item-caret:hover {
 
-    color: darken(@brand-warning, 5%);
-    cursor: pointer;
+
+
+
+
+.s-logic-dropdown {
+  position: relative;
+  top: -33px;
+  left: 75%;
+  z-index: 5;
+}
+
+.s-dropdown-menu {
+  padding: 15%;
+  min-width: 93px;
+  top: 70%;
+  left: 50%;
+}
+
+.s-widget-options {
+  height: 0px
+}
+
+.s-widget-meta .dropdown-menu p {
+  padding: 3px 5px 0px 5px;
+}
+
+.s-widget-meta .dropdown-menu label {
+  padding: 0px;
+  margin: 0px;
+}
+
+.s-widget {
+  margin: 10px;
+}
+
+.s-widget-container {
+
+}
+
+.s-widget-body {
+  x-overflow: hidden;
+  y-overflow: hidden;
+  padding-left: 2%;
+
+}
+
+.s-widget-body .selected {
+  color: @brand-primary
+}
+
+.logic-container label {
+  display: block
+}
+
+.chart .bar {
+  stroke: white;
+  fill: lighten(@brand-success, 10%);
+  &:hover {
+    fill: lighten(@brand-primary, 20%)
+  }
+}
+
+.chart .x-axis .active text {
+  fill: lighten(@brand-primary, 20%);
+  font: 12px sans-serif;
+}
+
+.chart {
+  padding-bottom: 70px;
+}
+
+.axis text {
+  font: 11px sans-serif;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.show-slider-data-first, .show-slider-data-second {
+  width: 38px;
+}
+
+.slider-data {
+  padding-top: 10px;
+  position: relative;
+  right: 18px;
+}
+
+.sort-options {
+  margin: 0px;
+  padding-left: 20px;
+}
+
+.sort-options label {
+  margin: 0px;
+}
+
+.zoomable-graph {
+  .apply {
+    margin-top: 10px;
   }
 
-  .s-widget label {
-    font-weight: normal;
-    margin: 0px;
-    width: 100%;
-    display: inline-block;
-  }
+}
 
-  .tree label {
-    width: 92% !important;
+//end facets
 
-  }
 
-  .s-widget-meta {
-    cursor: pointer !important;
-    height: 25px;
-  }
-
-  .s-item-children {
-    padding-left: 5%;
-  }
-
-  .s-logic-dropdown {
-    position: relative;
-    top: -33px;
-    left: 75%;
-    z-index: 5;
-  }
-
-  .s-dropdown-menu {
-    padding: 15%;
-    min-width: 93px;
-    top: 70%;
-    left: 50%;
-  }
-
-  .s-widget-options {
-    height: 0px
-  }
-
-  .s-widget-meta .dropdown-menu p {
-    padding: 3px 5px 0px 5px;
-  }
-
-  .s-widget-meta .dropdown-menu label {
-    padding: 0px;
-    margin: 0px;
-  }
-
-  .s-widget {
-    //  max-width: 400px;
-    max-height: 500px;
-    margin: 10px;
-  }
-
-  .s-widget-container {
-
-  }
-
-  .s-widget-body {
-    x-overflow: hidden;
-    y-overflow: hidden;
-    padding-left: 10px;
-    max-height: 340px;
-    padding-left: 5%;
-
-  }
-
-  .s-widget-body .selected {
-    color: @brand-primary
-  }
-
-  .logic-container label {
-    display: block
-  }
-
-  // graph facet css
-
-  .chart .bar {
-    stroke: white;
-    fill: lighten(@brand-success, 10%);
-    &:hover {
-      fill: lighten(@brand-primary, 20%)
-    }
-  }
-
-  .chart .x-axis .active text {
-    fill: lighten(@brand-primary, 20%);
-    font: 12px sans-serif;
-  }
-
-  .chart {
-    padding-bottom: 70px;
-  }
-
-  .axis text {
-    font: 11px sans-serif;
-  }
-
-  .axis path, .axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-  }
-
-  .show-slider-data-first, .show-slider-data-second {
-    width: 38px;
-  }
-
-  .slider-data {
-    padding-top: 10px;
-    position: relative;
-    right: 18px;
-  }
-
-  .sort-options {
-    margin: 0px;
-    padding-left: 20px;
-  }
-
-  .sort-options label {
-    margin: 0px;
-  }
-
-  .zoomable-graph {
-    .apply {
-      margin-top: 10px;
-    }
-
-  }
-
-  //end facets
-
-  // search bar css
+// search bar css
 
   .open .show-form {
     background-color: lighten(@brand-warning, 12%) !important
@@ -371,6 +466,8 @@
 
     }
 
+  }
+
     #search-dropdown-icon {
       font-size: 16px;
       color: lighten(@brand-primary, 15%);
@@ -388,7 +485,6 @@
       color: darken(@brand-primary, 10%)
 
     }
-  }
 
   .search-form-title {
     font-size: 14px;
@@ -414,7 +510,23 @@
     padding: 10px;
   }
 
-  // contents nav widget
+.show-form {
+  .draw-attention-text {
+    transition-property: color;
+    transition-duration: 2.5s;
+    color: darken(@brand-warning, 5%) !important;
+  }
+
+  .show-fields {
+    transition-property: background-color;
+    transition-duration: 2.5s;
+    background-color: none;
+
+  }
+}
+
+
+// contents nav widget
 
   .contents-nav {
     width: 100%;
@@ -484,3 +596,8 @@
     display: block;
   }
 
+
+  .table-of-contents {
+    height: 100%;
+    margin-right: 25%
+  }

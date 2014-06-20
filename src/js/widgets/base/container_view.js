@@ -114,7 +114,7 @@ define(['backbone', 'marionette',
         if (ev && ev.target) {
           var $el = $(ev.target);
           var text = $el.text().trim();
-          var tgt = $el.attr('target');
+          var tgt = $el.attr('data-target');
           ev.preventDefault();
           if (tgt) {
             this.triggerMethod(tgt, ev);

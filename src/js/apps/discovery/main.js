@@ -38,12 +38,6 @@ define(["config", 'module'], function(config, module) {
 
       var FacetFactory = app.getModule('FacetFactory');
 
-      var citationsGraphWidget = FacetFactory.makeGraphFacet({
-        facetField: "citation_count",
-        facetTitle: "Citations",
-        xAxisTitle: "Citation Count",
-        openByDefault: true
-      });
 
       var authorFacets = FacetFactory.makeHierarchicalCheckboxFacet({
         facetField: "author_facet_hier",
@@ -294,16 +288,11 @@ define(["config", 'module'], function(config, module) {
         }
       };
 
-      var yearGraph = FacetFactory.makeGraphFacet({
-        facetField: "year",
-        facetTitle: "Articles per year",
-        xAxisTitle: "Year",
-        openByDefault: true
-      });
 
-      citationsGraphWidget.activate(beehive.getHardenedInstance());
+      _.each(app.getWidget('GraphTabs').widgets, function(w){
+        w.activate(beehive.getHardenedInstance());
+      });
       authorFacets.activate(beehive.getHardenedInstance());
-      yearGraph.activate(beehive.getHardenedInstance());
       database.activate(beehive.getHardenedInstance());
       keywords.activate(beehive.getHardenedInstance());
       pub.activate(beehive.getHardenedInstance());
@@ -312,6 +301,9 @@ define(["config", 'module'], function(config, module) {
       vizier.activate(beehive.getHardenedInstance());
       grants.activate(beehive.getHardenedInstance());
       refereed.activate(beehive.getHardenedInstance());
+
+      authorFacets.activate(beehive.getHardenedInstance());
+      database.activate(beehive.getHardenedInstance());
 
       $("#top").append(app.getWidget('SearchBar').render().el);
 
@@ -334,12 +326,11 @@ define(["config", 'module'], function(config, module) {
       .append(grants.render().el);
 
 
-
       $("#right-column").append("<div id=\"s-right-col-container\"></div>");
       $("#s-right-col-container")
       .append(app.getWidget('QueryInfo').render().el)
-      .append(yearGraph.render().el)
-      .append(citationsGraphWidget.render().el)
+      .append(app.getWidget('GraphTabs').render().el)
+
       .append(app.getWidget('QueryDebugInfo').render().el);
 
       app.router = new Router();

@@ -47,13 +47,13 @@ define([
       switchViews: function (name) {
         switch(name) {
           case 'abs':
-            $('#middle #search-results').addClass('hide');
-            $('#middle .multi-view').removeClass('hide');
+            $('#middle-column #search-results').addClass('hide');
+            $('#middle-column .multi-view').removeClass('hide');
             break;
           case 'search':
           default:
-            $('#middle #search-results').removeClass('hide');
-            $('#middle .multi-view').addClass('hide');
+            $('#middle-column #search-results').removeClass('hide');
+            $('#middle-column .multi-view').addClass('hide');
             break;
         }
 

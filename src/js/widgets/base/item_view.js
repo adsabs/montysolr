@@ -27,21 +27,35 @@ define(['marionette', 'hbs!./templates/item-checkbox'],
       'mouseleave label' : "returnName"
     },
 
+    //  utility function (better place to put this?)
+    formatNum: function(num){
+      var withCommas = [];
+      num = num+"";
+      if (num.length < 4){
+        return num
+      }
+      else {
+        num  = num.split("").reverse();
+        _.each(num, function(n, i){
+          withCommas.splice(0,0, n)
+          if (i > 0 && (i+1) %3 === 0){
+            withCommas.splice(0,0, ",")
+          }
+
+        })
+      }
+      withCommas = withCommas.join("");
+      return withCommas.replace(/^\,(.+)/, "$1")
+    },
+
     addCount : function(){
       var val;
       val = this.model.get("count")
-      this.$(".facet-amount").html("&nbsp;(" + val + ")" )
+      this.$(".facet-amount").html("&nbsp;(" + this.formatNum(val) + ")" )
     },
 
     returnName : function(){
       this.$(".facet-amount").empty();
-
-    },
-
-    serializeData : function(){
-      var j = this.model.toJSON();
-      j.title = "&nbsp;" + this.model.get("title").replace(/\s+/g, "&nbsp;").replace(/–|-/g, "&ndash;")
-      return j
 
     },
 
