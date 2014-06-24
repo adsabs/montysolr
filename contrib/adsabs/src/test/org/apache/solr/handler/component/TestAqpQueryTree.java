@@ -51,23 +51,23 @@ public class TestAqpQueryTree extends MontySolrQueryTestCase {
         "            {name:\"FIELD\", label:\"FIELD\", children: [" +
         "                {name:\"TERM_NORMAL\", input:\"title\", start:0, end:4}," +
         "                {name:\"QNORMAL\", label:\"QNORMAL\", children: [" +
-        "                    {name:\"TERM_NORMAL\", input:\"joe\", start:6, end:8},]" +
-        "                },]" +
-        "            },]" +
-        "        },]" +
+        "                    {name:\"TERM_NORMAL\", input:\"joe\", start:6, end:8}]" +
+        "                }]" +
+        "            }]" +
+        "        }]" +
         "    }," +
         "    {name:\"MODIFIER\", label:\"MODIFIER\", children: [" +
         "        {name:\"TMODIFIER\", label:\"TMODIFIER\", children: [" +
         "            {name:\"FIELD\", label:\"FIELD\", children: [" +
         "                {name:\"QNORMAL\", label:\"QNORMAL\", children: [" +
-        "                    {name:\"TERM_NORMAL\", input:\"doe\", start:10, end:12},]" +
-        "                },]" +
-        "            },]" +
-        "        },]" +
-        "    },]" +
+        "                    {name:\"TERM_NORMAL\", input:\"doe\", start:10, end:12}]" +
+        "                }]" +
+        "            }]" +
+        "        }]" +
+        "    }]" +
         "}";
     
-    s = "\\n{name:\\\"OPERATOR\\\", label:\\\"DEFOP\\\", children: [\\n    {name:\\\"MODIFIER\\\", label:\\\"MODIFIER\\\", children: [\\n        {name:\\\"TMODIFIER\\\", label:\\\"TMODIFIER\\\", children: [\\n            {name:\\\"FIELD\\\", label:\\\"FIELD\\\", children: [\\n                {name:\\\"TERM_NORMAL\\\", input:\\\"title\\\", start:0, end:4},\\n                {name:\\\"QNORMAL\\\", label:\\\"QNORMAL\\\", children: [\\n                    {name:\\\"TERM_NORMAL\\\", input:\\\"joe\\\", start:6, end:8},]\\n                },]\\n            },]\\n        },]\\n    },\\n    {name:\\\"MODIFIER\\\", label:\\\"MODIFIER\\\", children: [\\n        {name:\\\"TMODIFIER\\\", label:\\\"TMODIFIER\\\", children: [\\n            {name:\\\"FIELD\\\", label:\\\"FIELD\\\", children: [\\n                {name:\\\"QNORMAL\\\", label:\\\"QNORMAL\\\", children: [\\n                    {name:\\\"TERM_NORMAL\\\", input:\\\"doe\\\", start:10, end:12},]\\n                },]\\n            },]\\n        },]\\n    },]\\n}";
+    s = "\\n{\\\"name\\\":\\\"OPERATOR\\\", \\\"label\\\":\\\"DEFOP\\\", \\\"children\\\": [\\n    {\\\"name\\\":\\\"MODIFIER\\\", \\\"label\\\":\\\"MODIFIER\\\", \\\"children\\\": [\\n        {\\\"name\\\":\\\"TMODIFIER\\\", \\\"label\\\":\\\"TMODIFIER\\\", \\\"children\\\": [\\n            {\\\"name\\\":\\\"FIELD\\\", \\\"label\\\":\\\"FIELD\\\", \\\"children\\\": [\\n                {\\\"name\\\":\\\"TERM_NORMAL\\\", \\\"input\\\":\\\"title\\\", \\\"start\\\":0, \\\"end\\\":4},\\n                {\\\"name\\\":\\\"QNORMAL\\\", \\\"label\\\":\\\"QNORMAL\\\", \\\"children\\\": [\\n                    {\\\"name\\\":\\\"TERM_NORMAL\\\", \\\"input\\\":\\\"joe\\\", \\\"start\\\":6, \\\"end\\\":8}]\\n                }]\\n            }]\\n        }]\\n    },\\n    {\\\"name\\\":\\\"MODIFIER\\\", \\\"label\\\":\\\"MODIFIER\\\", \\\"children\\\": [\\n        {\\\"name\\\":\\\"TMODIFIER\\\", \\\"label\\\":\\\"TMODIFIER\\\", \\\"children\\\": [\\n            {\\\"name\\\":\\\"FIELD\\\", \\\"label\\\":\\\"FIELD\\\", \\\"children\\\": [\\n                {\\\"name\\\":\\\"QNORMAL\\\", \\\"label\\\":\\\"QNORMAL\\\", \\\"children\\\": [\\n                    {\\\"name\\\":\\\"TERM_NORMAL\\\", \\\"input\\\":\\\"doe\\\", \\\"start\\\":10, \\\"end\\\":12}]\\n                }]\\n            }]\\n        }]\\n    }]\\n}";
     String response = h.query(req("qt", "/qtree", "q", "title:joe doe", "wt", "json"));
     
     assert response.contains(s);
