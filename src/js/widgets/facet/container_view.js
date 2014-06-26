@@ -97,20 +97,6 @@ define(['backbone', 'marionette',
           this.enableLogic();
           this.closeLogic();
         }
-        if (this.model.get("title") === "Authors"){
-          var self = this;
-          setTimeout(function(){
-            for (var i = 0; i < self.displayNum; i ++){
-
-              if (self.children.findByIndex(i).collection.length > 0){
-              // show the first entry with children
-                self.children.findByIndex(i).$(".item-caret").click();
-                break
-              }
-            }
-          }, 2500)
-          //open up first author facet for demonstration purposes
-        }
       },
 
       onShowMore: function() {
@@ -142,11 +128,11 @@ define(['backbone', 'marionette',
 
       _getShowMore: function() {
         var $o = this.$('.widget-options.bottom:first');
-        console.log($o.html())
+        //console.log($o.html())
         var $sm = $o.find("button[data-target=ShowMore]");
-        console.log($sm)
+        //console.log($sm)
         if (!$sm.length) {
-          console.log("show more", $sm)
+        //  console.log("show more", $sm)
 
           $sm = $('<button class="btn btn-xs btn-link" data-target="ShowMore">show more</button>');
           $o.append($sm);

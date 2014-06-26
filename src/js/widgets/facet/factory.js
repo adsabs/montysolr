@@ -3,7 +3,7 @@ define([
   'js/widgets/facet/widget',
   'js/widgets/facet/container_view',
   'hbs!js/widgets/facet/templates/logic-container',
-  'js/widgets/base/tree_view',
+  'js/widgets/facet/tree_view',
   'js/widgets/base/base_widget',
   'js/components/paginator',
   'js/widgets/facet/zoomable_graph_view'

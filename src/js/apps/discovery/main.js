@@ -305,33 +305,29 @@ define(["config", 'module'], function(config, module) {
       authorFacets.activate(beehive.getHardenedInstance());
       database.activate(beehive.getHardenedInstance());
 
-      $("#top").append(app.getWidget('SearchBar').render().el);
+      $("#top")
+        .append(app.getWidget('SearchBar').render().el);
 
-      $("#middle-column").append("<div id='s-middle-col-container'></div>")
       $("#s-middle-col-container")
-      .append(app.getWidget('Results').render().el)
-      .append(displayDocs.render().el);
-
-      $("#left-column").append("<div id='s-facet-container'></div>");
+        .append(app.getWidget('Results').render().el)
+        .append(displayDocs.render().el);
 
       $("#s-facet-container")
-      .append(authorFacets.render().el)
-      .append(database.render().el)
-      .append(refereed.render().el)
-      .append(keywords.render().el)
-      .append(pub.render().el)
-      .append(bibgroup.render().el)
-      .append(data.render().el)
-      .append(vizier.render().el)
-      .append(grants.render().el);
+        .append(authorFacets.render().el)
+        .append(database.render().el)
+        .append(refereed.render().el)
+        .append(keywords.render().el)
+        .append(pub.render().el)
+        .append(bibgroup.render().el)
+        .append(data.render().el)
+        .append(vizier.render().el)
+        .append(grants.render().el);
 
 
-      $("#right-column").append("<div id=\"s-right-col-container\"></div>");
       $("#s-right-col-container")
-      .append(app.getWidget('QueryInfo').render().el)
-      .append(app.getWidget('GraphTabs').render().el)
-
-      .append(app.getWidget('QueryDebugInfo').render().el);
+        .append(app.getWidget('QueryInfo').render().el)
+        .append(app.getWidget('GraphTabs').render().el)
+        .append(app.getWidget('QueryDebugInfo').render().el);
 
       app.router = new Router();
       app.router.activate(beehive.getHardenedInstance());

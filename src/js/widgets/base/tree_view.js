@@ -18,10 +18,11 @@ define(['marionette', 'hbs!./templates/item-tree'],
 
     var TreeView = Marionette.CompositeView.extend({
 
-      initialize: function (options) {
+      initialize: function () {
         this.collection = this.model.children;
         this.displayNum = Marionette.getOption(this, "displayNum") || 5;
         this.maxDisplayNum = Marionette.getOption(this, "maxDisplayNum") || 200;
+        //this.on('all', function(){console.log(arguments)});
       },
 
 
@@ -31,28 +32,11 @@ define(['marionette', 'hbs!./templates/item-tree'],
       onRender: function(view) {
         // give controller chance to load more data (the children of this view)
         if (!view.$el.hasClass('hide')) {
-//          view.trigger('treeNodeDisplayed');
+          //view.trigger('treeNodeDisplayed');
         }
-//      top-level
-        if (!Marionette.getOption(this, "parentCount")){
-          var percent = this.model.get("count") / this.model.get("total")
-        }
-//      child
-        else {
-          var percent = this.model.get("count") / Marionette.getOption(this, "parentCount")
-
-        }
-        this.$(".size-graphic").width(percent*100 +"%");
       },
 
       itemViewContainer: ".item-children",
-
-      itemViewOptions: function(){
-        count = this.model.get("count")
-        return {
-          parentCount: count
-        }
-      },
 
       /**
        * You will need to provide the template of your choice
@@ -63,45 +47,8 @@ define(['marionette', 'hbs!./templates/item-tree'],
       events: {
         'click .widget-item': "onClick",
         'click .item-caret ': "toggleChildren",
-        'click .show-more': 'onShowMore',
-        'mouseenter label' : "addCount",
-        'mouseleave label' : "returnName"
+        'click .show-more': 'onShowMore'
       },
-
-      addCount : function(e){
-        e.stopPropagation();
-        var val;
-        val = this.model.get("count")
-        this.$(".facet-amount:first").html("&nbsp;(" + this.formatNum(val) + ")" );
-
-      },
-
-      returnName : function(e){
-        e.stopPropagation();
-        this.$(".facet-amount:first").empty();
-
-
-      },
-//  utility function (better place to put this?)
-    formatNum: function(num){
-      var withCommas = [];
-      num = num+"";
-      if (num.length < 4){
-        return num
-      }
-      else {
-        num  = num.split("").reverse();
-        _.each(num, function(n, i){
-          withCommas.splice(0,0, n)
-          if (i > 0 && (i+1) %3 === 0){
-            withCommas.splice(0,0, ",")
-          }
-
-        })
-      }
-      withCommas = withCommas.join("");
-      return withCommas.replace(/^\,(.+)/, "$1")
-    },
 
       toggleChildren : function(e){
         if (e) {
@@ -109,13 +56,9 @@ define(['marionette', 'hbs!./templates/item-tree'],
         }
 
         this.$('.item-body:first').toggleClass('hide');
-//      closing the facet
         if (this.$(".item-caret:first").hasClass("item-open")){
-
           this.$(".item-caret:first").removeClass("item-open").addClass("item-closed");
-
         }
-//       opening the facet and showing its children
         else {
           if (this.$('.item-body').find('.item-view:first').hasClass('hide')) {
             this.displayMore(this.displayNum);
@@ -128,10 +71,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
 
       onClick: function (ev) {
         ev.stopPropagation();
-
-//      select item and its children
-        this.$("label:first").toggleClass("s-facet-selected");
-
+        this.$('.item-children').toggleClass('hide');
         this.model.set('selected', $(ev.target).is(':checked'));
         this.trigger('itemClicked'); // we don't need to pass data because marionette includes 'this'
       },
@@ -143,6 +83,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
       getCurrentQuery: function() {
         return this._q;
       },
+
       /**
        * As opposed to other views, this view will show the hidden item
        * and trigger 'treeNodeDisplayed' on its view to give controller
@@ -182,8 +123,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
         ev.stopPropagation();
         this.trigger('fetchMore', this.$('.item-children:first').children().filter('.hide').length,
           {view: this, collection: this.collection, query: this.getCurrentQuery()});
-      },
-
+      }
 
 
     });

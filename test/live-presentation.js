@@ -173,11 +173,8 @@ require([
 
   $("#top").append(searchBar.render().el);
 
-  $("#middle-column").append("<div id='s-middle-col-container'></div>")
   $("#s-middle-col-container").append(results.render().el).append(layout.render().el)
 
-
-  $("#left-column").append("<div id='s-facet-container'></div>")
   $("#s-facet-container")
     .append(authorFacets.render().el)
     .append(database.render().el)
@@ -190,9 +187,6 @@ require([
     .append(grants.render().el)
 
 
-
-
-  $("#right-column").append("<div id=\"s-right-col-container\"></div>")
   $("#s-right-col-container")
     .append(queryInfo.render().el)
     .append(yearGraph.render().el)

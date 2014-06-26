@@ -3,7 +3,10 @@
     {{/if}}
 
     <label>
-        <input type="checkbox" class="facet-item" value="{{value}}"> {{title}} }{{total}}
+        <input type="checkbox" class="widget-item" value="{{value}}">
+        <span class="size-graphic-container">
+            <span class="size-graphic">&nbsp;{{{title}}}<span class="facet-amount"></span></span>
+        </span>
     </label>
 
     {{#if more}}

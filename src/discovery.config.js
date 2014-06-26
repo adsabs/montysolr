@@ -33,7 +33,7 @@ require.config({
         Abstract: 'js/widgets/abstract/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',
         QueryDebugInfo: 'js/widgets/api_query/widget',
-        GraphTabs : 'js/widgets/tabs/graph_tabs'
+        GraphTabs : 'js/wraps/graph_tabs'
       },
       plugins: {
       }

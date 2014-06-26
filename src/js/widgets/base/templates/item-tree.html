@@ -1,11 +1,6 @@
-<div class="tree">
-<label><input type="checkbox" class="widget-item" value="{{value}}">
-    <span class="size-graphic-container">
-        <span class="size-graphic">{{{title}}}<span class="facet-amount"></span></span>
-</label>
-    </span> <span class="item-caret item-closed hide"/>
-    <div class="item-body hide">
+<label><input type="checkbox" class="widget-item item-leaf" value="{{value}}"> {{title}}
+    ({{count}}) </label> <i class="item-caret item-closed hide"/>
+<div class="item-body hide">
     <div class="item-children s-item-children"></div>
-    <div class="show-more hide"><button class="btn btn-xs btn-link" data-target="ShowMore">show more</button>
+    <div class="show-more hide"><a target="ShowMore">Show More...</a></div>
 </div>
-        </div>
