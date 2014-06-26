@@ -1,162 +1,391 @@
-
 @import 'ads-variables';
+@import 'mixins';
+
+//tests
 
 #mocha-stats > li.progress {
   height: 40px;
 }
 
-.buffer {
-  margin-top:10px;
+//bootstrap overrides
+
+.form-control:focus {
+  border-color: @brand-info;
+  border-radius : border-radius(0px);
 }
 
+// overriding button link focus
+.btn-link:focus {
+  outline:none;
+  cursor: pointer;
+}
+
+
+// styling three main columns and general layout
+
+#s-facet-container {
+  //  background-color: lighten(#f4f4f4, 2%) !important;
+  border-top: 1px solid darken(#f4f4f4, 10%);
+  min-height: 500px;
+  -webkit-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  -moz-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  z-index: 1;
+}
+
+#s-middle-col-container {
+  border-top: 1px solid darken(#f4f4f4, 10%);
+  border-right: 1px solid darken(#f4f4f4, 10%);
+  border-left: 1px solid darken(#f4f4f4, 10%);
+
+  -webkit-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  -moz-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+
+}
+
+#s-right-col-container {
+  border-top: 1px solid darken(#f4f4f4, 10%);
+  min-height: 500px;
+  border-top: 1px solid darken(#f4f4f4, 10%);
+  -webkit-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  -moz-box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  box-shadow: inset 0px 10px 10px -10px fade(darken(#f4f4f4, 10%), 30%);
+  padding:10px;
+}
+
+#left-column, #right-column, #middle-column {
+  padding: 0px !important;
+}
+
+.container-fluid {
+  width: 95%;
+  padding: 0px;
+}
+
+
+// utility classes/ general styling classes
+
+.buffer {
+  margin-top: 10px;
+}
+
+.no-show {
+  visibility: hidden
+}
 
 .unselectable {
   user-select: none;
   -moz-user-select: none;
   -khtml-user-select: none;
   -webkit-user-select: none;
-
-  /*
-    Introduced in IE 10.
-    See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
-  */
   -ms-user-select: none;
   user-select: none;
 }
 
-.item-closed {
-  .glyphicon;
-  .glyphicon-chevron-right;
-  color: @gray-light;
-  font-size: 13px;
-}
-.item-open {
-  .glyphicon;
-  .glyphicon-chevron-down;
-  color: @gray-light;
-  font-size: 13px;
-
-}
-.item-end {
-  color: @gray-light
-}
 .hide {
-  display:none;
+  display: none;
 }
 
 .chosen {
   background-color: lighten(@brand-info, 40%)
 }
 
-.just-authors {
-  display:inline-block
+
+
+
+.draw-attention {
+  transition-property: background-color;
+  transition-duration: 3s;
+  background-color: lighten(@brand-warning, 12%)
 }
 
-.results-list {
-  h5 {
-    margin-top : 0px;
-    margin-bottom : 5px;
+
+.s-item-closed {
+  color: @gray-light;
+  .glyphicon;
+  .glyphicon-chevron-right;
+}
+
+.s-item-open {
+  color: @gray-light;
+  .glyphicon;
+  .glyphicon-chevron-down;
+
+}
+
+/*facets */
+
+.s-child-facet-item-closed {
+  display:inline-block;
+  width: 5px;
+  height: 5px;
+  .glyphicon;
+  .glyphicon-arrow-right;
+  color: darken(@brand-warning, 18%);
+  margin-left: 2px;
+  cursor: pointer;
+  z-index:1;
+
+}
+
+.s-child-facet-item-open {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  .glyphicon;
+  .glyphicon-share-alt;
+  color: darken(@brand-warning, 18%);
+  transform:rotate(90deg);
+  -ms-transform:rotate(90deg); /* IE 9 */
+  -webkit-transform:rotate(90deg); /* Opera, Chrome, and Safari */
+  margin-left: 4%;
+  margin-top: 3px;
+  cursor: pointer;
+  z-index:1;
+}
+
+.item-open {
+  .s-item-open
+}
+
+.item-closed {
+  .s-item-closed
+}
+
+//rules for item open and closed styling
+.tree {
+  .item-open {
+    .s-child-facet-item-open;
+  }
+  .item-closed {
+    .s-child-facet-item-closed;
+  }
+}
+
+.s-item-children .size-graphic-container {
+  width: 74%
+}
+
+
+// results list css
+
+  .just-authors {
+    display: inline-block
   }
 
-  label {
-    font-weight: initial
+  .results-list {
+
+    margin-top: 20px;
+    h4 {
+      margin-top: 0px;
+      margin-bottom: 10px;
+      font-size:15px;
+      font-weight:500;
+    }
+
+
+    label {
+      font-weight: initial
+    }
   }
-}
 
-.field-options {
-  min-width:120px;
-  padding:7px;
-}
+  .field-options {
+    min-width: 120px;
+    padding: 7px;
+  }
 
-.field-options span {
-  display:block
-}
+  .field-options span {
+    display: block
+  }
 
-.no-show {
-  visibility : hidden
-}
-#results h5 {
-  margin-top: -3px;
-  margin-bottom:2px;
-}
+  #results h5 {
+    margin-top: -3px;
+    margin-bottom: 2px;
+  }
 
+  li.article-author {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+
+  }
+
+  button#toggle-aff {
+    float: right;
+  }
+
+  // end results list css
+  .size-graphic-container {
+    width: 77%;
+    display: inline-block;
+    background-color: lighten(@brand-info, 37%);
+    height: 18px;
+    margin-left: 2px;
+    margin-bottom: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+
+  }
 //facets
 
-.s-widget-meta {
-  height: 25px;
+.size-graphic {
+  display: inline-block;
+  background-color: lighten(@brand-info, 23%);
+  overflow: visible;
+  color: black;
+   font-size : 13px !important;
 }
 
-.s-widget-name {
-  cursor: pointer !important;
+.size-graphic-container {
+  width: 77%;
+  display: inline-block;
+  background-color: lighten(@brand-info, 37%);
+  height: 18px;
+  margin-left: 2px;
+  margin-bottom: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+
+}
+
+.s-facet-selected {
+  .size-graphic {
+    color: white;
+    background-color: darken(@brand-info, 30%);
+  }
+  .size-graphic-container {
+    background-color: darken(@brand-info, 20%);
+  }
+}
+
+.s-widget .item-caret:hover {
+
+  color: darken(@brand-warning, 5%);
+  cursor: pointer;
 }
 
 .s-widget label {
-  font-weight:normal;
+  font-weight: normal;
   margin: 0px;
+  width: 100%;
+  display: inline-block;
+}
+
+.tree label {
+  width: 92% !important;
+  display:inline;
+
+}
+
+.tree .show-more button {
+  margin-left: 50%;
+}
+
+
+.s-widget-meta {
+  cursor: pointer !important;
+  height: 25px;
 }
 
 .s-item-children {
-  padding-left: 5%;
+  padding-left: 10%;
+
+  .size-graphic {
+    background-color: lighten(@brand-additional, 8%);
+
+  }
+
+  .size-graphic-container {
+    background-color: lighten(@brand-additional, 20%);
+  }
+
+
+  .s-facet-selected {
+    .size-graphic {
+      background-color: darken(@brand-additional, 24%);
+    }
+
+    .size-graphic-container {
+      background-color:darken(@brand-additional, 4%);
+
+    }
+  }
 }
+
+
+
+
+
+
 .s-logic-dropdown {
-  position:relative;
-  top:-33px;
-  left:140px;
+  position: relative;
+  top: -33px;
+  left: 75%;
+  z-index: 5;
 }
 
 .s-dropdown-menu {
-  padding :15%;
-  min-width: 88px;
+  padding: 15%;
+  min-width: 93px;
+  top: 70%;
+  left: 50%;
 }
 
 .s-widget-options {
   height: 0px
 }
 
-
 .s-widget-meta .dropdown-menu p {
   padding: 3px 5px 0px 5px;
 }
+
 .s-widget-meta .dropdown-menu label {
-  padding:0px 10px;
-  margin:0px;
+  padding: 0px;
+  margin: 0px;
 }
+
 .s-widget {
-  max-width:400px;
-  max-height:500px;
   margin: 10px;
 }
-.s-widget-body {
-  overflow-y:auto;
-  padding-left:10px;
-  max-height: 340px;
-  padding-left: 5%;
+
+.s-widget-container {
 
 }
+
+.s-widget-body {
+  x-overflow: hidden;
+  y-overflow: hidden;
+  padding-left: 2%;
+
+}
+
 .s-widget-body .selected {
   color: @brand-primary
 }
 
 .logic-container label {
-  display:block
+  display: block
 }
 
 .chart .bar {
   stroke: white;
   fill: lighten(@brand-success, 10%);
   &:hover {
-    fill : lighten(@brand-primary, 20%)
+    fill: lighten(@brand-primary, 20%)
   }
 }
 
 .chart .x-axis .active text {
-  fill : lighten(@brand-primary, 20%);
-  font :12px sans-serif;
+  fill: lighten(@brand-primary, 20%);
+  font: 12px sans-serif;
 }
 
 .chart {
-  padding-bottom:70px;
+  padding-bottom: 70px;
 }
+
 .axis text {
   font: 11px sans-serif;
 }
@@ -168,23 +397,22 @@
 }
 
 .show-slider-data-first, .show-slider-data-second {
-  width: 66px;
+  width: 38px;
 }
 
-
 .slider-data {
-  padding-top:10px;
-  position:relative;
+  padding-top: 10px;
+  position: relative;
   right: 18px;
 }
 
 .sort-options {
   margin: 0px;
-  padding-left:20px;
+  padding-left: 20px;
 }
 
 .sort-options label {
-  margin:0px;
+  margin: 0px;
 }
 
 .zoomable-graph {
@@ -196,179 +424,180 @@
 
 //end facets
 
-//results list
 
-li.article-author {
-  padding-left:2px !important;
-  padding-right:2px !important;
+// search bar css
 
-}
+  .open .show-form {
+    background-color: lighten(@brand-warning, 12%) !important
+  }
 
+  .show-form:hover {
+    background-color: darken(@brand-warning, 10%)
+  }
 
-//general
+  .open .show-form:hover {
+    background-color: darken(@brand-warning, 10%) !important
+  }
 
-.draw-attention {
-  transition-property: background-color;
-  transition-duration: 3s;
-  background-color: lighten(@brand-warning, 12%)
-}
+  .inactive-style {
+    color: @gray-light
+  }
+
+  .active-style {
+    color: @component-active-bg
+  }
+
+  //weird stuff going on with input-addon overriding css
+  .search-submit {
+    background-color: @brand-primary !important;
+    color: @body-bg !important
+  }
+
+  .search-dropdown {
+    position: relative;
+    left: 88%;
+    top: -32px;
+    z-index: 1000;
+
+    ul.dropdown-menu {
+      position: absolute;
+      left: -88%;
+      padding: 5px 10px;
+
+    }
+
+  }
+
+    #search-dropdown-icon {
+      font-size: 16px;
+      color: lighten(@brand-primary, 15%);
+    }
+
+    #search-dropdown-icon:hover {
+      color: @brand-primary;
+    }
+
+    .search-form-header .title {
+      font-size: 15px;
+    }
+
+    .search-form-header .title:hover {
+      color: darken(@brand-primary, 10%)
+
+    }
+
+  .search-form-title {
+    font-size: 14px;
+    display: inline !important;
+  }
+
+  .search-form-header {
+    font-size: 14px;
+    padding: 2px 8px;
+    cursor: pointer;
+
+  }
+
+  .search-form-header-active .title {
+    color: lighten(@brand-primary, 5%);
+  }
+
+  .search-form-header-active .title:hover {
+    color: lighten(@brand-primary, 10%) !important;
+  }
+
+  .search-form-section {
+    padding: 10px;
+  }
 
 .show-form {
-  transition-property: background-color;
-  transition-duration: 3s;
-  background-color: none;
+  .draw-attention-text {
+    transition-property: color;
+    transition-duration: 2.5s;
+    color: darken(@brand-warning, 5%) !important;
+  }
 
-}
+  .show-fields {
+    transition-property: background-color;
+    transition-duration: 2.5s;
+    background-color: none;
 
-.open .show-form {
-  background-color: lighten(@brand-warning, 12%) !important
-}
-
-.show-form:hover {
-  background-color: darken(@brand-warning, 10%)
-}
-
-.open .show-form:hover {
-  background-color: darken(@brand-warning, 10%) !important
-}
-
-.inactive-style {
-  color: @gray-light
-}
-
-.active-style {
-  color: @component-active-bg
-}
-
-//weird stuff going on with input-addon overriding css
-.search-submit {
-  background-color: @brand-primary !important;
-  color: @body-bg  !important
-}
-
-.contents-nav {
-  width: 100%;
-  margin:auto;
-  color:@gray-dark;
-  cursor: pointer;
-  list-style: none;
-  height:42px;
-  padding: 12px 5px 10px 5px;
-  a {
-    text-decoration: none;
   }
 }
 
-.contents-nav:hover {
-  color:@gray-darker;
 
-}
+// contents nav widget
 
-.contents-nav-active {
-  position: relative;
-  background: #88b7d5;
-  background-color: lighten(@brand-info, 32%);
-  border: 1px solid lighten(@btn-info-border, 18%);
+  .contents-nav {
+    width: 100%;
+    margin: auto;
+    color: @gray-dark;
+    cursor: pointer;
+    list-style: none;
+    height: 42px;
+    padding: 12px 5px 10px 5px;
+    a {
+      text-decoration: none;
+    }
+  }
 
+  .contents-nav:hover {
+    color: @gray-darker;
 
-}
+  }
 
-.contents-nav-active:after, .contents-nav-active:before {
-  left: 100%;
-  top: 50%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
+  .contents-nav-active {
+    position: relative;
+    background: #88b7d5;
+    background-color: lighten(@brand-info, 32%);
+    border: 1px solid lighten(@btn-info-border, 18%);
 
-.contents-nav-active:after {
-  border-color: rgba(136, 183, 213, 0);
-  border-left-color: lighten(@brand-info, 32%);
-  border-width: 20px;
-  margin-top: -20px;
-}
-.contents-nav-active:before {
-  border-color: rgba(204, 204, 204, 0);
-  border-left-color: darken(saturate(@btn-info-border, 100%), 3%);
-  border-width: 21px;
-  margin-top: -21px;
-}
+  }
 
-.table-of-contents {
-  height: 100%;
-  margin-right: 25%
-}
-
-.results-item .panel-info {
-  border-color: white;
-}
-.results-item .panel-info em {
-  font-weight: bold;
-  font-size: larger;
-}
-.results-item .panel-info li {
-  display: block;
-}
-button#toggle-aff {
-  float: right;
-}
-
-.search-dropdown {
-  position: relative;
-  left: 88%;
-  top: -32px;
-  z-index: 1000;
-
-  ul.dropdown-menu {
+  .contents-nav-active:after, .contents-nav-active:before {
+    left: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
     position: absolute;
-    left: -88%;
-    padding: 5px 10px;
-
+    pointer-events: none;
   }
 
-  #search-dropdown-icon {
-    font-size:16px;
-    color: lighten(@brand-primary, 15%);
+  .contents-nav-active:after {
+    border-color: rgba(136, 183, 213, 0);
+    border-left-color: lighten(@brand-info, 32%);
+    border-width: 20px;
+    margin-top: -20px;
   }
 
-  #search-dropdown-icon:hover{
-    color: @brand-primary;
+  .contents-nav-active:before {
+    border-color: rgba(204, 204, 204, 0);
+    border-left-color: darken(saturate(@btn-info-border, 100%), 3%);
+    border-width: 21px;
+    margin-top: -21px;
   }
 
-  .search-form-header .title {
-    font-size:15px;
+  .table-of-contents {
+    height: 100%;
+    margin-right: 25%
   }
 
-  .search-form-header .title:hover {
-    color: darken(@brand-primary, 10%)
-
+  .results-item .panel-info {
+    border-color: white;
   }
-}
+  .results-item .panel-info em {
+    font-weight: bold;
+    font-size: larger;
+  }
 
-.search-form-title {
-  font-size: 14px;
-  display: inline !important;
-}
-
-.search-form-header {
- font-size:14px;
- padding: 2px 8px;
-  cursor: pointer;
-
-}
-
-.search-form-header-active .title {
-    color: lighten(@brand-primary, 5%);
-}
+  .results-item .panel-info li {
+    display: block;
+  }
 
 
-.search-form-header-active .title:hover {
-  color: lighten(@brand-primary, 10%) !important;
-}
-
-.search-form-section {
-  padding: 10px;
-}
+  .table-of-contents {
+    height: 100%;
+    margin-right: 25%
+  }

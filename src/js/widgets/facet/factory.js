@@ -127,7 +127,7 @@ define([
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options,
-           ['responseProcessors', 'defaultQueryArguments', 'extractionProcessors']));
+        ['responseProcessors', 'defaultQueryArguments', 'extractionProcessors']));
 
       var widget = new FacetWidget(controllerOptions);
       return widget;
@@ -195,9 +195,9 @@ define([
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options,
-          ['defaultQueryArguments']));
+        ['defaultQueryArguments']));
 
-      var GraphWidget = BaseWidget.extend({
+      var GraphWidget = FacetWidget.extend({
         facetField: options.facetField,
         //XXX:rca hack - facet.prefix should be cleaned up by QM
         customizeQuery: function(apiQuery) {

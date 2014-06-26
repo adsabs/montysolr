@@ -173,24 +173,29 @@ require([
 
   $("#top").append(searchBar.render().el);
 
-  $("#middle").append(results.render().el);
-  $("#middle").append(layout.render().el);
-
-  $("#left").append(authorFacets.render().el);
-  $("#left").append(database.render().el);
-  $("#left").append(refereed.render().el);
-  $("#left").append(keywords.render().el);
-  $("#left").append(pub.render().el);
-  $("#left").append(bibgroup.render().el);
-  $("#left").append(data.render().el);
-  $("#left").append(vizier.render().el);
-  $("#left").append(grants.render().el);
+  $("#middle-column").append("<div id='s-middle-col-container'></div>")
+  $("#s-middle-col-container").append(results.render().el).append(layout.render().el)
 
 
+  $("#left-column").append("<div id='s-facet-container'></div>")
+  $("#s-facet-container")
+    .append(authorFacets.render().el)
+    .append(database.render().el)
+    .append(refereed.render().el)
+    .append(keywords.render().el)
+    .append(pub.render().el)
+    .append(bibgroup.render().el)
+    .append(data.render().el)
+    .append(vizier.render().el)
+    .append(grants.render().el)
 
 
-  $("#right").append(queryInfo.render().el);
-  $("#right").append(yearGraph.render().el);
-  $("#right").append(citationsGraphWidget.render().el);
+
+
+  $("#right-column").append("<div id=\"s-right-col-container\"></div>")
+  $("#s-right-col-container")
+    .append(queryInfo.render().el)
+    .append(yearGraph.render().el)
+    .append(citationsGraphWidget.render().el);
 
 });

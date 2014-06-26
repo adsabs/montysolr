@@ -57,9 +57,9 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 
         top   : 10,
         right : 10,
         bottom: 5,
-        left  : 55
+        left  : 40
       };
-      this.fullWidth = 350;
+      this.fullWidth = 280;
       this.fullHeight = 200;
 
       this.width = this.fullWidth - this.margin.left - this.margin.right;
@@ -115,14 +115,15 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 
     events: {
       "click .apply"              : "submitFacet",
       "blur input[type=text]"     : "triggerGraphChange",
-      "change .sort-options input": "addSortChangeToQueue"
+      "change .sort-options input": "addSortChangeToQueue",
+
     },
 
     template: FacetGraphTemplate,
 
     submitFacet: function () {
-      this.model.set("newValue", this.$(".slider").slider("values"))
-
+      this.model.set("value", this.$(".slider").slider("values").join("-"));
+      this.trigger('itemClicked');
     },
 
     triggerGraphChange: function () {

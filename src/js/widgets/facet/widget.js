@@ -20,7 +20,6 @@ define(['backbone',
     var BaseFacetWidget = PaginatedMultiCallbackWidget.extend({
 
       initialize: function (options) {
-
         options = options || {};
         this._checkStandardWidgetOptions(options);
 
@@ -133,6 +132,7 @@ define(['backbone',
           }
 
           var d = {
+            total : apiResponse.toJSON().response.numFound,
             title: modifiedValue,
             value: fValue,
             count: fNum,
@@ -198,7 +198,6 @@ define(['backbone',
 
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
-        //console.log(ev);
         if (ev.indexOf("fetchMore") > -1) {
           var numOfLoadedButHidden = arguments[arguments.length-2];
           var data = arguments[arguments.length-1];
@@ -227,6 +226,7 @@ define(['backbone',
         else if (ev.substring(ev.length-20) == 'itemview:itemClicked') {
           var view = arguments[arguments.length-1];
           this.handleConditionApplied(view.model);
+
         }
         else if (ev.substring(ev.length-20) == 'itemview:treeClicked') { // hierarchical view
           var view = arguments[arguments.length-1];

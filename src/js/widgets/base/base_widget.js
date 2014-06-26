@@ -30,7 +30,7 @@ define(['backbone', 'marionette',
    * * var newWidgetClass = BaseWidget.extend({
    *   initialize: function() {
    *      // do something
-   *      BaseWidget.prototype.apply(this, arguments);
+   *      BaseWidget.prototype.initialize.apply(this, arguments);
    *   }
    * });
    *
