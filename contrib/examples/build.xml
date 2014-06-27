@@ -239,11 +239,18 @@
 	    
 		<antcall target="populate-classpath" />
 		
-		<!-- generate the run.sh using default profile (even if that may be wrong for now) --> 
+		<!-- generate the run.sh using default profile (even if that may be wrong for now) -->
+		<ant inheritAll="false" inheritRefs="false" target="generate-run.sh">
+			<property name="ename" value="${example.name}" />
+			<property name="ignore-environment" value="true" />
+			<property name="profile" value="${example.config}" />
+		</ant>
+		<!--	
 		<exec executable="ant" failonerror="true" dir="${basedir}">
 			<arg line="-Dename=${example.name} -Dignore-environment=true -Dprofile=${example.config} -Dtarget=generate-run.sh" />
 			<arg value="run-configured" />
 		</exec>
+		-->
 
 		<delete dir="${build.dir}/${example.name}/solrwar"/>
     <delete dir="${build.dir}/${example.name}/example-DIH"/>

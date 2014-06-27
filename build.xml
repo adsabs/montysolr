@@ -148,6 +148,13 @@ lucene.real.location=${lucene.real.location}
 solr.version=${solr.version}    
 montysolr.version=${montysolr.version}
 		   </echo>
+		
+		<!-- necessary only on windows (git bash) -->
+		<replaceregexp file="${build.dir}/build.properties"
+		               match="\\"
+		               replace="/"
+			             flags="g"
+		/>
 	</target>
 
 
