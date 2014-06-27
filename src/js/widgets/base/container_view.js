@@ -93,18 +93,18 @@ define(['backbone', 'marionette',
         if (e){
           e.stopPropagation();
         }
-        var $caret = this.$(".main-caret");
+        var $caret = this.$(".main-caret:first");
         if ($caret.hasClass("item-open")) {
           $caret.removeClass("item-open");
           $caret.addClass("item-closed");
-          this.$(".widget-body").addClass("hide");
-          this.$(".widget-options").addClass("hide")
+          this.$(".widget-body:first").addClass("hide");
+          this.$(".widget-options:first").addClass("hide")
         }
         else {
           $caret.removeClass("item-closed");
           $caret.addClass("item-open");
-          this.$(".widget-body").removeClass("hide");
-          this.$(".widget-options").removeClass("hide")
+          this.$(".widget-body:first").removeClass("hide");
+          this.$(".widget-options:first").removeClass("hide")
 
         }
       },
@@ -114,7 +114,7 @@ define(['backbone', 'marionette',
         if (ev && ev.target) {
           var $el = $(ev.target);
           var text = $el.text().trim();
-          var tgt = $el.attr('data-target');
+          var tgt = $el.attr('wtarget');
           ev.preventDefault();
           if (tgt) {
             this.triggerMethod(tgt, ev);

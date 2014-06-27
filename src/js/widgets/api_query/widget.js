@@ -27,8 +27,8 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
       template : ItemTemplate,
       events : {
         'click .remove' : 'removeItem',
-        'blur .key>input': 'onChange',
-        'blur .value>input': 'onChange'
+        'blur input[name=key]': 'onChange',
+        'blur input[name=value]': 'onChange'
       },
       onChange: function(ev) {
         var container = $(ev.target);
@@ -128,7 +128,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        * that back views
        */
       onAll: function() {
-        //console.log('onAll', arguments[0]);
+        console.log('onAll', arguments[0]);
         var event = arguments[0];
 
         if (event == 'itemview:remove-clicked') {

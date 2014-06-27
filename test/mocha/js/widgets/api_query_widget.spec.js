@@ -24,26 +24,26 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'js/services/p
       it("should build a view of the ApiQuery values", function(done) {
         var q = new ApiQuery().load('foo=bar&foo=baz');
         var widget = new ApiQueryWidget(q);
-        var html = $(widget.render());
+        var html = $(widget.render().el);
 
         expect(html.find('input[value="foo"]').length).to.be.eql(1); //contain('<tr><td class="key"><input type="text" name="key" value="foo"></td>');
         expect(html.find('input[value="bar|baz"]').length).to.be.eql(1); //.to.contain('<td class="value"><input type="text" name="value" value="bar|baz"></td>');
         expect(html.find('a.remove').length).to.be.eql(1); //contain('<td> <a class="remove">remove</a></td></tr>');
-        expect($(widget.render()).find('tr').length).to.be.equal(1);
+        expect($(widget.render().el).find('tr').length).to.be.equal(1);
 
         widget.initialize(new ApiQuery().load('foo=bar&boo=baz'));
-        html = $(widget.render()).html();
-        expect($(widget.render()).find('tr').length).to.be.equal(2);
+        html = $(widget.render().el).html();
+        expect($(widget.render().el).find('tr').length).to.be.equal(2);
 
 
         widget.onLoad(new ApiQuery().load('foo=bar'));
-        html = $(widget.render()).html();
-        expect($(widget.render()).find('tr').length).to.be.equal(1);
+        html = $(widget.render().el).html();
+        expect($(widget.render().el).find('tr').length).to.be.equal(1);
 
         widget = new ApiQueryWidget(new ApiQuery());
-        html = $(widget.render());
+        html = $(widget.render().el);
         expect(html.find('a.remove').length).to.eql(0);//to.not.contain('<a class="remove">remove</a></td></tr>');
-        expect($(widget.render()).find('tr').length).to.be.equal(0);
+        expect($(widget.render().el).find('tr').length).to.be.equal(0);
         done();
       });
 
@@ -51,7 +51,7 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'js/services/p
       var q = new ApiQuery().load('foo=bar&boo=baz&woo=waz');
       var widget = new ApiQueryWidget(q);
       var ta = $('#test-area');
-      ta.append(widget.render());
+      ta.append(widget.render().el);
 
       // widget is initialized with the query
       expect(ta.find('#api-query-input').val()).to.equal("boo=baz&foo=bar&woo=waz");
@@ -108,7 +108,7 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'js/services/p
       var q = new ApiQuery().load('foo=bar&boo=baz&woo=waz');
       var widget = new ApiQueryWidget(q);
       widget.activate(beehive.getHardenedInstance());
-      var $w = $(widget.render());
+      var $w = $(widget.render().el);
 
       expect($w.find('#api-query-input').val()).to.equal("boo=baz&foo=bar&woo=waz");
 

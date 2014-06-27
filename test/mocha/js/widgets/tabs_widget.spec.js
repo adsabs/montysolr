@@ -28,8 +28,8 @@ define(['marionette', 'backbone', 'js/widgets/tabs/tabs_widget'], function (Mari
         removeCount++
       }
       tabs = new TabsWidget({tabs: [
-        {title: "view1", view: view1, id: "view1", default: true},
-        {title: "view2", view: view2, id: "view2", default: false}
+        {title: "view1", widget: view1, id: "view1", default: true},
+        {title: "view2", widget: view2, id: "view2", default: false}
       ]})
 
       $("#test").append(tabs.render().el)

@@ -44,7 +44,7 @@ define([
         });
         var $v = $(view.render().el);
         expect($v.find('.widget-name').length).to.be.equal(1);
-        expect($v.find('.widget-name > h5').text()).to.be.equal("");
+        expect($v.find('.widget-name > h5').text().trim()).to.be.equal("");
         expect($v.find('.widget-body').length).to.be.equal(1);
 
 
@@ -53,7 +53,7 @@ define([
           model: new BaseContainerView.ContainerModelClass({title: "Widget Title"})
         });
         var $v = $(view.render().el);
-        expect($v.find('.widget-name > h5').text()).to.be.equal("Widget Title");
+        expect($v.find('.widget-name > h5').text().trim()).to.be.equal("Widget Title");
       });
 
       it("to render something, it needs a collection", function() {
@@ -145,13 +145,14 @@ define([
 
         var $v = $(view.render().el);
 
+        //$('#test-area').append(view.render().el);
 
         expect($v.find('.widget-body:eq(0)').hasClass('hide')).to.be.false;
-        expect($v.find('.widget-body:eq(1)').hasClass('hide')).to.be.true;
-        expect($v.find('.widget-body:eq(2)').hasClass('hide')).to.be.true;
+        expect($v.find('.widget-body .widget-body:nth(0)').hasClass('hide')).to.be.true;
+        expect($v.find('.widget-body .widget-body:nth(1)').hasClass('hide')).to.be.true;
 
         // click the nested first container
-        $v.find('.widget-name:eq(1) > h5').click();
+        $v.find('.widget-body .widget-name:nth(0) > h5').click();
         expect($v.find('.widget-body:eq(0)').hasClass('hide')).to.be.false;
         expect($v.find('.widget-body:eq(1)').hasClass('hide')).to.be.false;
         expect($v.find('.widget-body:eq(2)').hasClass('hide')).to.be.true;
@@ -162,7 +163,14 @@ define([
         expect($v.find('.widget-body:eq(1)').hasClass('hide')).to.be.false;
         expect($v.find('.widget-body:eq(2)').hasClass('hide')).to.be.true;
 
-        //$('#test-area').append(view.render().el);
+
+        // reopen top container (the 0th widget should still be opened)
+        $v.find('.widget-name:eq(0) > h5').click();
+        expect($v.find('.widget-body:eq(0)').hasClass('hide')).to.be.false;
+        expect($v.find('.widget-body:eq(1)').hasClass('hide')).to.be.false;
+        expect($v.find('.widget-body:eq(2)').hasClass('hide')).to.be.true;
+
+
       });
 
       it("can handle clicks inside options", function() {

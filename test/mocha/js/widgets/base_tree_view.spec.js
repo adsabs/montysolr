@@ -45,8 +45,8 @@ define([
         $('#test-area').append($v);
 
         expect($v.find('.widget-body > div.item-view').length).to.be.equal(6);
-        expect($($v.find('.widget-body > .item-view > input:eq(0)')).val()).to.be.equal('bar');
-        expect($($v.find('.widget-body > .item-view > input:eq(1)')).val()).to.be.equal('bab');
+        expect($($v.find('.widget-body > .item-view input:eq(0)')).val()).to.be.equal('bar');
+        expect($($v.find('.widget-body > .item-view input:eq(1)')).val()).to.be.equal('bab');
 
         view.collection.models[0].children.add(
           new TreeView.ModelClass({title: 'hey', value: 'joe' , 'children': []}));
@@ -54,7 +54,7 @@ define([
         spy.reset();
 
         // click on the first item
-        $v.find('.item-leaf:first').click();
+        $v.find('.widget-item:first').click();
         expect($($v.find('input[value="joe"]')).is(':visible')).to.be.true;
         expect(spy.callCount).to.be.eql(1);
         expect(spy.args[0][1].collection.models[0].get('title')).to.be.equal('hey');
