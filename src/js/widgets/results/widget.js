@@ -42,10 +42,10 @@ define([
         }
 
         if (data.author) {
+          var l = shownAuthors.length-1;
           data.authorFormatted = _.map(shownAuthors, function (d, i) {
-            if (i === shownAuthors.length - 1) {
-              //last one
-              return d;
+            if (i == l || l == 1) {
+              return d; //last one, or only one
             } else {
               return d + ";";
             }
@@ -105,10 +105,11 @@ define([
               var hl = highlights[id];
               var finalList = [];
               //adding abstract,title, etc highlights to one big list
-              _.each(hl, function (val, key) {
-                finalList.push(val);
+              _.each(_.pairs(hl), function (pair) {
+                var field = pair[0];
+                finalList = finalList.concat(pair[1]);
               });
-              finalList = _.flatten(finalList);
+              finalList = finalList;
 
               return {
                 "highlights": finalList
@@ -119,6 +120,7 @@ define([
 
           if (h.highlights && h.highlights.length > 0)
             d['details'] = h;
+
           d['orderNum'] = orderNum;
 
           orderNum += 1;
