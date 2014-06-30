@@ -18,9 +18,7 @@ define([
             LogicSelectionContainerTemplate
     ) {
 
-    describe("Facet Base Container View (UI)", function () {
-
-      describe('isolation', function () {
+    describe("FacetContainerView (UI)", function () {
 
         afterEach(function (done) {
           var ta = $('#test-area');
@@ -111,7 +109,7 @@ define([
           view.on('containerLogicSelected', fired);
 
           var $v = $(view.render().el);
-          //$('#test-area').append(view.render().el);
+          $('#test-area').append(view.render().el);
 
           view.collection.add(new Backbone.Model({title: 'foo1', value: 'bar1'}));
           view.collection.add(new Backbone.Model({title: 'foo2', value: 'bar2'}));
@@ -151,5 +149,4 @@ define([
         });
 
       });
-    });
   });

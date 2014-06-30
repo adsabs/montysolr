@@ -22,7 +22,7 @@ define([
     TreeView
     ) {
 
-    describe("Facet Widget - base (UI)", function () {
+    describe("FacetWidget - base (UI)", function () {
 
       // modify the test to contain only 5 pairs of facet values
       _.each([test1, test2], function(o) {
@@ -36,7 +36,7 @@ define([
       beforeEach(function(done) {
         //var testId = 'test' + Math.random().toString(16).split('.')[1];
         //var testEl = $('<div id="' +  testId + '">hello</div>');
-        testId = '#test-area';
+        testId = '#test';
         //$('#test-area').append(testEl);
         minsub = new (MinimalPubsub.extend({
           request: function(apiRequest) {
@@ -175,8 +175,8 @@ define([
 
             // which updates the view (we should see 3 new, 2 hidden new items)
             expect($w.find('.widget-options.bottom').hasClass('hide')).to.be.false;
-            expect($w.find('.item-view').length).to.be.equal(3);
-            expect($w.find('.item-view').not('.hide').length).to.be.equal(2);
+            expect($w.find('.item-view').length).to.be.equal(5);
+            expect($w.find('.item-view').filter('.hide').length).to.be.equal(2);
 
             done();
           }
@@ -209,7 +209,7 @@ define([
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
-        $(testId).append($w);
+        $('#test').append($w);
 
         $w.find('.item-view:first input').click();
         expect($w.find('input[value="limit to"]').is(':visible')).to.be.true;
@@ -253,7 +253,7 @@ define([
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
-        $(testId).append($w);
+        $('#test-area').append($w);
 
         expect($w.find('input').length).to.be.gt(0);
 

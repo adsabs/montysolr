@@ -154,9 +154,9 @@ define(['backbone',
 
 
         // for the first level display only (nested levels are triggered through toggleChildren)
-        if (paginator.getCycle() <= 1 && this.view === view) {
-          view.displayMore(this.view.displayNum);
-        }
+        //if (paginator.getCycle() <= 1 && this.view === view) {
+        //  view.displayMore(this.view.displayNum);
+        //}
 
         if (facetsCol.length > 0) { // we got a full batch (so we'll assume there is more)
           view.enableShowMore();
