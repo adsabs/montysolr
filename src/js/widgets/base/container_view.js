@@ -78,10 +78,10 @@ define(['backbone', 'marionette',
         if (this.openByDefault) {
           this.toggleWidget();
         }
-//        if (this.showOptions) {
-//          this.$(".widget-options:first").removeClass("hide");
-//          this.$(".widget-options.bottom:first").removeClass("hide");
-//        }
+        if (this.showOptions) {
+          this.$(".widget-options:first").removeClass("hide");
+          this.$(".widget-options.bottom:first").removeClass("hide");
+        }
       },
 
       /**

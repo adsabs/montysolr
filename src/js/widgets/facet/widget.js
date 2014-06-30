@@ -314,10 +314,10 @@ define(['backbone',
             q = q.clone();
             value = this.queryUpdater.escapeInclWhitespace(value);
             if (model.get('selected')) {
-              this.queryUpdater.updateQuery(q, 'q', value, 'AND', 'add');
+              this.queryUpdater.updateQuery(q, 'q', 'limit', value);
             }
             else {
-              this.queryUpdater.updateQuery(q, 'q', value, 'AND', 'remove');
+              this.queryUpdater.updateQuery(q, 'q', 'exclude', value);
             }
             this.dispatchNewQuery(paginator.cleanQuery(q));
           }

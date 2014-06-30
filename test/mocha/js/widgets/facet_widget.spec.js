@@ -79,7 +79,7 @@ define([
         expect(w).to.be.instanceof(FacetWidgetSuperClass);
 
         $w = $(w.render().el);
-        expect($w.find('h5').text()).to.be.equal('Facet Title');
+        expect($w.find('h5').text().trim()).to.be.equal('Facet Title');
         expect($w.find('.widget-body').text().trim()).to.be.equal('No content to display.');
         done();
       });
@@ -155,7 +155,7 @@ define([
         expect($w.find('.item-view').not('.hide').length).to.be.equal(3);
 
 
-        $w.find('a[target="ShowMore"]').click();
+        $w.find('button[wtarget="ShowMore"]').click();
         setTimeout(
           function() {
             expect($w.find('.item-view').not('.hide').length).to.be.equal(6);
@@ -169,14 +169,14 @@ define([
             // select one item - this should trigger new query
             $w.find('.item-view:eq(5) input').click();  // XXX for some reason this works only if it is appended to the page
             expect(widget.dispatchNewQuery.callCount).to.be.equal(1);
-            expect(widget.dispatchNewQuery.args[0][0].get('q')).to.be.eql(['star', '0\\/Wang,\\ J']);
+            expect(widget.dispatchNewQuery.args[0][0].get('q')).to.be.eql(["(star AND 0\\/Wang,\\ J)"]);
             expect(widget.processResponse.callCount).to.be.equal(3);
 
 
-            // which updates the view
+            // which updates the view (we should see 3 new, 2 hidden new items)
             expect($w.find('.widget-options.bottom').hasClass('hide')).to.be.false;
-            expect($w.find('.item-view').length).to.be.equal(5);
-            expect($w.find('.item-view').not('.hide').length).to.be.equal(3);
+            expect($w.find('.item-view').length).to.be.equal(3);
+            expect($w.find('.item-view').not('.hide').length).to.be.equal(2);
 
             done();
           }

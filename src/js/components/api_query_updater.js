@@ -389,7 +389,7 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
       }
       var i = _.indexOf(this.operationModes, mode);
       if (i == -1) {
-        throw new Error("Unkwnown mode: ", mode);
+        throw new Error("Unkwnown mode: " + mode);
       }
       return this.operationModes[i];
     },
