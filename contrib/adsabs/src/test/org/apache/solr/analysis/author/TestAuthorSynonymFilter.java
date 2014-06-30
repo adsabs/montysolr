@@ -21,6 +21,8 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
 		WriteableSynonymMap map = new WriteableExplicitSynonymMap();
+		map.setOutput("foo");
+		
 		List<String> rules = new ArrayList<String>();
 		rules.add("MILLER, WILLIAM=>MILLER, B;MILLER, BILL;MILLER,;MILLER, BILL\\b.*");
 		rules.add("MILLER, BILL=>MILLER, WILLIAM;MILLER, WILLIAM\\b.*;MILLER,;MILLER, W");
@@ -56,6 +58,8 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
 		WriteableSynonymMap map = new WriteableExplicitSynonymMap();
+		map.setOutput("foo");
+		
 		List<String> rules = new ArrayList<String>();
 		
 		//XXX: there is a problem with the matcher, it doesn't find
@@ -108,6 +112,8 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		
 		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory();
 		WriteableSynonymMap map = new WriteableEquivalentSynonymMap();
+		map.setOutput("foo");
+		
 		List<String> rules = new ArrayList<String>(){{
 			add("ADAMČUK\\,\\ K,ADAMCUK\\,\\ K,ADAMCHUK\\,\\ K,");
 			add("ADAMČUK\\,\\ KAREL,ADAMCUK\\,\\ KAREL,ADAMCHUK\\,\\ KAREL,");

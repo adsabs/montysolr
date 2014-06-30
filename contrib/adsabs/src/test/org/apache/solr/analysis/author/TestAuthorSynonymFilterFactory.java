@@ -21,6 +21,7 @@ public class TestAuthorSynonymFilterFactory {
 		}
 		
 	    WriteableSynonymMap synMap = new WriteableExplicitSynonymMap();
+	    synMap.setOutput("foo");
 	    synMap.populateMap(rules);
 	    Set<String> expected = new HashSet<String>();
 	    expected.add("MILLER, B");
