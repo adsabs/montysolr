@@ -59,6 +59,8 @@ public abstract class WriteableSynonymMap {
   }
   
   public void put(String k, Set<String> v) {
+  	if (outFile == null)
+  		return;
     numUpdates++;
     this.map.put(k, v);
   }

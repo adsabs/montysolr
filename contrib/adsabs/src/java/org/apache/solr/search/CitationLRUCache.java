@@ -578,7 +578,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     //String unique = schema.getUniqueKeyField().getName();
     
   	for (String f: listOfFields) {
-  		SchemaField fieldInfo = schema.getField(f);
+  		SchemaField fieldInfo = schema.getField(f.replace(":sorted", ""));
   		FieldType type = fieldInfo.getType();
   		
   		//if (fieldInfo.isRequired()) {

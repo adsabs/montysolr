@@ -40,7 +40,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/httpcore-4.3.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/httpmime-4.3.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/joda-time-2.2.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-analyzers-common-4.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-analyzers-common-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/lucene/analysis/common/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-analyzers-icu-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-analyzers-kuromoji-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-analyzers-morfologik-4.8-SNAPSHOT.jar"/>

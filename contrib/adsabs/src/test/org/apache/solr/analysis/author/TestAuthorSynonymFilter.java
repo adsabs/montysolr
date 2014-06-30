@@ -19,7 +19,9 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	public void testAuthorSynonyms1() throws Exception {
 		
 		
-		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory(new HashMap<String,String>());
+		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory(
+				new HashMap<String,String>(){{ put("synonyms", "foo");}}
+				);
 		WriteableSynonymMap map = new WriteableExplicitSynonymMap();
 		List<String> rules = new ArrayList<String>();
 		rules.add("MILLER, WILLIAM=>MILLER, B;MILLER, BILL;MILLER,;MILLER, BILL\\b.*");
@@ -54,7 +56,10 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	}
 	public void testAuthorSynonyms2() throws Exception {
 		
-		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory(new HashMap<String,String>());
+		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory(
+				new HashMap<String,String>(){{ put("synonyms", "foo");}}
+		);
+		
 		WriteableSynonymMap map = new WriteableExplicitSynonymMap();
 		List<String> rules = new ArrayList<String>();
 		
@@ -106,7 +111,9 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 	
 	public void testAuthorEquivSynonymMap() throws Exception {
 		
-		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory(new HashMap<String,String>());
+		AuthorSynonymFilterFactory factory = new AuthorSynonymFilterFactory(
+				new HashMap<String,String>(){{ put("synonyms", "foo");}}
+				);
 		WriteableSynonymMap map = new WriteableEquivalentSynonymMap();
 		List<String> rules = new ArrayList<String>(){{
 			add("ADAMČUK\\,\\ K,ADAMCUK\\,\\ K,ADAMCHUK\\,\\ K,");
