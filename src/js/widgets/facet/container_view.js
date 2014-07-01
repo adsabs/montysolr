@@ -89,8 +89,11 @@ define(['backbone', 'marionette',
 
       onRender: function() {
         this._onRender();
-        if (this.collection && this.collection.models.length >= this.displayNum) {
+        if (this.collection && this.collection.models.length > this.displayNum) {
           this.enableShowMore();
+        }
+        else {
+          this.disableShowMore();
         }
         if (this.logicOptions) {
           this.refreshLogicTooltip();

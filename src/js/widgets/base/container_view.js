@@ -59,13 +59,26 @@ define(['backbone', 'marionette',
 
         options = options || {};
 
-        this.itemViewOptions = Marionette.getOption(this, "itemViewOptions") || {};
+        //this.itemViewOptions = Marionette.getOption(this, "itemViewOptions") || {};
         this.openByDefault = Marionette.getOption(this, "openByDefault");
         this.showOptions = Marionette.getOption(this, "showOptions");
+
+        this.displayNum = Marionette.getOption(this, "displayNum") || 5;
+        this.maxDisplayNum = Marionette.getOption(this, "maxDisplayNum") || 200;
 
         this._states = [];
       },
 
+      itemViewOptions: function (model, index) {
+        var additionalOptions = Marionette.getOption(this, "additionalItemViewOptions") || {};
+        //if this is the initial round, hide fetchnum - displaynum
+        if (index < this.displayNum) {
+          return _.extend({hide: false}, additionalOptions);
+        }
+        else {
+          return _.extend({hide: true}, additionalOptions);
+        }
+      },
 
       /**
        * Called right after the view has been rendered

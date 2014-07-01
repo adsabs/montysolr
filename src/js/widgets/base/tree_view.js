@@ -26,14 +26,20 @@ define(['marionette', 'hbs!./templates/item-tree'],
       },
 
 
-      className: "hide item-view",
+      className: function () {
+        if (Marionette.getOption(this, "hide") === true) {
+          return "hide item-view";
+        } else {
+          return "item-view";
+        }
+      },
 
 
       onRender: function(view) {
-        // give controller chance to load more data (the children of this view)
-        if (!view.$el.hasClass('hide')) {
+        // if we want to give controller chance to load more data (the children of this view)
+        //if (!view.$el.hasClass('hide')) {
           //view.trigger('treeNodeDisplayed');
-        }
+        //}
       },
 
       itemViewContainer: ".item-children",

@@ -15,7 +15,7 @@ define([
     describe("Tree view (nested items)", function() {
 
       afterEach(function () {
-        var ta = $('#test-area');
+        var ta = $('#test');
         if (ta) {
           ta.empty();
         }
@@ -42,7 +42,7 @@ define([
         view.on('all', spy);
 
         var $v = $(view.render().el);
-        $('#test-area').append($v);
+        $('#test').append($v);
 
         expect($v.find('.widget-body > div.item-view').length).to.be.equal(6);
         expect($($v.find('.widget-body > .item-view input:eq(0)')).val()).to.be.equal('bar');
@@ -52,6 +52,7 @@ define([
           new TreeView.ModelClass({title: 'hey', value: 'joe' , 'children': []}));
 
         spy.reset();
+
 
         // click on the first item
         $v.find('.widget-item:first').click();
@@ -65,9 +66,7 @@ define([
         $v.find('.item-leaf:first').click();
         expect($($v.find('input[value="joe"]')).is(':visible')).to.be.false;
 
-
-
       });
     });
 
-  })
+  });
