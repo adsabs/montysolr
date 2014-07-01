@@ -7,7 +7,8 @@ define([
     'js/widgets/facet/container_view',
     'js/widgets/facet/collection',
     'hbs!js/widgets/facet/templates/logic-container',
-    'js/widgets/base/tree_view'
+    'js/widgets/base/tree_view',
+    'js/widgets/facet/tree_view',
   ],
 
   function (
@@ -19,7 +20,8 @@ define([
     FacetContainerView,
     FacetCollection,
     LogicSelectionContainerTemplate,
-    TreeView
+    TreeView,
+    FacetTreeView
     ) {
 
     describe("FacetWidget - base (UI)", function () {
@@ -225,7 +227,6 @@ define([
         done();
       });
 
-
       it("knows to handle hierarchial views", function(done) {
 
         var widget = new FacetWidget({
@@ -235,7 +236,7 @@ define([
             "facet.mincount": "1"
           },
           view: new FacetContainerView({
-            itemView: TreeView,
+            itemView: FacetTreeView,
             model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
             collection: new TreeView.CollectionClass(),
             displayNum: 3,
@@ -253,7 +254,7 @@ define([
         minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
-        $('#test-area').append($w);
+        $('#test').append($w);
 
         expect($w.find('input').length).to.be.gt(0);
 

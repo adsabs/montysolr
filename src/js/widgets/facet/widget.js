@@ -36,6 +36,7 @@ define(['backbone',
 
         this.responseProcessors = options['responseProcessors'] || this.responseProcessors || [];
         this.extractionProcessors = options['extractionProcessors'] || this.extractionProcessors || [];
+        this.hierMaxLevels = options['hierMaxLevels'] || this.hierMaxLevels || -1;
 
         this._extractor = undefined;
         this._preprocessor = undefined;
@@ -198,6 +199,7 @@ define(['backbone',
 
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
+
         if (ev.indexOf("fetchMore") > -1) {
           var numOfLoadedButHidden = arguments[arguments.length-2];
           var data = arguments[arguments.length-1];
@@ -233,6 +235,10 @@ define(['backbone',
           this.handleConditionApplied(view.model);
         }
         else if (ev.indexOf('treeNodeDisplayed') > -1) {
+          if (this.hierMaxLevels > -1 && ev.split('itemview:').length >= this.hierMaxLevels+1) {
+            return; // ignore further requests
+          }
+
           var view = arguments[arguments.length-1];
           this.handleTreeExpansion(view); // see if we need to fetch deeper data
         }

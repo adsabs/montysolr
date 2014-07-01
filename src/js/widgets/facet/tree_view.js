@@ -22,7 +22,7 @@ define(['underscore',
     onRender: function(view) {
       // give controller chance to load more data (the children of this view)
       if (!view.$el.hasClass('hide')) {
-        // view.trigger('treeNodeDisplayed');
+        view.trigger('treeNodeDisplayed');
       }
       //      top-level
       if (!Marionette.getOption(this, "parentCount")){

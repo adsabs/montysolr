@@ -122,12 +122,13 @@ define([
           "facet.prefix": "0/",
           fl: 'id'
         },
+        hierMaxLevels: 2,
         view: new FacetContainerView(containerOptions),
         paginator: new Paginator({start: 0, rows: 20, startName: "facet.offset", rowsName: "facet.limit"})
       };
 
       var controllerOptions = _.extend(controllerOptions, _.pick(options,
-        ['responseProcessors', 'defaultQueryArguments', 'extractionProcessors']));
+        ['responseProcessors', 'defaultQueryArguments', 'extractionProcessors', 'hierMaxLevels']));
 
       var widget = new FacetWidget(controllerOptions);
       return widget;
