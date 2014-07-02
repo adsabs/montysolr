@@ -261,7 +261,7 @@ define([
         $w.find('.widget-item:first').click();
         expect(widget.handleTreeExpansion.called).to.be.true;
         expect(widget.processFacetResponse.called).to.be.true;
-        expect(widget.processFacetResponse.args[1][0].getApiQuery().get('facet.prefix')).to.be.eql(['1/Head, J']);
+        expect(widget.processFacetResponse.args[1][0].getApiQuery().get('facet.prefix')).to.be.eql(['1/Head, J/']);
 
         done();
       });

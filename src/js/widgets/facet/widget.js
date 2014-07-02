@@ -199,7 +199,7 @@ define(['backbone',
 
       //deliver info to pubsub after one of two main submit events (depending on facet type)
       onAllInternalEvents: function(ev, arg1, arg2) {
-
+        //console.log('widget', ev);
         if (ev.indexOf("fetchMore") > -1) {
           var numOfLoadedButHidden = arguments[arguments.length-2];
           var data = arguments[arguments.length-1];
@@ -241,6 +241,9 @@ define(['backbone',
 
           var view = arguments[arguments.length-1];
           this.handleTreeExpansion(view); // see if we need to fetch deeper data
+        }
+        else if (ev == 'composite:collection:rendered') {
+          this.view.displayMore(this.view.displayNum);
         }
         else if (ev == 'containerLogicSelected') {
           this.handleLogicalSelection(arg1);

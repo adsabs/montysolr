@@ -15,15 +15,12 @@ define(['underscore',
     itemViewOptions: function(){
       var count = this.model.get("count");
       return {
-        parentCount: count
+        parentCount: count,
+        hide: true
       }
     },
 
     onRender: function(view) {
-      // give controller chance to load more data (the children of this view)
-      if (!view.$el.hasClass('hide')) {
-        view.trigger('treeNodeDisplayed');
-      }
       //      top-level
       if (!Marionette.getOption(this, "parentCount")){
         var percent = this.model.get("count") / this.model.get("total")
@@ -88,6 +85,10 @@ define(['underscore',
 
       this.model.set('selected', $(ev.target).is(':checked'));
       this.trigger('itemClicked'); // we don't need to pass data because marionette includes 'this'
+
+      if (this.model.children && this.model.children.length == 0) {
+        this.trigger('treeNodeDisplayed');
+      }
     }
 
   });

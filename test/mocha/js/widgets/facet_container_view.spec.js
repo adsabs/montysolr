@@ -63,9 +63,13 @@ define([
           expect($v.find('.widget-options.bottom').hasClass('hide')).to.be.false;
           expect($v.find('.widget-options.top').hasClass('hide')).to.be.false;
 
-          // expect 3 items in the facet
+          // expect 5 items in the facet (all hidden)
           expect($v.find('.item-view').length).to.be.equal(5);
-          expect($v.find('.item-view').filter('.hide').length).to.be.equal(2);
+          expect($v.find('.item-view').filter('.hide').length).to.be.equal(5);
+
+          // display the first batch
+          view.displayMore(view.displayNum);
+
           expect($v.find('button[wtarget="ShowMore"]').text()).to.be.equal('show more');
 
           var cc = all.callCount;

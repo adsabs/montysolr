@@ -128,7 +128,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        * that back views
        */
       onAll: function() {
-        console.log('onAll', arguments[0]);
+        //console.log('onAll', arguments[0]);
         var event = arguments[0];
 
         if (event == 'itemview:remove-clicked') {
