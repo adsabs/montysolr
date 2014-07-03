@@ -73,13 +73,13 @@ public class AqpQueryTree extends SearchComponent {
         SyntaxParser syntaxParser = aqpParser.getSyntaxParser();
         QueryNode queryTree = syntaxParser.parse(queryString, null);
         if (queryTree instanceof AqpANTLRNode) {
-          if (params.get(CommonParams.WT, "json") == "json") {
+          if (params.get(CommonParams.WT, null) == "xml") {
             //System.err.println(((AqpANTLRNode) queryTree).toJson());
-            rsp.add("qtree", ((AqpANTLRNode) queryTree).toJson());
+            rsp.add("qtree", ((AqpANTLRNode) queryTree).toString());
           }
           else {
             //System.err.println(((AqpANTLRNode) queryTree).toString());
-            rsp.add("qtree", ((AqpANTLRNode) queryTree).toString());
+            rsp.add("qtree", ((AqpANTLRNode) queryTree).toJson());
           }
         }
       }
