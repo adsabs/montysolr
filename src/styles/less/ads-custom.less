@@ -66,10 +66,6 @@
 
 // utility classes/ general styling classes
 
-.buffer {
-  margin-top: 10px;
-}
-
 .no-show {
   visibility: hidden
 }
@@ -174,13 +170,47 @@
     display: inline-block
   }
 
-  .results-list {
+.s-result-item-buffer {
+  margin-top: 10px;
+
+}
+
+
+.s-result-item-separator {
+
+
+}
+
+
+.s-more-info {
+    background-color: @gray-lightest;
+    padding:1%;
+
+    em {
+      font-weight: bold;
+      font-size: larger;
+    }
+
+    li {
+      list-style: none;
+    }
+
+    ul {
+      padding-left: 2%;
+
+    }
+  }
+
+
+
+
+.results-list {
 
     margin-top: 20px;
     h4 {
       margin-top: 0px;
       margin-bottom: 10px;
-      font-size:15px;
+      font-size:16px;
       font-weight:500;
     }
 
@@ -215,11 +245,15 @@
   }
 
   // end results list css
+
+
+//facets
+
   .size-graphic-container {
     width: 77%;
     display: inline-block;
     background-color: lighten(@brand-info, 37%);
-    height: 18px;
+    height: 19px;
     margin-left: 2px;
     margin-bottom: 4px;
     font-weight: 500;
@@ -227,28 +261,20 @@
     white-space: nowrap;
 
   }
-//facets
+
 
 .size-graphic {
   display: inline-block;
   background-color: lighten(@brand-info, 23%);
-  overflow: visible;
+  overflow-x: visible;
   color: black;
    font-size : 13px !important;
+  overflow-x:visible
 }
 
-.size-graphic-container {
-  width: 77%;
-  display: inline-block;
-  background-color: lighten(@brand-info, 37%);
-  height: 18px;
-  margin-left: 2px;
-  margin-bottom: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-
-}
+//.size-graphic-wrapper {
+//  overflow-y: hidden;
+//}
 
 .s-facet-selected {
   .size-graphic {
@@ -256,7 +282,7 @@
     background-color: darken(@brand-info, 30%);
   }
   .size-graphic-container {
-    background-color: darken(@brand-info, 20%);
+    background-color: darken(@brand-info, 10%);
   }
 }
 
@@ -583,19 +609,6 @@
     height: 100%;
     margin-right: 25%
   }
-
-  .results-item .panel-info {
-    border-color: white;
-  }
-  .results-item .panel-info em {
-    font-weight: bold;
-    font-size: larger;
-  }
-
-  .results-item .panel-info li {
-    display: block;
-  }
-
 
   .table-of-contents {
     height: 100%;
