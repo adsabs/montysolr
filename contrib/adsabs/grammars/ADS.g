@@ -42,8 +42,8 @@ tokens {
 }
 
 mainQ : 
-	clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
-	;
+  clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
+  ;
    
   
 clauseOr
@@ -63,291 +63,291 @@ clauseNear
   ;
   
 clauseBasic
-	: 
-	 (lmodifier? func_name) => lmodifier? func_name clauseOr+  RPAREN rmodifier?
-	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(QFUNC func_name ^(OPERATOR["DEFOP"] clauseOr+) RPAREN))))
-	| (lmodifier LPAREN clauseOr+ RPAREN )=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
-	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
-	| (LPAREN clauseOr+ RPAREN rmodifier)=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
-	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
-	| (LPAREN )=> LPAREN clauseOr+ RPAREN
-		-> ^(OPERATOR["DEFOP"] clauseOr+)
-	| atom
-	;
+  : 
+   (lmodifier? func_name) => lmodifier? func_name clauseOr+  RPAREN rmodifier?
+   -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(QFUNC func_name ^(OPERATOR["DEFOP"] clauseOr+) RPAREN))))
+  | (lmodifier LPAREN clauseOr+ RPAREN )=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
+   -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+  | (LPAREN clauseOr+ RPAREN rmodifier)=> lmodifier? LPAREN clauseOr+ RPAREN rmodifier? 
+   -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(OPERATOR["DEFOP"] clauseOr+)))) // Default operator
+  | (LPAREN )=> LPAREN clauseOr+ RPAREN
+    -> ^(CLAUSE ^(OPERATOR["DEFOP"] clauseOr+))
+  | atom
+  ;
     
 
 atom   
-	: 
-	lmodifier? field multi_value rmodifier?
-	 -> ^(CLAUSE ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field multi_value))))
-	| lmodifier? field? value rmodifier? 
-	-> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
-	//| lmodifier? (STAR COLON)? STAR 
-	//-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
-	
-	;
+  : 
+  lmodifier? field multi_value rmodifier?
+   -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field multi_value)))
+  | lmodifier? field? value rmodifier? 
+  -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
+  //| lmodifier? (STAR COLON)? STAR 
+  //-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
+  
+  ;
    
 
-field	
-	:	
-	TERM_NORMAL COLON -> TERM_NORMAL
-	//| STAR COLON -> STAR["*"]
-	;
+field 
+  : 
+  TERM_NORMAL COLON -> TERM_NORMAL
+  //| STAR COLON -> STAR["*"]
+  ;
 
 
 range_term_in
         options {greedy=true;}
-	:	
+  : 
        LBRACK
        (a=range_value -> $a ^(QANYTHING QANYTHING["*"]))
        (TO?  b=range_value -> $a $b? )?
        RBRACK
-	;
+  ;
 
 /*
 deactivated for the time being
 
 range_term_ex
-	:	
+  : 
        LCURLY
        ( a=range_value -> range_value ^(QANYTHING QANYTHING["*"]))
        ( 'TO' ? b=range_value -> $a $b? )?
        RCURLY
-	;	
+  ; 
 */
 value  
-	:
-	REGEX -> ^(QREGEX REGEX) 
-	|range_term_in -> ^(QRANGEIN range_term_in)
-//	| range_term_ex -> ^(QRANGEEX range_term_ex) 
-	| identifier -> ^(QIDENTIFIER identifier)
-	| coordinate -> ^(QCOORDINATE coordinate)
-	| normal -> ^(QNORMAL normal)	
-	| truncated -> ^(QTRUNCATED truncated)	
-	| quoted -> ^(QPHRASE quoted)
-	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| DATE_RANGE -> ^(QDATE DATE_RANGE)
-	| AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
-	| QMARK -> ^(QTRUNCATED QMARK)
-	| match_all -> ^(QANYTHING match_all)
-	| STAR -> ^(QTRUNCATED STAR)
-	| LOCAL_PARAMS -> ^(XMETA LOCAL_PARAMS)	
-	| COMMA -> ^(QDELIMITER COMMA)
-	| SEMICOLON -> ^(QDELIMITER SEMICOLON)
-  	;
+  :
+  REGEX -> ^(QREGEX REGEX) 
+  |range_term_in -> ^(QRANGEIN range_term_in)
+//  | range_term_ex -> ^(QRANGEEX range_term_ex) 
+  | identifier -> ^(QIDENTIFIER identifier)
+  | coordinate -> ^(QCOORDINATE coordinate)
+  | normal -> ^(QNORMAL normal) 
+  | truncated -> ^(QTRUNCATED truncated)  
+  | quoted -> ^(QPHRASE quoted)
+  | quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+  | DATE_RANGE -> ^(QDATE DATE_RANGE)
+  | AUTHOR_SEARCH -> ^(QPOSITION AUTHOR_SEARCH)
+  | QMARK -> ^(QTRUNCATED QMARK)
+  | match_all -> ^(QANYTHING match_all)
+  | STAR -> ^(QTRUNCATED STAR)
+  | LOCAL_PARAMS -> ^(XMETA LOCAL_PARAMS) 
+  | COMMA -> ^(QDELIMITER COMMA)
+  | SEMICOLON -> ^(QDELIMITER SEMICOLON)
+    ;
 
-	
+  
 
 
 range_value
-	:	
-	truncated -> ^(QTRUNCATED truncated)
-	| quoted -> ^(QPHRASE quoted)
-	| quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
-	| date -> ^(QNORMAL date)
-	| normal -> ^(QNORMAL normal)	
-	| STAR -> ^(QANYTHING STAR)
-	;
+  : 
+  truncated -> ^(QTRUNCATED truncated)
+  | quoted -> ^(QPHRASE quoted)
+  | quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
+  | date -> ^(QNORMAL date)
+  | normal -> ^(QNORMAL normal) 
+  | STAR -> ^(QANYTHING STAR)
+  ;
 
 func_name
-	:	
-	FUNC_NAME
-	;
+  : 
+  FUNC_NAME
+  ;
 
 
 
 multi_value
-	: 
-	LPAREN multiClause RPAREN -> multiClause
-	;
+  : 
+  LPAREN multiClause RPAREN -> ^(CLAUSE multiClause)
+  ;
 
 
 
-multiClause	
-	:
-	
-	//m:(a b NEAR c OR d OR e)
-	
-	// without duplicating the rules (but it allows recursion)
-	clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
-	
-	// allows only limited set of operations
-	//multiDefault
-	
-	// this is also working, but i want operator precedence
-	//multiClause:
-	//(mterm+ -> mterm+)
-	//(op=operator rhs=fclause -> ^(OPERATOR ^(OPERATOR["DEFOP"] $mclause) $rhs))?
-	//;
-	//flause:mclause;
-	;
+multiClause 
+  :
+  
+  //m:(a b NEAR c OR d OR e)
+  
+  // without duplicating the rules (but it allows recursion)
+  clauseOr+ -> ^(OPERATOR["DEFOP"] clauseOr+)
+  
+  // allows only limited set of operations
+  //multiDefault
+  
+  // this is also working, but i want operator precedence
+  //multiClause:
+  //(mterm+ -> mterm+)
+  //(op=operator rhs=fclause -> ^(OPERATOR ^(OPERATOR["DEFOP"] $mclause) $rhs))?
+  //;
+  //flause:mclause;
+  ;
 
 /* this works, could be used, it is stricter
 
 multiDefault
-	:	
-	multiOr+ -> ^(OPERATOR["DEFOP"] multiOr+)
-	;
+  : 
+  multiOr+ -> ^(OPERATOR["DEFOP"] multiOr+)
+  ;
 
-multiOr	
-	:	
-	(first=multiAnd  -> $first) (or others=multiAnd-> ^(OPERATOR["OR"] multiAnd+ ))*
-	;	
-		
+multiOr 
+  : 
+  (first=multiAnd  -> $first) (or others=multiAnd-> ^(OPERATOR["OR"] multiAnd+ ))*
+  ; 
+    
 multiAnd
-	:	
-	(first=multiNot  -> $first) (and others=multiNot -> ^(OPERATOR["AND"] multiNot+ ))*
-	;	
+  : 
+  (first=multiNot  -> $first) (and others=multiNot -> ^(OPERATOR["AND"] multiNot+ ))*
+  ; 
 
-multiNot	
-	:	
-	(first=multiNear  -> $first) (not others=multiNear-> ^(OPERATOR["NOT"] multiNear+ ))*
-	;	
+multiNot  
+  : 
+  (first=multiNear  -> $first) (not others=multiNear-> ^(OPERATOR["NOT"] multiNear+ ))*
+  ; 
 
-multiNear	
-	:	
-	(first=multiBasic  -> $first) (near others=multiBasic-> ^(near multiBasic+ ))*
-	;	
+multiNear 
+  : 
+  (first=multiBasic  -> $first) (near others=multiBasic-> ^(near multiBasic+ ))*
+  ; 
 
 
 multiBasic
-	:	
-	mterm
-	;
-		
-mterm	
-	:	
-	lmodifier? value -> ^(MODIFIER lmodifier? value)
-	;
+  : 
+  mterm
+  ;
+    
+mterm 
+  : 
+  lmodifier? value -> ^(MODIFIER lmodifier? value)
+  ;
 
 
-	
+  
 operator: (
-	AND -> OPERATOR["AND"]
-	| OR -> OPERATOR["OR"]
-	| NOT -> OPERATOR["NOT"]
-	| NEAR -> OPERATOR["NEAR"]
-	);	
-*/	
+  AND -> OPERATOR["AND"]
+  | OR -> OPERATOR["OR"]
+  | NOT -> OPERATOR["NOT"]
+  | NEAR -> OPERATOR["NEAR"]
+  );  
+*/  
 
 match_all
-	:	
-	STAR COLON STAR
-	;
-normal	
-	:
-	TERM_NORMAL
-	| NUMBER
-	| TO
-	;	
+  : 
+  STAR COLON STAR
+  ;
+normal  
+  :
+  TERM_NORMAL
+  | NUMBER
+  | TO
+  ; 
 
-	
+  
 
-			
+      
 truncated
-	:	
-	TERM_TRUNCATED
-	; 
+  : 
+  TERM_TRUNCATED
+  ; 
 
 
 quoted_truncated
-	:	
-	PHRASE_ANYTHING
-	;
+  : 
+  PHRASE_ANYTHING
+  ;
 
-quoted	:	
-	PHRASE
-	;
+quoted  : 
+  PHRASE
+  ;
 
 
 lmodifier: 
-	PLUS -> PLUS["+"]
-	| MINUS -> MINUS["-"]
-	| '=' -> EQUAL["="]
-	| '#' -> HASH["#"]
-	;
+  PLUS -> PLUS["+"]
+  | MINUS -> MINUS["-"]
+  | '=' -> EQUAL["="]
+  | '#' -> HASH["#"]
+  ;
 
 
 
-rmodifier	:	
-	TILDE CARAT? -> ^(BOOST CARAT?) ^(FUZZY TILDE) 
-	| CARAT TILDE? -> ^(BOOST CARAT) ^(FUZZY TILDE?)
-	;
+rmodifier : 
+  TILDE CARAT? -> ^(BOOST CARAT?) ^(FUZZY TILDE) 
+  | CARAT TILDE? -> ^(BOOST CARAT) ^(FUZZY TILDE?)
+  ;
 
 
-boost	:
-	(CARAT -> ^(BOOST NUMBER["DEF"])) // set the default value
-	(NUMBER -> ^(BOOST NUMBER))? //replace the default with user input
-	;
+boost :
+  (CARAT -> ^(BOOST NUMBER["DEF"])) // set the default value
+  (NUMBER -> ^(BOOST NUMBER))? //replace the default with user input
+  ;
 
-fuzzy	:
-	(TILDE -> ^(FUZZY NUMBER["DEF"])) // set the default value
-	(NUMBER -> ^(FUZZY NUMBER))? //replace the default with user input
-	;
+fuzzy :
+  (TILDE -> ^(FUZZY NUMBER["DEF"])) // set the default value
+  (NUMBER -> ^(FUZZY NUMBER))? //replace the default with user input
+  ;
 
-not	:	
-	(AND NOT)=> AND NOT
-	| NOT
-	;
-	
-and 	:	
-	AND
-	;
-	
-or 	:	
-	OR
-	;		
+not : 
+  (AND NOT)=> AND NOT
+  | NOT
+  ;
+  
+and   : 
+  AND
+  ;
+  
+or  : 
+  OR
+  ;   
 
-near	:	
-	(NEAR -> ^(OPERATOR[$NEAR]) )
-	;
+near  : 
+  (NEAR -> ^(OPERATOR[$NEAR]) )
+  ;
 
-comma	:	
-	COMMA+
-	;	
+comma : 
+  COMMA+
+  ; 
 
 semicolon
-	:
-	SEMICOLON+
-	;
+  :
+  SEMICOLON+
+  ;
 
-date	:	
-	//a=NUMBER '/' b=NUMBER '/' c=NUMBER -> ^(QDATE $a $b $c)
-	DATE_TOKEN
-	;
+date  : 
+  //a=NUMBER '/' b=NUMBER '/' c=NUMBER -> ^(QDATE $a $b $c)
+  DATE_TOKEN
+  ;
 
-identifier	
-	:	
-	//IDENTIFIER	
-	('doi:' -> QNORMAL["doi"]
-	|'arxiv:' -> QNORMAL["arxiv"]
-	|'arXiv:'  -> QNORMAL["arxiv"])
-	(TERM_NORMAL -> $identifier TERM_NORMAL
-	| PHRASE_ANYTHING  -> $identifier ^(QPHRASETRUNC PHRASE_ANYTHING)
-	| PHRASE -> $identifier ^(QPHRASE PHRASE)
-	| NUMBER  -> $identifier NUMBER
-	| STAR -> $identifier ^(QANYTHING STAR)
-	)
-	;
-	
+identifier  
+  : 
+  //IDENTIFIER  
+  ('doi:' -> QNORMAL["doi"]
+  |'arxiv:' -> QNORMAL["arxiv"]
+  |'arXiv:'  -> QNORMAL["arxiv"])
+  (TERM_NORMAL -> $identifier TERM_NORMAL
+  | PHRASE_ANYTHING  -> $identifier ^(QPHRASETRUNC PHRASE_ANYTHING)
+  | PHRASE -> $identifier ^(QPHRASE PHRASE)
+  | NUMBER  -> $identifier NUMBER
+  | STAR -> $identifier ^(QANYTHING STAR)
+  )
+  ;
+  
 coordinate
-	:
-	//20 54 05.689 +37 01 17.38
-	//NUMBER NUMBER NUMBER (PLUS|MINUS) NUMBER NUMBER NUMBER
-	//| //10:12:45.3-45:17:50
-	HOUR
-	| //15h17m-11d10m
-	H_NUMBER M_NUMBER (PLUS|MINUS) D_NUMBER M_NUMBER
-	| // 15h17+89d15
-	H_NUMBER NUMBER (PLUS|MINUS) D_NUMBER NUMBER
-	| // 275d11m15.6954s+17d59m59.876s 
-	D_NUMBER M_NUMBER S_NUMBER (PLUS|MINUS) D_NUMBER M_NUMBER S_NUMBER
-	| // 12.34567h-17.87654d
-	H_NUMBER (PLUS|MINUS) D_NUMBER
-	| // 350.123456d-17.33333d <=> 350.123456 -17.33333
-	'<=>'
-	;	
-	
+  :
+  //20 54 05.689 +37 01 17.38
+  //NUMBER NUMBER NUMBER (PLUS|MINUS) NUMBER NUMBER NUMBER
+  //| //10:12:45.3-45:17:50
+  HOUR
+  | //15h17m-11d10m
+  H_NUMBER M_NUMBER (PLUS|MINUS) D_NUMBER M_NUMBER
+  | // 15h17+89d15
+  H_NUMBER NUMBER (PLUS|MINUS) D_NUMBER NUMBER
+  | // 275d11m15.6954s+17d59m59.876s 
+  D_NUMBER M_NUMBER S_NUMBER (PLUS|MINUS) D_NUMBER M_NUMBER S_NUMBER
+  | // 12.34567h-17.87654d
+  H_NUMBER (PLUS|MINUS) D_NUMBER
+  | // 350.123456d-17.33333d <=> 350.123456 -17.33333
+  '<=>'
+  ; 
+  
 /* ================================================================
  * =                     LEXER                                    =
  * ================================================================
@@ -382,24 +382,24 @@ CARAT : '^' NUMBER?;
 
 TILDE : '~' NUMBER?;
 
-DQUOTE	:	'\"';
+DQUOTE  : '\"';
 
-//SQUOTE	:	'\'';
+//SQUOTE  : '\'';
 
-COMMA	:	',';
+COMMA : ',';
 
-SEMICOLON:	';';
+SEMICOLON:  ';';
 
 
 fragment AS_CHAR
-	:
-	~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
-	;
-	
-	
+  :
+  ~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
+  ;
+  
+  
 fragment ESC_CHAR:  '\\' .; 
 
-TO	:	'TO';
+TO  : 'TO';
 
 /* We want to be case insensitive */
 AND   : (('a' | 'A') ('n' | 'N') ('d' | 'D')) ;
@@ -409,60 +409,60 @@ NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ('0'..'9')*;
 
 
 
-	
+  
 AUTHOR_SEARCH
-	:
-	'^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
-	;
+  :
+  '^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
+  ;
 
 
 /*
 COORDINATE
-	:
-	// AS a LEXICAL token, these patterns work, but they generate too a big
-	// lexer code, either they must be built into a separate grammar, or
-	// be done differently, with regex for example
-	
-	//20 54 05.689 +37 01 17.38
-	INT INT INT INT '.' INT INT INT ('+'|'-') INT INT INT INT INT INT '.' INT INT 
-	| //10:12:45.3-45:17:50
-	INT INT ':' INT INT ':' INT INT '.' INT ('+'|'-') INT INT ':' INT INT ':' INT INT ':' INT INT	
-	| //15h17m-11d10m
-	INT INT 'h' INT INT 'm' ('+'|'-') INT INT 'd' INT INT 'm'	
-	| // 15h17+89d15
-	INT INT 'h' INT INT ('+'|'-') INT INT 'd' INT INT	
+  :
+  // AS a LEXICAL token, these patterns work, but they generate too a big
+  // lexer code, either they must be built into a separate grammar, or
+  // be done differently, with regex for example
+  
+  //20 54 05.689 +37 01 17.38
+  INT INT INT INT '.' INT INT INT ('+'|'-') INT INT INT INT INT INT '.' INT INT 
+  | //10:12:45.3-45:17:50
+  INT INT ':' INT INT ':' INT INT '.' INT ('+'|'-') INT INT ':' INT INT ':' INT INT ':' INT INT 
+  | //15h17m-11d10m
+  INT INT 'h' INT INT 'm' ('+'|'-') INT INT 'd' INT INT 'm' 
+  | // 15h17+89d15
+  INT INT 'h' INT INT ('+'|'-') INT INT 'd' INT INT 
 
-	| // 275d11m15.6954s+17d59m59.876s 
-	INT+ 'd' INT INT 'm' INT INT '.' INT+ 's' ('+'|'-') INT+ 'd' INT INT 'm' INT INT '.' INT+ 's'	
-	| // 12.34567h-17.87654d
-	INT INT '.' INT INT INT INT INT 'h' ('+'|'-') INT INT '.' INT INT INT INT INT 'd'	
-	| // 350.123456d-17.33333d <=> 350.123456 -17.33333
-	INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'? '<' '=' '>' INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'?
-	;
-	*/
-	
-	
-	
+  | // 275d11m15.6954s+17d59m59.876s 
+  INT+ 'd' INT INT 'm' INT INT '.' INT+ 's' ('+'|'-') INT+ 'd' INT INT 'm' INT INT '.' INT+ 's' 
+  | // 12.34567h-17.87654d
+  INT INT '.' INT INT INT INT INT 'h' ('+'|'-') INT INT '.' INT INT INT INT INT 'd' 
+  | // 350.123456d-17.33333d <=> 350.123456 -17.33333
+  INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'? '<' '=' '>' INT+ '.' INT+ 'd'? ('+'|'-') INT+ '.' INT+ 'd'?
+  ;
+  */
+  
+  
+  
 
-	
+  
 DATE_RANGE
-	:	
-	'-' INT INT INT INT
-	| INT INT INT INT '-' (INT INT INT INT)?
-	;
-	
+  : 
+  '-' INT INT INT INT
+  | INT INT INT INT '-' (INT INT INT INT)?
+  ;
+  
 //IDENTIFIER
-//	:	('arXiv'|'arxiv') ':' TERM_CHAR+
-//	|'doi:' TERM_CHAR+
-//	//| INT+ '.' INT+ '/' INT+ ('.' INT+)?
-//	;
+//  : ('arXiv'|'arxiv') ':' TERM_CHAR+
+//  |'doi:' TERM_CHAR+
+//  //| INT+ '.' INT+ '/' INT+ ('.' INT+)?
+//  ;
 
-	
+  
 
 FUNC_NAME
-	:	
-	TERM_NORMAL '('
-	;	
+  : 
+  TERM_NORMAL '('
+  ; 
 
 
 WS  :   ( ' '
@@ -472,83 +472,83 @@ WS  :   ( ' '
         | '\u3000'
         ) 
         {$channel=HIDDEN;}
-    ;	
+    ; 
 
 fragment INT: '0' .. '9';
 
 
 
 fragment TERM_START_CHAR
-	:
-	(~(' ' | '\t' | '\n' | '\r' | '\u3000'
-	      | '\"' 
-	      | '(' | ')' | '[' | ']' | '{' | '}'
-	      | '+' | '-' | '!' | ':' | '~' | '^' 
-	      | '?' | '*' | '\\'|',' | '=' | '#'
-	      | ';'|'/'
-	      )
-	 | ESC_CHAR );  	
+  :
+  (~(' ' | '\t' | '\n' | '\r' | '\u3000'
+        | '\"' 
+        | '(' | ')' | '[' | ']' | '{' | '}'
+        | '+' | '-' | '!' | ':' | '~' | '^' 
+        | '?' | '*' | '\\'|',' | '=' | '#'
+        | ';'|'/'
+        )
+   | ESC_CHAR );    
 
 
 fragment TERM_CHAR
-	:	
-	(TERM_START_CHAR  | '+' | '-' | '=' | '#' | '/')
-	;
+  : 
+  (TERM_START_CHAR  | '+' | '-' | '=' | '#' | '/')
+  ;
 
 
-	
+  
 DATE_TOKEN
-	:	
-	INT INT? ('/'|MINUS|'.') INT INT? ('/'|MINUS|'.') INT INT (INT INT)?
-	;
+  : 
+  INT INT? ('/'|MINUS|'.') INT INT? ('/'|MINUS|'.') INT INT (INT INT)?
+  ;
 
 NUMBER  
-	: 
-	INT+ ('.' INT+)?
-	;
+  : 
+  INT+ ('.' INT+)?
+  ;
 
-fragment M_NUMBER:	
-	NUMBER 'm'
-	;	
-fragment H_NUMBER:	
-	NUMBER 'h'
-	;	
-fragment D_NUMBER:	
-	NUMBER 'd'
-	;	
-fragment S_NUMBER:	
-	NUMBER 's'
-	;			
+fragment M_NUMBER:  
+  NUMBER 'm'
+  ; 
+fragment H_NUMBER:  
+  NUMBER 'h'
+  ; 
+fragment D_NUMBER:  
+  NUMBER 'd'
+  ; 
+fragment S_NUMBER:  
+  NUMBER 's'
+  ;     
 HOUR
-	:	
-	INT INT COLON INT INT COLON NUMBER (PLUS|MINUS) INT INT COLON INT INT COLON NUMBER
-	;
+  : 
+  INT INT COLON INT INT COLON NUMBER (PLUS|MINUS) INT INT COLON INT INT COLON NUMBER
+  ;
 
 TERM_NORMAL
-	: 
-	TERM_START_CHAR ( TERM_CHAR )*
-	;
+  : 
+  TERM_START_CHAR ( TERM_CHAR )*
+  ;
 
 
 TERM_TRUNCATED: 
-	(STAR|QMARK) (TERM_CHAR+ (QMARK|STAR))+ (TERM_CHAR)*
-	| TERM_START_CHAR (TERM_CHAR* (QMARK|STAR))+ (TERM_CHAR)*
-	| (STAR|QMARK) TERM_CHAR+
-	;
+  (STAR|QMARK) (TERM_CHAR+ (QMARK|STAR))+ (TERM_CHAR)*
+  | TERM_START_CHAR (TERM_CHAR* (QMARK|STAR))+ (TERM_CHAR)*
+  | (STAR|QMARK) TERM_CHAR+
+  ;
 
 
-PHRASE	
-	:	
-	DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
-	;
+PHRASE  
+  : 
+  DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
+  ;
 
-PHRASE_ANYTHING	:	
-	DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
-	;
+PHRASE_ANYTHING : 
+  DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
+  ;
 
-LOCAL_PARAMS	:	
-	'{!' (ESC_CHAR|~('}'|'\\'))+ '}'
-	;
-REGEX	:	
-	'/' (ESC_CHAR|~('/'|'\\'))+ '/'
-	;	
+LOCAL_PARAMS  : 
+  '{!' (ESC_CHAR|~('}'|'\\'))+ '}'
+  ;
+REGEX : 
+  '/' (ESC_CHAR|~('/'|'\\'))+ '/'
+  ; 

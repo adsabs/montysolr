@@ -630,7 +630,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	
   	assertQueryEquals("foo:(A)", null, "foo:a");
   	assertQueryEquals("foo:(A -B)", null, "+foo:a -foo:b");
-  	assertQueryEquals("foo:(A B D E)", null, "foo:\"a b d e\"");
+  	assertQueryEquals("foo:(A B D E)", null, "+foo:a +foo:b +foo:d +foo:e"); // but this is fielded
   	assertQueryEquals("A B D E", null, "\"a b d e\"");
   	assertQueryEquals("+A B D E", null, "\"a b d e\"");
   	assertQueryEquals("A +B D E", null, "+a +\"b d e\"");
@@ -644,7 +644,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	
   	assertQueryEquals("foo:(A)", null, "foo:a");
   	assertQueryEquals("foo:(A -B)", null, "+foo:a -foo:b");
-  	assertQueryEquals("foo:(A B D E)", null, "(+foo:a +foo:b +foo:d +foo:e) foo:\"a b d e\"");
+  	assertQueryEquals("foo:(A B D E)", null, "+foo:a +foo:b +foo:d +foo:e"); // fielded
   	assertQueryEquals("A B D E", null, "(+a +b +d +e) \"a b d e\"");
   	assertQueryEquals("+A B D E", null, "(+a +b +d +e) \"a b d e\"");
   	assertQueryEquals("A +B D E", null, "+a +((+b +d +e) \"b d e\")");
@@ -657,7 +657,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	parserArgs.put("aqp.unfielded.tokens.new.type", "normal");
   	assertQueryEquals("foo:(A)", null, "foo:a");
   	assertQueryEquals("foo:(A -B)", null, "+foo:a -foo:b");
-  	assertQueryEquals("foo:(A B D E)", kwa, "(+foo:A +foo:B +foo:D +foo:E) foo:A B D E");
+  	assertQueryEquals("foo:(A B D E)", kwa, "+foo:A +foo:B +foo:D +foo:E"); // fielded
   	assertQueryEquals("A B D E", kwa, "(+A +B +D +E) A B D E");
   	assertQueryEquals("+A B D E", kwa, "(+A +B +D +E) A B D E");
   	assertQueryEquals("A +B D E", kwa, "+A +((+B +D +E) B D E)");
@@ -670,9 +670,11 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	parserArgs.put("aqp.unfielded.tokens.strategy", "add");
   	parserArgs.put("aqp.unfielded.tokens.new.type", "phrase");
   	assertQueryEquals("author:(huchra)", null, "author:huchra");
-		assertQueryEquals("author:(huchra, j)", null, "(+author:huchra +author:j) author:\"huchra j\"");
-		assertQueryEquals("author:(kurtz; -eichhorn, g)", kwa, "+((+author:kurtz) author:kurtz;) +((-author:eichhorn +author:g) author:eichhorn, g)");
-		assertQueryEquals("author:(kurtz; -\"eichhorn, g\")", null, "+((+author:kurtz) author:kurtz) -author:\"eichhorn g\"");
+  	// without field specific logic, we don't understand this as elements of the same name
+		assertQueryEquals("author:(huchra, j)", null, "+author:huchra +author:j");
+		assertQueryEquals("author:(kurtz; -eichhorn, g)", kwa, "+author:kurtz -author:eichhorn +author:g");
+		
+		assertQueryEquals("author:(kurtz; -\"eichhorn, g\")", null, "+author:kurtz -author:\"eichhorn g\"");
 		
 		
 		// here the stakes are higher - we don't understand that the next value
