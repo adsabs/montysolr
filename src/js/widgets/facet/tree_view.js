@@ -45,7 +45,7 @@ define(['underscore',
       e.stopPropagation();
       var val;
       val = this.model.get("count")
-      this.$(".facet-amount").html("&nbsp;(" + val + ")" );
+      this.$(".facet-amount:first").html("&nbsp;(" + this.formatNum(val) + ")" );
       this.$(".item-caret").addClass("draw-attention-text")
 
     },

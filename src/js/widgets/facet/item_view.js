@@ -1,5 +1,5 @@
-define('underscore', 'js/widgets/base/item_view',
-  'hbs!./templates/item-checkbox', function(
+define(['underscore', 'js/widgets/base/item_view',
+  'hbs!./templates/item-checkbox'], function(
   _,
   BaseItemView,
   ItemCheckBoxTemplate

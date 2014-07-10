@@ -2,7 +2,7 @@ define(['backbone', 'marionette',
     'js/widgets/base/container_view',
     'js/mixins/widget_pagination',
     'js/components/paginator',
-    'js/widgets/base/item_view',
+    'js/widgets/facet/item_view',
     'hbs!./templates/tooltip'
   ],
   function (Backbone,
@@ -21,6 +21,7 @@ define(['backbone', 'marionette',
         this.displayNum = Marionette.getOption(this, "displayNum") || 5;
         this.maxDisplayNum = Marionette.getOption(this, "maxDisplayNum") || 200;
         this.paginator = Marionette.getOption(this, "paginator");
+
 
         if (!this.paginator) {
           this.paginator = new Paginator({start: 0, rows: 20});

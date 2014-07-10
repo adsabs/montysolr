@@ -5885,9 +5885,6 @@ button.close {
   width: 95%;
   padding: 0px;
 }
-.buffer {
-  margin-top: 10px;
-}
 .no-show {
   visibility: hidden;
 }
@@ -6068,13 +6065,30 @@ button.close {
 .just-authors {
   display: inline-block;
 }
+.s-result-item-buffer {
+  margin-top: 10px;
+}
+.s-more-info {
+  background-color: #f7f7f7;
+  padding: 1%;
+}
+.s-more-info em {
+  font-weight: bold;
+  font-size: larger;
+}
+.s-more-info li {
+  list-style: none;
+}
+.s-more-info ul {
+  padding-left: 2%;
+}
 .results-list {
   margin-top: 20px;
 }
 .results-list h4 {
   margin-top: 0px;
   margin-bottom: 10px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
 }
 .results-list label {
@@ -6102,7 +6116,7 @@ button#toggle-aff {
   width: 77%;
   display: inline-block;
   background-color: #d8eefb;
-  height: 18px;
+  height: 19px;
   margin-left: 2px;
   margin-bottom: 4px;
   font-weight: 500;
@@ -6112,27 +6126,16 @@ button#toggle-aff {
 .size-graphic {
   display: inline-block;
   background-color: #98d2f3;
-  overflow: visible;
   color: black;
   font-size: 13px !important;
-}
-.size-graphic-container {
-  width: 77%;
-  display: inline-block;
-  background-color: #d8eefb;
-  height: 18px;
-  margin-left: 2px;
-  margin-bottom: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
+  overflow-x: visible;
 }
 .s-facet-selected .size-graphic {
   color: white;
   background-color: #0d4c70;
 }
 .s-facet-selected .size-graphic-container {
-  background-color: #126b9e;
+  background-color: #178acc;
 }
 .s-widget .item-caret:hover {
   color: #ffd933;
@@ -6366,16 +6369,6 @@ button#toggle-aff {
 .table-of-contents {
   height: 100%;
   margin-right: 25%;
-}
-.results-item .panel-info {
-  border-color: white;
-}
-.results-item .panel-info em {
-  font-weight: bold;
-  font-size: larger;
-}
-.results-item .panel-info li {
-  display: block;
 }
 .table-of-contents {
   height: 100%;
