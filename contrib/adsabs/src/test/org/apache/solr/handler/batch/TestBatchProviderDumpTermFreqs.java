@@ -1,7 +1,9 @@
 package org.apache.solr.handler.batch;
 
+import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.request.SolrQueryRequest;
 
+@SuppressCodecs({"Lucene3x", "SimpleText"})
 public class TestBatchProviderDumpTermFreqs extends BatchProviderTest {
 
 
