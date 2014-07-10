@@ -81,5 +81,8 @@ public class TestAqpQueryTree extends MontySolrQueryTestCase {
     
     assert response.contains(s);
     
+    response = h.query(req("qt", "/qtree", "q", "title:\"joe doe\"", "wt", "json"));
+    //System.out.println(response);
+    
   }
 }

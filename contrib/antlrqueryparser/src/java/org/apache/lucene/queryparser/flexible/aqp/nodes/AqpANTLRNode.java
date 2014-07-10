@@ -75,7 +75,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
   }
   
   public String escapeJsonVal(String v) {
-    return v.replace("\"", "\\\"").replace("'", "\\'").replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n");
+    return v.replace("\"", "\\\""); //replace("\\", "\\\\").replace("\"", "\\\"").replace("'", "\\'").replace("\t", "\\t").replace("\n", "\\n");
   }
   
   /**
