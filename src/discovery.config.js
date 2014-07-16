@@ -20,11 +20,11 @@ require.config({
         objects: {
           User: 'js/components/user',
           DynamicConfig: 'discovery.vars',
-          QueryMediator: 'js/components/query_mediator'
+          QueryMediator: 'js/components/query_mediator',
+          HistoryManager: 'js/components/history_manager'
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory',
-          LayoutBuilder: 'js/widgets/contents_manager/widget'
         }
       },
       widgets: {
@@ -33,7 +33,13 @@ require.config({
         Abstract: 'js/widgets/abstract/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',
         QueryDebugInfo: 'js/widgets/api_query/widget',
-        GraphTabs : 'js/wraps/graph_tabs'
+        GraphTabs : 'js/wraps/graph_tabs',
+        References: 'js/widgets/references/widget',
+        Citations : 'js/widgets/citations/widget',
+        Coreads : 'js/widgets/coreads/widget',
+        TableOfContents : 'js/widgets/table_of_contents/widget',
+        Similar : 'js/widgets/similar/widget'
+
       },
       plugins: {
       }
@@ -80,7 +86,8 @@ require.config({
     'd3':'libs/d3/d3',
     'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
     'cache': 'libs/dsjslib/lib/Cache',
-    'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder'
+    'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
+    'backbone-query-parameters': 'libs/backbone-query-parameters/backbone.queryparams'
 
   },
 

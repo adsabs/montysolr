@@ -1,11 +1,11 @@
-<div id="article-navigation"><a target="prev">prev</a>|<a target="next">next</a></div>
 <article>
     <div id="abstract-metadata">
         <dl>
 
             {{#if authorAff.length}}
             <dt>Authors
-                {{#if hasAffiliation}}<button class="btn btn-default btn-sm" id="toggle-aff"> Show affiliations</button>
+                {{#if hasAffiliation}}
+                <button class="btn btn-link" id="toggle-aff"> Show affiliations</button>
                 {{/if}}
             </dt>
             <dd>
@@ -54,11 +54,13 @@
             <dt>Abstract</dt>
             <dd>
                 <div id="abstract-content">
-                    {{abstract}}
+                    {{{abstract}}}
                 </div>
             </dd>
 
             {{/if}}
+
+            <br/>
 
             {{#if keyword}}
             <div id="keywords">

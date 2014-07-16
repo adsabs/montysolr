@@ -61,7 +61,15 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
       },
 
       toggleAffiliation: function () {
-        this.$(".affiliation").toggleClass("hide")
+
+        this.$(".affiliation").toggleClass("hide");
+        if (this.$(".affiliation").hasClass("hide")){
+          this.$("#toggle-aff").text("Show affiliations")
+        }
+        else {
+          this.$("#toggle-aff").text("Hide affiliations")
+        }
+
       },
 
       onClick: function(ev) {
@@ -86,7 +94,7 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
 
-        _.bindAll(this, ['onNewQuery', 'dispatchRequest', 'processResponse', 'onDisplayDocuments']);
+        _.bindAll(this, ['onNewQuery', 'dispatchRequest', 'processResponse']);
         this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onNewQuery);
 
         //custom dispatchRequest function goes here
@@ -95,14 +103,14 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
         //custom handleResponse function goes here
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
 
-        this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       },
 
       defaultQueryArguments: {
         fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,year,doi,pub_raw'
       },
 
-      onDisplayDocuments: function (bibcode) {
+
+      loadBibcodeData : function (bibcode) {
         if (this._docs[bibcode]) {
           this._current = bibcode;
           this.model.set(this._docs[bibcode]);
@@ -116,21 +124,6 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
         this._docs = {};
       },
 
-      onAllInternalEvents: function(ev) {
-        if ((ev == 'next' || ev == 'prev') && this._current) {
-          var keys = _.keys(this._docs);
-
-          var curr = _.indexOf(keys, this._current);
-          if (curr > -1) {
-            if (ev == 'next' && curr+1 < keys.length) {
-              this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, keys[curr+1]);
-            }
-            else if (curr-1 > 0) {
-              this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, keys[curr-1]);
-            }
-          }
-        }
-      },
 
       processResponse: function (apiResponse) {
         var q = apiResponse.getApiQuery();
@@ -145,7 +138,7 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
           });
 
           if (apiResponse.has('responseHeader.params.__show')) {
-            this.onDisplayDocuments(apiResponse.get('responseHeader.params.__show'));
+            this.loadBibcodeData(apiResponse.get('responseHeader.params.__show'));
           }
         }
 

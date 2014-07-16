@@ -95,7 +95,7 @@ define(['marionette',
         }))();
 
         widget.activate(minsub.beehive.getHardenedInstance());
-        var $w = $(widget.render().el);
+        var $w = widget.render().$el;
 
         //get widget to request info
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({

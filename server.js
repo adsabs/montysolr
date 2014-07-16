@@ -104,10 +104,15 @@ app.use('/api', function (req, res, next) {
 });
 
 
+
+
+
 // serve the static files & folders
-home = process.env.HOMEDIR || './';
-app.use(express.static(__dirname + '/' + home));
-app.use(express.directory(__dirname + '/' + home));
+home = process.env.HOMEDIR || '/';
+//app.use(express.static(__dirname + '/' + home));
+//app.use(express.directory(__dirname + '/' + home ));
+
+app.use("/", express.static('src'))
 
 // map test dependencies so that we can run tests too
 app.use('/src', express.static(__dirname + '/' + home));
@@ -120,8 +125,21 @@ app.use('/bower_components', express.static(__dirname + '/bower_components'));
 app.use('/bower_components', express.directory(__dirname + '/bower_components'));
 
 port = process.env.PORT || 3000;
+
+
+app.get( /\/discovery\.html\/.*$/, function(req, res) {
+
+  // Prepare the context
+  res.sendfile( home + '/discovery.html' )
+
+});
+
+
 app.listen(port);
+
 
 console.log('listening on port ' + port);
 //console.log(process.env);
+
+
 

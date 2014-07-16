@@ -26,8 +26,20 @@ var tests = [
   tbase + '/widgets/facet_zoomable_graph_view.spec.js',
   tbase + '/widgets/search_bar_widget.spec.js',
 
+  tbase + '/widgets/citations_widget.spec.js',
+  tbase + '/widgets/references_widget.spec.js',
+  tbase + '/widgets/similar_widget.spec.js',
+  tbase + '/widgets/table_of_contents_widget.spec.js',
+  tbase + '/widgets/coreads_widget.spec.js',
 
-  //tbase + '/widgets/contents_manager_widget.spec.js'
+//  tbase + '/page_managers/abstract_page_controller.spec.js',
+//  tbase + '/page_managers/landing_page_controller.spec.js',
+//  tbase + '/page_managers/results_page_controller.spec.js'
+//
+
+
+
+
   //tbase + '/widgets/facet_container_views.spec.js',
   //tbase + '/widgets/facet_controllers.spec.js'
 

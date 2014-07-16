@@ -96,12 +96,13 @@ define([], function() {
      */
     DISPLAY_DOCUMENTS: '[Router]-Display-Documents',
 
-
     /**
      * Used by OC to request parsed query tree - to check a query
      * for example
      */
-    GET_QTREE: '[FC]-GetQTree'
+    GET_QTREE: '[FC]-GetQTree',
+
+    NAVIGATE : '[Router]-Navigate'
 
   };
 

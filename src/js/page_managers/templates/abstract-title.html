@@ -1,0 +1,14 @@
+<div class="row">
+    <div class="col-sm-8 col-sm-offset-2 col-sm-offset-2  abstract-title-info-row s-abstract-title-info-row">{{description}}</div>
+</div>
+<div class="row s-abstract-title-row">
+    <div class="col-sm-1 col-sm-offset-1">
+        {{#if prev}}<div><a href="#abs/{{prev}}"><i class="glyphicon glyphicon-chevron-left"></i>prev</a></div>{{/if}}
+    </div>
+    <div class="col-sm-6">
+        <h4 class="abstract-title s-abstract-title"><span class="s-abstract-num">{{#if index}}{{index}}.&nbsp;&nbsp;{{/if}}</span>{{{title}}}</h4>
+    </div>
+    <div class="col-sm-1">
+        {{#if next}}<div ><a class="abstract-paginator-next" href="#abs/{{next}}">next<i class="glyphicon glyphicon-chevron-right"></i></a></div>{{/if}}
+    </div>
+</div>
