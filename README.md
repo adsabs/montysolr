@@ -312,5 +312,5 @@ miscellanea
   $ env API_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js 
 ```
 
-- you can see the search being routed to the SOLR api by accessing: http://localhost:3000/api/search, for instance:
-  http://localhost:3000/api/search?q=kurtz
+- you can see the search being routed to the SOLR api by accessing: http://localhost:port/api/1/search, for instance:
+  http://localhost:port/api/1/search?q=kurtz 
