@@ -33,7 +33,7 @@ define(['marionette',
       initialize: function (options) {
         _.bindAll(this, "tempFieldInsert", "tempFieldClear")
         this.queryBuilder = new QueryBuilderPlugin();
-        this.queryBuilder.loadCss();
+        // this.queryBuilder.loadCss(); // not needed since we have it in style.css
       },
 
       activate: function(beehive) {
