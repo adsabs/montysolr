@@ -5,6 +5,7 @@ var needle = require('needle');
 var querystring = require('querystring');
 
 var search_re = /\/1\/search$/;
+var qtree_re = /\/1\/qtree$/;
 var app = express();
 
 var API_ENDPOINT = process.env.API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
@@ -37,6 +38,9 @@ app.use('/api', function (req, res, next) {
 
   if (r.pathname.match(search_re)) {
     // optionally swith endpoints
+  }
+  else if(r.pathname.match(qtree_re)) {
+    end.pathname = '/solr/qtree';
   }
   else {
     res.send(503, {error: 'Unknown service: ' + req.url + ' Are you using the correct endpoint (/api/1/search etc...)?'});

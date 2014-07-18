@@ -94,7 +94,14 @@ define([], function() {
      * A message from the router requesting showing citizens of the
      * city
      */
-    DISPLAY_DOCUMENTS: '[Router]-Display-Documents'
+    DISPLAY_DOCUMENTS: '[Router]-Display-Documents',
+
+
+    /**
+     * Used by OC to request parsed query tree - to check a query
+     * for example
+     */
+    GET_QTREE: '[FC]-GetQTree'
 
   };
 

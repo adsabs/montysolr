@@ -11,6 +11,7 @@ define(['underscore',
     'cache',
     'js/components/generic_module',
     'js/mixins/dependon',
+    'js/components/api_request',
     'js/components/api_response',
     'js/components/api_query_updater',
     'js/components/api_feedback'],
@@ -20,6 +21,7 @@ define(['underscore',
     Cache,
     GenericModule,
     Mixins,
+    ApiRequest,
     ApiResponse,
     ApiQueryUpdater,
     ApiFeedback) {
@@ -57,12 +59,24 @@ define(['underscore',
 
       pubsub.subscribe(this.mediatorPubSubKey, pubsub.NEW_QUERY, _.bind(this.startSearchCycle, this));
       pubsub.subscribe(this.mediatorPubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
+      pubsub.subscribe(this.mediatorPubSubKey, pubsub.GET_QTREE, _.bind(this.getQTree, this));
+    },
+
+
+    getQTree: function(apiQuery, senderKey) {
+      var apiRequest = new ApiRequest({'query': apiQuery, 'target': 'qtree'});
+      var api = this.getBeeHive().Services.get('Api');
+      api.request(apiRequest, {
+        done: this.onApiResponse,
+        fail: this.onApiRequestFailure,
+        context: {request:apiRequest, key: senderKey, requestKey:apiRequest.url(), qm: this }
+      });
     },
 
     /**
      * Happens at the beginnng of the new search cycle. This is the 'race started' signal
      */
-    startSearchCycle: function(apiQuery) {
+    startSearchCycle: function(apiQuery, senderKey) {
       if (this.debug)
         console.log('[QM]: received query:', apiQuery.url());
 

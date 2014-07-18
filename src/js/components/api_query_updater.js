@@ -185,6 +185,26 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
 
 
     /**
+     * Tells whether the string needs escaping (it ignores empty space)
+     *
+     * @param value
+     */
+    needsEscape: function(s) {
+      var sb = [], c;
+      for (var i = 0; i < s.length; i++) {
+        c = s[i];
+        // These characters are part of the query syntax and must be escaped
+        if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')'
+          || c == ':' || c == '^' || c == '[' || c == ']' || c == '"'
+          || c == '{' || c == '}' || c == '~' || c == '*' || c == '?'
+          || c == '|' || c == '&' || c == '/' ) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    /**
      * Escapes special characters (but not whitespace)
      *
      * @param value
@@ -218,6 +238,50 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
           sb.push('\\');
         }
         sb.push(c);
+      }
+      return sb.join('');
+    },
+
+    /**
+     * Wraps string between quotes - and escapes any quotes if present
+     * @param s
+     * @returns {string}
+     */
+    quoteIfNecessary: function(s, quoteChar, quoteCharEnd) {
+      return this.quote(s, quoteChar, quoteCharEnd, true);
+    },
+
+    /**
+     * Wraps string between quotes - and escapes any quotes if present
+     * @param s
+     * @returns {string}
+     */
+    quote: function(s, quoteChar, quoteCharEnd, onlyIfNecessary) {
+      if (!quoteChar)
+        quoteChar = '"';
+      if (!quoteCharEnd)
+        quoteCharEnd = quoteChar;
+
+      if (_.isUndefined(onlyIfNecessary))
+        onlyIfNecessary = false;
+
+      var sb = [], c;
+      var needsQuotes = false;
+      for (var i = 0; i < s.length; i++) {
+        c = s[i];
+        if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')'
+          || c == ':' || c == '^' || c == '[' || c == ']' || c == '"'
+          || c == '{' || c == '}' || c == '~' //|| c == '*' || c == '?'
+          || c == '|' || c == '&' || c == '/' || c == ' ' || c == '\t') {
+          needsQuotes = true;
+        }
+        if ((c == quoteChar || c == quoteCharEnd) && i>0 && s[i-1] !== '\\') {
+          sb.push('\\');
+        }
+        sb.push(c);
+      }
+      if (needsQuotes || onlyIfNecessary == false) {
+        return quoteChar + sb.join('') + quoteCharEnd;
       }
       return sb.join('');
     },

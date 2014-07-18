@@ -14,8 +14,12 @@
  *
  */
 
-require(['js/components/application', 'js/components/beehive', 'js/services/pubsub', 'js/components/query_mediator', 'js/services/api',
-  'jquery', 'underscore'], function(Application, BeeHive, PubSub, QueryMediator, Api, $, _) {
+require(['js/components/application',
+  'jquery',
+  'underscore'],
+  function(Application,
+           $,
+           _) {
 
   var d = window.location.search.substring(1);
 
@@ -32,7 +36,7 @@ require(['js/components/application', 'js/components/beehive', 'js/services/pubs
         PubSub: 'js/services/pubsub',
         Api: 'js/services/api'
       },
-      modules: {
+      objects: {
         QueryMediator: 'js/components/query_mediator'
       }
     },
