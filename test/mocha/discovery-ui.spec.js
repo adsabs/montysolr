@@ -29,15 +29,9 @@ var tests = [
 
 
   //tbase + '/widgets/contents_manager_widget.spec.js'
-
   //tbase + '/widgets/facet_container_views.spec.js',
-
   //tbase + '/widgets/facet_controllers.spec.js'
 
-  tbase + '/components/query_builder/plugin.spec.js',
-  tbase + '/components/query_builder/rules_translator.spec.js',
-  tbase + '/components/query_builder/translation_query2ui.spec.js',
-  tbase + '/components/query_builder/plugin.testcases.spec.js'
 
 ];
 
