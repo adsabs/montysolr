@@ -32,14 +32,14 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
     });
 
 
-    it("should render a search bar and a submit button", function() {
+    it("should render a search bar and a submit button", function(done) {
 
       expect($(".q").length).to.equal(1);
       expect($(".search-submit").length).to.equal(1);
-
+      done();
     });
 
-    it("should trigger a NEW_QUERY when the search-submit button is pressed", function() {
+    it("should trigger a NEW_QUERY when the search-submit button is pressed", function(done) {
 
       var currentSearch;
 
@@ -54,20 +54,21 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
       $(".q").val("author:kurtz,m");
       $(".search-submit").click();
       expect(currentSearch).to.equal('author:kurtz,m');
+      done();
 
     });
 
-    it("should allow the user to open and close a dropdown menu from the search bar", function(){
+    it("should allow the user to open and close a dropdown menu from the search bar", function(done){
       expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(false);
       widget.view.$(".show-form").click();
       expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(true);
       widget.view.$(".show-form").click();
       expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(false);
+      done();
+    });
 
-    })
 
-
-    it("should allow the user to click to add fielded search words to search bar", function() {
+    it("should allow the user to click to add fielded search words to search bar", function(done) {
 
 //      can't easily trigger hoverIntent so calling the method directly
       var e = {};
@@ -77,7 +78,7 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
       widget.view.tempFieldInsert(e)
       widget.view.$("#field-options div[data-field=author]").click();
       expect($(".q").val().trim()).to.equal("author:\"\"");
-
+      done();
     })
 
   });

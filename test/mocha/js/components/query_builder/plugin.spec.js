@@ -36,12 +36,13 @@ define(['jquery',
         done();
       });
 
-      it("returns QueryBuilder object", function () {
+      it("returns QueryBuilder object", function (done) {
         expect(new QueryBuilderPlugin()).to.be.instanceof(QueryBuilderPlugin);
         expect(new QueryBuilderPlugin()).to.be.instanceof(GenericModule);
+        done();
       });
 
-      it("can load CSS", function() {
+      it("can load CSS", function(done) {
         var p = new QueryBuilderPlugin();
         p.loadCss();
 
@@ -50,9 +51,10 @@ define(['jquery',
         expect($(document.getElementsByTagName("head")[0]).find('link[href=\''+url+'\']').length).to.be.eql(1);
         p.loadCss();
         expect($(document.getElementsByTagName("head")[0]).find('link[href=\''+url+'\']').length).to.be.eql(1);
+        done();
       });
 
-      it("supports the complete loop from the user input through qtree back to string output", function() {
+      it("supports the complete loop from the user input through qtree back to string output", function(done) {
         var p = new QueryBuilderPlugin({el: '#test',
           qtreeGetter: QueryBuilderPlugin.buildQTreeGetter(minsub.beehive.getHardenedInstance())});
 
@@ -95,10 +97,10 @@ define(['jquery',
         $qb.find('.rule-container:nth(1) input').val('woe');
 
         expect(p.getQuery()).to.eql('title:joe AND woe');
-
+        done();
       });
 
-      it("has isDirty() method", function() {
+      it("has isDirty() method", function(done) {
         var p = new QueryBuilderPlugin({el: '#test',
           qtreeGetter: {
             getQTree: function() {
@@ -129,7 +131,7 @@ define(['jquery',
         $qb.find('.rule-container:nth(0) input').val('woe');
 
         expect(p.isDirty()).to.be.true;
-
+        done();
       });
 
       it("has attachHeartBeat() method", function(done) {
@@ -153,7 +155,7 @@ define(['jquery',
           }});
 
         var spy = sinon.spy();
-        p.attachHeartBeat(spy, 99);
+        p.attachHeartBeat(spy, 50);
         p.updateQueryBuilder('title:joe');
 
         // quick check the UI is there

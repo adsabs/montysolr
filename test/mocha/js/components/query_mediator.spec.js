@@ -50,7 +50,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         expect(qm.getBeeHive()).to.be.equal(beehive);
         expect(qm.mediatorPubSubKey).to.be.instanceof(PubSubKey);
 
-        expect(pubsub.subscribe.callCount).to.be.eql(2);
+        expect(pubsub.subscribe.callCount).to.be.eql(3);
         expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.NEW_QUERY]);
         expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.DELIVERING_REQUEST]);
 

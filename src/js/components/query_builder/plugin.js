@@ -467,7 +467,7 @@ define([
         }
         catch(err) {
           console.trace(err);
-          return true;
+          return false;
         }
         return false;
       },
