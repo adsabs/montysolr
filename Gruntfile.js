@@ -8,7 +8,15 @@ module.exports = function(grunt) {
     local: grunt.file.readJSON('local-config.json'),
 
     // Wipe out previous builds and test reporting.
-    clean: ['dist/', 'test/reports'],
+    clean: {
+      dist: {
+        src: ['dist/', 'test/reports']
+      },
+      bower: {
+        src: ['./bower_components']
+      }
+    },
+
 
     // This will install libraries (client-side dependencies)
     bower: {
@@ -263,10 +271,9 @@ module.exports = function(grunt) {
     less: {
       development: {
         files: {
-          'src/styles/css/styles.css': 'src/styles/less/manifest.less',
-
+          'src/styles/css/styles.css': 'src/styles/less/manifest.less'
         }
-      },
+      }
       //     production: {
       //         options: {
       //             // paths: ["assets/css"],
@@ -331,7 +338,7 @@ module.exports = function(grunt) {
   // When running the default Grunt command, just lint the code.
   grunt.registerTask('default', [
     'env:dev',
-    'clean',
+    'clean:dist',
     'jshint',
     'copy',
     'processhtml',
@@ -349,6 +356,6 @@ module.exports = function(grunt) {
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
 
-  grunt.registerTask('bower-setup', ['bower', 'exec:convert_dsjslib']);
+  grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib']);
 
 };
