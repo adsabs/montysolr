@@ -79,7 +79,51 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
       widget.view.$("#field-options div[data-field=author]").click();
       expect($(".q").val().trim()).to.equal("author:\"\"");
       done();
-    })
+    });
+
+    it("shows the query builder form on clicking 'Search Form' ", function() {
+
+    });
+
+    it("in QB form: when rule is removed, the form stays open", function() {
+
+    });
+
+    it("typing inside one of the input fields updates the search input", function() {
+
+    });
+
+    it("changing operator updates the search input", function() {
+
+    });
+
+    it("removing the rule/group updates the input", function() {
+
+    });
+
+    it("clicking outside the QB area, hides QB form", function() {
+
+    });
+
+    it("spinning wheel is shown when the query cannot be parsed immediately", function() {
+
+    });
+
+    it("you can type into the QB form without typing into search form first", function() {
+
+    });
+
+    it("you can create several input fields, some empty, and the form indicates which one are wrong", function() {
+
+    });
+
+    it("when the QB form opens, the search bar should become little opaque", function() {
+
+    });
+
+    it("when some of the fields have wrong input (and the query doesn't contain everything), the form should warn user before closing itself", function() {
+
+    });
 
   });
 

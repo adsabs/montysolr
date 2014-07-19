@@ -38,7 +38,7 @@ define(['underscore',
         queries.push(child.toString(level+1));
       });
 
-      var q = queries.join(' ' + this.operator + ' ');
+      var q = this.operator ? queries.join(' ' + this.operator + ' ') : queries.join(' ');
       if (level > 0) {
         q = "(" + q + ")";
       }

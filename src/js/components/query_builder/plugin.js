@@ -276,13 +276,14 @@ define([
               var h = '\
 <dl id="'+ group_id +'" class="rules-group-container" '+ (this.settings.sortable ? 'draggable="true"' : '') +'> \
   <dt class="rules-group-header"> \
-    <div class="btn-group pull-right"> \
+    <div class="btn-group"> \
+      ' + conditions + '\
+      &nbsp;&nbsp;\
+    </div> \
+    <div class="btn-group"> \
       <button type="button" class="btn btn-xs btn-success" data-add="rule"><i class="glyphicon glyphicon-plus"></i> '+ this.lang.add_rule +'</button> \
       <button type="button" class="btn btn-xs btn-success" data-add="group"><i class="glyphicon glyphicon-plus-sign"></i> '+ this.lang.add_group +'</button> \
       <button type="button" class="btn btn-xs btn-danger" data-delete="group"><i class="glyphicon glyphicon-remove"></i> '+ this.lang.delete_group +'</button> \
-    </div> \
-    <div class="btn-group"> \
-      ' + conditions + '\
     </div> \
     '+ (this.settings.sortable ? '<div class="drag-handle"><i class="glyphicon glyphicon-sort"></i></div>' : '') +' \
   </dt> \
@@ -312,6 +313,15 @@ define([
             }
           }
         });
+
+        // prevent the form from being closed
+        this.$el.on('click.queryBuilder', '[data-delete=rule]', function(ev) {
+          ev.stopPropagation();
+        });
+        this.$el.on('click.queryBuilder', '[data-delete=group]', function(ev) {
+          ev.stopPropagation();
+        });
+
       },
 
 
