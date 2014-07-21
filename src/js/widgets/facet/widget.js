@@ -322,12 +322,12 @@ define(['backbone',
 
             q = q.clone();
             value = this.queryUpdater.escapeInclWhitespace(value);
-            if (model.get('selected')) {
-              this.queryUpdater.updateQuery(q, 'q', 'limit', value);
-            }
-            else {
-              this.queryUpdater.updateQuery(q, 'q', 'exclude', value);
-            }
+
+            var fieldName = 'q'; // + this.facetField;
+            //make default limit to
+              this.queryUpdater.updateQuery(q, fieldName, 'limit', value);
+            //not sure when exclude would ever be useful in this case
+            //this.queryUpdater.updateQuery(q, 'q', 'exclude', value);
             this.dispatchNewQuery(paginator.cleanQuery(q));
           }
         }
@@ -380,85 +380,6 @@ define(['backbone',
 
           this.dispatchNewQuery(paginator.cleanQuery(q));
         }
-      },
-
-      // XXX:rca - these were the old Alex's methods; i'll remove them once it is
-      // clear all functionality has been incorporated...
-      onFacetApplySubmit: function () {
-
-        var changed, currentFQ, finalFQ, newQuery, facetQuery;
-
-        currentFQ = this.getCurrentQuery().get("fq");
-
-        //get the item that has changed
-        changed = this.view.collection.filter(function (x) {
-          return x.get("newValue") !== undefined
-        });
-
-        changed = changed[0].get("newValue");
-
-        //no logic, so it's a single facet
-        facetQuery = this.facetField + ":[" + changed.join(" TO ") + "]"
-
-        currentFQ ? finalFQ = currentFQ + " AND " + facetQuery : finalFQ = facetQuery;
-
-        newQuery = this.composeQuery({
-          fq: finalFQ
-        });
-
-        this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
-
-      },
-
-      // XXX:rca - dtto
-      onContainerLogicSelected: function () {
-
-        var facetQuery, selected, logic;
-
-        var currentFQ, finalFQ, newQuery;
-
-        currentFQ = this.getCurrentQuery().get("fq");
-
-        //selected from basic collection
-        var getSelected = function (collection) {
-          return collection.where({
-            selected: true
-          });
-        };
-
-        selected = getSelected(this.collection);
-
-        //selected from possible child collections
-        _.each(this.childCollections, function (v, k) {
-          selected.push(getSelected(v.collection))
-        });
-
-        selected = _.map(selected, function (s) {
-          return s.get("value")
-        });
-
-        logic = this.view.model.get("selected")
-
-        if (logic === "exclude") {
-
-          facetQuery = "-" + this.facetField + ":(" + "\"" + selected.join(" AND ") + "\")"
-        }
-        else if (logic === "limit to") {
-          facetQuery = this.facetField + ":(\"" + selected + "\")"
-        }
-        else {
-          //it's "and" or "or"
-          facetQuery = this.facetField + ":(\"" + selected.join("\" " + logic.toUpperCase() + " \"") + "\")"
-        }
-
-        currentFQ ? finalFQ = currentFQ + " AND " + facetQuery : finalFQ = facetQuery;
-
-        newQuery = this.composeQuery({
-          fq: finalFQ
-        });
-
-        this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
-
       }
 
     });
