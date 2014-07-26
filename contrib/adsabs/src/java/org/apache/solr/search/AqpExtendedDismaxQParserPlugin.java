@@ -1202,7 +1202,7 @@ class AqpExtendedDismaxQParser extends QParser {
       	//nl.add("aqp.df.fields", "title abstract^.7");
       	nl.add("qf", req.getParams().get("qf", ""));
       	String qs = getQueryStr();
-      	if (localParams.getBool("aqp.exact.search")) {
+      	if (localParams != null && localParams.getBool("aqp.exact.search")) {
       	  qs = "=" + qs;
       	}
       	
