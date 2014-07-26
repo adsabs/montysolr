@@ -1202,6 +1202,10 @@ class AqpExtendedDismaxQParser extends QParser {
       	//nl.add("aqp.df.fields", "title abstract^.7");
       	nl.add("qf", req.getParams().get("qf", ""));
       	String qs = getQueryStr();
+      	if (localParams.getBool("aqp.exact.search")) {
+      	  qs = "=" + qs;
+      	}
+      	
       	//nl.add(CommonParams.DF, field);
       	nl.add(CommonParams.Q, qs);
       	localReq = new LocalSolrQueryRequest(req.getCore(), nl);

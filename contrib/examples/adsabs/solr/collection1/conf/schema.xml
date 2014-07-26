@@ -544,9 +544,78 @@
 		</fieldType>
 
 
-		<!-- AA: TODO: we should create a field type ads_text_nosyn to enable exact 
-			searches RC: I think this must be subject to performance test given the troubles 
-			we have experienced with speed degradation -->
+    
+		<!-- ads_text_nosyn to enable exact	searches; only used for querying;
+		test: TestAdsabsTypeFullText -->
+		
+		<fieldType name="ads_text_nosyn" class="solr.TextField">
+      <analyzer type="query">
+        <charFilter class="solr.HTMLStripCharFilterFactory"/>
+        <!-- AA: as above, but we only have one canonical replacement for the 
+          expression -->
+        <charFilter class="solr.PatternReplaceCharFilterFactory"
+          pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b" replacement="M$3" />
+        <charFilter class="solr.PatternReplaceCharFilterFactory"
+          pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b" replacement="A$3" />
+        <charFilter class="solr.PatternReplaceCharFilterFactory"
+          pattern="\b(?i:(NGC|N)(-|\s+)([0-9]+[A-Z]*))\b" replacement="NGC$3" />
+        <charFilter class="solr.PatternReplaceCharFilterFactory"
+          pattern="\b(?i:([34]CR?|ADS|H[DHR]|IC|[MW]|MKN|NGC|PKS|PSR[BJ]?|SAO|UGC|UT)(-|\s+)([0-9]+[A-Z]*))\b"
+          replacement="$1$3" />
+
+
+        <!-- tokenize on empty space (if it is not a hyphen connecting other 
+          words) -->
+        <tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)" 
+          group="-1" />
+          
+        <!--  translate math symbols and others into their ascii representation -->
+        <filter class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+
+        
+        <filter class="solr.WordDelimiterFilterFactory"
+          generateWordParts="1" generateNumberParts="1" catenateWords="0"
+          catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
+          splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+
+        
+        <!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond => 
+          mond Hubble Space Telescope => hubble space telescope -->
+        <filter
+          class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
+
+        
+
+        <!-- if the original or synonym contains UPPERCASE variant, mark it as 
+          an acronym but do not change its type, if it was a SYNONYM, it is important 
+          information for query parsing -->
+        <filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
+          prefix="acr::" />
+
+        
+        <!-- remove stop words - first the case sensitively -->
+        <filter class="solr.StopFilterFactory" ignoreCase="false"
+          words="text.kill_sens" enablePositionIncrements="false" />
+        <!-- remove stop words - then case insensitively -->
+        <filter class="solr.StopFilterFactory" ignoreCase="true"
+          words="text.kill" enablePositionIncrements="false" />
+
+
+
+        <!-- we emit ASCIIField version of the token (at the same position) -->
+        <filter class="solr.ASCIIDuplicatingFilterFactory" />
+
+        <!-- final normalization -->
+        <filter class="solr.TrimFilterFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        
+        <filter
+          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+        
+        <!-- <filter class="solr.DiagnoseFilterFactory" idString="final"/> -->
+      </analyzer>
+    </fieldType>
+		
 
 
 		<!-- Type date_string is used for properly formatting (translating) the 
@@ -1004,12 +1073,15 @@
 		<field name="title" type="ads_text" indexed="true" stored="true" 
       multiValued="true" termVectors="true" termOffsets="true" 
       termPositions="true"/>
+    <field name="title_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
             
 		<field name="alternate_title" type="ads_text" indexed="true" stored="true" 
 		  multiValued="true" termVectors="true" />
+		<field name="alternate_title_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
 		<field name="abstract" type="ads_text" indexed="true" stored="true"
 			termVectors="true" termOffsets="true" termPositions="true" />
+		<field name="abstract_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
 
 
@@ -1176,6 +1248,7 @@
     -->
 		<field name="all" type="ads_text" indexed="true" stored="false"
 			multiValued="true" />
+		<field name="all_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
 
 
@@ -1203,11 +1276,14 @@
 		  
 		 -->
 		<field name="full" type="ads_text" indexed="false" stored="false"/>
+		<field name="full_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
       
 		<field name="body" type="ads_text" indexed="true" stored="true"
 			termVectors="true" termOffsets="true" termPositions="true" />
+		<field name="body_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 			
 		<field name="ack" type="ads_text" indexed="true" stored="true" />
+		<field name="ack_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 		
 		
 		<!-- 
@@ -1363,6 +1439,7 @@
 			
 		<field name="unfielded_search" type="ads_text"
 			indexed="false" stored="false" multiValued="true" />
+		<field name="unfielded_search_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
 	</fields>
 

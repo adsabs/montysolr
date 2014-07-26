@@ -8,8 +8,10 @@ import java.util.Map;
 import org.apache.lucene.queryparser.flexible.aqp.ADSEscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
@@ -35,6 +37,8 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.SolrParams;
 
 /**
  * This processor wraps fields with the 'null' value into edismax 
@@ -103,6 +107,10 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	          "Unknown function \"" + funcName +"\"" ));
 	    }
 	    
+	    // let adismax know that we want exact search
+	    if (node.getParent() instanceof AqpAdsabsSynonymQueryNode && ((AqpAdsabsSynonymQueryNode) node.getParent()).isActivated() == false) {
+        subQuery = "{!adismax aqp.exact.search=true}" + subQuery;
+      }
 	    
 	    List<OriginalInput> fValues = new ArrayList<OriginalInput>();
 	    fValues.add(new OriginalInput(subQuery, -1, -1));
