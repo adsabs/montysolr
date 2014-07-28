@@ -51,7 +51,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         expect(qm.mediatorPubSubKey).to.be.instanceof(PubSubKey);
 
         expect(pubsub.subscribe.callCount).to.be.eql(3);
-        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.NEW_QUERY]);
+        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.START_SEARCH]);
         expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.DELIVERING_REQUEST]);
 
         done();
@@ -85,7 +85,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
             if (debug)
               console.log('[' + this.mid + '] User Action:', q.url());
             var pubsub = this.bee.Services.get('PubSub');
-            pubsub.publish(pubsub.NEW_QUERY, q);
+            pubsub.publish(pubsub.START_SEARCH, q);
           },
           sendRequest: function(q) {
             q = q.clone();
@@ -140,7 +140,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
         /*
          whole chain of events should happen:
-         - user clicked: NEW_QUERY
+         - user clicked: START_SEARCH
          - mediator issues: INVITING_REQUEST
            - m1 and m2 respond with: DELIVERING_REQUEST
          - mediator calls api: api.request(apiRequest)

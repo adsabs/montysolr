@@ -191,7 +191,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        */
       onAllPubSub: function() {
         var event = arguments[0];
-        if (event == PubSubEvents.NEW_QUERY || event == PubSubEvents.INVITING_REQUEST) {
+        if (event == PubSubEvents.START_SEARCH || event == PubSubEvents.INVITING_REQUEST) {
           console.log('[debug:ApiQueryWidget]', arguments[0]);
           //this.onLoad(arguments[1]);
           this.view.updateInputBox(arguments[1].url()); // update the input
@@ -206,7 +206,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        */
       onRun: function(apiQuery) {
         if (this.pubsub) {
-          this.pubsub.publish(this.pubsub.NEW_QUERY, apiQuery);
+          this.pubsub.publish(this.pubsub.START_SEARCH, apiQuery);
         }
       }
 

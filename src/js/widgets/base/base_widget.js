@@ -91,7 +91,7 @@ define(['backbone', 'marionette',
      * @param apiQuery
      */
     dispatchNewQuery: function(apiQuery) {
-      this.pubsub.publish(this.pubsub.NEW_QUERY, apiQuery);
+      this.pubsub.publish(this.pubsub.START_SEARCH, apiQuery);
     },
 
     /**

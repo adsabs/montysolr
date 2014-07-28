@@ -55,7 +55,7 @@ define(['marionette', 'backbone',
         widget.activate(minsub.beehive.getHardenedInstance());
 
 
-        minsub.publish(minsub.NEW_QUERY, new ApiQuery({q: 'pluto'}));
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'pluto'}));
 
         expect(widget.dispatchRequest.firstCall.args[0].url()).to.eql('q=pluto');
         expect(widget.customizeQuery.calledOnce).to.be.true;

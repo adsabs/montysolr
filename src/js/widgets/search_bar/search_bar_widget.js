@@ -244,7 +244,7 @@ define(['marionette',
           q: query
         });
 
-        this.pubsub.publish(this.pubsub.NEW_QUERY, this.customizeQuery(newQuery));
+        this.pubsub.publish(this.pubsub.START_SEARCH, this.customizeQuery(newQuery));
       }
     });
 

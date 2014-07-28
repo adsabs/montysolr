@@ -81,7 +81,7 @@ define([
 
 
         // issue a new query
-        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'planet'}));
+        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'planet'}));
 
 
         expect($w.find('.widget-body').children().not('.hide').length).to.be.eql(5);

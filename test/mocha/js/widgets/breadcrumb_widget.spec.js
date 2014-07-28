@@ -41,7 +41,7 @@ define(['js/widgets/breadcrumb/widget', 'js/components/api_query', 'js/services/
         var $w = $(widget.render());
 
         // send a new response trough the pubsub, widget should catch it and display
-        pubsub.trigger(pubsub.NEW_QUERY, new ApiQuery({foo: 'bar'}));
+        pubsub.trigger(pubsub.START_SEARCH, new ApiQuery({foo: 'bar'}));
 
         //expect($w.find('#api-query-input').val()).to.equal("foo=bar");
 

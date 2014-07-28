@@ -406,7 +406,7 @@ define(['backbone',
           fq: finalFQ
         });
 
-        this.pubsub.publish(this.pubsub.NEW_QUERY, newQuery);
+        this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
 
       },
 
@@ -457,7 +457,7 @@ define(['backbone',
           fq: finalFQ
         });
 
-        this.pubsub.publish(this.pubsub.NEW_QUERY, newQuery);
+        this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
 
       }
 

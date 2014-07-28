@@ -87,7 +87,7 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
         this.pubsub = beehive.Services.get('PubSub');
 
         _.bindAll(this, ['onNewQuery', 'dispatchRequest', 'processResponse', 'onDisplayDocuments']);
-        this.pubsub.subscribe(this.pubsub.NEW_QUERY, this.onNewQuery);
+        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onNewQuery);
 
         //custom dispatchRequest function goes here
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);

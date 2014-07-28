@@ -26,7 +26,7 @@ define([], function() {
      * It means: 'user did something', we need to start reacting. The OC
      * will build a new ApiQuery and send it together with this event
      */
-    NEW_QUERY: '[PubSub]-New-Query',
+    START_SEARCH: '[PubSub]-New-Query',
 
     /**
      * Called by FC's (usually: Mediator) - this is a signal to *all* OC's

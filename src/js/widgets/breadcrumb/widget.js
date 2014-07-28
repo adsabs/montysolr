@@ -74,7 +74,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
       activate: function(beehive) {
         _.bindAll(this, "onNewQuery", "onRequest", "onResponse", "onAllPubSub");
         var pubsub = beehive.Services.get('PubSub');
-        pubsub.subscribe(pubsub.NEW_QUERY, this.onNewQuery);
+        pubsub.subscribe(pubsub.START_SEARCH, this.onNewQuery);
         pubsub.subscribe(pubsub.DELIVERING_REQUEST, this.onRequest);
         //pubsub.subscribe('all', this.onAllPubSub);
         this.pubsub = pubsub;
@@ -86,7 +86,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
       },
 
       onNewQuery: function(apiQuery, key) {
-        console.log('NEW_QUERY', apiQuery.url(), key);
+        console.log('START_SEARCH', apiQuery.url(), key);
         this.listening = true;
       },
 

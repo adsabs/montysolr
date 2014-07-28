@@ -39,15 +39,15 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
       done();
     });
 
-    it("should trigger a NEW_QUERY when the search-submit button is pressed", function(done) {
+    it("should trigger a START_SEARCH when the search-submit button is pressed", function(done) {
 
       var currentSearch;
 
       var pretendCurrentQuery = new ApiQuery({q:"star"});
 
-      pubsub.publish(key, pubsub.NEW_QUERY, pretendCurrentQuery);
+      pubsub.publish(key, pubsub.START_SEARCH, pretendCurrentQuery);
 
-      pubsub.subscribe(key, pubsub.NEW_QUERY, function(apiQuery) {
+      pubsub.subscribe(key, pubsub.START_SEARCH, function(apiQuery) {
         currentSearch = apiQuery.get("q")[0]
       });
 

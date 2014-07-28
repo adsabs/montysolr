@@ -27,7 +27,7 @@ define([
           if (_.isString(query))
             query = new ApiQuery().load(query);
           var pubsub = this.getBeeHive().Services.get('PubSub');
-          pubsub.publish(pubsub.NEW_QUERY, query);
+          pubsub.publish(pubsub.START_SEARCH, query);
         }
       },
 
@@ -62,7 +62,7 @@ define([
       activate: function (beehive) {
         this.setBeeHive(beehive);
         var pubsub = this.getBeeHive().Services.get('PubSub');
-        pubsub.subscribe(pubsub.NEW_QUERY, _.bind(this.onNewQuery, this));
+        pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.onNewQuery, this));
       }
 
     });

@@ -15,7 +15,7 @@
  * var widget = new MyNewWidget();
  * widget.activate(minsub.beehive.getHardenedInstance());
  *
- * minsub.publish(minsub.NEW_QUERY, new ApiQuery({q: 'star'}));
+ * minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'star'}));
  *
  *
  * You just need to implement a request method, which returns a JSON

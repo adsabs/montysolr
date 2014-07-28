@@ -57,7 +57,7 @@ define(['underscore',
       var pubsub = beehive.Services.get('PubSub');
       this.mediatorPubSubKey = pubsub.getPubSubKey();
 
-      pubsub.subscribe(this.mediatorPubSubKey, pubsub.NEW_QUERY, _.bind(this.startSearchCycle, this));
+      pubsub.subscribe(this.mediatorPubSubKey, pubsub.START_SEARCH, _.bind(this.startSearchCycle, this));
       pubsub.subscribe(this.mediatorPubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
       pubsub.subscribe(this.mediatorPubSubKey, pubsub.GET_QTREE, _.bind(this.getQTree, this));
     },

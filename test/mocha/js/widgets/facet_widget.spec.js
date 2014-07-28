@@ -115,7 +115,7 @@ define([
 
         //$(testId).append(widget.render());
 
-        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
+        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
         expect(widget.dispatchRequest.called).to.be.true;
         expect(widget.processResponse.called).to.be.true;
         expect(widget.processResponse.args[0][0].getApiQuery().url()).to.equal("facet=true&facet.field=author_facet_hier&facet.mincount=1&q=star&rows=20&start=0");
@@ -146,7 +146,7 @@ define([
         sinon.spy(widget, "dispatchNewQuery");
 
         widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
+        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
         $(testId).append($w);
@@ -208,7 +208,7 @@ define([
         sinon.spy(widget, "dispatchNewQuery");
 
         widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
+        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
         $('#test').append($w);
@@ -251,7 +251,7 @@ define([
         sinon.spy(widget, "processFacetResponse");
 
         widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
+        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
 
         var $w = $(widget.render().el);
         $('#test').append($w);
@@ -288,7 +288,7 @@ define([
         });
 
         widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.NEW_QUERY, minsub.createQuery({'q': 'star'}));
+        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
 
         expect(widget.collection.models[0].get('title')).to.be.equal('x/Head, J');
         done();

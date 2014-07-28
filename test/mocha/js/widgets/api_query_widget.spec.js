@@ -113,7 +113,7 @@ define(['js/widgets/api_query/widget', 'js/components/api_query', 'js/services/p
       expect($w.find('#api-query-input').val()).to.equal("boo=baz&foo=bar&woo=waz");
 
       // send a new response trough the pubsub, widget should catch it and display
-      pubsub.trigger(pubsub.NEW_QUERY, new ApiQuery({foo:'bar'}));
+      pubsub.trigger(pubsub.START_SEARCH, new ApiQuery({foo:'bar'}));
 
       expect($w.find('#api-query-input').val()).to.equal("foo=bar");
 
