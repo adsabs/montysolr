@@ -33,7 +33,7 @@ package {
 
 exec {
   'npm_install_grunt':
-    command => 'npm install -g grunt-cli && npm install -g bower',
+    command => 'npm install -g grunt-cli',
     require => Package['nodejs'];
 }
 
@@ -46,14 +46,14 @@ exec {
 
 exec {
   'grunt_cli':
-    command => 'bower --config.interactive=false --allow-root --verbose install && grunt setup',
+    command => 'grunt setup',
     cwd     => '/vagrant/',
     require => Exec['npm_install_grunt'];
 }
 
 exec {
   'link_discovery_vars':
-    command => 'ln -s /vagrant/src/discovery.vars.js.default /vagrant/src/discovery.vars.js',
+    command => 'ln -sf /vagrant/src/discovery.vars.js.default /vagrant/src/discovery.vars.js',
 }
 
 #exec {
