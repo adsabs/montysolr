@@ -63,7 +63,7 @@ define(['marionette',
 
         expect(widget.collection.get("4189917").get("details").highlights[0]).to.eql("External triggers of <em>star</em> formation.");
 
-        expect($w.find('.more-info:last > ul > li:first').html()).to.eql("Diffuse high-energy radiation from regions of massive <em>star</em> formation.");
+        expect($w.find('.more-info:last .s-highlight-list li:first').html()).to.eql("Diffuse high-energy radiation from regions of massive <em>star</em> formation.");
         done();
       });
 

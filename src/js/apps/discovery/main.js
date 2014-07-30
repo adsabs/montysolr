@@ -2,7 +2,10 @@
 define(["config", 'module'], function(config, module) {
 
   // Kick off the application
-  require(["router", 'js/components/application'], function(Router, Application) {
+  require(["router", 'js/components/application',
+      'js/page_managers/abstract_page_controller', 'js/page_managers/results_page_controller',
+      'js/page_managers/landing_page_controller', 'bootstrap'],
+    function(Router, Application, AbstractController, ResultsController, LandingPageController) {
 
     // load the objects/widgets/modules (as specified inside the main config
     // in the section config.main
@@ -33,13 +36,12 @@ define(["config", 'module'], function(config, module) {
       // XXX:rca - this will need to be moved somewhere else (it is getting confusing -- to long)
 
       // create composite widgets
-      var LayoutBuilder = app.getModule('LayoutBuilder');
-      var displayDocs = new LayoutBuilder({widgetTitleMapping : {'abstract' : {widget: app.getWidget('Abstract'), default : true}}});
 
-      var FacetFactory = app.getModule('FacetFactory');
+      var FacetFactory = app.getModule("FacetFactory")
 
+      resultsWidgetDict = {}
 
-      var authorFacets = FacetFactory.makeHierarchicalCheckboxFacet({
+      resultsWidgetDict.authorFacets = FacetFactory.makeHierarchicalCheckboxFacet({
         facetField: "author_facet_hier",
         facetTitle: "Authors",
         openByDefault: true,
@@ -50,7 +52,7 @@ define(["config", 'module'], function(config, module) {
       });
 
       // XXX:rca - another hack
-      authorFacets.handleLogicalSelection = function(operator) {
+      resultsWidgetDict.authorFacets.handleLogicalSelection = function(operator) {
         var q = this.getCurrentQuery();
         var paginator = this.findPaginator(q).paginator;
         var conditions = this.queryUpdater.removeTmpEntry(q, 'SelectedItems');
@@ -100,21 +102,22 @@ define(["config", 'module'], function(config, module) {
         }
       };
 
-      var keywords = FacetFactory.makeBasicCheckboxFacet({
+
+      resultsWidgetDict.keywords = FacetFactory.makeBasicCheckboxFacet({
         facetField: "keyword_facet",
         facetTitle: "Keywords",
         openByDefault: false,
         logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
       });
 
-      var database = FacetFactory.makeBasicCheckboxFacet({
+      resultsWidgetDict.database = FacetFactory.makeBasicCheckboxFacet({
         facetField: "database",
         facetTitle: "Collections",
         openByDefault: true,
         logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
 
       });
-      var data = FacetFactory.makeBasicCheckboxFacet({
+      resultsWidgetDict.data = FacetFactory.makeBasicCheckboxFacet({
         facetField: "data_facet",
         facetTitle: "Data",
         openByDefault: false,
@@ -122,7 +125,7 @@ define(["config", 'module'], function(config, module) {
 
       });
 
-      var vizier = FacetFactory.makeBasicCheckboxFacet({
+      resultsWidgetDict.vizier = FacetFactory.makeBasicCheckboxFacet({
         facetField: "vizier_facet",
         facetTitle: "Vizier Tables",
         openByDefault: false,
@@ -130,20 +133,21 @@ define(["config", 'module'], function(config, module) {
 
       });
 
-      var pub = FacetFactory.makeBasicCheckboxFacet({
+      resultsWidgetDict.pub = FacetFactory.makeBasicCheckboxFacet({
         facetField: "bibstem_facet",
         facetTitle: "Publications",
         openByDefault: false,
         logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]}
       });
-      var bibgroup = FacetFactory.makeBasicCheckboxFacet({
+
+      resultsWidgetDict.bibgroup = FacetFactory.makeBasicCheckboxFacet({
         facetField: "bibgroup_facet",
         facetTitle: "Bib Groups",
         openByDefault: false,
         logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]}
       });
 
-      var grants = FacetFactory.makeHierarchicalCheckboxFacet({
+      resultsWidgetDict.grants = FacetFactory.makeHierarchicalCheckboxFacet({
         facetField: "grant_facet_hier",
         facetTitle: "Grants",
         openByDefault: false,
@@ -153,7 +157,8 @@ define(["config", 'module'], function(config, module) {
         ]
       });
 
-      grants.handleLogicalSelection = function(operator) {
+
+      resultsWidgetDict.grants.handleLogicalSelection = function(operator) {
         var q = this.getCurrentQuery();
         var paginator = this.findPaginator(q).paginator;
         var conditions = this.queryUpdater.removeTmpEntry(q, 'SelectedItems');
@@ -203,8 +208,7 @@ define(["config", 'module'], function(config, module) {
         }
       };
 
-
-      var refereed = FacetFactory.makeBasicCheckboxFacet({
+      resultsWidgetDict.refereed = FacetFactory.makeBasicCheckboxFacet({
         facetField: "property",
         facetTitle: "Refereed Status",
         openByDefault: true,
@@ -239,7 +243,7 @@ define(["config", 'module'], function(config, module) {
 
       });
 
-      refereed.handleLogicalSelection = function(operator) {
+      resultsWidgetDict.refereed.handleLogicalSelection = function(operator) {
         var q = this.getCurrentQuery();
         var paginator = this.findPaginator(q).paginator;
         var conditions = this.queryUpdater.removeTmpEntry(q, 'SelectedItems');
@@ -288,57 +292,98 @@ define(["config", 'module'], function(config, module) {
         }
       };
 
+      resultsWidgetDict.authorFacets.activate(beehive.getHardenedInstance());
+      resultsWidgetDict.database.activate(beehive.getHardenedInstance());
+      resultsWidgetDict.keywords.activate(beehive.getHardenedInstance());
+      resultsWidgetDict.pub.activate(beehive.getHardenedInstance());
+      resultsWidgetDict.bibgroup.activate(beehive.getHardenedInstance());
+      resultsWidgetDict.data.activate(beehive.getHardenedInstance());
+      resultsWidgetDict.vizier.activate(beehive.getHardenedInstance());
+      resultsWidgetDict.grants.activate(beehive.getHardenedInstance());
+      resultsWidgetDict.refereed.activate(beehive.getHardenedInstance());
 
-      _.each(app.getWidget('GraphTabs').widgets, function(w){
+      resultsWidgetDict.results = app.getWidget('Results')
+      resultsWidgetDict.results.activate(beehive.getHardenedInstance());
+
+      resultsWidgetDict.graphTabs = app.getWidget('GraphTabs')
+
+      resultsWidgetDict.searchBar = app.getWidget('SearchBar')
+
+      resultsWidgetDict.queryInfo = app.getWidget('QueryInfo');
+      resultsWidgetDict.graphTabs = app.getWidget('GraphTabs');
+      resultsWidgetDict.queryDebugInfo = app.getWidget('QueryDebugInfo');
+
+
+
+      _.each(resultsWidgetDict.graphTabs.widgets, function(w){
         w.activate(beehive.getHardenedInstance());
       });
-      authorFacets.activate(beehive.getHardenedInstance());
-      database.activate(beehive.getHardenedInstance());
-      keywords.activate(beehive.getHardenedInstance());
-      pub.activate(beehive.getHardenedInstance());
-      bibgroup.activate(beehive.getHardenedInstance());
-      data.activate(beehive.getHardenedInstance());
-      vizier.activate(beehive.getHardenedInstance());
-      grants.activate(beehive.getHardenedInstance());
-      refereed.activate(beehive.getHardenedInstance());
 
-      authorFacets.activate(beehive.getHardenedInstance());
-      database.activate(beehive.getHardenedInstance());
+      var abstract = app.getWidget('Abstract')
+      abstract.activate(beehive.getHardenedInstance())
+      var references = app.getWidget('References');
+      references.activate(beehive.getHardenedInstance())
 
-      $("#top")
-        .append(app.getWidget('SearchBar').render().el);
+      var citations = app.getWidget('Citations')
+      citations.activate(beehive.getHardenedInstance())
 
-      $("#s-middle-col-container")
-        .append(app.getWidget('Results').render().el)
-        .append(displayDocs.render().el);
+      var coreads = app.getWidget('Coreads')
+      coreads.activate(beehive.getHardenedInstance())
 
-      $("#s-facet-container")
-        .append(authorFacets.render().el)
-        .append(database.render().el)
-        .append(refereed.render().el)
-        .append(keywords.render().el)
-        .append(pub.render().el)
-        .append(bibgroup.render().el)
-        .append(data.render().el)
-        .append(vizier.render().el)
-        .append(grants.render().el);
+      var tableOfContents = app.getWidget('TableOfContents')
+      tableOfContents.activate(beehive.getHardenedInstance())
+
+      var similar = app.getWidget('Similar')
+      similar.activate(beehive.getHardenedInstance())
+
+      var pageControllers = {};
+      var bumblebeeHistory = app.getObject("HistoryManager");
+
+      //     all sub-views have their own controllers
+     pageControllers.resultsPage = new ResultsController({widgetDict : resultsWidgetDict, history : bumblebeeHistory});
 
 
-      $("#s-right-col-container")
-        .append(app.getWidget('QueryInfo').render().el)
-        .append(app.getWidget('GraphTabs').render().el)
-        .append(app.getWidget('QueryDebugInfo').render().el);
+     pageControllers.abstractPage = new AbstractController({widgetDict :
+          {abstract : abstract,
+            references :references,
+            citations : citations,
+            coreads : coreads,
+            tableOfContents : tableOfContents,
+            similar : similar,
+            searchBar : resultsWidgetDict.searchBar
+          },
+     history : bumblebeeHistory});
 
-      app.router = new Router();
+     pageControllers.landingPage  = new LandingPageController({widgetDict : {searchBar: resultsWidgetDict.searchBar},
+     history: bumblebeeHistory});
+
+      _.each(pageControllers, function(v, k){
+        v.activate(beehive.getHardenedInstance())
+      });
+
+      app.router = new Router({pageControllers : pageControllers, history : bumblebeeHistory});
       app.router.activate(beehive.getHardenedInstance());
 
-      // Trigger the initial route and enable HTML5 History API support, set the
-      // root folder to '/' by default.  Change in app.js.
-      var histOpts = {}
-      if (conf.root) {
-        histOpts['root'] = conf.root;
-      }
-      Backbone.history.start(histOpts);
+      // Trigger the initial route and enable HTML5 History API support
+
+
+      Backbone.history.start(conf.routerConf);
+//
+
+      $(document).on("scroll", function(){
+        //navbar is currently 40 px height
+        if ($(window).scrollTop() > 40) {
+          $(".s-search-bar-row").addClass("s-search-bar-motion");
+          $("#field-options").hide()
+        }
+        else {
+          $(".s-search-bar-row").removeClass("s-search-bar-motion")
+          $("#field-options").fadeIn()
+        }
+      })
+
+
+
 
     });
 

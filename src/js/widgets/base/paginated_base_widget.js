@@ -14,6 +14,7 @@ define(['backbone', 'marionette', 'js/widgets/base/base_widget',
       initialize: function (options) {
         this.paginator = options.paginator || new Paginator({"start": options.start, "rows": options.rows,
           "startName": options.startName, "rowsName": options.rowsName});
+
         BaseWidget.prototype.initialize.call(this, options)
       },
 

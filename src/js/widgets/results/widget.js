@@ -1,13 +1,13 @@
 /**
  * Widget to display list of result hits - it allows to paginate through them
  * and display details
- * 
+ *
  */
 
 define([
     'underscore',
-    'hbs!./templates/results-container-template',
-    'hbs!./templates/item-template',
+    'hbs!js/widgets/list_of_things/templates/results-container-template',
+    'hbs!js/widgets/list_of_things/templates/item-template',
     'js/widgets/list_of_things/widget'
     ],
 
@@ -19,7 +19,7 @@ define([
 
     var ItemModelClass = ListOfThingsWidget.prototype.ItemModelClass.extend({
       parse: function(doc) {
-        doc['identifier'] = doc.bibcode;
+//        doc['highlights'] = doc.details.highlights;
         return doc;
       }
     });
@@ -50,6 +50,10 @@ define([
               return d + ";";
             }
           })
+        }
+
+        if (data.details){
+          data.highlights = data.details.highlights
         }
         return data
       }
@@ -100,13 +104,13 @@ define([
           var h = {};
 
           if (highlights) {
+
             h = (function () {
 
               var hl = highlights[id];
               var finalList = [];
               //adding abstract,title, etc highlights to one big list
               _.each(_.pairs(hl), function (pair) {
-                var field = pair[0];
                 finalList = finalList.concat(pair[1]);
               });
               finalList = finalList;

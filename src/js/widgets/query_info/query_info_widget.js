@@ -22,12 +22,30 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
         this.model = new queryModel();
       },
 
+      events : {
+        "click #show-more-query-data" : "toggleAdditionalInfo"
+      },
+
+      toggleAdditionalInfo : function(ev){
+        var $add = $("#additional-query-data");
+        var $button = $("#show-more-query-data");
+        $add.toggleClass("hide");
+
+        if ($add.hasClass("hide")){
+          $button.text("more...")
+        }
+        else {
+          $button.text("less...")
+        }
+
+      },
+
       render: function() {
         this.$el.html(this.template(this.model.attributes))
         return this
       },
 
-      template: queryInfoTemplate,
+      template: queryInfoTemplate
     });
 
     var Widget = BaseWidget.extend({
