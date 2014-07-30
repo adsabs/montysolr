@@ -1,37 +1,10 @@
 define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 'hbs!./templates/graph'],
   function (Marionette, d3, $, $ui, BaseItemView, FacetGraphTemplate) {
 
-  var Buffer = function (maxLength) {
-    this.commands = [];
-    this.maxLength = maxLength
-  };
-
-  Buffer.prototype.add = function (fn, data) {
-    // Adds a command to the buffer, and executes it if it's
-    // the only command to be ran.
-    var commands = this.commands;
-    if (commands.length <= this.maxLength) {
-      commands.push({fn: fn, data: data});
-    }
-    else {
-      commands.shift();
-      commands.push({fn: fn, data: data});
-
-    }
-    if (this.commands.length == 1) fn(data, next);
-
-    // Moves onto the next command in the buffer.
-    function next() {
-      commands.shift();
-      if (commands.length) commands[0].fn(commands[0].data, next);
-    }
-  };
 
   var ZoomableGraphView = BaseItemView.extend({
 
     initialize   : function (options) {
-
-      _.bindAll(this, "triggerSortChange");
 
       if (!(options.xAxisTitle && options.title)) {
         //throw new Error("Missing key information: x axis title or graph title")
@@ -115,7 +88,6 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 
     events: {
       "click .apply"              : "submitFacet",
       "blur input[type=text]"     : "triggerGraphChange",
-      "change .sort-options input": "addSortChangeToQueue",
 
     },
 
@@ -134,73 +106,6 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui', 'js/widgets/base/item_view', 
       this.$(".slider").slider("values", [val1, val2]);
 
       this.graphChange(val1, val2)
-
-    },
-
-    addSortChangeToQueue: function (e) {
-      this.sortAnimationQueue = this.sortAnimationQueue || new Buffer(1)
-      //console.log("change request",this.sortAnimationQueue.commands )
-
-      this.sortAnimationQueue.add(this.triggerSortChange, e)
-    },
-
-    triggerSortChange: function (e, next) {
-
-      var data, x, xAxis, innerChart, sortVal;
-      var transition, delay, x0;
-
-      sortVal = $(e.target).val();
-      if (sortVal === "size") {
-        //if people redraw the graph by narrowing it
-        this.sizeSort = true;
-      }
-      else {
-        this.sizeSort = false;
-      }
-
-      data = this.currentData.binnedData;
-      x = this.currentData.x;
-      xAxis = this.currentData.xAxis;
-      xLabels = this.currentData.xLabels;
-      innerChart = d3.select(this.el).select(".inner-chart");
-
-      //from http://bl.ocks.org/mbostock/3885705
-      x0 = x.domain(data.sort(sortVal == "size" ? function (a, b) {
-        return a.y - b.y;
-      } : function (a, b) {
-        var retrieveNum = function (s) {
-          var l = s.split("-");
-          return parseInt(l[l.length - 1])
-        };
-        return d3.ascending(retrieveNum(a.x), retrieveNum(b.x));
-      }).map(function (d) {
-        return d.x;
-      })).copy();
-
-      transition = innerChart.transition().duration(800);
-
-      delay = function (d, i) {
-        return i * 50
-      };
-
-      transition.selectAll(".bar").delay(delay).attr("transform", function (d) {
-        return "translate(" + x0(d.x) + ",0)";
-      })
-
-      transition.select(".x-axis").call(xAxis).selectAll("g").delay(function (d, i) {
-        // find d's position in d axis list
-        var pos = xLabels.indexOf(d)
-        return pos * 50
-      }).selectAll("text")
-        .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em")
-        .each("end", function (d, i) {
-          if (i === data.length -1 ) {
-            setTimeout(next, 100)
-          }
-        });
-
     },
 
     buildSlider: function () {
