@@ -1,6 +1,6 @@
 /**
  * Provides the nervous system of the application. There may exist
- * different breads of this animal and application can choose
+ * different breeds of this animal and application can choose
  * which ones to use.
  *
  * The intended usage is this:

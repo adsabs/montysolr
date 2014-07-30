@@ -41,6 +41,8 @@ define(['backbone', 'marionette',
    *
    */
 
+    //adding "isRendered" flag to Marionette ItemView
+
 
   var BaseWidget = Marionette.Controller.extend({
 

@@ -1,19 +1,20 @@
-<h4>Current Query Info</h4>
  <div id="info-changeable hide">
-{{#if currentQuery}}
-<p><b>Query:</b> {{currentQuery}}</p>
-{{/if}}
-{{#if facets}}
-<p><b>Filters :</b> {{facets}}</p>
-{{/if}}
-{{#if sort}}
-<p><b>Sort :</b>{{sort}} </p>
-{{/if}}
 {{#if numFound}}
-<p><b>Total Number of Results:</b> {{numFound}}</p>
+<b>{{numFound}}</b> results {{/if}} for <b>Query:</b> <em>{{currentQuery}}</em>
+     {{#if facets}}
+     <br/><b>Filter:</b> <em>{{facets}}</em>
 {{/if}}
-{{#if citations}}
-<p><b>Total Number of Citations:</b> {{citations.sum}} (<span title="Something for nerds among us: mu={{citations.mean}}, stdev={{citations.stddev}}, missingCount={{citations.missing}}, max={{citations.max}}, min={{citations.min}}">*</span>)</p>
-{{/if}}
+
+     <div><button class="btn btn-link btn-xs" id="show-more-query-data">more...</button></div>
+
+     <div class="hide" id="additional-query-data">
+         {{#if sort}}
+         <p><b>Sort :</b>{{sort}} </p>
+         {{/if}}
+
+         {{#if citations}}
+         <p><b>Total citations:</b> {{citations.sum}} (<span title="Something for nerds among us: mu={{citations.mean}}, stdev={{citations.stddev}}, missingCount={{citations.missing}}, max={{citations.max}}, min={{citations.min}}">*</span>)</p>
+         {{/if}}
+     </div>
 
  </div>

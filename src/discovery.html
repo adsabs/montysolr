@@ -8,37 +8,74 @@
 
   <title>Bumblebee discovery</title>
 
-  <link rel="stylesheet" href="./styles/css/styles.css" />
-  <link rel="stylesheet" href="./styles/css/smoothness/jquery-ui-1.10.4.custom.min.css" />
+  <link rel="stylesheet" href="/styles/css/styles.css" />
+  <link rel="stylesheet" href="/styles/css/smoothness/jquery-ui-1.10.4.custom.min.css" />
 
-
+   <!--trying out some web fonts just for fun-->
+    <link href='http://fonts.googleapis.com/css?family=Vollkorn' rel='stylesheet' type='text/css'>
 </head>
 
 <body>
-<div class="container-fluid">
+<div class="container-fluid" id="app-container">
     <div class="row">
-        <div class="col-md-12" id="header" style="height:20px;"><br/></div>
-        <div class="row">
-            <div class="col-md-12" id="top" style="margin-bottom:20px"></div>
-        </div>
-        <div class="row">
-            <div class="col-md-2 col-sm-4 hidden-xs" id="left-column">
-                <div id="s-facet-container"></div>
-            </div>
-            <div class="col-md-7  col-md-offset-0 col-sm-7  col-sm-offset-1 col-xs-offset-1" id="middle-column">
-                <div id="s-middle-col-container"></div>
-            </div>
-            <div class="col-md-3 hidden-sm hidden-xs" id="right-column">
-                <div id="s-right-col-container"></div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12" id="bottom">This is experimental interface, please do not link! For production, go to: <a href="http://labs.adsabs.harvard.edu/adsabs/">ADS2.0</a></div>
-        </div>
+        <nav class="navbar navbar-inverse" role="navigation">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">ADS</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Link</a></li>
+                        <li><a href="#">Link</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">I want to... <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                (non operational)
+                                <li><a href="#">Copy paste a group of authors/bibcodes</a></li>
+                                <li><a href="#">Use the classic ads form</a></li>
+                                <li><a href="#">etc</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#">Link</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
     </div>
+        <div id="body-template-container"></div>
+        <div class="row">
+            <div class="col-md-12" id="bottom"></div>
+        </div>
+  </div>
 
 
-    <script data-main="./discovery.config" src="./libs/requirejs/require.js"></script>
+    <script data-main="/discovery.config" src="/libs/requirejs/require.js"></script>
 
 
 </body>
