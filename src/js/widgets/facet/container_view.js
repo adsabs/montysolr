@@ -3,7 +3,8 @@ define(['backbone', 'marionette',
     'js/mixins/widget_pagination',
     'js/components/paginator',
     'js/widgets/facet/item_view',
-    'hbs!./templates/tooltip'
+    'hbs!./templates/tooltip',
+    'hbs!./templates/widget-container'
   ],
   function (Backbone,
     Marionette,
@@ -11,7 +12,8 @@ define(['backbone', 'marionette',
     WidgetPagination,
     Paginator,
     BaseItemView,
-    FacetTooltipTemplate
+    FacetTooltipTemplate,
+    WidgetContainerTemplate
     ) {
 
     var FacetContainerView = ContainerView.extend({
@@ -55,7 +57,9 @@ define(['backbone', 'marionette',
 
       //id: "search-results",
       itemView: BaseItemView,
-      itemViewContainer: ".widget-body",
+      template: WidgetContainerTemplate,
+
+      itemViewContainer:".widget-body",
 
       events: function () {
         var addEvents;
@@ -101,8 +105,9 @@ define(['backbone', 'marionette',
         }
         if (this.logicOptions) {
           this.refreshLogicTooltip();
-          this.enableLogic();
           this.closeLogic();
+          this.enableLogic();
+
         }
       },
 
@@ -112,10 +117,11 @@ define(['backbone', 'marionette',
 
       displayMore: function(howMany) {
         //show hidden data
-        var hidden = this.$('.widget-body:first').children('.item-view').filter('.hide');
-        this.$('.widget-body:first').children('.item-view').filter('.hide').slice(0,howMany).removeClass('hide');
-        if (hidden.length > 0) {
-          var offset = this.collection.models.length - hidden.length;
+        var $hidden = this.$('.widget-body:first').children('.item-view').filter('.hide'),
+            hiddenLength = $hidden[0] ? $hidden[0].length : undefined;
+            $hidden.slice(0,howMany).removeClass('hide');
+        if (hiddenLength > 0) {
+          var offset = this.collection.models.length - hiddenLength;
           var max = this.children.length-offset;
           for (var i=0;i<howMany && i<max;i++) {
             this.children.findByIndex(offset+i).trigger('treeNodeDisplayed');

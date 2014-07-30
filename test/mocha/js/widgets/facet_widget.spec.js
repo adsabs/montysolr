@@ -136,7 +136,7 @@ define([
             displayNum: 3,
             maxDisplayNum: 10,
             openByDefault: true,
-            showOptions: true
+            showOptions: true,
 
           })
         });
@@ -152,7 +152,7 @@ define([
         $(testId).append($w);
 
         // options are there and visible
-        expect($w.find('.widget-options.bottom').hasClass('hide')).to.be.false;
+        expect($w.find('.widget-options.bottom:first').hasClass('hide')).to.be.false;
         expect($w.find('.item-view').length).to.be.equal(5);
         expect($w.find('.item-view').not('.hide').length).to.be.equal(3);
 
@@ -176,7 +176,7 @@ define([
 
 
             // which updates the view (we should see 3 new, 2 hidden new items)
-            expect($w.find('.widget-options.bottom').hasClass('hide')).to.be.false;
+            expect($w.find('.widget-options.bottom:first').hasClass('hide')).to.be.false;
             expect($w.find('.item-view').length).to.be.equal(5);
             expect($w.find('.item-view').filter('.hide').length).to.be.equal(2);
 

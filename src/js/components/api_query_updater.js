@@ -2,14 +2,14 @@
  * Created by rchyla on 5/24/14.
  *
  * Set of utilities for manipulating ApiQuery object. These are mainly
- * useful for widgets that often do the same opearations with the
+ * useful for widgets that often do the same operations with the
  * query.
  *
  * The object must be initialized with an 'identifier' -- this identifier
  * will represent a context; so we'll be touching all elements that
  * belong to the context
  *
- * TODO: need to distinguish globalOpearator from 'operator' inside clauses
+ * TODO: need to distinguish globalOperator from 'operator' inside clauses
  * TODO: the 'globalOperator' joins clauses; 'operator' joins elements of the
  * TODO: clauses
  *

@@ -90,11 +90,13 @@ define(['backbone', 'marionette',
       _onRender: function() {
         if (this.openByDefault) {
           this.toggleWidget();
+
+          if (this.showOptions) {
+            this.$(".widget-options:first").removeClass("hide");
+            this.$(".widget-options.bottom:first").removeClass("hide");
+          }
         }
-        if (this.showOptions) {
-          this.$(".widget-options:first").removeClass("hide");
-          this.$(".widget-options.bottom:first").removeClass("hide");
-        }
+
       },
 
       /**
@@ -111,13 +113,16 @@ define(['backbone', 'marionette',
           $caret.removeClass("item-open");
           $caret.addClass("item-closed");
           this.$(".widget-body:first").addClass("hide");
-          this.$(".widget-options:first").addClass("hide")
+          this.$(".widget-options.bottom:first").addClass("hide");
+          this.$(".widget-options.top:first").addClass("hide")
+
         }
         else {
           $caret.removeClass("item-closed");
           $caret.addClass("item-open");
           this.$(".widget-body:first").removeClass("hide");
-          this.$(".widget-options:first").removeClass("hide")
+          this.$(".widget-options.bottom:first").removeClass("hide");
+          this.$(".widget-options.top:first").removeClass("hide");
 
         }
       },

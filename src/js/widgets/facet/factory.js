@@ -211,6 +211,8 @@ define([
           return q;
         },
         processResponse: function (apiResponse) {
+          this.setCurrentQuery(apiResponse.getApiQuery());
+
           //console.log(JSON.stringify(apiResponse.getApiQuery().toJSON()));
           var view = this.view;
           var coll = this.collection;

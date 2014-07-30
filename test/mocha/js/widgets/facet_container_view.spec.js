@@ -60,7 +60,7 @@ define([
           var $v = $(view.render().el);
           $('#test-area').append($v);
 
-          expect($v.find('.widget-options.bottom').hasClass('hide')).to.be.false;
+          expect($v.find('.widget-options.bottom').hasClass('hide')).to.be.true;
           expect($v.find('.widget-options.top').hasClass('hide')).to.be.false;
 
           // expect 5 items in the facet (all hidden)
