@@ -3,21 +3,20 @@
         <dl>
 
             {{#if authorAff.length}}
-            <dt>Authors
+            <dt><span class="no-display">Authors</span>
                 {{#if hasAffiliation}}
                 <button class="btn btn-link" id="toggle-aff"> Show affiliations</button>
                 {{/if}}
             </dt>
             <dd>
-
                 <div id="authors-and-aff">
                     <ul class="list-inline">
                     {{#each authorAff}}
                     {{#if @last}}
-                    <li class="author">{{this.[0]}} <span class="affiliation hide">(<i>{{this.[1]}}</i>)</span></li>
+                    <li class="author">{{this.[0]}}<span class="affiliation hide">(<i>{{this.[1]}}</i>)</span></li>
 
                     {{else}}
-                    <li class="author">{{this.[0]}} <span class="affiliation hide">(<i>{{this.[1]}}</i>);</span></li>
+                    <li class="author">{{this.[0]}}<span class="affiliation hide">(<i>{{this.[1]}}</i>)</span>;</li>
 
                     {{/if}}
                     {{/each}}
@@ -33,12 +32,10 @@
             </dd>
             {{/if}}
 
-            <br/>
-
             {{#if pub_raw}}
-            <dt>Publication</dt>
+            <dt class="no-display">Publication</dt>
             <dd>
-                <div id="article-publication">{{pub_raw}}</div>
+                <div id="article-publication"><em>{{pub_raw}}</em></div>
             </dd>
             {{/if}}
             {{#if pubdate}}
@@ -51,7 +48,7 @@
             <br/>
 
             {{#if abstract}}
-            <dt>Abstract</dt>
+            <dt class="no-display">Abstract</dt>
             <dd>
                 <div id="abstract-content">
                     {{{abstract}}}

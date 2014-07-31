@@ -41,7 +41,8 @@ define([
           bibcode: undefined,
           pub_raw: undefined,
           doi: undefined,
-          details: undefined
+          details: undefined,
+          links_data : undefined
         }
       },
 
@@ -74,8 +75,105 @@ define([
        * @returns {*}
        */
       serializeData: function () {
-        var data = this.model.toJSON();
+        var data ,links, shownAuthors, ld, bib;
+        links = [];
+        data = this.model.toJSON();
+        console.log(data)
+        bib = data.bibcode;
+
+        if (data.author && data.author.length > 3) {
+          data.extraAuthors = data.author.length - 3;
+          shownAuthors = data.author.splice(0, 3);
+        } else if (data.author) {
+          shownAuthors = data.author
+        }
+
+        if (data.author) {
+          var l = shownAuthors.length-1;
+          data.authorFormatted = _.map(shownAuthors, function (d, i) {
+            if (i == l || l == 1) {
+              return d; //last one, or only one
+            } else {
+              return d + ";";
+            }
+          })
+        }
+         //if details/highlights
+        if (data.details) {
+          data.highlights = data.details.highlights
+        }
+        if (data.ids_data){
+          console.log("ids data", data.ids_data)
+        }
+
+        if(data["[citations]"]){
+          if (data["[citations]"].num_citations >= 1){
+
+            links.push({"letter": "C", "link":"#abs/"+ bib + "/citations" })
+
+          }
+          if (data["[citations]"].num_references >= 1){
+            links.push({"letter": "R", "link": "#abs/"+ bib + "/references"})
+          }
+        }
+
+        if (data.reader && data.reader.length >=1 ){
+          debugger;
+          links.push({"letter": "U", "link":"#abs/"+ bib + "/coreads" })
+        }
+
+        if (data.links_data){
+
+          ld = _.map(data.links_data, function(d){
+            return JSON.parse(d)
+          });
+
+          _.each(ld, function(l){
+            var link = this.adsUrlRedirect(l.type, bib);
+            if (link){
+              var letter = l["type"][0].toUpperCase(0);
+              links.push( {"letter": letter, "link" : link})
+            }
+          }, this);
+
+        }
+
+        if (links) {
+          data.links = _.unique(links, false, function(dict){return dict.link});
+        }
         return data;
+
+      },
+      //function that can turn links_data into a list of actual links
+
+      adsUrlRedirect : function(type, id){
+
+        var adsClassicBaseUrl = "http://adsabs.harvard.edu/";
+
+        switch(type){
+          case "doi":
+            return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/" + id
+          case "data":
+            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=DATA"
+          case "electr":
+            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=EJOURNAL"
+          case "gif":
+            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=GIF"
+          case "article":
+            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=ARTICLE"
+          case "preprint":
+            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=PREPRINT"
+          case "arXiv":
+            return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/" + id
+          case "simbad":
+            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode="+ id + "&link_type=SIMBAD"
+          case "ned":
+            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=NED"
+          case "openurl":
+            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=OPENURL"
+
+        }
+
       },
 
       events: {
@@ -255,7 +353,7 @@ define([
 
       //will be requested in composeRequest
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year'
+        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year,links_data,ids_data,[citations],reader'
       },
 
       dispatchRequest: function (apiQuery) {
@@ -366,9 +464,6 @@ define([
        * @returns {*}
        */
 
-      defaultQueryArguments: {
-        fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year'
-      },
 
       parseResponse: function (apiResponse, orderNum) {
         var raw = apiResponse.toJSON();
@@ -386,6 +481,7 @@ define([
 
         var keys = _.map(this.defaultQueryArguments.fl.split(','), function (v) {
           return v.trim()
+          console.log(keys)
         });
 
         var docs = _.map(raw.response.docs, function (doc) {

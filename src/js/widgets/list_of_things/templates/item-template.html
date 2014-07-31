@@ -20,7 +20,16 @@
             </p>
         </div>
         <div class="col-sm-4">
-            <span class="pull-right">[options go here]</span>
+
+            {{#if links}}
+
+            <span class="pull-right">[
+              {{#each links}}
+               <a href="{{{this.link}}}" target = "_blank">{{this.letter}}</a>
+            {{/each}}]
+            </span>
+
+            {{/if}}
 
         </div>
 

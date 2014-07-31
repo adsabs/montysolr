@@ -29,34 +29,8 @@ define([
     });
 
     var ItemViewClass = ListOfThingsWidget.prototype.ItemViewClass.extend({
-      template: ItemTemplate,
-      serializeData: function () {
-        var data = this.model.toJSON();
-        var shownAuthors;
+      template: ItemTemplate
 
-        if (data.author && data.author.length > 3) {
-          data.extraAuthors = data.author.length - 3;
-          shownAuthors = data.author.splice(0, 3);
-        } else if (data.author) {
-          shownAuthors = data.author
-        }
-
-        if (data.author) {
-          var l = shownAuthors.length-1;
-          data.authorFormatted = _.map(shownAuthors, function (d, i) {
-            if (i == l || l == 1) {
-              return d; //last one, or only one
-            } else {
-              return d + ";";
-            }
-          })
-        }
-
-        if (data.details){
-          data.highlights = data.details.highlights
-        }
-        return data
-      }
     });
 
     var CollectionViewClass = ListOfThingsWidget.prototype.CollectionViewClass.extend({

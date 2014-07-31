@@ -94,12 +94,12 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         if (model.get("originalSearchResult") === true){
 
           index = this.collection.indexOf(model);
-          prevBib = this.collection.filter(function(model, i){return i == index-1})[0]
-          nextBib = this.collection.filter(function(model, i){return i == index+1})[0]
+          prevBib = _(this.collection.findWhere({originalSearchResult : true})).filter(function(model, i){return i == index-1})[0]
+          nextBib =  _(this.collection.findWhere({originalSearchResult : true})).filter(function(model, i){return i == index+1})[0]
         }
 
-        prevBib = (prevBib && prevBib.get("originalSearchResult"))? prevBib.get("bibcode") : undefined;
-        nextBib = (nextBib && nextBib.get("originalSearchResult"))? nextBib.get("bibcode") : undefined;
+        prevBib = prevBib ? prevBib.get("bibcode") : undefined;
+        nextBib = nextBib ? nextBib.get("bibcode") : undefined;
 
         this.$el.html(this.template(
           {index : index+1, bibcode: model.get("bibcode"), title: model.get("title"), prev: prevBib, next : nextBib}
