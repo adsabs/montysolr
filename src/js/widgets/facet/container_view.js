@@ -118,7 +118,7 @@ define(['backbone', 'marionette',
       displayMore: function(howMany) {
         //show hidden data
         var $hidden = this.$('.widget-body:first').children('.item-view').filter('.hide'),
-            hiddenLength = $hidden[0] ? $hidden[0].length : undefined;
+            hiddenLength = $hidden.length;
             $hidden.slice(0,howMany).removeClass('hide');
         if (hiddenLength > 0) {
           var offset = this.collection.models.length - hiddenLength;
