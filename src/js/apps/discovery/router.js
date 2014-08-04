@@ -74,14 +74,6 @@ define([
       viewAbstract: function (bibcode, subView) {
 
         if (bibcode){
-<<<<<<< HEAD
-=======
-          //it's the default abstract view
-          console.log("subView!", subView)
-          this.pageControllers.abstractPage.showPage(bibcode, subView, fromWithinPage);
-          this.history.addEntry({"abstractPage": {bibcode: bibcode, subView : subView}})
-        }
->>>>>>> some links work
 
           this.history.addEntry({page: "abstractPage", data:  bibcode, subPage: subView})
 

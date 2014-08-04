@@ -120,6 +120,9 @@ define([
 
         })
 
+        //getting links data from LinkGenerator Mixin
+        var docs = this.parseLinksData(docs);
+
         return docs
 
       },

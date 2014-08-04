@@ -37,6 +37,9 @@ module.exports = function(grunt) {
       // this is necessary to make the library AMD compatible
       convert_dsjslib: {
         cmd: 'node node_modules/requirejs/bin/r.js -convert src/libs/dsjslib src/libs/dsjslib'
+      },
+      move_lesshat {
+        cmd : 'cp bower_components/lesshat/build/lesshat.less src/styles/less/mixins.less'
       }
     },
 
@@ -165,7 +168,7 @@ module.exports = function(grunt) {
       },
 
       server: {
-        files: ['./src/js/**/*.js', './src/*.js', './src/*.html', './server.js'],
+        files: ['./src/js/**/*.js', './src/*.js', './src/*.html', './server.js', './src/styles/css/*.css'],
         tasks: ['env:dev', 'express:dev']
       },
 
@@ -178,13 +181,15 @@ module.exports = function(grunt) {
         files: ['./src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
         tasks: ['express:dev', 'mocha_phantomjs:web_testing', 'watch:web_testing']
       },
-      less_compile: {
-        files: ['*.less'],
+      styles: {
+        files: ['./src/styles/less/*.less'], // which files to watch
         tasks: ['less']
-
       }
     },
 
+    concurrent: {
+        serverTasks: ['watch:server', 'watch:styles'],
+    },
     //**
     //* PhantomJS is a headless browser that runs our tests, by default it runs <mocha/discovery>.spec.html
     //* if you need to change the tested file: grunt --testname=foo ....
@@ -264,6 +269,12 @@ module.exports = function(grunt) {
       }
     },
 
+    coveralls: {
+      options: {
+        src: ['src/js/**/*.js'],
+        coverage_dir: 'test/coverage/PhantomJS 1.9.2 (Linux)/'
+      }
+    },
 
     // concatenates all javascript into one big minified file (of limited 
     // use for now)
@@ -279,24 +290,15 @@ module.exports = function(grunt) {
 
     less: {
       development: {
+        options : {
+           compress: true,
+          yuicompress: true,
+          optimization: 2
+        },
         files: {
           'src/styles/css/styles.css': 'src/styles/less/manifest.less'
         }
       }
-      //     production: {
-      //         options: {
-      //             // paths: ["assets/css"],
-      //             // cleancss: true,
-      //             // modifyVars: {
-      //             //     imgPath: '"http://mycdn.com/path/to/images"',
-      //             //     bgColor: 'red'
-      //             // }
-      //         },
-      //         files: {
-      //             'src/styles/css/styles.css': 'src/styles/less/manifest.less',
-
-      //         }
-      //     }
     }
 
   });
@@ -340,6 +342,8 @@ module.exports = function(grunt) {
   //npm install
   grunt.loadNpmTasks('grunt-install-dependencies');
 
+  grunt.loadNpmTasks('grunt-concurrent');
+
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
     ['install-dependencies', 'bower-setup', 'less', '_conditional_copy']);
@@ -365,7 +369,7 @@ module.exports = function(grunt) {
   ]);
 
   // starts a web server (automatically reloading)
-  grunt.registerTask('server', ['env:dev',  "less", 'express:dev', 'watch:server', 'watch:less_compile']);
+  grunt.registerTask('server', ['env:dev',  "less", 'express:dev', 'concurrent:serverTasks']);
 
   // runs tests in a web server (automatically reloading)
   grunt.registerTask('test:web', ['env:dev', 'watch:web_testing']);
@@ -376,6 +380,6 @@ module.exports = function(grunt) {
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
 
-  grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib']);
+  grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_lesshat']);
 
 };

@@ -1,3 +1,6 @@
+//font awesome
+@import '../fonts/font-awesome-4.1.0/less/font-awesome';
+
 @import 'ads-variables';
 @import 'mixins';
 
@@ -82,6 +85,7 @@ select:focus {
 //the following weird classes are to get 100% height columns
 //in results page
 
+
 .s-left-column, .s-right-column {
   padding-top: 10px;
 }
@@ -115,9 +119,7 @@ select:focus {
 }
 
 .s-motion-shadow {
-  -webkit-box-shadow:  0 2px 2px -1px rgba(0,0,0,.1);
-  -moz-box-shadow:  0 2px 2px -1px rgba(0,0,0,.1);
-  box-shadow:  0 2px 2px -1px rgba(0,0,0,.1);
+  .box-shadow("0 2px 2px -1px rgba(0,0,0,.1)");
   background-color: rgba( 255, 255, 255, 0.9);
 }
 
@@ -139,18 +141,18 @@ select:focus {
 }
 
 
-.s-middle-column {
-  border-right:  @border-default;;
-  border-left: @border-default;;
+.s-results-page-layout .s-middle-column {
+  border-right:  @border-default;
+  border-left: @border-default;
 
 }
 
 .s-results-page-layout .s-left-column {
-background-color: lighten(#eee, 3%)
+  .lh-background-image(linear-gradient(to bottom, lighten(@gray-lighter, 2%) 0%,#FFFFFF 100%))
 }
 
 .s-results-page-layout .s-right-column {
-  background-color: lighten(#eee, 3%)
+  .lh-background-image(linear-gradient(to bottom, lighten(@gray-lighter, 2%) 0%,#FFFFFF 100%))
 
 }
 
@@ -220,14 +222,26 @@ background-color: lighten(#eee, 3%)
 
 .s-item-closed {
   color: @gray-light;
-  .glyphicon;
-  .glyphicon-chevron-right;
+  .fa;
+  .fa-2x;
+  position: relative;
+  top: 3px;
+  &:before {
+    content: @fa-var-angle-right;
+
+  }
 }
 
 .s-item-open {
   color: @gray-light;
-  .glyphicon;
-  .glyphicon-chevron-down;
+  .fa;
+  .fa-2x;
+  position: relative;
+  top: 3px;
+  &:before {
+    content: @fa-var-angle-down;
+
+  }
 
 }
 
@@ -289,6 +303,65 @@ background-color: lighten(#eee, 3%)
 
 // results list css
 
+
+//icons for links
+
+.s-icon-draw-attention {
+  color: darken(@brand-info, 5%) !important;
+
+}
+
+.s-link-details {
+  position:absolute;
+  padding: 10px 15px 0px 15px;
+  min-width: 125px;
+  background-color: white;
+  border: @border-light-default;
+  .lh-border-radius(@border-radius-base);
+  .box-shadow(0 1px 5px @gray-lighter);
+  z-index: 500;
+}
+
+.letter-icon {
+
+  display: inline-block;
+  margin-right: 5%;
+  margin-top: 0px;
+  width: 5%;
+
+  i {
+    cursor: pointer !important;
+    color : darken(@brand-info, 20%);
+  }
+
+}
+
+
+.s-data-icon {
+  .fa;
+  &:before {
+    content : @fa-var-database;
+  }
+
+}
+
+.s-list-icon {
+  .fa;
+  &:before {
+    content : @fa-var-list-alt;
+  }
+
+}
+
+.s-text-icon {
+  .fa;
+  &:before {
+    content : @fa-var-book;
+  }
+}
+
+
+
 .s-identifier a {
   color: @gray-dark;
 }
@@ -298,7 +371,7 @@ background-color: lighten(#eee, 3%)
   }
 
 .s-result-item-buffer {
-  margin-top: 15px;
+  margin-bottom: 15px;
 
 }
 
@@ -320,26 +393,6 @@ background-color: lighten(#eee, 3%)
   padding-left: .5%;
 }
 
-.s-more-info-quote {
-  font-size: 45px;
-  color: @gray-light;
-
-}
-
-.s-more-info-quote.right {
-  float: right;
-  position: relative;
-  top: -20px;
-  left: -14px;
-  height: 15px;
-
-}
-
-.s-more-info-quote.left {
-  float:left;
-  position: relative;
-  left: -1%;
-}
 
 .s-highlight-list {
   padding: 20px 0px 0px 10px
@@ -351,7 +404,6 @@ background-color: lighten(#eee, 3%)
 
     em {
       font-weight: bold;
-      font-size: larger;
     }
 
     li {
@@ -362,6 +414,12 @@ background-color: lighten(#eee, 3%)
       padding-left: 2%;
 
     }
+  blockquote {
+    margin: 0em 2em;
+    padding:.5em .5em;
+    font-size: 1em}
+
+
   }
 
 .s-checkbox-col {
@@ -369,25 +427,29 @@ background-color: lighten(#eee, 3%)
 }
 
 .s-results-controls {
-  padding: 3%;
+  padding: 2%;
   min-width: 83 px;
-//  background-image: linear-gradient(to bottom, lighten(@gray-light, 22%) 0, lighten(@gray-lighter, 6%) 100%);
 
+}
 
-
+.s-open-access {
+  color: @brand-success !important;
 }
 
 .s-results-list {
 
-  margin-top: 20px;
-  margin-left:2%;
-  margin-right: 7%;
-
-
-    label {
-      font-weight: initial
-    }
+  label {
+    font-weight: initial
   }
+}
+
+#results-page-layout {
+  .s-results-list {
+    padding-left: 6%;
+
+  }
+
+}
 
   .field-options {
     min-width: 120px;
@@ -414,6 +476,13 @@ background-color: lighten(#eee, 3%)
 
 //facets
 
+
+.s-filter-image {
+  .fa;
+  &:before {
+    content : @fa-var-filter;
+  }
+}
 
   .size-graphic-container {
     width: 77%;
@@ -487,6 +556,10 @@ background-color: lighten(#eee, 3%)
   top: -33px;
   left: 75%;
   z-index: 5;
+
+  button {
+    padding: 0px;
+  }
 }
 
 .s-dropdown-menu {
@@ -603,6 +676,9 @@ background-color: lighten(#eee, 3%)
     pointer-events: all;
     fill: @refereed;
 
+.chart .bar {
+  stroke: white;
+  fill: lighten(@brand-primary, 20%);
 }
 
 .chart .x-axis .active text {
@@ -662,6 +738,12 @@ background-color: lighten(#eee, 3%)
 }
 
 //end facets
+
+//query-info
+
+.s-info-changeable {
+  margin-left: 21%;
+}
 
 
 // search bar css
@@ -997,6 +1079,27 @@ div.query-builder > .rules-group-container {
 
 //  styling for abstract page
 
+.s-open-access-image {
+  .fa;
+  .fa-lg;
+  &:before{
+  content: @fa-var-unlock-alt;
+  }
+  color: @brand-success;
+}
+
+.s-doi {
+  dt, dd {
+    display: inline-block;
+  }
+}
+
+.s-toggle-aff {
+  padding : 0px;
+  position: relative;
+  top: -12px;
+}
+
 .s-abstract-title-bibcode {
   margin: 0px;
 }
@@ -1023,8 +1126,8 @@ div.query-builder > .rules-group-container {
 .s-abstract-title-info-row {
   font-style: italic;
   font-size: 16px;
-  color: @brand-primary;
   padding-top: 20px;
+  font-variant: all-small-caps;
 }
 
 .abstract-title {

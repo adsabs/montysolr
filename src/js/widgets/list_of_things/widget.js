@@ -18,7 +18,8 @@ define([
     'js/widgets/base/paginated_base_widget',
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
-    'js/mixins/widget_pagination'],
+    'js/mixins/widget_pagination',
+    'js/mixins/link_generator_mixin'],
 
   function (Marionette,
     Backbone,
@@ -27,7 +28,8 @@ define([
     PaginatedBaseWidget,
     ItemTemplate,
     ResultsContainerTemplate,
-    WidgetPagination) {
+    WidgetPagination,
+    LinkGenerator) {
 
     var ItemModel = Backbone.Model.extend({
       defaults: function () {
@@ -75,11 +77,8 @@ define([
        * @returns {*}
        */
       serializeData: function () {
-        var data ,links, shownAuthors, ld, bib;
-        links = [];
+        var data ,shownAuthors;
         data = this.model.toJSON();
-        console.log(data)
-        bib = data.bibcode;
 
         if (data.author && data.author.length > 3) {
           data.extraAuthors = data.author.length - 3;
@@ -102,86 +101,30 @@ define([
         if (data.details) {
           data.highlights = data.details.highlights
         }
-        if (data.ids_data){
-          console.log("ids data", data.ids_data)
-        }
 
-        if(data["[citations]"]){
-          if (data["[citations]"].num_citations >= 1){
-
-            links.push({"letter": "C", "link":"#abs/"+ bib + "/citations" })
-
-          }
-          if (data["[citations]"].num_references >= 1){
-            links.push({"letter": "R", "link": "#abs/"+ bib + "/references"})
-          }
-        }
-
-        if (data.reader && data.reader.length >=1 ){
-          debugger;
-          links.push({"letter": "U", "link":"#abs/"+ bib + "/coreads" })
-        }
-
-        if (data.links_data){
-
-          ld = _.map(data.links_data, function(d){
-            return JSON.parse(d)
-          });
-
-          _.each(ld, function(l){
-            var link = this.adsUrlRedirect(l.type, bib);
-            if (link){
-              var letter = l["type"][0].toUpperCase(0);
-              links.push( {"letter": letter, "link" : link})
-            }
-          }, this);
-
-        }
-
-        if (links) {
-          data.links = _.unique(links, false, function(dict){return dict.link});
-        }
         return data;
-
-      },
-      //function that can turn links_data into a list of actual links
-
-      adsUrlRedirect : function(type, id){
-
-        var adsClassicBaseUrl = "http://adsabs.harvard.edu/";
-
-        switch(type){
-          case "doi":
-            return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/" + id
-          case "data":
-            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=DATA"
-          case "electr":
-            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=EJOURNAL"
-          case "gif":
-            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=GIF"
-          case "article":
-            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=ARTICLE"
-          case "preprint":
-            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=PREPRINT"
-          case "arXiv":
-            return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/" + id
-          case "simbad":
-            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode="+ id + "&link_type=SIMBAD"
-          case "ned":
-            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=NED"
-          case "openurl":
-            return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=OPENURL"
-
-        }
 
       },
 
       events: {
-        'change input[name=identifier]': 'toggleSelect'
+        'change input[name=identifier]': 'toggleSelect',
+        'mouseover .letter-icon' : "showLinks",
+        'mouseleave .letter-icon' : "hideLinks"
       },
 
       toggleSelect: function () {
         this.$el.toggleClass("chosen");
+      },
+
+      showLinks : function(e){
+        $c = $(e.currentTarget);
+        $c.find("i").addClass("s-icon-draw-attention");
+        $c.find(".s-link-details").removeClass("no-display");
+      },
+      hideLinks : function(e){
+        $c = $(e.currentTarget);
+        $c.find("i").removeClass("s-icon-draw-attention");
+        $c.find(".s-link-details").addClass("no-display");
       }
 
     });
@@ -301,6 +244,12 @@ define([
 
         PaginatedBaseWidget.prototype.initialize.call(this, options);
 
+        /*adding fields necessary to get all linksdata,
+        * 'this.abstractPageFields' comes from linkGenerator Mixin*/
+        if (this.defaultQueryArguments){
+          this.defaultQueryArguments.fl = this.defaultQueryArguments.fl + "," + this.resultsPageFields
+        }
+
         this.collection = new this.CollectionClass();
 
         this.displayNum = this.displayNum || options.displayNum || 20;
@@ -353,7 +302,7 @@ define([
 
       //will be requested in composeRequest
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year,links_data,ids_data,[citations],reader'
+        fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year'
       },
 
       dispatchRequest: function (apiQuery) {
@@ -495,6 +444,9 @@ define([
 
         });
 
+        //getting links data from LinkGenerator Mixin
+        var docs = this.parseLinksData(docs)
+
         return docs;
       }
 
@@ -502,6 +454,7 @@ define([
 
     // add mixins
     _.extend(ResultsWidget.prototype, WidgetPagination);
+    _.extend(ResultsWidget.prototype, LinkGenerator);
 
 
     return ResultsWidget;

@@ -1,6 +1,7 @@
-<div class="col-sm-12 s-result-item-buffer">
+<div class="s-result-item-buffer">
+<div class="col-sm-12">
     <div class="row">
-        <div class="col-sm-1 s-checkbox-col">
+        <div class="col-xs-1 s-checkbox-col">
             <label>
                 <input type="checkbox" value={{identifier}} name="identifier">
                 {{orderNum}}
@@ -12,7 +13,7 @@
                 </a>
             </span>
         </div>
-        <div class="col-sm-2 col-sm-offset-1 hidden-xs">
+        <div class="col-sm-2">
             <span title="citation count">
                 {{#if citation_count}}
                 cited: {{citation_count}}</span>
@@ -22,12 +23,46 @@
         <div class="col-sm-4">
 
             {{#if links}}
+            <div class="s-results-links">
+                <div class="letter-icon">
+                    {{#if links.text}}
+                    <i class="s-text-icon"></i>
+                    <div class="no-display s-link-details">
+                        <ul class="list-unstyled">
+                            {{#each links.text}}
+                            <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank">{{this.title}}</a></li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/if}}
+                </div>
+                <div class="letter-icon">
+                    {{#if links.list}}
+                    <i class="s-list-icon"></i>
 
-            <span class="pull-right">[
-              {{#each links}}
-               <a href="{{{this.link}}}" target = "_blank">{{this.letter}}</a>
-            {{/each}}]
-            </span>
+                    <div class="no-display s-link-details">
+                        <ul class="list-unstyled">
+                            {{#each links.list}}
+                            <li><a href="{{this.link}}" target="_blank">{{this.title}}</a></li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/if}}
+                </div>
+                <div class="letter-icon">
+                    {{#if links.data}}
+                    <i class="s-data-icon"></i>
+
+                    <div class="no-display s-link-details">
+                        <ul class="list-unstyled">
+                            {{#each links.data}}
+                            <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank" >{{this.title}}</a></li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
 
             {{/if}}
 
@@ -61,17 +96,13 @@
     <div class="col-xs-9 col-xs-offset-1">
         <div class="s-more-info more-info hide">
             {{#if highlights}}
-            <span class="s-more-info-quote left">&#8220;</span>
-            <div class="s-highlight-list">
-            <ul>
-                {{#each highlights}}
-                <li>{{{this}}}</li>
-                {{/each}}
-            </ul>
-            </div>
-            <span class="s-more-info-quote right">&#8221;</span>
-            {{else}}
-            <ul><li>No snippets available</li></ul>
+            <blockquote>
+                <ul>
+                    {{#each highlights}}
+                    <li>{{{this}}}</li>
+                    {{/each}}
+                </ul>
+            </blockquote>
             {{/if}}
         </div>
     </div>

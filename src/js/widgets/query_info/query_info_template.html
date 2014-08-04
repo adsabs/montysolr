@@ -1,13 +1,14 @@
- <div id="info-changeable hide">
+ <div id="info-changeable" class="s-info-changeable">
 {{#if numFound}}
-<b>{{numFound}}</b> results {{/if}} for <b>Query:</b> <em>{{currentQuery}}</em>
-     {{#if facets}}
-     <br/><b>Filter:</b> <em>{{facets}}</em>
-{{/if}}
-
-     <div><button class="btn btn-link btn-xs" id="show-more-query-data">more...</button></div>
+<b>{{numFound}}</b> results ... {{/if}}
+     <button class="btn btn-link btn-xs" id="show-more-query-data"><i class="glyphicon glyphicon-plus"></i></button>
 
      <div class="hide" id="additional-query-data">
+         for <b>Query:</b> <em>{{currentQuery}}</em>
+         {{#if facets}}
+         <br/><b>Filter:</b> <em>{{facets}}</em>
+         {{/if}}
+
          {{#if sort}}
          <p><b>Sort :</b>{{sort}} </p>
          {{/if}}
