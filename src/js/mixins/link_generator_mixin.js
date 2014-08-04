@@ -75,6 +75,21 @@ var linkGenerator = {
          }, this)
        }
 
+
+
+       if(data["[citations]"]){
+
+         var nc = data["[citations]"].num_citations;
+         var nr = data["[citations]"].num_references;
+         if (nc >= 1){
+           links.list.push({letter: "C", title: "Citations ("+ nc + ")",   link:"#abs/"+ bib + "/citations" })
+
+         }
+         if (nr >= 1){
+           links.list.push({ letter: "R", title: "References ("+ nr + ")" , link: "#abs/"+ bib + "/references"})
+         }
+       }
+
        if (data.property){
          if (_.contains(data.property, "TOC")){
            links.list.push({letter: "T", title: "Table of Contents", link:"#abs/"+ bib + "/tableofcontents"})
@@ -88,19 +103,6 @@ var linkGenerator = {
            ADSScan = true;
            links.text.push({ openAccess : true, letter: "G", title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)})
 
-         }
-       }
-
-       if(data["[citations]"]){
-
-         var nc = data["[citations]"].num_citations;
-         var nr = data["[citations]"].num_references;
-         if (nc >= 1){
-           links.list.push({letter: "C", title: "Citations ("+ nc + ")",   link:"#abs/"+ bib + "/citations" })
-
-         }
-         if (nr >= 1){
-           links.list.push({ letter: "R", title: "References ("+ nr + ")" , link: "#abs/"+ bib + "/references"})
          }
        }
 
