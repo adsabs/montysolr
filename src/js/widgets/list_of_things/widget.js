@@ -248,7 +248,6 @@ define([
         var searchTerm = this.solrOperator? this.solrOperator + "(" + bibcode +")" : this.solrField + ":" + bibcode
 
         this.deferredObject =  $.Deferred();
-        debugger;
         this.dispatchRequest(new ApiQuery({'q': searchTerm}));
         return this.deferredObject.promise();
 
@@ -343,6 +342,8 @@ define([
             this.resetPagination = false;
             this.dispatchRequest(this.getCurrentQuery());
           }
+
+
         }
       },
 

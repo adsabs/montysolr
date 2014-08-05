@@ -220,13 +220,27 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
         this.pubsub = beehive.Services.get('PubSub');
 
-        _.bindAll(this, ['dispatchInitialRequest', 'processResponse']);
+        _.bindAll(this, ['dispatchInitialRequest', 'processResponse', 'autoPaginate']);
 
         //custom dispatchRequest function goes here
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchInitialRequest);
 
         //custom handleResponse function goes here
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+        this.pubsub.subscribe(this.pubsub.CUSTOM_EVENT, this.autoPaginate);
+
+
+      },
+
+      autoPaginate : function(eventData){
+
+        if (eventData.event === "pagination" && eventData.data.cycle % 2 ==1 ){
+
+          this.dispatchRequest(this.getApiQuery());
+
+        }
+
       },
 
       initialize : function(options){
@@ -266,8 +280,11 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
         this.loadingWidget = new LoadingWidget();
 
+        options.rows = 40;
 
-        PaginatedBaseWidget.prototype.initialize.apply(this, arguments);
+        PaginatedBaseWidget.prototype.initialize.call(this, options);
+
+
 
       },
 
@@ -329,13 +346,13 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
           this.view.render(bibcode, this.collection.findWhere({bibcode: bibcode}), this.collection);
 
         }
-        else if (this.getMasterQuery()){
-          //the information hasn't arrived yet, so listen to the collection reset event
-          this.listenToOnce(this.collection.reset, this.renderNewBibcode(bibcode))
-
-        }
         else if (data){
           this.view.render(bibcode,  new Backbone.Model(data));
+        }
+        else if (this.getMasterQuery()){
+          //the information hasn't arrived yet, so listen to the collection reset event
+          this.listenToOnce(this.collection, "collection:augmented", this.renderNewBibcode(bibcode));
+
         }
         else {
           //we dont have the bibcode
@@ -370,11 +387,14 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
             this.collection.reset(r.response.docs, {
               parse: true
             });
+            this.collection.trigger("collection:augmented")
           }
           else {
             this.collection.add(r.response.docs, {
               parse: true
             });
+            this.collection.trigger("collection:augmented")
+
 
           }
 

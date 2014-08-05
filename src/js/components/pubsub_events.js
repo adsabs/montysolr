@@ -102,7 +102,11 @@ define([], function() {
      */
     GET_QTREE: '[FC]-GetQTree',
 
-    NAVIGATE : '[Router]-Navigate'
+    NAVIGATE : '[Router]-Navigate',
+
+    /*for custom widget-to-widget events*/
+
+    CUSTOM_EVENT : '[PubSub]-Custom-Event'
 
   };
 

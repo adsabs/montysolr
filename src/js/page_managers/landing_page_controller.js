@@ -3,12 +3,12 @@ define(["marionette", "hbs!./templates/landing-page-layout",
   ],
   function(Marionette, fullLengthLayout, BaseWidget){
 
-  var widgetDict, history;
+  var  history;
 
   var API = {
 
     insertTemplate : function(){
-      $("#body-template-container").children().detach().end()
+      $("#body-template-container").empty()
         .append(fullLengthLayout())
 
     },
@@ -16,11 +16,10 @@ define(["marionette", "hbs!./templates/landing-page-layout",
     displayLandingPage : function(){
       this.insertTemplate();
 
-      $("#row-2-content").append(widgetDict.searchBar.render().el)
+      $("#row-2-content").append(this.widgetDict.searchBar.render().el)
 
       //opening the form
       $(".show-form").click();
-
 
     }
 
@@ -29,15 +28,17 @@ define(["marionette", "hbs!./templates/landing-page-layout",
   var LandingPageController = BaseWidget.extend({
 
 
-
    initialize : function(options){
 
     options = options || {};
 
-    this.API = API;
 
-     widgetDict = options.widgetDict;
+     this.widgetDict = options.widgetDict;
+     _.extend(this, API)
+
+
      history = options.history;
+
 
    },
 
@@ -47,8 +48,8 @@ define(["marionette", "hbs!./templates/landing-page-layout",
 
   showPage : function(page){
 
-      console.log("displayingLandingpage!!")
-      API.displayLandingPage()
+
+      this.displayLandingPage()
 
 
   }

@@ -54,6 +54,9 @@ define(['backbone', 'marionette',
       // and they will carry their own context 'this'
       _.bindAll(this, "dispatchRequest", "processResponse");
 
+      this.on("show", this.onShow)
+
+
       this._currentQuery = new ApiQuery();
       this.defaultQueryArguments = this.defaultQueryArguments || {};
       if (options.defaultQueryArguments) {
@@ -65,7 +68,6 @@ define(['backbone', 'marionette',
         this.collection = options.view.collection;
       }
     },
-
 
     /**
      * Called by Bumblebee application when a widget is about to be registered
@@ -224,6 +226,11 @@ define(['backbone', 'marionette',
       return this.view;
     },
 
+    onShow : function(){
+      console.log("showing!");
+      this.view.delegateEvents();
+
+    },
 
 
     /**
