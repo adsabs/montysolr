@@ -54,24 +54,7 @@ define(['js/mixins/link_generator_mixin'],
 
         expect(mixin.parseLinksData).to.be.instanceof(Function);
 
-        expect(dataWithLinks[0]["links"]).to.eql([
-          {
-            "openAccess": true,
-            "letter": "G",
-            "title": "ADS Scanned Article (Open Access)",
-            "link": "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"
-          },
-          {
-            "letter": "C",
-            "title": "Citations (62)",
-            "link": "#abs/1993A&A...277..309L/citations"
-          },
-          {
-            "letter": "R",
-            "title": "References (8)",
-            "link": "#abs/1993A&A...277..309L/references"
-          }
-        ])
+        expect(JSON.stringify(dataWithLinks[0]["links"])).to.eql('{"text":[{"openAccess":true,"letter":"G","title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"}],"list":[{"letter":"C","title":"Citations (62)","link":"#abs/1993A&A...277..309L/citations"},{"letter":"R","title":"References (8)","link":"#abs/1993A&A...277..309L/references"}],"data":[]}')
 
       })
 
@@ -102,24 +85,17 @@ define(['js/mixins/link_generator_mixin'],
 
         expect(mixin.parseResourcesData).to.be.instanceof(Function);
 
-        expect(dataWithLinks.fullTextSources).to.eql([
-          {
-            "openAccess": true,
-            "title": "ADS Scanned Article",
-            "link": "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=GIF"
-          }
-        ]);
+        expect(dataWithLinks.fullTextSources[0].link).to.eql(
+          "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=GIF");
 
-        expect(dataWithLinks.dataProducts).to.eql([
-          {
-            "title": "SIMBAD Objects",
-            "link": "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=SIMBAD"
-          },
-          {
-            "title": "NED Objects",
-            "link": "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=NED"
-          }
-        ]);
+        expect(dataWithLinks.fullTextSources[0].title).to.eql("ADS Scanned Article");
+
+        expect(dataWithLinks.dataProducts[0].link).to.eql(
+          "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=SIMBAD"
+         );
+
+        expect(dataWithLinks.dataProducts[0].title).to.eql("SIMBAD objects");
+
 
 
 

@@ -27,6 +27,7 @@ var tests  = [
     tbase + '/components/api_feedback.spec.js',
     tbase + '/components/history_manager.spec.js'
     tbase + '/components/mixins/link_generator_mixin.spec.js'
+    tbase + '/mixins/link_generator_mixin.spec.js'
 
 ];
 
