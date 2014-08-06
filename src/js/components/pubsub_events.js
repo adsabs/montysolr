@@ -102,7 +102,9 @@ define([], function() {
      */
     GET_QTREE: '[FC]-GetQTree',
 
-    NAVIGATE : '[Router]-Navigate',
+    NAVIGATE_WITH_TRIGGER : '[Router]-Navigate-With-Trigger',
+
+    NAVIGATE_WITHOUT_TRIGGER : '[Router]-Navigate-Without-Trigger',
 
     /*for custom widget-to-widget events*/
 

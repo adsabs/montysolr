@@ -170,7 +170,6 @@ define([
           //letting other interested widgets know that more info was fetched
           this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: this.paginator});
 
-
         }
       }
 

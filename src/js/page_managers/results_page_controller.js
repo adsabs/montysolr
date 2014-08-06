@@ -141,9 +141,6 @@ define(["marionette", "hbs!./templates/results-page-layout",
 
       _.bindAll(this, ['showPage']);
 
-      //custom dispatchRequest function goes here
-      this.pubsub.subscribe(this.pubsub.START_SEARCH, this.showPage);
-
     },
 
     showPage: function (page) {

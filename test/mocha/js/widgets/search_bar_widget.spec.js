@@ -39,21 +39,20 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
       done();
     });
 
-    it("should trigger a START_SEARCH when the search-submit button is pressed", function(done) {
+    it("should trigger a NAVIGATE_WITH_TRIGGER when the search-submit button is pressed", function(done) {
 
-      var currentSearch;
+      var triggered = false;
 
-      var pretendCurrentQuery = new ApiQuery({q:"star"});
 
-      pubsub.publish(key, pubsub.START_SEARCH, pretendCurrentQuery);
 
-      pubsub.subscribe(key, pubsub.START_SEARCH, function(apiQuery) {
-        currentSearch = apiQuery.get("q")[0]
+      pubsub.subscribe(key, pubsub.NAVIGATE_WITH_TRIGGER, function(apiQuery) {
+        triggered = true;
       });
 
       $(".q").val("author:kurtz,m");
       $(".search-submit").click();
-      expect(currentSearch).to.equal('author:kurtz,m');
+
+      expect(triggered).to.eql(true);
       done();
 
     });

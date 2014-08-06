@@ -32,7 +32,7 @@ define(['marionette',
       template: SearchBarTemplate,
 
       initialize: function (options) {
-        _.bindAll(this, "tempFieldInsert", "tempFieldClear")
+        _.bindAll(this, "tempFieldInsert", "tempFieldClear", "addField")
         this.queryBuilder = new QueryBuilderPlugin();
         // this.queryBuilder.loadCss(); // not needed since we have it in style.css
       },
@@ -55,6 +55,7 @@ define(['marionette',
 
       onRender: function () {
         this.$("#search-form-container").append(SearchFormTemplate);
+        this.$("#field-options div").click(this.addField);
         this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
         this.$("#search-gui").append(this.queryBuilder.$el);
 
@@ -67,7 +68,6 @@ define(['marionette',
 
       events: {
         "click .search-submit": "submitQuery",
-        "click #field-options div": "addField",
         "keypress .q": function(e){
           this.highlightFields(e);
         },
@@ -125,9 +125,9 @@ define(['marionette',
       },
 
       toggleFormSection: function (e) {
-        var $p = $(e.target).parent()
-        $p.next().toggleClass("hide")
-        $p.toggleClass("search-form-header-active")
+        var $p = $(e.target).parent();
+        $p.next().toggleClass("hide");
+        $p.toggleClass("search-form-header-active");
       },
 
 
@@ -184,7 +184,7 @@ define(['marionette',
         }
       },
 
-      addField: function (e, mouseover) {
+      addField: function (e) {
         this.addField = true;
       },
 
@@ -222,16 +222,18 @@ define(['marionette',
 
 
       storeQuery : function(query){
-        this.currentQuery = query;
+        this.setCurrentQuery(query);
       },
 
       initialize: function(options) {
         this.currentQuery = undefined;
         this.view = new SearchBarView();
         this.listenTo(this.view, "new_query", function(query){
-          this.submitNewQuery(query);
-          this.storeQuery(query);
-          this.navigate(query);
+          var newQuery = new ApiQuery({
+                      q: query
+                    });
+          this.storeQuery(newQuery);
+          this.navigate(newQuery);
         });
 
         this.listenTo(this.view, "render", function(){
@@ -250,18 +252,12 @@ define(['marionette',
         this.storeQuery(q.get('q'));
       },
 
-      submitNewQuery: function (query) {
-        var newQuery = new ApiQuery({
-          q: query
-        });
-
-        this.pubsub.publish(this.pubsub.START_SEARCH, this.customizeQuery(newQuery));
-      },
 
       navigate : function(newQuery){
+        debugger;
 
-        this.pubsub.publish(this.pubsub.NAVIGATE,
-          {path : "search", parameters: { q : newQuery}});
+        this.pubsub.publish(this.pubsub.NAVIGATE_WITH_TRIGGER,
+          {path : "search/" + newQuery.url()});
 
       }
     });
