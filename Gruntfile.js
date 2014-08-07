@@ -38,8 +38,8 @@ module.exports = function(grunt) {
       convert_dsjslib: {
         cmd: 'node node_modules/requirejs/bin/r.js -convert src/libs/dsjslib src/libs/dsjslib'
       },
-      move_lesshat {
-        cmd : 'cp bower_components/lesshat/build/lesshat.less src/styles/less/mixins.less'
+      move_lesshat : {
+        cmd : 'cp bower_components/lesshat/build/lesshat-prefixed.less src/styles/less/mixins.less'
       }
     },
 

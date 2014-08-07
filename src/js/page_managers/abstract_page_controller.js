@@ -436,10 +436,6 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       renderNewBibcode: function () {
 
-        //automatically renders this._bibcode
-        //first, check if we have the info in current query docs
-        if (this.collection.findWhere({bibcode: bibcode})) {
-
         //first, check if we have the info in current query docs
         if (this.collection.findWhere({bibcode: this._bibcode})) {
 

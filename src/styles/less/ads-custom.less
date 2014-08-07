@@ -19,7 +19,16 @@
 
 @vis-brand-success :  desaturate(@brand-success, 20%);
 
-  //tests
+
+@facebook-color : rgb(59,89,153);
+
+@twitter-color : rgb(64,153,255);
+
+@mendeley-color : rgb(60,30,33);
+
+@sciencewise-color: rgb(179, 27, 27);
+
+//tests
 
 #mocha-stats > li.progress {
   height: 40px;
@@ -40,20 +49,13 @@
 
 input:focus {
   border: 1px solid brighten(@brand-primary, 15%) !important;
-  box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-  -moz-box-shadow: none !important;
-  -moz-transition: none !important;
-  -webkit-transition: none !important;
+  .lh-box-shadow(none)
 }
 
 select:focus {
   border: 1px solid brighten(@brand-primary, 15%) !important;
-  box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-  -moz-box-shadow: none !important;
-  -moz-transition: none !important;
-  -webkit-transition: none !important;
+  .lh-box-shadow(none)
+
 }
 
 .tab-content {
@@ -119,7 +121,7 @@ select:focus {
 }
 
 .s-motion-shadow {
-  .box-shadow("0 2px 2px -1px rgba(0,0,0,.1)");
+  .lh-box-shadow(0 2px 2px -1px rgba(0,0,0,.1));
   background-color: rgba( 255, 255, 255, 0.9);
 }
 
@@ -320,7 +322,7 @@ select:focus {
   background-color: white;
   border: @border-light-default;
   .lh-border-radius(@border-radius-base);
-  .box-shadow(0 1px 5px @gray-lighter);
+  .lh-box-shadow(0 1px 5px @gray-lighter);
   z-index: 500;
 }
 
@@ -350,7 +352,7 @@ select:focus {
 .s-list-icon {
   .fa;
   &:before {
-    content : @fa-var-list-alt;
+    content : @fa-var-list-ul;
   }
 
 }
@@ -358,10 +360,9 @@ select:focus {
 .s-text-icon {
   .fa;
   &:before {
-    content : @fa-var-book;
+    content : @fa-var-file-text-o;
   }
 }
-
 
 
 .s-identifier a {
@@ -1080,6 +1081,52 @@ div.query-builder > .rules-group-container {
 }
 
 //  styling for abstract page
+
+
+.facebook-icon {
+    .fa;
+    .fa-2x;
+    color : @facebook-color;
+    &:before {
+      content: @fa-var-facebook-square;
+    }
+}
+
+.mendeley-icon {
+  .fa;
+  .fa-2x;
+  color : @mendeley-color;
+  &:before {
+    content: @fa-var-facebook-square;
+  }
+
+}
+
+.twitter-icon {
+  .fa;
+  .fa-2x;
+  color : @twitter-color;
+  &:before {
+    content: @fa-var-twitter-square;
+  }
+
+}
+
+.sciencewise-icon {
+
+  background-color: @sciencewise-color;
+  color : white;
+  font-size : 10px;
+  width:  41px;
+  height: 50px;
+  padding: 2px;
+
+  &:before {
+    content: "Science WISE"
+  }
+
+}
+
 
 .s-open-access-image {
   .fa;
