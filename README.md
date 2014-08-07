@@ -1,6 +1,8 @@
 bumblebee
 =========
 
+[![Build Status](https://travis-ci.org/adsabs/bumblebee.svg?branch=master)](https://travis-ci.org/adsabs/bumblebee)
+
 This is a new UI for adslabs
 
 A word or two as introduction into this bright new world of perplexity. Mistakes 
