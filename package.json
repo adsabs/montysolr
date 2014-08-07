@@ -33,7 +33,7 @@
     "coveralls": "*"
   },
   "scripts": {
-    "test": "grunt test coveralls"
+    "test": "grunt test"
   },
   "dependencies": {
     "lodash": "~2.4.1",
