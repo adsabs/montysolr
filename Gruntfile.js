@@ -230,6 +230,10 @@ module.exports = function(grunt) {
             return dest + src.replace('/src/', '/');
           }
         }]
+      },
+      discovery_vars: {
+          src: 'src/discovery.vars.js.default',
+          dest: 'src/discovery.vars.js'
       }
     },
 
@@ -333,7 +337,15 @@ module.exports = function(grunt) {
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
-    ['install-dependencies', 'bower-setup', 'less']);
+    ['install-dependencies', 'bower-setup', 'less', '_conditional_copy']);
+
+  grunt.registerTask('_conditional_copy', function() {
+    if (!grunt.file.exists('src/discovery.vars.js')) {
+      grunt.task.run(['copy:discovery_vars']);
+      grunt.log.write('Please modify src/discovery.vars.js if necessary...').ok();
+    }
+  });
+
 
   // When running the default Grunt command, just lint the code.
   grunt.registerTask('default', [

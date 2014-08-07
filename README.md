@@ -111,7 +111,7 @@ To help you get started, explore these examples:
   
   * finally, the complete test suite of the discovery application 
   
-     http://localhost:8000/test/mocha/discovery.spec.html
+     http://localhost:8000/test/tests.html
 
 
 
