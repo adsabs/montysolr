@@ -25,7 +25,7 @@ define(["underscore"], function (_) {
       currentPage = _.last(this.history).page;
       //first, simplify the dict to include only pages, not subpages
       p = 1;
-      while (true){
+      while (p < this.history.length){
 
         priorPage = this.history[(this.history.length -1) -p].page
 
@@ -35,6 +35,8 @@ define(["underscore"], function (_) {
        p+=1
 
       }
+      //nothing was found that differs from currentPage, so just return that
+      return undefined
     },
     getPriorPageVal    : function () {
 
@@ -48,7 +50,7 @@ define(["underscore"], function (_) {
       //first, simplify the dict to include only pages, not subpages
       p = 1;
 
-      while (true){
+      while (p < this.history.length){
         prior= this.history[(this.history.length -1) -p]
         priorPage = prior.page
 

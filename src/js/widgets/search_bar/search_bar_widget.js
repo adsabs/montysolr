@@ -38,11 +38,11 @@ define(['marionette',
       },
 
       activate: function(beehive) {
-        this.queryBuilder.setQTreeGetter(QueryBuilderPlugin.buildQTreeGetter(beehive));
-        var that = this;
-        this.queryBuilder.attachHeartBeat(function() {
-          that.onBuilderChange();
-        });
+//        this.queryBuilder.setQTreeGetter(QueryBuilderPlugin.buildQTreeGetter(beehive));
+//        var that = this;
+//        this.queryBuilder.attachHeartBeat(function() {
+//          that.onBuilderChange();
+//        });
         this.beehive = beehive;
       },
 
@@ -54,6 +54,7 @@ define(['marionette',
       },
 
       onRender: function () {
+        this.delegateEvents();
         this.$("#search-form-container").append(SearchFormTemplate);
         this.$("#field-options div").click(this.addField);
         this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
@@ -67,7 +68,7 @@ define(['marionette',
       },
 
       events: {
-        "click .search-submit": "submitQuery",
+
         "keypress .q": function(e){
           this.highlightFields(e);
         },
@@ -76,7 +77,9 @@ define(['marionette',
           e.stopPropagation()
         },
         "click #search-form-container .title": "toggleFormSection",
-        "click .show-form": "onShowForm"
+        "click .show-form": "onShowForm",
+        "click" : function(){console.log("yo")},
+        "submit form[name=main-query]": "submitQuery",
       },
 
       getFormVal: function() {
@@ -129,7 +132,6 @@ define(['marionette',
         $p.next().toggleClass("hide");
         $p.toggleClass("search-form-header-active");
       },
-
 
       highlightFields: function () {
         this.$(".show-form").addClass("draw-attention")
@@ -189,10 +191,12 @@ define(['marionette',
       },
 
 
-      submitQuery: function() {
+      submitQuery: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         var query = (this.$(".q").val());
         this.trigger("new_query", query);
-        return false
       },
 
       setQueryBox: function (val) {
@@ -219,7 +223,6 @@ define(['marionette',
         //sort: 'date desc',
         fl: 'id'
       },
-
 
       storeQuery : function(query){
         this.setCurrentQuery(query);
@@ -254,11 +257,9 @@ define(['marionette',
 
 
       navigate : function(newQuery){
-        debugger;
 
         this.pubsub.publish(this.pubsub.NAVIGATE_WITH_TRIGGER,
           {path : "search/" + newQuery.url()});
-
       }
     });
 

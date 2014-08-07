@@ -75,7 +75,7 @@ define([
 
       defaultQueryArguments: {
         hl     : "true",
-        "hl.fl": "title,abstract",
+        "hl.fl": "title,abstract,body",
         fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year'
       },
 

@@ -68,8 +68,8 @@ define(["marionette", "hbs!./templates/results-page-layout",
     },
 
     displaySearchBar : function(){
-      $("#search-bar-row").children().detach();
       $("#search-bar-row").append(widgetDict.searchBar.render().el);
+
 
     },
 

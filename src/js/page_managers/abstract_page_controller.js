@@ -10,34 +10,70 @@
 
 define(["marionette", "hbs!./templates/abstract-page-layout",
     'js/widgets/base/paginated_base_widget', 'hbs!./templates/abstract-title',
-    'js/components/api_query', 'hbs!./templates/abstract-nav', 'js/widgets/loading/widget'],
+    'js/components/api_query', 'hbs!./templates/abstract-nav',
+    'hbs!./templates/abstract-title-nav-descriptor', 'js/widgets/loading/widget'],
   function(Marionette, threeColumnTemplate, PaginatedBaseWidget,
-    abstractTitleTemplate, ApiQuery, abstractNavTemplate, LoadingWidget){
+    abstractTitleTemplate, ApiQuery, abstractNavTemplate,
+    abstractTitleNavDescriptor, LoadingWidget){
 
 
     var currentBibcode;
 
+    var AbstractTitleNavDescriptorView = Backbone.View.extend({
+
+      initialize : function(){
+
+        this.listenTo(this.collection, "subPageChanged", this.render)
+
+      },
+
+      template : abstractTitleNavDescriptor,
+
+      render : function(){
+        this.$el.html(this.template({descriptor: this.collection.subPage}));
+        return this
+      }
+
+    });
+
     var AbstractNavView = Backbone.View.extend({
       template : abstractNavTemplate,
 
-      render : function(){
-        this.$el.html(this.template({bibcode: currentBibcode}))
+      render : function(subView){
+        this.$el.html(this.template({bibcode: currentBibcode}));
+
+        if (subView){
+          this.$("#"+subView).addClass("s-abstract-nav-active");
+        }
         return this
       },
 
       events : {
-        "click a" : "emitNavigateEvent"
+        "click a" : function(e){
+          this.emitNavigateEvent(e);
+          this.changeHighlight(e);
+          return false
+        }
+      },
+
+      changeHighlight : function(e){
+        var $t  = $(e.currentTarget);
+        //first, remove all highlights
+
+        this.$(".abstract-nav").removeClass("s-abstract-nav-active");
+
+        //then add it in for the right one
+        $t.find(".abstract-nav").addClass("s-abstract-nav-active");
+
       },
 
       emitNavigateEvent : function(e){
         var $t  = $(e.currentTarget);
         var route = $t.attr("href");
         //taking only final path
-        e.preventDefault();
-        e.stopPropagation();
         this.trigger("navigate", route);
-
       }
+
     })
 
     var AbstractTitleView = Backbone.View.extend({
@@ -57,10 +93,10 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
           nextBib = this.collection.filter(function(model, i){return i == index+1})[0]
         }
 
-        prevBib = prevBib? prevBib.get("bibcode") : undefined;
-        nextBib = nextBib? nextBib.get("bibcode") : undefined;
+        prevBib = (prevBib && prevBib.get("originalSearchResult"))? prevBib.get("bibcode") : undefined;
+        nextBib = (nextBib && nextBib.get("originalSearchResult"))? nextBib.get("bibcode") : undefined;
 
-        this.$el.html(this.template({index : index+1, description: this.collection.subPage , title: model.get("title"), prev: prevBib, next : nextBib}))
+        this.$el.html(this.template({index : index+1, title: model.get("title"), prev: prevBib, next : nextBib}))
 
         return this
 
@@ -154,16 +190,19 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
       },
 
 
-      displayAbstractNav: function(){
+      displayAbstractNav: function(subPage){
 
         var $leftCol = $("#s-left-col-container")
 
-        $leftCol.append(this.navView.render().el);
+        $leftCol.append(this.navView.render(subPage).el);
 
       },
 
       showTitle : function(){
         var $titleRow = $("#abstract-title-container");
+
+        $titleRow.append(this.TitleNavDescriptorView.render().el);
+
 
         $titleRow.append(this.titleView.el)
 
@@ -173,35 +212,29 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
         var dataForRouter, $middleCol, widget;
 
+        if (!viewName){
+          console.warn("viewname undefined")
+          return
+        }
+
         //tell router to display the correct url
 
          dataForRouter = {page:"abstractPage", subPage: viewName, data : this._bibcode, path: "abs/"+ this._bibcode + "/" + viewName}
 
         this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, dataForRouter)
 
-        if (!viewName){
-          console.warn("viewname undefined")
-          return
-        }
-
         $middleCol = $("#s-middle-col-container");
 
         $middleCol.children().detach();
 
-        //removing highlight for another view nav
-        $(".abstract-nav").removeClass("s-abstract-nav-active")
-
         widget = this.abstractSubViews[viewName]["widget"];
-
 
         $middleCol.append(widget.render().el);
 
-        //also amending the title
-        $(".abstract-title-info-row").text(this.abstractSubViews[viewName]["descriptor"])
+        /*The two lines below notify the title descriptor view to change*/
+        this.collection.subPage = this.abstractSubViews[viewName]["descriptor"];
 
-        //also highlighting the relevant nav
-
-        $("#"+viewName).addClass("s-abstract-nav-active")
+        this.collection.trigger("subPageChanged");
 
       },
 
@@ -214,7 +247,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         var $searchBar = $("#search-bar-row");
 
         $searchBar.append(this.widgetDict.searchBar.render().el)
-        if (this.getMasterQuery()  && (this.history.getPriorPage() === "resultsPage") || (this.history.getPriorPage() === "abstractPage")) {
+        if (this.getMasterQuery()  && (this.history.getPriorPage() === "resultsPage" || this.history.getPriorPage() === "abstractPage")) {
           $(".opt-nav-button").append("<a href=" + "/search/" + this.getMasterQuery().url()
             + " class=\"btn btn-sm \"> <i class=\"glyphicon glyphicon-arrow-left\"></i> back to results</a>")
         }
@@ -261,17 +294,6 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-      autoPaginate : function(eventData){
-
-        //requesting too much?
-        if (eventData.event === "pagination" ){
-
-          this.dispatchRequest(this.getCurrentQuery());
-
-        }
-
-      },
-
       initialize : function(options){
 
         options = options || {};
@@ -279,6 +301,8 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         this.collection = new AbstractControllerCollection();
 
         this.titleView = new AbstractTitleView({collection: this.collection});
+
+        this.TitleNavDescriptorView = new AbstractTitleNavDescriptorView({collection : this.collection});
 
         this.navView = new AbstractNavView();
 
@@ -315,6 +339,17 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         options.rows = 40;
 
         PaginatedBaseWidget.prototype.initialize.call(this, options);
+
+      },
+
+
+      autoPaginate : function(eventData){
+        //requesting too much?
+        if (eventData.event === "pagination" ){
+
+          this.dispatchRequest(this.getCurrentQuery());
+
+        }
 
       },
 
@@ -384,22 +419,18 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
           this.titleView.render();
 
         }
-        else if (this.getMasterQuery()){
-          //the information hasn't arrived yet, so listen to the collection reset/add event
-          //i made a new event to encompass both of them-- there must be a better way to do this!
-          this.listenToOnce(this.collection, "collection:augmented", this.renderNewBibcode)
-
-        }
 
         else {
           //we dont have the bibcode
           //processResponse will re-call this function, but with the data parameter
 
           //is there a better way to avoid pagination?
-          var req = this.dispatchRequest(new ApiQuery({'q': 'bibcode:' + this._bibcode, '__show': this._bibcode}));
-        }
-      },
-
+            var req = this.composeRequest(new ApiQuery({'q': 'bibcode:' + this._bibcode, 'fl': "title,bibcode", '__show': this._bibcode}));
+            if (req) {
+              this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+            }
+          }
+        },
 
       processResponse: function (apiResponse) {
 
@@ -453,15 +484,8 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       //   called by the router
 
-      showPage : function(bib, subPage, fromWithinPage){
+      showPage : function(bib, subPage){
 
-        if (fromWithinPage){
-          //just need to switch out the subPage
-          this.showAbstractSubView(subPage)
-
-        }
-
-        else {
 
           this._bibcode = bib;
 
@@ -471,18 +495,17 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
           this.insertTemplate();
           this.showTitle();
-          this.displayAbstractNav();
+          this.displayAbstractNav(subPage);
           this.displayRightColumn();
           this.displayTopRow();
 
           //this calls "displayNav" upon individual widget completion
           this.loadWidgetData();
 
-          this.showAbstractSubView("abstract");
+          this.showAbstractSubView(subPage);
 
           this.insertLoadingView()
 
-        }
 
       }
 
