@@ -2,7 +2,7 @@ define([
     'jquery',
     'backbone',
     'marionette',
-    'js/widgets/base/container_view',
+    'js/widgets/facet/container_view',
     'js/widgets/base/item_view'
   ],
   function ($,

@@ -199,7 +199,19 @@ module.exports = function(grunt) {
 
       web_testing: {
         options: {
-          urls: ['http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/discovery') + '.spec.html']
+          urls: [
+              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/discovery') + '.spec.html'
+          ]
+        }
+      },
+
+      full_testing: {
+        options: {
+          urls: [
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-ui.spec.html',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-qb.spec.html'
+          ]
         }
       }
     },
@@ -366,7 +378,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test:web', ['env:dev', 'watch:web_testing']);
 
   // runs tests (only once)
-  grunt.registerTask('test', ['env:dev', 'express:dev', 'mocha_phantomjs:web_testing']);
+  grunt.registerTask('test', ['env:dev', 'express:dev', 'mocha_phantomjs:full_testing']);
 
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
