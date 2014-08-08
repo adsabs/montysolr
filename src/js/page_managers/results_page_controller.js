@@ -22,7 +22,7 @@ define(["marionette", "hbs!./templates/results-page-layout",
 
     insertTemplate : function() {
 
-      $("#body-template-container").empty();
+      $("#body-template-container").children().detach();
 
       $("#body-template-container").append(threeColumnTemplate());
 

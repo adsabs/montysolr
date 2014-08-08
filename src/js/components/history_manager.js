@@ -35,7 +35,7 @@ define(["underscore"], function (_) {
        p+=1
 
       }
-      //nothing was found that differs from currentPage, so just return that
+      //nothing was found that differs from currentPage
       return undefined
     },
     getPriorPageVal    : function () {
@@ -60,6 +60,7 @@ define(["underscore"], function (_) {
 
         p+=1
       }
+      return undefined
     },
 
     /*

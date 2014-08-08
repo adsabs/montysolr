@@ -27,7 +27,6 @@ define(['jquery',
       }))({verbose: false});
 
       widget.activate(minsub.beehive.getHardenedInstance());
-      var $w = widget.render().$el;
 
     });
 
@@ -46,7 +45,6 @@ define(['jquery',
 
     it("fetches citation information for the bibcode only if it doesn't already have it and loads it into a collection", function(){
 
-
       var spy = sinon.spy(widget, 'dispatchRequest');
 
       widget.loadBibcodeData("2015NewA...34..108Y");
@@ -64,17 +62,18 @@ define(['jquery',
 
     })
 
-    it("resolves the promise from loadBibcodeInfo with the collection", function(){
+    it("resolves the promise from loadBibcodeData with numFound", function(){
 
-      var promisedCollection;
+      var numFound;
 
-      p = widget.loadBibcodeData("2015NewA...34..108Y")
+      p = widget.loadBibcodeData("2015NewA...34")
 
-      p.done(function(collection){ promisedCollection =  collection.toJSON()});
+      p.done(function(n){numFound= n});
 
-      expect(promisedCollection[0].identifier).to.equal(Test1.response.docs[0].identifier[0])
+      expect(numFound).to.equal(841359)
+
+      console.log(numFound)
     })
-
 
   })
 

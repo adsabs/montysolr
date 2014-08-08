@@ -43,23 +43,26 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         this.$el.html(this.template({bibcode: currentBibcode}));
 
         if (subView){
-          this.$("#"+subView).addClass("s-abstract-nav-active");
+          this.$("#"+subView)
+            .addClass("s-abstract-nav-active")
+            .removeClass("s-abstract-nav-inactive");
         }
         return this
       },
 
       events : {
         "click a" : function(e){
-          this.emitNavigateEvent(e);
-          this.changeHighlight(e);
+          $t  = $(e.currentTarget);
+          if ($t.find("div").attr("id") !== $(".s-abstract-nav-active").attr("id")){
+            this.emitNavigateEvent($t);
+            this.changeHighlight($t);
+          }
           return false
         }
       },
 
-      changeHighlight : function(e){
-        var $t  = $(e.currentTarget);
+      changeHighlight : function($t){
         //first, remove all highlights
-
         this.$(".abstract-nav").removeClass("s-abstract-nav-active");
 
         //then add it in for the right one
@@ -67,8 +70,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-      emitNavigateEvent : function(e){
-        var $t  = $(e.currentTarget);
+      emitNavigateEvent : function($t){
         var route = $t.attr("href");
         //taking only final path
         this.trigger("navigate", route);
@@ -88,6 +90,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
         //only send number to template if it is in a set of results
         if (model.get("originalSearchResult") === true){
+
           index = this.collection.indexOf(model);
           prevBib = this.collection.filter(function(model, i){return i == index-1})[0]
           nextBib = this.collection.filter(function(model, i){return i == index+1})[0]
@@ -96,7 +99,10 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         prevBib = (prevBib && prevBib.get("originalSearchResult"))? prevBib.get("bibcode") : undefined;
         nextBib = (nextBib && nextBib.get("originalSearchResult"))? nextBib.get("bibcode") : undefined;
 
-        this.$el.html(this.template({index : index+1, title: model.get("title"), prev: prevBib, next : nextBib}))
+        this.$el.html(this.template(
+          {index : index+1, bibcode: model.get("bibcode"), title: model.get("title"), prev: prevBib, next : nextBib}
+        ));
+
 
         return this
 
@@ -113,75 +119,73 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
     var API = {
 
-      insertTemplate : function(){
+      insertTemplate: function () {
 
         var $bodyContainer = $("#body-template-container");
 
-        $bodyContainer.children().detach()
+        $bodyContainer.children().detach();
 
         $bodyContainer.append(threeColumnTemplate())
 
       },
 
-      insertLoadingView : function(){
+      insertLoadingView: function () {
         $("#body-template-container").append(this.loadingWidget.render().el)
 
         this.loadingWidget.trigger("showLoading")
 
       },
 
-      loadWidgetData : function(){
+      loadWidgetData: function () {
         var that = this;
 
-        _.each(this.abstractSubViews, function(v, k){
+        _.each(this.abstractSubViews, function (v, k) {
 
-          if (k === "abstract"){
+          if (k === "abstract") {
 
             v.widget.loadBibcodeData(this._bibcode);
             this.activateNavButton(k)
 
           }
           else {
-            var promise= v.widget.loadBibcodeData(this._bibcode);
+            var promise = v.widget.loadBibcodeData(this._bibcode);
 
-              promise.done(function () {
-                if (v.widget.collection.length >=1) {
-                  that.activateNavButton(k, v.showNumFound, v.widget.collection.length)
-                }
-                else {
-                  that.deactivateNavButton(k)
-                }
+            promise.done(function (numFound) {
 
-              })
+              if (numFound) {
+                that.activateNavButton(k, v.showNumFound, numFound)
+              }
+              else {
+                that.deactivateNavButton(k)
+              }
+
+            })
           }
 
         }, this)
 
       },
 
-      activateNavButton : function(k, showNumFound, colLength){
+      activateNavButton: function (k, showNumFound, colLength) {
 
-        var $navButton = $("#"+k);
+        var $navButton = $("#" + k);
 
-        if (showNumFound){
-          $navButton.removeClass("s-abstract-nav-inactive")
-            .find(".num-items").text("("+colLength +")")
-        }
-        else {
-          $navButton.parent().off(this, this.deactivateLink)
-          $navButton.removeClass("s-abstract-nav-inactive")
+        $navButton.removeClass("s-abstract-nav-inactive");
+        $navButton.parent().off(this, this.deactivateLink);
+
+        if (showNumFound) {
+          $navButton.find(".num-items").text("(" + colLength + ")")
         }
 
       },
 
-      deactivateLink : function(){
-      return false
-    },
+      deactivateLink: function () {
+        return false
+      },
 
+      deactivateNavButton: function (k) {
 
-      deactivateNavButton : function(k){
-
-        var $navButton = $("#"+k);
+        var $navButton = $("#" + k);
 
         $navButton.addClass("s-abstract-nav-inactive")
 
@@ -189,8 +193,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-
-      displayAbstractNav: function(subPage){
+      displayAbstractNav: function (subPage) {
 
         var $leftCol = $("#s-left-col-container")
 
@@ -198,30 +201,29 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-      showTitle : function(){
+      showTitle: function () {
         var $titleRow = $("#abstract-title-container");
 
         $titleRow.append(this.TitleNavDescriptorView.render().el);
-
 
         $titleRow.append(this.titleView.el)
 
       },
 
-      showAbstractSubView: function(viewName) {
+      showAbstractSubView: function (viewName) {
 
         var dataForRouter, $middleCol, widget;
 
-        if (!viewName){
+        if (!viewName) {
           console.warn("viewname undefined")
           return
         }
 
         //tell router to display the correct url
 
-         dataForRouter = {page:"abstractPage", subPage: viewName, data : this._bibcode, path: "abs/"+ this._bibcode + "/" + viewName}
+        dataForRouter = {page: "abstractPage", subPage: viewName, data: this._bibcode, path: "abs/" + this._bibcode + "/" + viewName}
 
-        this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, dataForRouter)
+        this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, dataForRouter);
 
         $middleCol = $("#s-middle-col-container");
 
@@ -238,20 +240,24 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-      displayRightColumn : function(){
+      displayRightColumn: function () {
         var $rightCol = $("#s-right-col-container");
 
       },
 
-      displayTopRow : function(){
+      displayTopRow: function () {
         var $searchBar = $("#search-bar-row");
+        $searchBar.append(this.widgetDict.searchBar.render().el);
 
-        $searchBar.append(this.widgetDict.searchBar.render().el)
-        if (this.getMasterQuery()  && (this.history.getPriorPage() === "resultsPage" || this.history.getPriorPage() === "abstractPage")) {
+        //adding back to results button
+        var m = this.collection.findWhere({bibcode: this._bibcode});
+        if (m && m.get("originalSearchResult")){
           $(".opt-nav-button").append("<a href=" + "/search/" + this.getMasterQuery().url()
             + " class=\"btn btn-sm \"> <i class=\"glyphicon glyphicon-arrow-left\"></i> back to results</a>")
+
+          }
+
         }
-      }
 
     };
 
@@ -259,7 +265,8 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
       defaults: function () {
         return {
           bibcode: undefined,
-          title: undefined
+          title: undefined,
+          originalSearchResult : false
         }
       },
 
@@ -322,7 +329,8 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         this.history = options.history;
 
 //      to be explicit, transferring only those widgets considered "sub views" to this dict
-        this.abstractSubViews = {
+//      allowing abstractSubViews to be set by options for testing purposes
+        this.abstractSubViews = options.abstractSubViews ||  {
           //the keys are also the sub-routes
           "abstract": {widget: this.widgetDict.abstract, title:"Abstract", descriptor: "Abstract for:"},
           "references": {widget: this.widgetDict.references, title:"References", descriptor: "References in:", showNumFound : true},
@@ -342,10 +350,16 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
+      //keep in sync with results list on results page
 
       autoPaginate : function(eventData){
+
+        var currentLength = this.collection.filter(function(d){if(d.get("originalSearchResult")){return true}}).length;
+
         //requesting too much?
         if (eventData.event === "pagination" ){
+
+          if(this.paginator.start<= eventData.data.start)
 
           this.dispatchRequest(this.getCurrentQuery());
 
@@ -356,7 +370,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
       onAllInternalEvents : function(ev, arg1, arg2){
 
         if (ev.indexOf("nextEvent")!== -1){
-          this.checkLoadMore()
+          this.checkLoadMore();
         }
 
       },
@@ -390,8 +404,6 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       dispatchInitialRequest: function (apiQuery) {
 
-        //does this work to compare apiQueries?
-        if (JSON.stringify(apiQuery.toJSON()) !== JSON.stringify(this.getCurrentQuery().toJSON())){
           this.setCurrentQuery(apiQuery);
 
           //tells you what the people have searched (not the widget's query)
@@ -400,8 +412,6 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
           this.paginator.reset();
 
           this.dispatchRequest(apiQuery)
-
-        }
 
       },
 
@@ -481,6 +491,9 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
+      setCurrentBibcode :function(bib){
+        currentBibcode = bib;
+      },
 
       //   called by the router
 
@@ -489,7 +502,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
           this._bibcode = bib;
 
-          currentBibcode = bib;
+          this.setCurrentBibcode(bib);
 
           this.renderNewBibcode();
 

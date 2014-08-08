@@ -32,17 +32,17 @@ define(['marionette',
       template: SearchBarTemplate,
 
       initialize: function (options) {
-        _.bindAll(this, "tempFieldInsert", "tempFieldClear", "addField")
+        _.bindAll(this, "tempFieldInsert", "tempFieldClear");
         this.queryBuilder = new QueryBuilderPlugin();
         // this.queryBuilder.loadCss(); // not needed since we have it in style.css
       },
 
       activate: function(beehive) {
-//        this.queryBuilder.setQTreeGetter(QueryBuilderPlugin.buildQTreeGetter(beehive));
-//        var that = this;
-//        this.queryBuilder.attachHeartBeat(function() {
-//          that.onBuilderChange();
-//        });
+        this.queryBuilder.setQTreeGetter(QueryBuilderPlugin.buildQTreeGetter(beehive));
+        var that = this;
+        this.queryBuilder.attachHeartBeat(function() {
+          that.onBuilderChange();
+        });
         this.beehive = beehive;
       },
 
@@ -56,7 +56,7 @@ define(['marionette',
       onRender: function () {
         this.delegateEvents();
         this.$("#search-form-container").append(SearchFormTemplate);
-        this.$("#field-options div").click(this.addField);
+
         this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
         this.$("#search-gui").append(this.queryBuilder.$el);
 
@@ -69,8 +69,10 @@ define(['marionette',
 
       events: {
 
+        "click #field-options div" : "setAddField",
         "keypress .q": function(e){
           this.highlightFields(e);
+          this.setAddField();
         },
         "blur .q": "unHighlightFields",
         "click #search-form-container": function (e) {
@@ -78,8 +80,7 @@ define(['marionette',
         },
         "click #search-form-container .title": "toggleFormSection",
         "click .show-form": "onShowForm",
-        "click" : function(){console.log("yo")},
-        "submit form[name=main-query]": "submitQuery",
+        "submit form[name=main-query]": "submitQuery"
       },
 
       getFormVal: function() {
@@ -186,7 +187,7 @@ define(['marionette',
         }
       },
 
-      addField: function (e) {
+      setAddField: function (e) {
         this.addField = true;
       },
 

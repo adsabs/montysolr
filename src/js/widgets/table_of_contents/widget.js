@@ -78,7 +78,7 @@ define([
 
       if (bibcode === this._bibcode){
 
-        this.deferredObject.resolve(this.collection)
+        this.deferredObject.resolve(this.collection.numFound)
         
         return this.deferredObject
       }
