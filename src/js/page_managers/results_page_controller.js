@@ -22,7 +22,7 @@ define(["marionette", "hbs!./templates/results-page-layout",
 
     insertTemplate : function() {
 
-      $("#body-template-container").children().detach()
+      $("#body-template-container").children().detach();
 
       $("#body-template-container").append(threeColumnTemplate());
 
@@ -68,8 +68,8 @@ define(["marionette", "hbs!./templates/results-page-layout",
     },
 
     displaySearchBar : function(){
-      $("#search-bar-row").children().detach();
       $("#search-bar-row").append(widgetDict.searchBar.render().el);
+
 
     },
 
@@ -140,9 +140,6 @@ define(["marionette", "hbs!./templates/results-page-layout",
       this.pubsub = beehive.Services.get('PubSub');
 
       _.bindAll(this, ['showPage']);
-
-      //custom dispatchRequest function goes here
-      this.pubsub.subscribe(this.pubsub.START_SEARCH, this.showPage);
 
     },
 

@@ -75,7 +75,7 @@ define([
 
       defaultQueryArguments: {
         hl     : "true",
-        "hl.fl": "title,abstract",
+        "hl.fl": "title,abstract,body",
         fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year'
       },
 
@@ -132,7 +132,47 @@ define([
 
         });
         return docs;
+      },
+
+      onAllInternalEvents: function(ev, arg1, arg2) {
+
+        if (ev == 'composite:rendered') {
+          this.view.disableShowMore();
+          this.view.toggleDetailsControls(false);
+          if (this.showMoreAfterRender){
+            this.view.enableShowMore()
+          }
+          this.viewRendered = true;
+
+        }
+        else if (ev == 'reset') {
+          var details = _.filter(this.view.collection.models, function(m) {return m.has('details')});
+          if (details.length > 0) {
+            this.view.toggleDetailsControls(true);
+          }
+          else {
+            this.view.toggleDetailsControls(false);
+          }
+
+        }
+        else if (ev == "fetchMore") {
+
+          var p = this.handlePagination(this.displayNum, this.maxDisplayNum, arg1, this.paginator, this.view, this.collection);
+          if (p && p.before) {
+            p.before();
+          }
+          if (p && p.runQuery) {
+            // ask for more data
+            this.resetPagination = false;
+            this.dispatchRequest(this.getCurrentQuery());
+          }
+
+          //letting other interested widgets know that more info was fetched
+          this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: this.paginator});
+
+        }
       }
+
     });
 
     return ResultsWidget;

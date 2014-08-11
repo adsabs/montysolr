@@ -32,7 +32,7 @@ define(['marionette',
       template: SearchBarTemplate,
 
       initialize: function (options) {
-        _.bindAll(this, "tempFieldInsert", "tempFieldClear")
+        _.bindAll(this, "tempFieldInsert", "tempFieldClear");
         this.queryBuilder = new QueryBuilderPlugin();
         // this.queryBuilder.loadCss(); // not needed since we have it in style.css
       },
@@ -54,7 +54,9 @@ define(['marionette',
       },
 
       onRender: function () {
+        this.delegateEvents();
         this.$("#search-form-container").append(SearchFormTemplate);
+
         this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
         this.$("#search-gui").append(this.queryBuilder.$el);
 
@@ -66,17 +68,19 @@ define(['marionette',
       },
 
       events: {
-        "click .search-submit": "submitQuery",
-        "click #field-options div": "addField",
+
+        "click #field-options div" : "setAddField",
         "keypress .q": function(e){
           this.highlightFields(e);
+          this.setAddField();
         },
         "blur .q": "unHighlightFields",
         "click #search-form-container": function (e) {
           e.stopPropagation()
         },
         "click #search-form-container .title": "toggleFormSection",
-        "click .show-form": "onShowForm"
+        "click .show-form": "onShowForm",
+        "submit form[name=main-query]": "submitQuery"
       },
 
       getFormVal: function() {
@@ -125,11 +129,10 @@ define(['marionette',
       },
 
       toggleFormSection: function (e) {
-        var $p = $(e.target).parent()
-        $p.next().toggleClass("hide")
-        $p.toggleClass("search-form-header-active")
+        var $p = $(e.target).parent();
+        $p.next().toggleClass("hide");
+        $p.toggleClass("search-form-header-active");
       },
-
 
       highlightFields: function () {
         this.$(".show-form").addClass("draw-attention")
@@ -184,15 +187,17 @@ define(['marionette',
         }
       },
 
-      addField: function (e, mouseover) {
+      setAddField: function (e) {
         this.addField = true;
       },
 
 
-      submitQuery: function() {
+      submitQuery: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         var query = (this.$(".q").val());
         this.trigger("new_query", query);
-        return false
       },
 
       setQueryBox: function (val) {
@@ -220,18 +225,19 @@ define(['marionette',
         fl: 'id'
       },
 
-
       storeQuery : function(query){
-        this.currentQuery = query;
+        this.setCurrentQuery(query);
       },
 
       initialize: function(options) {
         this.currentQuery = undefined;
         this.view = new SearchBarView();
         this.listenTo(this.view, "new_query", function(query){
-          this.submitNewQuery(query);
-          this.storeQuery(query);
-          this.navigate(query);
+          var newQuery = new ApiQuery({
+                      q: query
+                    });
+          this.storeQuery(newQuery);
+          this.navigate(newQuery);
         });
 
         this.listenTo(this.view, "render", function(){
@@ -250,19 +256,11 @@ define(['marionette',
         this.storeQuery(q.get('q'));
       },
 
-      submitNewQuery: function (query) {
-        var newQuery = new ApiQuery({
-          q: query
-        });
-
-        this.pubsub.publish(this.pubsub.START_SEARCH, this.customizeQuery(newQuery));
-      },
 
       navigate : function(newQuery){
 
-        this.pubsub.publish(this.pubsub.NAVIGATE,
-          {path : "search", parameters: { q : newQuery}});
-
+        this.pubsub.publish(this.pubsub.NAVIGATE_WITH_TRIGGER,
+          {path : "search/" + newQuery.url()});
       }
     });
 

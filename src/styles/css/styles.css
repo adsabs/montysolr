@@ -7086,6 +7086,9 @@ textarea#search-gui select,
 textarea#search-gui input {
   height: auto;
 }
+.s-abstract-title-bibcode {
+  margin: 0px;
+}
 .s-abstract-num {
   font-family: "Helvetica", Arial, sans-serif;
   font-weight: 300;

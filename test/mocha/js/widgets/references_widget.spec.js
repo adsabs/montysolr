@@ -65,15 +65,15 @@ define(['jquery',
 
     })
 
-    it("resolves the promise from loadBibcodeInfo with the collection", function(){
+    it("resolves the promise from loadBibcodeData with numFound", function(){
 
-      var promisedCollection;
+      var numFound;
 
       p = widget.loadBibcodeData("sampleBib1")
 
-      p.done(function(collection){console.log("ok", collection); promisedCollection =  collection.toJSON()});
+      p.done(function(n){numFound= n});
 
-      expect(promisedCollection[0].identifier).to.equal(Test1.response.docs[0].identifier[0])
+      expect(numFound).to.equal(841359)
     })
 
 

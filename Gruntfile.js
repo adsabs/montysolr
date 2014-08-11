@@ -264,13 +264,6 @@ module.exports = function(grunt) {
       }
     },
 
-    coveralls: {
-      options: {
-        src: ['src/js/**/*.js'],
-        coverage_dir: 'test/coverage/PhantomJS 1.9.2 (Linux)/'
-      }
-    },
-
 
     // concatenates all javascript into one big minified file (of limited 
     // use for now)

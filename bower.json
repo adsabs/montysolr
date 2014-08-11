@@ -18,8 +18,7 @@
     "jquery-hoverIntent": "*",
     "marionette": "~1.8.6",
     "dsjslib": "https://github.com/monmohan/dsjslib.git#v0.6.6",
-    "jQuery-QueryBuilder": "https://github.com/romanchyla/jQuery-QueryBuilder.git#master",
-    "backbone-query-parameters": "git://github.com/jhudson8/backbone-query-parameters.git#~0.3.0"
+    "jQuery-QueryBuilder": "https://github.com/romanchyla/jQuery-QueryBuilder.git#master"
   },
   "devDependencies": {
     "chai": "~1.8.0",

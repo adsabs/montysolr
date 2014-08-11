@@ -63,15 +63,15 @@ define(['jquery',
 
     })
 
-    it("resolves the promise from loadBibcodeInfo with the collection", function(){
+    it("resolves the promise from loadBibcodeInfo  with numFound", function(){
 
-      var promisedCollection;
+      var numFound;
 
       p = widget.loadBibcodeData("sampleBib1")
 
-      p.done(function(collection){console.log("similarok", collection.toJSON()[0]); promisedCollection =  collection.toJSON()});
+      p.done(function(n){numFound= n});
 
-     expect(promisedCollection[0].identifier).to.equal("2013arXiv1305.3460H")
+      expect(numFound).to.equal(2745325);
     })
 
   })
