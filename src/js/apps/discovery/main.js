@@ -26,7 +26,7 @@ define(["config", 'module'], function(config, module) {
       var api = beehive.getService('Api');
 
       if (conf.root) {
-        api.url = "" + api.url;
+        api.url = conf.root + "/" + api.url;
         app.root = conf.root;
       }
       if (conf.debug !== undefined) {
