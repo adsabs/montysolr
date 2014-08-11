@@ -8,7 +8,15 @@
 
 @border-light-default: 1px solid #dddddd;
 
-//tests
+
+@vis-brand-info : desaturate(@brand-info, 10%);
+
+@vis-brand-primary :  lighten(desaturate(@brand-primary, 20%), 15%);
+
+
+@vis-brand-success :  desaturate(@brand-success, 20%);
+
+  //tests
 
 #mocha-stats > li.progress {
   height: 40px;
@@ -363,7 +371,6 @@ background-color: lighten(#eee, 3%)
 .s-results-controls {
   padding: 3%;
   min-width: 83 px;
-  border-bottom: 1px solid darken(@gray-lighter, 10%);
 //  background-image: linear-gradient(to bottom, lighten(@gray-light, 22%) 0, lighten(@gray-lighter, 6%) 100%);
 
 
@@ -407,10 +414,11 @@ background-color: lighten(#eee, 3%)
 
 //facets
 
+
   .size-graphic-container {
     width: 77%;
     display: inline-block;
-    background-color: lighten(@brand-info, 34%);
+    background-color:lighten(@vis-brand-info, 30%);
     height: 19px;
     margin-left: 2px;
     margin-bottom: 4px;
@@ -422,7 +430,7 @@ background-color: lighten(#eee, 3%)
 
 .size-graphic {
   display: block;
-  background-color: lighten(@brand-info, 21%);
+  background-color:  lighten(@vis-brand-info, 15%);
   overflow-x: visible;
   color: black;
   font-size : 13px !important;
@@ -471,26 +479,6 @@ background-color: lighten(#eee, 3%)
 .s-item-children {
   padding-left: 10%;
 
-//  .size-graphic {
-//    background-color: lighten(@brand-additional, 8%);
-//
-//  }
-//
-//  .size-graphic-container {
-//    background-color: lighten(@brand-additional, 20%);
-//  }
-//
-//
-//  .s-facet-selected {
-//    .size-graphic {
-//      background-color: darken(@brand-additional, 24%);
-//    }
-//
-//    .size-graphic-container {
-//      background-color:darken(@brand-additional, 4%);
-//
-//    }
-//  }
 }
 
 
@@ -526,9 +514,6 @@ background-color: lighten(#eee, 3%)
   max-width: 275px;
 }
 
-.s-widget-container {
-
-}
 
 .s-widget-body {
   x-overflow: hidden;
@@ -537,6 +522,18 @@ background-color: lighten(#eee, 3%)
 
 }
 
+@refereed  : @vis-brand-primary;
+
+@nonrefereed : @vis-brand-success;
+
+
+.graph-legend {
+  font-size : 12px;
+}
+
+.s-citation-padding {
+  height: 15px;
+}
 .s-widget-body .selected {
   color: @brand-primary
 }
@@ -545,21 +542,80 @@ background-color: lighten(#eee, 3%)
   display: block
 }
 
-.chart .bar {
-  stroke: white;
-  fill: lighten(@brand-success, 10%);
-  &:hover {
-    fill: lighten(@brand-primary, 20%)
-  }
+.s-legend-color {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+
+}
+
+.s-legend-color.refereed {
+  background-color: @refereed;
+
+}
+
+.s-legend-color.nonrefereed {
+  background-color: @nonrefereed;
+}
+
+
+
+.chart .full-bar, .dot{
+
+  pointer-events: all;
+  fill: @nonrefereed;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.s-vertical-slider {
+  position: absolute !important;
+  top: 61px !important;
+  height: 180px !important;
+  left: 11px !important;;
+
+}
+
+.line {
+  fill: none;
+  stroke: mix(@refereed, @nonrefereed, 30%);
+  stroke-width: 5px;
+}
+
+.h-index {
+  fill: none;
+  stroke: @gray;
+  stroke-width: 1px;
+
+}
+
+
+.chart .refereed {
+    pointer-events: all;
+    fill: @refereed;
+
 }
 
 .chart .x-axis .active text {
-  fill: lighten(@brand-primary, 20%);
-  font: 12px sans-serif;
+  fill: lighten(@brand-primary, 10%);
 }
 
 .chart {
-  padding-bottom: 70px;
+  pointer-events :all;
+  min-height: 270px;
+}
+
+#citation-graph .chart {
+  min-height: 240px;
 }
 
 .axis text {
@@ -573,13 +629,20 @@ background-color: lighten(#eee, 3%)
 }
 
 .show-slider-data-first, .show-slider-data-second {
-  width: 40%;
+  width: 28%;
+}
+
+.ui-slider {
+  margin-bottom: 5px !important;
 }
 
 .slider-data {
   padding-top: 10px;
-  position: relative;
-  right: 18px;
+
+}
+
+.graph-legend {
+  height: 50px;
 }
 
 .sort-options {

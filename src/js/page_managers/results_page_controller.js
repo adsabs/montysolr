@@ -1,164 +1,162 @@
-
-
 //knows about the central region manager (passed it on instantiation) and can manipulate it (also it can add sub regions)
 
 //listens to any events that request the abstract page or a sub part of it and displays the necessary views
 
 //provides an api that can be used by the router
 
+define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/base_widget', 'js/widgets/loading/widget', 'hbs!./templates/results-control-row', 'js/components/api_query'], function (Marionette, threeColumnTemplate, BaseWidget, LoadingWidget, resultsControlRowTemplate, ApiQuery) {
 
+    var widgetDict, history, API;
 
-define(["marionette", "hbs!./templates/results-page-layout",
-  'js/widgets/base/base_widget', 'js/widgets/loading/widget',
-  'hbs!./templates/results-control-row'],
-  function(Marionette, threeColumnTemplate,
-    BaseWidget, LoadingWidget, resultsControlRowTemplate){
+    //  router can make use of these functions
 
-  var  widgetDict, history, API;
+    API = {
 
-  //  router can make use of these functions
+      insertTemplate: function () {
 
-  API = {
+        $("#body-template-container").children().detach();
 
-    insertTemplate : function() {
+        $("#body-template-container").append(threeColumnTemplate());
 
-      $("#body-template-container").children().detach();
+        $("#results-control-row").append(resultsControlRowTemplate())
 
-      $("#body-template-container").append(threeColumnTemplate());
+      },
 
-      $("#results-control-row").append(resultsControlRowTemplate())
+      insertLoadingView: function () {
+        $("#body-template-container").append(this.loadingWidget.render().el)
 
-    },
+        this.loadingWidget.trigger("showLoading")
 
-    insertLoadingView : function(){
-      $("#body-template-container").append(this.loadingWidget.render().el)
+      },
 
-      this.loadingWidget.trigger("showLoading")
+      displayFacets: function () {
 
-    },
+        var $leftCol = $("#s-left-col-container")
 
-    displayFacets : function(){
+        $leftCol.append(widgetDict.authorFacets.render().el).append(widgetDict.database.render().el).append(widgetDict.refereed.render().el).append(widgetDict.keywords.render().el).append(widgetDict.pub.render().el).append(widgetDict.bibgroup.render().el).append(widgetDict.data.render().el).append(widgetDict.vizier.render().el).append(widgetDict.grants.render().el);
 
-      var $leftCol = $("#s-left-col-container")
+      },
 
-      $leftCol
-        .append(widgetDict.authorFacets.render().el)
-        .append(widgetDict.database.render().el)
-        .append(widgetDict.refereed.render().el)
-        .append(widgetDict.keywords.render().el)
-        .append(widgetDict.pub.render().el)
-        .append(widgetDict.bibgroup.render().el)
-        .append(widgetDict.data.render().el)
-        .append(widgetDict.vizier.render().el)
-        .append(widgetDict.grants.render().el);
+      displayControlRow: function () {
+        $("#query-info-container").append(widgetDict.queryInfo.render().el)
+      },
 
+      displayRightColumn: function () {
+        var $rightCol = $("#s-right-col-container");
 
-    },
+        $rightCol.append(widgetDict.graphTabs.render().el).append(widgetDict.queryDebugInfo.render().el);
 
-    displayControlRow : function(){
-      $("#query-info-container").append(widgetDict.queryInfo.render().el)
-    },
+      },
 
-    displayRightColumn : function(){
-      var $rightCol = $("#s-right-col-container");
+      displaySearchBar: function () {
+        $("#search-bar-row").append(widgetDict.searchBar.render().el);
 
-      $rightCol.append(widgetDict.graphTabs.render().el)
-        .append(widgetDict.queryDebugInfo.render().el);
+      },
 
-    },
+      displayResultsList: function () {
 
-    displaySearchBar : function(){
-      $("#search-bar-row").append(widgetDict.searchBar.render().el);
+        $middleCol = $("#s-middle-col-container")
 
+        $middleCol.append(widgetDict.results.render().el)
 
-    },
+        $(".list-of-things").removeClass("hide")
 
-    displayResultsList : function(){
+      },
 
-      $middleCol = $("#s-middle-col-container")
+      enableRightColToggle: function () {
 
-      $middleCol.append(widgetDict.results.render().el)
+        $("#right-col-toggle").on("click", function (e) {
 
-      $(".list-of-things").removeClass("hide")
+          var $this = $(this);
+          var $i = $this.find("i");
 
-    },
+          if ($i.hasClass("right-col-open")) {
 
-    enableRightColToggle : function(){
+            $i.removeClass("right-col-open").addClass("right-col-close");
+            $this.find("span").text("show 3rd col")
 
-      $("#right-col-toggle").on("click", function(e){
+            $("#right-column").addClass("no-display")
+            $("#middle-column").removeClass("col-md-7").addClass("col-md-9");
+            $("#left-column").removeClass("col-md-2").addClass("col-md-3");
 
-        var $this = $(this);
-        var $i = $this.find("i");
+          }
+          else {
+            $this.find("span").text("hide 3rd col")
 
-        if ($i.hasClass("right-col-open")){
+            $i.removeClass("right-col-close").addClass("right-col-open");
 
-          $i.removeClass("right-col-open").addClass("right-col-close");
-          $this.find("span").text("show 3rd col")
+            $("#right-column").removeClass("no-display");
+            $("#middle-column").removeClass("col-md-9").addClass("col-md-7");
+            $("#left-column").removeClass("col-md-3").addClass("col-md-2");
 
-          $("#right-column").addClass("no-display")
-          $("#middle-column").removeClass("col-md-7").addClass("col-md-9");
-          $("#left-column").removeClass("col-md-2").addClass("col-md-3");
-
-        }
-        else {
-          $this.find("span").text("hide 3rd col")
-
-          $i.removeClass("right-col-close").addClass("right-col-open");
-
-          $("#right-column").removeClass("no-display");
-          $("#middle-column").removeClass("col-md-9").addClass("col-md-7");
-          $("#left-column").removeClass("col-md-3").addClass("col-md-2");
-
-
-        }
-      })
+          }
+        })
+      }
     }
-  }
 
-  var ResultsController = BaseWidget.extend({
+    var ResultsController = BaseWidget.extend({
 
-    initialize: function (options) {
+      initialize: function (options) {
 
-      options = options || {};
+        options = options || {};
 
-      _.extend(this, API);
+        _.bindAll(this, 'showPage');
 
-      if (!options.widgetDict){
-        throw new error("page managers need a dictionary of widgets to render")
+        _.extend(this, API);
+
+        if (!options.widgetDict) {
+          throw new error("page managers need a dictionary of widgets to render")
+        }
+
+        widgetDict = options.widgetDict;
+
+        history = options.history;
+
+        this.loadingWidget = new LoadingWidget();
+
+      },
+
+      activate: function (beehive) {
+
+        this.pubsub = beehive.Services.get('PubSub');
+
+        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.showPage)
+
+      },
+
+      showPage: function (apiQuery) {
+
+
+        //it's false when the router uses this function to display the results page
+        if (apiQuery !== false) {
+
+          var tempQuery = new ApiQuery();
+          if (apiQuery.get("q")){
+            tempQuery.set("q", apiQuery.get("q"));
+          }
+          if (apiQuery.get("fq")){
+            tempQuery.set("fq", apiQuery.get("fq"));
+          }
+
+          var urlData = {page: "resultsPage", subPage: undefined, data: apiQuery.toJSON(), path: "search/" + tempQuery.url()}
+
+          this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, urlData);
+
+        }
+
+        this.insertTemplate();
+        this.displaySearchBar();
+        this.displayControlRow();
+        this.displayFacets();
+        this.displayRightColumn();
+        this.displayResultsList();
+        this.enableRightColToggle();
+        //this.insertLoadingView()
+
       }
 
-      widgetDict = options.widgetDict;
+    })
 
-      history = options.history;
-
-      this.loadingWidget = new LoadingWidget();
-
-    },
-
-    activate: function (beehive) {
-
-      this.pubsub = beehive.Services.get('PubSub');
-
-      _.bindAll(this, ['showPage']);
-
-    },
-
-    showPage: function (page) {
-
-              this.insertTemplate()
-              this.displaySearchBar();
-              this.displayControlRow();
-              this.displayFacets();
-              this.displayRightColumn();
-              this.displayResultsList();
-              this.enableRightColToggle();
-//              this.insertLoadingView()
-
-    }
+    return ResultsController
 
   })
-
-
-return ResultsController
-
-})

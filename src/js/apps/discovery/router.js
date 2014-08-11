@@ -13,7 +13,7 @@ define([
       initialize : function(options){
         options = options || {};
 
-        _.bindAll(this, "navigateFromPubSub", "changeURLFromPubSub");
+        _.bindAll(this, "changeURLFromPubSub");
         this.pageControllers = options.pageControllers;
         this.history = options.history;
 
@@ -23,13 +23,12 @@ define([
         this.setBeeHive(beehive);
         this.pubsub = this.getBeeHive().Services.get('PubSub');
 
-        this.pubsub.subscribe(this.pubsub.NAVIGATE_WITH_TRIGGER, this.navigateFromPubSub);
-
         this.pubsub.subscribe(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, this.changeURLFromPubSub)
 
       },
 
       changeURLFromPubSub : function(d){
+
         if (!d) {
           console.warn("can't navigate, no information given")
           return
@@ -41,26 +40,11 @@ define([
 
       },
 
-      navigateFromPubSub : function (data) {
-        /*
-        * data should be a dict like {path: x, parameters : {y:1, z:2}}
-        * */
-
-         if (!data) {
-          console.warn("can't navigate, no information given")
-          return
-        }
-        else {
-          this.navigate(data.path, {trigger: true})
-
-        }
-
-      },
-
       routes: {
         "": "index",
-        "search/:query": 'search',
-        'abs/:bibcode(/)(:subView)': 'viewAbstract'
+        "search/(:query)": 'search',
+        'abs/:bibcode(/)(:subView)': 'viewAbstract',
+        '*invalidRoute': 'noPageFound'
       },
 
 
@@ -79,9 +63,12 @@ define([
 
           this.history.addEntry({page : "resultsPage", subPage: undefined, data: q.toJSON()})
           this.pubsub.publish(this.pubsub.START_SEARCH, q);
-          this.pageControllers.resultsPage.showPage();
         }
+        else {
+          this.history.addEntry({page : "resultsPage", subPage: undefined, data: undefined})
+          this.pageControllers.resultsPage.showPage(false);
 
+        }
       },
 
       viewAbstract: function (bibcode, subView) {
@@ -99,7 +86,15 @@ define([
          this.pageControllers.abstractPage.showPage(bibcode, subView);
 
         }
-      }
+      },
+
+      noPageFound : function() {
+       //i will fix this later
+
+        $("#body-template-container").html("<div>You have broken bumblebee. (404)</div><img src=\"http://imgur.com/EMJhzmL.png\" alt=\"sad-bee\">")
+
+
+    }
 
 
     });

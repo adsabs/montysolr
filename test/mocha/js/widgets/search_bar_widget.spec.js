@@ -39,13 +39,13 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
       done();
     });
 
-    it("should trigger a NAVIGATE_WITH_TRIGGER when the search-submit button is pressed", function(done) {
+    it("should trigger a START_SEARCH when the search-submit button is pressed", function(done) {
 
       var triggered = false;
 
 
 
-      pubsub.subscribe(key, pubsub.NAVIGATE_WITH_TRIGGER, function(apiQuery) {
+      pubsub.subscribe(key, pubsub.START_SEARCH, function(apiQuery) {
         triggered = true;
       });
 

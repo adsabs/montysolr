@@ -6,7 +6,9 @@ define([
   'js/widgets/facet/tree_view',
   'js/widgets/base/base_widget',
   'js/components/paginator',
-  'js/widgets/facet/zoomable_graph_view'
+  'js/widgets/facet/graph-facet/year-graph',
+  'js/widgets/facet/graph-facet/citation-graph'
+
 ], function (
   FacetCollection,
   FacetWidget,
@@ -15,7 +17,8 @@ define([
   TreeView,
   BaseWidget,
   Paginator,
-  ZoomableGraphView
+  YearGraphView,
+  CitationGraphView
   ) {
 
 
@@ -158,48 +161,185 @@ define([
      * @param options
      * @returns {BaseFacetWidget}
      */
-    makeGraphFacet: function (options) {
-      //required config
-      if (!(options.facetField && options.facetTitle && options.xAxisTitle)) {
-        throw new Error("Required configuration variables were not passed");
+    makeGraphFacet: function (graphName) {
+
+      var graphView, processResponse, facetField, defaultQueryArguments;
+
+      if (graphName === "year"){
+        graphView = YearGraphView;
+        facetField = "year";
+        defaultQueryArguments = {
+            "facet.pivot" : "property,year",
+              "facet" : "true",
+              "facet.minCount" : "1"
+          };
+        processResponse = function (apiResponse) {
+
+          this.setCurrentQuery(apiResponse.getApiQuery());
+
+          var data = apiResponse.get("facet_counts.facet_pivot.property,year");
+
+          if (apiResponse.get("response.numFound") < 2){
+            this.collection.reset({graphData : []});
+            return
+          }
+
+
+          var refData = _.findWhere(data, {value : "refereed"});
+
+          if (refData){
+            refData = refData.pivot;
+          }
+
+          var nonRefData = _.findWhere(data, {value : "notrefereed"});
+
+          if (nonRefData){
+            nonRefData = nonRefData.pivot;
+          }
+
+          var maxVal, minVal;
+
+          _.each(refData, function(d){
+            var val = parseInt(d.value);
+            if (maxVal === undefined){
+              maxVal = val;
+            }
+            else if (val > maxVal){
+              maxVal = val
+            }
+            if(minVal === undefined){
+              minVal = val;
+            }
+            else if (parseInt(d.value) < minVal){
+              minVal = parseInt(d.value);
+            }
+          });
+
+          _.each(nonRefData, function(d){
+            var val = parseInt(d.value);
+            if (maxVal === undefined){
+              maxVal = val;
+            }
+            else if (val > maxVal){
+              maxVal = val
+            }
+            if(minVal === undefined){
+              minVal = val;
+            }
+            else if (parseInt(d.value) < minVal){
+              minVal = parseInt(d.value);
+            }
+          });
+
+          var yearRange = _.range(minVal, maxVal+1);
+
+          var finalData = [];
+
+          _.each(yearRange, function(year){
+            var stringYear = year + "";
+            refCount = _.filter(refData, function(d){return d.value === stringYear})[0];
+            refCount = refCount? refCount.count : 0;
+            nonRefCount = _.filter(nonRefData, function(d){return d.value === stringYear})[0];
+            nonRefCount = nonRefCount? nonRefCount.count : 0;
+
+            finalData.push({x: year, y: refCount + nonRefCount, refCount: refCount})
+
+          })
+
+          if (finalData.length < 2){
+            this.collection.reset({graphData : []});
+            return
+          }
+
+          this.collection.reset([{graphData : finalData}]);
+        }
+      }
+      else if (graphName === "citation"){
+        graphView = CitationGraphView;
+        facetField = "citation_count";
+        defaultQueryArguments = {
+          "facet.pivot" : "property,citation_count",
+          "facet" : "true",
+          "facet.minCount" : "1"
+        };
+        processResponse = function (apiResponse) {
+          this.setCurrentQuery(apiResponse.getApiQuery());
+
+          var data = apiResponse.get("facet_counts.facet_pivot.property,citation_count");
+
+          if (apiResponse.get("response.numFound") < 2){
+            this.collection.reset({graphData : []});
+            return
+          }
+
+          var refData = _.findWhere(data, {value : "refereed"});
+
+          if (refData){
+          refData = refData.pivot;
+          }
+
+          var nonRefData = _.findWhere(data, {value : "notrefereed"});
+
+          if (nonRefData){
+            nonRefData = nonRefData.pivot;
+          }
+
+          var finalData = [];
+
+          _.each(refData, function(d) {
+            var val = d.value, count = d.count;
+            _.each(_.range(count), function () {
+              finalData.push({refereed: true, x: undefined, y: val})
+            })
+          })
+
+          _.each(nonRefData, function(d) {
+            var val = d.value, count = d.count;
+            _.each(_.range(count), function () {
+              finalData.push({refereed: false, x: undefined, y: val})
+            })
+          })
+
+          if (finalData.length < 2){
+            this.collection.reset({graphData : []});
+            return
+          }
+
+          finalData = finalData.sort(function (a, b) {
+            return b.y- a.y;
+          });
+
+          //a cut off of 2000
+          finalData = _.first(finalData, 2000);
+
+          finalData = _.map(finalData, function(d, i){
+            d.x = i +1
+            return d
+          });
+
+          this.collection.reset([{graphData : finalData}]);
+
+        }
+      }
+      else {
+        throw new Error("We can't make that particular graph, check the name you passed to the factory")
       }
 
-      var GraphContainerView = FacetContainerView.extend({
-        itemViewOptions: function (model, index) {
-          return _.extend({xAxisTitle: options.facetTitle, title: options.facetTitle}, FacetContainerView.prototype.itemViewOptions.apply(this, arguments));
-        }
-      });
-
       var containerOptions = {
-        model: new FacetContainerView.ContainerModelClass({title: options.facetTitle}),
+        model: new FacetContainerView.ContainerModelClass({title: ""}),
         collection: new FacetCollection(),
-        displayNum: 5,
-        maxDisplayNum: 100,
-        openByDefault: false,
-        showOptions: true,
-        itemView: ZoomableGraphView
+        openByDefault: true,
+        itemView: graphView
       };
-
-      containerOptions = _.extend(containerOptions,
-        _.pick(options, ['displayNum', 'maxDisplayNum', 'openByDefault', 'showOptions']));
-
 
       var controllerOptions = {
-        defaultQueryArguments: {
-          "facet": "true",
-          "facet.field": options.facetField,
-          "facet.mincount": "1",
-          "facet.limit": 100,
-          fl: 'id'
-        },
-        view: new GraphContainerView(containerOptions)
+        view: new FacetContainerView(containerOptions),
+        facetField : facetField
       };
 
-      var controllerOptions = _.extend(controllerOptions, _.pick(options,
-        ['defaultQueryArguments']));
-
       var GraphWidget = FacetWidget.extend({
-        facetField: options.facetField,
+        processResponse : processResponse,
+       defaultQueryArguments : defaultQueryArguments,
         //XXX:rca hack - facet.prefix should be cleaned up by QM
         customizeQuery: function(apiQuery) {
           var q = apiQuery.clone();
@@ -209,45 +349,8 @@ define([
             q = this.composeQuery(this.defaultQueryArguments, q);
           }
           return q;
-        },
-        processResponse: function (apiResponse) {
-          this.setCurrentQuery(apiResponse.getApiQuery());
-
-          //console.log(JSON.stringify(apiResponse.getApiQuery().toJSON()));
-          var view = this.view;
-          var coll = this.collection;
-          var facets = apiResponse.get("facet_counts.facet_fields." + this.facetField);
-          var facetsCol = [];
-          _.each(facets, function (f, i) {
-            if (i % 2 === 0) {
-              facetsCol.push({
-                //"title"
-                x: parseInt(f),
-                //"value"
-                y: parseInt(facets[i + 1])
-              })
-            }
-          }, this);
-
-          if (facetsCol.length == 0) {
-            coll.reset();
-            return;
-          }
-
-          facetsCol = _.sortBy(facetsCol, function (d) {
-            return d.x
-          });
-
-          coll.reset({
-            "graphInfo": facetsCol,
-            "value": [facetsCol[0].x, facetsCol[facetsCol.length - 1].x]
-          });
-
         }
       });
-
-
-
       return new GraphWidget(controllerOptions);
 
     }

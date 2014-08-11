@@ -196,8 +196,10 @@ define(['marionette',
         e.preventDefault();
         e.stopPropagation();
 
+        console.log("SUBMITTING")
+
         var query = (this.$(".q").val());
-        this.trigger("new_query", query);
+        this.trigger("start_search", query);
       },
 
       setQueryBox: function (val) {
@@ -225,23 +227,23 @@ define(['marionette',
         fl: 'id'
       },
 
-      storeQuery : function(query){
+      storeQuery: function (query) {
         this.setCurrentQuery(query);
       },
 
-      initialize: function(options) {
+      initialize: function (options) {
         this.currentQuery = undefined;
         this.view = new SearchBarView();
-        this.listenTo(this.view, "new_query", function(query){
+        this.listenTo(this.view, "start_search", function (query) {
           var newQuery = new ApiQuery({
-                      q: query
-                    });
+            q: query
+          });
           this.storeQuery(newQuery);
           this.navigate(newQuery);
         });
 
-        this.listenTo(this.view, "render", function(){
-          if (this.currentQuery){
+        this.listenTo(this.view, "render", function () {
+          if (this.currentQuery) {
             this.view.setQueryBox(this.currentQuery)
           }
         })
@@ -256,13 +258,12 @@ define(['marionette',
         this.storeQuery(q.get('q'));
       },
 
+      navigate: function (newQuery) {
 
-      navigate : function(newQuery){
+        this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
 
-        this.pubsub.publish(this.pubsub.NAVIGATE_WITH_TRIGGER,
-          {path : "search/" + newQuery.url()});
       }
-    });
+    })
 
 
     return SearchBarWidget;
