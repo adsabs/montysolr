@@ -25,9 +25,9 @@ define(["config", 'module'], function(config, module) {
       var beehive = app.getBeeHive();
       var api = beehive.getService('Api');
 
-      if (conf.routerConf.root) {
+      if (conf.root) {
         api.url = "" + api.url;
-        app.root = conf.routerConf.root;
+        app.root = conf.root;
       }
       if (conf.debug !== undefined) {
         app.getObject('QueryMediator').debug = conf.debug;
