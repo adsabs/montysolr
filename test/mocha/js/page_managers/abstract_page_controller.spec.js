@@ -51,6 +51,13 @@ describe("Abstract Page Controller (Page Manager)", function(){
       {
         bibcode: "test2",
         title: "testtitle2",
+        originalSearchResult : false
+      },
+
+
+      {
+        bibcode: "test3",
+        title: "testtitle3",
         originalSearchResult : true
       }]);
 
@@ -59,7 +66,8 @@ describe("Abstract Page Controller (Page Manager)", function(){
     widget.titleView.render();
 
     expect(widget.titleView.$(".abstract-paginator-next").length).to.eql(1);
-    expect(widget.titleView.$(".abstract-paginator-next").attr("href")).to.eql("/abs/test2");
+    //skipping the intermediate bibcode
+    expect(widget.titleView.$(".abstract-paginator-next").attr("href")).to.eql("/abs/test3");
 
     expect(widget.titleView.$(".abstract-paginator-prev").length).to.eql(0);
 

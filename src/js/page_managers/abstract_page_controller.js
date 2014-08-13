@@ -14,13 +14,11 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
     'js/widgets/base/paginated_base_widget', 'hbs!./templates/abstract-title',
     'js/components/api_query', 'hbs!./templates/abstract-nav',
     'hbs!./templates/abstract-title-nav-descriptor', 'js/widgets/loading/widget'],
-
   function(Marionette, threeColumnTemplate, PaginatedBaseWidget,
     abstractTitleTemplate, ApiQuery, abstractNavTemplate,
     abstractTitleNavDescriptor, LoadingWidget){
 
 
-    //so view can keep track of what to render
     var currentBibcode;
 
     var AbstractTitleNavDescriptorView = Backbone.View.extend({
@@ -74,8 +72,6 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-    var AbstractTitleView = Backbone.View.extend({
-
       emitNavigateEvent : function($t){
         var route = $t.attr("href");
         //taking only final path
@@ -98,12 +94,12 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         if (model.get("originalSearchResult") === true){
 
           index = this.collection.indexOf(model);
-          prevBib = _(this.collection.findWhere({originalSearchResult : true})).filter(function(model, i){return i == index-1})[0]
-          nextBib =  _(this.collection.findWhere({originalSearchResult : true})).filter(function(model, i){return i == index+1})[0]
+          prevBib = _.last(_.where(_.first(this.collection.toJSON(), index), {originalSearchResult : true}))
+          nextBib = _.first(_.where(_.rest(this.collection.toJSON(), index+1), {originalSearchResult : true}))
         }
 
-        prevBib = prevBib ? prevBib.get("bibcode") : undefined;
-        nextBib = nextBib ? nextBib.get("bibcode") : undefined;
+        prevBib = prevBib ? prevBib.bibcode : undefined;
+        nextBib = nextBib ? nextBib.bibcode : undefined;
 
         this.$el.html(this.template(
           {index : index+1, bibcode: model.get("bibcode"), title: model.get("title"), prev: prevBib, next : nextBib}
@@ -117,7 +113,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
       events : {"click .abstract-paginator-next" : "checkLoadMore"},
 
       checkLoadMore : function(){
-       this.trigger("nextEvent")
+        this.trigger("nextEvent")
       }
 
     })
@@ -142,11 +138,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-
-      /* all widgets that need to be told which bibcode to render
-      should be activated here */
-
-      loadWidgetData : function(){
+      loadWidgetData: function () {
         var that = this;
 
         _.each(this.abstractSubViews, function (v, k) {
@@ -173,8 +165,6 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
           }
 
         }, this)
-
-        this.widgetDict.resources.loadBibcodeData(this._bibcode)
 
       },
 
@@ -242,7 +232,6 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         $middleCol.children().detach();
 
         widget = this.abstractSubViews[viewName]["widget"];
-        $middleCol.append(widget.render().el);
 
         $middleCol.append(widget.render().el);
 
@@ -253,10 +242,8 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-
-      displayRightColumn : function(){
+      displayRightColumn: function () {
         var $rightCol = $("#s-right-col-container");
-        $rightCol.append(this.widgetDict.resources.render().el)
 
       },
 
@@ -270,9 +257,9 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
           $(".opt-nav-button").append("<a href=" + "/search/" + this.getMasterQuery().url()
             + " class=\"btn btn-sm \"> <i class=\"glyphicon glyphicon-arrow-left\"></i> back to results</a>")
 
-          }
-
         }
+
+      }
 
     };
 
@@ -343,8 +330,8 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
         this.history = options.history;
 
-//      to be explicit, transferring only those widgets considered "sub views" to this dict
-//      allowing abstractSubViews to be set by options for testing purposes
+        //      to be explicit, transferring only those widgets considered "sub views" to this dict
+        //      allowing abstractSubViews to be set by options for testing purposes
         this.abstractSubViews = options.abstractSubViews ||  {
           //the keys are also the sub-routes
           "abstract": {widget: this.widgetDict.abstract, title:"Abstract", descriptor: "Abstract for:"},
@@ -376,7 +363,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
           if(this.paginator.start<= eventData.data.start)
 
-          this.dispatchRequest(this.getCurrentQuery());
+            this.dispatchRequest(this.getCurrentQuery());
 
         }
 
@@ -419,14 +406,14 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       dispatchInitialRequest: function (apiQuery) {
 
-          this.setCurrentQuery(apiQuery);
+        this.setCurrentQuery(apiQuery);
 
-          //tells you what the people have searched (not the widget's query)
-          this._masterQuery = apiQuery;
+        //tells you what the people have searched (not the widget's query)
+        this._masterQuery = apiQuery;
 
-          this.paginator.reset();
+        this.paginator.reset();
 
-          this.dispatchRequest(apiQuery)
+        this.dispatchRequest(apiQuery)
 
       },
 
@@ -435,6 +422,8 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
       },
 
       renderNewBibcode: function () {
+
+        //automatically renders this._bibcode
 
         //first, check if we have the info in current query docs
         if (this.collection.findWhere({bibcode: this._bibcode})) {
@@ -448,12 +437,12 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
           //processResponse will re-call this function, but with the data parameter
 
           //is there a better way to avoid pagination?
-            var req = this.composeRequest(new ApiQuery({'q': 'bibcode:' + this._bibcode, 'fl': "title,bibcode", '__show': this._bibcode}));
-            if (req) {
-              this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-            }
+          var req = this.composeRequest(new ApiQuery({'q': 'bibcode:' + this._bibcode, 'fl': "title,bibcode", '__show': this._bibcode}));
+          if (req) {
+            this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
           }
-        },
+        }
+      },
 
       processResponse: function (apiResponse) {
 
@@ -467,10 +456,10 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
             throw new Error("did not receive bibcode data")
           };
           /* we are adding to the model the notion that this bib didn't come from
-          * a system-wide query, i.e. they clicked on a title within the abstract page
-          * rather than in the results page
-          *
-          */
+           * a system-wide query, i.e. they clicked on a title within the abstract page
+           * rather than in the results page
+           *
+           */
           this.collection.add({title: data.title, bibcode : data.bibcode, originalSearchResult: false})
 
           this.renderNewBibcode(this._bibcode);
@@ -513,27 +502,24 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
       showPage : function(bib, subPage){
 
 
-          this._bibcode = bib;
+        this._bibcode = bib;
 
-          //for the view so it can pick the right model
-          currentBibcode = bib;
+        this.setCurrentBibcode(bib);
 
-          this.setCurrentBibcode(bib);
+        this.renderNewBibcode();
 
-          this.renderNewBibcode();
+        this.insertTemplate();
+        this.showTitle();
+        this.displayAbstractNav(subPage);
+        this.displayRightColumn();
+        this.displayTopRow();
 
-          this.insertTemplate();
-          this.showTitle();
-          this.displayAbstractNav(subPage);
-          this.displayRightColumn();
-          this.displayTopRow();
+        //this calls "displayNav" upon individual widget completion
+        this.loadWidgetData();
 
-          //this calls "displayNav" upon individual widget completion
-          this.loadWidgetData();
+        this.showAbstractSubView(subPage);
 
-          this.showAbstractSubView(subPage);
-
-          this.insertLoadingView()
+        this.insertLoadingView()
 
 
       }

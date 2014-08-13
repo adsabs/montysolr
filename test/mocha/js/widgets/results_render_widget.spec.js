@@ -8,13 +8,13 @@ define(['marionette',
     'js/widgets/base/paginated_base_widget'
   ],
   function (Marionette,
-            Backbone,
-            MinimalPubsub,
-            ResultsWidget,
-            ApiQuery,
-            Test1,
-            Test2,
-            PaginatedBaseWidget) {
+    Backbone,
+    MinimalPubsub,
+    ResultsWidget,
+    ApiQuery,
+    Test1,
+    Test2,
+    PaginatedBaseWidget) {
 
     describe("Render Results (UI Widget)", function () {
 
@@ -29,7 +29,7 @@ define(['marionette',
               return Test1;
             }
           }
-          }))({verbose: false});
+        }))({verbose: false});
 
         widget = new ResultsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
@@ -60,11 +60,11 @@ define(['marionette',
 
 
       it("should join highlights with their records on a model by model basis", function (done) {
+        debugger;
 
         expect(widget.collection.get("4189917").get("details").highlights[0]).to.eql("External triggers of <em>star</em> formation.");
 
-        expect($w.find(".more-info:last li:first").html()).to.eql("Diffuse high-energy radiation from regions of massive <em>star</em> formation.");
-
+        expect($w.find('.more-info:last li').eq(0).html()).to.eql("Diffuse high-energy radiation from regions of massive <em>star</em> formation.");
         done();
       });
 

@@ -39,7 +39,16 @@ module.exports = function(grunt) {
         cmd: 'node node_modules/requirejs/bin/r.js -convert src/libs/dsjslib src/libs/dsjslib'
       },
       move_lesshat : {
-        cmd : 'cp bower_components/lesshat/build/lesshat-prefixed.less src/styles/less/mixins.less'
+        cmd : 'cp  bower_components/lesshat/build/lesshat-prefixed.less src/styles/less/mixins.less'
+      },
+      move_bootstrap : {
+        cmd : 'cp -r bower_components/bootstrap/less src/styles/less/bootstrap-less'
+      },
+      move_fontawesome : {
+        cmd : 'cp -r bower_components/fontawesome/fonts/.* src/styles/fonts/; cp -r bower_components/fontawesome/less/.* src/styles/fonts/fontawesome/less'
+      },
+      move_jqueryuicss : {
+        cmd : 'cp -r bower_components/jqueryui/themes/smoothness src/styles/css/'
       }
     },
 
@@ -303,6 +312,8 @@ module.exports = function(grunt) {
 
   });
 
+
+
   // Basic environment config
   grunt.loadNpmTasks('grunt-env');
 
@@ -380,6 +391,6 @@ module.exports = function(grunt) {
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
 
-  grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_lesshat']);
+  grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_lesshat', 'exec:move_bootstrap', 'exec:move_fontawesome', 'exec:move_jqueryuicss']);
 
 };

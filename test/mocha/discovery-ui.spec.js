@@ -30,7 +30,7 @@ var tests = [
   tbase + '/widgets/similar_widget.spec.js',
   tbase + '/widgets/table_of_contents_widget.spec.js',
   tbase + '/widgets/coreads_widget.spec.js',
-  tbase + '/page_managers/abstract_page_controller.spec.js'
+  tbase + '/page_managers/abstract_page_controller.spec.js',
   tbase + '/widgets/resources_widget.spec.js'
 
 

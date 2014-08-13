@@ -20,6 +20,11 @@ test/coverage
 test/reports
 test/mocha/sandbox.spec.js
 
+src/styles/css
+src/fonts
+src/less/bootstrap_less
+src/less/mixins.less
+
 .idea
 
 .vagrant
