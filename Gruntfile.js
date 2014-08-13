@@ -45,7 +45,7 @@ module.exports = function(grunt) {
         cmd : 'cp -r bower_components/bootstrap/less src/styles/less/bootstrap-less'
       },
       move_fontawesome : {
-        cmd : 'cp -r bower_components/fontawesome/fonts/.* src/styles/fonts/; cp -r bower_components/fontawesome/less/.* src/styles/fonts/fontawesome/less'
+        cmd : 'cp -a bower_components/fontawesome/fonts/. src/styles/fonts/; mkdir src/styles/fonts/fontawesome/; cp -r bower_components/fontawesome/less/ src/styles/fonts/fontawesome'
       },
       move_jqueryuicss : {
         cmd : 'cp -r bower_components/jqueryui/themes/smoothness src/styles/css/'
