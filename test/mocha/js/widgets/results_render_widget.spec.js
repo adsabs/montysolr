@@ -60,8 +60,6 @@ define(['marionette',
 
 
       it("should join highlights with their records on a model by model basis", function (done) {
-        debugger;
-
         expect(widget.collection.get("4189917").get("details").highlights[0]).to.eql("External triggers of <em>star</em> formation.");
 
         expect($w.find('.more-info:last li').eq(0).html()).to.eql("Diffuse high-energy radiation from regions of massive <em>star</em> formation.");

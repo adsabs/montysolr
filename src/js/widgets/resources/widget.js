@@ -67,7 +67,6 @@ define(['underscore',
     },
 
     processResponse : function(apiResponse){
-      console.log("REsoinse!", apiResponse.toJSON())
 
       var data = apiResponse.get("response.docs[0]");
 
