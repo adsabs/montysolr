@@ -1,12 +1,14 @@
-
-
-//knows about the central region manager (passed it on instantiation) and can manipulate it (also it can add sub regions)
-
-//listens to any events that request the abstract page or a sub part of it and displays the necessary views
-
-//provides an api that can be used by the router
-
-
+/**
+ * This widget controls what gets displayed on the 'abstract' view
+ *
+ * It knows about the central region manager (passed it on instantiation)
+ * and can manipulate it (also it can add sub regions)
+ *
+ * Listens to any events that request the abstract page or a sub part
+ * of it and displays the necessary views
+ *
+ * Provides an api that can be used by the router
+ */
 
 define(["marionette", "hbs!./templates/abstract-page-layout",
     'js/widgets/base/paginated_base_widget', 'hbs!./templates/abstract-title',

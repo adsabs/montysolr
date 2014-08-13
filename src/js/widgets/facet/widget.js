@@ -41,9 +41,7 @@ define(['backbone',
         this._extractor = undefined;
         this._preprocessor = undefined;
 
-        if (! (this.defaultQueryArguments['facet.field'] || this.getExtractorChain())) {
-          throw new Error("Required parameter defaultQueryArguments[facet.field] or extractionProcessor is missing");
-        }
+
 
       },
 
@@ -315,13 +313,13 @@ define(['backbone',
         }
         else {
 
-          var value = model.get('value');
+          var value = this.facetField + ":" + model.get('value');
 
           if (value) {
             var paginator = this.findPaginator(q).paginator;
 
             q = q.clone();
-            value = this.queryUpdater.escapeInclWhitespace(value);
+//            value = this.queryUpdater.escapeInclWhitespace(value);
 
             var fieldName = 'q'; // + this.facetField;
             //make default limit to
