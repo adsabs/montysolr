@@ -205,7 +205,7 @@ define(["js/widgets/facet/factory",
         widget = FacetFactory.makeGraphFacet("year");
         widget.processResponse(new ApiResponse(testJSON));
 
-      })
+      });
 
 
       it("should process refereed and refereed data into a single array, filling in missing years (with y values of 0), to be used by d3", function(){
@@ -226,4 +226,4 @@ define(["js/widgets/facet/factory",
     })
 
 
-})
+});

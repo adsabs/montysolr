@@ -1,10 +1,30 @@
-//knows about the central region manager (passed it on instantiation) and can manipulate it (also it can add sub regions)
+/**
+ * This widget knows about the central region manager (passed it on instantiation)
+ * and can manipulate it (also it can add sub regions)
+ *
+ * It listens to any events that request the abstract page or a sub part of it and
+ * displays the necessary views
+ *
+ * Exposes an api that can be used by the router (to change what is currently
+ * displayed)
+ *
+ */
 
-//listens to any events that request the abstract page or a sub part of it and displays the necessary views
 
-//provides an api that can be used by the router
-
-define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/base_widget', 'js/widgets/loading/widget', 'hbs!./templates/results-control-row', 'js/components/api_query'], function (Marionette, threeColumnTemplate, BaseWidget, LoadingWidget, resultsControlRowTemplate, ApiQuery) {
+define([
+  "marionette",
+  "hbs!./templates/results-page-layout",
+  'js/widgets/base/base_widget',
+  'js/widgets/loading/widget',
+  'hbs!./templates/results-control-row',
+  'js/components/api_query'],
+  function (
+    Marionette,
+    threeColumnTemplate,
+    BaseWidget,
+    LoadingWidget,
+    resultsControlRowTemplate,
+    ApiQuery) {
 
     var widgetDict, history, API;
 
@@ -23,7 +43,7 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
       },
 
       insertLoadingView: function () {
-        $("#body-template-container").append(this.loadingWidget.render().el)
+        $("#body-template-container").append(this.loadingWidget.render().el);
 
         this.loadingWidget.trigger("showLoading")
 
@@ -31,7 +51,7 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
 
       displayFacets: function () {
 
-        var $leftCol = $("#s-left-col-container")
+        var $leftCol = $("#s-left-col-container");
 
         $leftCol.append(widgetDict.authorFacets.render().el).append(widgetDict.database.render().el).append(widgetDict.refereed.render().el).append(widgetDict.keywords.render().el).append(widgetDict.pub.render().el).append(widgetDict.bibgroup.render().el).append(widgetDict.data.render().el).append(widgetDict.vizier.render().el).append(widgetDict.grants.render().el);
 
@@ -55,9 +75,9 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
 
       displayResultsList: function () {
 
-        $middleCol = $("#s-middle-col-container")
+        var $middleCol = $("#s-middle-col-container");
 
-        $middleCol.append(widgetDict.results.render().el)
+        $middleCol.append(widgetDict.results.render().el);
 
         $(".list-of-things").removeClass("hide")
 
@@ -73,15 +93,15 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
           if ($i.hasClass("right-col-open")) {
 
             $i.removeClass("right-col-open").addClass("right-col-close");
-            $this.find("span").text("show 3rd col")
+            $this.find("span").text("show 3rd col");
 
-            $("#right-column").addClass("no-display")
+            $("#right-column").addClass("no-display");
             $("#middle-column").removeClass("col-md-7").addClass("col-md-9");
             $("#left-column").removeClass("col-md-2").addClass("col-md-3");
 
           }
           else {
-            $this.find("span").text("hide 3rd col")
+            $this.find("span").text("hide 3rd col");
 
             $i.removeClass("right-col-close").addClass("right-col-open");
 
@@ -92,7 +112,7 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
           }
         })
       }
-    }
+    };
 
     var ResultsController = BaseWidget.extend({
 
@@ -105,7 +125,7 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
         _.extend(this, API);
 
         if (!options.widgetDict) {
-          throw new error("page managers need a dictionary of widgets to render")
+          throw new error("page managers need a dictionary of widgets to render");
         }
 
         widgetDict = options.widgetDict;
@@ -120,7 +140,7 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
 
         this.pubsub = beehive.Services.get('PubSub');
 
-        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.showPage)
+        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.showPage);
 
       },
 
@@ -138,7 +158,7 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
             tempQuery.set("fq", apiQuery.get("fq"));
           }
 
-          var urlData = {page: "resultsPage", subPage: undefined, data: apiQuery.toJSON(), path: "search/" + tempQuery.url()}
+          var urlData = {page: "resultsPage", subPage: undefined, data: apiQuery.toJSON(), path: "search/" + tempQuery.url()};
 
           this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, urlData);
 
@@ -155,8 +175,8 @@ define(["marionette", "hbs!./templates/results-page-layout", 'js/widgets/base/ba
 
       }
 
-    })
+    });
 
     return ResultsController
 
-  })
+  });

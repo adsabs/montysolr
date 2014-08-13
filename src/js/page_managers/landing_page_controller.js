@@ -1,63 +1,63 @@
 define(["marionette", "hbs!./templates/landing-page-layout",
     "js/widgets/base/base_widget"
   ],
-  function(Marionette, fullLengthLayout, BaseWidget){
+  function (Marionette, fullLengthLayout, BaseWidget) {
 
-  var  history;
+    var history;
 
-  var API = {
+    var API = {
 
-    insertTemplate : function(){
-      $("#body-template-container").empty()
-        .append(fullLengthLayout())
+      insertTemplate: function () {
+        $("#body-template-container").empty()
+          .append(fullLengthLayout())
 
-    },
+      },
 
-    displayLandingPage : function(){
-      this.insertTemplate();
+      displayLandingPage: function () {
+        this.insertTemplate();
 
-      $("#row-2-content").append(this.widgetDict.searchBar.render().el)
+        $("#row-2-content").append(this.widgetDict.searchBar.render().el);
 
-      //opening the form
-      $(".show-form").click();
+        //opening the form
+        $(".show-form").click();
 
-    }
+      }
 
-  };
+    };
 
-  var LandingPageController = BaseWidget.extend({
-
-
-   initialize : function(options){
-
-    options = options || {};
+    var LandingPageController = BaseWidget.extend({
 
 
-     this.widgetDict = options.widgetDict;
-     _.extend(this, API)
+      initialize: function (options) {
+
+        options = options || {};
 
 
-     history = options.history;
+        this.widgetDict = options.widgetDict;
+        _.extend(this, API);
 
 
-   },
-
-   activate : function(beehive){
-
-   },
-
-  showPage : function(page){
+        history = options.history;
 
 
-      this.displayLandingPage()
+      },
+
+      activate: function (beehive) {
+
+      },
+
+      showPage: function (page) {
 
 
-  }
-
-  })
+        this.displayLandingPage()
 
 
- return LandingPageController
+      }
+
+    });
 
 
-})
+    return LandingPageController
+
+
+  });

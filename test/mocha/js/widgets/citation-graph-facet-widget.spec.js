@@ -122,7 +122,7 @@ define(["js/widgets/facet/factory",
           ]
         }
       }
-    }
+    };
 
 
 
@@ -133,9 +133,9 @@ define(["js/widgets/facet/factory",
       beforeEach(function(){
 
         widget = FacetFactory.makeGraphFacet("citation");
-        widget.processResponse(new ApiResponse(testJSON))
+        widget.processResponse(new ApiResponse(testJSON));
 
-      })
+      });
 
 
       it("should have a processResponse function that unspools a facet pivot query into a single, ordered array usable by d3", function(){
@@ -272,7 +272,7 @@ define(["js/widgets/facet/factory",
 
 
         _.each(expectedResults, function(d,i){
-          expect(d).to.eql(graphData[i])
+          expect(d).to.eql(graphData[i]);
         });
 
       })
@@ -283,4 +283,4 @@ define(["js/widgets/facet/factory",
     })
 
 
-  })
+  });
