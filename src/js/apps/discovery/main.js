@@ -339,8 +339,6 @@ define(["config", 'module'], function(config, module) {
       var resources = app.getWidget('Resources');
       resources.activate(beehive.getHardenedInstance());
 
-      console.log("b", beehive, beehive.getHardenedInstance, beehive.getHardenedInstance())
-
       var pageControllers = {};
       var bumblebeeHistory = app.getObject("HistoryManager");
 

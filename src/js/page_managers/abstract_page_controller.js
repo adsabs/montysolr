@@ -163,6 +163,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
             })
           }
+          this.widgetDict.resources.loadBibcodeData(this._bibcode);
 
         }, this)
 
@@ -244,6 +245,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       displayRightColumn: function () {
         var $rightCol = $("#s-right-col-container");
+        $rightCol.append(this.widgetDict.resources.render().el)
 
       },
 
