@@ -251,6 +251,12 @@ define(['marionette',
         done();
       })
 
+
+      it("should request links_data and parse it into the model")
+      it("should render links for the relevan")
+
+
+
     })
 
   });

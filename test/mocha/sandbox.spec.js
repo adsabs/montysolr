@@ -22,23 +22,23 @@ if (window.location && window.location.search) {
 // These are the tests that we want to run for this app
 var tests = [
 
-    //tbase + '/widgets/facet_widget.spec.js',
-    //tbase + '/widgets/results_render_widget.spec.js',
-    //tbase + '/widgets/base_container_view.spec.js',
+    tbase + '/widgets/facet_widget.spec.js',
+    tbase + '/widgets/results_render_widget.spec.js',
+    tbase + '/widgets/base_container_view.spec.js',
 
-    //tbase + '/widgets/base_tree_view.spec.js',
-    //tbase + '/widgets/facet_container_view.spec.js',
+    tbase + '/widgets/base_tree_view.spec.js',
+    tbase + '/widgets/facet_container_view.spec.js',
 
-    //tbase + '/components/api_query_updater.spec.js',
-    //tbase + '/widgets/facet_widget.spec.js',
-    //tbase + '/components/query_mediator.spec.js'
-    //tbase + '/widgets/multi_callback_widget.spec.js',
-    //tbase + '/widgets/facet_zoomable_graph_view.spec.js',
-    //tbase + '/widgets/facet_controllers.spec.js'
-    //tbase + '/widgets/facet_hier_widget.spec.js'
-    //tbase + '/widgets/facet_zoomable_graph_view.spec.js'
-    //tbase + '/widgets/list_ot_things_widget.spec.js',
-    //tbase + '/widgets/results_render_widget.spec.js'
+    tbase + '/components/api_query_updater.spec.js',
+    tbase + '/widgets/facet_widget.spec.js',
+    tbase + '/components/query_mediator.spec.js'
+    tbase + '/widgets/multi_callback_widget.spec.js',
+    tbase + '/widgets/facet_zoomable_graph_view.spec.js',
+    tbase + '/widgets/facet_controllers.spec.js'
+    tbase + '/widgets/facet_hier_widget.spec.js'
+    tbase + '/widgets/facet_zoomable_graph_view.spec.js'
+    tbase + '/widgets/list_ot_things_widget.spec.js',
+    tbase + '/widgets/results_render_widget.spec.js'
 
     tbase + '/components/query_builder/plugin.spec.js',
     tbase + '/components/query_builder/rules_translator.spec.js',
@@ -46,6 +46,7 @@ var tests = [
     tbase + '/components/query_builder/translation_query2ui.spec.js',
 
     tbase + '/components/query_builder/plugin.testcases.spec.js'
+      tbase + '/mixins/link_generator_mixin.spec.js',
 
 ];
 

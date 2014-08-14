@@ -32,10 +32,10 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
         $add.toggleClass("hide");
 
         if ($add.hasClass("hide")){
-          $button.text("more...")
+          $button.html(("<i class=\"glyphicon glyphicon-plus\"></i>"))
         }
         else {
-          $button.text("less...")
+          $button.html("<i class=\"glyphicon glyphicon-minus\"></i>")
         }
 
       },

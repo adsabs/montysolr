@@ -18,7 +18,8 @@ define([
     'js/widgets/base/paginated_base_widget',
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
-    'js/mixins/widget_pagination'],
+    'js/mixins/widget_pagination',
+    'js/mixins/link_generator_mixin'],
 
   function (Marionette,
     Backbone,
@@ -27,7 +28,8 @@ define([
     PaginatedBaseWidget,
     ItemTemplate,
     ResultsContainerTemplate,
-    WidgetPagination) {
+    WidgetPagination,
+    LinkGenerator) {
 
     var ItemModel = Backbone.Model.extend({
       defaults: function () {
@@ -41,7 +43,8 @@ define([
           bibcode: undefined,
           pub_raw: undefined,
           doi: undefined,
-          details: undefined
+          details: undefined,
+          links_data : undefined
         }
       },
 
@@ -74,16 +77,54 @@ define([
        * @returns {*}
        */
       serializeData: function () {
-        var data = this.model.toJSON();
+        var data ,shownAuthors;
+        data = this.model.toJSON();
+
+        if (data.author && data.author.length > 3) {
+          data.extraAuthors = data.author.length - 3;
+          shownAuthors = data.author.splice(0, 3);
+        } else if (data.author) {
+          shownAuthors = data.author
+        }
+
+        if (data.author) {
+          var l = shownAuthors.length-1;
+          data.authorFormatted = _.map(shownAuthors, function (d, i) {
+            if (i == l || l == 1) {
+              return d; //last one, or only one
+            } else {
+              return d + ";";
+            }
+          })
+        }
+         //if details/highlights
+        if (data.details) {
+          data.highlights = data.details.highlights
+        }
+
         return data;
+
       },
 
       events: {
-        'change input[name=identifier]': 'toggleSelect'
+        'change input[name=identifier]': 'toggleSelect',
+        'mouseover .letter-icon' : "showLinks",
+        'mouseleave .letter-icon' : "hideLinks"
       },
 
       toggleSelect: function () {
         this.$el.toggleClass("chosen");
+      },
+
+      showLinks : function(e){
+        $c = $(e.currentTarget);
+        $c.find("i").addClass("s-icon-draw-attention");
+        $c.find(".s-link-details").removeClass("no-display");
+      },
+      hideLinks : function(e){
+        $c = $(e.currentTarget);
+        $c.find("i").removeClass("s-icon-draw-attention");
+        $c.find(".s-link-details").addClass("no-display");
       }
 
     });
@@ -203,6 +244,12 @@ define([
 
         PaginatedBaseWidget.prototype.initialize.call(this, options);
 
+        /*adding fields necessary to get all linksdata,
+        * 'this.abstractPageFields' comes from linkGenerator Mixin*/
+        if (this.defaultQueryArguments){
+          this.defaultQueryArguments.fl = this.defaultQueryArguments.fl + "," + this.resultsPageFields
+        }
+
         this.collection = new this.CollectionClass();
 
         this.displayNum = this.displayNum || options.displayNum || 20;
@@ -255,7 +302,7 @@ define([
 
       //will be requested in composeRequest
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year'
+        fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year'
       },
 
       dispatchRequest: function (apiQuery) {
@@ -366,9 +413,6 @@ define([
        * @returns {*}
        */
 
-      defaultQueryArguments: {
-        fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year'
-      },
 
       parseResponse: function (apiResponse, orderNum) {
         var raw = apiResponse.toJSON();
@@ -386,6 +430,7 @@ define([
 
         var keys = _.map(this.defaultQueryArguments.fl.split(','), function (v) {
           return v.trim()
+          console.log(keys)
         });
 
         var docs = _.map(raw.response.docs, function (doc) {
@@ -399,6 +444,9 @@ define([
 
         });
 
+        //getting links data from LinkGenerator Mixin
+        var docs = this.parseLinksData(docs)
+
         return docs;
       }
 
@@ -406,6 +454,7 @@ define([
 
     // add mixins
     _.extend(ResultsWidget.prototype, WidgetPagination);
+    _.extend(ResultsWidget.prototype, LinkGenerator);
 
 
     return ResultsWidget;

@@ -38,7 +38,8 @@ require.config({
         Citations : 'js/widgets/citations/widget',
         Coreads : 'js/widgets/coreads/widget',
         TableOfContents : 'js/widgets/table_of_contents/widget',
-        Similar : 'js/widgets/similar/widget'
+        Similar : 'js/widgets/similar/widget',
+        Resources : 'js/widgets/resources/widget'
 
       },
       plugins: {

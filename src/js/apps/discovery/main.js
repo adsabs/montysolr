@@ -334,7 +334,10 @@ define(["config", 'module'], function(config, module) {
       tableOfContents.activate(beehive.getHardenedInstance())
 
       var similar = app.getWidget('Similar')
-      similar.activate(beehive.getHardenedInstance())
+      similar.activate(beehive.getHardenedInstance());
+
+      var resources = app.getWidget('Resources');
+      resources.activate(beehive.getHardenedInstance());
 
       var pageControllers = {};
       var bumblebeeHistory = app.getObject("HistoryManager");
@@ -350,7 +353,8 @@ define(["config", 'module'], function(config, module) {
             coreads : coreads,
             tableOfContents : tableOfContents,
             similar : similar,
-            searchBar : resultsWidgetDict.searchBar
+            searchBar : resultsWidgetDict.searchBar,
+            resources : resources
           },
      history : bumblebeeHistory});
 
@@ -397,7 +401,7 @@ define(["config", 'module'], function(config, module) {
 
       $(document).on("scroll", function(){
         //navbar is currently 40 px height
-        if ($(window).scrollTop() > 40) {
+        if ($(window).scrollTop() > 70) {
           $(".s-search-bar-row").addClass("s-search-bar-motion");
           $("#field-options").hide()
         }

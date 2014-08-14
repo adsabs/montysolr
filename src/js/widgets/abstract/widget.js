@@ -3,8 +3,9 @@
  */
 define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
     'js/widgets/base/base_widget', 'hbs!./templates/abstract_template',
-    'js/components/api_query'],
-  function (Marionette, Backbone, $, _, Cache, BaseWidget, abstractTemplate, ApiQuery) {
+    'js/components/api_query', 'js/mixins/link_generator_mixin'],
+  function (Marionette, Backbone, $, _, Cache, BaseWidget,
+    abstractTemplate, ApiQuery, LinkGeneratorMixin) {
 
     var AbstractModel = Backbone.Model.extend({
       defaults: function () {
@@ -24,8 +25,7 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
       parse: function (doc) {
         var authorAff, hasAffiliation;
 
-
-        doc.aff = doc.aff || [];
+       doc.aff = doc.aff || [];
         if (doc.aff.length) {
           hasAffiliation = true
         }
@@ -109,7 +109,6 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
         fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,year,doi,pub_raw'
       },
 
-
       loadBibcodeData : function (bibcode) {
         if (this._docs[bibcode]) {
           this._current = bibcode;
@@ -133,6 +132,10 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
         var d, self = this;
         if (r.response && r.response.docs) {
           _.each(r.response.docs, function (doc) {
+            //add doi link
+            if (doc.doi){
+              doc.doi = {doi: doc.doi,  href: self.adsUrlRedirect("doi", doc.doi)}
+            }
             d = self.model.parse(doc);
             self._docs[d.bibcode] = d;
           });
@@ -141,10 +144,11 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
             this.loadBibcodeData(apiResponse.get('responseHeader.params.__show'));
           }
         }
-
       }
 
     });
+
+    _.extend(AbstractWidget.prototype, LinkGeneratorMixin);
 
 
     return AbstractWidget;
