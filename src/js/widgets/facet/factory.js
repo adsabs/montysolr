@@ -260,7 +260,7 @@ define([
         defaultQueryArguments = {
           "facet.pivot" : "property,citation_count",
           "facet" : "true",
-          "facet.minCount" : "1"
+          "facet.limit": "-1"
         };
         processResponse = function (apiResponse) {
           this.setCurrentQuery(apiResponse.getApiQuery());

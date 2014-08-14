@@ -13,7 +13,7 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
         top   : 10,
         right : 10,
         bottom: 5,
-        left  : 50
+        left  : 40
       };
       this.fullWidth = 280;
       this.fullHeight = 200;

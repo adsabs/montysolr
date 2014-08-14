@@ -1,6 +1,35 @@
-// Import Bootstrap source
+/* Import Bootstrap source */
+
 @import 'bootstrap-less/bootstrap';    // This will import the entire Bootstrap base
 
-//// Import your LESS files here
-@import 'ads-variables';   //this is our customized series of variable overrides for bootstrap 3
-@import 'ads-custom';  //this is for everything that extends bootstrap rather than overriding it
+/* Import Bootstrap variable overrides */
+
+@import 'ads-less/ads-variables';
+
+/* Import Bumblebee-specific less files */
+
+@import 'ads-less/general';
+@import 'ads-less/abstract-page-widgets';
+@import 'ads-less/bootstrap-overrides';
+@import 'ads-less/facets';
+@import 'ads-less/page-managers';
+@import 'ads-less/query-builder';
+@import 'ads-less/results-list';
+@import 'ads-less/results-page-toolbar';
+@import 'ads-less/search-bar';
+
+/* To add a new less file (say you have made a new widget that needs
+new styling, add the file to the ads-less folder, and make sure
+to put the following lines at the top:
+
+//import these files so the fonts, mixins, and global variables can be used
+@import '../../fonts/fontawesome/less/font-awesome.less';
+@import '../mixins';
+@import 'general';
+
+Then, add an import statement to this manifest file
+
+*/
+
+
+

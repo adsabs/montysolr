@@ -54,7 +54,7 @@ define(['js/mixins/link_generator_mixin'],
 
         expect(mixin.parseLinksData).to.be.instanceof(Function);
 
-        expect(JSON.stringify(dataWithLinks[0]["links"])).to.eql('{"text":[{"openAccess":true,"letter":"G","title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"}],"list":[{"letter":"C","title":"Citations (62)","link":"#abs/1993A&A...277..309L/citations"},{"letter":"R","title":"References (8)","link":"#abs/1993A&A...277..309L/references"}],"data":[]}')
+        expect(JSON.stringify(dataWithLinks[0]["links"])).to.eql('{"text":[{"openAccess":true,"letter":"G","title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"}],"list":[{"letter":"C","title":"Citations (62)","link":"/abs/1993A&A...277..309L/citations"},{"letter":"R","title":"References (8)","link":"/abs/1993A&A...277..309L/references"}],"data":[]}')
 
       })
 

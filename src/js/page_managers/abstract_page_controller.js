@@ -257,7 +257,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
         var m = this.collection.findWhere({bibcode: this._bibcode});
         if (m && m.get("originalSearchResult")){
           $(".opt-nav-button").append("<a href=" + "/search/" + this.getMasterQuery().url()
-            + " class=\"btn btn-sm \"> <i class=\"glyphicon glyphicon-arrow-left\"></i> back to results</a>")
+            + " class=\"btn btn-sm \"> <i class=\"fa fa-lg fa-arrow-left\"></i> back to results</a>")
 
         }
 
