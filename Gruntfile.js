@@ -42,7 +42,7 @@ module.exports = function(grunt) {
         cmd : 'cp  bower_components/lesshat/build/lesshat-prefixed.less src/styles/less/mixins.less'
       },
       move_bootstrap : {
-        cmd : 'cp -r bower_components/bootstrap/less src/styles/less/bootstrap-less'
+        cmd : 'cp -r bower_components/bootstrap/less/* src/styles/less/bootstrap-less'
       },
       move_fontawesome : {
         cmd : 'cp -a bower_components/fontawesome/fonts/. src/styles/fonts/; mkdir src/styles/fonts/fontawesome/; cp -r bower_components/fontawesome/less/ src/styles/fonts/fontawesome'

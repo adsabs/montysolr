@@ -554,6 +554,9 @@ define([
          * @param apiResponse
          */
         getResponse: function(apiResponse) {
+          if (!apiResponse.has('qtree'))
+            return;
+
           var qtree = JSON.parse(apiResponse.get('qtree'));
           if (this.promise && qtree) {
             this.promise.resolve(qtree);
