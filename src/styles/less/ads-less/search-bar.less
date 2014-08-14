@@ -1,0 +1,122 @@
+//import these files so the fonts, mixins, and global variables can be used
+@import '../../fonts/fontawesome/less/font-awesome.less';
+@import '../mixins';
+@import 'general';
+
+
+.s-search-bar-input-row {
+  width: 71%;
+  padding-left: 0px;
+
+}
+
+.s-search-submit {
+  width: 50px;
+}
+
+.open .show-form {
+  background-color: darken(@brand-warning, 5%) !important;
+}
+
+.show-form:hover {
+  background-color: lighten(@brand-warning, 10%);
+}
+
+.open .show-form:hover {
+  background-color: darken(@brand-warning, 5%) !important;
+}
+
+.inactive-style {
+  color: @gray-light
+}
+
+.active-style {
+  color: @component-active-bg
+}
+
+//weird stuff going on with input-addon overriding css
+.search-submit {
+  background-color: @brand-primary !important;
+  color: @body-bg !important
+}
+
+.search-dropdown {
+  position: relative;
+  left: 88%;
+  top: -32px;
+  z-index: 1000;
+
+  ul.dropdown-menu {
+    position: absolute;
+    left: -88%;
+    padding: 5px 10px;
+
+  }
+
+}
+
+#search-dropdown-icon {
+  font-size: 16px;
+  color: lighten(@brand-primary, 15%);
+}
+
+#search-dropdown-icon:hover {
+  color: @brand-primary;
+}
+
+.search-form-header .title {
+  font-size: 15px;
+}
+
+.search-form-header .title:hover {
+  color: darken(@brand-primary, 10%)
+
+}
+
+.search-form-title {
+  font-size: 14px;
+  display: inline !important;
+}
+
+.search-form-header {
+  font-size: 14px;
+  padding: 2px 8px;
+  cursor: pointer;
+
+}
+
+.search-form-header-active .title {
+  color: lighten(@brand-primary, 5%);
+}
+
+.search-form-header-active .title:hover {
+  color: lighten(@brand-primary, 10%) !important;
+}
+
+.search-form-section {
+  padding: 10px;
+}
+
+.s-quick-add {
+  padding-left: 0.5%;
+}
+
+.show-form {
+  .draw-attention-text {
+    transition-property: color;
+    transition-duration: 2.5s;
+    color: darken(@brand-warning, 5%) !important;
+  }
+
+  .show-fields {
+    transition-property: background-color;
+    transition-duration: 2.5s;
+    background-color: none;
+
+  }
+}
+
+.draw-attention-text:hover {
+  color: @brand-warning !important;
+
+}

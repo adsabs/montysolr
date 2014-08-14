@@ -1,0 +1,176 @@
+//import these files so the fonts, mixins, and global variables can be used
+@import '../../fonts/fontawesome/less/font-awesome.less';
+@import '../mixins';
+@import 'general';
+
+
+
+// results list css
+
+
+//icons for links
+
+.s-icon-draw-attention {
+  color: darken(@brand-info, 5%) !important;
+
+}
+
+.s-link-details {
+  position: absolute;
+  margin-left: -8%;
+  padding: 10px 15px 0px 15px;
+  min-width: 125px;
+  background-color: white;
+  border: @border-light-default;
+  .lh-border-radius(@border-radius-base);
+  .lh-box-shadow(0 1px 5px @gray-lighter);
+  z-index: 500;
+}
+
+.letter-icon {
+
+  display: inline-block;
+  margin-right: 5%;
+  margin-top: 0px;
+  width: 5%;
+
+  i {
+    cursor: pointer !important;
+    color : darken(@brand-info, 15%);
+  }
+
+}
+
+
+.s-data-icon {
+  .fa;
+  &:before {
+    content : @fa-var-database;
+  }
+
+}
+
+.s-list-icon {
+  .fa;
+  &:before {
+    content : @fa-var-list-ul;
+  }
+
+}
+
+.s-text-icon {
+  .fa;
+  &:before {
+    content : @fa-var-file-text-o;
+  }
+}
+
+
+.s-identifier a {
+  color: @gray-dark;
+}
+
+.just-authors {
+  display: inline-block
+}
+
+.s-result-item-buffer {
+  margin-bottom: 15px;
+
+}
+
+.s-show-details-container {
+  position: relative;
+  left: 30px;
+}
+
+.s-results-title {
+  margin-top: -2px;
+  margin-bottom: 6px;
+  font-size:17px;
+  font-weight:500;
+  color: darken(@brand-primary, 6%)
+}
+
+
+.s-results-authors {
+  padding-left: .5%;
+}
+
+
+.s-highlight-list {
+  padding: 20px 0px 0px 10px
+}
+
+
+.s-more-info {
+  padding: 0px 1%;
+
+  em {
+    font-weight: bold;
+  }
+
+  li {
+    list-style: none;
+  }
+
+  ul {
+    padding-left: 2%;
+
+  }
+  blockquote {
+    margin: 0em 2em;
+    padding:.5em .5em;
+    font-size: 1em}
+
+}
+
+.s-checkbox-col {
+  padding-right: 0px;
+}
+
+.s-results-controls {
+  padding: 2%;
+  min-width: 83 px;
+
+}
+
+.s-open-access {
+  color: @brand-success !important;
+}
+
+.s-results-list {
+  padding-top: 15px;
+
+  label {
+    font-weight: initial
+  }
+}
+
+#results-page-layout {
+  .s-results-list {
+    padding-left: 6%;
+
+  }
+
+}
+
+.field-options {
+  min-width: 120px;
+  padding: 7px;
+}
+
+.field-options span {
+  display: block
+}
+
+#results h5 {
+  margin-top: -3px;
+  margin-bottom: 2px;
+}
+
+li.article-author {
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+
+}

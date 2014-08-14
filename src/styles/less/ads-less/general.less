@@ -1,0 +1,128 @@
+//import these files so the fonts, mixins, and global variables can be used
+@import '../../fonts/fontawesome/less/font-awesome.less';
+@import '../mixins';
+
+
+
+@border-default : 1px solid @btn-default-border;
+
+@border-light-default: 1px solid #dddddd;
+
+
+@vis-brand-info : desaturate(@brand-info, 10%);
+
+@vis-brand-primary :  lighten(desaturate(@brand-primary, 20%), 15%);
+
+@vis-brand-success :  desaturate(@brand-success, 20%);
+
+
+@facebook-color : rgb(59,89,153);
+
+@twitter-color : rgb(64,153,255);
+
+@mendeley-color : rgb(60,30,33);
+
+@sciencewise-color: rgb(179, 27, 27);
+
+
+//for query builder, alias from glyphicon to font awesome, so it doesn't barf
+
+.glyphicon-plus {
+  .fa;
+  .fa-lg;
+  &:before {
+    content : @fa-var-plus;
+  }
+
+}
+
+.glyphicon-plus-sign {
+  .fa;
+  .fa-lg;
+  &:before {
+    content : @fa-var-plus-circle;
+  }
+
+}
+
+.glyphicon-remove{
+  .fa;
+  .fa-lg;
+  &:before {
+    content : @fa-var-minus;
+  }
+}
+
+//tests
+
+#mocha-stats > li.progress {
+  height: 40px;
+}
+
+
+//utility classes
+
+
+.no-padding-right {
+  padding-right: 0px !important;
+}
+
+.no-show {
+  visibility: hidden
+}
+
+.unselectable {
+  user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+//get rid of this
+.hide {
+  display: none;
+}
+
+//use this instead
+.no-display{
+  display: none !important;
+}
+
+.chosen {
+  background-color: lighten(@brand-info, 40%)
+}
+
+
+.draw-attention {
+  transition-property: background-color;
+  transition-duration: 3s;
+  background-color: lighten(@brand-warning, 12%)
+}
+
+
+.s-item-closed {
+  color: @gray-light;
+  .fa;
+  .fa-2x;
+  position: relative;
+  top: 3px;
+  &:before {
+    content: @fa-var-angle-right;
+
+  }
+}
+
+.s-item-open {
+  color: @gray-light;
+  .fa;
+  .fa-2x;
+  position: relative;
+  top: 3px;
+  &:before {
+    content: @fa-var-angle-down;
+
+  }
+
+}

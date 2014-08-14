@@ -1,0 +1,110 @@
+//import these files so the fonts, mixins, and global variables can be used
+@import '../../fonts/fontawesome/less/font-awesome.less';
+@import '../mixins';
+@import 'general';
+
+
+
+// layout css
+
+//the following weird classes are to get 100% height columns
+//in results page
+
+
+.s-left-column, .s-right-column {
+  padding-top: 10px;
+}
+
+.s-results-page-layout .s-table-wrapper > .row {
+  display: table;
+}
+
+//using table cell display to get side columns to be height 100%
+.s-results-page-layout .s-left-column, .s-results-page-layout .s-middle-column, .s-results-page-layout .s-right-column {
+  display: table-cell;
+  float: none;
+  vertical-align: top;
+  border-top: @border-default;
+}
+
+.s-results-control-row {
+  padding: 1%;
+}
+
+
+.s-search-bar-row {
+  padding-bottom: 10px;
+  border-bottom : @border-default;
+
+  background-color: white;
+
+  input  {
+    background-color: rgba( 255, 255, 255, 0.97) !important;
+  }
+
+}
+
+.s-motion-shadow {
+  .lh-box-shadow(0 2px 2px -1px rgba(0,0,0,.1));
+  background-color: rgba( 255, 255, 255, 0.9);
+}
+
+.s-search-bar-motion {
+  .s-motion-shadow;
+
+  border-bottom : @border-default;
+  padding-top: 10px;
+  position:fixed;
+  top: 0px;
+  z-index: 1000;
+
+}
+
+
+#body-template-container {
+  min-height: 550px;
+
+}
+
+
+.s-results-page-layout .s-middle-column {
+  border-right:  @border-default;
+  border-left: @border-default;
+
+}
+
+.s-results-page-layout .s-left-column {
+  .lh-background-image(linear-gradient(to bottom, lighten(@gray-lighter, 2%) 0%,#FFFFFF 100%));
+  .unselectable;
+}
+
+.s-results-page-layout .s-right-column {
+  .lh-background-image(linear-gradient(to bottom, lighten(@gray-lighter, 2%) 0%,#FFFFFF 100%))
+
+}
+
+#right-col-toggle {
+  position: absolute;
+  top: 1.25%;
+  right: 2%;
+  background-color: white;
+
+}
+
+.right-col-close {
+
+  .fa;
+  .fa-lg;
+  &:before{
+    content : @fa-var-chevron-circle-left;
+  }
+
+}
+
+.right-col-open {
+  .fa;
+  .fa-lg;
+  &:before{
+    content : @fa-var-chevron-circle-right;
+  }
+}

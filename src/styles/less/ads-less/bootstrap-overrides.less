@@ -1,0 +1,50 @@
+
+.modal-content {
+  height: 250px;
+  margin-top: 30%;
+
+}
+
+.modal-body {
+  padding: 60px 20px;
+}
+
+input:focus {
+  border: 1px solid brighten(@brand-primary, 15%) !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  -moz-transition: none !important;
+  -webkit-transition: none !important;
+}
+
+select:focus {
+  border: 1px solid brighten(@brand-primary, 15%) !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  -moz-transition: none !important;
+  -webkit-transition: none !important;
+}
+
+.tab-content {
+  border-left: @border-light-default;
+  border-right: @border-light-default;
+  border-bottom:  @border-light-default;
+  position: relative;
+  top: -10px;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  background-color: white;
+}
+
+.btn:active {
+  outline: none !important;
+}
+
+
+// overriding button link focus
+.btn-link:focus {
+  outline:none;
+  cursor: pointer;
+}
