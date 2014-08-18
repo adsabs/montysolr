@@ -27,6 +27,9 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
         throw new Error("Graph widget has no model or else an incorrect model")
       }
 
+      //for citation and reads graph
+      this.currentScale = "linear";
+
     },
 
     template: FacetGraphTemplate,
@@ -49,8 +52,8 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
 
       }
       else {
-        this.buildGraph();
         this.insertLegend();
+        this.buildGraph();
         this.addSliderWindows();
         this.buildSlider();
         if (this.addToOnRender){

@@ -42,6 +42,7 @@ define([
 
       },
 
+
       insertLoadingView: function () {
         $("#body-template-container").append(this.loadingWidget.render().el);
 
@@ -145,7 +146,6 @@ define([
       },
 
       showPage: function (apiQuery) {
-
 
         //it's false when the router uses this function to display the results page
         if (apiQuery !== false) {

@@ -18,19 +18,17 @@
 .s-link-details {
   position: absolute;
   margin-left: -8%;
-  padding: 10px 15px 0px 15px;
   min-width: 125px;
   background-color: white;
-  border: @border-light-default;
-  .lh-border-radius(@border-radius-base);
-  .lh-box-shadow(0 1px 5px @gray-lighter);
+  .ads-container;
+  padding: 10px 15px 0px 15px;
   z-index: 500;
 }
 
 .letter-icon {
 
   display: inline-block;
-  margin-right: 5%;
+  margin-right: 10%;
   margin-top: 0px;
   width: 5%;
 
@@ -75,7 +73,7 @@
 }
 
 .s-result-item-buffer {
-  margin-bottom: 15px;
+  margin-top: 15px;
 
 }
 
@@ -115,7 +113,7 @@
   }
 
   ul {
-    padding-left: 2%;
+    padding-left: 1%;
 
   }
   blockquote {
@@ -130,18 +128,16 @@
 }
 
 .s-results-controls {
-  padding: 2%;
-  min-width: 83 px;
+  padding-top: 2%;
 
 }
 
 .s-open-access {
-  color: @brand-success !important;
+  color: darken(saturate(@brand-success, 10%), 15%) !important;
 }
 
 .s-results-list {
-  padding-top: 15px;
-
+  padding-top: 20px;
   label {
     font-weight: initial
   }

@@ -4,7 +4,54 @@
 @import 'general';
 
 
+.s-results-control-row-container {
+  padding: 1%;
+  background-color: white;
+  border-bottom: @border-light-default;
+  border-top: @border-light-default;
+  position:relative;
+  .lh-box-shadow(0px 2px 2px 1px @gray-lighter);
 
-.s-info-changeable {
-  margin-left: 21%;
+
+  .clearfix;
+
 }
+
+
+.s-results-control-row {
+  padding-bottom:  1%;
+
+  background-color:  @results-page-background;
+
+
+  .btn {
+    margin-left: 8px;
+
+  }
+
+  .s-results-action-buttons {
+    .btn-group{
+      margin-left: 8px;
+      .lh-box-shadow(2px 2px 2px 1px @gray-lighter);
+
+    }
+
+
+
+  }
+
+  .btn-success {
+    color:white;
+    background-color: @btn-success-bg;
+    border: 1px solid @btn-success-border;
+  }
+
+
+  div.dropdown-menu {
+    padding: 10px;
+    width: 200px;
+  }
+
+}
+
+

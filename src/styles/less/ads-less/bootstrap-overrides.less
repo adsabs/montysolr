@@ -27,16 +27,6 @@ select:focus {
   -webkit-transition: none !important;
 }
 
-.tab-content {
-  border-left: @border-light-default;
-  border-right: @border-light-default;
-  border-bottom:  @border-light-default;
-  position: relative;
-  top: -10px;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  background-color: white;
-}
 
 .btn:active {
   outline: none !important;
@@ -47,4 +37,39 @@ select:focus {
 .btn-link:focus {
   outline:none;
   cursor: pointer;
+}
+
+
+
+
+.tab-content {
+  background-color: white;
+  border: 1px solid lighten(@border-light-default-color, 8%);
+  border-top : none;
+  .lh-box-shadow(2px 2px 5px @gray-lighter);
+  position: relative;
+  top: -10px;
+  border-bottom-left-radius: @border-radius-base;
+  border-bottom-right-radius: @border-radius-base;
+  background-color: white;
+}
+
+.navbar {
+  margin-bottom: 0px !important;
+}
+
+
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+  color: #595959;
+  background-color: #fffff;
+  border:none;
+  border-left: 1px solid lighten(@gray-lighter, 5%);
+  border-bottom-color: transparent;
+  cursor: default;
+
+}
+
+.tab-pane {
+  padding-right : 9% !important;
+
 }

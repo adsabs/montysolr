@@ -106,7 +106,6 @@ define(['backbone', 'marionette',
         if (this.logicOptions) {
           this.refreshLogicTooltip();
           this.closeLogic();
-          this.enableLogic();
 
         }
       },
@@ -153,44 +152,44 @@ define(['backbone', 'marionette',
         return $sm;
       },
 
-      enableLogic: function(ev) {
-        if (ev)
-          ev.stopPropagation();
-        this.$(".widget-options.top > .dropdown").removeClass("hide");
-        this.$(".widget-options.top > .dropdown").toggleClass("open");
-      },
 
       closeLogic: function (ev) {
         if (ev)
           ev.stopPropagation();
+        $(".s-logic-dropdown").addClass("no-display");
+
         this.$(".widget-options.top > .dropdown").removeClass("open");
       },
 
 
       onLogic: function(ev) {
         if (ev)
-          ev.stopPropagation();
+        ev.stopPropagation();
         //close the logic dropdown
         this.closeLogic();
         var val = $(ev.target).val();
         this.trigger("containerLogicSelected", val);
       },
 
-      refreshLogicTooltip: function() {
+      refreshLogicTooltip: function(){
+
 
         var selected = this.$("input:checked");
         var numSelected = selected.length;
 
         if (numSelected >= 1) {
           //highlight filter
-          this.$("i.glyphicon-filter").removeClass("inactive-style").addClass("active-style");
+          this.$(".logic-dropdown").removeClass("no-display");
+          this.$(".s-filter-image")
           //highlight caret
           this.$("i.main-caret").addClass("active-style");
 
         }
         else {
           //unhighlight filter
-          this.$("i.glyphicon-filter").removeClass("active-style").addClass("inactive-style");
+          this.$(".logic-dropdown").addClass("no-display");
+
+          this.$(".s-filter-image")
           //unhighlight caret
           this.$("i.main-caret").removeClass("active-style");
         }

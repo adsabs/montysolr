@@ -18,10 +18,7 @@ define([
     ListOfThingsWidget) {
 
     var ItemModelClass = ListOfThingsWidget.prototype.ItemModelClass.extend({
-      parse: function(doc) {
-//        doc['highlights'] = doc.details.highlights;
-        return doc;
-      }
+
     });
 
     var CollectionClass = ListOfThingsWidget.prototype.CollectionClass.extend({
@@ -42,6 +39,8 @@ define([
 
     var ResultsWidget = ListOfThingsWidget.extend({
 
+
+
       ItemModelClass     : ItemModelClass,
       ItemViewClass      : ItemViewClass,
       CollectionClass    : CollectionClass,
@@ -49,8 +48,8 @@ define([
 
       defaultQueryArguments: {
         hl     : "true",
-        "hl.fl": "title,abstract,body",
-        fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year'
+        "hl.fl": "title,abstract",
+        fl     : 'title,abstract,id,bibcode,author,keyword,citation_count,highlights,pub,aff,volume,year,links_data,ids_data,[citations],property'
       },
 
       parseResponse: function (apiResponse, orderNum) {
@@ -95,7 +94,7 @@ define([
               }
             }());
           }
-          ;
+
 
           if (h.highlights && h.highlights.length > 0)
             d['details'] = h;
@@ -115,6 +114,7 @@ define([
       onAllInternalEvents: function(ev, arg1, arg2) {
 
         if (ev == 'composite:rendered') {
+
           this.view.disableShowMore();
           this.view.toggleDetailsControls(false);
           if (this.showMoreAfterRender){
@@ -124,7 +124,8 @@ define([
 
         }
         else if (ev == 'reset') {
-          var details = _.filter(this.view.collection.models, function(m) {return m.has('details')});
+
+        var details = _.filter(this.view.collection.models, function(m) {return m.has('details')});
           if (details.length > 0) {
             this.view.toggleDetailsControls(true);
           }
@@ -140,6 +141,7 @@ define([
             p.before();
           }
           if (p && p.runQuery) {
+            debugger;
             // ask for more data
             this.resetPagination = false;
             this.dispatchRequest(this.getCurrentQuery());

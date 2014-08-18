@@ -17,10 +17,10 @@ define(['jquery',
 
           var query = sentRequest.toJSON().query;
 
-          if (query.get("q")[0] === "bibcode:sampleBib1" && (query.get("mlt")[0] === "true") && (query.get("mlt.fl")[0] === "title,body")) {
+          if (query.get("q")[0] === "bibcode:sampleBib1" && (query.get("mlt")[0] === "true") && (query.get("mlt.fl")[0] === "title,abstract,body")) {
             return {"responseHeader":{"params" : {}},"moreLikeThis":{"randomNum":{"numFound": 2745325, docs : [{bibcode: "2013arXiv1305.3460H"}]}}}
 
-        } else if(query.get("q")[0] === "bibcode:sampleBib2" && (query.get("mlt")[0] === "true") && (query.get("mlt.fl")[0] == "title,body")) {
+        } else if(query.get("q")[0] === "bibcode:sampleBib2" && (query.get("mlt")[0] === "true") && (query.get("mlt.fl")[0] == "title,abstract,body")) {
             return {"responseHeader":{"params":{}},"moreLikeThis":{"randomNum":{"numFound": 2745325, docs : [{bibcode: "2006IEDL...27..896K"}]}}};
           }
         }

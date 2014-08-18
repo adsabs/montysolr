@@ -303,14 +303,12 @@ define(["config", 'module'], function(config, module) {
       resultsWidgetDict.refereed.activate(beehive.getHardenedInstance());
 
       resultsWidgetDict.results = app.getWidget('Results')
-      resultsWidgetDict.results.activate(beehive.getHardenedInstance());
 
       resultsWidgetDict.graphTabs = app.getWidget('GraphTabs')
 
       resultsWidgetDict.searchBar = app.getWidget('SearchBar')
 
       resultsWidgetDict.queryInfo = app.getWidget('QueryInfo');
-      resultsWidgetDict.graphTabs = app.getWidget('GraphTabs');
       resultsWidgetDict.queryDebugInfo = app.getWidget('QueryDebugInfo');
 
 

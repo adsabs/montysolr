@@ -17,6 +17,14 @@ define(['./base-graph', 'hbs!./templates/citation-graph-legend', 'hbs!./template
 
       },
 
+      events: {
+        "click .apply"         : "submitFacet",
+        "blur input[type=text]": "triggerGraphChange",
+        //only relevant for reads and citation
+        "change input[name=citation-scale]": "toggleScale"
+      },
+
+
       buildGraph: function () {
 
         var data, xLabels, x, y, xAxis, yAxis, chart, line;
@@ -61,7 +69,6 @@ define(['./base-graph', 'hbs!./templates/citation-graph-legend', 'hbs!./template
           "y-axis": true
         }).call(yAxis);
 
-        this.innerChart.append("path").datum(data).attr("class", "line").attr("d", line);
 
         if (data.length >= 40) {
 
@@ -77,18 +84,17 @@ define(['./base-graph', 'hbs!./templates/citation-graph-legend', 'hbs!./template
         else {
 
           //  show legend
-          $(".ref-nonref").removeClass("no-display");
+          this.$(".ref-nonref").removeClass("no-display");
 
           var d = this.innerChart.selectAll("circle").data(data);
 
-          d.enter().append("circle").attr("class", "dot").attr("r", 4).style("fill", function (d) {
-              if (d.refereed) {
-                return "#1D6BB5"
-              }
-              else {
-                return "#61ca7a"
-              }
-            }).attr("cx", function (d) {
+          d.enter().append("circle").attr("class", "dot")
+            .attr("r", 4.5)
+            .classed('refereed', function(d){
+            if (d.refereed){
+              return true
+            }
+          }).attr("cx", function (d) {
               return x(d.x)
             }).attr("cy", function (d) {
               return y(d.y)
@@ -108,18 +114,44 @@ define(['./base-graph', 'hbs!./templates/citation-graph-legend', 'hbs!./template
 
       },
 
+      /*takes scale val (linear or log) and calls graphChange*/
+
+      toggleScale: function(e){
+        var v = $(e.target).attr("value");
+
+        this.currentScale = v;
+
+        this.graphChange();
+
+      },
+
       graphChange: function (val) {
 
-        var data, x, xLabels, y, xAxis, yAxis;
+        var data, x, y, xAxis, yAxis;
 
         data = _.clone(this.graphData);
 
-        //now getting rid of anything outside of the new bounds
-        data = _.filter(data, function (d, i) {
-          return (d.x <= val)
-        })
 
-        xLabels = _.pluck(data, "x");
+        if (val) {
+          this.limitVal = val;
+        }
+        else if (!this.limitVal) {
+          this.limitVal = d3.max(_.pluck(data, "x"));;
+        }
+        //else, limitval has already been set previously
+
+        //now getting rid of anything outside of the new bounds
+        //(if log, y cant be less than 0)
+        data = _.filter(data, function (d, i) {
+          if (this.currentScale === "log"){
+            return (d.x <= this.limitVal && d.y >= 1)
+
+          }else {
+            return (d.x <= this.limitVal)
+          }
+        }, this);
+
+        var xLabels = _.pluck(data, "x");
         var yVals = _.pluck(data, "y");
         maxVal = d3.max(yVals);
         minVal = d3.min(yVals);
@@ -128,25 +160,47 @@ define(['./base-graph', 'hbs!./templates/citation-graph-legend', 'hbs!./template
 
         x = d3.scale.linear().domain(xDomain).range([0, this.width]);
 
-        y = d3.scale.linear().domain([minVal - 1 , maxVal + 1]).range([this.height, 0]);
-
         xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.format("d"));
-        ;
-
-        yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format("d"));
 
         d3.select(this.el).select(".x-axis").call(xAxis).selectAll("text").style("text-anchor", "end").attr("dx", "-.8em").attr("dy", ".15em").attr("transform", function (d) {
-            return "rotate(-65)"
-          });
+          return "rotate(-65)"
+        });
 
-        d3.select(this.el).select(".y-axis").transition().call(yAxis);
+
+        if (this.currentScale === "linear"){
+          y = d3.scale.linear().domain([minVal - 1 , maxVal + 1]).range([this.height, 0]);
+
+        }
+        else if (this.currentScale === "log"){
+          y = d3.scale.log().domain([_.max([1, (minVal - 1)]), maxVal + 1]).range([this.height, 0]).clamp(true);
+
+        }
+
+        yAxis = d3.svg.axis().scale(y).orient("left");
+
+        if (this.currentScale === "log"){
+
+          var numberFormat = d3.format(",f");
+          function logFormat(d) {
+            var x = Math.log(d) / Math.log(10) + 1e-6;
+            return Math.abs(x - Math.floor(x)) < .7 ? numberFormat(d) : "";
+          }
+
+          yAxis.tickFormat(logFormat)
+        }
+        else {
+
+          yAxis.tickFormat(d3.format("d"));
+
+        }
+         d3.select(this.el).select(".y-axis").call(yAxis);
 
         if (this.hIndex) {
           if (_.contains(data, this.hIndex)) {
-            d3.selectAll(".h-index").classed("no-display", false)
+            this.innerChart.selectAll(".h-index").classed("no-display", false)
           }
           else {
-            d3.selectAll(".h-index").classed("no-display", true)
+            this.innerChart.selectAll(".h-index").classed("no-display", true)
           }
 
           //first h index line
@@ -163,85 +217,45 @@ define(['./base-graph', 'hbs!./templates/citation-graph-legend', 'hbs!./template
           $(".ref-nonref").addClass("no-display");
 
           line = d3.svg.line().x(function (d) {
-              return x(d.x);
-            }).y(function (d) {
-              return y(d.y);
-            });
+            return x(d.x);
+          }).y(function (d) {
+            return y(d.y);
+          });
 
-          d3.selectAll(".dot").classed("no-display", true)
+          this.innerChart.selectAll(".dot").classed("no-display", true)
 
-          d3.selectAll(".line").datum(data).attr("d", line).classed("no-display", false)
+          this.innerChart.selectAll(".line").datum(data).attr("d", line).classed("no-display", false)
 
         }
         else {
 
-          //        show legend
-          $(".ref-nonref").removeClass("no-display");
+          //  show legend
+          this.$(".ref-nonref").removeClass("no-display");
 
-          d3.selectAll(".line").classed("no-display", true);
+          this.innerChart.selectAll(".line").classed("no-display", true);
 
-          d3.selectAll(".dot").classed("no-display", false)
+          this.innerChart.selectAll(".dot").classed("no-display", false)
 
           var d = this.innerChart.selectAll("circle").data(data);
 
           d.exit().remove();
 
-          d.enter().append("circle").attr("class", "dot").attr("r", 4)
+          d.enter().append("circle").attr("class", "dot").attr("r", 4.5)
 
-          d.transition().style("fill", function (d) {
-              if (d.refereed) {
-                return "#1D6BB5"
-              }
-              else {
-                return "#61ca7a"
-              }
-            }).attr("cx", function (d) {
-              return x(d.x)
-            }).attr("cy", function (d) {
-              return y(d.y)
-            })
+          d.classed('refereed', function(d){
+            if (d.refereed){
+              return true
+            }
+          }).attr("cx", function (d) {
+            return x(d.x)
+          }).attr("cy", function (d) {
+            return y(d.y)
+          })
         }
 
-      },
-
-      addChartEventListeners: function () {
-
-        var that = this;
-
-        this.$(".dot").on("mouseenter", function (e) {
-
-          var $ct = $(e.currentTarget);
-          if ($ct.hasClass("refereed")) {
-            $ct.css("fill", "#1D6BB5")
-          }
-          else {
-            $ct.css("fill", "#61ca7a")
-          }
-
-          var i = that.$(".dot").index($ct)
-
-          var t = that.innerChart.select(".x-axis").selectAll(".tick")[0][i];
-          d3.select(t).classed("active", true);
-
-        });
-
-        this.$(".dot").on("mouseout", function (e) {
-
-          var $ct = $(e.currentTarget);
-          if ($ct.hasClass("refereed")) {
-            $ct.css("fill", "#4184c4")
-          }
-          else {
-            $ct.css("fill", "#97c7a3")
-          }
-
-          var i = that.$(".dot").index($ct)
-
-          var t = that.innerChart.select(".x-axis").selectAll(".tick")[0][i];
-          d3.select(t).classed("active", false);
-        });
 
       },
+
 
       buildSlider: function () {
 

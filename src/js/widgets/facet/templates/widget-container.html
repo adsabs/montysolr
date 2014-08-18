@@ -2,17 +2,16 @@
     <div class="widget-name widget-meta s-widget-name">
        {{#if title}} <h5><i class="main-caret item-closed hide"/>&nbsp;{{title}}</h5>{{/if}}
 
-        <div class="widget-options s-widget-options top hide"></div>
+      {{#unless noOptions}}  <div class="widget-options s-widget-options top hide"></div> {{/unless}}
     </div>
 
 
     <div class="widget-body s-widget-body hide">
 
-        <div class="widget-options bottom hide"></div>
+      {{#unless noOptions}} <div class="widget-options bottom hide"></div> {{/unless}}
 
     </div>
 
-    <div class="widget-options bottom hide"></div>
 
 
 </div>

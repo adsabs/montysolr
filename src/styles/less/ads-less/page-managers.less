@@ -11,9 +11,36 @@
 //in results page
 
 
-.s-left-column, .s-right-column {
-  padding-top: 10px;
+.s-results-page-layout {
+
+  .s-middle-column {
+    border-radius: @border-radius-base;
+    background-color: white;
+    border: 1px solid lighten(@border-light-default-color, 8%);
+    .lh-box-shadow(2px 2px 5px darken(@gray-lighter, 5%));
+
+  }
+
+  .s-dynamic-page-body {
+    background-color:  @results-page-background;
+
+  }
+
+
+  #s-left-col-container {
+    border-radius: @border-radius-base;
+    background-color: white;
+    border: 1px solid lighten(@border-light-default-color, 8%);
+    .lh-box-shadow(2px 2px 3px @gray-lighter);
+    padding: 10px;
+    padding-bottom: 15px;
+    .unselectable;
+  }
+
+
+
 }
+
 
 .s-results-page-layout .s-table-wrapper > .row {
   display: table;
@@ -24,18 +51,11 @@
   display: table-cell;
   float: none;
   vertical-align: top;
-  border-top: @border-default;
-}
-
-.s-results-control-row {
-  padding: 1%;
 }
 
 
 .s-search-bar-row {
-  padding-bottom: 10px;
-  border-bottom : @border-default;
-
+  padding: 10px 0px 30px 0px;
   background-color: white;
 
   input  {
@@ -53,7 +73,7 @@
   .s-motion-shadow;
 
   border-bottom : @border-default;
-  padding-top: 10px;
+  padding: 10px;
   position:fixed;
   top: 0px;
   z-index: 1000;
@@ -67,21 +87,6 @@
 }
 
 
-.s-results-page-layout .s-middle-column {
-  border-right:  @border-default;
-  border-left: @border-default;
-
-}
-
-.s-results-page-layout .s-left-column {
-  .lh-background-image(linear-gradient(to bottom, lighten(@gray-lighter, 2%) 0%,#FFFFFF 100%));
-  .unselectable;
-}
-
-.s-results-page-layout .s-right-column {
-  .lh-background-image(linear-gradient(to bottom, lighten(@gray-lighter, 2%) 0%,#FFFFFF 100%))
-
-}
 
 #right-col-toggle {
   position: absolute;

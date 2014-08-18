@@ -1,9 +1,10 @@
- <div id="info-changeable" class="s-info-changeable">
-{{#if numFound}}
-<b>{{numFound}}</b> results ... {{/if}}
-     <button class="btn btn-link btn-xs" id="show-more-query-data"><i class="fa fa-plus fa-lg"></i></button>
-
-     <div class="hide" id="additional-query-data">
+<div class="btn-group">
+     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+         {{#if numFound}}
+         <b>{{numFound}}</b> results ... {{/if}}
+         <span class="caret"></span>
+     </button>
+     <div class="dropdown-menu" role="menu">
          for <b>Query:</b> <em>{{currentQuery}}</em>
          {{#if facets}}
          <br/><b>Filter:</b> <em>{{facets}}</em>
@@ -17,5 +18,5 @@
          <p><b>Total citations:</b> {{citations.sum}} (<span title="Something for nerds among us: mu={{citations.mean}}, stdev={{citations.stddev}}, missingCount={{citations.missing}}, max={{citations.max}}, min={{citations.min}}">*</span>)</p>
          {{/if}}
      </div>
-
+     </div>
  </div>

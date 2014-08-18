@@ -30,7 +30,7 @@
                     <div class="no-display s-link-details">
                         <ul class="list-unstyled">
                             {{#each links.text}}
-                            <li><a> {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank">{{this.title}}</a></li>
+                            <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank">{{this.title}}</a></li>
                             {{/each}}
                         </ul>
                     </div>

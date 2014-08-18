@@ -48,7 +48,7 @@ module.exports = function(grunt) {
         cmd : 'cp -a bower_components/fontawesome/fonts/. src/styles/fonts/; mkdir -p src/styles/fonts/fontawesome/; cp -r bower_components/fontawesome/less/ src/styles/fonts/fontawesome/less'
       },
       move_jqueryuicss : {
-        cmd : 'cp -r bower_components/jqueryui/themes/smoothness src/styles/css/'
+        cmd : 'cp -r bower_components/jqueryui/themes/smoothness/ src/styles/css/'
       }
     },
 

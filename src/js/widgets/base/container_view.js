@@ -216,4 +216,4 @@ define(['backbone', 'marionette',
     BaseContainerView.ContainerModelClass = BaseContainerModel;
 
     return BaseContainerView;
-});
+  });

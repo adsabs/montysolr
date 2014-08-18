@@ -15,13 +15,15 @@
 @gray-lighter:           lighten(#000, 93.5%); // #eee
 @gray-lightest:          lighten(#000, 97%);
 
-@brand-primary:       	#1D6BB5;
-@brand-info:           hsla(200, 70%, 59%, 1);
-@brand-success:        hsla(134, 50%, 60%, 1);
-@brand-warning:         #ffde4d;
-@brand-danger:          #FF4C49;
+@brand-primary:         #1D6BB5;
+@brand-info:            #58abd5;
+@brand-success:         #7ab889;
+@brand-warning:         #ffd447;
+@brand-danger:          #ed5e5b;
 
-@brand-additional:      lighten(desaturate(@brand-info, 40%), 18%);
+
+//extra colors
+@brand-primary-faded:   #5591ca;
 
 
 //== Scaffolding
@@ -49,7 +51,7 @@
 @font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;
 
-@font-size-base:          14px;
+@font-size-base:          15px;
 @font-size-large:         ceil((@font-size-base * 1.25)); // ~18px
 @font-size-small:         ceil((@font-size-base * 0.85)); // ~12px
 
@@ -99,9 +101,9 @@
 @line-height-large:         1.33;
 @line-height-small:         1.5;
 
-@border-radius-base:        3px;
-@border-radius-large:       5px;
-@border-radius-small:       2px;
+@border-radius-base:        1px;
+@border-radius-large:       3px;
+@border-radius-small:       1px;
 
 //** Global color for active items (e.g., navs or dropdowns).
 @component-active-color:    #fff;
@@ -145,12 +147,12 @@
 @btn-default-border:             #ccc;
 
 @btn-primary-color:              #fff;
-@btn-primary-bg:                 @brand-primary;
+@btn-primary-bg:                 @brand-primary-faded;
 @btn-primary-border:             darken(@btn-primary-bg, 5%);
 
 @btn-success-color:              #fff;
 @btn-success-bg:                 @brand-success;
-@btn-success-border:             darken(@btn-success-bg, 5%);
+@btn-success-border:             darken(@btn-success-bg, 10%);
 
 @btn-info-color:                 #fff;
 @btn-info-bg:                    @brand-info;
@@ -181,7 +183,7 @@
 //** `<input>` border color
 @input-border:                   #ccc;
 //** `<input>` border radius
-@input-border-radius:            @border-radius-base;
+@input-border-radius:            @border-radius-large;
 //** Border color for inputs on focus
 @input-border-focus:             #66afe9;
 
@@ -348,7 +350,7 @@
 
 // Inverted navbar
 // Reset inverted navbar basics
-@navbar-inverse-color:                     lighten(@gray-light, 10%);
+@navbar-inverse-color:                      #C4C4C4;
 @navbar-inverse-bg:                         darken(@gray-dark, 10%);
 @navbar-inverse-border:                     darken(@navbar-inverse-bg, 10%);
 

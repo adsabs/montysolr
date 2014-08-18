@@ -76,7 +76,7 @@
 .size-graphic-container {
   width: 77%;
   display: inline-block;
-  background-color:lighten(@vis-brand-info, 30%);
+  background-color:lighten(@brand-info, 30%);
   height: 19px;
   margin-left: 2px;
   margin-bottom: 4px;
@@ -88,7 +88,7 @@
 
 .size-graphic {
   display: block;
-  background-color:  lighten(@vis-brand-info, 15%);
+  background-color:  lighten(@brand-info, 15%);
   overflow-x: visible;
   color: black;
   font-size : 13px !important;
@@ -171,10 +171,6 @@
   margin: 0px;
 }
 
-.s-widget {
-  max-width: 275px;
-}
-
 
 .s-widget-body {
   x-overflow: hidden;
@@ -185,9 +181,9 @@
 
 }
 
-@refereed  : @vis-brand-primary;
+@refereed  : @brand-primary-faded;
 
-@nonrefereed : @vis-brand-success;
+@nonrefereed : @brand-success;
 
 
 .graph-legend {
@@ -222,13 +218,6 @@
 }
 
 
-
-.chart .full-bar, .dot{
-
-  pointer-events: all;
-  fill: @nonrefereed;
-}
-
 .axis path,
 .axis line {
   fill: none;
@@ -259,13 +248,12 @@
 
 .chart .refereed {
   pointer-events: all;
-  fill: @refereed;
+  fill: @refereed !important;
 
 }
 
-.chart .bar {
-  //    stroke: white;
-  fill: @brand-success;
+.chart .bar, .chart .dot {
+  fill: @nonrefereed;
 }
 
 .chart .x-axis .active text {
@@ -304,9 +292,6 @@
 
 }
 
-.graph-legend {
-  height: 50px;
-}
 
 .sort-options {
   margin: 0px;
@@ -321,5 +306,28 @@
   .apply {
     margin-top: 10px;
   }
+
+}
+
+
+.s-widget h5 {
+  margin-top: 0px;
+}
+
+.change-scale {
+  label {
+    display: inline-block;
+    width: 20%
+
+  }
+}
+
+.y-axis-title {
+  position: relative;
+  font-style: italic;
+  top: -3px;
+  left: -54%;
+  font-size: 14px;
+  .lh-rotate(270)
 
 }

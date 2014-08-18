@@ -16,7 +16,7 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
 
     var queryDisplayView = Backbone.View.extend({
 
-   	  className : "",
+   	  className : "query-info-widget",
 
       initialize: function(options) {
         this.model = new queryModel();

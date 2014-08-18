@@ -3,17 +3,13 @@
 @import '../mixins';
 
 
+@results-page-background : lighten(@gray-lighter, 3%);
 
 @border-default : 1px solid @btn-default-border;
 
 @border-light-default: 1px solid #dddddd;
 
-
-@vis-brand-info : desaturate(@brand-info, 10%);
-
-@vis-brand-primary :  lighten(desaturate(@brand-primary, 20%), 15%);
-
-@vis-brand-success :  desaturate(@brand-success, 20%);
+@border-light-default-color: #dddddd;
 
 
 @facebook-color : rgb(59,89,153);
@@ -23,6 +19,15 @@
 @mendeley-color : rgb(60,30,33);
 
 @sciencewise-color: rgb(179, 27, 27);
+
+
+.ads-container {
+  padding: 5px;
+  background-color: white;
+  border: @border-light-default;
+  .lh-border-radius(@border-radius-large);
+  .lh-box-shadow(0 1px 5px @gray-lighter);
+}
 
 
 //for query builder, alias from glyphicon to font awesome, so it doesn't barf
@@ -72,12 +77,12 @@
 }
 
 .unselectable {
-  user-select: none;
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  user-select: none !important;
+  -moz-user-select: none !important;
+  -khtml-user-select: none !important;
+  -webkit-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
 }
 
 //get rid of this
@@ -125,4 +130,10 @@
 
   }
 
+}
+
+
+
+.btn {
+  border-radius: @border-radius-large;
 }
