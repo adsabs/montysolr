@@ -112,7 +112,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
       },
 
       enableShowMore: function() {
-        this.$('.item-caret:first').removeClass('no-display');
+        this.$('.item-caret:first').removeClass('hide');
         this.$('.show-more:last').removeClass('hide');
       },
 

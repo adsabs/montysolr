@@ -1,13 +1,28 @@
 
 
-define(['./base-graph', 'hbs!./templates/reads-graph-legend', 'hbs!./templates/reads-slider-window'],
+define(['./base_graph',
+    'hbs!./templates/h-index-graph-legend',
+    'hbs!./templates/h-index-slider-window'],
 
 
   function(BaseGraphView, legendTemplate, sliderWindowTemplate) {
 
-    var ReadsGraphView = BaseGraphView.extend({
+    var HIndexGraphView = BaseGraphView.extend({
 
-      id: "reads-graph",
+      initialize : function(options){
+
+        options = options || {};
+
+         this.yAxisTitle = options.yAxisTitle;
+         this.graphTitle = options.graphTitle;
+         this.pastTenseTitle = options.pastTenseTitle;
+
+        this.id = this.graphTitle + "-graph";
+
+        BaseGraphView.prototype.initialize.apply(this, arguments)
+
+      },
+
 
       legendTemplate: legendTemplate,
 
@@ -21,7 +36,7 @@ define(['./base-graph', 'hbs!./templates/reads-graph-legend', 'hbs!./templates/r
         "click .apply"         : "submitFacet",
         "blur input[type=text]": "triggerGraphChange",
         //only relevant for reads and citation
-        "change input[name=reads-scale]": "toggleScale"
+        "change input[name*=scale]": "toggleScale"
       },
 
 
@@ -296,7 +311,7 @@ define(['./base-graph', 'hbs!./templates/reads-graph-legend', 'hbs!./templates/r
       },
 
       addSliderWindows: function () {
-        this.$(".slider-data").html(sliderWindowTemplate());
+        this.$(".slider-data").html(sliderWindowTemplate({pastTenseTitle : this.pastTenseTitle}));
       },
 
       triggerGraphChange: function () {
@@ -317,7 +332,7 @@ define(['./base-graph', 'hbs!./templates/reads-graph-legend', 'hbs!./templates/r
       }
     })
 
-    return ReadsGraphView
+    return HIndexGraphView
 
 
   })

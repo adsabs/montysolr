@@ -82,17 +82,17 @@ var linkGenerator = {
          var nc = data["[citations]"].num_citations;
          var nr = data["[citations]"].num_references;
          if (nc >= 1){
-           links.list.push({letter: "C", title: "Citations ("+ nc + ")",   link:"/abs/"+ bib + "/citations" })
+           links.list.push({letter: "C", title: "Citations ("+ nc + ")",   link:"/#abs/"+ bib + "/citations" })
 
          }
          if (nr >= 1){
-           links.list.push({ letter: "R", title: "References ("+ nr + ")" , link: "/abs/"+ bib + "/references"})
+           links.list.push({ letter: "R", title: "References ("+ nr + ")" , link:"/#abs/"+ bib + "/references"})
          }
        }
 
        if (data.property){
          if (_.contains(data.property, "TOC")){
-           links.list.push({letter: "T", title: "Table of Contents", link:"/abs/"+ bib + "/tableofcontents"})
+           links.list.push({letter: "T", title: "Table of Contents", link:"/#abs/"+ bib + "/tableofcontents"})
          }
          if (_.contains(data.property, "PUB_OPENACCESS")){
            //this will be accessed by the links_data part below
@@ -125,12 +125,13 @@ var linkGenerator = {
 
          _.each(link_types, function(l){
 
-           if (l.type === 'electr' && openAccess){
+           //limit to only one in links list, even though there may be multiple articles
+           if (l.type === 'electr' && openAccess && !_.findWhere(links.text, {title: "Publisher article"})){
 
              links.text.push({openAccess : true, letter: "E",title: "Publisher article", link : this.adsUrlRedirect(l.type, bib)})
 
            }
-           else if (l.type === 'electr' && !openAccess){
+           else if (l.type === 'electr' && !openAccess  && !_.findWhere(links.text, {title: "Publisher article"})){
              links.text.push({letter: "E", title: "Publisher article", link : this.adsUrlRedirect(l.type, bib)})
 
            }

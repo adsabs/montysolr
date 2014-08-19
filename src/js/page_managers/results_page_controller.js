@@ -164,14 +164,20 @@ define([
 
         }
 
-        this.insertTemplate();
-        this.displaySearchBar();
-        this.displayControlRow();
-        this.displayFacets();
-        this.displayRightColumn();
-        this.displayResultsList();
-        this.enableRightColToggle();
-        //this.insertLoadingView()
+        //showing page in response to "start search"
+        // don't reshow if it's already in the dom
+        if (!$("#results-page-layout").length){
+          this.insertTemplate();
+          this.displaySearchBar();
+          this.displayControlRow();
+          this.displayFacets();
+          this.displayRightColumn();
+          this.displayResultsList();
+          this.enableRightColToggle();
+          //this.insertLoadingView()
+
+        }
+
 
       }
 

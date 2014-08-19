@@ -91,8 +91,8 @@ define([
         this.dispatchRequest(new ApiQuery({
           'q'     : "bibcode:"+this._bibcode,
           mlt     : "true",
-          "mlt.fl": "title,abstract,body",
-          "mlt.count": "500",
+          "mlt.fl": "title,abstract",
+          "mlt.count": "20",
         fl      : 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year,links_data,ids_data,[citations],property'
 
         }));

@@ -35,7 +35,14 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
     template: FacetGraphTemplate,
 
     insertLegend : function(){
-      this.$(".graph-legend").html(this.legendTemplate());
+      var graphVars = {}
+      if (this.yAxisTitle){
+        graphVars.yAxisTitle = this.yAxisTitle;
+      }
+      if (this.graphTitle){
+        graphVars.graphTitle = this.graphTitle;
+      }
+      this.$(".graph-legend").html(this.legendTemplate(graphVars));
     },
 
     events: {

@@ -141,7 +141,6 @@ define([
             p.before();
           }
           if (p && p.runQuery) {
-            debugger;
             // ask for more data
             this.resetPagination = false;
             this.dispatchRequest(this.getCurrentQuery());

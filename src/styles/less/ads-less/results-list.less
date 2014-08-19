@@ -1,8 +1,7 @@
 //import these files so the fonts, mixins, and global variables can be used
-@import '../../fonts/fontawesome/less/font-awesome.less';
-@import '../mixins';
+@import '../../../../bower_components/fontawesome/less/font-awesome';
+@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
 @import 'general';
-
 
 
 // results list css
@@ -73,13 +72,13 @@
 }
 
 .s-result-item-buffer {
-  margin-top: 15px;
+  margin-top: 10px;
 
 }
 
-.s-show-details-container {
-  position: relative;
-  left: 30px;
+.s-show-details {
+  float: right;
+  margin-right: 2%;
 }
 
 .s-results-title {
@@ -117,7 +116,7 @@
 
   }
   blockquote {
-    margin: 0em 2em;
+    margin: 0em 1em;
     padding:.5em .5em;
     font-size: 1em}
 

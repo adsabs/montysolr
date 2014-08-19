@@ -1,6 +1,7 @@
 define(["js/widgets/facet/factory",
-    'js/components/api_response'],
-  function(FacetFactory, ApiResponse){
+    'js/components/api_response',
+    'js/widgets/facet/graph-facet/h_index_graph'],
+  function(FacetFactory, ApiResponse, HIndexGraph){
 
     var testJSON = {
       "responseHeader": {
@@ -12,7 +13,7 @@ define(["js/widgets/facet/factory",
           "indent": "true",
           "q": "author:^accomazzi,a",
           "wt": "json",
-          "facet.pivot": "property,citation_count"
+          "facet.pivot": "property,read_count"
         }
       },
       "response": {
@@ -57,39 +58,39 @@ define(["js/widgets/facet/factory",
         "facet_dates": {},
         "facet_ranges": {},
         "facet_pivot": {
-          "property,citation_count": [
+          "property,read_count": [
             {
               "field": "property",
               "value": "notrefereed",
               "count": 29,
               "pivot": [
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 0,
                   "count": 7
                 },
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 1,
                   "count": 3
                 },
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 2,
                   "count": 3
                 },
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 3,
                   "count": 3
                 },
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 6,
                   "count": 3
                 },
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 4,
                   "count": 1
                 }
@@ -102,17 +103,17 @@ define(["js/widgets/facet/factory",
               "count": 5,
               "pivot": [
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 0,
                   "count": 3
                 },
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 1,
                   "count": 1
                 },
                 {
-                  "field": "citation_count",
+                  "field": "read_count",
                   "value": 20,
                   "count": 1
                 }
@@ -126,13 +127,87 @@ define(["js/widgets/facet/factory",
 
 
 
-    describe("Graph for Citation Distribution in a List of Results", function(){
+    describe("Graph for Reads Distribution in a List of Results", function(){
 
       var widget;
 
       beforeEach(function(){
 
-        widget = FacetFactory.makeGraphFacet("citation");
+        widget = FacetFactory.makeGraphFacet({
+
+          graphView            : HIndexGraph,
+          facetField           : "read_count",
+          defaultQueryArguments: {
+            "facet.pivot": "property,read_count",
+            "facet"      : "true",
+            "facet.limit": "-1"
+          },
+          graphViewOptions : {
+            YAxisTitle :  "reads",
+            graphTitle: "Read",
+            pastTenseTitle : "read",
+          },
+          processResponse      : function (apiResponse) {
+            this.setCurrentQuery(apiResponse.getApiQuery());
+
+            var data = apiResponse.get("facet_counts.facet_pivot.property,read_count");
+
+            if (apiResponse.get("response.numFound") < 2) {
+              this.collection.reset({graphData: []});
+              return
+            }
+
+            var refData = _.findWhere(data, {value: "refereed"});
+
+            if (refData) {
+              refData = refData.pivot;
+            }
+
+            var nonRefData = _.findWhere(data, {value: "notrefereed"});
+
+            if (nonRefData) {
+              nonRefData = nonRefData.pivot;
+            }
+
+            var finalData = [];
+
+            _.each(refData, function (d) {
+              var val = d.value, count = d.count;
+              _.each(_.range(count), function () {
+                finalData.push({refereed: true, x: undefined, y: val})
+              })
+            })
+
+            _.each(nonRefData, function (d) {
+              var val = d.value, count = d.count;
+              _.each(_.range(count), function () {
+                finalData.push({refereed: false, x: undefined, y: val})
+              })
+            })
+
+            if (finalData.length < 2) {
+              this.collection.reset({graphData: []});
+              return
+            }
+
+            finalData = finalData.sort(function (a, b) {
+              return b.y - a.y;
+            });
+
+            //a cut off of 2000
+            finalData = _.first(finalData, 2000);
+
+            finalData = _.map(finalData, function (d, i) {
+              d.x = i + 1
+              return d
+            });
+
+            this.collection.reset([
+              {graphData: finalData}
+            ]);
+          }
+        });
+
         widget.processResponse(new ApiResponse(testJSON));
 
       });
@@ -268,7 +343,7 @@ define(["js/widgets/facet/factory",
             "x": 25,
             "y": 0
           }
-          ];
+        ];
 
 
         _.each(expectedResults, function(d,i){

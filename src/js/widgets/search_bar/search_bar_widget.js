@@ -147,6 +147,8 @@ define(['marionette',
 
         var currentVal, newVal, df;
 
+        this.unsetAddField();
+
         currentVal = this.$(".q").val();
         this.priorVal = currentVal;
 
@@ -191,12 +193,13 @@ define(['marionette',
         this.addField = true;
       },
 
+      unsetAddField : function (e) {
+        this.addField = false;
+      },
 
       submitQuery: function(e) {
         e.preventDefault();
         e.stopPropagation();
-
-        console.log("SUBMITTING")
 
         var query = (this.$(".q").val());
         this.trigger("start_search", query);

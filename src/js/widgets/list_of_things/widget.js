@@ -243,12 +243,6 @@ define([
 
         PaginatedBaseWidget.prototype.initialize.call(this, options);
 
-        /*adding fields necessary to get all linksdata,
-        * 'this.abstractPageFields' comes from linkGenerator Mixin*/
-//        if (this.defaultQueryArguments){
-//          this.defaultQueryArguments.fl = this.defaultQueryArguments.fl + "," + this.resultsPageFields
-//        }
-
         this.collection = new this.CollectionClass();
 
         this.displayNum = this.displayNum || options.displayNum || 20;

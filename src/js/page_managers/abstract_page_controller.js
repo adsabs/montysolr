@@ -521,7 +521,7 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
         this.showAbstractSubView(subPage);
 
-        this.insertLoadingView()
+//        this.insertLoadingView()
 
 
       }
