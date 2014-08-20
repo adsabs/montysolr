@@ -7,10 +7,11 @@ app = Flask(__name__,static_folder='src')
 
 def solr(request):
   headers = request.headers
-  payload = dict(request.args)
-  #payload = cleanup_solr_request(payload)
+  payload = dict(request.form)
+  payload['wt'] = 'json'
   headers = dict(headers.items())
   headers['Content-Type'] = 'application/x-www-form-urlencoded'
+  # TODO: Unify configuration scheme for setting API and/or search backend
   r = requests.post('http://localhost:8983/solr/search', data=urlencode(payload, doseq=True), headers=headers)
   return r.text, r.status_code
 
