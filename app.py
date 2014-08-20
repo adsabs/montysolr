@@ -12,7 +12,7 @@ def solr(request):
   headers = dict(headers.items())
   headers['Content-Type'] = 'application/x-www-form-urlencoded'
   # TODO: Unify configuration scheme for setting API and/or search backend
-  r = requests.post('http://localhost:8983/solr/search', data=urlencode(payload, doseq=True), headers=headers)
+  r = requests.post('http://localhost:8983/solr/select', data=urlencode(payload, doseq=True), headers=headers)
   return r.text, r.status_code
 
 @app.route('/',defaults={'path': ''})
