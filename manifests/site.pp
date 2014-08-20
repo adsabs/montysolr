@@ -26,7 +26,7 @@ class initial_apt_update {
 
 include initial_apt_update
 package {
-  ['nodejs',git]:
+  ['nodejs',git, nginx, python-pip]:
     ensure => installed,
     require => Class['initial_apt_update'];
 }
@@ -56,9 +56,34 @@ exec {
     command => 'ln -sf /vagrant/src/discovery.vars.js.default /vagrant/src/discovery.vars.js',
 }
 
-#exec {
-#  'run_naive_webserver':
-#    command => 'grunt server &',
-#    cwd     => '/vagrant/',
-#    require => Exec['grunt_cli'],
-#}
+file {
+  '/etc/nginx/sites-enabled/default':
+    ensure => absent,
+    require => Package['nginx'],
+}
+
+file {
+  '/etc/nginx/sites-enabled/bumblebee.nginx.conf':
+    ensure => link,
+    target => '/vagrant/manifests/bumblebee.nginx.conf',
+    require => Package['nginx'],
+}
+
+exec {
+  'restart_nginx':
+    command => 'service nginx restart',
+    require => [File['/etc/nginx/sites-enabled/bumblebee.nginx.conf'],File['/etc/nginx/sites-enabled/default']]
+}
+
+exec {
+  'upgrade_pip':
+    command => 'pip install --upgrade pip',
+    require => Package['python-pip'],
+}
+
+exec {
+  'pip_install_requirements.txt':
+    command => 'pip install -r requirements.txt',
+    cwd => '/vagrant/',
+    require => Exec['upgrade_pip'],
+}
