@@ -153,15 +153,15 @@ var linkGenerator = {
              }
 
            }
-           else if (l.type === 'simbad'){
+           else if (l.type === 'simbad' && !_.findWhere(links.data, {title: "SIMBAD Objects"})){
              links.data.push({ letter: "S", title: "SIMBAD Objects", link : this.adsUrlRedirect(l.type, bib)})
 
            }
-           else if (l.type === 'ned'){
+           else if (l.type === 'ned' && !_.findWhere(links.data, {title: "NED Objects"})){
              links.data.push({ letter: "N", title: "NED Objects", link : this.adsUrlRedirect(l.type, bib)})
 
            }
-           else if (l.type === 'data'){
+           else if (l.type === 'data' && !_.findWhere(links.data, {title: "Archival Data"})){
              links.data.push({letter: "D", title: "Archival Data", link : this.adsUrlRedirect(l.type, bib)})
 
            }
@@ -230,11 +230,11 @@ var linkGenerator = {
 
         _.each(link_types, function (l) {
 
-          if (l.type === "electr" && openAccess) {
+          if (l.type === "electr" && openAccess && !_.findWhere(fullTextSources, {title: "Publisher article"}))  {
             fullTextSources.push({openAccess: true, title: "Publisher article", link: this.adsUrlRedirect('electr', bib)})
           }
 
-          else if (l.type === "electr" && !openAccess) {
+          else if (l.type === "electr" && !openAccess &&  !_.findWhere(fullTextSources, {title: "Publisher article"})) {
 
             fullTextSources.push({title: "Publisher article", link: this.adsUrlRedirect('electr', bib)})
 
@@ -246,7 +246,7 @@ var linkGenerator = {
             if (ADSScan){
               fullTextSources.push({openAccess : true,  title: "ADS PDF", link : this.adsUrlRedirect('article', bib)})
             }
-            else {
+            else if (!_.findWhere(fullTextSources, {title: "Publisher PDF"})) {
               if (openAccess){
                 fullTextSources.push({openAccess : true,  title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
               }
@@ -257,14 +257,14 @@ var linkGenerator = {
             }
           }
 
-          else if (l.type === 'data'){
+          else if (l.type === 'data' &&  !_.findWhere(dataProducts, {title: "Archival data"})){
             dataProducts.push({title : "Archival data", link : this.adsUrlRedirect('data', bib)})
           }
-          else if (l.type === 'simbad'){
+          else if (l.type === 'simbad' && !_.findWhere(dataProducts, {title: "SIMBAD objects"})){
             dataProducts.push({title : "SIMBAD objects", link : this.adsUrlRedirect('simbad', bib)})
 
           }
-          else if (l.type === 'ned'){
+          else if (l.type === 'ned' && !_.findWhere(dataProducts, {title: "NED objects"})){
             dataProducts.push({title : "NED objects", link : this.adsUrlRedirect('ned', bib)})
 
           }

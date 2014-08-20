@@ -127,10 +127,10 @@ app.use('/bower_components', express.directory(__dirname + '/bower_components'))
 port = process.env.PORT || 3000;
 
 
-app.get( /\/discovery\.html\/.*$/, function(req, res) {
+app.get( /\/index\.html\/.*$/, function(req, res) {
 
   // Prepare the context
-  res.sendfile( home + '/discovery.html' )
+  res.sendfile( home + '/index.html' )
 
 });
 

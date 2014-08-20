@@ -110,9 +110,10 @@ define(["marionette", "hbs!./templates/abstract-page-layout",
 
       },
 
-      events : {"click .abstract-paginator-next" : "checkLoadMore"},
+      events : {"click .abstract-paginator-next" : "checkLoadMore"
+        },
 
-      checkLoadMore : function(){
+      checkLoadMore : function(e){
         this.trigger("nextEvent")
       }
 
