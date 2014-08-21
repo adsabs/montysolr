@@ -370,7 +370,7 @@ define(["config", 'module'], function(config, module) {
 
       // Trigger the initial route and enable HTML5 History API support
 
-
+      console.log(conf.routerConf)
       Backbone.history.start(conf.routerConf);
       
 
