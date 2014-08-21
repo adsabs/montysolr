@@ -5,6 +5,7 @@ define([], function() {
   // eg root: 'http://localhost:8000/test/foo/bar'
   return {
     debug: false,
-    routerConf: {pushState: true, root:'/'},
+    routerConf: {pushState: true, root:'/look-ma-not-root'},
   }
 });
+
