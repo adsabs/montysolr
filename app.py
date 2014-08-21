@@ -11,6 +11,7 @@ def solr(request):
   payload['wt'] = 'json'
   headers = dict(headers.items())
   headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
   # TODO: Unify configuration scheme for setting API and/or search backend
   r = requests.post('http://localhost:8983/solr/select', data=urlencode(payload, doseq=True), headers=headers)
   return r.text, r.status_code
@@ -18,10 +19,9 @@ def solr(request):
 @app.route('/',defaults={'path': ''})
 @app.route('/<path:path>',methods=['GET','POST'])
 def catch_all(path):
-    if path.startswith('api'):
-      return solr(request)
-
     DOC_ROOT="/look-ma-not-root"
+    if path.replace(DOC_ROOT[1:],'').startswith('api'):
+      return solr(request)
 
     P = os.path.join(DOC_ROOT,path.replace(DOC_ROOT[1:],'#'))
 
