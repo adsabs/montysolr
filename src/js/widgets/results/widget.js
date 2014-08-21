@@ -6,82 +6,92 @@
 
 define([
     'underscore',
-    'hbs!js/widgets/list_of_things/templates/results-container-template',
-    'hbs!js/widgets/list_of_things/templates/item-template',
-    'js/widgets/list_of_things/widget'
+    'js/widgets/list_of_things/widget',
+    'js/widgets/base/base_widget'
     ],
 
-  function (
-    _,
-    ContainerTemplate,
-    ItemTemplate,
-    ListOfThingsWidget) {
-
-    var ItemModelClass = ListOfThingsWidget.prototype.ItemModelClass.extend({
-
-    });
-
-    var CollectionClass = ListOfThingsWidget.prototype.CollectionClass.extend({
-      model: ItemModelClass
-    });
-
-    var ItemViewClass = ListOfThingsWidget.prototype.ItemViewClass.extend({
-      template: ItemTemplate
-
-    });
-
-    var CollectionViewClass = ListOfThingsWidget.prototype.CollectionViewClass.extend({
-      id: "search-results",
-      itemView: ItemViewClass,
-      template: ContainerTemplate
-    });
-
+  function (_, ListOfThingsWidget, BaseWidget) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
 
+      showDetailsButton : true,
 
+      mainResults  : true,
 
-      ItemModelClass     : ItemModelClass,
-      ItemViewClass      : ItemViewClass,
-      CollectionClass    : CollectionClass,
-      CollectionViewClass: CollectionViewClass,
+      activate: function (beehive) {
 
-      defaultQueryArguments: {
-        hl     : "true",
-        "hl.fl": "title,abstract",
-        fl     : 'title,abstract,id,bibcode,author,keyword,citation_count,highlights,pub,aff,volume,year,links_data,ids_data,[citations],property'
+        _.bindAll(this, "dispatchInitialRequest", "processResponse");
+
+        this.pubsub = beehive.Services.get('PubSub');
+
+        //custom dispatchRequest function goes here
+        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchInitialRequest);
+
+        //custom handleResponse function goes here
+        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
-      parseResponse: function (apiResponse, orderNum) {
-        var raw = apiResponse.toJSON();
 
-        var highlights = raw.highlighting;
-        orderNum = orderNum || 1;
+      dispatchInitialRequest  : function(){
 
-        if (!this.defaultQueryArguments.fl) {
-          return _.map(raw.response.docs, function (d) {
-            orderNum += 1;
-            d['orderNum'] = orderNum;
-            d['identifier'] = d.bibcode;
-            return d
-          });
+        this.resetWidget();
+
+        BaseWidget.prototype.dispatchRequest.apply(this, arguments)
+      },
+
+
+      defaultQueryArguments: function(){
+        return {
+          hl     : "true",
+          "hl.fl": "title,abstract,body",
+          fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year',
+          rows : 25
+        }
+      },
+
+      processResponse: function (apiResponse) {
+
+        this.setCurrentQuery(apiResponse.getApiQuery());
+        //also let pagination model know
+        this.paginationModel.set("currentQuery", this.getCurrentQuery());
+
+        var highlights = apiResponse.get("highlighting")
+
+
+        //checking to see if we need to reset start or rows values
+
+        var r =  this.getCurrentQuery().get("rows");
+        var s = this.getCurrentQuery().get("start");
+        if (r){
+          if ($.isArray(r)){
+            this.paginationModel.set("perPage",r[0])
+          }
+          else {
+            this.paginationModel.set("perPage",r)
+          }
+        }
+        if (s) {
+          if ($.isArray(s)) {
+            this.paginationModel.set("page", s[0]/ this.paginationModel.get("perPage") + 1)
+          }
+          else {
+            this.paginationModel.set("page", s/ this.paginationModel.get("perPage") + 1)
+          }
+
         }
 
-        var keys = _.map(this.defaultQueryArguments.fl.split(','), function (v) {
-          return v.trim()
-        });
+        var docs = apiResponse.get("response.docs")
 
-        var docs = _.map(raw.response.docs, function (doc) {
-          var d = _.pick(doc, keys);
-          d['identifier'] = d.bibcode;
-          var id = d.id;
+        //any preprocessing before adding the resultsIndex is done here
+        var docs = _.map(docs, function(d){
+          d.identifier = d.bibcode;
           var h = {};
 
           if (highlights) {
 
             h = (function () {
 
-              var hl = highlights[id];
+              var hl = highlights[d.id];
               var finalList = [];
               //adding abstract,title, etc highlights to one big list
               _.each(_.pairs(hl), function (pair) {
@@ -95,62 +105,24 @@ define([
             }());
           }
 
-
           if (h.highlights && h.highlights.length > 0)
             d['details'] = h;
 
-          d['orderNum'] = orderNum;
-
-          orderNum += 1;
           return d;
 
         });
-        //getting links data from LinkGenerator Mixin
-        var docs = this.parseLinksData(docs);
 
-        return docs;
-      },
+        docs = this.parseLinksData(docs);
 
-      onAllInternalEvents: function(ev, arg1, arg2) {
+        this.insertPaginatedDocsIntoCollection(docs, apiResponse)
 
-        if (ev == 'composite:rendered') {
-
-          this.view.disableShowMore();
-          this.view.toggleDetailsControls(false);
-          if (this.showMoreAfterRender){
-            this.view.enableShowMore()
-          }
-          this.viewRendered = true;
-
+        //resolving the promises generated by "loadBibcodeData"
+        if (this.deferredObject){
+          this.deferredObject.resolve(this.paginationModel.get("numFound"))
         }
-        else if (ev == 'reset') {
 
-        var details = _.filter(this.view.collection.models, function(m) {return m.has('details')});
-          if (details.length > 0) {
-            this.view.toggleDetailsControls(true);
-          }
-          else {
-            this.view.toggleDetailsControls(false);
-          }
-
-        }
-        else if (ev == "fetchMore") {
-
-          var p = this.handlePagination(this.displayNum, this.maxDisplayNum, arg1, this.paginator, this.view, this.collection);
-          if (p && p.before) {
-            p.before();
-          }
-          if (p && p.runQuery) {
-            // ask for more data
-            this.resetPagination = false;
-            this.dispatchRequest(this.getCurrentQuery());
-          }
-
-          //letting other interested widgets know that more info was fetched
-          this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: this.paginator});
-
-        }
       }
+
 
     });
 

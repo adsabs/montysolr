@@ -62,9 +62,8 @@
 }
 
 .s-toggle-aff {
-  padding: 0px;
-  position: relative;
-  top: -12px;
+  padding-left: 0px;
+
 }
 
 .s-abstract-title-bibcode {
@@ -92,7 +91,6 @@
 .s-abstract-title-info-row {
   font-style: italic;
   font-size: 16px;
-  padding-top: 20px;
   font-variant: all-small-caps;
 }
 
@@ -101,33 +99,54 @@
   margin-bottom: 0px;
 }
 
-.s-abstract-title-row {
-  padding: 5px 0px 20px 0px;
-  margin-bottom: 10px;
+
+.s-abstract-descriptor {
+
+  .row;
+
+  background-color: @body-bg;
+
 
   h4 {
     font-size: 20px;
   }
+
+  &:last-of-type {
+    padding-bottom:1%;
+    margin-bottom: 1%;
+    .lh-box-shadow(0 4px 2px -2px darken(@gray-lighter, 5%));
+
+  }
+
+
+}
+
+.s-abstract-metadata {
+  padding: 2%;
+
 }
 
 .s-abstract-nav {
 
-  padding: 5px 0px;
+  padding: 2%;
   background-color: darken(@gray-lighter, 3%);
   margin-bottom: 5px;
   text-align: center;
   cursor: pointer;
   font-size: 16px !important;
+  margin-right: 8%;
+  margin-left: 8%;
 }
 
 .s-abstract-nav:hover {
+
 
   background-color: darken(@gray-lighter, 5%);
 }
 
 .s-abstract-nav-active {
   color: white;
-  background-color: lighten(@brand-info, 12%);
+  background-color: @brand-primary-faded;
   border: none;
 }
 
@@ -137,10 +156,24 @@
 }
 
 .s-abstract-nav-active:hover {
-  background-color: lighten(@brand-info, 8%);
+  background-color: @brand-primary-faded;;
 }
 
 .s-abstract-nav-inactive:hover {
   background-color: lighten(@gray-lighter, 5%);
   cursor: not-allowed;
+}
+
+
+.s-abstract-title {
+  font-size : 23px;
+  font-weight: 500;
+}
+
+
+.s-results-pager {
+  background-color: @body-bg;
+  padding-top: 1%;
+  .clearfix;
+  border-top: @border-light-default;
 }

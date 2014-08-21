@@ -18,7 +18,8 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
           keywords: undefined,
           bibcode: undefined,
           pub_raw: undefined,
-          doi: undefined
+          doi: undefined,
+          bibcode: undefined
         }
       },
 
@@ -27,10 +28,11 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
 
        doc.aff = doc.aff || [];
         if (doc.aff.length) {
-          hasAffiliation = true
+          hasAffiliation = true;
+          // joining author and aff
+          authorAff = _.zip(doc.author, doc.aff);
         }
-        // joining author and aff
-        authorAff = _.zip(doc.author, doc.aff);
+
 
         title = $.isArray(doc.title)? doc.title[0] : undefined;
 
@@ -44,7 +46,8 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
           keyword: doc.keyword,
           bibcode: doc.bibcode,
           pub_raw: doc.pub_raw,
-          doi: doc.doi
+          doi: doc.doi,
+          bibcode: doc.bibcode
         }
       }
     });
@@ -66,10 +69,10 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
 
         this.$(".affiliation").toggleClass("hide");
         if (this.$(".affiliation").hasClass("hide")){
-          this.$("#toggle-aff").text("Show affiliations")
+          this.$("#toggle-aff").text("(Show author affiliations)")
         }
         else {
-          this.$("#toggle-aff").text("Hide affiliations")
+          this.$("#toggle-aff").text("(Hide author affiliations)")
         }
 
       },
@@ -84,7 +87,7 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
     var AbstractWidget = BaseWidget.extend({
       initialize: function (options) {
         options = options || {};
-        this.model = options.data ? new AbstractModel(options.data, {parse: true}) : new AbstractModel()
+        this.model = options.data ? new AbstractModel(options.data, {parse: true}) : new AbstractModel();
         this.view = new AbstractView({model: this.model});
 
         this.listenTo(this.view, 'all', this.onAllInternalEvents);

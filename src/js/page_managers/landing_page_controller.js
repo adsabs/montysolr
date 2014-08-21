@@ -29,7 +29,6 @@ define(["marionette", "hbs!./templates/landing-page-layout",
 
         options = options || {};
 
-
         this.widgetDict = options.widgetDict;
         _.extend(this, API);
 
@@ -41,13 +40,15 @@ define(["marionette", "hbs!./templates/landing-page-layout",
 
       activate: function (beehive) {
 
+
+
       },
 
-      showPage: function (page) {
+      showPage: function (options) {
 
-
-        this.displayLandingPage()
-
+        if (!options.inDom){
+          this.displayLandingPage()
+        }
 
       }
 

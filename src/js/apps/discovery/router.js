@@ -14,7 +14,7 @@ define([
         options = options || {};
 
         _.bindAll(this, "changeURLFromPubSub");
-        this.pageControllers = options.pageControllers;
+        this.pageManager  = options.pageManager;
         this.history = options.history;
 
       },
@@ -27,15 +27,15 @@ define([
 
       },
 
-      changeURLFromPubSub : function(d){
+      changeURLFromPubSub : function(path){
 
-        if (!d) {
+        //rewrite this to check to make sure its a valid path
+        if (!path) {
           console.warn("can't navigate, no information given")
           return
         }
         else {
-          this.history.addEntry({page: d.page, subPage:d.subPage, data : d.data })
-          this.navigate(d.path)
+          this.navigate(path)
         }
 
       },
@@ -50,9 +50,7 @@ define([
 
       index: function () {
 
-        this.history.addEntry({page : "landingPage", subPage : undefined, data : undefined})
-
-        this.pageControllers.landingPage.showPage();
+        this.pageManager.showPage("index");
 
       },
 
@@ -61,29 +59,25 @@ define([
         if (query) {
           var q= new ApiQuery().load(query);
 
-          this.history.addEntry({page : "resultsPage", subPage: undefined, data: q.toJSON()})
           this.pubsub.publish(this.pubsub.START_SEARCH, q);
         }
         else {
-          this.history.addEntry({page : "resultsPage", subPage: undefined, data: undefined})
-          this.pageControllers.resultsPage.showPage(false);
+          this.pageManager.showPage("results", {triggerNav: false});
 
         }
       },
 
-      viewAbstract: function (bibcode, subView) {
+      viewAbstract: function (bibcode, subPage) {
 
         if (bibcode){
 
-          this.history.addEntry({page: "abstractPage", data:  bibcode, subPage: subView})
-
-          if (!subView) {
-            subView = "abstract"
+          if (!subPage) {
+            subPage = "abstract"
             //"redirecting" to the abstract page
             this.navigate("/abs/" + bibcode + "/abstract", {replace: true})
           }
 
-         this.pageControllers.abstractPage.showPage(bibcode, subView);
+         this.pageManager.showPage("abstract", {bibcode: bibcode, subPage : subPage});
 
         }
       },

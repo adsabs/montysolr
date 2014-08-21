@@ -1,11 +1,16 @@
-<article>
-    <div id="abstract-metadata">
+<article id="abstract-metadata" class="s-abstract-metadata">
         <dl>
 
+            <dt class="hidden">Bibcode</dt>
+            <dd>{{bibcode}}</dd>
+
             {{#if authorAff.length}}
-            <dt><span class="no-display">Authors</span>
+            <dt><span class="hidden">Authors</span>
             </dt>
             <dd>
+                {{#if hasAffiliation}}
+                <button class="btn btn-link s-toggle-aff" id="toggle-aff"> (Show author affiliations)</button>
+                {{/if}}
                 <div id="authors-and-aff">
                     <ul class="list-inline">
                     {{#each authorAff}}
@@ -21,14 +26,11 @@
                 </div>
                 {{/if}}
 
-                {{#if hasAffiliation}}
-                <button class="btn btn-link s-toggle-aff" id="toggle-aff"> Show affiliations</button>
-                {{/if}}
             </dd>
 
 
             {{#if pub_raw}}
-            <dt class="no-display">Publication</dt>
+            <dt class="hidden">Publication</dt>
             <dd>
                 <div id="article-publication"><em>{{pub_raw}}</em></div>
             </dd>
@@ -53,12 +55,21 @@
             <br/>
 
             {{#if abstract}}
-            <dt class="no-display">Abstract</dt>
+            <dt class="hidden">Abstract</dt>
             <dd>
                 <div id="abstract-content">
                     {{{abstract}}}
                 </div>
             </dd>
+
+            {{else}}
+            <dt class="hidden">Abstract</dt>
+            <dd>
+                <div id="abstract-content">
+                    No abstract
+                </div>
+            </dd>
+
 
             {{/if}}
 
@@ -83,9 +94,5 @@
 
 
         </dl>
-
-
-    </div>
-
 
 </article>

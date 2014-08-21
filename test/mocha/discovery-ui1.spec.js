@@ -23,6 +23,24 @@ var tests = [
   tbase + '/widgets/facet_container_view.spec.js',
   tbase + '/widgets/facet_widget.spec.js',
 
+  tbase + '/widgets/tabs_widget.spec.js',
+  tbase + '/widgets/search_bar_widget.spec.js',
+
+  tbase + '/widgets/citations_widget.spec.js',
+  tbase + '/widgets/references_widget.spec.js',
+//  tbase + '/widgets/similar_widget.spec.js',
+  tbase + '/widgets/table_of_contents_widget.spec.js',
+  tbase + '/widgets/coreads_widget.spec.js',
+  tbase + '/widgets/resources_widget.spec.js',
+
+  tbase + '/widgets/year_graph_facet_widget.spec.js',
+  tbase + '/widgets/citation_graph_facet_widget.spec.js',
+  tbase + '/widgets/reads_graph_facet_widget.spec.js',
+
+  tbase + '/page_managers/master_page_manager.spec.js',
+  tbase + '/mixins/add_stable_index_to_collection.spec.js',
+  tbase + '/page_managers/abstract_title_view_mixin.spec.js'
+
 
 
 ];

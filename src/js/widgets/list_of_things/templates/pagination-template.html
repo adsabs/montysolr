@@ -1,0 +1,14 @@
+    <div class="col-sm-3">
+   Show <input class="per-page" type="text" placeholder="{{perPage}}"/> per page
+    </div>
+    <div class="col-sm-6">
+        <ul class="pagination">
+            <li><a href="search/{{../currentQuery}}" data-paginate = "1" data-bypass>&laquo;</a></li>
+            {{#each pageData}}
+            <li {{#if this.current}} class="active" {{/if}} >
+            <a href="{{this.link}}" data-bypass  data-paginate = "{{this.p}}" >{{this.p}} </a>
+            </li>
+            {{/each}}
+        </ul>
+    </div>
+

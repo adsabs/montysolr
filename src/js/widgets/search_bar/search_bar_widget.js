@@ -31,6 +31,8 @@ define(['marionette',
 
       template: SearchBarTemplate,
 
+      className : "s-search-bar-widget",
+
       initialize: function (options) {
         _.bindAll(this, "tempFieldInsert", "tempFieldClear");
         this.queryBuilder = new QueryBuilderPlugin();
@@ -211,7 +213,7 @@ define(['marionette',
 
       setQueryBox: function (val) {
         (this.$(".q").val(val));
-      }
+      },
 
     })
 
