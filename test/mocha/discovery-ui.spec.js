@@ -39,8 +39,10 @@ var tests = [
 //  tbase + '/page_managers/results_page_controller.spec.js'
 
 
-  tbase + '/widgets/year-graph-facet-widget.spec.js',
-  tbase + '/widgets/citation-graph-facet-widget.spec.js'
+  tbase + '/widgets/year_graph_facet_widget.spec.js',
+  tbase + '/widgets/citation_graph_facet_widget.spec.js',
+    tbase + '/widgets/reads_graph_facet_widget.spec.js'
+
 
 
 

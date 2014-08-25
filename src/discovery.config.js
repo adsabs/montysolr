@@ -41,6 +41,7 @@ require.config({
         Similar : 'js/widgets/similar/widget',
         Resources : 'js/widgets/resources/widget'
 
+
       },
       plugins: {
       }

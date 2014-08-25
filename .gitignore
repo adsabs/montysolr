@@ -21,9 +21,9 @@ test/reports
 test/mocha/sandbox.spec.js
 
 src/styles/css
-src/fonts
-src/less/bootstrap_less
-src/less/mixins.less
+src/styles/fonts
+src/styles/less/bootstrap_less
+src/styles/less/mixins.less
 
 .idea
 

@@ -13,7 +13,7 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
         top   : 10,
         right : 10,
         bottom: 5,
-        left  : 50
+        left  : 40
       };
       this.fullWidth = 280;
       this.fullHeight = 200;
@@ -27,12 +27,22 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
         throw new Error("Graph widget has no model or else an incorrect model")
       }
 
+      //for citation and reads graph
+      this.currentScale = "linear";
+
     },
 
     template: FacetGraphTemplate,
 
     insertLegend : function(){
-      this.$(".graph-legend").html(this.legendTemplate());
+      var graphVars = {}
+      if (this.yAxisTitle){
+        graphVars.yAxisTitle = this.yAxisTitle;
+      }
+      if (this.graphTitle){
+        graphVars.graphTitle = this.graphTitle;
+      }
+      this.$(".graph-legend").html(this.legendTemplate(graphVars));
     },
 
     events: {
@@ -49,8 +59,8 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
 
       }
       else {
-        this.buildGraph();
         this.insertLegend();
+        this.buildGraph();
         this.addSliderWindows();
         this.buildSlider();
         if (this.addToOnRender){

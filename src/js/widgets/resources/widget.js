@@ -60,7 +60,7 @@ define(['underscore',
         this.deferredObject =  $.Deferred();
         //abstractPageFields comes from the LinkGenerator Mixin
 
-        this.dispatchRequest(new ApiQuery({'q': searchTerm, fl : this.abstractPageFields}));
+        this.dispatchRequest(new ApiQuery({'q': searchTerm, fl : "links_data,ids_data,[citations],property,bibcode"}));
         return this.deferredObject.promise();
       }
 

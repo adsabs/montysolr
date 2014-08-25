@@ -74,25 +74,31 @@ define([
       //    a way to get data on command on a per-bibcode-basis
      loadBibcodeData: function (bibcode) {
 
+
        this.deferredObject =  $.Deferred();
+
+       //check if its an arxivID, if so just return
+       if (bibcode.match(/arXiv/)){
+         this.deferredObject.resolve(0);
+         return this.deferredObject;
+       }
 
       if (bibcode === this._bibcode){
 
-        this.deferredObject.resolve(this.collection.numFound)
-        
-        return this.deferredObject
+        this.deferredObject.resolve(this.collection.numFound);
+        return this.deferredObject;
       }
 
       this._bibcode = bibcode;
 
       if (bibcode[13] == 'E'){
         //take first fourteen
-        bibquery = _.first(bibcode, 14).join("");
+        bibquery = _.first(bibcode, 14).join("")+"*";
 
       }
       else {
         //take first thirteen
-        bibquery = _.first(bibcode, 13).join("");
+        bibquery = _.first(bibcode, 13).join("")+"*";
 
       }
 

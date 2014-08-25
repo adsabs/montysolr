@@ -1,0 +1,146 @@
+@import '../../../../bower_components/fontawesome/less/font-awesome';
+@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
+@import 'general';
+
+.facebook-icon {
+  .fa;
+  .fa-2x;
+  color: @facebook-color;
+  &:before {
+    content: @fa-var-facebook-square;
+  }
+}
+
+.mendeley-icon {
+  .fa;
+  .fa-2x;
+  color: @mendeley-color;
+  &:before {
+    content: @fa-var-facebook-square;
+  }
+
+}
+
+.twitter-icon {
+  .fa;
+  .fa-2x;
+  color: @twitter-color;
+  &:before {
+    content: @fa-var-twitter-square;
+  }
+
+}
+
+.sciencewise-icon {
+
+  background-color: @sciencewise-color;
+  color: white;
+  font-size: 10px;
+  width: 41px;
+  height: 50px;
+  padding: 2px;
+
+  &:before {
+    content: "Science WISE"
+  }
+
+}
+
+.s-open-access-image {
+  .fa;
+  .fa-lg;
+  &:before {
+    content: @fa-var-unlock-alt;
+  }
+  color: @brand-success;
+}
+
+.s-doi {
+  dt, dd {
+    display: inline-block;
+  }
+}
+
+.s-toggle-aff {
+  padding: 0px;
+  position: relative;
+  top: -12px;
+}
+
+.s-abstract-title-bibcode {
+  margin: 0px;
+}
+
+#abstract-metadata li {
+  padding: 1px;
+}
+
+#abstract-metadata ul {
+  padding-left: 0.8%;
+}
+
+.s-abstract-num {
+  font-family: @font-family-sans-serif;
+  font-weight: 300;
+  font-size: 23px;
+}
+
+.s-abstract-nav-col a:hover {
+  text-decoration: none;
+}
+
+.s-abstract-title-info-row {
+  font-style: italic;
+  font-size: 16px;
+  padding-top: 20px;
+  font-variant: all-small-caps;
+}
+
+.abstract-title {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.s-abstract-title-row {
+  padding: 5px 0px 20px 0px;
+  margin-bottom: 10px;
+
+  h4 {
+    font-size: 20px;
+  }
+}
+
+.s-abstract-nav {
+
+  padding: 5px 0px;
+  background-color: darken(@gray-lighter, 3%);
+  margin-bottom: 5px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 16px !important;
+}
+
+.s-abstract-nav:hover {
+
+  background-color: darken(@gray-lighter, 5%);
+}
+
+.s-abstract-nav-active {
+  color: white;
+  background-color: lighten(@brand-info, 12%);
+  border: none;
+}
+
+.s-abstract-nav-inactive {
+  background-color: lighten(@gray-lighter, 5%);
+  color: lighten(@gray-light, 10%) !important;
+}
+
+.s-abstract-nav-active:hover {
+  background-color: lighten(@brand-info, 8%);
+}
+
+.s-abstract-nav-inactive:hover {
+  background-color: lighten(@gray-lighter, 5%);
+  cursor: not-allowed;
+}

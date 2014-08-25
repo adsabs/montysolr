@@ -16,7 +16,7 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
 
     var queryDisplayView = Backbone.View.extend({
 
-   	  className : "",
+   	  className : "query-info-widget",
 
       initialize: function(options) {
         this.model = new queryModel();
@@ -32,10 +32,10 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
         $add.toggleClass("hide");
 
         if ($add.hasClass("hide")){
-          $button.html(("<i class=\"glyphicon glyphicon-plus\"></i>"))
+          $button.html(("<i class=\"fa fa-plus fa-lg\"></i>"))
         }
         else {
-          $button.html("<i class=\"glyphicon glyphicon-minus\"></i>")
+          $button.html("<i class=\"fa fa-minus fa-lg\"></i>")
         }
 
       },
