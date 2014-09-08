@@ -1,0 +1,22 @@
+<p> Selected Terms: </p>
+<ul class="vis-select-list s-vis-select-list">
+
+    {{#if selectedWords}}
+
+    {{#each selectedWords}}
+
+        <li>{{this}} <i class="x-remove"></i></li>
+
+    {{/each}}
+
+    {{else}}
+
+    <li> Click on a term to add it to this list.</li>
+    <li> Click again on the term to remove it.</li>
+
+    {{/if}}
+
+
+</ul>
+
+<button class="btn btn-info apply-vis-facet">Apply Filter to Search</button>
