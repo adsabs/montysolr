@@ -225,7 +225,7 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
     },
 
     /**
-     * Loads modules *one after another* from the following structure
+     * Loads modules *asynchronously* from the following structure
      *
      * {
      *  'Api': 'js/services/api',

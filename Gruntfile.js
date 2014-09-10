@@ -213,6 +213,7 @@ module.exports = function(grunt) {
 
       full_testing: {
         options: {
+          output: null,
           urls: [
             'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html',
             'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-ui.spec.html',

@@ -89,7 +89,6 @@ define(['js/components/application', 'module'], function(Application, module) {
 
         done();
       });
-
     });
 
   });

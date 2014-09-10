@@ -1,7 +1,18 @@
 define(["config", 'module'], function (config, module) {
 
   // Kick off the application
-  require(["router", 'js/components/application', 'js/page_managers/abstract_page_controller', 'js/page_managers/results_page_controller', 'js/page_managers/landing_page_controller', 'bootstrap'], function (Router, Application, AbstractController, ResultsController, LandingPageController) {
+  require(["router",
+    'js/components/application',
+    'js/page_managers/abstract_page_controller',
+    'js/page_managers/results_page_controller',
+    'js/page_managers/landing_page_controller',
+    'bootstrap'],
+    function (
+      Router,
+      Application,
+      AbstractController,
+      ResultsController,
+      LandingPageController) {
 
       // load the objects/widgets/modules (as specified inside the main config
       // in the section config.main

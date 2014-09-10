@@ -24,7 +24,7 @@ require.config({
           HistoryManager: 'js/components/history_manager'
         },
         modules: {
-          FacetFactory: 'js/widgets/facet/factory',
+          FacetFactory: 'js/widgets/facet/factory'
         }
       },
       widgets: {
