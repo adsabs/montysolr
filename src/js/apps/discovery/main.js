@@ -6,13 +6,17 @@ define(["config", 'module'], function (config, module) {
     'js/page_managers/abstract_page_controller',
     'js/page_managers/results_page_controller',
     'js/page_managers/landing_page_controller',
+    'js/components/api_query',
+    'js/components/api_request',
     'bootstrap'],
     function (
       Router,
       Application,
       AbstractController,
       ResultsController,
-      LandingPageController) {
+      LandingPageController,
+      ApiQuery,
+      ApiRequest) {
 
       // load the objects/widgets/modules (as specified inside the main config
       // in the section config.main
@@ -32,12 +36,46 @@ define(["config", 'module'], function (config, module) {
         var beehive = app.getBeeHive();
         var api = beehive.getService('Api');
 
-        if (conf.root) {
-          api.url = conf.root + "/" + api.url;
-          app.root = conf.root;
-        }
-        if (conf.debug !== undefined) {
-          app.getObject('QueryMediator').debug = conf.debug;
+        if (conf) {
+          if (conf.root) {
+            api.url = conf.root + "/" + api.url;
+            app.root = conf.root;
+          }
+          if (conf.debug !== undefined) {
+            app.getObject('QueryMediator').debug = conf.debug;
+          }
+
+          // bootstrap application with remote configuration
+          if (conf.bootstrapUrls) {
+
+            var opts = {
+              done: function (data) {
+                if (data.access_token) {
+                  api.access_token = data.access_token;
+                  api.refresh_token = data.refresh_token;
+                  api.expires_in = data.expires_in;
+                }
+              },
+              fail: function () {
+                // ignore
+              },
+              type: 'GET'
+            };
+            var redirect_uri = window.location;
+
+            _.each(conf.bootstrapUrls, function (url) {
+              if (url.indexOf('http') > -1) {
+                opts.u = url;
+              }
+              else {
+                delete opts.u;
+              }
+
+              api.request(new ApiRequest({query: new ApiQuery({redirect_uri: redirect_uri}),
+                  target: '/bumblebee/bootstrap'}),
+                  opts);
+            })
+          }
         }
 
         // XXX:rca - this will need to be moved somewhere else (it is getting confusing -- to long)

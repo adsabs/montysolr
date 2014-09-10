@@ -5,7 +5,7 @@
 <script>
     //for local development
     var b = document.createElement("base");
-    b.href = document.location.origin;
+    b.href = document.location.origin + (document.location.pathname ? document.location.pathname : "");
     document.getElementsByTagName("head")[0].appendChild(b)
 </script>
 
