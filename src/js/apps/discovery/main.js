@@ -51,7 +51,7 @@ define(["config", 'module'], function (config, module) {
             var opts = {
               done: function (data) {
                 if (data.access_token) {
-                  api.access_token = data.access_token;
+                  api.access_token = data.token_type + ':' + data.access_token;
                   api.refresh_token = data.refresh_token;
                   api.expires_in = data.expires_in;
                 }
@@ -61,7 +61,7 @@ define(["config", 'module'], function (config, module) {
               },
               type: 'GET'
             };
-            var redirect_uri = window.location;
+            var redirect_uri = window.location.origin + window.location.pathname;
 
             _.each(conf.bootstrapUrls, function (url) {
               if (url.indexOf('http') > -1) {
