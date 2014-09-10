@@ -26,7 +26,7 @@ class initial_apt_update {
 
 include initial_apt_update
 package {
-  ['nodejs',git,'libfontconfig', 'libfontconfig-dev', 'libfreetype6-dev']:
+  ['nodejs','git','libfontconfig', 'libfontconfig-dev', 'libfreetype6-dev']:
     ensure => installed,
     require => Class['initial_apt_update'];
 }
@@ -40,25 +40,13 @@ exec {
 exec {
   'npm_install':
     command => 'npm install',
-    cwd     => '/vagrant/',
+    cwd     => '/bumblebee/',
     require => [Exec['npm_install_grunt'],Package['git']];
 }
 
 exec {
   'grunt_cli':
     command => 'grunt setup',
-    cwd     => '/vagrant/',
+    cwd     => '/bumblebee/',
     require => Exec['npm_install_grunt'];
 }
-
-exec {
-  'link_discovery_vars':
-    command => 'ln -sf /vagrant/src/discovery.vars.js.default /vagrant/src/discovery.vars.js',
-}
-
-#exec {
-#  'run_naive_webserver':
-#    command => 'grunt server &',
-#    cwd     => '/vagrant/',
-#    require => Exec['grunt_cli'],
-#}
