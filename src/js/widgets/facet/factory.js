@@ -6,8 +6,9 @@ define([
   'js/widgets/facet/tree_view',
   'js/widgets/base/base_widget',
   'js/components/paginator',
-  'js/widgets/facet/graph-facet/year-graph',
-  'js/widgets/facet/graph-facet/citation-graph'
+  'js/widgets/facet/graph-facet/year_graph',
+  'js/widgets/facet/graph-facet/h_index_graph'
+
 
 ], function (
   FacetCollection,
@@ -18,7 +19,8 @@ define([
   BaseWidget,
   Paginator,
   YearGraphView,
-  CitationGraphView
+  CitationGraphView,
+  ReadsGraphView
   ) {
 
 
@@ -161,185 +163,26 @@ define([
      * @param options
      * @returns {BaseFacetWidget}
      */
-    makeGraphFacet: function (graphName) {
+    makeGraphFacet: function (options) {
 
-      var graphView, processResponse, facetField, defaultQueryArguments;
-
-      if (graphName === "year"){
-        graphView = YearGraphView;
-        facetField = "year";
-        defaultQueryArguments = {
-            "facet.pivot" : "property,year",
-              "facet" : "true",
-              "facet.minCount" : "1"
-          };
-        processResponse = function (apiResponse) {
-
-          this.setCurrentQuery(apiResponse.getApiQuery());
-
-          var data = apiResponse.get("facet_counts.facet_pivot.property,year");
-
-          if (apiResponse.get("response.numFound") < 2){
-            this.collection.reset({graphData : []});
-            return
-          }
-
-
-          var refData = _.findWhere(data, {value : "refereed"});
-
-          if (refData){
-            refData = refData.pivot;
-          }
-
-          var nonRefData = _.findWhere(data, {value : "notrefereed"});
-
-          if (nonRefData){
-            nonRefData = nonRefData.pivot;
-          }
-
-          var maxVal, minVal;
-
-          _.each(refData, function(d){
-            var val = parseInt(d.value);
-            if (maxVal === undefined){
-              maxVal = val;
-            }
-            else if (val > maxVal){
-              maxVal = val
-            }
-            if(minVal === undefined){
-              minVal = val;
-            }
-            else if (parseInt(d.value) < minVal){
-              minVal = parseInt(d.value);
-            }
-          });
-
-          _.each(nonRefData, function(d){
-            var val = parseInt(d.value);
-            if (maxVal === undefined){
-              maxVal = val;
-            }
-            else if (val > maxVal){
-              maxVal = val
-            }
-            if(minVal === undefined){
-              minVal = val;
-            }
-            else if (parseInt(d.value) < minVal){
-              minVal = parseInt(d.value);
-            }
-          });
-
-          var yearRange = _.range(minVal, maxVal+1);
-
-          var finalData = [];
-
-          _.each(yearRange, function(year){
-            var stringYear = year + "";
-            refCount = _.filter(refData, function(d){return d.value === stringYear})[0];
-            refCount = refCount? refCount.count : 0;
-            nonRefCount = _.filter(nonRefData, function(d){return d.value === stringYear})[0];
-            nonRefCount = nonRefCount? nonRefCount.count : 0;
-
-            finalData.push({x: year, y: refCount + nonRefCount, refCount: refCount})
-
-          })
-
-          if (finalData.length < 2){
-            this.collection.reset({graphData : []});
-            return
-          }
-
-          this.collection.reset([{graphData : finalData}]);
-        }
-      }
-      else if (graphName === "citation"){
-        graphView = CitationGraphView;
-        facetField = "citation_count";
-        defaultQueryArguments = {
-          "facet.pivot" : "property,citation_count",
-          "facet" : "true",
-          "facet.minCount" : "1"
-        };
-        processResponse = function (apiResponse) {
-          this.setCurrentQuery(apiResponse.getApiQuery());
-
-          var data = apiResponse.get("facet_counts.facet_pivot.property,citation_count");
-
-          if (apiResponse.get("response.numFound") < 2){
-            this.collection.reset({graphData : []});
-            return
-          }
-
-          var refData = _.findWhere(data, {value : "refereed"});
-
-          if (refData){
-          refData = refData.pivot;
-          }
-
-          var nonRefData = _.findWhere(data, {value : "notrefereed"});
-
-          if (nonRefData){
-            nonRefData = nonRefData.pivot;
-          }
-
-          var finalData = [];
-
-          _.each(refData, function(d) {
-            var val = d.value, count = d.count;
-            _.each(_.range(count), function () {
-              finalData.push({refereed: true, x: undefined, y: val})
-            })
-          })
-
-          _.each(nonRefData, function(d) {
-            var val = d.value, count = d.count;
-            _.each(_.range(count), function () {
-              finalData.push({refereed: false, x: undefined, y: val})
-            })
-          })
-
-          if (finalData.length < 2){
-            this.collection.reset({graphData : []});
-            return
-          }
-
-          finalData = finalData.sort(function (a, b) {
-            return b.y- a.y;
-          });
-
-          //a cut off of 2000
-          finalData = _.first(finalData, 2000);
-
-          finalData = _.map(finalData, function(d, i){
-            d.x = i +1
-            return d
-          });
-
-          this.collection.reset([{graphData : finalData}]);
-
-        }
-      }
-      else {
-        throw new Error("We can't make that particular graph, check the name you passed to the factory")
-      }
+      var viewOptions = options.graphViewOptions;
 
       var containerOptions = {
-        model: new FacetContainerView.ContainerModelClass({title: ""}),
+        model: new FacetContainerView.ContainerModelClass({noOptions : true}),
         collection: new FacetCollection(),
         openByDefault: true,
-        itemView: graphView
+        itemView: options.graphView,
+        itemViewOptions : viewOptions
       };
 
       var controllerOptions = {
         view: new FacetContainerView(containerOptions),
-        facetField : facetField
+        facetField : options.facetField
       };
 
       var GraphWidget = FacetWidget.extend({
-        processResponse : processResponse,
-       defaultQueryArguments : defaultQueryArguments,
+        processResponse : options.processResponse,
+        defaultQueryArguments : options.defaultQueryArguments,
         //XXX:rca hack - facet.prefix should be cleaned up by QM
         customizeQuery: function(apiQuery) {
           var q = apiQuery.clone();

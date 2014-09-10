@@ -233,7 +233,6 @@ define([
 
     var ResultsWidget = PaginatedBaseWidget.extend({
 
-
       ItemModelClass: ItemModel,
       ItemViewClass: ItemView,
       CollectionClass: ListCollection,
@@ -243,12 +242,6 @@ define([
         options.rows = options.rows || 40;
 
         PaginatedBaseWidget.prototype.initialize.call(this, options);
-
-        /*adding fields necessary to get all linksdata,
-        * 'this.abstractPageFields' comes from linkGenerator Mixin*/
-        if (this.defaultQueryArguments){
-          this.defaultQueryArguments.fl = this.defaultQueryArguments.fl + "," + this.resultsPageFields
-        }
 
         this.collection = new this.CollectionClass();
 
@@ -302,7 +295,7 @@ define([
 
       //will be requested in composeRequest
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year'
+        fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year,links_data,ids_data,[citations],property'
       },
 
       dispatchRequest: function (apiQuery) {

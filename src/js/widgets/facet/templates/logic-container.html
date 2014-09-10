@@ -1,11 +1,11 @@
 <div class="s-widget">
 <div class="widget-name s-widget-meta widget-meta">
     <h5><i class="main-caret item-closed"/> {{title}}</h5>
-    <span class="widget-options s-widget-options top hide">
-        <span class="btn-group dropdown logic-dropdown s-logic-dropdown">
+    {{#unless noOptions}}  <div class="widget-options s-widget-options top hide"> {{/unless}}
+        <span class="btn-group dropdown logic-dropdown s-logic-dropdown no-">
             <button type="button" class="btn btn-link dropdown-toggle">
-                <i class="s-filter-image inactive-style"> <span class="caret"/>
-                </i>
+                <span class="s-filter-image inactive-style"> <span class="caret"/>
+                </span>
             </button>
             <div class="dropdown-menu s-dropdown-menu">
                 <button type="button" class="close">&times;</button>
@@ -13,7 +13,7 @@
             </div>
         </span>
 
-    </span>
+    </div>
 </div>
 
 
@@ -21,7 +21,7 @@
 
 </div>
 
-    <div class="widget-options bottom hide"></div>
+    {{#unless noOptions}} <div class="widget-options bottom hide"></div> {{/unless}}
 
 
 

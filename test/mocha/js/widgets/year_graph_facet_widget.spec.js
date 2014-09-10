@@ -1,6 +1,8 @@
 define(["js/widgets/facet/factory",
-     'js/components/api_response'],
-  function(FacetFactory, ApiResponse){
+     'js/components/api_response',
+    'js/widgets/facet/graph-facet/year_graph'],
+  function(FacetFactory, ApiResponse, YearGraphView){
+
 
     var testJSON = {
       "responseHeader": {
@@ -202,7 +204,100 @@ define(["js/widgets/facet/factory",
 
       beforeEach(function(){
 
-        widget = FacetFactory.makeGraphFacet("year");
+        widget = FacetFactory.makeGraphFacet({
+          graphView            : YearGraphView,
+          facetField           : "year",
+          defaultQueryArguments: {
+            "facet.pivot"   : "property,year",
+            "facet"         : "true",
+            "facet.minCount": "1"
+          },
+
+          processResponse      : function (apiResponse) {
+
+            this.setCurrentQuery(apiResponse.getApiQuery());
+
+            var data = apiResponse.get("facet_counts.facet_pivot.property,year");
+
+            if (apiResponse.get("response.numFound") < 2) {
+              this.collection.reset({graphData: []});
+              return
+            }
+
+            var refData = _.findWhere(data, {value: "refereed"});
+
+            if (refData) {
+              refData = refData.pivot;
+            }
+
+            var nonRefData = _.findWhere(data, {value: "notrefereed"});
+
+            if (nonRefData) {
+              nonRefData = nonRefData.pivot;
+            }
+
+            var maxVal, minVal;
+
+            _.each(refData, function (d) {
+              var val = parseInt(d.value);
+              if (maxVal === undefined) {
+                maxVal = val;
+              }
+              else if (val > maxVal) {
+                maxVal = val
+              }
+              if (minVal === undefined) {
+                minVal = val;
+              }
+              else if (parseInt(d.value) < minVal) {
+                minVal = parseInt(d.value);
+              }
+            });
+
+            _.each(nonRefData, function (d) {
+              var val = parseInt(d.value);
+              if (maxVal === undefined) {
+                maxVal = val;
+              }
+              else if (val > maxVal) {
+                maxVal = val
+              }
+              if (minVal === undefined) {
+                minVal = val;
+              }
+              else if (parseInt(d.value) < minVal) {
+                minVal = parseInt(d.value);
+              }
+            });
+
+            var yearRange = _.range(minVal, maxVal + 1);
+
+            var finalData = [];
+
+            _.each(yearRange, function (year) {
+              var stringYear = year + "";
+              refCount = _.filter(refData, function (d) {
+                return d.value === stringYear
+              })[0];
+              refCount = refCount ? refCount.count : 0;
+              nonRefCount = _.filter(nonRefData, function (d) {
+                return d.value === stringYear
+              })[0];
+              nonRefCount = nonRefCount ? nonRefCount.count : 0;
+
+              finalData.push({x: year, y: refCount + nonRefCount, refCount: refCount})
+
+            })
+
+            if (finalData.length < 2) {
+              this.collection.reset({graphData: []});
+              return
+            }
+            this.collection.reset([
+              {graphData: finalData}
+            ]);
+          }});
+
         widget.processResponse(new ApiResponse(testJSON));
 
       });

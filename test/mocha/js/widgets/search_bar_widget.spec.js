@@ -74,7 +74,6 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
       e.preventDefault = function(){};
       e.target = document.querySelector("#field-options div[data-field=author]");
 
-      widget.view.tempFieldInsert(e)
       widget.view.$("#field-options div[data-field=author]").click();
       expect($(".q").val().trim()).to.equal("author:\"\"");
       done();

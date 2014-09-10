@@ -60,7 +60,7 @@ define([
           var $v = $(view.render().el);
           $('#test-area').append($v);
 
-          expect($v.find('.widget-options.bottom').hasClass('hide')).to.be.true;
+//          expect($v.find('.widget-options.bottom').hasClass('hide')).to.be.true;
           expect($v.find('.widget-options.top').hasClass('hide')).to.be.false;
 
           // expect 5 items in the facet (all hidden)
@@ -106,7 +106,6 @@ define([
           });
 
           sinon.spy(view, 'refreshLogicTooltip');
-          sinon.spy(view, 'enableLogic');
           sinon.spy(view, 'closeLogic');
 
           var fired = sinon.spy();
@@ -120,11 +119,16 @@ define([
           view.collection.add(new Backbone.Model({title: 'foo3', value: 'bar3'}));
 
           expect(view.refreshLogicTooltip.callCount).to.be.equal(6);
-          expect(view.enableLogic.callCount).to.be.equal(2);
-          expect(view.closeLogic.callCount).to.be.equal(2);
 
-          // selecting one of the options should activate the tooltip
-          $v.find('.widget-item:first').click();
+          //logic menu is shown only after a selection is made
+
+          expect(view.$(".logic-dropdown").hasClass("no-display")).to.be.true;
+          $v.find(".widget-item:first").click();
+          expect(view.$(".logic-dropdown").hasClass("no-display")).to.be.false;
+
+
+
+
 
           expect($v.find('.logic-container').is(':visible')).to.be.true;
           expect($v.find('.logic-container > label:eq(0) > input').val()).to.eql('limit to');

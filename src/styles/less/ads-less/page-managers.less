@@ -1,0 +1,115 @@
+//import these files so the fonts, mixins, and global variables can be used
+@import '../../../../bower_components/fontawesome/less/font-awesome';
+@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
+@import 'general';
+
+
+
+// layout css
+
+//the following weird classes are to get 100% height columns
+//in results page
+
+
+.s-results-page-layout {
+
+  .s-middle-column {
+    border-radius: @border-radius-base;
+    background-color: white;
+    border: 1px solid lighten(@border-light-default-color, 8%);
+    .lh-box-shadow(2px 2px 5px darken(@gray-lighter, 5%));
+
+  }
+
+  .s-dynamic-page-body {
+    background-color:  @results-page-background;
+
+  }
+
+
+  #s-left-col-container {
+    border-radius: @border-radius-base;
+    background-color: white;
+    border: 1px solid lighten(@border-light-default-color, 8%);
+    .lh-box-shadow(2px 2px 3px @gray-lighter);
+    padding: 10px;
+    padding-bottom: 15px;
+    .unselectable;
+  }
+
+
+
+}
+
+
+.s-results-page-layout .s-table-wrapper > .row {
+  display: table;
+}
+
+//using table cell display to get side columns to be height 100%
+.s-results-page-layout .s-left-column, .s-results-page-layout .s-middle-column, .s-results-page-layout .s-right-column {
+  display: table-cell;
+  float: none;
+  vertical-align: top;
+}
+
+
+.s-search-bar-row {
+  padding: 10px 0px 30px 0px;
+  background-color: white;
+
+  input  {
+    background-color: rgba( 255, 255, 255, 0.97) !important;
+  }
+
+}
+
+.s-motion-shadow {
+  .lh-box-shadow(0 2px 2px -1px rgba(0,0,0,.1));
+  background-color: rgba( 255, 255, 255, 0.9);
+}
+
+.s-search-bar-motion {
+  .s-motion-shadow;
+
+  border-bottom : @border-default;
+  padding: 10px;
+  position:fixed;
+  top: 0px;
+  z-index: 1000;
+
+}
+
+
+#body-template-container {
+  min-height: 550px;
+
+}
+
+
+
+#right-col-toggle {
+  position: absolute;
+  top: 1.25%;
+  right: 2%;
+  background-color: white;
+
+}
+
+.right-col-close {
+
+  .fa;
+  .fa-lg;
+  &:before{
+    content : @fa-var-chevron-circle-left;
+  }
+
+}
+
+.right-col-open {
+  .fa;
+  .fa-lg;
+  &:before{
+    content : @fa-var-chevron-circle-right;
+  }
+}

@@ -57,7 +57,9 @@ define(['marionette',
         this.delegateEvents();
         this.$("#search-form-container").append(SearchFormTemplate);
 
-        this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
+//        I think this is not acting perfectly if people hover and then enter text into
+        // the input field without clicking.
+//        this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
         this.$("#search-gui").append(this.queryBuilder.$el);
 
         return;
@@ -69,7 +71,7 @@ define(['marionette',
 
       events: {
 
-        "click #field-options div" : "setAddField",
+        "click #field-options div" : "tempFieldInsert",
         "keypress .q": function(e){
           this.highlightFields(e);
           this.setAddField();
@@ -147,6 +149,8 @@ define(['marionette',
 
         var currentVal, newVal, df;
 
+//        this.unsetAddField();
+
         currentVal = this.$(".q").val();
         this.priorVal = currentVal;
 
@@ -169,9 +173,11 @@ define(['marionette',
           } else {
             newVal = currentVal + " " + df + ":\"\"";
           }
-          ;
           this.$(".q").val(newVal);
         }
+
+        this.$(".q").focus();
+        this.$(".q").selectRange(this.$(".q").val().length - 1);
       },
 
       tempFieldClear: function (e) {
@@ -191,12 +197,13 @@ define(['marionette',
         this.addField = true;
       },
 
+      unsetAddField : function (e) {
+        this.addField = false;
+      },
 
       submitQuery: function(e) {
         e.preventDefault();
         e.stopPropagation();
-
-        console.log("SUBMITTING")
 
         var query = (this.$(".q").val());
         this.trigger("start_search", query);

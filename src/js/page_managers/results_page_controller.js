@@ -42,6 +42,7 @@ define([
 
       },
 
+
       insertLoadingView: function () {
         $("#body-template-container").append(this.loadingWidget.render().el);
 
@@ -146,7 +147,6 @@ define([
 
       showPage: function (apiQuery) {
 
-
         //it's false when the router uses this function to display the results page
         if (apiQuery !== false) {
 
@@ -164,14 +164,20 @@ define([
 
         }
 
-        this.insertTemplate();
-        this.displaySearchBar();
-        this.displayControlRow();
-        this.displayFacets();
-        this.displayRightColumn();
-        this.displayResultsList();
-        this.enableRightColToggle();
-        //this.insertLoadingView()
+        //showing page in response to "start search"
+        // don't reshow if it's already in the dom
+        if (!$("#results-page-layout").length){
+          this.insertTemplate();
+          this.displaySearchBar();
+          this.displayControlRow();
+          this.displayFacets();
+          this.displayRightColumn();
+          this.displayResultsList();
+          this.enableRightColToggle();
+          //this.insertLoadingView()
+
+        }
+
 
       }
 

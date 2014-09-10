@@ -1,13 +1,13 @@
 
 <div class="row s-abstract-title-row">
     <div class="col-sm-1 col-sm-offset-1">
-        {{#if prev}}<div><a href="/abs/{{prev}}"><i class="glyphicon glyphicon-chevron-left"></i>prev</a></div>{{/if}}
+        {{#if prev}}<div><a class="abstract-paginator-prev" href="#abs/{{prev}}" ><i class="fa  fa-arrow-circle-o-left"></i> prev</a></div>{{/if}}
     </div>
     <div class="col-sm-6">
         <h5 class="s-abstract-title-bibcode">{{bibcode}}</h5>
         <h4 class="abstract-title s-abstract-title"><span class="s-abstract-num">{{#if index}}{{index}}.&nbsp;&nbsp;{{/if}}</span>{{{title}}}</h4>
     </div>
     <div class="col-sm-1">
-        {{#if next}}<div ><a class="abstract-paginator-next" href="/abs/{{next}}">next<i class="glyphicon glyphicon-chevron-right"></i></a></div>{{/if}}
+        {{#if next}}<div ><a class="abstract-paginator-next" href="#abs/{{next}}"> next <i class="fa  fa-arrow-circle-o-right"></i></a></div>{{/if}}
     </div>
 </div>

@@ -67,7 +67,7 @@ describe("Abstract Page Controller (Page Manager)", function(){
 
     expect(widget.titleView.$(".abstract-paginator-next").length).to.eql(1);
     //skipping the intermediate bibcode
-    expect(widget.titleView.$(".abstract-paginator-next").attr("href")).to.eql("/abs/test3");
+    expect(widget.titleView.$(".abstract-paginator-next").attr("href")).to.eql("#abs/test3");
 
     expect(widget.titleView.$(".abstract-paginator-prev").length).to.eql(0);
 

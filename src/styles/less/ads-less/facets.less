@@ -1,0 +1,333 @@
+//import these files so the fonts, mixins, and global variables can be used
+@import '../../../../bower_components/fontawesome/less/font-awesome';
+@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
+@import 'general';
+
+
+
+.s-child-facet-item-closed {
+  display:inline-block;
+  width: 8px;
+  color: darken(@brand-warning, 25%);
+  margin-left: 2px;
+  cursor: pointer;
+  z-index:1;
+  margin-top: -10px;
+  margin-bottom: -10px;
+  .fa;
+  .fa-2x;
+  &:before {
+    content: @fa-var-angle-right;
+
+  }
+}
+
+
+.s-child-facet-item-open {
+  display: inline-block;
+  width: 12px;
+  color: darken(@brand-warning, 25%);
+  position: relative;
+  left: -3%;
+  margin-top: -10px;
+  margin-bottom: -10px;
+  cursor: pointer;
+  z-index:1;
+  .fa;
+  .fa-2x;
+  &:before {
+    content: @fa-var-angle-down;
+
+  }
+}
+
+.item-open {
+  .s-item-open
+}
+
+.item-closed {
+  .s-item-closed
+}
+
+//rules for item open and closed styling
+.tree {
+  .item-open {
+    .s-child-facet-item-open;
+  }
+  .item-closed {
+    .s-child-facet-item-closed;
+  }
+}
+
+.s-item-children label {
+  position: relative;
+  left : 3%;
+  width: 94% !important;
+}
+
+
+.s-filter-image {
+  .fa;
+  &:before {
+    content : @fa-var-filter;
+  }
+}
+
+.size-graphic-container {
+  width: 77%;
+  display: inline-block;
+  background-color:lighten(@brand-info, 30%);
+  height: 19px;
+  margin-left: 2px;
+  margin-bottom: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+
+}
+
+.size-graphic {
+  display: block;
+  background-color:  lighten(@brand-info, 15%);
+  overflow-x: visible;
+  color: black;
+  font-size : 13px !important;
+}
+
+
+.s-facet-selected {
+  .size-graphic {
+    color: white;
+    background-color: darken(@brand-info, 30%);
+  }
+  .size-graphic-container {
+    background-color: darken(@brand-info, 10%);
+  }
+}
+
+.s-widget .item-caret:hover {
+
+  color: darken(@brand-warning, 5%);
+  cursor: pointer;
+}
+
+.s-widget label {
+  font-weight: normal;
+  margin: 0px;
+  width: 100%;
+  display: inline-block;
+}
+
+.tree label {
+  width: 90%;
+  display:inline-block;
+
+}
+
+.tree .show-more button {
+  margin-left: 50%;
+}
+
+
+.s-widget-meta {
+  cursor: pointer !important;
+  height: 25px;
+}
+
+.s-item-children {
+  padding-left: 10%;
+
+}
+
+
+.s-logic-dropdown {
+  position: relative;
+  top: -33px;
+  left: 75%;
+  z-index: 5;
+
+  button {
+    padding: 0px;
+  }
+}
+
+.s-dropdown-menu {
+  padding: 15%;
+  min-width: 93px;
+  top: 70%;
+  left: 50%;
+}
+
+.s-widget-options {
+  height: 0px
+}
+
+.s-widget-meta .dropdown-menu p {
+  padding: 3px 5px 0px 5px;
+}
+
+.s-widget-meta .dropdown-menu label {
+  padding: 0px;
+  margin: 0px;
+}
+
+
+.s-widget-body {
+  x-overflow: hidden;
+  y-overflow: hidden;
+  padding-left: 8%;
+  padding-bottom: 5%;
+  padding-top: 5%;
+
+}
+
+@refereed  : @brand-primary-faded;
+
+@nonrefereed : @brand-success;
+
+
+.graph-legend {
+  font-size : 12px;
+}
+
+.s-citation-padding {
+  height: 15px;
+}
+.s-widget-body .selected {
+  color: @brand-primary
+}
+
+.logic-container label {
+  display: block
+}
+
+.s-legend-color {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+
+}
+
+.s-legend-color.refereed {
+  background-color: @refereed;
+
+}
+
+.s-legend-color.nonrefereed {
+  background-color: @nonrefereed;
+}
+
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.s-slider {
+  width: 106%
+}
+
+.line {
+  fill: none;
+  stroke: mix(@refereed, @nonrefereed, 30%);
+  stroke-width: 5px;
+}
+
+.h-index {
+  fill: none;
+  stroke: @gray;
+  stroke-width: 1px;
+
+}
+
+.chart .refereed {
+  pointer-events: all;
+  fill: @refereed !important;
+
+}
+
+.chart .bar, .chart .dot {
+  fill: @nonrefereed;
+}
+
+.chart .x-axis .active text {
+  fill: lighten(@brand-primary, 10%);
+}
+
+.chart {
+  pointer-events: all;
+  min-height: 270px;
+}
+
+#citation-graph .chart {
+  min-height: 240px;
+}
+
+.axis text {
+  font: 11px sans-serif;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.show-slider-data-first, .show-slider-data-second {
+  width: 26%;
+}
+
+.ui-slider {
+  margin-bottom: 5px !important;
+}
+
+.slider-data {
+  padding-top: 10px;
+
+}
+
+
+.sort-options {
+  margin: 0px;
+  padding-left: 20px;
+}
+
+.sort-options label {
+  margin: 0px;
+}
+
+.zoomable-graph {
+  .apply {
+    margin-top: 10px;
+  }
+
+}
+
+
+.s-widget h5 {
+  margin-top: 0px;
+}
+
+.change-scale {
+  label {
+    display: inline-block;
+    width: 20%
+
+  }
+}
+
+.y-axis-title {
+  position: relative;
+  font-style: italic;
+  top: -3px;
+  left: -54%;
+  font-size: 14px;
+  .lh-rotate(270)
+
+}

@@ -1,4 +1,4 @@
-define(['./base-graph', 'hbs!./templates/year-graph-legend'],
+define(['./base_graph', 'hbs!./templates/year-graph-legend'],
   function(BaseGraphView, legendTemplate){
 
 
@@ -27,7 +27,7 @@ define(['./base-graph', 'hbs!./templates/year-graph-legend'],
 
        xAxis = d3.svg.axis().scale(x).orient("bottom");
 
-       yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format("d"));
+       yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format("s"));
 
        chart = d3.select(this.el).select(".chart").attr("width", this.fullWidth).attr("height", this.fullHeight);
 
@@ -195,7 +195,7 @@ define(['./base-graph', 'hbs!./templates/year-graph-legend'],
 
        xAxis = d3.svg.axis().scale(x).orient("bottom");
 
-       yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format(".2d"));
+       yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format("s"));
 
        bar = this.innerChart.selectAll(".bar").data(data);
 

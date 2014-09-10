@@ -1,22 +1,89 @@
 <!doctype html>
 <html lang="en">
 
+
+<script>
+    //for local development
+    var b = document.createElement("base");
+    b.href = document.location.origin;
+    document.getElementsByTagName("head")[0].appendChild(b)
+</script>
+
+
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>Crossroad</title>
+  <title>Bumblebee discovery</title>
 
-  
-</head>
+  <link rel="stylesheet" href="./styles/css/styles.css" />
+  <link rel="stylesheet" href="./styles/css/smoothness/jquery-ui.min.css" />
 
 <body>
-  
-  <a href="./example.html">Simple example application</a></br>
-  <a href="./todo.html">More advanced Todo application</a></br>
-  <a href="./discovery.html">Search application [TBD]</a>
-  
+<div class="container-fluid" id="app-container">
+    <div class="row">
+        <nav class="navbar navbar-inverse" role="navigation">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">ADS</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Link</a></li>
+                        <li><a href="#">Link</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">I want to... <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                (non operational)
+                                <li><a href="#">Copy paste a group of authors/bibcodes</a></li>
+                                <li><a href="#">Use the classic ads form</a></li>
+                                <li><a href="#">etc</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#">Link</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something else here</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+    </div>
+        <div id="body-template-container"></div>
+        <div class="row">
+            <div class="col-md-12" id="bottom"></div>
+        </div>
+  </div>
+
+
+    <script data-main="./discovery.config" src="./libs/requirejs/require.js"></script>
+
+
 </body>
 
 </html>
+
