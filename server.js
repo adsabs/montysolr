@@ -6,10 +6,12 @@ var querystring = require('querystring');
 
 var search_re = /\/1\/search$/;
 var qtree_re = /\/1\/qtree$/;
+var bootstrap_re = /\/1\/bumblebee\/bootstrap$/;
+
 var app = express();
 
-var API_ENDPOINT = process.env.API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
-
+var API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:5000/api/1';
+var SOLR_ENDPOINT = process.env.SOLR_ENDPOINT || API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
 
 // this examples does not have any routes, however
 // you may `app.use(app.router)` before or after these
@@ -31,16 +33,23 @@ app.use(express.logger('dev'));
 // not to change the url path
 app.use('/api', function (req, res, next) {
   var r = url.parse(req.url);
-  var endpoint = API_ENDPOINT;
-  var end = url.parse(API_ENDPOINT);
+  var endpoint = SOLR_ENDPOINT;
+  var end = url.parse(SOLR_ENDPOINT);
 
   console.log('/api', req.body, r);
+
+  if (r.pathname)
+    r.pathname = r.pathname.replace(/\/\/+/, '/');
 
   if (r.pathname.match(search_re)) {
     // optionally swith endpoints
   }
   else if(r.pathname.match(qtree_re)) {
     end.pathname = '/solr/qtree';
+  }
+  else if (r.pathname.match(bootstrap_re)) {
+    end = url.parse(API_ENDPOINT);
+    end.pathname = '/api/1/bumblebee/bootstrap';
   }
   else {
     res.send(503, {error: 'Unknown service: ' + req.url + ' Are you using the correct endpoint (/api/1/search etc...)?'});
@@ -83,7 +92,7 @@ app.use('/api', function (req, res, next) {
     //req.headers['Content-Length'] = options.data.length;
   }
 
-  console.log(end.hostname + ':' + end.port + end.pathname, options, req.headers);
+  console.log('final query', end.hostname + ':' + end.port + end.pathname, options, req.headers);
 
   var n = needle.post(end.hostname + ':' + end.port + end.pathname,
     options.data,
@@ -139,6 +148,8 @@ app.listen(port);
 
 
 console.log('listening on port ' + port);
+console.log('API_ENDPOINT', API_ENDPOINT, process.env.API_ENDPOINT);
+console.log('SOLR_ENDPOINT', SOLR_ENDPOINT, process.env.SOLR_ENDPOINT);
 //console.log(process.env);
 
 

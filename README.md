@@ -92,7 +92,8 @@ If you need to change the way how build works, edit `local-config.js`
 
   * port_development: when running tests, webserver will start on this port [default: 8000]
   * port_development: port for webserver when running code from dist (ie. testing deployment) [default: 5000]
-  * api_endpoint: url of the ADS api service, see below for help on setting up a tunnel [default: http://localhost:9000/solr/select]
+  * solr_endpoint: url of Solr service, see below for help on setting up a tunnel [default: http://localhost:9000/solr/select]
+  * api_endpoint: url of API service, see below for help on setting up a tunnel [default: http://localhost:8000/api/1]
 
 
 To help you get started, explore these examples: 
@@ -305,13 +306,13 @@ miscellanea
 
   ```bash
   $ ssh -N -f -L 9000:adswhy.cfa.harvard.edu:9000 pogo3.cfa.harvard.edu
-  $ env API_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src node server.js 
+  $ env SOLR_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src node server.js
 ```
   
 - if you want to debug/edit in place node.js code, use supervisor (you need to install it first)
 
   ```bash
-  $ env API_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js 
+  $ env SOLR_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js
 ```
 
 - you can see the search being routed to the SOLR api by accessing: http://localhost:port/api/1/search, for instance:

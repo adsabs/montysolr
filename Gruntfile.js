@@ -125,7 +125,8 @@ module.exports = function(grunt) {
     // only for the express task (our webserver)
     env: {
       options: {
-        API_ENDPOINT: '<%= local.api_endpoint || "http://localhost:9000/solr/select" %>'
+        SOLR_ENDPOINT: '<%= local.solr_endpoint || "http://localhost:9000/solr/select" %>',
+        API_ENDPOINT: '<%= local.api_endpoint || "http://localhost:5000/api/1" %>'
       },
       dev: {
         HOMEDIR: 'src'
