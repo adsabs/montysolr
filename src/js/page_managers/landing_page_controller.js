@@ -16,10 +16,7 @@ define(["marionette", "hbs!./templates/landing-page-layout",
       displayLandingPage: function () {
         this.insertTemplate();
 
-        $("#row-2-content").append(this.widgetDict.searchBar.render().el);
-
-        //opening the form
-        $(".show-form").click();
+        $(".search-bar-rows-container").append(this.widgetDict.searchBar.render().el);
 
       }
 

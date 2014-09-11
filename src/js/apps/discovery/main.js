@@ -389,15 +389,99 @@ define(["config", 'module'], function (config, module) {
         });
 
         $(document).on("scroll", function () {
+
+          if ($("#landing-page-layout").length > 0){
+            return
+          }
           //navbar is currently 40 px height
           if ($(window).scrollTop() > 70) {
-            $(".s-search-bar-row").addClass("s-search-bar-motion");
+            $(".s-search-bar-full-width-container").addClass("s-search-bar-motion");
             $("#field-options").hide()
           }
           else {
-            $(".s-search-bar-row").removeClass("s-search-bar-motion")
+            $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion")
             $("#field-options").fadeIn()
           }
+        });
+
+      //turn this into its own view?
+        $(document).on("click", ".btn-expand", function(){
+
+          var $t = $(this);
+          var $leftCol =  $(".s-results-left-column");
+          var $rightCol =  $(".s-results-right-column");
+
+          if ($t.hasClass("btn-upside-down")){
+
+            $t.removeClass("btn-upside-down");
+
+            if ($t.hasClass("left-expand")){
+
+              $leftCol.removeClass("hidden-col")
+              $leftCol.find(".left-col-container").width('').fadeIn(800).children().show();
+
+            }
+            else {
+              $rightCol.removeClass("hidden-col");
+
+             $rightCol.find(".right-col-container").width('').fadeIn(800) ;
+
+            }
+
+            if (!$rightCol.hasClass("hidden-col") && !$leftCol.hasClass("hidden-col")){
+              $("#results-middle-column")
+                .css({"width": ""})
+
+            }
+            else if ($leftCol.hasClass("hidden-col")){
+              $("#results-middle-column")
+                .css({"width": "75%"})
+            }
+            else {
+              $("#results-middle-column")
+                .css({"width":  "83.33333333%"})
+
+            }
+
+          }
+          else {
+            $t.addClass("btn-upside-down");
+
+            if ($t.hasClass("left-expand")){
+
+              $leftCol.addClass("hidden-col")
+
+              $leftCol.find(".left-col-container").width(0).fadeOut(800).children().hide();
+
+            }
+            else {
+              //expand to the right
+
+              $rightCol.addClass("hidden-col")
+
+              $rightCol.find(".right-col-container").width(0).hide(800);
+
+            }
+
+            if ($rightCol.hasClass("hidden-col") && $leftCol.hasClass("hidden-col")){
+              $("#results-middle-column")
+                .css({"width": "100%"})
+
+            }
+            else if ($rightCol.hasClass("hidden-col")){
+              $("#results-middle-column")
+                // 58.33333 + 25
+                .css("width", "83.33333333%")
+            }
+            else {
+              //58.33333 + 16.666666
+              $("#results-middle-column")
+                .css("width", "75%")
+
+            }
+
+          }
+
         })
 
       });

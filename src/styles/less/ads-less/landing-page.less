@@ -1,0 +1,92 @@
+@landing-page-hero-background : desaturate(lighten(@brand-info, 20%), 15%);
+
+
+.s-greeting-row {
+  .row;
+  background-color: @landing-page-hero-background;
+  .lh-background-image(linear-gradient(to bottom, #53619B 0,#8498EE 100%));
+
+  h1 {
+    color: #ffffff;
+    vertical-align: middle;
+    font-size: 57px;
+    line-height: 1;
+    text-shadow: 3px 2px 0px #8498ee, 7px 6px 0px rgba(0, 0, 0, 0.15);
+
+    @media (min-width: @screen-sm-min) {
+
+      padding-top: 11%;
+
+    }
+  }
+}
+
+.s-search-bar-rows-container {
+  margin-top: 5%;
+  padding-right: 0px !important;
+
+
+  // for the quick add buttons
+  .search-form-title {
+    font-size: 16px !important;
+  }
+  .btn-sm{
+    font-size : 14px !important;
+  }
+
+}
+
+.s-greeting-text {
+  padding: 1% 0%;
+  font-size: 22px;
+  font-weight: 300;
+  text-align : center;
+  color: #fff;
+}
+
+.s-landing-page-note {
+  font-size : 16px;
+  text-align: center;
+  background-color: @gray-lighter;
+  padding-bottom: 10%;
+}
+
+.s-front-page-button-col {
+  .make-sm-column(2);
+  button {
+    width : 100%;
+    font-size: 20px;
+    border-radius: 0px;
+  }
+
+
+  .s-middle-button {
+    display: inline-block;
+    margin: auto;
+  }
+
+  .s-last-button {
+    float:right;
+  }
+
+  padding-right: 0;
+  padding-left: 0;
+
+}
+
+.s-ads-logo {
+  max-width: 200px;
+  margin: auto;
+  margin-top: 8%;
+
+  @media (min-width: @screen-sm-min) {
+    float:right;
+
+  }
+}
+
+.s-button-row {
+  padding: 7% 0;
+  margin-top: 6%;
+  background-color: @gray-lighter;
+}

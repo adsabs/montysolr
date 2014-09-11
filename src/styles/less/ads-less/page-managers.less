@@ -7,55 +7,144 @@
 
 // layout css
 
-//the following weird classes are to get 100% height columns
-//in results page
+.s-stable-search-bar-height {
+  height: 110px;
+}
+
+.s-search-bar-full-width-container {
+  width: 100%;
+}
+
+
+.hidden-col{
+  width: 0% !important;
+  padding: 0% !important;
+  margin: 0% !important;
+
+}
+
+.btn-expand {
+
+  background-color: hsla(360, 100%, 100%, 0.82);
+  border-radius: @border-radius-base;
+  border: 1px solid @gray-lighter;
+  .lh-transition(transform .5s ease-out, width .5s ease-out, height .5s ease-out, font-size .5s ease-out);
+  .lh-box-shadow(1px 1px 4px @gray-light);
+  display:none;
+
+  //show in desktops
+  @media (min-width : @screen-md-min){
+    display: inline-block;
+  }
+
+  &:hover {
+    .lh-box-shadow(1 1px 5px darken(@gray-light, 4%));
+    cursor: pointer;
+    font-size: 20px;
+
+  }
+
+}
+
+.left-expand {
+  position: absolute;
+  padding: 15px 20px 15px 9px;
+  left: -6px;
+  top: 20px;
+
+}
+
+.left-expand i {
+  color: @gray;
+  .fa;
+  .fa-lg;
+  &:before {
+    content: @fa-var-angle-double-left;
+  }
+
+}
+
+.right-expand {
+  position: absolute;
+  padding: 15px 9px 15px 20px;
+  right: -6px;
+  top: 20px;
+
+}
+
+.right-expand i {
+  color: @gray;
+  .fa;
+  .fa-lg;
+  &:before {
+    content: @fa-var-angle-double-right;
+  }
+}
 
 
 .s-results-page-layout {
-
-  .s-middle-column {
-    border-radius: @border-radius-base;
-    background-color: white;
-    border: 1px solid lighten(@border-light-default-color, 8%);
-    .lh-box-shadow(2px 2px 5px darken(@gray-lighter, 5%));
-
-  }
 
   .s-dynamic-page-body {
     background-color:  @results-page-background;
 
   }
 
+  .s-results-column {
 
-  #s-left-col-container {
+    .lh-transition(width .8s ease-out, padding .8s ease-out)
+
+  }
+
+
+
+  .s-middle-col-container{
+    border-radius: @border-radius-base;
+    background-color: white;
+    border: 1px solid lighten(@border-light-default-color, 8%);
+    .lh-box-shadow(2px 2px 5px darken(@gray-lighter, 5%));
+    min-height: 500px;
+
+  }
+
+
+
+  .s-left-col-container {
     border-radius: @border-radius-base;
     background-color: white;
     border: 1px solid lighten(@border-light-default-color, 8%);
     .lh-box-shadow(2px 2px 3px @gray-lighter);
     padding: 10px;
     padding-bottom: 15px;
+    min-height: 500px;
     .unselectable;
   }
 
-
-
 }
 
 
-.s-results-page-layout .s-table-wrapper > .row {
-  display: table;
+.s-left-col-mixin{
+  .make-sm-column(4);
+  .make-md-column(2);
 }
 
-//using table cell display to get side columns to be height 100%
-.s-results-page-layout .s-left-column, .s-results-page-layout .s-middle-column, .s-results-page-layout .s-right-column {
-  display: table-cell;
-  float: none;
-  vertical-align: top;
+.s-middle-col-mixin {
+  .make-sm-column(8);
+  .make-md-column(7);
+
+}
+
+.s-right-col-mixin {
+  .make-md-column(3);
+}
+
+
+.btn-upside-down i {
+  .lh-transform(rotate(-180deg))
+
 }
 
 
 .s-search-bar-row {
-  padding: 10px 0px 30px 0px;
   background-color: white;
 
   input  {
