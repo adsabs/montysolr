@@ -26,7 +26,7 @@
         assert = chai.assert,
         should = chai.should;
 
-    window.mocha.testToLoad = '../test/mocha/discovery-ui.spec';
+    window.mocha.testToLoad = window.location.hash ? ('../test/mocha/' + window.location.hash.replace('#', '')) : '../test/mocha/discovery-ui1.spec';
 
   </script>
 

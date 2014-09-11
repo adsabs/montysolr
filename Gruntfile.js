@@ -217,7 +217,8 @@ module.exports = function(grunt) {
           output: null,
           urls: [
             'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-ui.spec.html',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-ui.spec.html#discovery-ui1.spec',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-ui.spec.html#discovery-ui2.spec',
             'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-qb.spec.html'
           ]
         }
