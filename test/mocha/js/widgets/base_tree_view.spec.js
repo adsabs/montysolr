@@ -21,7 +21,7 @@ define([
         }
       });
 
-      it("should display nested collection of items", function() {
+      it("should be able to display nested collections of items", function() {
         var coll = new TreeView.CollectionClass();
 
         coll.add(new TreeView.ModelClass({title: 'foo', value: 'bar' , 'children': []}));
@@ -51,9 +51,12 @@ define([
         view.collection.models[0].children.add(
           new TreeView.ModelClass({title: 'hey', value: 'joe' , 'children': []}));
 
+
+        // difficulty with the treeView is that by default, it is hidden
+        view.displayMore(5);
+
         spy.reset();
-
-
+        
         // click on the first item
         $v.find('.widget-item:first').click();
         expect($($v.find('input[value="joe"]')).is(':visible')).to.be.true;
