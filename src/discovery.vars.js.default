@@ -4,8 +4,7 @@ define([], function() {
   // if you are not running from /, set the absolute path
   // eg root: 'http://localhost:8000/test/foo/bar'
   return {
-    debug: false,
-    routerConf: {pushState: true, root:'/look-ma-not-root'},
+    root: '/',
+    debug: false
   }
 });
-
