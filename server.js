@@ -4,9 +4,9 @@ var url = require('url');
 var needle = require('needle');
 var querystring = require('querystring');
 
-var search_re = /\/1\/search$/;
-var qtree_re = /\/1\/qtree$/;
-var bootstrap_re = /\/1\/bumblebee\/bootstrap$/;
+var search_re = /\/v?1\/search$/;
+var qtree_re = /\/v?1\/qtree$/;
+var bootstrap_re = /\/v?1\/bumblebee\/bootstrap$/;
 
 var app = express();
 

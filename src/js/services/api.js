@@ -50,10 +50,10 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     if (!u) {
       throw Error("Sorry, dude, you can't use api without url");
     }
-    u = u.replace(/\/\/+/, '/');
+    u = u.substring(0, this.url.length-2) + u.substring(this.url.length-2, u.length).replace('//', '/');
 
     var opts = {
-      type: 'POST',
+      type: 'GET',
       url: u,
       dataType: 'json',
       data: query ? query.url() : "{}",

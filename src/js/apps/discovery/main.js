@@ -45,6 +45,10 @@ define(["config", 'module'], function (config, module) {
             app.getObject('QueryMediator').debug = conf.debug;
           }
 
+          if (conf.apiRoot) {
+            api.url = conf.apiRoot;
+          }
+
           // bootstrap application with remote configuration
           if (conf.bootstrapUrls) {
 
