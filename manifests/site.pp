@@ -40,50 +40,13 @@ exec {
 exec {
   'npm_install':
     command => 'npm install',
-    cwd     => '/vagrant/',
+    cwd     => '/bumblebee/',
     require => [Exec['npm_install_grunt'],Package['git']];
 }
 
 exec {
   'grunt_cli':
     command => 'grunt setup',
-    cwd     => '/vagrant/',
+    cwd     => '/bumblebee/',
     require => Exec['npm_install_grunt'];
-}
-
-exec {
-  'link_discovery_vars':
-    command => 'ln -sf /vagrant/src/discovery.vars.js.default /vagrant/src/discovery.vars.js',
-}
-
-file {
-  '/etc/nginx/sites-enabled/default':
-    ensure => absent,
-    require => Package['nginx'],
-}
-
-file {
-  '/etc/nginx/sites-enabled/bumblebee.nginx.conf':
-    ensure => link,
-    target => '/vagrant/manifests/bumblebee.nginx.conf',
-    require => Package['nginx'],
-}
-
-exec {
-  'restart_nginx':
-    command => 'service nginx restart',
-    require => [File['/etc/nginx/sites-enabled/bumblebee.nginx.conf'],File['/etc/nginx/sites-enabled/default']]
-}
-
-exec {
-  'upgrade_pip':
-    command => 'pip install --upgrade pip',
-    require => Package['python-pip'],
-}
-
-exec {
-  'pip_install_requirements.txt':
-    command => 'pip install -r requirements.txt',
-    cwd => '/vagrant/',
-    require => Exec['upgrade_pip'],
 }

@@ -9,6 +9,10 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
     clientVersion: 20140329,
     outstandingRequests: 0,
 
+    access_token: null,
+    refresh_token: null,
+    expires_in: null,
+
     done: function( data, textStatus, jqXHR ) {
       // TODO: check the status responses
       var response = new ApiResponse(data);
@@ -59,6 +63,9 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       context: {request: request, api: self }
     };
 
+    if (this.access_token) {
+      opts.headers['Authorization'] = this.access_token;
+    }
 
     if (this.hasBeeHive()) {
       var beehive = this.getBeeHive();

@@ -1,5 +1,6 @@
 {
   "port_development": 8000,
-  "port_production": 8000,
-  "api_endpoint": "http://172.17.42.1:8983/solr/select"
+  "port_production": 5000,
+  "api_endpoint": "http://localhost:5000/api/1",
+  "solr_endpoint": "http://localhost:9000/solr/select"
 }

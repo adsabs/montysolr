@@ -56,7 +56,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
 
         if (!(_.every(tempVal, function(v) {
           return _.isString(v) || (_.isNumber(v) && !_.isNaN(v))}))) {
-          throw new Error('Invalid value: ' + tempVal);
+          throw new Error('Invalid value (not a string or number): ' + tempVal);
         }
 
         attributes[attr] = tempVal;
