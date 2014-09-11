@@ -1,43 +1,47 @@
-<html>
+<!doctype html>
 <script>
-//This still requires that the server distinguish between /search and /account 
-//if each has its own unique index.html entrypoint
-//
-//One way around this is to change config.routes to be an object in a form like
-// {'/search':'/search/index.html'}, but this makes urls ugly if the server only serves /
-//
-//I really think the most straightforward solution is to ensure that the server knows about specific endpoints
-//(i.e. location /search {}, location /account {}). We can still abstract it in a config file, and file it in as part of
-//provisioning/deployment.
 
-(function () {
-  var config = { //Will be moved to a separate file? How will we pass this config to this script? AMD seems overkill for this.
-    'routes': [
-      '/search', //Should we upgrade these to regex instead of simple string matching
-      '/account',
-    ],
-    'error_pages': {
-      404: '/404.html'
-    },
-  }
+    (function () {
+        /**
+         *
+         * @type {{routes: string[], error_pages: {404: string}}}
+         *
+         * The following file is served by a webserver if we can't find the resource (404)
+         * this is due to the pushState that we are using. When users bookmark clean urls
+         * and access the page; the browser is not able to load resources properly (we are
+         * not using <base href> tag to set the default location.
+         *
+         * Vlad: I really think the most straightforward solution is to ensure that the server
+         * knows about specific endpoints (i.e. location /search {}, location /account {}). We
+         * can still abstract it in a config file, and file it in as part of provisioning/deployment.
+         */
 
-  function findApplicationRoute() {
-    //The window.location object can be written without the window prefix.
-    //Is it worth it to write this in vanilla JS instead of using jQuery.each?
-    $.each(config.routes, function(index,value){
-      if (location.pathname.indexOf(value) > -1) {
-        //Ok, surely there is a nicer way to construct this string?
-        return location.pathname.substr(location.pathname.indexOf(value),value.length)+'/#/'+location.pathname.substr(value.length+1,location.pathname.length)
-      }
-    })
-    return config.error_pages["404"]
-  }
+        var config = {
+            root: '/test', // without origin
+            'routes': [
+                '/search',
+                '/abs'
+            ],
+            'error_pages': {
+                404: '/404.html'
+            }
+        };
 
-  //Do we care about location.hash? 
-  //if someone requests /search/foo/#bar/, location will be /search/#/foo
-  // /search/foo/#bar?q=baz will be /search/#/foo?q=baz
-  var baseRoute = findApplicationRoute()
-  location.assign(location.protocol+'//'+location.host+baseRoute+location.search)
-}())
+        // if there is a hash, it is not pushstate; let's get out of here!
+        if (window.location.hash && window.location.hash.strip().length > 1)
+            window.location.pathname = config.root + config.error_pages['404'];
+
+        var path = window.location.pathname.replace(config.root, '');
+
+        for (var i=0; i<config.routes.length; i++) {
+            var route = config.routes[i];
+            if (path.startsWith(route)) {
+                window.location.hash = path.substring(route.length, path.length);
+                window.location.pathname = config.root + window.location.pathname.substring(0, path.length);
+            }
+        }
+
+        window.location.pathname = config.root + config.error_pages['404'];
+    }())
 </script>
 </html>
