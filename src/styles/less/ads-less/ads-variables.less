@@ -15,15 +15,18 @@
 @gray-lighter:           lighten(#000, 93.5%); // #eee
 @gray-lightest:          lighten(#000, 97%);
 
-@brand-primary:         #1D6BB5;
+
+@brand-primary:        #243f7b;
 @brand-info:            #58abd5;
 @brand-success:         #7ab889;
 @brand-warning:         #ffd447;
 @brand-danger:          #ed5e5b;
 
 
+
 //extra colors
-@brand-primary-faded:   #5591ca;
+@brand-primary-faded:   lighten(@brand-primary, 20%);
+
 
 
 //== Scaffolding
@@ -45,8 +48,8 @@
 //
 //## Font, line-height, and color for body text, headings, and more.
 
-@font-family-sans-serif:  "Helvetica",  Arial, sans-serif;
-@font-family-serif:       "Vollkorn", Garamond,  serif;
+@font-family-sans-serif:   "Helvetica",  Arial, sans-serif;
+@font-family-serif:         Garamond,  serif;
 //** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
 @font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;

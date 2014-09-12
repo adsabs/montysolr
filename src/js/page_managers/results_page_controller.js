@@ -51,8 +51,7 @@ define([
       },
 
       displayFacets: function () {
-
-        var $leftCol = $("#s-left-col-container");
+        var $leftCol = $(".s-left-col-container");
 
         $leftCol.append(widgetDict.authorFacets.render().el).append(widgetDict.database.render().el).append(widgetDict.refereed.render().el).append(widgetDict.keywords.render().el).append(widgetDict.pub.render().el).append(widgetDict.bibgroup.render().el).append(widgetDict.data.render().el).append(widgetDict.vizier.render().el).append(widgetDict.grants.render().el);
 
@@ -63,7 +62,7 @@ define([
       },
 
       displayRightColumn: function () {
-        var $rightCol = $("#s-right-col-container");
+        var $rightCol = $(".s-right-col-container");
 
         $rightCol.append(widgetDict.graphTabs.render().el).append(widgetDict.queryDebugInfo.render().el);
 
@@ -76,7 +75,7 @@ define([
 
       displayResultsList: function () {
 
-        var $middleCol = $("#s-middle-col-container");
+        var $middleCol = $(".s-middle-col-container");
 
         $middleCol.append(widgetDict.results.render().el);
 
@@ -186,3 +185,6 @@ define([
     return ResultsController
 
   });
+
+
+

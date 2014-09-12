@@ -1,11 +1,7 @@
 <div class="row">
-    <div class="opt-nav-button col-sm-2"></div>
-    <div class="col-sm-10">
-     <div class="row">
          <div class="col-sm-12 s-quick-add">
              <div id="expanded-search-form" class="unselectable">
                  <div id="field-options" class="hidden-xs">
-                     <span class="search-form-title">Quick add:</span>
                      <div class="btn btn-link btn-sm" data-field="author">Author</div>
 
                      <div class="btn btn-link btn-sm"  data-field="first-author">First Author</div>
@@ -29,14 +25,14 @@
          </div>
      </div>
      <div class="row">
-         <div class="col-sm-9 search-bar-input-row s-search-bar-input-row">
+         <div class="col-sm-12 search-bar-input-row s-search-bar-input-row">
              <form name="main-query">
                  <div class="input-group">
                      <div class="input-group-btn">
                          <div type="div" class="btn btn-default dropdown-toggle show-form" data-toggle="dropdown">Search Form
                              <div class="caret"></div>
                          </div>
-                         <div class="dropdown-menu" id="search-form-container"></div>
+                         <div class="dropdown-menu s-search-form-container" id="search-form-container"></div>
                      </div>
 
                      <input type="text" class="form-control q" name="q" autofocus value={{currentQueryVal}}>
@@ -49,9 +45,6 @@
                  <!-- /input-group -->
              </form>
 
-         </div>
-     </div>
 
-
-    </div>
-</div>
+             </div>
+       </div>

@@ -20,6 +20,18 @@
 
 @sciencewise-color: rgb(179, 27, 27);
 
+@z-index-negative : -1;
+
+@z-index-0 : 0;
+
+@z-index-1 : 1;
+
+@z-index-2 : 2;
+
+@z-index-3 : 3;
+
+@z-index-4 : 4;
+
 
 .ads-container {
   padding: 5px;
@@ -100,13 +112,6 @@
 }
 
 
-.draw-attention {
-  transition-property: background-color;
-  transition-duration: 3s;
-  background-color: lighten(@brand-warning, 12%)
-}
-
-
 .s-item-closed {
   color: @gray-light;
   .fa;
@@ -137,3 +142,12 @@
 .btn {
   border-radius: @border-radius-large;
 }
+
+
+.lh-keyframes(~'pulseActive, 0%,100% {box-shadow: none;} 50% {box-shadow: 0 0 5px #ffb861; background-color:#ffe5b8}');
+
+.draw-attention {
+  background-color: white;
+  .lh-animation(pulseActive 2s linear 0s 3 alternate)
+}
+

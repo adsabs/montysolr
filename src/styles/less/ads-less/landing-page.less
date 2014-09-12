@@ -1,0 +1,108 @@
+@landing-page-hero-background : desaturate(lighten(@brand-info, 20%), 15%);
+
+
+.s-landing-page-layout {
+  background-color: @landing-page-hero-background;
+  background: url('../img/landing-background.jpg');
+  .lh-background-size(cover);
+  background-attachment: fixed;
+  margin-left: -15px;
+  margin-right: -15px;
+
+  .s-search-bar-row {
+    padding-bottom: 6%;
+    background-color: white;
+  }
+
+}
+
+.s-greeting-row {
+  .row;
+
+  h1 {
+    color: #ffffff;
+    vertical-align: middle;
+    font-size: 60px;
+    line-height: 1;
+    background-color: hsla(32, 100%, 0%, 0.7);
+
+
+    @media (min-width: @screen-sm-min) {
+
+      margin-top: 13%;
+      margin-bottom: 14%;
+
+    }
+  }
+
+}
+
+.s-search-bar-rows-container {
+  margin-top: 5%;
+  padding-right: 0px !important;
+
+  // for the quick add buttons
+
+  .btn-sm{
+    font-size : 15px !important;
+  }
+
+}
+
+.s-greeting-text {
+  padding: 1%;
+  margin-top: 5%;
+  margin-bottom: 5%;
+  font-size: 25px;
+  font-weight: 300;
+  line-height: 1.3;
+  color: #fff;
+  font-weight:500;
+  background-color: hsla(32, 100%, 0%, 0.7);
+
+  @media (min-width: @screen-sm-min){
+    text-align : right;
+  }
+
+  @media (min-width: @screen-md-min){
+    font-size: 30px;
+
+  }
+}
+
+.s-landing-page-note {
+  font-size : 16px;
+  text-align: center;
+  padding: 5%;
+  color:#fff;
+  background-color: @gray-darker;
+}
+
+.s-front-page-button-col {
+  .make-sm-column(2);
+  button {
+    width : 100%;
+    font-size: 20px;
+    border-radius: 0px;
+  }
+
+
+  .s-middle-button {
+    display: inline-block;
+    margin: auto;
+  }
+
+  .s-last-button {
+    float:right;
+  }
+
+  padding-right: 0;
+  padding-left: 0;
+
+}
+
+.s-button-row {
+  padding: 6% 0;
+  background-color: hsla(220, 100%, 9%, 0.61);
+
+}
