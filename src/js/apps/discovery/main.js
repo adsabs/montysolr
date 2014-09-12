@@ -418,13 +418,13 @@ define(["config", 'module'], function (config, module) {
             if ($t.hasClass("left-expand")){
 
               $leftCol.removeClass("hidden-col")
-              $leftCol.find(".left-col-container").width('').fadeIn(800).children().show();
+              $leftCol.find(".left-col-container").width('').fadeIn(500).children().show();
 
             }
             else {
               $rightCol.removeClass("hidden-col");
 
-             $rightCol.find(".right-col-container").width('').fadeIn(800) ;
+             $rightCol.find(".right-col-container").width('').fadeIn(500) ;
 
             }
 
@@ -451,7 +451,7 @@ define(["config", 'module'], function (config, module) {
 
               $leftCol.addClass("hidden-col")
 
-              $leftCol.find(".left-col-container").width(0).fadeOut(800).children().hide();
+              $leftCol.find(".left-col-container").width(0).fadeOut(500).children().hide();
 
             }
             else {
@@ -459,7 +459,7 @@ define(["config", 'module'], function (config, module) {
 
               $rightCol.addClass("hidden-col")
 
-              $rightCol.find(".right-col-container").width(0).hide(800);
+              $rightCol.find(".right-col-container").width(0).hide(500);
 
             }
 
