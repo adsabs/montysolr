@@ -5,7 +5,9 @@ define(['marionette',
     'js/components/api_query',
     './test_json/test1',
     './test_json/test2',
-    'js/components/api_response'
+    'js/components/api_response',
+    'js/components/api_request',
+    'js/widgets/base/base_widget'
   ],
   function (Marionette,
             Backbone,
@@ -14,13 +16,13 @@ define(['marionette',
             ApiQuery,
             Test1,
             Test2,
-            ApiResponse) {
+            ApiResponse,
+            ApiRequest,
+            BaseWidget) {
 
     describe("ListOfThings (UI Widget)", function () {
 
-
-
-      var minsub;
+      var minsub, w;
       beforeEach(function(done) {
 
         minsub = new (MinimalPubsub.extend({
@@ -34,248 +36,170 @@ define(['marionette',
             }
           }
           }))({verbose: false});
+
+        w = new ListOfThingsWidget();
         done();
       });
 
       afterEach(function(done) {
-//        minsub.close();
-//        var ta = $('#test');
-//        if (ta) {
-//          ta.empty();
-//        }
-//        done();
+        minsub.close();
+        var ta = $('#test');
+        if (ta) {
+          ta.empty();
+        }
+        done();
       });
 
-      it("works", function(){
+      it("has a pagination view and model that handle displaying and transmitting pagination state and changes", function(){
+
+        var v = w.paginationView;
+
+        w.collection.stopListening();
+
+        var m = w.paginationModel;
+
+        m.set("currentQuery", new ApiQuery());
+
+        m.set({numFound: 100, page : 1, perPage : 10})
+
+        expect(v.$(".pagination li").length).to.eql(5);
+
+        expect(v.$(".pagination li").filter(function(n){return $(n).text().trim() === "«"}).length).to.eql(0)
+
+        expect(v.$(".pagination li:first").text().trim()).to.eql("1")
+
+        expect(v.$(".pagination li:last").text().trim()).to.eql("5")
+
+        m.set({numFound: 100, page : 4, perPage : 10})
+
+        expect(v.$(".pagination li:first").text().trim()).to.eql("«");
+
+        expect(v.$(".pagination li:last").text().trim()).to.eql("6")
+
+        expect(v.$(".pagination li").length).to.eql(6);
 
 
-        var a = new ListOfThingsWidget({perPage : 10});
+        m.set({numFound: 30, page : 1, perPage : 10})
 
-        a.activate(minsub.beehive.getHardenedInstance());
+        expect(v.$(".pagination li").length).to.eql(3);
 
-        var test = new ApiResponse(Test1);
+        expect(v.$(".pagination li:first").text().trim()).to.eql("1");
 
-        test.setApiQuery(new ApiQuery({q : "foo"}))
-
-        a.processResponse(test)
-
-        $("#test").append(a.view.render().el)
+        expect(v.$(".pagination li:last").text().trim()).to.eql("3")
 
 
       })
-//
-//
-//      it("returns ListOfThingsWidget object", function(done) {
-//        expect(new ListOfThingsWidget()).to.be.instanceof(ListOfThingsWidget);
-//        expect(new ListOfThingsWidget()).to.be.instanceof(PaginatedBaseWidget);
-//        done();
-//      });
-//
-//      it("should consist of a Marionette Controller with a Marionette Composite View as its main view", function (done) {
-//
-//        expect(new ListOfThingsWidget()).to.be.instanceof(Marionette.Controller);
-//        expect(new ListOfThingsWidget().view).to.be.instanceof(Marionette.CompositeView);
-//
-//        done();
-//      });
-//
-//      it("hides Load more & Details if there is no data", function(done) {
-//        var widget = new (ListOfThingsWidget.extend({
-//          parseResponse: function(apiResponse) {
-//            var resp = ListOfThingsWidget.prototype.parseResponse.apply(this, arguments);
-//            _.each(resp, function(model) {
-//              model['details'] = 'hey';
-//            });
-//            return resp;
-//          }
-//        }))();
-//        widget.activate(minsub.beehive.getHardenedInstance());
-//        var $w = $(widget.render().el);
-//
-//        expect($w.find('.load-more').hasClass('hide')).to.be.true;
-//        expect($w.find('.results-controls').hasClass('hide')).to.be.true;
-//
-//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({q: "star"}));
-//
-//        expect($w.find('.load-more').hasClass('hide')).to.be.false;
-//        expect($w.find('.results-controls').hasClass('hide')).to.be.false;
-//
-//        done();
-//
-//      });
-//
-//      it("should listen to INVITING_REQUEST event", function (done) {
-//
-//        var widget = new (ListOfThingsWidget.extend({
-//          parseResponse: function(apiResponse) {
-//            var resp = ListOfThingsWidget.prototype.parseResponse.apply(this, arguments);
-//            _.each(resp, function(model) {
-//              model['identifier'] = model.bibcode;
-//            });
-//            return resp;
-//          }
-//        }))();
-//
-//        widget.activate(minsub.beehive.getHardenedInstance());
-//        var $w = widget.render().$el;
-//
-//        //get widget to request info
-//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-//          q: "star"
-//        }));
-//
-//        //find bibcode rendered
-//        expect($w.find(".identifier").eq(0).text()).to.equal("2013arXiv1305.3460H");
-//
-//
-//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-//          q: "star"
-//        }));
-//
-//        //find new first bib to confirm re-render
-//        expect($w.find(".identifier").eq(0).text()).to.equal("2006IEDL...27..896K");
-//        done();
-//      });
-//
-//      it("should know to load more results", function (done) {
-//
-//        var ItemModel = ListOfThingsWidget.prototype.ItemModelClass.extend({
-//          parse: function(doc) {
-//            doc['identifier'] = doc.bibcode;
-//            return doc;
-//          }
-//        });
-//
-//        var CollectionClass = ListOfThingsWidget.prototype.CollectionClass.extend({
-//          model: ItemModel
-//        });
-//
-//        var W = ListOfThingsWidget.extend({
-//          ItemModelClass: ItemModel,
-//          CollectionClass: CollectionClass
-//        });
-//
-//        var widget = new W({
-//          displayNum: 6,
-//          rows: 10,
-//          maxDisplayNum: 19
-//        });
-//
-//        widget.activate(minsub.beehive.getHardenedInstance());
-//
-//        var $w = $(widget.render().el);
-//        $('#test').append($w);
-//
-//        //get widget to request info
-//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-//          q: "star"
-//        }));
-//
-//        //we'll have 10 items (4 hidden)
-//        expect($('.results-item').length).to.be.equal(10);
-//        expect($('.results-item').not('.hide').length).to.be.equal(6);
-//        expect($('.results-item').filter('.hide').length).to.be.equal(4);
-//        expect($(".identifier").eq(0).text()).to.equal("2013arXiv1305.3460H");
-//
-//        // click on load more
-//        $(".load-more button").click();
-//
-//        setTimeout(
-//          function() {
-//            //we'll have 20 items (12 hidden)
-//            expect($('.results-item').length).to.be.equal(20);
-//            expect($('.results-item').not('.hide').length).to.be.equal(12);
-//            expect($('.results-item').filter('.hide').length).to.be.equal(8);
-//            expect($(".identifier").eq(13).text()).to.equal("1978GeoRL...5..294C");
-//
-//            // click once more (no fetching should happen)
-//            $(".load-more button").click();
-//
-//            //we'll have 20 items (2 hidden)
-//            expect($('.results-item').length).to.be.equal(20);
-//            expect($('.results-item').not('.hide').length).to.be.equal(18);
-//            expect($('.results-item').filter('.hide').length).to.be.equal(2);
-//            expect($(".identifier").eq(17).text()).to.equal("1982LPSC...13..260D");
-//
-//            // click once more (no fetching should happen and i expect to see 19 (maxAllowed) )
-//            $(".load-more button").click();
-//            setTimeout(function() {
-//              expect($('.results-item').length).to.be.equal(20);
-//              expect($('.results-item').not('.hide').length).to.be.equal(19);
-//              expect($('.results-item').filter('.hide').length).to.be.equal(1);
-//              done()}, 100);
-//          },
-//        100);
-//
-//      });
-//
-//
-//      it("should show details (if available) when a user clicks on 'show details'", function (done) {
-//
-//        var widget = new ListOfThingsWidget();
-//        widget.activate(minsub.beehive.getHardenedInstance());
-//        widget.render();
-//
-//        //$('#test').append(widget.render().el);
-//
-//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-//          q: "star"
-//        }));
-//
-//        var $w = $(widget.render().el);
-//
-//        expect($w.find('.more-info:last').hasClass("hide")).to.equal(true);
-//
-//        $w.find("button.show-details").click();
-//        expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(false);
-//        $w.find("button.show-details").click();
-//        expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(true);
-//        done();
-//      });
-//
-//      it("should hide detail controls if no record has details", function (done) {
-//
-//        var changeIt = true;
-//        var widget = new (ListOfThingsWidget.extend({
-//          parseResponse: function(apiResponse) {
-//            var resp = ListOfThingsWidget.prototype.parseResponse.apply(this, arguments);
-//
-//            _.each(resp, function(model) {
-//              if (changeIt) {
-//                delete model['details'];
-//              }
-//              else {
-//                model.details = 'one';
-//              }
-//            });
-//
-//            return resp;
-//          }
-//        }))();
-//
-//        widget.activate(minsub.beehive.getHardenedInstance());
-//        var $w = $(widget.render().el);
-//
-//        //$('#test').append(widget.render().el);
-//
-//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-//          q: "star"
-//        }));
-//
-//        expect($w.find('.results-controls').hasClass("hide")).to.equal(true);
-//
-//        changeIt = false;
-//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-//          q: "star"
-//        }));
-//
-//        expect($w.find('.results-controls').hasClass("hide")).to.equal(false);
-//        done();
-//      })
-//
-//
+
+      it("has a master collection that listens to the pagination model and transfers the proper models to the visible collection", function(){
+
+        w.stopListening();
+
+        //testing updateStartAndEndIndex method
+        expect(w.collection.updateStartAndEndIndex).to.be.instanceof(Function);
+
+        w.paginationModel.set({page: 1 , numFound: 100 , perPage:10 });
+
+        w.collection.updateStartAndEndIndex();
+
+        expect(w.collection.currentStartIndex).to.eql(0);
+
+        expect(w.collection.currentEndIndex).to.eql(9);
+
+        w.paginationModel.set({page: 1 , numFound: 100 , perPage:20 });
+
+        w.collection.updateStartAndEndIndex();
+
+        expect(w.collection.currentStartIndex).to.eql(0);
+
+        expect(w.collection.currentEndIndex).to.eql(19);
+
+        w.paginationModel.set({page: 1 , numFound: 15 , perPage:20 });
+
+        w.collection.updateStartAndEndIndex();
+
+        expect(w.collection.currentStartIndex).to.eql(0);
+
+        expect(w.collection.currentEndIndex).to.eql(14);
+
+        w.paginationModel.set({page: 2 , numFound: 50 , perPage:20 });
+
+        expect(w.collection.currentStartIndex).to.eql(20);
+
+        expect(w.collection.currentEndIndex).to.eql(39);
+
+        //testing transferModels method (comes after updateStartAndEndIndex)
+        expect(w.collection.transferModels).to.be.instanceof(Function);
+
+        w.collection.off("reset");
+        w.collection.off("add");
+        w.collection.reset();
+        w.visibleCollection.reset();
+
+        w.collection.currentStartIndex = 2;
+        w.collection.currentEndIndex = 4;
+
+        w.collection.reset([{resultsIndex:0 },{resultsIndex:1 },{resultsIndex:2 },{resultsIndex:3 },{resultsIndex:4 },{resultsIndex:5 }]);
+
+        var requestDataSpy = sinon.stub(w.collection, "requestData");
+
+        w.collection.transferModels();
+
+        expect(_.pluck(w.visibleCollection.toJSON(), "resultsIndex")).to.eql([2,3,4]);
+
+        expect(requestDataSpy.callCount).to.eql(0);
+
+        w.collection.reset([{resultsIndex:0 },{resultsIndex:1}]);
+
+        w.collection.transferModels();
+
+        //this time it had to request more data
+        expect(requestDataSpy.callCount).to.eql(1);
+
+      })
+
+      it("has a composite view that displays records for each model in the collection")
+
+      it("has a controller that can accept a command to load data, fetches data, and augments the collection", function(){
+
+        //this will be overridden for the main "results" widget
+        expect(w.loadBibcodeData).to.be.instanceof(Function);
+
+        w.pubsub = {publish: function(){}}
+
+        w.solrOperator = "foo"
+
+        var pubSubSpy = sinon.spy(w.pubsub, "publish")
+
+        //returns a deferred object
+        expect(w.loadBibcodeData("testBibcode").promise).to.be.instanceOf(Function);
+
+        //makes a request
+        expect(pubSubSpy.callCount).to.eql(1);
+        expect(pubSubSpy.firstCall.args[1]).to.be.instanceOf(ApiRequest);
+        expect(pubSubSpy.firstCall.args[1].get("query").get("q")[0]).to.eql("foo(testBibcode)")
+
+
+      })
+
+
+
+      it("returns ListOfThingsWidget object", function(done) {
+        expect(new ListOfThingsWidget()).to.be.instanceof(ListOfThingsWidget);
+        expect(new ListOfThingsWidget()).to.be.instanceof(BaseWidget);
+        done();
+      });
+
+      it("should consist of a Marionette Controller with a Marionette Composite View as its main view", function (done) {
+
+        expect(new ListOfThingsWidget()).to.be.instanceof(Marionette.Controller);
+        expect(new ListOfThingsWidget().view).to.be.instanceof(Marionette.CompositeView);
+
+        done();
+      });
+
+
 //      it("should request links_data and parse it into the model")
-//      it("should render links for the relevan")
+//      it("should render links for the relevant categories")
 
 
 

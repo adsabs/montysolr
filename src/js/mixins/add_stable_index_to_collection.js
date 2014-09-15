@@ -9,37 +9,52 @@ define(['underscore'], function (_) {
 
   var WidgetPaginator = {
 
+    //returns correctly zero-indexed start val
+    getStartVal        : function (page, rows) {
+      return (rows * page) - rows
+
+    },
+    //returns final index needed for constructing a page (inclusive)
+    getEndVal : function(page,rows, numFound){
+      var endVal =  this.getStartVal(page, rows) + rows - 1;
+
+      var finalIndex = numFound - 1;
+
+      return (finalIndex <= endVal) ? finalIndex : endVal;
+
+    },
+
+
+    //returns current page number
+    getPageVal            : function (start, rows) {
+
+      if (start  % rows !== 0){
+
+        throw new Error("start and rows values will not yield a full page")
+
+      }
+      else {
+        //also could do (start + rows) / rows
+        return start/rows + 1
+
+      }
+    },
+
     //handing docs and apiResponse seperately because there may have already
     //been some pre-processing on docs
-     insertPaginatedDocsIntoCollection : function(docs, apiResponse) {
+
+    addPaginationToDocs: function (docs, apiResponse) {
 
       var start = apiResponse.get("response.start");
 
-      var docs = _.map(docs, function(d){
+      var docs = _.map(docs, function (d) {
         d.resultsIndex = start
         start++;
         return d
       });
 
-      if (!this.numFound) {
-
-        this.numFound = apiResponse.get("response.numFound");
-
-        //might want other things to listen to this event
-        this.trigger("change:numFound", this.numFound);
-
-        this.collection.reset(docs, {
-          parse: true
-        });
-      }
-      else {
-        //backbone ignores duplicate records because it has an idAttribute of "resultsIndex"
-        this.collection.add(docs, {
-          parse: true
-        });
-
-      }
-     }
+      return docs
+    }
   }
 
   return WidgetPaginator

@@ -1,12 +1,17 @@
 /**
- * This widget can paginate through the list of 'things' - it accepts a query
- * as an input. It listens to:
+ * This widget can paginate through a list of results. It can easily be inherited
+ * by results widget ,table of contents widget, etc. It either listens to INVITING_REQUEST
+ * in the case of the results widget, or the loadBibcode method (currently all other widgets).
  *
- *    INVITING_REQUEST
- *    DELIVERING_RESPONSE
+ * This widget consists of the following components:
  *
- * If you need to, change the activate() method to listen to other signals
- * or stop listening altogether
+ * 1. a pagination view
+ * 2. an associated pagination model (all pagination info is kept here and only here)
+ * 3. a 'master' collection that holds all currently accessible records
+ * 4. a 'visible' collection that shows all records that should currently be visible on screen
+ * 5. a list view that listens to the visible collection and renders it
+ * 6. an item view for each record rendered repeatedly by the list view
+ * 7. a controller that handles requesting and recieving data from pubsub and initializing everything
  *
  */
 
@@ -52,7 +57,12 @@ define([
 
       initialize : function(options){
 
-        this.listenTo(this.model, "change", this.render)
+        /*
+         * listening to change in perPage value or change in current page
+         */
+        this.listenTo(this.model, "change", this.render);
+        this.getStartVal = options.getStartVal;
+
 
       },
 
@@ -60,73 +70,93 @@ define([
 
       render: function(){
 
+        var pageData, baseQ, showFirst;
+
+        var minAmountToShowPagination = 25;
+
         var page = this.model.get("page");
         var perPage = this.model.get("perPage");
+        var numFound = this.model.get("numFound");
 
-        var pageNums = _.map([-2,-1, 0, 1, 2 , 3, 4], function(d,i){
+        var pageNums = this.generatePageNums(page);
+
+        //iterate through remaining pageNums, keep them only if they're possible (< numFound)
+        pageNums = this.ensurePagePossible(pageNums, perPage, numFound);
+
+        //now, finally, generate links for each page number
+
+         baseQ = this.model.get("currentQuery");
+
+        if (baseQ){
+
+          baseQ = baseQ.clone();
+
+          //now, generating the link
+          pageData = _.map(pageNums, function(n){
+            var s = this.getStartVal(n.p, perPage);
+            baseQ.set("start", s)
+            n.link = baseQ.url();
+            return n
+          }, this);
+
+          baseQ.set("rows", perPage);
+
+        }
+
+        //should we show a "back to first page" button?
+        showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
+
+        //only render pagination controls if there are more than 25 results
+        if (numFound > minAmountToShowPagination){
+          this.$el.html(PaginationTemplate({
+            showFirst : showFirst,
+            pageData : pageData,
+            currentPage : page,
+            perPage : this.model.get("perPage"),
+            currentQuery : this.model.get("currentQuery")}));
+        }
+        else {
+          this.$el.html("");
+        }
+
+        return this
+      },
+
+
+      //create list of up to 5 page numbers to show
+      generatePageNums : function(page){
+
+        var pageNums = _.map([-2,-1, 0, 1, 2 , 3, 4], function(d){
           var current = (d === 0) ? true: false;
           return {p : page + d, current : current}
         });
 
-       /*now, filtering page numbers to include only
-       * those that are possible given several constraints
-       * */
-
+        //page number can't be less than 1
         pageNums = _.filter(pageNums, function(d){
           if (d.p > 0){
             return true
           }
         });
-        pageNums = pageNums.slice(0,5);
 
-        var numFound = this.model.get("numFound");
+        return pageNums.slice(0,5);
 
-        //iterate through remaining pageNums, keep them only if they're possible (< numFound)
-        pageNums = _.filter(pageNums, function(d){
-          if ( d.p * perPage - (perPage + 1) <= numFound){
-            return true
-          }
-        });
-
-        //now, finally, generate links for each page number
-
-        var baseQ = new ApiQuery();
-
-        var currentQuery = this.model.get("currentQuery");
-
-        if (currentQuery && currentQuery.get("q")){
-          baseQ.set("q", currentQuery.get("q"))
-        }
-        if (currentQuery && currentQuery.get("fq")){
-          baseQ.set("fq", currentQuery.get("fq"))
-        }
-        baseQ.set("rows", perPage)
-
-        //now, generating the link
-       pageData = _.map(pageNums, function(n){
-         var s = n.p * perPage - perPage;
-         baseQ.set("start", s)
-         n.link = baseQ.url();
-         return n
-       })
-
-
-        //should we show a "back to first page" button?
-        showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
-
-        this.$el.html(PaginationTemplate({
-          showFirst : showFirst,
-          pageData : pageData,
-          currentPage : page,
-          perPage : this.model.get("perPage"),
-          currentQuery : this.model.get("currentQuery")}));
-
-        return this
       },
+
+    //iterate through pageNums, keep them only if they're possible (< numFound)
+    ensurePagePossible : function(pageNums, perPage, numFound){
+
+      var endIndex = numFound - 1
+     return  _.filter(pageNums, function(n){
+       if (this.getStartVal(n.p, perPage)<= endIndex){
+         return true
+       }
+     }, this)
+
+    },
 
       events : {
         "click a" : "changePage",
-        "blur .per-page": "changePerPage"
+        "input .per-page": "changePerPage"
 
       },
 
@@ -140,12 +170,12 @@ define([
 
       },
 
-      changePerPage : function(e){
+      changePerPage : _.debounce(function(e){
 
         var perPage = parseInt($(e.target).val());
 
         this.model.set("perPage", perPage);
-      }
+      }, 2000)
 
     })
 
@@ -191,12 +221,9 @@ define([
 
         this.visibleCollection = options.visibleCollection;
 
-        var pageNum, perPage;
-        pageNum = this.paginationModel.get("page");
-        perPage = this.paginationModel.get("perPage");
+        _.extend(MasterCollection.prototype, WidgetPaginationMixin);
 
-        this.currentEndIndex =  pageNum * perPage;
-        this.currentStartIndex = this.currentEndIndex - perPage ;
+        this.updateStartAndEndIndex();
 
       },
 
@@ -208,17 +235,13 @@ define([
 
       updateStartAndEndIndex : function(){
 
-        var pageNum, perPage, numFound;
-        pageNum = this.paginationModel.get("page");
-        perPage = this.paginationModel.get("perPage");
-        numFound = this.paginationModel.get("numFound")
-
+        var pageNum = this.paginationModel.get("page");
+        var perPage = this.paginationModel.get("perPage");
+        var numFound = this.paginationModel.get("numFound")
         //used as a metric to see if we need to fetch new data or if data at these indexes
-        //already exists
-        this.currentEndIndex =  pageNum * perPage;
-        this.currentStartIndex = this.currentEndIndex - perPage ;
-        //making sure it's not actually more than the number of results
-        this.currentEndIndex = (numFound < this.currentEndIndex) ? numFound : pageNum * perPage;
+        //already exist
+        this.currentStartIndex = this.getStartVal(pageNum, perPage);
+        this.currentEndIndex = this.getEndVal(pageNum, perPage, numFound);
 
       },
 
@@ -236,26 +259,25 @@ define([
 
       transferModels : function(){
 
-        var indexes = _.range(this.currentStartIndex, this.currentEndIndex);
-
-        //check to make sure this request is possible
-        if (this.currentEndIndex > this.numFound){
-          return
-        }
+        //add one to the end to make sure the final index is inclusive
+        var indexes = _.range(this.currentStartIndex, this.currentEndIndex + 1);
 
         //check to see if we have the data
         var testList = this.filter(function(d){ if (indexes.indexOf(d.get("resultsIndex"))!== -1){return true}})
 
         //basically it was able to find a record that corresponded with every needed index
+        //probably should be equal rather than greater or equal, but maybe there could be duplicate records??
         if (testList.length  >= indexes.length){
 
           this.visibleCollection.reset(testList);
         }
-        else if (this.paginationModel.get("numFound") > 0) {
-          this.requestData()
-        }
-      }
+        else {
 
+          this.requestData();
+
+        }
+
+      }
 
     })
 
@@ -274,9 +296,11 @@ define([
         var data ,shownAuthors;
         data = this.model.toJSON();
 
-        if (data.author && data.author.length > 3) {
-          data.extraAuthors = data.author.length - 3;
-          shownAuthors = data.author.splice(0, 3);
+        var maxAuthorNames = 4;
+
+        if (data.author && data.author.length > maxAuthorNames) {
+          data.extraAuthors = data.author.length - maxAuthorNames;
+          shownAuthors = data.author.splice(0, maxAuthorNames);
         } else if (data.author) {
           shownAuthors = data.author
         }
@@ -359,6 +383,7 @@ define([
        */
       showDetails: function (ev) {
         if (ev)
+
           ev.stopPropagation();
         this.$(".more-info").toggleClass("hide");
         if (this.$(".more-info").hasClass("hide")) {
@@ -402,7 +427,9 @@ define([
         this.paginationModel = new PaginationModel(paginationOptions);
 
         this.paginationView = new PaginationView({
-          model : this.paginationModel
+          model : this.paginationModel,
+          //from the pagination mixin
+          getStartVal : this.getStartVal
 
         });
 
@@ -433,12 +460,12 @@ define([
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
-      resetWidget : function(bibcode){
-        //this will trigger paginationModel to reset itself as well
-        this.numFound = undefined;
-        this.trigger("change:numFound", this.numFound);
-
-        this.paginationModel.set("start",0 )
+      resetWidget : function(){
+        //this will trigger paginationModel to reset itself
+        var defaults =  _.result(this.paginationModel, 'defaults')
+        //reset pagination model, but prevent the view from immediately re-rendering
+        //by passing silent
+        this.paginationModel.set(defaults, {silent : true});
 
       },
 
@@ -469,7 +496,6 @@ define([
         }
 
         //numFound needs to equal undefined as a signal to other functions that the request cycle has restarted
-
         this.resetWidget();
         this.resetBibcode(bibcode);
 
@@ -506,42 +532,66 @@ define([
 
         this.setCurrentQuery(apiResponse.getApiQuery());
 
-        //also let pagination model know
-        this.paginationModel.set("currentQuery", this.getCurrentQuery())
+        var toSet = {"numFound":  apiResponse.get("response.numFound"),
+          "currentQuery":this.getCurrentQuery()};
 
         //checking to see if we need to reset start or rows values
+        var r =  this.getCurrentQuery().get("rows");
+        var s = this.getCurrentQuery().get("start");
 
-         var r =  this.getCurrentQuery().get("rows");
-         var s = this.getCurrentQuery().get("start");
-          if (r){
-            if ($.isArray(r)){
-              this.paginationModel.set("perPage",r[0])
-            }
-            else {
-              this.paginationModel.set("perPage",r)
-            }
-          }
-          if (s) {
-            if ($.isArray(s)) {
-              this.paginationModel.set("page", s[0]/ this.paginationModel.get("perPage") + 1)
-            }
-            else {
-              this.paginationModel.set("page", s/ this.paginationModel.get("perPage") + 1)
-            }
+        if (r){
 
-          }
+          r = $.isArray(r) ? r[0] : r;
+          toSet.perPage = r;
+
+        }
+
+        if (s) {
+
+          var perPage =  toSet.perPage || this.paginationModel.get("perPage");
+
+          s = $.isArray(s) ? s[0] : s;
+
+          //getPageVal comes from the pagination mixin
+          toSet.page= this.getPageVal(s, perPage);
+
+        }
 
         var docs = apiResponse.get("response.docs")
 
         //any preprocessing before adding the resultsIndex is done here
-        var docs = _.map(docs, function(d){
+        docs = _.map(docs, function(d){
           d.identifier = d.bibcode;
           return d
         });
 
         docs = this.parseLinksData(docs);
 
-        this.insertPaginatedDocsIntoCollection(docs, apiResponse)
+        docs = this.addPaginationToDocs(docs, apiResponse);
+
+        if (!this.paginationModel.get("numFound")) {
+
+          //reset the pagination model with toSet values
+          //has to happen right before collection changes
+          this.paginationModel.set(toSet);
+
+          this.collection.reset(docs, {
+            parse: true
+          });
+        }
+        else {
+          //reset the pagination model with toSet values
+          //has to happen right before collection changes
+          this.paginationModel.set(toSet);
+
+          //backbone ignores duplicate records because it has an idAttribute of "resultsIndex"
+          this.collection.add(docs, {
+            parse: true
+          });
+
+        }
+
+
 
         //resolving the promises generated by "loadBibcodeData"
         if (this.deferredObject){
@@ -554,7 +604,6 @@ define([
 
        if (ev === "dataRequest") {
 
-         console.log("requesting data", arg1, arg2)
 
           var start = arg1;
 
@@ -586,9 +635,6 @@ define([
 
        }
 
-        if (ev === "change:numFound"){
-          this.paginationModel.set("numFound", arg1);
-        }
       },
 
 

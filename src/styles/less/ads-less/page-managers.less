@@ -5,9 +5,9 @@
 
 
 
-// layout cs
-search-bar-height {
-  height: 110px;
+.s-stable-search-bar-height {
+  height: 107px;
+  .border-default-light;
 }
 
 .s-search-bar-full-width-container {
@@ -34,6 +34,7 @@ search-bar-height {
   //show in desktops
   @media (min-width : @screen-md-min){
     display: inline-block;
+    z-index: @z-index-3;
   }
 
   &:hover {
@@ -49,7 +50,7 @@ search-bar-height {
   position: absolute;
   padding: 15px 20px 15px 9px;
   left: -6px;
-  top: 20px;
+  top: 60px;
 
 }
 
@@ -67,7 +68,7 @@ search-bar-height {
   position: absolute;
   padding: 15px 9px 15px 20px;
   right: -6px;
-  top: 20px;
+  top: 60px;
 
 }
 
@@ -80,124 +81,126 @@ search-bar-height {
   }
 }
 
+/* Styles for results and abstract page */
 
-.s-results-page-layout {
-
-  .s-dynamic-page-body {
-    background-color:  @results-page-background;
-
-  }
-
-  .s-results-column {
-
-    .lh-transition(width .5s ease-out, padding .5s ease-out)
-
-  }
-
-
-
-  .s-middle-col-container{
-    border-radius: @border-radius-base;
-    background-color: white;
-    border: 1px solid lighten(@border-light-default-color, 8%);
-    .lh-box-shadow(2px 2px 5px darken(@gray-lighter, 5%));
-    min-height: 500px;
-
-  }
-
-
-
-  .s-left-col-container {
-    border-radius: @border-radius-base;
-    background-color: white;
-    border: 1px solid lighten(@border-light-default-color, 8%);
-    .lh-box-shadow(2px 2px 3px @gray-lighter);
-    padding: 10px;
-    padding-bottom: 15px;
-    min-height: 500px;
-    .unselectable;
-  }
-
-}
-
-
-.s-left-col-mixin{
-  .make-sm-column(4);
-  .make-md-column(2);
-}
-
-.s-middle-col-mixin {
-  .make-sm-column(8);
-  .make-md-column(7);
-
-}
-
-.s-right-col-mixin {
-  .make-md-column(3);
-}
-
-
-.btn-upside-down i {
-  .lh-transform(rotate(-180deg))
-
-}
-
-
-.s-search-bar-row {
+.s-main-content-container{
+  border-radius: @border-radius-base;
   background-color: white;
+  border: 1px solid lighten(@border-light-default-color, 8%);
+  .lh-box-shadow(2px 2px 5px darken(@gray-lighter, 5%));
+  min-height: 500px;
 
-  input  {
-    background-color: rgba( 255, 255, 255, 0.97) !important;
+}
+
+.s-dynamic-page-body {
+  background-color:  @results-page-background;
+
+}
+
+
+
+  /* Styles just for results page */
+
+
+  .s-results-page-layout {
+
+
+    .s-results-column {
+
+      .lh-transition(width .5s ease-out, padding .5s ease-out)
+
+    }
+
+    .s-left-col-container {
+      border-radius: @border-radius-base;
+      background-color: white;
+      border: 1px solid lighten(@border-light-default-color, 8%);
+      .lh-box-shadow(2px 2px 3px @gray-lighter);
+      padding: 10px;
+      padding-bottom: 15px;
+      min-height: 500px;
+      .unselectable;
+    }
+
   }
 
-}
 
-.s-motion-shadow {
-  .lh-box-shadow(0 2px 2px -1px rgba(0,0,0,.1));
-  background-color: rgba( 255, 255, 255, 0.9);
-}
-
-.s-search-bar-motion {
-  .s-motion-shadow;
-
-  border-bottom : @border-default;
-  padding-bottom: 1%;
-  position:fixed;
-  top: 0px;
-  z-index: 1000;
-
-}
-
-
-#body-template-container {
-  min-height: 550px;
-
-}
-
-
-
-#right-col-toggle {
-  position: absolute;
-  top: 1.25%;
-  right: 2%;
-  background-color: white;
-
-}
-
-.right-col-close {
-
-  .fa;
-  .fa-lg;
-  &:before{
-    content : @fa-var-chevron-circle-left;
+  .s-left-col-mixin{
+    .make-sm-column(4);
+    .make-md-column(2);
   }
 
-}
+  .s-middle-col-mixin {
+    .make-sm-column(8);
+    .make-md-column(7);
 
-.right-col-open {
-  .fa;
-  .fa-lg;
-  &:before{
-    content : @fa-var-chevron-circle-right;
   }
+
+  .s-right-col-mixin {
+    .make-md-column(3);
+  }
+
+
+  .btn-upside-down i {
+    .lh-transform(rotate(-180deg))
+
+  }
+
+
+  .s-search-bar-row {
+    background-color: white;
+
+    input  {
+      background-color: rgba( 255, 255, 255, 0.97) !important;
+    }
+
+  }
+
+  .s-motion-shadow {
+    .lh-box-shadow(0 2px 2px -1px rgba(0,0,0,.1));
+    background-color: rgba( 255, 255, 255, 0.9);
+  }
+
+  .s-search-bar-motion {
+    .s-motion-shadow;
+
+    border-bottom : @border-default;
+    position:fixed;
+    top: 0px;
+    z-index: @z-index-4;
+
+  }
+
+
+  #body-template-container {
+    min-height: 550px;
+
+  }
+
+
+
+  #right-col-toggle {
+    position: absolute;
+    top: 1.25%;
+    right: 2%;
+    background-color: white;
+
+  }
+
+  .right-col-close {
+
+    .fa;
+    .fa-lg;
+    &:before{
+      content : @fa-var-chevron-circle-left;
+    }
+
+  }
+
+  .right-col-open {
+    .fa;
+    .fa-lg;
+    &:before{
+      content : @fa-var-chevron-circle-right;
+    }
 }

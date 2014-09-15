@@ -1,30 +1,28 @@
-{{#if originalSearchResult}}
-<div class="row s-results-pager">
-    <div class="col-sm-6 col-sm-offset-3">
-        {{#if prevBib}}
-        <button class="btn btn-default btn-sm">
-            <a href="/abs/{{prevBib}}"><i class="paginate-left-icon"></i> prev</a>
-        </button>
-        {{/if}}
+<!--{{#if originalSearchResult}}-->
+<!--<div class="row s-results-pager">-->
+    <!--<div class="col-sm-6 col-sm-offset-3">-->
+        <!--{{#if prevBib}}-->
+        <!--<button class="btn btn-default btn-sm">-->
+            <!--<a href="/abs/{{prevBib}}"><i class="paginate-left-icon"></i> prev</a>-->
+        <!--</button>-->
+        <!--{{/if}}-->
 
-        Article {{index}} out of {{totalResults}} results  <a href="{{queryURL}}">(back to search results)</a>
+        <!--Article {{index}} out of {{totalResults}} results  <a href="{{queryURL}}">(back to search results)</a>-->
 
-        {{#if nextBib}}
-        <button class="btn btn-default btn-sm">
-        <a class="abstract-paginator-next" href="/abs/{{nextBib}}">next <i class="paginate-right-icon"></i></a>
-        </button>
-        {{/if}}
-    </div>
-</div>
-{{/if}}
-
-    <div class="s-abstract-descriptor">
-        <div class="col-sm-6 col-sm-offset-2 nav-descriptor"></div>
-    </div>
+        <!--{{#if nextBib}}-->
+        <!--<button class="btn btn-default btn-sm">-->
+        <!--<a class="abstract-paginator-next" href="/abs/{{nextBib}}">next <i class="paginate-right-icon"></i></a>-->
+        <!--</button>-->
+        <!--{{/if}}-->
+    <!--</div>-->
+<!--</div>-->
+<!--{{/if}}-->
 
     <div class="s-abstract-descriptor">
-        <div class="col-sm-6 col-sm-offset-2">
+        <div class=" nav-descriptor"></div>
+    </div>
+
+    <div class="s-abstract-descriptor">
             <h3 class="abstract-title s-abstract-title">{{{title}}}</h3>
-        </div>
     </div>
 

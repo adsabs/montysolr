@@ -75,7 +75,7 @@ define([
 
       displayResultsList: function () {
 
-        var $middleCol = $(".s-middle-col-container");
+        var $middleCol = $(".main-content-container");
 
         $middleCol.append(widgetDict.results.render().el);
 

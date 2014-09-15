@@ -60,9 +60,8 @@ define(['js/widgets/base/base_widget'], function(BaseWidget){
   },
 
     showSearchPage:  function(apiQuery){
-      console.log("showing search page")
       //first, navigate to proper URL
-      this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER,apiQuery.url())
+      this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, "search/" + apiQuery.url())
 
       //then show results page
       this.showPage("results")

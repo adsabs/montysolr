@@ -66,6 +66,10 @@
 
 }
 
+.s-abstract-title-container {
+
+  padding: 2%;
+}
 .s-abstract-title-bibcode {
   margin: 0px;
 }
@@ -89,9 +93,7 @@
 }
 
 .s-abstract-title-info-row {
-  font-style: italic;
   font-size: 16px;
-  font-variant: all-small-caps;
 }
 
 .abstract-title {
@@ -102,72 +104,28 @@
 
 .s-abstract-descriptor {
 
-  .row;
-
   background-color: @body-bg;
-
 
   h4 {
     font-size: 20px;
   }
 
   &:last-of-type {
-    padding-bottom:1%;
-    margin-bottom: 1%;
-    .lh-box-shadow(0 4px 2px -2px darken(@gray-lighter, 5%));
-
+    .border-default;
   }
-
 
 }
 
 .s-abstract-metadata {
-  padding: 2%;
+  padding: 0 2%;
 
-}
-
-.s-abstract-nav {
-
-  padding: 2%;
-  background-color: darken(@gray-lighter, 3%);
-  margin-bottom: 5px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 16px !important;
-  margin-right: 8%;
-  margin-left: 8%;
-}
-
-.s-abstract-nav:hover {
-
-
-  background-color: darken(@gray-lighter, 5%);
-}
-
-.s-abstract-nav-active {
-  color: white;
-  background-color: @brand-primary-faded;
-  border: none;
-}
-
-.s-abstract-nav-inactive {
-  background-color: lighten(@gray-lighter, 5%);
-  color: lighten(@gray-light, 10%) !important;
-}
-
-.s-abstract-nav-active:hover {
-  background-color: @brand-primary-faded;;
-}
-
-.s-abstract-nav-inactive:hover {
-  background-color: lighten(@gray-lighter, 5%);
-  cursor: not-allowed;
 }
 
 
 .s-abstract-title {
   font-size : 23px;
   font-weight: 500;
+  padding-bottom: 2%;
 }
 
 
@@ -177,3 +135,85 @@
   .clearfix;
   border-top: @border-light-default;
 }
+
+
+.s-abstract-content {
+  overflow: hidden;
+}
+
+@abstract-nav-col-color : @gray-dark;
+@abstract-nav-title-color: @gray;
+
+
+
+.s-abstract-page-layout {
+  .s-main-content-container {
+    margin: 2%;
+  }
+
+  .s-left-column {
+    background-color : @abstract-nav-col-color;
+    padding-bottom: 9999px;
+    margin-bottom: -9999px;
+    padding-top: 1%;
+    overflow:hidden;
+
+  }
+
+  .s-middle-column {
+    padding-bottom: 10%;
+  }
+
+}
+
+.s-abstract-nav {
+
+  padding: 3%;
+  cursor: pointer;
+  font-size: 18px;
+  color: @gray-lighter;
+  .lh-transition(all .4s ease-out);
+
+}
+
+.s-abstract-nav:hover {
+
+  background-color: mix(@brand-primary-faded, @abstract-nav-col-color, 33%);
+}
+
+.s-abstract-nav-active {
+  color: white !important;
+  background-color: @brand-primary-faded;
+
+}
+
+.s-abstract-nav-active:hover {
+  background-color: @brand-primary-faded;
+
+}
+
+.s-abstract-nav-inactive {
+  color: lighten(@abstract-nav-col-color, 15%) !important;
+}
+
+
+.s-abstract-nav-inactive:hover {
+  cursor: not-allowed;
+  background-color: @abstract-nav-col-color;
+
+}
+
+.s-nav-header {
+  width: 200%;
+  padding: 6% 10%;
+  font-size: 24px;
+  margin: 5% 0;
+  margin-left : -15px;
+  color: white;
+  font-size: 18px;
+  background-color: @abstract-nav-title-color;
+  border-bottom: 1px solid darken(@abstract-nav-col-color, 3%);
+
+
+}
+

@@ -2,28 +2,18 @@ define([
     'underscore',
     'js/mixins/add_stable_index_to_collection',
     'js/components/api_response',
-    '../widgets/test_json/test1'],
+    '../widgets/test_json/test1'
+  ],
 
   function(_,
     PaginationMixin,
     ApiResponse,
-    TestResponse){
+    TestResponse
+    ){
 
   describe("Widget Paginator (Widget Mixin)", function(){
 
-    var w, addSpy, resetSpy, fakeResponse, triggerSpy;
-
     beforeEach(function(){
-
-      w = {trigger : function(){}};
-      w.collection = {reset: function(){}, add : function(){}};
-
-      triggerSpy = sinon.spy(w, "trigger");
-      
-      addSpy = sinon.spy(w.collection,"add");
-      resetSpy = sinon.spy(w.collection,"reset");
-
-      _.extend(w, PaginationMixin);
 
       fakeResponse = new ApiResponse(TestResponse);
 
@@ -32,9 +22,9 @@ define([
 
     it ("should add a property called resultsIndex to each doc prior to pushing them to the collection", function(){
 
-      w.insertPaginatedDocsIntoCollection(fakeResponse.get("response.docs"), fakeResponse)
+      var docs  = PaginationMixin.addPaginationToDocs(fakeResponse.get("response.docs"), fakeResponse);
 
-      var resultsIndexes = _.pluck(resetSpy.firstCall.args[0], "resultsIndex")
+      var resultsIndexes = _.pluck(docs, "resultsIndex")
 
       expect(resultsIndexes).to.eql([0,1,2,3,4,5,6,7,8,9])
 
@@ -48,9 +38,9 @@ define([
 
       fakeResponse = new ApiResponse(TestResponse);
 
-      w.insertPaginatedDocsIntoCollection(fakeResponse.get("response.docs"), fakeResponse)
+      var docs = PaginationMixin.addPaginationToDocs(fakeResponse.get("response.docs"), fakeResponse)
 
-      var resultsIndexes = _.pluck(resetSpy.firstCall.args[0], "resultsIndex")
+      var resultsIndexes = _.pluck(docs, "resultsIndex")
 
       expect(resultsIndexes).to.eql([100, 101, 102, 103, 104, 105, 106, 107, 108, 109])
 
@@ -58,27 +48,69 @@ define([
     })
 
 
-    it("should add docs to the collection when the widget has a numFound value", function(){
+    it("should have a getStartVal method that returns a starting index given a page number and number of records per page", function(){
 
-      w.numFound = 10
-      w.insertPaginatedDocsIntoCollection(fakeResponse.get("response.docs"), fakeResponse)
+        expect(PaginationMixin.getStartVal).to.be.instanceof(Function);
 
-      expect(addSpy.callCount).to.eql(1);
-      expect(resetSpy.callCount).to.eql(0);
+        expect(PaginationMixin.getStartVal(3, 10)).to.eql(20);
 
-    })
+        expect(PaginationMixin.getStartVal(1, 5)).to.eql(0);
 
-    it("should reset the widget's collection when the widget does not have a numFound value", function(){
+        expect(PaginationMixin.getStartVal(1, 13)).to.eql(0);
 
-
-      w.numFound = undefined;
-      w.insertPaginatedDocsIntoCollection(fakeResponse.get("response.docs"), fakeResponse)
-
-      expect(addSpy.callCount).to.eql(0);
-      expect(resetSpy.callCount).to.eql(1)
+        expect(PaginationMixin.getStartVal(5, 25)).to.eql(100);
 
 
-    })
+    });
+
+    it("should have a getEndVal method that returns an ending index given a page number, number of records per page, and total number of records found", function(){
+
+      expect(PaginationMixin.getEndVal).to.be.instanceof(Function);
+
+      //ignoring numFound
+
+      expect(PaginationMixin.getEndVal(3, 10, 1000)).to.eql(29);
+
+      expect(PaginationMixin.getEndVal(1, 5, 1000)).to.eql(4);
+
+      expect(PaginationMixin.getEndVal(1, 13, 1000)).to.eql(12);
+
+      expect(PaginationMixin.getEndVal(5, 25, 1000)).to.eql(124);
+
+      //testing numFound limitation
+
+      expect(PaginationMixin.getEndVal(3, 10, 25)).to.eql(24);
+
+      expect(PaginationMixin.getEndVal(1, 5, 3)).to.eql(2);
+
+      expect(PaginationMixin.getEndVal(1, 13, 12)).to.eql(11);
+
+      expect(PaginationMixin.getEndVal(5, 25, 120)).to.eql(119);
+
+    });
+
+    it("should have a getPageVal method that returns the page number given a starting index and number of records per Page", function(){
+
+      expect(PaginationMixin.getPageVal).to.be.instanceof(Function);
+
+      expect(PaginationMixin.getPageVal(10, 5)).to.eql(3);
+
+//      expect(PaginationMixin.getPageVal(11, 5)).to.throw(Error);
+//
+      expect(PaginationMixin.getPageVal(100, 25)).to.eql(5);
+//
+//      expect(PaginationMixin.getPageVal(101, 25)).to.throw(Error);
+//
+      expect(PaginationMixin.getPageVal(10, 2)).to.eql(6);
+//
+//      expect(PaginationMixin.getPageVal(9, 2)).to.throw(Error);
+
+
+
+
+
+
+    });
 
 
 

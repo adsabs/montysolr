@@ -33,6 +33,15 @@
 @z-index-4 : 4;
 
 
+.border-default {
+  border-bottom : @border-default;
+}
+
+.border-default-light {
+  border-bottom: @border-light-default;
+}
+
+
 .ads-container {
   padding: 5px;
   background-color: white;
@@ -112,15 +121,13 @@
 
 .lh-keyframes(~'pulseActive, 0%,100% {box-shadow: none;} 50% {box-shadow: 0 0 5px #ffb861; background-color:#ffe5b8}');
 
-<<<<<<< HEAD
-=======
+
 .draw-attention {
   background-color: white;
   .lh-animation(pulseActive 2s linear 0s 3 alternate)
 }
 
 
->>>>>>> added pagination mixin, separated abstract view from controller
 .s-item-closed {
   color: @gray-light;
   .fa;
@@ -151,15 +158,6 @@
 }
 
 
-<<<<<<< HEAD
-.lh-keyframes(~'pulseActive, 0%,100% {box-shadow: none;} 50% {box-shadow: 0 0 5px #ffb861; background-color:#ffe5b8}');
-
-.draw-attention {
-  background-color: white;
-  .lh-animation(pulseActive 2s linear 0s 3 alternate)
-}
-
-=======
 .s-loading {
   opacity: .5;
   z-index : 1000;
@@ -195,8 +193,7 @@
   .fa;
   .fa-lg;
   &:before{
-  content:@fa-var-arrow-circle-right;
+    content:@fa-var-arrow-circle-right;
   }
 
 }
->>>>>>> added pagination mixin, separated abstract view from controller

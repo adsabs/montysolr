@@ -46,6 +46,9 @@ define(["marionette",
       events : {
         "click a" : function(e){
           $t  = $(e.currentTarget);
+          if ($t.find("div").hasClass("s-abstract-nav-inactive")){
+            return false
+          }
           if ($t.find("div").attr("id") !== $(".s-abstract-nav-active").attr("id")){
             this.emitNavigateEvent($t);
             this.changeHighlight($t);
@@ -172,7 +175,7 @@ define(["marionette",
 
           this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, dataForRouter);
 
-          $middleCol = $(".s-middle-col-container");
+          $middleCol = $("#current-subview");
 
           $middleCol.children().detach();
 
@@ -191,7 +194,7 @@ define(["marionette",
       },
 
       displayRightColumn: function () {
-        var $rightCol = $(".s-right-col-container");
+        var $rightCol = $("#right-col-container");
         $rightCol.append(this.widgetDict.resources.render().el)
 
       },

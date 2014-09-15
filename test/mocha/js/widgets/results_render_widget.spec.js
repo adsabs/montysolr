@@ -80,6 +80,106 @@ define(['marionette',
 //      })
 
 
+//      it("should show details (if available) when a user clicks on 'show details'", function (done) {
+//
+//        var widget = new ListOfThingsWidget();
+//        widget.activate(minsub.beehive.getHardenedInstance());
+//        widget.render();
+//
+//        //$('#test').append(widget.render().el);
+//
+//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
+//          q: "star"
+//        }));
+//
+//        var $w = $(widget.render().el);
+//
+//        expect($w.find('.more-info:last').hasClass("hide")).to.equal(true);
+//
+//        $w.find("button.show-details").click();
+//        expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(false);
+//        $w.find("button.show-details").click();
+//        expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(true);
+//        done();
+//      });
+//
+//      it("should hide detail controls if no record has details", function (done) {
+//
+//        var changeIt = true;
+//        var widget = new (ListOfThingsWidget.extend({
+//          parseResponse: function(apiResponse) {
+//            var resp = ListOfThingsWidget.prototype.parseResponse.apply(this, arguments);
+//
+//            _.each(resp, function(model) {
+//              if (changeIt) {
+//                delete model['details'];
+//              }
+//              else {
+//                model.details = 'one';
+//              }
+//            });
+//
+//            return resp;
+//          }
+//        }))();
+//
+//        widget.activate(minsub.beehive.getHardenedInstance());
+//        var $w = $(widget.render().el);
+//
+//        //$('#test').append(widget.render().el);
+//
+//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
+//          q: "star"
+//        }));
+//
+//        expect($w.find('.results-controls').hasClass("hide")).to.equal(true);
+//
+//        changeIt = false;
+//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
+//          q: "star"
+//        }));
+//
+//        expect($w.find('.results-controls').hasClass("hide")).to.equal(false);
+//        done();
+//      })
+
+//      it("should listen to INVITING_REQUEST event", function (done) {
+//
+//        var widget = new (ListOfThingsWidget.extend({
+//          parseResponse: function(apiResponse) {
+//            var resp = ListOfThingsWidget.prototype.parseResponse.apply(this, arguments);
+//            _.each(resp, function(model) {
+//              model['identifier'] = model.bibcode;
+//            });
+//            return resp;
+//          }
+//        }))();
+//
+//        widget.activate(minsub.beehive.getHardenedInstance());
+//        var $w = widget.render().$el;
+//
+//        //get widget to request info
+//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
+//          q: "star"
+//        }));
+//
+//        //find bibcode rendered
+//        expect($w.find(".identifier").eq(0).text()).to.equal("2013arXiv1305.3460H");
+//
+//
+//        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
+//          q: "star"
+//        }));
+//
+//        //find new first bib to confirm re-render
+//        expect($w.find(".identifier").eq(0).text()).to.equal("2006IEDL...27..896K");
+//        done();
+//      });
+
+
+      //
+
+
     })
 
   });

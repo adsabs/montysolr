@@ -26,12 +26,50 @@ define(["config", 'module'], function(config, module) {
       var beehive = app.getBeeHive();
       var api = beehive.getService('Api');
 
-      if (conf.root) {
-        api.url = conf.root + "/" + api.url;
-        app.root = conf.root;
-      }
-      if (conf.debug !== undefined) {
-        app.getObject('QueryMediator').debug = conf.debug;
+      if (conf) {
+        if (conf.root) {
+          api.url = conf.root + "/" + api.url;
+          app.root = conf.root;
+        }
+        if (conf.debug !== undefined) {
+          app.getObject('QueryMediator').debug = conf.debug;
+        }
+
+        if (conf.apiRoot) {
+          api.url = conf.apiRoot;
+        }
+
+        // bootstrap application with remote configuration
+        if (conf.bootstrapUrls) {
+
+          var opts = {
+            done: function (data) {
+              if (data.access_token) {
+                api.access_token = data.token_type + ':' + data.access_token;
+                api.refresh_token = data.refresh_token;
+                api.expires_in = data.expires_in;
+              }
+            },
+            fail: function () {
+              // ignore
+            },
+            type: 'GET'
+          };
+          var redirect_uri = window.location.origin + window.location.pathname;
+
+          _.each(conf.bootstrapUrls, function (url) {
+            if (url.indexOf('http') > -1) {
+              opts.u = url;
+            }
+            else {
+              delete opts.u;
+            }
+
+            api.request(new ApiRequest({query: new ApiQuery({redirect_uri: redirect_uri}),
+                target: '/bumblebee/bootstrap'}),
+              opts);
+          })
+        }
       }
 
       // XXX:rca - this will need to be moved somewhere else (it is getting confusing -- to long)
@@ -304,7 +342,6 @@ define(["config", 'module'], function(config, module) {
       resultsWidgetDict.refereed.activate(beehive.getHardenedInstance());
 
       resultsWidgetDict.results = app.getWidget('Results')
-      resultsWidgetDict.results.activate(beehive.getHardenedInstance());
 
       resultsWidgetDict.graphTabs = app.getWidget('GraphTabs')
 
@@ -420,8 +457,9 @@ define(["config", 'module'], function(config, module) {
           }
         });
 
-      //turn this into its own view?
-        $(document).on("click", ".btn-expand", function(){
+
+    //turn this into its own view?
+    $(document).on("click", ".btn-expand", function(){
 
           var $t = $(this);
           var $leftCol =  $(".s-results-left-column");
@@ -507,10 +545,3 @@ define(["config", 'module'], function(config, module) {
 
 
 
-
-
-    });
-
-
-  });
-});
