@@ -62,11 +62,14 @@
 }
 
 .s-toggle-aff {
-  padding: 0px;
-  position: relative;
-  top: -12px;
+  padding-left: 0px;
+
 }
 
+.s-abstract-title-container {
+
+  padding: 2%;
+}
 .s-abstract-title-bibcode {
   margin: 0px;
 }
@@ -90,10 +93,7 @@
 }
 
 .s-abstract-title-info-row {
-  font-style: italic;
   font-size: 16px;
-  padding-top: 20px;
-  font-variant: all-small-caps;
 }
 
 .abstract-title {
@@ -101,46 +101,119 @@
   margin-bottom: 0px;
 }
 
-.s-abstract-title-row {
-  padding: 5px 0px 20px 0px;
-  margin-bottom: 10px;
+
+.s-abstract-descriptor {
+
+  background-color: @body-bg;
 
   h4 {
     font-size: 20px;
   }
+
+  &:last-of-type {
+    .border-default;
+  }
+
+}
+
+.s-abstract-metadata {
+  padding: 0 2%;
+
+}
+
+
+.s-abstract-title {
+  font-size : 23px;
+  font-weight: 500;
+  padding-bottom: 2%;
+}
+
+
+.s-results-pager {
+  background-color: @body-bg;
+  padding-top: 1%;
+  .clearfix;
+  border-top: @border-light-default;
+}
+
+
+.s-abstract-content {
+  overflow: hidden;
+}
+
+@abstract-nav-col-color : @gray-dark;
+@abstract-nav-title-color: @gray;
+
+
+
+.s-abstract-page-layout {
+  .s-main-content-container {
+    margin: 2%;
+  }
+
+  .s-left-column {
+    background-color : @abstract-nav-col-color;
+    padding-bottom: 9999px;
+    margin-bottom: -9999px;
+    padding-top: 1%;
+    overflow:hidden;
+
+  }
+
+  .s-middle-column {
+    padding-bottom: 10%;
+  }
+
 }
 
 .s-abstract-nav {
 
-  padding: 5px 0px;
-  background-color: darken(@gray-lighter, 3%);
-  margin-bottom: 5px;
-  text-align: center;
+  padding: 3%;
   cursor: pointer;
-  font-size: 16px !important;
+  font-size: 18px;
+  color: @gray-lighter;
+  .lh-transition(all .4s ease-out);
+
 }
 
 .s-abstract-nav:hover {
 
-  background-color: darken(@gray-lighter, 5%);
+  background-color: mix(@brand-primary-faded, @abstract-nav-col-color, 33%);
 }
 
 .s-abstract-nav-active {
-  color: white;
-  background-color: lighten(@brand-info, 12%);
-  border: none;
-}
+  color: white !important;
+  background-color: @brand-primary-faded;
 
-.s-abstract-nav-inactive {
-  background-color: lighten(@gray-lighter, 5%);
-  color: lighten(@gray-light, 10%) !important;
 }
 
 .s-abstract-nav-active:hover {
-  background-color: lighten(@brand-info, 8%);
+  background-color: @brand-primary-faded;
+
 }
 
-.s-abstract-nav-inactive:hover {
-  background-color: lighten(@gray-lighter, 5%);
-  cursor: not-allowed;
+.s-abstract-nav-inactive {
+  color: lighten(@abstract-nav-col-color, 15%) !important;
 }
+
+
+.s-abstract-nav-inactive:hover {
+  cursor: not-allowed;
+  background-color: @abstract-nav-col-color;
+
+}
+
+.s-nav-header {
+  width: 200%;
+  padding: 6% 10%;
+  font-size: 24px;
+  margin: 5% 0;
+  margin-left : -15px;
+  color: white;
+  font-size: 18px;
+  background-color: @abstract-nav-title-color;
+  border-bottom: 1px solid darken(@abstract-nav-col-color, 3%);
+
+
+}
+

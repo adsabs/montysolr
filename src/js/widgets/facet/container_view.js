@@ -67,8 +67,6 @@ define(['backbone', 'marionette',
           "click .dropdown-toggle": "enableLogic",
           "click .dropdown-menu .close": "closeLogic",
           "change .logic-container input": "onLogic",
-          "click .logic-container input": "onLogic",
-          "click .apply": "onApply"
         };
         return _.extend(_.clone(ContainerView.prototype.events), addEvents);
       },

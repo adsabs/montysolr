@@ -33,6 +33,15 @@
 @z-index-4 : 4;
 
 
+.border-default {
+  border-bottom : @border-default;
+}
+
+.border-default-light {
+  border-bottom: @border-light-default;
+}
+
+
 .ads-container {
   padding: 5px;
   background-color: white;
@@ -89,7 +98,6 @@
 }
 
 .unselectable {
-  user-select: none !important;
   -moz-user-select: none !important;
   -khtml-user-select: none !important;
   -webkit-user-select: none !important;
@@ -109,6 +117,14 @@
 
 .chosen {
   background-color: lighten(@brand-info, 40%)
+}
+
+.lh-keyframes(~'pulseActive, 0%,100% {box-shadow: none;} 50% {box-shadow: 0 0 5px #ffb861; background-color:#ffe5b8}');
+
+
+.draw-attention {
+  background-color: white;
+  .lh-animation(pulseActive 2s linear 0s 3 alternate)
 }
 
 
@@ -137,17 +153,47 @@
 
 }
 
-
-
 .btn {
   border-radius: @border-radius-large;
 }
 
 
-.lh-keyframes(~'pulseActive, 0%,100% {box-shadow: none;} 50% {box-shadow: 0 0 5px #ffb861; background-color:#ffe5b8}');
-
-.draw-attention {
+.s-loading {
+  opacity: .5;
+  z-index : 1000;
   background-color: white;
-  .lh-animation(pulseActive 2s linear 0s 3 alternate)
+  position: absolute;
+  top: 0px;
+  left:0px;
+  bottom: 0px;
+  right: 0px;
+
+
 }
 
+.loading-indicator {
+  .fa;
+  .fa-2x;
+  .fa-spin;
+  &:before {
+    content: @fa-var-circle-o-notch;
+  }
+  color : @gray;
+}
+.paginate-left-icon {
+  .fa;
+  .fa-lg;
+  &:before{
+    content:@fa-var-arrow-circle-left;
+  }
+
+}
+
+.paginate-right-icon {
+  .fa;
+  .fa-lg;
+  &:before{
+    content:@fa-var-arrow-circle-right;
+  }
+
+}

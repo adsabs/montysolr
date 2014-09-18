@@ -1,7 +1,7 @@
 define(['backbone', 'marionette',
   'js/components/api_query', 'js/components/api_request',
-  'js/mixins/widget_mixin_method'
-], function (Backbone, Marionette, ApiQuery, ApiRequest, WidgetMixin) {
+  'js/mixins/widget_mixin_method', 'hbs!./templates/loading-template'
+], function (Backbone, Marionette, ApiQuery, ApiRequest, WidgetMixin, loadingTemplate) {
 
   /**
    * Default PubSub based widget; the main functionality is inside
@@ -39,6 +39,8 @@ define(['backbone', 'marionette',
    *
    *  defaultQueryArguments: this is a list of parameters added to each query
    *
+   *  showLoad == true will automatically fade out the widget while it waits for a response
+   *
    */
 
     //adding "isRendered" flag to Marionette ItemView
@@ -54,7 +56,7 @@ define(['backbone', 'marionette',
       // and they will carry their own context 'this'
       _.bindAll(this, "dispatchRequest", "processResponse");
 
-      this.on("show", this.onShow)
+      this.on("show", this.onShow);
 
 
       this._currentQuery = new ApiQuery();
@@ -113,6 +115,10 @@ define(['backbone', 'marionette',
           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
         }
       }
+       if (this.showLoad === true){
+         this.startWidgetLoad()
+       }
+
     },
 
     /**
@@ -226,10 +232,26 @@ define(['backbone', 'marionette',
       return this.view;
     },
 
-    onShow : function(){
-      console.log("showing!");
-      this.view.delegateEvents();
+    loadingTemplate : loadingTemplate,
 
+    //generic loading overlay,
+    //might have to override this function
+    //if widget isnt simple view or collection view
+
+    startWidgetLoad : function(){
+
+      if (this.view){
+        if (this.view.itemViewContainer) {
+          var removeLoadingView = function () {
+            this.view.$el.find(".s-loading").remove();
+          }
+          this.listenToOnce(this.collection, "reset", removeLoadingView);
+        }
+
+        if (this.view.$el.find(".s-loading").length === 0){
+          this.view.$el.append(this.loadingTemplate());
+        }
+      }
     },
 
 

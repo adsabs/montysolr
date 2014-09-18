@@ -31,6 +31,8 @@ define(['marionette',
 
       template: SearchBarTemplate,
 
+      className : "s-search-bar-widget",
+
       initialize: function (options) {
         _.bindAll(this, "tempFieldInsert", "tempFieldClear");
         this.queryBuilder = new QueryBuilderPlugin();
@@ -239,6 +241,7 @@ define(['marionette',
       },
 
       initialize: function (options) {
+
         this.currentQuery = undefined;
         this.view = new SearchBarView();
         this.listenTo(this.view, "start_search", function (query) {
@@ -250,8 +253,9 @@ define(['marionette',
         });
 
         this.listenTo(this.view, "render", function () {
-          if (this.currentQuery) {
-            this.view.setQueryBox(this.currentQuery)
+          var query = this.getCurrentQuery().get("q");
+          if (query) {
+            this.view.setQueryBox(query)
           }
         })
 
@@ -262,7 +266,7 @@ define(['marionette',
         var q = apiResponse.getApiQuery();
         this.setCurrentQuery(q);
         this.view.setQueryBox(q.get('q').join(' '));
-        this.storeQuery(q.get('q'));
+        this.storeQuery(q);
       },
 
       navigate: function (newQuery) {

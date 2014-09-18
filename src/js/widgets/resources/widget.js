@@ -34,7 +34,9 @@ define(['underscore',
 
       this._bibcode = options.bibcode || undefined;
 
-      _.bindAll(this, "processResponse")
+      _.bindAll(this, "processResponse");
+
+      this.showLoad = true;
     },
 
     activate: function (beehive) {

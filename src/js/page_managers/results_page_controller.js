@@ -42,7 +42,6 @@ define([
 
       },
 
-
       insertLoadingView: function () {
         $("#body-template-container").append(this.loadingWidget.render().el);
 
@@ -51,6 +50,7 @@ define([
       },
 
       displayFacets: function () {
+
         var $leftCol = $(".s-left-col-container");
 
         $leftCol.append(widgetDict.authorFacets.render().el).append(widgetDict.database.render().el).append(widgetDict.refereed.render().el).append(widgetDict.keywords.render().el).append(widgetDict.pub.render().el).append(widgetDict.bibgroup.render().el).append(widgetDict.data.render().el).append(widgetDict.vizier.render().el).append(widgetDict.grants.render().el);
@@ -75,7 +75,7 @@ define([
 
       displayResultsList: function () {
 
-        var $middleCol = $(".s-middle-col-container");
+        var $middleCol = $(".main-content-container");
 
         $middleCol.append(widgetDict.results.render().el);
 
@@ -136,18 +136,21 @@ define([
 
       },
 
+      //don't subscribe to events
+
       activate: function (beehive) {
-
         this.pubsub = beehive.Services.get('PubSub');
-
-        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.showPage);
 
       },
 
-      showPage: function (apiQuery) {
+      showPage: function (options) {
+
+        var apiQuery = options.apiQuery;
+        var inDom = options.inDom;
+        var triggerNav = options.triggerNav;
 
         //it's false when the router uses this function to display the results page
-        if (apiQuery !== false) {
+        if (apiQuery) {
 
           var tempQuery = new ApiQuery();
           if (apiQuery.get("q")){
@@ -159,13 +162,15 @@ define([
 
           var urlData = {page: "resultsPage", subPage: undefined, data: apiQuery.toJSON(), path: "search/" + tempQuery.url()};
 
-          this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, urlData);
+          if (triggerNav !== false){
+
+            this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, urlData);
+
+          }
 
         }
 
-        //showing page in response to "start search"
-        // don't reshow if it's already in the dom
-        if (!$("#results-page-layout").length){
+        if (!inDom){
           this.insertTemplate();
           this.displaySearchBar();
           this.displayControlRow();
@@ -173,10 +178,7 @@ define([
           this.displayRightColumn();
           this.displayResultsList();
           this.enableRightColToggle();
-          //this.insertLoadingView()
-
         }
-
 
       }
 

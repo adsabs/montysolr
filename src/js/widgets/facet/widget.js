@@ -28,6 +28,7 @@ define(['backbone',
         this.view = options.view;
         this.collection = options.view.collection;
 
+        this.showLoad = true;
 
         PaginatedMultiCallbackWidget.prototype.initialize.call(this, options)
 
@@ -59,6 +60,11 @@ define(['backbone',
             this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
           }
         }
+
+        if (this.showLoad === true){
+          this.startWidgetLoad()
+        }
+
       },
 
       /**

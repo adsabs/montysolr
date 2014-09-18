@@ -28,7 +28,10 @@ define(['./base_graph',
 
       addToOnRender: function () {
         //show the h index
-        this.$("#h-index-container").text(this.hIndex.x);
+        if (this.hIndex){
+          this.$("#h-index-container").text(this.hIndex.x);
+
+        }
 
       },
 

@@ -14,7 +14,7 @@ var tests = [
   tbase + '/widgets/base_widget.spec.js',
 
   tbase + '/widgets/multi_callback_widget.spec.js',
-  tbase + '/widgets/results_render_widget.spec.js',
+//  tbase + '/widgets/results_render_widget.spec.js',
 
   tbase + '/widgets/api_response_widget.spec.js',
   tbase + '/widgets/api_query_widget.spec.js',
@@ -22,6 +22,24 @@ var tests = [
 
   tbase + '/widgets/facet_container_view.spec.js',
   tbase + '/widgets/facet_widget.spec.js',
+
+  tbase + '/widgets/tabs_widget.spec.js',
+  tbase + '/widgets/search_bar_widget.spec.js',
+
+  tbase + '/widgets/citations_widget.spec.js',
+  tbase + '/widgets/references_widget.spec.js',
+  tbase + '/widgets/table_of_contents_widget.spec.js',
+  tbase + '/widgets/coreads_widget.spec.js',
+  tbase + '/widgets/resources_widget.spec.js',
+
+  tbase + '/widgets/list_of_things_widget.spec.js',
+
+  tbase + '/widgets/year_graph_facet_widget.spec.js',
+  tbase + '/widgets/citation_graph_facet_widget.spec.js',
+  tbase + '/widgets/reads_graph_facet_widget.spec.js',
+
+  tbase + '/page_managers/master_page_manager.spec.js',
+  tbase + '/mixins/add_stable_index_to_collection.spec.js',
 
 
 

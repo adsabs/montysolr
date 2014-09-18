@@ -6,6 +6,29 @@
 
 // results list css
 
+.s-fixed-search {
+  position: fixed;
+  top: 0px;
+  display: none;
+  background-color: lighten(@gray-lighter, 3%);
+  z-index: 1000;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  .s-motion-shadow;
+}
+
+
+
+.per-page {
+  .form-inline;
+  .form-control;
+  .input-sm;
+  .lh-border-radius(@border-radius-base);
+  margin: 0px;
+  display: inline-block;
+  width: 32%;
+}
+
 
 //icons for links
 
@@ -126,29 +149,27 @@
   padding-right: 0px;
 }
 
-.s-results-controls {
-  padding-top: 2%;
-
-}
-
 .s-open-access {
   color: darken(saturate(@brand-success, 10%), 15%) !important;
 }
 
 .s-results-list {
-  padding-top: 20px;
   label {
     font-weight: initial
   }
-}
-
-#results-page-layout {
-  .s-results-list {
-    padding-left: 6%;
-
-  }
+  padding-left: 4%;
 
 }
+
+.s-pagination-controls {
+  padding-top: 3%;
+}
+
+.s-per-page-controls {
+  padding-left: 5%;
+}
+
+
 
 .field-options {
   min-width: 120px;

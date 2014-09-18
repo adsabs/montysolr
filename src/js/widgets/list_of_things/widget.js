@@ -1,12 +1,17 @@
 /**
- * This widget can paginate through the list of 'things' - it accepts a query
- * as an input. It listens to:
+ * This widget can paginate through a list of results. It can easily be inherited
+ * by results widget ,table of contents widget, etc. It either listens to INVITING_REQUEST
+ * in the case of the results widget, or the loadBibcode method (currently all other widgets).
  *
- *    INVITING_REQUEST
- *    DELIVERING_RESPONSE
+ * This widget consists of the following components:
  *
- * If you need to, change the activate() method to listen to other signals
- * or stop listening altogether
+ * 1. a pagination view
+ * 2. an associated pagination model (all pagination info is kept here and only here)
+ * 3. a 'master' collection that holds all currently accessible records
+ * 4. a 'visible' collection that shows all records that should currently be visible on screen
+ * 5. a list view that listens to the visible collection and renders it
+ * 6. an item view for each record rendered repeatedly by the list view
+ * 7. a controller that handles requesting and recieving data from pubsub and initializing everything
  *
  */
 
@@ -15,21 +20,164 @@ define([
     'backbone',
     'js/components/api_request',
     'js/components/api_query',
-    'js/widgets/base/paginated_base_widget',
+    'js/widgets/base/base_widget',
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
-    'js/mixins/widget_pagination',
-    'js/mixins/link_generator_mixin'],
+    'js/mixins/link_generator_mixin',
+    'hbs!./templates/pagination-template',
+    'js/mixins/add_stable_index_to_collection'
+  ],
 
   function (Marionette,
     Backbone,
     ApiRequest,
     ApiQuery,
-    PaginatedBaseWidget,
+    BaseWidget,
     ItemTemplate,
     ResultsContainerTemplate,
-    WidgetPagination,
-    LinkGenerator) {
+    LinkGenerator,
+    PaginationTemplate,
+    WidgetPaginationMixin) {
+
+
+    var PaginationModel = Backbone.Model.extend({
+
+      defaults : function(){
+        return {
+          perPage : undefined,
+          page : 1,
+          currentQuery : undefined,
+          numFound : undefined
+        }
+      }
+
+    })
+
+    var PaginationView = Backbone.View.extend({
+
+      initialize : function(options){
+
+        /*
+         * listening to change in perPage value or change in current page
+         */
+        this.listenTo(this.model, "change", this.render);
+        this.getStartVal = options.getStartVal;
+
+
+      },
+
+      template : PaginationTemplate,
+
+      render: function(){
+
+        var pageData, baseQ, showFirst;
+
+        var minAmountToShowPagination = 25;
+
+        var page = this.model.get("page");
+        var perPage = this.model.get("perPage");
+        var numFound = this.model.get("numFound");
+
+        var pageNums = this.generatePageNums(page);
+
+        //iterate through remaining pageNums, keep them only if they're possible (< numFound)
+        pageNums = this.ensurePagePossible(pageNums, perPage, numFound);
+
+        //now, finally, generate links for each page number
+
+         baseQ = this.model.get("currentQuery");
+
+        if (baseQ){
+
+          baseQ = baseQ.clone();
+
+          //now, generating the link
+          pageData = _.map(pageNums, function(n){
+            var s = this.getStartVal(n.p, perPage);
+            baseQ.set("start", s)
+            n.link = baseQ.url();
+            return n
+          }, this);
+
+          baseQ.set("rows", perPage);
+
+        }
+
+        //should we show a "back to first page" button?
+        showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
+
+        //only render pagination controls if there are more than 25 results
+        if (numFound > minAmountToShowPagination){
+          this.$el.html(PaginationTemplate({
+            showFirst : showFirst,
+            pageData : pageData,
+            currentPage : page,
+            perPage : this.model.get("perPage"),
+            currentQuery : this.model.get("currentQuery")}));
+        }
+        else {
+          this.$el.html("");
+        }
+
+        return this
+      },
+
+
+      //create list of up to 5 page numbers to show
+      generatePageNums : function(page){
+
+        var pageNums = _.map([-2,-1, 0, 1, 2 , 3, 4], function(d){
+          var current = (d === 0) ? true: false;
+          return {p : page + d, current : current}
+        });
+
+        //page number can't be less than 1
+        pageNums = _.filter(pageNums, function(d){
+          if (d.p > 0){
+            return true
+          }
+        });
+
+        return pageNums.slice(0,5);
+
+      },
+
+    //iterate through pageNums, keep them only if they're possible (< numFound)
+    ensurePagePossible : function(pageNums, perPage, numFound){
+
+      var endIndex = numFound - 1
+     return  _.filter(pageNums, function(n){
+       if (this.getStartVal(n.p, perPage)<= endIndex){
+         return true
+       }
+     }, this)
+
+    },
+
+      events : {
+        "click a" : "changePage",
+        "input .per-page": "changePerPage"
+
+      },
+
+      changePage : function(e){
+
+        var d = $(e.target).data("paginate")
+
+        this.model.set("page", d);
+
+        return false
+
+      },
+
+      changePerPage : _.debounce(function(e){
+
+        var perPage = parseInt($(e.target).val());
+
+        this.model.set("perPage", perPage);
+      }, 2000)
+
+    })
 
     var ItemModel = Backbone.Model.extend({
       defaults: function () {
@@ -44,30 +192,97 @@ define([
           pub_raw: undefined,
           doi: undefined,
           details: undefined,
-          links_data : undefined
+          links_data : undefined,
+          resultsIndex : undefined
         }
       },
+      idAttribute : "resultsIndex"
 
-      parse: function (doc) {
-        // do some processing here
-        return doc;
-      }
     });
 
-    var ListCollection = Backbone.Collection.extend({
+    var VisibleCollection = Backbone.Collection.extend({
       model: ItemModel
+
     });
+
+
+    var MasterCollection = Backbone.Collection.extend({
+
+      initialize : function(options){
+
+        this.paginationModel = options.paginationModel;
+
+        this.listenTo(this.paginationModel, "change:page", this.onPaginationChange);
+        this.listenTo(this.paginationModel, "change:perPage", this.onPaginationChange);
+        this.listenTo(this.paginationModel, "change:numFound", this.updateStartAndEndIndex);
+
+        this.on("add", this.transferModels);
+        this.on("reset", this.transferModels);
+
+        this.visibleCollection = options.visibleCollection;
+
+        _.extend(MasterCollection.prototype, WidgetPaginationMixin);
+
+        this.updateStartAndEndIndex();
+
+      },
+
+      model : ItemModel,
+
+      numFound : undefined,
+
+      comparator: "resultsIndex",
+
+      updateStartAndEndIndex : function(){
+
+        var pageNum = this.paginationModel.get("page");
+        var perPage = this.paginationModel.get("perPage");
+        var numFound = this.paginationModel.get("numFound")
+        //used as a metric to see if we need to fetch new data or if data at these indexes
+        //already exist
+        this.currentStartIndex = this.getStartVal(pageNum, perPage);
+        this.currentEndIndex = this.getEndVal(pageNum, perPage, numFound);
+
+      },
+
+      onPaginationChange: function(model, options){
+
+        this.updateStartAndEndIndex();
+
+        this.transferModels();
+
+      },
+
+      requestData : function(){
+        this.trigger("dataRequest", this.currentStartIndex, this.paginationModel.get("perPage"))
+      },
+
+      transferModels : function(){
+
+        //add one to the end to make sure the final index is inclusive
+        var indexes = _.range(this.currentStartIndex, this.currentEndIndex + 1);
+
+        //check to see if we have the data
+        var testList = this.filter(function(d){ if (indexes.indexOf(d.get("resultsIndex"))!== -1){return true}})
+
+        //basically it was able to find a record that corresponded with every needed index
+        //probably should be equal rather than greater or equal, but maybe there could be duplicate records??
+        if (testList.length  >= indexes.length){
+
+          this.visibleCollection.reset(testList);
+        }
+        else {
+
+          this.requestData();
+
+        }
+
+      }
+
+    })
 
     var ItemView = Marionette.ItemView.extend({
 
-      //should it be hidden initially?
-      className: function () {
-        if (Marionette.getOption(this, "hide") === true) {
-          return "hide row results-item"
-        } else {
-          return "row results-item"
-        }
-      },
 
       template: ItemTemplate,
 
@@ -77,12 +292,15 @@ define([
        * @returns {*}
        */
       serializeData: function () {
+
         var data ,shownAuthors;
         data = this.model.toJSON();
 
-        if (data.author && data.author.length > 3) {
-          data.extraAuthors = data.author.length - 3;
-          shownAuthors = data.author.splice(0, 3);
+        var maxAuthorNames = 4;
+
+        if (data.author && data.author.length > maxAuthorNames) {
+          data.extraAuthors = data.author.length - maxAuthorNames;
+          shownAuthors = data.author.splice(0, maxAuthorNames);
         } else if (data.author) {
           shownAuthors = data.author
         }
@@ -90,7 +308,7 @@ define([
         if (data.author) {
           var l = shownAuthors.length-1;
           data.authorFormatted = _.map(shownAuthors, function (d, i) {
-            if (i == l || l == 1) {
+            if (i == l || l == 0) {
               return d; //last one, or only one
             } else {
               return d + ";";
@@ -101,6 +319,8 @@ define([
         if (data.details) {
           data.highlights = data.details.highlights
         }
+
+        data.orderNum = this.model.get("resultsIndex") + 1;
 
         return data;
 
@@ -132,84 +352,28 @@ define([
     var ListView = Marionette.CompositeView.extend({
 
       initialize: function (options) {
-        this.displayNum = options.displayNum;
-        this.paginator = options.paginator;
+        this.paginationView = options.paginationView;
+        this.showDetailsButton = options.showDetailsButton;
       },
 
       className: "list-of-things",
       itemView: ItemView,
 
-      itemViewOptions: function (model, index) {
-        //if this is the initial round, hide fetchnum - displaynum
-        if (this.paginator.getCycle() <= 1 && (index < this.displayNum)) {
-          return {}
-        }
-        else {
-          //otherwise, hide everything
-          return {
-            hide: true
-          }
-        }
-      },
-
       itemViewContainer: ".results-list",
       events: {
-        "click .load-more-results": "fetchMore",
         "click .show-details": "showDetails"
+      },
+
+      serializeData : function(){
+
+        return {showDetailsButton : this.showDetailsButton}
+
       },
 
       template: ResultsContainerTemplate,
 
-      fetchMore: function (ev) {
-        if (ev)
-          ev.stopPropagation();
-        this.trigger('fetchMore', this.$(".results-item").filter(".hide").length);
-      },
-
-      /**
-       * Displays loaded, but hidden items
-       *
-       * @param howMany
-       */
-      displayMore: function(howMany) {
-        this.$(".results-item").filter(".hide").slice(0, howMany).removeClass("hide");
-      },
-
-      /**
-       * Hides the area where 'show more' button lives; this is needed for
-       * the pagination widged
-       *
-       * @param text
-       */
-      disableShowMore: function(text) {
-        this.$('.load-more:first').addClass('hide');
-      },
-
-      /**
-       * Displays the area where 'show more' button lives; this is needed for
-       * the pagination widget
-       *
-       * @param text
-       */
-      enableShowMore: function(text) {
-
-          this.$('.load-more:first').removeClass('hide')
-
-      },
-
-      /**
-       * Un/Hides the area where details controls are
-       *
-       * @param text
-       */
-      toggleDetailsControls: function(visible){
-        if (visible) {
-          this.$(".results-controls:first").removeClass('hide');
-        }
-        else {
-          this.$(".results-controls:first").addClass('hide');
-        }
-
+      onRender: function(){
+        this.paginationView.setElement(this.$(".pagination-controls")).render();
       },
 
       /**
@@ -219,6 +383,7 @@ define([
        */
       showDetails: function (ev) {
         if (ev)
+
           ev.stopPropagation();
         this.$(".more-info").toggleClass("hide");
         if (this.$(".more-info").hasClass("hide")) {
@@ -228,58 +393,111 @@ define([
         }
       }
 
+
     });
 
 
-    var ResultsWidget = PaginatedBaseWidget.extend({
-
-      ItemModelClass: ItemModel,
-      ItemViewClass: ItemView,
-      CollectionClass: ListCollection,
-      CollectionViewClass: ListView,
+    var ListOfThingsWidget = BaseWidget.extend({
 
       initialize: function (options) {
-        options.rows = options.rows || 40;
 
-        PaginatedBaseWidget.prototype.initialize.call(this, options);
+        BaseWidget.prototype.initialize.call(this, options);
 
-        this.collection = new this.CollectionClass();
+        //so each widget gets its own copy instead of sharing one on the prototype chain
+        this.defaultQueryArguments = _.result(this, "defaultQueryArguments");
 
-        this.displayNum = this.displayNum || options.displayNum || 20;
+        //adding data for the letter links
+        this.defaultQueryArguments.fl = this.defaultQueryArguments.fl + "," + this.resultsPageFields;
 
-        this.maxDisplayNum = this.maxDisplayNum || options.maxDisplayNum || 300;
+        //letting widget know that the loading transition should happen
+        this.showLoad =  true;
 
-        this.view = new this.CollectionViewClass({
-          collection: this.collection,
-          //so it has reference to the pagination object
-          paginator: this.paginator,
-          displayNum: this.displayNum || this.paginator.rows / 2
+        this.visibleCollection = new VisibleCollection();
+
+        var paginationOptions = {};
+
+        if (options.perPage){
+          paginationOptions.perPage = options.perPage;
+          this.defaultQueryArguments.rows = options.perPage
+        }
+        else {
+          paginationOptions.perPage =  this.defaultQueryArguments.rows;
+        }
+
+        this.paginationModel = new PaginationModel(paginationOptions);
+
+        this.paginationView = new PaginationView({
+          model : this.paginationModel,
+          //from the pagination mixin
+          getStartVal : this.getStartVal
+
         });
-        this.listenTo(this.view, "all", this.onAllInternalEvents);
-        this.listenTo(this.view.collection, "all", this.onAllInternalEvents);
 
-        this.resetPagination = true;
+        //showdetails defaults to false, so details button will be hidden
+        this.view = new ListView({
+          collection: this.visibleCollection,
+          paginationView : this.paginationView,
+          showDetailsButton : this.showDetailsButton
+        });
+
+        this.collection = new MasterCollection({visibleCollection : this.visibleCollection,
+         paginationModel: this.paginationModel});
+
+        this.listenTo(this.collection, "all", this.onAllInternalEvents);
+        this.on("all", this.onAllInternalEvents);
+
       },
 
-      /*
-       a way to get data on command on a per-bibcode-basis
-       used by the page managers
-       it returns a promise which is resolved when the data
+      showDetailsButton : false,
+
+      activate: function (beehive) {
+
+        _.bindAll(this,  "processResponse");
+
+        this.pubsub = beehive.Services.get('PubSub');
+
+        //custom handleResponse function goes here
+        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      },
+
+      resetWidget : function(){
+        //this will trigger paginationModel to reset itself
+        var defaults =  _.result(this.paginationModel, 'defaults')
+        //reset pagination model, but prevent the view from immediately re-rendering
+        //by passing silent
+        this.paginationModel.set(defaults, {silent : true});
+
+      },
+
+      resetBibcode : function(bibcode){
+
+        this._bibcode = bibcode;
+
+      },
+
+    /*
+     -a way to get data on command on a per-bibcode-basis
+     -used by the page managers
+     -checks first to see if bibcode is the same as the current bibcode, in which case nothing happens
+     -it returns a promise which is resolved when the data
        is available
-       this function has to be overridden for some less straightforward
+     -this function has to be overridden for some less straightforward
        solr queries, such as "similar/more like this"
-        */
+      */
       loadBibcodeData: function (bibcode) {
+
 
         if (bibcode === this._bibcode){
 
           this.deferredObject =  $.Deferred();
-          this.deferredObject.resolve(this.collection.numFound);
+          this.deferredObject.resolve(this.paginationModel.get("numFound"));
           return this.deferredObject.promise();
 
         }
 
-        this._bibcode = bibcode;
+        //numFound needs to equal undefined as a signal to other functions that the request cycle has restarted
+        this.resetWidget();
+        this.resetBibcode(bibcode);
 
         if ((!this.solrOperator && !this.solrField) || (this.solrOperator && this.solrField)){
           throw new Error("Can't call loadBibcodeData without either a solrOperator or a solrField, and can't have both!")
@@ -288,168 +506,159 @@ define([
         var searchTerm = this.solrOperator? this.solrOperator + "(" + bibcode +")" : this.solrField + ":" + bibcode
 
         this.deferredObject =  $.Deferred();
-        this.dispatchRequest(new ApiQuery({'q': searchTerm}));
+
+        var q = this.composeQuery(this.defaultQueryArguments, new ApiQuery());
+
+        q.set("q", searchTerm);
+
+        var req = this.composeRequest(q);
+        if (req) {
+          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+        }
         return this.deferredObject.promise();
 
       },
 
       //will be requested in composeRequest
-      defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year,links_data,ids_data,[citations],property'
-      },
-
-      dispatchRequest: function (apiQuery) {
-
-        //preventing request for data that already is possessed
-
-        // by default we consider every request to be new one - unless it is clear
-        // that we are paginating
-        if (this.resetPagination) {
-          this.paginator.reset();
+      defaultQueryArguments: function(){
+        return {
+          fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year',
+          rows : 25,
+          start : 0
         }
-        else {
-          this.resetPagination = true;
-        }
-
-        PaginatedBaseWidget.prototype.dispatchRequest.call(this, apiQuery)
       },
 
       processResponse: function (apiResponse) {
 
-        this.collection.numFound = apiResponse.get('response.numFound');
-
-        //resetting this flag
-        this.showMoreAfterRender = false;
-
         this.setCurrentQuery(apiResponse.getApiQuery());
 
-        if (this.paginator.getCycle() <= 1) {
-          //it's the first set of results
-          this.collection.reset(this.parseResponse(apiResponse, 1), {
+        var toSet = {"numFound":  apiResponse.get("response.numFound"),
+          "currentQuery":this.getCurrentQuery()};
+
+        //checking to see if we need to reset start or rows values
+        var r =  this.getCurrentQuery().get("rows");
+        var s = this.getCurrentQuery().get("start");
+
+        if (r){
+
+          r = $.isArray(r) ? r[0] : r;
+          toSet.perPage = r;
+
+        }
+
+        if (s) {
+
+          var perPage =  toSet.perPage || this.paginationModel.get("perPage");
+
+          s = $.isArray(s) ? s[0] : s;
+
+          //getPageVal comes from the pagination mixin
+          toSet.page= this.getPageVal(s, perPage);
+
+        }
+
+        var docs = apiResponse.get("response.docs")
+
+        //any preprocessing before adding the resultsIndex is done here
+        docs = _.map(docs, function(d){
+          d.identifier = d.bibcode;
+          return d
+        });
+
+        docs = this.parseLinksData(docs);
+
+        docs = this.addPaginationToDocs(docs, apiResponse);
+
+        if (!this.paginationModel.get("numFound")) {
+
+          //reset the pagination model with toSet values
+          //has to happen right before collection changes
+          this.paginationModel.set(toSet);
+
+          this.collection.reset(docs, {
+            parse: true
+          });
+        }
+        else {
+          //reset the pagination model with toSet values
+          //has to happen right before collection changes
+          this.paginationModel.set(toSet);
+
+          //backbone ignores duplicate records because it has an idAttribute of "resultsIndex"
+          this.collection.add(docs, {
             parse: true
           });
 
-          this.paginator.setMaxNum(this.collection.numFound);
-          if (this.paginator.maxNum > this.displayNum && this.viewRendered) {
-            this.view.enableShowMore();
-            this.showMoreAfterRender = true;
-          }
-          else if (this.paginator.maxNum > this.displayNum && !this.viewRendered){
-            this.showMoreAfterRender = true;
-          }
-          else {
-            this.view.disableShowMore();
-          }
-        } else {
-          //it's in response to "load more"
-          this.collection.add(this.parseResponse(apiResponse, this.collection.models.length+1), {
-            parse: true
-          })
         }
+
+
+
         //resolving the promises generated by "loadBibcodeData"
         if (this.deferredObject){
-          this.deferredObject.resolve(this.collection.numFound)
+          this.deferredObject.resolve(this.paginationModel.get("numFound"))
         }
 
       },
 
       onAllInternalEvents: function(ev, arg1, arg2) {
 
-        if (ev == 'composite:rendered') {
-
-          this.view.disableShowMore();
-          this.view.toggleDetailsControls(false);
-          if (this.showMoreAfterRender){
-            this.view.enableShowMore()
-          }
-          this.viewRendered = true;
-
-        }
-        else if (ev == 'reset') {
-          var details = _.filter(this.view.collection.models, function(m) {return m.has('details')});
-          if (details.length > 0) {
-            this.view.toggleDetailsControls(true);
-          }
-          else {
-            this.view.toggleDetailsControls(false);
-          }
-
-        }
-        else if (ev == "fetchMore") {
-
-          var p = this.handlePagination(this.displayNum, this.maxDisplayNum, arg1, this.paginator, this.view, this.collection);
-          if (p && p.before) {
-            p.before();
-          }
-          if (p && p.runQuery) {
-            // ask for more data
-            this.resetPagination = false;
-            this.dispatchRequest(this.getCurrentQuery());
-          }
+       if (ev === "dataRequest") {
 
 
-        }
+          var start = arg1;
+
+          var rows = arg2;
+
+         var q = this.getCurrentQuery().clone();
+
+         q.unlock();
+         q = this.composeQuery(this.defaultQueryArguments, q);
+
+         q.set("start", start);
+         q.set("rows", rows)
+
+         var req = this.composeRequest(q);
+         if (req) {
+           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+         }
+
+         if (this.mainResults){
+           //letting other interested widgets know that more info was fetched
+           //i.e. there was a pagination event
+           this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: {start: start, rows: rows}});
+
+         }
+
+         if (this.showLoad === true){
+           this.startWidgetLoad()
+         }
+
+       }
+
       },
 
-      /**
-       * This functions takes apiResponse and returns an array of objects
-       * that will be passed to the collection. Model can do additional
-       * parsing on it. See {ItemModel}
-       *
-       * If you specified defaultQueryArguments['fl'] only these values
-       * will be returned.
-       *
-       * Each object will also contain 'orderNum' key; to indicate its
-       * position in the collection
-       *
-       * @param apiResponse
-       * @returns {*}
-       */
 
+      startWidgetLoad : function(){
 
-      parseResponse: function (apiResponse, orderNum) {
-        var raw = apiResponse.toJSON();
-        var highlights = raw.highlighting;
-        orderNum = orderNum || 1;
+          if (this.view.itemViewContainer) {
+            var removeLoadingView = function () {
+              this.view.$el.find(".s-loading").remove();
+            }
+            this.listenToOnce(this.visibleCollection, "reset", removeLoadingView);
 
-        if (!this.defaultQueryArguments.fl) {
-          return _.map(raw.response.docs, function (d) {
-            orderNum += 1;
-            d['orderNum'] = orderNum;
-            d['identifier'] = d.bibcode;
-            return d
-          });
+          if (this.view.$el.find(".s-loading").length === 0){
+            this.view.$el.append(this.loadingTemplate());
+          }
         }
-
-        var keys = _.map(this.defaultQueryArguments.fl.split(','), function (v) {
-          return v.trim()
-          console.log(keys)
-        });
-
-        var docs = _.map(raw.response.docs, function (doc) {
-          var d = _.pick(doc, keys);
-          d['identifier'] = d.bibcode;
-
-          d['orderNum'] = orderNum;
-
-          orderNum += 1;
-          return d;
-
-        });
-
-        //getting links data from LinkGenerator Mixin
-        var docs = this.parseLinksData(docs)
-
-        return docs;
       }
 
     });
 
     // add mixins
-    _.extend(ResultsWidget.prototype, WidgetPagination);
-    _.extend(ResultsWidget.prototype, LinkGenerator);
+    _.extend(ListOfThingsWidget.prototype, LinkGenerator);
+    _.extend(ListOfThingsWidget.prototype, WidgetPaginationMixin)
 
 
-    return ResultsWidget;
+    return ListOfThingsWidget;
 
   });

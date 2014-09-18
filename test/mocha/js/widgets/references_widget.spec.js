@@ -45,25 +45,6 @@ define(['jquery',
 
     })
 
-    it("fetches citation information for the bibcode only if it doesn't already have it and loads it into a collection", function(){
-
-      var spy = sinon.spy(widget, 'dispatchRequest');
-
-      widget.loadBibcodeData("sampleBib1");
-      expect(spy.callCount).to.equal(1);
-
-      expect(widget.collection.toJSON()[0].bibcode).to.equal("2013arXiv1305.3460H");
-
-      widget.loadBibcodeData("sampleBib1");
-      expect(spy.callCount).to.equal(1);
-
-      widget.loadBibcodeData("sampleBib2");
-      expect(spy.callCount).to.equal(2)
-
-      expect(widget.collection.toJSON()[0].bibcode).to.equal('2006IEDL...27..896K');
-
-
-    })
 
     it("resolves the promise from loadBibcodeData with numFound", function(){
 

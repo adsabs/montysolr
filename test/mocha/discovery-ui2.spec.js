@@ -8,26 +8,17 @@ var abase = tbase + '/apps/discovery';
 // These are the tests that we want to run for this app
 var tests = [
 
-    tbase + '/widgets/tabs_widget.spec.js',
-    tbase + '/widgets/search_bar_widget.spec.js',
-
-    tbase + '/widgets/citations_widget.spec.js',
-    tbase + '/widgets/references_widget.spec.js',
-    tbase + '/widgets/similar_widget.spec.js',
-    tbase + '/widgets/table_of_contents_widget.spec.js',
-    tbase + '/widgets/coreads_widget.spec.js',
-    tbase + '/page_managers/abstract_page_controller.spec.js',
-    tbase + '/widgets/resources_widget.spec.js',
-
-
-  //  tbase + '/page_managers/abstract_page_controller.spec.js',
-//  tbase + '/page_managers/landing_page_controller.spec.js',
-//  tbase + '/page_managers/results_page_controller.spec.js'
+//    tbase + '/widgets/tabs_widget.spec.js',
+//    tbase + '/widgets/search_bar_widget.spec.js',
+//
+//    tbase + '/widgets/citations_widget.spec.js',
+//    tbase + '/widgets/references_widget.spec.js',
+//    tbase + '/widgets/similar_widget.spec.js',
+//    tbase + '/widgets/table_of_contents_widget.spec.js',
+//    tbase + '/widgets/coreads_widget.spec.js',
+//    tbase + '/widgets/resources_widget.spec.js',
 
 
-    tbase + '/widgets/year_graph_facet_widget.spec.js',
-    tbase + '/widgets/citation_graph_facet_widget.spec.js',
-    tbase + '/widgets/reads_graph_facet_widget.spec.js'
 
 
 

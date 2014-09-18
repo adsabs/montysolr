@@ -6,82 +6,90 @@
 
 define([
     'underscore',
-    'hbs!js/widgets/list_of_things/templates/results-container-template',
-    'hbs!js/widgets/list_of_things/templates/item-template',
-    'js/widgets/list_of_things/widget'
+    'js/widgets/list_of_things/widget',
+    'js/widgets/base/base_widget'
     ],
 
-  function (
-    _,
-    ContainerTemplate,
-    ItemTemplate,
-    ListOfThingsWidget) {
-
-    var ItemModelClass = ListOfThingsWidget.prototype.ItemModelClass.extend({
-
-    });
-
-    var CollectionClass = ListOfThingsWidget.prototype.CollectionClass.extend({
-      model: ItemModelClass
-    });
-
-    var ItemViewClass = ListOfThingsWidget.prototype.ItemViewClass.extend({
-      template: ItemTemplate
-
-    });
-
-    var CollectionViewClass = ListOfThingsWidget.prototype.CollectionViewClass.extend({
-      id: "search-results",
-      itemView: ItemViewClass,
-      template: ContainerTemplate
-    });
-
+  function (_, ListOfThingsWidget, BaseWidget) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
 
+      mainResults  : true,
 
+      activate: function (beehive) {
 
-      ItemModelClass     : ItemModelClass,
-      ItemViewClass      : ItemViewClass,
-      CollectionClass    : CollectionClass,
-      CollectionViewClass: CollectionViewClass,
+        _.bindAll(this, "dispatchInitialRequest", "processResponse");
 
-      defaultQueryArguments: {
-        hl     : "true",
-        "hl.fl": "title,abstract",
-        fl     : 'title,abstract,id,bibcode,author,keyword,citation_count,highlights,pub,aff,volume,year,links_data,ids_data,[citations],property'
+        this.pubsub = beehive.Services.get('PubSub');
+
+        //custom dispatchRequest function goes here
+        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchInitialRequest);
+
+        //custom handleResponse function goes here
+        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
-      parseResponse: function (apiResponse, orderNum) {
-        var raw = apiResponse.toJSON();
 
-        var highlights = raw.highlighting;
-        orderNum = orderNum || 1;
+      dispatchInitialRequest  : function(){
 
-        if (!this.defaultQueryArguments.fl) {
-          return _.map(raw.response.docs, function (d) {
-            orderNum += 1;
-            d['orderNum'] = orderNum;
-            d['identifier'] = d.bibcode;
-            return d
-          });
+        this.resetWidget();
+
+        BaseWidget.prototype.dispatchRequest.apply(this, arguments)
+      },
+
+      //set "showDetails" to true
+      showDetailsButton : true,
+
+      defaultQueryArguments: function(){
+        return {
+          hl     : "true",
+          "hl.fl": "title,abstract,body",
+          fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year',
+          rows : 25
+        }
+      },
+
+      processResponse: function (apiResponse) {
+
+        this.setCurrentQuery(apiResponse.getApiQuery());
+
+        var toSet = {"numFound":  apiResponse.get("response.numFound"),
+          "currentQuery":this.getCurrentQuery()};
+
+        var r =  this.getCurrentQuery().get("rows");
+        var s = this.getCurrentQuery().get("start");
+        if (r){
+
+          r = $.isArray(r) ? r[0] : r;
+          toSet.perPage = r;
+
         }
 
-        var keys = _.map(this.defaultQueryArguments.fl.split(','), function (v) {
-          return v.trim()
-        });
+        if (s) {
 
-        var docs = _.map(raw.response.docs, function (doc) {
-          var d = _.pick(doc, keys);
-          d['identifier'] = d.bibcode;
-          var id = d.id;
+          var perPage =  toSet.perPage || this.paginationModel.get("perPage");
+
+          s = $.isArray(s) ? s[0] : s;
+
+          //getPageVal comes from the pagination widget
+          toSet.page= this.getPageVal(s, perPage);
+
+        }
+
+        var highlights = apiResponse.get("highlighting");
+
+        var docs = apiResponse.get("response.docs")
+
+        //any preprocessing before adding the resultsIndex is done here
+        var docs = _.map(docs, function(d){
+          d.identifier = d.bibcode;
           var h = {};
 
-          if (highlights) {
+          if (_.keys(highlights).length) {
 
             h = (function () {
 
-              var hl = highlights[id];
+              var hl = highlights[d.id];
               var finalList = [];
               //adding abstract,title, etc highlights to one big list
               _.each(_.pairs(hl), function (pair) {
@@ -95,62 +103,46 @@ define([
             }());
           }
 
-
           if (h.highlights && h.highlights.length > 0)
-            d['details'] = h;
+            d['details'] = {highlights: h};
 
-          d['orderNum'] = orderNum;
-
-          orderNum += 1;
           return d;
 
         });
-        //getting links data from LinkGenerator Mixin
-        var docs = this.parseLinksData(docs);
 
-        return docs;
-      },
+        docs = this.parseLinksData(docs);
 
-      onAllInternalEvents: function(ev, arg1, arg2) {
+        docs = this.addPaginationToDocs(docs, apiResponse);
 
-        if (ev == 'composite:rendered') {
 
-          this.view.disableShowMore();
-          this.view.toggleDetailsControls(false);
-          if (this.showMoreAfterRender){
-            this.view.enableShowMore()
-          }
-          this.viewRendered = true;
+        if (!this.paginationModel.get("numFound")) {
+
+          //reset the pagination model with toSet values
+          //has to happen right before collection changes
+          this.paginationModel.set(toSet);
+
+          this.collection.reset(docs, {
+            parse: true
+          });
+        }
+        else {
+          //reset the pagination model with toSet values
+          //has to happen right before collection changes
+          this.paginationModel.set(toSet);
+
+          //backbone ignores duplicate records because it has an idAttribute of "resultsIndex"
+          this.collection.add(docs, {
+            parse: true
+          });
 
         }
-        else if (ev == 'reset') {
 
-        var details = _.filter(this.view.collection.models, function(m) {return m.has('details')});
-          if (details.length > 0) {
-            this.view.toggleDetailsControls(true);
-          }
-          else {
-            this.view.toggleDetailsControls(false);
-          }
-
-        }
-        else if (ev == "fetchMore") {
-
-          var p = this.handlePagination(this.displayNum, this.maxDisplayNum, arg1, this.paginator, this.view, this.collection);
-          if (p && p.before) {
-            p.before();
-          }
-          if (p && p.runQuery) {
-            // ask for more data
-            this.resetPagination = false;
-            this.dispatchRequest(this.getCurrentQuery());
-          }
-
-          //letting other interested widgets know that more info was fetched
-          this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: this.paginator});
-
+        //resolving the promises generated by "loadBibcodeData"
+        if (this.deferredObject){
+          this.deferredObject.resolve(this.paginationModel.get("numFound"))
         }
       }
+
 
     });
 
