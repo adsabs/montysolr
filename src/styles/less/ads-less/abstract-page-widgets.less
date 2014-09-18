@@ -141,8 +141,8 @@
   overflow: hidden;
 }
 
-@abstract-nav-col-color : @gray-dark;
-@abstract-nav-title-color: @gray;
+@abstract-nav-col-color : lighten(@gray-dark, 5%);
+@abstract-nav-title-color: lighten(@gray-dark, 15%);
 
 
 
@@ -171,7 +171,7 @@
   padding: 3%;
   cursor: pointer;
   font-size: 18px;
-  color: @gray-lighter;
+  color: white;
   .lh-transition(all .4s ease-out);
 
 }
@@ -182,7 +182,6 @@
 }
 
 .s-abstract-nav-active {
-  color: white !important;
   background-color: @brand-primary-faded;
 
 }
