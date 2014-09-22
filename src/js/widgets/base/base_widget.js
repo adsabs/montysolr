@@ -43,8 +43,6 @@ define(['backbone', 'marionette',
    *
    */
 
-    //adding "isRendered" flag to Marionette ItemView
-
 
   var BaseWidget = Marionette.Controller.extend({
 
@@ -56,9 +54,6 @@ define(['backbone', 'marionette',
       // and they will carry their own context 'this'
       _.bindAll(this, "dispatchRequest", "processResponse");
 
-      this.on("show", this.onShow);
-
-
       this._currentQuery = new ApiQuery();
       this.defaultQueryArguments = this.defaultQueryArguments || {};
       if (options.defaultQueryArguments) {
@@ -69,6 +64,7 @@ define(['backbone', 'marionette',
         this.view = options.view;
         this.collection = options.view.collection;
       }
+
     },
 
     /**
@@ -204,7 +200,6 @@ define(['backbone', 'marionette',
           query.set(k, v)
         });
       }
-      ;
       return query;
     },
 
@@ -241,6 +236,7 @@ define(['backbone', 'marionette',
     startWidgetLoad : function(){
 
       if (this.view){
+        //composite view needs to explicitly remove the loading view
         if (this.view.itemViewContainer) {
           var removeLoadingView = function () {
             this.view.$el.find(".s-loading").remove();

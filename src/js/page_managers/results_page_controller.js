@@ -34,26 +34,59 @@ define([
 
       insertTemplate: function () {
 
-        $("#body-template-container").children().detach();
+        var $b = $("#body-template-container");
 
-        $("#body-template-container").append(threeColumnTemplate());
 
-        $("#results-control-row").append(resultsControlRowTemplate())
+        if (this.cachedTemplate){
+
+          $b.children().detach()
+
+          $b.append(this.cachedTemplate);
+          return
+
+        }
+        else {
+
+
+          $b.children().detach();
+
+          $b.append(threeColumnTemplate());
+
+          $("#results-control-row").append(resultsControlRowTemplate())
+
+          this.fillTemplateWithWidgets();
+
+        }
 
       },
 
-      insertLoadingView: function () {
-        $("#body-template-container").append(this.loadingWidget.render().el);
+      fillTemplateWithWidgets: function(){
+        this.displayControlRow();
+        this.displayFacets();
+        this.displayRightColumn();
+        this.displayResultsList();
+        this.enableRightColToggle();
 
-        this.loadingWidget.trigger("showLoading")
+        //cache a reference to the template only after
+        //the widgets have been inserted
+        this.cachedTemplate = $("#results-page-layout");
 
-      },
+    },
+
 
       displayFacets: function () {
 
         var $leftCol = $(".s-left-col-container");
 
-        $leftCol.append(widgetDict.authorFacets.render().el).append(widgetDict.database.render().el).append(widgetDict.refereed.render().el).append(widgetDict.keywords.render().el).append(widgetDict.pub.render().el).append(widgetDict.bibgroup.render().el).append(widgetDict.data.render().el).append(widgetDict.vizier.render().el).append(widgetDict.grants.render().el);
+        $leftCol.append(widgetDict.authorFacets.render().el)
+          .append(widgetDict.database.render().el)
+          .append(widgetDict.refereed.render().el)
+          .append(widgetDict.keywords.render().el)
+          .append(widgetDict.pub.render().el)
+          .append(widgetDict.bibgroup.render().el)
+          .append(widgetDict.data.render().el)
+          .append(widgetDict.vizier.render().el)
+          .append(widgetDict.grants.render().el);
 
       },
 
@@ -172,13 +205,10 @@ define([
 
         if (!inDom){
           this.insertTemplate();
-          this.displaySearchBar();
-          this.displayControlRow();
-          this.displayFacets();
-          this.displayRightColumn();
-          this.displayResultsList();
-          this.enableRightColToggle();
         }
+
+        //these functions must be called every time
+        this.displaySearchBar();
 
       }
 

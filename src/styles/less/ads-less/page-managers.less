@@ -25,33 +25,36 @@
 
 .btn-expand {
 
-  background-color: hsla(360, 100%, 100%, 0.82);
-  border-radius: @border-radius-base;
-  border: 1px solid @gray-lighter;
-  .lh-transition(transform .5s ease-out, width .5s ease-out, height .5s ease-out, font-size .5s ease-out);
-  .lh-box-shadow(1px 1px 4px @gray-light);
   display:none;
+
+  .descriptor {
+    display: none;
+  }
 
   //show in desktops
   @media (min-width : @screen-md-min){
     display: inline-block;
-    z-index: @z-index-3;
-  }
+    .lh-transition(all .5s ease-out, width .5s ease-out, height .5s ease-out, font-size .5s ease-out);
 
-  &:hover {
-    .lh-box-shadow(1 1px 5px darken(@gray-light, 4%));
-    cursor: pointer;
-    font-size: 20px;
 
+    &:hover {
+      .lh-box-shadow(1 1px 5px darken(@gray-light, 4%));
+//      width:150px;
+//
+//      .descriptor {
+//        display: inline-block
+//      }
+
+
+    }
   }
 
 }
 
 .left-expand {
   position: absolute;
-  padding: 15px 20px 15px 9px;
-  left: -6px;
-  top: 60px;
+  left: 4%;
+  top: 15px;
 
 }
 
@@ -67,9 +70,9 @@
 
 .right-expand {
   position: absolute;
-  padding: 15px 9px 15px 20px;
-  right: -6px;
-  top: 60px;
+  right: 4%;
+  top: 15px;
+
 
 }
 
@@ -89,8 +92,9 @@
   background-color: white;
   border: 1px solid lighten(@border-light-default-color, 8%);
   .lh-box-shadow(2px 2px 5px darken(@gray-lighter, 5%));
-  min-height: 500px;
-
+  margin-bottom: 40px;
+  min-height: 800px;
+  position: relative;
 }
 
 .s-dynamic-page-body {
@@ -129,6 +133,8 @@
   .s-left-col-mixin{
     .make-sm-column(4);
     .make-md-column(2);
+    //overriding standard column padding
+    padding-right: 0px;
   }
 
   .s-middle-col-mixin {
@@ -139,6 +145,8 @@
 
   .s-right-col-mixin {
     .make-md-column(3);
+    //overriding standard column padding
+    padding-left: 0px;
   }
 
 

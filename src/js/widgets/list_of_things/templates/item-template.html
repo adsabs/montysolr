@@ -1,26 +1,26 @@
 <div class="s-result-item-buffer">
 <div class="col-sm-12">
     <div class="row">
-        <div class="col-xs-1 s-checkbox-col">
+        <div class="col-sm-1 col-xs-2 s-checkbox-col">
             <label>
                 {{orderNum}}
                 <input type="checkbox" value={{identifier}} name="identifier">
             </label>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-4 col-xs-5">
             <span class="identifier s-identifier"><a href="#abs/{{identifier}}">
                {{identifier}}
                 </a>
             </span>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-3 col-xs-6">
             <span title="citation count">
                 {{#if citation_count}}
                 cited: {{citation_count}}</span>
             {{/if}}
             </p>
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-4">
 
             {{#if links}}
             <div class="s-results-links">

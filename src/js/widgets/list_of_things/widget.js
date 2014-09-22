@@ -225,6 +225,7 @@ define([
 
         this.updateStartAndEndIndex();
 
+
       },
 
       model : ItemModel,
@@ -354,6 +355,7 @@ define([
       initialize: function (options) {
         this.paginationView = options.paginationView;
         this.showDetailsButton = options.showDetailsButton;
+        this.mainResults = options.mainResults;
       },
 
       className: "list-of-things",
@@ -366,7 +368,8 @@ define([
 
       serializeData : function(){
 
-        return {showDetailsButton : this.showDetailsButton}
+        return {showDetailsButton : this.showDetailsButton,
+                mainResults : this.mainResults}
 
       },
 
@@ -400,8 +403,6 @@ define([
     var ListOfThingsWidget = BaseWidget.extend({
 
       initialize: function (options) {
-
-        BaseWidget.prototype.initialize.call(this, options);
 
         //so each widget gets its own copy instead of sharing one on the prototype chain
         this.defaultQueryArguments = _.result(this, "defaultQueryArguments");
@@ -437,7 +438,9 @@ define([
         this.view = new ListView({
           collection: this.visibleCollection,
           paginationView : this.paginationView,
-          showDetailsButton : this.showDetailsButton
+          showDetailsButton : this.showDetailsButton,
+          mainResults : this.mainResults
+
         });
 
         this.collection = new MasterCollection({visibleCollection : this.visibleCollection,
@@ -445,6 +448,9 @@ define([
 
         this.listenTo(this.collection, "all", this.onAllInternalEvents);
         this.on("all", this.onAllInternalEvents);
+
+        BaseWidget.prototype.initialize.call(this, options);
+
 
       },
 

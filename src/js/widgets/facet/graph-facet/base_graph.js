@@ -10,9 +10,9 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
       //setting some constants for the graph
       this.bins = 12; //will be around 12, depending on remainders
       this.margin = {
-        top   : 10,
-        right : 10,
-        bottom: 5,
+        top   : 0,
+        right : 0,
+        bottom: 15,
         left  : 40
       };
       this.fullWidth = 280;

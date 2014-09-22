@@ -68,7 +68,7 @@
 
 .s-abstract-title-container {
 
-  padding: 2%;
+  padding: 1% 2%;
 }
 .s-abstract-title-bibcode {
   margin: 0px;
@@ -117,7 +117,7 @@
 }
 
 .s-abstract-metadata {
-  padding: 0 2%;
+  padding: 0 4%;
 
 }
 
@@ -141,24 +141,12 @@
   overflow: hidden;
 }
 
-@abstract-nav-col-color : lighten(@gray-dark, 5%);
-@abstract-nav-title-color: lighten(@gray-dark, 15%);
 
-
+.s-abstract-content {
+  padding: 1% 0;
+}
 
 .s-abstract-page-layout {
-  .s-main-content-container {
-    margin: 2%;
-  }
-
-  .s-left-column {
-    background-color : @abstract-nav-col-color;
-    padding-bottom: 9999px;
-    margin-bottom: -9999px;
-    padding-top: 1%;
-    overflow:hidden;
-
-  }
 
   .s-middle-column {
     padding-bottom: 10%;
@@ -166,53 +154,60 @@
 
 }
 
+
 .s-abstract-nav {
-
-  padding: 3%;
-  cursor: pointer;
-  font-size: 18px;
-  color: white;
-  .lh-transition(all .4s ease-out);
-
-}
-
-.s-abstract-nav:hover {
-
-  background-color: mix(@brand-primary-faded, @abstract-nav-col-color, 33%);
+  padding: 5%;
+  margin: 0 10%;
+ .lh-transition(background-color, .5s, ease-out)
 }
 
 .s-abstract-nav-active {
-  background-color: @brand-primary-faded;
+  background-color: mix(@results-page-background, @brand-primary-faded, 20%);
+  color: white;
+}
 
+.s-abstract-nav:hover {
+  background-color: mix(@results-page-background, @brand-primary-faded, 90%);
 }
 
 .s-abstract-nav-active:hover {
-  background-color: @brand-primary-faded;
-
+  background-color: mix(@results-page-background, @brand-primary-faded, 20%);
 }
 
 .s-abstract-nav-inactive {
-  color: lighten(@abstract-nav-col-color, 15%) !important;
-}
+  color: lighten(@gray-light, 15%);
 
+}
 
 .s-abstract-nav-inactive:hover {
   cursor: not-allowed;
-  background-color: @abstract-nav-col-color;
+  background-color: @results-page-background;
 
 }
 
 .s-nav-header {
-  width: 200%;
-  padding: 6% 10%;
-  font-size: 24px;
-  margin: 5% 0;
-  margin-left : -15px;
-  color: white;
+  padding-top: 5%;
+  margin: 0 5% 5% 5%;
   font-size: 18px;
-  background-color: @abstract-nav-title-color;
-  border-bottom: 1px solid darken(@abstract-nav-col-color, 3%);
 
+
+}
+
+
+.s-view-nav{
+  border-bottom: 5px solid @brand-primary;
+
+}
+
+.s-export-nav {
+
+  border-bottom: 5px solid @brand-success;
+
+}
+
+.s-analyze-nav {
+
+  border-bottom: 5px solid @brand-info;
 
 }
 

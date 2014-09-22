@@ -80,9 +80,36 @@ define(["marionette",
 
       insertTemplate: function () {
 
-        var $bodyContainer = $("#body-template-container");
-        $bodyContainer.children().detach();
-        $bodyContainer.append(threeColumnTemplate())
+        var $b = $("#body-template-container");
+
+
+        if (this.cachedTemplate){
+
+          $b.children().detach()
+
+          $b.append(this.cachedTemplate);
+
+          return
+
+        }
+
+        else {
+
+          $b.children().detach();
+
+          $b.append(threeColumnTemplate());
+
+          this.fillTemplateWithWidgets();
+
+        }
+
+      },
+
+      fillTemplateWithWidgets : function(){
+        this.displayRightColumn();
+        this.showTitle();
+
+        this.cachedTemplate = $("#abstract-page-layout");
 
       },
 
@@ -322,14 +349,18 @@ define(["marionette",
 
         this.setCurrentBibcode(bib);
 
-        if (!inDom){
+
+        if (!inDom) {
 
           this.insertTemplate();
-          this.displayRightColumn();
-          this.displayTopRow();
-          this.showTitle();
         }
 
+        /*
+        * these functions must be called each time
+        * this page is rendered, regardless of whether
+        * it's been rendered before
+        * */
+        this.displayTopRow();
         this.displayAbstractNav(subPage);
         this.renderNewBibcode();
         this.loadWidgetData(bib);
