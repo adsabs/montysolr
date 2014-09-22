@@ -3,7 +3,7 @@
 @import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
 
 
-@results-page-background : lighten(@gray-lighter, 3%);
+@results-page-background : lighten(@gray-lighter, 2%);
 
 @border-default : 1px solid @btn-default-border;
 
@@ -168,8 +168,54 @@
   bottom: 0px;
   right: 0px;
 
+  &:before {
+    .fa;
+    .fa-spin;
+    .fa-2x;
+    color: @brand-info;
+    content : @fa-var-cog;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    z-index: @z-index-4;
+
+  }
+
 
 }
+
+//move up the loader image gif for lists of results
+.list-of-things {
+
+  .s-loading {
+    opacity: .5;
+    z-index : 1000;
+    background-color: white;
+    position: absolute;
+    top: 0px;
+    left:0px;
+    bottom: 0px;
+    right: 0px;
+
+    &:before {
+      .fa;
+      .fa-spin;
+      .fa-2x;
+      color: @brand-info;
+      content : @fa-var-cog;
+      position: absolute;
+      top: 10%;
+      right: 50%;
+      z-index: @z-index-4;
+
+    }
+
+
+  }
+
+}
+
+
 
 .loading-indicator {
   .fa;
