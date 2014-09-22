@@ -246,23 +246,25 @@
 
 }
 
-.chart .refereed {
+.s-chart .refereed {
   pointer-events: all;
   fill: @refereed !important;
 
 }
 
-.chart .bar, .chart .dot {
+.s-chart .bar, .s-chart .dot {
   fill: @nonrefereed;
 }
 
-.chart .x-axis .active text {
+.s-chart .x-axis .active text {
   fill: lighten(@brand-primary, 10%);
 }
 
-.chart {
+.s-chart {
   pointer-events: all;
   min-height: 270px;
+  height: 100%;
+  width: 100%
 }
 
 #citation-graph .chart {

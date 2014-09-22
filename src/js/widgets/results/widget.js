@@ -14,8 +14,6 @@ define([
 
     var ResultsWidget = ListOfThingsWidget.extend({
 
-      mainResults  : true,
-
       activate: function (beehive) {
 
         _.bindAll(this, "dispatchInitialRequest", "processResponse");
@@ -39,6 +37,10 @@ define([
 
       //set "showDetails" to true
       showDetailsButton : true,
+
+      //so that we show the toggle buttons
+      mainResults  : true,
+
 
       defaultQueryArguments: function(){
         return {

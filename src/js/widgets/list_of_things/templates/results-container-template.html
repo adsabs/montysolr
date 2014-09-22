@@ -1,13 +1,39 @@
 <div class="row s-list-controls">
-    <div class="pagination-controls s-pagination-controls"></div>
-        <div class="s-show-details-container col-sm-3">
+
+
+            {{#if mainResults}}
+
+                {{#if showDetailsButton}}
+                    <div class="s-show-details-container col-sm-4 col-sm-offset-8">
+                        <button class="btn btn-default show-details">Show details</button>
+                    </div>
+                {{/if}}
+
+    <button class="btn btn-default btn-expand left-expand" title="hide left column"><i></i></button>
+    <button class="btn btn-default btn-expand right-expand" title="hide right column"><i></i></button>
+
+
+    {{else}}
+
             {{#if showDetailsButton}}
-        <button class="btn btn-default show-details">Show details</button>
+                <div class="s-show-details-container col-sm-3 col-sm-offset-9">
+                    <button class="btn btn-default show-details">Show details</button>
+                </div>
             {{/if}}
+
+            {{/if}}
+
+
     </div>
     </div>
 
 </div>
 <div class="row">
     <div class="col-sm-12 results-list  s-results-list "></div>
+
 </div>
+<div class="row">
+    <div class="col-sm-12 pagination-controls s-pagination-controls"></div>
+</div>
+
+
