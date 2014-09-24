@@ -216,10 +216,10 @@ module.exports = function(grunt) {
         options: {
           output: null,
           urls: [
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-ui.spec.html#discovery-ui1.spec',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-ui.spec.html#discovery-ui2.spec',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery-qb.spec.html'
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=discovery.spec',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=discovery-ui1.spec',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=discovery-ui2.spec',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=discovery-qb.spec'
           ]
         }
       }

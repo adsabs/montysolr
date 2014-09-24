@@ -216,7 +216,9 @@ define([
         this.listenTo(this.paginationModel, "change:perPage", this.onPaginationChange);
         this.listenTo(this.paginationModel, "change:numFound", this.updateStartAndEndIndex);
 
-        this.on("add", this.transferModels);
+        // deactivated, because it is called both for collection.add([]) as well as for
+        // each of the collections model 'add' event
+        //this.on("add", this.transferModels);
         this.on("reset", this.transferModels);
 
         this.visibleCollection = options.visibleCollection;
