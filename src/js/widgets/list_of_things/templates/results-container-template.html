@@ -1,33 +1,39 @@
 <div class="row s-list-controls">
 
+    <div class="s-results-border-bottom">
+
+        <div class="col-sm-1">
 
             {{#if mainResults}}
+            <button class="btn btn-default btn-expand left-expand" title="hide left column"><i></i></button>
+            {{/if}}
+        </div>
 
-                {{#if showDetailsButton}}
-                    <div class="s-show-details-container col-sm-4 col-sm-offset-8">
-                        <button class="btn btn-default show-details">Show details</button>
-                    </div>
-                {{/if}}
-
-    <button class="btn btn-default btn-expand left-expand" title="hide left column"><i></i></button>
-    <button class="btn btn-default btn-expand right-expand" title="hide right column"><i></i></button>
-
-
-    {{else}}
+        <div class="col-sm-5">
 
             {{#if showDetailsButton}}
-                <div class="s-show-details-container col-sm-3 col-sm-offset-9">
-                    <button class="btn btn-default show-details">Show details</button>
-                </div>
+            <div class="s-show-details-container col-sm-4 ">
+                <button class="btn btn-default show-details">Show details</button>
+            </div>
             {{/if}}
 
+        </div>
+
+
+        <div class="col-sm-5 sort-container">
+
+        </div>
+
+        <div class="col-sm-1">
+            {{#if mainResults}}
+            <button class="btn btn-default btn-expand right-expand pull-right" title="hide right column"><i></i></button>
             {{/if}}
+        </div>
 
-
-    </div>
     </div>
 
 </div>
+
 <div class="row">
     <div class="col-sm-12 results-list  s-results-list "></div>
 

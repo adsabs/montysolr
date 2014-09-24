@@ -30,7 +30,9 @@ var tests = [
     //TBD 24/09/14 tbase + '/widgets/facet_graph_widget.spec.js',
     //TBD 24/09/14 tbase + '/widgets/facet_hier_widget.spec.js',
     tbase + '/widgets/facet_widget.spec.js',
-    //XXX 24/09/14 tbase + '/widgets/facet_zoomable_graph_view.spec.js'
+    //XXX 24/09/14 tbase + '/widgets/facet_zoomable_graph_view.spec.js',
+
+    tbase + 'widgets/sort_widget.spec.js'
 
 
 ];
