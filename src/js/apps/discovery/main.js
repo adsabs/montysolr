@@ -355,13 +355,14 @@ define(["config", 'module'], function(config, module) {
 
       resultsWidgetDict.results = app.getWidget('Results')
 
-      resultsWidgetDict.graphTabs = app.getWidget('GraphTabs')
 
       resultsWidgetDict.searchBar = app.getWidget('SearchBar')
 
       resultsWidgetDict.queryInfo = app.getWidget('QueryInfo');
       resultsWidgetDict.graphTabs = app.getWidget('GraphTabs');
       resultsWidgetDict.queryDebugInfo = app.getWidget('QueryDebugInfo');
+
+      resultsWidgetDict.sort = app.getWidget('Sort');
 
 
 

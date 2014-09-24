@@ -97,7 +97,7 @@ define([
       displayRightColumn: function () {
         var $rightCol = $(".s-right-col-container");
 
-        $rightCol.append(widgetDict.graphTabs.render().el).append(widgetDict.queryDebugInfo.render().el);
+        $rightCol.append(widgetDict.graphTabs.render().el);
 
       },
 
@@ -112,7 +112,8 @@ define([
 
         $middleCol.append(widgetDict.results.render().el);
 
-        $(".list-of-things").removeClass("hide")
+        $middleCol.find(".sort-container").append(widgetDict.sort.render().el)
+
 
       },
 
