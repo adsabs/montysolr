@@ -1,0 +1,27 @@
+<!-- Single button -->
+<div class="btn-group sort-widget s-sort-widget pull-right">
+    <button type="button" class="btn btn-default dropdown-toggle" id="sort-button" data-toggle="dropdown">
+        Current Sort: <em>{{current}}</em>
+        <span class="caret">
+    </button>
+
+    <ul class="dropdown-menu" role="menu">
+        <form action="">
+        <li>
+            {{#each sortOptions}}
+            <label><input type="radio" value="{{this.value}}" name="sort-options" {{#if this.default}} checked="checked" {{/if}}> {{this.title}}</label>
+            {{/each}}
+        </li>
+
+        <li class="divider"></li>
+
+        <li>
+            {{#each orderOptions}}
+            <label><input type="radio" value="{{this.value}}"  name="order-options" {{#if this.default}}checked="checked" {{/if}}> {{this.title}}</label>
+            {{/each}}
+        </li>
+
+        <li><button class="btn btn-info btn-xs choose-sort pull-right">Submit</button></li>
+        </form>
+    </ul>
+</div>
