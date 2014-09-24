@@ -16,17 +16,35 @@
 
   <!-- Setup the testing frameworks -->
   <script>
-    // Chai
-    //var should = chai.should();
-    
-    /*globals mocha, expect, chai */
-    mocha.setup('bdd');
-    mocha.bail(false);
-    var expect = chai.expect,
-        assert = chai.assert,
-        should = chai.should;
+      // Chai
+      //var should = chai.should();
 
-    window.mocha.testToLoad = '../test/mocha/discovery.spec';
+      // hack mocha to allow us specify tests dynamically through url parameter
+      function getUrlParam(n, deflt) {
+          var half = location.search.split(n + '=')[1];
+          return half !== undefined ? decodeURIComponent(half.split('&')[0]) : deflt;
+      }
+      mocha._reporter.prototype.suiteURL = function(suite){
+          var t = getUrlParam('bumblebeeTest');
+          if (t)
+              return '?grep=' + encodeURIComponent(suite.fullTitle()) + '&bumblebeeTest=' + encodeURIComponent(t);
+          return '?grep=' + encodeURIComponent(suite.fullTitle());
+      };
+      mocha._reporter.prototype.testURL = function(test){
+          var t = getUrlParam('bumblebeeTest');
+          if (t)
+              return '?grep=' + encodeURIComponent(test.fullTitle()) + '&bumblebeeTest=' + encodeURIComponent(t);
+          return '?grep=' + encodeURIComponent(test.fullTitle());
+      };
+
+      /*globals mocha, expect, chai */
+      mocha.setup('bdd');
+      mocha.bail(false);
+      var expect = chai.expect,
+              assert = chai.assert,
+              should = chai.should;
+
+      window.mocha.testToLoad = '../test/mocha/' + getUrlParam('bumblebeeTest', 'discovery.spec');
 
   </script>
 

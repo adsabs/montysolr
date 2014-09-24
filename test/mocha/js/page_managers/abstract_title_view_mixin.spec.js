@@ -1,3 +1,5 @@
+//TODO: these pagemanager components should live inside UI
+
 define([
     'underscore',
     'backbone',
