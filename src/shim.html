@@ -1,47 +1,46 @@
 <!doctype html>
 <script>
+      /**
+       *
+       * @type {{routes: string[], error_pages: {404: string}}}
+       *
+       * The following file is served by the webserver on 404.
+       * This script is responsible for adding a '/#/' immediately before the route in the URL, thus re-directing
+       * to the document root and having the application handle the routing instead of the webserver.
+       */
 
-    (function () {
-        /**
-         *
-         * @type {{routes: string[], error_pages: {404: string}}}
-         *
-         * The following file is served by a webserver if we can't find the resource (404)
-         * this is due to the pushState that we are using. When users bookmark clean urls
-         * and access the page; the browser is not able to load resources properly (we are
-         * not using <base href> tag to set the default location.
-         *
-         * Vlad: I really think the most straightforward solution is to ensure that the server
-         * knows about specific endpoints (i.e. location /search {}, location /account {}). We
-         * can still abstract it in a config file, and file it in as part of provisioning/deployment.
-         */
+(function () {
+  var config = {
+    'root': '/',
+    'routes': [
+      'search/',  //relative to config.root
+      'account/',
+      'abs/',
+    ],
+    'error_pages': {
+      404: '404.html'
+    },
+  }
 
-        var config = {
-            root: '/test', // without origin
-            'routes': [
-                '/search',
-                '/abs'
-            ],
-            'error_pages': {
-                404: '/404.html'
-            }
-        };
+  if (location.hash && location.hash.strip().length > 1) {
+    location.pathname = config.root + config.error_pages['404']
+  };
 
-        // if there is a hash, it is not pushstate; let's get out of here!
-        if (window.location.hash && window.location.hash.strip().length > 1)
-            window.location.pathname = config.root + config.error_pages['404'];
+  var path = location.pathname
+  if ( location.pathname.indexOf(config.root) > -1) {
+    path = path.replace(config.root,'');
+  };
 
-        var path = window.location.pathname.replace(config.root, '');
-
-        for (var i=0; i<config.routes.length; i++) {
-            var route = config.routes[i];
-            if (path.startsWith(route)) {
-                window.location.hash = path.substring(route.length, path.length);
-                window.location.pathname = config.root + window.location.pathname.substring(0, path.length);
-            }
-        }
-
-        window.location.pathname = config.root + config.error_pages['404'];
-    }())
+  console.log(path)
+  function findApplicationRoute() {
+    for (var i=0; i<config.routes.length; i++) {
+      var route = config.routes[i]
+      if (path.indexOf(route) > -1) {
+        return config.root + '#' + location.pathname.substring(0, path.length+1)
+      }
+    }
+    return config.root + config.error_pages["404"]
+  }
+  location.assign(location.protocol+'//'+location.host+findApplicationRoute()+location.search)
+}())
 </script>
-</html>

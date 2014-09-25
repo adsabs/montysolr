@@ -1,11 +1,10 @@
 define([], function() {
   "use strict";
-
   return {
     // if you are not running from /, set the absolute path
     // accordingly; eg. root: '/test' if it is deployed under
     // hostname:port/test/
-    root: '/',
+    root: root_,
 
     // to get more logging output on console
     debug: false,
@@ -18,12 +17,12 @@ define([], function() {
 
     // to let bumblebee discover oauth access_token at boot time
     // this can be absolute url; or url relative to the api path
-    bootstrapUrls: ['/bumblebee/bootstrap']
+    bootstrapUrls: ['/bumblebee/bootstrap'],
 
     // if you want to use pushState
-    // routerConf: {
-    //  pushState: true,
-    //  root: '/test/'
-    //}
+    routerConf: {
+      pushState: true,
+      root: '/',
+    },
   }
 });
