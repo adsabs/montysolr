@@ -372,8 +372,9 @@ define(["config", 'module'], function(config, module) {
 
       var abstract = app.getWidget('Abstract')
       abstract.activate(beehive.getHardenedInstance())
+
       var references = app.getWidget('References');
-      references.activate(beehive.getHardenedInstance())
+      references.activate(beehive.getHardenedInstance());
 
       var citations = app.getWidget('Citations')
       citations.activate(beehive.getHardenedInstance())

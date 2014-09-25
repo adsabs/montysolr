@@ -13,13 +13,7 @@ define([
 
     var ReferencesWidget = ListOfThingsWidget.extend({
 
-      //don't listen to inviting_request
-      activate: function (beehive) {
-        this.pubsub = beehive.Services.get('PubSub');
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-      },
-
-      solrField : "reference"
+      solrOperator: "references"
 
     });
 
