@@ -4,7 +4,6 @@ define([], function() {
     // if you are not running from /, set the absolute path
     // accordingly; eg. root: '/test' if it is deployed under
     // hostname:port/test/
-    root: root_,
 
     // to get more logging output on console
     debug: false,
