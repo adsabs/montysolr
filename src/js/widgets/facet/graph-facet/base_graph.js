@@ -12,7 +12,7 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
       this.margin = {
         top   : 0,
         right : 0,
-        bottom: 15,
+        bottom: 35,
         left  : 40
       };
       this.fullWidth = 280;
