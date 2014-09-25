@@ -31,12 +31,11 @@
     path = path.replace(config.root,'');
   };
 
-  console.log(path)
   function findApplicationRoute() {
     for (var i=0; i<config.routes.length; i++) {
       var route = config.routes[i]
       if (path.indexOf(route) > -1) {
-        return config.root + '#' + location.pathname.substring(0, path.length+1)
+        return config.root + '#' + path
       }
     }
     return config.root + config.error_pages["404"]
