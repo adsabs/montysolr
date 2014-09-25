@@ -210,7 +210,7 @@ define(['marionette',
         }
 //       if there is no sort indicated, it is the default, "relevant"
         else {
-          this.view.model.set(_.result(this.model.defaults()))
+          this.view.model.set(_.result(this.model, "defaults"))
         }
 
         //need to explicitly tell the view that the model changed

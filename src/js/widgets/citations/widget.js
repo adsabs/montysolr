@@ -13,7 +13,7 @@ define([
 
     var CitationsWidget = ListOfThingsWidget.extend({
 
-      solrField : "citation"
+      solrOperator : "citations"
 
     });
 

@@ -117,6 +117,8 @@ define(["marionette",
       loadWidgetData: function () {
         var that = this;
 
+        this.widgetDict.resources.loadBibcodeData(this._bibcode);
+
         _.each(this.abstractSubViews, function (v, k) {
 
           if (k === "abstract") {
@@ -126,6 +128,7 @@ define(["marionette",
 
           }
           else {
+
             var promise = v.widget.loadBibcodeData(this._bibcode);
 
             promise.done(function (numFound) {
@@ -139,9 +142,9 @@ define(["marionette",
 
             })
           }
-          this.widgetDict.resources.loadBibcodeData(this._bibcode);
 
-        }, this)
+        }, this);
+
 
       },
 
