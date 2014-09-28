@@ -95,7 +95,7 @@ define(["backbone",
       data.title = current.get("title");
       data.bibcode = current.get("bibcode");
 
-      this.titleView.model.set(data)
+      this.widgetDict.titleView.model.set(data)
     },
 
 

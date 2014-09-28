@@ -12,12 +12,12 @@
 
 
 define([
-  "marionette",
-  "hbs!./templates/results-page-layout",
-  'js/widgets/base/base_widget',
-  'js/widgets/loading/widget',
-  'hbs!./templates/results-control-row',
-  'js/components/api_query'],
+    "marionette",
+    "hbs!./templates/results-page-layout",
+    'js/widgets/base/base_widget',
+    'js/widgets/loading/widget',
+    'hbs!./templates/results-control-row',
+    'js/components/api_query'],
   function (
     Marionette,
     threeColumnTemplate,
@@ -26,130 +26,170 @@ define([
     resultsControlRowTemplate,
     ApiQuery) {
 
-    var widgetDict, history, API;
-
-    //  router can make use of these functions
-
-    API = {
-
-      insertTemplate: function () {
-
-        var $b = $("#body-template-container");
 
 
-        if (this.cachedTemplate){
+    ResultsControllerView = Marionette.ItemView.extend({
 
-          $b.children().detach()
+      initialize : function(options){
 
-          $b.append(this.cachedTemplate);
-          return
-
-        }
-        else {
-
-
-          $b.children().detach();
-
-          $b.append(threeColumnTemplate());
-
-          $("#results-control-row").append(resultsControlRowTemplate())
-
-          this.fillTemplateWithWidgets();
-
-        }
+        var options = options || {};
+        this.widgetDict = options.widgetDict;
 
       },
 
-      fillTemplateWithWidgets: function(){
+      template : threeColumnTemplate,
+
+      resultsControlRowTemplate  : resultsControlRowTemplate,
+
+      onRender : function(){
+
         this.displayControlRow();
         this.displayFacets();
         this.displayRightColumn();
         this.displayResultsList();
-        this.enableRightColToggle();
-
-        //cache a reference to the template only after
-        //the widgets have been inserted
-        this.cachedTemplate = $("#results-page-layout");
-
-    },
+      },
 
 
-      displayFacets: function () {
+      displayFacets: function() {
 
-        var $leftCol = $(".s-left-col-container");
-
-        $leftCol.append(widgetDict.authorFacets.render().el)
-          .append(widgetDict.database.render().el)
-          .append(widgetDict.refereed.render().el)
-          .append(widgetDict.keywords.render().el)
-          .append(widgetDict.pub.render().el)
-          .append(widgetDict.bibgroup.render().el)
-          .append(widgetDict.data.render().el)
-          .append(widgetDict.vizier.render().el)
-          .append(widgetDict.grants.render().el);
+        this.$(".s-left-col-container")
+          .append(this.widgetDict.authorFacets.render().el)
+          .append(this.widgetDict.database.render().el)
+          .append(this.widgetDict.refereed.render().el)
+          .append(this.widgetDict.keywords.render().el)
+          .append(this.widgetDict.pub.render().el)
+          .append(this.widgetDict.bibgroup.render().el)
+          .append(this.widgetDict.data.render().el)
+          .append(this.widgetDict.vizier.render().el)
+          .append(this.widgetDict.grants.render().el);
 
       },
 
       displayControlRow: function () {
-        $("#query-info-container").append(widgetDict.queryInfo.render().el)
+
+        this.$("#results-control-row")
+          .append(this.resultsControlRowTemplate());
+
+        this.$("#query-info-container")
+          .append(this.widgetDict.queryInfo.render().el)
       },
 
       displayRightColumn: function () {
-        var $rightCol = $(".s-right-col-container");
-
-        $rightCol.append(widgetDict.graphTabs.render().el);
-
-        if (this.beehive.getDebug())
-          $rightCol.append(widgetDict.queryDebugInfo.render().el);
-
-      },
-
-      displaySearchBar: function () {
-        $("#search-bar-row").append(widgetDict.searchBar.render().el);
+        this.$(".right-col-container")
+          .append(this.widgetDict.graphTabs.render().el)
 
       },
 
       displayResultsList: function () {
 
-        var $middleCol = $(".main-content-container");
+        this.$(".main-content-container")
+          .append(this.widgetDict.results.render().el);
 
-        $middleCol.append(widgetDict.results.render().el);
-
-        $middleCol.find(".sort-container").append(widgetDict.sort.render().el)
-
+        $(".list-of-things").removeClass("hide")
 
       },
 
-      enableRightColToggle: function () {
+      onShow : function(){
 
-        $("#right-col-toggle").on("click", function (e) {
+        //these functions must be called every time the template is inserted
+        this.displaySearchBar();
 
-          var $this = $(this);
-          var $i = $this.find("i");
+      },
 
-          if ($i.hasClass("right-col-open")) {
+      displaySearchBar: function () {
+        $("#search-bar-row")
+          .append(this.widgetDict.searchBar.render().el);
 
-            $i.removeClass("right-col-open").addClass("right-col-close");
-            $this.find("span").text("show 3rd col");
+      },
 
-            $("#right-column").addClass("no-display");
-            $("#middle-column").removeClass("col-md-7").addClass("col-md-9");
-            $("#left-column").removeClass("col-md-2").addClass("col-md-3");
+        if (this.beehive.getDebug())
+          $rightCol.append(widgetDict.queryDebugInfo.render().el);
+
+      events : {
+        "click .btn-expand" : "toggleColumns"
+      },
+
+      toggleColumns :function(e){
+
+        var $t = $(e.currentTarget);
+        var $leftCol =  this.$(".s-results-left-column");
+        var $rightCol =  this.$(".s-results-right-column");
+
+        if ($t.hasClass("btn-upside-down")){
+
+          $t.removeClass("btn-upside-down");
+
+          if ($t.hasClass("left-expand")){
+
+            $leftCol.removeClass("hidden-col")
+            $leftCol.find(".left-col-container").width('').fadeIn(500).children().show();
 
           }
           else {
-            $this.find("span").text("hide 3rd col");
+            $rightCol.removeClass("hidden-col");
 
-            $i.removeClass("right-col-close").addClass("right-col-open");
-
-            $("#right-column").removeClass("no-display");
-            $("#middle-column").removeClass("col-md-9").addClass("col-md-7");
-            $("#left-column").removeClass("col-md-3").addClass("col-md-2");
+            $rightCol.find(".right-col-container").width('').fadeIn(500) ;
 
           }
-        })
+
+          if (!$rightCol.hasClass("hidden-col") && !$leftCol.hasClass("hidden-col")){
+            this.$("#results-middle-column")
+              .css({"width": ""})
+
+          }
+          else if ($leftCol.hasClass("hidden-col")){
+            this.$("#results-middle-column")
+              .css({"width": "75%"})
+          }
+          else {
+            this.$("#results-middle-column")
+              .css({"width":  "83.33333333%"})
+
+          }
+
+        }
+        else {
+          $t.addClass("btn-upside-down");
+
+          if ($t.hasClass("left-expand")){
+
+            $leftCol.find(".left-col-container").width(0).fadeOut(500).children().hide();
+
+            $leftCol.addClass("hidden-col")
+
+          }
+          else {
+            //expand to the right
+
+            $rightCol.find(".right-col-container").width(0).hide(500);
+
+            $rightCol.addClass("hidden-col");
+
+
+          }
+
+          if ($rightCol.hasClass("hidden-col") && $leftCol.hasClass("hidden-col")){
+            this.$("#results-middle-column")
+              .css({"width": "100%"})
+
+          }
+          else if ($rightCol.hasClass("hidden-col")){
+            this.$("#results-middle-column")
+              // 58.33333 + 25
+              .css("width", "83.33333333%")
+          }
+          else {
+            //58.33333 + 16.666666
+            this.$("#results-middle-column")
+              .css("width", "75%")
+
+          }
+
+        }
       }
-    };
+
+    });
+
 
     var ResultsController = BaseWidget.extend({
 
@@ -159,18 +199,14 @@ define([
 
         _.bindAll(this, 'showPage');
 
-        _.extend(this, API);
 
-        if (!options.widgetDict) {
-          throw new error("page managers need a dictionary of widgets to render");
+        if (!options.widgetDict){
+          throw new Error("page managers need a dictionary of widgets to render")
         }
 
-        widgetDict = options.widgetDict;
+        this.widgetDict = options.widgetDict;
 
-        history = options.history;
-
-        this.loadingWidget = new LoadingWidget();
-
+        this.controllerView = new ResultsControllerView({widgetDict : this.widgetDict});
       },
 
       //don't subscribe to events
@@ -181,39 +217,28 @@ define([
 
       },
 
+      insertResultsControllerView : function(){
+
+          var $b = $("#body-template-container");
+
+          $b.children().detach();
+
+          //don't call render each time or else we
+          //would have to re-delegate widget events
+
+          $b.append(this.controllerView.el);
+
+          this.controllerView.triggerMethod("show");
+
+      },
+
       showPage: function (options) {
 
-        var apiQuery = options.apiQuery;
         var inDom = options.inDom;
-        var triggerNav = options.triggerNav;
-
-        //it's false when the router uses this function to display the results page
-        if (apiQuery) {
-
-          var tempQuery = new ApiQuery();
-          if (apiQuery.get("q")){
-            tempQuery.set("q", apiQuery.get("q"));
-          }
-          if (apiQuery.get("fq")){
-            tempQuery.set("fq", apiQuery.get("fq"));
-          }
-
-          var urlData = {page: "resultsPage", subPage: undefined, data: apiQuery.toJSON(), path: "search/" + tempQuery.url()};
-
-          if (triggerNav !== false){
-
-            this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, urlData);
-
-          }
-
-        }
 
         if (!inDom){
-          this.insertTemplate();
+          this.insertResultsControllerView();
         }
-
-        //these functions must be called every time
-        this.displaySearchBar();
 
       }
 
@@ -222,6 +247,4 @@ define([
     return ResultsController
 
   });
-
-
 

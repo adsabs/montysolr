@@ -34,7 +34,7 @@ define(['jquery',
 
 
 
-    it("has a loadBibcodeInfo function that takes a bibcode, requests citation:data, and returns a promise", function(){
+    it("has a loadBibcodeInfo function that takes a bibcode, requests  citations(bibcode:data), and returns a promise", function(){
 
       var p = widget.loadBibcodeData("sampleBib1")
 

@@ -21,7 +21,7 @@ define(['jquery',
 
           if (sentRequest.toJSON().query.get("q")[0] === "references(bibcode:sampleBib1)") {
             return Test1;
-          } else if(sentRequest.toJSON().query.get("q")[0] === "references(bibcode:sampleBib2)") {
+          } else if(sentRequest.toJSON().query.get("q")[0] === "references(bibcode:sampleBib1)") {
             return Test2;
           }
         }
@@ -34,7 +34,7 @@ define(['jquery',
 
 
 
-    it("has a loadBibcodeInfo function that takes a bibcode, requests reference:data, and returns a promise", function(){
+    it("has a loadBibcodeInfo function that takes a bibcode, requests references(bibcodedata), and returns a promise", function(){
 
       var p = widget.loadBibcodeData("sampleBib1");
 

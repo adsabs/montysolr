@@ -1,42 +1,18 @@
 <nav class="s-abstract-nav-col">
     <div class="s-nav-header s-view-nav"> View </div>
 
-    <a href="/abs/{{bibcode}}/abstract" data-bypass>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive" id="abstract">
-           Abstract
+    {{#each items}}
+
+    <a href="/abs/{{bibcode}}/{{this.id}}" data-bypass>
+        <div class="abstract-nav s-abstract-nav {{#if this.currentSubView}} s-abstract-nav-active {{/if}} {{#unless this.numFound}} s-abstract-nav-inactive{{/unless}}" id="{{this.id}}">
+            {{this.title}}
+            {{#if this.showCount}}
+            <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>
+            {{/if}}
         </div>
     </a>
 
-    <a href="/abs/{{bibcode}}/references" data-bypass>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive" id="references">
-              References
-            <span class="num-items"></span>
-
-        </div>
-    </a>
-    <a href="/abs/{{bibcode}}/citations" data-bypass>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive" id="citations">
-            Citations
-            <span class="num-items"></span>
-        </div>
-
-    </a>
-    <a href="/abs/{{bibcode}}/coreads" data-bypass>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive" id="coreads">
-           Co-Reads
-            <span class="num-items"></span>
-        </div>
-    </a>
-    <a href="/abs/{{bibcode}}/similar" data-bypass>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive" id="similar">
-            Similar Articles
-        </div>
-    </a>
-    <a href="/abs/{{bibcode}}/tableofcontents" data-bypass>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive" id="tableofcontents">
-           Table of Contents
-        </div>
-    </a>
+    {{/each}}
 
 
     <div class="s-nav-header s-export-nav"> Export </div>

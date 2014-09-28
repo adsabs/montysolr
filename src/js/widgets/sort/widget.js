@@ -15,6 +15,7 @@ define(['marionette',
   ) {
 
     var SortModel = Backbone.Model.extend({
+
       defaults: function () {
         return {
 
@@ -68,6 +69,7 @@ define(['marionette',
     });
 
     var SortView = Marionette.ItemView.extend({
+
       initialize: function (options) {
 
         //using custom event because backbone doesnt do nested events

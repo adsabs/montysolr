@@ -83,7 +83,6 @@ define([
       },
 
       noPageFound : function() {
-        debugger;
        //i will fix this later
 
         $("#body-template-container").html("<div>You have broken bumblebee. (404)</div><img src=\"http://imgur.com/EMJhzmL.png\" alt=\"sad-bee\">")

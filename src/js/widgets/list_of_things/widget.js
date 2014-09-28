@@ -208,7 +208,7 @@ define([
 
     var MasterCollection = Backbone.Collection.extend({
 
-      initialize : function(options){
+      initialize : function(models, options){
 
         this.paginationModel = options.paginationModel;
 
@@ -298,7 +298,7 @@ define([
         var data ,shownAuthors;
         data = this.model.toJSON();
 
-        var maxAuthorNames = 4;
+        var maxAuthorNames = 3;
 
         if (data.author && data.author.length > maxAuthorNames) {
           data.extraAuthors = data.author.length - maxAuthorNames;
@@ -351,12 +351,26 @@ define([
 
     });
 
+    var ListViewModel = Backbone.Model.extend({
+
+      defaults : function(){
+
+
+        return {
+          showDetailsButton : false,
+          mainResults : false
+        }
+      }
+
+    });
+
     var ListView = Marionette.CompositeView.extend({
 
       initialize: function (options) {
+
         this.paginationView = options.paginationView;
-        this.showDetailsButton = options.showDetailsButton;
-        this.mainResults = options.mainResults;
+        this.model = new ListViewModel();
+        this.sortView = this.sortView  || options.sortView;
       },
 
       className: "list-of-things",
@@ -367,16 +381,32 @@ define([
         "click .show-details": "showDetails"
       },
 
-      serializeData : function(){
+      //calls to render will render only the model after the 1st time
 
-        return {showDetailsButton : this.showDetailsButton,
-                mainResults : this.mainResults}
+      modelEvents : {
+
+        "change" : "render"
+
+      },
+
+      //calls to render will render only the model after the 1st time
+
+      collectionEvents : {
+
+        "reset" : "render"
 
       },
 
       template: ResultsContainerTemplate,
 
       onRender: function(){
+
+        if  (this.sortView){
+
+          this.sortView.setElement(this.$(".sort-container")).render();
+
+
+        }
         this.paginationView.setElement(this.$(".pagination-controls")).render();
       },
 
@@ -444,7 +474,7 @@ define([
 
         });
 
-        this.collection = new MasterCollection({visibleCollection : this.visibleCollection,
+        this.collection = new MasterCollection({}, {visibleCollection : this.visibleCollection,
          paginationModel: this.paginationModel});
 
         //this.listenTo(this.collection, "all", this.onAllInternalEvents);
@@ -455,7 +485,6 @@ define([
 
       },
 
-      showDetailsButton : false,
 
       activate: function (beehive) {
 

@@ -7,7 +7,15 @@
 *
 * */
 
-define(['js/widgets/base/base_widget'], function(BaseWidget){
+define([
+  'js/widgets/base/base_widget',
+  'js/components/api_query_updater',
+  'js/components/api_query'
+], function(
+  BaseWidget,
+  ApiQueryUpdater,
+  ApiQuery
+  ){
 
   /*
   * Expects in its options a dictionary in the following form:
@@ -28,6 +36,13 @@ define(['js/widgets/base/base_widget'], function(BaseWidget){
       if (!this.pageControllers){
         throw new Error("Page manager wasn't given any page controllers to work with")
       }
+
+      _.each(this.pageControllers, function(c){
+
+        if (c.controllerView && c.controllerView.render){
+          c.controllerView.render();
+        }
+      });
 
       this.currentPage = undefined;
 
@@ -60,8 +75,15 @@ define(['js/widgets/base/base_widget'], function(BaseWidget){
   },
 
     showSearchPage:  function(apiQuery){
+
+      /*
+      * takes care of navigating to the proper url
+      * */
+
+      var urlToShow = ApiQueryUpdater.prototype.clean(apiQuery);
+
       //first, navigate to proper URL
-      this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, "search/" + apiQuery.url())
+      this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, "search/" + urlToShow.url());
 
       //then show results page
       this.showPage("results")
