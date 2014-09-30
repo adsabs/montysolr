@@ -27,6 +27,9 @@ define(['jquery',
 
       widget.activate(minsub.beehive.getHardenedInstance());
 
+      widget.collection.requestData = function(){};
+
+
     });
 
 

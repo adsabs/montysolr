@@ -30,6 +30,9 @@ define(['jquery',
       widget.activate(minsub.beehive.getHardenedInstance());
       var $w = widget.render().$el;
 
+      //prevent infinite requests for data
+      widget.collection.requestData = function(){};
+
     });
 
     it("has a loadBibcodeInfo function that takes a bibcode; requests bibcode:data, mlt: true, mlt.fl = title, body; and returns a promise", function(){

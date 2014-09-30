@@ -98,7 +98,7 @@ define([
 
       displaySearchBar: function () {
         $("#search-bar-row")
-          .append(this.widgetDict.searchBar.render().el);
+          .append(this.widgetDict.searchBar.render().el)
 
       },
 
