@@ -117,8 +117,6 @@ define(['marionette',
 
         var j = this.model.toJSON();
 
-        var SortVal;
-
         _.each(j.sortOptions, function(input){
 
           if (input.default){
@@ -145,9 +143,9 @@ define(['marionette',
 
         current = this.getCurrentSortVal();
 
-        newVal = $("input[name=sort-options]:checked").attr("value");
+        newVal = this.$("input[name=sort-options]:checked").attr("value");
 
-        var order = $("input[name=order-options]:checked").attr("value");
+        var order = this.$("input[name=order-options]:checked").attr("value");
 
           newVal += " ";
           newVal += order;

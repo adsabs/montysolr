@@ -198,7 +198,7 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       //resp = decodeURIComponent(resp);
       var key,value;
       for (var i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split(/=(.+)/);
+        hash = hashes[i].split('=');
         key = decodeURIComponent(hash[0].split('+').join(' ')); // optimized: .replace(/\+/g, " ")
 
         var vall = hash[1];
