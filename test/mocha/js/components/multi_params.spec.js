@@ -125,9 +125,6 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
 
       // and callbacks still work
       assert.throw(function() {t2.set('foo', {key: 'value'})}, Error);
-
-
-
     });
 
     it("cannot be sync'ed to the server (it is state-less)", function() {
@@ -135,6 +132,11 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
       expect(function() {var t = new MultiParams({'foo': 'bar'});t.save()}).to.throw("MultiParams cannot be saved to server");
       expect(function() {var t = new MultiParams({'foo': 'bar'});t.fetch()}).to.throw("MultiParams cannot be saved to server");
       expect(function() {var t = new MultiParams({'foo': 'bar'});t.destroy()}).to.not.throw("MultiParams cannot be saved to server");
+    })
+
+    it("Can contain local parameters", function() {
+      var t = new MultiParams().load('__author_facet_hier_fq_author=AND&__author_facet_hier_fq_author=author:"Lee,+J"&facet.field=author_facet_hier&facet.mincount=1&fl=id&fq={!type=aqp+cache=false+cost=150+v=$fq_author}&fq_author=(author:"Lee,+J")&q=star');
+      expect(t.get('fq')).to.be.eql(['{!type=aqp cache=false cost=150 v=$fq_author}']);
     })
 
   });
