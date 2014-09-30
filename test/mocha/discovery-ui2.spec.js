@@ -16,8 +16,15 @@ var tests = [
     tbase + '/widgets/reads_graph_facet_widget.spec.js',
     tbase + '/widgets/references_widget.spec.js',
     tbase + '/widgets/resources_widget.spec.js',
-    //TBD 24/09/14 tbase + '/widgets/results_render_widget.spec.js',
-    tbase + '/widgets/search_bar_widget.spec.js',
+
+    tbase + '/widgets/references_widget.spec.js',
+    tbase + '/widgets/results_render_widget.spec.js',
+    tbase + '/widgets/coreads_widget.spec.js',
+    tbase + '/widgets/citations_widget.spec.js',
+    tbase + '/widgets/table_of_contents_widget.spec.js',
+
+
+  tbase + '/widgets/search_bar_widget.spec.js',
     //TBD 24/09/14 tbase + '/widgets/similar_widget.spec.js',
     tbase + '/widgets/table_of_contents_widget.spec.js',
     tbase + '/widgets/tabs_widget.spec.js',

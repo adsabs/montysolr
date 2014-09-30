@@ -8,7 +8,7 @@ define(['jquery',
 
   describe("Citation Widget (UI Widget)", function(){
 
-    var widget, minsub, sentRequest;
+    var widget, minsub, sentRequest, numRequests;
 
     beforeEach(function(){
       numRequests = 0;

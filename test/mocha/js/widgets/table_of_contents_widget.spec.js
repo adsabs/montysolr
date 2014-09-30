@@ -10,6 +10,7 @@ define(['jquery',
 
     var widget, minsub, sentRequest;
 
+
     beforeEach(function(){
       widget = new TableOfContentsWidget();
 

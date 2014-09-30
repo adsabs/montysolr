@@ -24,8 +24,6 @@ var tests = [
 
     tbase + '/widgets/breadcrumb_widget.spec.js',
     tbase + '/widgets/citation_graph_facet_widget.spec.js',
-    tbase + '/widgets/citations_widget.spec.js',
-    tbase + '/widgets/coreads_widget.spec.js',
     tbase + '/widgets/facet_container_view.spec.js',
     //TBD 24/09/14 tbase + '/widgets/facet_graph_widget.spec.js',
     //TBD 24/09/14 tbase + '/widgets/facet_hier_widget.spec.js',

@@ -8,7 +8,7 @@ define(['jquery',
 
   describe("CoReads Widget (UI Widget)", function(){
 
-    var widget, minsub, sentRequest;
+    var widget, minsub, sentRequest, numRequests;
 
     beforeEach(function(){
       widget = new CitationWidget();
