@@ -31,12 +31,18 @@ define(['marionette',
 
       template: SearchBarTemplate,
 
+      render : function(){
+        Marionette.ItemView.prototype.render.apply(this, arguments);
+
+        this.render = function(){ return this}
+
+      },
+
       className : "s-search-bar-widget",
 
       initialize: function (options) {
         _.bindAll(this, "tempFieldInsert", "tempFieldClear");
         this.queryBuilder = new QueryBuilderPlugin();
-        // this.queryBuilder.loadCss(); // not needed since we have it in style.css
       },
 
       activate: function(beehive) {
@@ -56,19 +62,14 @@ define(['marionette',
       },
 
       onRender: function () {
-        this.delegateEvents();
+
         this.$("#search-form-container").append(SearchFormTemplate);
 
-//        I think this is not acting perfectly if people hover and then enter text into
+        //        I think this is not acting perfectly if people hover and then enter text into
         // the input field without clicking.
-//        this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
+        //        this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
         this.$("#search-gui").append(this.queryBuilder.$el);
 
-        return;
-
-        this.queryBuilder = new QueryBuilderPlugin({el: '#search-gui'});
-        this.queryBuilder.loadCss();
-        this.queryBuilder.activate(this.beehive);
       },
 
       events: {
@@ -151,7 +152,7 @@ define(['marionette',
 
         var currentVal, newVal, df;
 
-//        this.unsetAddField();
+        //        this.unsetAddField();
 
         currentVal = this.$(".q").val();
         this.priorVal = currentVal;
