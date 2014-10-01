@@ -447,7 +447,7 @@ define([
         this.collection = new MasterCollection({visibleCollection : this.visibleCollection,
          paginationModel: this.paginationModel});
 
-        this.listenTo(this.collection, "all", this.onAllInternalEvents);
+        //this.listenTo(this.collection, "all", this.onAllInternalEvents);
         this.on("all", this.onAllInternalEvents);
 
         BaseWidget.prototype.initialize.call(this, options);

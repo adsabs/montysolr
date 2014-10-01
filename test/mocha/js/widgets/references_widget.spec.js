@@ -19,9 +19,9 @@ define(['jquery',
           sentRequest = apiRequest;
           numRequests++;
 
-          if (sentRequest.toJSON().query.get("q")[0] === "reference:sampleBib1") {
+          if (sentRequest.toJSON().query.get("q")[0] === "references(bibcode:sampleBib1)") {
             return Test1;
-          } else if(sentRequest.toJSON().query.get("q")[0] === "reference:sampleBib2") {
+          } else if(sentRequest.toJSON().query.get("q")[0] === "references(bibcode:sampleBib2)") {
             return Test2;
           }
         }
@@ -36,21 +36,21 @@ define(['jquery',
 
     it("has a loadBibcodeInfo function that takes a bibcode, requests reference:data, and returns a promise", function(){
 
-      var p = widget.loadBibcodeData("sampleBib1")
+      var p = widget.loadBibcodeData("sampleBib1");
 
       //how do you get the apiQuery from the apiRequest in an easier way?
-      expect(sentRequest.toJSON().query.get("q")[0]).to.equal("reference:sampleBib1")
+      expect(sentRequest.toJSON().query.get("q")[0]).to.equal("references(bibcode:sampleBib1)");
       //test if it returns a promise
-      expect(p.then).to.be.a("function")
+      expect(p.then).to.be.a("function");
 
-    })
+    });
 
 
     it("resolves the promise from loadBibcodeData with numFound", function(){
 
       var numFound;
 
-      p = widget.loadBibcodeData("sampleBib1")
+      p = widget.loadBibcodeData("sampleBib1");
 
       p.done(function(n){numFound= n});
 
@@ -61,4 +61,4 @@ define(['jquery',
   })
 
 
-})
+});
