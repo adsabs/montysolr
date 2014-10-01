@@ -174,7 +174,6 @@ define(['js/widgets/tabs/tabs_widget',
 
     });
 
-
     var readsGraphWidget = FacetFactory.makeGraphFacet({
       graphView            : HIndexGraph,
       facetField           : "read_count",
