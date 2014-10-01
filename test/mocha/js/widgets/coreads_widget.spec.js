@@ -16,7 +16,6 @@ define(['jquery',
       minsub = new (MinPubSub.extend({
         request: function(apiRequest) {
           sentRequest = apiRequest;
-          numRequests++;
 
           if (sentRequest.toJSON().query.get("q")[0] === "trending(bibcode:sampleBib1)") {
             return Test1;
@@ -54,7 +53,7 @@ define(['jquery',
 
       p.done(function(n){numFound= n});
 
-      expect(numFound).to.equal(841359)
+      expect(numFound).to.equal(841359);
     })
 
   })

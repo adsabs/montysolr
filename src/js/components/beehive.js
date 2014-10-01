@@ -12,6 +12,7 @@ define(['backbone', 'underscore',
       _.extend(this, _.pick(options, hiveOptions));
       this.Services = new ServicesContainer();
       this.Objects = new ServicesContainer();
+      this.debug = false;
     },
 
     activate: function() {
@@ -65,7 +66,8 @@ define(['backbone', 'underscore',
      */
     hardenedInterface:  {
       Services: 'services container',
-      Objects: 'objects container'
+      Objects: 'objects container',
+      debug: 'state of the app'
     }
 
 

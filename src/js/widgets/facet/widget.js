@@ -368,7 +368,13 @@ define(['backbone',
             this.queryUpdater.updateQuery(q, fieldName, 'expand', conditions);
           }
           else if (operator == 'exclude' || operator == 'not') {
-            this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+            if (q.get(fieldName)) {
+              this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+            }
+            else {
+              conditions.unshift('*:*');
+              this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+            }
           }
 
           var fq = '{!type=aqp v=$' + fieldName +'}';
