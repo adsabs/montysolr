@@ -76,8 +76,13 @@ define([
 
       displayRightColumn: function () {
         this.$(".right-col-container")
-          .append(this.widgetDict.graphTabs.render().el)
+          .append(this.widgetDict.graphTabs.render().el);
 
+          if (Marionette.getOption(this, "debug")) {
+            this.$(".right-col-container")
+              .append(widgetDict.queryDebugInfo.render().el);
+
+          }
       },
 
       displayResultsList: function () {
@@ -101,9 +106,6 @@ define([
           .append(this.widgetDict.searchBar.render().el)
 
       },
-
-        if (this.beehive.getDebug())
-          $rightCol.append(widgetDict.queryDebugInfo.render().el);
 
       events : {
         "click .btn-expand" : "toggleColumns"
@@ -206,14 +208,18 @@ define([
 
         this.widgetDict = options.widgetDict;
 
-        this.controllerView = new ResultsControllerView({widgetDict : this.widgetDict});
       },
 
       //don't subscribe to events
 
       activate: function (beehive) {
-        this.beehive = beehive;
         this.pubsub = beehive.Services.get('PubSub');
+
+        //this has to go here to get information from beehive
+        //better place to put it?
+
+        this.controllerView = new ResultsControllerView({widgetDict : this.widgetDict, debug : beehive.getDebug()});
+
 
       },
 

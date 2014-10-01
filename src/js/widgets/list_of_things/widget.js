@@ -477,7 +477,7 @@ define([
         this.collection = new MasterCollection({}, {visibleCollection : this.visibleCollection,
          paginationModel: this.paginationModel});
 
-        //this.listenTo(this.collection, "all", this.onAllInternalEvents);
+//        this.listenTo(this.collection, "all", this.onAllInternalEvents);
         this.on("all", this.onAllInternalEvents);
 
         BaseWidget.prototype.initialize.call(this, options);
@@ -684,8 +684,9 @@ define([
           if (this.view.itemViewContainer) {
             var removeLoadingView = function () {
               this.view.$el.find(".s-loading").remove();
+              this.listenToOnce(this.visibleCollection, "reset", removeLoadingView);
+
             }
-            this.listenToOnce(this.visibleCollection, "reset", removeLoadingView);
 
           if (this.view.$el.find(".s-loading").length === 0){
             this.view.$el.append(this.loadingTemplate());
