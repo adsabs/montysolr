@@ -200,7 +200,14 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       for (var i = 0; i < hashes.length; i++) {
         hash = hashes[i].split('=');
         key = decodeURIComponent(hash[0].split('+').join(' ')); // optimized: .replace(/\+/g, " ")
-        value = decodeURIComponent(hash[1].split('+').join(' '));
+
+        var vall = hash[1];
+        if (hash.length > 2) {
+          hash.shift()
+          vall = hash.join('=');
+        }
+
+        value = decodeURIComponent(vall.split('+').join(' '));
         if (attrs[key] !== undefined) {
           attrs[key].push(value);
         }

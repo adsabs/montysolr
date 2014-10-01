@@ -53,7 +53,7 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
 
   var Container = function() {
     this.container = {};
-  }
+  };
   _.extend(Container.prototype, {
     has: function(name) {
       return this.container.hasOwnProperty(name);
