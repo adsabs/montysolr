@@ -38,6 +38,7 @@ define([
           this.root = conf.root;
         }
         if (conf.debug !== undefined) {
+          beehive.debug = conf.debug;
           this.getObject('QueryMediator').debug = conf.debug;
         }
 
@@ -172,7 +173,14 @@ define([
             this.queryUpdater.updateQuery(q, fieldName, 'expand', conditions);
           }
           else if (operator == 'exclude' || operator == 'not') {
-            this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+            if (q.get(fieldName)) {
+              this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+            }
+            else {
+              conditions.unshift('*:*');
+              this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+            }
+
           }
 
           var fq = '{!type=aqp cache=false cost=150 v=$' + fieldName + '}';

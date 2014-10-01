@@ -99,6 +99,9 @@ define([
 
         $rightCol.append(widgetDict.graphTabs.render().el);
 
+        if (this.beehive.getDebug())
+          $rightCol.append(widgetDict.queryDebugInfo.render().el);
+
       },
 
       displaySearchBar: function () {
@@ -173,6 +176,7 @@ define([
       //don't subscribe to events
 
       activate: function (beehive) {
+        this.beehive = beehive;
         this.pubsub = beehive.Services.get('PubSub');
 
       },
