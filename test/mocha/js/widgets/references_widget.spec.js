@@ -8,7 +8,7 @@ define(['jquery',
 
   describe("References Widget (UI Widget)", function(){
 
-    var widget, minsub, sentRequest;
+    var widget, minsub, sentRequest, numRequests;
 
     beforeEach(function(){
       numRequests = 0;
@@ -21,20 +21,26 @@ define(['jquery',
 
           if (sentRequest.toJSON().query.get("q")[0] === "references(bibcode:sampleBib1)") {
             return Test1;
-          } else if(sentRequest.toJSON().query.get("q")[0] === "references(bibcode:sampleBib2)") {
+          } else if(sentRequest.toJSON().query.get("q")[0] === "references(bibcode:sampleBib1)") {
             return Test2;
           }
         }
       }))({verbose: false});
 
       widget.activate(minsub.beehive.getHardenedInstance());
+
+
       var $w = widget.render().$el;
+
+
+      //prevent infinite requests for data
+      widget.collection.requestData = function(){};
 
     });
 
 
 
-    it("has a loadBibcodeInfo function that takes a bibcode, requests reference:data, and returns a promise", function(){
+    it("has a loadBibcodeInfo function that takes a bibcode, requests references(bibcodedata), and returns a promise", function(){
 
       var p = widget.loadBibcodeData("sampleBib1");
 

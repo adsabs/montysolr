@@ -17,11 +17,11 @@ define(["config", 'module'], function(config, module) {
   require(["router",
       'js/components/application',
       'js/mixins/discovery_bootstrap'
-      ],
+    ],
     function(Router,
-             Application,
-             DiscoveryBootstrap
-             ) {
+      Application,
+      DiscoveryBootstrap
+      ) {
 
 
       var app = new (Application.extend(DiscoveryBootstrap))();
@@ -63,6 +63,5 @@ define(["config", 'module'], function(config, module) {
 
     });
 });
-
 
 

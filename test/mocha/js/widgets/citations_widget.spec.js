@@ -8,7 +8,7 @@ define(['jquery',
 
   describe("Citation Widget (UI Widget)", function(){
 
-    var widget, minsub, sentRequest;
+    var widget, minsub, sentRequest, numRequests;
 
     beforeEach(function(){
       numRequests = 0;
@@ -30,11 +30,14 @@ define(['jquery',
       widget.activate(minsub.beehive.getHardenedInstance());
       var $w = widget.render().$el;
 
+      //prevent infinite requests for data
+      widget.collection.requestData = function(){};
+
     });
 
 
 
-    it("has a loadBibcodeInfo function that takes a bibcode, requests citation:data, and returns a promise", function(){
+    it("has a loadBibcodeInfo function that takes a bibcode, requests  citations(bibcode:data), and returns a promise", function(){
 
       var p = widget.loadBibcodeData("sampleBib1")
 

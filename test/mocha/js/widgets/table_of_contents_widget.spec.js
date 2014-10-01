@@ -10,6 +10,7 @@ define(['jquery',
 
     var widget, minsub, sentRequest;
 
+
     beforeEach(function(){
       widget = new TableOfContentsWidget();
 
@@ -26,6 +27,9 @@ define(['jquery',
       }))({verbose: false});
 
       widget.activate(minsub.beehive.getHardenedInstance());
+
+      widget.collection.requestData = function(){};
+
 
     });
 

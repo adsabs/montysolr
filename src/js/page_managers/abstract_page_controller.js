@@ -14,9 +14,9 @@ define(["marionette",
     "hbs!./templates/abstract-page-layout",
     'js/widgets/base/base_widget',
     'js/components/api_query',
-    'hbs!./templates/abstract-nav',
     'js/mixins/add_stable_index_to_collection',
-    'js/page_managers/abstract_title_view_mixin.js'
+    'js/page_managers/abstract_title_view_mixin',
+    'js/page_managers/abstract_nav_view_mixin'
   ],
   function(Marionette,
     threeColumnTemplate,
@@ -24,170 +24,174 @@ define(["marionette",
     ApiQuery,
     abstractNavTemplate,
     WidgetPaginationMixin,
-    AbstractTitleViewMixin){
+    AbstractTitleViewMixin,
+    AbstractNavViewMixin){
 
-    var currentBibcode;
 
-    var AbstractNavView = Backbone.View.extend({
+    var AbstractMasterView = Marionette.ItemView.extend({
 
-      template : abstractNavTemplate,
-
-      render : function(subView){
-        this.$el.html(this.template({bibcode: currentBibcode}));
-
-        if (subView){
-          this.$("#"+subView)
-            .addClass("s-abstract-nav-active")
-            .removeClass("s-abstract-nav-inactive");
-        }
-        return this
+      initialize : function(options){
+        this.widgetDict = options.widgetDict;
       },
 
-      events : {
-        "click a" : function(e){
-          $t  = $(e.currentTarget);
-          if ($t.find("div").hasClass("s-abstract-nav-inactive")){
-            return false
-          }
-          if ($t.find("div").attr("id") !== $(".s-abstract-nav-active").attr("id")){
-            this.emitNavigateEvent($t);
-            this.changeHighlight($t);
-          }
-          return false
-        }
-      },
+      template : threeColumnTemplate,
 
-      changeHighlight : function($t){
-        //first, remove all highlights
-        this.$(".abstract-nav").removeClass("s-abstract-nav-active");
+      onRender : function(){
 
-        //then add it in for the right one
-        $t.find(".abstract-nav").addClass("s-abstract-nav-active");
-
-      },
-
-      emitNavigateEvent : function($t){
-        var route = $t.attr("href");
-        //taking only final path
-        this.trigger("navigate", route);
-      }
-
-    })
-
-
-
-    var API = {
-
-      insertTemplate: function () {
-
-        var $b = $("#body-template-container");
-
-
-        if (this.cachedTemplate){
-
-          $b.children().detach()
-
-          $b.append(this.cachedTemplate);
-
-          return
-
-        }
-
-        else {
-
-          $b.children().detach();
-
-          $b.append(threeColumnTemplate());
-
-          this.fillTemplateWithWidgets();
-
-        }
-
-      },
-
-      fillTemplateWithWidgets : function(){
         this.displayRightColumn();
         this.showTitle();
+        this.displayNav();
 
-        this.cachedTemplate = $("#abstract-page-layout");
+      },
+
+      showTitle: function () {
+        this.$("#abstract-title-container")
+          .append(this.widgetDict.titleView.render().el);
+
+      },
+
+      displayRightColumn: function () {
+        this.$("#right-col-container")
+          .append(this.widgetDict.resources.render().el)
+
+      },
+
+      displayNav : function(){
+
+        this.$(".s-left-col-container")
+          .append(this.widgetDict.navView.render().el)
+      },
+
+      onShow : function(){
+
+        this.displaySearchBar();
+
+      },
+
+      displaySearchBar: function () {
+        $("#search-bar-row")
+          .append(this.widgetDict.searchBar.render().el);
+
+      }
+
+    });
+
+
+    var AbstractControllerModel = Backbone.Model.extend({
+      defaults: function () {
+        return {
+          bibcode: undefined,
+          title: undefined,
+          resultsIndex : undefined
+          //id will be the result Index
+        }
+      },
+
+      idAttribute : "resultsIndex",
+
+      parse : function(d){
+        d.title = d.title[0];
+        return d
+      }
+
+    });
+
+    var AbstractControllerCollection = Backbone.Collection.extend({
+      model: AbstractControllerModel,
+
+      comparator: "resultsIndex"
+    });
+
+
+    var AbstractController = BaseWidget.extend({
+
+
+      initialize : function(options){
+
+        options = options || {}
+
+        this.widgetDict = options.widgetDict;
+
+        if (!options.widgetDict){
+          throw new Error("page managers need a dictionary of widgets to render")
+        }
+
+        this.collection = new AbstractControllerCollection();
+
+        //from the title view mixin
+        this.widgetDict.titleView = this.returnNewTitleView();
+
+        this.widgetDict.navView = this.returnNewAbstractNavView();
+
+        this.controllerView = new AbstractMasterView({widgetDict : this.widgetDict});
+
+        this.listenTo(this.widgetDict.navView, "navigate", this.subPageNavigate)
+
+        //represents the current bibcode (always only 1)
+        this._bibcode = undefined;
+
+        //      to be explicit, transferring only those widgets considered "sub views" to this dict
+        //      allowing abstractSubViews to be set by options for testing purposes
+        this.abstractSubViews = options.abstractSubViews ||  {
+          //the keys are also the sub-routes
+          "abstract": {widget: this.widgetDict.abstract, title:"Abstract", descriptor: "Abstract for:"},
+          "references": {widget: this.widgetDict.references, title:"References", descriptor: "References in:", showNumFound : true},
+          "citations": {widget: this.widgetDict.citations, title: "Citations", descriptor: "Papers that cite:", showNumFound : true},
+          "coreads" : {widget: this.widgetDict.coreads, title: "Co-Reads", descriptor: "Other papers read by those who read:"},
+          "tableofcontents" : {widget: this.widgetDict.tableOfContents, title: "Table of Contents", descriptor: "Table of Contents for:", showNumFound : false},
+          //          "similar": {widget : this.widgetDict.similar, title : "Similar Papers", descriptor : "Papers with similar characteristics to:"}
+        };
+
+        this.listenTo(this.widgetDict.titleView, "all", this.onAllInternalEvents)
+
+        BaseWidget.prototype.initialize.call(this, options);
+
+      },
+
+      onAllInternalEvents : function(ev, arg1, arg2){
+
+        if (ev.indexOf("loadMore")!== -1){
+          //from abstract title view mixin
+          this.checkLoadMore();
+        }
 
       },
 
 
       loadWidgetData: function () {
-        var that = this;
 
-        this.widgetDict.resources.loadBibcodeData(this._bibcode);
+        var that = this;
 
         _.each(this.abstractSubViews, function (v, k) {
 
           if (k === "abstract") {
 
             v.widget.loadBibcodeData(this._bibcode);
-            this.activateNavButton(k)
+
+            that.widgetDict.navView.collection.get("abstract").set("numFound", 1)
 
           }
           else {
-
             var promise = v.widget.loadBibcodeData(this._bibcode);
 
             promise.done(function (numFound) {
 
-              if (numFound) {
-                that.activateNavButton(k, v.showNumFound, numFound)
-              }
-              else {
-                that.deactivateNavButton(k)
-              }
+                that.widgetDict.navView.collection.get(k).set("numFound", numFound);
 
             })
           }
+          this.widgetDict.resources.loadBibcodeData(this._bibcode);
 
-        }, this);
-
-
-      },
-
-      activateNavButton: function (k, showNumFound, colLength) {
-
-        var $navButton = $("#" + k);
-
-        $navButton.removeClass("s-abstract-nav-inactive");
-        $navButton.parent().off(this, this.deactivateLink);
-
-        if (showNumFound) {
-          $navButton.find(".num-items").text("(" + colLength + ")")
-        }
+        }, this)
 
       },
 
-      deactivateLink: function () {
-        return false
-      },
+      renderAbstractNav: function (subPage) {
 
-      deactivateNavButton: function (k) {
-
-        var $navButton = $("#" + k);
-
-        $navButton.addClass("s-abstract-nav-inactive")
-
-        $navButton.parent().on("click", this.deactivateLink)
+        this.widgetDict.navView.render(subPage);
 
       },
 
-      displayAbstractNav: function (subPage) {
-
-        var $leftCol = $(".s-left-col-container")
-
-        $leftCol.append(this.navView.render(subPage).el);
-
-      },
-
-      showTitle: function () {
-        var $titleRow = $("#abstract-title-container");
-        $titleRow.append(this.titleView.el);
-
-      },
 
       showSubView: function (viewName) {
 
@@ -223,126 +227,43 @@ define(["marionette",
 
       },
 
-      displayRightColumn: function () {
-        var $rightCol = $("#right-col-container");
-        $rightCol.append(this.widgetDict.resources.render().el)
-
-      },
-
-      displayTopRow: function () {
-        var $searchBar = $("#search-bar-row");
-        $searchBar.append(this.widgetDict.searchBar.render().el);
-
-      }
-
-    };
-
-    var AbstractControllerModel = Backbone.Model.extend({
-      defaults: function () {
-        return {
-          bibcode: undefined,
-          title: undefined,
-          resultsIndex : undefined
-          //id will be the result Index
-        }
-      },
-
-      idAttribute : "resultsIndex",
-
-      parse : function(d){
-        d.title = d.title[0];
-        return d
-      }
-
-    });
-
-    var AbstractControllerCollection = Backbone.Collection.extend({
-      model: AbstractControllerModel,
-
-      comparator: "resultsIndex"
-    });
-
-
-    var AbstractController = BaseWidget.extend({
-
-
-      initialize : function(options){
-
-        options = options || {};
-
-        this.collection = new AbstractControllerCollection();
-
-        //from the title view mixin
-        this.titleView = this.returnNewTitleView();
-
-        this.navView = new AbstractNavView();
-
-        this.listenTo(this.navView, "navigate", this.subPageNavigate)
-
-        //represents the current bibcode (always only 1)
-        this._bibcode = undefined;
-
-
-        if (!options.widgetDict){
-          throw new error("page managers need a dictionary of widgets to render")
-        }
-
-        this.widgetDict = options.widgetDict
-
-        _.extend(this, API);
-
-        this.history = options.history;
-
-        //      to be explicit, transferring only those widgets considered "sub views" to this dict
-        //      allowing abstractSubViews to be set by options for testing purposes
-        this.abstractSubViews = options.abstractSubViews ||  {
-          //the keys are also the sub-routes
-          "abstract": {widget: this.widgetDict.abstract, title:"Abstract", descriptor: "Abstract for:"},
-          "references": {widget: this.widgetDict.references, title:"References", descriptor: "References in:", showNumFound : true},
-          "citations": {widget: this.widgetDict.citations, title: "Citations", descriptor: "Papers that cite:", showNumFound : true},
-          "coreads" : {widget: this.widgetDict.coreads, title: "Co-Reads", descriptor: "Other papers read by those who read:"},
-         "tableofcontents" : {widget: this.widgetDict.tableOfContents, title: "Table of Contents", descriptor: "Table of Contents for:", showNumFound : false},
-//          "similar": {widget : this.widgetDict.similar, title : "Similar Papers", descriptor : "Papers with similar characteristics to:"}
-        };
-
-        this.listenTo(this.titleView, "all", this.onAllInternalEvents)
-
-        options.rows = 40;
-
-        BaseWidget.prototype.initialize.call(this, options);
-
-      },
-
-
-      onAllInternalEvents : function(ev, arg1, arg2){
-
-        if (ev.indexOf("loadMore")!== -1){
-          //from abstract title view mixin
-          this.checkLoadMore();
-        }
-
-      },
-
       subPageNavigate : function(route){
 
         //now, just render the relevant page
         var sub  = route.match(/\/(\w+)$/)[1];
-          this.showSubView(sub);
-      },
-
-
-      getMasterQuery : function(){
-        return this._masterQuery;
+        this.showSubView(sub);
       },
 
 
       setCurrentBibcode :function(bib){
         this._bibcode = bib;
-        //so view can access it through closure
-        currentBibcode = bib;
+        this.widgetDict.navView.collection.reset(this.widgetDict.navView.collection.defaults);
+
+        //this will trigger initial render of abstract nav view
+        this.widgetDict.navView.model.set("bibcode", bib);
+
       },
 
-      //   called by the router
+      getCurrentBibcode : function(){
+        return this._bibcode;
+      },
+
+      insertAbstractControllerView : function(){
+
+        var $b = $("#body-template-container");
+
+        $b.children().detach();
+
+        //don't call render each time or else we
+        //would have to re-delegate widget events
+
+        $b.append(this.controllerView.el);
+
+        this.controllerView.triggerMethod("show");
+
+      },
+
+      // called by the router
 
       showPage : function(options){
 
@@ -350,23 +271,27 @@ define(["marionette",
         var subPage = options.subPage;
         var inDom = options.inDom;
 
-        this.setCurrentBibcode(bib);
-
 
         if (!inDom) {
 
-          this.insertTemplate();
+          this.insertAbstractControllerView();
+
         }
 
-        /*
-        * these functions must be called each time
-        * this page is rendered, regardless of whether
-        * it's been rendered before
-        * */
-        this.displayTopRow();
-        this.displayAbstractNav(subPage);
-        this.renderNewBibcode();
-        this.loadWidgetData(bib);
+        if (bib !== this.getCurrentBibcode()){
+
+          this.setCurrentBibcode(bib);
+          this.renderNewBibcode();
+          this.loadWidgetData(bib);
+
+
+        }
+
+        //these functions must be called
+        //every time the page is shown
+
+        this.renderAbstractNav(subPage);
+        this.widgetDict.navView.collection.setActive(subPage);
         this.showSubView(subPage);
 
       }
@@ -375,6 +300,7 @@ define(["marionette",
 
     _.extend(AbstractController.prototype, WidgetPaginationMixin);
     _.extend(AbstractController.prototype, AbstractTitleViewMixin);
+    _.extend(AbstractController.prototype, AbstractNavViewMixin);
 
     return AbstractController
 

@@ -5,6 +5,8 @@
 
 @results-page-background : lighten(@gray-lighter, 2%);
 
+@default-box-shadow-color : darken(@gray-lighter, 5%);
+
 @border-default : 1px solid @btn-default-border;
 
 @border-light-default: 1px solid #dddddd;
@@ -163,8 +165,8 @@
 
 
 .s-loading {
-  opacity: .5;
-  z-index : 1000;
+  opacity: .7;
+  z-index : @z-index-3;
   background-color: white;
   position: absolute;
   top: 0px;

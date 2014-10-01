@@ -39,7 +39,6 @@ var tests  = [
     tbase + '/mixins/link_generator_mixin.spec.js',
     tbase + '/mixins/add_stable_index_to_collection.spec.js',
     tbase + '/mixins/page-manager-mixin.spec.js'
-
 ];
 
 

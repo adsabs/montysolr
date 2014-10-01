@@ -8,7 +8,7 @@ define(['jquery',
 
   describe("CoReads Widget (UI Widget)", function(){
 
-    var widget, minsub, sentRequest;
+    var widget, minsub, sentRequest, numRequests;
 
     beforeEach(function(){
       widget = new CitationWidget();
@@ -27,6 +27,9 @@ define(['jquery',
 
       widget.activate(minsub.beehive.getHardenedInstance());
       var $w = widget.render().$el;
+
+      //prevent infinite requests for data
+      widget.collection.requestData = function(){};
 
     });
 

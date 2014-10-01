@@ -1,3 +1,4 @@
+
 define([
     'marionette',
     'backbone',
@@ -111,6 +112,10 @@ define([
     it("should generate a new request to pubsub when the user clicks the submit button on the form", function(){
 
 
+      if (window.mochaPhantomJS){
+        return
+      }
+
       minsub = new (MinimalPubSub.extend({
         request: function(apiRequest) {
           return {
@@ -135,10 +140,13 @@ define([
       $("input[value=pubdate]").attr('checked', true);
       $("input[value=desc]").attr('checked', false);
       $("input[value=asc]").attr('checked', true);
+      w.view.$("input[value=pubdate]").click();
+      w.view.$("input[value=asc]").click();
 
-      $("button.choose-sort").click();
+      w.view.$("button.choose-sort").click();
 
       expect(pubSubStub.lastCall.args[1].get("sort")[0]).to.eql("pubdate asc");
+
 
     })
 

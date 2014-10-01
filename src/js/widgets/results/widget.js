@@ -7,12 +7,29 @@
 define([
     'underscore',
     'js/widgets/list_of_things/widget',
-    'js/widgets/base/base_widget'
+    'js/widgets/base/base_widget',
+    'js/widgets/sort/widget'
     ],
 
-  function (_, ListOfThingsWidget, BaseWidget) {
+  function (_,
+    ListOfThingsWidget,
+    BaseWidget,
+    SortWidget) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
+
+
+      initialize : function(options){
+
+        ListOfThingsWidget.prototype.initialize.apply(this, arguments);
+
+        //now adjusting the List Model
+
+        this.view.model.set("mainResults", true);
+
+        this.listenTo(this.visibleCollection, "reset", this.notifyModelIfHighlights)
+
+      },
 
       activate: function (beehive) {
 
@@ -35,13 +52,6 @@ define([
         BaseWidget.prototype.dispatchRequest.apply(this, arguments)
       },
 
-      //set "showDetails" to true
-      showDetailsButton : true,
-
-      //so that we show the toggle buttons
-      mainResults  : true,
-
-
       defaultQueryArguments: function(){
         return {
           hl     : "true",
@@ -49,6 +59,43 @@ define([
           fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year',
           rows : 25
         }
+      },
+
+      checkIfHighlightsExist: function(){
+
+        //check for highlights in the visible collection;
+
+        var highlights = _.map(this.visibleCollection.toJSON(), function(m){
+
+          var d = m.details;
+          //returns an object like {details : object}
+         if (d){
+           return d.highlights;
+         }
+
+        });
+
+        var agg = _.flatten(_.map(
+          _.values(highlights), function(d){return _.values(d)}
+        ));
+        //check to make sure that highlights exist
+        //and they are not all empty strings
+        if (agg.length && agg.join("") !== ""){
+          return true
+        }
+
+      },
+
+      notifyModelIfHighlights : function(highlights){
+
+        if (this.checkIfHighlightsExist(highlights)){
+          this.view.model.set("showDetailsButton", true)
+        }
+        else {
+          this.view.model.set("showDetailsButton", false)
+
+        }
+
       },
 
       processResponse: function (apiResponse) {
@@ -106,7 +153,7 @@ define([
           }
 
           if (h.highlights && h.highlights.length > 0)
-            d['details'] = {highlights: h};
+            d['details'] = h;
 
           return d;
 
