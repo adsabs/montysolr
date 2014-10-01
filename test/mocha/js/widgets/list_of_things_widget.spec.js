@@ -176,7 +176,7 @@ define(['marionette',
         //makes a request
         expect(pubSubSpy.callCount).to.eql(1);
         expect(pubSubSpy.firstCall.args[1]).to.be.instanceOf(ApiRequest);
-        expect(pubSubSpy.firstCall.args[1].get("query").get("q")[0]).to.eql("foo(testBibcode)")
+        expect(pubSubSpy.firstCall.args[1].get("query").get("q")[0]).to.eql("foo(bibcode:testBibcode)")
 
 
       })

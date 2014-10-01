@@ -18,9 +18,9 @@ define(['jquery',
           sentRequest = apiRequest;
           numRequests++;
 
-          if (sentRequest.toJSON().query.get("q")[0] === "trending(sampleBib1)") {
+          if (sentRequest.toJSON().query.get("q")[0] === "trending(bibcode:sampleBib1)") {
             return Test1;
-          } else if(sentRequest.toJSON().query.get("q")[0] === "trending(sampleBib2)") {
+          } else if(sentRequest.toJSON().query.get("q")[0] === "trending(bibcode:sampleBib1)") {
             return Test2;
           }
         }
@@ -38,7 +38,7 @@ define(['jquery',
       var p = widget.loadBibcodeData("sampleBib1")
 
       //how do you get the apiQuery from the apiRequest in an easier way?
-      expect(sentRequest.toJSON().query.get("q")[0]).to.equal("trending(sampleBib1)")
+      expect(sentRequest.toJSON().query.get("q")[0]).to.equal("trending(bibcode:sampleBib1)")
       //test if it returns a promise
       expect(p.then).to.be.a("function")
 

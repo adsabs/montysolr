@@ -130,14 +130,15 @@ define([
 
       var pubSubStub = sinon.stub(w.pubsub, "publish");
 
-      $("input[value=pubdate]").click();
-      $("input[value=asc]").click();
+      // simulate the click (works in phantomjs)
+      $("input[value=score]").attr('checked', false);
+      $("input[value=pubdate]").attr('checked', true);
+      $("input[value=desc]").attr('checked', false);
+      $("input[value=asc]").attr('checked', true);
 
       $("button.choose-sort").click();
 
-
-      expect(pubSubStub.firstCall.args[1].get("sort")[0]).to.eql("pubdate asc")
-
+      expect(pubSubStub.lastCall.args[1].get("sort")[0]).to.eql("pubdate asc");
 
     })
 
