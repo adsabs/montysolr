@@ -80,7 +80,7 @@ define([
 
           if (Marionette.getOption(this, "debug")) {
             this.$(".right-col-container")
-              .append(widgetDict.queryDebugInfo.render().el);
+              .append(this.widgetDict.queryDebugInfo.render().el);
 
           }
       },

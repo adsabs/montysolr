@@ -28,26 +28,17 @@ define([
     'js/mixins/add_stable_index_to_collection'
   ],
 
-  function (Marionette,
-    Backbone,
-    ApiRequest,
-    ApiQuery,
-    BaseWidget,
-    ItemTemplate,
-    ResultsContainerTemplate,
-    LinkGenerator,
-    PaginationTemplate,
-    WidgetPaginationMixin) {
+  function (Marionette, Backbone, ApiRequest, ApiQuery, BaseWidget, ItemTemplate, ResultsContainerTemplate, LinkGenerator, PaginationTemplate, WidgetPaginationMixin) {
 
 
     var PaginationModel = Backbone.Model.extend({
 
-      defaults : function(){
+      defaults: function () {
         return {
-          perPage : undefined,
-          page : 1,
-          currentQuery : undefined,
-          numFound : undefined
+          perPage: undefined,
+          page: 1,
+          currentQuery: undefined,
+          numFound: undefined
         }
       }
 
@@ -55,7 +46,7 @@ define([
 
     var PaginationView = Backbone.View.extend({
 
-      initialize : function(options){
+      initialize: function (options) {
 
         /*
          * listening to change in perPage value or change in current page
@@ -66,9 +57,9 @@ define([
 
       },
 
-      template : PaginationTemplate,
+      template: PaginationTemplate,
 
-      render: function(){
+      render: function () {
 
         var pageData, baseQ, showFirst;
 
@@ -85,14 +76,14 @@ define([
 
         //now, finally, generate links for each page number
 
-         baseQ = this.model.get("currentQuery");
+        baseQ = this.model.get("currentQuery");
 
-        if (baseQ){
+        if (baseQ) {
 
           baseQ = baseQ.clone();
 
           //now, generating the link
-          pageData = _.map(pageNums, function(n){
+          pageData = _.map(pageNums, function (n) {
             var s = this.getStartVal(n.p, perPage);
             baseQ.set("start", s)
             n.link = baseQ.url();
@@ -107,13 +98,13 @@ define([
         showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
 
         //only render pagination controls if there are more than 25 results
-        if (numFound > minAmountToShowPagination){
+        if (numFound > minAmountToShowPagination) {
           this.$el.html(PaginationTemplate({
-            showFirst : showFirst,
-            pageData : pageData,
-            currentPage : page,
-            perPage : this.model.get("perPage"),
-            currentQuery : this.model.get("currentQuery")}));
+            showFirst: showFirst,
+            pageData: pageData,
+            currentPage: page,
+            perPage: this.model.get("perPage"),
+            currentQuery: this.model.get("currentQuery")}));
         }
         else {
           this.$el.html("");
@@ -124,43 +115,43 @@ define([
 
 
       //create list of up to 5 page numbers to show
-      generatePageNums : function(page){
+      generatePageNums: function (page) {
 
-        var pageNums = _.map([-2,-1, 0, 1, 2 , 3, 4], function(d){
-          var current = (d === 0) ? true: false;
-          return {p : page + d, current : current}
+        var pageNums = _.map([-2, -1, 0, 1, 2 , 3, 4], function (d) {
+          var current = (d === 0) ? true : false;
+          return {p: page + d, current: current}
         });
 
         //page number can't be less than 1
-        pageNums = _.filter(pageNums, function(d){
-          if (d.p > 0){
+        pageNums = _.filter(pageNums, function (d) {
+          if (d.p > 0) {
             return true
           }
         });
 
-        return pageNums.slice(0,5);
+        return pageNums.slice(0, 5);
 
       },
 
-    //iterate through pageNums, keep them only if they're possible (< numFound)
-    ensurePagePossible : function(pageNums, perPage, numFound){
+      //iterate through pageNums, keep them only if they're possible (< numFound)
+      ensurePagePossible: function (pageNums, perPage, numFound) {
 
-      var endIndex = numFound - 1
-     return  _.filter(pageNums, function(n){
-       if (this.getStartVal(n.p, perPage)<= endIndex){
-         return true
-       }
-     }, this)
+        var endIndex = numFound - 1
+        return  _.filter(pageNums, function (n) {
+          if (this.getStartVal(n.p, perPage) <= endIndex) {
+            return true
+          }
+        }, this)
 
-    },
+      },
 
-      events : {
-        "click a" : "changePage",
+      events: {
+        "click a": "changePage",
         "input .per-page": "changePerPage"
 
       },
 
-      changePage : function(e){
+      changePage: function (e) {
 
         var d = $(e.target).data("paginate")
 
@@ -170,7 +161,7 @@ define([
 
       },
 
-      changePerPage : _.debounce(function(e){
+      changePerPage: _.debounce(function (e) {
 
         var perPage = parseInt($(e.target).val());
 
@@ -192,11 +183,11 @@ define([
           pub_raw: undefined,
           doi: undefined,
           details: undefined,
-          links_data : undefined,
-          resultsIndex : undefined
+          links_data: undefined,
+          resultsIndex: undefined
         }
       },
-      idAttribute : "resultsIndex"
+      idAttribute: "resultsIndex"
 
     });
 
@@ -208,7 +199,7 @@ define([
 
     var MasterCollection = Backbone.Collection.extend({
 
-      initialize : function(models, options){
+      initialize: function (models, options) {
 
         this.paginationModel = options.paginationModel;
 
@@ -229,13 +220,13 @@ define([
 
       },
 
-      model : ItemModel,
+      model: ItemModel,
 
-      numFound : undefined,
+      numFound: undefined,
 
       comparator: "resultsIndex",
 
-      updateStartAndEndIndex : function(){
+      updateStartAndEndIndex: function () {
 
         var pageNum = this.paginationModel.get("page");
         var perPage = this.paginationModel.get("perPage");
@@ -247,7 +238,7 @@ define([
 
       },
 
-      onPaginationChange: function(model, options){
+      onPaginationChange: function (model, options) {
 
         this.updateStartAndEndIndex();
 
@@ -255,21 +246,25 @@ define([
 
       },
 
-      requestData : function(){
+      requestData: function () {
         this.trigger("dataRequest", this.currentStartIndex, this.paginationModel.get("perPage"))
       },
 
-      transferModels : function(){
+      transferModels: function () {
 
         //add one to the end to make sure the final index is inclusive
         var indexes = _.range(this.currentStartIndex, this.currentEndIndex + 1);
 
         //check to see if we have the data
-        var testList = this.filter(function(d){ if (indexes.indexOf(d.get("resultsIndex"))!== -1){return true}})
+        var testList = this.filter(function (d) {
+          if (indexes.indexOf(d.get("resultsIndex")) !== -1) {
+            return true
+          }
+        })
 
         //basically it was able to find a record that corresponded with every needed index
         //probably should be equal rather than greater or equal, but maybe there could be duplicate records??
-        if (testList.length  >= indexes.length){
+        if (testList.length >= indexes.length) {
 
           this.visibleCollection.reset(testList);
         }
@@ -295,7 +290,7 @@ define([
        */
       serializeData: function () {
 
-        var data ,shownAuthors;
+        var data , shownAuthors;
         data = this.model.toJSON();
 
         var maxAuthorNames = 3;
@@ -308,7 +303,7 @@ define([
         }
 
         if (data.author) {
-          var l = shownAuthors.length-1;
+          var l = shownAuthors.length - 1;
           data.authorFormatted = _.map(shownAuthors, function (d, i) {
             if (i == l || l == 0) {
               return d; //last one, or only one
@@ -317,7 +312,7 @@ define([
             }
           })
         }
-         //if details/highlights
+        //if details/highlights
         if (data.details) {
           data.highlights = data.details.highlights
         }
@@ -330,20 +325,20 @@ define([
 
       events: {
         'change input[name=identifier]': 'toggleSelect',
-        'mouseover .letter-icon' : "showLinks",
-        'mouseleave .letter-icon' : "hideLinks"
+        'mouseover .letter-icon': "showLinks",
+        'mouseleave .letter-icon': "hideLinks"
       },
 
       toggleSelect: function () {
         this.$el.toggleClass("chosen");
       },
 
-      showLinks : function(e){
+      showLinks: function (e) {
         $c = $(e.currentTarget);
         $c.find("i").addClass("s-icon-draw-attention");
         $c.find(".s-link-details").removeClass("no-display");
       },
-      hideLinks : function(e){
+      hideLinks: function (e) {
         $c = $(e.currentTarget);
         $c.find("i").removeClass("s-icon-draw-attention");
         $c.find(".s-link-details").addClass("no-display");
@@ -353,12 +348,12 @@ define([
 
     var ListViewModel = Backbone.Model.extend({
 
-      defaults : function(){
+      defaults: function () {
 
 
         return {
-          showDetailsButton : false,
-          mainResults : false
+          showDetailsButton: false,
+          mainResults: false
         }
       }
 
@@ -370,7 +365,7 @@ define([
 
         this.paginationView = options.paginationView;
         this.model = new ListViewModel();
-        this.sortView = this.sortView  || options.sortView;
+        this.sortView = this.sortView || options.sortView;
       },
 
       className: "list-of-things",
@@ -383,25 +378,25 @@ define([
 
       //calls to render will render only the model after the 1st time
 
-      modelEvents : {
+      modelEvents: {
 
-        "change" : "render"
+        "change": "render"
 
       },
 
       //calls to render will render only the model after the 1st time
 
-      collectionEvents : {
+      collectionEvents: {
 
-        "reset" : "render"
+        "reset": "render"
 
       },
 
       template: ResultsContainerTemplate,
 
-      onRender: function(){
+      onRender: function () {
 
-        if  (this.sortView){
+        if (this.sortView) {
 
           this.sortView.setElement(this.$(".sort-container")).render();
 
@@ -442,40 +437,40 @@ define([
         this.defaultQueryArguments.fl = this.defaultQueryArguments.fl + "," + this.resultsPageFields;
 
         //letting widget know that the loading transition should happen
-        this.showLoad =  true;
+        this.showLoad = true;
 
         this.visibleCollection = new VisibleCollection();
 
         var paginationOptions = {};
 
-        if (options.perPage){
+        if (options.perPage) {
           paginationOptions.perPage = options.perPage;
           this.defaultQueryArguments.rows = options.perPage
         }
         else {
-          paginationOptions.perPage =  this.defaultQueryArguments.rows;
+          paginationOptions.perPage = this.defaultQueryArguments.rows;
         }
 
         this.paginationModel = new PaginationModel(paginationOptions);
 
         this.paginationView = new PaginationView({
-          model : this.paginationModel,
+          model: this.paginationModel,
           //from the pagination mixin
-          getStartVal : this.getStartVal
+          getStartVal: this.getStartVal
 
         });
 
         //showdetails defaults to false, so details button will be hidden
         this.view = new ListView({
           collection: this.visibleCollection,
-          paginationView : this.paginationView,
-          showDetailsButton : this.showDetailsButton,
-          mainResults : this.mainResults
+          paginationView: this.paginationView,
+          showDetailsButton: this.showDetailsButton,
+          mainResults: this.mainResults
 
         });
 
-        this.collection = new MasterCollection({}, {visibleCollection : this.visibleCollection,
-         paginationModel: this.paginationModel});
+        this.collection = new MasterCollection({}, {visibleCollection: this.visibleCollection,
+          paginationModel: this.paginationModel});
 
 //        this.listenTo(this.collection, "all", this.onAllInternalEvents);
         this.on("all", this.onAllInternalEvents);
@@ -488,7 +483,7 @@ define([
 
       activate: function (beehive) {
 
-        _.bindAll(this,  "processResponse");
+        _.bindAll(this, "processResponse");
 
         this.pubsub = beehive.Services.get('PubSub');
 
@@ -496,36 +491,36 @@ define([
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
-      resetWidget : function(){
+      resetWidget: function () {
         //this will trigger paginationModel to reset itself
-        var defaults =  _.result(this.paginationModel, 'defaults')
+        var defaults = _.result(this.paginationModel, 'defaults')
         //reset pagination model, but prevent the view from immediately re-rendering
         //by passing silent
-        this.paginationModel.set(defaults, {silent : true});
+        this.paginationModel.set(defaults, {silent: true});
 
       },
 
-      resetBibcode : function(bibcode){
+      resetBibcode: function (bibcode) {
 
         this._bibcode = bibcode;
 
       },
 
-    /*
-     -a way to get data on command on a per-bibcode-basis
-     -used by the page managers
-     -checks first to see if bibcode is the same as the current bibcode, in which case nothing happens
-     -it returns a promise which is resolved when the data
+      /*
+       -a way to get data on command on a per-bibcode-basis
+       -used by the page managers
+       -checks first to see if bibcode is the same as the current bibcode, in which case nothing happens
+       -it returns a promise which is resolved when the data
        is available
-     -this function has to be overridden for some less straightforward
+       -this function has to be overridden for some less straightforward
        solr queries, such as "similar/more like this"
-      */
+       */
       loadBibcodeData: function (bibcode) {
 
 
-        if (bibcode === this._bibcode){
+        if (bibcode === this._bibcode) {
 
-          this.deferredObject =  $.Deferred();
+          this.deferredObject = $.Deferred();
           this.deferredObject.resolve(this.paginationModel.get("numFound"));
           return this.deferredObject.promise();
 
@@ -535,13 +530,13 @@ define([
         this.resetWidget();
         this.resetBibcode(bibcode);
 
-        if ((!this.solrOperator && !this.solrField) || (this.solrOperator && this.solrField)){
+        if ((!this.solrOperator && !this.solrField) || (this.solrOperator && this.solrField)) {
           throw new Error("Can't call loadBibcodeData without either a solrOperator or a solrField, and can't have both!")
         }
 
-        var searchTerm = this.solrOperator? this.solrOperator + "(bibcode:" + bibcode +")" : this.solrField + ":" + bibcode
+        var searchTerm = this.solrOperator ? this.solrOperator + "(bibcode:" + bibcode + ")" : this.solrField + ":" + bibcode
 
-        this.deferredObject =  $.Deferred();
+        this.deferredObject = $.Deferred();
 
         var q = this.composeQuery(this.defaultQueryArguments, new ApiQuery());
 
@@ -556,11 +551,11 @@ define([
       },
 
       //will be requested in composeRequest
-      defaultQueryArguments: function(){
+      defaultQueryArguments: function () {
         return {
           fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year',
-          rows : 25,
-          start : 0
+          rows: 25,
+          start: 0
         }
       },
 
@@ -568,14 +563,14 @@ define([
 
         this.setCurrentQuery(apiResponse.getApiQuery());
 
-        var toSet = {"numFound":  apiResponse.get("response.numFound"),
-          "currentQuery":this.getCurrentQuery()};
+        var toSet = {"numFound": apiResponse.get("response.numFound"),
+          "currentQuery": this.getCurrentQuery()};
 
         //checking to see if we need to reset start or rows values
-        var r =  this.getCurrentQuery().get("rows");
+        var r = this.getCurrentQuery().get("rows");
         var s = this.getCurrentQuery().get("start");
 
-        if (r){
+        if (r) {
 
           r = $.isArray(r) ? r[0] : r;
           toSet.perPage = r;
@@ -584,19 +579,19 @@ define([
 
         if (s) {
 
-          var perPage =  toSet.perPage || this.paginationModel.get("perPage");
+          var perPage = toSet.perPage || this.paginationModel.get("perPage");
 
           s = $.isArray(s) ? s[0] : s;
 
           //getPageVal comes from the pagination mixin
-          toSet.page= this.getPageVal(s, perPage);
+          toSet.page = this.getPageVal(s, perPage);
 
         }
 
         var docs = apiResponse.get("response.docs")
 
         //any preprocessing before adding the resultsIndex is done here
-        docs = _.map(docs, function(d){
+        docs = _.map(docs, function (d) {
           d.identifier = d.bibcode;
           return d
         });
@@ -628,67 +623,68 @@ define([
         }
 
         /*
-        * we need a special event that fires only once in event
-        * of a reset OR an add
-        * */
+         * we need a special event that fires only once in event
+         * of a reset OR an add
+         * */
         this.collection.trigger("collection:augmented");
 
         //resolving the promises generated by "loadBibcodeData"
-        if (this.deferredObject){
+        if (this.deferredObject) {
 
           this.deferredObject.resolve(this.paginationModel.get("numFound"))
         }
 
       },
 
-      onAllInternalEvents: function(ev, arg1, arg2) {
+      onAllInternalEvents: function (ev, arg1, arg2) {
 
-       if (ev === "dataRequest") {
+        if (ev === "dataRequest") {
 
 
           var start = arg1;
 
           var rows = arg2;
 
-         var q = this.getCurrentQuery().clone();
+          var q = this.getCurrentQuery().clone();
 
-         q.unlock();
-         q = this.composeQuery(this.defaultQueryArguments, q);
+          q.unlock();
+          q = this.composeQuery(this.defaultQueryArguments, q);
 
-         q.set("start", start);
-         q.set("rows", rows)
+          q.set("start", start);
+          q.set("rows", rows)
 
-         var req = this.composeRequest(q);
-         if (req) {
-           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-         }
+          var req = this.composeRequest(q);
+          if (req) {
+            this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+          }
 
-         if (this.mainResults){
-           //letting other interested widgets know that more info was fetched
-           //i.e. there was a pagination event
-           this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: {start: start, rows: rows}});
+          if (this.mainResults) {
+            //letting other interested widgets know that more info was fetched
+            //i.e. there was a pagination event
+            this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: {start: start, rows: rows}});
 
-         }
+          }
 
-         if (this.showLoad === true){
-           this.startWidgetLoad()
-         }
+          if (this.showLoad === true) {
+            this.startWidgetLoad()
+          }
 
-       }
+        }
 
       },
 
 
-      startWidgetLoad : function(){
+      startWidgetLoad: function () {
 
-          if (this.view.itemViewContainer) {
-            var removeLoadingView = function () {
-              this.view.$el.find(".s-loading").remove();
-              this.listenToOnce(this.visibleCollection, "reset", removeLoadingView);
+        if (this.view.itemViewContainer) {
+          var that = this;
+          var removeLoadingView = function () {
+            that.view.$el.find(".s-loading").remove();
+          };
 
-            }
+          this.listenToOnce(this.visibleCollection, "reset", removeLoadingView);
 
-          if (this.view.$el.find(".s-loading").length === 0){
+          if (this.view.$el.find(".s-loading").length === 0) {
             this.view.$el.append(this.loadingTemplate());
           }
         }
