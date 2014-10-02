@@ -624,11 +624,6 @@ define([
           return d
         });
 
-        if (this.customResponseProcessing instanceof Function){
-
-          docs = this.customResponseProcessing(docs, apiResponse)
-
-        }
 
         docs = this.parseLinksData(docs);
 
