@@ -88,11 +88,12 @@ define(['underscore',
       // we will protect the query -- in the future i can consider removing 'unlock' to really
       // cement the fact the query MUST NOT be changed (we want to receive a modified version)
       var q = apiQuery.clone();
+
       q.lock();
       ps.publish(this.mediatorPubSubKey, ps.INVITING_REQUEST, q);
     },
 
-    /**
+      /**
      * This method harvest requests from the PubSub and passes them to the Api. We do check
      * the local cache and also prepare context for the done/fail callbacks
      *
