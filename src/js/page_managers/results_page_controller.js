@@ -16,15 +16,13 @@ define([
     "hbs!./templates/results-page-layout",
     'js/widgets/base/base_widget',
     'js/widgets/loading/widget',
-    'hbs!./templates/results-control-row',
-    'js/components/api_query'],
+    'hbs!./templates/results-control-row'],
   function (
     Marionette,
     threeColumnTemplate,
     BaseWidget,
     LoadingWidget,
-    resultsControlRowTemplate,
-    ApiQuery) {
+    resultsControlRowTemplate) {
 
 
 
@@ -87,10 +85,12 @@ define([
 
       displayResultsList: function () {
 
+        this.widgetDict.results.view.sortView = this.widgetDict.sort.view;
+
         this.$(".main-content-container")
           .append(this.widgetDict.results.render().el);
 
-        $(".list-of-things").removeClass("hide")
+
 
       },
 
