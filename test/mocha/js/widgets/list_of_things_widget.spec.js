@@ -23,26 +23,32 @@ define(['marionette',
     describe("ListOfThings (UI Widget)", function () {
 
       var minsub, w;
-      beforeEach(function(done) {
 
-        minsub = new (MinimalPubsub.extend({
-          request: function(apiRequest) {
-            if (this.requestCounter % 2 === 0) {
-              return Test2;
-            } else {
-
-              Test1.response.start  = 10
-              return Test1;
-            }
-          }
-          }))({verbose: false});
+      beforeEach(function(){
 
         w = new ListOfThingsWidget();
-        done();
+
       });
 
       afterEach(function(done) {
-        minsub.close();
+
+        if (minsub){
+          minsub.close();
+
+        }
+        var ta = $('#test');
+        if (ta) {
+          ta.empty();
+        }
+        done();
+      });
+
+
+      afterEach(function(done) {
+        if (minsub){
+          minsub.close();
+
+        }
         var ta = $('#test');
         if (ta) {
           ta.empty();
@@ -157,8 +163,58 @@ define(['marionette',
 
       })
 
+      it("has a mechanism to prevent infinite requests", function(){
 
-      it("has a composite view that displays records for each model in the collection", function(){
+        minsub = new (MinimalPubsub.extend({
+          request: function(apiRequest) {
+
+            Test1.response.start  = 0
+            return Test1;
+
+          }
+        }))({verbose: false});
+
+        w.activate(minsub.beehive.getHardenedInstance());
+
+        //these methods allow the controller to keep track of pagination request status
+
+        expect(w.setPaginationRequestPending).to.be.instanceOf(Function);
+        expect(w.resetPaginationRequest).to.be.instanceOf(Function);
+        expect(w.isPaginationPending).to.be.instanceOf(Function);
+
+        /* now I will set pagination, return the wrong records, and check to make
+         sure data was only requested once despite the fact that the request wasn't properly fulfilled
+
+         */
+
+        var publishStub = sinon.stub(w.pubsub, "publish");
+
+        w.paginationModel.set("page", 50);
+
+        expect(w.isPaginationPending()).to.eql(true);
+
+        expect(publishStub.callCount).to.eql(1);
+
+        w.paginationModel.set("page", 100);
+
+        expect(w.isPaginationPending()).to.eql(true);
+
+        expect(publishStub.callCount).to.eql(2)
+
+        //now allowing it to fulfill the request
+
+        w.paginationModel.set("page", 1);
+
+        //this only gets reset next time the pagination changes
+        expect(w.isPaginationPending()).to.eql(true);
+
+        expect(publishStub.callCount).to.eql(3)
+
+
+
+      })
+
+   it("has a composite view that displays records for each model in the collection", function(){
 
         minsub = new (MinimalPubsub.extend({
           request: function(apiRequest) {
@@ -208,13 +264,12 @@ define(['marionette',
 
         expect($("#test .s-results-list").find("h5:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
 
+        //checking render order of more than 3 authors
+
         expect($("#test .s-results-list").find(".just-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2")
 
 
-        //checking render order of authors
-
       })
-
 
       it("has a controller that can accept a command to load data, fetches data, and augments the collection", function(){
 
