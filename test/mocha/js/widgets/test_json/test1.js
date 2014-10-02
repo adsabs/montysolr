@@ -387,7 +387,7 @@ define([], function() {
         "_version_": 1461845144484446208,
         "indexstamp": "2014-03-06T16:42:48.858Z"
       }, {
-        "author": ["Montmerle, T."],
+        "author": ["Montmerle, T.", "Fake Author 1", "Fake Author 2", "Fake Author 3", "fake Author 4", "Fake Author 6"],
         "first_author": "Montmerle, T.",
         "author_norm": ["Montmerle, T"],
         "author_facet": ["Montmerle, T"],
