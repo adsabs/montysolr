@@ -283,6 +283,8 @@ define([
 
       template: ItemTemplate,
 
+      className : "s-result-item-buffer",
+
       /**
        * This method prepares data for consumption by the template
        *
