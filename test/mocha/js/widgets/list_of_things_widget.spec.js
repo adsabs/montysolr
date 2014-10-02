@@ -157,7 +157,64 @@ define(['marionette',
 
       })
 
-      it("has a composite view that displays records for each model in the collection")
+
+      it("has a composite view that displays records for each model in the collection", function(){
+
+        minsub = new (MinimalPubsub.extend({
+          request: function(apiRequest) {
+
+            Test1.response.start  = 0
+            return Test1;
+
+          }
+        }))({verbose: false});
+
+        w = new ListOfThingsWidget({perPage: 10});
+
+        w.activate(minsub.beehive.getHardenedInstance());
+
+        w.solrOperator = "foo";
+
+        w.loadBibcodeData("test");
+
+        $("#test").append(w.view.el);
+
+        //now check to make sure it was rendered correctly
+
+        //checking first record
+
+        expect($("#test .s-results-list").find(".s-identifier:first").text().trim()).to.eql("2013arXiv1305.3460H");
+
+        expect($("#test .s-results-list").find(".s-identifier:first a").attr("href").trim()).to.eql("#abs/2013arXiv1305.3460H");
+
+        expect($("#test .s-results-list").find(".s-results-links:first").find("a").attr("href")).to.eql("http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/arXiv:1305.3460");
+
+        expect($("#test .s-results-list").find(".s-results-links:first").find("a").text().trim()).to.eql("arXiv eprint");
+
+        expect($("#test .s-results-list").find("h5:first").text().trim()).to.eql("A bijection for tri-cellular maps");
+
+        expect($("#test .s-results-list").find(".article-author:first").text().trim()).to.eql("Han, Hillary S. W.;");
+
+
+        //checking last record
+
+        expect($("#test .s-results-list").find(".s-identifier:last").text().trim()).to.eql("1987sbge.proc...47M");
+
+        expect($("#test .s-results-list").find(".s-identifier:last a").attr("href").trim()).to.eql("#abs/1987sbge.proc...47M");
+
+        expect($("#test .s-results-list").find(".s-results-links:last").find("a").attr("href")).to.eql("/#abs/1987sbge.proc...47M/tableofcontents");
+
+        expect($("#test .s-results-list").find(".s-results-links:last").find("a").text().trim()).to.eql("Table of Contents");
+
+        expect($("#test .s-results-list").find("h5:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
+
+        expect($("#test .s-results-list").find(".just-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2")
+
+
+        //checking render order of authors
+
+      })
+
 
       it("has a controller that can accept a command to load data, fetches data, and augments the collection", function(){
 

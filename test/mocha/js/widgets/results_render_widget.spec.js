@@ -85,7 +85,6 @@ define(['marionette',
 
       it.skip("should show three authors with semicolons in the correct places and, if there are more, show the number of the rest", function () {
         //$('#test').append($w);
-        debugger;
         var $parentRow = $($w.find("input[value='2002CeMDA..82..113F']").parents().eq(4))
         //
         expect($parentRow.find("ul.just-authors li:first").text()).to.equal("Fellhauer, M.;");

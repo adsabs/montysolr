@@ -297,7 +297,7 @@ define([
 
         if (data.author && data.author.length > maxAuthorNames) {
           data.extraAuthors = data.author.length - maxAuthorNames;
-          shownAuthors = data.author.splice(0, maxAuthorNames);
+          shownAuthors = data.author.slice(0, maxAuthorNames);
         } else if (data.author) {
           shownAuthors = data.author
         }
