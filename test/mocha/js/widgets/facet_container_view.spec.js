@@ -136,7 +136,7 @@ define([
 
           // selecting from the optins triggers onLogic()
 
-          $v.find('.logic-container label:first input').attr('checked', 'checked').trigger('change');
+          $v.find('.logic-container label:first input').attr('checked', 'checked').trigger('click');
 
           expect($v.find('.logic-container').is(':visible')).to.be.false;
           expect(fired.callCount).to.be.equal(1);
