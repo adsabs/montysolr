@@ -44,8 +44,13 @@ define(['jquery',
 
       var p = widget.loadBibcodeData("sampleBib1");
 
-      //how do you get the apiQuery from the apiRequest in an easier way?
-      expect(sentRequest.toJSON().query.get("q")[0]).to.equal("references(bibcode:sampleBib1)");
+      expect(sentRequest.get("query").get("q")[0]).to.equal("references(bibcode:sampleBib1)");
+
+      //sort should be first_author asc
+      expect(sentRequest.get("query").get("sort")[0]).to.equal("first_author asc");
+
+
+
       //test if it returns a promise
       expect(p.then).to.be.a("function");
 

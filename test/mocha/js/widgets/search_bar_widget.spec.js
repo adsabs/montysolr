@@ -102,7 +102,7 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
 
       expect(q2.get("sort")[0]).to.eql("pubdate asc");
 
-      //shouldn't change the sort
+      //shouldn't change the sort for the following cases
 
       var q3 = new ApiQuery({q : "star", sort : "citation_count desc"});
 
@@ -116,13 +116,29 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
 
       expect(q4.get("sort")[0]).to.eql("citation_count desc");
 
-      //shouldn't add a sort if there is no sort and the query is an operator
+      //should change sort to pubdate_desc for citations operator
 
-      var q5 = new ApiQuery({q : "trending(star)"});
+      var q5 = new ApiQuery({q : "citations(star)"});
 
       widget.changeDefaultSort(q5);
 
-      expect(q5.get("sort")).to.eql(undefined)
+      expect(q5.get("sort")[0]).to.eql("pubdate desc")
+
+      //should change sort to first_author asc for references operator
+
+      var q6 = new ApiQuery({q : "references(star)"});
+
+      widget.changeDefaultSort(q6);
+
+      expect(q6.get("sort")[0]).to.eql("first_author asc")
+
+      //shouldn't add a sort if there is no sort and the query is an operator other than citations and references
+
+      var q7 = new ApiQuery({q : "trending(star)"});
+
+      widget.changeDefaultSort(q7);
+
+      expect(q7.get("sort")).to.eql(undefined)
 
 
       done();

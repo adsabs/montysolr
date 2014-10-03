@@ -13,7 +13,9 @@ define([
 
     var ReferencesWidget = ListOfThingsWidget.extend({
 
-      solrOperator: "references"
+      solrOperator: "references",
+
+      sortOrder  : "first_author asc"
 
     });
 

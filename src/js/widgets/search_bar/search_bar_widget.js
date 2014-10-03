@@ -284,15 +284,21 @@ define(['marionette',
 
           queryVal = query.get("q")[0];
 
-          toMatch = ["trending(", "instructive(", "useful(", "citations(", "references("];
+          //citations operator should be sorted by pubdate too
+
+          toMatch = ["trending(", "instructive(", "useful(", "references("];
 
           operator = _.find(toMatch, function(e) {
 
             if (queryVal.indexOf(e) !== -1) {
-              return true
+              return e
             }
 
           })
+
+          if (operator && operator === "references(" ){
+            query.set("sort", "first_author asc")
+          }
 
           if (!operator) {
             query.set("sort", "pubdate desc")
