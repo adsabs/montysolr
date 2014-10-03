@@ -216,7 +216,7 @@ define([
         $w.find('.item-view:first input').click();
         expect($w.find('input[value="limit to"]').is(':visible')).to.be.true;
 
-        $w.find('input[value="limit to"]').attr('checked', 'checked').trigger('change');
+        $w.find('input[value="limit to"]').attr('checked', 'checked').trigger('click');
         //i don't understand why it is not closing (it does when i click manually)
         //expect($w.find('input[value="limit to"]').is(':visible')).to.be.false;
 
