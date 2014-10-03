@@ -13,7 +13,10 @@ define([
 
     var CitationsWidget = ListOfThingsWidget.extend({
 
-      solrOperator : "citations"
+      solrOperator : "citations",
+
+      sortOrder : "pubdate desc"
+
 
     });
 

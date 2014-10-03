@@ -79,6 +79,74 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
       done();
     });
 
+    it("adds a default sort value of pubdate if the query doesnt have an operator and doesn't already have a sort", function(done){
+
+
+      expect(widget.changeDefaultSort).to.be.instanceof(Function);
+
+
+      //should add pubdate sort if there is no sort
+
+      var q1 = new ApiQuery({q : "star"});
+
+      widget.changeDefaultSort(q1);
+
+      expect(q1.get("sort")[0]).to.eql("pubdate desc");
+
+
+      //shouldn't change the sort if a sort already exists
+
+      var q2 = new ApiQuery({q : "star", sort : "pubdate asc"});
+
+      widget.changeDefaultSort(q2);
+
+      expect(q2.get("sort")[0]).to.eql("pubdate asc");
+
+      //shouldn't change the sort for the following cases
+
+      var q3 = new ApiQuery({q : "star", sort : "citation_count desc"});
+
+      widget.changeDefaultSort(q3);
+
+      expect(q3.get("sort")[0]).to.eql("citation_count desc");
+
+      var q4 = new ApiQuery({q : "trending(star)", sort : "citation_count desc"});
+
+      widget.changeDefaultSort(q4);
+
+      expect(q4.get("sort")[0]).to.eql("citation_count desc");
+
+      //should change sort to pubdate_desc for citations operator
+
+      var q5 = new ApiQuery({q : "citations(star)"});
+
+      widget.changeDefaultSort(q5);
+
+      expect(q5.get("sort")[0]).to.eql("pubdate desc")
+
+      //should change sort to first_author asc for references operator
+
+      var q6 = new ApiQuery({q : "references(star)"});
+
+      widget.changeDefaultSort(q6);
+
+      expect(q6.get("sort")[0]).to.eql("first_author asc")
+
+      //shouldn't add a sort if there is no sort and the query is an operator other than citations and references
+
+      var q7 = new ApiQuery({q : "trending(star)"});
+
+      widget.changeDefaultSort(q7);
+
+      expect(q7.get("sort")).to.eql(undefined)
+
+
+      done();
+
+
+    });
+
+
     it("shows the query builder form on clicking 'Search Form' ", function() {
 
     });

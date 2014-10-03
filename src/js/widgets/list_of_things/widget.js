@@ -571,6 +571,10 @@ define([
 
         q.set("q", searchTerm);
 
+        if (this.sortOrder){
+          q.set("sort", this.sortOrder)
+        }
+
         var req = this.composeRequest(q);
         if (req) {
           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);

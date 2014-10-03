@@ -249,6 +249,9 @@ define(['marionette',
           var newQuery = new ApiQuery({
             q: query
           });
+
+          this.changeDefaultSort(newQuery)
+
           this.storeQuery(newQuery);
           this.navigate(newQuery);
         });
@@ -270,7 +273,43 @@ define(['marionette',
         this.storeQuery(q);
       },
 
+
+      changeDefaultSort : function(query) {
+
+        //make sure not to override an explicit sort if there is one
+
+        if (!query.get("sort")){
+
+          var queryVal, toMatch, operator;
+
+          queryVal = query.get("q")[0];
+
+          //citations operator should be sorted by pubdate too
+
+          toMatch = ["trending(", "instructive(", "useful(", "references("];
+
+          operator = _.find(toMatch, function(e) {
+
+            if (queryVal.indexOf(e) !== -1) {
+              return e
+            }
+
+          })
+
+          if (operator && operator === "references(" ){
+            query.set("sort", "first_author asc")
+          }
+
+          if (!operator) {
+            query.set("sort", "pubdate desc")
+          }
+        }
+
+      },
+
+
       navigate: function (newQuery) {
+
 
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
 
