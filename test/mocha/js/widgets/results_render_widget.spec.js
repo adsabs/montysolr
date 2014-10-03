@@ -66,6 +66,7 @@ define(['marionette',
           q: "star"
         }));
 
+
         expect(widget.collection.length).to.eql(10);
         expect(widget.getCurrentQuery().get("q")[0]).to.eql("star");
 
@@ -191,7 +192,7 @@ define(['marionette',
         done();
       });
 
-      it("should render the results button only if highlights exist given the paginated docs", function () {
+      it("should render the show details button only if highlights exist given the paginated docs", function () {
 
         var responseWithHighlights = new ApiResponse({
           "responseHeader": {
@@ -219,7 +220,7 @@ define(['marionette',
             "3513629": {"abstract": ""}
           }})
 
-        responseWithHighlights.setApiQuery(new ApiQuery())
+        responseWithHighlights.setApiQuery(new ApiQuery({start : 0, rows : 25}))
 
         widget.processResponse(responseWithHighlights);
 
