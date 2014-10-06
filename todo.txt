@@ -1,3 +1,0 @@
-- configuration for the app (loadable from a resource; eg. api url)
-- facets should detect they are empty and close themselves
-- router: hide/show abstracts/search results
