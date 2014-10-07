@@ -62,15 +62,22 @@ define(["marionette",
           .append(this.widgetDict.navView.render().el)
       },
 
-      onShow : function(){
+      onShow : function(currentQuery){
 
         this.displaySearchBar();
+        this.displayBackButton(currentQuery);
 
       },
 
       displaySearchBar: function () {
-        $("#search-bar-row")
+        this.$("#search-bar-row")
           .append(this.widgetDict.searchBar.render().el);
+
+      },
+
+      displayBackButton : function(currentQuery){
+
+        this.$(".back-button").attr("href", "search/" + currentQuery.url())
 
       }
 
@@ -259,7 +266,7 @@ define(["marionette",
 
         $b.append(this.controllerView.el);
 
-        this.controllerView.triggerMethod("show");
+        this.controllerView.triggerMethod("show", this.getCurrentQuery());
 
       },
 

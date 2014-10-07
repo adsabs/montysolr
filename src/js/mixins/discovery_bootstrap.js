@@ -509,13 +509,11 @@ define([
           return
         }
         //navbar is currently 40 px height
-        if ($(window).scrollTop() > 70) {
+        if ($(window).scrollTop() > 50) {
           $(".s-search-bar-full-width-container").addClass("s-search-bar-motion");
-          $("#field-options").hide()
         }
         else {
           $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion")
-          $("#field-options").fadeIn()
         }
       });
 
