@@ -51,11 +51,10 @@ define(["config", 'module'], function(config, module) {
           }
 
           app.start(Router);
-
         }).fail(function () {
           app.redirect('/505.html');
         });
-
+        app.reload('/404.html');
       }).fail(function() {
         // if we failed loading, retry *once again* (and give up eventually)
         app.reload('/404.html');
