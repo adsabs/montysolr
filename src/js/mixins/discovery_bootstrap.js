@@ -109,15 +109,28 @@ define([
       return defer;
     },
 
-    reload: function(v) {
+    /**
+     * Reload the application - by simply changing the URL (append bbbRedirect=1)
+     * If the url already contains 'bbbRedirect', redirect to the error page.
+     * @param errorPage
+     */
+    reload: function(endPage) {
       if (location.search && location.search.indexOf('bbbRedirect=1') > -1) {
-        location.href = location.protocol + '//' + location.hostname + location.pathname + v;
+        return this.redirect(endPage);
       }
       location.search = location.search ? location.search + '&bbbRedirect=1' : 'bbbRedirect=1';
     },
 
-    redirect: function(v) {
-      location.href = location.protocol + '//' + location.hostname + location.pathname + v;
+    redirect: function(endPage) {
+      if (this.router) {
+        location.pathname = this.router.root + endPage;
+      }
+      // let's replace the last element from pathname - this code will run only when
+      // router is not yet available; therefore it should hit situations when the app
+      // was not loaded (but it is not bulletproof - the urls can vary greatly)
+      // TODO: intelligently explore the rigth url (by sending HEAD requests)
+      location.href = location.protocol + '//' + location.hostname + ':' + location.port +
+        location.pathname.substring(0, location.pathname.lastIndexOf('/')) + '/' + endPage;
     },
 
     start: function(Router) {
