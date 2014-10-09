@@ -51,13 +51,13 @@
 .letter-icon {
 
   display: inline-block;
-  margin-right: 10%;
+  margin-right: 8%;
   margin-top: 0px;
-  width: 5%;
 
   i {
     cursor: pointer !important;
-    color : darken(@brand-info, 15%);
+    color : @brand-primary;
+
   }
 
 }
@@ -65,6 +65,7 @@
 
 .s-data-icon {
   .fa;
+  font-size: 1.1em;
   &:before {
     content : @fa-var-database;
   }
@@ -73,6 +74,7 @@
 
 .s-list-icon {
   .fa;
+  font-size: 1.1em;
   &:before {
     content : @fa-var-list-ul;
   }
@@ -81,6 +83,7 @@
 
 .s-text-icon {
   .fa;
+  font-size: 1.1em;
   &:before {
     content : @fa-var-file-text-o;
   }
@@ -96,7 +99,7 @@
 }
 
 .s-result-item-buffer {
-  margin-top: 6px;
+  margin-top: 10px;
 
 }
 
@@ -111,9 +114,11 @@
 
 .s-results-title {
   margin-top: -3px;
-  margin-bottom: 3px;
+  margin-bottom: 0px;
   font-size:16px;
-  color: darken(@brand-primary, 6%);
+  color: desaturate(@brand-primary, 40%);
+  font-weight: 600;
+  line-height: 1.2;
 
 }
 
@@ -193,14 +198,11 @@
   display: block
 }
 
-#results h5 {
-  margin-top: -3px;
-  margin-bottom: 2px;
-}
 
 li.article-author {
-  padding-left: 2px !important;
-  padding-right: 2px !important;
+  padding-left: 2px;
+  padding-right: 2px;
+  color: darken(@text-color, 8%)
 
 }
 
@@ -224,3 +226,29 @@ li.article-author {
   .clearfix;
   padding-bottom: 15px;
 }
+
+//changing font sizes for small screens
+
+@media (max-width :@screen-sm-min) {
+
+  .s-results-title {
+    font-size: 14px;
+    font-weight: normal;
+
+  }
+
+  .s-top-row {
+    font-size  : 12px;
+  }
+
+  .s-results-authors{
+    font-size: 12px;
+  }
+
+  .s-identifier {
+    position:relative;
+    left: -8%;
+  }
+
+}
+
