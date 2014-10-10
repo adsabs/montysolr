@@ -27,7 +27,8 @@ define([
     'hbs!./templates/pagination-template',
     'js/mixins/add_stable_index_to_collection',
     'hbs!./templates/empty-view-template',
-    'hbs!./templates/initial-view-template'
+    'hbs!./templates/initial-view-template',
+    'js/mixins/formatter'
   ],
 
   function (Marionette,
@@ -41,7 +42,8 @@ define([
     PaginationTemplate,
     WidgetPaginationMixin,
     EmptyViewTemplate,
-    InitialViewTemplate
+    InitialViewTemplate,
+    FormatMixin
     ) {
 
 
@@ -197,6 +199,7 @@ define([
           doi: undefined,
           details: undefined,
           links_data : undefined,
+          "[citations]" : undefined,
           resultsIndex : undefined
         }
       },
@@ -315,7 +318,7 @@ define([
        */
       serializeData: function () {
 
-        var data ,shownAuthors;
+        var data, shownAuthors;
         data = this.model.toJSON();
 
         var maxAuthorNames = 3;
@@ -340,6 +343,14 @@ define([
         //if details/highlights
         if (data.details) {
           data.highlights = data.details.highlights
+        }
+
+        if(data["[citations]"] && data["[citations]"]["num_citations"]>0){
+          data.citation_count = this.formatNum(data["[citations]"]["num_citations"]);
+        }
+        else {
+          //formatNum would return "0" for zero, which would then evaluate to true in the template
+          data.citation_count = 0
         }
 
         data.orderNum = this.model.get("resultsIndex") + 1;
@@ -457,6 +468,8 @@ define([
       }
 
     });
+
+    _.extend(ItemView.prototype, FormatMixin);
 
     var ListViewModel = Backbone.Model.extend({
 
@@ -702,7 +715,7 @@ define([
       //will be requested in composeRequest
       defaultQueryArguments: function(){
         return {
-          fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year',
+          fl: 'title,abstract,bibcode,author,keyword,[citations],pub,aff,volume,year',
           rows : 25,
           start : 0
         }

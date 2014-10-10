@@ -2,11 +2,13 @@ define([
   'backbone',
   'marionette',
   'hbs!./templates/abstract-nav',
+  'js/mixins/formatter'
 
 ], function(
   Backbone,
   Marionette,
-  abstractNavTemplate
+  abstractNavTemplate,
+  FormatMixin
   ){
 
 
@@ -76,7 +78,15 @@ define([
 
       data = _.extend(data, this.model.toJSON());
 
-      data = _.extend(data, {items : this.collection.toJSON()});
+      var items = _.map(this.collection.toJSON(), function(d){
+
+        d.numFound = d.numFound ? this.formatNum(d.numFound)  : 0;
+
+        return d
+
+      }, this);
+
+      data = _.extend(data, {items : items});
 
       return data;
 
@@ -122,6 +132,8 @@ define([
     }
 
   })
+
+  _.extend(AbstractNavView.prototype, FormatMixin)
 
 
   return {

@@ -5,17 +5,21 @@
          <span class="caret"></span>
      </button>
      <div class="dropdown-menu" role="menu">
-         for <b>Query:</b> <em>{{currentQuery}}</em>
+         for: <br> <b>Query:</b> <em>{{currentQuery}}</em>
          {{#if facets}}
-         <br/><b>Filter:</b> <em>{{facets}}</em>
+         <br/><b>Filter: </b> <em>{{facets}}</em>
          {{/if}}
 
          {{#if sort}}
-         <p><b>Sort :</b>{{sort}} </p>
+         <p><b>Sort: </b>{{sort}} </p>
          {{/if}}
 
          {{#if citations}}
-         <p><b>Total citations:</b> {{citations.sum}} (<span title="Something for nerds among us: mu={{citations.mean}}, stdev={{citations.stddev}}, missingCount={{citations.missing}}, max={{citations.max}}, min={{citations.min}}">*</span>)</p>
+         <p><b>Total Citations:</b> {{citations.sum}}</p>
+
+         <p><b>Citation Stats:</b> <br> mu={{citations.mean}}, <br> stdev={{citations.stddev}},<br> max={{citations.max}},<br> min={{citations.min}}, <br> missingCount={{citations.missing}},
+         </p>
+         </div>
          {{/if}}
      </div>
      </div>

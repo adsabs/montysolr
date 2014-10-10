@@ -1,8 +1,11 @@
 define(['underscore', 'js/widgets/base/item_view',
-  'hbs!./templates/item-checkbox'], function(
+  'hbs!./templates/item-checkbox',
+   'js/mixins/formatter'
+], function(
   _,
   BaseItemView,
-  ItemCheckBoxTemplate
+  ItemCheckBoxTemplate,
+  FormatMixin
   ) {
 
   var FacetItemView = BaseItemView.extend({
@@ -13,27 +16,6 @@ define(['underscore', 'js/widgets/base/item_view',
       'click .widget-item': "onClick",
       'mouseenter label': "onMouseEnter",
       'mouseleave label': "onMouseLeave"
-    },
-
-    //  utility function (better place to put this?)
-    formatNum: function(num){
-      var withCommas = [];
-      num = num+"";
-      if (num.length < 4){
-        return num
-      }
-      else {
-        num  = num.split("").reverse();
-        _.each(num, function(n, i){
-          withCommas.splice(0,0, n)
-          if (i > 0 && (i+1) %3 === 0){
-            withCommas.splice(0,0, ",")
-          }
-
-        })
-      }
-      withCommas = withCommas.join("");
-      return withCommas.replace(/^\,(.+)/, "$1")
     },
 
     onMouseEnter : function(){
@@ -47,7 +29,6 @@ define(['underscore', 'js/widgets/base/item_view',
 
     },
 
-
     onClick: function(ev) {
       ev.stopPropagation();
       this.model.set('selected', ev.target.checked);
@@ -59,6 +40,8 @@ define(['underscore', 'js/widgets/base/item_view',
       this.$(".size-graphic").width(percent*100 +"%")
     }
   });
+
+  _.extend(FacetItemView.prototype, FormatMixin)
 
   return FacetItemView;
 });
