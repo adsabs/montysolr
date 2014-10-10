@@ -33,6 +33,7 @@ var tests = [
     tbase + '/widgets/sort_widget.spec.js'
 
 
+
 ];
 
 

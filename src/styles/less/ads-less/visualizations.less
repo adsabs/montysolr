@@ -182,9 +182,231 @@ Year, Citation and Reference Graphs
 }
 
 
+
+/* Author network css */
+
 .zoomable-graph {
   .apply {
     margin-top: 10px;
   }
 
+
+//group circle color vars
+
+
+@group-circle-default : desaturate(lighten(@brand-primary-faded, 20%), 20%);
+
+@group-circle-hover : saturate(darken(@group-circle-default, 10%), 20%);
+
+@group-circle-active : @brand-warning;
+
+
+
+.s-selected-items-container {
+  position : relative;
+  left : -4%;
+
+
+}
+
+
+.s-detail-top-row {
+  padding : 3%;
+  position: absolute;
+  right: 2px;
+}
+
+.s-vis-top-row {
+  padding: 2% 0%;
+  border-radius: @border-radius-base;
+  .clearfix;
+  background-color: @gray-lighter;
+
+}
+
+.s-vis-col {
+  width : 50%;
+  float: left;
+}
+.s-vis-center-col {
+  width: 50%;
+  margin: auto;
+  text-align: center;
+}
+
+
+.s-summary-view {
+  width: 50%;
+  border-right:  4px solid @gray-lighter;
+  float: left;
+}
+
+.s-detail-view {
+  width: 50%;
+  float: left;
+  border-left: none;
+
+
+}
+
+
+.network-link {
+  stroke: fade(@brand-info, 20%);
+}
+
+.connector-link {
+
+  stroke: fade(@brand-primary, 50%);
+  stroke-width: 1.5px;
+  stroke-dasharray : 2;
+}
+
+
+.network-node {
+
+  fill: @group-circle-default;
+  .lh-transition(fill 2s, stroke-width 2s)
+
+
+}
+
+.connector-node {
+
+  fill: none;
+  stroke: none;
+
+}
+
+.central-author-background {
+
+  fill : white;
+
+}
+
+
+.s-network-chart {
+ width: 100%;
+  height: 100%;
+}
+
+.s-summary-chart {
+  min-width:300px;
+
+
+
+}
+
+
+.detail-link {
+  stroke: fade(@brand-primary, 5%);
+}
+
+.detail-node {
+  .lh-transition(fill, 1s);
+  cursor : pointer;
+  .unselectable;
+
+}
+
+.s-summary-graph-container {
+  position: relative;
+  max-height: 1000px;
+  max-width: 1500px;
+  min-height: 600px;
+  .s-hover-circle:not(.connector-node) {
+    fill: @group-circle-hover;
+    cursor : pointer;
+  }
+
+  .s-hover-text:not(.connector-node) {
+    cursor : pointer;
+
+  }
+
+  h4 {
+    margin-top : 0px;
+  }
+
+
+  }
+
+
+.selected-node {
+  fill : orange !important;
+}
+
+.target-group {
+
+  fill : @group-circle-active !important;
+  stroke : orange;
+  stroke-width : 1px;
+}
+
+
+.name-collection-container ul {
+  list-style : none;
+  display: inline;
+
+}
+
+.summary-node-group {
+  pointer-events : all;
+}
+
+.group-author-name {
+  text-anchor: middle;
+  cursor: pointer;
+  font-size: 2.5px;
+
+}
+
+.connector-node ~ .group-author-name:first-of-type {
+  font-size : 4px;
+  font-weight: 600;
+  fill : darken(@brand-primary, 20%);
+}
+
+.group-more {
+
+  text-anchor: middle;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 2.5px;
+
+
+}
+
+.s-zoom-panel {
+  width: 7%;
+  padding-left : 50%;
+}
+
+#zoom-in {
+  margin-bottom: 4px;
+}
+
+.s-filter-search {
+
+  margin-right : 2%;
+
+}
+
+.s-detail-explanation {
+  margin: 25% 10%;
+  font-size: 30px;
+  text-align: center;
+}
+
+.s-name-collection-container {
+    max-height: 400px;
+    overflow : auto;
+}
+
+.vis-close {
+  .close;
+  float: none;
+  margin-left: 5%;
+}
+
+.s-author-graph {
 }
