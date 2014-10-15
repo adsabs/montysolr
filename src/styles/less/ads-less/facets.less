@@ -26,9 +26,8 @@
 .s-child-facet-item-open {
   display: inline-block;
   width: 12px;
+  left: -13%;
   color: darken(@brand-warning, 25%);
-  position: relative;
-  left: -3%;
   margin-top: -10px;
   margin-bottom: -10px;
   cursor: pointer;
@@ -50,13 +49,15 @@
 }
 
 //rules for item open and closed styling
-.tree {
+.s-tree {
   .item-open {
     .s-child-facet-item-open;
   }
   .item-closed {
     .s-child-facet-item-closed;
   }
+
+  position: relative;
 }
 
 .s-item-children label {
@@ -91,7 +92,7 @@
   background-color:  lighten(@brand-info, 15%);
   overflow-x: visible;
   color: black;
-  font-size : 13px !important;
+  font-size : 13px;
 }
 
 
@@ -104,6 +105,13 @@
     background-color: darken(@brand-info, 10%);
   }
 }
+
+.s-item-caret {
+  position: absolute;
+  left : -10%;
+}
+
+
 
 .s-widget .item-caret:hover {
 

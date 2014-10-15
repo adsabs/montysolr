@@ -28,9 +28,9 @@ define(['marionette', 'hbs!./templates/item-tree'],
 
       className: function () {
         if (Marionette.getOption(this, "hide") === true) {
-          return "hide item-view";
+          return "hide item-view tree s-tree";
         } else {
-          return "item-view";
+          return "item-view tree s-tree";
         }
       },
 
