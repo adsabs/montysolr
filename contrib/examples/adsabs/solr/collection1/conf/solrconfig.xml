@@ -548,14 +548,23 @@
               regenerator="com.mycompany.MyRegenerator"
               />
       -->
+    <!-- 
+    This cache is built to answer 2nd order queries based on citation
+    relationships. If you use 'reuseCache', then make sure that the
+    searchers are warmed in the following sequence:
+    
+      1. query that sorts data by bibcode
+      2. warm_cache()
+     -->
     <cache name="citations-cache"
               class="solr.CitationLRUCache"
               size="1024"
               initialSize="1024"
               autowarmCount="512"
               regenerator="solr.CitationLRUCache$SimpleRegenerator"
-              identifierFields="bibcode,alternate_bibcode"
+              identifierFields="bibcode:sorted,alternate_bibcode"
               citationFields="citation"
+              reuseCache="true"
               />
               
               
@@ -626,7 +635,17 @@
       class="solr.QuerySenderListener"
       enable="true">
       <arr name="queries">
-        <lst><str name="q">new searcher warming</str></lst>
+        <!-- It is important to warm the searcher with ordering first, because
+             the citations-cache can reuse the cache
+         -->
+        <lst>
+          <str name="q">new searcher warming</str>
+          <str name="sort">bibcode desc</str>
+        </lst>
+        <lst>
+          <str name="q">new searcher warming</str>
+          <str name="sort">alternate_bibcode desc</str>
+        </lst>
         <lst><str name="q">author:&quot;John Doe&quot;</str></lst>
         <lst>
           <str name="q">(black holes thorne) AND database:&quot;astronomy&quot;</str>
@@ -659,7 +678,17 @@
               class="solr.QuerySenderListener"
               enable="true">
       <arr name="queries">
-        <lst><str name="q">first searcher warming</str></lst>
+        <!-- It is important to warm the searcher with ordering first, because
+             the citations-cache can reuse the cache
+         -->
+        <lst>
+          <str name="q">new searcher warming</str>
+          <str name="sort">bibcode desc</str>
+        </lst>
+        <lst>
+          <str name="q">new searcher warming</str>
+          <str name="sort">alternate_bibcode desc</str>
+        </lst>
         <lst><str name="q">warm_cache(new searcher warming)</str></lst>
         <lst>
           <str name="q">(black holes thorne) AND database:&quot;astronomy&quot;</str>

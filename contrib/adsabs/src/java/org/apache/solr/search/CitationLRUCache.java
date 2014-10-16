@@ -112,6 +112,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	// not be necessary as we are going to denormalize 
 	// citation data outside solr and prepare everything there...
 	private boolean incremental = false;
+
+	private boolean reuseCache;
 	
 
 
@@ -125,6 +127,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     
     
     incremental  = "true".equals(((String)args.get("incremental")));
+    reuseCache  = "true".equals(((String)args.get("reuseCache")));
     
     citationFields = new String[0];
     referenceFields = new String[0];
@@ -781,35 +784,42 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	}
   	
   	// first try discover if there exists a cache already that we can reuse
-  	CacheEntry[] caches = FieldCache.DEFAULT.getCacheEntries();
-		if (caches != null) {
-			for (int i=0; i < caches.length; i++) {
-				
-				CacheEntry c = caches[i];
-				String key = c.getFieldName();
-				Object readerKey = c.getReaderKey();
-				
-				if (idField.equals(key) && readerKey.toString().equals(reader.getCoreCacheKey().toString())) {
-					Object v = c.getValue();
-					if (v instanceof BinaryDocValues) {
-						return (BinaryDocValues) v;
+  	// be careful, the cache needs to be populated properly - ie. when a new
+  	// searcher is opened, the warming query should generate these caches;
+  	// otherwise it could happen we grab the old searcher's cache
+  	if (reuseCache) {
+	  	CacheEntry[] caches = FieldCache.DEFAULT.getCacheEntries();
+			if (caches != null) {
+				for (int i=0; i < caches.length; i++) {
+					
+					CacheEntry c = caches[i];
+					String key = c.getFieldName();
+					Object readerKey = c.getReaderKey();
+					
+					if (idField.equals(key)) { // && readerKey.toString().equals(reader.getCoreCacheKey().toString())
+						Object v = c.getValue();
+						if (v instanceof BinaryDocValues) {
+							return (BinaryDocValues) v;
+						}
 					}
+					
 				}
-				
 			}
-		}
+  	}
 		
 		BinaryDocValues idMapping;
 		
 		// because sorting components will create the cache anyway; we can avoid duplicating data
 		// if we create a cache duplicate, the tests will complain about cache insanity (and rightly so)
 		if (sorted) {
-			//System.out.println("creating new sorted: " + idField);
 			idMapping = FieldCache.DEFAULT.getTermsIndex(reader, idField);
+			//System.out.println("creating new sorted: " + idField);
+			//System.out.println("created: " + idMapping);
 		}
 		else {
-			//System.out.println("creating new: " + idField);
 		  idMapping = FieldCache.DEFAULT.getTerms(reader, idField, false); // XXX:rca - should we use 'true'?
+		  //System.out.println("creating new: " + idField);
+		  //System.out.println("created: " + idMapping);
 		}
 		return idMapping;
 		
