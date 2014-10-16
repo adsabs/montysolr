@@ -57,7 +57,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-facet-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-grouping-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-highlighter-4.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-join-4.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-join-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/lucene/join/src"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-memory-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-misc-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queries-4.8-SNAPSHOT.jar"/>

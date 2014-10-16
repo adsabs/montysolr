@@ -5,6 +5,9 @@ import org.junit.BeforeClass;
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.CacheEntry;
+
 
 
 public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
@@ -29,6 +32,11 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 	}
 	
 
+	@Override
+	public void tearDown() throws Exception {
+		FieldCache.DEFAULT.purgeAllCaches();
+		super.tearDown();
+	}
 
 	public void testSearch() throws Exception {
 		
