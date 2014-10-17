@@ -1,10 +1,12 @@
 package org.apache.solr.analysis.author;
 
+import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
@@ -16,6 +18,21 @@ import org.apache.solr.analysis.WriteableSynonymMap;
 import org.apache.solr.analysis.author.AuthorSynonymFilterFactory;
 
 public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
+	
+	private File tmpFile;
+
+	@Override
+	public void setUp() throws Exception {
+		tmpFile = File.createTempFile("montySolr-unittest", null);
+		super.setUp();
+	}
+	
+	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
+		FileUtils.deleteQuietly(tmpFile);
+	}
+	
 	public void testAuthorSynonyms1() throws Exception {
 		
 		
@@ -23,6 +40,8 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 				new HashMap<String,String>(){{ put("synonyms", "foo");}}
 				);
 		WriteableSynonymMap map = new WriteableExplicitSynonymMap();
+		map.setOutput(tmpFile.getAbsolutePath());
+		
 		List<String> rules = new ArrayList<String>();
 		rules.add("MILLER, WILLIAM=>MILLER, B;MILLER, BILL;MILLER,;MILLER, BILL\\b.*");
 		rules.add("MILLER, BILL=>MILLER, WILLIAM;MILLER, WILLIAM\\b.*;MILLER,;MILLER, W");
@@ -37,7 +56,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		for (String s: new String[]{"MILLER, B", "MILLER, BILL", "MILLER,", "MILLER, BILL\\b.*"}) {
 			orderedMap.add(s);
 		}
-		assertEquals(map.get("MILLER, WILLIAM"), orderedMap);
+		assertEquals(orderedMap, map.get("MILLER, WILLIAM"));
 		map.put("MILLER, WILLIAM", orderedMap);
 		
 		// 2nd row
@@ -53,6 +72,7 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		TokenStream stream = factory.create(tokenizer);
 		String[] expected = { "MILLER, BILL", "MILLER, WILLIAM", "MILLER, WILLIAM\\b.*", "MILLER,", "MILLER, W" };
 		assertTokenStreamContents(stream, expected);
+		FileUtils.deleteQuietly(tmpFile);
 	}
 	public void testAuthorSynonyms2() throws Exception {
 		
@@ -61,6 +81,8 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 		);
 		
 		WriteableSynonymMap map = new WriteableExplicitSynonymMap();
+		map.setOutput(tmpFile.getAbsolutePath());
+		
 		List<String> rules = new ArrayList<String>();
 		
 		//XXX: there is a problem with the matcher, it doesn't find
@@ -115,6 +137,8 @@ public class TestAuthorSynonymFilter extends BaseTokenStreamTestCase {
 				new HashMap<String,String>(){{ put("synonyms", "foo");}}
 				);
 		WriteableSynonymMap map = new WriteableEquivalentSynonymMap();
+		map.setOutput(tmpFile.getAbsolutePath());
+		
 		List<String> rules = new ArrayList<String>(){{
 			add("ADAMČUK\\,\\ K,ADAMCUK\\,\\ K,ADAMCHUK\\,\\ K,");
 			add("ADAMČUK\\,\\ KAREL,ADAMCUK\\,\\ KAREL,ADAMCHUK\\,\\ KAREL,");

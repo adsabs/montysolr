@@ -15,10 +15,6 @@ import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jluker
- *
- */
 public class AuthorSynonymFilterFactory extends PersistingMapTokenFilterFactory implements ResourceLoaderAware {
 
   public AuthorSynonymFilterFactory(Map<String,String> args) {

@@ -59,7 +59,7 @@ public class TestWriteableSynonymMap extends LuceneTestCase {
     assertTrue(fc.contains("Foo\\,\\ Bär=>Foo\\,\\ Bar,Foo\\,\\ Baer,Fuu\\,\\ Bar\n"));
     assertTrue(fc.contains("Boo\\,\\ Bär=>Boo\\,\\ Bar,Boo\\,\\ Baer"));
     
-
+    FileUtils.deleteQuietly(tmpFile);
   }
   
   public void testEquivalentMap() throws IOException, InterruptedException {
@@ -114,6 +114,7 @@ public class TestWriteableSynonymMap extends LuceneTestCase {
     assertTrue(fc.contains("Foo\\,\\ Bär,Foo\\,\\ Bar,Foo\\,\\ Baer,Fuu\\,\\ Bar\n"));
     assertTrue(fc.contains("Boo\\,\\ Bär,Boo\\,\\ Bar,Boo\\,\\ Baer"));
     
+    FileUtils.deleteQuietly(tmpFile);
 
   }
 

@@ -210,6 +210,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 									
 								}
 							}
+							buffer.close();
 						}
 					}
 				}

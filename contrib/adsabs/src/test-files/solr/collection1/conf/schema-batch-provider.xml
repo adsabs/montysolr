@@ -45,8 +45,7 @@
         <filter class="solr.WordDelimiterFilterFactory"
           generateWordParts="1" generateNumberParts="1" catenateWords="1"
           catenateNumbers="1" catenateAll="0" splitOnCaseChange="1" />
-        <filter class="solr.StopFilterFactory" ignoreCase="false"
-          enablePositionIncrements="false" />
+        <filter class="solr.StopFilterFactory" ignoreCase="false" />
         <filter class="solr.LowerCaseFilterFactory" />
         <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
       </analyzer>
