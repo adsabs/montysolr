@@ -85,6 +85,9 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   public void inform(ResourceLoader loader) throws IOException {
     final boolean ignoreCase = getBoolean(args, "ignoreCase", false); 
     this.ignoreCase = ignoreCase;
+    
+    // must set the value back (for use by the inheritting class)
+    args.put("ignoreCase", ignoreCase ? "true" : "false");
 
     String bf = args.get("builderFactory");
     SynonymBuilderFactory builder = loadBuilderFactory(loader, bf != null ? bf : SynonymBuilderFactory.class.getName());
