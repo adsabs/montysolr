@@ -82,16 +82,13 @@
 
 .s-landing-section-3 {
 
-  padding-top : 180px;
-  height: 400px;
-
-
+  padding: 10% 0;
 
 }
 
 .s-landing-section-3, .s-landing-section-5 {
   font-size : 16px;
-  background-color: hsl(0%,0%,0%, .2);
+  background-color: @navbar-inverse-bg;
   color: white;
   text-align: center;
 
@@ -122,11 +119,9 @@
   text-align: center;
 
 
-
   @media (min-width :@screen-sm-min) {
     font-size: 24px;
     border-radius: @border-radius-large;
-    padding: 1%;
     display: inline-block;
     margin-bottom: 5%;
     width: 20%;
@@ -147,12 +142,8 @@
 
 }
 
-@media (min-width :@screen-sm-min) {
-  .s-first-container {
-    margin-left: 20%
-  }
 
-}
+
 
 
 
@@ -168,13 +159,20 @@
 
   .s-search-bar-rows-container {
 
-    padding: 3% 2% 7% 2%;
+    padding: 6% 4% 10% 4%;
+
+    border-radius: @border-radius-large;
+    background-color: @gray-lighter;
+    width:70%;
+    min-width: 400px;
+    margin: auto;
 
   }
 
   .s-search-bar-row {
-    background-color: white;
-    min-height: 400px;
+    margin: 2% 0 12%;
   }
+
+
 
 }
