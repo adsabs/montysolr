@@ -946,7 +946,10 @@
       -->
     </requestHandler>
 
-    <!-- request handler for generating list of similar articles -->
+  <!-- this allows to send query data in content-stream -->
+  <requestHandler name="/bigquery" class="solr.BigQuerySearchHandler"></requestHandler>
+  
+  <!-- request handler for generating list of similar articles -->
 	<requestHandler name="/mlt" class="solr.MoreLikeThisHandler">
 		<lst name="defaults">
 		<str name="mlt.fl">title,abstract</str>

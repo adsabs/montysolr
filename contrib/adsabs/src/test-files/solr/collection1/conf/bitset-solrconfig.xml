@@ -5,13 +5,17 @@
   <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
   <dataDir>${solr.data.dir:}</dataDir>
   <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
-  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
-    
+
+  <requestHandler name="standard" class="solr.BigQuerySearchHandler"></requestHandler>
+  
+
   <queryParser name="bitset" class="solr.search.BitSetQParserPlugin">
     <lst name="defaults">
       <str name="cache-mapping">id:test-cache,bibcode:test-cache</str>
     </lst>
   </queryParser>
+  
+  
   
   <query>
     <cache name="test-cache"

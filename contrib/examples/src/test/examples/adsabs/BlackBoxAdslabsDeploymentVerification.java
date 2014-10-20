@@ -55,7 +55,9 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		assertQ(req("q", "*:*"),"//*[@numFound='5']");
 		assertQ(req("q", "id:*"),"//*[@numFound='5']");
 		
-		SolrQueryRequestBase req = (SolrQueryRequestBase) req("q","id:*", 
+		SolrQueryRequestBase req = (SolrQueryRequestBase) req(
+				"qt", "/bigquery",
+				"q","id:*", 
 				"fq","{!bitset compression=none}");
 		List<ContentStream> streams = new ArrayList<ContentStream>(1);
     ContentStreamBase cs = new ContentStreamBase.StringStream("bibcode\nb2\nx5");

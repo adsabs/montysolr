@@ -6,6 +6,16 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpMODIFIERProcessor;
 
+/**
+ * When QNode is prefixed with '='/'#' we wrap it into
+ * {@link AqpAdsabsSynonymQueryNode} and then further down
+ * the line, the processing will be different. Look at
+ * {@link AqpAdsabsSynonymNodeProcessor} for an idea
+ * 
+ * @author rchyla
+ *
+ */
+
 public class AqpAdsabsMODIFIERProcessor extends AqpMODIFIERProcessor {
 	
 	@Override
