@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -97,27 +98,39 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
   
   private QueryNode expandNodes(QueryNode node, NameInfo origNameInfo, int[] level) throws QueryNodeException {
     
-    ArrayList<QueryNode> pl = new ArrayList<QueryNode>();
+    ArrayList<QueryNode> collector = new ArrayList<QueryNode>();
     
     if (!node.isLeaf()) {
       List<QueryNode> children = node.getChildren();
+      boolean changed = false;
       for (int i=0;i<children.size();i++) {
-        doExpansion(origNameInfo, children.get(i), pl, level);
-        children.addAll(i+1, pl);
-        i += pl.size();
-        pl.clear();
+        doExpansion(origNameInfo, children.get(i), collector, level);
+        // interlacing new values right behind the old values
+        // it looks stupid (and is dangerous, true...) but i do it
+        // to make the results more readable (to show expansion right
+        // after the source token)
+        
+        if (collector.size() > 0) {
+        	changed = true;
+        	children.addAll(i+1, collector);
+        	i += collector.size();
+        	collector.clear();
+        }
       }
-      //children.addAll(pl);
+      
+      if (changed)
+      	node.set(children);
+      
     }
     else {
       // now expand the parent
-      doExpansion(origNameInfo, node, pl, level);
+      doExpansion(origNameInfo, node, collector, level);
     }
     
 
-    if (pl.size()>0) {
-      pl.add(0, node);
-      return new GroupQueryNode(new BooleanQueryNode(pl));
+    if (collector.size()>0) {
+      collector.add(0, node);
+      return new GroupQueryNode(new BooleanQueryNode(collector));
     }
     
     return node;
