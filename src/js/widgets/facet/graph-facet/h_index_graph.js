@@ -102,7 +102,7 @@ define(['./base_graph',
         else {
 
           //  show legend
-          this.$(".ref-nonref").removeClass("no-display");
+          this.$(".ref-nonref").removeClass("hidden");
 
           var d = this.innerChart.selectAll("circle").data(data);
 
@@ -219,10 +219,10 @@ define(['./base_graph',
 
         if (this.hIndex) {
           if (_.contains(data, this.hIndex)) {
-            this.innerChart.selectAll(".h-index").classed("no-display", false)
+            this.innerChart.selectAll(".h-index").classed("hidden", false)
           }
           else {
-            this.innerChart.selectAll(".h-index").classed("no-display", true)
+            this.innerChart.selectAll(".h-index").classed("hidden", true)
           }
 
           //first h index line
@@ -236,7 +236,7 @@ define(['./base_graph',
         if (data.length >= 40) {
 
           //  show legend
-          $(".ref-nonref").addClass("no-display");
+          $(".ref-nonref").addClass("hidden");
 
           line = d3.svg.line().x(function (d) {
             return x(d.x);
@@ -244,19 +244,19 @@ define(['./base_graph',
             return y(d.y);
           });
 
-          this.innerChart.selectAll(".dot").classed("no-display", true)
+          this.innerChart.selectAll(".dot").classed("hidden", true)
 
-          this.innerChart.selectAll(".line").datum(data).attr("d", line).classed("no-display", false)
+          this.innerChart.selectAll(".line").datum(data).attr("d", line).classed("hidden", false)
 
         }
         else {
 
           //  show legend
-          this.$(".ref-nonref").removeClass("no-display");
+          this.$(".ref-nonref").removeClass("hidden");
 
-          this.innerChart.selectAll(".line").classed("no-display", true);
+          this.innerChart.selectAll(".line").classed("hidden", true);
 
-          this.innerChart.selectAll(".dot").classed("no-display", false)
+          this.innerChart.selectAll(".dot").classed("hidden", false)
 
           var d = this.innerChart.selectAll("circle").data(data);
 
@@ -292,12 +292,12 @@ define(['./base_graph',
           stop : function (event, ui) {
 
             if (ui.value < max) {
-              that.$(".apply").removeClass("no-display");
+              that.$(".apply").removeClass("hidden");
               that.trigger("facet:active")
 
             }
             else {
-              that.$(".apply").addClass("no-display");
+              that.$(".apply").addClass("hidden");
               that.trigger("facet:inactive");
             }
 
