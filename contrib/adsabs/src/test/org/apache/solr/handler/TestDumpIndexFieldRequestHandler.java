@@ -25,6 +25,7 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.adsabs.solr.AdsConfig.F;
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
@@ -54,7 +55,13 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
 			    + "/example/solr");
 	}
+  
 
+  @Override
+  public void tearDown() throws Exception {
+  	FileUtils.deleteQuietly(generatedTransliterations);
+  	super.tearDown();
+  }
 
   public static String getSchemaFile() {
 
@@ -74,7 +81,7 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
       }
       ));
       newSchema = duplicateModify(new File(configFile), 
-          "outFile=\"author_generated.translit\"", "outFile=\"" + generatedTransliterations.getAbsolutePath() + "\"",
+          //"outFile=\"author_generated.translit\"", "outFile=\"" + generatedTransliterations.getAbsolutePath() + "\"",
           "synonyms=\"author_generated.translit\"", "synonyms=\"" + generatedTransliterations.getAbsolutePath() + "\"");
     } catch (IOException e) {
       e.printStackTrace();
@@ -174,10 +181,4 @@ public class TestDumpIndexFieldRequestHandler extends MontySolrQueryTestCase {
     }
   }
   
-  
-
-  // Uniquely for Junit 3
-  public static junit.framework.Test suite() {
-    return new junit.framework.JUnit4TestAdapter(TestDumpIndexFieldRequestHandler.class);
-  }
 }

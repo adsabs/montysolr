@@ -43,10 +43,25 @@ import org.noggit.JSONUtil;
 
 /**
  * Provider that dumps selected fields to disk - it can analyze fields 
- * and show their values (but only for text/string fields).
+ * and show their values as indexed (but only for text/string fields).
+ * 
+ * This method is INEFFICIENT and is to be avoided for normal operations!
+ * 
+ * How it works:
+ * 
+ * 		1. query for all documents that satisfy conditions
+ * 		2. in loop (for every doc):
+ * 				- read selected fields for the current document (stored values)
+ * 				- analyze the values by the appropriate analyzer (for that field)
+ * 			  - collect all tokens, put them inside array
+ *        - put the array into a fake solr doc
+ *        - dump the doc to disk in JSON
+ *        
+ * Tokens that are indexed at the same position are joined by '|'
+ * (eg. "field" : ["foo|fool", "bar", ....])
  */
 
-public class BatchProviderDumpIndexFields extends BatchProvider {
+public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 	
 	private Filter filter = null;
 	

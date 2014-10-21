@@ -7,8 +7,11 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.JSONDumper;
 
 /**
- * Provider which saves documents from the index in
- * JSON format on disk. 
+ * Provider which saves documents from the index to disk
+ * in JSON format. This method is (relatively) efficient.
+ * Dumping is of course expensive, as the docs needs to
+ * be loaded - but there is no better way to dump huge
+ * collections than this. 
  *
  */
 public class BatchProviderDumpIndex extends BatchProvider {

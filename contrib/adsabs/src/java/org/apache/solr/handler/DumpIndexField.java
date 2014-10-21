@@ -378,6 +378,7 @@ public class DumpIndexField extends RequestHandlerBase {
               while (ts.incrementToken()) {
                 //pass
               }
+              ts.close();
             }
           }
         } catch (IOException e) {

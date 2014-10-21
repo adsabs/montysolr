@@ -121,7 +121,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
 	
 	@Override
   public String getDescription() {
-	  return "Collect author names and saves them to disk as synonym file";
+	  return "Collects author names and saves them to disk as synonym file";
   }
 
 
