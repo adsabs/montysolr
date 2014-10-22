@@ -59,6 +59,11 @@ import org.noggit.JSONUtil;
  *        
  * Tokens that are indexed at the same position are joined by '|'
  * (eg. "field" : ["foo|fool", "bar", ....])
+ * 
+ * These are the parameters:
+ * 
+ * 		fields: list of fields to dump (comma separated)
+ *    analyze: true/false - whether to dump values as indexed [true]
  */
 
 public class BatchProviderDumpAnalyzedFields extends BatchProvider {

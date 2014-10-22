@@ -43,7 +43,7 @@
 
 		<!-- The purpose of the collector is just to harvest the author transliterations, 
 			we do it separately, not during the indexing (for speed/memory/control concerns) 
-			testcase: TestDumpIndexFieldRequestHandler TestAuthorCollectorFactory -->
+			testcase: TestBatchProviderDumpAuthorNames -->
 		<fieldType name="author_collector" class="solr.TextField"
 			positionIncrementGap="0">
 			<analyzer type="query"> <!-- it must be query type!!! -->
@@ -51,8 +51,8 @@
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<filter class="solr.analysis.author.AuthorTransliterationFactory" />
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
-					outFile="author_generated.translit" tokenTypes="AUTHOR_TRANSLITERATED"
-					emitTokens="false" />
+					tokenTypes="AUTHOR_INPUT,AUTHOR_TRANSLITERATED"
+					emitTokens="true" />
 			</analyzer>
 		</fieldType>
 
@@ -254,7 +254,7 @@
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<filter class="solr.analysis.author.AuthorTransliterationFactory" />
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
-					outFile="author_generated.translit" tokenTypes="AUTHOR_TRANSLITERATED"
+					tokenTypes="AUTHOR_TRANSLITERATED"
 					emitTokens="false" />
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
@@ -348,7 +348,7 @@
 				<!-- remove the transliterated variants, they were used only to discover 
 					synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
-					outFile="author_generated.translit" tokenTypes="AUTHOR_TRANSLITERATED"
+					tokenTypes="AUTHOR_TRANSLITERATED"
 					emitTokens="false" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter

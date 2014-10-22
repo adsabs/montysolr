@@ -1926,12 +1926,6 @@
     
   
   
-  <requestHandler name="/dump-index" class="solr.DumpIndexField" default="false">
-    <lst name="defaults">
-        <str name="allowed">.*</str>
-    </lst>
-  </requestHandler>
-  
   <requestHandler name="/batch" 
                   class="org.apache.solr.handler.batch.BatchHandler"
                   enable="${montysolr.enable.write:true}" 
@@ -1942,6 +1936,7 @@
         <str name="workdir">batch-handler</str>
     </lst>
     <lst name="providers">
+      <str name="dump-authors">org.apache.solr.handler.batch.BatchProviderDumpAuthorNames</str>
       <str name="dump-index">org.apache.solr.handler.batch.BatchProviderDumpIndexFields</str>
       <str name="dump-index-use-bibcodes">org.apache.solr.handler.batch.BatchProviderDumpBibcodes</str>
       <str name="dump-freqs">org.apache.solr.handler.batch.BatchProviderDumpTermFreqs</str>

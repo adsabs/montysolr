@@ -19,7 +19,7 @@ import org.apache.solr.search.CitationLRUCache;
 
 public class BatchProviderDumpBibcodes extends BatchProvider {
 	
-	private BatchProviderDumpIndexFields internalWorker = new BatchProviderDumpIndexFields();
+	private BatchProviderDumpAnalyzedFields internalWorker = new BatchProviderDumpAnalyzedFields();
 
 	@Override
   public void run(SolrQueryRequest locReq, BatchHandlerRequestQueue queue) throws Exception {

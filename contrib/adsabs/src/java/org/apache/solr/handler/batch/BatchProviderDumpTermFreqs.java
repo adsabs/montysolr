@@ -25,7 +25,7 @@ import org.apache.solr.schema.SchemaField;
  * 
  * #term #termFreq #docFreq
  * 
- * You can dump several fields at one, just
+ * You can dump several fields at once, just
  * separate them by a comma
  * 
  * Parameters:

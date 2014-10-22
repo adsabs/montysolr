@@ -18,6 +18,18 @@
         <tokenizer class="solr.WhitespaceTokenizerFactory" />
       </analyzer>
     </fieldType>
+    
+    <fieldType name="author_collector" class="solr.TextField"
+      positionIncrementGap="0">
+      <analyzer type="query">
+        <tokenizer class="solr.KeywordTokenizerFactory" />
+        <filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+        <filter class="solr.analysis.author.AuthorTransliterationFactory" />
+        <filter class="solr.analysis.author.AuthorCollectorFactory"
+          tokenTypes="AUTHOR_INPUT,AUTHOR_TRANSLITERATED"
+          emitTokens="true" />
+      </analyzer>
+    </fieldType>
 
     <fieldType name="text" class="solr.TextField"
       positionIncrementGap="100">
@@ -73,6 +85,9 @@
     <field name="references" type="string" indexed="true" stored="true" multiValued="true"/>
     <field name="reference" type="string" indexed="true" stored="true" multiValued="true"/>
     
+    <field name="author_collector" type="author_collector" 
+      indexed="false" stored="false" multiValued="true" />
+      
     <dynamicField name="*" type="text_ws" indexed="true"
       stored="true" />
   </fields>
