@@ -530,7 +530,7 @@ public enum InvenioDB {
   }
   
   private ResultSet getResultSet(String query, Object...args) throws SQLException {
-    System.err.println(query);
+    //System.err.println(query);
     try {
       Connection conn = connect();
       Statement stmt = null;
