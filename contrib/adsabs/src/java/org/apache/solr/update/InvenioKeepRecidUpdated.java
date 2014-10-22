@@ -241,6 +241,10 @@ public class InvenioKeepRecidUpdated extends RequestHandlerBase {
 		try {
 			invenioData = retrieveRecids(prop, req, rsp);
 		}
+		catch (SQLException e1) {
+		  setBusy(false);
+      throw e1;
+		}
 		catch (RuntimeException e) {
 			setBusy(false);
 			throw e;

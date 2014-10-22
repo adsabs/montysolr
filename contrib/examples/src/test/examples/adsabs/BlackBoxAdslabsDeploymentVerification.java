@@ -56,6 +56,7 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		assertQ(req("q", "*:*"),"//*[@numFound='5']");
 		assertQ(req("q", "id:*"),"//*[@numFound='5']");
 		
+		// bigquery handler
 		SolrQueryRequestBase req = (SolrQueryRequestBase) req("q","id:*", 
 				"fq","{!bitset compression=none}");
 		List<ContentStream> streams = new ArrayList<ContentStream>(1);
