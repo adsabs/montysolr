@@ -1,6 +1,7 @@
 define([
     'jquery',
   'backbone',
+  'marionette',
   'd3',
   'js/widgets/base/base_widget',
   'hbs!./templates/wordcloud-template',
@@ -10,6 +11,7 @@ define([
 
   ], function ($,
   Backbone,
+  Marionette,
   d3,
   BaseWidget,
   WordCloudTemplate,
@@ -83,7 +85,7 @@ define([
 
       });
 
-      var WordCloudView = Backbone.View.extend({
+      var WordCloudView = Marionette.View.extend({
 
         initialize: function (options) {
 
@@ -93,8 +95,6 @@ define([
 
           this.listenTo(this.model, "change:processedWordList", this.onRender);
           this.listenTo(this.listView.model, "userChange:selectedWords", this.toggleHighlight);
-
-          this.on("render", this.onRender);
 
         },
 
@@ -223,26 +223,26 @@ define([
           //exit selection
           text
             .exit()
-            .transition()
             .style("opacity", 0)
             //getting weird memory leaks because d3 remove just detaches dom tree???
             .remove();
 
           var that = this;
 
+
           // update selection
           text
+            .transition()
+            .duration(1000)
             .style("font-size", function(d) {return d.size})
             .style("fill", function(d, i) {return renderVals.fill(d.origSize);})
-
-            .attr("text-anchor", "middle")
-            .transition()
             .attr("transform", function(d)
             {
               return "translate(" + [d.x, d.y] + ")";
             })
 
-            text
+
+          text
             .on("click", function(d){
                 if (!this.classList.contains("selected")){
                   that.listView.model.trigger("selected", this.textContent);
@@ -329,10 +329,10 @@ define([
             return [key, modifiedVal || 0]
           });
 
-          // sort to get 60 top candidates
+          // sort to get 50 top candidates
           wordDict = _.last(_.sortBy(wordDict, function (l) {
             return l[1]
-          }), 60)
+          }), 50)
 
           wordDict = _.object(wordDict);
           min = _.min(_.values(wordDict));
@@ -375,10 +375,20 @@ define([
           this.view = new WordCloudView({model: this.model, listView : this.listView});
 
           this.on("all", this.onAllInternalEvents)
+
           this.listenTo(this.listView, "all", this.onAllInternalEvents)
         },
 
         activate: function (pubsub) {
+
+        },
+
+        close : function(){
+
+          this.listView.close();
+          this.view.close();
+
+          Marionette.Controller.prototype.close.apply(this, arguments);
 
         },
 
