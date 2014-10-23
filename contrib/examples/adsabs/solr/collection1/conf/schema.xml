@@ -82,21 +82,22 @@
 				<!--  detect cases when we should bail-out and not attempt author search -->
 				<filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
 				   maxlen="5" />
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="fresh start--"/>
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg=" variations--"/>
-				<!-- replace with UTF-8 variant(s): "adamčuk, k" -->
-				<filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit"
-					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="  synonyms--"/>
+				<!-- add UTF-8 variant(s): "adamčuk, k" -->
+				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
+          synonyms="author_generated.translit"
+          ignoreCase="true" 
+          expand="true" 
+          tokenizerFactory="solr.KeywordTokenizerFactory"
+          builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+          inclOrig="true" />
 				<!-- now remove the query variants, they were used only to discover upgraded 
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="    after collection (1)--"/>
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
@@ -104,7 +105,6 @@
 					and UTF8 forms) -->
 				<filter class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="null" />
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="      transliteration--"/>
 				<!-- generate ADS style extra search clauses (they will be used to find 
 					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk, 
 					p kolja" "adamcuk, p k" "adamcuk," (if plainSurname=true) -->
@@ -113,7 +113,6 @@
 					acronymVariations="1" />
 				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk, 
 					k", "adamguk, k" -->
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="        variations (2)--"/>
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
           synonyms="author_curated.synonyms" format="semicolon" 
 					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
@@ -128,10 +127,8 @@
 				<filter class="solr.LowerCaseFilterFactory" />
 				<!-- reset posIncrement - somtimes synonym expansion causes position 
 					bumps but make sure we skip the first token -->
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="        before reset--"/>
 				<filter class="solr.analysis.ResetFilterFactory"
 					posIncrement="0" range="1,100" />
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="        after reset--"/>
 				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja" 
 					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk, 
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
@@ -139,12 +136,10 @@
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" plainSurname="true" addShortenedMultiName="true"
 					addWildcards="false" lookAtPayloadForOrigAuthor="false" />
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="         variations (last)--"/>
 				<!-- deal with multiple occurences of the same (can happen because of 
 					the overlapping synonyms) -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-				<filter class="solr.analysis.DiagnoseFilterFactory" msg="           final"/>
 
 			</analyzer>
 		</fieldType>
@@ -220,9 +215,14 @@
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
-				<!-- replace with UTF-8 variant(s): "adamčuk, k" -->
-				<filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit"
-					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<!-- add UTF-8 variant(s): "adamčuk, k" -->
+				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
+          synonyms="author_generated.translit"
+          ignoreCase="true" 
+          expand="true" 
+          tokenizerFactory="solr.KeywordTokenizerFactory"
+          builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+          inclOrig="true" />
 				<!-- now remove the query variants, they were used only to discover upgraded 
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
@@ -282,9 +282,14 @@
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
-				<!-- replace with UTF-8 variant(s): "adamčuk, k" -->
-				<filter class="solr.SynonymFilterFactory" synonyms="author_generated.translit"
-					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<!-- add UTF-8 variant(s): "adamčuk, k" -->
+				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory" 
+          synonyms="author_generated.translit"
+          ignoreCase="true" 
+          expand="true" 
+          tokenizerFactory="solr.KeywordTokenizerFactory"
+          builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+          inclOrig="true" />
 				<!-- now remove the query variants, they were used only to discover upgraded 
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"

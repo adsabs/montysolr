@@ -275,6 +275,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("this and (one #5)", wsa, "+this +one +5");
 		
 		assertQueryEquals("=5", null, "5");
+		
 		assertQueryEquals("=(request synonyms 5)", null, "+request +synonyms +5");
 		assertQueryEquals("this and (one =5)", null, "+this +one +5");
 		assertQueryEquals("this and (one =5)", wsa, "+this +one +5");

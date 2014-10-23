@@ -77,6 +77,7 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
 			for (int i=0; i<children.size();i++) {
 				children.set(i, applyNonAnalyzableToAllChildren(children.get(i)));
 			}
+			node.set(children);
 		}
 		return node;
 		
