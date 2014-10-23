@@ -13,8 +13,15 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
 
 public class DiagnoseFilterFactory extends TokenFilterFactory {
   
-  public DiagnoseFilterFactory(Map<String,String> args) {
+  private String msg;
+
+	public DiagnoseFilterFactory(Map<String,String> args) {
     super(args);
+    msg = null;
+    if (args.containsKey("msg")) {
+      msg = args.remove("msg");
+    }
+	    
     if (!args.isEmpty()) {
       throw new IllegalArgumentException("Unknown parameter(s): " + args);
     }
@@ -28,7 +35,7 @@ public class DiagnoseFilterFactory extends TokenFilterFactory {
    * .TokenStream)
    */
   public DiagnoseFilter create(TokenStream input) {
-    return new DiagnoseFilter(input);
+    return new DiagnoseFilter(input, msg);
   }
   
 }
@@ -41,9 +48,11 @@ final class DiagnoseFilter extends TokenFilter {
   private final TypeAttribute typeAtt;
   private final CharTermAttribute termAtt;
   private final OffsetAttribute offsetAtt;
+	private final String msg;
   
-  public DiagnoseFilter(TokenStream input) {
+  public DiagnoseFilter(TokenStream input, String msg) {
     super(input);
+    this.msg = msg;
     posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     typeAtt = addAttribute(TypeAttribute.class);
     termAtt = addAttribute(CharTermAttribute.class);
@@ -60,7 +69,8 @@ final class DiagnoseFilter extends TokenFilter {
     
     if (!input.incrementToken()) return false;
     
-    System.out.println("term=" + termAtt.toString() + " pos="
+    System.out.println("stage:" + (msg != null ? msg : "null") + 
+    		" term=" + termAtt.toString() + " pos="
         + posIncrAtt.getPositionIncrement() + " type=" + typeAtt.type()
         + " offsetStart=" + offsetAtt.startOffset() + " offsetEnd="
         + offsetAtt.endOffset());

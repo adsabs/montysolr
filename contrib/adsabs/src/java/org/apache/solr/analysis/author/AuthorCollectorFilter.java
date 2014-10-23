@@ -51,23 +51,40 @@ public final class AuthorCollectorFilter extends TokenFilter {
       return false;
     }
 
-    if (tokenTypes.contains(typeAtt.type())) {
-      if (emitTokens) {
-        return true;
-      }
-      // we'll eat the tokens
-      while (input.incrementToken()) {
-        if (tokenTypes.contains(typeAtt.type())) {
-          //pass
-        }
-        else {
-          return true;
-        }
-      }
-      return false;
+    //System.out.println("token:" + termAtt.toString());
+    
+    if (emitTokens) {
+    	if (tokenTypes.contains(typeAtt.type())) {
+	        return true;
+    	}
+    	else {
+	      // we'll eat the tokens
+	      while (input.incrementToken()) {
+	        if (tokenTypes.contains(typeAtt.type())) {
+	          return true;
+	        }
+	      }
+	      return false;
+	    }
+    }
+    else {
+    	if (tokenTypes.contains(typeAtt.type())) {
+	      // we'll eat the tokens
+	      while (input.incrementToken()) {
+	        if (tokenTypes.contains(typeAtt.type())) {
+	          // pass
+	        }
+	        else {
+	        	return true;
+	        }
+	      }
+	      return false;
+	    }
+    	else {
+    		return true;
+    	}
     }
 
-    return true;
   }
 
 

@@ -165,8 +165,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
       File newSchema = duplicateModify(new File(schemaConfig), 
           "synonyms=\"author_curated.synonyms\"", "synonyms=\"" + curatedSynonyms.getAbsolutePath() + "\"",
-          "synonyms=\"author_generated.translit\"", "synonyms=\"" + generatedTransliterations.getAbsolutePath() + "\"",
-          "outFile=\"author_generated.translit\"", "outFile=\"" + generatedTransliterations.getAbsolutePath() + "\""
+          "synonyms=\"author_generated.translit\"", "synonyms=\"" + generatedTransliterations.getAbsolutePath() + "\""
       );
       return newSchema.getAbsolutePath();
 
@@ -1164,6 +1163,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     		       "author:adamchuk, m " + // ! author:adamchuk, m*
     		       "author:adamchuk,";
       
+    setDebug(true);
+    testAuthorQuery("\"adamczuk, molja k\"", expected + 
+                          " author:adamczuk, m k author:adamczuk, m k* author:adamczuk, m author:adamczuk,", 
+                          "//*[@numFound='21']");
+    setDebug(false);
 
     testAuthorQuery(
         "\"adamčuk, molja k\"", expected, "//*[@numFound='21']",
