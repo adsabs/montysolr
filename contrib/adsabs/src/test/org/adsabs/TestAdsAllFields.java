@@ -18,6 +18,8 @@ package org.adsabs;
  */
 
 
+import java.util.Arrays;
+
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
@@ -206,13 +208,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		
 		assertU(adoc("id", "101", "bibcode", "2014JNuM..455...10C", 
 				"title", "citation 1", "read_count", "0", "cite_read_boost", "0.4649",
-				"classic_factor", "5000"));
+				"classic_factor", "5000", "citation", "2014JNuM..455...10B",
+				"reader", "0xeeeeeeee", "reader", "1xeeeeeeee", "reader", "2xeeeeeeee"));
 		assertU(adoc("id", "102", "bibcode", "2014JNuM..455...10D", 
 				"title", "citation 2", "read_count", "1", "cite_read_boost", "0.373",
-				"classic_factor", "1500"));
+				"classic_factor", "1500", "citation", "2014JNuM..455...10B"));
 		assertU(adoc("id", "103", "bibcode", "2014JNuM..455...10R", 
 				"title", "reference 1", "read_count", "19", "cite_read_boost", "0.2416",
-				"classic_factor", "0"));
+				"classic_factor", "0", "reader", "4xeeeeeeee", "reader", "1xeeeeeeee"));
 		assertU(adoc("id", "104", "bibcode", "2014JNuM..455...10T", 
 				"title", "reference 2", "read_count", "15", "cite_read_boost", "0.4104"));
 		
@@ -233,6 +236,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		
 		
 		assertU(commit("waitSearcher", "true"));
+		
+		assertQ(req("q", "*:*"), 
+				"//*[@numFound>='19']"
+		);
+		assertQ(req("q", "id:100"), 
+				"//*[@numFound='1']"
+		);
 		
 		/*
 		 * id - str type, the unique id key, we do no processing
@@ -830,7 +840,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 *    25: 1977-01-01 
 		 */
 
-		if (false)  { // TODO: finish
 		assertQ(req("q", "title:datetest", "indent", "true"), "//*[@numFound='6']");
 		setDebug(true);
 		assertQ(req("q", "pubdate:[1976 TO 1977]", "indent", "true"), "//*[@numFound='6']");
@@ -886,7 +895,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']",
 		"//doc/int[@name='recid'][.='27']");
 
-		}
 
 
 
@@ -894,8 +902,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * links_data (856 data is generated and stored as JSON for display purposes)
 		 * ids_data (035 data is generated and stored as JSON for display purposes)
 		 */
-		//assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links_data']/str[contains(text(),'MAST')]");
-		//assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='ids_data']/str[contains(text(),'\"alternate_bibcode\":\"2012arXiv1210.5163R\"')]");
+		assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links_data']/str[contains(text(),'MAST')]");
+		assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='ids_data']/str[contains(text(),'\"alternate_bibcode\":\"2012arXiv1210.5163R\"')]");
 
 
 
@@ -903,90 +911,66 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * 2nd order queries
 		 */
 
+		// references/citations() - see TestSolrCitationQuery
+		
 		// what other papers we cite
 		assertQ(req("q", "references(*:*)"), 
-		"//*[@numFound='5']");
-		assertQ(req("q", "references(id:10)"), 
+				"//*[@numFound='3']");
+		assertQ(req("q", "references(id:100)"), 
 				"//*[@numFound='2']",
-				"//doc/int[@name='recid'][.='11']",
-		"//doc/int[@name='recid'][.='12']");
+				"//doc/int[@name='recid'][.='101']",
+				"//doc/int[@name='recid'][.='102']");
 
 		// who cites us
 		assertQ(req("q", "citations(*:*)"), 
-		"//*[@numFound='4']");
-		assertQ(req("q", "citations(id:10)"),
+		    "//*[@numFound='3']");
+		assertQ(req("q", "citations(id:101)"),
 				"//*[@numFound='1']",
-		"//doc/int[@name='recid'][.='11']");
+		    "//doc/int[@name='recid'][.='100']");
 
-		// similar to references(X)
+		// just check they are working
 		assertQ(req("q", "useful(*:*)"), 
-		"//*[@numFound='5']");
-		assertQ(req("q", "useful(id:10)"), 
-				"//*[@numFound='2']",
-				"//doc/int[@name='recid'][.='11']",
-		"//doc/int[@name='recid'][.='12']");
-
-
-		// this is similar to citations(x)
+				"//*[@numFound='3']");
 		assertQ(req("q", "reviews(*:*)"), 
-		"//*[@numFound='4']");
-		assertQ(req("q", "reviews(id:10)"), 
-				"//*[@numFound='1']",
-		"//doc/int[@name='recid'][.='11']");
+				"//*[@numFound='3']");
 
+		
 		// cut only the first n results
 		assertQ(req("q", "topn(2, reviews(*:*))"), 
 		"//*[@numFound='2']");
 
 		//dumpDoc(null, "id", "recid", "title");
 		assertQ(req("q", "topn(5, recid:[1 TO 10], id asc)"), 
-				"//*[@numFound='4']",
-				"//doc[1]/int[@name='recid'][.='2']",
-				"//doc[2]/int[@name='recid'][.='3']",
-				"//doc[3]/int[@name='recid'][.='4']",
-		"//doc[4]/int[@name='recid'][.='10']");
+				"//*[@numFound='5']",
+				"//doc[1]/int[@name='recid'][.='1']",
+				"//doc[2]/int[@name='recid'][.='2']",
+				"//doc[3]/int[@name='recid'][.='3']",
+				"//doc[4]/int[@name='recid'][.='4']");
 
 		// TODO: I am too tired now to find out why the sorting is weird
 		// but found it must be!
-		//    assertQ(req("q", "topn(5, recid:[1 TO 10], id desc)", "fl", "recid"), 
-		//				"//*[@numFound='4']",
-		//				"//doc[1]/int[@name='recid'][.='10']",
-		//				"//doc[2]/int[@name='recid'][.='4']",
-		//				"//doc[3]/int[@name='recid'][.='3']",
-		//				"//doc[4]/int[@name='recid'][.='2']");
+    //assertQ(req("q", "topn(5, recid:[1 TO 10], \"recid desc\")", "fl", "recid"), 
+		//		"//*[@numFound='5']",
+		//		"//doc[1]/int[@name='recid'][.='7']",
+		//		"//doc[2]/int[@name='recid'][.='6']",
+		//		"//doc[3]/int[@name='recid'][.='5']",
+		//		"//doc[4]/int[@name='recid'][.='4']");
 
 		// trending() - what people read
-		// ony one reader = no match (because we set minDocFreq = 2)
-		assertQ(req("q", "trending(bibcode:1976AJ.....81...67S)"), 
-				"//*[@numFound='0']"
-				//"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']"
-		);
-		// read by many
-		assertQ(req("q", "trending(bibcode:1991ApJ...371..665R OR bibcode:2009arXiv0909.1287I)"), 
-				"//*[@numFound='3']",
-				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
-				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
-				"//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']"
-		);
 		assertQ(req("q", "trending(*:*)"), 
-				"//*[@numFound='3']",
-				"//doc/str[@name='bibcode'][.='1987PhRvD..36..277B']",
-				"//doc/str[@name='bibcode'][.='1991ApJ...371..665R']",
-				"//doc/str[@name='bibcode'][.='2009arXiv0909.1287I']"
-				//"//doc/str[@name='bibcode'][.='1976AJ.....81...67S']"
+				"//*[@numFound>='2']",
+				"//doc[1]/int[@name='recid'][.='101']",
+				"//doc[2]/int[@name='recid'][.='103']"
 		);
 
 
 		
 		// test we can search for all docs that have certain field
-		assertQ(req("q", "*:*"), 
-				"//*[@numFound>='34']"
-		);
 		assertQ(req("q", "reference:*"), 
-				"//*[@numFound='9']"
+				"//doc[1]/int[@name='recid'][.='100']"
 		);
 		assertQ(req("q", "id:?"), // but works only for text fields 
-				"//*[@numFound='3']"
+				"//*[@numFound='8']"
 		);
 
 		
