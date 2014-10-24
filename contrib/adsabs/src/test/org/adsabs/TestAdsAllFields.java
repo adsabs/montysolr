@@ -18,7 +18,6 @@ package org.adsabs;
  */
 
 
-import java.util.Arrays;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
@@ -28,7 +27,6 @@ import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.servlet.DirectSolrConnection;
-import org.adsabs.solr.AdsConfig.F;
 import org.junit.BeforeClass;
 
 
