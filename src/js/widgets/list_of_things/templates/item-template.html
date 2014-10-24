@@ -22,7 +22,7 @@
                     <div class="letter-icon">
                         {{#if links.text}}
                         <i class="s-text-icon"></i>
-                        <div class="no-display s-link-details">
+                        <div class="hidden s-link-details">
                             <ul class="list-unstyled">
                                 {{#each links.text}}
                                 <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank">{{this.title}}</a></li>
@@ -35,7 +35,7 @@
                         {{#if links.list}}
                         <i class="s-list-icon"></i>
 
-                        <div class="no-display s-link-details">
+                        <div class="hidden s-link-details">
                             <ul class="list-unstyled">
                                 {{#each links.list}}
                                 <li><a href="{{this.link}}" target="_blank">{{this.title}}</a></li>
@@ -48,7 +48,7 @@
                         {{#if links.data}}
                         <i class="s-data-icon"></i>
 
-                        <div class="no-display s-link-details">
+                        <div class="hidden s-link-details">
                             <ul class="list-unstyled">
                                 {{#each links.data}}
                                 <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank" >{{this.title}}</a></li>

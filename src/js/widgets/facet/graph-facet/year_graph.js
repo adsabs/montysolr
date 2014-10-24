@@ -263,11 +263,11 @@ define(['./base_graph', 'hbs!./templates/year-graph-legend'],
          stop  : function (event, ui) {
            var ui1 = ui.values[0], ui2 = ui.values[1];
            if (!(ui1 === min && ui2 === max)) {
-             that.$(".apply").removeClass("no-display");
+             that.$(".apply").removeClass("hidden");
              that.trigger("facet:active")
            }
            else {
-             that.$(".apply").addClass("no-display");
+             that.$(".apply").addClass("hidden");
              that.trigger("facet:inactive");
            }
            that.graphChange(ui1, ui2)

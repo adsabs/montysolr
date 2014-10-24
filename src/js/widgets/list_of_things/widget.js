@@ -347,12 +347,12 @@ define([
       showLinks : function(e){
         $c = $(e.currentTarget);
         $c.find("i").addClass("s-icon-draw-attention");
-        $c.find(".s-link-details").removeClass("no-display");
+        $c.find(".s-link-details").removeClass("hidden");
       },
       hideLinks : function(e){
         $c = $(e.currentTarget);
         $c.find("i").removeClass("s-icon-draw-attention");
-        $c.find(".s-link-details").addClass("no-display");
+        $c.find(".s-link-details").addClass("hidden");
       }
 
     });
