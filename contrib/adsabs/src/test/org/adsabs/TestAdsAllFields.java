@@ -201,6 +201,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"keyword_schema\": [\"ADS\", \"PACS Codes\"]" +
 				", \"keyword_facet\": [\"angular momentum kw\"]" +
 				
+				", \"links_data\": [\"{whatever: here there MAST}\"]" +
+				", \"ids_data\": [\"{whatever: here there MAST}\"]" +
 			"}" +
 		"}}";
 		updateJ(json, null);
@@ -838,14 +840,15 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 *    23: 1976-01-02
 		 *    24: 1976-31-12
 		 *    25: 1977-01-01 
+		 *    
+		 * for more complete tests, look at: TestAdsabsTypeDateParsing
 		 */
 
-		assertQ(req("q", "title:datetest", "indent", "true"), "//*[@numFound='6']");
-		setDebug(true);
-		assertQ(req("q", "pubdate:[1976 TO 1977]", "indent", "true"), "//*[@numFound='6']");
-		
-		
-		assertQ(req("q", "pubdate:1976", "indent", "true"), 
+		assertQ(req("q", "title:datetest"), 
+				"//*[@numFound='6']");
+		assertQ(req("q", "pubdate:[1976 TO 1977]"), 
+				"//*[@numFound='6']");
+		assertQ(req("q", "pubdate:1976"), 
 				"//*[@numFound='5']",
 				"//doc/int[@name='recid'][.='20']",
 				"//doc/int[@name='recid'][.='21']",
@@ -853,57 +856,19 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='23']",
 				"//doc/int[@name='recid'][.='24']"
 		);
-		assertQ(req("q", "pubdate:1976-00"),  // 00 gets automatically translated into 1976-01-01 (includes 1976-01-00)
-				"//*[@numFound='4']",
-				"//doc/int[@name='recid'][.='20']",
-				"//doc/int[@name='recid'][.='21']",
-				"//doc/int[@name='recid'][.='22']",
-				"//doc/int[@name='recid'][.='24']"
-		);
-		assertQ(req("q", "pubdate:1976-00-00"), // gets automatically translated into 01-01
-				"//*[@numFound='3']",
-				"//doc/int[@name='recid'][.='20']",
-				"//doc/int[@name='recid'][.='21']",
-				"//doc/int[@name='recid'][.='24']"
-		);
-
-		assertQ(req("q", "pubdate:1976-00-32"), "//*[@numFound='0']"); // nonsense, but should be parsed properly into 01-01
-		assertQ(req("q", "pubdate:1976-01-00"), 
-				"//*[@numFound='3']",
-				"//doc/int[@name='recid'][.='20']",
-				"//doc/int[@name='recid'][.='21']",
-        "//doc/int[@name='recid'][.='24']");
-
-		assertQ(req("q", "pubdate:1976-01-01"), 
-		"//*[@numFound='0']");
-		assertQ(req("q", "pubdate:1976-01-02"), 
-				"//*[@numFound='1']",
-		"//doc/int[@name='recid'][.='22']");
-		assertQ(req("q", "pubdate:1976-02-00"), 
-				"//*[@numFound='2']",
-				"//doc/int[@name='recid'][.='23']",
-		"//doc/int[@name='recid'][.='25']");
-		assertQ(req("q", "pubdate:1976-02-01"), 
-				"//*[@numFound='2']",
-				"//doc/int[@name='recid'][.='23']",
-		"//doc/int[@name='recid'][.='25']");
-		assertQ(req("q", "pubdate:1977-00-00"), 
-				"//*[@numFound='2']",
-				"//doc/int[@name='recid'][.='26']",
-		"//doc/int[@name='recid'][.='27']");
-		assertQ(req("q", "pubdate:1977-01-01"), 
-				"//*[@numFound='1']",
-		"//doc/int[@name='recid'][.='27']");
+		
 
 
 
 
 		/*
-		 * links_data (856 data is generated and stored as JSON for display purposes)
-		 * ids_data (035 data is generated and stored as JSON for display purposes)
+		 * links_data (generated and stored as JSON for display purposes)
+		 * ids_data (generated and stored as JSON for display purposes)
 		 */
-		assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='links_data']/str[contains(text(),'MAST')]");
-		assertQ(req("q", "bibcode:2012ApJ...760..135R"), "//doc/arr[@name='ids_data']/str[contains(text(),'\"alternate_bibcode\":\"2012arXiv1210.5163R\"')]");
+		assertQ(req("q", "id:100"), 
+				"//doc/arr[@name='links_data']/str[contains(text(),'MAST')]",
+				"//doc/arr[@name='ids_data']/str[contains(text(),'MAST')]"
+				);
 
 
 
