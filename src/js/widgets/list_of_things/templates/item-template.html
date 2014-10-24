@@ -11,9 +11,9 @@
                 {{identifier}}
             </a>
             </div>
-            <div class="col-sm-3 col-xs-6" title="citation count">
+            <div class="col-sm-3 hidden-xs" title="citation count">
                 {{#if citation_count}}
-                cited: {{citation_count}}
+                cited by: {{citation_count}}
                 {{/if}}
             </div>
             <div class="col-sm-4">
@@ -78,10 +78,11 @@
                     {{#each authorFormatted}}
                     <li class="article-author">{{this}}</li>
                     {{/each}}
+                    {{#if extraAuthors}}
+                    <li><em>and {{extraAuthors}} more<em></li>
+                    {{/if}}
                 </ul>
-                {{#if extraAuthors}}
-                <span><em>and {{extraAuthors}} more<em></span>
-                {{/if}}
+
             </div>
 
         </div>
