@@ -117,7 +117,7 @@
 		description="Regenerates grammar; usage -Dgrammar=&lt;name&gt;"/>
 
 	
-	<target name="antlr-generate" >
+	<target name="antlr-generate" depends="resolve">
 		<generate-grammar grammar-name="${aqp.grammar}"
 			 grammar-dir="${aqp.grammars.dir}"
 			 parser-dir="${aqp.parser.dir}"
@@ -128,7 +128,7 @@
 
 
 	<!-- compiles both grammar and the test classes -->
-	<target name="compile-all" depends="compile,compile-ast,install-junit4-taskdef" />
+	<target name="compile-all" depends="compile,compile-ast" />
 		
     
 	<target name="compile-ast">
