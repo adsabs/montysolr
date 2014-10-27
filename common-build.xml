@@ -61,11 +61,9 @@
 
 	<property name="common.classpath.excludes" value="**/*.txt,**/*.template,**/*.sha1" />
 
-	<property name="ivy.bootstrap.version" value="2.2.0" />
-	<property name="ivy.resource" value="org/apache/ivy/ant/antlib.xml" />
-	<available resource="${ivy.resource}" property="ivy.available" />
-	<property name="ivy.default.configuration" value="*"/>
-    <property name="ivy.sync" value="true"/>
+	<property name="ivy.bootstrap.version" value="2.3.0" />
+  <property name="ivy.default.configuration" value="*"/>
+  <property name="ivy.sync" value="true"/>
 
 	<property name="junit.jar" value="junit-4.10.jar"/>
 	<property name="junit-location.jar" value="${common.dir}/lib/${junit.jar}"/>
@@ -320,29 +318,36 @@
 	</target>
 
 	<target name="ivy-configure">
-		<!-- [DW] ivy loses its configuration for some reason. cannot explain this. if
-	          you have an idea, fix it.
-	          unless="ivy.settings.uptodate" -->
-		<!-- override: just for safety, should be unnecessary -->
-		<ivy:configure file="${common.dir}/ivy-settings.xml" override="true"/>
-		<!-- <property name="ivy.settings.uptodate" value="true"/> -->
-	</target>
+     <!-- [DW] ivy loses its configuration for some reason. cannot explain this. if
+          you have an idea, fix it.
+          unless="ivy.settings.uptodate" -->
+    <!-- override: just for safety, should be unnecessary -->
+    <ivy:configure file="${common.dir}/ivy-settings.xml" override="true"/>
+    <!-- <property name="ivy.settings.uptodate" value="true"/> -->
+  </target>
 
-	<target name="resolve" depends="ivy-availability-check,ivy-fail,ivy-configure">
-		<!-- todo, make this a property or something. 
-	         only special cases need bundles -->
-		<ivy:retrieve type="jar,bundle" log="download-only" 
-	                  conf="${ivy.default.configuration}"/>
-	</target>
+  <target name="resolve" depends="ivy-availability-check,ivy-configure">
+    <!-- todo, make this a property or something. 
+         only special cases need bundles -->
+    <ivy:retrieve type="jar,bundle,test,test-jar,tests" log="download-only"
+                  conf="${ivy.default.configuration}" sync="${ivy.sync}"/>
+  </target>
 
 	<property name="ivy_install_path" location="${user.home}/.ant/lib" />
-	<property name="ivy_bootstrap_url1" value="http://repo1.maven.org/maven2"/>
-	<!-- you might need to tweak this from china so it works -->
-	<property name="ivy_bootstrap_url2" value="http://mirror.netcologne.de/maven2"/>
-	<property name="ivy_checksum_sha1" value="f9d1e83e82fc085093510f7d2e77d81d52bc2081"/>
+  <property name="ivy_bootstrap_url1" value="http://repo1.maven.org/maven2"/>
+  <!-- you might need to tweak this from china so it works -->
+  <property name="ivy_bootstrap_url2" value="http://uk.maven.org/maven2"/>
+  <property name="ivy_checksum_sha1" value="c5ebf1c253ad4959a29f4acfe696ee48cdd9f473"/>
 
 	<target name="ivy-availability-check" unless="ivy.available">
-		<echo>
+	    <condition property="ivy.available">
+	      <typefound uri="antlib:org.apache.ivy.ant" name="configure" />
+	    </condition>
+	    <antcall target="ivy-fail" />
+	  </target>
+
+	  <target name="ivy-fail" unless="ivy.available">
+	   <echo>
 	     This build requires Ivy and Ivy could not be found in your ant classpath.
 
 	     (Due to classpath issues and the recursive nature of the Lucene/Solr 
@@ -374,11 +379,9 @@
 	     try using the "--noconfig" option when running ant, or editing your global
 	     ant config to allow the user lib to be loaded.  See the wiki for more details:
 	       http://wiki.apache.org/lucene-java/HowToContribute#antivy
-	    </echo>
-	</target>
-	<target name="ivy-fail" unless="ivy.available">
-		<fail>Ivy is not available</fail>
-	</target>
+    </echo>
+    <fail>Ivy is not available</fail>
+  </target>
 	<target name="ivy-bootstrap" description="Download and install Ivy in the users ant lib dir" depends="ivy-bootstrap1,ivy-bootstrap2,ivy-checksum"/>
 
 	<!-- try to download from repo1.maven.org -->
