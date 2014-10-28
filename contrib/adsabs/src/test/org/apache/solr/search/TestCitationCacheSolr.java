@@ -90,7 +90,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				, "citation", "b9", "citation", "b10"
 				));
 		
-		assertU(commit()); // closes the writer, create a new segment
+		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 		
 		assertU(adoc("id", "5", "bibcode", "b5", "alternate_bibcode", "x5",
 				"reference", "x22", "reference", "b3", "reference", "b4"));
@@ -101,7 +101,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 		assertU(adoc("id", "8", "bibcode", "b8", "alternate_bibcode", "x8",
 				"reference", "x2", "reference", "x22", "reference", "b4"));
 
-		assertU(commit()); // closes the writer, create a new segment
+		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 		
 
 		assertU(adoc("id", "9", "bibcode", "b9",
@@ -110,7 +110,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				"reference", "b2", "reference", "b3", "reference", "b4"));
 		
 		
-		assertU(commit());
+		assertU(commit("waitSearcher", "true"));
 	}
 
 	

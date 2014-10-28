@@ -14,7 +14,6 @@
 	<classpathentry kind="con" path="build/solr-download/apache-solr-4.0.0-SVN/org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lib/ant-1.8.2.jar"/>
-	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-3.4-complete.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/jython-standalone-2.7-b1.jar" sourcepath="contrib/adsabs/lib/jython-2.7-b1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/luke-4.0.0-BETA.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solrj-lib/commons-io-2.1.jar"/>
@@ -111,5 +110,8 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-webapp-8.1.10.v20130312.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/jetty-xml-8.1.10.v20130312.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/servlet-api-3.0.jar"/>
+	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/stringtemplate-3.2.1.jar"/>
+	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-3.4.jar"/>
+	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-runtime-3.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

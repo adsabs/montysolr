@@ -122,6 +122,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  //", \"recid\": 100" +
 			  
 				", \"bibcode\": \"2014JNuM..455...10B\"" +
+				", \"alternate_bibcode\": [\"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\"]" +
 			  ", \"doi\": \"doi:ŽŠČŘĎŤŇ:123456789\"" +
 				", \"identifier\": [\"arxiv:1234.5678\", \"ARXIV:hep-ph/1234\"]" +
 			  
@@ -269,6 +270,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "bibcode:2014JnUm..*"), "//*[@numFound='5']");
 		assertQ(req("q", "bibcode:2014JNu?..455...10B"), "//*[@numFound='1']");
 
+		
+		/*
+		 * alternate_bibcode
+		 */
+		assertQ(req("q", "alternate_bibcode:2014JNuM..455...1a2"), "//*[@numFound='1']");
+		assertQ(req("q", "identifier:2014JNuM..455...1a2"), "//*[@numFound='1']");
 		
 		/*
 		 * bibstem
