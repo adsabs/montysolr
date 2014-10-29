@@ -5,26 +5,15 @@ define(['./base_graph',
     'hbs!./templates/h-index-slider-window'],
 
 
-  function(BaseGraphView, legendTemplate, sliderWindowTemplate) {
+  function(BaseGraphView,
+           legendTemplate,
+           sliderWindowTemplate) {
 
     var HIndexGraphView = BaseGraphView.extend({
 
-      initialize : function(options){
-
-        options = options || {};
-
-         this.yAxisTitle = options.yAxisTitle;
-         this.graphTitle = options.graphTitle;
-         this.pastTenseTitle = options.pastTenseTitle;
-
-        this.id = this.graphTitle + "-graph";
-
-        BaseGraphView.prototype.initialize.apply(this, arguments)
-
-      },
-
-
       legendTemplate: legendTemplate,
+
+      xAxisClassName : "h-index-x-axis-title",
 
       addToOnRender: function () {
         //show the h index
@@ -145,9 +134,25 @@ define(['./base_graph',
 
       graphChange: function (val) {
 
-        var data, x, xLabels, y, xAxis, yAxis;
+        var data, max, x, y, xAxis, yAxis;
 
         data = _.clone(this.graphData);
+
+        max = data[data.length - 1].x;
+
+        /* checking : do we need to signal
+         that facet is active/ show apply button?
+         */
+
+        if (val !== max) {
+
+          this.trigger("facet:active")
+        }
+        else {
+          this.trigger("facet:inactive");
+        }
+
+
 
         if (val) {
           this.limitVal = val;
@@ -290,16 +295,6 @@ define(['./base_graph',
           min  : min,
           value: max,
           stop : function (event, ui) {
-
-            if (ui.value < max) {
-              that.$(".apply").removeClass("hidden");
-              that.trigger("facet:active")
-
-            }
-            else {
-              that.$(".apply").addClass("hidden");
-              that.trigger("facet:inactive");
-            }
 
             that.graphChange(ui.value);
 

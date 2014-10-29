@@ -1,12 +1,34 @@
-define(['marionette', 'd3', 'jquery', 'jquery-ui',
-  'js/widgets/base/item_view', 'hbs!./templates/graph'],
-  function (Marionette, d3, $, $ui, BaseItemView, FacetGraphTemplate) {
+define(['marionette',
+    'd3',
+    'jquery',
+    'jquery-ui',
+  'js/widgets/base/item_view',
+    'hbs!./templates/graph',
+    'hbs!./templates/axis-titles-template'
+  ],
+  function (Marionette,
+            d3,
+            $,
+            $ui,
+            BaseItemView,
+            FacetGraphTemplate,
+            axisTitlesTemplate
+
+    ) {
 
   var ZoomableGraphView = BaseItemView.extend({
 
     className : "graph-facet",
 
     initialize   : function (options) {
+
+      this.yAxisTitle = options.yAxisTitle;
+      this.xAxisTitle = options.xAxisTitle;
+      this.graphTitle = options.graphTitle;
+      this.pastTenseTitle = options.pastTenseTitle;
+
+      this.id = this.graphTitle + "-graph";
+
       //setting some constants for the graph
       this.bins = 12; //will be around 12, depending on remainders
       this.margin = {
@@ -28,7 +50,10 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
       }
 
       //for citation and reads graph
-      this.currentScale = "linear";
+      this.currentScale = "linear"
+
+      this.on("facet:inactive", function(){console.log("inactive!"), this.hideApplyButton()});
+      this.on("facet:active", this.pulseApplyButton)
 
     },
 
@@ -36,18 +61,49 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
 
     insertLegend : function(){
       var graphVars = {}
-      if (this.yAxisTitle){
-        graphVars.yAxisTitle = this.yAxisTitle;
-      }
       if (this.graphTitle){
         graphVars.graphTitle = this.graphTitle;
       }
       this.$(".graph-legend").html(this.legendTemplate(graphVars));
     },
 
+    insertAxisTitles : function(){
+      //this is getting inserted after the
+
+      var axisVars = {};
+      axisVars.yAxisTitle = this.yAxisTitle;
+      axisVars.xAxisTitle = this.xAxisTitle;
+      axisVars.xAxisClassName = this.xAxisClassName
+      this.$("svg").after(axisTitlesTemplate(axisVars));
+
+    },
+
     events: {
       "click .apply"         : "submitFacet",
       "blur input[type=text]": "triggerGraphChange"
+    },
+
+    hideApplyButton : function(){
+
+      this.$(".apply").addClass("hidden")
+
+    },
+
+    pulseApplyButton : function(){
+
+      var that = this;
+
+      this.$(".apply").addClass("draw-attention-primary-faded");
+
+
+      //this initiates an animation that lasts for 6 second
+
+      setTimeout(function(){
+
+        this.$(".apply").removeClass("draw-attention-primary-faded");
+
+      }, 2000)
+
     },
 
 
@@ -61,6 +117,7 @@ define(['marionette', 'd3', 'jquery', 'jquery-ui',
       else {
         this.insertLegend();
         this.buildGraph();
+        this.insertAxisTitles();
         this.addSliderWindows();
         this.buildSlider();
         if (this.addToOnRender){

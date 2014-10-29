@@ -1,5 +1,9 @@
-define(['./base_graph', 'hbs!./templates/year-graph-legend'],
-  function(BaseGraphView, legendTemplate){
+define(['./base_graph',
+    'hbs!./templates/year-graph-legend'
+  ],
+  function(BaseGraphView,
+           legendTemplate
+    ){
 
 
    var YearGraphView = BaseGraphView.extend({
@@ -8,12 +12,13 @@ define(['./base_graph', 'hbs!./templates/year-graph-legend'],
 
      legendTemplate : legendTemplate,
 
-
      buildGraph  : function () {
 
        var that = this;
 
        var data, xLabels, x, y, xAxis, yAxis, chart, bar;
+
+       var standardFormatter;
 
        data = _.clone(this.graphData);
 
@@ -27,7 +32,23 @@ define(['./base_graph', 'hbs!./templates/year-graph-legend'],
 
        xAxis = d3.svg.axis().scale(x).orient("bottom");
 
-       yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format("s"));
+       standardFormatter = d3.format("s");
+
+       function isInt(n) {
+         return n % 1 === 0;
+       }
+
+
+       yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(function(d){
+
+         if (d >= 1 && isInt(d)){
+
+           return standardFormatter(d)
+         }
+         else {
+           return ""
+         }
+       });
 
        chart = d3.select(this.el).select(".chart").attr("width", this.fullWidth).attr("height", this.fullHeight);
 
@@ -165,6 +186,7 @@ define(['./base_graph', 'hbs!./templates/year-graph-legend'],
        return data
      },
 
+
      graphChange: function (val1, val2) {
 
        var that = this;
@@ -173,6 +195,20 @@ define(['./base_graph', 'hbs!./templates/year-graph-legend'],
 
        data = _.clone(this.graphData);
 
+
+       /* checking : do we need to signal
+       that facet is active/ show apply button?
+        */
+
+       var min = data[0].x;
+       var max = data[data.length - 1].x;
+
+       if (!(val1 === min && val2 === max)) {
+         this.trigger("facet:active")
+       }
+       else {
+         this.trigger("facet:inactive");
+       }
 
        //now getting rid of anything outside of the new bounds
        data = _.filter(data, function (d, i) {
@@ -195,7 +231,22 @@ define(['./base_graph', 'hbs!./templates/year-graph-legend'],
 
        xAxis = d3.svg.axis().scale(x).orient("bottom");
 
-       yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format("s"));
+       standardFormatter = d3.format("s");
+
+       function isInt(n) {
+         return n % 1 === 0;
+       }
+
+       yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(function(d){
+
+         if (d >= 1 && isInt(d)){
+
+           return standardFormatter(d)
+         }
+         else {
+           return ""
+         }
+       });
 
        bar = this.innerChart.selectAll(".bar").data(data);
 
@@ -253,7 +304,8 @@ define(['./base_graph', 'hbs!./templates/year-graph-legend'],
 
        var that = this;
        var data = _.clone(this.graphData);
-       min = data[0].x, max = data[data.length - 1].x;
+       var min = data[0].x;
+       var max = data[data.length - 1].x;
 
        this.$(".slider").slider({
          range : true,
@@ -262,15 +314,8 @@ define(['./base_graph', 'hbs!./templates/year-graph-legend'],
          values: [min, max],
          stop  : function (event, ui) {
            var ui1 = ui.values[0], ui2 = ui.values[1];
-           if (!(ui1 === min && ui2 === max)) {
-             that.$(".apply").removeClass("hidden");
-             that.trigger("facet:active")
-           }
-           else {
-             that.$(".apply").addClass("hidden");
-             that.trigger("facet:inactive");
-           }
-           that.graphChange(ui1, ui2)
+           that.graphChange(ui1, ui2);
+
          },
          slide : function (event, ui) {
            var ui1 = ui.values[0], ui2 = ui.values[1];
