@@ -30,20 +30,15 @@
     display: none;
   }
 
+
   //show in desktops
   @media (min-width : @screen-md-min){
     display: inline-block;
-    .lh-transition(all .5s ease-out, width .5s ease-out, height .5s ease-out, font-size .5s ease-out);
+    .lh-transition(all .5s ease-out);
 
 
     &:hover {
-      .lh-box-shadow(1 1px 5px darken(@gray-light, 4%));
-//      width:150px;
-//
-//      .descriptor {
-//        display: inline-block
-//      }
-
+      .button-hover-shadow;
 
     }
   }

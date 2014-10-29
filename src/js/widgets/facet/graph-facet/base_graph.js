@@ -52,7 +52,6 @@ define(['marionette',
       //for citation and reads graph
       this.currentScale = "linear"
 
-      this.on("facet:inactive", function(){console.log("inactive!"), this.hideApplyButton()});
       this.on("facet:active", this.pulseApplyButton)
 
     },
