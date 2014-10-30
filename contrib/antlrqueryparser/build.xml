@@ -86,9 +86,10 @@
     <path refid="classpath"/>
   	<pathelement location="${build.dir}/classes/test" />
   	<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
-        <include name="**/antlr-3*.jar"/>
+        <include name="**/antlr*.jar"/>
   		  <include name="**/ST4*.jar"/>
   		  <include name="**/stringtemplate*.jar"/>
+  		  <include name="**/gunit*.jar"/>
     </fileset>
   </path>
         	
