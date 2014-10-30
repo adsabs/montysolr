@@ -197,6 +197,8 @@ define([
 
       initialize: function (options) {
 
+        var that = this;
+
         options = options || {};
 
         _.bindAll(this, 'showPage');
@@ -207,6 +209,13 @@ define([
         }
 
         this.widgetDict = options.widgetDict;
+
+        //listen to results list for data load
+        this.listenTo(this.widgetDict.results.collection, "collection:augmented", function(){
+
+          this.ariaWaitingForResults = false;
+
+        });
 
       },
 
@@ -238,12 +247,17 @@ define([
 
       },
 
+
       showPage: function (options) {
 
         var inDom = options.inDom;
 
         if (!inDom){
           this.insertResultsControllerView();
+
+          this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, "Loading results page")
+
+
         }
 
       }

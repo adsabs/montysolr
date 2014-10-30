@@ -291,6 +291,10 @@ define([
 
     var ItemView = Marionette.ItemView.extend({
 
+      tagName : "li",
+
+      className : "col-sm-12 s-display-block",
+
 
       template: ItemTemplate,
 
@@ -337,22 +341,60 @@ define([
       events: {
         'change input[name=identifier]': 'toggleSelect',
         'mouseover .letter-icon' : "showLinks",
-        'mouseleave .letter-icon' : "hideLinks"
+        'mouseleave .letter-icon' : "hideLinks",
+        'click .letter-icon' : "pinLinks"
+
       },
 
       toggleSelect: function () {
         this.$el.toggleClass("chosen");
       },
 
+      /*
+      * adding this to make the dropdown
+      * accessible, and so people can click to sticky
+      * open the quick links
+      * */
+      pinLinks : function(e){
+
+        $c = $(e.currentTarget);
+
+        $c.toggleClass("pinned");
+
+        if($c.hasClass("pinned")){
+
+          $c.find("i").addClass("s-icon-draw-attention");
+          $c.find(".link-details").removeClass("hidden");
+          $c.find('ul').attr('aria-expanded', true);
+
+        }
+        else {
+
+          $c.find("i").removeClass("s-icon-draw-attention");
+          $c.find(".link-details").addClass("hidden");
+          $c.find('ul').attr('aria-expanded',false);
+
+        }
+
+      },
+
       showLinks : function(e){
         $c = $(e.currentTarget);
+        if ($c.hasClass("pinned")){
+          return
+        }
         $c.find("i").addClass("s-icon-draw-attention");
-        $c.find(".s-link-details").removeClass("hidden");
+        $c.find(".link-details").removeClass("hidden");
+
       },
       hideLinks : function(e){
         $c = $(e.currentTarget);
+        if ($c.hasClass("pinned")){
+          return
+        }
         $c.find("i").removeClass("s-icon-draw-attention");
-        $c.find(".s-link-details").addClass("hidden");
+        $c.find(".link-details").addClass("hidden");
+
       }
 
     });
@@ -717,29 +759,9 @@ define([
 
           }
 
-          if (this.showLoad === true){
-            this.startWidgetLoad()
-          }
-
 
         }
 
-      },
-
-
-      startWidgetLoad : function(){
-
-        if (this.view.itemViewContainer) {
-          var removeLoadingView = function () {
-            this.view.$el.find(".s-loading").remove();
-          }
-          this.listenToOnce(this.visibleCollection, "reset", removeLoadingView);
-
-        }
-
-        if (this.view.$el.find(".s-loading").length === 0){
-          this.view.$el.append(this.loadingTemplate());
-        }
       }
 
     });

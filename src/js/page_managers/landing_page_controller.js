@@ -40,6 +40,7 @@ define(["marionette", "hbs!./templates/landing-page-layout",
 
       activate: function (beehive) {
 
+       this.pubsub = beehive.Services.get('PubSub');
 
 
       },
@@ -47,7 +48,9 @@ define(["marionette", "hbs!./templates/landing-page-layout",
       showPage: function (options) {
 
         if (!options.inDom){
-          this.displayLandingPage()
+          this.displayLandingPage();
+          this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, "Switching to landing page" )
+
         }
 
       }
