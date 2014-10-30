@@ -19,7 +19,6 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
 
       $("#test").append(w)
 
-
       done();
 
     });
@@ -72,9 +71,9 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
 //      can't easily trigger hoverIntent so calling the method directly
       var e = {};
       e.preventDefault = function(){};
-      e.target = document.querySelector("#field-options div[data-field=author]");
+      e.target = document.querySelector("#field-options button[data-field=author]");
 
-      widget.view.$("#field-options div[data-field=author]").click();
+      widget.view.$("#field-options button[data-field=author]").click();
       expect($(".q").val().trim()).to.equal("author:\"\"");
       done();
     });

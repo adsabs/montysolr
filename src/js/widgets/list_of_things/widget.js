@@ -355,7 +355,43 @@ define([
       * accessible, and so people can click to sticky
       * open the quick links
       * */
-      pinLinks : function(e){
+
+
+    removeActiveQuickLinkState : function($node){
+
+      $node.removeClass("pinned");
+      $node.find("i").removeClass("s-icon-draw-attention")
+      $node.find(".link-details").addClass("hidden");
+      $node.find('ul').attr('aria-expanded', false);
+
+      },
+
+     addActiveQuickLinkState : function($node){
+
+       $node.find("i").addClass("s-icon-draw-attention")
+       $node.find(".link-details").removeClass("hidden");
+       $node.find('ul').attr('aria-expanded', true);
+
+     },
+
+     deactivateOtherQuickLinks: function($c){
+
+       var $hasList = this.$(".letter-icon").filter(function(){
+         if ($(this).find("i").hasClass("s-icon-draw-attention")){
+           return true
+         }
+       }).eq(0);
+
+       //there should be max 1 other icon that is active
+
+       if ($hasList.length && $hasList[0] !== $c[0]){
+
+         this.removeActiveQuickLinkState($hasList)
+       }
+
+     },
+
+       pinLinks : function(e){
 
         $c = $(e.currentTarget);
 
@@ -363,37 +399,42 @@ define([
 
         if($c.hasClass("pinned")){
 
-          $c.find("i").addClass("s-icon-draw-attention");
-          $c.find(".link-details").removeClass("hidden");
-          $c.find('ul').attr('aria-expanded', true);
+          this.deactivateOtherQuickLinks($c);
 
+          this.addActiveQuickLinkState($c);
         }
         else {
 
-          $c.find("i").removeClass("s-icon-draw-attention");
-          $c.find(".link-details").addClass("hidden");
-          $c.find('ul').attr('aria-expanded',false);
+          this.removeActiveQuickLinkState($c);
 
         }
 
       },
 
       showLinks : function(e){
+
         $c = $(e.currentTarget);
+
         if ($c.hasClass("pinned")){
           return
         }
-        $c.find("i").addClass("s-icon-draw-attention");
-        $c.find(".link-details").removeClass("hidden");
+        else {
+
+          this.deactivateOtherQuickLinks($c);
+          this.addActiveQuickLinkState($c)
+        }
 
       },
+
       hideLinks : function(e){
+
         $c = $(e.currentTarget);
+
         if ($c.hasClass("pinned")){
           return
         }
-        $c.find("i").removeClass("s-icon-draw-attention");
-        $c.find(".link-details").addClass("hidden");
+
+        this.removeActiveQuickLinkState($c)
 
       }
 

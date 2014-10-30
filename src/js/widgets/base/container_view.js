@@ -44,9 +44,10 @@ define(['backbone', 'marionette',
        * events and callbacks this container provides
        */
       events: {
-        "click .widget-name:first > h5": "toggleWidget",
-        "click .widget-options.top:first": "onClickOptions",
-        "click .widget-options.bottom:first": "onClickOptions"
+        "click .widget-name:first-of-type > h5": "toggleWidget",
+        "click .widget-name .main-caret" : "toggleWidget",
+        "click .widget-options.top:first-of-type": "onClickOptions",
+        "click .widget-options.bottom:first-of-type" : "onClickOptions"
       },
 
       // if we want to do some setup, ths is the way to go
