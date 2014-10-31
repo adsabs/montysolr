@@ -29,11 +29,14 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.lucene.document.SortedBytesDocValuesField;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DocTermOrds;
 import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.SegmentCommitInfo;
+import org.apache.lucene.index.SortedDocValues;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.FieldCache;
@@ -332,6 +335,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
   
   private boolean isWarming = false;
+
+	private boolean purgeCache;
   public boolean isWarmingOrWarmed() {
   	return isWarming;
   }
@@ -756,6 +761,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 			  }
 				i++;
 			}
+			if (purgeCache)
+				FieldCache.DEFAULT.purgeByCacheKey(reader.getCoreCacheKey());
 		}
 		for (String idField: fields.get("intFields")) {
 			Ints idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
@@ -775,6 +782,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 
   private BinaryDocValues getCacheReuseExisting(AtomicReader reader, String idField) throws IOException {
   	
+  	purgeCache = false;
+  	
   	Boolean sorted = false;
   	if (idField.indexOf(':') > -1) {
   		String[] parts = idField.split(":");
@@ -790,24 +799,47 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	if (reuseCache) {
 	  	CacheEntry[] caches = FieldCache.DEFAULT.getCacheEntries();
 			if (caches != null) {
+				ArrayList<CacheEntry> potentialCandidates = new ArrayList<CacheEntry>();
+				
 				for (int i=0; i < caches.length; i++) {
 					
 					CacheEntry c = caches[i];
 					String key = c.getFieldName();
-					Object readerKey = c.getReaderKey();
+					String readerKey = c.getReaderKey().toString();
+					String segmentCode = readerKey.substring(readerKey.indexOf("(")+1, readerKey.length()-1);
 					
-					if (idField.equals(key)) { // && readerKey.toString().equals(reader.getCoreCacheKey().toString())
-						Object v = c.getValue();
-						if (v instanceof BinaryDocValues) {
-							return (BinaryDocValues) v;
+					if (idField.equals(key) && 
+							(reader.getCoreCacheKey().toString().contains(segmentCode)
+									|| readerKey.contains("SegmentCoreReaders"))) {
+						if (sorted) {
+							if (c.getValue() instanceof SortedDocValues)	potentialCandidates.add(c);
+						}
+						else {
+							potentialCandidates.add(c);
 						}
 					}
 					
 				}
+				
+				if (potentialCandidates.size() == 0) {
+					// pass
+				}
+				else if (potentialCandidates.size() == 1) {
+					CacheEntry ce = potentialCandidates.get(0);
+					Object v = ce.getValue();
+					if (v instanceof BinaryDocValues) {
+						return (BinaryDocValues) v;
+					}
+				}
+				else {
+					log.warn("We cannot unambiguously identify cache entry for: {}, {}", idField, reader.getCoreCacheKey());
+				}
+				
 			}
   	}
 		
 		BinaryDocValues idMapping;
+		purgeCache = true;
 		
 		// because sorting components will create the cache anyway; we can avoid duplicating data
 		// if we create a cache duplicate, the tests will complain about cache insanity (and rightly so)

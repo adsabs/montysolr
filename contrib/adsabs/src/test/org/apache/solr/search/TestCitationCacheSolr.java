@@ -262,12 +262,12 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 			
 			SolrCache cache2 = searcher.getCache(cacheName);
 			CitationLRUCache cache = (CitationLRUCache) searcher.getCache(cacheName);
-			
+			//printCache(cache);
 			
 			assertTrue( cache.equals(cache2));
 			assertTrue( cache2 == cache2 );
 			
-			
+			//printCache(cache);
 			// test ID mapping function
 			assertTrue( cache.get("b0").equals(0));
 			assertTrue( cache.get("b1").equals(1));

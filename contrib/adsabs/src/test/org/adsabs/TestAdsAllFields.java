@@ -220,7 +220,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertU(adoc("id", "104", "bibcode", "2014JNuM..455...10T", 
 				"title", "reference 2", "read_count", "15", "cite_read_boost", "0.4104"));
 		
-		
+		assertU(commit());
 		assertU(adoc("id", "20", "bibcode", "b20", "title", "datetest",
 				"pubdate", "1976-01-01", "date", "1976-01-01T00:30:00Z"));
 		assertU(adoc("id", "21", "bibcode", "b21", "title", "datetest",

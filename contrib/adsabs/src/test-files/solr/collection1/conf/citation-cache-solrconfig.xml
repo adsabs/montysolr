@@ -17,6 +17,7 @@
               regenerator="solr.CitationLRUCache$SimpleRegenerator"
               identifierFields="bibcode,alternate_bibcode"
               referenceFields="reference"
+              reuseCache="false"
               />
               
     <cache name="citations-cache-from-citations"
@@ -27,6 +28,7 @@
               regenerator="solr.CitationLRUCache$SimpleRegenerator"
               identifierFields="bibcode,alternate_bibcode"
               citationFields="citation"
+              reuseCache="true"
               />
               
     <cache name="citations-cache-from-both"

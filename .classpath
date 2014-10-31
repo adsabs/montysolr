@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-test-framework-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/lucene/test-framework/src/java"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr-test-framework-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/solr/test-framework/src/java"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr-test-framework-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/lucene/core/src"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/java"/>
 	<classpathentry kind="src" path="contrib/adsabs/src/jython"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/test"/>
