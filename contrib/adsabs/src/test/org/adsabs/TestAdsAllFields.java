@@ -199,8 +199,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"keyword_norm\": [\"angular momentum\", \"89.20.Hh\"]" +
 				", \"keyword_schema\": [\"ADS\", \"PACS Codes\"]" +
 				", \"keyword_facet\": [\"angular momentum kw\"]" +
-				
-				", \"links_data\": [\"{whatever: here there MAST}\"]" +
+				// ["{whatever: here there MAST}",
+				// {"foo": ["bar", "baz"], "one": {"two": "three"}}
+				", \"links_data\": [\"{whatever: here there MAST}\","
+														+ "\"{\\\"foo\\\": [\\\"bar\\\", \\\"baz\\\"], \\\"one\\\": {\\\"two\\\": \\\"three\\\"}}\"]" +
 				", \"ids_data\": [\"{whatever: here there MAST}\"]" +
 			"}" +
 		"}}";
@@ -872,9 +874,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 */
 		assertQ(req("q", "id:100"), 
 				"//doc/arr[@name='links_data']/str[contains(text(),'MAST')]",
-				"//doc/arr[@name='ids_data']/str[contains(text(),'MAST')]"
+				"//doc/arr[@name='links_data']/str[contains(text(),'{\"foo\": [\"bar\", \"baz\"], \"one\": {\"two\": \"three\"}}')]"
 				);
-
 
 
 		/*
