@@ -14,8 +14,7 @@ define([
     PaginationMixin,
     BaseWidget,
     ApiResponse,
-    ApiQuery,
-    TestResponse){
+    ApiQuery){
 
     describe("Abstract Title Widget (UI Widget)", function(){
 

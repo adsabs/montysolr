@@ -82,8 +82,14 @@ define([
 
       var urlToShow = ApiQueryUpdater.prototype.clean(apiQuery);
 
+      var path = "search/" + urlToShow.url();
+
+      var args = {}
+
+      args.path = path;
+
       //first, navigate to proper URL
-      this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, "search/" + urlToShow.url());
+      this.pubsub.publish(this.pubsub.NAVIGATE_WITHOUT_TRIGGER,  args);
 
       //then show results page
       this.showPage("results")

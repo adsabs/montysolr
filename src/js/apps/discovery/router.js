@@ -27,7 +27,9 @@ define([
 
       },
 
-      changeURLFromPubSub : function(path){
+      changeURLFromPubSub : function(options, pubsubkey){
+
+        var path = options.path;
 
         //rewrite this to check to make sure its a valid path
         if (!path) {
@@ -35,7 +37,10 @@ define([
           return
         }
         else {
-          this.navigate(path)
+
+          var skipHistory = options.skipHistory || false;
+
+          this.navigate(path, {replace : skipHistory})
         }
 
       },
