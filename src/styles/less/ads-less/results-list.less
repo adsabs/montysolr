@@ -39,27 +39,36 @@
 
 .s-link-details {
   position: absolute;
-  margin-left: -8%;
-  min-width: 125px;
+  top: 23px;
   background-color: white;
   .ads-container;
-  padding: 10px;
-  z-index: 500;
+  padding: 15px;
+  z-index: @z-index-4;
   font-weight: 500;
+  width: 150px;
 }
 
-.letter-icon {
+.s-letter-icon {
 
   display: inline-block;
+  position:relative;
   margin-right: 8%;
   margin-top: 0px;
 
   i {
-    cursor: pointer !important;
-    color : @brand-primary;
-
+    color : darken(@gray-lighter, 2%);
+    cursor: default;
   }
 
+  .s-active-link {
+
+    i {
+      cursor: pointer !important;
+      color : @brand-primary;
+
+    }
+
+  }
 }
 
 

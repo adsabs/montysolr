@@ -21,8 +21,8 @@
     <div class="col-sm-4">
         {{#if links}}
         <div class="s-results-links">
-            <div class="letter-icon">
-                <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "false" {{else}} "true" {{/if}}>
+            <div class="letter-icon s-letter-icon">
+                <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "true" {{else}} "false" {{/if}}>
                 <i class="s-text-icon" aria-label="quick access to full text links"></i>
                 </button>
                 {{#if links.text}}
@@ -35,8 +35,8 @@
                 </ul>
                 {{/if}}
             </div>
-            <div class="letter-icon">
-                <button class="btn-link {{#if links.list}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.list}} "false" {{else}} "true"  {{/if}}>
+            <div class="letter-icon s-letter-icon">
+                <button class="btn-link {{#if links.list}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.list}} "true" {{else}} "false"  {{/if}}>
                 <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
                 </button>
 
@@ -49,9 +49,9 @@
                 </ul>
                 {{/if}}
             </div>
-            <div class="letter-icon">
+            <div class="letter-icon s-letter-icon">
 
-                <button class="btn-link  {{#if links.data}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "false" {{else}} "true"  {{/if}}>
+                <button class="btn-link  {{#if links.data}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "true" {{else}} "false"  {{/if}}>
                 <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
                 </button>
 

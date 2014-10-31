@@ -340,7 +340,7 @@ define([
 
       events: {
         'change input[name=identifier]': 'toggleSelect',
-        'mouseover .letter-icon' : "showLinks",
+        'mouseenter .letter-icon' : "showLinks",
         'mouseleave .letter-icon' : "hideLinks",
         'click .letter-icon' : "pinLinks"
 
@@ -395,6 +395,10 @@ define([
 
         $c = $(e.currentTarget);
 
+        if (!$c.find(".active-link").length){
+           return
+         }
+
         $c.toggleClass("pinned");
 
         if($c.hasClass("pinned")){
@@ -414,6 +418,10 @@ define([
       showLinks : function(e){
 
         $c = $(e.currentTarget);
+
+        if (!$c.find(".active-link").length){
+          return
+        }
 
         if ($c.hasClass("pinned")){
           return
