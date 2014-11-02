@@ -368,14 +368,14 @@ define([
         w.model.set("tfidfData", fakeWordCloudData);
 
 
-      })
+      });
 
       afterEach(function(){
         $("#test").empty()
-      })
+      });
 
 
-      it("should request wordcloud data from pubsub")
+      it("should request wordcloud data from pubsub");
 
       it("should consist of a controller, a word cloud view, and a list view, (the views have corresponding models)", function(){
 
@@ -386,61 +386,61 @@ define([
         expect(w.listView).to.be.instanceof(Backbone.View);
         expect(w.listView.model).to.be.instanceof(Backbone.Model);
 
-      })
+      });
 
       it("should have a buildWCDict function on the word cloud model that listens for slider changes and re-processes keyword dict", function(){
 
         //resetting slider, recomputing processedWordList
 
-        w.model.set("currentSliderVal", 1)
+        w.model.set("currentSliderVal", 1);
 
-        var processed = w.model.get("processedWordList")
+        var processed = w.model.get("processedWordList");
 
-        expect(_.findWhere(processed, {text: "reionization"}).origSize).to.eql(1.324118996861761)
+        expect(_.findWhere(processed, {text: "reionization"}).origSize).to.eql(1.324118996861761);
 
-        expect(_.findWhere(processed, {text: "reionization"}).size).to.eql(21)
+        expect(_.findWhere(processed, {text: "reionization"}).size).to.eql(20);
 
         //resetting slider, recomputing processedWordList
 
-        w.model.set("currentSliderVal", 5)
+        w.model.set("currentSliderVal", 5);
 
-        var processed = w.model.get("processedWordList")
+        var processed = w.model.get("processedWordList");
 
         expect(_.findWhere(processed, {text: "reionization"})).to.eql(undefined);
 
-        expect(_.findWhere(processed, {text: "imaging"}).size).to.eql(19);
+        expect(_.findWhere(processed, {text: "imaging"}).size).to.eql(18);
 
         expect(_.findWhere(processed, {text: "imaging"}).origSize).to.eql(1.937015350530147);
 
 
-      })
+      });
 
       it("should have a draw function on the word cloud view that takes care of the word cloud rendering", function(){
 
-        expect(w.view.draw).to.be.instanceof(Function)
+        expect(w.view.draw).to.be.instanceof(Function);
 
         //how to best test the layout? leave this for later
 
-      })
+      });
 
       it("should have a list view that listens for click events on word cloud words and adds/removes the word from the list", function(){
 
         w.listView.model.trigger("selected", "optical");
 
-        expect(w.listView.model.get("selectedWords")[0]).to.eql("optical")
+        expect(w.listView.model.get("selectedWords")[0]).to.eql("optical");
 
         w.listView.model.trigger("unselected", "optical");
 
         expect(w.listView.model.get("selectedWords")[0]).to.eql(undefined)
 
-      })
+      });
 
 
       it("should have a submit button that emits a start_search with the new filter", function(){
 
-        w.pubsub = {publish : function(){}}
+        w.pubsub = {publish : function(){}};
 
-        var pubsubStub = sinon.stub(w.pubsub, "publish")
+        var pubsubStub = sinon.stub(w.pubsub, "publish");
 
         //for testing
         w.getCurrentQuery = function(){return new ApiQuery()};
@@ -453,22 +453,8 @@ define([
 
         expect(pubsubStub.args[0][1].get("q")).to.eql(["undefined AND (fakeA OR fakeB)"])
 
-
-
-
-
-
-
-
       })
-
-
-
-
-
 
     })
 
-
-
-})
+});
