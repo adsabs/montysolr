@@ -19,8 +19,6 @@ define(['backbone',
 
     var BaseFacetWidget = PaginatedMultiCallbackWidget.extend({
 
-
-
       initialize: function (options) {
         options = options || {};
         this._checkStandardWidgetOptions(options);

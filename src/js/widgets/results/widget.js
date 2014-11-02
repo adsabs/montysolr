@@ -49,7 +49,8 @@ define([
 
         this.resetWidget();
 
-        BaseWidget.prototype.dispatchRequest.apply(this, arguments)
+        BaseWidget.prototype.dispatchRequest.apply(this, arguments);
+
       },
 
       defaultQueryArguments: function(){
@@ -103,6 +104,8 @@ define([
       processResponse: function (apiResponse) {
 
         this.setCurrentQuery(apiResponse.getApiQuery());
+
+        var numFound =  apiResponse.get("response.numFound");
 
         var toSet = {"numFound":  apiResponse.get("response.numFound"),
           "currentQuery":this.getCurrentQuery()};
@@ -190,6 +193,8 @@ define([
 
           this.deferredObject.resolve(this.paginationModel.get("numFound"))
         }
+
+        this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, "Search results loaded. Search returned " + numFound + " results."  )
 
       }
 

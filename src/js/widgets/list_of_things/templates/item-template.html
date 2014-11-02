@@ -1,103 +1,110 @@
-    <div class="col-sm-12">
-        <div class="row s-top-row">
-            <div class="col-sm-1 col-xs-2 s-checkbox-col">
-                <label>
-                    {{orderNum}}
-                    <input type="checkbox" value={{identifier}} name="identifier">
-                </label>
-            </div>
-            <div class="col-sm-4 col-xs-5 identifier s-identifier">
-            <a href="#abs/{{identifier}}">
-                {{identifier}}
-            </a>
-            </div>
-            <div class="col-sm-3 hidden-xs" title="citation count">
-                {{#if citation_count}}
-                cited by: {{citation_count}}
-                {{/if}}
-            </div>
-            <div class="col-sm-4">
-                {{#if links}}
-                <div class="s-results-links">
-                    <div class="letter-icon">
-                        {{#if links.text}}
-                        <i class="s-text-icon"></i>
-                        <div class="hidden s-link-details">
-                            <ul class="list-unstyled">
-                                {{#each links.text}}
-                                <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank">{{this.title}}</a></li>
-                                {{/each}}
-                            </ul>
-                        </div>
-                        {{/if}}
-                    </div>
-                    <div class="letter-icon">
-                        {{#if links.list}}
-                        <i class="s-list-icon"></i>
+<div class="row s-top-row">
+    <div class="col-sm-1 col-xs-2 s-checkbox-col">
+        <label>
+            {{orderNum}}
+            <input type="checkbox" value={{identifier}} name="identifier">
+        </label>
+    </div>
+    <div class="col-sm-4 col-xs-5 identifier s-identifier">
+        <a href="#abs/{{identifier}}" aria-label="bibcode">
+            {{identifier}}
+        </a>
+        </span>
 
-                        <div class="hidden s-link-details">
-                            <ul class="list-unstyled">
-                                {{#each links.list}}
-                                <li><a href="{{this.link}}" target="_blank">{{this.title}}</a></li>
-                                {{/each}}
-                            </ul>
-                        </div>
-                        {{/if}}
-                    </div>
-                    <div class="letter-icon">
-                        {{#if links.data}}
-                        <i class="s-data-icon"></i>
-
-                        <div class="hidden s-link-details">
-                            <ul class="list-unstyled">
-                                {{#each links.data}}
-                                <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank" >{{this.title}}</a></li>
-                                {{/each}}
-                            </ul>
-                        </div>
-                        {{/if}}
-                    </div>
-                </div>
-
-                {{/if}}
-
-            </div>
-
-        </div>
-        <div class="row">
-            <div class="col-xs-10 col-xs-offset-1">
-                <a href="#abs/{{identifier}}">
-                    <h5 class="s-results-title">{{{title}}}</h5>
-                </a>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-xs-10 col-xs-offset-1">
-                <ul class="list-inline just-authors s-results-authors">
-                    {{#each authorFormatted}}
-                    <li class="article-author">{{this}}</li>
-                    {{/each}}
-                    {{#if extraAuthors}}
-                    <li><em>and {{extraAuthors}} more<em></li>
-                    {{/if}}
-                </ul>
-
-            </div>
-
-        </div>
 
     </div>
-    <div class="row">
-        <div class="col-xs-10 col-xs-offset-1 s-more-info more-info hide">
-                {{#if highlights}}
-                <blockquote>
-                    <ul>
-                        {{#each highlights}}
-                        <li>{{{this}}}</li>
-                        {{/each}}
-                    </ul>
-                </blockquote>
+    <div class="col-sm-3 col-xs-6" title="citation count">
+        {{#if citation_count}}
+        cited by: {{citation_count}}
+        {{/if}}
+    </div>
+    <div class="col-sm-4">
+        {{#if links}}
+        <div class="s-results-links">
+            <div class="letter-icon s-letter-icon">
+                <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "true" {{else}} "false" {{/if}}>
+                <i class="s-text-icon" aria-label="quick access to full text links"></i>
+                </button>
+                {{#if links.text}}
+                <ul class="hidden list-unstyled link-details s-link-details" role="menu">
+
+                    {{#each links.text}}
+                    <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}"
+                        target="_blank">{{this.title}}</a></li>
+                    {{/each}}
+                </ul>
                 {{/if}}
+            </div>
+            <div class="letter-icon s-letter-icon">
+                <button class="btn-link {{#if links.list}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.list}} "true" {{else}} "false"  {{/if}}>
+                <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
+                </button>
+
+                {{#if links.list}}
+                <ul class="hidden list-unstyled list-unstyled link-details s-link-details" role="menu">
+
+                    {{#each links.list}}
+                    <li><a href="{{this.link}}" target="_blank">{{this.title}}</a></li>
+                    {{/each}}
+                </ul>
+                {{/if}}
+            </div>
+            <div class="letter-icon s-letter-icon">
+
+                <button class="btn-link  {{#if links.data}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "true" {{else}} "false"  {{/if}}>
+                <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
+                </button>
+
+                {{#if links.data}}
+                <ul class="hidden list-unstyled link-details s-link-details" role="menu">
+
+                    {{#each links.data}}
+                    <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank"
+                        >{{this.title}}</a></li>
+                    {{/each}}
+                </ul>
+                {{/if}}
+            </div>
         </div>
+
+        {{/if}}
+
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-xs-10 col-xs-offset-1">
+        <a href="#abs/{{identifier}}">
+            <h5 class="s-results-title">{{{title}}}</h5>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-10 col-xs-offset-1">
+        <ul class="list-inline just-authors s-results-authors" aria-label="authors">
+            {{#each authorFormatted}}
+            <li class="article-author">{{this}}</li>
+            {{/each}}
+            {{#if extraAuthors}}
+            <li><em>and {{extraAuthors}} more<em></li>
+            {{/if}}
+        </ul>
+
+    </div>
+
+</div>
+
+</div>
+<div class="row">
+    <div class="col-xs-10 col-xs-offset-1 s-more-info more-info hide">
+        {{#if highlights}}
+        <blockquote>
+            <ul aria-label="search snippets">
+                {{#each highlights}}
+                <li>{{{this}}}</li>
+                {{/each}}
+            </ul>
+        </blockquote>
+        {{/if}}
     </div>
