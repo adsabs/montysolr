@@ -429,6 +429,7 @@ define([
       resultsWidgetDict.graphTabs = app.getWidget('GraphTabs');
       resultsWidgetDict.queryDebugInfo = app.getWidget('QueryDebugInfo');
 
+      resultsWidgetDict.export = app.getWidget("Export");
       resultsWidgetDict.sort = app.getWidget('Sort');
 
 

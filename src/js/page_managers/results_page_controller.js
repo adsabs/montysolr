@@ -69,7 +69,8 @@ define([
           .append(this.resultsControlRowTemplate());
 
         this.$("#query-info-container")
-          .append(this.widgetDict.queryInfo.render().el)
+          .append(this.widgetDict.queryInfo.render().el);
+
       },
 
       displayRightColumn: function () {

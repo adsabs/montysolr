@@ -29,7 +29,7 @@ require.config({
       },
       widgets: {
         SearchBar: 'js/widgets/search_bar/search_bar_widget',
-       Results: 'js/widgets/results/widget',
+        Results: 'js/widgets/results/widget',
         Abstract: 'js/widgets/abstract/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',
         QueryDebugInfo: 'js/widgets/api_query/widget',
@@ -40,6 +40,7 @@ require.config({
         TableOfContents : 'js/widgets/table_of_contents/widget',
         Similar : 'js/widgets/similar/widget',
         Resources : 'js/widgets/resources/widget',
+        Export  : 'js/widgets/export/widget',
         Sort : 'js/widgets/sort/widget'
 
       },
