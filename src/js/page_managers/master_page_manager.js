@@ -65,7 +65,7 @@ define([
 
       var $ac;
 
-      $ac = this.ariaAnnouncmentContainer || $("#aria-announcement-container");
+      $ac = this.ariaAnnouncementContainer || $("#aria-announcement-container");
 
       $ac.html(text);
 
