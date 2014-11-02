@@ -128,7 +128,11 @@ require.config({
     },
 
     'd3-cloud' : {
-      deps :['d3'],
+      deps :['d3']
+    },
+
+    'jquery-ui' : {
+      deps: ['jquery']
     }
   }
 });

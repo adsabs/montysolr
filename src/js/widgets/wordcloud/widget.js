@@ -1,5 +1,5 @@
 define([
-    'jquery',
+  'jquery',
   'backbone',
   'marionette',
   'd3',
@@ -100,10 +100,12 @@ define([
 
         toggleHighlight : function(word){
 
-        var wordToHighlight = this.$("text").filter(function(){if (this.textContent.trim() === word.trim()){return true}})[0]
-
-        wordToHighlight.classList.toggle("selected")
-
+          var w = word.trim();
+          this.$("text").filter(function(){
+            if (this.textContent.trim() == w) {
+              $(this).toggleClass("selected");
+            }
+          });
         },
 
         template: WordCloudTemplate,
