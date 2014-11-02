@@ -34,6 +34,8 @@
 
 @z-index-4 : 4;
 
+@z-index-max : 5;
+
 
 .border-default {
   border-bottom : @border-default;
@@ -181,7 +183,7 @@
     .fa;
     .fa-spin;
     .fa-2x;
-    color: @brand-info;
+    color: lighten(@brand-info, 10%);
     content : @fa-var-cog;
     position: absolute;
     top: 50%;

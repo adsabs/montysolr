@@ -25,9 +25,9 @@ define(['backbone', 'marionette',
       template: WidgetContainerTemplate,
 
       /**
-       * This will be the class in which the view is going to be wrapped
+       * These will be the classes in which the view is going to be wrapped
        */
-      className: "widget-container",
+      className: "widget-container s-widget-container",
 
       /**
        * The container nested inside className object

@@ -233,7 +233,7 @@ define(['marionette',
 
         w.loadBibcodeData("test");
 
-        $("#test").append(w.view.el);
+        $("#test").append(w.view.render().el);
 
         //now check to make sure it was rendered correctly
 

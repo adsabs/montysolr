@@ -338,6 +338,10 @@ define([
         // need to check)
         extractionProcessors: function (apiResponse) {
           var returnList = [];
+          if (apiResponse.get('response.numFound') <= 0) {
+            return returnList;
+          }
+
           if (apiResponse.has('facet_counts.facet_queries')) {
             var queries = apiResponse.get('facet_counts.facet_queries');
             var v, found = 0;
