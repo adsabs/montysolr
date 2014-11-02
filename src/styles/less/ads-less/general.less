@@ -1,6 +1,5 @@
-//import these files so the fonts, mixins, and global variables can be used
-@import '../../../../bower_components/fontawesome/less/font-awesome';
-@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
+
+
 
 
 @results-page-background : lighten(@gray-lighter, 2%);
@@ -49,6 +48,14 @@
   font-weight: 300 !important;
 }
 
+.x-remove {
+  cursor: pointer;
+  .fa;
+  .fa-lg;
+  &:before {
+    content: @fa-var-xing;
+  }
+}
 
 .ads-container {
   padding: 5px;

@@ -89,12 +89,12 @@ require.config({
     'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
-    'backbone-query-parameters': 'libs/backbone-query-parameters/backbone.queryparams'
+    'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud'
 
   },
 
   hbs : {
-    'templateExtension' : 'html',
+    'templateExtension' : 'html'
 
   },
 
@@ -125,6 +125,10 @@ require.config({
     'jquery-querybuilder': {
       deps: ['jquery'],
       exports: 'QueryBuilder'
+    },
+
+    'd3-cloud' : {
+      deps :['d3'],
     }
   }
 });
