@@ -293,11 +293,7 @@ define(['./base_graph',
          .transition()
          .call(yAxis);
 
-       /*add hover event listener
-        have to do this again because delegated events don't
-        work with svg :( */
 
-       this.addChartEventListeners();
      },
 
      buildSlider: function () {
@@ -341,43 +337,6 @@ define(['./base_graph',
        this.$(".slider").slider("values", [val1, val2]);
 
        this.graphChange(val1, val2)
-     },
-
-
-
-     addChartEventListeners: function () {
-
-       var that = this;
-
-       this.$(".refereed, .full-bar").on("mouseenter", function (e) {
-
-         var $ct = $(e.currentTarget);
-         var b = d3.select($ct.parent()[0]);
-         //change color
-         b.select(".full-bar").style("fill", "#61ca7a");
-         b.select(".refereed").style("fill", "#1D6BB5")
-
-         var i = that.$(".bar").index($ct.parent())
-
-         var t = that.innerChart.select(".x-axis").selectAll(".tick")[0][i];
-         d3.select(t).classed("active", true);
-
-       });
-
-       this.$(".refereed, .full-bar").on("mouseout", function (e) {
-
-         var $ct = $(e.currentTarget);
-
-         var b = d3.select($ct.parent()[0]);
-         //change color
-         b.select(".full-bar").style("fill", null);
-         b.select(".refereed").style("fill", null);
-
-         var i = that.$(".bar").index($ct.parent())
-
-         var t = that.innerChart.select(".x-axis").selectAll(".tick")[0][i];
-         d3.select(t).classed("active", false);
-       });
      },
 
      submitFacet: function () {
