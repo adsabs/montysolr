@@ -77,7 +77,18 @@ define(["marionette",
 
       displayBackButton : function(currentQuery){
 
-        this.$(".back-button").attr("href", "search/" + currentQuery.url())
+        if(currentQuery.url()){
+
+          this.$(".back-button").attr("href", "search/" + currentQuery.url())
+            .removeClass("hidden");
+
+        }
+        else {
+          //make sure the button is hidden
+          this.$(".back-button").addClass("hidden");
+
+        }
+
 
       }
 
@@ -163,7 +174,6 @@ define(["marionette",
         }
 
       },
-
 
       loadWidgetData: function () {
 
