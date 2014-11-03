@@ -152,23 +152,19 @@
 
 .s-search-bar-row {
 
-  input  {
-    background-color: rgba( 255, 255, 255, 1);
+  input {
+    background-color: rgba(255, 255, 255, 1);
   }
 
-  .s-motion-shadow {
-    .lh-box-shadow(0 2px 2px -1px rgba(0,0,0,.2));
-    background-color: rgba( 255, 255, 255, 0.97);
+  .s-search-bar-motion {
+    .s-motion-shadow;
+
+    border-bottom: @border-default;
+    position: fixed;
+    top: 0px;
+    z-index: @z-index-max;
+
   }
-}
-
-.s-search-bar-motion {
-  .s-motion-shadow;
-
-  border-bottom : @border-default;
-  position:fixed;
-  top: 0px;
-  z-index: @z-index-max;
 
 }
 
@@ -212,7 +208,5 @@
   margin: 0;
   padding: 0;
   font-size: 25px;
-
-
 
 }
