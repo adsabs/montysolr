@@ -1,6 +1,5 @@
-//import these files so the fonts, mixins, and global variables can be used
-@import '../../../../bower_components/fontawesome/less/font-awesome';
-@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
+
+
 
 
 @results-page-background : lighten(@gray-lighter, 2%);
@@ -34,6 +33,8 @@
 
 @z-index-4 : 4;
 
+@z-index-max : 5;
+
 
 @transparent : hsla(0, 0, 0, 0);
 
@@ -50,6 +51,14 @@
   font-weight: 300 !important;
 }
 
+.x-remove {
+  cursor: pointer;
+  .fa;
+  .fa-lg;
+  &:before {
+    content: @fa-var-xing;
+  }
+}
 
 .ads-container {
   padding: 5px;
@@ -114,15 +123,10 @@
   user-select: none !important;
 }
 
-//get rid of this
 .hide {
   display: none;
 }
 
-//use this instead
-.no-display{
-  display: none !important;
-}
 
 .chosen {
   background-color: lighten(@brand-info, 40%)
@@ -134,6 +138,14 @@
 .draw-attention {
   background-color: white;
   .lh-animation(pulseActive 2s linear 0s 3 alternate)
+}
+
+
+.lh-keyframes(~'pulseActivePrimaryFaded, 0%,100% {box-shadow: none;} 50% {box-shadow: 0 0 15px  #4073dd; background-color : #4073dd}');
+
+
+.draw-attention-primary-faded {
+  .lh-animation(pulseActivePrimaryFaded 2s linear 0s 1 alternate)
 }
 
 
@@ -181,7 +193,7 @@
     .fa;
     .fa-spin;
     .fa-2x;
-    color: @brand-info;
+    color: lighten(@brand-info, 10%);
     content : @fa-var-cog;
     position: absolute;
     top: 50%;
@@ -254,32 +266,37 @@
 }
 
 .s-navbar-brand {
-
   h1 {
-
     font-family : "verdana";
     position: relative;
     top: -3px;
-
-
     color : darken(@gray-lighter, 25%) !important;
-
     span {
       color : @gray-lighter;
     }
-
-
   }
-
 
   .fa-star {
     color :white;
     text-shadow:  3px 3px 0px  @brand-success, -3px -3px 0px @brand-primary-faded;
     font-size: 1.2 em;
   }
-
-
-
-
-
 }
+
+
+.button-hover-shadow {
+  .lh-box-shadow(1px 1px 4px @gray-light);
+}
+
+.s-display-block {
+  display : block;
+}
+
+#aria-announcement-container{
+
+  color : fade(#fff, 0%);
+  position: absolute !important;
+  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+  clip: rect(1px, 1px, 1px, 1px);
+}
+

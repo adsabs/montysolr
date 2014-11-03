@@ -170,19 +170,25 @@ module.exports = function(grunt) {
       },
 
       server: {
-        files: ['./src/js/**/*.js', './src/*.js', './src/*.html', './server.js', './src/styles/css/*.css'],
+        files: ['./Gruntfile', './src/js/**/*.js', './src/*.js', './src/*.html', './server.js', './src/styles/css/*.css'],
         tasks: ['env:dev', 'express:dev']
       },
 
       local_testing: {
-        files: ['./src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
+        files: ['./Gruntfile', './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
         tasks: ['mocha_phantomjs:local_testing', 'watch:local_testing']
       },
 
       web_testing: {
-        files: ['./src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
+        files: ['./Gruntfile', './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
         tasks: ['express:dev', 'mocha_phantomjs:web_testing', 'watch:web_testing']
       },
+
+      sandbox_testing: {
+        files: ['./Gruntfile', './src/js/**/*.js', './test/mocha/**/*.js', './src/*.js', './src/*.html'],
+        tasks: ['express:dev', 'mocha_phantomjs:sandbox_testing', 'watch:sandbox_testing']
+      },
+
       styles: {
         files: ['./src/styles/less/*.less'], // which files to watch
         tasks: ['less']
@@ -190,7 +196,7 @@ module.exports = function(grunt) {
     },
 
     concurrent: {
-        serverTasks: ['watch:server', 'watch:styles'],
+        serverTasks: ['watch:server', 'watch:styles']
     },
     //**
     //* PhantomJS is a headless browser that runs our tests, by default it runs <mocha/discovery>.spec.html
@@ -207,7 +213,18 @@ module.exports = function(grunt) {
       web_testing: {
         options: {
           urls: [
-              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/discovery') + '.spec.html'
+              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/discovery.spec.html')
+          ]
+        }
+      },
+
+      //**
+      //* Another way: grunt test:web --testname='mocha/discovery.spec.html?bumblebeeTest=sandbox.spec'
+      //**
+      sandbox_testing: {
+        options: {
+          urls: [
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=sandbox.spec'
           ]
         }
       },
@@ -379,6 +396,7 @@ module.exports = function(grunt) {
 
   // runs tests in a web server (automatically reloading)
   grunt.registerTask('test:web', ['env:dev', 'watch:web_testing']);
+  grunt.registerTask('test:sandbox', ['env:dev', 'watch:sandbox_testing']);
 
   // runs tests (only once)
   grunt.registerTask('test', ['env:dev', 'express:dev', 'mocha_phantomjs:full_testing']);

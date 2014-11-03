@@ -1,7 +1,3 @@
-//import these files so the fonts, mixins, and global variables can be used
-@import '../../../../bower_components/fontawesome/less/font-awesome';
-@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
-@import 'general';
 
 
 
@@ -26,9 +22,8 @@
 .s-child-facet-item-open {
   display: inline-block;
   width: 12px;
+  left: -13%;
   color: darken(@brand-warning, 25%);
-  position: relative;
-  left: -3%;
   margin-top: -10px;
   margin-bottom: -10px;
   cursor: pointer;
@@ -50,13 +45,15 @@
 }
 
 //rules for item open and closed styling
-.tree {
+.s-tree {
   .item-open {
     .s-child-facet-item-open;
   }
   .item-closed {
     .s-child-facet-item-closed;
   }
+
+  position: relative;
 }
 
 .s-item-children label {
@@ -76,7 +73,7 @@
 .size-graphic-container {
   width: 77%;
   display: inline-block;
-  background-color:lighten(@brand-info, 30%);
+  background-color:lighten(@brand-info, 33%);
   height: 19px;
   margin-left: 2px;
   margin-bottom: 4px;
@@ -88,10 +85,11 @@
 
 .size-graphic {
   display: block;
-  background-color:  lighten(@brand-info, 15%);
+  background-color:  lighten(@brand-info, 18%);
   overflow-x: visible;
   color: black;
-  font-size : 13px !important;
+  font-size : 13px;
+  font-weight: 500;
 }
 
 
@@ -104,6 +102,13 @@
     background-color: darken(@brand-info, 10%);
   }
 }
+
+.s-item-caret {
+  position: absolute;
+  left : -10%;
+}
+
+
 
 .s-widget .item-caret:hover {
 
@@ -118,11 +123,6 @@
   display: inline-block;
 }
 
-.tree label {
-  width: 90%;
-  display:inline-block;
-
-}
 
 .tree .show-more button {
   margin-left: 50%;
@@ -139,12 +139,11 @@
 
 }
 
-
 .s-logic-dropdown {
   position: relative;
   top: -33px;
   left: 75%;
-  z-index: 5;
+  z-index: @z-index-4;
 
   button {
     padding: 0px;
@@ -230,7 +229,8 @@
 }
 
 .s-slider {
-  width: 106%
+  width: 106%;
+  top: -25px;
 }
 
 .line {
@@ -264,7 +264,7 @@
   pointer-events: all;
   width: 100%;
   height: 100%;
-  min-height: 270px;
+  min-height: 280px;
   max-width: 300px;
 }
 
@@ -283,7 +283,7 @@
 }
 
 .show-slider-data-first, .show-slider-data-second {
-  width: 26%;
+  width: 35%;
 }
 
 .ui-slider {
@@ -328,10 +328,28 @@
 .y-axis-title {
   position: relative;
   font-style: italic;
-  top: -3px;
+  top: -263px;
   left: -54%;
-  font-size: 14px;
-  .lh-rotate(270)
+  font-weight: bold;
+  .lh-rotate(270);
+
+}
+
+.x-axis-title {
+
+  position: relative;
+  font-style: italic;
+  top: -38px;
+  font-weight: bold;
+  left: 41%;
+  font-weight: bold;
+
+}
+
+.h-index-x-axis-title {
+
+  left: 77px;
+  top: -57px;
 
 }
 
@@ -341,4 +359,14 @@
   font-weight: 300;
   margin-left: 5px;
 
+}
+
+.s-widget-container {
+  position: relative;
+}
+
+.s-widget-meta {
+  h5 {
+    display: inline;
+  }
 }

@@ -51,7 +51,6 @@ define(["config", 'module'], function(config, module) {
           }
 
           app.start(Router);
-
         }).fail(function () {
           app.redirect('/505.html');
         });

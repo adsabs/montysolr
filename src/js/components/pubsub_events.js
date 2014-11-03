@@ -106,9 +106,13 @@ define([], function() {
 
     /*for custom widget-to-widget events*/
 
-    CUSTOM_EVENT : '[PubSub]-Custom-Event'
+    CUSTOM_EVENT : '[PubSub]-Custom-Event',
 
-  };
+
+    ARIA_ANNOUNCEMENT : "[PubSub]-Aria-Announcement"
+
+
+};
 
   return PubSubEvents;
 });

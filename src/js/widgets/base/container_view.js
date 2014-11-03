@@ -25,9 +25,9 @@ define(['backbone', 'marionette',
       template: WidgetContainerTemplate,
 
       /**
-       * This will be the class in which the view is going to be wrapped
+       * These will be the classes in which the view is going to be wrapped
        */
-      className: "widget-container",
+      className: "widget-container s-widget-container",
 
       /**
        * The container nested inside className object
@@ -44,9 +44,12 @@ define(['backbone', 'marionette',
        * events and callbacks this container provides
        */
       events: {
-        "click .widget-name:first > h5": "toggleWidget",
-        "click .widget-options.top:first": "onClickOptions",
-        "click .widget-options.bottom:first": "onClickOptions"
+
+        "click .widget-name > h5": "toggleWidget",
+        "click .widget-options.top": "onClickOptions",
+        "click .widget-options.bottom": "onClickOptions",
+        "click .widget-name .main-caret" : "toggleWidget",
+
       },
 
       // if we want to do some setup, ths is the way to go

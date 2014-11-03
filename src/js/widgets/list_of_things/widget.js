@@ -25,7 +25,9 @@ define([
     'hbs!./templates/results-container-template',
     'js/mixins/link_generator_mixin',
     'hbs!./templates/pagination-template',
-    'js/mixins/add_stable_index_to_collection'
+    'js/mixins/add_stable_index_to_collection',
+    'hbs!./templates/empty-view-template',
+    'hbs!./templates/initial-view-template'
   ],
 
   function (Marionette,
@@ -37,7 +39,10 @@ define([
     ResultsContainerTemplate,
     LinkGenerator,
     PaginationTemplate,
-    WidgetPaginationMixin) {
+    WidgetPaginationMixin,
+    EmptyViewTemplate,
+    InitialViewTemplate
+    ) {
 
 
     var PaginationModel = Backbone.Model.extend({
@@ -199,6 +204,7 @@ define([
 
     });
 
+
     var VisibleCollection = Backbone.Collection.extend({
       model: ItemModel
 
@@ -215,6 +221,9 @@ define([
         this.listenTo(this.paginationModel, "change:perPage", this.onPaginationChange);
 
         this.on("collection:augmented", this.onCollectionAugmented);
+
+        //if nothing was found, show the empty view
+        this.on("noneFound", function(){this.visibleCollection.reset()})
 
         this.visibleCollection = options.visibleCollection;
 
@@ -275,7 +284,8 @@ define([
 
         //basically it was able to find a record that corresponded with every needed index
         //probably should be equal rather than greater or equal, but maybe there could be duplicate records??
-        if (testList.length  >= indexes.length){
+        //checking for length to prevent unecessary initial render
+        if (testList.length){
 
           this.visibleCollection.reset(testList);
         }
@@ -290,6 +300,10 @@ define([
     })
 
     var ItemView = Marionette.ItemView.extend({
+
+      tagName : "li",
+
+      className : "col-sm-12 s-display-block",
 
 
       template: ItemTemplate,
@@ -336,23 +350,110 @@ define([
 
       events: {
         'change input[name=identifier]': 'toggleSelect',
-        'mouseover .letter-icon' : "showLinks",
-        'mouseleave .letter-icon' : "hideLinks"
+        'mouseenter .letter-icon' : "showLinks",
+        'mouseleave .letter-icon' : "hideLinks",
+        'click .letter-icon' : "pinLinks"
+
       },
 
       toggleSelect: function () {
         this.$el.toggleClass("chosen");
       },
 
-      showLinks : function(e){
-        $c = $(e.currentTarget);
-        $c.find("i").addClass("s-icon-draw-attention");
-        $c.find(".s-link-details").removeClass("no-display");
+      /*
+      * adding this to make the dropdown
+      * accessible, and so people can click to sticky
+      * open the quick links
+      * */
+
+
+    removeActiveQuickLinkState : function($node){
+
+      $node.removeClass("pinned");
+      $node.find("i").removeClass("s-icon-draw-attention")
+      $node.find(".link-details").addClass("hidden");
+      $node.find('ul').attr('aria-expanded', false);
+
       },
-      hideLinks : function(e){
+
+     addActiveQuickLinkState : function($node){
+
+       $node.find("i").addClass("s-icon-draw-attention")
+       $node.find(".link-details").removeClass("hidden");
+       $node.find('ul').attr('aria-expanded', true);
+
+     },
+
+     deactivateOtherQuickLinks: function($c){
+
+       var $hasList = this.$(".letter-icon").filter(function(){
+         if ($(this).find("i").hasClass("s-icon-draw-attention")){
+           return true
+         }
+       }).eq(0);
+
+       //there should be max 1 other icon that is active
+
+       if ($hasList.length && $hasList[0] !== $c[0]){
+
+         this.removeActiveQuickLinkState($hasList)
+       }
+
+     },
+
+       pinLinks : function(e){
+
         $c = $(e.currentTarget);
-        $c.find("i").removeClass("s-icon-draw-attention");
-        $c.find(".s-link-details").addClass("no-display");
+
+        if (!$c.find(".active-link").length){
+           return
+         }
+
+        $c.toggleClass("pinned");
+
+        if($c.hasClass("pinned")){
+
+          this.deactivateOtherQuickLinks($c);
+
+          this.addActiveQuickLinkState($c);
+        }
+        else {
+
+          this.removeActiveQuickLinkState($c);
+
+        }
+
+      },
+
+      showLinks : function(e){
+
+        $c = $(e.currentTarget);
+
+        if (!$c.find(".active-link").length){
+          return
+        }
+
+        if ($c.hasClass("pinned")){
+          return
+        }
+        else {
+
+          this.deactivateOtherQuickLinks($c);
+          this.addActiveQuickLinkState($c)
+        }
+
+      },
+
+      hideLinks : function(e){
+
+        $c = $(e.currentTarget);
+
+        if ($c.hasClass("pinned")){
+          return
+        }
+
+        this.removeActiveQuickLinkState($c)
+
       }
 
     });
@@ -370,6 +471,18 @@ define([
 
     });
 
+
+    var VisibleCollectionEmptyView = Marionette.ItemView.extend({
+
+      template :  EmptyViewTemplate
+
+    });
+
+    var VisibleCollectionInitialView = Marionette.ItemView.extend({
+
+      template : InitialViewTemplate
+    })
+
     var ListView = Marionette.CompositeView.extend({
 
       initialize: function (options) {
@@ -381,6 +494,17 @@ define([
 
       className: "list-of-things",
       itemView: ItemView,
+      alreadyRendered : false,
+
+      getEmptyView : function(){
+        if (this.alreadyRendered)
+          return VisibleCollectionEmptyView;
+        else {
+          this.alreadyRendered = true;
+          return VisibleCollectionInitialView;
+
+        }
+      },
 
       itemViewContainer: ".results-list",
       events: {
@@ -388,18 +512,9 @@ define([
       },
 
       //calls to render will render only the model after the 1st time
-
       modelEvents : {
 
         "change" : "render"
-
-      },
-
-      //calls to render will render only the model after the 1st time
-
-      collectionEvents : {
-
-        "reset" : "render"
 
       },
 
@@ -493,9 +608,7 @@ define([
         this.listenTo(this.collection, "all", this.onAllInternalEvents);
         this.on("all", this.onAllInternalEvents);
 
-
         BaseWidget.prototype.initialize.call(this, options);
-
 
       },
 
@@ -511,6 +624,7 @@ define([
       },
 
       resetWidget : function(){
+
         //this will trigger paginationModel to reset itself
         var defaults =  _.result(this.paginationModel, 'defaults')
         //reset pagination model, but prevent the view from immediately re-rendering
@@ -522,8 +636,10 @@ define([
 
         //also resetting the main collection and the visible collection
 
-        this.collection.reset();
-        this.visibleCollection.reset();
+        this.collection.reset(null, {silent : true});
+
+        //prevent rendering of empty view
+        this.visibleCollection.reset(null, {silent: true});
 
       },
 
@@ -651,6 +767,12 @@ define([
 
         }
 
+        else {
+          //used by loading view
+          //and to re-render collection
+          this.collection.trigger("noneFound");
+        }
+
         //resolving the promises generated by "loadBibcodeData"
         if (this.deferredObject){
 
@@ -717,30 +839,11 @@ define([
 
           }
 
-          if (this.showLoad === true){
-            this.startWidgetLoad()
-          }
-
 
         }
 
-      },
-
-
-      startWidgetLoad : function(){
-
-        if (this.view.itemViewContainer) {
-          var removeLoadingView = function () {
-            this.view.$el.find(".s-loading").remove();
-          }
-          this.listenToOnce(this.visibleCollection, "reset", removeLoadingView);
-
-        }
-
-        if (this.view.$el.find(".s-loading").length === 0){
-          this.view.$el.append(this.loadingTemplate());
-        }
       }
+
 
     });
 

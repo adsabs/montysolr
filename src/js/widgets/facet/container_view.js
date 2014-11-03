@@ -151,12 +151,14 @@ define(['backbone', 'marionette',
       },
 
 
-      closeLogic: function (ev) {
-        if (ev)
-          ev.stopPropagation();
-        $(".s-logic-dropdown").addClass("no-display");
+      closeLogic: function (e) {
 
-        this.$(".widget-options.top > .dropdown").removeClass("open");
+        if (e){
+          e.stopPropagation();
+        }
+
+        this.$(".logic-dropdown").addClass("hide").removeClass("open");
+
       },
 
 
@@ -171,23 +173,20 @@ define(['backbone', 'marionette',
 
       refreshLogicTooltip: function(){
 
-
-        var selected = this.$("input:checked");
+        var selected = this.$(".widget-item:checked");
         var numSelected = selected.length;
 
         if (numSelected >= 1) {
           //highlight filter
-          this.$(".logic-dropdown").removeClass("no-display");
-          this.$(".s-filter-image")
+          this.$(".logic-dropdown").removeClass("hide");
           //highlight caret
           this.$("i.main-caret").addClass("active-style");
 
         }
         else {
           //unhighlight filter
-          this.$(".logic-dropdown").addClass("no-display");
+          this.$(".logic-dropdown").removeClass("open").addClass("hide");
 
-          this.$(".s-filter-image")
           //unhighlight caret
           this.$("i.main-caret").removeClass("active-style");
         }

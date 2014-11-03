@@ -1,6 +1,3 @@
-@import '../../../../bower_components/fontawesome/less/font-awesome';
-@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
-@import 'general';
 
 .modal-content {
   height: 250px;
@@ -72,6 +69,7 @@ select:focus {
 
 .tab-pane {
   padding-right : 9% !important;
+  min-height: 400px;
 
 }
 
@@ -85,4 +83,29 @@ select:focus {
    display:inline-block;
    padding-left:0;
    margin: 0;
+}
+
+.btn-primary-faded {
+  background-color : @brand-primary-faded;
+  border :1px solid darken(@brand-primary-faded, 5%);
+  color: #fff;
+}
+
+
+.btn-info-faded {
+  background-color : @brand-info-faded;
+  border :1px solid darken(@brand-info-faded, 5%);
+  color : #fff;
+}
+
+.btn-default{
+
+  .lh-transition(all, 1s)
+
+
+}
+
+.btn-default:hover {
+  background-color: #fff;
+  .button-hover-shadow;
 }

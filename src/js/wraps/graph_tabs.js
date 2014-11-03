@@ -13,6 +13,12 @@ define(['js/widgets/tabs/tabs_widget',
         "facet.minCount": "1"
       },
 
+      graphViewOptions : {
+        yAxisTitle :  "article count",
+        xAxisTitle : "years",
+        graphTitle: "Years"
+      },
+
       processResponse      : function (apiResponse) {
 
         this.setCurrentQuery(apiResponse.getApiQuery());
@@ -108,8 +114,9 @@ define(['js/widgets/tabs/tabs_widget',
       },
       graphViewOptions : {
         yAxisTitle :  "citations",
+        xAxisTitle : "number of records",
         graphTitle: "Citation",
-        pastTenseTitle : "cited",
+        pastTenseTitle : "cited"
       },
       processResponse      : function (apiResponse) {
         this.setCurrentQuery(apiResponse.getApiQuery());
@@ -184,6 +191,7 @@ define(['js/widgets/tabs/tabs_widget',
       },
       graphViewOptions : {
         yAxisTitle :  "reads",
+        xAxisTitle : "number of records",
         graphTitle: "Reads",
         pastTenseTitle : "read"
       },

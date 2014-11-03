@@ -286,6 +286,7 @@ define(["marionette",
 
       },
 
+
       // called by the router
 
       showPage : function(options){
@@ -298,6 +299,9 @@ define(["marionette",
         if (!inDom) {
 
           this.insertAbstractControllerView();
+
+          this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, "Switching to abstract page");
+
 
         }
 

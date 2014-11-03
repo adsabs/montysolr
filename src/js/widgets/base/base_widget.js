@@ -39,7 +39,7 @@ define(['backbone', 'marionette',
    *
    *  defaultQueryArguments: this is a list of parameters added to each query
    *
-   *  showLoad == true will automatically fade out the widget while it waits for a response
+   *  showLoad = true will automatically fade out the widget while it waits for a response
    *
    */
 
@@ -111,9 +111,9 @@ define(['backbone', 'marionette',
           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
         }
       }
-       if (this.showLoad === true){
-         this.startWidgetLoad()
-       }
+      if (this.showLoad === true){
+        this.startWidgetLoad()
+      }
 
     },
 
@@ -229,6 +229,8 @@ define(['backbone', 'marionette',
 
     loadingTemplate : loadingTemplate,
 
+    callbacksAdded : false,
+
     //generic loading overlay,
     //might have to override this function
     //if widget isnt simple view or collection view
@@ -237,11 +239,20 @@ define(['backbone', 'marionette',
 
       if (this.view){
         //composite view needs to explicitly remove the loading view
-        if (this.view.itemViewContainer) {
+        //the first time, need to add event listeners to the collection
+        if (this.view.itemViewContainer && !this.callbacksAdded) {
+
           var removeLoadingView = function () {
             this.view.$el.find(".s-loading").remove();
-          }
-          this.listenToOnce(this.collection, "reset", removeLoadingView);
+          };
+
+          this.listenTo(this.collection, "reset", removeLoadingView);
+          this.listenTo(this.collection, "add", removeLoadingView);
+          //need to manually have collection trigger this if necessary
+          this.listenTo(this.collection, "noneFound", removeLoadingView);
+
+          this.callbacksAdded = true;
+
         }
 
         if (this.view.$el.find(".s-loading").length === 0){
@@ -249,6 +260,7 @@ define(['backbone', 'marionette',
         }
       }
     },
+
 
 
     /**

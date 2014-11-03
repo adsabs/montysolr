@@ -74,7 +74,7 @@ define(['marionette',
 
       events: {
 
-        "click #field-options div" : "tempFieldInsert",
+        "click #field-options button" : "tempFieldInsert",
         "keypress .q": function(e){
           this.highlightFields(e);
           this.setAddField();
@@ -210,6 +210,7 @@ define(['marionette',
 
         var query = (this.$(".q").val());
         this.trigger("start_search", query);
+
       },
 
       setQueryBox: function (val) {

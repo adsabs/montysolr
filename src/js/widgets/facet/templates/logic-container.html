@@ -1,13 +1,13 @@
 <div class="s-widget">
 <div class="widget-name s-widget-meta widget-meta">
-    <h5><i class="main-caret item-closed"/> {{title}}</h5>
+    <i class="main-caret item-closed"/><h5>{{title}}</h5>
     {{#unless noOptions}}  <div class="widget-options s-widget-options top hide"> {{/unless}}
-        <span class="btn-group dropdown logic-dropdown s-logic-dropdown no-">
+        <span class="btn-group dropdown logic-dropdown s-logic-dropdown">
             <button type="button" class="btn btn-link dropdown-toggle">
                 <span class="s-filter-image inactive-style"> <span class="caret"/>
                 </span>
             </button>
-            <div class="dropdown-menu s-dropdown-menu">
+            <div class="dropdown-menu s-dropdown-menu" aria-live="rude" aria-atomic="true" aria-label="logic options">
                 <button type="button" class="close">&times;</button>
                 To filter your search, select one or more items.
             </div>

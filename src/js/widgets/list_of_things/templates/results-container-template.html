@@ -1,11 +1,13 @@
 <div class="row s-list-controls">
 
+
+
     <div class="s-results-border-bottom">
 
         <div class="col-sm-1">
 
             {{#if mainResults}}
-            <button class="btn btn-default btn-expand left-expand" title="hide left column"><i></i></button>
+            <button class="btn btn-default btn-expand left-expand" title="hide left column" aria-label="hide left column"><i></i></button>
             {{/if}}
         </div>
 
@@ -26,7 +28,7 @@
 
         <div class="col-sm-1">
             {{#if mainResults}}
-            <button class="btn btn-default btn-expand right-expand pull-right" title="hide right column"><i></i></button>
+            <button class="btn btn-default btn-expand right-expand pull-right" title="hide right column" aria-label="hide right column"><i></i></button>
             {{/if}}
         </div>
 
@@ -35,9 +37,12 @@
 </div>
 
 <div class="row">
-    <div class="col-sm-12 results-list  s-results-list ">
-        <h2 class="sr-only">Search Results</h2>
-    </div>
+    {{#if mainResults}}
+    <h2 class="sr-only">Search Results</h2>
+
+    {{/if}}
+    <ul class="col-sm-12 results-list  s-results-list list-unstyled s-display-block" aria-label="list of results">
+    </ul>
 
 </div>
 <div class="row">

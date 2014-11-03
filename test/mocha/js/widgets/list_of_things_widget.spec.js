@@ -233,7 +233,7 @@ define(['marionette',
 
         w.loadBibcodeData("test");
 
-        $("#test").append(w.view.el);
+        $("#test").append(w.view.render().el);
 
         //now check to make sure it was rendered correctly
 
@@ -266,7 +266,7 @@ define(['marionette',
 
         //checking render order of more than 3 authors
 
-        expect($("#test .s-results-list").find(".just-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2")
+        expect($("#test .s-results-list").find(".just-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2and3more")
 
 
       })

@@ -109,15 +109,28 @@ define([
       return defer;
     },
 
-    reload: function(v) {
+    /**
+     * Reload the application - by simply changing the URL (append bbbRedirect=1)
+     * If the url already contains 'bbbRedirect', redirect to the error page.
+     * @param errorPage
+     */
+    reload: function(endPage) {
       if (location.search && location.search.indexOf('bbbRedirect=1') > -1) {
-        location.href = location.protocol + '//' + location.hostname + location.pathname + v;
+        return this.redirect(endPage);
       }
       location.search = location.search ? location.search + '&bbbRedirect=1' : 'bbbRedirect=1';
     },
 
-    redirect: function(v) {
-      location.href = location.protocol + '//' + location.hostname + location.pathname + v;
+    redirect: function(endPage) {
+      if (this.router) {
+        location.pathname = this.router.root + endPage;
+      }
+      // let's replace the last element from pathname - this code will run only when
+      // router is not yet available; therefore it should hit situations when the app
+      // was not loaded (but it is not bulletproof - the urls can vary greatly)
+      // TODO: intelligently explore the rigth url (by sending HEAD requests)
+      location.href = location.protocol + '//' + location.hostname + ':' + location.port +
+        location.pathname.substring(0, location.pathname.lastIndexOf('/')) + '/' + endPage;
     },
 
     start: function(Router) {
@@ -325,6 +338,10 @@ define([
         // need to check)
         extractionProcessors: function (apiResponse) {
           var returnList = [];
+          if (apiResponse.get('response.numFound') <= 0) {
+            return returnList;
+          }
+
           if (apiResponse.has('facet_counts.facet_queries')) {
             var queries = apiResponse.get('facet_counts.facet_queries');
             var v, found = 0;
@@ -412,6 +429,7 @@ define([
       resultsWidgetDict.graphTabs = app.getWidget('GraphTabs');
       resultsWidgetDict.queryDebugInfo = app.getWidget('QueryDebugInfo');
 
+      resultsWidgetDict.export = app.getWidget("Export");
       resultsWidgetDict.sort = app.getWidget('Sort');
 
 

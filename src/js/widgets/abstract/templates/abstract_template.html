@@ -1,11 +1,11 @@
 <article id="abstract-metadata" class="s-abstract-metadata">
         <dl>
 
-            <dt class="hidden">Bibcode</dt>
+            <dt class="sr-only">Bibcode</dt>
             <dd>{{bibcode}}</dd>
 
             {{#if authorAff.length}}
-            <dt><span class="hidden">Authors</span>
+            <dt><span class="sr-only">Authors</span>
             </dt>
             <dd>
                 {{#if hasAffiliation}}
@@ -30,7 +30,7 @@
 
 
             {{#if pub_raw}}
-            <dt class="hidden">Publication</dt>
+            <dt class="sr-only">Publication</dt>
             <dd>
                 <div id="article-publication"><em>{{pub_raw}}</em></div>
             </dd>
@@ -55,7 +55,7 @@
             <br/>
 
             {{#if abstract}}
-            <dt class="hidden">Abstract</dt>
+            <dt class="sr-only">Abstract</dt>
             <dd>
                 <div id="abstract-content">
                     {{{abstract}}}
@@ -63,7 +63,7 @@
             </dd>
 
             {{else}}
-            <dt class="hidden">Abstract</dt>
+            <dt class="sr-only">Abstract</dt>
             <dd>
                 <div id="abstract-content">
                     No abstract

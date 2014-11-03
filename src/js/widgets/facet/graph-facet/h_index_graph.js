@@ -5,26 +5,15 @@ define(['./base_graph',
     'hbs!./templates/h-index-slider-window'],
 
 
-  function(BaseGraphView, legendTemplate, sliderWindowTemplate) {
+  function(BaseGraphView,
+           legendTemplate,
+           sliderWindowTemplate) {
 
     var HIndexGraphView = BaseGraphView.extend({
 
-      initialize : function(options){
-
-        options = options || {};
-
-         this.yAxisTitle = options.yAxisTitle;
-         this.graphTitle = options.graphTitle;
-         this.pastTenseTitle = options.pastTenseTitle;
-
-        this.id = this.graphTitle + "-graph";
-
-        BaseGraphView.prototype.initialize.apply(this, arguments)
-
-      },
-
-
       legendTemplate: legendTemplate,
+
+      xAxisClassName : "h-index-x-axis-title",
 
       addToOnRender: function () {
         //show the h index
@@ -102,7 +91,7 @@ define(['./base_graph',
         else {
 
           //  show legend
-          this.$(".ref-nonref").removeClass("no-display");
+          this.$(".ref-nonref").removeClass("hidden");
 
           var d = this.innerChart.selectAll("circle").data(data);
 
@@ -145,9 +134,25 @@ define(['./base_graph',
 
       graphChange: function (val) {
 
-        var data, x, xLabels, y, xAxis, yAxis;
+        var data, max, x, y, xAxis, yAxis;
 
         data = _.clone(this.graphData);
+
+        max = data[data.length - 1].x;
+
+        /* checking : do we need to signal
+         that facet is active/ show apply button?
+         */
+
+        if (val !== max) {
+
+          this.trigger("facet:active")
+        }
+        else {
+          this.trigger("facet:inactive");
+        }
+
+
 
         if (val) {
           this.limitVal = val;
@@ -219,10 +224,10 @@ define(['./base_graph',
 
         if (this.hIndex) {
           if (_.contains(data, this.hIndex)) {
-            this.innerChart.selectAll(".h-index").classed("no-display", false)
+            this.innerChart.selectAll(".h-index").classed("hidden", false)
           }
           else {
-            this.innerChart.selectAll(".h-index").classed("no-display", true)
+            this.innerChart.selectAll(".h-index").classed("hidden", true)
           }
 
           //first h index line
@@ -236,7 +241,7 @@ define(['./base_graph',
         if (data.length >= 40) {
 
           //  show legend
-          $(".ref-nonref").addClass("no-display");
+          $(".ref-nonref").addClass("hidden");
 
           line = d3.svg.line().x(function (d) {
             return x(d.x);
@@ -244,19 +249,19 @@ define(['./base_graph',
             return y(d.y);
           });
 
-          this.innerChart.selectAll(".dot").classed("no-display", true)
+          this.innerChart.selectAll(".dot").classed("hidden", true)
 
-          this.innerChart.selectAll(".line").datum(data).attr("d", line).classed("no-display", false)
+          this.innerChart.selectAll(".line").datum(data).attr("d", line).classed("hidden", false)
 
         }
         else {
 
           //  show legend
-          this.$(".ref-nonref").removeClass("no-display");
+          this.$(".ref-nonref").removeClass("hidden");
 
-          this.innerChart.selectAll(".line").classed("no-display", true);
+          this.innerChart.selectAll(".line").classed("hidden", true);
 
-          this.innerChart.selectAll(".dot").classed("no-display", false)
+          this.innerChart.selectAll(".dot").classed("hidden", false)
 
           var d = this.innerChart.selectAll("circle").data(data);
 
@@ -290,16 +295,6 @@ define(['./base_graph',
           min  : min,
           value: max,
           stop : function (event, ui) {
-
-            if (ui.value < max) {
-              that.$(".apply").removeClass("no-display");
-              that.trigger("facet:active")
-
-            }
-            else {
-              that.$(".apply").addClass("no-display");
-              that.trigger("facet:inactive");
-            }
 
             that.graphChange(ui.value);
 

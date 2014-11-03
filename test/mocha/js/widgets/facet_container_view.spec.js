@@ -122,9 +122,9 @@ define([
 
           //logic menu is shown only after a selection is made
 
-          expect(view.$(".logic-dropdown").hasClass("no-display")).to.be.true;
+          expect(view.$(".logic-dropdown").hasClass("hide")).to.be.true;
           $v.find(".widget-item:first").click();
-          expect(view.$(".logic-dropdown").hasClass("no-display")).to.be.false;
+          expect(view.$(".logic-dropdown").hasClass("hide")).to.be.false;
 
 
 

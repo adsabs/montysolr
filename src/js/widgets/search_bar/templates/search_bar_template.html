@@ -1,24 +1,26 @@
 <div class="row">
-         <div class="col-sm-12 s-quick-add">
+    <h2 class="sr-only">New Query</h2>
+
+    <div class="col-sm-12 s-quick-add" aria-label="quick add fields">
              <div id="expanded-search-form" class="unselectable">
                  <div id="field-options">
-                     <div class="btn btn-link btn-sm" data-field="author">Author</div>
+                     <button class="btn btn-link btn-sm" data-field="author">Author</button>
 
-                     <div class="btn btn-link btn-sm"  data-field="first-author">First Author</div>
+                     <button class="btn btn-link btn-sm"  data-field="first-author">First Author</button>
 
-                     <div class="btn btn-link btn-sm"  data-field="title">Title</div>
+                     <button class="btn btn-link btn-sm"  data-field="title">Title</button>
 
-                     <div class="btn btn-link btn-sm"  data-field="year">Year</div>
+                     <button class="btn btn-link btn-sm"  data-field="year">Year</button>
 
-                     <div class="btn btn-link btn-sm"  data-field="bibstem">Publication</div>
+                     <button class="btn btn-link btn-sm"  data-field="bibstem">Publication</button>
 
-                     <div class="btn btn-link btn-sm"  data-field="full">Fulltext</div>
+                     <button class="btn btn-link btn-sm"  data-field="full">Fulltext</button>
 
-                     <div class="btn btn-link btn-sm"  data-field="operator-trending">Trending(...)</div>
+                     <button class="btn btn-link btn-sm"  data-field="operator-trending">Trending(...)</button>
 
-                     <div class="btn btn-link btn-sm"  data-field="operator-useful">Useful(...)</div>
+                     <button class="btn btn-link btn-sm"  data-field="operator-useful">Useful(...)</button>
 
-                     <div class="btn btn-link btn-sm"  data-field="operator-instructive">Instructive(...)</div>
+                     <button class="btn btn-link btn-sm"  data-field="operator-instructive">Instructive(...)</button>
                  </div>
              </div>
 
@@ -38,7 +40,7 @@
                      <input type="text" class="form-control q" name="q" autofocus value={{currentQueryVal}}>
                   <span class="input-group-btn">
 
-            <button type="submit" class= "btn btn-primary search-submit s-search-submit"><i class="fa fa-search"></i></button>
+            <button type="submit" class= "btn btn-primary search-submit s-search-submit" aria-label="submit"><i class="fa fa-search"></i></button>
                       </span>
 
                  </div>

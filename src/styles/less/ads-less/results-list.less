@@ -1,8 +1,3 @@
-//import these files so the fonts, mixins, and global variables can be used
-@import '../../../../bower_components/fontawesome/less/font-awesome';
-@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
-@import 'general';
-
 
 // results list css
 
@@ -39,32 +34,42 @@
 
 .s-link-details {
   position: absolute;
-  margin-left: -8%;
-  min-width: 125px;
+  top: 23px;
   background-color: white;
   .ads-container;
-  padding: 10px 15px 0px 15px;
-  z-index: 500;
+  padding: 15px;
+  z-index: @z-index-4;
   font-weight: 500;
+  width: 150px;
 }
 
-.letter-icon {
+.s-letter-icon {
 
   display: inline-block;
-  margin-right: 10%;
+  position:relative;
+  margin-right: 8%;
   margin-top: 0px;
-  width: 5%;
 
   i {
-    cursor: pointer !important;
-    color : darken(@brand-info, 15%);
+    color : darken(@gray-lighter, 2%);
+    cursor: default;
   }
 
+  .s-active-link {
+
+    i {
+      cursor: pointer !important;
+      color : @brand-primary;
+
+    }
+
+  }
 }
 
 
 .s-data-icon {
   .fa;
+  font-size: 1.1em;
   &:before {
     content : @fa-var-database;
   }
@@ -73,6 +78,7 @@
 
 .s-list-icon {
   .fa;
+  font-size: 1.1em;
   &:before {
     content : @fa-var-list-ul;
   }
@@ -81,6 +87,7 @@
 
 .s-text-icon {
   .fa;
+  font-size: 1.1em;
   &:before {
     content : @fa-var-file-text-o;
   }
@@ -96,7 +103,7 @@
 }
 
 .s-result-item-buffer {
-  margin-top: 6px;
+  margin-top: 10px;
 
 }
 
@@ -113,7 +120,9 @@
   margin-top: -1px;
   margin-bottom: 2px;
   font-size:16px;
-  color: darken(@brand-primary, 6%);
+  color: desaturate(@brand-primary, 40%);
+  font-weight: 600;
+  line-height: 1.2;
 
 }
 
@@ -192,14 +201,11 @@
   display: block
 }
 
-#results h5 {
-  margin-top: -3px;
-  margin-bottom: 2px;
-}
 
 li.article-author {
-  padding-left: 2px !important;
-  padding-right: 2px !important;
+  padding-left: 2px;
+  padding-right: 2px;
+  font-weight: 400;
 
 }
 
@@ -228,3 +234,28 @@ li.article-author {
   padding-top : 3%;
   padding-left : 2%;
 }
+=======
+
+@media (max-width :@screen-sm-min) {
+
+  .s-results-title {
+    font-size: 14px;
+    font-weight: normal;
+
+  }
+
+  .s-top-row {
+    font-size  : 12px;
+  }
+
+  .s-results-authors{
+    font-size: 12px;
+  }
+
+  .s-identifier {
+    position:relative;
+    left: -8%;
+  }
+
+}
+

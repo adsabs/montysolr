@@ -79,9 +79,9 @@ define([
         expect($v.find('.widget-body').hasClass('hide')).to.be.true;
 
         // by clicking on title/caret it will be toggled
-        $v.find('.widget-name > h5').click();
+        $v.find('.widget-name h5').click();
         expect($v.find('.widget-body').hasClass('hide')).to.be.false;
-        $v.find('.widget-name > h5 > .main-caret').click();
+        $v.find('.widget-name > .main-caret').click();
         expect($v.find('.widget-body').hasClass('hide')).to.be.true;
 
         //$('#test-area').append(view.render().el);
