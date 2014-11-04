@@ -1,0 +1,111 @@
+.s-item-closed {
+  color: @gray-light;
+  .fa;
+  .fa-2x;
+  position: relative;
+  top: 3px;
+  &:before {
+    content: @fa-var-angle-right;
+
+  }
+}
+
+.s-item-open {
+  color: @gray-light;
+  .fa;
+  .fa-2x;
+  position: relative;
+  top: 3px;
+  &:before {
+    content: @fa-var-angle-down;
+
+  }
+
+}
+
+// to indicate that column expands
+
+
+.paginate-left-icon {
+  .fa;
+  .fa-lg;
+  &:before{
+    content:@fa-var-arrow-circle-left;
+  }
+
+}
+
+.paginate-right-icon {
+  .fa;
+  .fa-lg;
+  &:before{
+    content:@fa-var-arrow-circle-right;
+  }
+
+}
+
+
+
+
+//for query builder, alias from glyphicon to font awesome, so it doesn't barf
+
+.glyphicon-plus {
+  .fa;
+  .fa-lg;
+  &:before {
+    content : @fa-var-plus;
+  }
+
+}
+
+.glyphicon-plus-sign {
+  .fa;
+  .fa-lg;
+  &:before {
+    content : @fa-var-plus-circle;
+  }
+
+}
+
+.glyphicon-remove{
+  .fa;
+  .fa-lg;
+  &:before {
+    content : @fa-var-minus;
+  }
+}
+
+
+//currently used for facets
+
+.s-filter-image {
+  .fa;
+  &:before {
+    content : @fa-var-filter;
+  }
+}
+
+
+//carets
+
+.icon-item-open {
+  .fa;
+  .fa-2x;
+  &:before {
+    content: @fa-var-angle-down;
+  }
+}
+
+.icon-item-closed {
+
+  .fa;
+  .fa-2x;
+  &:before {
+    content: @fa-var-angle-right;
+
+  }
+
+}
+
+
+
