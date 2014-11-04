@@ -23,9 +23,11 @@
 
 }
 
-.s-greeting-row {
+.s-landing-section-1 {
   .row;
   text-align: center;
+  padding-bottom: 40px;
+  padding-top: 20px;
 
 
   h1 {
@@ -33,8 +35,6 @@
     color: #ffffff;
     font-family: "Courier New", Courier, monospace;
     display: inline-block;
-
-
 
   }
 
@@ -77,23 +77,50 @@
 
 
 
+}
 
+.s-landing-section-2 {
+  margin: 2% -15px 0% -15px;
+  background-color: white;
+  padding: 3% 0 8% 0;
 }
 
 .s-landing-section-3 {
 
-  padding: 10% 0;
+  padding: 160px 0;
+  font-size: 2.2em;
+  background-color:fade(#fff, 70%);
+  margin: 0 -15px;
+
+
+
+  a {
+
+    .lh-transition(all, 2s);
+
+    &:hover {
+        color : @brand-primary-faded;
+    }
+  }
+
+  .s-second-action {
+    text-align: center;
+  }
+
+  .s-third-action{
+    text-align: right;
+  }
+
 
 }
 
-.s-landing-section-3, .s-landing-section-5 {
-  font-size : 16px;
+.s-landing-section-5 {
   background-color: @navbar-inverse-bg;
   color: white;
   text-align: center;
 
   a {
-    color: @brand-info;
+    color: white;
   }
 
 }
@@ -114,34 +141,6 @@
 }
 
 
-.s-action-container {
-  color:white;
-  text-align: center;
-
-
-  @media (min-width :@screen-sm-min) {
-    font-size: 24px;
-    border-radius: @border-radius-large;
-    display: inline-block;
-    margin-bottom: 5%;
-    width: 20%;
-
-  }
-
-
-  .lh-transition(background-color, .8s,  ease-out);
-
-  &:hover {
-
-    cursor:pointer;
-
-    background-color:white;
-    color: @brand-primary;
-
-  }
-
-}
-
 
 
 
@@ -159,18 +158,18 @@
 
   .s-search-bar-rows-container {
 
-    padding: 6% 4% 10% 4%;
+    padding: 3% 4% 10% 4%;
 
     border-radius: @border-radius-large;
-    background-color: @gray-lighter;
+    background-color: #fff;
     width:70%;
     min-width: 400px;
     margin: auto;
 
   }
 
-  .s-search-bar-row {
-    margin: 2% 0 12%;
+  .s-quick-add {
+    text-align : center;
   }
 
 

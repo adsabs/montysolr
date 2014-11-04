@@ -1,11 +1,11 @@
 <div class="row s-top-row">
-    <div class="col-sm-1 col-xs-2 s-checkbox-col">
+    <div class="col-sm-1 col-xs-2 s-checkbox-col s-top-row-col">
         <label>
             {{orderNum}}
             <input type="checkbox" value={{identifier}} name="identifier">
         </label>
     </div>
-    <div class="col-sm-4 col-xs-5 identifier s-identifier">
+    <div class="col-sm-4 col-xs-5 s-top-row-col identifier s-identifier">
         <a href="#abs/{{identifier}}" aria-label="bibcode">
             {{identifier}}
         </a>
@@ -13,7 +13,7 @@
 
 
     </div>
-    <div class="col-sm-3 col-xs-6" title="citation count">
+    <div class="col-sm-3 col-xs-6 s-top-row-col" title="citation count">
         {{#if citation_count}}
         cited by: {{citation_count}}
         {{/if}}
