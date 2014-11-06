@@ -10,12 +10,7 @@
   z-index:1;
   margin-top: -10px;
   margin-bottom: -10px;
-  .fa;
-  .fa-2x;
-  &:before {
-    content: @fa-var-angle-right;
-
-  }
+  .icon-item-closed;
 }
 
 
@@ -28,12 +23,8 @@
   margin-bottom: -10px;
   cursor: pointer;
   z-index:1;
-  .fa;
-  .fa-2x;
-  &:before {
-    content: @fa-var-angle-down;
+  .icon-item-open;
 
-  }
 }
 
 .item-open {
@@ -60,14 +51,6 @@
   position: relative;
   left : 3%;
   width: 94% !important;
-}
-
-
-.s-filter-image {
-  .fa;
-  &:before {
-    content : @fa-var-filter;
-  }
 }
 
 .size-graphic-container {
@@ -180,119 +163,12 @@
 
 }
 
-@refereed  : @brand-primary-faded;
-
-@nonrefereed : @brand-success;
-
-
-.graph-legend {
-  font-size : 12px;
-}
 
 .s-citation-padding {
   height: 15px;
 }
 .s-widget-body .selected {
   color: @brand-primary
-}
-
-.logic-container label {
-  display: block
-}
-
-.s-legend-color {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-
-}
-
-.s-legend-color.refereed {
-  background-color: @refereed;
-
-}
-
-.s-legend-color.nonrefereed {
-  background-color: @nonrefereed;
-}
-
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.x.axis path {
-  display: none;
-}
-
-.s-slider {
-  width: 106%;
-  top: -25px;
-}
-
-.line {
-  fill: none;
-  stroke: mix(@refereed, @nonrefereed, 30%);
-  stroke-width: 5px;
-}
-
-.h-index {
-  fill: none;
-  stroke: @gray;
-  stroke-width: 1px;
-
-}
-
-.s-chart .refereed {
-  pointer-events: all;
-  fill: @refereed !important;
-
-}
-
-.s-chart .bar, .s-chart .dot {
-  fill: @nonrefereed;
-}
-
-.s-chart .x-axis .active text {
-  fill: lighten(@brand-primary, 10%);
-}
-
-.s-chart {
-  pointer-events: all;
-  width: 100%;
-  height: 100%;
-  min-height: 280px;
-  max-width: 300px;
-}
-
-#citation-graph .chart {
-  min-height: 240px;
-}
-
-.axis text {
-  font: 11px sans-serif;
-}
-
-.axis path, .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.show-slider-data-first, .show-slider-data-second {
-  width: 35%;
-}
-
-.ui-slider {
-  margin-bottom: 5px !important;
-}
-
-.slider-data {
-  padding-top: 10px;
-
 }
 
 
@@ -305,52 +181,9 @@
   margin: 0px;
 }
 
-.zoomable-graph {
-  .apply {
-    margin-top: 10px;
-  }
-
-}
-
 
 .s-widget h5 {
   margin-top: 0px;
-}
-
-.change-scale {
-  label {
-    display: inline-block;
-    width: 20%
-
-  }
-}
-
-.y-axis-title {
-  position: relative;
-  font-style: italic;
-  top: -263px;
-  left: -54%;
-  font-weight: bold;
-  .lh-rotate(270);
-
-}
-
-.x-axis-title {
-
-  position: relative;
-  font-style: italic;
-  top: -38px;
-  font-weight: bold;
-  left: 41%;
-  font-weight: bold;
-
-}
-
-.h-index-x-axis-title {
-
-  left: 77px;
-  top: -57px;
-
 }
 
 .s-sort-widget label{
