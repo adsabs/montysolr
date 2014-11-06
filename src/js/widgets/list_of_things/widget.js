@@ -345,13 +345,17 @@ define([
           data.highlights = data.details.highlights
         }
 
-        if(data["[citations]"] && data["[citations]"]["num_citations"]>0){
-          data.citation_count = this.formatNum(data["[citations]"]["num_citations"]);
-        }
-        else {
-          //formatNum would return "0" for zero, which would then evaluate to true in the template
-          data.citation_count = 0
-        }
+//        if(data["[citations]"] && data["[citations]"]["num_citations"]>0){
+//          data.citation_count = this.formatNum(data["[citations]"]["num_citations"]);
+//        }
+//        else {
+//          //formatNum would return "0" for zero, which would then evaluate to true in the template
+//          data.citation_count = 0
+//        }
+
+        data.citation_count = data.citation_count? this.formatNum(data.citation_count) : 0;
+
+
 
         data.orderNum = this.model.get("resultsIndex") + 1;
 
@@ -715,7 +719,7 @@ define([
       //will be requested in composeRequest
       defaultQueryArguments: function(){
         return {
-          fl: 'title,abstract,bibcode,author,keyword,[citations],pub,aff,volume,year',
+          fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year',
           rows : 25,
           start : 0
         }
