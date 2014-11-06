@@ -10,7 +10,6 @@ var tbase = '../../test/mocha/js';
 
 // These are the tests that we want to run for this app
 var tests = [
-<<<<<<< HEAD
 
     tbase + '/widgets/list_of_things_widget.spec.js',
     tbase + '/widgets/multi_callback_widget.spec.js',
@@ -30,7 +29,7 @@ var tests = [
     tbase + '/widgets/table_of_contents_widget.spec.js',
     tbase + '/widgets/tabs_widget.spec.js',
     tbase + '/widgets/wordcloud_widget.spec.js',
-    tbase + '/widgets/year_graph_facet_widget.spec.js'
+    tbase + '/widgets/year_graph_facet_widget.spec.js',
 
     tbase + '/widgets/network_widget.spec.js'
 
