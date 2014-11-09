@@ -48,11 +48,11 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
 
         expect(qm.hasBeeHive()).to.be.true;
         expect(qm.getBeeHive()).to.be.equal(beehive);
-        expect(qm.mediatorPubSubKey).to.be.instanceof(PubSubKey);
+        expect(qm.pubSubKey).to.be.instanceof(PubSubKey);
 
         expect(pubsub.subscribe.callCount).to.be.eql(3);
-        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.START_SEARCH]);
-        expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.mediatorPubSubKey, pubsub.DELIVERING_REQUEST]);
+        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.START_SEARCH]);
+        expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.DELIVERING_REQUEST]);
 
         done();
       });

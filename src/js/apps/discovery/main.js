@@ -23,8 +23,11 @@ define(["config", 'module'], function(config, module) {
       DiscoveryBootstrap
       ) {
 
+      // at the beginning, we don't know anything about ourselves...
+      var debug = window.location.search.indexOf('debug') > -1 ? true : false;
 
-      var app = new (Application.extend(DiscoveryBootstrap))();
+      // app object will load everything
+      var app = new (Application.extend(DiscoveryBootstrap))({'debug': debug});
 
       // load the objects/widgets/modules (using discovery.config.js)
       var defer = app.loadModules(module.config());
@@ -38,9 +41,7 @@ define(["config", 'module'], function(config, module) {
         // set some important urls, parameters before doing anything
         app.configure();
 
-        var bootPromise = app.bootstrap();
-
-        bootPromise.done(function (data) {
+        app.bootstrap().done(function (data) {
 
           // set the API key
           if (data.access_token) {
@@ -51,6 +52,13 @@ define(["config", 'module'], function(config, module) {
           }
 
           app.start(Router);
+
+          var dynConf = app.getObject('DynamicConfig');
+          if (dynConf && dynConf.debugExportBBB) {
+            console.log('Exposing Bumblebee as global object: window.bbb');
+            window.bbb = app;
+          }
+
         }).fail(function () {
           app.redirect('/505.html');
         });

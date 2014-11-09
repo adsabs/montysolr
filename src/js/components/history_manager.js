@@ -8,12 +8,12 @@ define(["underscore"], function (_) {
 
 
     /*
-    * This will return the prior PAGE--so the history entry before the current
-    * one. If you are on the abstract page and were on the results page before that,
-    * that is what will be returned. Even if you have been on several routes within
-    * the abstract page, these will be ignored and you will be given the
-    * actual page name.
-    *
+     * This will return the prior PAGE--so the history entry before the current
+     * one. If you are on the abstract page and were on the results page before that,
+     * that is what will be returned. Even if you have been on several routes within
+     * the abstract page, these will be ignored and you will be given the
+     * actual page name.
+     *
      * */
     getPriorPage       : function () {
 
@@ -32,7 +32,7 @@ define(["underscore"], function (_) {
         if (priorPage !== currentPage){
           return priorPage
         }
-       p+=1
+        p+=1
 
       }
       //nothing was found that differs from currentPage
@@ -64,9 +64,9 @@ define(["underscore"], function (_) {
     },
 
     /*
-    * Unlike get prior page, this will give you whatever the prior
-    * route was, even if it was within the current page.
-    * */
+     * Unlike get prior page, this will give you whatever the prior
+     * route was, even if it was within the current page.
+     * */
 
     getPriorRoute : function(){
 

@@ -7,93 +7,60 @@ define([
 
     "use strict";
 
-    // Defining the application router.
     var Router = Backbone.Router.extend({
 
       initialize : function(options){
         options = options || {};
-
-        _.bindAll(this, "changeURLFromPubSub");
-        this.pageManager  = options.pageManager;
         this.history = options.history;
-
       },
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
-        this.pubsub = this.getBeeHive().Services.get('PubSub');
-
-        this.pubsub.subscribe(this.pubsub.NAVIGATE_WITHOUT_TRIGGER, this.changeURLFromPubSub)
-
+        this.pubsub = beehive.Services.get('PubSub');
+        if (!this.pubsub) {
+          throw new Exception("Ooops! Who configured this #@$%! There is no PubSub service!")
+        }
       },
 
-      changeURLFromPubSub : function(options, pubsubkey){
-
-        var path = options.path;
-
-        //rewrite this to check to make sure its a valid path
-        if (!path) {
-          console.warn("can't navigate, no information given")
-          return
-        }
-        else {
-
-          var skipHistory = options.skipHistory || false;
-
-          this.navigate(path, {replace : skipHistory})
-        }
-
-      },
 
       routes: {
         "": "index",
         "search/(:query)": 'search',
-        'abs/:bibcode(/)(:subView)': 'viewAbstract',
+        'abs/:bibcode(/)(:subView)': 'view',
         '*invalidRoute': 'noPageFound'
       },
 
 
       index: function () {
-
-        this.pageManager.showPage("index");
-
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
       },
 
       search: function (query) {
-
         if (query) {
           var q= new ApiQuery().load(query);
-
           this.pubsub.publish(this.pubsub.START_SEARCH, q);
         }
-        else {
-          this.pageManager.showPage("results", {triggerNav: false});
-
-        }
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'results-page');
       },
 
-      viewAbstract: function (bibcode, subPage) {
-
+      view: function (bibcode, subPage) {
         if (bibcode){
+          this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
 
           if (!subPage) {
-            subPage = "abstract"
-            //"redirecting" to the abstract page
-            this.navigate("/abs/" + bibcode + "/abstract", {replace: true})
+            return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page', bibcode);
           }
-
-         this.pageManager.showPage("abstract", {bibcode: bibcode, subPage : subPage});
-
+          else {
+            return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page:' + subPage, bibcode);
+          }
         }
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page');
       },
 
       noPageFound : function() {
-       //i will fix this later
-
+        //i will fix this later
         $("#body-template-container").html("<div>You have broken bumblebee. (404)</div><img src=\"http://imgur.com/EMJhzmL.png\" alt=\"sad-bee\">")
-
-
-    }
+      }
 
 
     });

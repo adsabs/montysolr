@@ -30,27 +30,27 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
       })
 
       it("should have a model that takes raw solr data and parses it to template-ready condition", function(){
-        expect(aw.model.attributes.pubdate).to.equal("1981-00-00")
-        expect(aw.model.attributes.pub).to.equal("IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics")
-        expect(aw.model.attributes.authorAff[0][0]).to.equal("Lieske, J. H.")
-        expect(aw.model.attributes.authorAff[0][1]).to.equal("Heidelberg, Universität, Heidelberg, Germany")
-        expect(aw.model.attributes.authorAff[1][0]).to.equal("Standish, E. M.")
-        expect(aw.model.attributes.authorAff[1][1]).to.equal( "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA")
+        expect(aw.model.attributes.pubdate).to.equal("1981-00-00");
+        expect(aw.model.attributes.pub).to.equal("IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics");
+        expect(aw.model.attributes.authorAff[0][0]).to.equal("Lieske, J. H.");
+        expect(aw.model.attributes.authorAff[0][1]).to.equal("Heidelberg, Universität, Heidelberg, Germany");
+        expect(aw.model.attributes.authorAff[1][0]).to.equal("Standish, E. M.");
+        expect(aw.model.attributes.authorAff[1][1]).to.equal( "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA");
 
-      })
+      });
 
       it("should render a view with the properly rendered information and 'view more' user interactions", function(){
-        $("#test").append(view.el)
+        $("#test").append(view.el);
 
         expect(view.$(".affiliation").filter(".hide").length).to.equal(view.$(".affiliation").length)
 
-        $("#test").find("#toggle-aff").click()
+        $("#test").find("#toggle-aff").click();
 
-        expect(view.$(".affiliation").filter(".hide").length).to.equal(0)
-        expect(view.$("#abstract-content").text()).to.match(/In the past twenty years there has been a great amount of growth in radiometric observing methods./)
+        expect(view.$(".affiliation").filter(".hide").length).to.equal(0);
+        expect(view.$("#abstract-content").text()).to.match(/In the past twenty years there has been a great amount of growth in radiometric observing methods./);
 
 
-      })
+      });
 
       it("should interact properly with pubsub", function(){
 

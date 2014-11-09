@@ -1,0 +1,54 @@
+<div id="abstract-page-layout" class="s-abstract-page-layout">
+
+    <div class="row s-stable-search-bar-height">
+        <div class="s-search-bar-full-width-container">
+            <div class="col-sm-2 s-back-button-container">
+                {{#if this.query}}
+                <a href="" class="back-button"> <i class="fa fa-arrow-left"></i> Back to search results</a>
+                {{/if}}
+            </div>
+            <div class="col-sm-8 s-search-bar-row" id="search-bar-row"
+                 data-widget="SearchWidget"></div>
+        </div>
+    </div>
+    <div class="row s-dynamic-page-body" id="dynamic-page-body">
+        <div class="s-abstract-content">
+            <div class="col-sm-2 s-left-column" id="left-column">
+                <div class="s-left-col-container">
+                    <div data-widget="TOCWidget"
+                         data-ShowAbstract='{"title": "Abstract", "path":"abstract", "showCount": false, "isSelected":true}'
+                         data-ShowCitations='{"title": "Citations", "path":"citations"}'
+                         data-ShowReferences='{"title": "References", "path":"references"}'
+                         data-ShowCoreads='{"title": "Co-Reads", "path":"coreads"}'
+                         data-ShowTableOfContents='{"title": "Table of Contents", "path":"toc"}'
+                         data-ShowSimilar='{"title": "Similar Papers", "path":"similar"}'
+                            />
+                </div>
+            </div>
+            <div class="col-sm-10 s-middle-column" id="middle-column">
+                <div class="main-content-container s-main-content-container">
+
+                    <div id="abstract-title-container" class="s-abstract-title-container">
+                        <div data-widget="TOCTitleWidget"/>
+                    </div>
+                    <div class="row">
+                        <div id="current-subview" class="col-sm-9">
+                            <div data-widget="ShowAbstract" />
+                            <div data-widget="ShowCitations" />
+                            <div data-widget="ShowReferences" />
+                            <div data-widget="ShowCoreads" />
+                            <div data-widget="ShowTableOfContents" />
+                            <div data-widget="ShowSimilar" />
+                        </div>
+                        <div id="right-col-container" class="s-right-col-container col-sm-3">
+                            <div data-widget="ShowResources" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>

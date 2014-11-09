@@ -1,11 +1,26 @@
 /**
  * Created by alex on 5/19/14.
  */
-define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
-    'js/widgets/base/base_widget', 'hbs!./templates/abstract_template',
-    'js/components/api_query', 'js/mixins/link_generator_mixin'],
-  function (Marionette, Backbone, $, _, Cache, BaseWidget,
-    abstractTemplate, ApiQuery, LinkGeneratorMixin) {
+define([
+    'marionette',
+    'backbone',
+    'jquery',
+    'underscore',
+    'cache',
+    'js/widgets/base/base_widget',
+    'hbs!./templates/abstract_template',
+    'js/components/api_query',
+    'js/mixins/link_generator_mixin'],
+  function (
+    Marionette,
+    Backbone,
+    $,
+    _,
+    Cache,
+    BaseWidget,
+    abstractTemplate,
+    ApiQuery,
+    LinkGeneratorMixin) {
 
     var AbstractModel = Backbone.Model.extend({
       defaults: function () {
@@ -99,15 +114,14 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
 
-        _.bindAll(this, ['onNewQuery', 'dispatchRequest', 'processResponse']);
+        _.bindAll(this, ['onNewQuery', 'dispatchRequest', 'processResponse', 'onDisplayDocuments']);
         this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onNewQuery);
 
-        //custom dispatchRequest function goes here
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
 
-        //custom handleResponse function goes here
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
 
+        this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       },
 
       defaultQueryArguments: {
@@ -128,6 +142,37 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
         this._docs = {};
       },
 
+      onDisplayDocuments: function (apiQuery) {
+        var q = apiQuery.clone();
+        var bibcode = q.get('q');
+        if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
+          bibcode = bibcode[0].replace('bibcode:', '');
+        }
+        if (this._docs[bibcode]) { // we have already loaded it
+          this._current = bibcode;
+          this.model.set(this._docs[bibcode]);
+        }
+        else {
+          q.set('__show', bibcode);
+          this.dispatchRequest(q);
+        }
+      },
+
+      onAllInternalEvents: function(ev) {
+        if ((ev == 'next' || ev == 'prev') && this._current) {
+          var keys = _.keys(this._docs);
+
+          var curr = _.indexOf(keys, this._current);
+          if (curr > -1) {
+            if (ev == 'next' && curr+1 < keys.length) {
+              this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, keys[curr+1]);
+            }
+            else if (curr-1 > 0) {
+              this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, keys[curr-1]);
+            }
+          }
+        }
+      },
 
       processResponse: function (apiResponse) {
         var q = apiResponse.getApiQuery();
@@ -146,9 +191,12 @@ define(['marionette', 'backbone', 'jquery', 'underscore', 'cache',
           });
 
           if (apiResponse.has('responseHeader.params.__show')) {
-            this.loadBibcodeData(apiResponse.get('responseHeader.params.__show'));
+            this.onDisplayDocuments(apiResponse.getApiQuery());
           }
         }
+
+        this.trigger('page-manager-event', 'widget-ready',
+          {numFound: apiResponse.get("response.numFound"), widget: this});
       }
 
     });

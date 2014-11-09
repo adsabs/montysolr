@@ -55,11 +55,11 @@ define(['underscore',
     activate: function(beehive) {
       this.setBeeHive(beehive);
       var pubsub = beehive.Services.get('PubSub');
-      this.mediatorPubSubKey = pubsub.getPubSubKey();
+      this.pubSubKey = pubsub.getPubSubKey();
 
-      pubsub.subscribe(this.mediatorPubSubKey, pubsub.START_SEARCH, _.bind(this.startSearchCycle, this));
-      pubsub.subscribe(this.mediatorPubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
-      pubsub.subscribe(this.mediatorPubSubKey, pubsub.GET_QTREE, _.bind(this.getQTree, this));
+      pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, _.bind(this.startSearchCycle, this));
+      pubsub.subscribe(this.pubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
+      pubsub.subscribe(this.pubSubKey, pubsub.GET_QTREE, _.bind(this.getQTree, this));
     },
 
 
@@ -90,7 +90,7 @@ define(['underscore',
       var q = apiQuery.clone();
 
       q.lock();
-      ps.publish(this.mediatorPubSubKey, ps.INVITING_REQUEST, q);
+      ps.publish(this.pubSubKey, ps.INVITING_REQUEST, q);
     },
 
       /**
