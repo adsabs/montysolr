@@ -1,5 +1,8 @@
 /**
  * Created by rchyla on 3/16/14.
+ *
+ * Beehive is where all the communication happens ('Application' object
+ * is where setup happens; application will load beehive)
  */
 
 define(['backbone', 'underscore',
@@ -16,7 +19,7 @@ define(['backbone', 'underscore',
     },
 
     activate: function() {
-      this.Services.activate(arguments);
+      this.Services.activate.apply(this.Services, arguments);
       this.Objects.activate(this);
     },
 
@@ -57,6 +60,9 @@ define(['backbone', 'underscore',
       return this.Objects.remove(name);
     },
 
+    getDebug: function() {
+      return this.debug;
+    },
 
     /*
      * Wraps itself into a Facade that can be shared with other modules
@@ -67,14 +73,36 @@ define(['backbone', 'underscore',
     hardenedInterface:  {
       Services: 'services container',
       Objects: 'objects container',
-      debug: 'state of the app'
+      debug: 'state of the app',
+      getHardenedInstance: 'allow to create clone of the already hardened instance'
     }
-
 
 
   });
 
-  _.extend(BeeHive.prototype, Hardened);
+  _.extend(BeeHive.prototype, Hardened, {
+    getHardenedInstance: function(iface) {
+      iface = _.clone(iface || this.hardenedInterface);
+
+      // because 'facade' functions are normally bound to the
+      // original object, we have to do this to access 'facade'
+      iface['getService'] = function(name) { // 'get service X (but only the hardened ones)',
+        return hardened.Services.get(name);
+      };
+      iface['hasService'] = function(name) {
+        return hardened.Services.has(name);
+      };
+      iface['getObject'] = function(name) { // 'get object X (but only the hardened ones)',
+        return hardened.Objects.get(name);
+      };
+      iface['hasObject'] = function(name) {
+        return hardened.Objects.has(name);
+      };
+
+      var hardened = this._getHardenedInstance(iface, this);
+      return hardened;
+    }
+  });
 
   return BeeHive;
 });

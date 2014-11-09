@@ -779,6 +779,10 @@ define([
           this.deferredObject.resolve(this.paginationModel.get("numFound"))
         }
 
+        // XXX:rca - hack, to be solved later
+        this.trigger('page-manager-event', 'widget-ready',
+          {numFound: apiResponse.get("response.numFound"), widget: this});
+
       },
 
       setPaginationRequestPending : function(){

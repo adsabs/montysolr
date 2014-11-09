@@ -5,20 +5,12 @@
 define([
     'underscore',
     'backbone',
-    'js/page_managers/abstract_page_controller',
-    'js/page_managers/results_page_controller',
-    'js/page_managers/landing_page_controller',
-    'js/page_managers/master_page_manager',
     'js/components/api_query',
     'js/components/api_request'
     ],
   function(
     _,
     Backbone,
-    AbstractController,
-    ResultsController,
-    LandingPageController,
-    MasterPageManager,
     ApiQuery,
     ApiRequest) {
 
@@ -115,6 +107,11 @@ define([
      * @param errorPage
      */
     reload: function(endPage) {
+      if (location.search.indexOf('debug') > -1) {
+        console.warn('Debug stop, normally would reload to: ' + endPage);
+        return; // do nothing
+      }
+
       if (location.search && location.search.indexOf('bbbRedirect=1') > -1) {
         return this.redirect(endPage);
       }
@@ -137,361 +134,38 @@ define([
       var app = this;
       var beehive = this.getBeeHive();
       var api = beehive.getService("Api");
-      var FacetFactory = app.getModule("FacetFactory");
       var conf = this.getObject('DynamicConfig');
 
-
-      var resultsWidgetDict = {};
-
-      resultsWidgetDict.authorFacets = FacetFactory.makeHierarchicalCheckboxFacet({
-        facetField: "author_facet_hier",
-        facetTitle: "Authors",
-        openByDefault: true,
-        logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
-        responseProcessors: [
-          function (v) {
-            var vv = v.split('/');
-            return vv[vv.length - 1]
-          }
-        ]
-      });
-
-      // XXX:rca - another hack
-      resultsWidgetDict.authorFacets.handleLogicalSelection = function (operator) {
-        var q = this.getCurrentQuery();
-        var paginator = this.findPaginator(q).paginator;
-        var conditions = this.queryUpdater.removeTmpEntry(q, 'SelectedItems');
-
-        //XXX:rca - hack ; this logic is triggerd multiple times
-        // we need to prevent that
-
-        var self = this;
-
-        if (conditions && _.keys(conditions).length > 0) {
-
-
-          conditions = _.values(conditions);
-          _.each(conditions, function (c, i, l) {
-            l[i] = "author:\"" + c.title + "\"";
-          });
-
-          q = q.clone();
-
-          var fieldName = 'fq_author';
-
-          if (operator == 'and' || operator == 'limit to') {
-            this.queryUpdater.updateQuery(q, fieldName, 'limit', conditions);
-          }
-          else if (operator == 'or') {
-            this.queryUpdater.updateQuery(q, fieldName, 'expand', conditions);
-          }
-          else if (operator == 'exclude' || operator == 'not') {
-            if (q.get(fieldName)) {
-              this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
-            }
-            else {
-              conditions.unshift('*:*');
-              this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
-            }
-
-          }
-
-          var fq = '{!type=aqp cache=false cost=150 v=$' + fieldName + '}';
-          var fqs = q.get('fq');
-          if (!fqs) {
-            q.set('fq', [fq]);
-          }
-          else {
-            var i = _.indexOf(fqs, fq);
-            if (i == -1) {
-              fqs.push(fq);
-            }
-            q.set('fq', fqs);
-          }
-          q.unset('facet.prefix');
-          q.unset('facet');
-          this.dispatchNewQuery(paginator.cleanQuery(q));
-        }
+      var complain = function(x) {
+        throw new Error("Ooops. Check you config! There is no " + x + " component @#!")
       };
 
-
-      resultsWidgetDict.keywords = FacetFactory.makeBasicCheckboxFacet({
-        facetField: "keyword_facet",
-        facetTitle: "Keywords",
-        openByDefault: false,
-        logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
-      });
-
-      resultsWidgetDict.database = FacetFactory.makeBasicCheckboxFacet({
-        facetField: "database",
-        facetTitle: "Collections",
-        openByDefault: true,
-        logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
-
-      });
-      resultsWidgetDict.data = FacetFactory.makeBasicCheckboxFacet({
-        facetField: "data_facet",
-        facetTitle: "Data",
-        openByDefault: false,
-        logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
-
-      });
-
-      resultsWidgetDict.vizier = FacetFactory.makeBasicCheckboxFacet({
-        facetField: "vizier_facet",
-        facetTitle: "Vizier Tables",
-        openByDefault: false,
-        logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']}
-
-      });
-
-      resultsWidgetDict.pub = FacetFactory.makeBasicCheckboxFacet({
-        facetField: "bibstem_facet",
-        facetTitle: "Publications",
-        openByDefault: false,
-        logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]}
-      });
-
-      resultsWidgetDict.bibgroup = FacetFactory.makeBasicCheckboxFacet({
-        facetField: "bibgroup_facet",
-        facetTitle: "Bib Groups",
-        openByDefault: false,
-        logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]}
-      });
-
-      resultsWidgetDict.grants = FacetFactory.makeHierarchicalCheckboxFacet({
-        facetField: "grant_facet_hier",
-        facetTitle: "Grants",
-        openByDefault: false,
-        logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]},
-        responseProcessors: [
-          function (v) {
-            var vv = v.split('/');
-            return vv[vv.length - 1]
-          }
-        ]
-      });
+      var navigator = app.getBeeHive().Services.get('Navigator');
+      if (!navigator)
+        complain('services.Navigator');
 
 
-      resultsWidgetDict.grants.handleLogicalSelection = function (operator) {
-        var q = this.getCurrentQuery();
-        var paginator = this.findPaginator(q).paginator;
-        var conditions = this.queryUpdater.removeTmpEntry(q, 'SelectedItems');
+      var masterPageManager = app.getObject('MasterPageManager');
+      if (!masterPageManager)
+        complain('objects.MasterPageManager');
 
-        //XXX:rca - hack ; this logic is triggerd multiple times
-        // we need to prevent that
+      // get together all pages and insert widgets there
+      masterPageManager.assemble(app);
 
-        var self = this;
-
-        if (conditions && _.keys(conditions).length > 0) {
+      // attach the master page to the body
+      $('div#body-template-container').append(masterPageManager.view.el);
 
 
-          conditions = _.values(conditions);
-          _.each(conditions, function (c, i, l) {
-            l[i] = "grant:\"" + c.title + "\"";
-          });
-
-          q = q.clone();
-
-          var fieldName = 'fq_grant';
-
-          if (operator == 'and' || operator == 'limit to') {
-            this.queryUpdater.updateQuery(q, fieldName, 'limit', conditions);
-          }
-          else if (operator == 'or') {
-            this.queryUpdater.updateQuery(q, fieldName, 'expand', conditions);
-          }
-          else if (operator == 'exclude' || operator == 'not') {
-            this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
-          }
-
-          var fq = '{!type=aqp cache=false cost=150 v=$' + fieldName + '}';
-          var fqs = q.get('fq');
-          if (!fqs) {
-            q.set('fq', [fq]);
-          }
-          else {
-            var i = _.indexOf(fqs, fq);
-            if (i == -1) {
-              fqs.push(fq);
-            }
-            q.set('fq', fqs);
-          }
-          q.unset('facet.prefix');
-          q.unset('facet');
-          this.dispatchNewQuery(paginator.cleanQuery(q));
-        }
-      };
-
-      resultsWidgetDict.refereed = FacetFactory.makeBasicCheckboxFacet({
-        facetField: "property",
-        facetTitle: "Refereed Status",
-        openByDefault: true,
-        defaultQueryArguments: {
-          "facet": "true",
-          "facet.mincount": "1",
-          "fl": "id",
-          "facet.query": 'property:refereed'
-        },
-        // this is optimization, we'll execute only one query (we don't even facet on
-        // other values). There is a possibility is is OK (but could also be wrong;
-        // need to check)
-        extractionProcessors: function (apiResponse) {
-          var returnList = [];
-          if (apiResponse.get('response.numFound') <= 0) {
-            return returnList;
-          }
-
-          if (apiResponse.has('facet_counts.facet_queries')) {
-            var queries = apiResponse.get('facet_counts.facet_queries');
-            var v, found = 0;
-            _.each(_.keys(queries), function (k) {
-              v = queries[k];
-              if (k.indexOf(':refereed') > -1) {
-                found = v;
-                returnList.push("refereed", v);
-              }
-            });
-
-            returnList.push('notrefereed', apiResponse.get('response.numFound') - found);
-            return returnList;
-          }
-        },
-        logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['invalid choice']}
-
-      });
-
-      resultsWidgetDict.refereed.handleLogicalSelection = function (operator) {
-        var q = this.getCurrentQuery();
-        var paginator = this.findPaginator(q).paginator;
-        var conditions = this.queryUpdater.removeTmpEntry(q, 'SelectedItems');
-
-        //XXX:rca - hack ; this logic is triggerd multiple times
-        // we need to prevent that
-
-        var self = this;
-
-        if (conditions && _.keys(conditions).length > 0) {
-
-
-          conditions = _.values(conditions);
-          _.each(conditions, function (c, i, l) {
-            l[i] = 'property:' + self.queryUpdater.escapeInclWhitespace(c.value);
-          });
-
-          q = q.clone();
-
-          var fieldName = 'fq_' + this.facetField;
-
-          if (operator == 'and' || operator == 'limit to') {
-            this.queryUpdater.updateQuery(q, fieldName, 'limit', conditions);
-          }
-          else if (operator == 'or') {
-            this.queryUpdater.updateQuery(q, fieldName, 'expand', conditions);
-          }
-          else if (operator == 'exclude' || operator == 'not') {
-            this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
-          }
-
-          var fq = '{!type=aqp v=$' + fieldName + '}';
-          var fqs = q.get('fq');
-          if (!fqs) {
-            q.set('fq', [fq]);
-          }
-          else {
-            var i = _.indexOf(fqs, fq);
-            if (i == -1) {
-              fqs.push(fq);
-            }
-            q.set('fq', fqs);
-          }
-
-          this.dispatchNewQuery(paginator.cleanQuery(q));
-        }
-      };
-
-      resultsWidgetDict.authorFacets.activate(beehive.getHardenedInstance());
-      resultsWidgetDict.database.activate(beehive.getHardenedInstance());
-      resultsWidgetDict.keywords.activate(beehive.getHardenedInstance());
-      resultsWidgetDict.pub.activate(beehive.getHardenedInstance());
-      resultsWidgetDict.bibgroup.activate(beehive.getHardenedInstance());
-      resultsWidgetDict.data.activate(beehive.getHardenedInstance());
-      resultsWidgetDict.vizier.activate(beehive.getHardenedInstance());
-      resultsWidgetDict.grants.activate(beehive.getHardenedInstance());
-      resultsWidgetDict.refereed.activate(beehive.getHardenedInstance());
-
-      resultsWidgetDict.results = app.getWidget('Results')
-
-
-      resultsWidgetDict.searchBar = app.getWidget('SearchBar')
-
-      resultsWidgetDict.queryInfo = app.getWidget('QueryInfo');
-      resultsWidgetDict.graphTabs = app.getWidget('GraphTabs');
-      resultsWidgetDict.queryDebugInfo = app.getWidget('QueryDebugInfo');
-
-      resultsWidgetDict.export = app.getWidget("Export");
-      resultsWidgetDict.sort = app.getWidget('Sort');
-
-
-      _.each(resultsWidgetDict.graphTabs.widgets, function (w) {
-        w.activate(beehive.getHardenedInstance());
-      });
-
-      var abstract = app.getWidget('Abstract')
-      abstract.activate(beehive.getHardenedInstance())
-
-      var references = app.getWidget('References');
-      references.activate(beehive.getHardenedInstance());
-
-      var citations = app.getWidget('Citations')
-      citations.activate(beehive.getHardenedInstance())
-
-      var coreads = app.getWidget('Coreads')
-      coreads.activate(beehive.getHardenedInstance())
-
-      var tableOfContents = app.getWidget('TableOfContents')
-      tableOfContents.activate(beehive.getHardenedInstance())
-
-      var similar = app.getWidget('Similar')
-      similar.activate(beehive.getHardenedInstance());
-
-      var resources = app.getWidget('Resources');
-      resources.activate(beehive.getHardenedInstance());
-
-      var pageControllers = {};
-      var bumblebeeHistory = app.getObject("HistoryManager");
-
-      //     all sub-views have their own controllers
-      pageControllers.results = new ResultsController({widgetDict: resultsWidgetDict});
-
-
-      pageControllers.abstract = new AbstractController({widgetDict: {
-        abstract: abstract,
-        references: references,
-        citations: citations,
-        coreads: coreads,
-        tableOfContents: tableOfContents,
-        similar: similar,
-        searchBar: resultsWidgetDict.searchBar,
-        resources: resources
-      }});
-
-      pageControllers.index = new LandingPageController({widgetDict: {searchBar: resultsWidgetDict.searchBar}});
-
-      _.each(pageControllers, function (v, k) {
-        v.activate(beehive.getHardenedInstance())
-      });
-
-      var masterPageManager = new MasterPageManager({pageControllers: pageControllers, history: bumblebeeHistory});
-
-      masterPageManager.activate(beehive.getHardenedInstance());
-
-      app.router = new Router({pageManager: masterPageManager});
+      // kick off routing
+      app.router = new Router();
       app.router.activate(beehive.getHardenedInstance());
 
+      // get ready to handle navigation signals
+      navigator.start(this);
+      navigator.router = app.router; // this feels hackish
+
+
       // Trigger the initial route and enable HTML5 History API support
-
-
       Backbone.history.start(conf.routerConf);
 
 

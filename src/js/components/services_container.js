@@ -9,12 +9,12 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
     },
 
     activate: function() {
-      for (var k in this._services) {
-        var s = this._services[k];
-        if ('activate' in s) {
-          s.activate.apply(s, arguments);
+      var args = arguments;
+      _.each(_.values(this._services), function(service) {// _.keys() preserves access order
+        if ('activate' in service) {
+          service.activate.apply(service, args);
         }
-      }
+      });
     },
 
     close: function() {

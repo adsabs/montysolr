@@ -1,12 +1,35 @@
 /**
  * Created by alex on 5/12/14.
  */
-define(['marionette', 'bootstrap', 'hbs!./templates/tabs_inner', 'hbs!./templates/tabs_outer', 'hbs!./templates/tabs_title'], function (Marionette, Bootstrap, innerTemplate, outerTemplate, titleTemplate) {
+define([
+  'underscore',
+  'marionette',
+  'bootstrap',
+  'hbs!./templates/tabs_inner',
+  'hbs!./templates/tabs_outer',
+  'hbs!./templates/tabs_title'],
+  function (
+    _,
+    Marionette,
+    Bootstrap,
+    innerTemplate,
+    outerTemplate,
+    titleTemplate) {
 
   var TabsWidget = Marionette.ItemView.extend({
 
     // expects in options a list of views like this:
     // {tabs: [{title : (title for tab) , widget: (actual widget), id : (unique id)}, {default : true/false} (a tab widget has only one default tab)]}
+
+    /**
+     * Activates all widgets (our children)
+     * @param beehive (hardened version)
+     */
+    activate: function(beehive) {
+      _.each(this.widgets, function (w) {
+        w.activate(beehive.getHardenedInstance());
+      });
+    },
 
     initialize: function (options) {
       this.tabs = options.tabs || [];

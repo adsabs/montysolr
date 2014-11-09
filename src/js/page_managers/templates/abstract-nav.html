@@ -3,8 +3,8 @@
 
     {{#each items}}
 
-    <a href="/abs/{{../bibcode}}/{{this.id}}" {{#unless this.numFound}} aria-disabled="true" {{/unless}}  data-bypass>
-        <div class="abstract-nav s-abstract-nav {{#if this.currentSubView}} s-abstract-nav-active {{/if}} {{#unless this.numFound}} s-abstract-nav-inactive{{/unless}}" id="{{this.id}}">
+    <a href="/abs/{{../bibcode}}/{{this.path}}" {{#unless this.isActive}} aria-disabled="true" {{/unless}}  data-bypass>
+        <div class="abstract-nav s-abstract-nav {{#if this.isSelected}} s-abstract-nav-active {{/if}} {{#unless this.isActive}} s-abstract-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
             {{this.title}}
             {{#if this.showCount}}
             <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>

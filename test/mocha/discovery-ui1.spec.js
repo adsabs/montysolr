@@ -11,10 +11,7 @@ var tbase = '../../test/mocha/js';
 // These are the tests that we want to run for this app
 var tests = [
 
-    tbase + '/page_managers/master_page_manager.spec.js',
-    tbase + '/page_managers/abstract_page_manager.spec.js',
-
-  //TBD 24/09/14 tbase + '/page_managers/abstract_title_view_mixin.spec.js',
+    tbase + '/page_managers/all_tests.spec.js',
 
     //TBD 24/09/14 tbase + '/widgets/abstract_widget.spec.js',
     tbase + '/widgets/api_query_widget.spec.js',

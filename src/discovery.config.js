@@ -11,37 +11,62 @@ require.config({
   // Configuration we want to make available to modules of ths application
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
   config: {
+    'js/page_managers/controller': {
+      'LandingPageManager': {
+
+      }
+    },
     'js/apps/discovery/main': {
       core: {
         services: {
           'Api': 'js/services/api',
-          'PubSub': 'js/services/pubsub'
+          'PubSub': 'js/services/pubsub',
+          'Navigator': 'js/apps/discovery/navigator'
         },
         objects: {
           User: 'js/components/user',
           DynamicConfig: 'discovery.vars',
           QueryMediator: 'js/components/query_mediator',
-          HistoryManager: 'js/components/history_manager'
+          HistoryManager: 'js/components/history_manager',
+
+          MasterPageManager: 'js/page_managers/master'
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory'
         }
       },
       widgets: {
-        SearchBar: 'js/widgets/search_bar/search_bar_widget',
+        LandingPage: 'js/wraps/landing_page_manager',
+        SearchPage: 'js/wraps/results_page_manager',
+        DetailsPage: 'js/wraps/details_page_manager',
+
+        SearchWidget: 'js/widgets/search_bar/search_bar_widget',
         Results: 'js/widgets/results/widget',
-        Abstract: 'js/widgets/abstract/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',
         QueryDebugInfo: 'js/widgets/api_query/widget',
-        GraphTabs : 'js/wraps/graph_tabs',
-        References: 'js/widgets/references/widget',
-        Citations : 'js/widgets/citations/widget',
-        Coreads : 'js/widgets/coreads/widget',
-        TableOfContents : 'js/widgets/table_of_contents/widget',
-        Similar : 'js/widgets/similar/widget',
-        Resources : 'js/widgets/resources/widget',
         Export  : 'js/widgets/export/widget',
-        Sort : 'js/widgets/sort/widget'
+        Sort : 'js/widgets/sort/widget',
+
+        AuthorFacet: 'js/wraps/author_facet',
+        BibgroupFacet: 'js/wraps/bibgroup_facet',
+        BibstemFacet: 'js/wraps/bibstem_facet',
+        DataFacet: 'js/wraps/data_facet',
+        DatabaseFacet: 'js/wraps/database_facet',
+        GrantsFacet: 'js/wraps/grants_facet',
+        KeywordFacet: 'js/wraps/keyword_facet',
+        RefereedFacet: 'js/wraps/refereed_facet',
+        VizierFacet: 'js/wraps/vizier_facet',
+        GraphTabs : 'js/wraps/graph_tabs',
+
+        ShowAbstract: 'js/widgets/abstract/widget',
+        ShowReferences: 'js/widgets/references/widget',
+        ShowCitations : 'js/widgets/citations/widget',
+        ShowCoreads : 'js/widgets/coreads/widget',
+        ShowTableOfContents : 'js/widgets/table_of_contents/widget',
+        ShowSimilar : 'js/widgets/similar/widget',
+        ShowResources : 'js/widgets/resources/widget',
+
+        TOCWidget: 'js/page_managers/toc_widget'
 
       },
       plugins: {

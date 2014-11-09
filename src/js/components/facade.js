@@ -91,7 +91,7 @@ define(['underscore', 'js/components/facade'], function(_, Facade) {
       facade.__facade__ = true;
     }
     return facade;
-  }
+  };
 
   return Facade;
 });

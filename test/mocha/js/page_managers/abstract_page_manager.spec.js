@@ -28,12 +28,12 @@ define([
 
       it("should show a back button only when there is a system-wide query to return to", function(){
 
-        abstractPageController.controllerView.onRender = function(){};
+        abstractPageController.view.onRender = function(){};
 
-        abstractPageController.controllerView.render();
+        abstractPageController.view.render();
 
         //so onShow doesn't raise an error
-        abstractPageController.controllerView.displaySearchBar = function(){};
+        abstractPageController.view.displaySearchBar = function(){};
 
         abstractPageController.insertAbstractControllerView();
 
@@ -41,9 +41,9 @@ define([
 
         expect(abstractPageController.getCurrentQuery().url()).to.eql('');
 
-        expect(abstractPageController.controllerView.$(".back-button").attr("href")).to.eql("")
+        expect(abstractPageController.view.$(".back-button").attr("href")).to.eql("")
 
-        expect(abstractPageController.controllerView.$('.back-button').hasClass("hidden")).to.eql(true);
+        expect(abstractPageController.view.$('.back-button').hasClass("hidden")).to.eql(true);
 
         abstractPageController.getCurrentQuery = function(){return {url : function(){return "fakeURL"}}};
 
@@ -53,9 +53,9 @@ define([
 
         abstractPageController.insertAbstractControllerView();
 
-        expect(abstractPageController.controllerView.$('.back-button').hasClass("hidden")).to.eql(false);
+        expect(abstractPageController.view.$('.back-button').hasClass("hidden")).to.eql(false);
 
-        expect(abstractPageController.controllerView.$(".back-button").attr("href")).to.eql("search/fakeURL")
+        expect(abstractPageController.view.$(".back-button").attr("href")).to.eql("search/fakeURL")
 
 
 
