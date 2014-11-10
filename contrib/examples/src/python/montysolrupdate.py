@@ -7,10 +7,7 @@ that run it. This script is to be executed unattended and very often.
 
 Here are the assumptions under which we work:
 
-   - PATH contains correct versions of ant, java, javac, python, gcc,
-         git
-   - PYTHONPATH contains jcc, lucene
-   - we are executed and accept NO parameters
+   - PATH contains correct versions of ant, java, javac, git
    - we have internet access
    - we have write access to INSTDIR (/var/lib/montysolr)
    - the INSTDIR already exists
@@ -30,7 +27,7 @@ Here are the assumptions under which we work:
                    everything is nuked, montysolr is completely rebuilt,
                    index is forgotten
        MAJOR     : major bump in MontySolr, the same behaviour as above
-       MINOR     : only java modules are recompiled (no JCC recompilation)
+       MINOR     : only java modules are recompiled
                    the solr configs are replaced, index is forgotten
        PATCH     : all java modules are recompiled, solr configs replaced
                    with the new version, index is re-used
@@ -48,12 +45,7 @@ If all these conditions are met, we'll do the following
        
 
 
-Necessary tests:
-
- - live instance stopped
- - live instance running, but in failed state (stalled)
- - live instance running (responding)
- - live instance restarted (but is broken)
+tests are inside: test_montysolrupdate.py
 
 """
 
@@ -83,13 +75,10 @@ INSTDIR = os.environ.get('MONTYSOLR_HOME','/var/lib/montysolr')
 INSTNAME = os.environ.get('MONTYSOLR_EXAMPLE_NAME','adsabs')
 GITURL = os.environ.get('MONTYSOLR_GIT','https://github.com/romanchyla/montysolr.git') #where to get the latest code from
 NEW_INSTANCE_PORT_GAP = os.environ.get('MONTYSOLR_URL_GAP',10) #when we build a new release, it will be started as orig_port+GAP
-JCC_SVN_TAG = os.environ.get('MONTYSOLR_JCC_SVN_TAG','1452473') #the version of JCC we rely on (Use the one from Jenkins)
-PYLUCENE_SVN_TAG = os.environ.get('MONTYSOLR_PYLUCENE_SVN_TAG',JCC_SVN_TAG)
-INVENIO_CONFIG = os.environ.get('INVENIO_CONFIG','')
-INVENIO_COMMIT = os.environ.get('INVENIO_COMMIT','master')
 START_ARGS = os.environ.get('START_ARGS','')
 START_JVMARGS = os.environ.get('START_JVMARGS','')
 PYTHON_RELEASE = os.environ.get('MONTYSOLR_PYTHON_RELEASE','2')
+UPDATER_RELEASE = os.environ.get('MONTYSOLR_UPDATER_RELEASE','3')
 ANT_HOME = os.environ.get('ANT_HOME','/usr/share/ant')
 JAVA_HOME = os.environ.get('JAVA_HOME','/usr/lib/jvm/java-7-openjdk-amd64')
 
@@ -181,15 +170,6 @@ def get_arg_parser():
     p.add_option('--setup_ant',
                  default=False, action='store_true',
                  help='Install Ant (1.8.3) into perpetuum folder, this must be called with ANT_HOME=<perpetuum>/ant')
-    p.add_option('-j', '--setup_jcc',
-                 default=False, action='store_true',
-                 help='Install JCC')
-    p.add_option('-y', '--setup_pylucene',
-                 default=False, action='store_true',
-                 help='Install pylucene')
-    p.add_option('-i', '--setup_invenio',
-                 default=False, action='store_true',
-                 help='Install invenio, you need INVENIO_CONFIG variable')
     p.add_option('-d', '--check_diagnostics',
                  default=False, action='store_true',
                  help='Invokes /solr/montysolr_diagnostics when checking MontySolr health')
@@ -266,44 +246,6 @@ def make_dist(name):
             error('%s/ is not a directory' % name)
     else:
         print('created dist directory %s' % name)
-
-def tarball(source):
-    """Build tarballs for a directory."""
-    print('Making .tgz')
-    base = os.path.basename(source)
-    tgz = base + '.tgz'
-    bz = base + '.tar.bz2'
-    xz = base + '.tar.xz'
-    run_cmd(['tar cf - %s | gzip -9 > %s' % (source, tgz)])
-    print("Making .tar.bz2")
-    run_cmd(['tar cf - %s | bzip2 -9 > %s' % (source, bz)])
-    print("Making .tar.xz")
-    run_cmd(['tar cf - %s | xz > %s' % (source, xz)])
-    print('Calculating md5 sums')
-    checksum_tgz = hashlib.md5()
-    with open(tgz, 'rb') as data:
-        checksum_tgz.update(data.read())
-    checksum_bz2 = hashlib.md5()
-    with open(bz, 'rb') as data:
-        checksum_bz2.update(data.read())
-    checksum_xz = hashlib.md5()
-    with open(xz, 'rb') as data:
-        checksum_xz.update(data.read())
-    print('  %s  %8s  %s' % (
-        checksum_tgz.hexdigest(), int(os.path.getsize(tgz)), tgz))
-    print('  %s  %8s  %s' % (
-        checksum_bz2.hexdigest(), int(os.path.getsize(bz)), bz))
-    print('  %s  %8s  %s' % (
-        checksum_xz.hexdigest(), int(os.path.getsize(xz)), xz))
-    with open(tgz + '.md5', 'w', encoding="ascii") as fp:
-        fp.write(checksum_tgz.hexdigest())
-    with open(bz + '.md5', 'w', encoding="ascii") as fp:
-        fp.write(checksum_bz2.hexdigest())
-    with open(xz + '.md5', 'w', encoding="ascii") as fp:
-        fp.write(checksum_xz.hexdigest())
-
-
-
 
 
 
@@ -674,8 +616,9 @@ def start_indexing(instance_dir, port):
     url = 'http://localhost:%s/solr/invenio-doctor' % port
     rsp = req(url, command='status')
     
-    if rsp['status'] != 'idle':
+    if rsp['status'] == 'busy':
         print ('WARNING: live instance is reporting to be already busy: %s' % instance_dir)
+        return
     
     rsp = req(url, command='discover')
     rsp = req(url, command='start')
@@ -786,12 +729,6 @@ def check_prerequisites(options):
         setup_ant(options)
     if options.setup_prerequisites or options.setup_python:
         setup_python(options)
-    if options.setup_prerequisites or options.setup_jcc:
-        setup_jcc(options)
-    if options.setup_prerequisites or options.setup_pylucene:
-        setup_pylucene(options)
-    if options.setup_prerequisites or options.setup_invenio:
-        setup_invenio(options)
     
     check_ant(options)
     
@@ -824,7 +761,7 @@ def setup_ant(options):
     
     if options.force_recompilation and os.path.exists('ant'):
         run_cmd(['rm', '-fr', 'ant'])
-    elif os.path.exists('ant/RELEASE') and str(get_pid('ant/RELEASE')) == str(JCC_SVN_TAG):
+    elif os.path.exists('ant/RELEASE') and str(get_pid('ant/RELEASE')) == str(UPDATER_RELEASE):
         return # already installed
     
     with open("install_ant.sh", "w") as build_ant:
@@ -845,7 +782,7 @@ def setup_ant(options):
         
         """ % {'java_home': JAVA_HOME, 
                'ant_home': os.path.join(INSTDIR, "perpetuum/ant"),
-               'release': JCC_SVN_TAG})
+               'release': UPDATER_RELEASE})
     
     run_cmd(['chmod', 'u+x', 'install_ant.sh'])
     run_cmd(['./install_ant.sh'])
@@ -878,8 +815,8 @@ def setup_python(options):
             'setuptools',
             'sqlalchemy',
             'mysql-python',
-            'numpy',
-            'lxml',
+            #'numpy',
+            #'lxml',
             'simplejson',
             'configobj',
             'pyparsing==1.5.7',
@@ -911,191 +848,8 @@ def setup_python(options):
     run_cmd(['chmod', 'u+x', 'install_python.sh'])
     run_cmd(['./install_python.sh'])
 
-def setup_jcc(options):
-
-    if options.force_recompilation and os.path.exists('jcc'):
-        run_cmd(['rm', '-fr', 'jcc'])
-    
-    if os.path.exists('jcc') and str(get_pid('jcc/RELEASE')) == str(JCC_SVN_TAG):
-        return # already there
-    
-    with open("install_jcc.sh", "w") as inpython:
-        header = '#!/bin/bash -e\n'
-        venv_activate = 'source python/bin/activate\n'
-        core_commands = '\n'.join([
-            'svn co http://svn.apache.org/repos/asf/lucene/pylucene/trunk/jcc@%(JCC_SVN_TAG)s',
-            'cd jcc',
-            'echo "0" > RELEASE',
-            'export USE_DISTUTILS',
-            'export JCC_JDK=%(JAVA_HOME)s',
-            'python setup.py build',
-            'python setup.py bdist_egg',
-            'python setup.py install',
-            'echo "%(JCC_SVN_TAG)s" > RELEASE',
-            '',
-            '# verify installation',
-            'cd ..',
-            'python -c "import jcc;jcc.initVM();print jcc.__file__"',
-            '',
-            ])
-        venv_deactivate = 'deactivate\n'
-        if options.no_venv:
-            venv_activate,venv_deactivate = '',''
-
-        inpython.write(
-            (header+venv_activate+core_commands+venv_deactivate) 
-            % {'JAVA_HOME': JAVA_HOME, 'JCC_SVN_TAG' : JCC_SVN_TAG}
-            )
-        
-    run_cmd(['chmod', 'u+x', 'install_jcc.sh'])
-    run_cmd(['bash', '-e', './install_jcc.sh'])
-    
 
 
-def setup_pylucene(options):
-
-    if options.force_recompilation and os.path.exists('pylucene'):
-        run_cmd(['rm', '-fr', 'pylucene'])
-        
-    if os.path.exists('pylucene') and str(get_pid('pylucene/RELEASE')) == str(PYLUCENE_SVN_TAG):
-        return # already there
-
-    
-    run_cmd(['rm', 'pylucene/Makefile*'], strict=False)
-    
-    with open("install_pylucene.sh", "w") as infile:
-        header = '#!/bin/bash -xe\n'
-        venv_activate = 'source python/bin/activate\n'
-        venv_deactivate = 'deactivate\n'
-        core_commands = '\n'.join([
-            'export ANT_HOME=%(ant_home)s',
-            'export JAVA_HOME=%(java_home)s',
-            '',
-            'svn co http://svn.apache.org/repos/asf/lucene/pylucene/trunk@%(PYLUCENE_SVN_TAG)s pylucene',
-            'cd pylucene',
-            '',
-            'echo "0" > RELEASE',
-            '',
-            'if [ ! -f Makefile.copy ]; then',
-            '    cp Makefile Makefile.copy',
-            ''   ,
-            '    echo "VERSION=4.0-0',
-            'LUCENE_SVN_VER=HEAD',
-            'LUCENE_VER=4.0',
-            'LUCENE_SVN=http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0',
-            'PYLUCENE:=\$(shell pwd)',
-            'LUCENE_SRC=lucene-java-\$(LUCENE_VER)',
-            'LUCENE=\$(LUCENE_SRC)/lucene',
-            'PREFIX_PYTHON=/usr',
-            'ANT=%(ant_home)s/bin/ant',
-            'PYTHON=python',
-            'JCC=\$(PYTHON) -m jcc.__main__ --shared --use_full_names',
-            'NUM_FILES=3',
-            '" > Makefile',
-            '',
-            '    tail -n +25 Makefile.copy >> Makefile',
-            '',
-            '    # on stupid old centos, icupkg is outdated and since it took 2 hours of my life',
-            '    # i deactivate it from the build (we dont use it anyways....)',
-            ''    ,
-            "    sed 's/shell which icupkg/shell which icupkgooooo/' Makefile > Makefile.tmp",
-            '    mv Makefile.tmp Makefile',
-            '',
-            'fi',
-            '',
-            'make',
-            'make install',
-            '',
-            'echo "%(PYLUCENE_SVN_TAG)s" > RELEASE',
-            '',
-            'cd ..',
-            'python -c "import lucene;lucene.initVM();print lucene.__file__"',
-            '',
-            ])
-        if options.no_venv:
-            venv_activate,venv_deactivate = '',''
-
-
-        infile.write(
-            (header+venv_activate+core_commands+venv_deactivate) 
-            % {'ant_home': ANT_HOME, 'PYLUCENE_SVN_TAG': PYLUCENE_SVN_TAG,'java_home': JAVA_HOME})
-        
-    run_cmd(['chmod', 'u+x', 'install_pylucene.sh'])
-    run_cmd(['./install_pylucene.sh'])
-
-
-def setup_invenio(options):
-
-    if options.force_recompilation and os.path.exists('invenio'):
-        run_cmd(['rm', '-fr', 'invenio'])
-        
-    if os.path.exists('invenio/RELEASE') and str(get_pid('invenio/RELEASE', raw=True)) == str(INVENIO_COMMIT):
-        return # already there
-        
-    #if os.path.exists('invenio.git') and os.path.exists('invenio'):
-    #    with changed_dir('invenio.git'):
-    #        commit = get_output(["git", "log", "--pretty=oneline", "--abbrev-commit", "-n 1"])
-    #        run_cmd(['git', 'fetch'])
-    #        run_cmd(['git', 'reset', '--hard', 'origin/master'])
-    #        run_cmd(['git', 'checkout', 'master'])
-    #        commit2 = get_output(["git", "log", "--pretty=oneline", "--abbrev-commit", "-n 1"])
-    #        if commit == commit2 and len(commit2) > 0:
-    #            return # already installed, no changes there
-        
-    
-    with open("install_invenio.sh", "w") as inpython:
-        inpython.write("""#!/bin/bash -e
-
-source python/bin/activate
-
-target=%(INSTDIR)s/perpetuum/invenio
-
-if [ ! -d invenio.git ]; then
-   git clone git://github.com/tiborsimko/invenio.git invenio.git
-else
-   cd invenio.git
-   git fetch
-   git reset --hard origin/master
-   cd ..
-fi
-
-site_packages=`python -c "import os,sys;print '%%s/lib/python%%s.%%s/site-packages' %% (os.path.realpath('python'), sys.version_info[0], sys.version_info[1])"`
-
-cd invenio.git
-git checkout %(INVENIO_COMMIT)s
-
-aclocal && automake -a && autoconf
-
-export PYTHONPATH=%(INSTDIR)s/perpetuum/invenio/lib/python:$PYTHONPATH
-CONFIGURE_OPTS="--with-python=`which python` --prefix=$target" 
-./configure $CONFIGURE_OPTS  0</dev/null
-
-rm -fR $target
-make clean
-make
-make install
-
-if [ -f $site_packages/invenio ]; then
-  rm $site_packages/invenio
-fi
-
-ln -s %(INSTDIR)s/perpetuum/invenio/lib/python/invenio $site_packages/invenio
-
-echo "%(invenio_config)s" > %(INSTDIR)s/perpetuum/invenio/etc/invenio-local.conf
-
-echo "%(INVENIO_COMMIT)s" > %(INSTDIR)s/perpetuum/invenio/RELEASE
-
-# this actually generates invnenio module (inside invenio lib)
-python %(INSTDIR)s/perpetuum/invenio/bin/inveniocfg --update-all
-
-deactivate
-exit 0
-""" % {'INSTDIR':INSTDIR, 
-       'invenio_config': INVENIO_CONFIG.replace("$", "\\$"),
-       'INVENIO_COMMIT': INVENIO_COMMIT})
-        
-    run_cmd(['chmod', 'u+x', 'install_invenio.sh'])
-    run_cmd(['bash', '-e', './install_invenio.sh'])
 
 
 def setup_build_properties(options):
@@ -1144,14 +898,12 @@ def upgrade_montysolr(curr_tag, git_tag,options):
                 '    fi',
                 '    ant clean',
                 '    ant get-solr build-all',
-                '    ant test-python',
                 '    ;;',
                 '"minor" | "3")',
                 '    if [ -f RELEASE ]; then',
                 '       rm RELEASE',
                 '    fi',
                 '    ant get-solr build-all',
-                '    ant test-python',
                 '    ;;',
                 'esac',
                 '',
@@ -1346,7 +1098,7 @@ def start_live_instance(options, instance_dir, port,
         start = '\n'.join(lines)
         
         start = re.sub(r'HOMEDIR=.*\n', 'HOMEDIR=%s\n' % os.path.realpath('.'), start)
-        start = re.sub(r'--port\s+\d+', '--port %s' % port, start)
+        start = re.sub(r'-Djetty.port\=\d+', '-Djetty.port=%s' % port, start)
         start = re.sub('\n([\t\s]+)(java -cp )', '\\1export PATH=%s/bin:$PATH\n\\1\\2' % JAVA_HOME, start)
         
         # this is necessary only when in test run (and there we can be sure that the files were
@@ -1392,7 +1144,7 @@ def start_live_instance(options, instance_dir, port,
         fo.close()
         
         run_cmd(['chmod', 'u+x', 'automatic-run.sh'])
-        run_cmd(['bash', '-e', './automatic-run.sh', '"%s"' % START_JVMARGS, '"%s"' % START_ARGS, '&'])
+        run_cmd(['bash', '-e', './automatic-run.sh', '"%s"' % START_JVMARGS, '"%s"' % START_ARGS, '&'], False)
         
         fo = open('manual-run.sh', 'w')
         fo.write('bash -e ./automatic-run.sh "%s" "%s" &' % (START_JVMARGS, START_ARGS))

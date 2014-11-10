@@ -1884,8 +1884,6 @@
     =====================================================================
     -->
   
-  
-  
   <requestHandler name="/ads-config" class="solr.AdsConfigHandler" default="false">
      <lst name="queryParser">
       <str name="defaultField">unfielded_search</str>
@@ -1908,6 +1906,13 @@
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
        </lst>
+       
+       <str name="aqp.unfieldedSearchField">unfielded_search</str>
+       <str name="aqp.defaultField">unfielded_search</str>
+       <str name="aqp.defaultOperator">AND</str>
+       <str name="aqp.fieldMap">arxiv identifier;</str>
+       <str name="aqp.fieldMapPostAnalysis">pubdate date;author_nosyn author_notrans author_nosyn_notrans author</str>
+       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
        
     </lst>
   </queryParser>
@@ -1953,5 +1958,18 @@
       <str name="allowed-fields">bibcode,recid</str>
     </lst>
   </queryParser>
+  
+  <!-- to parse the query and get the syntactic tree (useful for BB) -->
+  <searchComponent name="qtree" class="org.apache.solr.handler.component.AqpQueryTree" />
+  <requestHandler name="/qtree" class="solr.StandardRequestHandler">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <int name="rows">10</int>
+      <str name="defType">aqp</str>
+    </lst>
+    <arr name="components">
+      <str>qtree</str>
+    </arr>
+  </requestHandler>
   
 </config>

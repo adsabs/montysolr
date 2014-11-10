@@ -409,6 +409,9 @@
 					replacement="-" replace="all" />
 				<filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$"
 					replacement="$2" />
+					
+		    <!--  translate math symbols and others into their ascii representation -->
+		    <filter class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
 				<!-- split all-sky into [all, sky, allsky] -->
 				<filter class="solr.WordDelimiterFilterFactory"
@@ -466,7 +469,6 @@
 			</analyzer>
 			<analyzer type="query">
         <charFilter class="solr.HTMLStripCharFilterFactory"/>
-        
 				<!-- AA: as above, but we only have one canonical replacement for the 
 					expression -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
@@ -482,14 +484,19 @@
 
 				<!-- tokenize on empty space (if it is not a hyphen connecting other 
 					words) -->
-				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)"
+				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)" 
 					group="-1" />
+					
+			  <!--  translate math symbols and others into their ascii representation -->
+        <filter class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
+        
 				<filter class="solr.WordDelimiterFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
 
+        
 				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond => 
 					mond Hubble Space Telescope => hubble space telescope -->
 				<filter
@@ -543,10 +550,11 @@
 				<!-- final normalization -->
 				<filter class="solr.TrimFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
+				
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-
-				<!-- <filter class="solr.DiagnoseFilterFactory" /> -->
+        
+				<!-- <filter class="solr.DiagnoseFilterFactory" idString="final"/> -->
 			</analyzer>
 		</fieldType>
 

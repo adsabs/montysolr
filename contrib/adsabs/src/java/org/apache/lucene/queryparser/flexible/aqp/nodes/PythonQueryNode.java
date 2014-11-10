@@ -7,17 +7,18 @@ import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
-import org.apache.lucene.search.CacheWrapper;
 import org.apache.lucene.search.SolrCacheWrapper;
+
 
 public class PythonQueryNode extends QueryNodeImpl implements QueryNode {
 
-	private static final long serialVersionUID = 3935454544149998076L;
-	private boolean useIntBits;
-	private SolrCacheWrapper cacheWrapper;
+	private boolean useIntBits = false;
+	@SuppressWarnings("rawtypes")
+  private SolrCacheWrapper cacheWrapper;
 	private String pythonFunctionName;
 	
-	public PythonQueryNode(QueryNode query, SolrCacheWrapper cache) {
+	@SuppressWarnings("rawtypes")
+  public PythonQueryNode(QueryNode query, SolrCacheWrapper cache) {
 		if (query == null) {
 			throw new QueryNodeError(new MessageImpl(
 					QueryParserMessages.PARAMETER_VALUE_NOT_SUPPORTED, "query",
@@ -64,7 +65,7 @@ public class PythonQueryNode extends QueryNodeImpl implements QueryNode {
 	 * between java na python
 	 */
 	public boolean useIntBitSet() {
-	  return false;
+	  return useIntBits;
   }
 	
 	public void setIntBitSet(boolean v) {
@@ -77,11 +78,13 @@ public class PythonQueryNode extends QueryNodeImpl implements QueryNode {
 	 * lucene ids. This wrapper should provide that functionality
 	 * This should not be null
 	 */
-	public SolrCacheWrapper getCacheWrapper() {
+	@SuppressWarnings("rawtypes")
+  public SolrCacheWrapper getCacheWrapper() {
 	  return cacheWrapper;
   }
 	
-	public void setCacheWrapper(SolrCacheWrapper cache) {
+	@SuppressWarnings("rawtypes")
+  public void setCacheWrapper(SolrCacheWrapper cache) {
 		cacheWrapper = cache;
 	}
 

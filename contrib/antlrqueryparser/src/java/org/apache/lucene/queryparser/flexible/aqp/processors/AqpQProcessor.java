@@ -1,10 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.antlr.runtime.CharStream;
@@ -19,7 +15,6 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
 
 /**
  * A generic class that is used by other query processors, eg.

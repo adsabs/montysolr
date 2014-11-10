@@ -299,7 +299,7 @@
 
 	<target name="run-bare" depends="populate-classpath,generate-run.sh">
 		<run-montysolr 
-			classpath="${prop.jcc_egg}"
+			classpath=""
 			classpathref="examples.classpath" 
 			ignore-environment="${example.ignore-environment}" 
 			pythonpath="${env.PYTHONPATH}" 
@@ -311,7 +311,7 @@
 	</target>
 
 	<target name="generate-run.sh" depends="populate-classpath">
-		<create-run.sh classpath="${prop.jcc_egg}" 
+		<create-run.sh classpath="" 
 			classpathref="examples.classpath" 
 			ignore-environment="${example.ignore-environment}" 
 			pythonpath="${env.PYTHONPATH}"
@@ -356,7 +356,6 @@
 	    export JYTHONPATH=@{jythonpath}
 
 	    #          For reference (not needed by MontySOLR)
-	    export JCC_CP="@{classpath}"
 	    export JAVA_CP="${toString:@{classpathref}}"            
 	    export CP="$JCC_CP${path.separator}$JAVA_CP"            
 	                

@@ -69,9 +69,80 @@ public class AqpANTLRNode extends QueryNodeImpl {
     }
   }
 
+  
+  public String escapeXmlVal(String v) {
+    return v.replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;");
+  }
+  
+  public String escapeJsonVal(String v) {
+    return v.replace("\"", "\\\"").replace("'", "\\'").replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n");
+  }
+  
+  /**
+   * Method to transform the tree into JSON - so that we can send it to the 
+   * javascript clients
+   * 
+   * @return
+   */
+  public String toJson() {
+    return toJson(0);
+  }
+  
+  public String toJson(int level) {
+    StringBuffer buf = new StringBuffer();
+    buf.append("\n");
+    for (int i = 0; i < level; i++) {
+      buf.append(" ");
+    }
+
+    buf.append("{name:\"");
+    buf.append(getTokenName());
+    buf.append("\"");
+
+    if (getTokenInput() != null) {
+      buf.append(", input:\"");
+      buf.append(escapeJsonVal(getTokenInput()));
+      buf.append("\", start:" + getTokenStart());
+      buf.append(", end:" + getTokenEnd());
+    } else {
+      buf.append(", label:\"");
+      buf.append(getTokenLabel());
+      buf.append("\"");
+    }
+
+    List<QueryNode> children = this.getChildren();
+
+    if (children != null) {
+      buf.append(", children: [");
+      for (QueryNode child : children) {
+        if (child instanceof AqpANTLRNode) {
+          buf.append(((AqpANTLRNode) child).toJson(level + 4));
+          buf.append(",");
+        } else {
+          buf.append("{xvalue:\"");
+          buf.append(escapeJsonVal(child.toString()));
+          buf.append("\"}");
+        }
+      }
+      buf.append("]");
+    }
+
+    if (isLeaf()) {
+      buf.append("}");
+    } else {
+      buf.append("\n");
+      for (int i = 0; i < level; i++) {
+        buf.append(" ");
+      }
+      buf.append("}");
+    }
+
+    return buf.toString();
+  }
+  
   public String toStringNodeOnly() {
     if (getTokenInput() != null) {
-      return "<ast" + getTokenName() + " value=\"" + getTokenInput()
+      return "<ast" + getTokenName() + " value=\"" + escapeXmlVal(getTokenInput())
           + "\" start=\"" + getTokenStart() + "\" end=\"" + getTokenEnd()
           + "\" />";
     } else {
@@ -93,7 +164,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
     buf.append("<ast" + getTokenName() + " ");
 
     if (getTokenInput() != null) {
-      buf.append("value=\"" + getTokenInput() + "\" start=\"" + getTokenStart()
+      buf.append("value=\"" + escapeXmlVal(getTokenInput()) + "\" start=\"" + getTokenStart()
           + "\" end=\"" + getTokenEnd() + "\"");
     } else {
       buf.append("label=\"" + getTokenLabel() + "\"");
