@@ -95,6 +95,7 @@ define([], function() {
      * city
      */
     DISPLAY_DOCUMENTS: '[Router]-Display-Documents',
+    DISPLAY_DOCUMENTS_DETAILS: '[Router]-Display-Documents-Details',
 
     /**
      * Used by OC to request parsed query tree - to check a query

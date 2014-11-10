@@ -72,7 +72,8 @@ define([
       },
 
       collectionEvents : {
-        "change:isSelected" : "onSelectedChange"
+        "change:isSelected" : "onSelectedChange",
+        "change:options": "onSelectedChange"
       },
 
       onSelectedChange: function(model) {

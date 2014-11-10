@@ -116,11 +116,8 @@ define([
 
         _.bindAll(this, ['onNewQuery', 'dispatchRequest', 'processResponse', 'onDisplayDocuments']);
         this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onNewQuery);
-
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
-
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-
         this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       },
 
