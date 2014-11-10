@@ -6,7 +6,7 @@
 
 define([
     'underscore',
-    'js/widgets/list_of_things/widget',
+    'js/widgets/list_of_things/temporary',
     'js/components/api_query'
   ],
 

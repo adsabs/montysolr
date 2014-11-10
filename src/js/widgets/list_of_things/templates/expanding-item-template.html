@@ -1,0 +1,62 @@
+<div class="buffer">
+    <div class="row ">
+        <div class="col-md-1">
+            <label>
+                <input type="checkbox" value={{identifier}} name="identifier"> {{orderNum}}
+            </label>
+        </div>
+        <div class="col-md-3">
+            <p class="identifier">{{identifier}}</p>
+        </div>
+        <div class="col-md-2 col-md-offset-1">
+            <p title="citation count">
+                {{#if citation_count}}
+                cited by: {{citation_count}}</p>
+            {{/if}}
+            </p>
+        </div>
+        <div class="col-md-3 col-md-offset-2">
+            [options go here]
+
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-8 col-md-offset-1">
+            <a href="#abs/{{identifier}}">
+                <h5 class="text-primary">{{{title}}}</h5>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-1">
+            <ul class="list-inline just-authors">
+                {{#each authorFormatted}}
+                <li class="article-author">{{this}}</li>
+                {{/each}}
+            </ul>
+            {{#if extraAuthors}}
+            <span>and {{extraAuthors}} more</span>
+            {{/if}}
+        </div>
+
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+        <div class="more-info panel panel-info hide">
+            {{#if highlights}}
+            <ul>
+                {{#each highlights}}
+                <li>{{{this}}}</li>
+                {{/each}}
+            </ul>
+            {{else}}
+            <ul><li>No snippets available</li></ul>
+            {{/if}}
+        </div>
+    </div>
+</div>
+</div>

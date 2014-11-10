@@ -88,7 +88,7 @@ define(['underscore',
       },
 
       handleMissingTransition: function() {
-        console.error("Cannot handle 'navigate' event: ", arguments);
+        console.error("Cannot handle 'navigate' event: " + JSON.stringify(arguments));
         this.pubsub.publish(this.pubSubKey, this.pubsub.BIG_FIRE, 'navigation-error', arguments);
       },
 
