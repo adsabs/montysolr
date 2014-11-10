@@ -66,6 +66,7 @@ define([
           self.broadcast('page-manager-message', event, data);
         }
         else if (event == 'widget-selected') {
+          widgetId = data;
           this.pubsub.publish(this.pubsub.NAVIGATE, this.widgetId ? this.widgetId + ':' + widgetId : widgetId);
         }
 
