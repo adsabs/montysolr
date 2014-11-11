@@ -60,22 +60,17 @@ define([
     var PaginationView = Backbone.View.extend({
 
       initialize : function(options){
-
         /*
          * listening to change in perPage value or change in current page
          */
         this.listenTo(this.model, "change", this.render);
         this.getStartVal = options.getStartVal;
-
-
       },
 
       template : PaginationTemplate,
 
       render: function(){
-
         var pageData, baseQ, showFirst;
-
         var minAmountToShowPagination = 25;
 
         var page = this.model.get("page");
@@ -83,18 +78,14 @@ define([
         var numFound = this.model.get("numFound");
 
         var pageNums = this.generatePageNums(page);
-
         //iterate through remaining pageNums, keep them only if they're possible (< numFound)
         pageNums = this.ensurePagePossible(pageNums, perPage, numFound);
 
         //now, finally, generate links for each page number
-
         baseQ = this.model.get("currentQuery");
 
         if (baseQ){
-
           baseQ = baseQ.clone();
-
           //now, generating the link
           pageData = _.map(pageNums, function(n){
             var s = this.getStartVal(n.p, perPage);
@@ -104,7 +95,6 @@ define([
           }, this);
 
           baseQ.set("rows", perPage);
-
         }
 
         //should we show a "back to first page" button?
@@ -122,7 +112,6 @@ define([
         else {
           this.$el.html("");
         }
-
         return this
       },
 
@@ -141,21 +130,17 @@ define([
             return true
           }
         });
-
         return pageNums.slice(0,5);
-
       },
 
       //iterate through pageNums, keep them only if they're possible (< numFound)
       ensurePagePossible : function(pageNums, perPage, numFound){
-
         var endIndex = numFound - 1
         return  _.filter(pageNums, function(n){
           if (this.getStartVal(n.p, perPage)<= endIndex){
             return true
           }
         }, this)
-
       },
 
       events : {
@@ -165,23 +150,17 @@ define([
       },
 
       changePage : function(e){
-
         var d = $(e.target).data("paginate")
-
         this.model.set("page", d);
-
         return false
-
       },
 
       changePerPage : _.debounce(function(e){
-
         var perPage = parseInt($(e.target).val());
-
         this.model.set("perPage", perPage);
       }, 2000)
 
-    })
+    });
 
     var ItemModel = Backbone.Model.extend({
       defaults: function () {
@@ -207,7 +186,6 @@ define([
 
     var VisibleCollection = Backbone.Collection.extend({
       model: ItemModel
-
     });
 
 
@@ -250,22 +228,15 @@ define([
       },
 
       onPaginationChange: function(){
-
         //so controller can allow a request
         this.trigger("pagination:change");
-
         this.updateStartAndEndIndex();
-
         this.transferModels();
-
       },
 
       onCollectionAugmented : function(){
-
         this.updateStartAndEndIndex();
-
         this.transferModels();
-
       },
 
       requestData : function(){
@@ -275,7 +246,6 @@ define([
 
 
       transferModels : function(){
-
         //add one to the end to make sure the final index is inclusive
         var indexes = _.range(this.currentStartIndex, this.currentEndIndex + 1);
 
@@ -286,25 +256,19 @@ define([
         //probably should be equal rather than greater or equal, but maybe there could be duplicate records??
         //checking for length to prevent unecessary initial render
         if (testList.length){
-
           this.visibleCollection.reset(testList);
         }
         else {
-
           this.requestData();
-
         }
-
       }
-
-    })
+    });
 
     var ItemView = Marionette.ItemView.extend({
 
       tagName : "li",
 
       className : "col-sm-12 s-display-block",
-
 
       template: ItemTemplate,
 
@@ -343,9 +307,7 @@ define([
         }
 
         data.orderNum = this.model.get("resultsIndex") + 1;
-
         return data;
-
       },
 
       events: {
@@ -353,7 +315,6 @@ define([
         'mouseenter .letter-icon' : "showLinks",
         'mouseleave .letter-icon' : "hideLinks",
         'click .letter-icon' : "pinLinks"
-
       },
 
       toggleSelect: function () {
@@ -426,67 +387,48 @@ define([
       },
 
       showLinks : function(e){
-
         $c = $(e.currentTarget);
-
         if (!$c.find(".active-link").length){
           return
         }
-
         if ($c.hasClass("pinned")){
           return
         }
         else {
-
           this.deactivateOtherQuickLinks($c);
           this.addActiveQuickLinkState($c)
         }
-
       },
 
       hideLinks : function(e){
-
         $c = $(e.currentTarget);
-
         if ($c.hasClass("pinned")){
           return
         }
-
         this.removeActiveQuickLinkState($c)
-
       }
-
     });
 
     var ListViewModel = Backbone.Model.extend({
-
       defaults : function(){
-
-
         return {
           showDetailsButton : false,
           mainResults : false
         }
       }
-
     });
 
 
     var VisibleCollectionEmptyView = Marionette.ItemView.extend({
-
       template :  EmptyViewTemplate
-
     });
 
     var VisibleCollectionInitialView = Marionette.ItemView.extend({
-
       template : InitialViewTemplate
-    })
+    });
 
     var ListView = Marionette.CompositeView.extend({
-
       initialize: function (options) {
-
         this.paginationView = options.paginationView;
         this.model = new ListViewModel();
         this.sortView = this.sortView  || options.sortView;
@@ -513,21 +455,15 @@ define([
 
       //calls to render will render only the model after the 1st time
       modelEvents : {
-
         "change" : "render"
-
       },
 
       template: ResultsContainerTemplate,
 
       onRender: function(){
-
         if  (this.sortView){
-
           this.sortView.setElement(this.$(".sort-container")).render();
-
         }
-
         this.paginationView.setElement(this.$(".pagination-controls")).render();
       },
 
@@ -538,8 +474,8 @@ define([
        */
       showDetails: function (ev) {
         if (ev)
-
           ev.stopPropagation();
+
         this.$(".more-info").toggleClass("hide");
         if (this.$(".more-info").hasClass("hide")) {
           this.$(".show-details").text("Show details");
@@ -553,9 +489,7 @@ define([
 
 
     var ListOfThingsWidget = BaseWidget.extend({
-
       initialize: function (options) {
-
         //so each widget gets its own copy instead of sharing one on the prototype chain
         this.defaultQueryArguments = _.result(this, "defaultQueryArguments");
 
@@ -614,9 +548,7 @@ define([
 
 
       activate: function (beehive) {
-
         _.bindAll(this,  "processResponse");
-
         this.pubsub = beehive.Services.get('PubSub');
 
         //custom handleResponse function goes here
@@ -644,9 +576,7 @@ define([
       },
 
       resetBibcode : function(bibcode){
-
         this._bibcode = bibcode;
-
       },
 
       /*
@@ -660,13 +590,10 @@ define([
        */
       loadBibcodeData: function (bibcode) {
 
-
         if (bibcode === this._bibcode){
-
           this.deferredObject =  $.Deferred();
           this.deferredObject.resolve(this.paginationModel.get("numFound"));
           return this.deferredObject.promise();
-
         }
 
         //numFound needs to equal undefined as a signal to other functions that the request cycle has restarted
@@ -696,7 +623,6 @@ define([
           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
         }
         return this.deferredObject.promise();
-
       },
 
       //will be requested in composeRequest
@@ -720,25 +646,19 @@ define([
         var s = this.getCurrentQuery().get("start");
 
         if (r){
-
           r = $.isArray(r) ? r[0] : r;
           toSet.perPage = r;
-
         }
 
         if (s) {
-
           var perPage =  toSet.perPage || this.paginationModel.get("perPage");
-
           s = $.isArray(s) ? s[0] : s;
 
           //getPageVal comes from the pagination mixin
           toSet.page= this.getPageVal(s, perPage);
-
         }
 
         var docs = apiResponse.get("response.docs")
-
         docs = _.map(docs, function(d) {
           d.identifier = d.bibcode;
           return d
@@ -746,11 +666,9 @@ define([
 
 
         docs = this.parseLinksData(docs);
-
         docs = this.addPaginationToDocs(docs, apiResponse);
 
         if (docs.length) {
-
           //reset the pagination model with toSet values
           //has to happen right before collection changes
           this.paginationModel.set(toSet, {silent : true});
@@ -764,9 +682,7 @@ define([
            * of a reset OR an add
            * */
           this.collection.trigger("collection:augmented");
-
         }
-
         else {
           //used by loading view
           //and to re-render collection
@@ -775,53 +691,37 @@ define([
 
         //resolving the promises generated by "loadBibcodeData"
         if (this.deferredObject){
-
           this.deferredObject.resolve(this.paginationModel.get("numFound"))
         }
 
         // XXX:rca - hack, to be solved later
         this.trigger('page-manager-event', 'widget-ready',
           {numFound: apiResponse.get("response.numFound"), widget: this});
-
       },
 
       setPaginationRequestPending : function(){
-
         this._paginationRequestPending = true;
-
       },
 
       resetPaginationRequest : function(){
-
         this._paginationRequestPending = false;
-
       },
 
       isPaginationPending : function(){
-
         return this._paginationRequestPending;
-
       },
 
       onAllInternalEvents: function(ev, arg1, arg2) {
-
         if (ev === "pagination:change"){
-
           this.resetPaginationRequest()
         }
-
-        if (ev === "dataRequest") {
-
+        else if (ev === "dataRequest") {
           if (this.isPaginationPending()){
             return
           }
-
           var start = arg1;
-
           var rows = arg2;
-
           var q = this.getCurrentQuery().clone();
-
           q.unlock();
           q = this.composeQuery(this.defaultQueryArguments, q);
 
@@ -830,32 +730,21 @@ define([
 
           var req = this.composeRequest(q);
           if (req) {
-
             this.setPaginationRequestPending();
-
             this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
           }
-
           if (this.mainResults){
             //letting other interested widgets know that more info was fetched
             //i.e. there was a pagination event
             this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: {start: start, rows: rows}});
-
           }
-
-
         }
-
       }
-
-
     });
 
     // add mixins
     _.extend(ListOfThingsWidget.prototype, LinkGenerator);
     _.extend(ListOfThingsWidget.prototype, WidgetPaginationMixin)
 
-
     return ListOfThingsWidget;
-
   });
