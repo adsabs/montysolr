@@ -10,7 +10,6 @@
   padding-left: 15px;
   padding-right: 15px;
 
-
   @media(min-width: @screen-sm-min) {
 
   background: url('../img/7419293528_befed97b29_b.jpg');
@@ -26,8 +25,6 @@
 .s-landing-section-1 {
   .row;
   text-align: center;
-  padding-bottom: 40px;
-  padding-top: 20px;
 
 
   h1 {
@@ -38,12 +35,19 @@
 
   }
 
+  @media(max-width: @screen-xs-max){
+
+    .lh-background-image(linear-gradient(to bottom, darken(@brand-primary,10%) 0%, @brand-primary-faded 100%));
+
+  }
+
 
   @media (min-width: @screen-sm-min) {
 
 
   h1 {
-        font-size: 62px;
+        font-size: 50px;
+        margin-bottom: 0;
 
       }
 
@@ -65,14 +69,18 @@
 
 .s-greeting-text {
   font-weight: 200;
-  line-height: 1.3;
+  line-height: 1.5;
   font-weight:300;
-  margin-top:4%;
+  margin-top:2%;
     color: #fff;
+
+  p {
+    padding: 0
+  }
 
   @media (min-width :@screen-sm-min) {
 
-    font-size: 26px;
+    font-size: 22px;
   }
 
 
@@ -80,17 +88,37 @@
 }
 
 .s-landing-section-2 {
-  margin: 2% -15px 0% -15px;
+  margin: 0 -15px 0% -15px;
   background-color: white;
-  padding: 3% 0 8% 0;
+  padding: 30px 0 50px 0;
+
+  @media (min-width: @screen-sm-min) {
+
+    padding-bottom: 415px;
+
+  }
+
 }
 
 .s-landing-section-3 {
 
-  padding: 160px 0;
-  font-size: 2.2em;
+  padding: 100px 0;
+  font-size: 1.5em;
   background-color:fade(#fff, 70%);
   margin: 0 -15px;
+
+  @media(min-width: @screen-sm-min){
+
+    font-size: 2.2em;
+
+
+  }
+
+  .s-link-container {
+    text-align:center;
+    width: 32%;
+    display: inline-block;
+  }
 
 
 
@@ -107,27 +135,9 @@
     text-align: center;
   }
 
-  .s-third-action{
-    text-align: right;
-  }
-
 
 }
 
-.s-landing-section-5 {
-  background-color: @navbar-inverse-bg;
-  color: white;
-  text-align: center;
-
-  a {
-    color: white;
-  }
-
-}
-
-.s-landing-section-5 {
-  padding: 10px;
-}
 
 .s-landing-section-4 {
 
@@ -139,6 +149,19 @@
   padding-top: 330px;
 
 }
+
+
+.s-landing-section-5 {
+  padding: 10px;
+  background-color: @navbar-inverse-bg;
+  color: white;
+  text-align: center;
+
+  a {
+    color: white;
+  }
+}
+
 
 
 
@@ -158,13 +181,13 @@
 
   .s-search-bar-rows-container {
 
-    padding: 3% 4% 10% 4%;
-
     border-radius: @border-radius-large;
     background-color: #fff;
-    width:70%;
-    min-width: 400px;
-    margin: auto;
+    margin: 0 auto;
+
+    @media(min-width: @screen-sm-min){
+      width:70%;
+    }
 
   }
 
