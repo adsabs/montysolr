@@ -18,18 +18,18 @@ define([
       fakeResponse = new ApiResponse(TestResponse);
 
 
-    })
+    });
 
     it ("should add a property called resultsIndex to each doc prior to pushing them to the collection", function(){
 
-      var docs  = PaginationMixin.addPaginationToDocs(fakeResponse.get("response.docs"), fakeResponse);
+      var docs  = PaginationMixin.addPaginationToDocs(fakeResponse.get("response.docs"), fakeResponse.get("response.start"));
 
-      var resultsIndexes = _.pluck(docs, "resultsIndex")
+      var resultsIndexes = _.pluck(docs, "resultsIndex");
 
       expect(resultsIndexes).to.eql([0,1,2,3,4,5,6,7,8,9])
 
 
-    })
+    });
 
 
     it("should be aware of the apiResponse's start value and change the results index to reflect that value", function(){
@@ -38,9 +38,9 @@ define([
 
       fakeResponse = new ApiResponse(TestResponse);
 
-      var docs = PaginationMixin.addPaginationToDocs(fakeResponse.get("response.docs"), fakeResponse)
+      var docs = PaginationMixin.addPaginationToDocs(fakeResponse.get("response.docs"), fakeResponse.get("response.start"));
 
-      var resultsIndexes = _.pluck(docs, "resultsIndex")
+      var resultsIndexes = _.pluck(docs, "resultsIndex");
 
       expect(resultsIndexes).to.eql([100, 101, 102, 103, 104, 105, 106, 107, 108, 109])
 

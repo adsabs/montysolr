@@ -167,7 +167,7 @@ define([
 
         docs = this.parseLinksData(docs);
 
-        docs = this.addPaginationToDocs(docs, apiResponse);
+        docs = this.addPaginationToDocs(docs, apiResponse.get("response.start"));
 
         if (docs.length) {
 
