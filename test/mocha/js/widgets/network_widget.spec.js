@@ -1648,7 +1648,7 @@ define([
 
 
     //  graph view should cache group views so it doesn't have to re-animate them
-      expect(networkWidget.view.graphView.detailViews.length).to.eql(8)
+      expect(networkWidget.view.graphView.detailViews.length).to.eql(9)
 
 
       done();

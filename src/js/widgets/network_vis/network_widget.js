@@ -325,48 +325,36 @@ define([
 
     highlightNode: function (e) {
 
-      var circle = e.currentTarget.childNodes[0];
+      var $kids = $(e.currentTarget).children();
 
-      var textNodes = [e.currentTarget.childNodes.item(1), e.currentTarget.childNodes.item(2)]
+      var $circle = $kids.eq(0);
 
-      circle.classList.add("s-hover-circle")
+      var $textNodes = [$kids.eq(1), $kids.eq(2)];
 
-      _.each(textNodes, function (t) {
+      $circle.addClass("s-hover-circle");
 
-        if (t) {
-
-          t.classList.add("s-hover-text")
-
-        }
-
-      })
+      $textNodes.addClass("s-hover-text");
 
     },
 
     unhighlightNode: function (e) {
 
-      var circle = e.currentTarget.childNodes[0];
+      var $kids = $(e.currentTarget).children();
 
-      var textNodes = [e.currentTarget.childNodes.item(1), e.currentTarget.childNodes.item(2)]
+      var $circle = $kids.eq(0);
 
-      circle.classList.remove("s-hover-circle")
+      var $textNodes = [$kids.eq(1), $kids.eq(2)];
 
-      _.each(textNodes, function (t) {
+      $circle.removeClass("s-hover-circle");
 
-        if (t){
-
-          t.classList.remove("s-hover-text")
-
-        }
-
-      })
+      $textNodes.removeClass("s-hover-text");
 
     },
 
     setNodeDetail: function (e) {
       e.stopPropagation();
 
-      if (e.currentTarget.childNodes[0].classList.contains("connector-node")) {
+      if ($(e.currentTarget).children().eq(0).hasClass("connector-node")) {
         return
       }
       this.model.set("currentGroup", e.currentTarget)
@@ -393,7 +381,7 @@ define([
 
       this.$(".target-group").each(function () {
 
-        this.classList.remove("target-group")
+        $(this).removeClass("target-group")
       })
 
       if (this.detailViews.findByCustom(group + 1)){
@@ -436,7 +424,7 @@ define([
       this.detailNetworkView.triggerMethod("show");
 
       //add highlight to node
-      targetGroupNode.childNodes[0].classList.add("target-group")
+      $(targetGroupNode).children().eq(0).addClass("target-group")
 
       this.ui.detailContainer
         .fadeIn()
@@ -778,12 +766,12 @@ define([
 
           if (col.get(el.textContent)){
 
-            el.classList.add("selected-node")
+            $(el).addClass("selected-node")
 
           }
           else {
 
-            el.classList.remove("selected-node")
+            $(el).removeClass("selected-node")
 
           }
         })
@@ -845,7 +833,7 @@ define([
 
       this.$(".detail-node").each(function () {
         if (this.textContent.trim() === name.trim()) {
-          this.classList.remove("selected-node")
+          $(this).removeClass("selected-node")
 
         }
       })
@@ -855,7 +843,7 @@ define([
 
       var name = e.currentTarget.textContent;
 
-      e.currentTarget.classList.toggle("selected-node");
+      $(e.currentTarget).toggleClass("selected-node");
 
       this.trigger("name:toggle", name);
 
@@ -869,7 +857,7 @@ define([
 
       if (action === "add") {
         this.$(".detail-node").each(function () {
-          this.classList.add("selected-node")
+          $(this).addClass("selected-node");
           names.push(this.textContent);
 
         });
@@ -877,7 +865,7 @@ define([
       }
       else {
         this.$(".detail-node").each(function () {
-          this.classList.remove("selected-node")
+          $(this).removeClass("selected-node");
           names.push(this.textContent);
 
         });
