@@ -46,6 +46,7 @@ require.config({
         QueryDebugInfo: 'js/widgets/api_query/widget',
         Export  : 'js/widgets/export/widget',
         Sort : 'js/widgets/sort/widget',
+        VisualizationDropdown : 'js/wraps/visualization_dropdown',
 
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',
