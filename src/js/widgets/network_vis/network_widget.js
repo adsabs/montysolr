@@ -237,8 +237,8 @@ define([
 
      var newGraphView = false;
 
-
-     if (_.keys(this.model.get("summaryData")).length){
+    //it's a big graph with summary nodes
+     if (!_.isEmpty(this.model.get("summaryData"))){
 
        this.graphView = new SummaryGraphView({model : this.model, chosenNamesCollection : this.chosenNamesCollection})
 
@@ -249,12 +249,15 @@ define([
        newGraphView = true;
 
      }
-
-     else if (!this.model.get("fullData").length || !this.model.get("fullData").nodes.length ) {
+    //not enough data to make a graph
+     else if ( _.isEmpty(this.model.get("fullData")) || !this.model.get("fullData").nodes.length ) {
 
        this.$el.empty().append(notEnoughDataTemplate())
 
      }
+
+     //enough data just for a basic network graph
+     
      else if (this.model.get("fullData").nodes.length > 1 ){
 
        this.model.set("nodes", this.model.get("fullData").nodes);

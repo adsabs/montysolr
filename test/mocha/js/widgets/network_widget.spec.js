@@ -1497,7 +1497,7 @@ define([
 
     beforeEach(function () {
 
-      networkWidget = new NetworkWidget({networkType: "author"});
+      networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network"});
       $("#test").append(networkWidget.view.el);
 
       minsub = new MinimalPubsub({verbose: false});
@@ -1538,6 +1538,7 @@ define([
 
       expect($("#test").find("circle.network-node").length).to.eql(9)
       expect($("#test").find("circle.connector-node").length).to.eql(1)
+
       expect($("#test").find("line.network-link").length).to.eql(29)
 
       $(".network-node").eq(0).click();

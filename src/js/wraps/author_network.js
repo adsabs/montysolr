@@ -6,7 +6,7 @@ define([
 
   var options = {};
 
-  options.endpoint = "author-network";
+  options.endpoint = "services/vis/author-network";
 
   options.networkType = "author";
 
