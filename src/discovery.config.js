@@ -47,7 +47,7 @@ require.config({
         Export  : 'js/widgets/export/widget',
         Sort : 'js/widgets/sort/widget',
         VisualizationDropdown : 'js/wraps/visualization_dropdown',
-        AuthorNetwork : 'js/wraps/author-network'
+        AuthorNetwork : 'js/wraps/author_network',
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',
         BibstemFacet: 'js/wraps/bibstem_facet',

@@ -250,7 +250,7 @@ define([
 
      }
 
-     else if (!this.model.get("fullData") || !this.model.get("fullData").nodes.length ) {
+     else if (!this.model.get("fullData").length || !this.model.get("fullData").nodes.length ) {
 
        this.$el.empty().append(notEnoughDataTemplate())
 
