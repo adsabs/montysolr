@@ -1,7 +1,15 @@
 define([
-  'js/widgets/network_vis/network_widget'
+  'marionette',
+  'js/widgets/network_vis/network_widget',
+  'js/bugutils/minimal_pubsub',
+  'js/components/api_query'
 
-], function (NetworkWidget) {
+], function (
+  Marionette,
+  NetworkWidget,
+  MinimalPubsub,
+  ApiQuery
+  ) {
 
 
   describe("Network Visualization Widget", function () {
@@ -1485,11 +1493,14 @@ define([
 
     testDataEmpty = {"fullGraph": {"nodes": [], "links": []}};
 
+    var minsub;
+
     beforeEach(function () {
 
       networkWidget = new NetworkWidget({networkType: "author"});
       $("#test").append(networkWidget.view.el);
 
+      minsub = new MinimalPubsub({verbose: false});
 
     })
 
@@ -1656,7 +1667,25 @@ define([
     })
 
 
-    it("can accept data")
+    it("can communicate with pubsub and accept data", function(){
+
+      var q =  new ApiQuery({q: 'star'});
+
+      minsub.request = sinon.stub();
+
+      networkWidget.activate(minsub.beehive.getHardenedInstance());
+
+      minsub.publish(minsub.START_SEARCH, q);
+
+      expect(networkWidget.getCurrentQuery()).to.eql(q);
+
+      networkWidget.onShow();
+
+      expect(minsub.request.calledOnce).to.be.true;
+
+      expect(minsub.request.args[0][0].url()).to.eql("author-network?q=star");
+
+    })
 
 
     it("has a method to completely remove the graphView", function(){

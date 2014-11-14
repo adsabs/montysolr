@@ -1,6 +1,8 @@
 define([
   "marionette",
   "d3",
+   "js/components/api_request",
+    "js/components/api_query",
   "js/widgets/base/base_widget",
   "hbs!./templates/container-template",
   'hbs!./templates/detail-graph-container-template',
@@ -13,6 +15,8 @@ define([
   function (
     Marionette,
     d3,
+    ApiRequest,
+    ApiQuery,
     BaseWidget,
     ContainerTemplate,
     DetailTemplate,
@@ -189,8 +193,8 @@ define([
 
      }
      else {
-       this.chosenNamesCollection.add({name: name})
-       this.chosenNamesCollection.trigger("augment")
+       this.chosenNamesCollection.add({name: name});
+       this.chosenNamesCollection.trigger("augment");
 
      }
 
@@ -730,7 +734,7 @@ define([
     defaults: {
       links: [],
       nodes: [],
-      scales: {},
+      scales: {}
     }
 
   })
@@ -766,12 +770,12 @@ define([
 
           if (col.get(el.textContent)){
 
-            $(el).addClass("selected-node")
+            $(el).addClass("selected-node");
 
           }
           else {
 
-            $(el).removeClass("selected-node")
+            $(el).removeClass("selected-node");
 
           }
         })
@@ -833,7 +837,7 @@ define([
 
       this.$(".detail-node").each(function () {
         if (this.textContent.trim() === name.trim()) {
-          $(this).removeClass("selected-node")
+          $(this).removeClass("selected-node");
 
         }
       })
@@ -884,13 +888,13 @@ define([
 
       if (this.$(".update-all").hasClass("add-all")) {
 
-        this.$(".update-all").text("Add entire group to filter list.")
+        this.$(".update-all").text("Add entire group to filter list.");
 
       }
 
       else {
 
-        this.$(".update-all").text("Remove entire group from filter list.")
+        this.$(".update-all").text("Remove entire group from filter list.");
 
       }
 
@@ -931,9 +935,9 @@ define([
 
       //container for network
       //need two gs because of weird panning requirement
-      g1 = svg.append("g")
+      g1 = svg.append("g");
 
-      g2 = g1.append("g")
+      g2 = g1.append("g");
 
 
       g2.append("rect")
@@ -943,7 +947,7 @@ define([
         .style("pointer-events", "all");
 
 
-      this.model.set("g2", g2)
+      this.model.set("g2", g2);
 
 
       force
@@ -951,7 +955,7 @@ define([
         .links(this.model.get("links"))
         .start();
 
-      this.model.set("force", force)
+      this.model.set("force", force);
 
       link = g2.selectAll(".detail-link")
         .data(this.model.get("links"))
@@ -1194,16 +1198,35 @@ define([
 
     initialize: function (options) {
 
+
+      if (!options.endpoint){
+        
+        throw new Error("widget was not configured with an endpoint");
+      }
+
       this.model = new NetworkModel();
 
       this.view = new ContainerView({
         model : this.model,
         networkType: Marionette.getOption(this, "networkType")
 
-      })
+      });
 
     },
 
+    activate : function(beehive){
+
+      _.bindAll(this, "setCurrentQuery", "processResponse");
+
+      this.pubsub = beehive.Services.get('PubSub');
+
+      //custom dispatchRequest function goes here
+      this.pubsub.subscribe(this.pubsub.START_SEARCH, this.setCurrentQuery);
+
+      //custom handleResponse function goes here
+      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+    },
 
     resetWidget : function(){
 
@@ -1221,9 +1244,21 @@ define([
 
     },
 
+    //fetch data
+    onShow : function(){
+
+        var request =  new ApiRequest({
+          target: Marionette.getOption(this, "endpoint"),
+          query: this.getCurrentQuery()
+        });
+
+     this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request)
+
+    },
+
     processResponse: function (data) {
 
-        this.model.set({fullData : data.fullGraph, summaryData : data.summaryGraph})
+        this.model.set({fullData : data.fullGraph, summaryData : data.summaryGraph});
 
     }
 
