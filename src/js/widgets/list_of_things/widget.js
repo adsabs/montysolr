@@ -5,13 +5,11 @@
  *
  * This widget consists of the following components:
  *
- * 1. a pagination view
+ * 1. a pagination view (you can choose from expanding view or paginated view [default])
  * 2. an associated pagination model (all pagination info is kept here and only here)
- * 3. a 'master' collection that holds all currently accessible records
- * 4. a 'visible' collection that shows all records that should currently be visible on screen
- * 5. a list view that listens to the visible collection and renders it
- * 6. an item view for each record rendered repeatedly by the list view
- * 7. a controller that handles requesting and recieving data from pubsub and initializing everything
+ * 3. a list view that listens to the visible records and renders them
+ * 4. an item view for each record rendered repeatedly by the list view
+ * 5. a controller that handles requesting and recieving data from pubsub and initializing everything
  *
  */
 
@@ -26,8 +24,8 @@ define([
     'js/mixins/link_generator_mixin',
     'hbs!./templates/pagination-template',
     'js/mixins/add_stable_index_to_collection',
-    'hbs!./templates/empty-view-template',
-    'hbs!./templates/initial-view-template'
+    './model',
+    './paginated_view'
   ],
 
   function (Marionette,
@@ -39,64 +37,45 @@ define([
     ResultsContainerTemplate,
     LinkGenerator,
     PaginationTemplate,
-    WidgetPaginationMixin,
-    EmptyViewTemplate,
-    InitialViewTemplate
+    PaginationMixin,
+    PaginatedCollection,
+    PaginatedView
     ) {
 
 
 
     var ListOfThingsWidget = BaseWidget.extend({
       initialize: function (options) {
-        //so each widget gets its own copy instead of sharing one on the prototype chain
-        this.defaultQueryArguments = _.result(this, "defaultQueryArguments");
+        options = options || {};
 
-        //adding data for the letter links
-        this.defaultQueryArguments.fl = this.defaultQueryArguments.fl + "," + this.resultsPageFields;
 
-        //letting widget know that the loading transition should happen
-        this.showLoad =  true;
+        _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model']));
 
-        this.visibleCollection = new VisibleCollection();
+        var defaultPagination = {
+          perPage: 20,
+          numFound: undefined,
+          currentQuery: undefined,
+          start: 0
+        };
+        options.pagination = _.defaults(options.pagination || {}, defaultPagination);
 
-        var paginationOptions = {};
-
-        if (options.perPage){
-          paginationOptions.perPage = options.perPage;
-          this.defaultQueryArguments.rows = options.perPage
+        if (!options.collection) {
+          options.collection = new PaginatedCollection();
         }
-        else {
-          paginationOptions.perPage =  this.defaultQueryArguments.rows;
+        if (!options.view) {
+          if (options.model) {
+            options.view = new PaginatedView({collection: options.collection, model: options.model});
+          }
+          else {
+            options.view = new PaginatedView({collection: options.collection});
+          }
         }
+        options.model = options.view.model;
+        options.model.set(options.pagination, {silent: true});
 
-        paginationOptions.numFound = undefined;
-        paginationOptions.currentQuery = undefined;
-        paginationOptions.page = 1;
+        _.extend(this, _.pick(options, ['model', 'collection', 'view']));
 
-        //have to use a cloned copy or else it will work on the first go but then
-        //be modified once the model itself is modified!!!
-        this.paginationModel = new PaginationModel({}, {defaults : function(){return _.clone(paginationOptions)}});
-
-        this.paginationView = new PaginationView({
-          model : this.paginationModel,
-          //from the pagination mixin
-          getStartVal : this.getStartVal
-
-        });
-
-
-        //showdetails defaults to false, so details button will be hidden
-        this.view = new ListView({
-          collection: this.visibleCollection,
-          paginationView : this.paginationView,
-          showDetailsButton : this.showDetailsButton,
-          mainResults : this.mainResults
-
-        });
-
-        this.collection = new MasterCollection({}, {visibleCollection : this.visibleCollection,
-          paginationModel: this.paginationModel});
-
+        // XXX:rca - start using modelEvents, instead of all....
         this.listenTo(this.collection, "all", this.onAllInternalEvents);
         this.on("all", this.onAllInternalEvents);
 
@@ -106,12 +85,88 @@ define([
 
 
       activate: function (beehive) {
-        _.bindAll(this,  "processResponse");
         this.pubsub = beehive.Services.get('PubSub');
 
-        //custom handleResponse function goes here
+        _.bindAll(this, 'onStartSearch', 'onDisplayDocuments', 'processResponse');
+        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onStartSearch);
+        this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
+
+      onStartSearch: function(apiQuery) {
+        this.view.close();
+        this.view = this.view.constructor({collection: this.options.collection, model: this.options.model});
+        this.options.view = this.view;
+      },
+
+      onDisplayDocuments: function(apiQuery) {
+        this.view.model.set("currentQuery", apiQuery);
+        BaseWidget.prototype.dispatchRequest.call(this, apiQuery);
+      },
+
+      processResponse: function (apiResponse) {
+        var q = apiResponse.getApiQuery();
+        this.setCurrentQuery(q);
+
+        var pagination = this.getPaginationInfo(apiResponse);
+
+        var docs = apiResponse.get("response.docs");
+        docs = _.map(docs, function(d) {
+          d.identifier = d.bibcode;
+          return d;
+        });
+
+        docs = this.processDocs(apiResponse, docs, pagination);
+
+        if (docs.length) {
+          //update model with pagination info
+          //has to happen right before collection changes
+          this.model.set(pagination, {silent : true});
+
+          //just using add because the collection was emptied
+          //when a new request was made
+          this.collection.add(docs);
+
+          this.collection.showMore(pagination.perPage);
+        }
+        else {
+          //nothing was found, show empty view
+          this.collection.reset();
+        }
+
+        // XXX:rca - hack, to be solved later
+        this.trigger('page-manager-event', 'widget-ready',
+          {numFound: apiResponse.get("response.numFound"), widget: this});
+      },
+
+      getPaginationInfo: function(apiResponse) {
+        var q = apiResponse.getApiQuery();
+        var toSet = {
+          "numFound":  apiResponse.get("response.numFound"),
+          "currentQuery":q
+        };
+
+        //checking to see if we need to reset start or rows values
+        var rows =  q.get("rows") || this.model.get('perPage');
+        var start = q.get("start") || this.model.get('start');
+
+        if (rows){
+          rows = _.isArray(rows) ? rows[0] : rows;
+          toSet.perPage = rows;
+        }
+
+        if (_.isNumber(start)){
+          start = _.isArray(start) ? start[0] : start;
+          toSet.page = PaginationMixin.getPageVal(start, rows);
+        }
+        toSet.start = start;
+        return toSet;
+      },
+
+      processDocs: function(apiResponse, docs, paginationInfo) {
+        return PaginationMixin.addPaginationToDocs(docs, apiResponse.get("response.start"));
+      },
+
 
       resetWidget : function(){
 
@@ -192,69 +247,6 @@ define([
         }
       },
 
-      processResponse: function (apiResponse) {
-
-        this.setCurrentQuery(apiResponse.getApiQuery());
-
-        var toSet = {"numFound":  apiResponse.get("response.numFound"),
-          "currentQuery":this.getCurrentQuery()};
-
-        //checking to see if we need to reset start or rows values
-        var r =  this.getCurrentQuery().get("rows");
-        var s = this.getCurrentQuery().get("start");
-
-        if (r){
-          r = $.isArray(r) ? r[0] : r;
-          toSet.perPage = r;
-        }
-
-        if (s) {
-          var perPage =  toSet.perPage || this.paginationModel.get("perPage");
-          s = $.isArray(s) ? s[0] : s;
-
-          //getPageVal comes from the pagination mixin
-          toSet.page= this.getPageVal(s, perPage);
-        }
-
-        var docs = apiResponse.get("response.docs")
-        docs = _.map(docs, function(d) {
-          d.identifier = d.bibcode;
-          return d
-        });
-
-
-        docs = this.parseLinksData(docs);
-        docs = this.addPaginationToDocs(docs, apiResponse.get("response.start"));
-
-        if (docs.length) {
-          //reset the pagination model with toSet values
-          //has to happen right before collection changes
-          this.paginationModel.set(toSet, {silent : true});
-
-          //just using add because the collection was emptied
-          //when a new request was made
-          this.collection.add(docs);
-
-          /*
-           * we need a special event that fires only once in event
-           * of a reset OR an add
-           * */
-          this.collection.trigger("collection:augmented");
-        }
-        else {
-          //nothing was found, show empty view
-          this.collection.reset();
-        }
-
-        //resolving the promises generated by "loadBibcodeData"
-        if (this.deferredObject){
-          this.deferredObject.resolve(this.paginationModel.get("numFound"))
-        }
-
-        // XXX:rca - hack, to be solved later
-        this.trigger('page-manager-event', 'widget-ready',
-          {numFound: apiResponse.get("response.numFound"), widget: this});
-      },
 
       setPaginationRequestPending : function(){
         this._paginationRequestPending = true;
@@ -299,9 +291,7 @@ define([
       }
     });
 
-    // add mixins
-    _.extend(ListOfThingsWidget.prototype, LinkGenerator);
-    _.extend(ListOfThingsWidget.prototype, WidgetPaginationMixin)
+    _.extend(ListOfThingsWidget.prototype, PaginationMixin);
 
     return ListOfThingsWidget;
   });

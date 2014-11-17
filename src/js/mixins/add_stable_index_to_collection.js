@@ -25,12 +25,10 @@ define(['underscore'], function (_) {
     //returns current page number
     getPageVal: function (start, rows) {
       if (start  % rows !== 0){
-        throw new Error("start and rows values will not yield a full page");
+        console.error("start and rows values will not yield a full page! start=" + start + ' rows=' + rows);
       }
-      else {
-        //also could do (start + rows) / rows
-        return start/rows + 1;
-      }
+      //also could do (start + rows) / rows
+      return start/rows + 1;
     },
 
     /**
@@ -41,10 +39,10 @@ define(['underscore'], function (_) {
      * @returns {*}
      */
     addPaginationToDocs: function (docs, start) {
-      var docs = _.map(docs, function (d) {
-        d.resultsIndex = start;
-        start++;
-        return d;
+      var s = start;
+      _.each(docs, function (d) {
+        d.resultsIndex = s;
+        s += 1;
       });
       return docs;
     }
