@@ -95,6 +95,10 @@ select:focus {
   background-color : @brand-primary-faded;
   border :1px solid darken(@brand-primary-faded, 5%);
   color: #fff;
+  &:hover {
+    color: #fff;
+    background-color: darken(@brand-primary-faded, 5%);
+  }
 }
 
 
@@ -113,6 +117,10 @@ select:focus {
 .btn-default:hover {
   background-color: #fff;
   .button-hover-shadow;
+}
+
+.btn-success:hover {
+  background-color: darken(@brand-success, 5%);
 }
 
 .btn {

@@ -111,6 +111,8 @@ define([
 
         data.dropdownTitle = Marionette.getOption(this, "dropdownTitle");
 
+        data.iconClass = Marionette.getOption(this, "iconClass");
+
         return data
 
       }

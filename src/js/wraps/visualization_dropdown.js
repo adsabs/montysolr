@@ -18,7 +18,12 @@ define([
 
   var dropdownTitle = "Visualize";
 
-  var VisDropdown = new DropdownWidget({links : links, btnType: btnType, dropdownTitle : dropdownTitle })
+  var iconClass = "icon-visualize";
+
+  var VisDropdown = new DropdownWidget({links : links,
+    btnType: btnType,
+    dropdownTitle : dropdownTitle,
+    iconClass: iconClass })
 
   return VisDropdown;
 
