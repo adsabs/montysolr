@@ -35,121 +35,6 @@ define([
     ) {
 
 
-    var PaginationModel = Backbone.Model.extend({
-
-      initialize: function (attrs, options) {
-        this.defaults = options.defaults;
-        this.attributes = _.result(this, "defaults");
-      }
-    });
-
-    var PaginationView = Backbone.View.extend({
-
-      initialize: function (options) {
-        /*
-         * listening to change in perPage value or change in current page
-         */
-        this.listenTo(this.model, "change", this.render);
-        this.getStartVal = options.getStartVal;
-      },
-
-      template: PaginationTemplate,
-
-      render: function () {
-        var pageData, baseQ, showFirst;
-        var minAmountToShowPagination = 25;
-
-        var page = this.model.get("page");
-        var perPage = this.model.get("perPage");
-        var numFound = this.model.get("numFound");
-
-        var pageNums = this.generatePageNums(page);
-        //iterate through remaining pageNums, keep them only if they're possible (< numFound)
-        pageNums = this.ensurePagePossible(pageNums, perPage, numFound);
-
-        //now, finally, generate links for each page number
-        baseQ = this.model.get("currentQuery");
-
-        if (baseQ) {
-          baseQ = baseQ.clone();
-          //now, generating the link
-          pageData = _.map(pageNums, function (n) {
-            var s = this.getStartVal(n.p, perPage);
-            baseQ.set("start", s)
-            n.link = baseQ.url();
-            return n
-          }, this);
-
-          baseQ.set("rows", perPage);
-        }
-
-        //should we show a "back to first page" button?
-        showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
-
-        //only render pagination controls if there are more than 25 results
-        if (numFound > minAmountToShowPagination) {
-          this.$el.html(PaginationTemplate({
-            showFirst: showFirst,
-            pageData: pageData,
-            currentPage: page,
-            perPage: this.model.get("perPage"),
-            currentQuery: this.model.get("currentQuery")}));
-        }
-        else {
-          this.$el.html("");
-        }
-        return this
-      },
-
-
-      //create list of up to 5 page numbers to show
-      generatePageNums: function (page) {
-
-        var pageNums = _.map([-2, -1, 0, 1, 2 , 3, 4], function (d) {
-          var current = (d === 0) ? true : false;
-          return {p: page + d, current: current}
-        });
-
-        //page number can't be less than 1
-        pageNums = _.filter(pageNums, function (d) {
-          if (d.p > 0) {
-            return true
-          }
-        });
-        return pageNums.slice(0, 5);
-      },
-
-      //iterate through pageNums, keep them only if they're possible (< numFound)
-      ensurePagePossible: function (pageNums, perPage, numFound) {
-        var endIndex = numFound - 1
-        return  _.filter(pageNums, function (n) {
-          if (this.getStartVal(n.p, perPage) <= endIndex) {
-            return true
-          }
-        }, this)
-      },
-
-      events: {
-        "click a": "changePage",
-        "input .per-page": "changePerPage"
-
-      },
-
-      changePage: function (e) {
-        var d = $(e.target).data("paginate");
-        this.model.set("page", d);
-        return false
-      },
-
-      changePerPage: _.debounce(function (e) {
-        var perPage = parseInt($(e.target).val());
-        this.model.set("perPage", perPage);
-      }, 2000)
-
-    });
-
-
-
     /**
      * A simple model that holds attributes of the
      * paginated view. Changes in this model are
@@ -219,7 +104,9 @@ define([
 
       itemViewContainer: ".results-list",
       events: {
-        "click .show-details": "showDetails"
+        "click .show-details": "showDetails",
+        "click a[data-paginate]": "changePage",
+        "input .per-page": "changePerPage"
       },
 
       modelEvents: {
@@ -248,7 +135,19 @@ define([
         } else {
           this.$(".show-details").text("Hide details");
         }
-      }
+      },
+
+      changePage: function (e) {
+        var d = $(e.target).data("paginate");
+        this.trigger('pagination:select', d);
+        e.preventDefault();
+      },
+
+      changePerPage: _.debounce(function (e) {
+        var perPage = parseInt($(e.target).val());
+        this.trigger('pagination:change', perPage);
+        e.preventDefault();
+      }, 2000)
     });
 
     return ListOfThingsView;

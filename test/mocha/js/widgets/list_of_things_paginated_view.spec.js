@@ -57,17 +57,25 @@ define(['marionette',
 
         expect(coll.showRange(30,40)).to.be.equal(0);
         expect(coll.getNumVisible()).to.be.equal(0);
+        expect(coll.models.length).to.be.eql(24); // the gap 29-39 was auto-filled
 
         // jump to the page 20-30
         var ri = 20;
         _.each(docs, function(d) {
-          coll.add(_.extend({resultsIndex: ri++}, d));
+          //console.log('adding' + (ri), d);
+          coll.add(_.extend({resultsIndex: ri}, d), {merge: true});
+          ri += 1;
         });
+        expect(_.map(coll.models, function(x) {return x.attributes.resultsIndex + ':' + (x.attributes.emptyPlaceholder ? 0 : 1)})).to.eql(
+          [ "0:1", "1:1", "2:1", "3:1", "4:1", "5:1", "6:1", "7:1", "8:1", "9:1", "10:0", "11:0", "12:0",
+            "20:1", "21:1", "22:1", "23:1", "24:1", "25:1", "26:1", "27:1", "28:1", "29:1",
+            "30:0", "31:0", "32:0", "33:0", "34:0", "35:0", "36:0", "37:0", "38:0", "39:0"]
+        );
+        expect(coll.models.length).to.be.eql(33);
 
         var spy = sinon.spy();
         coll.on('show:missing', spy);
 
-        expect(coll.models.length).to.be.eql(20);
         expect(coll.showRange(0,4)).to.be.equal(5);
         expect(coll.showMore(10)).to.be.equal(5); // only 5 are available, then a gap
         expect(spy.lastCall.args[0]).to.be.eql([{start: 10, end: 14}]);
@@ -79,8 +87,9 @@ define(['marionette',
         expect(spy.lastCall.args[0]).to.be.eql([{start: 10, end: 14}]);
 
         // however when we ask to display more, the system reports more gaps
-        coll.showMore(100);
-        expect(spy.lastCall.args[0]).to.be.eql([{"start":10,"end":19},{"start":30,"end":49}]);
+        coll.showRange(0, 100);
+        expect(spy.lastCall.args[0]).to.be.eql([{"start":10,"end":19},{"start":30,"end":49},
+          {"start":51,"end":99}]);
 
         done();
       });
@@ -142,9 +151,17 @@ define(['marionette',
         var minsub = new (MinPubSub.extend({
           request: function(apiRequest) {
             counter++;
+            var q = apiRequest.get('query');
+            var ret = test1;
             if (counter % 2 == 0)
-              return test2;
-            return test1;
+              ret = test2;
+
+            ret = _.clone(ret);
+            _.each(q.keys(), function(k) {
+              ret.responseHeader.params[k] = q.get(k)[0];
+            });
+            //_.extend(ret.responseHeader.params, q.toJSON());
+            return ret;
           }
         }))({verbose: false});
 
@@ -159,7 +176,7 @@ define(['marionette',
         expect($w.find("label").length).to.equal(10);
 
         // click on next page
-        $w.find('button.show-details').click();
+        $w.find('a[data-paginate=2]').click();
 
         // this should trigger new request
         expect($w.find("label").length).to.equal(10);

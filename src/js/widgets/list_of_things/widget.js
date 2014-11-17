@@ -52,6 +52,7 @@ define([
         _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model']));
 
         var defaultPagination = {
+          pagination: true,
           perPage: 20,
           numFound: undefined,
           currentQuery: undefined,
@@ -73,10 +74,14 @@ define([
         options.model = options.view.model;
         options.model.set(options.pagination, {silent: true});
 
-        _.extend(this, _.pick(options, ['model', 'collection', 'view']));
+        _.extend(this, _.pick(options, ['model', 'view']));
+
+        // this is the hidden collection (just to hold data)
+        this.hiddenCollection = new PaginatedCollection();
 
         // XXX:rca - start using modelEvents, instead of all....
-        this.listenTo(this.collection, "all", this.onAllInternalEvents);
+        this.listenTo(this.hiddenCollection, "all", this.onAllInternalEvents);
+        this.listenTo(this.view, "all", this.onAllInternalEvents);
         this.on("all", this.onAllInternalEvents);
 
         BaseWidget.prototype.initialize.call(this, options);
@@ -94,9 +99,8 @@ define([
       },
 
       onStartSearch: function(apiQuery) {
-        this.view.close();
-        this.view = this.view.constructor({collection: this.options.collection, model: this.options.model});
-        this.options.view = this.view;
+        this.hiddenCollection.reset(null, {silent: true});
+        //this.resetView();
       },
 
       onDisplayDocuments: function(apiQuery) {
@@ -105,10 +109,9 @@ define([
       },
 
       processResponse: function (apiResponse) {
-        var q = apiResponse.getApiQuery();
-        this.setCurrentQuery(q);
+        //this.resetView();
 
-        var pagination = this.getPaginationInfo(apiResponse);
+        var q = apiResponse.getApiQuery();
 
         var docs = apiResponse.get("response.docs");
         docs = _.map(docs, function(d) {
@@ -116,22 +119,19 @@ define([
           return d;
         });
 
+        var pagination = this.getPaginationInfo(apiResponse, docs);
         docs = this.processDocs(apiResponse, docs, pagination);
 
         if (docs.length) {
-          //update model with pagination info
-          //has to happen right before collection changes
-          this.model.set(pagination, {silent : true});
+          this.hiddenCollection.add(docs, {merge: true});
+          this.model.set(pagination);
 
-          //just using add because the collection was emptied
-          //when a new request was made
-          this.collection.add(docs);
+          //if (pagination.showMore) {
+          //  this.hiddenCollection.showMore(pagination.showMore);
+          //}
+          this.hiddenCollection.showRange(pagination.start, pagination.start + pagination.perPage);
+          this.view.collection.reset(this.hiddenCollection.getVisibleModels());
 
-          this.collection.showMore(pagination.perPage);
-        }
-        else {
-          //nothing was found, show empty view
-          this.collection.reset();
         }
 
         // XXX:rca - hack, to be solved later
@@ -139,7 +139,7 @@ define([
           {numFound: apiResponse.get("response.numFound"), widget: this});
       },
 
-      getPaginationInfo: function(apiResponse) {
+      getPaginationInfo: function(apiResponse, docs) {
         var q = apiResponse.getApiQuery();
         var toSet = {
           "numFound":  apiResponse.get("response.numFound"),
@@ -147,147 +147,108 @@ define([
         };
 
         //checking to see if we need to reset start or rows values
-        var rows =  q.get("rows") || this.model.get('perPage');
+        var perPage =  q.get("rows") || this.model.get('perPage');
         var start = q.get("start") || this.model.get('start');
 
-        if (rows){
-          rows = _.isArray(rows) ? rows[0] : rows;
-          toSet.perPage = rows;
+        if (perPage){
+          perPage = _.isArray(perPage) ? perPage[0] : perPage;
+          toSet.perPage = perPage;
         }
 
-        if (_.isNumber(start)){
+        if (_.isNumber(start) || _.isArray(start)){
           start = _.isArray(start) ? start[0] : start;
-          toSet.page = PaginationMixin.getPageVal(start, rows);
+          toSet.page = PaginationMixin.getPageVal(start, perPage);
+        }
+        else {
+          toSet.page = 0;
         }
         toSet.start = start;
+
+        var numVisible = this.hiddenCollection.getNumVisible();
+        var showMore = 0;
+        if (numVisible == 0) {
+          showMore = perPage;
+        } else if(numVisible % perPage !== 0) {
+          showMore = numVisible % perPage;
+        }
+        toSet.showMore = showMore;
+
+        // create pagination navigation links
+        var pageNums = PaginationMixin.generatePageNums(toSet.page, 3);
+        pageNums = PaginationMixin.ensurePagePossible(pageNums, toSet.perPage, toSet.numFound);
+
+        var pageData = {};
+        //only render pagination controls if there are more pages
+        if (pageNums.length > 1) {
+          //now, finally, generate links for each page number
+          var pageData = _.map(pageNums, function (n) {
+            var baseQ = q.clone();
+            var s = PaginationMixin.getStartVal(n.p, perPage);
+            baseQ.set("start", s);
+            baseQ.set("rows", perPage);
+            n.start = s;
+            n.perPage = perPage;
+            n.link = baseQ.url();
+            return n;
+          }, this);
+        }
+        toSet.pageData = pageData;
+
+        //should we show a "back to first page" button?
+        toSet.showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
+
         return toSet;
       },
 
       processDocs: function(apiResponse, docs, paginationInfo) {
-        return PaginationMixin.addPaginationToDocs(docs, apiResponse.get("response.start"));
+        return PaginationMixin.addPaginationToDocs(docs, apiResponse.get("responseHeader.params.start"));
       },
 
 
-      resetWidget : function(){
-
-        //this will trigger paginationModel to reset itself
-        var defaults =  _.result(this.paginationModel, 'defaults')
-        //reset pagination model, but prevent the view from immediately re-rendering
-        //by passing silent
-        this.paginationModel.set(defaults, {silent : true});
-
-        //this will hopefully be overridden by the pagination information
-        //gathered in processResponse, but just to be safe I'm setting it here too.
-
-        //also resetting the main collection and the visible collection
-
-        this.collection.reset(null, {silent : true});
-
-        //prevent rendering of empty view
-        this.visibleCollection.reset(null, {silent: true});
-
-      },
-
-      resetBibcode : function(bibcode){
-        this._bibcode = bibcode;
-      },
-
-      /*
-       -a way to get data on command on a per-bibcode-basis
-       -used by the page managers
-       -checks first to see if bibcode is the same as the current bibcode, in which case nothing happens
-       -it returns a promise which is resolved when the data
-       is available
-       -this function has to be overridden for some less straightforward
-       solr queries, such as "similar/more like this"
-       */
-      loadBibcodeData: function (bibcode) {
-
-        if (bibcode === this._bibcode){
-          this.deferredObject =  $.Deferred();
-          this.deferredObject.resolve(this.paginationModel.get("numFound"));
-          return this.deferredObject.promise();
-        }
-
-        //numFound needs to equal undefined as a signal to other functions that the request cycle has restarted
-        //need to know whether to add or reset the collection (the absence of numFound means it is a new
-        //query that needs to be reset)
-        this.resetWidget();
-        this.resetBibcode(bibcode);
-
-        if ((!this.solrOperator && !this.solrField) || (this.solrOperator && this.solrField)){
-          throw new Error("Can't call loadBibcodeData without either a solrOperator or a solrField, and can't have both!")
-        }
-
-        var searchTerm = this.solrOperator? this.solrOperator + "(bibcode:" + bibcode +")" : this.solrField + ":" + bibcode
-
-        this.deferredObject =  $.Deferred();
-
-        var q = this.composeQuery(this.defaultQueryArguments, new ApiQuery());
-
-        q.set("q", searchTerm);
-
-        if (this.sortOrder){
-          q.set("sort", this.sortOrder)
-        }
-
-        var req = this.composeRequest(q);
-        if (req) {
-          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-        }
-        return this.deferredObject.promise();
-      },
-
-      //will be requested in composeRequest
-      defaultQueryArguments: function(){
-        return {
-          fl: 'title,abstract,bibcode,author,keyword,citation_count,pub,aff,volume,year',
-          rows : 25,
-          start : 0
-        }
+      defaultQueryArguments: {
+        fl: 'id',
+        rows : 10,
+        start : 0
       },
 
 
-      setPaginationRequestPending : function(){
-        this._paginationRequestPending = true;
-      },
-
-      resetPaginationRequest : function(){
-        this._paginationRequestPending = false;
-      },
-
-      isPaginationPending : function(){
-        return this._paginationRequestPending;
-      },
 
       onAllInternalEvents: function(ev, arg1, arg2) {
         if (ev === "pagination:change"){
-          this.resetPaginationRequest()
+          console.log('need to recompute', arg1);
         }
-        else if (ev === "dataRequest") {
-          if (this.isPaginationPending()){
-            return
-          }
-          var start = arg1;
-          var rows = arg2;
-          var q = this.getCurrentQuery().clone();
-          q.unlock();
-          q = this.composeQuery(this.defaultQueryArguments, q);
-
-          q.set("start", start);
-          q.set("rows", rows)
-
-          var req = this.composeRequest(q);
-          if (req) {
-            this.setPaginationRequestPending();
-            this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-          }
-          if (this.mainResults){
-            //letting other interested widgets know that more info was fetched
-            //i.e. there was a pagination event
-            this.pubsub.publish(this.pubsub.CUSTOM_EVENT, {event: "pagination", data: {start: start, rows: rows}});
+        else if (ev === "pagination:select") {
+          console.log('need to request data', arg1);
+          var pageData = _.findWhere(this.model.attributes.pageData, {p: arg1});
+          if (pageData) {
+            var start = pageData.start;
+            var perPage = pageData.perPage;
+            this.hiddenCollection.showRange(start, start+perPage);
           }
         }
+        else if (ev === 'show:missing') {
+          console.log('we have to retrieve new data');
+          // TODO: show spinning wheel?? (we could do it from the template)
+          _.each(arg1, function(gap) {
+            var q = this.getCurrentQuery().clone();
+            q.set('start', gap.start);
+            q.set('rows', this.model.get('perPage'));
+            BaseWidget.prototype.dispatchRequest.call(this, q);
+          }, this);
+
+        }
+      },
+
+      resetView: function() {
+        //var $el = this.view.$el;
+        //this.view.$itemViewContainer.empty();
+        //this.view.closeChildren();
+
+        //this.view.close();
+        //this.view = new this.view.constructor({hiddenCollection: this.options.collection, model: this.options.model});
+        //this.view.$el = $el;
+        //this.view.render();
+        //this.options.view = this.view;
       }
     });
 

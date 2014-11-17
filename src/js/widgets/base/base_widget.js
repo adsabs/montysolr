@@ -197,7 +197,8 @@ define(['backbone', 'marionette',
 
       if (queryParams) {
         _.each(queryParams, function (v, k) {
-          query.set(k, v)
+          if (!query.has(k))
+            query.set(k, v)
         });
       }
       return query;

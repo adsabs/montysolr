@@ -94,8 +94,15 @@ function(
       if (attrs.resultsIndex === undefined) {
         attrs.resultsIndex = this._incrementLastIndex();
       }
+      if (attrs.title || attrs.bibcode || attrs.identifier) {
+        attrs.emptyPlaceholder = false;
+      }
 
       return Backbone.Collection.prototype._prepareModel.call(this, attrs, options);
+    },
+
+    getVisibleModels: function() {
+      return _.filter(this.models, function(x) {return x.attributes.visible});
     },
 
     updateIndexes: function(start, end) {
@@ -133,6 +140,13 @@ function(
           model.set('visible', false);
         }
       });
+
+      if (visible !== end-1-start) {
+        _.each(_.range((lastIdx || start+gaps.length), end-1), function(c) {
+          if (!this.get(c))
+            gaps.push(c);
+        }, this);
+      }
       if (gaps.length) {
         // we have discoverd all gaps, but we want to report only those that span the start..end range
         for (var i=0; i<gaps.length; i++) {
