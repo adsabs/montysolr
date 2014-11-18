@@ -89,8 +89,9 @@ Year, Citation and Reference Graphs
 }
 
 .s-slider {
-  width: 106%;
   top: -25px;
+  width: 90%;
+  margin: auto;
 }
 
 .line {
@@ -126,6 +127,9 @@ Year, Citation and Reference Graphs
   height: 100%;
   min-height: 280px;
   max-width: 300px;
+  display: block;
+  margin:auto;
+  margin-bottom: 35px;
 }
 
 #citation-graph .chart {
@@ -133,7 +137,7 @@ Year, Citation and Reference Graphs
 }
 
 .axis text {
-  font: 11px sans-serif;
+  font: 12px sans-serif;
 }
 
 .axis path, .axis line {
@@ -142,17 +146,17 @@ Year, Citation and Reference Graphs
   shape-rendering: crispEdges;
 }
 
+.s-label {
+  font: 14px sans-serif;
+  text-anchor: middle;
+}
+
 .show-slider-data-first, .show-slider-data-second {
   width: 35%;
 }
 
 .ui-slider {
   margin-bottom: 5px !important;
-}
-
-.slider-data {
-  padding-top: 10px;
-
 }
 
 .logic-container label {
@@ -187,4 +191,8 @@ Year, Citation and Reference Graphs
     margin-top: 10px;
   }
 
+}
+
+.tab-content .s-widget-body {
+  padding-left: 4%;
 }

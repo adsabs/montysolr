@@ -1,8 +1,11 @@
 define(['./base_graph',
-    'hbs!./templates/year-graph-legend'
+    'hbs!./templates/year-graph-legend',
+    'marionette'
   ],
-  function(BaseGraphView,
-           legendTemplate
+  function(
+    BaseGraphView,
+    legendTemplate,
+    Marionette
     ){
 
 
@@ -94,6 +97,20 @@ define(['./base_graph',
          "axis"  : true,
          "y-axis": true
        }).call(yAxis);
+
+
+       this.innerChart.append("text")
+         .attr("class", "s-label")
+         .attr("x", this.width/2 - 20)
+         .attr("y", 228)
+         .text(Marionette.getOption(this, "xAxisTitle"));
+
+       this.innerChart.append("text")
+         .attr("class", "s-label")
+         .attr("y", -40)
+         .attr("x", -this.height/2)
+         .attr("transform", "rotate(-90)")
+         .text(Marionette.getOption(this, "yAxisTitle"));
 
 
      },
