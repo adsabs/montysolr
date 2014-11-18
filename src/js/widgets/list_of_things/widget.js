@@ -21,7 +21,6 @@ define([
     'js/widgets/base/base_widget',
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
-    'js/mixins/link_generator_mixin',
     'hbs!./templates/pagination-template',
     'js/mixins/add_stable_index_to_collection',
     './model',
@@ -35,7 +34,6 @@ define([
     BaseWidget,
     ItemTemplate,
     ResultsContainerTemplate,
-    LinkGenerator,
     PaginationTemplate,
     PaginationMixin,
     PaginatedCollection,
@@ -113,11 +111,7 @@ define([
 
         var q = apiResponse.getApiQuery();
 
-        var docs = apiResponse.get("response.docs");
-        docs = _.map(docs, function(d) {
-          d.identifier = d.bibcode;
-          return d;
-        });
+        var docs = this.extractDocs(apiResponse);
 
         var pagination = this.getPaginationInfo(apiResponse, docs);
         docs = this.processDocs(apiResponse, docs, pagination);
@@ -137,6 +131,15 @@ define([
         // XXX:rca - hack, to be solved later
         this.trigger('page-manager-event', 'widget-ready',
           {numFound: apiResponse.get("response.numFound"), widget: this});
+      },
+
+      extractDocs: function(apiResponse) {
+        var docs = apiResponse.get("response.docs");
+        docs = _.map(docs, function(d) {
+          d.identifier = d.bibcode;
+          return d;
+        });
+        return docs;
       },
 
       getPaginationInfo: function(apiResponse, docs) {
@@ -201,7 +204,9 @@ define([
       },
 
       processDocs: function(apiResponse, docs, paginationInfo) {
-        return PaginationMixin.addPaginationToDocs(docs, apiResponse.get("responseHeader.params.start"));
+        var params = apiResponse.get("responseHeader.params");
+        var start = params.start || 0;
+        return PaginationMixin.addPaginationToDocs(docs, start);
       },
 
 
