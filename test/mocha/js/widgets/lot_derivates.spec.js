@@ -4,14 +4,19 @@ define([
   'js/components/api_query',
   './test_json/test1',
   './test_json/test2',
-  'js/wraps/citations'
+  'js/wraps/citations',
+  'js/wraps/coreads',
+  'js/wraps/references'
+
 ], function(
   $,
   MinPubSub,
   ApiQuery,
   test1,
   test2,
-  CitationWidget
+  CitationWidget,
+  CoreadsWidget,
+  ReferencesWidget
   ){
 
   describe("Various show-detail Widgets (Based on ListOfThings)", function(){
@@ -41,8 +46,29 @@ define([
 
 
     it("Show citations", function(){
-
       var widget = new CitationWidget();
+      widget.activate(minsub.beehive.getHardenedInstance());
+
+      var $w = widget.render().$el;
+      //$('#test').append($w);
+
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
+      expect($w.find("label").length).to.equal(20);
+    });
+
+    it("Show references", function(){
+      var widget = new ReferencesWidget();
+      widget.activate(minsub.beehive.getHardenedInstance());
+
+      var $w = widget.render().$el;
+      //$('#test').append($w);
+
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
+      expect($w.find("label").length).to.equal(20);
+    });
+
+    it("Show coreads", function(){
+      var widget = new CoreadsWidget();
       widget.activate(minsub.beehive.getHardenedInstance());
 
       var $w = widget.render().$el;
