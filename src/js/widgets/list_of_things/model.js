@@ -61,8 +61,8 @@ function(
       var numFound = this.paginationModel.get("numFound")
       //used as a metric to see if we need to fetch new data or if data at these indexes
       //already exist
-      this.currentStartIndex = this.getStartVal(pageNum, perPage);
-      this.currentEndIndex = this.getEndVal(pageNum, perPage, numFound);
+      this.currentStartIndex = this.getPageStart(pageNum, perPage);
+      this.currentEndIndex = this.getPageEnd(pageNum, perPage, numFound);
 
     },
 

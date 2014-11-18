@@ -18,6 +18,7 @@ define([
         if (this.queryOperator) {
           q.set('q', this.queryOperator + '(' + q.get('q').join(' ') + ')');
         }
+        return q;
       },
 
       extractValueFromQuery: function(apiQuery, key, indexName) {

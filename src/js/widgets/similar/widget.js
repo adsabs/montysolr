@@ -88,7 +88,7 @@ define([
           //now, finally, generate links for each page number
           var pageData = _.map(pageNums, function (n) {
             var baseQ = q.clone();
-            var s = PaginationMixin.getStartVal(n.p, perPage);
+            var s = PaginationMixin.getPageStart(n.p, perPage);
             baseQ.set("start", s);
             baseQ.set("rows", perPage);
             n.start = s;

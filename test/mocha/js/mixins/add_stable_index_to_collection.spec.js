@@ -48,44 +48,44 @@ define([
     })
 
 
-    it("should have a getStartVal method that returns a starting index given a page number and number of records per page", function(){
+    it("should have a getPageStart method that returns a starting index given a page number and number of records per page", function(){
 
-        expect(PaginationMixin.getStartVal).to.be.instanceof(Function);
+        expect(PaginationMixin.getPageStart).to.be.instanceof(Function);
 
-        expect(PaginationMixin.getStartVal(3, 10)).to.eql(20);
+        expect(PaginationMixin.getPageStart(3, 10)).to.eql(20);
 
-        expect(PaginationMixin.getStartVal(1, 5)).to.eql(0);
+        expect(PaginationMixin.getPageStart(1, 5)).to.eql(0);
 
-        expect(PaginationMixin.getStartVal(1, 13)).to.eql(0);
+        expect(PaginationMixin.getPageStart(1, 13)).to.eql(0);
 
-        expect(PaginationMixin.getStartVal(5, 25)).to.eql(100);
+        expect(PaginationMixin.getPageStart(5, 25)).to.eql(100);
 
 
     });
 
-    it("should have a getEndVal method that returns an ending index given a page number, number of records per page, and total number of records found", function(){
+    it("should have a getPageEnd method that returns an ending index given a page number, number of records per page, and total number of records found", function(){
 
-      expect(PaginationMixin.getEndVal).to.be.instanceof(Function);
+      expect(PaginationMixin.getPageEnd).to.be.instanceof(Function);
 
       //ignoring numFound
 
-      expect(PaginationMixin.getEndVal(3, 10, 1000)).to.eql(29);
+      expect(PaginationMixin.getPageEnd(3, 10, 1000)).to.eql(29);
 
-      expect(PaginationMixin.getEndVal(1, 5, 1000)).to.eql(4);
+      expect(PaginationMixin.getPageEnd(1, 5, 1000)).to.eql(4);
 
-      expect(PaginationMixin.getEndVal(1, 13, 1000)).to.eql(12);
+      expect(PaginationMixin.getPageEnd(1, 13, 1000)).to.eql(12);
 
-      expect(PaginationMixin.getEndVal(5, 25, 1000)).to.eql(124);
+      expect(PaginationMixin.getPageEnd(5, 25, 1000)).to.eql(124);
 
       //testing numFound limitation
 
-      expect(PaginationMixin.getEndVal(3, 10, 25)).to.eql(24);
+      expect(PaginationMixin.getPageEnd(3, 10, 25)).to.eql(24);
 
-      expect(PaginationMixin.getEndVal(1, 5, 3)).to.eql(2);
+      expect(PaginationMixin.getPageEnd(1, 5, 3)).to.eql(2);
 
-      expect(PaginationMixin.getEndVal(1, 13, 12)).to.eql(11);
+      expect(PaginationMixin.getPageEnd(1, 13, 12)).to.eql(11);
 
-      expect(PaginationMixin.getEndVal(5, 25, 120)).to.eql(119);
+      expect(PaginationMixin.getPageEnd(5, 25, 120)).to.eql(119);
 
     });
 

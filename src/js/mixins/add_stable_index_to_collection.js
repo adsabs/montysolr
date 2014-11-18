@@ -9,26 +9,34 @@ define(['underscore'], function (_) {
 
   var WidgetPaginator = {
 
-    //returns correctly zero-indexed start val
-    getStartVal: function (page, rows) {
-      return (rows * page) - rows;
+    /**
+     * returns zero-indexed start val (we expect the page
+     * to be zero-indexed!)
+     */
+
+    getPageStart: function (page, perPage) {
+      return page*perPage;
     },
 
-    //returns final index needed for constructing a page (inclusive)
-    getEndVal : function(page,rows, numFound){
-      var endVal =  this.getStartVal(page, rows) + rows - 1;
-      var finalIndex = numFound - 1;
-      return (finalIndex <= endVal) ? finalIndex : endVal;
+    /**
+     * returns final row value for constructing a page (inclusive)
+     */
+    getPageEnd : function(page, perPage, numFound){
+      var endVal =  this.getPageStart(page, perPage) + perPage;
+      return (endVal > numFound) ? numFound : endVal;
     },
 
 
-    //returns current page number
-    getPageVal: function (start, rows) {
-      if (start  % rows !== 0){
-        console.error("start and rows values will not yield a full page! start=" + start + ' rows=' + rows);
-      }
-      //also could do (start + rows) / rows
-      return parseInt(start/rows) + 1;
+    /**
+     * Returns the page number (on which the position falls)
+     * It is zero-based count
+     *
+     * @param position
+     * @param perPage
+     * @returns {number}
+     */
+    getPageVal: function (position, perPage) {
+      return parseInt(position/perPage);
     },
 
     /**
@@ -48,37 +56,27 @@ define(['underscore'], function (_) {
     },
 
     /**
-     *  create list of up to X page numbers to show
+     *  create list of up to X page numbers to show;
+     *  it is zero-based count and respects numFound
+     *  boundary
      *
      * @param pageStartingPoint
      * @returns {*}
      */
-    generatePageNums: function (pageStartingPoint, numPagesAround) {
+    generatePageNums: function (pageStartingPoint, numPagesAround, perPage, numFound) {
       numPagesAround = numPagesAround || 3;
-      pageStartingPoint = pageStartingPoint - 1; // internally we count from zero
+
       var pageNums = _.map(_.range(pageStartingPoint-numPagesAround, pageStartingPoint+numPagesAround+1), function (d) {
-        var current = (d === pageStartingPoint) ? true : false;
-        return {p: pageStartingPoint + d + 1, current: current};
+        return {p: pageStartingPoint + d, current: (d === pageStartingPoint) ? true : false};
       });
-      //page number can't be less than 1
+      //page number can't be less than 0
       pageNums = _.filter(pageNums, function (d) {
-        if (d.p > 0) {
-          return true
-        }
-      });
+        if (d.p < 0) return false;
+        if (this.getPageStart(d.p, perPage) >= numFound) return false;
+        return true;
+      }, this);
       return pageNums;
-    },
-
-    //iterate through pageNums, keep them only if they're possible (< numFound)
-    ensurePagePossible: function (pageNums, perPage, numFound) {
-      var endIndex = numFound - 1;
-      return  _.filter(pageNums, function (n) {
-        if (this.getStartVal(n.p, perPage) <= endIndex) {
-          return true;
-        }
-      }, this)
     }
-
   };
 
   return WidgetPaginator

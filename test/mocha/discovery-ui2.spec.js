@@ -20,7 +20,7 @@ var tests = [
     tbase + '/widgets/references_widget.spec.js',
     tbase + '/widgets/results_render_widget.spec.js',
     tbase + '/widgets/coreads_widget.spec.js',
-    tbase + '/widgets/citations_widget.spec.js',
+    tbase + '/widgets/lot_derivates.spec.js',
     tbase + '/widgets/table_of_contents_widget.spec.js',
 
 

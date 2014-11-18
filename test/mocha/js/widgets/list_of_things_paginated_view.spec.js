@@ -170,7 +170,7 @@ define(['marionette',
         widget.activate(minsub.beehive.getHardenedInstance());
 
         var $w = widget.render().$el;
-        $('#test').append($w);
+        //$('#test').append($w);
 
         minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
         expect($w.find("label").length).to.equal(10);
@@ -180,8 +180,6 @@ define(['marionette',
 
         // this should trigger new request
         expect($w.find("label").length).to.equal(10);
-
-
 
         done();
       });

@@ -98,12 +98,12 @@ define([
 
       onStartSearch: function(apiQuery) {
         this.hiddenCollection.reset(null, {silent: true});
-        //this.resetView();
+        this.collection.reset();
       },
 
       onDisplayDocuments: function(apiQuery) {
-        this.view.model.set("currentQuery", apiQuery);
         BaseWidget.prototype.dispatchRequest.call(this, apiQuery);
+        this.view.model.set("currentQuery", apiQuery);
       },
 
       processResponse: function (apiResponse) {
@@ -114,18 +114,20 @@ define([
         var docs = this.extractDocs(apiResponse);
 
         var pagination = this.getPaginationInfo(apiResponse, docs);
+
         docs = this.processDocs(apiResponse, docs, pagination);
 
-        if (docs.length) {
+        if (docs && docs.length) {
           this.hiddenCollection.add(docs, {merge: true});
-          this.model.set(pagination);
 
-          //if (pagination.showMore) {
-          //  this.hiddenCollection.showMore(pagination.showMore);
-          //}
-          this.hiddenCollection.showRange(pagination.start, pagination.start + pagination.perPage);
+          if (pagination.showRange) {
+            // we must update the model before updating collection because the showRange
+            // can automatically start fetching documents
+            this.model.set(pagination);
+            this.hiddenCollection.showRange(pagination.showRange[0], pagination.showRange[1]);
+          }
+
           this.view.collection.reset(this.hiddenCollection.getVisibleModels());
-
         }
 
         // XXX:rca - hack, to be solved later
@@ -144,68 +146,65 @@ define([
 
       getPaginationInfo: function(apiResponse, docs) {
         var q = apiResponse.getApiQuery();
-        var toSet = {
-          "numFound":  apiResponse.get("response.numFound"),
-          "currentQuery":q
-        };
 
-        //checking to see if we need to reset start or rows values
-        var perPage =  q.get("rows") || this.model.get('perPage');
-        var start = q.get("start") || this.model.get('start');
 
-        if (perPage){
-          perPage = _.isArray(perPage) ? perPage[0] : perPage;
-          toSet.perPage = perPage;
+        // this information is important for calcullation of pages
+        var numFound = apiResponse.get("response.numFound");
+        var perPage =  this.model.get('perPage') || q.has("rows") ? q.get('rows')[0] : 10;
+        var start = q.has("start") ? q.get('start')[0] : 0;
+
+        // compute the page number of this request
+        var page = PaginationMixin.getPageVal(start, perPage);
+
+        // compute which documents should be made visible
+        var showRange = [page*perPage, (page+1)*perPage];
+
+
+        // means that we were fetching the missing documents (to fill gaps in the collection)
+        var fillingGaps = q.has('__fetch_missing');
+        if (fillingGaps) {
+          return {
+            start: start,
+            showRange: showRange
+          }
         }
 
-        if (_.isNumber(start) || _.isArray(start)){
-          start = _.isArray(start) ? start[0] : start;
-          toSet.page = PaginationMixin.getPageVal(start, perPage);
-        }
-        else {
-          toSet.page = 0;
-        }
-        toSet.start = start;
-
-        var numVisible = this.hiddenCollection.getNumVisible();
-        var showMore = 0;
-        if (numVisible == 0) {
-          showMore = perPage;
-        } else if(numVisible % perPage !== 0) {
-          showMore = numVisible % perPage;
-        }
-        toSet.showMore = showMore;
-
-        // create pagination navigation links
-        var pageNums = PaginationMixin.generatePageNums(toSet.page, 3);
-        pageNums = PaginationMixin.ensurePagePossible(pageNums, toSet.perPage, toSet.numFound);
-
+        // compute paginations (to be inserted into navigation)
         var pageData = {};
-        //only render pagination controls if there are more pages
-        if (pageNums.length > 1) {
+        var pageNums = PaginationMixin.generatePageNums(page, 3, perPage, numFound);
+        if (pageNums.length > 1) { //only render pagination controls if there are more pages
           //now, finally, generate links for each page number
           var pageData = _.map(pageNums, function (n) {
-            var baseQ = q.clone();
-            var s = PaginationMixin.getStartVal(n.p, perPage);
-            baseQ.set("start", s);
-            baseQ.set("rows", perPage);
-            n.start = s;
+            n.start = PaginationMixin.getPageStart(n.p, perPage);
+            n.end = PaginationMixin.getPageEnd(n.p, perPage);
             n.perPage = perPage;
+
+            var baseQ = q.clone();
+            baseQ.set("start", n.start);
+            baseQ.set("rows", perPage);
             n.link = baseQ.url();
+            n.p = n.p + 1; // make page nums 1-based
             return n;
           }, this);
         }
-        toSet.pageData = pageData;
 
         //should we show a "back to first page" button?
-        toSet.showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
+        var showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
 
-        return toSet;
+        return {
+          numFound: numFound,
+          perPage: perPage,
+          start: start,
+          page: page,
+          showRange: showRange,
+          pageData: pageData,
+          currentQuery: q
+        }
       },
 
       processDocs: function(apiResponse, docs, paginationInfo) {
         var params = apiResponse.get("responseHeader.params");
-        var start = params.start || 0;
+        var start = params.start || (paginationInfo.start || 0);
         return PaginationMixin.addPaginationToDocs(docs, start);
       },
 
@@ -232,13 +231,17 @@ define([
           }
         }
         else if (ev === 'show:missing') {
-          console.log('we have to retrieve new data');
+          console.log('we have to retrieve new data', arg1);
           // TODO: show spinning wheel?? (we could do it from the template)
           _.each(arg1, function(gap) {
-            var q = this.getCurrentQuery().clone();
+            var q = this.model.get('currentQuery').clone();
+            q.set('__fetch_missing', 'true');
             q.set('start', gap.start);
             q.set('rows', this.model.get('perPage'));
-            BaseWidget.prototype.dispatchRequest.call(this, q);
+            var req = this.composeRequest(q);
+            if (req) {
+              this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+            }
           }, this);
 
         }
