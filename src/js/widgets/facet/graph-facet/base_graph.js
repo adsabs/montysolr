@@ -3,16 +3,14 @@ define(['marionette',
     'jquery',
     'jquery-ui',
   'js/widgets/base/item_view',
-    'hbs!./templates/graph',
-    'hbs!./templates/axis-titles-template'
+    'hbs!./templates/graph'
   ],
   function (Marionette,
             d3,
             $,
             $ui,
             BaseItemView,
-            FacetGraphTemplate,
-            axisTitlesTemplate
+            FacetGraphTemplate
 
     ) {
 
@@ -33,9 +31,9 @@ define(['marionette',
       this.bins = 12; //will be around 12, depending on remainders
       this.margin = {
         top   : 0,
-        right : 0,
-        bottom: 35,
-        left  : 40
+        right : 10,
+        bottom: 50,
+        left  : 50
       };
       this.fullWidth = 280;
       this.fullHeight = 200;
@@ -66,27 +64,11 @@ define(['marionette',
       this.$(".graph-legend").html(this.legendTemplate(graphVars));
     },
 
-    insertAxisTitles : function(){
-      //this is getting inserted after the
-
-      var axisVars = {};
-      axisVars.yAxisTitle = this.yAxisTitle;
-      axisVars.xAxisTitle = this.xAxisTitle;
-      axisVars.xAxisClassName = this.xAxisClassName
-      this.$("svg").after(axisTitlesTemplate(axisVars));
-
-    },
-
     events: {
       "click .apply"         : "submitFacet",
       "blur input[type=text]": "triggerGraphChange"
     },
 
-    hideApplyButton : function(){
-
-      this.$(".apply").addClass("hidden")
-
-    },
 
     pulseApplyButton : function(){
 
@@ -116,7 +98,6 @@ define(['marionette',
       else {
         this.insertLegend();
         this.buildGraph();
-        this.insertAxisTitles();
         this.addSliderWindows();
         this.buildSlider();
         if (this.addToOnRender){

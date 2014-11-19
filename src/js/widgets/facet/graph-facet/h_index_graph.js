@@ -2,12 +2,14 @@
 
 define(['./base_graph',
     'hbs!./templates/h-index-graph-legend',
-    'hbs!./templates/h-index-slider-window'],
-
+    'hbs!./templates/h-index-slider-window',
+    'marionette'
+  ],
 
   function(BaseGraphView,
            legendTemplate,
-           sliderWindowTemplate) {
+           sliderWindowTemplate,
+          Marionette) {
 
     var HIndexGraphView = BaseGraphView.extend({
 
@@ -56,9 +58,24 @@ define(['./base_graph',
 
         y = d3.scale.linear().domain([minVal - 1, maxVal + 1]).range([this.height, 0]);
 
-        xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.format("d"));
+        xAxis = d3.svg.axis().scale(x).orient("bottom");
 
-        yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(d3.format("d"));
+        standardFormatter = d3.format("s");
+
+        function isInt(n) {
+          return n % 1 === 0;
+        }
+
+        yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(function(d){
+
+          if (d >= 1 && isInt(d)){
+
+            return standardFormatter(d)
+          }
+          else {
+            return ""
+          }
+        });
 
         chart = d3.select(this.el).select(".chart").attr("width", this.fullWidth).attr("height", this.fullHeight);
 
@@ -118,6 +135,19 @@ define(['./base_graph',
           this.innerChart.append("line").classed({"h-index": true, "h-index-2": true}).attr("x1", x(xLabels[0] - 1)).attr("y1", y(this.hIndex.y)).attr("x2", x(this.hIndex.x)).attr("y2", y(this.hIndex.y));
 
         }
+
+        this.innerChart.append("text")
+          .attr("class", "s-label")
+          .attr("x", this.width/2 - 20)
+          .attr("y", 220)
+          .text(Marionette.getOption(this, "xAxisTitle"));
+
+        this.innerChart.append("text")
+          .attr("class", "s-label")
+          .attr("y", -40)
+          .attr("x", -this.height/2)
+          .attr("transform", "rotate(-90)")
+          .text(Marionette.getOption(this, "yAxisTitle"));
 
       },
 
@@ -201,11 +231,18 @@ define(['./base_graph',
           return "rotate(-65)"
         });
 
+        standardFormatter = d3.format("s");
+
+        function isInt(n) {
+          return n % 1 === 0;
+        }
+
+
         yAxis = d3.svg.axis().scale(y).orient("left");
 
         if (this.currentScale === "log"){
 
-          var numberFormat = d3.format(",f");
+          var numberFormat = d3.format("s");
           function logFormat(d) {
             var x = Math.log(d) / Math.log(10) + 1e-6;
             return Math.abs(x - Math.floor(x)) < .7 ? numberFormat(d) : "";
@@ -215,7 +252,16 @@ define(['./base_graph',
         }
         else {
 
-          yAxis.tickFormat(d3.format("d"));
+          yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(function(d){
+
+            if (d >= 1 && isInt(d)){
+
+              return standardFormatter(d)
+            }
+            else {
+              return ""
+            }
+          });
 
         }
 
