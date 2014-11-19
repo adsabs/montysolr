@@ -32,6 +32,7 @@ var tests = [
     //XXX 24/09/14 tbase + '/widgets/facet_zoomable_graph_view.spec.js',
 
 
+
 ];
 
 

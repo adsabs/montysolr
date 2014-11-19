@@ -27,7 +27,10 @@ var tests = [
   //TBD 24/09/14 tbase + '/widgets/similar_widget.spec.js',
     tbase + '/widgets/tabs_widget.spec.js',
     tbase + '/widgets/wordcloud_widget.spec.js',
-    tbase + '/widgets/year_graph_facet_widget.spec.js'
+    tbase + '/widgets/year_graph_facet_widget.spec.js',
+
+    tbase + '/widgets/network_widget.spec.js'
+
 
 
 ];

@@ -311,7 +311,6 @@ define(["marionette",
           this.renderNewBibcode();
           this.loadWidgetData(bib);
 
-
         }
 
         //these functions must be called

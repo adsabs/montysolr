@@ -14,7 +14,7 @@ define([
 
 
       var links = [
-        {href: '/test', description: 'Author Network', navEvent: 'showAuthorNetwork'}
+        {href: '/test', description: 'Author Network', navEvent: 'show-author-network'}
 
       ];
 
