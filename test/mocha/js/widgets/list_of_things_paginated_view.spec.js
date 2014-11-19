@@ -2,6 +2,7 @@ define(['marionette',
     'backbone',
     'underscore',
     'js/components/api_query',
+    'js/components/api_response',
     './test_json/test1',
     './test_json/test2',
     'js/widgets/list_of_things/paginated_view',
@@ -14,6 +15,7 @@ define(['marionette',
             Backbone,
             _,
             ApiQuery,
+            ApiResponse,
             test1,
             test2,
             PaginatedView,
@@ -23,7 +25,7 @@ define(['marionette',
             MinPubSub
     ) {
 
-    describe("ListOfThings (PaginatedView)", function () {
+    describe("ListOfThings", function () {
 
       it("returns PaginatedView object", function(done) {
         expect(new PaginatedView()).to.be.instanceof(Marionette.CompositeView);
@@ -144,7 +146,6 @@ define(['marionette',
         done();
       });
 
-
       it("the controller reacts to user actions", function(done) {
 
         var counter = 0;
@@ -173,17 +174,79 @@ define(['marionette',
         //$('#test').append($w);
 
         minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
-        expect($w.find("label").length).to.equal(10);
 
-        // click on next page
+        expect($w.find("label").length).to.equal(20);
+
+        // click on next page // this should trigger new request
         $w.find('a[data-paginate=2]').click();
-
-        // this should trigger new request
-        expect($w.find("label").length).to.equal(10);
+        expect($w.find("label").length).to.equal(20);
 
         done();
       });
 
+      it("has a pagination view and model that handle displaying and transmitting pagination state and changes", function(){
+
+        var widget = new ListOfThings({pagination: {perPage: 5}});
+        //widget.activate(minsub.beehive.getHardenedInstance());
+
+        var data = JSON.parse(JSON.stringify(test1));
+        data.response.numFound = 100;
+
+        _.each(_.range(5), function(n) {
+          data.response.start = n*10;
+          var res = new ApiResponse(data);
+          res.setApiQuery(new ApiQuery({q: 'foo:bar'}));
+          widget.processResponse(res);
+        });
+
+        var $w = widget.render().$el;
+        //$('#test').append($w);
+
+        widget.updatePagination({numFound: 100, page : 1, perPage : 5});
+        console.log(widget.model.attributes);
+        expect($w.find(".pagination li").length).to.eql(5);
+        expect($w.find(".pagination li").filter(function(n){return $(n).text().trim() === "«"}).length).to.eql(0);
+        expect($w.find(".pagination li:first").text().trim()).to.eql("1");
+        expect($w.find(".pagination li:last").text().trim()).to.eql("5");
+
+        widget.updatePagination({numFound: 100, page : 4, perPage : 5});
+        expect($w.find(".pagination li:first").text().trim()).to.eql("«");
+        expect($w.find(".pagination li:last").text().trim()).to.eql("7");
+        expect($w.find(".pagination li").length).to.eql(6);
+
+        widget.updatePagination(({numFound: 15, page : 1, perPage : 5}));
+        expect($w.find(".pagination li").length).to.eql(3);
+        expect($w.find(".pagination li:first").text().trim()).to.eql("1");
+        expect($w.find(".pagination li:last").text().trim()).to.eql("3");
+      });
+
+      it("has a mechanism to prevent infinite requests", function(done){
+
+        var minsub = new (MinPubSub.extend({
+          request: function(apiRequest) {
+            var t = JSON.parse(JSON.stringify(test1));
+            t.response.start  = 0;
+            return t;
+          }
+        }))({verbose: false});
+        var widget = new ListOfThings();
+        
+        widget.activate(minsub.beehive.getHardenedInstance());
+        var publishStub = sinon.stub(widget.pubsub, "publish");
+        
+        /* now I will set pagination, return the wrong records, and check to make
+         sure data was only requested once despite the fact that the request wasn't
+         properly fulfilled
+         */
+
+
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
+        expect(publishStub.callCount).to.eql(1);
+
+        //XXX:TODO finish
+
+        done();
+      });
     })
 
   });

@@ -154,7 +154,7 @@ define([
         var page = PaginationMixin.getPageVal(start, perPage);
 
         // compute which documents should be made visible
-        var showRange = [page*perPage, (page+1)*perPage];
+        var showRange = [page*perPage, ((page+1)*perPage)-1];
 
 
         // means that we were fetching the missing documents (to fill gaps in the collection)
@@ -167,26 +167,12 @@ define([
         }
 
         // compute paginations (to be inserted into navigation)
-        var pageData = {};
-        var pageNums = PaginationMixin.generatePageNums(page, 3, perPage, numFound);
-        if (pageNums.length > 1) { //only render pagination controls if there are more pages
-          //now, finally, generate links for each page number
-          var pageData = _.map(pageNums, function (n) {
-            n.start = PaginationMixin.getPageStart(n.p, perPage);
-            n.end = PaginationMixin.getPageEnd(n.p, perPage);
-            n.perPage = perPage;
+        var numAround = this.model.get('numAround') || 2;
+        var pageData = this._getPageDataDatastruct(q, page, numAround, perPage, numFound);
 
-            var baseQ = q.clone();
-            baseQ.set("start", n.start);
-            baseQ.set("rows", perPage);
-            n.link = baseQ.url();
-            n.p = n.p + 1; // make page nums 1-based
-            return n;
-          }, this);
-        }
 
         //should we show a "back to first page" button?
-        var showFirst = (_.pluck(pageNums, "p").indexOf(1) !== -1) ? false : true;
+        var showFirst = (_.pluck(pageData, "p").indexOf(1) !== -1) ? false : true;
 
         return {
           numFound: numFound,
@@ -199,8 +185,29 @@ define([
         }
       },
 
+      _getPageDataDatastruct: function(q, page, numAround, perPage, numFound) {
+        var pageData = {};
+        var pageNums = PaginationMixin.generatePageNums(page, numAround, perPage, numFound);
+        if (pageNums.length > 1) { //only render pagination controls if there are more pages
+          //now, finally, generate links for each page number
+          var pageData = _.map(pageNums, function (n) {
+            n.start = PaginationMixin.getPageStart(n.p, perPage);
+            n.end = PaginationMixin.getPageEnd(n.p, perPage);
+            n.perPage = perPage;
+
+            var baseQ = q.clone();
+            baseQ.set("start", n.start+1); // solr is 1-based
+            baseQ.set("rows", perPage);
+            n.link = baseQ.url();
+            n.p = n.p + 1; // make page nums 1-based
+            return n;
+          }, this);
+        }
+        return pageData;
+      },
+
       processDocs: function(apiResponse, docs, paginationInfo) {
-        var params = apiResponse.get("responseHeader.params");
+        var params = apiResponse.get("response");
         var start = params.start || (paginationInfo.start || 0);
         return PaginationMixin.addPaginationToDocs(docs, start);
       },
@@ -213,10 +220,42 @@ define([
       },
 
 
+      updatePagination: function(options) {
+        var perPage = options.perPage || this.model.get('perPage');
+        var page = options.page || this.model.get('start');
+        var numFound = options.numFound || this.model.get('numFound');
+        var numAround = options.numAround || this.model.get('numAround') || 2;
+        var currentQuery = options.currentQuery || this.model.get('currentQuery');
+
+        // click to go to another 'page' will skip this
+        if (!options.page && this.collection.length) {
+          var resIdx = this.collection.models[0].get('resultsIndex');
+          page = PaginationMixin.getPageVal(resIdx, perPage);
+        }
+
+        var pageData = this._getPageDataDatastruct(currentQuery, page, numAround, perPage, numFound);
+        var showRange = [page*perPage, (page*perPage)+perPage-1];
+        var showFirst = (_.pluck(pageData, "p").indexOf(1) !== -1) ? false : true;
+
+        this.model.set({
+          perPage: perPage,
+          page: page,
+          numFound: numFound,
+          numAround: numAround,
+          pageData: pageData,
+          currentQuery: currentQuery,
+          showRange: showRange,
+          showFirst: showFirst
+        });
+
+
+        this.hiddenCollection.showRange(showRange[0], showRange[1]);
+        this.collection.reset(this.hiddenCollection.getVisibleModels());
+      },
 
       onAllInternalEvents: function(ev, arg1, arg2) {
         if (ev === "pagination:change"){
-          console.log('need to recompute', arg1);
+          this.updatePagination({page: arg1});
         }
         else if (ev === "pagination:select") {
           console.log('need to request data', arg1);
@@ -225,6 +264,9 @@ define([
             var start = pageData.start;
             var perPage = pageData.perPage;
             this.hiddenCollection.showRange(start, start+perPage);
+          }
+          else {
+            this.updatePagination({page: arg1});
           }
         }
         else if (ev === 'show:missing') {
@@ -244,7 +286,7 @@ define([
             q.set('rows', perPage);
             var req = this.composeRequest(q);
 
-            console.log('we have to retrieve new data', arg1);
+            //console.log('we have to retrieve new data', arg1);
 
             if (req) {
               this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
