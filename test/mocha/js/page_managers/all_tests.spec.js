@@ -38,7 +38,7 @@ define([
 
     ) {
 
-  describe("Three column PageManager", function () {
+  describe("PageManager (all_tests.spec.js)", function () {
 
     var config = null;
     beforeEach(function() {
@@ -63,7 +63,7 @@ define([
 
           TOCWidget: 'js/page_managers/toc_widget',
           ShowAbstract: 'js/widgets/abstract/widget',
-          ShowReferences: 'js/widgets/references/widget',
+          ShowReferences: 'js/wraps/references',
 
           PageManager: 'js/page_managers/controller'
         }

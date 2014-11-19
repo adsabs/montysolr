@@ -10,23 +10,18 @@ define(['underscore',
 
 
   var ResourcesModel = Backbone.Model.extend({
-
   });
 
 
   var ResourcesView = Marionette.ItemView.extend({
-
     template : ResourcesTemplate,
-
     modelEvents: {
       "change": "render"
     }
-
-  })
+  });
 
 
   var ResourcesWidget = BaseWidget.extend({
-
     initialize : function(options){
       options = options || {};
       this.model = new ResourcesModel();
@@ -44,8 +39,7 @@ define(['underscore',
     },
 
     onNewQuery: function() {
-      this.model.reset();
-      this.collection.reset();
+      this.model.clear();
     },
     onDisplayDocuments: function(apiQuery) {
       var bibcode = apiQuery.get('q');
@@ -61,20 +55,15 @@ define(['underscore',
     loadBibcodeData : function(bibcode){
 
       if (bibcode === this._bibcode){
-
         this.deferredObject =  $.Deferred();
         this.deferredObject.resolve(this.model);
         return this.deferredObject.promise();
-
       }
       else {
         this._bibcode = bibcode;
-
         var searchTerm = "bibcode:"+this._bibcode;
-
         this.deferredObject =  $.Deferred();
         //abstractPageFields comes from the LinkGenerator Mixin
-
         this.dispatchRequest(new ApiQuery({'q': searchTerm, fl : "links_data,ids_data,[citations],property,bibcode"}));
         return this.deferredObject.promise();
       }
@@ -84,7 +73,6 @@ define(['underscore',
     processResponse : function(apiResponse){
 
       var data = apiResponse.get("response.docs[0]");
-
       //from link mixin
       data = this.parseResourcesData(data);
 
@@ -94,14 +82,10 @@ define(['underscore',
       if (this.deferredObject){
         this.deferredObject.resolve(this.model)
       }
-
     }
 
-  })
+  });
 
   _.extend(ResourcesWidget.prototype, LinkGenerator);
-
-
   return ResourcesWidget
-
-})
+});

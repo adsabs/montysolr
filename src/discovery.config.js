@@ -59,10 +59,10 @@ require.config({
         GraphTabs : 'js/wraps/graph_tabs',
 
         ShowAbstract: 'js/widgets/abstract/widget',
-        ShowReferences: 'js/widgets/references/widget',
-        ShowCitations : 'js/widgets/citations/widget',
-        ShowCoreads : 'js/widgets/coreads/widget',
-        ShowTableOfContents : 'js/widgets/table_of_contents/widget',
+        ShowReferences: 'js/wraps/references',
+        ShowCitations : 'js/wraps/citations',
+        ShowCoreads : 'js/wraps/coreads',
+        ShowTableOfContents : 'js/wraps/table_of_contents',
         ShowSimilar : 'js/widgets/similar/widget',
         ShowResources : 'js/widgets/resources/widget',
 
