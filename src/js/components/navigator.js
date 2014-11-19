@@ -111,10 +111,10 @@ define(['underscore',
         else if (arguments.length == 2) {
           var endpoint = arguments[0];
           if (_.isFunction(arguments[1])) {
-            this.catalog.add(new Transition(endpoint, {execute: arguments[1]}));
+            return this.catalog.add(new Transition(endpoint, {execute: arguments[1]}));
           }
           else if (_.isObject(arguments[1]) && arguments[1].execute) {
-            this.catalog.add(new Transition(endpoint, arguments[1]));
+            return this.catalog.add(new Transition(endpoint, arguments[1]));
           }
           else {
             throw new Exception('Himmm, I dont know how to create a catalog rule with this input:', arguments);

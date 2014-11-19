@@ -16,6 +16,7 @@ define(['underscore',
           throw new Error("You can add only Transition objects");
         }
         this._catalog[transition.endpoint] = transition;
+        return transition;
       },
       get: function(name) {
         return this._catalog[name];

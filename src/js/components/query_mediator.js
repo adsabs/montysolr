@@ -91,6 +91,10 @@ define(['underscore',
       // cement the fact the query MUST NOT be changed (we want to receive a modified version)
       var q = apiQuery.clone();
 
+      // since widgets are dirty bastards, we will remove the fl parameter (to avoid cross-
+      // contamination)
+      q.unset('fl');
+
       q.lock();
       ps.publish(this.pubSubKey, ps.INVITING_REQUEST, q);
     },

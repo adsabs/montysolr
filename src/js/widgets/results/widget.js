@@ -42,7 +42,7 @@ define([
         this.pubsub = beehive.Services.get('PubSub');
 
         _.bindAll(this, 'onStartSearch', 'onDisplayDocuments', 'processResponse');
-        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onDisplayDocuments);
+        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 

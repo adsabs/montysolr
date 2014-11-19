@@ -6,8 +6,13 @@
 define([
     'jquery',
     'backbone',
+    'underscore',
     'js/components/navigator'],
-  function ($, Backbone, Navigator) {
+  function (
+    $,
+    Backbone,
+    _,
+    Navigator) {
 
     "use strict";
 
@@ -27,27 +32,32 @@ define([
         var self = this;
         pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, function() {self.navigate('results-page')});
 
-        this.set('index-page', function() {app.getObject('MasterPageManager').show('LandingPage')});
-        this.set('results-page', function() { app.getObject('MasterPageManager').show('SearchPage',
-          ['Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet', 'KeywordFacet',
-            'BibstemFacet', 'BibgroupFacet', 'DataFacet', 'VizierFacet', 'GrantsFacet', 'GraphTabs',
-            'QueryDebugInfo', 'VisualizationDropdown', 'SearchWidget']);
-          app.getWidget("SearchPage").view.returnColWidthsToDefault();
+        var searchPageAlwaysVisible = [
+          'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
+          'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
+          'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
+          'VisualizationDropdown', 'SearchWidget'];
 
+        this.set('index-page', function() {
+          app.getObject('MasterPageManager').show('LandingPage');
+          this.route = '#search/' + app.getWidget('SearchWidget').getCurrentQuery().url();
         });
-        this.set('show-author-network', function() { app.getObject('MasterPageManager').show('SearchPage',
-          ['AuthorNetwork','QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet', 'KeywordFacet',
-            'BibstemFacet', 'BibgroupFacet', 'DataFacet', 'VizierFacet', 'GrantsFacet', 'GraphTabs',
-            'QueryDebugInfo', 'VisualizationDropdown', 'SearchWidget']);
-          app.getWidget("SearchPage").view.makeCenterFullWidth();
+        this.set('results-page', function() {
+          app.getObject('MasterPageManager').show('SearchPage',
+          searchPageAlwaysVisible);
+          this.route = '#search/' + app.getWidget('SearchWidget').getCurrentQuery().url();
+        });
+        this.set('show-author-network', function() {
+          app.getObject('MasterPageManager').show('SearchPage',
+            ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
         });
         this.set("visualization-closed", this.get("results-page"));
         this.set('abstract-page', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources']);
+          //this.route = '#abs/' + app.getWidget('ShowAbstract').getCurrentQuery().url();
         });
-        this.set('ShowAbstract', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources']);
-        });
+        this.set('ShowAbstract', this.get('abstract-page'));
         this.set('ShowCitations', function() {
           app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCitations', 'SearchWidget', 'ShowResources']);
         });
