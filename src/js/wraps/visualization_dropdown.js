@@ -10,8 +10,7 @@ define([
   //config
 
   var links = [
-    {href : '/results/author-network' , description : 'Author Network' , navEvent: 'showAuthorNetwork'}
-
+    {href : '/results/author-network' , description : 'Author Network' , navEvent: 'show-author-network'}
   ];
 
   var btnType = "btn-primary-faded";
@@ -23,9 +22,8 @@ define([
   var VisDropdown = new DropdownWidget({links : links,
     btnType: btnType,
     dropdownTitle : dropdownTitle,
-    iconClass: iconClass })
+    iconClass: iconClass });
 
   return VisDropdown;
 
-
-})
+});
