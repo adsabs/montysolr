@@ -12,6 +12,7 @@ var tbase = '../../test/mocha/js';
 var tests = [
 
 
+    tbase + '/widgets/list_of_things_expanding.spec.js',
     tbase + '/widgets/list_of_things_widget.spec.js',
     tbase + '/widgets/lot_derivates.spec.js',
     tbase + '/widgets/multi_callback_widget.spec.js',

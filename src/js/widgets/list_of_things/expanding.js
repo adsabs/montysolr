@@ -18,7 +18,10 @@ define([
     'js/widgets/base/paginated_base_widget',
     'hbs!./templates/expanding-item-template',
     'hbs!./templates/expanding-results-container-template',
-    'js/mixins/widget_pagination'],
+    'js/mixins/widget_pagination',
+    './infinite_view',
+    './item_view'
+  ],
 
   function (Marionette,
             Backbone,
@@ -27,7 +30,10 @@ define([
             PaginatedBaseWidget,
             ItemTemplate,
             ResultsContainerTemplate,
-            WidgetPagination) {
+            WidgetPagination,
+            ListView,
+            ItemView
+    ) {
 
     var ItemModel = Backbone.Model.extend({
       defaults: function () {
