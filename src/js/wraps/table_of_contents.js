@@ -3,13 +3,13 @@ define([
     'underscore',
     'js/widgets/list_of_things/details_widget'
   ],
-
-  function (  _,  ListOfThingsWidget) {
+  function (
+    _,
+    ListOfThingsWidget
+    ) {
 
     var Widget = ListOfThingsWidget.extend({
-
       customizeQuery: function(apiQuery) {
-
         var bibcode = this.extractValueFromQuery(apiQuery, 'q', 'bibcode');
         if (!bibcode) {
           return; // ignore
@@ -17,10 +17,10 @@ define([
         var q = ListOfThingsWidget.prototype.customizeQuery.apply(this, arguments);
 
         if (bibcode[13] == 'E'){ //take first fourteen
-          q.set('q', _.first(bibcode, 14).join("")+"*");
+          q.set('q', 'bibcode:' + _.first(bibcode, 14).join("")+"*");
         }
         else { //take first thirteen
-          q.set('q', _.first(bibcode, 13).join("")+"*");
+          q.set('q', 'bibcode:' + _.first(bibcode, 13).join("")+"*");
         }
 
         if (this.sortOrder){
@@ -29,10 +29,9 @@ define([
         if (this.queryOperator) {
           q.set('q', this.queryOperator + '(' + q.get('q').join(' ') + ')');
         }
+        return q;
       }
-
     });
 
     return Widget;
-
   });

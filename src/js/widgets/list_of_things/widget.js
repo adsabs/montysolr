@@ -97,17 +97,14 @@ define([
       },
 
       onStartSearch: function(apiQuery) {
-        this.hiddenCollection.reset(null, {silent: true});
-        this.collection.reset();
+        this.reset();
       },
 
       onDisplayDocuments: function(apiQuery) {
         BaseWidget.prototype.dispatchRequest.call(this, apiQuery);
-        this.view.model.set("currentQuery", apiQuery);
       },
 
       processResponse: function (apiResponse) {
-        //this.resetView();
 
         var q = apiResponse.getApiQuery();
 
@@ -150,7 +147,7 @@ define([
 
         // this information is important for calcullation of pages
         var numFound = apiResponse.get("response.numFound");
-        var perPage =  this.model.get('perPage') || q.has("rows") ? q.get('rows')[0] : 10;
+        var perPage =  this.model.get('perPage') || (q.has("rows") ? q.get('rows')[0] : 10);
         var start = q.has("start") ? q.get('start')[0] : 0;
 
         // compute the page number of this request
@@ -231,14 +228,24 @@ define([
           }
         }
         else if (ev === 'show:missing') {
-          console.log('we have to retrieve new data', arg1);
+
           // TODO: show spinning wheel?? (we could do it from the template)
           _.each(arg1, function(gap) {
+            var numFound = this.model.get('numFound');
+            var start = gap.start;
+            var perPage = this.model.get('perPage');
+
+            if (start >= numFound)
+              return; // ignore this
+
             var q = this.model.get('currentQuery').clone();
             q.set('__fetch_missing', 'true');
-            q.set('start', gap.start);
-            q.set('rows', this.model.get('perPage'));
+            q.set('start', start);
+            q.set('rows', perPage);
             var req = this.composeRequest(q);
+
+            console.log('we have to retrieve new data', arg1);
+
             if (req) {
               this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
             }
@@ -247,16 +254,13 @@ define([
         }
       },
 
-      resetView: function() {
-        //var $el = this.view.$el;
-        //this.view.$itemViewContainer.empty();
-        //this.view.closeChildren();
-
-        //this.view.close();
-        //this.view = new this.view.constructor({hiddenCollection: this.options.collection, model: this.options.model});
-        //this.view.$el = $el;
-        //this.view.render();
-        //this.options.view = this.view;
+      reset: function() {
+        this.collection.reset();
+        this.hiddenCollection.reset();
+        this.model.set({
+          showDetailsButton: false,
+          pageData: {}
+        })
       }
     });
 

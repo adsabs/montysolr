@@ -14,8 +14,8 @@ define(['underscore'], function (_) {
      * to be zero-indexed!)
      */
 
-    getPageStart: function (page, perPage) {
-      return page*perPage;
+    getPageStart: function (page, perPage, numFound) {
+      return numFound ? Math.min(page*perPage, numFound) : page*perPage;
     },
 
     /**
@@ -36,7 +36,7 @@ define(['underscore'], function (_) {
      * @returns {number}
      */
     getPageVal: function (position, perPage) {
-      return parseInt(position/perPage);
+      return Math.max(0, Math.ceil(position/perPage)-1);
     },
 
     /**
@@ -79,6 +79,6 @@ define(['underscore'], function (_) {
     }
   };
 
-  return WidgetPaginator
+  return WidgetPaginator;
 
 });

@@ -4,9 +4,12 @@ define([
   'js/components/api_query',
   './test_json/test1',
   './test_json/test2',
+  'js/widgets/list_of_things/widget',
+  'js/widgets/list_of_things/details_widget',
   'js/wraps/citations',
   'js/wraps/coreads',
-  'js/wraps/references'
+  'js/wraps/references',
+  'js/wraps/table_of_contents'
 
 ], function(
   $,
@@ -14,9 +17,12 @@ define([
   ApiQuery,
   test1,
   test2,
+  LoTWidget,
+  DetailsLoTWidget,
   CitationWidget,
   CoreadsWidget,
-  ReferencesWidget
+  ReferencesWidget,
+  TableOfContentsWidget
   ){
 
   describe("Various show-detail Widgets (Based on ListOfThings)", function(){
@@ -44,6 +50,20 @@ define([
     });
 
 
+
+    it("Extends Details LoT widget", function() {
+      expect(new DetailsLoTWidget()).to.be.instanceof(LoTWidget);
+      expect(new CitationWidget()).to.be.instanceof(DetailsLoTWidget);
+      expect(new ReferencesWidget()).to.be.instanceof(DetailsLoTWidget);
+      expect(new CoreadsWidget()).to.be.instanceof(DetailsLoTWidget);
+      expect(new TableOfContentsWidget()).to.be.instanceof(DetailsLoTWidget);
+    });
+
+    it("Details LoT widget has certain methods", function() {
+      var widget = new DetailsLoTWidget();
+      expect(widget.extractValueFromQuery(new ApiQuery({'q': 'bibcode:foo'}), 'q', 'bibcode')).to.eql('foo');
+      expect(widget.extractValueFromQuery(new ApiQuery({'q': '"bibcode:foo"'}), 'q', 'bibcode')).to.eql('foo');
+    });
 
     it("Show citations", function(){
       var widget = new CitationWidget();
@@ -78,6 +98,16 @@ define([
       expect($w.find("label").length).to.equal(20);
     });
 
+    it("Show TableOfContents", function(){
+      var widget = new TableOfContentsWidget();
+      widget.activate(minsub.beehive.getHardenedInstance());
+
+      var $w = widget.render().$el;
+      $('#test').append($w);
+
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
+      expect($w.find("label").length).to.equal(20);
+    });
 
   })
 });

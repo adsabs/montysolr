@@ -1,3 +1,8 @@
+/**
+ * Helper class that extends LoT - it is used by widgets that display details
+ * of a paper (one identifier search)
+ */
+
 define([
   './widget'
 ],
@@ -6,7 +11,7 @@ define([
     ) {
     var DetailsWidget = ListOfThings.extend({
       defaultQueryArguments: {
-        fl: 'title,bibcode,author,keyword,citation_count,pub,aff,volume,year,links_data,ids_data,[citations],property',
+        fl: 'title,bibcode,author,keyword,pub,aff,volume,year,links_data,ids_data,[citations],property',
         rows : 20,
         start : 0
       },
@@ -26,7 +31,7 @@ define([
           var v = apiQuery.get(key);
           for (var i=0; i< v.length; i++) {
             if (v[i].indexOf(indexName + ':') > -1) {
-              var w = r.replace(new RegExp(indexName + ':', 'g'), '');
+              var w = v[i].replace(new RegExp(indexName + ':', 'g'), '');
               return w.replace(/\\?\"/g, '');
             }
           }

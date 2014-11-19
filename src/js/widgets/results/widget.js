@@ -25,7 +25,7 @@ define([
         ListOfThingsWidget.prototype.initialize.apply(this, arguments);
         //now adjusting the List Model
         this.view.model.set({"mainResults": true}, {silent : true});
-        this.listenTo(this.collection, "before:reset", this.checkHighlights);
+        this.listenTo(this.view.collection, "reset", this.checkHighlights);
       },
 
       defaultQueryArguments: {
@@ -46,10 +46,14 @@ define([
 
       checkHighlights: function(){
         var hExists = false;
-        this.collection.each(function(m) {
-          if (m.highlights)
+        for (var i=0; i<this.collection.models.length; i++) {
+          var m = this.collection.models[i];
+          if (m.attributes.details && m.attributes.details.highlights) {
             hExists = true;
-        });
+            break;
+          }
+        }
+
         if (hExists) {
           this.model.set("showDetailsButton", true);
         }
@@ -81,8 +85,11 @@ define([
               _.each(_.pairs(hl), function (pair) {
                 finalList = finalList.concat(pair[1]);
               });
-              finalList = finalList;
 
+              if (finalList.length == 1 && finalList[0].trim() == "") {
+                return {};
+              }
+              
               return {
                 "highlights": finalList
               }

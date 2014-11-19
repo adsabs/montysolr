@@ -1,4 +1,5 @@
-define(['marionette',
+define([
+    'marionette',
     'backbone',
     'js/bugutils/minimal_pubsub',
     'js/widgets/results/widget',
@@ -9,7 +10,18 @@ define(['marionette',
     'js/components/api_response',
     'js/components/api_query'
   ],
-  function (Marionette, Backbone, MinimalPubsub, ResultsWidget, ApiQuery, Test1, Test2, ListOfThingsWidget, ApiResponse, ApiQuery) {
+  function (
+    Marionette,
+    Backbone,
+    MinimalPubsub,
+    ResultsWidget,
+    ApiQuery,
+    Test1,
+    Test2,
+    ListOfThingsWidget,
+    ApiResponse,
+    ApiQuery
+    ) {
 
     describe("Render Results (UI Widget)", function () {
 
@@ -19,23 +31,14 @@ define(['marionette',
         minsub = new (MinimalPubsub.extend({
           request: function (apiRequest) {
             if (this.requestCounter % 2 === 0) {
-              return Test2;
+              return JSON.parse(JSON.stringify(Test1));
             } else {
-              Test1.response.start = 10
-              return Test1;
+              var ret = JSON.parse(JSON.stringify(Test1));
+              ret.response.start = 10;
+              return ret;
             }
           }
         }))({verbose: false});
-
-        widget = new ResultsWidget();
-
-        widget.activate(minsub.beehive.getHardenedInstance());
-        $w = $(widget.render().el);
-
-        //prevent infinite requests for data
-        widget.collection.requestData = function () {
-        };
-
         done();
       });
 
@@ -55,31 +58,28 @@ define(['marionette',
         done();
       });
 
-      it("should listen to INVITING_REQUEST and automatically request and render data", function () {
+      var _getWidget = function() {
+        var widget = new ResultsWidget();
+        widget.activate(minsub.beehive.getHardenedInstance());
+        return widget;
+      };
 
-        //default model, not sure why its there?
-        expect(widget.collection.length).to.eql(1);
+      it("should listen to START_SEARCH and automatically request and render data", function () {
+        var widget = _getWidget();
 
+        expect(widget.collection.length).to.eql(0);
         expect(widget.getCurrentQuery().toJSON()).to.eql({});
-
-        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-          q: "star"
-        }));
-
-
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         expect(widget.collection.length).to.eql(10);
-        expect(widget.getCurrentQuery().get("q")[0]).to.eql("star");
-
-
-      })
+        expect(widget.model.get('currentQuery').url()).to.eql(
+          "fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2Cpub%2Caff%2Cemail%2Cvolume%2Cyear&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0"
+        );
+      });
 
 
       it("should join highlights with their records on a model by model basis", function (done) {
-
-        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-          q: "star"
-        }));
-
+        var widget = _getWidget();
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         expect(widget.collection.findWhere({"recid": 4189917}).get("details").highlights[0]).to.eql("External triggers of <em>star</em> formation.");
         done();
       });
@@ -194,6 +194,7 @@ define(['marionette',
 
       it("should render the show details button only if highlights exist given the paginated docs", function () {
 
+        var widget = _getWidget();
         var responseWithHighlights = new ApiResponse({
           "responseHeader": {
             "status": 0,
@@ -218,28 +219,18 @@ define(['marionette',
           "highlighting": {
             "10406064": {"title": "fooblydoo"},
             "3513629": {"abstract": ""}
-          }})
-
+          }});
         responseWithHighlights.setApiQuery(new ApiQuery({start : 0, rows : 25}))
-
         widget.processResponse(responseWithHighlights);
+        expect(widget.model.get('showDetailsButton')).to.be.true;
 
-
-        //transfer models
-
-        widget.paginationModel.set({page: 1, perPage: 2});
+        var $w = widget.render().$el;
 
         //expect results button;
-
         expect(widget.view.render().$el.find(".show-details").length).to.eql(1);
 
 
-        //pagination showing only 1 record without highlights should hide the button
-
-
-        widget.paginationModel.set({page: 2, perPage: 1});
-
-
+        widget.model.set('showDetailsButton', false);
         expect(widget.view.render().$el.find(".show-details").length).to.eql(0);
 
 
@@ -255,7 +246,7 @@ define(['marionette',
               "hl.simple.post": "</em>",
               "wt": "json",
               "hl": "true"}},
-          "response": {"numFound": 175, "start": 0, "docs": [
+          "response": {"numFound": 3, "start": 0, "docs": [
             {
               "id": "10406064"},
             {
@@ -267,33 +258,26 @@ define(['marionette',
           "highlighting": {
             "10406064": {"title": ""},
             "3513629": {"abstract": ""}
-          }})
-
+          }});
         responseWithoutHighlights.setApiQuery(new ApiQuery());
 
-        widget.collection.reset({});
-        widget.visibleCollection.reset({});
-
+        widget.reset();
+        expect(widget.model.get('showDetailsButton')).to.be.false;
         widget.processResponse(responseWithoutHighlights);
+        expect(widget.model.get('showDetailsButton')).to.be.false;
 
-        widget.paginationModel.set({page: 1, perPage: 2});
 
-
-        //results button should not exist
-
-        expect(widget.view.render().$el.find(".show-details").length).to.eql(0);
-
-      })
+      });
 
 
       it("should show details (if available) when a user clicks on 'show details'", function () {
 
-
-        minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
+        var widget = _getWidget();
+        minsub.publish(minsub.pubsub.START_SEARCH, new ApiQuery({
           q: "star"
         }));
 
-        widget.visibleCollection.reset(widget.collection.models);
+        var $w = widget.render().$el;
 
 
         expect($w.find('.more-info:last').hasClass("hide")).to.equal(true);
