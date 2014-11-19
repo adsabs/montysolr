@@ -1,8 +1,8 @@
 define([
     'marionette',
-  'js/widgets/base/base_widget',
-   'hbs!./templates/dropdown',
-   'hbs!./templates/dropdown-item'
+    'js/widgets/base/base_widget',
+    'hbs!./templates/dropdown',
+    'hbs!./templates/dropdown-item'
   ],
   function(
     Marionette,
@@ -13,13 +13,13 @@ define([
     ) {
 
     /*
-    *
-    * To use this widget to generate a dropdown list,
-    * you should pass a configuration object to the
-    * widget called links, in the form
-    *  links : [{href : '' , description : '' , navEvent: ''}]
-    *
-    * */
+     *
+     * To use this widget to generate a dropdown list,
+     * you should pass a configuration object to the
+     * widget called links, in the form
+     *  links : [{href : '' , description : '' , navEvent: ''}]
+     *
+     * */
 
     var DropdownModel = Backbone.Model.extend({
 
@@ -151,12 +151,15 @@ define([
 
         }
 
+        //for now, just set it to false, but later listen to nav event to remove
+        model.set("selected", false);
+
 
       },
 
       activate: function (beehive) {
 
-          this.pubsub = beehive.Services.get('PubSub');
+        this.pubsub = beehive.Services.get('PubSub');
 
       }
 
@@ -168,4 +171,4 @@ define([
 
 
 
-})
+  })
