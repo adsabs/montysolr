@@ -72,7 +72,7 @@ define([
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         expect(widget.collection.length).to.eql(10);
         expect(widget.model.get('currentQuery').url()).to.eql(
-          "fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2Cpub%2Caff%2Cemail%2Cvolume%2Cyear&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0"
+          "fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cyear&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0"
         );
       });
 
@@ -321,6 +321,10 @@ define([
       });
 
 
+      it("should have the num formatter", function() {
+        var widget  = _getWidget();
+        expect(widget.formatNum(889899)).to.be.eql('889,899');
+      });
 
     })
 

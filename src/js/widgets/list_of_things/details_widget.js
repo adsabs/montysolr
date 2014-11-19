@@ -4,10 +4,12 @@
  */
 
 define([
-  './widget'
+  './widget',
+  'js/mixins/add_stable_index_to_collection'
 ],
   function(
-    ListOfThings
+    ListOfThings,
+    PaginationMixin
     ) {
     var DetailsWidget = ListOfThings.extend({
       defaultQueryArguments: {
@@ -36,6 +38,12 @@ define([
             }
           }
         }
+      },
+
+      processDocs: function(apiResponse, docs, paginationInfo) {
+        var params = apiResponse.get("response");
+        var start = params.start || (paginationInfo.start || 0);
+        return PaginationMixin.addPaginationToDocs(docs, start);
       }
     });
     return DetailsWidget;

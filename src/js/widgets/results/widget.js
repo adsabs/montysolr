@@ -9,7 +9,8 @@ define([
     'js/widgets/list_of_things/widget',
     'js/widgets/base/base_widget',
     'js/mixins/add_stable_index_to_collection',
-    'js/mixins/link_generator_mixin'
+    'js/mixins/link_generator_mixin',
+    'js/mixins/formatter'
   ],
 
   function (
@@ -17,7 +18,8 @@ define([
     ListOfThingsWidget,
     BaseWidget,
     PaginationMixin,
-    LinkGenerator
+    LinkGenerator,
+    Formatter
     ) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
@@ -31,7 +33,7 @@ define([
       defaultQueryArguments: {
           hl     : "true",
           "hl.fl": "title,abstract,body",
-          fl     : 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,email,volume,year',
+          fl     : 'title,abstract,bibcode,author,keyword,id,[citations],pub,aff,email,volume,year',
           rows : 25,
           start : 0
       },
@@ -69,6 +71,7 @@ define([
         var start = params.start || 0;
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
         var highlights = apiResponse.get("highlighting");
+        var self = this;
 
         //any preprocessing before adding the resultsIndex is done here
         docs = _.map(docs, function (d) {
@@ -97,14 +100,25 @@ define([
           }
           if (h.highlights && h.highlights.length > 0)
             d['details'] = h;
+
+          if(d["[citations]"] && d["[citations]"]["num_citations"]>0){
+            d.num_citations = self.formatNum(d["[citations]"]["num_citations"]);
+          }
+          else {
+            //formatNum would return "0" for zero, which would then evaluate to true in the template
+            d.num_citations = 0;
+          }
+
           return d;
         });
+
         docs = this.parseLinksData(docs);
         return docs;
       }
     });
 
     _.extend(ResultsWidget.prototype, LinkGenerator);
+    _.extend(ResultsWidget.prototype, Formatter);
     return ResultsWidget;
 
   });
