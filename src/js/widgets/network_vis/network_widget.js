@@ -119,7 +119,7 @@ define([
         return {
           highlightColor: "orange",
           linkDistance: 30,
-          charge: -200,
+          charge: -400,
           width: 100,
           height: 100
         }
