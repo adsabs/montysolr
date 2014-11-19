@@ -86,15 +86,19 @@ select:focus {
 
 
 .pagination {
-   display:inline-block;
-   padding-left:0;
-   margin: 0;
+  display:inline-block;
+  padding-left:0;
+  margin: 0;
 }
 
 .btn-primary-faded {
   background-color : @brand-primary-faded;
   border :1px solid darken(@brand-primary-faded, 5%);
   color: #fff;
+  &:hover {
+    color: #fff;
+    background-color: darken(@brand-primary-faded, 5%);
+  }
 }
 
 
@@ -115,6 +119,10 @@ select:focus {
   .button-hover-shadow;
 }
 
+.btn-success:hover {
+  background-color: darken(@brand-success, 5%);
+}
+
 .btn {
   border-radius: @border-radius-large;
 }
@@ -122,4 +130,3 @@ select:focus {
 .dropdown-menu li {
   padding : 2%;
 }
-

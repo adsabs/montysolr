@@ -21,10 +21,15 @@ define([
         var self = this;
         pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, function() {self.navigate('results-page')});
 
-        this.set('index-page', function() {
-          app.getObject('MasterPageManager').show('LandingPage')});
-        this.set('results-page', function() { app.getObject('MasterPageManager').show('SearchPage', ['Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet', 'KeywordFacet','BibstemFacet', 'BibgroupFacet', 'DataFacet', 'VizierFacet', 'GrantsFacet', 'GraphTabs','QueryDebugInfo'])});
-        this.set('ShowAuthorNetwork', function() { app.getObject('MasterPageManager').show('SearchPage', ['AuthorNetwork','QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet', 'KeywordFacet','BibstemFacet', 'BibgroupFacet', 'DataFacet', 'VizierFacet', 'GrantsFacet', 'GraphTabs','QueryDebugInfo'])});
+        this.set('index-page', function() {app.getObject('MasterPageManager').show('LandingPage')});
+        this.set('results-page', function() { app.getObject('MasterPageManager').show('SearchPage', ['Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet', 'KeywordFacet','BibstemFacet', 'BibgroupFacet', 'DataFacet', 'VizierFacet', 'GrantsFacet', 'GraphTabs','QueryDebugInfo', 'VisualizationDropdown', 'SearchWidget']);
+          app.getWidget("SearchPage").view.returnColWidthsToDefault();
+
+        });
+        this.set('ShowAuthorNetwork', function() { app.getObject('MasterPageManager').show('SearchPage', ['AuthorNetwork','QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet', 'KeywordFacet','BibstemFacet', 'BibgroupFacet', 'DataFacet', 'VizierFacet', 'GrantsFacet', 'GraphTabs','QueryDebugInfo', 'VisualizationDropdown', 'SearchWidget']);
+          app.getWidget("SearchPage").view.makeCenterFullWidth();
+        });
+        this.set("visualization-closed", this.get("results-page"));
         this.set('abstract-page', function() {
           app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources']);
         });
@@ -57,4 +62,3 @@ define([
     return NavigatorService;
 
   });
-
