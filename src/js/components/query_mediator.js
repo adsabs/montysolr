@@ -14,7 +14,8 @@ define(['underscore',
     'js/components/api_request',
     'js/components/api_response',
     'js/components/api_query_updater',
-    'js/components/api_feedback'],
+    'js/components/api_feedback',
+    'js/components/json_response'],
   function(
     _,
     $,
@@ -24,7 +25,8 @@ define(['underscore',
     ApiRequest,
     ApiResponse,
     ApiQueryUpdater,
-    ApiFeedback) {
+    ApiFeedback,
+    JsonResponse) {
 
 
   var QueryMediator = GenericModule.extend({
@@ -178,7 +180,9 @@ define(['underscore',
         console.log('[QM]: received response:', JSON.stringify(data).substring(0, 1000));
 
       // TODO: check the status responses
-      var response = new ApiResponse(data);
+
+     var response = (data.responseHeader && data.responseHeader.QTime) ? new ApiResponse(data) : new JsonResponse(data);
+
       response.setApiQuery(this.request.get('query'));
 
       if (qm.debug)
