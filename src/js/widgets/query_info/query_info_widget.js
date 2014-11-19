@@ -1,8 +1,22 @@
-define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js/components/api_query',
-    'js/widgets/base/base_widget', 'hbs!./query_info_template'
+define(['marionette',
+    'backbone',
+    'underscore',
+    'js/components/api_request',
+    'js/components/api_query',
+    'js/widgets/base/base_widget',
+    'hbs!./query_info_template',
+    'js/mixins/formatter'
   ],
 
-  function(Marionette, Backbone, _, ApiRequest, ApiQuery, BaseWidget, queryInfoTemplate) {
+  function(Marionette,
+           Backbone,
+           _,
+           ApiRequest,
+           ApiQuery,
+           BaseWidget,
+           queryInfoTemplate,
+           FormatMixin
+    ) {
 
     var queryModel = Backbone.Model.extend({
 
@@ -41,12 +55,26 @@ define(['marionette', 'backbone', 'underscore', 'js/components/api_request', 'js
       },
 
       render: function() {
-        this.$el.html(this.template(this.model.attributes))
+        var json = this.model.toJSON();
+        json.numFound = json.numFound ? this.formatNum(json.numFound) : 0;
+
+        if (json.citations){
+
+          _.each(json.citations, function(v,k){
+            json.citations[k] = parseInt(v)
+          })
+
+          json.citations.sum = json.citations.sum ? this.formatNum(json.citations.sum) : 0;
+        }
+
+        this.$el.html(this.template(json))
         return this
       },
 
       template: queryInfoTemplate
-    });
+    })
+
+    _.extend(queryDisplayView.prototype, FormatMixin)
 
     var Widget = BaseWidget.extend({
 

@@ -1,11 +1,14 @@
 define(['underscore',
   'marionette',
   'js/widgets/base/tree_view',
-  'hbs!./templates/item-tree'], function(
+  'hbs!./templates/item-tree',
+  'js/mixins/formatter'
+], function(
   _,
   Marionette,
   TreeView,
-  TreeViewTemplate
+  TreeViewTemplate,
+  FormatMixin
   ) {
 
   var FacetTreeView = TreeView.extend({
@@ -56,26 +59,6 @@ define(['underscore',
       this.$("i.item-caret").removeClass("draw-attention-text")
     },
 
-    //  utility function (better place to put this?)
-    formatNum: function(num){
-      var withCommas = [];
-      num = num+"";
-      if (num.length < 4){
-        return num
-      }
-      else {
-        num  = num.split("").reverse();
-        _.each(num, function(n, i){
-          withCommas.splice(0,0, n)
-          if (i > 0 && (i+1) %3 === 0){
-            withCommas.splice(0,0, ",")
-          }
-
-        })
-      }
-      withCommas = withCommas.join("");
-      return withCommas.replace(/^\,(.+)/, "$1")
-    },
 
     onClick: function (ev) {
       ev.stopPropagation();
@@ -92,6 +75,8 @@ define(['underscore',
     }
 
   });
+
+  _.extend(FacetTreeView.prototype, FormatMixin)
 
   return FacetTreeView;
 });
