@@ -23,6 +23,8 @@ define([
 
         this.set('index-page', function() {
           app.getObject('MasterPageManager').show('LandingPage')});
+
+        this.set('showAuthorNetwork', function(){app.getObject('MasterPageManager').show('SearchPage', ['AuthorNetwork', ])})
         this.set('results-page', function() { app.getObject('MasterPageManager').show('SearchPage')});
         this.set('abstract-page', function() {
           app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources']);
