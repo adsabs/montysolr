@@ -98,7 +98,8 @@ define([
 
       collectionEvents  : {
         "augment" : "render",
-        "remove" : "render"
+        "remove" : "render",
+        "reset" : "render"
       },
 
       serializeData : function(){
@@ -471,7 +472,7 @@ define([
         var nodes = [], indexDict = {}, links = [];
 
         _.each(fullGraph.nodes, function (n, i) {
-          if (n.group === group) {
+          if (n.group === group && n.nodeName) {
             var newIndex = nodes.push(_.clone(n));
             newIndex -= 1
             indexDict[i] = newIndex;
@@ -754,6 +755,7 @@ define([
         return {
           highlightColor: "orange",
           linkStrength: .1,
+          linkDistance: 35,
           width: 100,
           height: 100
         }
@@ -870,7 +872,7 @@ define([
 
         this.$(".detail-node").each(function () {
           if (this.textContent.trim() === name.trim()) {
-            $(this).removeClass("selected-node");
+            d3.select(this).classed("selected-node", false);
 
           }
         })
@@ -958,7 +960,8 @@ define([
         this.model.set("svg", svg)
 
         var force = d3.layout.force()
-          .size([width, height]);
+          .size([width, height])
+          .linkDistance(this.styleModel.get("linkDistance"));
 
 
         svg
@@ -1218,8 +1221,6 @@ define([
 
         this.model.get("g2").on(null);
 
-
-
       }
 
 
@@ -1256,7 +1257,7 @@ define([
 
       activate : function(beehive){
 
-        _.bindAll(this, "setCurrentQuery", "processResponse");
+        _.bindAll(this, "setCurrentQuery", "processResponse", "conditionalResetWidget");
 
         this.pubsub = beehive.Services.get('PubSub');
 
@@ -1265,6 +1266,18 @@ define([
 
         //custom handleResponse function goes here
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+//        this.pubsub.subscribe(this.pubsub.NAVIGATE, this.conditionalResetWidget);
+
+      },
+
+      conditionalResetWidget : function(event){
+//
+//        //how to check that widget is in the dom?
+//
+//          if (event !== "show-author-network"){
+//            this.resetWidget();
+//          }
 
       },
 
@@ -1275,7 +1288,7 @@ define([
 
           this.view.graphView.close();
 
-          this.view.chosenNamesCollection.reset(null, {silent : true});
+          this.view.chosenNamesCollection.reset(null);
 
         }
 
@@ -1314,15 +1327,19 @@ define([
 
         names = "\""+ names.join("\" OR \"") + "\"";
 
-        var q = this.getCurrentQuery().get("q");
+        var fq = this.getCurrentQuery().get("fq");
 
-        var newQueryVal = q + " AND author:(" + names + ")";
+        var newFilterVal = fq ? fq + " AND author:(" + names + ")" : "author:(" + names + ")" ;
 
         newQuery = this.getCurrentQuery().clone();
 
-        newQuery.set("q", newQueryVal);
+        newQuery.set("fq", newFilterVal);
+
+        this.resetWidget();
 
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+
+
 
       },
 
