@@ -202,11 +202,11 @@ Year, Citation and Reference Graphs
 //group circle color vars
 
 
-@group-circle-default : desaturate(lighten(@brand-primary-faded, 20%), 20%);
+@group-circle-default : lighten(@brand-info, 20%);
 
 @group-circle-hover : saturate(darken(@group-circle-default, 10%), 20%);
 
-@group-circle-active : @brand-warning;
+@group-circle-active : lighten(@brand-warning, 10%);
 
 
 
@@ -272,7 +272,7 @@ Year, Citation and Reference Graphs
 .network-node {
 
   fill: @group-circle-default;
-  .lh-transition(fill 2s, stroke-width 2s)
+  .lh-transition(fill 1s, stroke-width 1s)
 
 
 }
@@ -346,8 +346,6 @@ Year, Citation and Reference Graphs
 .target-group {
 
   fill : @group-circle-active !important;
-  stroke : orange;
-  stroke-width : 1px;
 }
 
 

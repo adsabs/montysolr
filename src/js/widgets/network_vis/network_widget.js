@@ -4,6 +4,7 @@ define([
     "js/components/api_request",
     "js/components/api_query",
     "js/widgets/base/base_widget",
+    "js/components/api_query_updater",
     "hbs!./templates/container-template",
     'hbs!./templates/detail-graph-container-template',
     'hbs!./templates/summary-graph-container-template',
@@ -18,6 +19,7 @@ define([
     ApiRequest,
     ApiQuery,
     BaseWidget,
+    ApiQueryUpdater,
     ContainerTemplate,
     DetailTemplate,
     SummaryTemplate,
@@ -510,7 +512,7 @@ define([
 
         linkValues = _.pluck(currentData.links, "weight");
 
-        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([2, 10]);
+        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([1, 10]);
         scalesDict.linkScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.1, .3]);
         scalesDict.radiusScale = d3.scale.linear().domain([d3.min(groupWeights), d3.max(groupWeights)]).range([10, 16]);
 
@@ -844,7 +846,7 @@ define([
         scalesDict = this.model.get("scales");
 
         scalesDict.fontScale = d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([2, 4]);
-        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkWeights), d3.max(linkWeights)]).range([.5, 2]);
+        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkWeights), d3.max(linkWeights)]).range([.5,2]);
         scalesDict.colorScale = d3.scale.ordinal().range([
           "#1f77b4",
           "#2ca02c",
@@ -1252,6 +1254,8 @@ define([
 
         this.listenTo(this.view, "close", this.broadcastClose);
 
+        this.queryUpdater = new ApiQueryUpdater("author");
+
 
       },
 
@@ -1306,6 +1310,8 @@ define([
           query: this.getCurrentQuery()
         });
 
+        this.startWidgetLoad();
+
         this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
 
       },
@@ -1325,15 +1331,13 @@ define([
 
         }
 
-        names = "\""+ names.join("\" OR \"") + "\"";
+        names = _.map(names, function(n){return this.queryUpdater.quote(n)}, this);
 
-        var fq = this.getCurrentQuery().get("fq");
-
-        var newFilterVal = fq ? fq + " AND author:(" + names + ")" : "author:(" + names + ")" ;
+        names =  "author:(" +names.join(" OR ") +")";
 
         newQuery = this.getCurrentQuery().clone();
 
-        newQuery.set("fq", newFilterVal);
+        newQuery.add('q', names);
 
         this.resetWidget();
 
@@ -1349,7 +1353,28 @@ define([
 
         this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
 
+      },
+
+      startWidgetLoad : function(){
+
+          if (!this.callbacksAdded) {
+
+            var removeLoadingView = function () {
+              this.view.$(".s-loading").remove();
+            };
+
+            this.listenTo(this.model, "change:fullData", removeLoadingView);
+
+            this.callbacksAdded = true;
+
+          }
+
+          if (this.view.$el.find(".s-loading").length === 0){
+            this.view.$el.empty().append(this.loadingTemplate());
+          }
+
       }
+
 
 
     })

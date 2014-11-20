@@ -1670,11 +1670,10 @@ define([
     })
 
 
-    it("can communicate with pubsub and accept data", function(){
+    it("communicates with pubsub to get current query info and to request network data", function(){
 
       var q =  new ApiQuery({q: 'star'});
 
-      minsub.request = sinon.stub();
 
       networkWidget.activate(minsub.beehive.getHardenedInstance());
 
@@ -1682,11 +1681,50 @@ define([
 
       expect(networkWidget.getCurrentQuery()).to.eql(q);
 
+      networkWidget.pubsub.publish = sinon.stub()
+
       networkWidget.onShow();
 
-      expect(minsub.request.calledOnce).to.be.true;
+      expect (networkWidget.pubsub.publish.calledOnce).to.be.true;
 
-      expect(minsub.request.args[0][0].url()).to.eql("author-network?q=star");
+      expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql("author-network?q=star");
+
+
+    })
+
+    it("communicates a filtered request to pubsub", function(){
+
+      networkWidget.setCurrentQuery(new ApiQuery({q : "original search"}))
+
+      networkWidget.activate(minsub.beehive.getHardenedInstance());
+
+      networkWidget.pubsub.publish = sinon.stub();
+
+      networkWidget.view.trigger("filterSearch", ["testName1", "testName2"]);
+
+      expect(networkWidget.pubsub.publish.called).to.be.true;
+
+      expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
+
+      expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql( "q=original+search&q=author%3A(%22testName1%22+OR+%22testName2%22)");
+
+    })
+
+    it("should show a loading view while it waits for data from pubsub", function(){
+
+      networkWidget.activate(minsub.beehive.getHardenedInstance());
+
+      networkWidget.pubsub.publish = sinon.stub();
+
+      networkWidget.startWidgetLoad();
+
+      expect(networkWidget.view.$(".s-loading").length).to.eql(1);
+
+      networkWidget.processResponse(new JsonResponse(testDataEmpty))
+
+      expect(networkWidget.view.$(".s-loading").length).to.eql(0);
+
+
 
     })
 
