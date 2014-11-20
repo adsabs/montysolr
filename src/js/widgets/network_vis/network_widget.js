@@ -512,7 +512,7 @@ define([
 
         linkValues = _.pluck(currentData.links, "weight");
 
-        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([1, 10]);
+        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([1, 20]);
         scalesDict.linkScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.1, .3]);
         scalesDict.radiusScale = d3.scale.linear().domain([d3.min(groupWeights), d3.max(groupWeights)]).range([10, 16]);
 
@@ -592,6 +592,8 @@ define([
           .attr("height", height)
           .style("fill", "none")
           .style("pointer-events", "all");
+
+
 
 
         //improving mouseover interaction (svg doesn't use z index)
@@ -1342,8 +1344,6 @@ define([
         this.resetWidget();
 
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
-
-
 
       },
 
