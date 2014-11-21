@@ -37,7 +37,7 @@ define([
       idAttribute: "name"
 
 
-    })
+    });
 
     var ChosenNamesCollection = Backbone.Collection.extend({
 
@@ -65,7 +65,7 @@ define([
 
       }
 
-    })
+    });
 
     var EmptyItemsView = Marionette.ItemView.extend({
 
@@ -76,7 +76,7 @@ define([
       }
 
 
-    })
+    });
 
     var ChosenNamesView = Marionette.CompositeView.extend({
 
@@ -112,7 +112,7 @@ define([
         }
       }
 
-    })
+    });
 
 
     //these defaults won't typically change
@@ -128,7 +128,7 @@ define([
         }
 
       }
-    })
+    });
 
     var NetworkModel = Backbone.Model.extend({
 
@@ -147,7 +147,7 @@ define([
         }
       }
 
-    })
+    });
 
     //this stuff changes
 

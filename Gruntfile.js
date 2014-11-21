@@ -30,7 +30,26 @@ module.exports = function(grunt) {
     },
 
     // Run your source code through JSHint's defaults.
-    jshint: ['src/js/**/*.js'],
+    jshint: {
+      uses_defaults: ['src/js/**/*.js', 'test/mocha/**/*.js'],
+
+      // config used by watch tasks, the src gets set by 'watch'
+      individual: {
+        src: [],
+        options: {
+          
+        }
+      },
+      ignore_semicolons: {
+        options: {
+          '-W033': true
+        },
+        files: {
+          src: ['src/js/**/*.js', 'test/mocha/**/*.js']
+        }
+      }
+
+    },
 
 
     exec: {
@@ -190,8 +209,11 @@ module.exports = function(grunt) {
       },
 
       styles: {
-        files: ['./src/styles/less/*.less'], // which files to watch
-        tasks: ['less']
+        files: ['./src/styles/less/**/*.less'], // which files to watch
+        tasks: ['less', 'express:dev', 'watch:styles'],
+        options: {
+          livereload: true
+        }
       }
     },
 
@@ -325,6 +347,13 @@ module.exports = function(grunt) {
   });
 
 
+  // on watch events configure jshint to only run on changed file
+  grunt.event.on('watch', function(action, filepath) {
+    console.log("Linting ", filepath);
+    grunt.config('jshint.individual.src', filepath);
+    grunt.task.run(['jshint:individual']);
+    return;
+  });
 
   // Basic environment config
   grunt.loadNpmTasks('grunt-env');

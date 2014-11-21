@@ -73,7 +73,7 @@ define(['backbone', 'marionette',
 
       itemViewOptions: function (model, index) {
 //       merging in options from factory stage
-        additionalOptions = Marionette.getOption(this, "additionalItemViewOptions") || {};
+        var additionalOptions = Marionette.getOption(this, "additionalItemViewOptions") || {};
 
         return _.extend({hide: true}, additionalOptions);
 
