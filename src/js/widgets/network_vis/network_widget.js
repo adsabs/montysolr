@@ -4,6 +4,7 @@ define([
     "js/components/api_request",
     "js/components/api_query",
     "js/widgets/base/base_widget",
+    "js/components/api_query_updater",
     "hbs!./templates/container-template",
     'hbs!./templates/detail-graph-container-template',
     'hbs!./templates/summary-graph-container-template',
@@ -18,6 +19,7 @@ define([
     ApiRequest,
     ApiQuery,
     BaseWidget,
+    ApiQueryUpdater,
     ContainerTemplate,
     DetailTemplate,
     SummaryTemplate,
@@ -98,7 +100,8 @@ define([
 
       collectionEvents  : {
         "augment" : "render",
-        "remove" : "render"
+        "remove" : "render",
+        "reset" : "render"
       },
 
       serializeData : function(){
@@ -119,7 +122,7 @@ define([
         return {
           highlightColor: "orange",
           linkDistance: 30,
-          charge: -200,
+          charge: -400,
           width: 100,
           height: 100
         }
@@ -471,7 +474,7 @@ define([
         var nodes = [], indexDict = {}, links = [];
 
         _.each(fullGraph.nodes, function (n, i) {
-          if (n.group === group) {
+          if (n.group === group && n.nodeName) {
             var newIndex = nodes.push(_.clone(n));
             newIndex -= 1
             indexDict[i] = newIndex;
@@ -509,7 +512,7 @@ define([
 
         linkValues = _.pluck(currentData.links, "weight");
 
-        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([2, 10]);
+        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([1, 20]);
         scalesDict.linkScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.1, .3]);
         scalesDict.radiusScale = d3.scale.linear().domain([d3.min(groupWeights), d3.max(groupWeights)]).range([10, 16]);
 
@@ -589,6 +592,8 @@ define([
           .attr("height", height)
           .style("fill", "none")
           .style("pointer-events", "all");
+
+
 
 
         //improving mouseover interaction (svg doesn't use z index)
@@ -754,6 +759,7 @@ define([
         return {
           highlightColor: "orange",
           linkStrength: .1,
+          linkDistance: 35,
           width: 100,
           height: 100
         }
@@ -842,7 +848,7 @@ define([
         scalesDict = this.model.get("scales");
 
         scalesDict.fontScale = d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([2, 4]);
-        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkWeights), d3.max(linkWeights)]).range([.5, 2]);
+        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkWeights), d3.max(linkWeights)]).range([.5,2]);
         scalesDict.colorScale = d3.scale.ordinal().range([
           "#1f77b4",
           "#2ca02c",
@@ -870,7 +876,7 @@ define([
 
         this.$(".detail-node").each(function () {
           if (this.textContent.trim() === name.trim()) {
-            $(this).removeClass("selected-node");
+            d3.select(this).classed("selected-node", false);
 
           }
         })
@@ -958,7 +964,8 @@ define([
         this.model.set("svg", svg)
 
         var force = d3.layout.force()
-          .size([width, height]);
+          .size([width, height])
+          .linkDistance(this.styleModel.get("linkDistance"));
 
 
         svg
@@ -1218,8 +1225,6 @@ define([
 
         this.model.get("g2").on(null);
 
-
-
       }
 
 
@@ -1251,12 +1256,14 @@ define([
 
         this.listenTo(this.view, "close", this.broadcastClose);
 
+        this.queryUpdater = new ApiQueryUpdater("author");
+
 
       },
 
       activate : function(beehive){
 
-        _.bindAll(this, "setCurrentQuery", "processResponse");
+        _.bindAll(this, "setCurrentQuery", "processResponse", "conditionalResetWidget");
 
         this.pubsub = beehive.Services.get('PubSub');
 
@@ -1265,6 +1272,18 @@ define([
 
         //custom handleResponse function goes here
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+//        this.pubsub.subscribe(this.pubsub.NAVIGATE, this.conditionalResetWidget);
+
+      },
+
+      conditionalResetWidget : function(event){
+//
+//        //how to check that widget is in the dom?
+//
+//          if (event !== "show-author-network"){
+//            this.resetWidget();
+//          }
 
       },
 
@@ -1275,7 +1294,7 @@ define([
 
           this.view.graphView.close();
 
-          this.view.chosenNamesCollection.reset(null, {silent : true});
+          this.view.chosenNamesCollection.reset(null);
 
         }
 
@@ -1292,6 +1311,8 @@ define([
           target: Marionette.getOption(this, "endpoint"),
           query: this.getCurrentQuery()
         });
+
+        this.startWidgetLoad();
 
         this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
 
@@ -1312,15 +1333,15 @@ define([
 
         }
 
-        names = "\""+ names.join("\" OR \"") + "\"";
+        names = _.map(names, function(n){return this.queryUpdater.quote(n)}, this);
 
-        var q = this.getCurrentQuery().get("q");
-
-        var newQueryVal = q + " AND author:(" + names + ")";
+        names =  "author:(" +names.join(" OR ") +")";
 
         newQuery = this.getCurrentQuery().clone();
 
-        newQuery.set("q", newQueryVal);
+        newQuery.add('q', names);
+
+        this.resetWidget();
 
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
 
@@ -1332,7 +1353,28 @@ define([
 
         this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
 
+      },
+
+      startWidgetLoad : function(){
+
+          if (!this.callbacksAdded) {
+
+            var removeLoadingView = function () {
+              this.view.$(".s-loading").remove();
+            };
+
+            this.listenTo(this.model, "change:fullData", removeLoadingView);
+
+            this.callbacksAdded = true;
+
+          }
+
+          if (this.view.$el.find(".s-loading").length === 0){
+            this.view.$el.empty().append(this.loadingTemplate());
+          }
+
       }
+
 
 
     })

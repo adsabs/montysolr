@@ -214,11 +214,11 @@ Year, Citation and Reference Graphs
 //group circle color vars
 
 
-@group-circle-default : desaturate(lighten(@brand-primary-faded, 20%), 20%);
+@group-circle-default : lighten(@brand-info, 20%);
 
 @group-circle-hover : saturate(darken(@group-circle-default, 10%), 20%);
 
-@group-circle-active : @brand-warning;
+@group-circle-active : lighten(@brand-warning, 10%);
 
 
 
@@ -237,7 +237,7 @@ Year, Citation and Reference Graphs
 }
 
 .s-vis-top-row {
-  padding: 1% 0%;
+  padding: 1%;
   border-radius: @border-radius-base;
   .clearfix;
   background-color: #fff;
@@ -277,15 +277,14 @@ Year, Citation and Reference Graphs
 .connector-link {
 
   stroke: fade(@brand-primary, 50%);
-  stroke-width: 1.5px;
-  stroke-dasharray : 2;
+  stroke-dasharray : 1;
 }
 
 
 .network-node {
 
   fill: @group-circle-default;
-  .lh-transition(fill 2s, stroke-width 2s)
+  .lh-transition(fill 1s, stroke-width 1s)
 
 
 }
@@ -359,8 +358,6 @@ Year, Citation and Reference Graphs
 .target-group {
 
   fill : @group-circle-active !important;
-  stroke : orange;
-  stroke-width : 1px;
 }
 
 
@@ -397,9 +394,16 @@ Year, Citation and Reference Graphs
 
 }
 
+.s-update-all {
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
 .s-zoom-panel {
-  width: 7%;
-  padding-left : 50%;
+  position: absolute;
+  right: 5px;
+  width: 40px;
+  top: 5px;
 }
 
 #zoom-in {
