@@ -132,6 +132,8 @@ app.use('/test', express.directory(__dirname + '/test'));
 
 app.use('/bower_components', express.static(__dirname + '/bower_components'));
 app.use('/bower_components', express.directory(__dirname + '/bower_components'));
+app.use('/node_modules', express.static(__dirname + '/node_modules'));
+app.use('/node_modules', express.directory(__dirname + '/node_modules'));
 
 port = process.env.PORT || 3000;
 

@@ -6,7 +6,9 @@ require.config({
 
   // Initialize the application with the main application file or if we run
   // as a test, then load the test unittests
-  deps: window.mocha ? [ window.mocha.testToLoad ? window.mocha.testToLoad : '../test/mocha/discovery.spec' ] : [ 'js/apps/discovery/main' ],
+  deps: window.mocha
+    ? [ window.mocha.testLoader ? window.mocha.testLoader : '../test/test-loader' ]
+    : [ 'js/apps/discovery/main' ],
 
   // Configuration we want to make available to modules of ths application
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
@@ -117,7 +119,11 @@ require.config({
     'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
-    'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud'
+    'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
+
+    // only for testing (won't get loaded otherwise)
+    'chai': '../bower_components/chai/chai',
+    'sinon': '../bower_components/sinon/index'
 
   },
 

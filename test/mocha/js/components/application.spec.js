@@ -2,7 +2,7 @@ define(['js/components/application', 'module'], function(Application, module) {
   describe("Application (Scaffolding)", function () {
 
     var config = null;
-    beforeEach(function() {
+    beforeEach(function(done) {
       config = {
         core: {
           services: {
@@ -24,11 +24,13 @@ define(['js/components/application', 'module'], function(Application, module) {
           Test: 'js/components/multi_params'
         }
       };
+      done();
     });
 
 
-    it("should create application object", function() {
+    it("should create application object", function(done) {
       expect(new Application()).to.be.instanceof(Application);
+      done();
     });
 
     it("loads components", function(done) {

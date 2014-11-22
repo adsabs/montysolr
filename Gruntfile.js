@@ -235,18 +235,18 @@ module.exports = function(grunt) {
       web_testing: {
         options: {
           urls: [
-              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/discovery.spec.html')
+              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html')
           ]
         }
       },
 
       //**
-      //* Another way: grunt test:web --testname='mocha/discovery.spec.html?bumblebeeTest=sandbox.spec'
+      //* Another way: grunt test:web --testname='mocha/tests.html?bbbSuite=ui-suite'
       //**
       sandbox_testing: {
         options: {
           urls: [
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=sandbox.spec'
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=sandbox'
           ]
         }
       },
@@ -255,10 +255,10 @@ module.exports = function(grunt) {
         options: {
           output: null,
           urls: [
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=discovery.spec',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=discovery-ui1.spec',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=discovery-ui2.spec',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/discovery.spec.html?bumblebeeTest=discovery-qb.spec'
+            //'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=core-suite',
+            //'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=ui-suite',
+            //'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=qb-suite'
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=discovery-suite'
           ]
         }
       }
@@ -342,6 +342,24 @@ module.exports = function(grunt) {
           'src/styles/css/styles.css': 'src/styles/less/manifest.less'
         }
       }
+    },
+
+    blanket_mocha : {
+      test: {
+        src: ['./test/mocha/coverage.html'],
+        options : {
+          threshold : 60,
+          globalThreshold : 65,
+          log : true,
+          logErrors: true,
+          moduleThreshold : 60,
+          modulePattern : "./src/js/components/(.*?)/",
+          customThreshold: {
+            './src/spelling/plurals.js': 50
+          }
+        }
+      }
+
     }
 
   });
@@ -375,26 +393,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-express-server');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-exec');
-
-
-  // karma tasks. (to ditch?)
-  // grunt.loadNpmTasks('grunt-karma');
-  // grunt.loadNpmTasks('grunt-karma-coveralls');
-
-  // for testing
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
-
-  // other 3rd party libs
   grunt.loadNpmTasks('grunt-processhtml');
   grunt.loadNpmTasks('grunt-contrib-less');
-
-  // Bower tasks
   grunt.loadNpmTasks('grunt-bower-task');
-
-  //npm install
   grunt.loadNpmTasks('grunt-install-dependencies');
-
   grunt.loadNpmTasks('grunt-concurrent');
+  grunt.loadNpmTasks('grunt-mocha');
+  grunt.loadNpmTasks("grunt-blanket-mocha");
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
@@ -425,6 +431,7 @@ module.exports = function(grunt) {
 
   // runs tests in a web server (automatically reloading)
   grunt.registerTask('test:web', ['env:dev', 'watch:web_testing']);
+  grunt.registerTask('test:once', ['env:dev', 'express:dev', 'mocha_phantomjs:web_testing']);
   grunt.registerTask('test:sandbox', ['env:dev', 'watch:sandbox_testing']);
 
   // runs tests (only once)
@@ -434,5 +441,6 @@ module.exports = function(grunt) {
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
 
   grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_jqueryuicss']);
+  grunt.registerTask('coverage', ['env:dev', 'expess:dev', 'blanket_mocha']);
 
 };
