@@ -13,12 +13,15 @@ define([
     "use strict";
 
     /*globals mocha, expect, chai */
+    chai.Assertion.includeStack = true;
+
     mocha.setup('bdd');
     mocha.bail(false);
+
     window.expect = chai.expect;
     window.assert = chai.assert;
     window.should = chai.should;
-    chai.Assertion.includeStack = true;
+
 
     if (window.PHANTOMJS && blanket) {
       blanket.options("reporter", "../node_modules/grunt-blanket-mocha/support/grunt-reporter.js"
