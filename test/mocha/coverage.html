@@ -1,0 +1,41 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mocha Tests</title>
+
+    <link rel="stylesheet" href="../../bower_components/mocha/mocha.css"/>
+    <link rel="stylesheet" href="../../src/styles/css/styles.css"/>
+</head>
+<body>
+<div id="mocha"></div>
+
+<!-- this is here becasue grunt-blanket-mocha is using old version of phantomjs -->
+<script src="../../bower_components/es5-shim/es5-shim.js"></script>
+<script src="../../bower_components/mocha/mocha.js"></script>
+
+    <!-- This tells the config to load the testing frameworks (path is relative to the require's data-main -->
+    <script>
+        window.mocha.testLoader = '../test/test-loader';
+    </script>
+
+    <b>Beware! On command line, grunt-blanket-mocha uses old version of phantomjs,
+        <a href="https://github.com/ModelN/grunt-blanket-mocha/issues/34">this could cause troubles!</a>
+        If tests pass normally, but coverage fails, try to see if it is caused by different version of phantomjs.</b>
+
+    <!-- Now start our application
+         When we point to our application, we are using the same configuration -->
+    <script data-main="../../src/discovery.config" src="../../src/libs/requirejs/require.js"></script>
+
+    <!-- Activate coverage support -->
+    <script type="text/javascript" src="../../node_modules/blanket/dist/qunit/blanket.js"
+            data-cover-only="../../src/js"></script>
+    <script type="text/javascript" src="../../node_modules/grunt-blanket-mocha/support/mocha-blanket.js"></script>
+
+
+    <!-- Test Fixtures. -->
+    <div id="fixtures" style="display: none; visibility: hidden;"></div>
+    <div id="test-area" style="visibility: hidden;"></div>
+    <div id="test"></div>
+
+</body>
+</html>
