@@ -255,10 +255,10 @@ module.exports = function(grunt) {
         options: {
           output: null,
           urls: [
-            //'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=core-suite',
-            //'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=ui-suite',
-            //'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=qb-suite'
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=discovery-suite'
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=core-suite',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=ui-suite',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=qb-suite'
+            //'http://localhost:<%= local.port || 8000 %>/test/mocha/tests.html?bbbSuite=discovery-suite'
           ]
         }
       }
@@ -346,8 +346,8 @@ module.exports = function(grunt) {
 
     blanket_mocha : {
       test: {
-        src: ['./test/mocha/coverage.html'],
         options : {
+          urls: ['http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=core-suite'],
           threshold : 60,
           globalThreshold : 65,
           log : true,
@@ -441,6 +441,6 @@ module.exports = function(grunt) {
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
 
   grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_jqueryuicss']);
-  grunt.registerTask('coverage', ['env:dev', 'expess:dev', 'blanket_mocha']);
+  grunt.registerTask('coverage', ['env:dev', 'express:dev', 'blanket_mocha']);
 
 };

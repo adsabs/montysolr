@@ -1,5 +1,5 @@
 define(['js/components/application', 'module'], function(Application, module) {
-  describe("Application (Scaffolding)", function () {
+  describe("Application Scaffolding (application.spec.js)", function () {
 
     var config = null;
     beforeEach(function(done) {
@@ -56,7 +56,7 @@ define(['js/components/application', 'module'], function(Application, module) {
 
     });
 
-    it("handles errors of loading components", function(done) {
+    it.skip("handles errors of loading components", function(done) {
       var app = new Application();
       config.core.services.Api = 'js/components/nonexisting';
 

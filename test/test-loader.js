@@ -62,7 +62,8 @@ define([
     var suites = _.map(args, function(m) {return '../test/mocha/' + m});
     var testBase = '../../test/mocha/js/';
 
-    console.log('About to load testsuite(s): ' + suites.concat(', ') + ' (testBase=' + testBase + ')');
+    console.log('About to load testsuite(s): ' + suites.concat(', '));
+    console.log('window.location=' + window.location + ' (testBase=' + testBase + ')');
 
     require(suites, function() { // load the test suites
 

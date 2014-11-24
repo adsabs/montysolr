@@ -32,6 +32,7 @@ define(['underscore',
   var QueryMediator = GenericModule.extend({
 
     initialize: function(options) {
+
       if (options.cache) {
         this._cache = new Cache(_.extend({
           'maximumSize': 100,

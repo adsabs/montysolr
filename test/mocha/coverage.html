@@ -5,11 +5,12 @@
 
     <link rel="stylesheet" href="../../bower_components/mocha/mocha.css"/>
     <link rel="stylesheet" href="../../src/styles/css/styles.css"/>
-
 </head>
 <body>
 <div id="mocha"></div>
 
+<!-- this is here becasue grunt-blanket-mocha is using old version of phantomjs -->
+<script src="../../bower_components/es5-shim/es5-shim.js"></script>
 <script src="../../bower_components/mocha/mocha.js"></script>
 
     <!-- This tells the config to load the testing frameworks (path is relative to the require's data-main -->
@@ -17,7 +18,9 @@
         window.mocha.testLoader = '../test/test-loader';
     </script>
 
-
+    <b>Beware! On command line, grunt-blanket-mocha uses old version of phantomjs,
+        <a href="https://github.com/ModelN/grunt-blanket-mocha/issues/34">this could cause troubles!</a>
+        If tests pass normally, but coverage fails, try to see if it is caused by different version of phantomjs.</b>
 
     <!-- Now start our application
          When we point to our application, we are using the same configuration -->
