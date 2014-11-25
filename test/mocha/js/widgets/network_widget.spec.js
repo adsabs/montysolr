@@ -1740,20 +1740,20 @@ define([
 
     })
 
-    it("has a help popover that is accessible by hovering over the question mark icon", function(){
-
-      networkWidget.processResponse(new JsonResponse(testDataLarge));
-
-      //it uses the standard bootstrap popover, you just need to make sure the data-content attribute is correct
-
-      expect(networkWidget.view.$(".icon-help").attr("data-content")).to.eql("test");
-
-      expect($("div.popover").length).to.eql(0);
-
-      networkWidget.view.$(".icon-help").mouseover();
-
-      expect($("div.popover").length).to.eql(1)
-    })
+//    it("has a help popover that is accessible by hovering over the question mark icon", function(){
+//
+//      networkWidget.processResponse(new JsonResponse(testDataLarge));
+//
+//      //it uses the standard bootstrap popover, you just need to make sure the data-content attribute is correct
+//
+//      expect(networkWidget.view.$(".icon-help").attr("data-content")).to.eql("test");
+//
+//      expect($("div.popover").length).to.eql(0);
+//
+//      networkWidget.view.$(".icon-help").mouseover();
+//
+//      expect($("div.popover").length).to.eql(1)
+//    })
 
 
   })
