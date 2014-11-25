@@ -1706,7 +1706,7 @@ define([
 
       expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
 
-      expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql( "q=original+search&q=author%3A(%22testName1%22+OR+%22testName2%22)");
+      expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql( "__fq_fq=AND&__fq_fq=author%3A(%22testName1%22+OR+%22testName2%22)&fq=(author%3A(%22testName1%22+OR+%22testName2%22))&q=original+search");
 
     })
 

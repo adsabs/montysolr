@@ -24,6 +24,8 @@ define([], function() {
       '/widgets/list_of_things_widget.spec.js',
       '/widgets/lot_derivates.spec.js',
       '/widgets/multi_callback_widget.spec.js',
+      '/widgets/network_widget.spec.js',
+      '/widgets/paper_network_widget.spec.js',
       '/widgets/reads_graph_facet_widget.spec.js',
       '/widgets/resources_widget.spec.js',
 
@@ -37,7 +39,6 @@ define([], function() {
       '/widgets/wordcloud_widget.spec.js',
       '/widgets/year_graph_facet_widget.spec.js',
 
-      '/widgets/network_widget.spec.js'
   ];
   return tests;
 });
