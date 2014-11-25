@@ -37,7 +37,8 @@
     "needle": "~0.7.1",
     "requirejs": "^2.1.13",
     "grunt-mocha": "^0.4.11",
-    "grunt-blanket-mocha": "^0.4.1"
+    "grunt-blanket-mocha": "^0.4.1",
+    "blanket": "^1.1.6"
   },
   "peerDependencies": {
     "bower": "*",
