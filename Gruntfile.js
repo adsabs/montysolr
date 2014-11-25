@@ -235,7 +235,7 @@ module.exports = function(grunt) {
       web_testing: {
         options: {
           urls: [
-              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html')
+              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=core-suite')
           ]
         }
       },

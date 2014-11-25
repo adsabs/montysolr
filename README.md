@@ -95,7 +95,7 @@ code and have it automatically re-tested.
  
 ```bash
   # run tests
-  $ grunt test
+  $ grunt test:web
 ```
 
 By default, the PhantomJS will execute all tests; you can run specific suite as:
@@ -122,8 +122,9 @@ To get coverage reports:
 
 
 To make a pull request, clone our repo, create a new branch, add your changes,
-push the new branch into your branch and open a new pull request.
-*Before making the push, make sure unittests and coverage tests pass!*
+push the new branch to github and open a new pull request.
+_Before making the push, make sure unittests and coverage tests pass!_
+
 
 ```bash
    $ grunt test coverage
@@ -141,7 +142,7 @@ Unit Test Results: 271 specs passed! (6.04s)
 Done, without errors.
 ```
 
-If you need to change the way how build works, edit `local-config.js`
+If you need to change the way how grunt works, you can edit `local-config.js`
 
   * port_development: when running tests, webserver will start on this port [default: 8000]
   * port_development: port for webserver when running code from dist (ie. testing deployment) [default: 5000]
