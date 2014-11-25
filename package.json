@@ -36,8 +36,7 @@
     "coveralls": "*"
   },
   "scripts": {
-    "test": "grunt test",
-    "coverage": "grunt coverage"
+    "test": "grunt test coverage"
   },
   "dependencies": {
     "chalk": "~0.4.0",
