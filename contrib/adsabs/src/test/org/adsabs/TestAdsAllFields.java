@@ -195,7 +195,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"alternate_title\": \"This is of the alternate\"" +
 				", \"abstract\": \"all no-sky survey q'i quotient\"" +
 				
-				", \"keyword\": [\"Classical statistical mechanics\"]" +
+				", \"keyword\": [\"Classical statistical mechanics\", \"foo bar\"]" +
 				", \"keyword_norm\": [\"angular momentum\", \"89.20.Hh\"]" +
 				", \"keyword_schema\": [\"ADS\", \"PACS Codes\"]" +
 				", \"keyword_facet\": [\"angular momentum kw\"]" +
@@ -504,6 +504,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
+		assertQ(req("q", "keyword:\"foo bar\""), 
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']"
+		);
 		assertQ(req("q", "keyword:\"Classical Statistical Mechanics\""), // should be case-insensitive 
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
@@ -520,7 +524,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		);
 
 		assertQ(req("q", "keyword_norm:classical"), "//*[@numFound='0']"); // should not contain keywords
-		assertQ(req("q", "keyword:89.20.Hh"), "//*[@numFound='1']"); // should contain keywords_norm
+		assertQ(req("q", "keyword:89.20.Hh"), "//*[@numFound='0']"); // should not contain keywords_norm
 		
 		
 		/*

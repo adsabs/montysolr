@@ -3,6 +3,7 @@
 	<name>montysolr-next</name>
 	<comment></comment>
 	<projects>
+		<project>solr-next</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

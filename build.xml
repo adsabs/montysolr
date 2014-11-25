@@ -130,12 +130,14 @@
 
 
 
-	<target name="test" depends="write-properties">
-		   <antcall target="common.test" inheritall="true" inheritrefs="true"/>
-	</target>
+	<target name="test" depends="write-properties" description="Run tests for core and contrib">
+    <antcall target="common.test" inheritall="true" inheritrefs="true"/>
+    <antcall target="test-contrib" inheritall="true" inheritrefs="true"/>
+  </target>
 
     
-	<target name="test-all" depends="test,test-contrib" description="Run tests for core and contrib"/>
+  <!-- obsolete: redirecting to test -->
+  <target name="test-all" depends="test" />
     
 	
 	<!-- writes into a simple format various config variables, they can be used by unittests/java -->

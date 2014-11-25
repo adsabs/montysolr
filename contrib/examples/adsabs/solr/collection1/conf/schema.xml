@@ -451,10 +451,12 @@
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="false"
-					words="text.kill_sens" enablePositionIncrements="false" />
+					words="text.kill_sens" enablePositionIncrements="false" 
+					luceneMatchVersion="4.3"/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="text.kill" enablePositionIncrements="false" />
+					words="text.kill" enablePositionIncrements="false" 
+					luceneMatchVersion="4.3"/>
 
 
 
@@ -537,10 +539,12 @@
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="false"
-					words="text.kill_sens" enablePositionIncrements="false" />
+					words="text.kill_sens" enablePositionIncrements="false" 
+					luceneMatchVersion="4.3"/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="text.kill" enablePositionIncrements="false" />
+					words="text.kill" enablePositionIncrements="false" 
+					luceneMatchVersion="4.3"/>
 
 
 
@@ -609,10 +613,12 @@
         
         <!-- remove stop words - first the case sensitively -->
         <filter class="solr.StopFilterFactory" ignoreCase="false"
-          words="text.kill_sens" enablePositionIncrements="false" />
+          words="text.kill_sens" enablePositionIncrements="false" 
+          luceneMatchVersion="4.3"/>
         <!-- remove stop words - then case insensitively -->
         <filter class="solr.StopFilterFactory" ignoreCase="true"
-          words="text.kill" enablePositionIncrements="false" />
+          words="text.kill" enablePositionIncrements="false" 
+          luceneMatchVersion="4.3"/>
 
 
 
@@ -679,6 +685,8 @@
 				<filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:)"
 					replacement="" replace="all" />
 				<filter class="solr.TrimFilterFactory" />
+				<filter
+          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
@@ -773,6 +781,8 @@
 				<filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_| )"
           replacement="" replace="all" />
 				<filter class="solr.TrimFilterFactory" />
+				<filter
+          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
@@ -1050,6 +1060,8 @@
 
 		<field name="page" type="first_string" indexed="true" stored="true"
 			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+	  <field name="eid" type="first_string" indexed="true" stored="true"
+      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 			
 		<field name="year" type="first_string" indexed="true" stored="true" 
 			multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
@@ -1079,9 +1091,6 @@
 		<field name="pubdate" type="date_string" indexed="true" stored="true"
 			omitNorms="true" omitTermFreqAndPositions="true"/>
 			
-		<field name="pubdate_sort" type="int" indexed="true" stored="${storeAll:false}"
-			omitNorms="true" omitTermFreqAndPositions="true"/>
-
 
 		<field name="title" type="ads_text" indexed="true" stored="true" 
       multiValued="true" termVectors="true" termOffsets="true" 
@@ -1460,33 +1469,7 @@
 	<solrQueryParser defaultOperator="AND" />
 
 	<copyField source="id" dest="recid" />
-
-  <copyField source="arxiv_class" dest="keyword" />
-	<copyField source="keyword_norm" dest="keyword" />
 	
-	<copyField source="bibgroup" dest="bibgroup_facet" />
-	<copyField source="data" dest="data_facet" />
-	<copyField source="vizier" dest="vizier_facet" />
-
-	<copyField source="a_100" dest="author" />
-	<copyField source="a_700" dest="author" />
-
-	<copyField source="a_100_norm" dest="author_norm" />
-	<copyField source="a_700_norm" dest="author_norm" />
-
-	<copyField source="a_100_norm" dest="author_facet" />
-	<copyField source="a_700_norm" dest="author_facet" />
-
-	<copyField source="a_100" dest="first_author" />
-	<copyField source="a_100_norm" dest="first_author_norm" />
-
-  <copyField source="tmp_aff_100" dest="aff" />
-  <copyField source="tmp_aff_700" dest="aff" />
-  
-  <copyField source="tmp_email_100" dest="email" />
-  <copyField source="tmp_email_700" dest="email" />
-  
-  
   <copyField source="bibcode" dest="identifier" />
   <copyField source="alternate_bibcode" dest="identifier" />
   <copyField source="doi" dest="identifier" />
