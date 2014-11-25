@@ -23,9 +23,13 @@ define([
     window.should = chai.should;
 
 
-    if (window.PHANTOMJS && blanket) {
-      blanket.options("reporter", "../node_modules/grunt-blanket-mocha/support/grunt-reporter.js"
-      );
+    if (blanket) {
+      if (true || window.PHANTOMJS) {
+        blanket.options("reporter", 
+      "../../node_modules/grunt-blanket-mocha/support/grunt-reporter.js");  
+      }
+      
+      blanket.options('debug', false);
     }
 
     /*

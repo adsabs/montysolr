@@ -347,15 +347,18 @@ module.exports = function(grunt) {
     blanket_mocha : {
       test: {
         options : {
-          urls: ['http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=core-suite'],
-          threshold : 60,
-          globalThreshold : 65,
+          urls: [
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=core-suite',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=ui-suite',
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=qb-suite'
+          ],
+          threshold : 0,
+          globalThreshold : 63,
           log : true,
           logErrors: true,
-          moduleThreshold : 60,
-          modulePattern : "./src/js/components/(.*?)/",
+          moduleThreshold : 0,
+          modulePattern : "../../src/js/(.*)",
           customThreshold: {
-            './src/spelling/plurals.js': 50
           }
         }
       }
