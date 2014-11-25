@@ -23,10 +23,12 @@ define([
     window.should = chai.should;
 
 
-    if (blanket) {
-      if (true || window.PHANTOMJS) {
+    if (window.blanket) {
+      if (window.PHANTOMJS) {
         blanket.options("reporter", 
-      "../../node_modules/grunt-blanket-mocha/support/grunt-reporter.js");  
+          "../../node_modules/grunt-blanket-mocha/support/grunt-reporter.js");
+        //blanket.options('reporter',
+        //  "../../node_modules/blanket/src/reporters/simple_json_reporter.js");
       }
       
       blanket.options('debug', false);

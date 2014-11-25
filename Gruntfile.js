@@ -345,7 +345,7 @@ module.exports = function(grunt) {
     },
 
     blanket_mocha : {
-      test: {
+      full: {
         options : {
           urls: [
             'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=core-suite',
@@ -356,13 +356,54 @@ module.exports = function(grunt) {
           globalThreshold : 63,
           log : true,
           logErrors: true,
+          moduleThreshold : 60,
+          modulePattern : "../../src/js/(.*)",
+          customModuleThreshold: {
+            'components/api_feedback.js': 59,
+            'components/api_query_updater.js': 42,
+            'components/query_mediator.js': 50,
+            'mixins/dependon.js': 46,
+            'services/api.js': 46,
+            'components/navigator.js': 58,
+            'components/query_builder/rules_translator.js': 45,
+            'mixins/widget_mixin_method.js': 37,
+            'mixins/widget_utility.js': 40,
+            'page_managers/three_column_view.js': 38,
+            'widgets/abstract/widget.js': 58,
+            'widgets/base/base_widget.js': 51,
+            'widgets/base/tree_view.js': 50,
+            'widgets/breadcrumb/widget.js': 55,
+            'widgets/export/widget.js': 23,
+            'widgets/facet/collection.js': 33,
+            'widgets/facet/factory.js': 50,
+            'widgets/facet/graph-facet/base_graph.js': 8,
+            'widgets/facet/graph-facet/h_index_graph.js': 2,
+            'widgets/facet/graph-facet/year_graph.js': 2,
+            'widgets/list_of_things/item_view.js': 50,
+            'wraps/author_facet.js': 13,
+            'wraps/graph_tabs.js': 5
+          }
+        }
+      },
+
+      test: {
+        options : {
+          urls: [
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=core-suite'
+          ],
+          threshold : 0,
+          globalThreshold : 63,
+          log : true,
+          logErrors: true,
           moduleThreshold : 0,
           modulePattern : "../../src/js/(.*)",
           customThreshold: {
-          }
-        }
-      }
 
+          }
+          //reporter: 'JSONCov',
+          //dest: './coverage/output'
+          }
+      }
     }
 
   });
@@ -373,6 +414,11 @@ module.exports = function(grunt) {
     console.log("Linting ", filepath);
     grunt.config('jshint.individual.src', filepath);
     grunt.task.run(['jshint:individual']);
+    return;
+  });
+
+  grunt.event.on('blanket:fileDone', function(total, filepath) {
+    console.log("blanket:fileDone ", filepath);
     return;
   });
 
@@ -444,6 +490,6 @@ module.exports = function(grunt) {
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
 
   grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_jqueryuicss']);
-  grunt.registerTask('coverage', ['env:dev', 'express:dev', 'blanket_mocha']);
+  grunt.registerTask('coverage', ['env:dev', 'express:dev', 'blanket_mocha:full']);
 
 };
