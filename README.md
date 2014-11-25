@@ -14,8 +14,9 @@ Things may change dramatically, be prepared.
 
 
 dev setup - vagrant (virtualbox)
-=================
+================================
 
+This is the easiest option. It will create a virtual machine and run the application. No hassles.
 Port 8000 is forwarded directly to the host (8000:8000). This directory is synced to /vagrant/ on the guest.
 
 1. `vagrant up`
@@ -26,7 +27,7 @@ Port 8000 is forwarded directly to the host (8000:8000). This directory is synce
 dev setup - linux
 =================
 
-If you don't have node.js, do this (or equivalent of your distribution):
+This is mode is for developers.
 
 ```bash
   $ sudo apt-get install node npm phantomjs
@@ -75,17 +76,69 @@ Yes, you can develop even on Windows! ;-)
    $ grunt setup 
 ```
 
-And you are ready to go!
+Developing for bumblebee
 ========================
 
 Set your editor to use spaces instead of tabs (width: 2)
 
-```bash
-  # run some tests
-  $ grunt test:web
+When you want to interact with the application:
 
-  # open a browser and look on what is inside
+ ```bash
+  # start the webserver (it will automatically reload on code changes)
+  $ grunt server
   $ open http://localhost:8000
+  ```
+
+
+Take advantage of the headless testing framework! You can be editing
+code and have it automatically re-tested.
+ 
+```bash
+  # run tests
+  $ grunt test
+```
+
+By default, the PhantomJS will execute all tests; you can run specific suite as:
+
+```bash
+  $ grunt test:web --testname='mocha/tests.html?bbbSuite=core-suite'
+```
+
+
+Tests can also be opened in a browser, you can click on a certain class of tests
+(to ignore others), and you can combine test suites:
+
+```bash
+   # open the test in a browser
+   $ chrome http://localhost:8000/test/mocha/tests.html?bbbSuite=ui-suite|core-suite
+```
+
+To get coverage reports:
+
+```bash
+   # open the test in a browser
+   $ chrome http://localhost:8000/test/mocha/coverage.html?bbbSuite=core-suite
+```
+
+
+To make a pull request, clone our repo, create a new branch, add your changes,
+push the new branch into your branch and open a new pull request.
+*Before making the push, make sure unittests and coverage tests pass!*
+
+```bash
+   $ grunt test coverage
+.
+.
+PASS [100% > 60% ] : wraps/references.js (3 / 3)
+PASS [ 73% > 60% ] : wraps/table_of_contents.js (11 / 15)
+
+Global Coverage Results: (63% minimum)
+PASS [ 63% = 63% ] : global (4982 / 7818)
+
+Unit Test Results: 271 specs passed! (6.04s)
+>> No issues found.
+
+Done, without errors.
 ```
 
 If you need to change the way how build works, edit `local-config.js`
@@ -96,70 +149,25 @@ If you need to change the way how build works, edit `local-config.js`
   * api_endpoint: url of API service, see below for help on setting up a tunnel [default: http://localhost:8000/api/1]
 
 
-To help you get started, explore these examples: 
+To help you get started, explore these examples:
 
   * ./src/example.html (./src/js/apps/example)
-    
-	very stupid application showing use of requirejs to load modules 
-	
+
+	very stupid application showing use of requirejs to load modules
+
   * ./src/todo.html (./src/js/apps/todo)
-  
+
     a complete port of the TODO application from todomvc.com (using requirejs)
-	
+
   * for interactive development of widgets
-  
+
 	 http://localhost:8000/test/test-widgets.html?top-region-left=js/widgets/api_query/widget&top-region-right=js/widgets/api_request/widget&middle-region-left=js/widgets/api_response/widget
-	 
+
 	 notice that each components is identified by its path (without .js suffix) eg. `top-region=js/widgets/api_query/widget`
-  
-  * finally, the complete test suite of the discovery application 
-  
+
+  * finally, the complete test suite of the discovery application
+
      http://localhost:8000/test/tests.html
-
-
-
-
-Typical dev-cycle
-=================
-
- 1. write tests
- 2. write code and make sure tests are passing
- 3. ```grunt deploy``` -- this will prepare the target (note: deploy is not yet ready)
-
-
-Take advantage of the headless testing framework! You can edit code and
-have it automatically re-tested.
- 
-```bash
-  # run tests (it will reload automatically and report in terminal)
-  $ grunt test:web
-  
-  # or somewhat faster (but not good for cross site ajax calls)
-  $ grunt test:local
-```
-
-By default, the PhantomJS will execute tests from: test/mocha/discovery.spec.html; you can
-run other tests like so:
-
-```bash
-  $ grunt test:web --testname=mocha/foo  # assuming test/mocha/foo.spec.html exists!
-```
-
-
-Tests can also be opened in a browser, you can zone-in on certain class of tests when editing,
-but you have to reload in your browser
-
-```bash
-   # open the test in a browser
-   $ chrome ./test/mocha/todo.spec.html
-```
-
-When you want to interact with the server (and see the application through web):
-
- ```bash
-  # start the webserver (it will automatically reload on code changes)
-  $ grunt server
-  ```
 
   
 Explanation of the module structure:

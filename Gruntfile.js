@@ -221,8 +221,8 @@ module.exports = function(grunt) {
         serverTasks: ['watch:server', 'watch:styles']
     },
     //**
-    //* PhantomJS is a headless browser that runs our tests, by default it runs <mocha/discovery>.spec.html
-    //* if you need to change the tested file: grunt --testname=foo ....
+    //* PhantomJS is a headless browser that runs our tests, by default it runs core-suite
+    //* if you need to change the tested suite: grunt --testname='mocha/tests.html?bbbSuite=foo'
     //**
     mocha_phantomjs: {
       options: {
@@ -230,7 +230,7 @@ module.exports = function(grunt) {
         'output': 'test/reports/' + (grunt.option('testname') || 'mocha/discovery')
       },
 
-      local_testing: ['test/' + (grunt.option('testname') || 'mocha/discovery') + '.spec.html'],
+      local_testing: ['test/' + (grunt.option('testname') || 'mocha/tests.html')],
 
       web_testing: {
         options: {
