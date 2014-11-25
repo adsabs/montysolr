@@ -123,6 +123,7 @@ require.config({
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
     'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
+    'nvd3' :  'libs/nvd3/nvd3',
 
     // only for testing (won't get loaded otherwise)
     'chai': '../bower_components/chai/chai',
@@ -166,6 +167,11 @@ require.config({
 
     'd3-cloud' : {
       deps :['d3']
+    },
+
+    'nvd3' : {
+      deps : ['d3']
+
     },
 
     'jquery-ui' : {
