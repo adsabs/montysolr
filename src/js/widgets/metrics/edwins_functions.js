@@ -169,163 +169,26 @@ function extract_data_to_plot(variable, multidata, startidx)
 };
 
 //function that create a plot for the paper history
-function plot_paperhist()
-{
-  //I extract the data to plot
-  //if I don't have to extract the normalized values I start to take the values from 0
-  if (!NORM_PAPERHIST)
-    var data = extract_data_to_plot(paperhist_data, false, 0)
-  //otherwise I start to take the values from 2
-  else
-    var data = extract_data_to_plot(paperhist_data, false, 2)
-
-
-  var data1_refereed_to_plot = data[0];
-  var data2_not_refereed_to_plot = data[1];
-  var max = data[2];
-
-  //I define the size of the plot
-  var plot_size = 300 * SIZE_PAPERHIST;
-  $("#paperhist").css('height', plot_size+'px').css('width', plot_size+'px');
-
-  //I define the kind of plot I want
-  //by default I want a histogram
-  var show_bar = true;
-  var show_lines = false;
-  var show_points = false;
-  if (MODE_PAPERHIST == 'hist')
+dataExtractorObject.plot_paperhist = function(){
   {
-    show_bar = true;
-    show_lines = false;
-  }
-  else if (MODE_PAPERHIST == 'lines')
-  {
-    show_bar = false;
-    show_lines = true;
-  }
-  else if (MODE_PAPERHIST == 'points')
-  {
-    show_bar = false;
-    show_lines = true;
-    show_points = true;
+    //I extract the data to plot
+    //if I don't have to extract the normalized values I start to take the values from 0
+    if (!NORM_PAPERHIST)
+      var data = extract_data_to_plot(paperhist_data, false, 0)
+    //otherwise I start to take the values from 2
+    else
+      var data = extract_data_to_plot(paperhist_data, false, 2)
+
+
+    var data1_refereed_to_plot = data[0];
+    var data2_not_refereed_to_plot = data[1];
+
+    //more processing here
+
+
   }
 
-  //I set Up the options
-  var options = {
-    //bars: {show: true, barWidth: 0.8},
-    //lines: { show: true, fill: true, steps: false },
-    xaxis: {tickDecimals: 0},
-    yaxis: {min: 0, max: max, tickDecimals: 0},
-    grid: { hoverable: true, clickable: true },
-    legend:{container: $("#paperhist_legend")},
-    series: {
-      stack: true,
-      lines: { show: show_lines, fill: true, steps: false },
-      bars: { show: show_bar, barWidth: 0.8 },
-      points: { show: show_points },
-    }
-  };
 
-  //I plot the graph
-  $.plot($("#paperhist"),
-    [
-      {
-        label: "Refereed",
-        data:data1_refereed_to_plot,
-        //color:'red'
-      },
-      {
-        label: "Not Refereed",
-        data:data2_not_refereed_to_plot,
-        //color:'yellow'
-      }
-    ],
-    options
-  );
-
-  //I bind the event of the mouse over the graph to show the current value
-  $("#paperhist").bind("plothover", function (event, pos, item) {
-
-    if (item) {
-      //console.log([previousPoint, item.dataIndex, item])
-      if ((previousPoint != item.dataIndex) || (previousLabel != item.series.label)) {
-        previousPoint = item.dataIndex;
-        previousLabel = item.series.label;
-
-        $("#tooltip").remove();
-        var x = item.datapoint[0];//the year in the plot
-        var y = item.datapoint[1] - item.datapoint[2];//the single value without the staked
-        //If it is a float I round it
-        if (isFloat(y))
-          y = roundNumber(y, 2);
-
-        showTooltip(pos.pageX, pos.pageY,
-            item.series.label + " <br/>Year: " + x + " <br/>Publications: " + y);
-      }
-    }
-    else {
-      $("#tooltip").remove();
-      previousPoint = null;
-      previousLabel = null;
-    }
-  });
-};
-
-//function that changes the visualization mode
-function show_plot_paperhist(mode)
-{
-  if (mode == 'hist')
-    MODE_PAPERHIST = 'hist';
-  else if (mode == 'lines')
-    MODE_PAPERHIST = 'lines';
-  else if (mode == 'points')
-    MODE_PAPERHIST = 'points';
-  plot_paperhist();
-};
-//function that changes the size
-function size_plot_paperhist(size)
-{
-  if (parseInt(size) == 1)
-    SIZE_PAPERHIST = 1;
-  else if (parseInt(size) == 2)
-    SIZE_PAPERHIST = 2;
-  plot_paperhist();
-};
-//function called from the interface to switch from regular to normalized mode
-function switch_plot_paperhist(mode, position, ids_start)
-{
-  if (mode == 'regular')
-  {
-    //first of all I change the parameter to switch from regular to normalized
-    NORM_PAPERHIST = false;
-  }
-  else if (mode == 'normalized')
-  {
-    //first of all I change the parameter to switch from regular to normalized
-    NORM_PAPERHIST = true;
-  }
-
-  //then I fix some CSS
-  var this_id = ids_start + position;
-  if (position == 'right')
-  {
-    var other_id = ids_start + 'left';
-    $('#'+this_id).removeClass('plot_tabs_right_unselected');
-    $('#'+other_id).addClass('plot_tabs_left_unselected');
-    $('#'+this_id).off('click');
-    $('#'+other_id).on('click', function(event){switch_plot_paperhist('regular', 'left', 'paperhist_tabs_');});
-  }
-  else if (position == 'left')
-  {
-    var other_id = ids_start + 'right';
-    $('#'+this_id).removeClass('plot_tabs_left_unselected');
-    $('#'+other_id).addClass('plot_tabs_right_unselected');
-    $('#'+this_id).off('click');
-    $('#'+other_id).on('click', function(event){switch_plot_paperhist('normalized', 'right', 'paperhist_tabs_');});
-  }
-  //finally I plot the graph
-  plot_paperhist();
-};
 
 //function that creates a plot for the Citations histogram
 function plot_citshist()
