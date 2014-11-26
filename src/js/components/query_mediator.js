@@ -195,7 +195,9 @@ define(['underscore',
 
       var pubsub = qm.getBeeHive().Services.get('PubSub');
 
-      pubsub.publish(this.key, pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
+      if (pubsub)
+        pubsub.publish(this.key, pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
+        
       if (qm.failedRequestsCache.getIfPresent(this.requestKey)) {
         qm.failedRequestsCache.invalidate(this.requestKey);
       }
@@ -229,7 +231,8 @@ define(['underscore',
       }
 
       var pubsub = qm.getBeeHive().Services.get('PubSub');
-      pubsub.publish(this.key, pubsub.DELIVERING_FEEDBACK+this.key.getId(), feedback);
+      if (pubsub)
+        pubsub.publish(this.key, pubsub.DELIVERING_FEEDBACK+this.key.getId(), feedback);
 
     },
 

@@ -584,7 +584,8 @@ define([], function() {
         "abstract": ["In the Galaxy, there is evidence that various components of regions of massive <em>star</em>"]
       }
     }
-  }
-  return testJson
+  };
 
-})
+  return function() {return JSON.parse(JSON.stringify(testJson))};
+
+});

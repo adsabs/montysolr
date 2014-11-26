@@ -24,9 +24,9 @@ define(['marionette',
         minsub = new (MinimalPubsub.extend({
           request: function(apiRequest) {
             if (this.requestCounter % 2 === 0) {
-              return Test2;
+              return Test2();
             } else {
-              return Test1;
+              return Test1();
             }
           }
         }))({verbose: false});

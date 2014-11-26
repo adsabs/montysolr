@@ -340,6 +340,10 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
             expect(qm.onApiResponse.callCount, 0);
             expect(qm.onApiRequestFailure.callCount, 5);
             expect(qm.tryToRecover.callCount, 3);
+
+            qm.close();
+            delete qm;
+            
             done();
           }, 50);
 

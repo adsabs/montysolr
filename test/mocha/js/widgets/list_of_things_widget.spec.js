@@ -25,7 +25,7 @@ define(['marionette',
             MinPubSub
     ) {
 
-    describe("ListOfThings", function () {
+    describe("ListOfThings (list_of_things_widget.spec.js)", function () {
 
       it("returns PaginatedView object", function(done) {
         expect(new PaginatedView()).to.be.instanceof(Marionette.CompositeView);
@@ -38,7 +38,7 @@ define(['marionette',
 
       it("the collection supports pagination operations'", function (done) {
         var coll = new PaginatedCollection();
-        var docs = test1.response.docs;
+        var docs = test1().response.docs;
 
         _.each(docs, function(d) {
           coll.add(_.clone(d));
@@ -100,7 +100,7 @@ define(['marionette',
 
         var coll = new PaginatedCollection();
         var view = new PaginatedView({collection: coll});
-        var docs = test1.response.docs;
+        var docs = test1().response.docs;
 
         _.each(docs, function(d) {
           view.collection.add(_.clone(d));
@@ -153,11 +153,10 @@ define(['marionette',
           request: function(apiRequest) {
             counter++;
             var q = apiRequest.get('query');
-            var ret = test1;
+            var ret = test1();
             if (counter % 2 == 0)
-              ret = test2;
+              ret = test2();
 
-            ret = _.clone(ret);
             _.each(q.keys(), function(k) {
               ret.responseHeader.params[k] = q.get(k)[0];
             });
@@ -189,7 +188,7 @@ define(['marionette',
         var widget = new ListOfThings({pagination: {perPage: 5}});
         //widget.activate(minsub.beehive.getHardenedInstance());
 
-        var data = JSON.parse(JSON.stringify(test1));
+        var data = test1();
         data.response.numFound = 100;
 
         _.each(_.range(5), function(n) {
@@ -203,7 +202,7 @@ define(['marionette',
         //$('#test').append($w);
 
         widget.updatePagination({numFound: 100, page : 1, perPage : 5});
-        console.log(widget.model.attributes);
+        //console.log(widget.model.attributes);
         expect($w.find(".pagination li").length).to.eql(5);
         expect($w.find(".pagination li").filter(function(n){return $(n).text().trim() === "«"}).length).to.eql(0);
         expect($w.find(".pagination li:first").text().trim()).to.eql("1");
@@ -224,7 +223,7 @@ define(['marionette',
 
         var minsub = new (MinPubSub.extend({
           request: function(apiRequest) {
-            var t = JSON.parse(JSON.stringify(test1));
+            var t = test1();
             t.response.start  = 0;
             return t;
           }

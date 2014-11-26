@@ -24,14 +24,7 @@ define([
     FacetTreeView
     ) {
 
-    describe("FacetWidget - base (UI)", function () {
-
-      // modify the test to contain only 5 pairs of facet values
-      _.each([test1, test2], function(o) {
-        _.each(_.keys(o.facet_counts.facet_fields), function(fKey) {
-          o.facet_counts.facet_fields[fKey] = Array.prototype.slice.call(o.facet_counts.facet_fields[fKey], 0, 10);
-        });
-      });
+    describe("FacetWidget - base (facet_widget.spec.js)", function () {
 
 
       var minsub, testId;
@@ -42,11 +35,18 @@ define([
         //$('#test-area').append(testEl);
         minsub = new (MinimalPubsub.extend({
           request: function(apiRequest) {
+            var ret;
             if (this.requestCounter % 2 === 0) {
-              return test1;
+              ret = test1();
             } else {
-              return test2;
+              ret = test2();
             }
+            // modify the test to contain only 5 pairs of facet values
+            _.each(_.keys(ret.facet_counts.facet_fields), function(fKey) {
+              ret.facet_counts.facet_fields[fKey] = Array.prototype.slice.call(ret.facet_counts.facet_fields[fKey], 0, 10);
+            });
+
+            return ret;
           }
         }))({verbose: false});
         done();

@@ -31,9 +31,9 @@ define([
         minsub = new (MinimalPubsub.extend({
           request: function (apiRequest) {
             if (this.requestCounter % 2 === 0) {
-              return JSON.parse(JSON.stringify(Test1));
+              return Test1();
             } else {
-              var ret = JSON.parse(JSON.stringify(Test1));
+              var ret = Test1();
               ret.response.start = 10;
               return ret;
             }

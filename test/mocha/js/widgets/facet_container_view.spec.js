@@ -18,7 +18,7 @@ define([
             LogicSelectionContainerTemplate
     ) {
 
-    describe("FacetContainerView (UI)", function () {
+    describe("FacetContainerView (facet_container_view.spec.js)", function () {
 
         afterEach(function (done) {
           var ta = $('#test-area');

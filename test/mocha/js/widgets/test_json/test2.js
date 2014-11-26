@@ -3100,6 +3100,6 @@ define([], function() {
       "7952576": {}
     }
   };
-  return testJson;
+  return function() {return JSON.parse(JSON.stringify(testJson))};
 
 });

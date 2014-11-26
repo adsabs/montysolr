@@ -162,7 +162,7 @@ define([
           // deliver data to the widget for display
           var abstract = app.getWidget('ShowAbstract');
           var references = app.getWidget('ShowReferences');
-          var r = new ApiResponse(testData);
+          var r = new ApiResponse(testData());
           r.setApiQuery(new ApiQuery({q: 'foo'}));
 
           abstract.processResponse(r);

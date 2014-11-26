@@ -151,10 +151,12 @@ define(['backbone',
 
 
         if (paginator.getCycle() <= 1) {
-          coll.reset(facetsCol);
+          coll.reset(facetsCol.slice(0, view.maxDisplayNum));
         }
         else {
-          coll.add(facetsCol);
+          var a = view.maxDisplayNum - coll.length;
+          if (a > 0)
+            coll.add(facetsCol.slice(0, a));
         }
 
 

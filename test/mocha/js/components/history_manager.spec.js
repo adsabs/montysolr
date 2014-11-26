@@ -32,16 +32,6 @@ define(['js/components/history_manager'], function(HistoryManager){
       manager.addEntry({page: "abstractPage", data:  "fakeBibcode", subPage: "subPage1"});
 
       expect(manager.getPriorPageVal()).to.eql("fakeQuery");
-
-
-
-
-    })
-
-
-
+    });
   })
-
-
-
-})
+});
