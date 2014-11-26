@@ -235,7 +235,7 @@ module.exports = function(grunt) {
       web_testing: {
         options: {
           urls: [
-              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=core-suite')
+              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=discovery-suite')
           ]
         }
       },
@@ -348,41 +348,47 @@ module.exports = function(grunt) {
       full: {
         options : {
           urls: [
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=core-suite',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=ui-suite',
-            'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=qb-suite'
+            'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=discovery-suite'
           ],
           threshold : 0,
-          globalThreshold : 63,
+          globalThreshold : 72,
           log : true,
           logErrors: true,
-          moduleThreshold : 60,
+          moduleThreshold : 80,
           modulePattern : "../../src/js/(.*)",
           customModuleThreshold: {
-            'components/api_feedback.js': 59,
-            'components/api_query_updater.js': 42,
-            'components/query_mediator.js': 50,
-            'mixins/dependon.js': 46,
-            'services/api.js': 46,
-            'components/navigator.js': 58,
-            'components/query_builder/rules_translator.js': 45,
-            'mixins/widget_mixin_method.js': 37,
-            'mixins/widget_utility.js': 40,
-            'page_managers/three_column_view.js': 38,
-            'widgets/abstract/widget.js': 58,
-            'widgets/base/base_widget.js': 51,
-            'widgets/base/tree_view.js': 50,
-            'widgets/breadcrumb/widget.js': 55,
-            'widgets/export/widget.js': 23,
-            'widgets/facet/collection.js': 33,
-            'widgets/facet/factory.js': 50,
-            'widgets/facet/graph-facet/base_graph.js': 8,
-            'widgets/facet/graph-facet/h_index_graph.js': 2,
-            'widgets/facet/graph-facet/year_graph.js': 2,
-            'widgets/list_of_things/item_view.js': 50,
-            'wraps/author_facet.js': 13,
-            'wraps/graph_tabs.js': 5
-          }
+            "widgets/facet/graph-facet/h_index_graph.js":2,
+            "widgets/facet/graph-facet/year_graph.js":2,
+            "wraps/graph_tabs.js":5,
+            "widgets/facet/graph-facet/base_graph.js":8,
+            "wraps/author_facet.js":13,
+            "widgets/export/widget.js":23,
+            "widgets/facet/collection.js":33,
+            "mixins/widget_mixin_method.js":37,
+            "page_managers/three_column_view.js":38,
+            "mixins/widget_utility.js":40,
+            "components/query_builder/rules_translator.js":45,
+            "widgets/base/tree_view.js":50,
+            "widgets/facet/factory.js":50,
+            "widgets/list_of_things/item_view.js":50,
+            "widgets/base/base_widget.js":51,
+            "widgets/breadcrumb/widget.js":55,
+            "components/navigator.js":58,
+            "widgets/abstract/widget.js":58,
+            "widgets/network_vis/network_widget.js":60,
+            "mixins/dependon.js":61,
+            "widgets/facet/tree_view.js":62,
+            "widgets/search_bar/search_bar_widget.js":65,
+            "widgets/facet/item_view.js":71,
+            "widgets/resources/widget.js":72,
+            "wraps/table_of_contents.js":73,
+            "bugutils/minimal_pubsub.js":74,
+            "components/history_manager.js":75,
+            "services/api.js":76,
+            "components/api_feedback.js":77,
+            "components/transition.js":77,
+            "widgets/dropdown-menu/widget.js":78,
+            "widgets/list_of_things/paginated_view.js":78}
         }
       },
 

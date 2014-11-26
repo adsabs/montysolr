@@ -25,7 +25,7 @@ define([
   TableOfContentsWidget
   ){
 
-  describe("Various show-detail Widgets (Based on ListOfThings)", function(){
+  describe("Various show-detail LoT Widgets (lot_derivates.spec.js)", function(){
 
     var minsub, counter;
 
@@ -35,11 +35,10 @@ define([
         request: function(apiRequest) {
           counter++;
           var q = apiRequest.get('query');
-          var ret = test1;
+          var ret = test1();
           if (counter % 2 == 0)
-            ret = test2;
+            ret = test2();
 
-          ret = _.clone(ret);
           _.each(q.keys(), function(k) {
             ret.responseHeader.params[k] = q.get(k)[0];
           });

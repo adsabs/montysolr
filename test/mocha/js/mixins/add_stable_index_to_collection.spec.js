@@ -8,14 +8,14 @@ define([
   function(_,
     PaginationMixin,
     ApiResponse,
-    TestResponse
+    TestData
     ){
 
   describe("Widget Paginator (Widget Mixin)", function(){
 
     beforeEach(function(){
 
-      fakeResponse = new ApiResponse(TestResponse);
+      fakeResponse = new ApiResponse(TestData());
 
 
     });
@@ -34,9 +34,10 @@ define([
 
     it("should be aware of the apiResponse's start value and change the results index to reflect that value", function(){
 
-      TestResponse.response.start = 100;
+      var d = TestData();
+      d.response.start = 100;
 
-      var fakeResponse = new ApiResponse(TestResponse);
+      var fakeResponse = new ApiResponse(d);
 
       var docs = PaginationMixin.addPaginationToDocs(fakeResponse.get("response.docs"), fakeResponse.get("response.start"));
 

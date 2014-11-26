@@ -58,7 +58,7 @@ function(
     _updateStartAndEndIndex: function () {
       var pageNum = this.paginationModel.get("page");
       var perPage = this.paginationModel.get("perPage");
-      var numFound = this.paginationModel.get("numFound")
+      var numFound = this.paginationModel.get("numFound");
       //used as a metric to see if we need to fetch new data or if data at these indexes
       //already exist
       this.currentStartIndex = this.getPageStart(pageNum, perPage);
@@ -76,6 +76,10 @@ function(
       if (this.paginationModel) {
         this._updateStartAndEndIndex();
       }
+    },
+
+    onReset: function() {
+      this.lastIndex = -1;
     },
 
     getStartIndex: function() {

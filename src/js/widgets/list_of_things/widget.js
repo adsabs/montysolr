@@ -105,7 +105,6 @@ define([
       },
 
       processResponse: function (apiResponse) {
-
         var q = apiResponse.getApiQuery();
 
         var docs = this.extractDocs(apiResponse);

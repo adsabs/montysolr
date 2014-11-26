@@ -150,11 +150,9 @@ define(['marionette',
           newVal += " ";
           newVal += order;
 
-        console.log('BANG!');
+        //console.log('BANG!');
         if (newVal !== current) {
-
           this.trigger("sortChange", newVal)
-
         }
 
       }

@@ -53,13 +53,13 @@ define([
     mocha._reporter.prototype.suiteURL = function(suite){
       var t = getUrlParam('bbbSuite');
       if (t)
-        return '?grep=' + encodeURIComponent(suite.fullTitle()) + '&bbbSuite=' + encodeURIComponent(t);
+        return '?grep=' + encodeURIComponent(suite.fullTitle()) + '&bbbSuite=' + t.join('|');
       return '?grep=' + encodeURIComponent(suite.fullTitle());
     };
     mocha._reporter.prototype.testURL = function(test){
       var t = getUrlParam('bbbSuite');
       if (t)
-        return '?grep=' + encodeURIComponent(test.fullTitle()) + '&bbbSuite=' + encodeURIComponent(t);
+        return '?grep=' + encodeURIComponent(test.fullTitle()) + '&bbbSuite=' + t.join('|');
       return '?grep=' + encodeURIComponent(test.fullTitle());
     };
 
