@@ -88,7 +88,7 @@ define([
       .force()
       .size([width, height])
       .distance(function (d) {
-       return 50
+        return 50
       })
       .charge(charge);
 
@@ -174,7 +174,7 @@ define([
             .attr("text-anchor", "middle")
             .classed("group-paper-name", true)
             .attr("y", function () {
-             var p = i % 2 == 1? -i : i;
+              var p = i % 2 == 1? -i : i;
               if (i == 1){
                 return -1
               }
@@ -191,18 +191,18 @@ define([
     force.on("tick", function () {
 
 
-/*
-*   NOTE TO ROMAN: the offending lines are :
-*   var r = d3.select(this.children[0]).attr("r");
-*   (repeated 2x)
-* */
-
+      /*
+       *   NOTE TO ROMAN: the offending lines are :
+       *   var r = d3.select(this.children[0]).attr("r");
+       *   (repeated 2x)
+       * */
+      console.log(this)
       node.attr("x", function(d) {
-      var r = d3.select(this.children[0]).attr("r");
+        var r = d3.select(this.children[0]).attr("r");
         return d.x = Math.max(r, Math.min(width - r, d.x));
       })
         .attr("y", function(d) {
-      var r = d3.select(this.children[0]).attr("r");
+          var r = d3.select(this.children[0]).attr("r");
           return d.y = Math.max(r, Math.min(height - r, d.y));
         });
 
@@ -480,10 +480,6 @@ define([
   };
 
 
-  var widget = new NetworkWidget(options);
-
-
-  return widget;
-
+  return function() {return new NetworkWidget(options)};
 
 })
