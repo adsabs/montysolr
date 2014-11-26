@@ -1061,7 +1061,7 @@
 		<field name="page" type="first_string" indexed="true" stored="true"
 			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 	  <field name="eid" type="first_string" indexed="true" stored="true"
-      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+      multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 			
 		<field name="year" type="first_string" indexed="true" stored="true" 
 			multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>

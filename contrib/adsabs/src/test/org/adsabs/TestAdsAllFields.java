@@ -180,7 +180,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"reference\": [\"2014JNuM..455...10R\", \"2014JNuM..455...10T\"]" +
 				
 				// we actually index only the first token '2056'
-				", \"page\": \"2056-2078\"" +
+				", \"page\": [\"2056-2078\", \"55\"]" +
+				", \"eid\": \"00001\"" +
 				", \"volume\": \"l24\"" +
 				", \"issue\": \"24i\"" +
 				
@@ -446,6 +447,17 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "page:2056-xxxxx"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']");
+		assertQ(req("q", "page:2056 AND page:55"),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']");
+		
+		/*
+		 * eid
+		 */
+		assertQ(req("q", "eid:00001"),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']");
+		
 		
 
 		/*

@@ -310,15 +310,6 @@
     </listener>
     -->
     
-    
-    <!-- Enables a transaction log, currently used for real-time get.
-         "dir" - the target directory for transaction logs, defaults to the
-            solr data directory.  --> 
-    <updateLog>
-      <str name="dir">${solr.data.dir:}</str>
-    </updateLog>
-   
-
   </updateHandler>
   
   <!-- IndexReaderFactory
