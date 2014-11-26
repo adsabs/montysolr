@@ -191,12 +191,18 @@ define([
     force.on("tick", function () {
 
 
+/*
+*   NOTE TO ROMAN: the offending lines are :
+*   var r = d3.select(this.children[0]).attr("r");
+*   (repeated 2x)
+* */
+
       node.attr("x", function(d) {
-        var r = d3.select(this.children[0]).attr("r");
+      var r = d3.select(this.children[0]).attr("r");
         return d.x = Math.max(r, Math.min(width - r, d.x));
       })
         .attr("y", function(d) {
-          var r = d3.select(this.children[0]).attr("r");
+      var r = d3.select(this.children[0]).attr("r");
           return d.y = Math.max(r, Math.min(height - r, d.y));
         });
 
