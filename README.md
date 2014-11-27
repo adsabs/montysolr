@@ -142,6 +142,30 @@ Unit Test Results: 271 specs passed! (6.04s)
 Done, without errors.
 ```
 
+Configuration
+=============
+
+The web application loads its config from local modules and from remote urls
+(if configured to do so). The most important config files are:
+
+  * src/js/discovery.config.js
+
+    This is the require.js configuration, but we keep there also the definition
+    of all modules/widgets/plugins that the application should load (or make
+    available). It is in the section: 'js/apps/discovery/main'
+
+  * src/js/discovery.vars.js
+
+    This is for often changing variables (e.g. what is the main url under which
+    bumblebee is running, or the url to the API services). By default,
+    this file will be created during 'grunt setup' and if already exists, it
+    will NOT be overwritten. Look at 'discovery.vars.js.defaults' for explanation.
+
+  * dynamic discovery
+
+    The application can also load config from remote urls (during startup) if
+    configured to do so in src/js/discoverry.vars.js >> 'bootstrapUrls'
+
 If you need to change the way how grunt works, you can edit `local-config.js`
 
   * port_development: when running tests, webserver will start on this port [default: 8000]

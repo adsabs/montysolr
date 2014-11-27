@@ -742,7 +742,7 @@ define([
 
 
     beforeEach(function(){
-      $("#test").append(PaperNetwork.view.el)
+     
 
 
     });
@@ -758,6 +758,7 @@ define([
 
     it("should render small word clouds for the summary nodes", function(){
       var widget = new PaperNetwork();
+       $("#test").append(widget.view.el);
       widget.processResponse(new JsonResponse(testDataBig));
 //      expect(d3.select(".summary-node-group").text()).to.eql("classificationdatadigitallibraryoverviewsearching")
     });
