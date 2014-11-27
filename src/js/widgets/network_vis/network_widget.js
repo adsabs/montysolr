@@ -154,12 +154,10 @@ define([
 
     var ContainerView = Marionette.ItemView.extend({
 
-      initialize : function(options){
+      initialize : function(){
 
         this.chosenNamesCollection = new ChosenNamesCollection();
         this.chosenNamesView = new ChosenNamesView({collection: this.chosenNamesCollection, networkType : Marionette.getOption(this, "networkType") });
-
-
 
       },
 
@@ -176,8 +174,7 @@ define([
 
         n =  n[0].toUpperCase() + n.slice(1)
 
-        return {networkType : n,
-                helpText : Marionette.getOption(this, "helpText")}
+        return {networkType : n}
       },
 
       template  : ContainerTemplate,
@@ -190,6 +187,7 @@ define([
 
 
       updateSingleName: function (name) {
+
 
         if (this.chosenNamesCollection.get(name)) {
           //remove it
@@ -213,7 +211,7 @@ define([
 
             this.chosenNamesCollection.add({name: n}, {silent : true})
 
-          }, this);
+          }, this)
 
           this.chosenNamesCollection.trigger("augment")
 
@@ -266,9 +264,7 @@ define([
         //it's a big graph with summary nodes
         if (!_.isEmpty(this.model.get("summaryData"))){
 
-          this.graphView = new SummaryGraphView({model : this.model, chosenNamesCollection : this.chosenNamesCollection, detailMixin : Marionette.getOption(this, "detailMixin")})
-
-          _.extend(this.graphView, Marionette.getOption(this, "summaryMixin"))
+          this.graphView = new SummaryGraphView({model : this.model, chosenNamesCollection : this.chosenNamesCollection})
 
           this.ui.selectedContainer.append(this.chosenNamesView.render().el);
 
@@ -312,9 +308,6 @@ define([
           })
 
         }
-
-        //initialize popover
-        this.$(".icon-help").popover({trigger : "hover", placement : "bottom", html :true});
 
       }
 
@@ -408,8 +401,6 @@ define([
 
         if (this.detailNetworkView) {
 
-          //getting rid of event listeners
-
           this.detailNetworkView.remove();
 
         }
@@ -436,7 +427,6 @@ define([
 
           this.detailNetworkView.delegateEvents();
 
-
         }
 
         else {
@@ -446,9 +436,6 @@ define([
 
           //now create a new view
           this.detailNetworkView = new DetailNetworkView({model: new DetailModel(data), chosenNamesCollection : this.chosenNamesCollection , groupNumber: group});
-
-          //extend with possible mixin passed in during configuration
-          _.extend(this.detailNetworkView, Marionette.getOption(this, "detailMixin"));
 
           this.listenTo(this.detailNetworkView, "names:toggle", function(n, a){ this.trigger("names:toggle", n, a)})
           this.listenTo(this.detailNetworkView, "name:toggle", function(n,a ){ this.trigger("name:toggle", n,a )})
@@ -464,14 +451,6 @@ define([
           this.detailNetworkView.render();
 
           this.detailViews.add(this.detailNetworkView, group + 1)
-
-        }
-
-        //currently the paper network needs to add the popover interaction
-
-        if (this.detailNetworkView.addExtraListeners){
-
-          this.detailNetworkView.addExtraListeners();
 
         }
 
@@ -509,7 +488,7 @@ define([
         _.each(fullGraph.links, function (l, i) {
           if (keys.indexOf(l.source) !== -1 && keys.indexOf(l.target) !== -1) {
             //re-assign the indexes to the links
-            var newLink = _.clone(l);
+            var newLink = _.clone(l)
             newLink.source = indexDict[l.source];
             newLink.target = indexDict[l.target];
             links.push(newLink)
@@ -533,7 +512,7 @@ define([
 
         linkValues = _.pluck(currentData.links, "weight");
 
-        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([1, 12]);
+        scalesDict.lineScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([1, 20]);
         scalesDict.linkScale = d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.1, .3]);
         scalesDict.radiusScale = d3.scale.linear().domain([d3.min(groupWeights), d3.max(groupWeights)]).range([10, 16]);
 
@@ -615,7 +594,9 @@ define([
           .style("pointer-events", "all");
 
 
-       //improving mouseover interaction (svg doesn't use z index)
+
+
+        //improving mouseover interaction (svg doesn't use z index)
         link = g2.selectAll(".network-link")
           .data(linksData)
           .enter()
@@ -1246,7 +1227,10 @@ define([
 
       }
 
-    });
+
+
+    })
+
 
 
     var NetworkWidget = BaseWidget.extend({
@@ -1260,24 +1244,20 @@ define([
           throw new Error("widget was not configured with an endpoint");
         }
 
-        if (options.broadcastFilteredQuery){
-          this.broadcastFilteredQuery = options.broadcastFilteredQuery;
-        }
-
         this.model = new NetworkModel();
 
         this.view = new ContainerView({
           model : this.model,
-          networkType: Marionette.getOption(this, "networkType"),
-          helpText : Marionette.getOption(this, "helpText"),
-          summaryMixin : options.summaryMixin,
-          detailMixin : options.detailMixin
+          networkType: Marionette.getOption(this, "networkType")
 
         });
 
         this.listenTo(this.view, "filterSearch", this.broadcastFilteredQuery);
 
         this.listenTo(this.view, "close", this.broadcastClose);
+
+        this.queryUpdater = new ApiQueryUpdater("author");
+
 
       },
 
@@ -1346,23 +1326,20 @@ define([
 
       },
 
-
       broadcastFilteredQuery : function(names){
-
-        var updater = new ApiQueryUpdater("fq");
 
         if (!names.length){
           return
 
         }
 
-        names = _.map(names, function(n){return updater.quote(n)}, this);
+        names = _.map(names, function(n){return this.queryUpdater.quote(n)}, this);
 
         names =  "author:(" +names.join(" OR ") +")";
 
         newQuery = this.getCurrentQuery().clone();
 
-        updater.updateQuery(newQuery, "fq", "limit", names);
+        newQuery.add('q', names);
 
         this.resetWidget();
 

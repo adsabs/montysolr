@@ -1499,7 +1499,7 @@ define([
 
     beforeEach(function () {
 
-      networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
+      networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network"});
       $("#test").append(networkWidget.view.el);
 
       minsub = new MinimalPubsub({verbose: false});
@@ -1706,7 +1706,7 @@ define([
 
       expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
 
-      expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql( "__fq_fq=AND&__fq_fq=author%3A(%22testName1%22+OR+%22testName2%22)&fq=(author%3A(%22testName1%22+OR+%22testName2%22))&q=original+search");
+      expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql( "q=original+search&q=author%3A(%22testName1%22+OR+%22testName2%22)");
 
     })
 
@@ -1739,21 +1739,6 @@ define([
 
 
     })
-
-//    it("has a help popover that is accessible by hovering over the question mark icon", function(){
-//
-//      networkWidget.processResponse(new JsonResponse(testDataLarge));
-//
-//      //it uses the standard bootstrap popover, you just need to make sure the data-content attribute is correct
-//
-//      expect(networkWidget.view.$(".icon-help").attr("data-content")).to.eql("test");
-//
-//      expect($("div.popover").length).to.eql(0);
-//
-//      networkWidget.view.$(".icon-help").mouseover();
-//
-//      expect($("div.popover").length).to.eql(1)
-//    })
 
 
   })
