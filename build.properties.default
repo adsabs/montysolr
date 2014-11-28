@@ -11,3 +11,6 @@
 solr.version=4.0.0-SVN
 montysolr.version=4.0.0-SVN
 
+# if you want to use custom executables; define them here
+python=python
+ant=ant
