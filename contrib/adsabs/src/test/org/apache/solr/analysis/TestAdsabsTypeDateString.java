@@ -205,6 +205,17 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 			"//*[@numFound='0']"
 			);
 		
+		// and using the real date
+		// TODO: this should work too: assertQ(req("q", "date:[\"2012-10-01T00:00:00\" TO \"2012-11-01T00:00:00Z\"]", "indent", "true"),
+		assertQ(req("q", "date:[\"2012-10-01T00:00:00\" TO \"2012-12-01T00:00:00Z\"]", "indent", "true"), 
+    		"//*[@numFound='5']", 
+    		"//doc/str[@name='id'][.='0']",
+        "//doc/str[@name='id'][.='1']",
+        "//doc/str[@name='id'][.='2']",
+        "//doc/str[@name='id'][.='3']",
+        "//doc/str[@name='id'][.='4']"
+        );
+		
     
   }
   
