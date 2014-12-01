@@ -1,53 +1,132 @@
 
 
-.s-graph-view {
-  .clearfix;
-  height: 100%;
-}
-.s-metrics-table, .s-metrics-graph {
-  width: 50%;
-  float: left;
+.s-metrics-svg {
+  height: 340px !important;
 }
 
-.s-metrics-graph {
+
+.s-metrics-title {
+  padding: 1px 2%;
+  background-color: lighten(@brand-info, 33%);
+  margin-right: -1px;
+
+  h3 {
+    margin: 8px 0;
+    font-size: 20px;
+  }
+}
+
+
+
+.s-metrics-table, .s-metrics-graph {
+
+  @media(min-width: @screen-sm-min){
+
+    display: inline-block;
+    vertical-align: top;
+    padding: 0% 2%;
+
+  }
 
 }
 
 .s-metrics-table {
-  padding: 0 5%;
+  font-size : 14px;
+  /*
+  I don't understand why I have to specify this
+  the width from the parent div is also being applied to the table
+  but I thought a table was a block level element
+  */
+
+  table {
+    width: 100%;
+  }
+
+  @media(min-width: @screen-sm-min){
+
+    width: 33%;
+
+  }
+
+  th {
+    text-align: right;
+  }
+
+  tr td:first-of-type {
+
+    width: 190px;
+
+  }
+
+  tr td:nth-of-type(3), tr td:nth-of-type(4) {
+
+      text-align: right;
+
+  }
 
 }
 
+.s-metrics-graph {
+
+  @media(min-width: @screen-sm-min){
+
+    width: 66%;
+
+  }
+}
+
+
 .s-graph-tab {
   float:left;
-  width: 30%;
-  font-size: 16px;
-  margin: 0 10% 20px 10%;
-  padding-left: 2%;
+  width: 15%;
+  font-size: 14px;
+  margin: 0 10px 20px 0;
+  text-align: center;
   cursor: pointer;
   font-weight: 600;
+  padding: 5px;
+  border-bottom: 2px solid #fff;
+
+
+  &:first-of-type {
+    margin-left: 5%;
+  }
+
+  &:hover {
+    border-bottom: 2px solid lighten(@brand-primary-faded, 30%);
+  ;
+  }
+
+  .lh-transition(all, .5s);
 
 }
 
 .s-graph-tab.active{
-  border-bottom: 3px solid @brand-primary-faded;
-  color: @brand-primary;
+  border-bottom: 2px solid @brand-primary-faded;
+  color:  @brand-primary-faded;
 }
 
-.s-graph-container {
-  width: 80%;
-  float:left;
+
+.s-graph-container text {
+
+  font-size : 16px !important;
 }
 
-.s-graph-options {
-  width: 20%;
-  float: left;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
 
-  label {
-    display : block;
-    font-weight: 300;
-  }
+/* nvd3 overrides */
+
+
+.nvtooltip h3 {
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #fff;
+}
+
+.nvtooltip  p {
+  text-align: left;
+}
+
+.nvtooltip{
+  .ads-container;
+  .box-shadow(2px 2px 2px @gray-light)
 }

@@ -54,6 +54,9 @@ require.config({
         AuthorNetwork : 'js/wraps/author_network',
         PaperNetwork : 'js/wraps/paper_network',
 
+        MetricsDropdown : 'js/wraps/metrics_dropdown',
+        Metrics :  'js/widgets/metrics/widget',
+
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',
         BibstemFacet: 'js/wraps/bibstem_facet',

@@ -36,28 +36,66 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
 
   Api.prototype.request = function(request, options) {
 
+    /* making the assumption that if the method is post,
+    * the data will be submitted as json
+    * */
+
     if (!(request instanceof ApiRequest)) {
       throw Error("Api.request accepts only instances of ApiRequest");
     }
 
     var self = this;
     var query = request.get('query');
+
+    var method = request.get('method') || "GET";
+
+    if (method === "POST"){
+
+      var u = this.url + (request.get('target') || '');
+
+    }
+
+    else {
+
+      var u = this.url + (request.get('target') || '');
+      u = u.substring(0, this.url.length-2) + u.substring(this.url.length-2, u.length).replace('//', '/');
+
+      if (!u) {
+        throw Error("Sorry, dude, you can't use api without url");
+      }
+
+    }
+
+    var data;
+
     if (query && !(query instanceof ApiQuery)) {
       throw Error("Api.query must be instance of ApiQuery");
     }
 
-    var u = this.url + (request.get('target') || '');
-    if (!u) {
-      throw Error("Sorry, dude, you can't use api without url");
+    if (query && method === "GET"){
+
+      data = query.url();
+
     }
-    u = u.substring(0, this.url.length-2) + u.substring(this.url.length-2, u.length).replace('//', '/');
+    else if (query && method === "POST"){
+
+      data = JSON.stringify(query.toJSON());
+
+    }
+    else {
+
+      data = "{}";
+    }
+
+    var contentType = method === "POST" ? 'application/json' :  'application/x-www-form-urlencoded';
+
 
     var opts = {
-      type: 'GET',
+      type: method,
       url: u,
       dataType: 'json',
-      data: query ? query.url() : "{}",
-      contentType: 'application/x-www-form-urlencoded',
+      data: data,
+      contentType: contentType,
       cache: false,
       headers: {"X-BB-Api-Client-Version": this.clientVersion},
       context: {request: request, api: self }

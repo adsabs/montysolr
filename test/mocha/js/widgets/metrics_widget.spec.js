@@ -1,18 +1,25 @@
 define([
   'js/widgets/metrics/widget',
   'js/widgets/metrics/edwins_functions',
-  'js/components/json_response'
+  'js/components/json_response',
+  'js/bugutils/minimal_pubsub',
+  'js/components/api_query',
+  'js/components/api_response'
+
 ], function(
   MetricsWidget,
   DataExtractor,
-  JsonResponse
+  JsonResponse,
+  MinimalPubSub,
+  ApiQuery,
+  ApiResponse
   ){
 
   describe("Metrics Widget (UI Widget)", function(){
 
 //query : {"bibcodes":["1980ApJS...44..137K","1980ApJS...44..489B"]}'
 
-
+    //this is the large version straight from Edwin's api
     var testData = {
       "all reads": {
         "Average number of downloads": 51.0,
@@ -184,30 +191,122 @@ define([
       }
     };
 
+    //the smaller more manageable version
+    var testDataSmall = {
+      "all reads": {
+        "Average number of downloads": 51.0,
+        "Average number of reads": 75.0,
+        "Median number of downloads": 51.0,
+        "Median number of reads": 75.0,
+        "Normalized number of downloads": 90.0,
+        "Normalized number of reads": 129.0,
+        "Total number of downloads": 102,
+        "Total number of reads": 150
+      },
+      "all stats": {
+        "Average citations": 38.5,
+        "Average refereed citations": 37.0,
+        "H-index": 2,
+        "Median citations": 38.5,
+        "Median refereed citations": 37.0,
+        "Normalized citations": 71.5,
+        "Normalized paper count": 1.5,
+        "Normalized refereed citations": 69.0,
+        "Number of citing papers": 77,
+        "Number of papers": 2,
+        "Refereed citations": 74,
+        "Total citations": 77,
+        "e-index": 8.5,
+        "g-index": 2,
+        "i10-index": 2,
+        "i100-index": 0,
+        "m-index": 2.0,
+        "read10 index": 0,
+        "roq index": 1792.0,
+        "self-citations": 0,
+        "tori index": 3.2
+      },
+      "citation histogram": {
+        "1980": "0:0:0:0:0.0:0.0:0.0:0.0",
+        "1981": "4:4:4:4:4.0:4.0:4.0:4.0",
+        "type": "citation_histogram"
+      },
+      "metrics series": {
+        "1980": "0:0:0:0:0.0:0:0:0",
+        "1981": "1:2:0:0.472023809524:0.5:343:0:0",
+        "type": "metrics_series"
+      },
+      "paper histogram": {
+        "1980": "2:2:1.5:1.5",
+        "type": "publication_histogram"
+      },
+      "reads histogram": {
+        "1996": "0:0:0.0:0.0",
+        "1997": "0:0:0.0:0.0",
+        "type": "reads_histogram"
+      },
+      "refereed reads": {
+        "Average number of downloads": 51.0,
+        "Average number of reads": 75.0,
+        "Median number of downloads": 51.0,
+        "Median number of reads": 75.0,
+        "Normalized number of downloads": 90.0,
+        "Normalized number of reads": 129.0,
+        "Total number of downloads": 102,
+        "Total number of reads": 150
+      },
+      "refereed stats": {
+        "Average citations": 38.5,
+        "Average refereed citations": 37.0,
+        "H-index": 2,
+        "Median citations": 38.5,
+        "Median refereed citations": 37.0,
+        "Normalized citations": 71.5,
+        "Normalized paper count": 1.5,
+        "Normalized refereed citations": 69.0,
+        "Number of citing papers": 77,
+        "Number of papers": 2,
+        "Refereed citations": 74,
+        "Total citations": 77,
+        "e-index": 8.5,
+        "g-index": 2,
+        "i10-index": 2,
+        "i100-index": 0,
+        "m-index": 2.0,
+        "read10 index": 0,
+        "roq index": 1792.0,
+        "self-citations": 0,
+        "tori index": 3.2
+      }
+    };
 
-    var metricsWidget;
+
+    afterEach(function(){
+
+      $("#test").empty();
+
+    })
 
     //first, test Edwin's functions
 
     it("should have a data extractor object that takes metrics data and prepares json for the nvd3 graph", function(){
 
+      var citshist = DataExtractor.plot_citshist({norm : false, citshist_data : testDataSmall["citation histogram"]});
 
-      var citshist = DataExtractor.plot_citshist({norm : false, citshist_data : testData["citation histogram"]});
+      var norm_citshist =  DataExtractor.plot_citshist({norm : true, citshist_data : testDataSmall["citation histogram"]});
 
-      var norm_citshist =  DataExtractor.plot_citshist({norm : true, citshist_data : testData["citation histogram"]});
+      var readshist = DataExtractor.plot_readshist({norm: false, readshist_data : testDataSmall["reads histogram"]});
 
-      var readshist = DataExtractor.plot_readshist({norm: false, readshist_data : testData["reads histogram"]});
+      var norm_readshist  = DataExtractor.plot_readshist({norm: true, readshist_data : testDataSmall["reads histogram"]});
 
-      var norm_readshist  = DataExtractor.plot_readshist({norm: true, readshist_data : testData["reads histogram"]});
+      var paperhist = DataExtractor.plot_paperhist({norm : true, paperhist_data : testDataSmall["paper histogram"]});
 
-      var paperhist = DataExtractor.plot_paperhist({norm : true, paperhist_data : testData["paper histogram"]});
+      var norm_paperhist = DataExtractor.plot_paperhist({norm : false, paperhist_data : testDataSmall["paper histogram"]});
 
-      var norm_paperhist = DataExtractor.plot_paperhist({norm : false, paperhist_data : testData["paper histogram"]});
+      var indexes_data = DataExtractor.plot_series({series_data : testDataSmall["metrics series"]});
 
-      var indexes_data = DataExtractor.plot_series({series_data : testData["metrics series"]});
 
-      expect(citshist).to.eql([
-      {
+      expect(citshist).to.eql([{
         "key": "Ref. citations to ref. papers",
         "values": [
           {
@@ -217,1179 +316,375 @@ define([
           {
             "x": "1981",
             "y": 4
-          },
-          {
-            "x": "1982",
-            "y": 5
-          },
-          {
-            "x": "1983",
-            "y": 4
-          },
-          {
-            "x": "1984",
-            "y": 3
-          },
-          {
-            "x": "1985",
-            "y": 7
-          },
-          {
-            "x": "1986",
-            "y": 4
-          },
-          {
-            "x": "1987",
-            "y": 7
-          },
-          {
-            "x": "1988",
-            "y": 7
-          },
-          {
-            "x": "1989",
-            "y": 1
-          },
-          {
-            "x": "1990",
-            "y": 5
-          },
-          {
-            "x": "1991",
-            "y": 2
-          },
-          {
-            "x": "1992",
-            "y": 2
-          },
-          {
-            "x": "1993",
-            "y": 1
-          },
-          {
-            "x": "1994",
-            "y": 5
-          },
-          {
-            "x": "1995",
-            "y": 0
-          },
-          {
-            "x": "1996",
-            "y": 3
-          },
-          {
-            "x": "1997",
-            "y": 1
-          },
-          {
-            "x": "1998",
-            "y": 2
-          },
-          {
-            "x": "1999",
-            "y": 3
-          },
-          {
-            "x": "2000",
-            "y": 1
-          },
-          {
-            "x": "2001",
-            "y": 1
-          },
-          {
-            "x": "2002",
-            "y": 2
-          },
-          {
-            "x": "2003",
-            "y": 0
-          },
-          {
-            "x": "2004",
-            "y": 0
-          },
-          {
-            "x": "2005",
-            "y": 0
-          },
-          {
-            "x": "2006",
-            "y": 1
-          },
-          {
-            "x": "2007",
-            "y": 1
-          },
-          {
-            "x": "2008",
-            "y": 0
-          },
-          {
-            "x": "2009",
-            "y": 1
-          },
-          {
-            "x": "2010",
-            "y": 0
-          },
-          {
-            "x": "2011",
-            "y": 0
-          },
-          {
-            "x": "2012",
-            "y": 1
-          },
-          {
-            "x": "2013",
-            "y": 0
-          },
-          {
-            "x": "2014",
-            "y": 0
           }
         ]
       },
-      {
-        "key": "Ref. citations to non ref. papers",
-        "values": [
-          {
-            "x": "1980",
-            "y": 0
-          },
-          {
-            "x": "1981",
-            "y": 0
-          },
-          {
-            "x": "1982",
-            "y": 0
-          },
-          {
-            "x": "1983",
-            "y": 0
-          },
-          {
-            "x": "1984",
-            "y": 0
-          },
-          {
-            "x": "1985",
-            "y": 0
-          },
-          {
-            "x": "1986",
-            "y": 0
-          },
-          {
-            "x": "1987",
-            "y": 0
-          },
-          {
-            "x": "1988",
-            "y": 0
-          },
-          {
-            "x": "1989",
-            "y": 0
-          },
-          {
-            "x": "1990",
-            "y": 0
-          },
-          {
-            "x": "1991",
-            "y": 0
-          },
-          {
-            "x": "1992",
-            "y": 0
-          },
-          {
-            "x": "1993",
-            "y": 0
-          },
-          {
-            "x": "1994",
-            "y": 0
-          },
-          {
-            "x": "1995",
-            "y": 0
-          },
-          {
-            "x": "1996",
-            "y": 0
-          },
-          {
-            "x": "1997",
-            "y": 0
-          },
-          {
-            "x": "1998",
-            "y": 0
-          },
-          {
-            "x": "1999",
-            "y": 0
-          },
-          {
-            "x": "2000",
-            "y": 0
-          },
-          {
-            "x": "2001",
-            "y": 0
-          },
-          {
-            "x": "2002",
-            "y": 0
-          },
-          {
-            "x": "2003",
-            "y": 0
-          },
-          {
-            "x": "2004",
-            "y": 0
-          },
-          {
-            "x": "2005",
-            "y": 0
-          },
-          {
-            "x": "2006",
-            "y": 0
-          },
-          {
-            "x": "2007",
-            "y": 0
-          },
-          {
-            "x": "2008",
-            "y": 0
-          },
-          {
-            "x": "2009",
-            "y": 0
-          },
-          {
-            "x": "2010",
-            "y": 0
-          },
-          {
-            "x": "2011",
-            "y": 0
-          },
-          {
-            "x": "2012",
-            "y": 0
-          },
-          {
-            "x": "2013",
-            "y": 0
-          },
-          {
-            "x": "2014",
-            "y": 0
-          }
-        ]
-      },
-      {
-        "key": "Non ref. citations to ref. papers",
-        "values": [
-          {
-            "x": "1980",
-            "y": 0
-          },
-          {
-            "x": "1981",
-            "y": 0
-          },
-          {
-            "x": "1982",
-            "y": 0
-          },
-          {
-            "x": "1983",
-            "y": 1
-          },
-          {
-            "x": "1984",
-            "y": 0
-          },
-          {
-            "x": "1985",
-            "y": 0
-          },
-          {
-            "x": "1986",
-            "y": 0
-          },
-          {
-            "x": "1987",
-            "y": 1
-          },
-          {
-            "x": "1988",
-            "y": 0
-          },
-          {
-            "x": "1989",
-            "y": 0
-          },
-          {
-            "x": "1990",
-            "y": 0
-          },
-          {
-            "x": "1991",
-            "y": 0
-          },
-          {
-            "x": "1992",
-            "y": 0
-          },
-          {
-            "x": "1993",
-            "y": 0
-          },
-          {
-            "x": "1994",
-            "y": 0
-          },
-          {
-            "x": "1995",
-            "y": 0
-          },
-          {
-            "x": "1996",
-            "y": 0
-          },
-          {
-            "x": "1997",
-            "y": 0
-          },
-          {
-            "x": "1998",
-            "y": 0
-          },
-          {
-            "x": "1999",
-            "y": 0
-          },
-          {
-            "x": "2000",
-            "y": 1
-          },
-          {
-            "x": "2001",
-            "y": 0
-          },
-          {
-            "x": "2002",
-            "y": 0
-          },
-          {
-            "x": "2003",
-            "y": 0
-          },
-          {
-            "x": "2004",
-            "y": 0
-          },
-          {
-            "x": "2005",
-            "y": 0
-          },
-          {
-            "x": "2006",
-            "y": 0
-          },
-          {
-            "x": "2007",
-            "y": 0
-          },
-          {
-            "x": "2008",
-            "y": 0
-          },
-          {
-            "x": "2009",
-            "y": 0
-          },
-          {
-            "x": "2010",
-            "y": 0
-          },
-          {
-            "x": "2011",
-            "y": 0
-          },
-          {
-            "x": "2012",
-            "y": 0
-          },
-          {
-            "x": "2013",
-            "y": 0
-          },
-          {
-            "x": "2014",
-            "y": 0
-          }
-        ]
-      },
-      {
-        "key": "Non ref. citations to non ref. papers",
-        "values": [
-          {
-            "x": "1980",
-            "y": 0
-          },
-          {
-            "x": "1981",
-            "y": 0
-          },
-          {
-            "x": "1982",
-            "y": 0
-          },
-          {
-            "x": "1983",
-            "y": 0
-          },
-          {
-            "x": "1984",
-            "y": 0
-          },
-          {
-            "x": "1985",
-            "y": 0
-          },
-          {
-            "x": "1986",
-            "y": 0
-          },
-          {
-            "x": "1987",
-            "y": 0
-          },
-          {
-            "x": "1988",
-            "y": 0
-          },
-          {
-            "x": "1989",
-            "y": 0
-          },
-          {
-            "x": "1990",
-            "y": 0
-          },
-          {
-            "x": "1991",
-            "y": 0
-          },
-          {
-            "x": "1992",
-            "y": 0
-          },
-          {
-            "x": "1993",
-            "y": 0
-          },
-          {
-            "x": "1994",
-            "y": 0
-          },
-          {
-            "x": "1995",
-            "y": 0
-          },
-          {
-            "x": "1996",
-            "y": 0
-          },
-          {
-            "x": "1997",
-            "y": 0
-          },
-          {
-            "x": "1998",
-            "y": 0
-          },
-          {
-            "x": "1999",
-            "y": 0
-          },
-          {
-            "x": "2000",
-            "y": 0
-          },
-          {
-            "x": "2001",
-            "y": 0
-          },
-          {
-            "x": "2002",
-            "y": 0
-          },
-          {
-            "x": "2003",
-            "y": 0
-          },
-          {
-            "x": "2004",
-            "y": 0
-          },
-          {
-            "x": "2005",
-            "y": 0
-          },
-          {
-            "x": "2006",
-            "y": 0
-          },
-          {
-            "x": "2007",
-            "y": 0
-          },
-          {
-            "x": "2008",
-            "y": 0
-          },
-          {
-            "x": "2009",
-            "y": 0
-          },
-          {
-            "x": "2010",
-            "y": 0
-          },
-          {
-            "x": "2011",
-            "y": 0
-          },
-          {
-            "x": "2012",
-            "y": 0
-          },
-          {
-            "x": "2013",
-            "y": 0
-          },
-          {
-            "x": "2014",
-            "y": 0
-          }
-        ]
-      }
-    ])
+        {
+          "key": "Ref. citations to non ref. papers",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "Non ref. citations to ref. papers",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "Non ref. citations to non ref. papers",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        }
+      ]);
 
-     expect(norm_citshist).to.eql([
-       {
-         "key": "Ref. citations to ref. papers",
-         "values": [
-           {
-             "x": "1980",
-             "y": 0
-           },
-           {
-             "x": "1981",
-             "y": 4
-           },
-           {
-             "x": "1982",
-             "y": 4
-           },
-           {
-             "x": "1983",
-             "y": 3.5
-           },
-           {
-             "x": "1984",
-             "y": 3
-           },
-           {
-             "x": "1985",
-             "y": 7
-           },
-           {
-             "x": "1986",
-             "y": 4
-           },
-           {
-             "x": "1987",
-             "y": 6.5
-           },
-           {
-             "x": "1988",
-             "y": 7
-           },
-           {
-             "x": "1989",
-             "y": 1
-           },
-           {
-             "x": "1990",
-             "y": 4.5
-           },
-           {
-             "x": "1991",
-             "y": 2
-           },
-           {
-             "x": "1992",
-             "y": 1.5
-           },
-           {
-             "x": "1993",
-             "y": 1
-           },
-           {
-             "x": "1994",
-             "y": 4.5
-           },
-           {
-             "x": "1995",
-             "y": 0
-           },
-           {
-             "x": "1996",
-             "y": 2.5
-           },
-           {
-             "x": "1997",
-             "y": 1
-           },
-           {
-             "x": "1998",
-             "y": 2
-           },
-           {
-             "x": "1999",
-             "y": 3
-           },
-           {
-             "x": "2000",
-             "y": 1
-           },
-           {
-             "x": "2001",
-             "y": 1
-           },
-           {
-             "x": "2002",
-             "y": 1.5
-           },
-           {
-             "x": "2003",
-             "y": 0
-           },
-           {
-             "x": "2004",
-             "y": 0
-           },
-           {
-             "x": "2005",
-             "y": 0
-           },
-           {
-             "x": "2006",
-             "y": 1
-           },
-           {
-             "x": "2007",
-             "y": 0.5
-           },
-           {
-             "x": "2008",
-             "y": 0
-           },
-           {
-             "x": "2009",
-             "y": 1
-           },
-           {
-             "x": "2010",
-             "y": 0
-           },
-           {
-             "x": "2011",
-             "y": 0
-           },
-           {
-             "x": "2012",
-             "y": 1
-           },
-           {
-             "x": "2013",
-             "y": 0
-           },
-           {
-             "x": "2014",
-             "y": 0
-           }
-         ]
-       },
-       {
-         "key": "Ref. citations to non ref. papers",
-         "values": [
-           {
-             "x": "1980",
-             "y": 0
-           },
-           {
-             "x": "1981",
-             "y": 0
-           },
-           {
-             "x": "1982",
-             "y": 0
-           },
-           {
-             "x": "1983",
-             "y": 0
-           },
-           {
-             "x": "1984",
-             "y": 0
-           },
-           {
-             "x": "1985",
-             "y": 0
-           },
-           {
-             "x": "1986",
-             "y": 0
-           },
-           {
-             "x": "1987",
-             "y": 0
-           },
-           {
-             "x": "1988",
-             "y": 0
-           },
-           {
-             "x": "1989",
-             "y": 0
-           },
-           {
-             "x": "1990",
-             "y": 0
-           },
-           {
-             "x": "1991",
-             "y": 0
-           },
-           {
-             "x": "1992",
-             "y": 0
-           },
-           {
-             "x": "1993",
-             "y": 0
-           },
-           {
-             "x": "1994",
-             "y": 0
-           },
-           {
-             "x": "1995",
-             "y": 0
-           },
-           {
-             "x": "1996",
-             "y": 0
-           },
-           {
-             "x": "1997",
-             "y": 0
-           },
-           {
-             "x": "1998",
-             "y": 0
-           },
-           {
-             "x": "1999",
-             "y": 0
-           },
-           {
-             "x": "2000",
-             "y": 0
-           },
-           {
-             "x": "2001",
-             "y": 0
-           },
-           {
-             "x": "2002",
-             "y": 0
-           },
-           {
-             "x": "2003",
-             "y": 0
-           },
-           {
-             "x": "2004",
-             "y": 0
-           },
-           {
-             "x": "2005",
-             "y": 0
-           },
-           {
-             "x": "2006",
-             "y": 0
-           },
-           {
-             "x": "2007",
-             "y": 0
-           },
-           {
-             "x": "2008",
-             "y": 0
-           },
-           {
-             "x": "2009",
-             "y": 0
-           },
-           {
-             "x": "2010",
-             "y": 0
-           },
-           {
-             "x": "2011",
-             "y": 0
-           },
-           {
-             "x": "2012",
-             "y": 0
-           },
-           {
-             "x": "2013",
-             "y": 0
-           },
-           {
-             "x": "2014",
-             "y": 0
-           }
-         ]
-       },
-       {
-         "key": "Non ref. citations to ref. papers",
-         "values": [
-           {
-             "x": "1980",
-             "y": 0
-           },
-           {
-             "x": "1981",
-             "y": 0
-           },
-           {
-             "x": "1982",
-             "y": 0
-           },
-           {
-             "x": "1983",
-             "y": 0.5
-           },
-           {
-             "x": "1984",
-             "y": 0
-           },
-           {
-             "x": "1985",
-             "y": 0
-           },
-           {
-             "x": "1986",
-             "y": 0
-           },
-           {
-             "x": "1987",
-             "y": 1
-           },
-           {
-             "x": "1988",
-             "y": 0
-           },
-           {
-             "x": "1989",
-             "y": 0
-           },
-           {
-             "x": "1990",
-             "y": 0
-           },
-           {
-             "x": "1991",
-             "y": 0
-           },
-           {
-             "x": "1992",
-             "y": 0
-           },
-           {
-             "x": "1993",
-             "y": 0
-           },
-           {
-             "x": "1994",
-             "y": 0
-           },
-           {
-             "x": "1995",
-             "y": 0
-           },
-           {
-             "x": "1996",
-             "y": 0
-           },
-           {
-             "x": "1997",
-             "y": 0
-           },
-           {
-             "x": "1998",
-             "y": 0
-           },
-           {
-             "x": "1999",
-             "y": 0
-           },
-           {
-             "x": "2000",
-             "y": 1
-           },
-           {
-             "x": "2001",
-             "y": 0
-           },
-           {
-             "x": "2002",
-             "y": 0
-           },
-           {
-             "x": "2003",
-             "y": 0
-           },
-           {
-             "x": "2004",
-             "y": 0
-           },
-           {
-             "x": "2005",
-             "y": 0
-           },
-           {
-             "x": "2006",
-             "y": 0
-           },
-           {
-             "x": "2007",
-             "y": 0
-           },
-           {
-             "x": "2008",
-             "y": 0
-           },
-           {
-             "x": "2009",
-             "y": 0
-           },
-           {
-             "x": "2010",
-             "y": 0
-           },
-           {
-             "x": "2011",
-             "y": 0
-           },
-           {
-             "x": "2012",
-             "y": 0
-           },
-           {
-             "x": "2013",
-             "y": 0
-           },
-           {
-             "x": "2014",
-             "y": 0
-           }
-         ]
-       },
-       {
-         "key": "Non ref. citations to non ref. papers",
-         "values": [
-           {
-             "x": "1980",
-             "y": 0
-           },
-           {
-             "x": "1981",
-             "y": 0
-           },
-           {
-             "x": "1982",
-             "y": 0
-           },
-           {
-             "x": "1983",
-             "y": 0
-           },
-           {
-             "x": "1984",
-             "y": 0
-           },
-           {
-             "x": "1985",
-             "y": 0
-           },
-           {
-             "x": "1986",
-             "y": 0
-           },
-           {
-             "x": "1987",
-             "y": 0
-           },
-           {
-             "x": "1988",
-             "y": 0
-           },
-           {
-             "x": "1989",
-             "y": 0
-           },
-           {
-             "x": "1990",
-             "y": 0
-           },
-           {
-             "x": "1991",
-             "y": 0
-           },
-           {
-             "x": "1992",
-             "y": 0
-           },
-           {
-             "x": "1993",
-             "y": 0
-           },
-           {
-             "x": "1994",
-             "y": 0
-           },
-           {
-             "x": "1995",
-             "y": 0
-           },
-           {
-             "x": "1996",
-             "y": 0
-           },
-           {
-             "x": "1997",
-             "y": 0
-           },
-           {
-             "x": "1998",
-             "y": 0
-           },
-           {
-             "x": "1999",
-             "y": 0
-           },
-           {
-             "x": "2000",
-             "y": 0
-           },
-           {
-             "x": "2001",
-             "y": 0
-           },
-           {
-             "x": "2002",
-             "y": 0
-           },
-           {
-             "x": "2003",
-             "y": 0
-           },
-           {
-             "x": "2004",
-             "y": 0
-           },
-           {
-             "x": "2005",
-             "y": 0
-           },
-           {
-             "x": "2006",
-             "y": 0
-           },
-           {
-             "x": "2007",
-             "y": 0
-           },
-           {
-             "x": "2008",
-             "y": 0
-           },
-           {
-             "x": "2009",
-             "y": 0
-           },
-           {
-             "x": "2010",
-             "y": 0
-           },
-           {
-             "x": "2011",
-             "y": 0
-           },
-           {
-             "x": "2012",
-             "y": 0
-           },
-           {
-             "x": "2013",
-             "y": 0
-           },
-           {
-             "x": "2014",
-             "y": 0
-           }
-         ]
-       }
-     ])
+      expect(norm_citshist).to.eql([
+        {
+          "key": "Ref. citations to ref. papers",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 4
+            }
+          ]
+        },
+        {
+          "key": "Ref. citations to non ref. papers",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "Non ref. citations to ref. papers",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "Non ref. citations to non ref. papers",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        }
+      ]);
+
+      expect(readshist).to.eql([
+        {
+          "key": "Refereed",
+          "values": [
+            {
+              "x": 1996,
+              "y": 0
+            },
+            {
+              "x": 1997,
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "Non-refereed",
+          "values": [
+            {
+              "x": 1996,
+              "y": 0
+            },
+            {
+              "x": 1997,
+              "y": 0
+            }
+          ]
+        }
+      ]);
+
+      expect(norm_readshist).to.eql([
+        {
+          "key": "Refereed",
+          "values": [
+            {
+              "x": 1996,
+              "y": 0
+            },
+            {
+              "x": 1997,
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "Non-refereed",
+          "values": [
+            {
+              "x": 1996,
+              "y": 0
+            },
+            {
+              "x": 1997,
+              "y": 0
+            }
+          ]
+        }
+      ]);
+
+      expect(paperhist).to.eql([
+        {
+          "key": "Refereed",
+          "values": [
+            {
+              "x": 1980,
+              "y": 1.5
+            }
+          ]
+        },
+        {
+          "key": "Non-refereed",
+          "values": [
+            {
+              "x": 1980,
+              "y": 0
+            }
+          ]
+        }
+      ]);
+
+      expect(norm_paperhist).to.eql([
+        {
+          "key": "Refereed",
+          "values": [
+            {
+              "x": 1980,
+              "y": 2
+            }
+          ]
+        },
+        {
+          "key": "Non-refereed",
+          "values": [
+            {
+              "x": 1980,
+              "y": 0
+            }
+          ]
+        }
+      ]);
+
+      expect(indexes_data).to.eql([
+        {
+          "key": "h Index",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 1
+            }
+          ]
+        },
+        {
+          "key": "g Index",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "i10 Index",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "i100 Index",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0.5
+            }
+          ]
+        },
+        {
+          "key": "tori Index",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "read10 Index",
+          "values": [
+            {
+              "x": "1980",
+              "y": 0
+            },
+            {
+              "x": "1981",
+              "y": 0
+            }
+          ]
+        }
+      ]);
+
+    })
+
+
+    it("should have a function that empties the main view", function(){
+
+      metricsWidget = new MetricsWidget();
+
+      metricsWidget.processResponse(new JsonResponse(testData));
+
+      $("#test").append(metricsWidget.view.el);
+
+      metricsWidget.resetWidget();
+
+      //check to see that the rendered views are inserted
+
+        expect($("#test").find((".metrics-graph *")).length).to.eql(0);
+        expect($("#test").find((".metrics-table *")).length).to.eql(0);
 
 
     })
 
 
+    it("should have a configurable graph view that can show a bar chart", function(done){
+
+      this.timeout(3000);
 
 
-    it("should have a configurable graph view", function(){
+      var metricsWidget = new MetricsWidget();
 
-        var metricsWidget = new MetricsWidget();
+      var gModel = new metricsWidget.components.GraphModel();
 
-        var gModel = new metricsWidget.components.GraphModel();
+      var graphView = new metricsWidget.components.GraphView({model : gModel });
 
-        var graphView = new metricsWidget.components.GraphView({model : gModel });
+      graphView.model.set("graphData", DataExtractor.plot_citshist({norm : false, citshist_data : testData["citation histogram"]}));
+      graphView.model.set("normalizedGraphData", DataExtractor.plot_citshist({norm : true, citshist_data : testData["citation histogram"]}));
 
-        graphView.model.set("graphData", DataExtractor.plot_citshist({norm : false, citshist_data : testData["citation histogram"]}));
+      $("#test").append(graphView.render().el);
 
-       $("#test").append(graphView.render().el)
+      //need to wait for animation to complete
 
+      setTimeout(function(){
+
+        //should show 25 bars representing ref to ref citations
+        expect(d3.selectAll("#test g.nv-series-0 rect").filter(function(d){if (d3.select(this).attr("height") > 1 ){return true}})[0].length).to.eql(25);
+
+        //the third of these bars should be shorter than the second
+        expect(parseInt(d3.select("#test g.nv-series-0 rect:nth-of-type(3)").attr("y"))).to.be.lessThan(d3.select("#test g.nv-series-0 rect:nth-of-type(2)").attr("y"))
+
+        //all bars from the third series (non ref to ref) should have a height of 0
+        expect(d3.selectAll("#test g.nv-series-3 rect").filter(function(){if (d3.select(this).attr("height") == 1){return true}})[0].length).to.eql(35);
+
+        $("#test").empty();
+
+        done();
+
+      }, 2000);
+
+
+
+    })
+
+   // this isn't working, the setimeout is running before anything is in the dom...
+
+    it("should have a configurable graph view that can show a line chart", function(done){
+
+    this.timeout(3000);
+
+      var metricsWidget = new MetricsWidget();
+
+      var gModel = new metricsWidget.components.GraphModel({graphType : "line"});
+
+      var graphView = new metricsWidget.components.GraphView({model : gModel });
+
+      graphView.model.set("graphData", DataExtractor.plot_series({series_data : testData["metrics series"]}));
+
+      $("#test").empty();
+
+      $("#test").append(graphView.render().el);
+
+      setTimeout(function(){
+
+        //should show 6 different lines, so 12 items (nvd3 shows a separate group with a path and a group of circles)
+
+        expect($(".nv-group").length).to.eql(12)
+
+        done();
+
+
+      }, 2500)
 
 
     })
@@ -1400,48 +695,200 @@ define([
 
       metricsWidget.processResponse(new JsonResponse(testData));
 
-
       //checking a single row from each template
       //would there be a way to check the entire rendered html in a non-messy way?
 
-      expect(metricsWidget.papersTableView.render().$("td:contains(Number of Papers)~td").eq(1).text().trim()).to.eql("2");
-      expect(metricsWidget.papersTableView.render().$("td:contains(Number of Papers)~td").eq(2).text().trim()).to.eql("2");
+      expect(metricsWidget.childViews.papersTableView.render().$("td:contains(Number of papers)~td").eq(1).text().trim()).to.eql("2");
+      expect(metricsWidget.childViews.papersTableView.render().$("td:contains(Number of papers)~td").eq(2).text().trim()).to.eql("2");
 
-      expect(metricsWidget.readsTableView.render().$("td:contains(Total Number of Downloads)~td").eq(1).text().trim()).to.eql("102");
-      expect(metricsWidget.readsTableView.render().$("td:contains(Total Number of Downloads)~td").eq(2).text().trim()).to.eql("102");
+      expect(metricsWidget.childViews.readsTableView.render().$("td:contains(Total number of downloads)~td").eq(1).text().trim()).to.eql("102");
+      expect(metricsWidget.childViews.readsTableView.render().$("td:contains(Total number of downloads)~td").eq(2).text().trim()).to.eql("102");
 
-      expect(metricsWidget.citationsTableView.render().$("td:contains(Average Refereed Citations)~td").eq(1).text().trim()).to.eql("37");
-      expect(metricsWidget.citationsTableView.render().$("td:contains(Average Refereed Citations)~td").eq(2).text().trim()).to.eql("37");
+      expect(metricsWidget.childViews.citationsTableView.render().$("td:contains(Average refereed citations)~td").eq(1).text().trim()).to.eql("37");
+      expect(metricsWidget.childViews.citationsTableView.render().$("td:contains(Average refereed citations)~td").eq(2).text().trim()).to.eql("37");
 
-      expect(metricsWidget.indicesTableView.render().$("td:contains(i10-index)~td").eq(1).text().trim()).to.eql("2");
-      expect(metricsWidget.indicesTableView.render().$("td:contains(i10-index)~td").eq(2).text().trim()).to.eql("2");
+      expect(metricsWidget.childViews.indicesTableView.render().$("td:contains(i10-index)~td").eq(1).text().trim()).to.eql("2");
+      expect(metricsWidget.childViews.indicesTableView.render().$("td:contains(i10-index)~td").eq(2).text().trim()).to.eql("2");
 
 
     })
 
     it("should have a function that creates graph views out of the raw api response", function(){
 
+      var metricsWidget = new MetricsWidget();
 
+      metricsWidget.createGraphViews(testData);
+
+      //should have 4 graph views
+      expect(_.keys(metricsWidget.childViews)).to.eql(["papersGraphView", "citationsGraphView", "indicesGraphView", "readsGraphView"]);
+
+      //they should be instances of GraphView
+      expect(metricsWidget.childViews.papersGraphView).to.be.instanceof(metricsWidget.components.GraphView);
+
+      //they should have the proper data in their models
+      expect(metricsWidget.childViews.citationsGraphView.model.get("graphData")).to.eql(DataExtractor.plot_citshist({norm: false, citshist_data: testData["citation histogram"]}));
+      expect(metricsWidget.childViews.citationsGraphView.model.get("normalizedGraphData")).to.eql(DataExtractor.plot_citshist({norm: true, citshist_data: testData["citation histogram"]}));
 
 
     })
 
-    it("should have a container view (marionette layout) that arranges the child views", function(){
+
+    it("should have a container view (marionette layout) that arranges the child views", function(done){
 
       var metricsWidget = new MetricsWidget();
 
       metricsWidget.processResponse(new JsonResponse(testData));
 
-//      $("#test").append(metricsWidget.view.el)
+      //check to see that the rendered views are inserted
 
+      $("#test").append(metricsWidget.view.el);
+
+      expect($("#test").find((".metrics-graph")).length).to.eql(4);
+      expect($("#test").find((".metrics-table")).length).to.eql(4);
+
+      done();
 
 
     })
 
 
-    it("should have a function that creates graph views from the raw api response")
+    it("should request data from pubsub, then send that data to the metrics endpoint, then render the graph", function(){
 
 
+     var metricsWidget = new MetricsWidget();
+
+      minsub = new (MinimalPubSub.extend({
+        request: function(apiRequest) {
+
+          if (apiRequest.toJSON().target === "search"){
+
+            return {
+              "responseHeader":{
+                "status":0,
+                "QTime":1,
+                "params":{
+                  "fl":"bibcode",
+                  "indent":"true",
+                  "rows": 200,
+                  "wt":"json",
+                  "q":"bibcode:(\"1980ApJS...44..137K\" OR \"1980ApJS...44..489B\")\n"}},
+              "response":{"numFound":2,"start":0,"docs":[
+                {
+                  "bibcode":"1980ApJS...44..489B"},
+                {
+                  "bibcode":"1980ApJS...44..137K"}]
+              }};
+
+          }
+          //just to be explicit
+          else if (apiRequest.toJSON().target === "services/metrics"){
+
+            return testData;
+
+          }
+
+        }
+
+      }))({verbose: false});
+
+      metricsWidget.activate(minsub.beehive.getHardenedInstance());
+
+      expect(metricsWidget.childViews.citationsTableView).to.be.undefined;
+
+      //provide widget with current query
+      minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
+
+      //trigger show event, should prompt dispatchRequest
+      metricsWidget.onShow();
+
+      //if the views received the data, the 2 step request process worked
+
+      expect(metricsWidget.childViews.citationsTableView.model.attributes.medianCitations).to.eql([38.5, 38.5])
+
+    })
+
+
+    it("should allow the user to request a different number of documents", function(done){
+
+      var minsub = new (MinimalPubSub.extend({
+        request: function (apiRequest) {
+
+          if (apiRequest.toJSON().target === "search") {
+
+            return {
+              "responseHeader": {
+                "status": 0,
+                "QTime": 1,
+                "params": {
+                  "fl": "bibcode",
+                  "indent": "true",
+                  "wt": "json",
+                  "rows": 200,
+                  "q": "bibcode:(\"1980ApJS...44..137K\" OR \"1980ApJS...44..489B\")\n"}},
+              "response": {"numFound": 2, "start": 0, "docs": [
+                {
+                  "bibcode": "1980ApJS...44..489B"},
+                {
+                  "bibcode": "1980ApJS...44..137K"}
+              ]
+              }};
+
+          }
+          //just to be explicit
+          else if (apiRequest.toJSON().target === "services/metrics") {
+
+            return testData;
+
+          }
+
+        }
+      }))({verbose: false});
+
+      var metricsWidget = new MetricsWidget();
+
+      metricsWidget.activate(minsub.beehive.getHardenedInstance());
+
+      $("#test").append(metricsWidget.view.render().el);
+
+      //provide widget with current query
+      minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
+
+      //trigger show event, should prompt dispatchRequest
+      metricsWidget.onShow();
+
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 2 paper(s).\n    Change to first  paper(s) (max is 2).');
+
+      metricsWidget.pubsub.publish = sinon.spy();
+
+      $("#test").find(".metrics-metadata input").val("1");
+
+      $("#test").find(".metrics-metadata input").change();
+
+
+      setTimeout(function(){
+
+        expect(metricsWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Request");
+        expect(metricsWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql(["1"]);
+
+
+        done();
+
+
+      }, 1000)
+
+
+
+
+
+
+
+
+
+
+
+
+
+    })
 
 
 

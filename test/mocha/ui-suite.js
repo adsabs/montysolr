@@ -23,6 +23,7 @@ define([], function() {
       '/widgets/list_of_things_expanding.spec.js',
       '/widgets/list_of_things_widget.spec.js',
       '/widgets/lot_derivates.spec.js',
+      '/widgets/metrics_widget.spec.js',
       '/widgets/multi_callback_widget.spec.js',
       '/widgets/network_widget.spec.js',
       '/widgets/paper_network_widget.spec.js',

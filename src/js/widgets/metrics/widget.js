@@ -2,6 +2,11 @@ define([
   'marionette',
   'nvd3',
   'js/widgets/base/base_widget',
+  './edwins_functions',
+  'js/components/api_response',
+  'js/components/json_response',
+  'js/components/api_request',
+  'js/components/api_query',
   'hbs!./templates/metrics_container',
   'hbs!./templates/graph_template',
   'hbs!./templates/paper_table',
@@ -13,6 +18,11 @@ define([
   Marionette,
   nvd3,
   BaseWidget,
+  DataExtractor,
+  ApiResponse,
+  JsonResponse,
+  ApiRequest,
+  ApiQuery,
   MetricsContainer,
   GraphTemplate,
   PaperTableTemplate,
@@ -20,6 +30,7 @@ define([
   IndicesTableTemplate,
   ReadsTableTemplate
   ) {
+
 
   var TableModel = Backbone.Model.extend({
 
@@ -34,71 +45,64 @@ define([
 
   var TableView = Marionette.ItemView.extend({
 
-    className: "table table-hover",
+    className: "table table-hover s-metrics-table table-condensed",
 
-    tagName: "table"
+    tagName: "table",
+
+    onRender: function () {
+
+      this.$('[data-toggle="popover"]').popover(
+        {
+          html: true,
+          trigger: "hover"
+        }
+      )
+    }
 
   });
 
   var GraphModel = Backbone.Model.extend({
 
-    initialize : function(){
-
-      //set current graph based on the graphOptions configuration
-      var current = _.filter(this.get("graphOptions"), function(item){
-        if (item.default === true){
-          return true
-        }
-      })[0].value;
-      this.set("currentGraph", current);
-
-    },
-
-    defaults : function(){
+    defaults: function () {
       return {
         //precompute this data to have on hand
-        graphData : undefined,
-        normalizedGraphData : undefined,
+        graphData: undefined,
+        normalizedGraphData: undefined,
         //when this changes, graph view changes to normalized
-        normalized : false,
+        normalized: false,
         //tells graph which options to allow
-        graphOptions : [
-          {value : "line", name : "Line Graph"},
-          {value : "stacked", name : "Stacked Graph"},
-          {value : "histogram", default : true, name : "Histogram"}],
-        priorGraph : undefined,
-        currentGraph : undefined
-      }
+        //right now we do "histogram" and "line"
+        graphType: "histogram"
 
+
+      }
     }
   });
 
 
   var GraphView = Marionette.ItemView.extend({
 
-    className : "graph-view s-graph-view",
+    className: "graph-view s-graph-view",
 
-    initialize : function(){
+    initialize: function () {
 
       this.initial = true;
 
-      this.listenTo(this.model, "change:currentGraph", this.drawGraph);
       this.listenTo(this.model, "change:normalized", this.drawGraph);
 
     },
 
-    ui : {
-      svg : "svg"
+    ui: {
+      svg: "svg"
     },
 
-    events : {
+    events: {
 
-      "click input[name=graph-type]" : "updateGraphType",
-      "click .graph-tab" : "updateTabValue"
+      "click .graph-tab": "updateTabValue"
 
     },
 
-    updateTabValue : function(e){
+    updateTabValue: function (e) {
 
       var $e = $(e.currentTarget);
 
@@ -108,7 +112,7 @@ define([
 
       var val = $e.data("tab");
 
-      if (val = "normalized"){
+      if (val === "normalized") {
         this.model.set("normalized", true);
       }
       else {
@@ -116,224 +120,346 @@ define([
       }
     },
 
-    updateGraphType: function(e){
+    colors  : ["#5683e0", "#7ab889", "#ffb639", "#ed5e5b", "#ce5cff", "#1c459b"],
 
-      var val = $(e.target).attr("value");
-      this.model.set("priorGraph", this.model.get("currentGraph"));
-      this.model.set("currentGraph", val);
-
-    },
-
-    drawHistogram : function(){
+    drawHistogram: function () {
 
       var data, d3SVG;
 
+      var that = this;
+
       d3SVG = d3.select(this.ui.svg[0]);
 
-    //get data
-     data = this.model.get("normalized") ? this.model.get("normalizedGraphData") : this.model.get("graphData");
+      //for the tooltip
+      //tells you the total value of y for a given x value
+      //e.g. adds refereed and non-refereed
+      function countAll(data, year) {
 
-    //figure out : is this a transition or a re-draw
-      if (!this.initial && this.model.get("priorGraph") == "histogram"){
+        var total = 0;
+
+        _.each(data, function (d) {
+
+          var val = _.filter(d.values, function (v) {
+            if (v.x == year) {
+              return true
+            }
+          });
+
+          total+= val[0].y;
+
+        });
+
+        return  total;
+
+      }
+
+      //get data
+      data = this.model.get("normalized") ? this.model.get("normalizedGraphData") : this.model.get("graphData");
+
+      //make a copy
+      data =  $.extend(true, [], data);
+
+      //figure out : is this a transition or a re-draw
+      if (that.chart) {
         //it's a transition
+
+//        //overriding library tooltip function
+        that.chart.tooltip(function (key, x, y, e, graph) {
+          var total = countAll(data, x);
+          return  '<h3>'+x+'</h3>'+
+            '<p><b>' + key + "</b>: " +  y  + '</p>' +
+            '<p><b> Total: </b>' + total.toFixed(1) + '</p>'
+        });
+
+        d3SVG
+          .datum(data)
+          .transition()
+          .duration(500)
+          .call(that.chart);
 
       }
       else {
-        // just draw the graph from scratch
 
-        this.ui.svg.empty();
+        nv.addGraph(function () {
+          that.chart = nv.models.multiBarChart();
 
-        nv.addGraph(function() {
-          var chart = nv.models.multiBarChart();
+          that.chart
+            .color(that.colors);
 
-          chart.xAxis
-            .tickFormat(d3.format());
+          that.chart.yAxis
+            //only touch values that are divisible by 1 to get rid of #s that look like "4.0"
+            .tickFormat(function(d){
+              if (d === 0 ){
+                //sometimes -0.1 was showing on the y axis, I dont know why
+                return 0
+              }
+              if (d % 1 !== 0){
+                return d3.format(",.01f")(d)
+              }
+              else {
+                return d3.format(",.0d")(d)
+              }
 
-          chart.yAxis
-            .tickFormat(d3.format());
+            });
+
+
+          /*
+           * This is how you make the chart stacked by default
+           * Not documented anywhere.
+           * */
+          that.chart.multibar.stacked(true);
+
+//          //overriding library tooltip function
+          that.chart.tooltip(function (key, x, y, e, graph) {
+            var total = countAll(data, x);
+            return  '<h3>'+x+'</h3>'+
+            '<p><b>' + key + "</b>: " +  y  + '</p>' +
+              '<p><b> Total: </b>' +  total.toFixed(1) + '</p>'
+          });
 
           d3SVG
             .datum(data)
-            .call(chart);
+            .call(that.chart);
 
-          return chart;
         });
 
       }
 
     },
 
-    drawLineGraph : function(){
+    drawLineGraph: function () {
 
-      var data, d3SVG;
+      var data, d3SVG, options;
+
+      var that = this;
 
       d3SVG = d3.select(this.ui.svg[0]);
 
       //get data
       data = this.model.get("normalized") ? this.model.get("normalizedGraphData") : this.model.get("graphData");
 
+      //make a copy
+      data =  $.extend(true, [], data);
+
       //figure out : is this a transition or a re-draw
-      if (!this.initial && this.model.get("priorGraph") == "line"){
+      if (that.chart) {
+
+        d3SVG
+          .datum(data)
+          .transition()
+          .duration(500)
+          .call(that.chart);
 
       }
       else {
 
-        this.ui.svg.empty();
+        options = {
+          showControls: false
+        };
 
-        nv.addGraph(function() {
-          var chart = nv.models.cumulativeLineChart()
-              .x(function(d) { return d.x })
-              .y(function(d) { return d.y })
-              .color(d3.scale.category10().range())
-              .useInteractiveGuideline(true);
+        nv.addGraph(function () {
+          that.chart = nv.models.lineChart()
+            .x(function (d) {
+              return d.x
+            })
+            .y(function (d) {
+              return d.y
+            })
+            .color(that.colors)
+            .useInteractiveGuideline(true)
+            .options(options);
 
-          chart.xAxis
-            .tickFormat();
-
-          chart.yAxis.tickFormat();
-
-          d3SVG.datum(data)
-            .call(chart);
-
-          return chart;
-        });
-
-      }
-
-    },
-
-    drawStackedGraph : function(){
-
-      var data, d3SVG;
-
-      d3SVG = d3.select(this.ui.svg[0]);
-
-      //get data
-      data = this.model.get("normalized") ? this.model.get("normalizedGraphData") : this.model.get("graphData");
-
-
-      //figure out : is this a transition or a re-draw
-      if (!this.initial && this.model.get("priorGraph") == "stacked"){
-
-      }
-      else {
-        this.ui.svg.empty();
-
-
-        nv.addGraph(function() {
-          var chart = nv.models.stackedAreaChart()
-              .x(function(d) { return d.x })
-              .y(function(d) { return d.y })
-              .clipEdge(true)
-              .useInteractiveGuideline(true)
-            ;
-
-          chart.xAxis
-            .showMaxMin(false)
-            .tickFormat();
-
-          chart.yAxis
-            .tickFormat();
+          that.chart.yAxis
+            .tickFormat(d3.format(",.0f"));
 
           d3SVG.datum(data)
-            .call(chart);
+            .call(that.chart);
 
-          return chart;
         });
-
       }
-
-
     },
-
 
     //listens on change events
-    drawGraph : function(){
+    drawGraph: function () {
 
-      var current = this.model.get("currentGraph");
+      var type = this.model.get("graphType");
 
       //find correct function
 
-      if (current === "histogram"){
+      if (type === "histogram") {
 
         this.drawHistogram();
 
       }
-      else if ( current === "line") {
+      else if (type === "line") {
 
         this.drawLineGraph();
 
       }
-      else if (current === "stacked") {
-
-        this.drawStackedGraph();
-
-      }
-
-      this.initial = false;
 
     },
 
-    template : GraphTemplate,
+    template: GraphTemplate,
 
-    onRender: function(){
+    onRender: function () {
 
       this.drawGraph();
 
     }
 
-  })
+  });
+
+
+  var ContainerModel = Backbone.Model.extend({
+
+    initialize : function(){
+
+    this.on("change:numFound", this.updateMax);
+    this.on("change:numFound", this.updateCurrent)
+
+    },
+
+    updateMax : function() {
+
+     this.set("max", _.min([500, this.get("numFound")]));
+    },
+
+    updateCurrent : function(){
+
+      this.set("current", _.min([this.get("rows"), this.get("numFound")]));
+
+    },
+
+    defaults : function(){
+
+      return {
+
+        rows : undefined,
+        numFound : undefined,
+        current : undefined,
+        max : undefined,
+        userVal: undefined
+
+       }
+    }
+
+  });
 
 
   var ContainerView = Marionette.Layout.extend({
 
     template: MetricsContainer,
 
+    events : {
+
+      "change .metrics-rows" : "changeRows"
+
+    },
+
+   changeRows : _.debounce(function(e){
+
+     this.model.set("userVal", _.min([this.model.get("max"), e.target.value]));
+
+    }, 500),
+
     regions: {
       papersGraph: "#papers .metrics-graph",
       papersTable: "#papers .metrics-table",
       citationsGraph: "#citations .metrics-graph",
       citationsTable: "#citations .metrics-table",
-      indicesGraph: "#indeices .metrics-graph",
+      indicesGraph: "#indices .metrics-graph",
       indicesTable: "#indices .metrics-table",
       readsGraph: "#reads .metrics-graph",
       readsTable: "#reads .metrics-table"
 
     }
 
-
-
-
   })
 
 
   var MetricsWidget = BaseWidget.extend({
 
+    initialize: function () {
 
-    initialize: function (options) {
+      this.containerModel = new ContainerModel();
 
-      this.view = new ContainerView();
+      this.listenTo(this.containerModel, "change:userVal", this.requestDifferentRows)
+
+      this.view = new ContainerView({model : this.containerModel});
+
+      this.childViews = {};
 
     },
 
     resetWidget: function () {
-      this.views = {};
+
+      this.childViews = {};
+
       //empty the container view
-//        this.containerView.emptyCon
+
+      _.each(this.view.regions, function(v,k){
+
+        this.view[k].currentView.close();
+
+      }, this);
+
+    },
+
+    /*when a user requests a different number of documents*/
+    requestDifferentRows : function(model, rows){
+
+      var query = this.getCurrentQuery().clone();
+
+      query.set("rows", rows);
+
+      var request = new ApiRequest({
+        query : query
+      });
+
+     this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
 
     },
 
     processResponse: function (response) {
 
-      this.childViews = {};
+      if (response instanceof ApiResponse){
 
-      response = response.toJSON();
+        var bibcodes = _.map(response.get("response.docs"), function(d){return d.bibcode});
 
-      this.createTableViews(response);
+        var request =  new ApiRequest({
 
-      this.createGraphViews(response);
+          target: "services/metrics",
+          query: new ApiQuery({"bibcodes" : bibcodes}),
+          method : "POST"
+        });
 
-      this.insertViews();
+        this.startWidgetLoad();
+
+        // let container view know how many bibcodes we have
+        this.view.model.set("rows", response.get("responseHeader.params.rows"));
+        this.view.model.set("numFound", response.get("response.numFound"));
+
+        this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
+
+      }
+
+      //it's from the metrics endpoint
+
+      else if (response instanceof JsonResponse ) {
+
+        //is it a response with bibcodes from solr or a response with metrics?
+        response = response.toJSON();
+
+        //how is the json response formed? need to figure out why attributes is there
+        response = response.attributes ? response.attributes : response;
+
+        this.createTableViews(response);
+
+        this.createGraphViews(response);
+
+        this.insertViews();
+
+      }
 
     },
 
@@ -345,7 +471,7 @@ define([
       var paperModelData = {
         totalNumberOfPapers: [generalData.total["Number of papers"], generalData.refereed["Number of papers"]],
         totalNormalizedPaperCount: [generalData.total["Normalized paper count"], generalData.refereed["Normalized paper count"]]
-      }
+      };
 
       this.childViews.papersTableView = new TableView({
         template: PaperTableTemplate,
@@ -379,7 +505,7 @@ define([
         medianRefereedCitations: [generalData.total["Median refereed citations"], generalData.refereed["Median refereed citations"]],
         normalizedRefereedCitations: [generalData.total["Normalized refereed citations"], generalData.refereed["Normalized refereed citations"]]
 
-      }
+      };
 
       this.childViews.citationsTableView = new TableView({
         model: new TableModel(citationsModelData),
@@ -396,7 +522,8 @@ define([
         roqIndex: [generalData.total["roq index"], generalData.refereed["roq index"]],
         read10Index: [generalData.total["read10 index"], generalData.refereed["read10 index"]]
 
-      }
+      };
+
 
       this.childViews.indicesTableView = new TableView({
         model: new TableModel(indicesModelData),
@@ -405,10 +532,30 @@ define([
 
     },
 
-    createGraphViews : function(response){
+    createGraphViews: function (response) {
 
-//      this.childViews.
+      //papers graph
+      var papersModel = new GraphModel();
+      this.childViews.papersGraphView = new GraphView({model: papersModel });
+      this.childViews.papersGraphView.model.set("graphData", DataExtractor.plot_paperhist({norm: false, paperhist_data: response["paper histogram"]}));
+      this.childViews.papersGraphView.model.set("normalizedGraphData", DataExtractor.plot_paperhist({norm: true, paperhist_data: response["paper histogram"]}));
 
+      //citations graph
+      var citationsModel = new GraphModel();
+      this.childViews.citationsGraphView = new GraphView({model: citationsModel });
+      this.childViews.citationsGraphView.model.set("graphData", DataExtractor.plot_citshist({norm: false, citshist_data: response["citation histogram"]}));
+      this.childViews.citationsGraphView.model.set("normalizedGraphData", DataExtractor.plot_citshist({norm: true, citshist_data: response["citation histogram"]}));
+
+      //indices graph
+      var indicesModel = new GraphModel({graphType: "line"});
+      this.childViews.indicesGraphView = new GraphView({model: indicesModel });
+      this.childViews.indicesGraphView.model.set("graphData", DataExtractor.plot_series({series_data: response["metrics series"]}));
+
+      //reads graph
+      var readsModel = new GraphModel();
+      this.childViews.readsGraphView = new GraphView({model: readsModel });
+      this.childViews.readsGraphView.model.set("graphData", DataExtractor.plot_readshist({norm: false, readshist_data: response["reads histogram"]}));
+      this.childViews.readsGraphView.model.set("normalizedGraphData", DataExtractor.plot_readshist({norm: true, readshist_data: response["reads histogram"]}));
 
     },
 
@@ -424,8 +571,12 @@ define([
       this.view.readsTable.show(this.childViews.readsTableView);
 
       //attach graph views
-    },
 
+      this.view.papersGraph.show(this.childViews.papersGraphView);
+      this.view.citationsGraph.show(this.childViews.citationsGraphView);
+      this.view.indicesGraph.show(this.childViews.indicesGraphView);
+      this.view.readsGraph.show(this.childViews.readsGraphView);
+    },
 
 
 //so I can test these individually
@@ -437,17 +588,40 @@ define([
 
       GraphView: GraphView,
 
-      GraphModel : GraphModel,
+      GraphModel: GraphModel,
 
       ContainerView: ContainerView
 
-    }
+    },
 
+    defaultQueryArguments : {
+
+      fl : "bibcode",
+      rows : 200
+    },
+
+
+    activate : function(beehive){
+
+      _.bindAll(this, "setCurrentQuery", "processResponse");
+
+      this.pubsub = beehive.Services.get('PubSub');
+
+      this.pubsub.subscribe(this.pubsub.START_SEARCH, this.setCurrentQuery);
+
+      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+    },
+
+    //fetch data
+    onShow : function(){
+
+      this.dispatchRequest(this.getCurrentQuery());
+
+    }
 
   });
 
-
   return MetricsWidget;
 
-
-})
+});

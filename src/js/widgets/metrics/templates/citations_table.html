@@ -9,7 +9,7 @@
 
     </th>
     <th>
-        Total
+        Totals
 
     </th>
     <th>
@@ -23,11 +23,11 @@
 <tr>
 
     <td>
-        Number of Citing Papers
+        Number of citing papers
     </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Number of Citing Papers</b>" data-content="Number of unique papers citing the papers in the submitted list."></i>
-
+        &nbsp;
     </td>
     <td>
         {{ numberOfCitingPapers.[0] }}
@@ -38,7 +38,7 @@
 
 </tr>
 <tr>
-    <td> Total Citations </td>
+    <td> Total citations </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Total Citations</b>" data-content="The total number of times all papers in the list were cited."></i>
     </td>
@@ -51,9 +51,9 @@
 
 </tr>
 <tr>
-    <td> Number of Self-Citations </td>
+    <td> Number of self-citations </td>
     <td>
-        <i class="icon-help" data-toggle="popover" title="<b>Number of Self-Citations</b>" data-content="The number of citing papers that were also in the list from which the metrics were computed"></i>
+        <i class="icon-help" data-toggle="popover" title="<b>Number of Self-Citations</b>" data-content="The number of citing papers that were also in the list from which the metrics were computed."></i>
     </td>
     <td>
         {{ numberOfSelfCitations.[0] }}
@@ -65,7 +65,7 @@
 </tr>
 
 <tr>
-    <td> Average Citations </td>
+    <td> Average citations </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Average Citations</b>" data-content="The total number of citations divided by the number of papers."></i>
     </td>
@@ -78,7 +78,7 @@
 
 </tr>
 <tr>
-    <td> Median Citations </td>
+    <td> Median citations </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Median Citations</b>" data-content="The median of the citation distribution."></i>
     </td>
@@ -92,10 +92,9 @@
 </tr>
 
 <tr>
-    <td> Normalized Citations  </td>
+    <td> Normalized citations  </td>
     <td>
-        <i class="icon-help" data-toggle="popover" title="<b>Normalized Citations</b>" data-content="For a list of N papers (i=1,...N), where N<sub>auth</sub><sup>i</sup> is the number of authors for publication i and C<sub>i</sub> the number of citations that this paper received, the normalized citation count for each article is \
-            C<sub>i</sub>/N<sub>auth</sub><sup>i</sup> ,and the \'normalized citations\' for this list of N papers is the sum of these N numbers"></i>
+        <i class="icon-help" data-toggle="popover" title="<b>Normalized Citations</b>" data-content="For a list of N papers (i=1,...N), where N<sub>auth</sub><sup>i</sup> is the number of authors for publication i and C<sub>i</sub> the number of citations that this paper received, the normalized citation count for each article is C<sub>i</sub>/N<sub>auth</sub><sup>i</sup> ,and the 'normalized citations' for this list of N papers is the sum of these N numbers."></i>
     </td>
     <td>
         {{ normalizedCitations.[0] }}
@@ -107,7 +106,7 @@
 </tr>
 
 <tr>
-    <td> Refereed Citations  </td>
+    <td> Refereed citations  </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Refereed Citations</b>" data-content="Number of refereed citing papers."></i>
     </td>
@@ -120,7 +119,7 @@
 
 </tr>
 <tr>
-    <td> Average Refereed Citations  </td>
+    <td> Average refereed citations  </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Average Refereed Citations</b>" data-content="The average number of citations from refereed publications to all/refereed publications in the list."></i>
     </td>
@@ -134,9 +133,9 @@
 </tr>
 
 <tr>
-    <td> Median Refereed Citations  </td>
+    <td> Median refereed citations  </td>
     <td>
-        <i class="icon-help" data-toggle="popover" title="<b>Median Refereed Citations</b>" data-content="The average median of citations from refereed publications to all/refereed publications in the list."></i>
+        <i class="icon-help" data-toggle="popover" title="<b>Median Refereed Citations</b>" data-content="The average median of citations from refereed publications to all refereed publications in the list."></i>
     </td>
     <td>
         {{ medianRefereedCitations.[0] }}
@@ -147,9 +146,9 @@
 
 </tr>
 <tr>
-    <td> Normalized Refereed Citations  </td>
+    <td> Normalized refereed citations  </td>
     <td>
-        <i class="icon-help" data-toggle="popover" title="<b>Normalized Refereed Citations</b>" data-content="The normalized number of citations from refereed publications to all/refereed publications in the list."></i>
+        <i class="icon-help" data-toggle="popover" title="<b>Normalized Refereed Citations</b>" data-content="The normalized number of citations from refereed publications to all refereed publications in the list."></i>
     </td>
     <td>
         {{ normalizedRefereedCitations.[0] }}
