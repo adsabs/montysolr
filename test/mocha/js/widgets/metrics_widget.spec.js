@@ -1,9 +1,11 @@
 define([
   'js/widgets/metrics/widget',
-  'js/widgets/metrics/edwins_functions'
+  'js/widgets/metrics/edwins_functions',
+  'js/components/json_response'
 ], function(
   MetricsWidget,
-  DataExtractor
+  DataExtractor,
+  JsonResponse
   ){
 
   describe("Metrics Widget (UI Widget)", function(){
@@ -1375,7 +1377,7 @@ define([
 
 
 
-    it("should have a table view that reads metrics data ", function(){
+    it("should have a table view that renders metrics data and adds a tooltip ", function(){
 
       var metricsWidget = new MetricsWidget();
 
@@ -1392,7 +1394,21 @@ define([
 
     })
 
-    it("should have a function on the controller that ")
+    it("should have a graph view")
+
+    it("should have a function that creates table views from the raw api response", function(){
+
+      var metricsWidget = new MetricsWidget();
+
+      metricsWidget.processResponse(new JsonResponse(testData));
+
+
+
+    })
+
+
+    it("should have a function that creates graph views from the raw api response")
+
 
 
 
