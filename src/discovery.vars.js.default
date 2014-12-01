@@ -40,6 +40,14 @@ define([], function() {
     /**
      * To get debugging output in console
      */
-    debug: false
+    debug: false,
+
+    /**
+     * When a component has method 'activateCache' - we'll call it;
+     * this is e.g. useful for Query Mediator which controls traffic
+     * between widgets and API (and doesn't bother issuing another
+     * request when the query can be served from the application cache)
+     */
+    useCache: true,
   }
 });

@@ -390,6 +390,32 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
     },
     getAllWidgets: function() {
       return _.pairs(this.__widgets.container);
+    },
+
+    /**
+     * Helper method to invoke a 'function' on all objects
+     * that are inside the application
+     *
+     * @param funcName
+     * @param options
+     */
+    triggerMethodOnAll: function(funcName, options) {
+      this.triggerMethod(this.getAllModules(), 'modules', funcName, options);
+      this.triggerMethod(this.getAllPlugins(), 'plugins', funcName, options);
+      this.triggerMethod(this.getAllWidgets(), 'widgets', funcName, options);
+      this.triggerMethod(this.getBeeHive().getAllServices(), 'BeeHive:services', funcName, options);
+      this.triggerMethod(this.getBeeHive().getAllObjects(), 'BeeHive:objects', funcName, options);
+    },
+
+    triggerMethod: function(objects, msg, funcName, options) {
+      var self = this;
+      _.each(objects, function(el) {
+        if (self.debug) {console.log('application.triggerMethod: ' + msg + ": " + el[0] + '.' + funcName + '()')};
+        var obj = el[1];
+        if (funcName in obj) {
+          obj[funcName].call(obj, options);
+        }
+      });
     }
 
 

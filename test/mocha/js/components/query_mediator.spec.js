@@ -39,7 +39,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         done();
       });
 
-      it("has 'activate' function - which does the appropriate setup", function(done) {
+      it("has 'activate' and 'activateCache' function - which does the appropriate setup", function(done) {
         var qm = new QueryMediator();
         var pubsub = beehive.Services.get('PubSub');
 
@@ -53,6 +53,10 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         expect(pubsub.subscribe.callCount).to.be.eql(3);
         expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.START_SEARCH]);
         expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.DELIVERING_REQUEST]);
+
+        expect(qm._cache).to.be.undefined;
+        qm.activateCache();
+        expect(qm._cache).to.be.defined;
 
         done();
       });

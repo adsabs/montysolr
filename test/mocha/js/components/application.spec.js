@@ -93,5 +93,28 @@ define(['js/components/application', 'module'], function(Application, module) {
       });
     });
 
+    it("has triggerMethod", function(done) {
+      var app = new Application();
+      var defer = app.loadModules(config);
+
+      defer.done(function() {
+        var counter = 0;
+        var args = [];
+        _.each(app.getAllWidgets(), function(w) {
+          w[1].foox = function(options) {
+            counter += 1;
+            args.push(options);
+          }
+        });
+
+        expect(counter).to.be.equal(0);
+        app.triggerMethodOnAll('foox', 'foo');
+        expect(counter).to.be.equal(2);
+        expect(args).to.be.eql(['foo', 'foo']);
+
+        done();
+      });
+    });
+
   });
 });

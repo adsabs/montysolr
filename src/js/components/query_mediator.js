@@ -34,19 +34,25 @@ define(['underscore',
     initialize: function(options) {
 
       if (options.cache) {
-        this._cache = new Cache(_.extend({
-          'maximumSize': 100,
-          'expiresAfterWrite':60*30 // 30 mins
-        }, _.isObject(options.cache) ? options.cache : {}));
+        this._cache = this._getNewCache(options.cache);
       }
       this.debug = options.debug || false;
       this.queryUpdater = new ApiQueryUpdater('QueryMediator');
-      this.failedRequestsCache = new Cache({
-        maximumSize: 100,
-        expiresAfterWrite: 60*30 // 30 mins
-      });
+      this.failedRequestsCache = this._getNewCache();
       this.maxRetries = options.maxRetries || 3;
       this.recoveryDelayInMs = options.recoveryDelayInMs || 700;
+    },
+
+    activateCache: function() {
+      if (!this._cache)
+        this._cache = this._getNewCache();
+    },
+
+    _getNewCache: function(options) {
+      return new Cache(_.extend({
+        'maximumSize': 100,
+        'expiresAfterWrite':60*30 // 30 mins
+      }, _.isObject(options) ? options : {}));
     },
 
     /**
