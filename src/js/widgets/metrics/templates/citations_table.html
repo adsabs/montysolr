@@ -1,0 +1,161 @@
+
+
+<thead>
+<tr>
+    <th>
+
+    </th>
+    <th>
+
+    </th>
+    <th>
+        Total
+
+    </th>
+    <th>
+        Refereed
+
+    </th>
+
+</tr>
+</thead>
+
+<tr>
+
+    <td>
+        Number of Citing Papers
+    </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Number of Citing Papers</b>" data-content="Number of unique papers citing the papers in the submitted list."></i>
+
+    </td>
+    <td>
+        {{ numberOfCitingPapers.[0] }}
+    </td>
+    <td>
+        {{ numberOfCitingPapers.[1] }}
+    </td>
+
+</tr>
+<tr>
+    <td> Total Citations </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Total Citations</b>" data-content="The total number of times all papers in the list were cited."></i>
+    </td>
+    <td>
+        {{ totalCitations.[0]}}
+    </td>
+    <td>
+        {{ totalCitations.[1] }}
+    </td>
+
+</tr>
+<tr>
+    <td> Number of Self-Citations </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Number of Self-Citations</b>" data-content="The number of citing papers that were also in the list from which the metrics were computed"></i>
+    </td>
+    <td>
+        {{ numberOfSelfCitations.[0] }}
+    </td>
+    <td>
+        {{  numberOfSelfCitations.[1] }}
+    </td>
+
+</tr>
+
+<tr>
+    <td> Average Citations </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Average Citations</b>" data-content="The total number of citations divided by the number of papers."></i>
+    </td>
+    <td>
+        {{ averageCitations.[0] }}
+    </td>
+    <td>
+        {{ averageCitations.[1] }}
+    </td>
+
+</tr>
+<tr>
+    <td> Median Citations </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Median Citations</b>" data-content="The median of the citation distribution."></i>
+    </td>
+    <td>
+        {{ medianCitations.[0] }}
+    </td>
+    <td>
+        {{ medianCitations.[1] }}
+    </td>
+
+</tr>
+
+<tr>
+    <td> Normalized Citations  </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Normalized Citations</b>" data-content="For a list of N papers (i=1,...N), where N<sub>auth</sub><sup>i</sup> is the number of authors for publication i and C<sub>i</sub> the number of citations that this paper received, the normalized citation count for each article is \
+            C<sub>i</sub>/N<sub>auth</sub><sup>i</sup> ,and the \'normalized citations\' for this list of N papers is the sum of these N numbers"></i>
+    </td>
+    <td>
+        {{ normalizedCitations.[0] }}
+    </td>
+    <td>
+        {{ normalizedCitations.[1] }}
+    </td>
+
+</tr>
+
+<tr>
+    <td> Refereed Citations  </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Refereed Citations</b>" data-content="Number of refereed citing papers."></i>
+    </td>
+    <td>
+        {{ refereedCitations.[0] }}
+    </td>
+    <td>
+        {{  refereedCitations.[1] }}
+    </td>
+
+</tr>
+<tr>
+    <td> Average Refereed Citations  </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Average Refereed Citations</b>" data-content="The average number of citations from refereed publications to all/refereed publications in the list."></i>
+    </td>
+    <td>
+        {{ averageRefereedCitations.[0] }}
+    </td>
+    <td>
+        {{  averageRefereedCitations.[1] }}
+    </td>
+
+</tr>
+
+<tr>
+    <td> Median Refereed Citations  </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Median Refereed Citations</b>" data-content="The average median of citations from refereed publications to all/refereed publications in the list."></i>
+    </td>
+    <td>
+        {{ medianRefereedCitations.[0] }}
+    </td>
+    <td>
+        {{ medianRefereedCitations.[1] }}
+    </td>
+
+</tr>
+<tr>
+    <td> Normalized Refereed Citations  </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Normalized Refereed Citations</b>" data-content="The normalized number of citations from refereed publications to all/refereed publications in the list."></i>
+    </td>
+    <td>
+        {{ normalizedRefereedCitations.[0] }}
+    </td>
+    <td>
+        {{ normalizedRefereedCitations.[1]  }}
+    </td>
+
+</tr>

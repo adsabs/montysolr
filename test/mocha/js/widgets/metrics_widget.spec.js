@@ -1377,30 +1377,62 @@ define([
 
 
 
-    it("should have a table view that renders metrics data and adds a tooltip ", function(){
 
-      var metricsWidget = new MetricsWidget();
+    it("should have a configurable graph view", function(){
 
-      var m = new metricsWidget.components.TableModel({
-        title : ["title1", "title2"],
-        rows : [[1,2],[3,4]]
-      });
+        var metricsWidget = new MetricsWidget();
 
-      var table = new metricsWidget.components.TableView({model : m })
+        var gModel = new metricsWidget.components.GraphModel();
 
-      expect()
+        var graphView = new metricsWidget.components.GraphView({model : gModel });
+
+        graphView.model.set("graphData", DataExtractor.plot_citshist({norm : false, citshist_data : testData["citation histogram"]}));
+
+       $("#test").append(graphView.render().el)
 
 
 
     })
-
-    it("should have a graph view")
 
     it("should have a function that creates table views from the raw api response", function(){
 
       var metricsWidget = new MetricsWidget();
 
       metricsWidget.processResponse(new JsonResponse(testData));
+
+
+      //checking a single row from each template
+      //would there be a way to check the entire rendered html in a non-messy way?
+
+      expect(metricsWidget.papersTableView.render().$("td:contains(Number of Papers)~td").eq(1).text().trim()).to.eql("2");
+      expect(metricsWidget.papersTableView.render().$("td:contains(Number of Papers)~td").eq(2).text().trim()).to.eql("2");
+
+      expect(metricsWidget.readsTableView.render().$("td:contains(Total Number of Downloads)~td").eq(1).text().trim()).to.eql("102");
+      expect(metricsWidget.readsTableView.render().$("td:contains(Total Number of Downloads)~td").eq(2).text().trim()).to.eql("102");
+
+      expect(metricsWidget.citationsTableView.render().$("td:contains(Average Refereed Citations)~td").eq(1).text().trim()).to.eql("37");
+      expect(metricsWidget.citationsTableView.render().$("td:contains(Average Refereed Citations)~td").eq(2).text().trim()).to.eql("37");
+
+      expect(metricsWidget.indicesTableView.render().$("td:contains(i10-index)~td").eq(1).text().trim()).to.eql("2");
+      expect(metricsWidget.indicesTableView.render().$("td:contains(i10-index)~td").eq(2).text().trim()).to.eql("2");
+
+
+    })
+
+    it("should have a function that creates graph views out of the raw api response", function(){
+
+
+
+
+    })
+
+    it("should have a container view (marionette layout) that arranges the child views", function(){
+
+      var metricsWidget = new MetricsWidget();
+
+      metricsWidget.processResponse(new JsonResponse(testData));
+
+//      $("#test").append(metricsWidget.view.el)
 
 
 

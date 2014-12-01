@@ -1,0 +1,106 @@
+<thead>
+    <tr>
+        <th>
+
+        </th>
+        <th>
+
+        </th>
+        <th>
+            Total
+
+        </th>
+        <th>
+            Refereed
+
+        </th>
+
+    </tr>
+    </thead>
+
+    <tr>
+
+        <td>
+            Total Number of Reads
+        </td>
+        <td>
+            <i class="icon-help" data-toggle="popover" title="<b>Total Number of Reads</b>" data-content="The total number of times all papers were \"read\". For each paper, a \"read\" is counted if an ADS user runs a search in our system and then requests to either view the paper\'s full bibliographic record or download the fulltext."></i>
+
+        </td>
+        <td>
+            {{ totalNumberOfReads.[0] }}
+        </td>
+        <td>
+            {{ totalNumberOfReads.[1]  }}
+        </td>
+
+    </tr>
+    <tr>
+        <td> Average Number of Reads </td>
+        <td>
+            <i class="icon-help" data-toggle="popover" title="<b>Average Number of Reads</b>" data-content="The total number of reads divided by the number of papers."></i>
+        </td>
+        <td>
+            {{ averageNumberOfReads.[0] }}
+        </td>
+        <td>
+            {{ averageNumberOfReads.[1] }}
+        </td>
+
+    </tr>
+<tr>
+    <td> Median Number of Reads </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Median Number of Reads</b>" data-content="The median of the reads distribution."></i>
+    </td>
+    <td>
+        {{ medianNumberOfReads.[0] }}
+    </td>
+    <td>
+        {{ medianNumberOfReads.[1] }}
+    </td>
+
+</tr>
+
+<tr>
+    <td> Total Number of Downloads </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Total Number of Downloads</b>" data-content="The total number of times full text (article or e-print) was accessed.'"></i>
+    </td>
+    <td>
+        {{ totalNumberOfDownloads.[0] }}
+    </td>
+    <td>
+        {{ totalNumberOfDownloads.[1] }}
+    </td>
+
+</tr>
+<tr>
+    <td> Average Number of Downloads </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Average Number of Downloads</b>" data-content="The total number of downloads divided by the number of papers."></i>
+    </td>
+    <td>
+        {{ averageNumberOfDownloads.[0] }}
+    </td>
+    <td>
+        {{ averageNumberOfDownloads.[1]  }}
+    </td>
+
+</tr>
+
+<tr>
+    <td> Median Number of Downloads </td>
+    <td>
+        <i class="icon-help" data-toggle="popover" title="<b>Median Number of Downloads</b>" data-content="The median of the downloads distribution."></i>
+    </td>
+    <td>
+        {{ medianNumberOfDownloads.[0] }}
+    </td>
+    <td>
+        {{ medianNumberOfDownloads.[1] }}
+    </td>
+
+</tr>
+
+

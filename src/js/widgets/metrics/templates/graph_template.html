@@ -1,0 +1,23 @@
+
+
+<div class="graph-container s-graph-container">
+    <div class="graph-tab s-graph-tab active" data-tab="total">Total</div>
+    <div class="graph-tab s-graph-tab" data-tab="normalized">Normalized</div>
+
+    <svg height="100%" width="100%" viewBox="0 0 500 550" preserveAspectRatio="xMinYMax meet">
+
+    </svg>
+
+</div>
+<div class="s-graph-options">
+
+
+        {{#each graphOptions}}
+
+        <label><input type="radio" name="graph-type" value="{{this.value}}" {{#if this.default}} checked {{/if}}/> {{this.name}}</label>
+
+        {{/each}}
+
+
+</div>
+
