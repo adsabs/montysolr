@@ -214,7 +214,7 @@ define(['underscore',
       var qm = this.qm;
       var query = this.request.get('query');
       if (qm.debug) {
-        console.warn('[QM]: failing request', jqXHR, textStatus, errorThrown);
+        console.warn('[QM]: request failed', jqXHR, textStatus, errorThrown);
       }
 
       var errCount = qm.failedRequestsCache.getSync(this.requestKey) || 0;
@@ -222,6 +222,9 @@ define(['underscore',
 
       if (qm.tryToRecover.apply(this, arguments)) {
         console.warn("[QM]: attempting recovery");
+      }
+      else {
+        return;
       }
 
       var feedback = new ApiFeedback({code:503, msg:textStatus});
@@ -238,7 +241,7 @@ define(['underscore',
 
       var pubsub = qm.getBeeHive().Services.get('PubSub');
       if (pubsub)
-        pubsub.publish(this.key, pubsub.DELIVERING_FEEDBACK+this.key.getId(), feedback);
+        pubsub.publish(this.key, pubsub.FEEDBACK+this.key.getId(), feedback);
 
     },
 

@@ -58,10 +58,10 @@ define([
         return this.req;
       },
 
-
       setMsg: function(msg) {
         this.msg = msg;
       }
+
     }, Hardened);
 
     ApiFeedback.extend = Backbone.Model.extend;
