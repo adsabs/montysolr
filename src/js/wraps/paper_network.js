@@ -30,7 +30,7 @@ define([
 
     currentData = this.model.get("summaryData");
 
-    scalesDict = this.model.get("scales")
+    scalesDict = this.model.get("scales");
 
     groupWeights = _.pluck(currentData.nodes, "size");
 
@@ -87,7 +87,7 @@ define([
     force = d3.layout
       .force()
       .size([width, height])
-      .distance(function (d) {
+      .distance(function () {
        return 50
       })
       .charge(charge);
@@ -95,16 +95,16 @@ define([
     force
       .nodes(nodesData)
       .links(linksData)
-      .start()
+      .start();
 
-    this.model.set("force", force)
+    this.model.set("force", force);
 
     //need two gs because of weird panning requirement
-    g1 = svg.append("g")
+    g1 = svg.append("g");
 
-    this.model.set("g1", g1)
+    this.model.set("g1", g1);
 
-    g2 = g1.append("g")
+    g2 = g1.append("g");
 
     g2.append("rect")
       .attr("width", width)
@@ -141,7 +141,6 @@ define([
       .classed("summary-node-group", true)
       .call(force.drag);
 
-
     node.append("circle")
       .classed({"network-node": true })
       .attr("r", function (d) {
@@ -152,12 +151,11 @@ define([
         var d3Group = d3.select(this.parentElement);
 
         wordValues = [];
-        _.each(d.nodeName, function(v,k){
+        _.each(d.nodeName, function(v){
           wordValues.push(v);
         });
 
         var size = d.size;
-
 
         fontScale = d3.scale.linear().domain([d3.min(wordValues), d3.max(wordValues)]).range([radiusScale(d.size)/5, radiusScale(d.size)/4]);
 
@@ -191,19 +189,19 @@ define([
     force.on("tick", function () {
 
       node.attr("x", function(d) {
-        var r = d3.select(this.children ? this.children[0] : this.childNodes[0]).attr("r");
+
+        var r = d3.select(this.childNodes[0]).attr("r");
         return d.x = Math.max(r, Math.min(width - r, d.x));
       })
         .attr("y", function(d) {
-          var r = d3.select(this.children ? this.children[0] : this.childNodes[0]).attr("r");
+          var r = d3.select(this.childNodes[0]).attr("r");
           return d.y = Math.max(r, Math.min(height - r, d.y));
         });
-
 
       node.attr("transform", function (d) {
 
         return "translate(" + d.x + "," + d.y + ")"
-      })
+      });
 
       link.attr("x1", function (d) {
         return d.source.x;
@@ -220,16 +218,13 @@ define([
 
     });
 
-
     z = d3.behavior.zoom().scaleExtent([1, 1]);
 
     g1.call(z)
 
-
   };
 
   options.detailMixin = {};
-
 
   options.detailMixin.drawGraph = function () {
 
@@ -246,23 +241,21 @@ define([
     width = this.styleModel.get("width");
     height = this.styleModel.get("height");
 
-    scalesDict = this.model.get("scales")
+    scalesDict = this.model.get("scales");
 
     svg = d3.select(this.$("svg")[0]);
 
-    this.model.set("svg", svg)
+    this.model.set("svg", svg);
 
     var force = d3.layout.force()
       .size([width, height])
       .linkDistance(this.styleModel.get("linkDistance"));
 
-
     svg
       .attr("width", width)
-      .attr("height", height)
+      .attr("height", height);
 
-    this.model.set("svg", svg)
-
+    this.model.set("svg", svg);
 
     //container for network
     //need two gs because of weird panning requirement
@@ -270,16 +263,13 @@ define([
 
     g2 = g1.append("g");
 
-
     g2.append("rect")
       .attr("width", width)
       .attr("height", height)
       .style("fill", "none")
       .style("pointer-events", "all");
 
-
     this.model.set("g2", g2);
-
 
     force
       .nodes(this.model.get("nodes"))
@@ -317,7 +307,7 @@ define([
       }})
       .style("fill", function (d, i) {
         return scalesDict.colorScale(i);
-      })
+      });
 
     numTicks = 0;
 
@@ -370,7 +360,8 @@ define([
 
         xList.push(this.__data__.x);
         yList.push(this.__data__.y);
-      })
+
+      });
 
       maxX = _.max(xList);
       minX = _.min(xList);
@@ -378,11 +369,11 @@ define([
       maxY = _.max(yList);
       minY = _.min(yList);
 
-      buffer = 30
+      buffer = 30;
 
       largestDistance = _.max([(maxX - minX), (maxY - minY)]) + buffer;
 
-      center = [(maxX + minX) / 2, (maxY + minY) / 2]
+      center = [(maxX + minX) / 2, (maxY + minY) / 2];
 
       var newScale = 100 / largestDistance;
 
@@ -395,26 +386,22 @@ define([
       z.translate([translateX, translateY]);
 
       g2.transition().duration(3000)
-        .attr('transform', 'translate(' + translateX + ', ' + translateY + ')' + 'scale(' + z.scale() + ')')
+        .attr('transform', 'translate(' + translateX + ', ' + translateY + ')' + 'scale(' + z.scale() + ')');
 
       self.model.set("z", z);
       self.model.set("g2", g2);
 
-
-
-
-      setTimeout(zoomCallback, 3000)
+      setTimeout(zoomCallback, 3000);
 
       //now initializing all zoom behaviors, including button zoom
       //will be called after 40 ticks
       function zoomCallback() {
 
-
         var drag = d3.behavior.drag()
-          .on("drag", function (d, i) {
+          .on("drag", function () {
             var x = this.transform.animVal[0].matrix.e + d3.event.dx;
             var y = this.transform.animVal[0].matrix.f + d3.event.dy;
-            d3.select(this).attr("transform", function (d, i) {
+            d3.select(this).attr("transform", function () {
               return "translate(" + [ x, y ] + ")"
                 + " scale(" + z.scale() + ")";
 
@@ -427,14 +414,10 @@ define([
 
         g2.call(drag);
 
-
       }
-
     }
 
-
   };
-
 
 
   options.detailMixin.addExtraListeners = function(){
@@ -475,12 +458,9 @@ define([
 
   return function(){
 
-    var widget = new NetworkWidget(options);
-
-    return widget;
-
+    return new NetworkWidget(options);
 
   };
 
 
-})
+});
