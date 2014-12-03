@@ -11,10 +11,10 @@
 
 
 .hidden-col{
-  width: 0% !important;
-  padding: 0% !important;
-  margin: 0% !important;
-
+  width: 0 ;
+  padding: 0 ;
+  margin: 0 ;
+  opacity: 0;
 }
 
 .btn-expand {
@@ -27,7 +27,7 @@
 
 
   //show in desktops
-  @media (min-width : @screen-md-min){
+  @media (min-width : @screen-sm-min){
     display: inline-block;
     .lh-transition(all .5s ease-out);
 
@@ -74,6 +74,11 @@
   }
 }
 
+.btn-reversed i {
+  .lh-transform(rotate(-180deg))
+
+}
+
 /* Styles for results and abstract page */
 
 .s-main-content-container{
@@ -98,13 +103,9 @@
 
 .s-results-page-layout {
 
-
   .s-results-column {
-
     .lh-transition(width .5s ease-out, padding .5s ease-out)
-
   }
-
   .s-left-col-container {
     border-radius: @border-radius-base;
     background-color: white;
@@ -113,12 +114,18 @@
     padding: 10px;
     padding-bottom: 15px;
     min-height: 500px;
+    margin-bottom: 25px;
     .unselectable;
   }
-
 }
 
+.s-results-left-column {
+  padding-right: 0
+}
 
+.s-results-right-column {
+  padding-left:0
+}
 .s-left-col-mixin{
   .make-sm-column(4);
   .make-md-column(2);

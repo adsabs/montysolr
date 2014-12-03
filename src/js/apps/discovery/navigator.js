@@ -7,12 +7,16 @@ define([
     'jquery',
     'backbone',
     'underscore',
-    'js/components/navigator'],
+    'js/components/navigator',
+    'js/components/api_feedback'
+  ],
   function (
     $,
     Backbone,
     _,
-    Navigator) {
+    Navigator,
+    ApiFeedback
+    ) {
 
     "use strict";
 
@@ -30,7 +34,13 @@ define([
          */
         var pubsub = this.pubsub;
         var self = this;
-        pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, function() {self.navigate('results-page')});
+        pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, function() {
+          self.navigate('results-page')
+        });
+
+        var publishFeedback = function(data) {
+          self.pubsub.publish(self.pubSubKey, self.pubsub.FEEDBACK, new ApiFeedback(data))
+        };
 
         var searchPageAlwaysVisible = [
           'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
@@ -47,9 +57,12 @@ define([
           searchPageAlwaysVisible);
           this.route = '#search/' + app.getWidget('SearchWidget').getCurrentQuery().url();
         });
+
         this.set('show-author-network', function() {
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',
             ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
+
         });
         this.set("visualization-closed", this.get("results-page"));
         this.set('abstract-page', function() {

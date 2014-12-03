@@ -40,7 +40,19 @@
  *
  */
 
-define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], function(_, $, Backbone, module, BeeHive) {
+define([
+  'underscore',
+  'jquery',
+  'backbone',
+  'module',
+  'js/components/beehive'
+], function(
+  _,
+  $,
+  Backbone,
+  module,
+  BeeHive
+  ) {
 
 
   var Application = function(options) {
@@ -76,6 +88,7 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
       // these are core (elevated access)
       this.__beehive = new BeeHive();
       this.__modules = new Container();
+      this.__controllers = new Container();
 
       // these are barbarians behind the gates
       this.__widgets = new Container();
@@ -108,7 +121,7 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
 
       var core = config['core'];
       if (core) {
-        _.each(['modules', 'services', 'objects'], function(name) {
+        _.each(['controllers', 'modules', 'services', 'objects'], function(name) {
           if (core[name]) {
             promise = self._loadModules(name, core[name]);
             if (promise)
@@ -183,7 +196,12 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
 
       //console.log('registering', section, modules);
 
-      if (section == "services") {
+      if (section == "controllers") {
+        hasKey = _.bind(this.hasController, this);
+        removeKey = _.bind(function(key) {this.__controllers.remove(key)}, this);
+        addKey = _.bind(function(key, module) {this.__controllers.add(key, module)}, this);
+      }
+      else if (section == "services") {
         hasKey = _.bind(beehive.hasService, beehive);
         removeKey = _.bind(beehive.removeService, beehive);
         addKey = _.bind(beehive.addService, beehive);
@@ -317,9 +335,18 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
       if (self.debug) {console.log('application: beehive.activate()')};
       beehive.activate(beehive);
 
+      // controllers receive application itself and elevated beehive object
+      _.each(this.getAllControllers(), function(el) {
+        if (self.debug) {console.log('application: controllers: ' + el[0] + '.activate(beehive, app)')};
+        var plugin = el[1];
+        if ('activate' in plugin) {
+          plugin.activate(beehive, self);
+        }
+      });
+
       // modules receive elevated beehive object
       _.each(this.getAllModules(), function(el) {
-        if (self.debug) {console.log('application: modules: ' + el[0] + '.activate()')};
+        if (self.debug) {console.log('application: modules: ' + el[0] + '.activate(beehive)')};
         var plugin = el[1];
         if ('activate' in plugin) {
           plugin.activate(beehive);
@@ -328,14 +355,14 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
 
       // all the rest receive hardened beehive
       _.each(this.getAllPlugins(), function(el) {
-        if (self.debug) {console.log('application: plugins: ' + el[0] + '.activate()')};
+        if (self.debug) {console.log('application: plugins: ' + el[0] + '.activate(beehive)')};
         var plugin = el[1];
         if ('activate' in plugin) {
           plugin.activate(beehive.getHardenedInstance());
         }
       });
       _.each(this.getAllWidgets(), function(el) {
-        if (self.debug) {console.log('application: widget: ' + el[0] + '.activate()')};
+        if (self.debug) {console.log('application: widget: ' + el[0] + '.activate(beehive)')};
         var plugin = el[1];
         if ('activate' in plugin) {
           plugin.activate(beehive.getHardenedInstance());
@@ -362,6 +389,13 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
       return this.getBeeHive().getObject(name);
     },
 
+    hasController: function(name) {
+      return this.__controllers.has(name);
+    },
+    getController: function(name) {
+      return this.__controllers.get(name);
+    },
+
     hasModule: function(name) {
       return this.__modules.has(name);
     },
@@ -382,6 +416,9 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
       return this.__plugins.get(name);
     },
 
+    getAllControllers: function() {
+      return _.pairs(this.__controllers.container);
+    },
     getAllModules: function() {
       return _.pairs(this.__modules.container);
     },
@@ -400,6 +437,7 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
      * @param options
      */
     triggerMethodOnAll: function(funcName, options) {
+      this.triggerMethod(this.getAllControllers(), 'controllers', funcName, options);
       this.triggerMethod(this.getAllModules(), 'modules', funcName, options);
       this.triggerMethod(this.getAllPlugins(), 'plugins', funcName, options);
       this.triggerMethod(this.getAllWidgets(), 'widgets', funcName, options);
@@ -410,9 +448,9 @@ define(['underscore', 'jquery', 'backbone', 'module', 'js/components/beehive'], 
     triggerMethod: function(objects, msg, funcName, options) {
       var self = this;
       _.each(objects, function(el) {
-        if (self.debug) {console.log('application.triggerMethod: ' + msg + ": " + el[0] + '.' + funcName + '()')};
         var obj = el[1];
         if (funcName in obj) {
+          if (self.debug) {console.log('application.triggerMethod: ' + msg + ": " + el[0] + '.' + funcName + '()')};
           obj[funcName].call(obj, options);
         }
       });

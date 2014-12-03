@@ -2,11 +2,30 @@
  * Created by rchyla on 3/31/14.
  */
 
-define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/beehive',
-        'js/services/pubsub', 'js/services/api', 'js/components/generic_module',
-        'js/components/pubsub_key', 'js/components/api_query', 'js/components/api_request'
-        ],
-  function(_, $, QueryMediator, BeeHive, PubSub, Api, GenericModule, PubSubKey, ApiQuery, ApiRequest) {
+define([
+    'underscore',
+    'jquery',
+    'js/components/query_mediator',
+    'js/components/beehive',
+    'js/services/pubsub',
+    'js/services/api',
+    'js/components/generic_module',
+    'js/components/pubsub_key',
+    'js/components/api_query',
+    'js/components/api_request'
+     ],
+  function(
+    _,
+    $,
+    QueryMediator,
+    BeeHive,
+    PubSub,
+    Api,
+    GenericModule,
+    PubSubKey,
+    ApiQuery,
+    ApiRequest
+    ) {
 
     var beehive, debug = false;
     describe('Query Mediator (Scaffolding)', function() {
@@ -178,13 +197,13 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
       });
 
 
-      it("has getCacheKey function", function(done) {
+      it("has _getCacheKey function", function(done) {
         var qm = new QueryMediator();
         var req = new ApiRequest({target: 'search', query:new ApiQuery({'q': 'pluto'})});
 
         req.get('query').set('__x', 'foo');
         expect(req.url()).to.be.equal('search?__x=foo&q=pluto');
-        var key = qm.getCacheKey(req);
+        var key = qm._getCacheKey(req);
         expect(req.url()).to.be.equal('search?__x=foo&q=pluto');
         expect(key).to.be.equal('search?q=pluto');
         done();

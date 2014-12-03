@@ -20,6 +20,9 @@ require.config({
     },
     'js/apps/discovery/main': {
       core: {
+        controllers: {
+          FeedbackMediator: 'js/wraps/discovery_mediator'
+        },
         services: {
           'Api': 'js/services/api',
           'PubSub': 'js/services/pubsub',
@@ -30,7 +33,6 @@ require.config({
           DynamicConfig: 'discovery.vars',
           QueryMediator: 'js/components/query_mediator',
           HistoryManager: 'js/components/history_manager',
-
           MasterPageManager: 'js/page_managers/master'
         },
         modules: {

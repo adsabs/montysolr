@@ -120,7 +120,7 @@ define(['underscore',
       var ps = this.getBeeHive().Services.get('PubSub');
       var api = this.getBeeHive().Services.get('Api');
 
-      var requestKey = this.getCacheKey(apiRequest);
+      var requestKey = this._getCacheKey(apiRequest);
       var maxTry = this.failedRequestsCache.getSync(requestKey) || 0;
 
       if (maxTry >= this.maxRetries) {
@@ -302,7 +302,7 @@ define(['underscore',
      * Creates a unique, cleaned key from the request and the apiQuery
      * @param apiRequest
      */
-    getCacheKey: function(apiRequest) {
+    _getCacheKey: function(apiRequest) {
       var oldQ = apiRequest.get('query');
       var newQ = this.queryUpdater.clean(oldQ);
       apiRequest.set('query', newQ);

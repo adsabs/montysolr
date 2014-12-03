@@ -13,4 +13,4 @@ define([
   return new NetworkWidget(options);
 
 
-})
+});
