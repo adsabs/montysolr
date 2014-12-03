@@ -22,9 +22,24 @@ define([
     window.assert = chai.assert;
     window.should = chai.should;
 
+    if (window.mochaPhantomJS) {
+      var stringify = JSON.stringify;
+      console.log('Because we run inside PHANTOMJS, redefining JSON.stringify() to output acyclic structures:');
+      JSON.stringify = function(obj) {
+        var seen = [];
+
+        return stringify(obj, function(key, val) {
+          if (typeof val === "object") {
+            if (seen.indexOf(val) >= 0) { return; }
+            seen.push(val);
+          }
+          return val;
+        });
+      };
+    }
 
     if (window.blanket) {
-      if (window.PHANTOMJS) {
+      if (window.PHANTOMJS) { // run inside mocha-phantomjs
         blanket.options("reporter", 
           "../../node_modules/grunt-blanket-mocha/support/grunt-reporter.js");
         //blanket.options('reporter',
@@ -42,9 +57,9 @@ define([
       var val = (half !== undefined) ? decodeURIComponent(half.split('&')[0]) : deflt;
       if (_.isString(val)) {
         if (val.indexOf('|')) {
-          return val.split('|');
+          return _.compact(val.split('|'));
         }
-        return [val];
+        return _.compact([val]);
       }
       else {
         return deflt;
@@ -68,7 +83,7 @@ define([
     var suites = _.map(args, function(m) {return '../test/mocha/' + m});
     var testBase = '../../test/mocha/js/';
 
-    console.log('About to load testsuite(s): ' + suites.concat(', '));
+    console.log('About to load testsuite(s): ' + JSON.stringify(suites));
     console.log('window.location=' + window.location + ' (testBase=' + testBase + ')');
 
     require(suites, function() { // load the test suites

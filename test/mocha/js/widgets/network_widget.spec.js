@@ -1497,6 +1497,9 @@ define([
 
     var minsub;
 
+    var stringify = JSON.stringify;
+
+
     beforeEach(function () {
 
       networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
@@ -1752,7 +1755,8 @@ define([
 
       networkWidget.view.$(".icon-help").mouseover();
 
-      expect($("div.popover").length).to.eql(1)
+      expect($("div.popover").length).to.eql(1);
+
     })
 
 

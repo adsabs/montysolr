@@ -27,11 +27,13 @@ define([
 
   return function(){
 
-    var VisDropdown = new DropdownWidget({links : links,
+    var VisDropdown = new DropdownWidget({
+      links : links,
       btnType: btnType,
       dropdownTitle : dropdownTitle,
       iconClass: iconClass,
-      rightAlign : rightAlign});
+      rightAlign : rightAlign
+    });
 
     return VisDropdown;
 

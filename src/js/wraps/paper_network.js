@@ -191,11 +191,11 @@ define([
     force.on("tick", function () {
 
       node.attr("x", function(d) {
-        var r = d3.select(this.children[0]).attr("r");
+        var r = d3.select(this.children ? this.children[0] : this.childNodes[0]).attr("r");
         return d.x = Math.max(r, Math.min(width - r, d.x));
       })
         .attr("y", function(d) {
-          var r = d3.select(this.children[0]).attr("r");
+          var r = d3.select(this.children ? this.children[0] : this.childNodes[0]).attr("r");
           return d.y = Math.max(r, Math.min(height - r, d.y));
         });
 
