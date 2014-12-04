@@ -26,7 +26,7 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
     afterEach(function(done) {
       beehive, pubsub, key, widget, $w = undefined;
       $("#test").empty();
-
+      beehive.close();
       done();
     });
 
@@ -166,7 +166,7 @@ define(['jquery', 'js/widgets/search_bar/search_bar_widget',
 
     });
 
-    it("clicking outside the QB area, hides QB form", function() {
+    it.skip("clicking outside the QB area, hides QB form", function() {
 
     });
 
