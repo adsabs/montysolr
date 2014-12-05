@@ -862,13 +862,13 @@ define([
 
       $("#test").find(".metrics-metadata input").val("1");
 
-      $("#test").find(".metrics-metadata input").change();
+      $("#test").find(".metrics-metadata input").trigger("keypress");
 
 
       setTimeout(function(){
 
         expect(metricsWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Request");
-        expect(metricsWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql(["1"]);
+        expect(metricsWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
 
 
         done();

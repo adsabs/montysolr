@@ -352,13 +352,19 @@ define([
 
     events : {
 
-      "change .metrics-rows" : "changeRows"
+      "keypress .metrics-rows" : "changeRows"
 
     },
 
    changeRows : _.debounce(function(e){
 
-     this.model.set("userVal", _.min([this.model.get("max"), e.target.value]));
+     var num = parseInt(e.target.value);
+
+     if (num){
+
+       this.model.set("userVal", _.min([this.model.get("max"), parseInt(e.target.value)]));
+
+     }
 
     }, 500),
 
@@ -411,8 +417,10 @@ define([
       var query = this.getCurrentQuery().clone();
 
       query.set("rows", rows);
+      query.set("fl", "bibcode")
 
       var request = new ApiRequest({
+        target : 'search',
         query : query
       });
 
