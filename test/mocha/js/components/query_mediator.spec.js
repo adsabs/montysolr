@@ -2,11 +2,30 @@
  * Created by rchyla on 3/31/14.
  */
 
-define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/beehive',
-        'js/services/pubsub', 'js/services/api', 'js/components/generic_module',
-        'js/components/pubsub_key', 'js/components/api_query', 'js/components/api_request'
-        ],
-  function(_, $, QueryMediator, BeeHive, PubSub, Api, GenericModule, PubSubKey, ApiQuery, ApiRequest) {
+define([
+    'underscore',
+    'jquery',
+    'js/components/query_mediator',
+    'js/components/beehive',
+    'js/services/pubsub',
+    'js/services/api',
+    'js/components/generic_module',
+    'js/components/pubsub_key',
+    'js/components/api_query',
+    'js/components/api_request'
+     ],
+  function(
+    _,
+    $,
+    QueryMediator,
+    BeeHive,
+    PubSub,
+    Api,
+    GenericModule,
+    PubSubKey,
+    ApiQuery,
+    ApiRequest
+    ) {
 
     var beehive, debug = false;
     describe('Query Mediator (Scaffolding)', function() {
@@ -39,7 +58,7 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         done();
       });
 
-      it("has 'activate' function - which does the appropriate setup", function(done) {
+      it("has 'activate' and 'activateCache' function - which does the appropriate setup", function(done) {
         var qm = new QueryMediator();
         var pubsub = beehive.Services.get('PubSub');
 
@@ -53,6 +72,10 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
         expect(pubsub.subscribe.callCount).to.be.eql(3);
         expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.START_SEARCH]);
         expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.DELIVERING_REQUEST]);
+
+        expect(qm._cache).to.be.undefined;
+        qm.activateCache();
+        expect(qm._cache).to.be.defined;
 
         done();
       });
@@ -174,13 +197,13 @@ define(['underscore', 'jquery', 'js/components/query_mediator', 'js/components/b
       });
 
 
-      it("has getCacheKey function", function(done) {
+      it("has _getCacheKey function", function(done) {
         var qm = new QueryMediator();
         var req = new ApiRequest({target: 'search', query:new ApiQuery({'q': 'pluto'})});
 
         req.get('query').set('__x', 'foo');
         expect(req.url()).to.be.equal('search?__x=foo&q=pluto');
-        var key = qm.getCacheKey(req);
+        var key = qm._getCacheKey(req);
         expect(req.url()).to.be.equal('search?__x=foo&q=pluto');
         expect(key).to.be.equal('search?q=pluto');
         done();

@@ -87,7 +87,7 @@ define([], function() {
      * A message containing feedback from the FC; traveling towards OC
      * The feedback will be instance of ApiFeedback
      */
-    DELIVERING_FEEDBACK: '[FC]-FeedBack',
+    FEEDBACK: '[FC]-FeedBack',
 
 
     /**

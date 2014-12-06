@@ -16,6 +16,7 @@ define([], function() {
       '/components/application.spec.js',
       '/components/api_query_updater.spec.js',
       '/components/api_feedback.spec.js',
+      '/components/feedback_mediator.spec.js',
       '/components/history_manager.spec.js',
 
       '/services/backbone.events.spec.js',

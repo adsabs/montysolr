@@ -64,6 +64,14 @@ define(['backbone', 'underscore',
       return this.debug;
     },
 
+    getAllServices: function() {
+      return this.Services.getAll();
+    },
+
+    getAllObjects: function() {
+      return this.Objects.getAll();
+    },
+
     /*
      * Wraps itself into a Facade that can be shared with other modules
      * (it is read-only); absolutely non-modifiable and provides the

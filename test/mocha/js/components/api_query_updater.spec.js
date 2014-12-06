@@ -1,4 +1,12 @@
-define(['underscore', 'js/components/api_query', 'js/components/api_query_updater'], function(_, ApiQuery, ApiQueryUpdater) {
+define([
+  'underscore',
+  'js/components/api_query',
+  'js/components/api_query_updater'
+], function(
+  _,
+  ApiQuery,
+  ApiQueryUpdater
+  ) {
   describe("ApiQuery Updater (Utility)", function () {
       
 

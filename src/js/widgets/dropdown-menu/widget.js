@@ -4,13 +4,7 @@ define([
     'hbs!./templates/dropdown',
     'hbs!./templates/dropdown-item'
   ],
-  function(
-    Marionette,
-    BaseWidget,
-    dropdownTemplate,
-    dropdownItemTemplate
-
-    ) {
+  function (Marionette, BaseWidget, dropdownTemplate, dropdownItemTemplate) {
 
     /*
      *
@@ -23,152 +17,101 @@ define([
 
     var DropdownModel = Backbone.Model.extend({
 
-      defaults : function(){
+      defaults: function () {
         return {
           selected: false,
-          href : undefined,
-          description : undefined,
-          navEvent : undefined
+          href: undefined,
+          description: undefined,
+          navEvent: undefined
         }
       }
-
-
     });
-
 
 
     var DropdownCollection = Backbone.Collection.extend({
 
-      initialize : function(models, options){
-
+      initialize: function (models, options) {
         this.on("change:selected", this.removeOtherSelected)
       },
 
-      model : DropdownModel,
+      model: DropdownModel,
 
       //only allow 1 selected model at a time
-      removeOtherSelected : function(selectedModel, val){
+      removeOtherSelected: function (selectedModel, val) {
 
-        if (val === false){
+        if (val === false) {
           return
         }
-
-        this.each(function(m){
-
-          if (m !== selectedModel){
-
+        this.each(function (m) {
+          if (m !== selectedModel) {
             m.set("selected", false)
-
           }
-
         })
-
       }
-
-
     });
 
     var DropdownItemView = Marionette.ItemView.extend({
 
-      tagName : "li",
+      tagName: "li",
 
-      events : {
-
-        "click" : "setSelected"
+      events: {
+        "click": "setSelected"
       },
 
-      setSelected : function(e){
-
+      setSelected: function (e) {
         e.preventDefault();
-
         this.model.set("selected", true);
       },
-
-      template : dropdownItemTemplate
-
+      template: dropdownItemTemplate
     });
 
     var DropdownView = Marionette.CompositeView.extend({
 
-      initialize : function(options){
-
+      initialize: function (options) {
         options = options || {};
-
       },
 
       itemView: DropdownItemView,
+      itemViewContainer: ".dropdown-menu",
+      template: dropdownTemplate,
 
-      itemViewContainer : ".dropdown-menu",
-
-      template : dropdownTemplate,
-
-      serializeData : function() {
-
+      serializeData: function () {
         var data = {};
-
         //what color should the button be?
         data.btnType = Marionette.getOption(this, "btnType") || "btn-default";
-
         data.dropdownTitle = Marionette.getOption(this, "dropdownTitle");
-
         data.iconClass = Marionette.getOption(this, "iconClass");
-
         return data
-
       }
-
-
     });
 
 
     var DropdownWidget = BaseWidget.extend({
 
-      initialize : function(options){
-
+      initialize: function (options) {
         options = options || {};
-
-        if (!options.links){
-
+        if (!options.links) {
           throw new Error("Dropdown menu will be empty!")
-
         }
 
         this.collection = new DropdownCollection(options.links);
-
         this.view = new DropdownView(_.extend({collection: this.collection}, options));
-
         this.listenTo(this.collection, "change:selected", this.emitNavigateEvent);
-
       },
 
-      emitNavigateEvent : function(model, value){
-
+      emitNavigateEvent: function (model, value) {
         //checking to make sure selected == true
-
-        if (value){
-
+        if (value) {
           this.pubsub.publish(this.pubsub.NAVIGATE, model.get("navEvent"));
-
         }
-
         //for now, just set it to false, but later listen to nav event to remove
         model.set("selected", false);
-
-
       },
 
       activate: function (beehive) {
-
         this.pubsub = beehive.Services.get('PubSub');
-
       }
-
-
-    })
-
+    });
 
     return DropdownWidget
-
-
-
-  })
+  });

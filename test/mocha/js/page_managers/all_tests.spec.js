@@ -102,7 +102,36 @@ define([
 
           done();
         });
+      });
 
+      it("the three-col view reacts to user actions", function() {
+        var view = new ThreeColumnView();
+
+        expect(view.model.get('left')).to.be.eql('open');
+        expect(view.model.get('right')).to.be.eql('open');
+        expect(view.model.get('user_left')).to.be.eql(null);
+        expect(view.model.get('user_right')).to.be.eql(null);
+
+        view.showCols({left: true, right: false});
+
+        expect(view.model.get('left')).to.be.eql('open');
+        expect(view.model.get('right')).to.be.eql('closed');
+        expect(view.model.get('user_left')).to.be.eql(null);
+        expect(view.model.get('user_right')).to.be.eql(null);
+
+        view.model.set('user_left', 'open');
+        view.showCols({left: false, right: false});
+
+        expect(view.model.get('left')).to.be.eql('open');
+        expect(view.model.get('right')).to.be.eql('closed');
+        expect(view.model.get('user_left')).to.be.eql('open');
+        expect(view.model.get('user_right')).to.be.eql(null);
+
+        view.showCols({left: false, right: true, force: true});
+        expect(view.model.get('left')).to.be.eql('closed');
+        expect(view.model.get('right')).to.be.eql('open');
+        expect(view.model.get('user_left')).to.be.eql(null);
+        expect(view.model.get('user_right')).to.be.eql(null);
       });
     });
 

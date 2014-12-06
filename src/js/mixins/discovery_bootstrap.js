@@ -39,7 +39,12 @@ define([
         }
 
         this.bootstrapUrls = conf.bootstrapUrls;
+
+        if (conf.useCache) {
+          this.triggerMethodOnAll('activateCache');
+        }
       }
+
 
     },
 
@@ -166,7 +171,7 @@ define([
 
 
       // Trigger the initial route and enable HTML5 History API support
-      Backbone.history.start(conf.routerConf);
+      Backbone.history.start(conf ? conf.routerConf : {});
 
 
       // All navigation that is relative should be passed through the navigate

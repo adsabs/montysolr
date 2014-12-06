@@ -26,6 +26,16 @@ define([
       expect(function() {new ApiFeedback({code: 2009, msg: 'whatever'});}).to.throw.Error;
     });
 
+    it("has setSenderKey", function() {
+      var f = new ApiFeedback({code: 200, msg: 'whatever'});
+      expect(f.getSenderKey()).to.be.undefined;
+      f.setSenderKey('foo');
+      expect(f.getSenderKey()).to.be.eql('foo');
+      var h = f.getHardenedInstance();
+      expect(h.setSenderKey).to.be.undefined;
+      expect(function() {h.setSenderKey('bar');}).to.throw.Error;
+    });
+
   });
 
 });
