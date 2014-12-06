@@ -173,8 +173,13 @@ define([
           var k = keys[i];
           if (k in options) {
             var ul = this.model.get('user_' + k);
-            if (ul === null || options.force)
+            if (ul === null) {
               this.model.set(k, options[k] ? 'open' : 'closed');
+            }
+            else if (options.force) {
+              this.model.set(k, options[k] ? 'open' : 'closed');
+              this.model.set('user_' + k, null);
+            }
           }
         }
       },
