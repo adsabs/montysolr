@@ -2,7 +2,8 @@ define([
   'js/widgets/network_vis/network_widget',
   'js/components/api_query_updater',
   'bootstrap'
-], function(
+],
+  function(
   NetworkWidget,
   ApiQueryUpdater
   ) {
@@ -60,7 +61,7 @@ define([
 
     charge = this.styleModel.get("charge");
 
-    gravity = this.styleModel.get("gravity");
+    var gravity = this.styleModel.get("gravity");
 
     linksData = this.model.get("summaryData").links;
 
@@ -404,12 +405,8 @@ define([
             d3.select(this).attr("transform", function () {
               return "translate(" + [ x, y ] + ")"
                 + " scale(" + z.scale() + ")";
-
             });
-
             z.translate([x,y]);
-
-
           });
 
         g2.call(drag);
@@ -437,29 +434,21 @@ define([
   options.broadcastFilteredQuery = function(bibcodes){
 
     if (!bibcodes.length) {
-      return
-
+      return;
     }
 
     var updater = new ApiQueryUpdater("fq");
-
     bibcodes = "bibcode:(" + bibcodes.join(" OR ") +")";
-
-    newQuery = this.getCurrentQuery().clone();
-
+    var newQuery = this.getCurrentQuery().clone();
     updater.updateQuery(newQuery, "fq", "limit", bibcodes);
 
     this.resetWidget();
-
     this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
-
   };
 
 
   return function(){
-
     return new NetworkWidget(options);
-
   };
 
 
