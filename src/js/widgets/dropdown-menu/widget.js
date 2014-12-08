@@ -83,7 +83,7 @@ define([
         data.iconClass = Marionette.getOption(this, "iconClass");
         //whether to right align the dropdown
         data.pullRight = Marionette.getOption(this, "rightAlign");
-        
+
         return data
       }
     });

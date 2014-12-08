@@ -678,7 +678,7 @@ define([
      };
 
 
-    testDataSmall = {
+    var testDataSmall = {
       "fullGraph": {
         "links": [],
         "nodes": [
@@ -743,10 +743,7 @@ define([
 
 
     afterEach(function(){
-
       $("#test").empty();
-
-
     });
 
     it("should have a help popover", function(){
@@ -756,17 +753,13 @@ define([
       paperNetwork.processResponse(new JsonResponse(testDataBig));
 
       $("#test").append(paperNetwork.view.el);
-
       $("#test").find("i.icon-help").mouseover();
 
-    expect($(".popover").text()).to.eql("About This Network VisualizationThe paper network groups papers from your search results based on how many references they have in common. Papers with many references in common are more likely to discuss similar topics.If your search results returned a large enough set of papers, you will see two views: a summary view, which shows groups of tightly linked papers, and a detail view  which shows you the individual papers from a group and how they are connected. The size of the circles in the summary node graph are based on the cumulative number of citations shared by the group, and the titles of the summary nodes are small word clouds based on the words from the titles of the papers in the group.");
+      expect($(".popover").text()).to.eql("About This Network VisualizationThe paper network groups papers from your search results based on how many references they have in common. Papers with many references in common are more likely to discuss similar topics.If your search results returned a large enough set of papers, you will see two views: a summary view, which shows groups of tightly linked papers, and a detail view  which shows you the individual papers from a group and how they are connected. The size of the circles in the summary node graph are based on the cumulative number of citations shared by the group, and the titles of the summary nodes are small word clouds based on the words from the titles of the papers in the group.");
+      expect($(".popover").css("display")).to.eql("block");
 
-     expect($(".popover").css("display")).to.eql("block");
-
-     $("#test").find("i.icon-help").mouseout();
-
-
-    })
+      $("#test").find("i.icon-help").mouseout();
+    });
 
 
     it("should render small word clouds for the summary nodes", function(){
@@ -778,75 +771,54 @@ define([
       $("#test").append(paperNetwork.view.el);
 
       expect(d3.select(".summary-node-group:first-of-type").text()).to.eql("dwarfmassmechanicsmontenearbyspherical");
-
       expect(d3.select(".summary-node-group:last-of-type").text()).to.eql("dwarfgalaxyobjectsformedmergermergingratestimescales");
 
       //the font sizes of the words should represent the size score assigned by the api
-
       var compare = d3.select(".summary-node-group:last-of-type").select("text");
-
       var compareSize = compare.data()[0]["size"];
-
       var compareFontSize =  compare.attr("font-size");
 
       d3.select(".summary-node-group:last-of-type").selectAll("text").each(function(){
-
         if (d3.select(this).data()[0]["size"] > compareSize){
-
           expect(parseInt(d3.select(this).attr("font-size"))).to.be.greaterThan(compareFontSize);
-
         }
         else if (d3.select(this).data()[0]["size"] < compareSize) {
-
           expect(parseInt(d3.select(this).attr("font-size"))).to.be.lessThan(compareFontSize);
-
         }
       })
-
-
     });
 
     it("should add mouseover interactions for the detail graph", function(){
 
       var paperNetwork = new PaperNetwork();
-
       paperNetwork.processResponse(new JsonResponse(testDataBig));
 
       $("#test").append(paperNetwork.view.el);
-
       paperNetwork.view.graphView.model.set("currentGroup", $(".summary-node-group:first-of-type").get(0));
 
       expect( $(".detail-node:first-of-type").data("content")).to.eql("<b>Title: </b>The role of dense cores in isolated and cluster star formation.<br/><b>First Author: </b>Myers, P. C.<br/><b>Citation Count: </b>6");
-
       expect( $(".detail-node:last-of-type").data("content")).to.eql("<b>Title: </b>Steepest descent technique and stellar equilibrium statistical mechanics. IV. Gravitating systems with an energy cutoff.<br/><b>First Author: </b>Katz, J.<br/><b>Citation Count: </b>21");
+    });
 
+    if (!window.PHANTOMJS) {
+      it("should add mouseover interactions for the detail graph (Non-PhantomJS)", function () {
 
+        var paperNetwork = new PaperNetwork();
+        paperNetwork.processResponse(new JsonResponse(testDataBig));
 
-    })
+        $("#test").append(paperNetwork.view.el);
 
-    it.skip("should add mouseover interactions for the detail graph", function(){
+        //trigger detail view sadly can't trigger mouse events on svg in phantomjs
+        $(".summary-node-group:first-of-type").click();
+        $(".detail-node:first-of-type").mouseover();
 
-      var paperNetwork = new PaperNetwork();
+        expect($(".popover").length).to.eql(1);
+        expect($(".popover").text()).to.eql("1991ASPC...13...73MTitle: The role of dense cores in isolated and cluster star formation.First Author: Myers, P. C.Citation Count: 6");
+        expect($(".popover").css("display")).to.eql("block");
+        $(".detail-node:first-of-type").mouseout();
 
-      paperNetwork.processResponse(new JsonResponse(testDataBig));
-
-      $("#test").append(paperNetwork.view.el);
-
-      //trigger detail view sadly can't trigger mouse events on svg in phantomjs
-      $(".summary-node-group:first-of-type").click();
-
-      $(".detail-node:first-of-type").mouseover();
-
-      expect($(".popover").length).to.eql(1);
-
-      expect($(".popover").text()).to.eql("1991ASPC...13...73MTitle: The role of dense cores in isolated and cluster star formation.First Author: Myers, P. C.Citation Count: 6");
-
-      expect($(".popover").css("display")).to.eql("block");
-
-      $(".detail-node:first-of-type").mouseout();
-
-    })
-
+      })
+    }
 
   });
 
