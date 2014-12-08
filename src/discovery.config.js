@@ -52,6 +52,7 @@ require.config({
         Sort : 'js/widgets/sort/widget',
         VisualizationDropdown : 'js/wraps/visualization_dropdown',
         AuthorNetwork : 'js/wraps/author_network',
+        PaperNetwork : 'js/wraps/paper_network',
 
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',

@@ -81,6 +81,9 @@ define([
         data.btnType = Marionette.getOption(this, "btnType") || "btn-default";
         data.dropdownTitle = Marionette.getOption(this, "dropdownTitle");
         data.iconClass = Marionette.getOption(this, "iconClass");
+        //whether to right align the dropdown
+        data.pullRight = Marionette.getOption(this, "rightAlign");
+        
         return data
       }
     });

@@ -64,6 +64,10 @@ define([
             ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
 
         });
+        this.set('show-paper-network', function() {
+          app.getObject('MasterPageManager').show('SearchPage',
+            ['PaperNetwork'].concat(searchPageAlwaysVisible.slice(1)));
+        });
         this.set("visualization-closed", this.get("results-page"));
         this.set('abstract-page', function() {
           app.getObject('MasterPageManager').show('DetailsPage',
