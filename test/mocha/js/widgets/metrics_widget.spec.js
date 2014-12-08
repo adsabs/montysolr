@@ -813,7 +813,12 @@ define([
       var minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
 
-          if (apiRequest.toJSON().target === "search") {
+          this.counter = this.counter || 0;
+
+          if (apiRequest.toJSON().target === "search" && this.counter === 0) {
+
+            this.counter++;
+
 
             return {
               "responseHeader": {
@@ -831,11 +836,35 @@ define([
                 {
                   "bibcode": "1980ApJS...44..137K"}
               ]
-              }};
+              }}
+
+
+          }
+          else if (apiRequest.toJSON().target === "search" && this.counter === 2){
+
+            return {
+              "responseHeader": {
+                "status": 0,
+                "QTime": 1,
+                "params": {
+                  "fl": "bibcode",
+                  "indent": "true",
+                  "wt": "json",
+                  "rows": 1,
+                  "q": "bibcode:(\"1980ApJS...44..137K\" OR \"1980ApJS...44..489B\")\n"}},
+              "response": {"numFound": 2, "start": 0, "docs": [
+                {
+                  "bibcode": "1980ApJS...44..489B"},
+                {
+                  "bibcode": "1980ApJS...44..137K"}
+              ]
+              }}
 
           }
           //just to be explicit
-          else if (apiRequest.toJSON().target === "services/metrics") {
+          else if (apiRequest.toJSON().target === "services/metrics" ) {
+
+            this.counter++
 
             return testData;
 
@@ -856,19 +885,22 @@ define([
       //trigger show event, should prompt dispatchRequest
       metricsWidget.onShow();
 
-      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 2 paper(s).\n    Change to first  paper(s) (max is 2).');
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 2 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
 
-      metricsWidget.pubsub.publish = sinon.spy();
+     sinon.spy(metricsWidget.pubsub, "publish");
 
       $("#test").find(".metrics-metadata input").val("1");
 
-      $("#test").find(".metrics-metadata input").trigger("keypress");
+      $("#test").find(".metrics-metadata button.submit-rows").trigger("click");
 
 
       setTimeout(function(){
 
         expect(metricsWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Request");
         expect(metricsWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
+
+        expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 1 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
+
 
 
         done();

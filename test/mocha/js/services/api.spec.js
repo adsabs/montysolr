@@ -35,6 +35,29 @@ define(['jquery', 'underscore',
       done();
     });
 
+    it("should look at the ApiRequest to check whether to send a get (with url data) or post request (with json data)", function(){
+
+      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+
+      var q = new ApiQuery({q: 'foo'});
+
+      api.request(new ApiRequest({target: 'search', query: q}));
+
+      expect(this.server.requests[0].method).to.eql("GET");
+      expect(this.server.requests[0].requestHeaders["Content-Type"]).to.eql("application/x-www-form-urlencoded");
+
+      var q = new ApiQuery({q: 'foo'});
+
+      api.request(new ApiRequest({target: 'search', query: q, method : "POST"}));
+
+      expect(this.server.requests[1].method).to.eql("POST");
+      expect(this.server.requests[1].url).to.eql("/api/1/search");
+      expect(this.server.requests[1].requestHeaders["Content-Type"]).to.eql('application/json;charset=utf-8');
+      expect(this.server.requests[1].requestBody).to.eql("{\"q\":[\"foo\"]}");
+
+
+    });
+
     it("should call appropriate callback upon arrival of data", function() {
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
       sinon.stub(api, 'trigger');

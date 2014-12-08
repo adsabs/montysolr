@@ -7,6 +7,7 @@ define([
   'js/components/json_response',
   'js/components/api_request',
   'js/components/api_query',
+  'hbs!./templates/metrics_metadata',
   'hbs!./templates/metrics_container',
   'hbs!./templates/graph_template',
   'hbs!./templates/paper_table',
@@ -23,6 +24,7 @@ define([
   JsonResponse,
   ApiRequest,
   ApiQuery,
+  MetricsMetadataTemplate,
   MetricsContainer,
   GraphTemplate,
   PaperTableTemplate,
@@ -213,7 +215,7 @@ define([
           that.chart.tooltip(function (key, x, y, e, graph) {
             var total = countAll(data, x);
             return  '<h3>'+x+'</h3>'+
-            '<p><b>' + key + "</b>: " +  y  + '</p>' +
+              '<p><b>' + key + "</b>: " +  y  + '</p>' +
               '<p><b> Total: </b>' +  total.toFixed(1) + '</p>'
           });
 
@@ -314,14 +316,14 @@ define([
 
     initialize : function(){
 
-    this.on("change:numFound", this.updateMax);
-    this.on("change:numFound", this.updateCurrent)
+      this.on("change:numFound", this.updateMax);
+      this.on("change:rows", this.updateCurrent);
 
     },
 
     updateMax : function() {
 
-     this.set("max", _.min([500, this.get("numFound")]));
+      this.set("max", _.min([500, this.get("numFound")]));
     },
 
     updateCurrent : function(){
@@ -340,7 +342,7 @@ define([
         max : undefined,
         userVal: undefined
 
-       }
+      }
     }
 
   });
@@ -348,25 +350,49 @@ define([
 
   var ContainerView = Marionette.Layout.extend({
 
-    template: MetricsContainer,
 
-    events : {
+    onRender : function(){
 
-      "keypress .metrics-rows" : "changeRows"
+      this.renderMetadata();
 
     },
 
-   changeRows : _.debounce(function(e){
+    //function to just re-render the metadata part at the bottom
 
-     var num = parseInt(e.target.value);
 
-     if (num){
+    renderMetadata : function(){
 
-       this.model.set("userVal", _.min([this.model.get("max"), parseInt(e.target.value)]));
+      var data = {};
 
-     }
+      data.max = this.model.get("max");
 
-    }, 500),
+      data.current = this.model.get("current");
+
+      this.$(".metrics-metadata").html(this.metadataTemplate(data))
+
+    },
+
+    template: MetricsContainer,
+
+    metadataTemplate : MetricsMetadataTemplate,
+
+    events : {
+
+      "click .submit-rows" : "changeRows"
+
+    },
+
+    changeRows : function(e){
+
+      var num = parseInt(this.$(".metrics-rows").val());
+
+      if (num){
+
+        this.model.set("userVal", _.min([this.model.get("max"), num]));
+
+      }
+
+    },
 
     regions: {
       papersGraph: "#papers .metrics-graph",
@@ -416,7 +442,7 @@ define([
 
       var query = this.getCurrentQuery().clone();
 
-      query.set("rows", rows);
+      query.set("rows", model.get("userVal"));
       query.set("fl", "bibcode")
 
       var request = new ApiRequest({
@@ -424,7 +450,7 @@ define([
         query : query
       });
 
-     this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
+      this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
 
     },
 
@@ -444,8 +470,8 @@ define([
         this.startWidgetLoad();
 
         // let container view know how many bibcodes we have
-        this.view.model.set("rows", response.get("responseHeader.params.rows"));
-        this.view.model.set("numFound", response.get("response.numFound"));
+        this.view.model.set({"numFound": parseInt(response.get("response.numFound")),
+                              "rows":  parseInt(response.get("responseHeader.params.rows"))});
 
         this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
 
