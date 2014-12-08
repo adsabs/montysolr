@@ -800,7 +800,7 @@ define([
       expect( $(".detail-node:last-of-type").data("content")).to.eql("<b>Title: </b>Steepest descent technique and stellar equilibrium statistical mechanics. IV. Gravitating systems with an energy cutoff.<br/><b>First Author: </b>Katz, J.<br/><b>Citation Count: </b>21");
     });
 
-    if (!window.PHANTOMJS) {
+    if (!(window.PHANTOMJS || window.mochaPhantomJS)) {
       it("should add mouseover interactions for the detail graph (Non-PhantomJS)", function () {
 
         var paperNetwork = new PaperNetwork();
