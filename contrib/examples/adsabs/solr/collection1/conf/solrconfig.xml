@@ -636,7 +636,7 @@
     <lst name="defaults">
         <str name="allowed">.*</str>
         <bool name="asynchronous">true</bool>
-        <str name="workdir">batch-handler</str>
+        <str name="workdir">${montysolr.batch.workdir:batch-handler}</str>
     </lst>
     <lst name="providers">
       <str name="dump-authors">org.apache.solr.handler.batch.BatchProviderDumpAuthorNames</str>
