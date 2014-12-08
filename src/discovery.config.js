@@ -72,6 +72,7 @@ require.config({
         ShowTableOfContents : 'js/wraps/table_of_contents',
         ShowSimilar : 'js/widgets/similar/widget',
         ShowResources : 'js/widgets/resources/widget',
+        ShowRecommender : 'js/widgets/recommender/widget',
 
         TOCWidget: 'js/page_managers/toc_widget'
 

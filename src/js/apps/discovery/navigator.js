@@ -71,24 +71,24 @@ define([
         this.set("visualization-closed", this.get("results-page"));
         this.set('abstract-page', function() {
           app.getObject('MasterPageManager').show('DetailsPage',
-            ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources']);
+            ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
           //this.route = '#abs/' + app.getWidget('ShowAbstract').getCurrentQuery().url();
         });
         this.set('ShowAbstract', this.get('abstract-page'));
         this.set('ShowCitations', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCitations', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCitations', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
         });
         this.set('ShowReferences', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowReferences', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowReferences', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
         });
         this.set('ShowCoreads', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCoreads', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCoreads', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
         });
         this.set('ShowTableOfContents', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowTableOfContents', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowTableOfContents', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
         });
         this.set('ShowSimilar', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowSimilar', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowSimilar', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
         });
         this.set('abstract-page:bibtex', function() { app.getObject('MasterPageManager').show('DetailsPage')});
         this.set('abstract-page:endnote', function() { app.getObject('MasterPageManager').show('DetailsPage')});

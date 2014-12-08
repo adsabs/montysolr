@@ -1,0 +1,21 @@
+
+<div>
+    <h4 class="s-right-col-widget-title">Suggested Articles</h4>
+
+    <i class="icon-help" data-toggle="popover" data-content="These recommendations are based on a number of factors, including text similarity, citations, and co-readership information." ></i>
+</div>
+
+
+<ul class="list-unstyled">
+
+    {{#each items}}
+
+    <li title="{{bibcode}}">
+        <a href="#abs/{{bibcode}}">{{title}}</a>;
+        <i>{{author}}</i>
+    </li>
+
+
+    {{/each}}
+
+</ul>
