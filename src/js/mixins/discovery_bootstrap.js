@@ -207,10 +207,13 @@ define([
         }
         //navbar is currently 40 px height
         if ($(window).scrollTop() > 50) {
+          $(".s-quick-add").addClass("hidden");
           $(".s-search-bar-full-width-container").addClass("s-search-bar-motion");
         }
         else {
-          $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion")
+          $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion");
+          $(".s-quick-add").removeClass("hidden");
+
         }
       });
 
