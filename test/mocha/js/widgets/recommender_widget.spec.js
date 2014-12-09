@@ -1,8 +1,10 @@
 define([
   'js/widgets/recommender/widget',
+  'js/components/json_response'
 
 ], function (
-  RecommenderWidget
+  RecommenderWidget,
+  JsonResponse
   ) {
 
   describe("Recommender Widget", function (){
@@ -28,7 +30,7 @@ define([
 
       $("#test").append(r.render().el);
 
-      r.processResponse(testData);
+      r.processResponse(new JsonResponse(testData));
 
       expect($("#test").find("li").length).to.eql(7);
 
@@ -45,7 +47,7 @@ define([
 
       $("#test").append(r.render().el);
 
-      r.processResponse(testData);
+      r.processResponse(new JsonResponse(testData));
 
       expect($("#test").find("li:first a").attr("href")).to.eql("#abs/1998ApJ...509..212S");
 
@@ -61,13 +63,34 @@ define([
 
       $("#test").append(r.render().el);
 
-      r.processResponse(testData);
+      r.processResponse(new JsonResponse(testData));
 
       expect($("#test").find("i.icon-help").data("content")).to.eql('These recommendations are based on a number of factors, including text similarity, citations, and co-readership information.')
 
 
 
     });
+
+    it("extends from BaseWidget and can communicate with pubsub and its page controller through loadBibcodeData function", function(){
+
+      var r = new RecommenderWidget();
+
+      r.pubsub = {DELIVERING_REQUEST : "foo", publish : sinon.spy()}
+
+      expect(r.loadBibcodeData).to.be.instanceof(Function);
+
+      r.loadBibcodeData("fakeBibcode");
+
+      var apiRequest = r.pubsub.publish.args[0][1];
+
+      expect(apiRequest.toJSON().target).to.eql("services/recommender/fakeBibcode");
+      expect(apiRequest.toJSON().query.toJSON()).to.eql({});
+
+
+
+
+    })
+
 
 
 

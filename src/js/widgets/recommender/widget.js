@@ -29,7 +29,9 @@ define([
 
       this.$(".icon-help").popover({trigger : "hover", placement : "left"});
 
-    }
+    },
+
+    className : "s-recommender-widget"
 
   });
 
@@ -96,7 +98,9 @@ define([
 
     processResponse : function(data){
 
-      this.collection.reset(data["recommendations"]);
+      data = data.toJSON();
+
+      this.collection.reset(data.recommendations);
 
     }
 

@@ -27,6 +27,7 @@ define([], function() {
       '/widgets/network_widget.spec.js',
       '/widgets/paper_network_widget.spec.js',
       '/widgets/reads_graph_facet_widget.spec.js',
+       '/widgets/recommender_widget.spec.js',
       '/widgets/resources_widget.spec.js',
 
       '/widgets/results_render_widget.spec.js',
