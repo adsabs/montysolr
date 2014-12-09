@@ -48,7 +48,7 @@ define(['jquery', 'underscore',
 
       var q = new ApiQuery({q: 'foo'});
 
-      api.request(new ApiRequest({target: 'search', query: q, method : "POST"}));
+      api.request(new ApiRequest({target: 'search', query: q, options : {method : "POST", contentType: 'application/json' }}));
 
       expect(this.server.requests[1].method).to.eql("POST");
       expect(this.server.requests[1].url).to.eql("/api/1/search");

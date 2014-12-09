@@ -170,6 +170,8 @@ define([
             '<p><b> Total: </b>' + total.toFixed(1) + '</p>'
         });
 
+
+
         d3SVG
           .datum(data)
           .transition()
@@ -183,7 +185,7 @@ define([
           that.chart = nv.models.multiBarChart();
 
           that.chart
-            .color(that.colors);
+            .color(that.colors)
 
           that.chart.yAxis
             //only touch values that are divisible by 1 to get rid of #s that look like "4.0"
@@ -403,7 +405,9 @@ define([
 
   var MetricsWidget = BaseWidget.extend({
 
-    initialize: function () {
+    initialize: function (options) {
+
+      options = options || {};
 
       this.containerModel = new ContainerModel();
 
@@ -494,22 +498,19 @@ define([
 
     },
 
-    createTableViews: function (response) {
+    createTableData : function(response){
+
+      var data = {};
 
       var generalData = {refereed: response["refereed stats"], total: response["all stats"]};
       var readsData = {refereed: response["refereed reads"], total: response["all reads"]};
 
-      var paperModelData = {
+      data.paperModelData = {
         totalNumberOfPapers: [generalData.total["Number of papers"], generalData.refereed["Number of papers"]],
         totalNormalizedPaperCount: [generalData.total["Normalized paper count"], generalData.refereed["Normalized paper count"]]
       };
 
-      this.childViews.papersTableView = new TableView({
-        template: PaperTableTemplate,
-        model: new TableModel(paperModelData)
-      });
-
-      var readsModelData = {
+      data.readsModelData = {
         totalNumberOfReads: [readsData.total["Total number of reads"], readsData.refereed["Total number of reads"]],
         averageNumberOfReads: [readsData.total["Average number of reads"], readsData.refereed["Average number of reads"]],
         medianNumberOfReads: [readsData.total["Median number of reads"], readsData.refereed["Median number of reads"]],
@@ -518,13 +519,7 @@ define([
         medianNumberOfDownloads: [readsData.total["Median number of reads"], readsData.total["Median number of reads"]]
       };
 
-
-      this.childViews.readsTableView = new TableView({
-        template: ReadsTableTemplate,
-        model: new TableModel(readsModelData)
-      });
-
-      var citationsModelData = {
+      data.citationsModelData = {
         numberOfCitingPapers: [generalData.total["Number of citing papers"], generalData.refereed["Number of citing papers"]],
         totalCitations: [generalData.total["Total citations"], generalData.refereed["Total citations"]],
         numberOfSelfCitations: [generalData.total["self-citations"], generalData.refereed["self-citations"]],
@@ -538,12 +533,7 @@ define([
 
       };
 
-      this.childViews.citationsTableView = new TableView({
-        model: new TableModel(citationsModelData),
-        template: CitationsTableTemplate
-      });
-
-      var indicesModelData = {
+      data.indicesModelData = {
         hIndex: [generalData.total["H-index"], generalData.refereed["H-index"]],
         mIndex: [generalData.total["m-index"], generalData.refereed["m-index"]],
         gIndex: [generalData.total["g-index"], generalData.refereed["g-index"]],
@@ -555,15 +545,40 @@ define([
 
       };
 
+      return data;
+
+    },
+
+
+    createTableViews: function (response) {
+
+      var tableData = this.createTableData(response);
+
+      this.childViews.papersTableView = new TableView({
+        template: PaperTableTemplate,
+        model: new TableModel(tableData.paperModelData),
+
+      });
+
+      this.childViews.readsTableView = new TableView({
+        template: ReadsTableTemplate,
+        model: new TableModel(tableData.readsModelData)
+      });
+
+      this.childViews.citationsTableView = new TableView({
+        model: new TableModel(tableData.citationsModelData),
+        template: CitationsTableTemplate
+      });
 
       this.childViews.indicesTableView = new TableView({
-        model: new TableModel(indicesModelData),
+        model: new TableModel(tableData.indicesModelData),
         template: IndicesTableTemplate
       });
 
     },
 
     createGraphViews: function (response) {
+
 
       //papers graph
       var papersModel = new GraphModel();
