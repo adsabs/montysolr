@@ -95,6 +95,7 @@ define([
         }
         this.render();
       },
+
       render: function() {
         // ignoring templating
         return this;

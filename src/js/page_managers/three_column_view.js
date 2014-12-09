@@ -1,12 +1,15 @@
 define([
+    "underscore",
     "marionette",
     "hbs!./templates/results-page-layout",
     'hbs!./templates/results-control-row',
     'js/widgets/base/base_widget'
   ],
-  function (Marionette,
-            pageTemplate,
-            controlRowTemplate
+  function (
+    _,
+    Marionette,
+    pageTemplate,
+    controlRowTemplate
     ) {
 
 
@@ -32,11 +35,12 @@ define([
         var options = options || {};
         this.widgets = options.widgets;
         this.model = new ResultsStateModel();
-
+        _.bindAll(this, 'setScreenSize');
       },
 
-      onDetach : function(){
-        $(window).off("resize", this.setScreenSize)
+      close: function() {
+        Marionette.ItemView.prototype.close.call(this, arguments);
+        $(window).off("resize", this.setScreenSize);
       },
 
       template : pageTemplate,
@@ -73,8 +77,11 @@ define([
         //let view know whether it should display a 2 or 3 column layout
         this.setScreenSize();
 
+        // safety precaution
+        $(window).off("resize", this.setScreenSize);
+
         //listen for resizing events
-        $(window).resize(_.bind(this.setScreenSize, this));
+        $(window).resize(this.setScreenSize);
       },
 
       displaySearchBar: function (show) {

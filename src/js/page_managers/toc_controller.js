@@ -25,18 +25,6 @@ define([
         });
       },
 
-      /**
-       * broadcast the event to all other managed widgets
-       */
-      broadcast: function(){
-        var args = arguments;
-        var self = this;
-        _.each(_.keys(self.widgets), function(w) {
-          var widget = self.widgets[w];
-          widget.trigger.apply(widget, args);
-        });
-      },
-
 
       /**
        * Listens to and receives signals from managed widgets.

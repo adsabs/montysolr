@@ -1,4 +1,5 @@
 define([
+    'underscore',
     "marionette",
     "hbs!./templates/results-page-layout",
     'hbs!./templates/results-control-row',
@@ -6,7 +7,8 @@ define([
     './three_column_view',
     './view_mixin'
   ],
-  function (Marionette,
+  function (_,
+            Marionette,
             pageTemplate,
             controlRowTemplate,
             BaseWidget,
@@ -123,7 +125,10 @@ define([
       hideAll: function() {
         // hide all widgets that are under our control
         _.each(this.widgets, function(w) {
-          if (w.view && w.view.$el) {
+          if ('detach' in w && _.isFunction(w.detach)) {
+            w.detach();
+          }
+          else if (w.view && w.view.$el) {
             w.view.$el.detach();
           }
           else if (w.$el) {
@@ -132,6 +137,7 @@ define([
         });
         return this.view;
       },
+
 
       showAll: function() {
         var self = this;
@@ -144,6 +150,18 @@ define([
             self.widgets[widgetName].triggerMethod('show');
         });
         return this.view;
+      },
+
+      /**
+       * broadcast the event to all other managed widgets
+       */
+      broadcast: function(){
+        var args = arguments;
+        var self = this;
+        _.each(_.keys(self.widgets), function(w) {
+          var widget = self.widgets[w];
+          widget.trigger.apply(widget, args);
+        });
       }
 
     });
