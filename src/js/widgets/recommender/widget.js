@@ -18,21 +18,15 @@ define([
   var RecommenderView = Marionette.ItemView.extend({
 
     initialize : function(){
-
       this.listenTo(this.collection, "reset", this.render);
-
     },
 
     template : RecommenderTemplate,
 
     onRender : function(){
-
       this.$(".icon-help").popover({trigger : "hover", placement : "left"});
-
     },
-
     className : "s-recommender-widget"
-
   });
 
 
@@ -40,13 +34,9 @@ define([
 
 
     initialize : function(){
-
       this.collection = new Backbone.Collection();
-
       this.view = new RecommenderView({collection : this.collection});
-
       this.showLoad = true;
-
     },
 
     activate: function (beehive) {
@@ -97,18 +87,10 @@ define([
     },
 
     processResponse : function(data){
-
       data = data.toJSON();
-
       this.collection.reset(data.recommendations);
-
     }
-
-
   });
 
-
   return RecommenderWidget;
-
-
-})
+});

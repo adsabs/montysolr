@@ -1,10 +1,12 @@
 define([
   'js/widgets/recommender/widget',
-  'js/components/json_response'
+  'js/components/json_response',
+  'js/bugutils/minimal_pubsub'
 
 ], function (
   RecommenderWidget,
-  JsonResponse
+  JsonResponse,
+  MinPubSub
   ) {
 
   describe("Recommender Widget", function (){
@@ -20,9 +22,8 @@ define([
     ]};
 
     afterEach(function(){
-
       $("#test").empty();
-    })
+    });
 
     it("should display a list of recommended articles", function(){
 
@@ -33,12 +34,9 @@ define([
       r.processResponse(new JsonResponse(testData));
 
       expect($("#test").find("li").length).to.eql(7);
-
       expect($("#test").find("li:first").text().trim()).to.eql('Propagation of Cosmic-Ray Nucleons in the Galaxy;\n        Strong,+');
       expect($("#test").find("li:first").attr("title")).to.eql("1998ApJ...509..212S");
-
-
-    })
+    });
 
 
     it("should link directly to the abstract pages in Bumblebee", function(){
@@ -50,10 +48,7 @@ define([
       r.processResponse(new JsonResponse(testData));
 
       expect($("#test").find("li:first a").attr("href")).to.eql("#abs/1998ApJ...509..212S");
-
       expect($("#test").find("li:last a").attr("href")).to.eql("#abs/1978MNRAS.182..147B");
-
-
     });
 
 
@@ -62,39 +57,58 @@ define([
       var r = new RecommenderWidget();
 
       $("#test").append(r.render().el);
-
       r.processResponse(new JsonResponse(testData));
-
       expect($("#test").find("i.icon-help").data("content")).to.eql('These recommendations are based on a number of factors, including text similarity, citations, and co-readership information.')
-
-
-
     });
 
-    it("extends from BaseWidget and can communicate with pubsub and its page controller through loadBibcodeData function", function(){
+    it("extends from BaseWidget and can communicate with pubsub and its page controller through loadBibcodeData function", function() {
 
       var r = new RecommenderWidget();
-
       r.pubsub = {DELIVERING_REQUEST : "foo", publish : sinon.spy()}
 
       expect(r.loadBibcodeData).to.be.instanceof(Function);
-
       r.loadBibcodeData("fakeBibcode");
 
       var apiRequest = r.pubsub.publish.args[0][1];
 
       expect(apiRequest.toJSON().target).to.eql("services/recommender/fakeBibcode");
       expect(apiRequest.toJSON().query.toJSON()).to.eql({});
+    });
 
+    it("Communicates through pubsub", function() {
+      var minsub = new (MinPubSub.extend({
+        request: function(apiRequest) {
+          return JSON.parse(JSON.stringify(testData));
+        }
 
+      }))({verbose: false});
 
+      var widget = new RecommenderWidget();
+      var onDisplayDocuments = sinon.spy(widget, 'onDisplayDocuments');
+      var loadBibcodeData = sinon.spy(widget, 'loadBibcodeData');
+      var processResponse = sinon.spy(widget, 'processResponse');
 
-    })
+      widget.activate(minsub.beehive.getHardenedInstance());
 
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
+      expect(onDisplayDocuments.callCount).to.be.eql(1);
+      expect(loadBibcodeData.callCount).to.be.eql(1);
+      expect(loadBibcodeData.lastCall.args[0]).to.be.eql('foo');
+      expect(processResponse.callCount).to.be.eql(1);
 
+      expect(widget.collection.models.length).to.be.eql(7);
 
+      minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'bibcode:foo'}));
+      expect(widget.collection.models.length).to.be.eql(0);
+
+      // the same query should reuse data
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
+      expect(onDisplayDocuments.callCount).to.be.eql(2);
+      expect(loadBibcodeData.callCount).to.be.eql(2);
+      expect(loadBibcodeData.lastCall.args[0]).to.be.eql('foo');
+      expect(processResponse.callCount).to.be.eql(1);
+
+    });
 
   })
-
-
-})
+});
