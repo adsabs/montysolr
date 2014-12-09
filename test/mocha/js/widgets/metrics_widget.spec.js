@@ -1,6 +1,6 @@
 define([
   'js/widgets/metrics/widget',
-  'js/widgets/metrics/edwins_functions',
+  'js/widgets/metrics/extractor_functions',
   'js/components/json_response',
   'js/bugutils/minimal_pubsub',
   'js/components/api_query',

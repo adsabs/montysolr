@@ -2,7 +2,7 @@ define([
   'marionette',
   'nvd3',
   'js/widgets/base/base_widget',
-  './edwins_functions',
+  './extractor_functions',
   'js/components/api_response',
   'js/components/json_response',
   'js/components/api_request',
@@ -33,7 +33,6 @@ define([
   ReadsTableTemplate
   ) {
 
-
   var TableModel = Backbone.Model.extend({
 
     defaults: function () {
@@ -43,7 +42,6 @@ define([
       }
     }
   });
-
 
   var TableView = Marionette.ItemView.extend({
 
@@ -80,7 +78,6 @@ define([
       }
     }
   });
-
 
   var GraphView = Marionette.ItemView.extend({
 
@@ -204,14 +201,13 @@ define([
 
             });
 
-
           /*
            * This is how you make the chart stacked by default
            * Not documented anywhere.
            * */
           that.chart.multibar.stacked(true);
 
-//          //overriding library tooltip function
+          //overriding library tooltip function
           that.chart.tooltip(function (key, x, y, e, graph) {
             var total = countAll(data, x);
             return  '<h3>'+x+'</h3>'+
@@ -347,9 +343,7 @@ define([
 
   });
 
-
   var ContainerView = Marionette.Layout.extend({
-
 
     onRender : function(){
 
@@ -358,7 +352,6 @@ define([
     },
 
     //function to just re-render the metadata part at the bottom
-
 
     renderMetadata : function(){
 
@@ -408,14 +401,13 @@ define([
 
   })
 
-
   var MetricsWidget = BaseWidget.extend({
 
     initialize: function () {
 
       this.containerModel = new ContainerModel();
 
-      this.listenTo(this.containerModel, "change:userVal", this.requestDifferentRows)
+      this.listenTo(this.containerModel, "change:userVal", this.requestDifferentRows);
 
       this.view = new ContainerView({model : this.containerModel});
 
@@ -428,7 +420,6 @@ define([
       this.childViews = {};
 
       //empty the container view
-
       _.each(this.view.regions, function(v,k){
 
         this.view[k].currentView.close();
@@ -437,13 +428,13 @@ define([
 
     },
 
-    /*when a user requests a different number of documents*/
+    //when a user requests a different number of documents
     requestDifferentRows : function(model, rows){
 
       var query = this.getCurrentQuery().clone();
 
       query.set("rows", model.get("userVal"));
-      query.set("fl", "bibcode")
+      query.set("fl", "bibcode");
 
       var request = new ApiRequest({
         target : 'search',
@@ -460,11 +451,17 @@ define([
 
         var bibcodes = _.map(response.get("response.docs"), function(d){return d.bibcode});
 
+        var options = {
+          type : "POST",
+          contentType : "application/json"
+
+        };
+
         var request =  new ApiRequest({
 
           target: "services/metrics",
           query: new ApiQuery({"bibcodes" : bibcodes}),
-          method : "POST"
+          options : options
         });
 
         this.startWidgetLoad();
@@ -612,18 +609,13 @@ define([
       this.view.readsGraph.show(this.childViews.readsGraphView);
     },
 
-
 //so I can test these individually
     components: {
 
       TableModel: TableModel,
-
       TableView: TableView,
-
       GraphView: GraphView,
-
       GraphModel: GraphModel,
-
       ContainerView: ContainerView
 
     },
@@ -640,9 +632,7 @@ define([
       _.bindAll(this, "setCurrentQuery", "processResponse");
 
       this.pubsub = beehive.Services.get('PubSub');
-
       this.pubsub.subscribe(this.pubsub.START_SEARCH, this.setCurrentQuery);
-
       this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
 
     },

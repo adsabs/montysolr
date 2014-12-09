@@ -1,3 +1,10 @@
+
+/*
+*
+* Mostly by Edwin, with some modification by Alex
+*
+* */
+
 define([
 
 ], function () {
