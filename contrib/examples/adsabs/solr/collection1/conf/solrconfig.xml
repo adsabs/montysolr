@@ -35,8 +35,8 @@
     
     <useCompoundFile>false</useCompoundFile>
 
-    <ramBufferSizeMB>100</ramBufferSizeMB>
-    <maxBufferedDocs>5000</maxBufferedDocs>
+    <ramBufferSizeMB>1000</ramBufferSizeMB>
+    <maxBufferedDocs>50000</maxBufferedDocs>
 
     
     <!-- When we run several instances sharing the same index, we must
