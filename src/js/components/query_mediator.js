@@ -94,6 +94,7 @@ define(['underscore',
         return;
       }
       var ps = this.getBeeHive().Services.get('PubSub');
+
       // we will protect the query -- in the future i can consider removing 'unlock' to really
       // cement the fact the query MUST NOT be changed (we want to receive a modified version)
       var q = apiQuery.clone();
@@ -105,6 +106,7 @@ define(['underscore',
       q.lock();
       ps.publish(this.pubSubKey, ps.INVITING_REQUEST, q);
     },
+
 
       /**
      * This method harvest requests from the PubSub and passes them to the Api. We do check
