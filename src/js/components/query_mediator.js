@@ -41,6 +41,7 @@ define(['underscore',
       this.failedRequestsCache = this._getNewCache();
       this.maxRetries = options.maxRetries || 3;
       this.recoveryDelayInMs = options.recoveryDelayInMs || 700;
+      this.__searchCycle = {waiting:{}, inprogress: {}}
     },
 
     activateCache: function() {
@@ -68,6 +69,7 @@ define(['underscore',
 
       pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, _.bind(this.startSearchCycle, this));
       pubsub.subscribe(this.pubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
+      pubsub.subscribe(this.pubSubKey, pubsub.EXECUTE_REQUEST, _.bind(this.executeRequest, this));
       pubsub.subscribe(this.pubSubKey, pubsub.GET_QTREE, _.bind(this.getQTree, this));
     },
 
@@ -95,6 +97,14 @@ define(['underscore',
       }
       var ps = this.getBeeHive().Services.get('PubSub');
 
+      if (this._cache)
+        this._cache.invalidateAll();
+
+      if (this.__searchCycle.waiting && _.keys(this.__searchCycle.waiting)) {
+        console.error('The previous search cycle did not finish, and there already comes the next!', this.__searchCycle);
+      }
+      this.__searchCycle = {waiting:{}, inprogress: {}}; //reset the datastruct
+
       // we will protect the query -- in the future i can consider removing 'unlock' to really
       // cement the fact the query MUST NOT be changed (we want to receive a modified version)
       var q = apiQuery.clone();
@@ -105,12 +115,142 @@ define(['underscore',
 
       q.lock();
       ps.publish(this.pubSubKey, ps.INVITING_REQUEST, q);
+
+      this.__searchCycle.initiator = senderKey.getId();
+      var self = this;
+      setTimeout(function() {
+        self.startExecutingQueries();
+      }, 10);
     },
 
 
-      /**
-     * This method harvest requests from the PubSub and passes them to the Api. We do check
-     * the local cache and also prepare context for the done/fail callbacks
+    startExecutingQueries: function(force) {
+      if (this.__searchCycle.running) return;
+
+      var self = this;
+      var cycle = this.__searchCycle;
+
+      if (_.isEmpty(cycle.waiting)) return;
+
+      // check if we have request from the component that initiated the cycle
+      // and if not, wait little bit more
+      if (!force && !cycle.waiting[cycle.initiator]) {
+        var self = this;
+        setTimeout(function() {
+          self.startExecutingQueries(true);
+        }, 50);
+        return;
+      }
+
+      cycle.running = true;
+
+      if (_.isEmpty(cycle.waiting)) return;
+
+      var data;
+      var beehive = this.getBeeHive();
+      var api = beehive.getService('Api');
+      var ps = this.getBeeHive().getService('PubSub');
+
+      // first, grab the query/request which started the cycle
+      if (cycle.waiting[cycle.initiator]) {
+        data = cycle.waiting[cycle.initiator];
+        delete cycle.waiting[cycle.initiator];
+      }
+      else { // pick a request that will be executed first
+        if (beehive.hasObject('RuntimeConfig')) {
+          var runtime = beehive.getObject('RuntimeConfig');
+          if (runtime.pskToExecuteFirst && cycle.waiting[runtime.pskToExecuteFirst]) {
+            data = cycle.waiting[runtime.pskToExecuteFirst];
+            delete cycle.waiting[runtime.pskToExecuteFirst];
+          }
+          else {
+            console.warn('RuntimeConfig does not tell us which request to execute first (grabbing random one).');
+            var kx;
+            data = cycle.waiting[(kx=_.keys()[0])];
+            delete cycle.waiting[kx]
+          }
+        }
+      }
+
+      // execute the first search (if it succeeds, fire the rest)
+      var requestKey = this._getCacheKey(data.request);
+      api.request(data.request, {
+        done: function(data, textStatus, jqXHR) {
+
+          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED}));
+          var other = this;
+          // 50ms after we are done, start executing other queries
+          setTimeout(function() {
+            self.onApiResponse.call(
+              {request: other.request, key: other.key, requestKey: other.requestKey, qm: other.qm},
+              data, textStatus, jqXHR);
+
+            _.each(_.keys(cycle.waiting), function (k) {
+              data = cycle.waiting[k];
+              delete cycle.waiting[k];
+              cycle.inprogress[k] = data;
+              self.executeRequest.call(self, data.request, data.key);
+            });
+          }, 50);
+
+
+        },
+        fail: function(jqXHR, textStatus, errorThrown) {
+          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
+          request: this.request}));
+
+          // try to recover
+          if (self.onApiRequestFailure.call(
+            {request:this.request, key: this.key, requestKey:this.requestKey, qm: this.qm},
+            jqXHR, textStatus, errorThrown)) {
+
+
+            if (!self.__searchCycle.error) {
+              setTimeout(function() {
+                self.startExecutingQueries(true);
+              }, 50);
+            }
+          }
+          self.__searchCycle.error = true;
+        },
+        context: {request:data.request, key: data.key, requestKey:requestKey, qm: this }
+      });
+
+      self.monitorExecution();
+    },
+
+    monitorExecution: function() {
+      var self = this;
+      var ps = this.getBeeHive().getService('PubSub');
+
+      this.__searchCycle.monitor += 1;
+
+      if (this.__searchCycle.monitor > 100) {
+        console.warn('Stopping monitoring of queries, it is running too long');
+        ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_STOP_MONITORING}));
+        return;
+      }
+
+      if (this.__searchCycle.waiting && _.isEmpty(this.__searchCycle.waiting)) {
+        ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED}));
+        return;
+      }
+
+      var lenToDo = _.keys(this.__searchCycle.waiting).length;
+      var lenDone = _.keys(this.__searchCycle.inprogress).length; // TODO: this is not exactly correct
+      var total = lenToDo + lenDone;
+
+      ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_PROGRESS,
+      msg: (lenToDo / total), total: total, todo: lenToDo}));
+
+      setTimeout(function() {
+        self.monitorExecution();
+      }, 200);
+    },
+
+     /**
+     * This method harvest requests from the PubSub and stores them inside internal
+     * datastruct
      *
      * @param apiRequest
      * @param senderKey
@@ -118,6 +258,17 @@ define(['underscore',
     receiveRequests: function(apiRequest, senderKey) {
       if (this.debug)
         console.log('[QM]: received request:', apiRequest.url(), senderKey.getId());
+      this.__searchCycle.waiting[senderKey.getId()] = {request: apiRequest, key: senderKey};
+    },
+
+    /**
+     * This method executes a request, we check
+     * the local cache and also prepare context for the done/fail callbacks
+     *
+     * @param apiRequest
+     * @param senderKey
+     */
+    executeRequest: function(apiRequest, senderKey) {
 
       var ps = this.getBeeHive().Services.get('PubSub');
       var api = this.getBeeHive().Services.get('Api');
@@ -226,7 +377,7 @@ define(['underscore',
         console.warn("[QM]: attempting recovery");
       }
       else {
-        return;
+        return false;
       }
 
       var feedback = new ApiFeedback({code:503, msg:textStatus});
@@ -245,6 +396,7 @@ define(['underscore',
       if (pubsub)
         pubsub.publish(this.key, pubsub.FEEDBACK+this.key.getId(), feedback);
 
+      return true; // means: we are trying to recover
     },
 
     /**
@@ -289,7 +441,7 @@ define(['underscore',
                 }
               }
               // re-send the query
-              qm.receiveRequests.call(qm, request, senderKey);
+              qm.executeRequest.call(qm, request, senderKey);
             }, qm.recoveryDelayInMs);
             return true;
             break;

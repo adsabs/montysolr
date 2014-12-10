@@ -29,7 +29,12 @@ define([
 
 
       // Internal events
-      MAKE_SPACE: -1
+      MAKE_SPACE: -1,
+      SEARCH_CYCLE_STARTED: -2,
+      SEARCH_CYCLE_FAILED_TO_START: -3,
+      SEARCH_CYCLE_PROGRESS: -4,
+      SEARCH_CYCLE_STOP_MONITORING: -5,
+      SEARCH_CYCLE_FINISHED: -6,
     };
 
     var _codes = {};

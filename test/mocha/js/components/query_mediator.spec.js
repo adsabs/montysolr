@@ -69,7 +69,7 @@ define([
         expect(qm.getBeeHive()).to.be.equal(beehive);
         expect(qm.pubSubKey).to.be.instanceof(PubSubKey);
 
-        expect(pubsub.subscribe.callCount).to.be.eql(3);
+        expect(pubsub.subscribe.callCount).to.be.eql(4);
         expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.START_SEARCH]);
         expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.DELIVERING_REQUEST]);
 
@@ -166,10 +166,12 @@ define([
          - user clicked: START_SEARCH
          - mediator issues: INVITING_REQUEST
            - m1 and m2 respond with: DELIVERING_REQUEST
-         - mediator calls api: api.request(apiRequest)
-           - api gets data and sends them back to mediator
-           - mediator wraps it into ApiResponse and issues: DELIVERING_RESPONSE
-              - m1 & m2 receive the apiResponse (each for their own request only)
+         - mediator collects requests
+           - mediator tests the first query
+           - mediator calls api: api.request(apiRequest)
+             - api gets data and sends them back to mediator
+             - mediator wraps it into ApiResponse and issues: DELIVERING_RESPONSE
+                - m1 & m2 receive the apiResponse (each for their own request only)
         */
 
         // must be called after we have collected everything
@@ -227,87 +229,88 @@ define([
         qm.receiveRequests(req, key);
         qm.receiveRequests(req, key2);
 
-        expect(qm.onApiResponse.callCount, 2);
-        var api = beehive.Services.get('Api');
-        expect(api.request.callCount).to.be.equal(1);
+        setTimeout(function() {
+          expect(qm.onApiResponse.callCount, 2);
+          var api = beehive.Services.get('Api');
+          expect(api.request.callCount).to.be.equal(1);
 
 
-        for (var i=0; i<10; i++) {
-          qm.receiveRequests(req, pubsub.getPubSubKey());
-        }
-        expect(qm.onApiResponse.callCount, 12);
-        expect(api.request.callCount).to.be.equal(1);
+          for (var i = 0; i < 10; i++) {
+            qm.receiveRequests(req, pubsub.getPubSubKey());
+          }
+          expect(qm.onApiResponse.callCount, 12);
+          expect(api.request.callCount).to.be.equal(1);
 
-        q.set('__boo', 'hey');
-        qm.receiveRequests(req, key2);
-        expect(qm.onApiResponse.callCount, 13);
-        expect(api.request.callCount).to.be.equal(1);
+          q.set('__boo', 'hey');
+          qm.receiveRequests(req, key2);
+          expect(qm.onApiResponse.callCount, 13);
+          expect(api.request.callCount).to.be.equal(1);
 
-        q.set('fq', 'hey');
-        qm.receiveRequests(req, key2);
-        expect(qm.onApiResponse.callCount, 14);
-        expect(api.request.callCount).to.be.equal(2);
+          q.set('fq', 'hey');
+          qm.receiveRequests(req, key2);
+          expect(qm.onApiResponse.callCount, 14);
+          expect(api.request.callCount).to.be.equal(2);
 
-        this.server.respond();
-        api.request.reset();
+          this.server.respond();
+          api.request.reset();
 
-        // errors should not be cached
-        this.server.responses[0].response[0] = 502;
-        //this.server.respondWith(/\/api\/1\/search.*/,
-        //  [503, { "Content-Type": "application/json" }, validResponse]);
-
-
-        q.set('fq', 'bey');
-        qm.receiveRequests(req, key2);
-        this.server.respond();
-        expect(qm.onApiResponse.callCount, 14);
-        expect(qm.onApiRequestFailure.callCount, 1);
-        expect(api.request.callCount).to.be.equal(1);
+          // errors should not be cached
+          this.server.responses[0].response[0] = 502;
+          //this.server.respondWith(/\/api\/1\/search.*/,
+          //  [503, { "Content-Type": "application/json" }, validResponse]);
 
 
-        //this.server.respondWith(/\/api\/1\/search.*/,
-        //  [200, { "Content-Type": "application/json" }, validResponse]);
-        this.server.responses[0].response[0] = 200;
-
-        qm.receiveRequests(req, key2);
-        this.server.respond();
-        expect(qm.onApiResponse.callCount, 15);
-        expect(qm.onApiRequestFailure.callCount, 1);
-        expect(api.request.callCount).to.be.equal(2);
-
-        // but this this will be served from  cache
-        qm.receiveRequests(req, key);
-        this.server.respond();
-        expect(qm.onApiResponse.callCount, 16);
-        expect(qm.onApiRequestFailure.callCount, 1);
-        expect(api.request.callCount).to.be.equal(2);
-
-
-
-        // constant failures should trigger safety mechanism of max-retries
-        this.server.responses[0].response[0] = 502;
-        q.set('fq', 'ha');
-        qm.onApiResponse.reset();
-        qm.onApiRequestFailure.reset();
-        api.request.reset();
-
-        for (var i=0;i<3;i++) {
+          q.set('fq', 'bey');
           qm.receiveRequests(req, key2);
           this.server.respond();
-          expect(qm.onApiResponse.callCount, 0);
-          expect(qm.onApiRequestFailure.callCount, i+1);
-          expect(api.request.callCount).to.be.equal(i+1);
-        }
+          expect(qm.onApiResponse.callCount, 14);
+          expect(qm.onApiRequestFailure.callCount, 1);
+          expect(api.request.callCount).to.be.equal(1);
 
-        for (var i=0;i<3;i++) {
+
+          //this.server.respondWith(/\/api\/1\/search.*/,
+          //  [200, { "Content-Type": "application/json" }, validResponse]);
+          this.server.responses[0].response[0] = 200;
+
           qm.receiveRequests(req, key2);
           this.server.respond();
-          expect(qm.onApiResponse.callCount, 0);
-          expect(qm.onApiRequestFailure.callCount, 4+i);
-          expect(api.request.callCount).to.be.equal(3);
-        }
+          expect(qm.onApiResponse.callCount, 15);
+          expect(qm.onApiRequestFailure.callCount, 1);
+          expect(api.request.callCount).to.be.equal(2);
 
-        done();
+          // but this this will be served from  cache
+          qm.receiveRequests(req, key);
+          this.server.respond();
+          expect(qm.onApiResponse.callCount, 16);
+          expect(qm.onApiRequestFailure.callCount, 1);
+          expect(api.request.callCount).to.be.equal(2);
+
+
+          // constant failures should trigger safety mechanism of max-retries
+          this.server.responses[0].response[0] = 502;
+          q.set('fq', 'ha');
+          qm.onApiResponse.reset();
+          qm.onApiRequestFailure.reset();
+          api.request.reset();
+
+          for (var i = 0; i < 3; i++) {
+            qm.receiveRequests(req, key2);
+            this.server.respond();
+            expect(qm.onApiResponse.callCount, 0);
+            expect(qm.onApiRequestFailure.callCount, i + 1);
+            expect(api.request.callCount).to.be.equal(i + 1);
+          }
+
+          for (var i = 0; i < 3; i++) {
+            qm.receiveRequests(req, key2);
+            this.server.respond();
+            expect(qm.onApiResponse.callCount, 0);
+            expect(qm.onApiRequestFailure.callCount, 4 + i);
+            expect(api.request.callCount).to.be.equal(3);
+          }
+
+          done();
+        }, 20);
       });
 
       it("knows to recover from certain error situations (such as hangup)", function(done) {

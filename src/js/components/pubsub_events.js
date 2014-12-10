@@ -42,6 +42,13 @@ define([], function() {
     DELIVERING_REQUEST: '[PubSub]-New-Request',
 
     /**
+     * Will be called by OC's, this is one-time forget action (outside of the
+     * the search cycle); use this for any query that needs to be executed
+     * and not be tracked by search cycle
+     */
+    EXECUTE_REQUEST: '[PubSub]-Execute-Request',
+
+    /**
      * Published by FC's - typically Mediator - when a response has been retrieved
      * for a given ApiRequest.
      *
