@@ -273,12 +273,16 @@ define(['./base_graph',
 
        enterSelection.append("rect").classed("full-bar", true);
 
-       enterSelection.append("rect").classed("refereed", true)
+       enterSelection.append("rect").classed("refereed", true);
+
+       var countBars = xLabels.length;
 
        //update selection is within bar
        bar.attr("transform", function (d) {
          return "translate(" + x(d.x) + ",0)";
-       }).transition().select("rect").attr("y", function (d) {
+       }).transition(500)
+         .delay(function(d, i) { return i * 500/countBars; })
+         .select("rect").attr("y", function (d) {
          return y(d.y);
        }).attr("height", function (d) {
          return that.height - y(d.y);
@@ -286,7 +290,10 @@ define(['./base_graph',
          return x.rangeBand() * d.width / that.binSize
        })
 
-       bar.select(".refereed").transition().attr("y", function (d) {
+       bar.select(".refereed")
+         .transition(500)
+         .delay(function(d, i) {  return i * 500/countBars; })
+         .attr("y", function (d) {
          return y(d.refCount);
        }).attr("height", function (d) {
          return that.height - y(d.refCount);

@@ -4,7 +4,8 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
-    'hbs!./templates/item-template'
+    'hbs!./templates/item-template',
+    'bootstrap'
   ],
 
   function (Marionette,
@@ -38,53 +39,18 @@ define([
         return this;
       },
 
-      /**
-       * This method prepares data for consumption by the template
-       *
-       * @returns {*}
-       */
-      serializeData: function () {
-
-        var data , shownAuthors;
-        data = this.model.toJSON();
-
-        var maxAuthorNames = 3;
-
-        if (data.author && data.author.length > maxAuthorNames) {
-          data.extraAuthors = data.author.length - maxAuthorNames;
-          shownAuthors = data.author.slice(0, maxAuthorNames);
-        } else if (data.author) {
-          shownAuthors = data.author
-        }
-
-        if (data.author) {
-          var l = shownAuthors.length - 1;
-          data.authorFormatted = _.map(shownAuthors, function (d, i) {
-            if (i == l || l == 0) {
-              return d; //last one, or only one
-            } else {
-              return d + ";";
-            }
-          })
-        }
-        //if details/highlights
-        if (data.details) {
-          data.highlights = data.details.highlights
-        }
-
-        data.orderNum = this.model.get("resultsIndex") + 1;
-        return data;
-      },
 
       events: {
         'change input[name=identifier]': 'toggleSelect',
+        'click .details-control' : "toggleDetails",
         'mouseenter .letter-icon': "showLinks",
         'mouseleave .letter-icon': "hideLinks",
         'click .letter-icon': "pinLinks"
       },
 
       modelEvents: {
-        "change:visible": 'render'
+        "change:visible": 'render',
+        "change:showDetails" : 'render'
       },
 
       collectionEvents: {
@@ -97,12 +63,18 @@ define([
         this.model.set('chosen', this.model.get('chosen') ? false : true);
       },
 
+      toggleDetails : function(){
+
+        var newValue = this.model.get("showDetails") ? false : true;
+
+        this.model.set("showDetails", newValue);
+      },
+
       /*
        * adding this to make the dropdown
        * accessible, and so people can click to sticky
        * open the quick links
        * */
-
 
       removeActiveQuickLinkState: function ($node) {
 

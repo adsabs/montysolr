@@ -1,4 +1,5 @@
 
+
 /*
 
 For all changes that can't be made by altering the ads-variables file
@@ -119,6 +120,22 @@ select:focus {
   .button-hover-shadow;
 }
 
+.btn-default:focus {
+  background-color: white;
+}
+
+.btn-default-flat {
+  .btn-default;
+}
+
+.btn-default-flat:hover{
+  background-color: white;
+}
+
+.btn-default-flat:focus{
+  background-color: white;
+}
+
 .btn-success:hover {
   background-color: darken(@brand-success, 5%);
 }
@@ -136,5 +153,6 @@ select:focus {
 }
 
 .popover {
-  max-width : 400px;
+  max-width : 600px;
+  min-width: 200px;
 }

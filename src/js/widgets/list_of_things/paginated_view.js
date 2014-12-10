@@ -44,7 +44,9 @@ define([
       defaults: function () {
         return {
           showDetailsButton: false,
-          mainResults: false
+          mainResults: false,
+          title : undefined,
+          showAllDetails : false
         }
       }
     });
@@ -104,7 +106,7 @@ define([
 
       itemViewContainer: ".results-list",
       events: {
-        "click .show-details": "showDetails",
+        "click .show-details": "toggleDetails",
         "click a[data-paginate]": "changePage",
         "input .per-page": "changePerPage"
       },
@@ -113,10 +115,19 @@ define([
         "change": "render"
       },
 
+      collectionEvents : {
+
+        "reset" : "resetViewModel"
+
+      },
+
       template: ResultsContainerTemplate,
 
-      onRender: function () {
-        //this.paginationView.setElement(this.$(".pagination-controls")).render();
+      resetViewModel : function(){
+
+        this.model.set("showAllDetails", false)
+
+
       },
 
       /**
@@ -124,17 +135,17 @@ define([
        * with details (this place is normally hidden
        * by default)
        */
-      showDetails: function (ev) {
-        if (ev)
-          ev.stopPropagation();
-        this.model.set('showDetailsButton', false, {silent: true});
+      toggleDetails: function (ev) {
 
-        this.$(".more-info").toggleClass("hide");
-        if (this.$(".more-info").hasClass("hide")) {
-          this.$(".show-details").text("Show details");
-        } else {
-          this.$(".show-details").text("Hide details");
-        }
+          var newValue = this.model.get("showAllDetails") ? false : true;
+
+        // show the proper button
+          this.model.set("showAllDetails", newValue);
+
+          this.collection.each(function(m){
+            //notify each item view to rerender itself and show/hide details
+            m.set("showDetails", newValue);
+          })
       },
 
       changePage: function (e) {

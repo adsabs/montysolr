@@ -1,23 +1,20 @@
 <div class="row s-list-controls">
 
-
-
     <div class="s-results-border-bottom">
 
         <div class="col-sm-1">
 
-            {{#if mainResults}}
-            <button class="btn btn-default btn-expand left-expand hidden-xs" title="hide left column" aria-label="hide left column"><i></i></button>
-            {{/if}}
         </div>
 
         <div class="col-sm-5">
 
-            {{#if showDetailsButton}}
             <div class="s-show-details-container col-sm-4 ">
-                <button class="btn btn-default show-details">Show details</button>
+                {{#if showAllDetails}}
+                <button class="btn btn-default show-details"> <i class="icon-details"></i> Show details</button>
+                {{else}}
+                <button class="btn btn-default show-details"> <i class="icon-hide-details"></i> Hide details</button>
+                {{/if}}
             </div>
-            {{/if}}
 
         </div>
 
@@ -27,19 +24,24 @@
         </div>
 
         <div class="col-sm-1">
-            {{#if mainResults}}
-            <button class="btn btn-default btn-expand right-expand hidden-sm pull-right" title="hide right column" aria-label="hide right column"><i></i></button>
-            {{/if}}
-        </div>
+
 
     </div>
 
 </div>
 
 <div class="row">
-    {{#if mainResults}}
-    <h2 class="sr-only">Search Results</h2>
 
+    {{#if description}}
+    <div class="col-sm-12">
+    <h4 class="s-list-description">{{description}}</h4>
+    </div>
+    {{/if}}
+
+    {{#if title}}
+    <div class="col-sm-12">
+    <h2 class="s-article-title">{{title}}</h2>
+    </div>
     {{/if}}
     <ul class="col-sm-12 results-list  s-results-list list-unstyled s-display-block" aria-label="list of results">
     </ul>

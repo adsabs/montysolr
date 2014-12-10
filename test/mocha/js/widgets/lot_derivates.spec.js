@@ -84,6 +84,14 @@ define([
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
       expect($w.find("label").length).to.equal(20);
+
+      expect($w.find(".s-list-description").text()).to.eql("List of papers referenced by");
+
+      widget.trigger("page-manager-message", "article-title", {title: "foo"})
+
+      expect($w.find(".s-article-title").text()).to.eql("foo");
+
+
     });
 
     it("Show coreads", function(){
@@ -95,6 +103,14 @@ define([
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
       expect($w.find("label").length).to.equal(20);
+
+      expect($w.find(".s-list-description").text()).to.eql("List of papers also read by those who read");
+
+      widget.trigger("page-manager-message", "article-title", {title: "foo"})
+
+      expect($w.find(".s-article-title").text()).to.eql("foo");
+
+
     });
 
     it("Show TableOfContents", function(){
@@ -106,6 +122,14 @@ define([
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(20);
+
+      expect($w.find(".s-list-description").text()).to.eql("List of papers in the same volume as");
+
+      widget.trigger("page-manager-message", "article-title", {title: "foo"})
+
+      expect($w.find(".s-article-title").text()).to.eql("foo");
+
+
     });
 
   })

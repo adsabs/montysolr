@@ -30,6 +30,21 @@ define([
           q.set('q', this.queryOperator + '(' + q.get('q').join(' ') + ')');
         }
         return q;
+      },
+
+      description : "List of papers in the same volume as",
+
+      initialize : function(options){
+
+        this.on('page-manager-message', function(event, data){
+          if (event === "article-title"){
+            this.model.set("title", data.title);
+
+          }
+        });
+
+        ListOfThingsWidget.prototype.initialize.call(this, options);
+
       }
     });
 
