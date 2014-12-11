@@ -71,6 +71,8 @@ define([
         options = options || {};
       },
 
+      className : "btn-group",
+
       itemView: DropdownItemView,
       itemViewContainer: ".dropdown-menu",
       template: dropdownTemplate,

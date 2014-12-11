@@ -1395,8 +1395,6 @@ define([
 
       }
 
-
-
     })
 
     return NetworkWidget

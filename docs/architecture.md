@@ -40,11 +40,11 @@ It is important to understand relationships between components of the mini-app.
      feedback messages and modifies the state of the application/UI based on them)
        
   * `beehive` - this is a central component, almost every component has access to it. It provides
-    access to services and objects. 
-    Beehive is amorphous access point. It has one face for 'core components', and different face to 'periphery' 
-    - i.e. widgets cannot change it (and nothing inside it). This is because every widget will 
-    receive `hardened` version of beehive (the real object is hidden behind a facade and the widget has no way 
-    to access/change the real object; this holds true for beehive and to anything that Beehive contains)
+    access to services and objects. Beehive is amorphous access point. It has one face for 'core components', 
+    and different face to 'periphery' - i.e. widgets cannot change it (and nothing inside it). This is because 
+    every widget will receive `hardened` version of beehive (the real object is hidden behind a facade 
+    and the widget has no way to access/change the real object; this holds true for beehive and to anything 
+    that Beehive contains)
     
     * `Services` - beehive exposes (potentially) many services, they provide functionality to the periphery
       e.g. `Api` (communicates with remote web server, fetches data) or `PubSub` (controls the publish-subscribe

@@ -25,7 +25,8 @@ define(['underscore', 'backbone',
     var allowedAttrs = {
       query: function(v) {return v instanceof ApiQuery},
       target: basicCheck,
-      sender: basicCheck
+      sender: basicCheck,
+      options : basicCheck
     };
 
     var checker = {

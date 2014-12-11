@@ -46,7 +46,7 @@ define([
           'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
-          'VisualizationDropdown', 'SearchWidget'];
+          'VisualizationDropdown', 'MetricsDropdown', 'SearchWidget'];
 
         this.set('index-page', function() {
           app.getObject('MasterPageManager').show('LandingPage');
@@ -67,6 +67,10 @@ define([
         this.set('show-paper-network', function() {
           app.getObject('MasterPageManager').show('SearchPage',
             ['PaperNetwork'].concat(searchPageAlwaysVisible.slice(1)));
+        });
+        this.set('show-metrics', function() {
+          app.getObject('MasterPageManager').show('SearchPage',
+            ['Metrics'].concat(searchPageAlwaysVisible.slice(1)));
         });
         this.set("visualization-closed", this.get("results-page"));
         this.set('abstract-page', function() {

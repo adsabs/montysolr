@@ -5,14 +5,19 @@
 
 .border-default-light {
   border-bottom: @border-light-default;
+
+}
+
+.ads-corners {
+  .lh-border-radius(@border-radius-large);
+  .lh-box-shadow(0 1px 5px @gray-lighter);
 }
 
 .ads-container {
   padding: 5px;
   background-color: white;
   border: @border-light-default;
-  .lh-border-radius(@border-radius-large);
-  .lh-box-shadow(0 1px 5px @gray-lighter);
+  .ads-corners;
 }
 
 .s-motion-shadow {
