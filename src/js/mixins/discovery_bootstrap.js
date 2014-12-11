@@ -49,6 +49,15 @@ define([
     },
 
     bootstrap: function() {
+      // XXX:rca - solve this better, through config
+      var beehive = this.getBeeHive();
+      var results = this.getWidget('Results');
+      var runtime = {};
+      beehive.addObject('RuntimeConfig', runtime);
+      if (results) {
+        runtime.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
+      }
+
 
       var defer = $.Deferred();
 

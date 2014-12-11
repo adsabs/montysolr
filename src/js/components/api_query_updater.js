@@ -500,11 +500,13 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
      */
     clean: function(apiQuery) {
       var q = {};
-      _.each(apiQuery.keys(), function(key) {
-        if (!(key.substring(0, 2) == '__')) {
-          q[key] = apiQuery.get(key);
-        }
-      });
+      if (apiQuery && apiQuery.keys) {
+        _.each(apiQuery.keys(), function(key) {
+          if (!(key.substring(0, 2) == '__')) {
+            q[key] = apiQuery.get(key);
+          }
+        });
+      }
       return new ApiQuery(q);
     }
 

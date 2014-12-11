@@ -19,6 +19,7 @@ require.config({
       }
     },
     'js/apps/discovery/main': {
+
       core: {
         controllers: {
           FeedbackMediator: 'js/wraps/discovery_mediator'
