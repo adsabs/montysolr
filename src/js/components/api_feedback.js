@@ -24,7 +24,12 @@ define([
       SERVER_ERROR: 503,
       TOO_MANY_FAILURES: 580,
       ALL_FINE: 200,
-      KEEP_WAITING: 190
+      KEEP_WAITING: 190,
+      TESTING: 0,
+
+
+      // Internal events
+      MAKE_SPACE: -1
     };
 
     var _codes = {};
@@ -37,7 +42,8 @@ define([
         code: 'integer value of the code',
         msg: 'string message',
         toJSON: 'for cloning',
-        getApiRequest: 'to get the original request'
+        getApiRequest: 'to get the original request',
+        getSenderKey: 'retrieve the senders key'
 
       },
       initialize: function () {
@@ -58,10 +64,19 @@ define([
         return this.req;
       },
 
-
       setMsg: function(msg) {
         this.msg = msg;
+      },
+
+      getSenderKey: function() {
+        return this.senderKey;
+      },
+
+      setSenderKey: function(key) {
+        this.senderKey = key;
       }
+
+
     }, Hardened);
 
     ApiFeedback.extend = Backbone.Model.extend;

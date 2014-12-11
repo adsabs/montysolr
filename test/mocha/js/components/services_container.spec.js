@@ -19,6 +19,9 @@ define(['js/components/services_container', 'js/components/generic_module'],
       expect(sc.add('test', test)).to.be.OK;
       expect(sc.has('test')).to.be.true;
       expect(sc.get('test')).to.be.equal(test);
+
+      expect(sc.getAll()).to.be.eql([['test', test]]);
+
       expect(sc.remove('test')).to.be.OK;
       expect(sc.has('test')).to.be.false;
 

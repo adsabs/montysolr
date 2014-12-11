@@ -58,7 +58,7 @@ define(['backbone', 'marionette', 'js/components/api_query',
           throw new Error("Callback must be a function");
         }
         if (this._queriesInProgress[queryId]) {
-          console.warn("Ignoring request, there is already a callback for: " + queryId);
+          console.warn("There already exists a callback for: " + queryId);
           return false;
         }
         this._queriesInProgress[queryId] = {callback: callback, data: data};

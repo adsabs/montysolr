@@ -34,7 +34,8 @@ define(['underscore', 'backbone',
   'js/services/pubsub',
   'js/components/beehive',
   'js/components/pubsub_events',
-  'js/components/api_query'
+  'js/components/api_query',
+  'js/components/api_request'
 ], function(
   _,
   BackBone,
@@ -42,7 +43,8 @@ define(['underscore', 'backbone',
   PubSub,
   BeeHive,
   PubSubEvents,
-  ApiQuery
+  ApiQuery,
+  ApiRequest
   ) {
 
   var MinimalPubsub = function() {
@@ -116,6 +118,10 @@ define(['underscore', 'backbone',
 
     createQuery: function(data) {
       return new ApiQuery(data);
+    },
+
+    createRequest: function(data) {
+      return new ApiRequest(data);
     }
 
   });

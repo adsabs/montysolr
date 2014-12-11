@@ -43,6 +43,7 @@ define(["config", 'module'], function(config, module) {
 
         app.bootstrap().done(function (data) {
 
+
           // set the API key
           if (data.access_token) {
             var api = app.getBeeHive().getService('Api');

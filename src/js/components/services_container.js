@@ -5,7 +5,7 @@
 define(['js/components/facade', 'js/components/generic_module', 'js/mixins/hardened', 'underscore'], function(Facade, GenericModule, Hardened, _) {
   var Services = GenericModule.extend({
     initialize: function(options) {
-      this._services = _.has(options, 'services') ? options['services'] : {};
+      this._services = _.has(options, 'services') ? _.clone(options['services']) : {};
     },
 
     activate: function() {
@@ -51,6 +51,10 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
 
     get: function(name) {
       return this._services[name];
+    },
+
+    getAll: function() {
+      return _.pairs(this._services);
     }
 
   });

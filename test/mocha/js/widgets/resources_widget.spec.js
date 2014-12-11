@@ -87,11 +87,11 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
 
       widget.loadBibcodeData("fakeBibcode");
 
-      expect($w.find("dd:first").find("a").attr("href")).to.eql(
+      expect($w.find("p:first").find("a").attr("href")).to.eql(
         'http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=GIF'
       )
 
-      expect($w.find("dd:last").find("a").attr("href")).to.eql(
+      expect($w.find("p:last").find("a").attr("href")).to.eql(
         "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=SIMBAD"
       )
 

@@ -34,19 +34,25 @@ define(['underscore',
     initialize: function(options) {
 
       if (options.cache) {
-        this._cache = new Cache(_.extend({
-          'maximumSize': 100,
-          'expiresAfterWrite':60*30 // 30 mins
-        }, _.isObject(options.cache) ? options.cache : {}));
+        this._cache = this._getNewCache(options.cache);
       }
       this.debug = options.debug || false;
       this.queryUpdater = new ApiQueryUpdater('QueryMediator');
-      this.failedRequestsCache = new Cache({
-        maximumSize: 100,
-        expiresAfterWrite: 60*30 // 30 mins
-      });
+      this.failedRequestsCache = this._getNewCache();
       this.maxRetries = options.maxRetries || 3;
       this.recoveryDelayInMs = options.recoveryDelayInMs || 700;
+    },
+
+    activateCache: function() {
+      if (!this._cache)
+        this._cache = this._getNewCache();
+    },
+
+    _getNewCache: function(options) {
+      return new Cache(_.extend({
+        'maximumSize': 100,
+        'expiresAfterWrite':60*30 // 30 mins
+      }, _.isObject(options) ? options : {}));
     },
 
     /**
@@ -114,7 +120,7 @@ define(['underscore',
       var ps = this.getBeeHive().Services.get('PubSub');
       var api = this.getBeeHive().Services.get('Api');
 
-      var requestKey = this.getCacheKey(apiRequest);
+      var requestKey = this._getCacheKey(apiRequest);
       var maxTry = this.failedRequestsCache.getSync(requestKey) || 0;
 
       if (maxTry >= this.maxRetries) {
@@ -208,7 +214,7 @@ define(['underscore',
       var qm = this.qm;
       var query = this.request.get('query');
       if (qm.debug) {
-        console.warn('[QM]: failing request', jqXHR, textStatus, errorThrown);
+        console.warn('[QM]: request failed', jqXHR, textStatus, errorThrown);
       }
 
       var errCount = qm.failedRequestsCache.getSync(this.requestKey) || 0;
@@ -216,6 +222,9 @@ define(['underscore',
 
       if (qm.tryToRecover.apply(this, arguments)) {
         console.warn("[QM]: attempting recovery");
+      }
+      else {
+        return;
       }
 
       var feedback = new ApiFeedback({code:503, msg:textStatus});
@@ -232,7 +241,7 @@ define(['underscore',
 
       var pubsub = qm.getBeeHive().Services.get('PubSub');
       if (pubsub)
-        pubsub.publish(this.key, pubsub.DELIVERING_FEEDBACK+this.key.getId(), feedback);
+        pubsub.publish(this.key, pubsub.FEEDBACK+this.key.getId(), feedback);
 
     },
 
@@ -293,7 +302,7 @@ define(['underscore',
      * Creates a unique, cleaned key from the request and the apiQuery
      * @param apiRequest
      */
-    getCacheKey: function(apiRequest) {
+    _getCacheKey: function(apiRequest) {
       var oldQ = apiRequest.get('query');
       var newQ = this.queryUpdater.clean(oldQ);
       apiRequest.set('query', newQ);

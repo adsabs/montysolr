@@ -1,20 +1,18 @@
 
-<dl class="s-resources-dl">
     {{#if fullTextSources}}
-    <dt>Full Text Sources</dt>
+    <h4 class="s-right-col-widget-title">Full Text Sources</h4>
     {{#each fullTextSources}}
-    <dd><a href="{{link}}" target = "_blank">
+    <p><a href="{{link}}" target = "_blank">
         {{title}}{{#if openAccess}}
         <i class="s-open-access-image"></i>
         {{/if}} </a>
-    </dd>
+    </p>
     {{/each}}
     {{/if}}
     {{#if dataProducts}}
     <br/>
-    <dt>Data Products</dt>
+    <h4 class="s-right-col-widget-title">Data Products</h4>
     {{#each dataProducts}}
-    <dd><a href="{{link}}" target = "_blank">{{title}}</a></dd>
+    <p><a href="{{link}}" target = "_blank">{{title}}</a></p>
     {{/each}}
     {{/if}}
-</dl>

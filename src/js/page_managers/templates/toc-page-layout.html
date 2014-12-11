@@ -7,7 +7,7 @@
                 <a href="" class="back-button"> <i class="fa fa-arrow-left"></i> Back to search results</a>
                 {{/if}}
             </div>
-            <div class="col-sm-8 s-search-bar-row" id="search-bar-row"
+            <div class="col-sm-7 s-search-bar-row" id="search-bar-row"
                  data-widget="SearchWidget"></div>
         </div>
     </div>
@@ -25,28 +25,30 @@
                             />
                 </div>
             </div>
-            <div class="col-sm-10 s-middle-column" id="middle-column">
+            <div class="col-sm-7 s-middle-column" id="middle-column">
                 <div class="main-content-container s-main-content-container">
 
-                    <div id="abstract-title-container" class="s-abstract-title-container">
-
+                    <div id="abstract-title-container" class="s-abstract-title-container"></div>
+                    <div id="current-subview">
+                        <div data-widget="ShowAbstract"/>
+                        <div data-widget="ShowCitations"/>
+                        <div data-widget="ShowReferences"/>
+                        <div data-widget="ShowCoreads"/>
+                        <div data-widget="ShowTableOfContents"/>
+                        <div data-widget="ShowSimilar"/>
                     </div>
-                    <div class="row">
-                        <div id="current-subview" class="col-sm-9">
-                            <div data-widget="ShowAbstract" />
-                            <div data-widget="ShowCitations" />
-                            <div data-widget="ShowReferences" />
-                            <div data-widget="ShowCoreads" />
-                            <div data-widget="ShowTableOfContents" />
-                            <div data-widget="ShowSimilar" />
-                        </div>
-                        <div id="right-col-container" class="s-right-col-container col-sm-3">
-                            <div data-widget="ShowResources" />
-                        </div>
-                    </div>
-
                 </div>
             </div>
+
+            <div class="s-right-col-container col-sm-3 s-right-column" id="right-col-container">
+                <div class="s-right-col-widget-container">
+                    <div data-widget="ShowResources"/>
+               </div>
+                <div class="s-right-col-widget-container">
+                <div data-widget="ShowRecommender"/>
+                </div>
+            </div>
+
 
         </div>
     </div>

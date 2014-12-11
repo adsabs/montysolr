@@ -7,12 +7,16 @@ define([
     'jquery',
     'backbone',
     'underscore',
-    'js/components/navigator'],
+    'js/components/navigator',
+    'js/components/api_feedback'
+  ],
   function (
     $,
     Backbone,
     _,
-    Navigator) {
+    Navigator,
+    ApiFeedback
+    ) {
 
     "use strict";
 
@@ -30,7 +34,13 @@ define([
          */
         var pubsub = this.pubsub;
         var self = this;
-        pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, function() {self.navigate('results-page')});
+        pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, function() {
+          self.navigate('results-page')
+        });
+
+        var publishFeedback = function(data) {
+          self.pubsub.publish(self.pubSubKey, self.pubsub.FEEDBACK, new ApiFeedback(data))
+        };
 
         var searchPageAlwaysVisible = [
           'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
@@ -47,31 +57,38 @@ define([
           searchPageAlwaysVisible);
           this.route = '#search/' + app.getWidget('SearchWidget').getCurrentQuery().url();
         });
+
         this.set('show-author-network', function() {
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',
             ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
+
+        });
+        this.set('show-paper-network', function() {
+          app.getObject('MasterPageManager').show('SearchPage',
+            ['PaperNetwork'].concat(searchPageAlwaysVisible.slice(1)));
         });
         this.set("visualization-closed", this.get("results-page"));
         this.set('abstract-page', function() {
           app.getObject('MasterPageManager').show('DetailsPage',
-            ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources']);
+            ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
           //this.route = '#abs/' + app.getWidget('ShowAbstract').getCurrentQuery().url();
         });
         this.set('ShowAbstract', this.get('abstract-page'));
         this.set('ShowCitations', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCitations', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCitations', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
         });
         this.set('ShowReferences', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowReferences', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowReferences', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
         });
         this.set('ShowCoreads', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCoreads', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCoreads', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
         });
         this.set('ShowTableOfContents', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowTableOfContents', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowTableOfContents', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
         });
         this.set('ShowSimilar', function() {
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowSimilar', 'SearchWidget', 'ShowResources']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowSimilar', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
         });
         this.set('abstract-page:bibtex', function() { app.getObject('MasterPageManager').show('DetailsPage')});
         this.set('abstract-page:endnote', function() { app.getObject('MasterPageManager').show('DetailsPage')});

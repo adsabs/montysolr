@@ -351,7 +351,7 @@ module.exports = function(grunt) {
             'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=discovery-suite'
           ],
           threshold : 0,
-          globalThreshold : 72,
+          globalThreshold : 74,
           log : true,
           logErrors: true,
           moduleThreshold : 80,
@@ -388,7 +388,9 @@ module.exports = function(grunt) {
             "components/api_feedback.js":77,
             "components/transition.js":77,
             "widgets/dropdown-menu/widget.js":78,
-            "widgets/list_of_things/paginated_view.js":78}
+            "widgets/list_of_things/paginated_view.js":78,
+            "wraps/paper_network.js": 74 // some tests don't run properly in phantomjs
+          }
         }
       },
 

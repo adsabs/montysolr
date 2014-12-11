@@ -95,6 +95,7 @@ define([
         }
         this.render();
       },
+
       render: function() {
         // ignoring templating
         return this;
@@ -140,6 +141,8 @@ define([
       var pm = this.collection.get(pageManager);
       if (pm && pm.get('object')) {
 
+        this.currentChild = pageManager;
+
         if (!pm.attributes.isSelected) {
           this.hideAll();
         }
@@ -151,6 +154,10 @@ define([
       else {
         console.error('eeeek, you want me to display: ' + pageManager + ' (but I cant, cause there is no such Page!)')
       }
+    },
+
+    getCurrentActiveChild: function() {
+      return this.collection.get(this.currentChild).get('object'); // brittle?
     },
 
     hideAll: function() {

@@ -39,7 +39,12 @@ define([
         }
 
         this.bootstrapUrls = conf.bootstrapUrls;
+
+        if (conf.useCache) {
+          this.triggerMethodOnAll('activateCache');
+        }
       }
+
 
     },
 
@@ -166,7 +171,7 @@ define([
 
 
       // Trigger the initial route and enable HTML5 History API support
-      Backbone.history.start(conf.routerConf);
+      Backbone.history.start(conf ? conf.routerConf : {});
 
 
       // All navigation that is relative should be passed through the navigate
@@ -202,10 +207,13 @@ define([
         }
         //navbar is currently 40 px height
         if ($(window).scrollTop() > 50) {
+          $(".s-quick-add").addClass("hidden");
           $(".s-search-bar-full-width-container").addClass("s-search-bar-motion");
         }
         else {
-          $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion")
+          $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion");
+          $(".s-quick-add").removeClass("hidden");
+
         }
       });
 

@@ -20,6 +20,9 @@ require.config({
     },
     'js/apps/discovery/main': {
       core: {
+        controllers: {
+          FeedbackMediator: 'js/wraps/discovery_mediator'
+        },
         services: {
           'Api': 'js/services/api',
           'PubSub': 'js/services/pubsub',
@@ -30,7 +33,6 @@ require.config({
           DynamicConfig: 'discovery.vars',
           QueryMediator: 'js/components/query_mediator',
           HistoryManager: 'js/components/history_manager',
-
           MasterPageManager: 'js/page_managers/master'
         },
         modules: {
@@ -50,6 +52,7 @@ require.config({
         Sort : 'js/widgets/sort/widget',
         VisualizationDropdown : 'js/wraps/visualization_dropdown',
         AuthorNetwork : 'js/wraps/author_network',
+        PaperNetwork : 'js/wraps/paper_network',
 
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',
@@ -69,6 +72,7 @@ require.config({
         ShowTableOfContents : 'js/wraps/table_of_contents',
         ShowSimilar : 'js/widgets/similar/widget',
         ShowResources : 'js/widgets/resources/widget',
+        ShowRecommender : 'js/widgets/recommender/widget',
 
         TOCWidget: 'js/page_managers/toc_widget'
 
