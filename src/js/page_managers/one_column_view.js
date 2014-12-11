@@ -4,8 +4,7 @@ define([
     'js/widgets/base/base_widget'
   ],
   function (Marionette,
-            pageTemplate,
-            BaseWidget
+            pageTemplate
             ) {
 
     var OneColumnView = Marionette.ItemView.extend({
@@ -14,6 +13,10 @@ define([
         var options = options || {};
         this.widgets = options.widgets;
       },
+
+      className : "s-landing-page-layout",
+
+      id : "landing-page-layout",
 
       template : pageTemplate,
 
