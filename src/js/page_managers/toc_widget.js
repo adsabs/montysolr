@@ -99,7 +99,6 @@ define([
       "change:numFound" : "render"
     },
 
-
     onPageManagerMessage: function(event, data) {
       if (event == 'new-widget') {
         //this.collection.set([new WidgetData({widgetData: arguments[1]})]);

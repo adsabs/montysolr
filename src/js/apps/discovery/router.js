@@ -51,7 +51,9 @@ define([
             return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page', bibcode);
           }
           else {
-            return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page:' + subPage, bibcode);
+
+            var navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
+            return this.pubsub.publish(this.pubsub.NAVIGATE, navigateString, bibcode);
           }
         }
         this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page');

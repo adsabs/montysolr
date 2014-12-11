@@ -94,7 +94,7 @@ define([
        * @param pageName
        * @returns {exports.el|*|queryBuilder.el|p.el|AppView.el|view.el}
        */
-      show: function(pageName) {
+      show: function(pageName){
 
         var self = this;
 
