@@ -326,6 +326,31 @@ define([
         expect(widget.formatNum(889899)).to.be.eql('889,899');
       });
 
+      it("should have an item view that allows the user to toggle details", function(){
+
+        var widget = new ResultsWidget({perPage: 10});
+        widget.activate(minsub.beehive.getHardenedInstance());
+
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({'q': 'foo:bar'}));
+
+
+        var $w = widget.render().$el;
+        $("#test").append($w);
+
+        $w.find(".details-control").click();
+
+        expect($w.find(".details-control").hasClass("icon-hide-details")).to.be.true;
+        expect($w.find(".details").hasClass("hide")).to.be.false;
+
+        $w.find(".details-control").click();
+
+        expect($w.find(".details-control").hasClass("icon-details")).to.be.true;
+
+        expect($w.find(".details").hasClass("hide")).to.be.true;
+
+
+      })
+
     })
 
   });

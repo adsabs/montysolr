@@ -135,7 +135,7 @@ define([
        * with details (this place is normally hidden
        * by default)
        */
-      toggleDetails: function (ev) {
+      toggleDetails: function () {
 
           var newValue = this.model.get("showAllDetails") ? false : true;
 

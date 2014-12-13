@@ -136,13 +136,13 @@ define(['marionette',
         $('#test').append($w);
         expect($w.find("label").length).to.equal(10);
 
-        $w.find('button.show-details').click();
+        view.toggleDetails();
 
         expect($w.find('.details:first').hasClass("hide")).to.be.false;
         expect($w.find('.details:last').hasClass("hide")).to.be.false;
 
 
-        $w.find('button.show-details').click();
+        view.toggleDetails();
 
         expect($w.find('.details:first').hasClass("hide")).to.be.true;
         expect($w.find('.details:last').hasClass("hide")).to.be.true;
