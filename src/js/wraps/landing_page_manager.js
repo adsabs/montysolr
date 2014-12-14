@@ -9,15 +9,10 @@ define([
 
   var PageManager = PageManagerController.extend({
 
-
-    className : "s-landing-page-layout",
-
-    id : "landing-page-layout",
-    
     createView: function(options) {
       options = options || {};
       options.template = options.template || PageManagerTemplate;
-      return new PageManagerView({template: PageManagerTemplate})
+      return new PageManagerView({template: PageManagerTemplate, className :  "s-landing-page-layout",  id : "landing-page-layout"  })
     }
   });
   return PageManager;

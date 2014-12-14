@@ -2,8 +2,11 @@ define([
     'jquery',
     'backbone',
     'js/components/api_query',
-    'js/mixins/dependon'],
-  function ($, Backbone, ApiQuery, Dependon) {
+    'js/mixins/dependon',
+    'hbs!404.html'
+
+  ],
+  function ($, Backbone, ApiQuery, Dependon, ErrorTemplate) {
 
     "use strict";
 
@@ -61,7 +64,7 @@ define([
 
       noPageFound : function() {
         //i will fix this later
-        $("#body-template-container").html("<div>You have broken bumblebee. (404)</div><img src=\"styles/img/bumblerocket.svg\" alt=\"sad-bee\">")
+        $("#body-template-container").html(ErrorTemplate())
       }
 
 
