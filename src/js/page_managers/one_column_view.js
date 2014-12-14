@@ -14,10 +14,6 @@ define([
         this.widgets = options.widgets;
       },
 
-      className : "s-landing-page-layout",
-
-      id : "landing-page-layout",
-
       template : pageTemplate,
 
       onRender : function(){
