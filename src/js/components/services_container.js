@@ -11,7 +11,7 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
     activate: function() {
       var args = arguments;
       _.each(_.values(this._services), function(service) {// _.keys() preserves access order
-        if ('activate' in service) {
+        if (_.isObject(service) && 'activate' in service) {
           service.activate.apply(service, args);
         }
       });

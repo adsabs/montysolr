@@ -288,7 +288,7 @@ define([
             //console.log('we have to retrieve new data', arg1);
 
             if (req) {
-              this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+              this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
             }
           }, this);
 
@@ -303,6 +303,7 @@ define([
           pageData: {}
         })
       }
+
     });
 
     _.extend(ListOfThingsWidget.prototype, PaginationMixin);

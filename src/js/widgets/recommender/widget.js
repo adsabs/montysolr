@@ -80,7 +80,7 @@ define([
           query : new ApiQuery()
         });
 
-        this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
+        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
         return this.deferredObject.promise();
       }
 

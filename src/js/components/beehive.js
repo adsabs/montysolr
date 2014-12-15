@@ -29,16 +29,19 @@ define([
       this.Services = new ServicesContainer();
       this.Objects = new ServicesContainer();
       this.debug = false;
+      this.active = true;
     },
 
     activate: function() {
       this.Services.activate.apply(this.Services, arguments);
       this.Objects.activate(this);
+      this.active = true;
     },
 
     close: function() {
       this.Services.close(arguments);
       this.Objects.close(arguments);
+      this.active = false;
     },
 
     getService: function(name) {
@@ -95,6 +98,7 @@ define([
       Services: 'services container',
       Objects: 'objects container',
       debug: 'state of the app',
+      active: 'active or not',
       getHardenedInstance: 'allow to create clone of the already hardened instance'
     }
 

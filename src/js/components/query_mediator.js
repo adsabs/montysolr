@@ -40,8 +40,8 @@ define(['underscore',
         this.maxRetries = options.maxRetries || 3;
         this.recoveryDelayInMs = _.isNumber(options.recoveryDelayInMs) ? options.recoveryDelayInMs : 700;
         this.__searchCycle = {waiting:{}, inprogress: {}};
-        this.shortDelayInMs = _.isNumber(options.shortDelayInMs) ? options.shortDelayInMs : 10;
-        this.longDelayInMs = _.isNumber(options.longDelayInMs) ? options.longDelayInMs: 100;
+        this.shortDelayInMs = _.isNumber(options.shortDelayInMs) ? options.shortDelayInMs : 0;
+        this.longDelayInMs = _.isNumber(options.longDelayInMs) ? options.longDelayInMs: 0;
         this.monitoringDelayInMs = _.isNumber(options.monitoringDelayInMs) ? options.monitoringDelayInMs : 200;
       },
 
@@ -97,6 +97,7 @@ define(['underscore',
 
         this.reset();
         this.__searchCycle.initiator = senderKey.getId();
+        this.__searchCycle.collectingRequests = true;
 
         // we will protect the query -- in the future i can consider removing 'unlock' to really
         // cement the fact the query MUST NOT be changed (we want to receive a modified version)
@@ -111,11 +112,21 @@ define(['underscore',
 
         // give widgets some time to submit their requests
         var self = this;
-        setTimeout(function() {
-          self.startExecutingQueries();
-          self.monitorExecution();
-        }, this.shortDelayInMs);
 
+        if (this.shortDelayInMs) {
+          setTimeout(function() {
+            self.__searchCycle.collectingRequests = false;
+            self.startExecutingQueries();
+            self.monitorExecution();
+          }, this.shortDelayInMs);
+        }
+        else {
+          this.__searchCycle.collectingRequests = false;
+          self.startExecutingQueries();
+          setTimeout(function() {
+            self.monitorExecution();
+          }, this.shortDelayInMs);
+        }
       },
 
 
@@ -126,6 +137,8 @@ define(['underscore',
         var cycle = this.__searchCycle;
 
         if (_.isEmpty(cycle.waiting)) return;
+        if (!this.hasBeeHive()) return;
+
         cycle.running = true;
 
 
@@ -191,6 +204,9 @@ define(['underscore',
       },
 
       monitorExecution: function() {
+
+        if (!this.hasBeeHive()) return; // app is closed
+
         var self = this;
         var ps = this.getBeeHive().getService('PubSub');
         if (!ps) return; // application is gone
@@ -230,7 +246,12 @@ define(['underscore',
       receiveRequests: function(apiRequest, senderKey) {
         if (this.debug)
           console.log('[QM]: received request:', apiRequest.url(), senderKey.getId());
-        this.__searchCycle.waiting[senderKey.getId()] = {request: apiRequest, key: senderKey};
+        if (this.__searchCycle.collectingRequests) {
+          this.__searchCycle.waiting[senderKey.getId()] = {request: apiRequest, key: senderKey};
+        }
+        else {
+          this.executeRequest(apiRequest, senderKey);
+        }
       },
 
       /**

@@ -83,7 +83,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
       },
 
       setCurrentQuery: function(q) {
-        this._q = q;
+        this._q = q.clone();
       },
 
       getCurrentQuery: function() {

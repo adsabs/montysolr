@@ -61,6 +61,7 @@ define(['underscore', 'backbone',
       this.requestCounter = 0;
       this.beehive = new BeeHive();
       this.pubsub = new PubSub();
+      this.debug = true;
       this.beehive.addService('PubSub', this.pubsub);
       var self = this;
       this.beehive.addService('Api', {
@@ -70,9 +71,19 @@ define(['underscore', 'backbone',
           if (self.verbose) {
             console.log('[MinSub]', 'request', self.requestCounter, response);
           }
-          context.done.call(context.context, response);
+          var defer = $.Deferred();
+          defer.done(function() {
+            context.done.call(context.context, response);
+          });
+          defer.resolve();
+          return defer.promise();
         }});
-      this.beehive.addObject('QueryMediator', new QueryMediator({cache:false, recoveryDelayInMs: 0}));
+      this.beehive.addObject('QueryMediator', new QueryMediator({
+        recoveryDelayInMs: 0,
+        shortDelayInMs: 0,
+        longDelayInMs: 0,
+        monitoringDelayInMs: 5
+      }));
       this.beehive.activate();
       this.key = this.pubsub.getPubSubKey();
       this.listen();

@@ -15,7 +15,7 @@ define([
   ApiResponse
   ){
 
-  describe("Metrics Widget (UI Widget)", function(){
+  describe("Metrics Widget (metrics_widget.spec.js)", function(){
 
 //query : {"bibcodes":["1980ApJS...44..137K","1980ApJS...44..489B"]}'
 
@@ -611,8 +611,8 @@ define([
 
       //check to see that the rendered views are inserted
 
-        expect($("#test").find((".metrics-graph *")).length).to.eql(0);
-        expect($("#test").find((".metrics-table *")).length).to.eql(0);
+      expect($("#test").find((".metrics-graph *")).length).to.eql(0);
+      expect($("#test").find((".metrics-table *")).length).to.eql(0);
 
 
     })
@@ -657,11 +657,11 @@ define([
 
     })
 
-   // this isn't working, the setimeout is running before anything is in the dom...
+    // this isn't working, the setimeout is running before anything is in the dom...
 
     it("should have a configurable graph view that can show a line chart", function(done){
 
-    this.timeout(3000);
+      this.timeout(3000);
 
       var metricsWidget = new MetricsWidget();
 
@@ -752,16 +752,14 @@ define([
     })
 
 
-    it("should request data from pubsub, then send that data to the metrics endpoint, then render the graph", function(){
+    it("should request data from pubsub, then send that data to the metrics endpoint, then render the graph", function(done){
 
 
-     var metricsWidget = new MetricsWidget();
+      var metricsWidget = new MetricsWidget();
 
-      minsub = new (MinimalPubSub.extend({
+      var minsub = new (MinimalPubSub.extend({
         request: function(apiRequest) {
-
           if (apiRequest.toJSON().target === "search"){
-
             return {
               "responseHeader":{
                 "status":0,
@@ -778,17 +776,12 @@ define([
                 {
                   "bibcode":"1980ApJS...44..137K"}]
               }};
-
           }
           //just to be explicit
           else if (apiRequest.toJSON().target === "services/metrics"){
-
             return testData;
-
           }
-
         }
-
       }))({verbose: false});
 
       metricsWidget.activate(minsub.beehive.getHardenedInstance());
@@ -801,25 +794,21 @@ define([
       //trigger show event, should prompt dispatchRequest
       metricsWidget.onShow();
 
-      //if the views received the data, the 2 step request process worked
-
-      expect(metricsWidget.childViews.citationsTableView.model.attributes.medianCitations).to.eql([38.5, 38.5])
-
-    })
+      setTimeout(function() {
+        //if the views received the data, the 2 step request process worked
+        expect(metricsWidget.childViews.citationsTableView.model.attributes.medianCitations).to.eql([38.5, 38.5]);
+        done();
+      }, 5);
+    });
 
 
     it("should allow the user to request a different number of documents", function(done){
 
       var minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
-
           this.counter = this.counter || 0;
-
           if (apiRequest.toJSON().target === "search" && this.counter === 0) {
-
             this.counter++;
-
-
             return {
               "responseHeader": {
                 "status": 0,
@@ -837,11 +826,8 @@ define([
                   "bibcode": "1980ApJS...44..137K"}
               ]
               }}
-
-
           }
           else if (apiRequest.toJSON().target === "search" && this.counter === 2){
-
             return {
               "responseHeader": {
                 "status": 0,
@@ -859,17 +845,12 @@ define([
                   "bibcode": "1980ApJS...44..137K"}
               ]
               }}
-
           }
           //just to be explicit
           else if (apiRequest.toJSON().target === "services/metrics" ) {
-
             this.counter++
-
             return testData;
-
           }
-
         }
       }))({verbose: false});
 
@@ -885,54 +866,23 @@ define([
       //trigger show event, should prompt dispatchRequest
       metricsWidget.onShow();
 
-      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 2 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
+      setTimeout(function() {
+        expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 2 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
 
-     sinon.spy(metricsWidget.pubsub, "publish");
+        sinon.spy(metricsWidget.pubsub, "publish");
 
-      $("#test").find(".metrics-metadata input").val("1");
+        $("#test").find(".metrics-metadata input").val("1");
+        $("#test").find(".metrics-metadata button.submit-rows").trigger("click");
 
-      $("#test").find(".metrics-metadata button.submit-rows").trigger("click");
-
-
-      setTimeout(function(){
-
-        expect(metricsWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Request");
-        expect(metricsWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
-
-        expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 1 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
-
-
-
-        done();
+        setTimeout(function(){
+          expect(metricsWidget.pubsub.publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
+          expect(metricsWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
+          expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 1 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
+          done();
+        }, 1000)
+      }, 500);
 
 
-      }, 1000)
-
-
-
-
-
-
-
-
-
-
-
-
-
-    })
-
-
-
-
-
-
-
-
+    });
   })
-
-
-
-
-
-})
+});

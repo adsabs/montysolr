@@ -9,7 +9,7 @@ define([
   MinPubSub
   ) {
 
-  describe("Recommender Widget", function (){
+  describe("Recommender Widget (recommender_widget.spec.js)", function (){
 
     var testData = {"paper": "2010MNRAS.409.1719J", "recommendations": [
       {"bibcode": "1998ApJ...509..212S", "author": "Strong,+", "title": "Propagation of Cosmic-Ray Nucleons in the Galaxy"},

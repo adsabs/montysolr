@@ -16,7 +16,7 @@ define(['marionette',
             Test2,
             PaginatedBaseWidget) {
 
-    describe("ListOfThings (UI Widget)", function () {
+    describe("ListOfThings (list_of_things_expanding.spec.js)", function () {
 
       var minsub;
       beforeEach(function(done) {
