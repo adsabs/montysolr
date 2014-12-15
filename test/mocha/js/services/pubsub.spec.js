@@ -19,6 +19,24 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       expect(p.getPubSubKey()).to.not.be.equal(p.getPubSubKey());
     });
 
+    it('has start/close methods', function() {
+      var p = new PubSub();
+      expect(p.running).to.be.true; // by default, it is ready
+      p.running = false;
+      sinon.spy(p, 'publish');
+      p.start();
+      expect(p.running).to.be.true;
+      expect(p.publish.firstCall.args[1]).to.be.eql(PubSubEvents.OPENING_GATES);
+      expect(p.publish.secondCall.args[1]).to.be.eql(PubSubEvents.OPEN_FOR_BUSINESS);
+
+      p.publish.reset();
+      p.close();
+      expect(p.running).to.be.false;
+      expect(p.publish.firstCall.args[1]).to.be.eql(PubSubEvents.CLOSING_GATES);
+      expect(p.publish.secondCall.args[1]).to.be.eql(PubSubEvents.CLOSED_FOR_BUSINESS);
+
+    });
+
     it("requires the key to subscribe/unsubscribe", function() {
       var p = new PubSub();
       var k = p.getPubSubKey();
@@ -35,6 +53,10 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       expect(function() {p.subscribe('event', spy)}).to.throw(Error);
       expect(function() {p.unsubscribe({}, 'event', spy)}).to.throw(Error);
       expect(function() {p.unsubscribe('event', spy)}).to.throw(Error);
+
+      // close pubsub and try to use it
+      p.close();
+      expect(function() {p.subscribe(k, 'event', spy);}).to.throw.Error;
 
     });
 
@@ -278,6 +300,21 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
 
       expect(function() {hardened.publish(undefined, sinon.spy())}).to.throw(Error);
       expect(function() {pubsub.publish(undefined, sinon.spy())}).to.throw(Error);
+    });
+
+    it("has subscribeOnce", function() {
+      var pubsub = new PubSub();
+      var hardened = pubsub.getHardenedInstance();
+
+      var spy = sinon.spy();
+
+      expect(hardened.subscribeOnce).to.be.undefined;
+      pubsub.subscribeOnce(pubsub.getPubSubKey(), 'event', spy);
+      hardened.publish('event', 'one');
+
+      expect(spy.callCount).to.be.eql(1);
+      hardened.publish('event', 'one');
+      expect(spy.callCount).to.be.eql(1);
     });
 
   });

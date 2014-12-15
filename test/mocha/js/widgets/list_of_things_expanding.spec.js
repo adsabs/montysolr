@@ -16,7 +16,7 @@ define(['marionette',
             Test2,
             PaginatedBaseWidget) {
 
-    describe("ListOfThings (UI Widget)", function () {
+    describe("ListOfThings (list_of_things_expanding.spec.js)", function () {
 
       var minsub;
       beforeEach(function(done) {
@@ -107,7 +107,7 @@ define(['marionette',
 
 
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-          q: "star"
+          q: "star", x: 'bar' // different query = no cache
         }));
 
         //find new first bib to confirm re-render

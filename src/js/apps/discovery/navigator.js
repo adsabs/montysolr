@@ -67,6 +67,7 @@ define([
 
         });
         this.set('show-paper-network', function() {
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',
             ['PaperNetwork'].concat(searchPageAlwaysVisible.slice(1)));
         });

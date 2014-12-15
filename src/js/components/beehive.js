@@ -5,9 +5,22 @@
  * is where setup happens; application will load beehive)
  */
 
-define(['backbone', 'underscore',
-  'js/components/generic_module', 'js/mixins/dependon', 'js/mixins/hardened', 'js/components/services_container'],
-  function(Backbone, _, GenericModule, Dependon, Hardened, ServicesContainer) {
+define([
+    'backbone',
+    'underscore',
+    'js/components/generic_module',
+    'js/mixins/dependon',
+    'js/mixins/hardened',
+    'js/components/services_container'
+  ],
+  function(
+    Backbone,
+    _,
+    GenericModule,
+    Dependon,
+    Hardened,
+    ServicesContainer
+    ) {
 
   var hiveOptions = [];
   var BeeHive = GenericModule.extend({
@@ -16,16 +29,19 @@ define(['backbone', 'underscore',
       this.Services = new ServicesContainer();
       this.Objects = new ServicesContainer();
       this.debug = false;
+      this.active = true;
     },
 
     activate: function() {
       this.Services.activate.apply(this.Services, arguments);
       this.Objects.activate(this);
+      this.active = true;
     },
 
     close: function() {
       this.Services.close(arguments);
       this.Objects.close(arguments);
+      this.active = false;
     },
 
     getService: function(name) {
@@ -82,6 +98,7 @@ define(['backbone', 'underscore',
       Services: 'services container',
       Objects: 'objects container',
       debug: 'state of the app',
+      active: 'active or not',
       getHardenedInstance: 'allow to create clone of the already hardened instance'
     }
 

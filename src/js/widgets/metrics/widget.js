@@ -377,7 +377,7 @@ define([
 
     },
 
-    changeRows : function(e){
+    changeRows : function(e) {
 
       var num = parseInt(this.$(".metrics-rows").val());
 
@@ -406,36 +406,25 @@ define([
   var MetricsWidget = BaseWidget.extend({
 
     initialize: function (options) {
-
       options = options || {};
-
       this.containerModel = new ContainerModel();
-
       this.listenTo(this.containerModel, "change:userVal", this.requestDifferentRows);
-
       this.view = new ContainerView({model : this.containerModel});
-
       this.childViews = {};
-
     },
 
     resetWidget: function () {
-
       this.childViews = {};
-
       //empty the container view
       _.each(this.view.regions, function(v,k){
-
         this.view[k].currentView.close();
-
       }, this);
-
     },
 
     //when a user requests a different number of documents
     requestDifferentRows : function(model, rows){
-
       var query = this.getCurrentQuery().clone();
+      query.unlock();
 
       query.set("rows", model.get("userVal"));
       query.set("fl", "bibcode");
@@ -444,25 +433,19 @@ define([
         target : 'search',
         query : query
       });
-
-      this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
-
+      this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
     },
 
     processResponse: function (response) {
 
       if (response instanceof ApiResponse){
-
         var bibcodes = _.map(response.get("response.docs"), function(d){return d.bibcode});
-
         var options = {
           type : "POST",
           contentType : "application/json"
-
         };
 
         var request =  new ApiRequest({
-
           target: "services/metrics",
           query: new ApiQuery({"bibcodes" : bibcodes}),
           options : options
@@ -473,13 +456,9 @@ define([
         // let container view know how many bibcodes we have
         this.view.model.set({"numFound": parseInt(response.get("response.numFound")),
                               "rows":  parseInt(response.get("responseHeader.params.rows"))});
-
-        this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
-
+        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
       }
-
       //it's from the metrics endpoint
-
       else if (response instanceof JsonResponse ) {
 
         //is it a response with bibcodes from solr or a response with metrics?
@@ -647,7 +626,7 @@ define([
       _.bindAll(this, "setCurrentQuery", "processResponse");
 
       this.pubsub = beehive.Services.get('PubSub');
-      this.pubsub.subscribe(this.pubsub.START_SEARCH, this.setCurrentQuery);
+      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
       this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
 
     },

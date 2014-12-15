@@ -93,6 +93,7 @@ define([
       // these are barbarians behind the gates
       this.__widgets = new Container();
       this.__plugins = new Container();
+      this.__barbarianRegistry = {};
     },
 
     /**
@@ -331,7 +332,8 @@ define([
     activate: function(options) {
       var beehive = this.getBeeHive();
       var self = this;
-      // services are activated without beehive
+
+      // services are activated by beehive itself
       if (self.debug) {console.log('application: beehive.activate()')};
       beehive.activate(beehive);
 
@@ -354,21 +356,46 @@ define([
       });
 
       // all the rest receive hardened beehive
+      var hardenedBee;
       _.each(this.getAllPlugins(), function(el) {
         if (self.debug) {console.log('application: plugins: ' + el[0] + '.activate(beehive)')};
         var plugin = el[1];
         if ('activate' in plugin) {
-          plugin.activate(beehive.getHardenedInstance());
+          plugin.activate(hardenedBee = beehive.getHardenedInstance());
+          self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'plugin:' + el[0];
         }
       });
       _.each(this.getAllWidgets(), function(el) {
         if (self.debug) {console.log('application: widget: ' + el[0] + '.activate(beehive)')};
         var plugin = el[1];
         if ('activate' in plugin) {
-          plugin.activate(beehive.getHardenedInstance());
+          plugin.activate(hardenedBee = beehive.getHardenedInstance());
+          self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'widget:'+ el[0];
         }
       });
+
       this.__activated = true;
+    },
+
+    getPluginOrWidgetByPubSubKey: function(psk) {
+      var k;
+      if (this.__barbarianRegistry[psk]) {
+        k = this.__barbarianRegistry[psk];
+      }
+      else {
+        return undefined;
+      }
+
+      var key = k.split(':');
+
+      if (this.__widgets.has(key[1])) {
+        return this.__widgets.get(key[1]);
+      }
+      else if (this.__plugins.has(key[1])) {
+        return this.__plugins.get(key[1]);
+      }
+
+      throw new Error('Eeeek, thisis unexpectEED bEhAvjor! Cant find barbarian with ID: ' + psk);
     },
 
     isActivated: function() {
