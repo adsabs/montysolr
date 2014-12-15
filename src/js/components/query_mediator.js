@@ -40,8 +40,8 @@ define(['underscore',
         this.maxRetries = options.maxRetries || 3;
         this.recoveryDelayInMs = _.isNumber(options.recoveryDelayInMs) ? options.recoveryDelayInMs : 700;
         this.__searchCycle = {waiting:{}, inprogress: {}};
-        this.shortDelayInMs = _.isNumber(options.shortDelayInMs) ? options.shortDelayInMs : 0;
-        this.longDelayInMs = _.isNumber(options.longDelayInMs) ? options.longDelayInMs: 0;
+        this.shortDelayInMs = _.isNumber(options.shortDelayInMs) ? options.shortDelayInMs : 10;
+        this.longDelayInMs = _.isNumber(options.longDelayInMs) ? options.longDelayInMs: 100;
         this.monitoringDelayInMs = _.isNumber(options.monitoringDelayInMs) ? options.monitoringDelayInMs : 200;
       },
 
