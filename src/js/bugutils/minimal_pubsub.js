@@ -61,7 +61,7 @@ define(['underscore', 'backbone',
       this.requestCounter = 0;
       this.beehive = new BeeHive();
       this.pubsub = new PubSub();
-      this.debug = true;
+      this.pubsub.debug = true;
       this.beehive.addService('PubSub', this.pubsub);
       var self = this;
       this.beehive.addService('Api', {
@@ -75,7 +75,7 @@ define(['underscore', 'backbone',
           defer.done(function() {
             context.done.call(context.context, response);
           });
-          defer.resolve();
+          defer.resolve(response);
           return defer.promise();
         }});
       this.beehive.addObject('QueryMediator', new QueryMediator({

@@ -107,7 +107,7 @@ define(['marionette',
 
 
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
-          q: "star"
+          q: "star", x: 'bar' // different query = no cache
         }));
 
         //find new first bib to confirm re-render

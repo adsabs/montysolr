@@ -5,6 +5,9 @@ define(['js/components/application', 'module'], function(Application, module) {
     beforeEach(function(done) {
       config = {
         core: {
+          controllers: {
+            FeedbackMediator: 'js/wraps/discovery_mediator'
+          },
           services: {
             'Api': 'js/services/api',
             'PubSub': 'js/services/pubsub'
@@ -21,7 +24,7 @@ define(['js/components/application', 'module'], function(Application, module) {
           ApiResponse2: 'js/widgets/api_response/widget'
         },
         plugins: {
-          Test: 'js/components/multi_params'
+          Test: 'js/widgets/api_response/widget'
         }
       };
       done();
@@ -30,6 +33,12 @@ define(['js/components/application', 'module'], function(Application, module) {
 
     it("should create application object", function(done) {
       expect(new Application()).to.be.instanceof(Application);
+      var app = new Application();
+      expect(app.getBeeHive()).to.be.defined;
+      var beehive = app.getBeeHive();
+      sinon.spy(beehive, 'close');
+      app.close();
+      expect(beehive.close.called).to.be.true;
       done();
     });
 
@@ -42,14 +51,23 @@ define(['js/components/application', 'module'], function(Application, module) {
         expect(app.getBeeHive()).to.be.defined;
         var beehive = app.getBeeHive();
 
-        expect(beehive.getService('Api').request).to.be.defined;
-        expect(beehive.getService('PubSub').publish).to.be.defined;
-        expect(beehive.getObject('User')).to.be.defined;
+        expect(app.hasService('Api')).to.be.true;
+        expect(app.hasObject('User')).to.be.true;
+        expect(app.hasController('FeedbackMediator')).to.be.true;
+
+        expect(app.getService('Api').request).to.be.defined;
+        expect(app.getService('PubSub').publish).to.be.defined;
+        expect(app.getObject('User')).to.be.defined;
+        expect(app.getController('FeedbackMediator')).to.be.defined;
+
         expect(app.getModule('QM')).to.be.defined;
 
         expect(app.getWidget('ApiResponse')).to.be.defined;
         expect(app.getWidget('ApiResponse')).to.not.be.equal(app.getWidget('ApiResponse2'));
         expect(app.getPlugin('Test')).to.be.defined;
+
+        expect(app.getWidget('ApiResponse').pubsub).to.be.defined;
+        expect(app.getPlugin('Test').pubsub).to.be.defined;
 
         done();
       });

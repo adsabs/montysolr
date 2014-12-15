@@ -7,16 +7,25 @@
  * It also listens to DELIVERING_RESPONSE event
  */
 
-define(['underscore', 'jquery', 'backbone', 'marionette',
-  'js/components/api_response',
-  'hbs!./templates/widget-view',
-  'js/components/pubsub_events'
-],
+define([
+    'underscore',
+    'jquery',
+    'backbone',
+    'marionette',
+    'js/components/api_response',
+    'hbs!./templates/widget-view',
+    'js/components/pubsub_events'
+  ],
 
-  function(_, $, Backbone, Marionette,
-           ApiResponse,
-           WidgetTemplate,
-           PubSubEvents){
+  function(
+    _,
+    $,
+    Backbone,
+    Marionette,
+    ApiResponse,
+    WidgetTemplate,
+    PubSubEvents
+    ){
 
     var Model = Backbone.Model.extend({ });
 
@@ -85,7 +94,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
       },
 
       render : function(){
-        this.view.render()
+        this.view.render();
         return this.view.el
       },
 

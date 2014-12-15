@@ -389,7 +389,8 @@ module.exports = function(grunt) {
             "components/transition.js":77,
             "widgets/dropdown-menu/widget.js":78,
             "widgets/list_of_things/paginated_view.js":78,
-            "wraps/paper_network.js": 74 // some tests don't run properly in phantomjs
+            "wraps/paper_network.js": 74, // some tests don't run properly in phantomjs,
+            "wraps/discovery_mediator.js": 50 // contains configuration stuff
           }
         }
       },
