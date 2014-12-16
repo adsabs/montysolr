@@ -1,0 +1,51 @@
+<div class="s-group-title" style="background:{{backgroundColor}}">
+
+    <h3>{{#each summaryData.nodeName}}
+        {{@key}}
+        {{/each}}
+    </h3>
+
+</div>
+
+
+{{#if currentlySelected}}
+<button class="btn btn-default btn-sm update-all s-update-all">Remove entire group from filter list.</button>
+{{else}}
+<button class="btn btn-default btn-sm update-all s-update-all add-all">Add entire group to filter list.</button>
+
+{{/if}}
+
+
+<p>This group consists of <b>{{summaryData.paperCount}}</b> papers, which have been cited, in total, <b>{{summaryData.size}}</b>
+    times.</p>
+
+
+<p>The <b>most cited </b> papers of this group are : </p>
+<ul class="list-unstyled">
+    {{#each topNodes}}
+
+    <li title="{{this.nodeName}}">
+        <a href="#abs/{{this.nodeName}}" data-bypass target="_blank"><b>{{this.title}}</b></a>; <i>{{this.first_author}}</i>
+        ({{this.citation_count}} citations)
+
+    </li>
+
+
+    {{/each}}
+</ul>
+
+
+<p>The papers that have been most <b> highly referenced</b> by the papers in this group include:</p>
+
+<ul class="list-unstyled">
+    {{#each summaryData.processedTopCommonReferences}}
+
+    <li><a href="#abs/{{this.[0]}}" data-bypass target="_blank">{{this.[0]}}</a> (cited by {{this.[1]}}% of papers in this group)</li>
+
+    {{/each}}
+
+</ul>
+
+</div>
+
+
