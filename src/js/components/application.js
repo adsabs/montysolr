@@ -377,7 +377,7 @@ define([
       this.__activated = true;
     },
 
-    getPluginOrWidgetByPubSubKey: function(psk) {
+    getPluginOrWidgetName: function(psk) {
       var k;
       if (this.__barbarianRegistry[psk]) {
         k = this.__barbarianRegistry[psk];
@@ -385,6 +385,12 @@ define([
       else {
         return undefined;
       }
+      return k;
+    },
+
+    getPluginOrWidgetByPubSubKey: function(psk) {
+      var k = this.getPluginOrWidgetName(psk);
+      if (k === undefined) return undefined;
 
       var key = k.split(':');
 

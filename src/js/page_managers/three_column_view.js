@@ -174,7 +174,7 @@ define([
        * @param options
        */
       showCols: function(options) {
-        options = options || {left: open, right: open, force: false};
+        options = options || {left: true, right: true, force: false};
         var keys = ['left', 'right'];
         for (var i=0; i<keys.length; i++) {
           var k = keys[i];

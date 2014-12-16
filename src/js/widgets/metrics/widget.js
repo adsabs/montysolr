@@ -401,7 +401,7 @@ define([
 
     }
 
-  })
+  });
 
   var MetricsWidget = BaseWidget.extend({
 
@@ -617,7 +617,7 @@ define([
     defaultQueryArguments : {
 
       fl : "bibcode",
-      rows : 200
+      rows : 20 // the metrics service is not handling big numbers nicely, so let's be conservative
     },
 
 
@@ -633,9 +633,7 @@ define([
 
     //fetch data
     onShow : function(){
-
       this.dispatchRequest(this.getCurrentQuery());
-
     }
 
   });

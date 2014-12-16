@@ -14,7 +14,7 @@ define([
   ) {
 
 
-  describe("Network Visualization Widget", function () {
+  describe("Network Visualization Widget (network_widget.spec.js)", function () {
 
     var testDataSmall, testDataLarge, testDataEmpty, networkWidget;
 
@@ -1670,30 +1670,24 @@ define([
 //
       done();
 
-    })
+    });
 
 
     it("communicates with pubsub to get current query info and to request network data", function(){
 
       var q =  new ApiQuery({q: 'star'});
 
-
       networkWidget.activate(minsub.beehive.getHardenedInstance());
-
       minsub.publish(minsub.START_SEARCH, q);
 
-      expect(networkWidget.getCurrentQuery()).to.eql(q);
+      expect(networkWidget.getCurrentQuery().toJSON()).to.eql(q.toJSON());
 
-      networkWidget.pubsub.publish = sinon.stub()
-
+      networkWidget.pubsub.publish = sinon.stub();
       networkWidget.onShow();
 
       expect (networkWidget.pubsub.publish.calledOnce).to.be.true;
-
       expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql("author-network?q=star");
-
-
-    })
+    });
 
     it("communicates a filtered request to pubsub", function(){
 

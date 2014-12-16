@@ -296,6 +296,7 @@ define([
       },
 
       reset: function() {
+        console.log('resetting', this.collection)
         this.collection.reset();
         this.hiddenCollection.reset();
         this.model.set({

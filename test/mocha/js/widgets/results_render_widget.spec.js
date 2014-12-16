@@ -23,9 +23,9 @@ define([
     ApiQuery
     ) {
 
-    describe("Render Results (UI Widget)", function () {
+    describe("Render Results UI Widget (results_render_widget.spec.js)", function () {
 
-      var minsub, widget, $w;
+      var minsub;
       beforeEach(function (done) {
 
         minsub = new (MinimalPubsub.extend({
@@ -38,7 +38,7 @@ define([
               return ret;
             }
           }
-        }))({verbose: false});
+        }))({verbose: true});
         done();
       });
 
@@ -64,24 +64,29 @@ define([
         return widget;
       };
 
-      it("should listen to START_SEARCH and automatically request and render data", function () {
+      it("should listen to START_SEARCH and automatically request and render data", function (done) {
         var widget = _getWidget();
-
+        widget.foox = 1;
         expect(widget.collection.length).to.eql(0);
         expect(widget.getCurrentQuery().toJSON()).to.eql({});
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
-        expect(widget.collection.length).to.eql(10);
-        expect(widget.model.get('currentQuery').url()).to.eql(
-          "fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cyear&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0"
-        );
+        setTimeout(function() {
+          expect(widget.model.get('currentQuery').url()).to.eql(
+            "fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cyear&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0"
+          );
+          expect(widget.collection.length).to.eql(10);
+          done();
+        }, 50);
       });
 
 
       it("should join highlights with their records on a model by model basis", function (done) {
         var widget = _getWidget();
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
-        expect(widget.collection.findWhere({"recid": 4189917}).get("details").highlights[0]).to.eql("External triggers of <em>star</em> formation.");
-        done();
+        setTimeout(function() {
+          expect(widget.collection.findWhere({"recid": 4189917}).get("details").highlights[0]).to.eql("External triggers of <em>star</em> formation.");
+          done();
+        },5);
       });
 
       it.skip("should show three authors with semicolons in the correct places and, if there are more, show the number of the rest", function () {
@@ -91,9 +96,7 @@ define([
         expect($parentRow.find("ul.just-authors li:first").text()).to.equal("Fellhauer, M.;");
         expect($parentRow.find("ul.just-authors li:eq(2)").text()).to.equal("Kroupa, P.");
         expect($parentRow.find("ul.just-authors").siblings().eq(0).text()).to.equal("and 1 more");
-        //
-        //
-      })
+      });
 
 
       it.skip("should show details (if available) when a user clicks on 'show details'", function (done) {
@@ -107,7 +110,7 @@ define([
         minsub.publish(minsub.INVITING_REQUEST, new ApiQuery({
           q: "star"
         }));
-        //
+
         var $w = $(widget.render().el);
         //
         expect($w.find('.more-info:last').hasClass("hide")).to.equal(true);
@@ -270,7 +273,7 @@ define([
       });
 
 
-      it("should show details (if available) when a user clicks on 'show details'", function () {
+      it("should show details (if available) when a user clicks on 'show details'", function (done) {
 
         var widget = _getWidget();
         minsub.publish(minsub.pubsub.START_SEARCH, new ApiQuery({
@@ -279,16 +282,20 @@ define([
 
         var $w = widget.render().$el;
 
+        setTimeout(function() {
 
-        expect($w.find('.more-info:last').hasClass("hide")).to.equal(true);
+          expect($w.find('.more-info:last').hasClass("hide")).to.equal(true);
 
-        $w.find("button.show-details").click();
-        expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(false);
-        $w.find("button.show-details").click();
-        expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(true);
+          $w.find("button.show-details").click();
+          expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(false);
+          $w.find("button.show-details").click();
+          expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(true);
+          done();
+        }, 5);
+
       });
 
-      it("has a view that displays records for each model in the collection", function(){
+      it("has a view that displays records for each model in the collection", function(done){
 
         var widget = new ResultsWidget({perPage: 10});
         widget.activate(minsub.beehive.getHardenedInstance());
@@ -299,25 +306,27 @@ define([
         minsub.publish(minsub.START_SEARCH, new ApiQuery({'q': 'foo:bar'}));
 
         //now check to make sure it was rendered correctly
+        setTimeout(function() {
+          //checking first record
+          expect($w.find(".s-identifier:first").text().trim()).to.eql("2013arXiv1305.3460H");
+          expect($w.find(".s-identifier:first a").attr("href").trim()).to.eql("#abs/2013arXiv1305.3460H");
+          expect($w.find(".s-results-links:first").find("a").attr("href")).to.eql("http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/arXiv:1305.3460");
+          expect($w.find(".s-results-links:first").find("a").text().trim()).to.eql("arXiv eprint");
+          expect($w.find("h5:first").text().trim()).to.eql("A bijection for tri-cellular maps");
+          expect($w.find(".article-author:first").text().trim()).to.eql("Han, Hillary S. W.;");
 
-        //checking first record
-        expect($w.find(".s-identifier:first").text().trim()).to.eql("2013arXiv1305.3460H");
-        expect($w.find(".s-identifier:first a").attr("href").trim()).to.eql("#abs/2013arXiv1305.3460H");
-        expect($w.find(".s-results-links:first").find("a").attr("href")).to.eql("http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/arXiv:1305.3460");
-        expect($w.find(".s-results-links:first").find("a").text().trim()).to.eql("arXiv eprint");
-        expect($w.find("h5:first").text().trim()).to.eql("A bijection for tri-cellular maps");
-        expect($w.find(".article-author:first").text().trim()).to.eql("Han, Hillary S. W.;");
 
+          //checking last record
+          expect($w.find(".s-identifier:last").text().trim()).to.eql("1987sbge.proc...47M");
+          expect($w.find(".s-identifier:last a").attr("href").trim()).to.eql("#abs/1987sbge.proc...47M");
+          expect($w.find(".s-results-links:last").find("a").attr("href")).to.eql("/#abs/1987sbge.proc...47M/tableofcontents");
+          expect($w.find(".s-results-links:last").find("a").text().trim()).to.eql("Table of Contents");
+          expect($w.find("h5:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
 
-        //checking last record
-        expect($w.find(".s-identifier:last").text().trim()).to.eql("1987sbge.proc...47M");
-        expect($w.find(".s-identifier:last a").attr("href").trim()).to.eql("#abs/1987sbge.proc...47M");
-        expect($w.find(".s-results-links:last").find("a").attr("href")).to.eql("/#abs/1987sbge.proc...47M/tableofcontents");
-        expect($w.find(".s-results-links:last").find("a").text().trim()).to.eql("Table of Contents");
-        expect($w.find("h5:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
-
-        //checking render order of more than 3 authors
-        expect($w.find(".just-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2and3more")
+          //checking render order of more than 3 authors
+          expect($w.find(".just-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2and3more");
+          done();
+        }, 5);
       });
 
 
