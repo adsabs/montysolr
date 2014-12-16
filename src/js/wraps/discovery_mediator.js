@@ -24,7 +24,7 @@ define([
           if (child.view && child.view.showCols) {
             child.view.showCols({left: true, right: false});
             // open the view again
-            this.pubsub.once(this.pubsub.NAVIGATE + ' ' + this.pubsub.START_SEARCH, function() {child.view.showCols({right:true})});
+            this.pubsub.once(this.pubsub.NAVIGATE, function() {child.view.showCols({right:true})});
           }
         }
       }

@@ -1285,7 +1285,7 @@ define([
         this.pubsub = beehive.Services.get('PubSub');
 
         //custom dispatchRequest function goes here
-        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.setCurrentQuery);
+        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
 
         //custom handleResponse function goes here
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);

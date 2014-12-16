@@ -41,9 +41,14 @@ define([
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
 
-        _.bindAll(this, 'onStartSearch', 'onDisplayDocuments', 'processResponse');
+        _.bindAll(this, 'onDisplayDocuments', 'processResponse');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      },
+
+      onDisplayDocuments: function(apiQuery) {
+        this.reset();
+        ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
       },
 
       checkHighlights: function(){
@@ -63,8 +68,6 @@ define([
           this.view.model.set("showDetailsButton", false);
         }
       },
-
-
 
       processDocs: function(apiResponse, docs, paginationInfo) {
         var params = apiResponse.get("responseHeader.params");

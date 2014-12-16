@@ -367,62 +367,44 @@ define([
       var WordCloudWidget = BaseWidget.extend({
 
         initialize: function (options) {
-
           options = options || {};
-
           this.listView = new ListView();
-
           this.model = new WordCloudModel();
-
           this.view = new WordCloudView({model: this.model, listView : this.listView});
-
           this.on("all", this.onAllInternalEvents)
-
           this.listenTo(this.listView, "all", this.onAllInternalEvents)
         },
 
         activate: function (pubsub) {
-
         },
 
         close : function(){
 
           this.listView.close();
           this.view.close();
-
           Marionette.Controller.prototype.close.apply(this, arguments);
-
         },
 
         dispatchRequest: function () {
-
           this.model.restoreDefaults();
         },
 
         processResponse : function() {
-
         },
 
-        onAllInternalEvents : function(ev, arg1, arg2){
-
+        onAllInternalEvents : function(ev, arg1, arg2) {
           if (ev === "submitFacet"){
-
             var filterList = this.listView.model.get("selectedWords");
-
             var q = this.getCurrentQuery().clone();
-
             var newQ =  q.get("q") + " AND (" + filterList.join(" OR ") + ")"
-
             q.set("q", newQ);
-
-              this.pubsub.publish(this.pubsub.START_SEARCH, q);
-
+            this.pubsub.publish(this.pubsub.START_SEARCH, q);
           }
-      }
+        }
 
   });
 
   return WordCloudWidget
 
-})
+});
 
