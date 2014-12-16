@@ -3,7 +3,7 @@ define([
     'backbone',
     'js/components/api_query',
     'js/mixins/dependon',
-    'hbs!404.html'
+    'hbs!404'
 
   ],
   function ($, Backbone, ApiQuery, Dependon, ErrorTemplate) {
