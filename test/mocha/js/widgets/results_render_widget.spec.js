@@ -38,7 +38,7 @@ define([
               return ret;
             }
           }
-        }))({verbose: true});
+        }))({verbose: false});
         done();
       });
 

@@ -257,7 +257,6 @@ define([
           this.updatePagination({page: arg1});
         }
         else if (ev === "pagination:select") {
-          console.log('need to request data', arg1);
           var pageData = _.findWhere(this.model.attributes.pageData, {p: arg1});
           if (pageData) {
             var start = pageData.start;
@@ -296,7 +295,6 @@ define([
       },
 
       reset: function() {
-        console.log('resetting', this.collection)
         this.collection.reset();
         this.hiddenCollection.reset();
         this.model.set({
