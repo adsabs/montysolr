@@ -17,7 +17,7 @@ define([
            MinimalPubSub,
            SortWidget) {
 
-    describe("Sort Widget (UI Widget)", function(){
+    describe("Sort Widget (sort_widget.spec.js)", function(){
 
       var w, minSub;
 

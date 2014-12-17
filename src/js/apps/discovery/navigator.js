@@ -48,7 +48,9 @@ define([
           'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
-          'VisualizationDropdown', 'MetricsDropdown', 'SearchWidget'];
+          'VisualizationDropdown', 'MetricsDropdown', 'SearchWidget',
+          'Sort'
+        ];
 
         this.set('index-page', function() {
           app.getObject('MasterPageManager').show('LandingPage');

@@ -46,9 +46,6 @@ define([
           this.triggerMethodOnAll('activateCache');
         }
       }
-
-
-      console.log(HandleBars);
     },
 
     bootstrap: function() {

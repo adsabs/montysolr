@@ -277,7 +277,7 @@ define(['marionette',
         sinon.spy(M.prototype, 'hideLinks');
         var view = new M({model: model});
         var $w = view.render().$el;
-        $('#scratch').append($w);
+        $('#test').append($w);
 
 
         $w.find('input[name=identifier]').trigger('change');
