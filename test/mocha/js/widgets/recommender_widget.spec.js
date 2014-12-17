@@ -28,14 +28,15 @@ define([
     it("should display a list of recommended articles", function(){
 
       var r = new RecommenderWidget();
+      var $w = r.render().$el;
 
-      $("#test").append(r.render().el);
+      $("#test").append($w);
 
       r.processResponse(new JsonResponse(testData));
 
-      expect($("#test").find("li").length).to.eql(7);
-      expect($("#test").find("li:first").text().trim()).to.eql('Propagation of Cosmic-Ray Nucleons in the Galaxy;\n        Strong,+');
-      expect($("#test").find("li:first").attr("title")).to.eql("1998ApJ...509..212S");
+      expect($w.find("li").length).to.eql(7);
+      expect($w.find("li:first").text().trim()).to.eql('Propagation of Cosmic-Ray Nucleons in the Galaxy;\n        Strong,+');
+      expect($w.find("li:first").attr("title")).to.eql("1998ApJ...509..212S");
     });
 
 
