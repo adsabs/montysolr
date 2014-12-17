@@ -30,11 +30,12 @@ define([
         "": "index",
         "search/(:query)": 'search',
         'abs/:bibcode(/)(:subView)': 'view',
+        "(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
 
 
-      index: function () {
+      index: function (query) {
         this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
       },
 

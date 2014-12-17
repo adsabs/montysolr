@@ -63,6 +63,10 @@ define([
             hExists = true;
             break;
           }
+          if (m.attributes.abstract) {
+            hExists = true;
+            break;
+          }
         }
 
         if (hExists) {

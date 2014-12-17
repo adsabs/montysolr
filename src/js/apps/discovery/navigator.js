@@ -54,7 +54,7 @@ define([
 
         this.set('index-page', function() {
           app.getObject('MasterPageManager').show('LandingPage');
-          this.route = '#search/' + app.getWidget('SearchWidget').getCurrentQuery().url();
+          this.route = '#/' + app.getWidget('SearchWidget').getCurrentQuery().url();
         });
         this.set('results-page', function() {
           app.getObject('MasterPageManager').show('SearchPage',
