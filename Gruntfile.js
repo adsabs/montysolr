@@ -351,7 +351,7 @@ module.exports = function(grunt) {
             'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=discovery-suite'
           ],
           threshold : 0,
-          globalThreshold : 74,
+          globalThreshold : 75,
           log : true,
           logErrors: true,
           moduleThreshold : 80,

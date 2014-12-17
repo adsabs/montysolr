@@ -208,7 +208,7 @@ define(['marionette',
         });
 
         var $w = widget.render().$el;
-        //$('#test').append($w);
+        $('#test').append($w);
 
         widget.updatePagination({numFound: 100, page : 1, perPage : 5});
         //console.log(widget.model.attributes);
@@ -216,16 +216,22 @@ define(['marionette',
         expect($w.find(".pagination li").filter(function(n){return $(n).text().trim() === "«"}).length).to.eql(0);
         expect($w.find(".pagination li:first").text().trim()).to.eql("1");
         expect($w.find(".pagination li:last").text().trim()).to.eql("5");
+        expect(widget.collection.models[0].get('resultsIndex')).to.eql(5);
+        expect(widget.collection.models[4].get('resultsIndex')).to.eql(9);
 
         widget.updatePagination({numFound: 100, page : 4, perPage : 5});
         expect($w.find(".pagination li:first").text().trim()).to.eql("«");
         expect($w.find(".pagination li:last").text().trim()).to.eql("7");
         expect($w.find(".pagination li").length).to.eql(6);
+        expect(widget.collection.models[0].get('resultsIndex')).to.eql(20);
+        expect(widget.collection.models[4].get('resultsIndex')).to.eql(24);
 
-        widget.updatePagination(({numFound: 15, page : 1, perPage : 5}));
+        widget.updatePagination(({numFound: 15, page : 0, perPage : 5}));
         expect($w.find(".pagination li").length).to.eql(3);
         expect($w.find(".pagination li:first").text().trim()).to.eql("1");
         expect($w.find(".pagination li:last").text().trim()).to.eql("3");
+        expect(widget.collection.models[0].get('resultsIndex')).to.eql(0);
+        expect(widget.collection.models[4].get('resultsIndex')).to.eql(4);
       });
 
       it("has a mechanism to prevent infinite requests", function(done){
@@ -277,7 +283,7 @@ define(['marionette',
         sinon.spy(M.prototype, 'hideLinks');
         var view = new M({model: model});
         var $w = view.render().$el;
-        $('#test').append($w);
+        //$('#test').append($w);
 
 
         $w.find('input[name=identifier]').trigger('change');
