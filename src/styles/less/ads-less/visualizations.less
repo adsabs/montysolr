@@ -305,25 +305,27 @@ Year, Citation and Reference Graphs
 
 .s-network-chart {
   width: 100%;
-  height: 100%;
 }
 
 .s-summary-chart {
   min-width:300px;
 
+}
 
-
+svg text {
+  font: none;
 }
 
 
 .detail-link {
-  stroke: fade(@brand-primary, 2%);
+  opacity: .6;
 }
 
 .detail-node {
   .lh-transition(fill, 1s);
   cursor : pointer;
   .unselectable;
+  text-anchor: middle;
 
 }
 
@@ -349,10 +351,8 @@ Year, Citation and Reference Graphs
 }
 
 
-
-
 .selected-node {
-  fill : orange !important;
+  fill : @brand-warning !important;
 }
 
 .target-group {
@@ -439,4 +439,16 @@ Year, Citation and Reference Graphs
 
 .group-paper-name {
   fill : darken(@brand-primary, 10%)
+}
+
+
+.chord path {
+  fill-opacity: .67;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+
+.summary-label-container text {
+  opacity: .25;
 }
