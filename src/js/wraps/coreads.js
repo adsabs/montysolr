@@ -7,7 +7,8 @@ define([
   function (  _,  ListOfThingsWidget) {
 
     var Widget = ListOfThingsWidget.extend({
-      queryOperator : "trending"
+      queryOperator : "trending",
+      description : "List of papers also read by those who read"
     });
 
     return Widget;

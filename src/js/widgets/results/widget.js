@@ -10,7 +10,9 @@ define([
     'js/widgets/base/base_widget',
     'js/mixins/add_stable_index_to_collection',
     'js/mixins/link_generator_mixin',
-    'js/mixins/formatter'
+    'js/mixins/formatter',
+    'hbs!./templates/container-template',
+    'js/mixins/papers_utils'
   ],
 
   function (
@@ -19,28 +21,30 @@ define([
     BaseWidget,
     PaginationMixin,
     LinkGenerator,
-    Formatter
+    Formatter,
+    ContainerTemplate,
+    PapersUtilsMixin
     ) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
       initialize : function(options){
         ListOfThingsWidget.prototype.initialize.apply(this, arguments);
         //now adjusting the List Model
+        this.view.template = ContainerTemplate;
         this.view.model.set({"mainResults": true}, {silent : true});
-        this.listenTo(this.view.collection, "reset", this.checkHighlights);
+        this.listenTo(this.collection, "reset", this.checkDetails);
       },
 
       defaultQueryArguments: {
           hl     : "true",
           "hl.fl": "title,abstract,body",
-          fl     : 'title,abstract,bibcode,author,keyword,id,[citations],pub,aff,email,volume,year',
+          fl     : 'title,abstract,bibcode,author,keyword,id,links_data,ids_data,[citations],pub,aff,email,volume,pubdate',
           rows : 25,
           start : 0
       },
 
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
-
         _.bindAll(this, 'onDisplayDocuments', 'processResponse');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
@@ -51,7 +55,7 @@ define([
         ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
       },
 
-      checkHighlights: function(){
+      checkDetails: function(){
         var hExists = false;
         for (var i=0; i<this.collection.models.length; i++) {
           var m = this.collection.models[i];
@@ -62,10 +66,10 @@ define([
         }
 
         if (hExists) {
-          this.model.set("showDetailsButton", true);
+          this.model.set("showDetails", 'closed'); // default is to be closed (openable)
         }
         else {
-          this.view.model.set("showDetailsButton", false);
+          this.view.model.set("showDetails", false); // will make it non-clickable
         }
       },
 
@@ -79,6 +83,7 @@ define([
         //any preprocessing before adding the resultsIndex is done here
         docs = _.map(docs, function (d) {
           d.identifier = d.bibcode;
+          d.details = {};
           var h = {};
 
           if (_.keys(highlights).length) {
@@ -95,14 +100,38 @@ define([
               if (finalList.length == 1 && finalList[0].trim() == "") {
                 return {};
               }
-              
+
               return {
                 "highlights": finalList
               }
             }());
           }
-          if (h.highlights && h.highlights.length > 0)
-            d['details'] = h;
+
+          var maxAuthorNames = 3;
+
+          if (d.author && d.author.length > maxAuthorNames) {
+            d.extraAuthors = d.author.length - maxAuthorNames;
+            shownAuthors = d.author.slice(0, maxAuthorNames);
+          } else if (d.author) {
+            shownAuthors = d.author
+          }
+
+          if (d.author) {
+            var l = shownAuthors.length - 1;
+            d.authorFormatted = _.map(shownAuthors, function (d, i) {
+              if (i == l || l == 0) {
+                return d; //last one, or only one
+              } else {
+                return d + ";";
+              }
+            })
+          }
+
+          if (h.highlights && h.highlights.length > 0){
+            _.extend(d.details, h);
+        }
+
+          d.details.pub = d.pub;
 
           if(d["[citations]"] && d["[citations]"]["num_citations"]>0){
             d.num_citations = self.formatNum(d["[citations]"]["num_citations"]);
@@ -111,6 +140,10 @@ define([
             //formatNum would return "0" for zero, which would then evaluate to true in the template
             d.num_citations = 0;
           }
+
+          d.pubdate = d.pubdate ? self.formatDate(d.pubdate) : undefined;
+
+          d.details.shortAbstract = d.abstract? self.shortenAbstract(d.abstract) : undefined;
 
           return d;
         });
@@ -122,6 +155,7 @@ define([
 
     _.extend(ResultsWidget.prototype, LinkGenerator);
     _.extend(ResultsWidget.prototype, Formatter);
+    _.extend(ResultsWidget.prototype, PapersUtilsMixin);
     return ResultsWidget;
 
   });

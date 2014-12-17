@@ -133,4 +133,33 @@
     content : @fa-var-question-circle;
   }
   font-size: 1.3em;
+
 }
+
+.icon-help:hover {
+
+  color: mix(@gray-light, @brand-info);
+
+}
+
+
+.icon-details {
+  .fa;
+  cursor: pointer;
+  &:before{
+    content: @fa-var-plus-circle
+  }
+  color: @gray-light;
+}
+
+
+.icon-hide-details {
+  .fa;
+  cursor: pointer;
+  &:before{
+    content: @fa-var-minus-circle
+  }
+  color: @gray-light;
+}
+
+

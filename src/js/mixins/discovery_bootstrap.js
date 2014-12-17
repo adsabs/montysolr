@@ -6,13 +6,15 @@ define([
     'underscore',
     'backbone',
     'js/components/api_query',
-    'js/components/api_request'
+    'js/components/api_request',
+    'hbs'
     ],
   function(
     _,
     Backbone,
     ApiQuery,
-    ApiRequest) {
+    ApiRequest,
+    HandleBars) {
 
   var Mixin = {
 
@@ -46,6 +48,7 @@ define([
       }
 
 
+      console.log(HandleBars);
     },
 
     bootstrap: function() {

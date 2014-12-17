@@ -43,8 +43,9 @@ define([
     var MainViewModel = Backbone.Model.extend({
       defaults: function () {
         return {
-          showDetailsButton: false,
-          mainResults: false
+          mainResults: false,
+          title : undefined,
+          showDetails : false
         }
       }
     });
@@ -104,7 +105,7 @@ define([
 
       itemViewContainer: ".results-list",
       events: {
-        "click .show-details": "showDetails",
+        "click .show-details": "toggleDetails",
         "click a[data-paginate]": "changePage",
         "input .per-page": "changePerPage"
       },
@@ -113,10 +114,14 @@ define([
         "change": "render"
       },
 
+      collectionEvents : {
+        "reset" : "resetViewModel"
+      },
+
       template: ResultsContainerTemplate,
 
-      onRender: function () {
-        //this.paginationView.setElement(this.$(".pagination-controls")).render();
+      resetViewModel : function(){
+        this.model.set("showDetails", false)
       },
 
       /**
@@ -124,17 +129,26 @@ define([
        * with details (this place is normally hidden
        * by default)
        */
-      showDetails: function (ev) {
-        if (ev)
-          ev.stopPropagation();
-        this.model.set('showDetailsButton', false, {silent: true});
-
-        this.$(".more-info").toggleClass("hide");
-        if (this.$(".more-info").hasClass("hide")) {
-          this.$(".show-details").text("Show details");
-        } else {
-          this.$(".show-details").text("Hide details");
+      toggleDetails: function () {
+        var newValue = false;
+        if (this.model.has("showDetails")) {
+          var v = this.model.get('showDetails');
+          if ( v === true || v == 'opened') {
+            newValue = 'closed';
+          }
+          else {
+            newValue = 'opened';
+          }
         }
+
+        // show the proper button
+        this.model.set("showDetails", newValue);
+
+        var itemVal = newValue === 'opened' ? true : false;
+        this.collection.each(function(m){
+          //notify each item view to rerender itself and show/hide details
+          m.set("showDetails", itemVal);
+        });
       },
 
       changePage: function (e) {

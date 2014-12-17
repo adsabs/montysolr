@@ -72,7 +72,7 @@ define([
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         setTimeout(function() {
           expect(widget.model.get('currentQuery').url()).to.eql(
-            "fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cyear&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0"
+            "fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cids_data%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0"
           );
           expect(widget.collection.length).to.eql(10);
           done();
@@ -195,7 +195,8 @@ define([
         done();
       });
 
-      it("should render the show details button only if highlights exist given the paginated docs", function () {
+
+      it("should render the show details button only if details exist given the paginated docs", function () {
 
         var widget = _getWidget();
         var responseWithHighlights = new ApiResponse({
@@ -223,17 +224,18 @@ define([
             "10406064": {"title": "fooblydoo"},
             "3513629": {"abstract": ""}
           }});
-        responseWithHighlights.setApiQuery(new ApiQuery({start : 0, rows : 25}))
+        responseWithHighlights.setApiQuery(new ApiQuery({start : 0, rows : 25}));
         widget.processResponse(responseWithHighlights);
-        expect(widget.model.get('showDetailsButton')).to.be.true;
+        expect(widget.model.get('showDetails')).to.eql('closed');
 
         var $w = widget.render().$el;
+        $('#test').append($w);
 
         //expect results button;
         expect(widget.view.render().$el.find(".show-details").length).to.eql(1);
 
 
-        widget.model.set('showDetailsButton', false);
+        widget.model.set('showDetails', false);
         expect(widget.view.render().$el.find(".show-details").length).to.eql(0);
 
 
@@ -255,7 +257,7 @@ define([
             {
               "id": "3513629"},
             {
-              "id": "5422941"},
+              "id": "5422941"}
           ]
           },
           "highlighting": {
@@ -265,9 +267,9 @@ define([
         responseWithoutHighlights.setApiQuery(new ApiQuery());
 
         widget.reset();
-        expect(widget.model.get('showDetailsButton')).to.be.false;
+        expect(widget.model.get('showDetails')).to.be.false;
         widget.processResponse(responseWithoutHighlights);
-        expect(widget.model.get('showDetailsButton')).to.be.false;
+        expect(widget.model.get('showDetails')).to.be.false;
 
 
       });
@@ -281,18 +283,17 @@ define([
         }));
 
         var $w = widget.render().$el;
+        //$('#scratch').append($w);
 
         setTimeout(function() {
-
-          expect($w.find('.more-info:last').hasClass("hide")).to.equal(true);
+          expect($w.find('.details:last').hasClass("hide")).to.equal(true);
 
           $w.find("button.show-details").click();
-          expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(false);
+          expect($w.find('.details:last').hasClass("hide")).to.be.equal(false);
           $w.find("button.show-details").click();
-          expect($w.find('.more-info:last').hasClass("hide")).to.be.equal(true);
+          expect($w.find('.details:last').hasClass("hide")).to.be.equal(true);
           done();
         }, 5);
-
       });
 
       it("has a view that displays records for each model in the collection", function(done){
@@ -335,6 +336,26 @@ define([
         expect(widget.formatNum(889899)).to.be.eql('889,899');
       });
 
-    })
+      it("should have an item view that allows the user to toggle details", function(){
 
+        var widget = new ResultsWidget({perPage: 10});
+        widget.activate(minsub.beehive.getHardenedInstance());
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({'q': 'foo:bar'}));
+
+
+        var $w = widget.render().$el;
+        $("#test").append($w);
+
+        $w.find(".details-control").click();
+
+        expect($w.find(".details-control").hasClass("icon-hide-details")).to.be.true;
+        expect($w.find(".details").hasClass("hide")).to.be.false;
+
+        $w.find(".details-control").click();
+
+        expect($w.find(".details-control").hasClass("icon-details")).to.be.true;
+
+        expect($w.find(".details").hasClass("hide")).to.be.true;
+      })
+    })
   });

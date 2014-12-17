@@ -78,6 +78,7 @@ define([
         });
         this.set("visualization-closed", this.get("results-page"));
         this.set('abstract-page', function() {
+          app.getWidget("TOCWidget").collection.selectOne("ShowAbstract");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
           //this.route = '#abs/' + app.getWidget('ShowAbstract').getCurrentQuery().url();
