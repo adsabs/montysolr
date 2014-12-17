@@ -5,17 +5,20 @@
             <input type="checkbox" value={{identifier}} name="identifier">
         </label>
     </div>
-    <div class="col-sm-4 col-xs-5 s-top-row-col identifier s-identifier">
+    <div class="col-sm-3 col-xs-5 s-top-row-col identifier s-identifier">
         <a href="#abs/{{identifier}}" aria-label="bibcode">
             {{identifier}}
         </a>
     </div>
+    <div class="col-sm-2 s-top-row-col">
+        {{pubdate}}
+    </div>
     <div class="col-sm-3 col-xs-6 s-top-row-col" title="citation count">
         {{#if num_citations}}
-        cited by: {{num_citations}}
+        <a href="#abs/{{bibcode}}/citations">cited: {{num_citations}}</a>
         {{/if}}
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-3">
         {{#if links}}
         <div class="s-results-links">
             <div class="letter-icon s-letter-icon">
@@ -70,7 +73,12 @@
 
 </div>
 <div class="row">
-    <div class="col-xs-10 col-xs-offset-1">
+    <div class="col-xs-1">
+        {{#if details}}
+        <i class="details-control {{#if showDetails}} icon-hide-details {{else}} icon-details {{/if}} "></i>
+        {{/if}}
+    </div>
+    <div class="col-xs-10">
         <a href="#abs/{{identifier}}">
             <h5 class="s-results-title">{{{title}}}</h5>
         </a>
@@ -84,7 +92,7 @@
             <li class="article-author">{{this}}</li>
             {{/each}}
             {{#if extraAuthors}}
-            <li><em>and {{extraAuthors}} more<em></li>
+            <li><em>and {{extraAuthors}} more</em></li>
             {{/if}}
         </ul>
 
@@ -93,15 +101,30 @@
 </div>
 
 <div class="row">
-    <div class="col-xs-10 col-xs-offset-1 s-more-info more-info hide">
-        {{#if highlights}}
-        <blockquote>
+    <div class="col-xs-10 col-xs-offset-1 s-more-info details {{#unless showDetails}}hide {{/unless}}">
+        <dl>
+        {{#if details.highlights}}
+        <dt>Highlights</dt>
+          <dd>
             <ul aria-label="search snippets">
-                {{#each highlights}}
+                {{#each details.highlights}}
                 <li>{{{this}}}</li>
                 {{/each}}
             </ul>
-        </blockquote>
+          </dd>
         {{/if}}
+        {{#if details.shortAbstract}}
+        <dt>Abstract</dt>
+        <dd>
+        {{details.shortAbstract}}
+        {{/if}}
+        {{#if details.pub}}
+        </dd>
+        <dt>Publication</dt>
+        <dd>
+        {{details.pub}}
+        {{/if}}
+        </dd>
+        </dl>
     </div>
   </div>

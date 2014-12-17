@@ -1,80 +1,65 @@
-<article id="abstract-metadata" class="s-abstract-metadata">
-        <div id="article-navigation">{{#if hasPrev}}<a target="prev">prev</a>{{/if}}|{{#if hasNext}} <a target="next">next</a>{{/if}}</div>
-        <dl>
+        <!--<div id="article-navigation">{{#if hasPrev}}<a target="prev">prev</a>{{/if}}|{{#if hasNext}} <a target="next">next</a>{{/if}}</div>-->
 
-            <dt class="sr-only">Bibcode</dt>
-            <dd>{{bibcode}}</dd>
+          <h2 class="s-abstract-title">{{{title}}}</h2>
+
 
             {{#if authorAff.length}}
-            <dt><span class="sr-only">Authors</span>
-            </dt>
-            <dd>
-                {{#if hasAffiliation}}
-                <button class="btn btn-link s-toggle-aff" id="toggle-aff"> (Show author affiliations)</button>
-                {{/if}}
-                <div id="authors-and-aff">
+        {{#if hasAffiliation}}
+        <button class="btn btn-xs btn-default-flat s-toggle-aff" id="toggle-aff">Show affiliations</button>
+        {{/if}}
+
+            <div id="authors-and-aff" class="s-authors-and-aff">
                     <ul class="list-inline">
                     {{#each authorAff}}
                     {{#if @last}}
-                    <li class="author">{{this.[0]}}<span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
+                        <li class="author"><a href="#search/?q=author%3A{{this.[2]}}">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
 
                     {{else}}
-                    <li class="author">{{this.[0]}}<span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
+                    <li class="author"><a href="#search/?q=author%3A{{this.[2]}}">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
 
                     {{/if}}
                     {{/each}}
+                    </a>
                     </ul>
+
                 </div>
                 {{/if}}
 
-            </dd>
+            <div class="s-abstract-text">
+            <h4 class="sr-only">Abstract</h4>
+            <p>
+                    {{#if abstract}}
+                        {{{abstract}}}
+                    {{else}}
+                        <i>No abstract</i>
+                    {{/if}}
+            </p>
+            </div>
 
+
+            <dl class="s-abstract-dl-horizontal">
 
             {{#if pub_raw}}
-            <dt class="sr-only">Publication</dt>
+            <dt>Publication</dt>
             <dd>
-                <div id="article-publication"><em>{{pub_raw}}</em></div>
-            </dd>
-            {{/if}}
-            {{#if pubdate}}
-            <dt>Publication Date</dt>
-            <dd>
-                <div id="article-pubdate">{{pubdate}}</div>
-            </dd>
-            {{/if}}
-
-
-            {{#if doi}}
-            <div class="s-doi">
-                <dt>DOI: </dt>
-                <dd>
-                    <a href="{{doi.href}}" target="_blank">{{doi.doi}}</a>
-                </dd>
-            </div>
-            {{/if}}
-
-            <br/>
-
-            {{#if abstract}}
-            <dt class="sr-only">Abstract</dt>
-            <dd>
-                <div id="abstract-content">
-                    {{{abstract}}}
+                <div id="article-publication">{{pub_raw}}</div>
+                {{#if pubdate}}
+                <div>
+                    <em>Pub Date:</em> {{pubdate}}
                 </div>
-            </dd>
+                {{/if}}
 
-            {{else}}
-            <dt class="sr-only">Abstract</dt>
-            <dd>
-                <div id="abstract-content">
-                    No abstract
+                {{#if doi}}
+                <div>
+                    <em>DOI:</em> <a href="{{doi.href}}" target="_blank">{{doi.doi}}</a>
                 </div>
+                {{/if}}
             </dd>
-
-
             {{/if}}
 
-            <br/>
+
+            <dt >Bibcode</dt>
+            <dd>{{bibcode}} <i class="icon-help" data-toggle="popover" data-content="Bibcodes are the ADS's way of uniquely representing each scholarly work. [to be improved]"></i></dd>
 
             {{#if keyword}}
             <div id="keywords">
@@ -96,4 +81,3 @@
 
         </dl>
 
-</article>

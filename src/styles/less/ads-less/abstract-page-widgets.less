@@ -53,17 +53,6 @@
   color: @brand-success;
 }
 
-.s-doi {
-  dt, dd {
-    display: inline-block;
-  }
-}
-
-.s-toggle-aff {
-  padding-left: 0px;
-
-}
-
 .s-abstract-title-container {
 
   padding: 1% 2%;
@@ -116,15 +105,15 @@
 
 .s-abstract-metadata {
   padding: 0 4%;
+  font-size : 1.05em;
 
 }
-
 
 .s-abstract-title {
-  font-size : 23px;
-  font-weight: 500;
-  padding-bottom: 2%;
+  font-size: 24px;
+  margin: 18px 0;
 }
+
 
 
 .s-results-pager {
@@ -154,8 +143,8 @@
 
 
 .s-abstract-nav {
+  margin: 5px 0;
   padding: 5%;
-  margin: 0 10%;
  .lh-transition(background-color, .5s, ease-out)
 }
 
@@ -185,10 +174,16 @@
 
 .s-nav-header {
   padding-top: 5%;
-  margin: 0 5% 5% 5%;
   font-size: 18px;
 
 
+}
+
+.s-abstract-metadata {
+
+  dt {
+    color : @gray;
+  }
 }
 
 
@@ -209,3 +204,66 @@
 
 }
 
+.s-abstract-text {
+  font-size : 1.05em;
+  margin-top: 18px;
+}
+
+.s-list-description {
+  margin-left: 4%;
+  font-weight: 300;
+  font-size : 18px;
+
+}
+
+.s-abstract-description {
+  font-weight: 300;
+  font-size : 18px;
+
+}
+
+.s-authors-and-aff {
+  margin: 10px 0;
+
+  ul {
+    margin-bottom: 0px;
+    padding-left : 2px;
+  }
+
+  .list-inline li {
+    padding-left : 2px;
+    padding-right: 2px;
+  }
+}
+
+
+.s-abstract-dl-horizontal{
+
+  dt {
+    display: inline-block;
+    width: 18%;
+
+
+  }
+
+dd {
+  display: inline-block;
+  width: 80%;
+  vertical-align: top;
+  margin-bottom: 12px;
+}
+
+}
+
+//.s-inline-dt {
+//  dt, dd {
+//    display: inline-block;
+//  }
+//  dt {
+//    font-weight: normal;
+//    font-style: italic;
+//    margin-left: 20%;
+//    width : auto;
+//  }
+//}
+//

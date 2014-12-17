@@ -47,7 +47,7 @@ define([
         options = options || {};
 
 
-        _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model']));
+        _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model', 'description']));
 
         var defaultPagination = {
           pagination: true,
@@ -71,6 +71,12 @@ define([
         }
         options.model = options.view.model;
         options.model.set(options.pagination, {silent: true});
+
+
+        if (options.description){
+          //allow the widget to describe itself at the top of its view
+          options.model.set("description", options.description);
+        }
 
         _.extend(this, _.pick(options, ['model', 'view']));
 
@@ -122,7 +128,6 @@ define([
             this.model.set(pagination);
             this.hiddenCollection.showRange(pagination.showRange[0], pagination.showRange[1]);
           }
-
           this.view.collection.reset(this.hiddenCollection.getVisibleModels());
         }
 
@@ -205,10 +210,12 @@ define([
         return pageData;
       },
 
+
       processDocs: function(apiResponse, docs, paginationInfo) {
         var params = apiResponse.get("response");
         var start = params.start || (paginationInfo.start || 0);
-        return PaginationMixin.addPaginationToDocs(docs, start);
+        docs = PaginationMixin.addPaginationToDocs(docs, start);
+        return docs
       },
 
 
@@ -298,7 +305,7 @@ define([
         this.collection.reset();
         this.hiddenCollection.reset();
         this.model.set({
-          showDetailsButton: false,
+          showDetails : false,
           pageData: {}
         })
       }

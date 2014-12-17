@@ -10,7 +10,10 @@ define([
     'js/widgets/base/base_widget',
     'hbs!./templates/abstract_template',
     'js/components/api_query',
-    'js/mixins/link_generator_mixin'],
+    'js/mixins/link_generator_mixin',
+    'js/mixins/papers_utils',
+    'bootstrap'
+  ],
   function (
     Marionette,
     Backbone,
@@ -20,7 +23,9 @@ define([
     BaseWidget,
     abstractTemplate,
     ApiQuery,
-    LinkGeneratorMixin) {
+    LinkGeneratorMixin,
+    PapersUtils
+    ) {
 
     var AbstractModel = Backbone.Model.extend({
       defaults: function () {
@@ -38,16 +43,24 @@ define([
         }
       },
 
+
+
       parse: function (doc) {
         var authorAff, hasAffiliation, title;
 
-       doc.aff = doc.aff || [];
+
+        doc.aff = doc.aff || [];
         if (doc.aff.length) {
           hasAffiliation = true;
           // joining author and aff
           authorAff = _.zip(doc.author, doc.aff);
         }
 
+        _.each(authorAff, function(el, index){
+          authorAff[index][2] = encodeURIComponent('"' +  el[0] + '"');
+        });
+
+        doc.pubdate = PapersUtils.formatDate(doc.pubdate);
 
         title = $.isArray(doc.title)? doc.title[0] : undefined;
 
@@ -69,6 +82,10 @@ define([
 
     var AbstractView = Marionette.ItemView.extend({
 
+      tagName : "article",
+
+      className : "s-abstract-metadata",
+
       initialize: function () {
         this.listenTo(this.model, "change", this.render)
       },
@@ -84,10 +101,10 @@ define([
 
         this.$(".affiliation").toggleClass("hide");
         if (this.$(".affiliation").hasClass("hide")){
-          this.$("#toggle-aff").text("(Show author affiliations)")
+          this.$("#toggle-aff").text("Show affiliations")
         }
         else {
-          this.$("#toggle-aff").text("(Hide author affiliations)")
+          this.$("#toggle-aff").text("Hide affiliations")
         }
 
       },
@@ -95,6 +112,10 @@ define([
       onClick: function(ev) {
         ev.preventDefault();
         this.trigger($(ev.target).attr('target'));
+      },
+
+      onRender : function(){
+        this.$(".icon-help").popover({trigger : "hover", placement : "right", html :true});
       }
 
     });
@@ -122,18 +143,9 @@ define([
       },
 
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,year,doi,pub_raw'
+        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,pubdate,doi,pub_raw'
       },
 
-      loadBibcodeData : function (bibcode) {
-        if (this._docs[bibcode]) {
-          this._current = bibcode;
-          this.model.set(this._docs[bibcode]);
-        }
-        else {
-          this.dispatchRequest(new ApiQuery({'q': 'bibcode:' + bibcode, '__show': bibcode}));
-        }
-      },
 
       onNewQuery: function () {
         this._docs = {};
@@ -148,6 +160,8 @@ define([
         if (this._docs[bibcode]) { // we have already loaded it
           this._current = bibcode;
           this.model.set(this._docs[bibcode]);
+          // let other widgets know details
+          this.trigger('page-manager-event', 'broadcast-payload', {title: this._docs[bibcode].title} );
         }
         else {
           q.set('__show', bibcode);
@@ -194,6 +208,7 @@ define([
 
         this.trigger('page-manager-event', 'widget-ready',
           {numFound: apiResponse.get("response.numFound"), widget: this});
+
       }
 
     });

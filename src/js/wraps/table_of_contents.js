@@ -30,7 +30,10 @@ define([
           q.set('q', this.queryOperator + '(' + q.get('q').join(' ') + ')');
         }
         return q;
-      }
+      },
+
+      description : "List of papers in the same volume as"
+
     });
 
     return Widget;

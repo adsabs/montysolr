@@ -8,7 +8,8 @@ define([
 
     var Widget = ListOfThingsWidget.extend({
       queryOperator : "citations",
-      sortOrder : "pubdate desc"
+      sortOrder : "pubdate desc",
+      description : "List of papers which cite"
     });
 
     return Widget;

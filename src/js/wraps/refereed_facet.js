@@ -31,7 +31,7 @@ define(['js/widgets/facet/factory' ], function ( FacetFactory) {
             }
           });
 
-          returnList.push('notrefereed', apiResponse.get('response.numFound') - found);
+          returnList.push('non-refereed', apiResponse.get('response.numFound') - found);
           return returnList;
         }
       },
