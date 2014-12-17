@@ -228,15 +228,18 @@ define([
 
       updatePagination: function(options) {
         var perPage = options.perPage || this.model.get('perPage');
-        var page = options.page || this.model.get('start');
+        var page = _.isNumber(options.page) ? options.page : null;
         var numFound = options.numFound || this.model.get('numFound');
         var numAround = options.numAround || this.model.get('numAround') || 2;
         var currentQuery = options.currentQuery || this.model.get('currentQuery');
 
         // click to go to another 'page' will skip this
-        if (!options.page && this.collection.length) {
+        if (page === null && this.collection.length) {
           var resIdx = this.collection.models[0].get('resultsIndex');
           page = PaginationMixin.getPageVal(resIdx, perPage);
+        }
+        if (page === null) {
+          page = PaginationMixin.getPageVal(this.model.get('start'), perPage);
         }
 
         var pageData = this._getPageDataDatastruct(currentQuery, page, numAround, perPage, numFound);
@@ -261,18 +264,10 @@ define([
 
       onAllInternalEvents: function(ev, arg1, arg2) {
         if (ev === "pagination:change"){
-          this.updatePagination({page: arg1});
+          this.updatePagination({perPage: arg1});
         }
         else if (ev === "pagination:select") {
-          var pageData = _.findWhere(this.model.attributes.pageData, {p: arg1});
-          if (pageData) {
-            var start = pageData.start;
-            var perPage = pageData.perPage;
-            this.hiddenCollection.showRange(start, start+perPage);
-          }
-          else {
-            this.updatePagination({page: arg1});
-          }
+          return this.updatePagination({page: arg1-1});
         }
         else if (ev === 'show:missing') {
 
