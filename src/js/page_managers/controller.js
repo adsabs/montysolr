@@ -110,8 +110,15 @@ define([
 
               //don't call render each time or else we
               //would have to re-delegate widget events
-              self.view.$el.find('[data-widget="' + widgetName + '"]').append(widget.el ? widget.el : widget.view.el);
-              self.widgets[widgetName].triggerMethod('show');
+              var $wcontainer = self.view.$el.find('[data-widget="' + widgetName + '"]');
+              if ($wcontainer.length) {
+                var d = $wcontainer.data('debug');
+                if ( d !== undefined && d && !self.debug) {
+                  return; // skip widgets that are there only for debugging
+                }
+                $wcontainer.append(widget.el ? widget.el : widget.view.el);
+                self.widgets[widgetName].triggerMethod('show');
+              }
             }
             else {
               console.error("Cannot show widget: " + widgetName + "(because, frankly... there is no such widget there!)");
