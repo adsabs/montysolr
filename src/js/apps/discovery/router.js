@@ -36,6 +36,12 @@ define([
 
 
       index: function (query) {
+        //XXX:rca - hack, to remove!
+        if (query) {
+          if (query.indexOf('citations-facet') > -1 || query.indexOf('reads-facet') > -1 || query.indexOf('year-facet') > -1) {
+            return;
+          }
+        }
         this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
       },
 
