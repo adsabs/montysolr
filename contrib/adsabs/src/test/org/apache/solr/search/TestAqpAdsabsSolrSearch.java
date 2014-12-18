@@ -296,7 +296,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	}
 
 	public void testSpecialCases() throws Exception {
-		
+	  
 		// virtual fields (their definition is in the solrconfig.xml)
 		assertQueryEquals(req("defType", "aqp", "q", "full:foo"), 
 				"abstract:foo^2.0 body:foo title:foo^2.0 ack:foo keyword:foo", 

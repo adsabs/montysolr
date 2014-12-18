@@ -5,7 +5,7 @@ package org.apache.lucene.queryparser.flexible.aqp.parser;
 
 /**
  * Automatically generated SyntaxParser wrapper built by ant
- * from the grammar source: /dvt/workspace/montysolr-next/contrib/antlrqueryparser/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/StandardLuceneGrammar.g
+ * from the grammar source: /tmp/montysolr/contrib/antlrqueryparser/src/java/org/apache/lucene/queryparser/flexible/aqp/parser/StandardLuceneGrammar.g
  * 
  * YOUR CHANGES WILL BE OVERWRITTEN AUTOMATICALLY!
  */

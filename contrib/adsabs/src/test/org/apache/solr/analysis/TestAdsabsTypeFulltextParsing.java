@@ -24,6 +24,7 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MultiPhraseQuery;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TermQuery;
 
 import java.io.File;
@@ -512,6 +513,27 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     
   }
+  
+  
+  public void testNoSynChain() throws Exception {
+  
+    
+    // simple case: synonyms deactivated
+    assertQueryEquals(req("q", "=title:\"Hubble Space Telescope\"", "defType", "aqp"), 
+        "title:\"hubble space telescope\"", 
+        PhraseQuery.class);
+    assertQ(req("q", "=title:\"Hubble Space Telescope\""), 
+        "//*[@numFound='1']",
+        "//doc/str[@name='id'][.='4']"
+        );
+    //setDebug(true);
+    assertQueryEquals(req("q", "=\"Hubble Space Telescope\"", "defType", "aqp", "qf", "title body"), 
+        "(body:\"hubble space telescope\" | title:\"hubble space telescope\")", 
+        DisjunctionMaxQuery.class);
+  }
+  
+  
+  
   public void testSynonyms() throws Exception {
     
     /*

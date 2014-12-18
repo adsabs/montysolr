@@ -75,7 +75,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
   }
   
   public String escapeJsonVal(String v) {
-    return v.replace("\"", "\\\"").replace("'", "\\'").replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n");
+    return v.replace("\"", "\\\""); //replace("\\", "\\\\").replace("\"", "\\\"").replace("'", "\\'").replace("\t", "\\t").replace("\n", "\\n");
   }
   
   /**
@@ -95,17 +95,17 @@ public class AqpANTLRNode extends QueryNodeImpl {
       buf.append(" ");
     }
 
-    buf.append("{name:\"");
+    buf.append("{\"name\":\"");
     buf.append(getTokenName());
     buf.append("\"");
 
     if (getTokenInput() != null) {
-      buf.append(", input:\"");
+      buf.append(", \"input\":\"");
       buf.append(escapeJsonVal(getTokenInput()));
-      buf.append("\", start:" + getTokenStart());
-      buf.append(", end:" + getTokenEnd());
+      buf.append("\", \"start\":" + getTokenStart());
+      buf.append(", \"end\":" + getTokenEnd());
     } else {
-      buf.append(", label:\"");
+      buf.append(", \"label\":\"");
       buf.append(getTokenLabel());
       buf.append("\"");
     }
@@ -113,16 +113,19 @@ public class AqpANTLRNode extends QueryNodeImpl {
     List<QueryNode> children = this.getChildren();
 
     if (children != null) {
-      buf.append(", children: [");
+      buf.append(", \"children\": [");
+      boolean notFirst = false;
       for (QueryNode child : children) {
+        if (notFirst)
+          buf.append(",");
         if (child instanceof AqpANTLRNode) {
           buf.append(((AqpANTLRNode) child).toJson(level + 4));
-          buf.append(",");
         } else {
-          buf.append("{xvalue:\"");
+          buf.append("{\"xvalue\":\"");
           buf.append(escapeJsonVal(child.toString()));
           buf.append("\"}");
         }
+        notFirst = true;
       }
       buf.append("]");
     }
