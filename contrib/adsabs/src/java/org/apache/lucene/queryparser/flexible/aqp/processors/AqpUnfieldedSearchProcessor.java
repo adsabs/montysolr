@@ -109,8 +109,8 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	    
 	    // let adismax know that we want exact search
 	    if (node.getParent() instanceof AqpAdsabsSynonymQueryNode && ((AqpAdsabsSynonymQueryNode) node.getParent()).isActivated() == false) {
-        subQuery = "{!adismax aqp.exact.search=true}" + subQuery;
-      }
+          subQuery = "{!adismax aqp.exact.search=true}" + subQuery;
+        }
 	    
 	    List<OriginalInput> fValues = new ArrayList<OriginalInput>();
 	    fValues.add(new OriginalInput(subQuery, -1, -1));
