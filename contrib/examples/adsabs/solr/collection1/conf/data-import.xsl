@@ -10,54 +10,49 @@ and modifies certain fields to be always present (even if empty)
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
  xmlns="http://www.loc.gov/MARC21/slim"
 >
-	<xsl:output omit-xml-declaration="yes"/>
-	
+  <xsl:output omit-xml-declaration="yes"/>
+  
    <xsl:template match="node()|@*">
-   	<xsl:copy>
-      	<xsl:apply-templates select="node()|@*"/>
+    <xsl:copy>
+        <xsl:apply-templates select="node()|@*"/>
       </xsl:copy>
    </xsl:template>
 
-	<xsl:template match="marc:datafield[@tag='035']">
-	   <!-- create a new version of the field-->
+  <xsl:template match="marc:datafield[@tag='035']">
+     <!-- create a new version of the field-->
       <xsl:text disable-output-escaping="yes">&lt;</xsl:text>identifierfield<xsl:text disable-output-escaping="yes">&gt;</xsl:text>{&quot;identifier&quot;:&quot;<xsl:value-of select="marc:subfield[@code='a']" />&quot;, &quot;alternate_bibcode&quot;:&quot;<xsl:value-of select="marc:subfield[@code='y']" />&quot;, &quot;deleted_bibcode&quot;:&quot;<xsl:value-of select="marc:subfield[@code='z']" />&quot;, &quot;description&quot;:&quot;<xsl:value-of select="marc:subfield[@code='2']" />&quot;}<xsl:text disable-output-escaping="yes">&lt;</xsl:text>/identifierfield<xsl:text disable-output-escaping="yes">&gt;</xsl:text>
       <!-- Then copy it -->
-		<xsl:copy>
-      	<xsl:apply-templates select="node()|@*"/>
+    <xsl:copy>
+        <xsl:apply-templates select="node()|@*"/>
       </xsl:copy>
    </xsl:template>
-	
+  
    <!-- make sure every author has email (m) /affiliation (u) - even if just an empty string -->
-   <xsl:template match="marc:datafield[@tag='100' and not(marc:subfield[@code='u'])]">
-	  <xsl:copy>
-	   <xsl:apply-templates select="@*"/>
-		 <subfield code="u">-</subfield>
-	   <xsl:apply-templates select="node()"/>
-	  </xsl:copy>
+   <xsl:template match="marc:datafield[@tag='100' and not(marc:subfield[@code='u|m'])]">
+    <xsl:copy>
+     <xsl:apply-templates select="@*"/>
+     <xsl:if test="not(marc:subfield[@code='u'])">
+        <subfield code="u">-</subfield>
+     </xsl:if>
+     <xsl:if test="not(marc:subfield[@code='m'])">
+        <subfield code="m">-</subfield>
+     </xsl:if>
+     <xsl:apply-templates select="node()"/>
+    </xsl:copy>
   </xsl:template>
-   <xsl:template match="marc:datafield[@tag='100' and not(marc:subfield[@code='m'])]">
-	  <xsl:copy>
-	   <xsl:apply-templates select="@*"/>
-		 <subfield code="m">-</subfield>
-	   <xsl:apply-templates select="node()"/>
-	  </xsl:copy>
+  
+  <xsl:template match="marc:datafield[@tag='700' and not(marc:subfield[@code='u|m'])]">
+    <xsl:copy>
+     <xsl:apply-templates select="@*"/>
+     <xsl:if test="not(marc:subfield[@code='u'])">
+        <subfield code="u">-</subfield>
+     </xsl:if>
+     <xsl:if test="not(marc:subfield[@code='m'])">
+        <subfield code="m">-</subfield>
+     </xsl:if>
+     <xsl:apply-templates select="node()"/>
+    </xsl:copy>
   </xsl:template>
-
-  <xsl:template match="marc:datafield[@tag='700' and not(marc:subfield[@code='u'])]">
-	  <xsl:copy>
-	   <xsl:apply-templates select="@*"/>
-		 <subfield code="u">-</subfield>
-	   <xsl:apply-templates select="node()"/>
-	  </xsl:copy>
-  </xsl:template>
-   <xsl:template match="marc:datafield[@tag='700' and not(marc:subfield[@code='m'])]">
-	  <xsl:copy>
-	   <xsl:apply-templates select="@*"/>
-		 <subfield code="m">-</subfield>
-	   <xsl:apply-templates select="node()"/>
-	  </xsl:copy>
-  </xsl:template>
-
 
 
    <!--RC: why these empty instructions? remove? -->

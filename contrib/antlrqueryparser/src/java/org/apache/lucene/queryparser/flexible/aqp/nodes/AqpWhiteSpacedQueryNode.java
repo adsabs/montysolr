@@ -4,7 +4,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 
 /**
  * This node will be turned into the {@link AqpFunctionQueryNode} by 
- * {@link AqpUnfieldedSearchProcessor}. This node is created by 
+ * AqpUnfieldedSearchProcessor. This node is created by 
  * {@link AqpDEFOPUnfieldedTokens} processor from a group of words
  * separated by spaces, these should be ideally reparsed again
  * 

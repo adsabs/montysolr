@@ -1296,11 +1296,14 @@
 		  
 		 -->
 		<field name="full" type="ads_text" indexed="false" stored="false"/>
+		<field name="full_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
       
 		<field name="body" type="ads_text" indexed="true" stored="true"
 			termVectors="true" termOffsets="true" termPositions="true" />
+		<field name="body_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 			
 		<field name="ack" type="ads_text" indexed="true" stored="true" />
+		<field name="ack_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 		
 		
 		<!-- 
