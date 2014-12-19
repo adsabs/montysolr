@@ -58,7 +58,7 @@ define(['underscore',
        * @param beehive - the full access instance; we excpect PubSub to be
        *    present
        */
-      activate: function(beehive) {
+      activate: function(beehive, app) {
         this.setBeeHive(beehive);
         var pubsub = beehive.Services.get('PubSub');
         this.pubSubKey = pubsub.getPubSubKey();
@@ -67,6 +67,7 @@ define(['underscore',
         pubsub.subscribe(this.pubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
         pubsub.subscribe(this.pubSubKey, pubsub.EXECUTE_REQUEST, _.bind(this.executeRequest, this));
         pubsub.subscribe(this.pubSubKey, pubsub.GET_QTREE, _.bind(this.getQTree, this));
+        this.app = app;
       },
 
 
@@ -81,11 +82,15 @@ define(['underscore',
        * Happens at the beginnng of the new search cycle. This is the 'race started' signal
        */
       startSearchCycle: function(apiQuery, senderKey) {
-        if (this.debug)
-          console.log('[QM]: received query:', apiQuery.url());
+        if (this.debug) {
+          console.log('[QM]: received query:',
+            this.app ? (this.app.getPluginOrWidgetName(senderKey.getId()) || senderKey.getId()) : senderKey.getId(),
+            apiQuery.url()
+          );
+        }
 
         if (apiQuery.keys().length <= 0) {
-          console.warn('[QM] : received empty query (huh?!)');
+          console.error('[QM] : received empty query (huh?!)');
           return;
         }
         var ps = this.getBeeHive().getService('PubSub');
@@ -98,6 +103,7 @@ define(['underscore',
         this.reset();
         this.__searchCycle.initiator = senderKey.getId();
         this.__searchCycle.collectingRequests = true;
+        this.__searchCycle.query = apiQuery.clone();
 
         // we will protect the query -- in the future i can consider removing 'unlock' to really
         // cement the fact the query MUST NOT be changed (we want to receive a modified version)
@@ -162,7 +168,9 @@ define(['underscore',
           delete cycle.waiting[cycle.initiator];
         }
         if (!data) {
-          console.warn('RuntimeConfig does not tell us which request to execute first (grabbing random one).');
+          if (this.debug)
+            console.warn('RuntimeConfig does not tell us which request to execute first (grabbing random one).');
+
           var kx;
           data = cycle.waiting[(kx=_.keys(cycle.waiting)[0])];
           delete cycle.waiting[kx]
@@ -174,7 +182,10 @@ define(['underscore',
 
         this._executeRequest(data.request, data.key)
           .done(function(response, textStatus, jqXHR) {
-            ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED}));
+            ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+              code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED,
+              query: cycle.query
+            }));
 
             // after we are done with the first query, start executing other queries
             var f = function() {
@@ -228,8 +239,12 @@ define(['underscore',
         var lenDone = _.keys(this.__searchCycle.inprogress).length; // TODO: this is not exactly correct
         var total = lenToDo + lenDone;
 
-        ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_PROGRESS,
-          msg: (lenToDo / total), total: total, todo: lenToDo}));
+        ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+          code: ApiFeedback.CODES.SEARCH_CYCLE_PROGRESS,
+          msg: (lenToDo / total),
+          total: total,
+          todo: lenToDo
+        }));
 
         setTimeout(function() {
           self.monitorExecution();
@@ -245,7 +260,11 @@ define(['underscore',
        */
       receiveRequests: function(apiRequest, senderKey) {
         if (this.debug)
-          console.log('[QM]: received request:', apiRequest.url(), senderKey.getId());
+          console.log('[QM]: received request:',
+            this.app ? (this.app.getPluginOrWidgetName(senderKey.getId()) || senderKey.getId()) : senderKey.getId(),
+            apiRequest.url()
+          );
+
         if (this.__searchCycle.collectingRequests) {
           this.__searchCycle.waiting[senderKey.getId()] = {request: apiRequest, key: senderKey};
         }
@@ -341,8 +360,6 @@ define(['underscore',
 
       onApiResponse: function(data, textStatus, jqXHR ) {
         var qm = this.qm;
-        if (qm.debug)
-          console.log('[QM]: received response:', JSON.stringify(data).substring(0, 1000));
 
         // TODO: check the status responses
 
@@ -351,7 +368,10 @@ define(['underscore',
         response.setApiQuery(this.request.get('query'));
 
         if (qm.debug)
-          console.log('[QM]: sending response:', this.key.getId());
+          console.log('[QM]: sending response:',
+            qm.app ? (qm.app.getPluginOrWidgetName(this.key.getId()) || this.key.getId()) : this.key.getId(),
+            data
+          );
 
         var pubsub = qm.getBeeHive().Services.get('PubSub');
 

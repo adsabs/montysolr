@@ -24,7 +24,8 @@ require.config({
 
       core: {
         controllers: {
-          FeedbackMediator: 'js/wraps/discovery_mediator'
+          FeedbackMediator: 'js/wraps/discovery_mediator',
+          QueryMediator: 'js/components/query_mediator'
         },
         services: {
           'Api': 'js/services/api',
@@ -34,7 +35,6 @@ require.config({
         objects: {
           User: 'js/components/user',
           DynamicConfig: 'discovery.vars',
-          QueryMediator: 'js/components/query_mediator',
           HistoryManager: 'js/components/history_manager',
           MasterPageManager: 'js/page_managers/master'
         },

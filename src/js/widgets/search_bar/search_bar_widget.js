@@ -1,16 +1,26 @@
-define(['marionette',
+define([
+    'marionette',
     'js/components/api_query',
     'js/widgets/base/base_widget',
     'hbs!./templates/search_bar_template',
     'hbs!./templates/search_form_template',
     'js/components/query_builder/plugin',
-    'bootstrap',
-    'hoverIntent',
-
+    'js/components/api_feedback',
+    'bootstrap', // if bootstrap is missing, jQuery events get propagated
   ],
-  function (Marionette, ApiQuery, BaseWidget, SearchBarTemplate, SearchFormTemplate, QueryBuilderPlugin) {
+  function (
+    Marionette,
+    ApiQuery,
+    BaseWidget,
+    SearchBarTemplate,
+    SearchFormTemplate,
+    QueryBuilderPlugin,
+    ApiFeedback,
+    bootstrap
+    ) {
 
 
+    // XXX:rca - to be removed
     $.fn.selectRange = function (start, end) {
       if (!end) end = start;
       return this.each(function () {
@@ -33,9 +43,7 @@ define(['marionette',
 
       render : function(){
         Marionette.ItemView.prototype.render.apply(this, arguments);
-
         this.render = function(){ return this}
-
       },
 
       className : "s-search-bar-widget",
@@ -62,18 +70,15 @@ define(['marionette',
       },
 
       onRender: function () {
-
         this.$("#search-form-container").append(SearchFormTemplate);
 
         //        I think this is not acting perfectly if people hover and then enter text into
         // the input field without clicking.
         //        this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
         this.$("#search-gui").append(this.queryBuilder.$el);
-
       },
 
       events: {
-
         "click #field-options button" : "tempFieldInsert",
         "keypress .q": function(e){
           this.highlightFields(e);
@@ -81,7 +86,7 @@ define(['marionette',
         },
         "blur .q": "unHighlightFields",
         "click #search-form-container": function (e) {
-          e.stopPropagation()
+          e.stopPropagation();
         },
         "click #search-form-container .title": "toggleFormSection",
         "click .show-form": "onShowForm",
@@ -120,7 +125,7 @@ define(['marionette',
                 "input": "text",
                 "operator": "contains",
                 "value": ""
-              },
+              }
             ]
           });
         }
@@ -149,12 +154,11 @@ define(['marionette',
 
       tempFieldInsert: function (e) {
         e.preventDefault();
-
         var currentVal, newVal, df;
 
         //        this.unsetAddField();
 
-        currentVal = this.$(".q").val();
+        currentVal = this.getFormVal();
         this.priorVal = currentVal;
 
         df = $(e.target).attr("data-field");
@@ -166,7 +170,7 @@ define(['marionette',
           } else {
             newVal = df.split("-")[1] + "( )";
           }
-          this.$(".q").val(newVal);
+          this.setFormVal(newVal);
 
         } else {
 
@@ -176,7 +180,7 @@ define(['marionette',
           } else {
             newVal = currentVal + " " + df + ":\"\"";
           }
-          this.$(".q").val(newVal);
+          this.setFormVal(newVal);
         }
 
         this.$(".q").focus();
@@ -208,15 +212,9 @@ define(['marionette',
         e.preventDefault();
         e.stopPropagation();
 
-        var query = (this.$(".q").val());
+        var query = this.getFormVal();
         this.trigger("start_search", query);
-
-      },
-
-      setQueryBox: function (val) {
-        (this.$(".q").val(val));
       }
-
     });
 
     var SearchBarWidget = BaseWidget.extend({
@@ -224,8 +222,8 @@ define(['marionette',
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
 
-        //custom dispatchRequest function goes here
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
+        // search widget doesn't need to execute queries (but it needs to listen to them)
+        this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
 
         //custom handleResponse function goes here
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
@@ -236,6 +234,19 @@ define(['marionette',
       defaultQueryArguments: {
         //sort: 'date desc',
         fl: 'id'
+      },
+
+      handleFeedback: function(feedback) {
+        switch (feedback.code) {
+          case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
+            this.setCurrentQuery(feedback.query);
+            break;
+        }
+      },
+
+      dispatchRequest: function(apiQuery) {
+        // search bar doesn't need to make a request (it just needs to keep track of a query)
+        this.setCurrentQuery(apiQuery);
       },
 
       storeQuery: function (query) {
@@ -259,7 +270,7 @@ define(['marionette',
         this.listenTo(this.view, "render", function () {
           var query = this.getCurrentQuery().get("q");
           if (query) {
-            this.view.setQueryBox(query)
+            this.view.setFormVal(query)
           }
         });
 
@@ -269,7 +280,7 @@ define(['marionette',
       processResponse: function (apiResponse) {
         var q = apiResponse.getApiQuery();
         this.setCurrentQuery(q);
-        this.view.setQueryBox(q.get('q').join(' '));
+        this.view.setFormVal(q.get('q').join(' '));
         this.storeQuery(q);
       },
 
@@ -278,7 +289,7 @@ define(['marionette',
 
         //make sure not to override an explicit sort if there is one
 
-        if (!query.get("sort")){
+        if (!query.has("sort")){
 
           var queryVal, toMatch, operator;
 
@@ -289,30 +300,27 @@ define(['marionette',
           toMatch = ["trending(", "instructive(", "useful(", "references("];
 
           operator = _.find(toMatch, function(e) {
-
             if (queryVal.indexOf(e) !== -1) {
               return e
             }
+          });
 
-          })
+          if (!query.has('sort')) {
 
+          }
           if (operator && operator === "references(" ){
             query.set("sort", "first_author asc")
           }
 
           if (!operator) {
-            query.set("sort", "pubdate desc")
+            query.set("sort", "pubdate desc");
           }
         }
 
       },
 
-
       navigate: function (newQuery) {
-
-
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
-
       }
     });
 

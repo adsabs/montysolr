@@ -33,7 +33,7 @@ define([
         }
         if (conf.debug !== undefined) {
           beehive.debug = conf.debug;
-          this.getObject('QueryMediator').debug = conf.debug;
+          this.getController('QueryMediator').debug = conf.debug;
         }
 
         if (conf.apiRoot) {

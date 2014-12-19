@@ -36,7 +36,7 @@ require(['js/components/application',
         PubSub: 'js/services/pubsub',
         Api: 'js/services/api'
       },
-      objects: {
+      controllers: {
         QueryMediator: 'js/components/query_mediator'
       }
     },

@@ -119,6 +119,12 @@ define(['underscore', 'backbone',
       args.unshift(this.key);
       this.pubsub.subscribe.apply(this.pubsub, args);
     },
+    on: function() {
+      this.pubsub.on.apply(this.pubsub, arguments);
+    },
+    off: function() {
+      this.pubsub.on.apply(this.pubsub, arguments);
+    },
 
     request: function(apiRequest, params) {
       if (this.verbose) {
