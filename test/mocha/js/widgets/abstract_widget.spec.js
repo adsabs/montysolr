@@ -9,16 +9,16 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
     testJSON = {  "responseHeader":{    "status":0,    "QTime":62,    "params":{      "fl":"abstract,title,author,aff,pub,pubdate,keyword",      "indent":"true",      "start":"4",      "q":"planet\n",      "wt":"json",      "rows":"1"}},  "response":{"numFound":238540,"start":4,"docs":[      {    "keyword":["HARMONY OF THE UNIVERSE","THEORY OF MUSIC","PLATO'S BODIES"], "author":["Lieske, J. H.",          "Standish, E. M."],        "abstract":"In the past twenty years there has been a great amount of growth in radiometric observing methods.",  "pub":"IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics", "pubdate":"1981-00-00",        "title":["Planetary Ephemerides"],        "aff":["Heidelberg, Universität, Heidelberg, Germany",          "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA"]}]  }}
     beforeEach(function(){
-      aw = new AbstractWidget({data:testJSON});
+      aw = new AbstractWidget({data:JSON.parse(JSON.stringify(testJSON))});
       aw.render();
       view = aw.view;
 
-    })
+    });
 
     afterEach(function(){
       $("#test").empty()
 
-    })
+    });
 
     describe("Abstract Renderer (UI Widget)", function(){
 
@@ -27,7 +27,7 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect(aw).to.be.instanceof(BaseWidget)
         expect(view).to.be.instanceof(Marionette.ItemView)
         expect(aw.model).to.be.instanceof(Backbone.Model)
-      })
+      });
 
       it("should have a model that takes raw solr data and parses it to template-ready condition", function(){
         expect(aw.model.attributes.pubdate).to.equal("1981-00-00");
@@ -42,21 +42,16 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
       it("should render a view with the properly rendered information and 'view more' user interactions", function(){
         $("#test").append(view.el);
 
-        expect(view.$(".affiliation").filter(".hide").length).to.equal(view.$(".affiliation").length)
+        expect(view.$(".affiliation").filter(".hide").length).to.equal(view.$(".affiliation").length);
 
         $("#test").find("#toggle-aff").click();
 
         expect(view.$(".affiliation").filter(".hide").length).to.equal(0);
         expect(view.$("#abstract-content").text()).to.match(/In the past twenty years there has been a great amount of growth in radiometric observing methods./);
-
-
       });
 
       it("should interact properly with pubsub", function(){
-
         var m = new MinimalPubSub()
-
-
       })
 
 

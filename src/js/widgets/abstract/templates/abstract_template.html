@@ -1,83 +1,92 @@
-        <!--<div id="article-navigation">{{#if hasPrev}}<a target="prev">prev</a>{{/if}}|{{#if hasNext}} <a target="next">next</a>{{/if}}</div>-->
+<!--<div id="article-navigation">{{#if hasPrev}}<a target="prev">prev</a>{{/if}}|{{#if hasNext}} <a target="next">next</a>{{/if}}</div>-->
 
-          <h2 class="s-abstract-title">{{{title}}}</h2>
+<h2 class="s-abstract-title">{{{title}}}</h2>
 
 
-            {{#if authorAff.length}}
-        {{#if hasAffiliation}}
+{{#if authorAff.length}}
+    {{#if hasAffiliation}}
         <button class="btn btn-xs btn-default-flat s-toggle-aff" id="toggle-aff">Show affiliations</button>
+    {{/if}}
+    {{#if hasMoreAuthors}}
+        <button class="btn btn-xs btn-default-flat s-toggle-authors" id="toggle-more-authors">Show all authors</button>
+    {{/if}}
+
+    <div id="authors-and-aff" class="s-authors-and-aff">
+        <ul class="list-inline">
+            {{#each authorAff}}
+                {{#if @last}}
+                <li class="author"><a href="#search/?q=author%3A{{this.[2]}}">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
+                {{else}}
+                <li class="author"><a href="#search/?q=author%3A{{this.[2]}}">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
+                {{/if}}
+            {{/each}}
+            {{#if hasMoreAuthors}}
+                <li class="author extra-dots">; <a data-target="more-authors" title="Show all authors">...</a></li>
+            {{/if}}
+            {{#each authorAffExtra}}
+                {{#if @last}}
+                <li class="author extra hide"><a href="#search/?q=author%3A{{this.[2]}}">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
+                {{else}}
+                <li class="author extra hide"><a href="#search/?q=author%3A{{this.[2]}}">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
+                {{/if}}
+            {{/each}}
+        </ul>
+    </div>
+{{/if}}
+
+<div class="s-abstract-text">
+    <h4 class="sr-only">Abstract</h4>
+    <p>
+        {{#if abstract}}
+        {{{abstract}}}
+        {{else}}
+        <i>No abstract</i>
+        {{/if}}
+    </p>
+</div>
+
+
+<dl class="s-abstract-dl-horizontal">
+
+    {{#if pub_raw}}
+    <dt>Publication</dt>
+    <dd>
+        <div id="article-publication">{{pub_raw}}</div>
+        {{#if pubdate}}
+        <div>
+            <em>Pub Date:</em> {{pubdate}}
+        </div>
         {{/if}}
 
-            <div id="authors-and-aff" class="s-authors-and-aff">
-                    <ul class="list-inline">
-                    {{#each authorAff}}
-                    {{#if @last}}
-                        <li class="author"><a href="#search/?q=author%3A{{this.[2]}}">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
+        {{#if doi}}
+        <div>
+            <em>DOI:</em> <a href="{{doi.href}}" target="_blank">{{doi.doi}}</a>
+        </div>
+        {{/if}}
+    </dd>
+    {{/if}}
 
-                    {{else}}
-                    <li class="author"><a href="#search/?q=author%3A{{this.[2]}}">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
 
-                    {{/if}}
-                    {{/each}}
-                    </a>
-                    </ul>
+    <dt >Bibcode</dt>
+    <dd>{{bibcode}} <i class="icon-help" data-toggle="popover" data-content="Bibcodes are the ADS's way of uniquely representing each scholarly work. [to be improved]"></i></dd>
 
-                </div>
+    {{#if keyword}}
+    <div id="keywords">
+        <dt>Keywords</dt>
+        <dd>
+            <ul class="list-inline">
+                {{#each keyword}}
+                {{#if @last}}
+                <li>{{this}}</li>
+                {{else}}
+                <li>{{this}};</li>
                 {{/if}}
-
-            <div class="s-abstract-text">
-            <h4 class="sr-only">Abstract</h4>
-            <p>
-                    {{#if abstract}}
-                        {{{abstract}}}
-                    {{else}}
-                        <i>No abstract</i>
-                    {{/if}}
-            </p>
-            </div>
+                {{/each}}
+            </ul>
+        </dd>
+    </div>
+    {{/if}}
 
 
-            <dl class="s-abstract-dl-horizontal">
-
-            {{#if pub_raw}}
-            <dt>Publication</dt>
-            <dd>
-                <div id="article-publication">{{pub_raw}}</div>
-                {{#if pubdate}}
-                <div>
-                    <em>Pub Date:</em> {{pubdate}}
-                </div>
-                {{/if}}
-
-                {{#if doi}}
-                <div>
-                    <em>DOI:</em> <a href="{{doi.href}}" target="_blank">{{doi.doi}}</a>
-                </div>
-                {{/if}}
-            </dd>
-            {{/if}}
-
-
-            <dt >Bibcode</dt>
-            <dd>{{bibcode}} <i class="icon-help" data-toggle="popover" data-content="Bibcodes are the ADS's way of uniquely representing each scholarly work. [to be improved]"></i></dd>
-
-            {{#if keyword}}
-            <div id="keywords">
-                <dt>Keywords</dt>
-                <dd>
-                    <ul class="list-inline">
-                        {{#each keyword}}
-                        {{#if @last}}
-                        <li>{{this}}</li>
-                        {{else}}
-                        <li>{{this}};</li>
-                        {{/if}}
-                        {{/each}}
-                    </ul>
-                </dd>
-            </div>
-            {{/if}}
-
-
-        </dl>
+</dl>
 

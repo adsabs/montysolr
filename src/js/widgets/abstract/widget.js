@@ -43,11 +43,11 @@ define([
         }
       },
 
+      parse: function (doc, maxAuthors) {
+        var authorAff, hasAffiliation, title, authorAffExtra;
+        maxAuthors = maxAuthors || 20;
 
-
-      parse: function (doc) {
-        var authorAff, hasAffiliation, title;
-
+        authorAff = [], authorAffExtra = [];
 
         doc.aff = doc.aff || [];
         if (doc.aff.length) {
@@ -60,6 +60,11 @@ define([
           authorAff[index][2] = encodeURIComponent('"' +  el[0] + '"');
         });
 
+        if (authorAff.length > maxAuthors) {
+          authorAffExtra = authorAff.slice(maxAuthors, authorAff.length);
+          authorAff = authorAff.slice(0, maxAuthors);
+        }
+
         doc.pubdate = PapersUtils.formatDate(doc.pubdate);
 
         title = $.isArray(doc.title)? doc.title[0] : undefined;
@@ -69,6 +74,8 @@ define([
           abstract: doc.abstract,
           title: title,
           authorAff: authorAff,
+          authorAffExtra: authorAffExtra,
+          hasMoreAuthors: authorAffExtra.length,
           pub: doc.pub,
           pubdate: doc.pubdate,
           keyword: doc.keyword,
@@ -93,11 +100,30 @@ define([
       template: abstractTemplate,
       events: {
         "click #toggle-aff": "toggleAffiliation",
+        "click #toggle-more-authors": "toggleMoreAuthors",
+        'click a[data-target="more-authors"]': 'toggleMoreAuthors',
         'click a[target="prev"]': 'onClick',
         'click a[target="next"]': 'onClick'
       },
 
-      toggleAffiliation: function () {
+      toggleMoreAuthors: function (ev) {
+
+        if (ev) ev.stopPropagation();
+
+        this.$(".author.extra").toggleClass("hide");
+        this.$(".author.extra-dots").toggleClass("hide");
+        if (this.$(".author.extra").hasClass("hide")){
+          this.$("#toggle-more-authors").text("Show all authors");
+        }
+        else {
+          this.$("#toggle-more-authors").text("Hide authors");
+        }
+
+      },
+
+      toggleAffiliation: function (ev) {
+
+        if (ev) ev.preventDefault();
 
         this.$(".affiliation").toggleClass("hide");
         if (this.$(".affiliation").hasClass("hide")){
@@ -130,6 +156,7 @@ define([
 
         BaseWidget.prototype.initialize.apply(this, arguments);
         this._docs = {};
+        this.maxAuthors = 20;
       },
 
       activate: function (beehive) {
@@ -197,7 +224,7 @@ define([
             if (doc.doi){
               doc.doi = {doi: doc.doi,  href: self.adsUrlRedirect("doi", doc.doi)}
             }
-            d = self.model.parse(doc);
+            d = self.model.parse(doc, this.maxAuthors);
             self._docs[d.bibcode] = d;
           });
 
