@@ -3,7 +3,7 @@ define([], function() {
   var tests  = [
       '/page_managers/all_tests.spec.js',
 
-    //TBD 24/09/14 '/widgets/abstract_widget.spec.js',
+      '/widgets/abstract_widget.spec.js',
       '/widgets/api_query_widget.spec.js',
       '/widgets/api_request_widget.spec.js',
       '/widgets/api_response_widget.spec.js',

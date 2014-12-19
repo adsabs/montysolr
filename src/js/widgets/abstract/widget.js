@@ -51,9 +51,13 @@ define([
 
         doc.aff = doc.aff || [];
         if (doc.aff.length) {
-          hasAffiliation = true;
+          hasAffiliation = _.without(doc.aff, '-').length;
           // joining author and aff
           authorAff = _.zip(doc.author, doc.aff);
+        }
+        else if (doc.author) {
+          hasAffiliation = false;
+          authorAff = _.zip(doc.author, _.range(doc.author.length));
         }
 
         _.each(authorAff, function(el, index){
@@ -191,6 +195,8 @@ define([
           this.trigger('page-manager-event', 'broadcast-payload', {title: this._docs[bibcode].title} );
         }
         else {
+          if (q.has('__show')) return; // cycle protection
+
           q.set('__show', bibcode);
           this.dispatchRequest(q);
         }
@@ -226,7 +232,7 @@ define([
             }
             d = self.model.parse(doc, this.maxAuthors);
             self._docs[d.bibcode] = d;
-          });
+          }, this);
 
           if (apiResponse.has('responseHeader.params.__show')) {
             this.onDisplayDocuments(apiResponse.getApiQuery());
