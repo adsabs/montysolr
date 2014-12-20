@@ -69,6 +69,22 @@ define([
 
     });
 
+    it("should get a new query from FEEDBACK", function(done) {
+      var widget = _widget();
+      var $w = widget.render().$el;
+
+      minsub.subscribe(minsub.INVITING_REQUEST, function() {
+        minsub.publish(minsub.DELIVERING_REQUEST, minsub.createRequest(
+          {'query': minsub.createQuery({'test': 'foo'})}));
+      });
+
+      minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'foo:bar'}));
+      setTimeout(function() {
+        expect(widget.view.getFormVal()).to.be.eql('foo:bar');
+        done();
+      }, 5)
+    });
+
     it("should allow the user to open and close a dropdown menu from the search bar", function(done){
       var widget = _widget();
       var $w = widget.render().$el;

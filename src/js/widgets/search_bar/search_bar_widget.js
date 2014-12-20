@@ -224,10 +224,6 @@ define([
 
         // search widget doesn't need to execute queries (but it needs to listen to them)
         this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
-
-        //custom handleResponse function goes here
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-
         this.view.activate(beehive);
       },
 
@@ -240,17 +236,9 @@ define([
         switch (feedback.code) {
           case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
             this.setCurrentQuery(feedback.query);
+            this.view.setFormVal(feedback.query.get('q').join(' '));
             break;
         }
-      },
-
-      dispatchRequest: function(apiQuery) {
-        // search bar doesn't need to make a request (it just needs to keep track of a query)
-        this.setCurrentQuery(apiQuery);
-      },
-
-      storeQuery: function (query) {
-        this.setCurrentQuery(query);
       },
 
       initialize: function (options) {
@@ -263,7 +251,6 @@ define([
           });
 
           this.changeDefaultSort(newQuery);
-          this.storeQuery(newQuery);
           this.navigate(newQuery);
         });
 
@@ -277,55 +264,33 @@ define([
         BaseWidget.prototype.initialize.call(this, options)
       },
 
-      processResponse: function (apiResponse) {
-        var q = apiResponse.getApiQuery();
-        this.setCurrentQuery(q);
-        this.view.setFormVal(q.get('q').join(' '));
-        this.storeQuery(q);
-      },
-
-
       changeDefaultSort : function(query) {
 
         //make sure not to override an explicit sort if there is one
-
         if (!query.has("sort")){
-
           var queryVal, toMatch, operator;
-
           queryVal = query.get("q")[0];
 
           //citations operator should be sorted by pubdate too
-
           toMatch = ["trending(", "instructive(", "useful(", "references("];
-
           operator = _.find(toMatch, function(e) {
             if (queryVal.indexOf(e) !== -1) {
               return e
             }
           });
 
-          if (!query.has('sort')) {
-
-          }
           if (operator && operator === "references(" ){
             query.set("sort", "first_author asc")
           }
-
           if (!operator) {
             query.set("sort", "pubdate desc");
           }
         }
-
       },
 
       navigate: function (newQuery) {
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
       }
     });
-
-
     return SearchBarWidget;
-
-
   });

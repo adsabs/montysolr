@@ -32,7 +32,7 @@ define([
     ) {
 
     var beehive, debug = false, pubSpy;
-    describe('Query Mediator (Scaffolding)', function() {
+    describe('Query Mediator - Controller (query_mediator.spec.js)', function() {
 
 
       beforeEach(function(done) {
@@ -239,17 +239,18 @@ define([
       });
 
       it("has START_SEARCH signal", function(done) {
-        var qm = new QueryMediator({
-          shortDelayInMs: 2
-        });
-        qm.activate(beehive);
+        var x = createTestQM();
+        var qm = x.qm;
 
-        sinon.spy(qm, 'reset');
         sinon.spy(qm, 'startExecutingQueries');
-        sinon.spy(qm, 'monitorExecution');
 
-        var pubsub = beehive.Services.get('PubSub');
+        var pubsub = x.pubsub;
         var key = pubsub.getPubSubKey();
+
+        // it needs requests to start working
+        pubsub.subscribe(key, pubsub.INVITING_REQUEST, function() {
+          pubsub.publish(x.key1, pubsub.DELIVERING_REQUEST, x.req1);
+        });
 
         qm._cache.put('foo', 'bar');
 

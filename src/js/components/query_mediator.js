@@ -122,20 +122,30 @@ define(['underscore',
         if (this.shortDelayInMs) {
           setTimeout(function() {
             self.__searchCycle.collectingRequests = false;
-            self.startExecutingQueries();
-            self.monitorExecution();
+            if (self.startExecutingQueries()) {
+              self.monitorExecution();
+            }
           }, this.shortDelayInMs);
         }
         else {
           this.__searchCycle.collectingRequests = false;
-          self.startExecutingQueries();
-          setTimeout(function() {
-            self.monitorExecution();
-          }, this.shortDelayInMs);
+          if (self.startExecutingQueries()) {
+            setTimeout(function() {
+              self.monitorExecution();
+            }, this.shortDelayInMs);
+          }
         }
       },
 
 
+      /**
+       * Starts executing queries from the search cycle
+       *
+       * Return value indicates whether the process starter;
+       * if 'true', then you can start monitoring
+       *
+       * @param force
+       */
       startExecutingQueries: function(force) {
         if (this.__searchCycle.running) return; // safety barrier
 
@@ -212,6 +222,8 @@ define(['underscore',
             ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
               request: this.request}));
           });
+
+        return true; // means that the process can be monitored
       },
 
       monitorExecution: function() {
