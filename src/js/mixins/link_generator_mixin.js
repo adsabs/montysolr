@@ -3,9 +3,9 @@ define(["underscore"], function(_){
 
 var linkGenerator = {
 
-  abstractPageFields: "links_data,ids_data,[citations],property,bibcode",
+  abstractPageFields: "links_data,[citations],property,bibcode",
 
-  resultsPageFields : "links_data,ids_data,[citations],property",
+  resultsPageFields : "links_data,[citations],property",
 
   //function that can turn links_data into a list of actual links
 
@@ -50,32 +50,21 @@ var linkGenerator = {
 
        dataWithLinks = _.map(data, function (d) {
          return this.parseLinksDataForModel(d)
-       }, this)
+       }, this);
 
-       return dataWithLinks
+       return dataWithLinks;
 
      },
 
+  // this function is used by list-of-things to add quick links to an item
      parseLinksDataForModel : function(data){
 
        var links, bib, openAccess, ADSScan;
 
-       openAccess = false;
        ADSScan = false;
        bib = data.bibcode;
 
        links = {text : [], list : [], data : []};
-
-       if (data.ids_data){
-         _.each(data.ids_data, function(d){
-           var idDict = JSON.parse(d);
-           if (idDict.description === "arXiv") {
-             links.text.push({openAccess: true, title: "arXiv eprint", link: this.adsUrlRedirect("arXiv", idDict.identifier)})
-           }
-         }, this)
-       }
-
-
 
        if(data["[citations]"]){
 
@@ -94,15 +83,11 @@ var linkGenerator = {
          if (_.contains(data.property, "TOC")){
            links.list.push({letter: "T", title: "Table of Contents", link:"/#abs/"+ bib + "/tableofcontents"})
          }
-         if (_.contains(data.property, "PUB_OPENACCESS")){
-           //this will be accessed by the links_data part below
-           openAccess = true;
-         }
+
          if (_.contains(data.property, "ADS_SCAN")){
            //this will also be accessed by links_data below
            ADSScan = true;
-           links.text.push({ openAccess : true, letter: "G", title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)})
-
+           links.text.push({ openAccess : true, letter: "G", title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)});
          }
        }
 
@@ -115,42 +100,33 @@ var linkGenerator = {
              return JSON.parse(d);
            }
            catch(SyntaxError){
-             console.warn(d, "was not parsed")
+             console.warn(d, "was not parsed");
            }
          });
 
-         link_types = _.filter(link_types, function(l){if (l!== undefined){
-           return true;
-         }});
-
          _.each(link_types, function(l){
 
+           var openAccess = l.access === "open" ? true : false;
+
            //limit to only one in links list, even though there may be multiple articles
-           if (l.type === 'electr' && openAccess && !_.findWhere(links.text, {title: "Publisher article"})){
+           if (l.type === 'electr' && !_.findWhere(links.text, {title: "Publisher article"})){
 
-             links.text.push({openAccess : true, letter: "E",title: "Publisher article", link : this.adsUrlRedirect(l.type, bib)})
-
-           }
-           else if (l.type === 'electr' && !openAccess  && !_.findWhere(links.text, {title: "Publisher article"})){
-             links.text.push({letter: "E", title: "Publisher article", link : this.adsUrlRedirect(l.type, bib)})
+             links.text.push({openAccess : openAccess, letter: "E",title: "Publisher article", link : this.adsUrlRedirect(l.type, bib)});
 
            }
-           //has some more involved logic
+
+           else if (l.type === "preprint"){
+
+             links.text.push({openAccess: openAccess, letter : "X",  title: "arXiv eprint", link: this.adsUrlRedirect(l.type, bib)});
+
+           }
+
            else if (l.type === 'pdf'){
-             //default to adsscan
-             if (ADSScan){
-               links.text.push({ openAccess : true, letter: "F", title: "ADS PDF", link : this.adsUrlRedirect('article', bib)})
-             }
-             else {
-               if (openAccess){
-                 links.text.push({ openAccess : true, letter: "F", title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
-               }
-               else {
-                 links.text.push({letter: "F", title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
 
-               }
+             //first, find the title, which is dependent on ADSSCAN
+             var title = ADSScan ? "ADS PDF" : "Publisher PDF";
 
-             }
+             links.text.push({ openAccess : openAccess, letter: "F", title: title, link : this.adsUrlRedirect('article', bib)});
 
            }
            else if (l.type === 'simbad' && !_.findWhere(links.data, {title: "SIMBAD Objects"})){
@@ -171,44 +147,20 @@ var linkGenerator = {
        }
 
        data.links  = links;
-
        return data
 
      },
 
+  //this function is used as a widget on the abstract page
     parseResourcesData : function(data) {
 
-      var fullTextSources, dataProducts, bib, openAccess, ADSScan;
+      var fullTextSources, dataProducts, bib, ADSScan;
 
       fullTextSources = [];
       dataProducts = [];
 
-      openAccess = false;
       ADSScan = false;
-      links = [];
       bib = data.bibcode;
-
-      if (data.ids_data) {
-        _.each(data.ids_data, function (d) {
-          var idDict = JSON.parse(d);
-          if (idDict.description === "arXiv") {
-            fullTextSources.push({openAccess: true, title: "arXiv eprint", link: this.adsUrlRedirect("arXiv", idDict.identifier)})
-          }
-        }, this)
-      }
-
-      if (data.property) {
-
-        if (_.contains(data.property, "PUB_OPENACCESS")) {
-          //this will be accessed by the links_data part below
-          openAccess = true;
-        }
-        if (_.contains(data.property, "ADS_SCAN")) {
-          //this will also be accessed by links_data below
-          ADSScan = true;
-          fullTextSources.push({openAccess: true, title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)})
-        }
-      }
 
       if (data.links_data) {
 
@@ -224,37 +176,35 @@ var linkGenerator = {
 
         });
 
-        link_types = _.filter(link_types, function(l){if (l!== undefined){
-          return true;
-        }});
+        if (data.property) {
+
+          if (_.contains(data.property, "ADS_SCAN")) {
+            //this will also be accessed by links_data below
+            ADSScan = true;
+            fullTextSources.push({openAccess: true, title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)});
+          }
+        }
 
         _.each(link_types, function (l) {
 
-          if (l.type === "electr" && openAccess && !_.findWhere(fullTextSources, {title: "Publisher article"}))  {
-            fullTextSources.push({openAccess: true, title: "Publisher article", link: this.adsUrlRedirect('electr', bib)})
-          }
+          var openAccess = l.access === "open" ? true : false;
 
-          else if (l.type === "electr" && !openAccess &&  !_.findWhere(fullTextSources, {title: "Publisher article"})) {
+          if (l.type == "preprint"){
 
-            fullTextSources.push({title: "Publisher article", link: this.adsUrlRedirect('electr', bib)})
+            fullTextSources.push({openAccess: openAccess, title: "arXiv eprint", link: this.adsUrlRedirect("preprint", bib)});
 
           }
 
-         //has some more involved logic
+          if (l.type === "electr" && !_.findWhere(fullTextSources, {title: "Publisher article"}))  {
+
+            fullTextSources.push({openAccess: openAccess, title: "Publisher article", link: this.adsUrlRedirect('electr', bib)})
+          }
+
           else if (l.type === 'pdf'){
-            //default to adsscan
-            if (ADSScan){
-              fullTextSources.push({openAccess : true,  title: "ADS PDF", link : this.adsUrlRedirect('article', bib)})
-            }
-            else if (!_.findWhere(fullTextSources, {title: "Publisher PDF"})) {
-              if (openAccess){
-                fullTextSources.push({openAccess : true,  title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
-              }
-              else {
-                fullTextSources.push({title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
+            //default to adsscan, otherwise publisher pdf
+            var title = ADSScan ? "ADS PDF" : "Publisher PDF";
 
-              }
-            }
+              fullTextSources.push({openAccess : true,  title: title, link : this.adsUrlRedirect('article', bib)});
           }
 
           else if (l.type === 'data' &&  !_.findWhere(dataProducts, {title: "Archival data"})){
@@ -271,12 +221,12 @@ var linkGenerator = {
 
         }, this);
 
-      };
+      }
 
       data.fullTextSources = fullTextSources;
       data.dataProducts = dataProducts;
 
-      return data
+      return data;
     }
 
 }

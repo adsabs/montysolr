@@ -20,7 +20,7 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
                 "params": {
                   "wt": "json",
                   "q": "bibcode:1984NASCP2349..191B",
-                  "fl": "links_data,ids_data,[citations],property,bibcode"
+                  "fl": "links_data,[citations],property,bibcode"
                 }
               },
               "response": {
@@ -29,14 +29,10 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
                 "docs": [
                   {
                     "bibcode": "1984NASCP2349..191B",
-                    "ids_data": [
-                      "{\"identifier\":\"1984NASCP2349..191B\", \"alternate_bibcode\":\"\", \"deleted_bibcode\":\"\", \"description\":\"ADS bibcode\"}",
-                      "{\"identifier\":\"\", \"alternate_bibcode\":\"1984fiue.rept..191B\", \"deleted_bibcode\":\"\", \"description\":\"alternate\"}",
-                      "{\"identifier\":\"\", \"alternate_bibcode\":\"1984IUE84......191B\", \"deleted_bibcode\":\"\", \"description\":\"alternate\"}"
-                    ],
+
                     "links_data": [
-                      "{\"title\":\"\", \"type\":\"simbad\", \"instances\":\"2\"}",
-                      "{\"title\":\"\", \"type\":\"ADSlink\", \"instances\":\"\"}"
+                      "{\"title\":\"\", \"type\":\"simbad\", \"instances\":\"2\", \"access\":\"\"}",
+                      "{\"title\":\"\", \"type\":\"ADSlink\", \"instances\":\"\", \"access\":\"open\"}"
                     ],
                     "property": [
                       "OPENACCESS",
@@ -87,11 +83,12 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
 
       widget.loadBibcodeData("fakeBibcode");
 
-      expect($w.find("p:first").find("a").attr("href")).to.eql(
+
+      expect($w.find("ul:first").find("a").attr("href")).to.eql(
         'http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=GIF'
       )
 
-      expect($w.find("p:last").find("a").attr("href")).to.eql(
+      expect($w.find("ul:last").find("a").attr("href")).to.eql(
         "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=SIMBAD"
       )
 

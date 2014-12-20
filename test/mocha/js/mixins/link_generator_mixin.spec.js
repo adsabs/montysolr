@@ -15,8 +15,8 @@ define(['js/mixins/link_generator_mixin'],
 
         //added to defaultQueryFields
 
-        expect(mixin.abstractPageFields).to.equal("links_data,ids_data,[citations],property,bibcode");
-        expect(mixin.resultsPageFields).to.equal("links_data,ids_data,[citations],property");
+        expect(mixin.abstractPageFields).to.equal("links_data,[citations],property,bibcode");
+        expect(mixin.resultsPageFields).to.equal("links_data,[citations],property");
 
       })
 

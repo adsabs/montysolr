@@ -1,18 +1,27 @@
 
     {{#if fullTextSources}}
     <h4 class="s-right-col-widget-title">Full Text Sources</h4>
+        <ul class="list-unstyled">
     {{#each fullTextSources}}
-    <p><a href="{{link}}" target = "_blank">
-        {{title}}{{#if openAccess}}
-        <i class="s-open-access-image"></i>
-        {{/if}} </a>
-    </p>
+    <li>
+        <a href="{{link}}" target = "_blank">
+        {{title}}
+            {{#if openAccess}}
+            <i class="s-open-access-image"></i>
+            {{/if}}
+        </a>
+    </li>
     {{/each}}
+        </ul>
     {{/if}}
     {{#if dataProducts}}
     <br/>
     <h4 class="s-right-col-widget-title">Data Products</h4>
-    {{#each dataProducts}}
-    <p><a href="{{link}}" target = "_blank">{{title}}</a></p>
-    {{/each}}
+        <ul class="list-unstyled">
+        {{#each dataProducts}}
+            <li>
+                <a href="{{link}}" target = "_blank">{{title}}</a>
+            </li>
+        {{/each}}
+        </ul>
     {{/if}}

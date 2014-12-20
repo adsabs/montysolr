@@ -31,7 +31,7 @@ define([
     show: function(pageName){
       var ret = PageManagerController.prototype.show.apply(this, arguments);
       if (this.view.model && this.view.model.has('query')) {
-        ret.$el.find('.s-back-button-container').empty().html('<a href="#search/' + this.view.model.get('query') + '" class="back-button"> <i class="fa fa-arrow-left"></i> Back to search results</a>');
+        ret.$el.find('.s-back-button-container').empty().html('<a href="#search/' + this.view.model.get('query') + '" class="back-button"> <i class="fa fa-arrow-left"></i> Back to results</a>');
       }
       return ret;
     }
