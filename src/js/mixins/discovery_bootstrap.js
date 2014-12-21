@@ -7,6 +7,7 @@ define([
     'backbone',
     'js/components/api_query',
     'js/components/api_request',
+    'js/components/pubsub_events',
     'hbs'
     ],
   function(
@@ -14,6 +15,7 @@ define([
     Backbone,
     ApiQuery,
     ApiRequest,
+    PubSubEvents,
     HandleBars) {
 
   var Mixin = {
@@ -40,11 +42,21 @@ define([
           api.url = conf.apiRoot;
         }
 
+        var orcidApi = beehive.getService('OrcidApi');
+
+        if (conf.orcidProxy){
+          orcidApi.orcidProxyUri = location.origin + conf.orcidProxy;
+        }
+
         this.bootstrapUrls = conf.bootstrapUrls;
 
         if (conf.useCache) {
           this.triggerMethodOnAll('activateCache');
         }
+
+        var pubSub = beehive.getService('PubSub');
+        var pubSubKey = pubSub.getPubSubKey();
+        pubSub.publish(pubSubKey, PubSubEvents.BOOTSTRAP_CONFIGURED);
       }
     },
 

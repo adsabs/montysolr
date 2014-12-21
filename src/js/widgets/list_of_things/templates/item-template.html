@@ -19,8 +19,9 @@
         {{/if}}
     </div>
     <div class="col-sm-3">
-        {{#if links}}
+
         <div class="s-results-links">
+            {{#if links}}
             <div class="letter-icon s-letter-icon">
                 <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "true" {{else}} "false" {{/if}}>
                 <i class="s-text-icon" aria-label="quick access to full text links"></i>
@@ -65,10 +66,20 @@
                 </ul>
                 {{/if}}
             </div>
+            {{/if}}
+
+            <div class="{{#if this.orcidActionsVisible}}{{else}} hidden {{/if}} letter-icon s-letter-icon orcid-actions">
+                <button class="btn-link active-link s-active-link">
+                    <i class="s-list-icon" aria-label="orcid actions"/>
+                </button>
+
+                <ul class="hidden list-unstyled link-details s-link-details" role="menu">
+                    <li><a class="hidden orcid-action orcid-action-insert"> insert </a></li>
+                    <li><a class="hidden orcid-action orcid-action-update"> update </a></li>
+                    <li><a class="hidden orcid-action orcid-action-delete"> delete </a></li>
+                </ul>
+            </div>
         </div>
-
-        {{/if}}
-
     </div>
 
 </div>

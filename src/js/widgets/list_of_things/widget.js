@@ -19,6 +19,7 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
+    'js/services/orcid_api_constants',
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
     'hbs!./templates/pagination-template',
@@ -32,6 +33,7 @@ define([
     ApiRequest,
     ApiQuery,
     BaseWidget,
+    OrcidApiConstants,
     ItemTemplate,
     ResultsContainerTemplate,
     PaginationTemplate,
@@ -91,7 +93,6 @@ define([
         BaseWidget.prototype.initialize.call(this, options);
 
       },
-
 
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
@@ -293,6 +294,9 @@ define([
             }
           }, this);
 
+        }
+        else if (ev == 'itemview:OrcidAction'){
+          this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.OrcidAction, data: arg2});
         }
       },
 

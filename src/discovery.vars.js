@@ -54,6 +54,6 @@ define([], function() {
      * between widgets and API (and doesn't bother issuing another
      * request when the query can be served from the application cache)
      */
-    useCache: false
+    useCache: true,
   }
 });

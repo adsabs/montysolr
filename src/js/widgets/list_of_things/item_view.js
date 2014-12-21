@@ -5,7 +5,7 @@ define([
     'js/components/api_query',
     'js/widgets/base/base_widget',
     'hbs!./templates/item-template',
-    'bootstrap'
+    'js/widgets/orcid_model_notifier/orcid_model'
   ],
 
   function (Marionette,
@@ -13,7 +13,8 @@ define([
             ApiRequest,
             ApiQuery,
             BaseWidget,
-            ItemTemplate
+            ItemTemplate,
+            OrcidModel
     ) {
 
     var ItemView = Marionette.ItemView.extend({
@@ -26,10 +27,26 @@ define([
         if (options) {
           _.defaults(options, _.pick(this, ['model', 'collectionEvents', 'modelEvents']));
         }
+
+        this.listenTo(this, "item:rendered", this.onItemRendered);
+
+        _.bindAll(this, 'resetToggle');
+
+        OrcidModel.on('change:isInBulkInsertMode', this.resetToggle);
+
         return Marionette.ItemView.prototype.constructor.apply(this, arguments);
       },
 
+      onItemRendered: function(ev, arg1, arg2) {
+        if (OrcidModel.get('actionsVisible')){
+          this.showOrcidActions();
+        }
+      },
+
       render: function () {
+
+        this.model.set('orcidActionsVisible', OrcidModel.get('actionsVisible'));
+
         if (this.model.get('visible')) {
           return Marionette.ItemView.prototype.render.apply(this, arguments);
         }
@@ -45,7 +62,9 @@ define([
         'click .details-control' : "toggleDetails",
         'mouseenter .letter-icon': "showLinks",
         'mouseleave .letter-icon': "hideLinks",
+        'click .orcid-action': "orcidAction",
         'click .letter-icon': "pinLinks"
+
       },
 
       modelEvents: {
@@ -59,8 +78,38 @@ define([
       },
 
       toggleSelect: function () {
+
+        if (OrcidModel.get('isInBulkInsertMode')) {
+          if (this.model.get('chosen')) {
+            OrcidModel.removeFromBulkWorks(this.model.attributes);
+          }
+          else {
+            OrcidModel.addToBulkWorks(this.model.attributes);
+          }
+        }
+
         this.$el.toggleClass("chosen");
         this.model.set('chosen', this.model.get('chosen') ? false : true);
+      },
+
+      resetToggle: function(){
+        this.setToggleTo(false);
+      },
+
+      setToggleTo : function(to){
+
+        var $checkbox = $('input[name=identifier]');
+        if (to) {
+          this.$el.addClass("chosen");
+          this.model.set('chosen', true);
+          $checkbox.prop('checked', true);
+        }
+        else
+        {
+          this.$el.removeClass("chosen");
+          this.model.set('chosen', false);
+          $checkbox.prop('checked', false);
+        }
       },
 
       toggleDetails : function(){
@@ -143,6 +192,60 @@ define([
           return
         }
         this.removeActiveQuickLinkState($c)
+      },
+
+      showOrcidActions: function(){
+        var $orcidActions = this.$('.orcid-actions');
+        $orcidActions.removeClass('hidden');
+        $orcidActions.removeClass('orcid-wait');
+        var $update = $orcidActions.find('.orcid-action-update');
+        var $insert = $orcidActions.find('.orcid-action-insert');
+        var $delete = $orcidActions.find('.orcid-action-delete');
+
+        $update.addClass('hidden');
+        $insert.addClass('hidden');
+        $delete.addClass('hidden');
+
+        if (OrcidModel.isWorkInCollection(this.model.attributes)){
+          $update.removeClass('hidden');
+          $delete.removeClass('hidden');
+        }
+        else {
+          $insert.removeClass('hidden');
+        }
+      },
+
+      hideOrcidActions: function(){
+        var $orcidActions = this.$('.orcid-actions');
+        $orcidActions.addClass('hidden');
+      },
+
+      orcidAction: function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var $c = $(e.currentTarget);
+        var $orcidActions = this.$('.orcid-actions');
+        $orcidActions.addClass('orcid-wait');
+
+        var actionType = '';
+
+        if ($c.hasClass('orcid-action-insert')){
+          actionType = 'insert';
+        } else if ($c.hasClass('orcid-action-update')){
+          actionType = 'update';
+        } else if ($c.hasClass('orcid-action-delete')){
+          actionType = 'delete';
+        }
+
+        var msg = {
+          actionType : actionType,
+          model: this.model.attributes,
+          modelType: 'adsData'
+
+        };
+
+        this.trigger('OrcidAction', msg);
+
       }
     });
 

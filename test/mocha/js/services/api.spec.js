@@ -18,7 +18,7 @@ define(['jquery', 'underscore',
 
     afterEach(function() {
       this.server.restore();
-      //$.ajax.restore();
+      //$.ajax.restore()
     });
 
     it('should return API object', function(done) {
