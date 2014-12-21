@@ -6,7 +6,7 @@ define([
     'hbs!./templates/search_form_template',
     'js/components/query_builder/plugin',
     'js/components/api_feedback',
-    'bootstrap', // if bootstrap is missing, jQuery events get propagated
+    'bootstrap' // if bootstrap is missing, jQuery events get propagated
   ],
   function (
     Marionette,

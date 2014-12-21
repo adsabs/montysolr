@@ -94,7 +94,11 @@ define([
 
         w.activate(minsub.beehive.getHardenedInstance());
 
-        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'star'}));
+
+        minsub.subscribe(minsub.INVITING_REQUEST, function(apiQuery) {
+          return minsub.publish(minsub.DELIVERING_REQUEST, minsub.createRequest({query: apiQuery}));
+        });
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'star', 'sort': 'citation_count asc'}));
 
         expect($("#test").find("input[name=sort-options]:checked").val()).to.eql("citation_count");
 

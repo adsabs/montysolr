@@ -192,9 +192,17 @@ define(['underscore',
 
         this._executeRequest(data.request, data.key)
           .done(function(response, textStatus, jqXHR) {
+
+            var numFound = undefined;
+            if (response && response['response'] && response['response']['numFound']) {
+              numFound: response['response']['numFound'];
+            }
+
             ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
               code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED,
-              query: cycle.query
+              query: cycle.query,
+              numFound: numFound,
+              response: response // this is a raw response (and it is save to send, cause it was already copied by the first 'done' callback
             }));
 
             // after we are done with the first query, start executing other queries

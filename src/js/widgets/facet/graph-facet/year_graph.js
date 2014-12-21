@@ -1,11 +1,14 @@
-define(['./base_graph',
+define([
+    './base_graph',
     'hbs!./templates/year-graph-legend',
-    'marionette'
+    'marionette',
+    'jquery-ui'
   ],
   function(
     BaseGraphView,
     legendTemplate,
-    Marionette
+    Marionette,
+    $ui
     ){
 
 

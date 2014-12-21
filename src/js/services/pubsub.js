@@ -55,9 +55,13 @@ define(['backbone', 'underscore', 'js/mixins/hardened', 'pubsub_service_impl', '
         arguments = _.toArray(arguments); arguments.unshift(ctx.key);
         self.unsubscribe.apply(self, arguments);
       };
+      iface['subscribeOnce'] = function() {
+        arguments = _.toArray(arguments); arguments.unshift(ctx.key);
+        self.subscribeOnce.apply(self, arguments);
+      };
       iface['getCurrentPubSubKey'] = function() {
         return ctx.key;
-      }
+      };
       var hardened = this._getHardenedInstance(iface, this);
       _.extend(hardened, PubSubEvents);
 
