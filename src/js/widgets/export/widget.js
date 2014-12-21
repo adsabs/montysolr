@@ -4,219 +4,248 @@ define([
     'js/widgets/base/base_widget',
     'js/components/api_query',
     'hbs!./templates/export-button',
-    'hbs!./templates/export-menu'],
+    'hbs!./templates/export-menu',
+    'hbs!./templates/export_template',
+    'marionette',
+    'js/components/api_feedback',
+    'jquery',
+    'jquery-ui'
+
+  ],
   function(
     BaseWidget,
     ApiQuery,
     ButtonTemplate,
-    MenuTemplate){
+    MenuTemplate,
+    WidgetTemplate,
+    Marionette,
+    ApiFeedback,
+    $,
+    $ui
+    ){
 
 
     var ExportModel = Backbone.Model.extend({
-
       defaults : {
-        //always initially starts at 0
-        start : 0,
-        //might initially start at numFound rather than default 300
-        end: undefined
+        format: 'bibtex',
+        exports: undefined,
+        query: undefined,
+        identifiers: [],
+        msg: undefined,
+        maxExport: 300,
+        userExportVal: undefined,
+        numFound: undefined
       }
-
-
     });
 
 
-    var ExportView = Backbone.View.extend({
+    var ExportView = Marionette.ItemView.extend({
 
       tagName : "span",
+      className : "s-export",
 
-      events : {
-        "click .export-destination" : "triggerExport",
-        "click .dropdown-menu": "preventClose",
-        "click a": "closeDropdown",
-        "change input" : "updateModel"
+      initialize: function () {
       },
 
+      template: WidgetTemplate,
 
-      buttonTemplate : ButtonTemplate,
-
-      menuTemplate : MenuTemplate,
-
-      render : function(){
-
-        this.$el.html(ButtonTemplate());
-
-        this.renderMenu();
-
+      events: {
+        'click #exportModal button.apply': 'selectedExport'
       },
 
-      updateModel : function(e){
+      modelEvents: {
+        "change:exports": 'render',
+        "change:msg" : 'render'
+      },
 
-        var $t = $(e.target);
-        var v =  $t.val();
-
-        //user input is not zero indexed, but the model is
-
-
-        if ($t.hasClass("export-start-val")){
-          this.model.set("start", _.max([v - 1, 0]))
+      render: function() {
+        // this seems to be necessary (at least when the actions happen too fast ... like in unittests)
+        if (this.$el && this.$el.find('#exportModal').length) {
+          this.$el.find('#exportModal').modal('hideModal');
         }
-        else if ($t.hasClass("export-end-val")){
-          this.model.set("end", _.min([v, this.model.get("currentMax")]))
-        }
-
-        this.renderMenu();
-
+        Marionette.ItemView.prototype.render.apply(this, arguments);
       },
 
-      preventClose : function(e){
-        e.stopPropagation()
+      buildSlider: function (min, max) {
+        var that = this;
+        this.$(".slider").slider({
+          range: 'min',
+          min: min,
+          max: max,
+          value: Math.min(20, max),
+          slide: function( event, ui ) {
+            that.$(".show-slider-data-second").val(ui.value);
+          }
+        });
+        this.$(".show-slider-data-first").val(min);
+        this.$(".show-slider-data-second").val(Math.min(20, max));
       },
 
-      closeDropdown : function(){
-
-        this.$(".btn-group").removeClass("open");
-
-      },
-
-      renderMenu : function(){
-
-        var m = this.model.toJSON();
-
-        var data = {};
-
-        //display is not zero indexed, but the model is
-
-        data.startVal = m.start + 1;
-
-        data.endVal = m.end;
-
-        this.$el.find(".dropdown-menu").empty().append(MenuTemplate(data))
-
-
-      },
-
-      triggerExport : function(e){
-
-        var pathName = $(e.target).data("path");
-        this.trigger("export", pathName)
-
+      selectedExport: function(ev) {
+        this.model.set('userExportVal', this.$(".show-slider-data-second").val());
       }
-
     });
 
 
     var ExportWidget = BaseWidget.extend({
 
+      modelEvents: {
+        'change:userExportVal': 'exportRecords'
+      },
+
       initialize : function(options){
-
         this.model = new ExportModel();
-        this.view = new ExportView({model : this.model})
-        this.listenTo(this.view, "export", this.requestExportData)
-
+        this.view = new ExportView({model : this.model});
         this.defaultMax = options.defaultMax || 300;
-
         BaseWidget.prototype.initialize.apply(this, arguments);
-
+        Marionette.bindEntityEvents(this, this.view, Marionette.getOption(this, "viewEvents"));
+        Marionette.bindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
       },
 
       activate: function (beehive) {
-
-        _.bindAll(this, "getQueryInfo", "processResponse");
+        _.bindAll(this, "handleFeedback", "processResponse");
         this.pubsub = beehive.Services.get('PubSub');
 
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.getQueryInfo);
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+        // widget doesn't need to execute queries (but it needs to listen to them)
+        this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
       },
 
-      paths : {
-
-        ADSClassic : "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect"
-
+      handleFeedback: function(feedback) {
+        switch (feedback.code) {
+          case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
+            this.setCurrentQuery(feedback.query);
+            this.model.set('query', feedback.query.url());
+            this.model.set('numFound', feedback.numFound);
+            break;
+        }
       },
 
+      exportRecords: function() {
+        var max = this.model.get('userExportVal') || this.model.get('maxExport');
+        var q = this.getCurrentQuery();
+        q = q.clone();
+        q.unlock();
+        q.set('rows', max);
+        q.set('fl', 'bibcode');
+        var self = this;
+        this._executeApiRequest(q)
+          .done(function(apiResponse) {
+            var ids = _.map(apiResponse.get('response.docs'), function(d) {return d.bibcode});
+            self.export(self.model.get('format') || 'bibtex', ids);
+          });
+      },
+
+      export: function(format, data) {
+        var self = this;
+
+        if (data instanceof ApiQuery || !data) {
+          var q = data || this.getCurrentQuery();
+          if (q) {
+            var d = this.getQueryInfo(q);
+            d.done(function(numFound) {
+              var toSet = {};
+              if (numFound == -1) {
+                toSet['msg'] = 'Unknown number of results'
+              }
+              else {
+                toSet['numFound'] = numFound;
+                toSet['maxExport'] = Math.min(numFound, self.maxExport);
+              }
+              this.model.set(toSet);
+            })
+          }
+        }
+        else { // set of identifiers
+          this._getExport(data)
+            .done(function(exports) {
+              if (exports && exports.has('data')) {
+                self.model.set('exports', exports.get('data'));
+              }
+              else {
+                console.error('The export did return some garbage, tfuj!', exports);
+              }
+            });
+        }
+      },
+
+
+      /**
+       * Returns 'numFound' for the given query
+       *
+       * @param apiQuery
+       * @returns {*}
+       */
       getQueryInfo : function(apiQuery){
-
-        this.setCurrentQuery(apiQuery);
-
-        this.model.set("currentMax", this.defaultMax);
-
-        var  q = apiQuery.clone();
-        q.unlock();
-
-        q.unset("fl");
-        q.unset("facet");
-
-        //XXX: use ApiQueryModifier class for this
-        q.set("__forNumFound", "true");
+        var q = apiQuery || this.getCurrentQuery();
+        var defer = $.Deferred();
 
         if (q) {
+          if (this.model.get('query') == q.url() && this.model.has('numFound')) {
+            defer.resolve(this.model.get('numFound'));
+            return;
+          }
+
           var req = this.composeRequest(q);
           if (req) {
-            this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-          }
-        }
-
-
-      },
-
-      requestExportData : function(pathName){
-
-        var path = this.paths[pathName];
-
-        if (pathName === "ADSClassic"){
-
-          this.callBack = function(params){
-            this.post(path, params)
-          }
-
-        }
-
-        var currentQuery = this.getCurrentQuery();
-
-        var  q = currentQuery.clone();
-        q.unlock();
-
-        q.set("fl", "bibcode");
-        q.unset("facet");
-
-
-        var start = this.model.get("start");
-        q.set("start", start);
-        q.set("rows", this.model.get("end") - start);
-
-        if (q) {
-          var req = this.composeRequest(q);
-          if (req) {
-            this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
-          }
-        }
-      },
-
-
-      processResponse : function(apiResponse){
-
-        if (apiResponse.has('responseHeader.params.__forNumFound')){
-
-          this.numFound = apiResponse.get("response.numFound");
-
-          if (this.numFound < this.defaultMax){
-            this.model.set("end", this.numFound);
-            this.model.set("currentMax", this.numFound)
+            this.pubsub.subscribeOnce(this.pubsub.DELIVERING_RESPONSE, _.bind(function(apiResponse) {
+              defer.resolve(apiResponse.get('response.numFound'));
+            }), this);
+            this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
           }
           else {
-            this.model.set("end", this.defaultMax)
+            throw new Error('Well, this is unexpected behaviour! Who wrote this software?');
           }
-
-          this.view.render();
-
-          return
-
         }
+        else {
+          defer.resolve(-1);
+        }
+        return defer;
+      },
 
-        var docs = apiResponse.get("response.docs");
+      _getExport: function(identifiers, format){
 
-        this.callBack(docs);
+        if (!_.isArray(identifiers)) throw new Error('Identifiers must be an array');
+        if (identifiers.length <= 0) throw new Error('Do you want to export nothing? Let me be!');
 
+        format = format || this.model.get('format');
+        var self = this;
+        var q = new ApiQuery();
+        q.set('identifiers', identifiers);
+        q.set('format', format);
+
+        var req = this.composeRequest(q);
+        req.set('target', '/export');
+
+        var defer = $.Deferred();
+
+        if (req) {
+          this.pubsub.subscribeOnce(this.pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
+            defer.resolve(data);
+          }), this);
+          this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
+        }
+        else {
+          throw new Error('Well, this is unexpected behaviour! Who wrote this software?');
+        }
+        return defer;
+      },
+
+      _executeApiRequest: function(apiQuery){
+        if (!apiQuery) throw new Error('Damn, and I thought you knew what you do!');
+
+        var self = this;
+        var req = this.composeRequest(apiQuery);
+        var defer = $.Deferred();
+        if (req) {
+          this.pubsub.subscribeOnce(this.pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
+            defer.resolve(data);
+          }), this);
+          this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
+        }
+        else {
+          throw new Error('Well, this is unexpected behaviour! Who wrote this software?');
+        }
+        return defer;
       },
 
 

@@ -183,7 +183,7 @@ require.config({
     },
 
     'jquery-ui' : {
-      deps: ['jquery']
+      deps: ['jquery', 'bootstrap']
     }
   },
 

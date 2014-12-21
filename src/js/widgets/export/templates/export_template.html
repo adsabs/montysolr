@@ -1,0 +1,36 @@
+<!-- Button trigger modal -->
+<button type="button" id="exportQuery" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#exportModal">
+    Export query
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exportModalLabel">Select number of records to export</h4>
+            </div>
+            <div class="modal-body">
+                <div class="slider s-slider"></div>
+                <div class="graph-controls row">
+                    <div class="slider-data col-sm-8">
+                        <input type="number" class="show-slider-data-first" readonly="true"></input> to
+                        <input type="number" class="show-slider-data-second"></input>
+                    </div>
+{{#if maxExport}}You can export maximum of&nbsp;{{maxExport}}.{{/if}}
+{{#if numFound}}The query returns {{numFound}} results.{{/if}}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                <button class="apply btn btn-sm btn-info" data-dismiss="modal">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exports -->
+{{#if exports}}
+    <pre id="exportData">{{exports}}</pre>
+{{/if}}
