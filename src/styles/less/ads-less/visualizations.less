@@ -256,18 +256,9 @@ Year, Citation and Reference Graphs
 
 
 .s-summary-view {
-  width: 50%;
   border-right:  4px solid @gray-lighter;
-  float: left;
 }
 
-.s-detail-view {
-  width: 50%;
-  float: left;
-  border-left: none;
-
-
-}
 
 
 .network-link {
@@ -305,20 +296,13 @@ Year, Citation and Reference Graphs
 
 .s-network-chart {
   width: 100%;
+  height: 100%;
 }
 
-.s-summary-chart {
-  min-width:300px;
-
-}
-
-svg text {
-  font: none;
-}
 
 
 .detail-link {
-  opacity: .6;
+  opacity: .15;
 }
 
 .detail-node {
@@ -451,4 +435,30 @@ svg text {
 
 .summary-label-container text {
   opacity: .25;
+}
+
+
+.graph-region, .info-region {
+  width: 49%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.s-group-title {
+padding: 10px;
+  margin-left: -1%;
+  margin-bottom: 20px;
+  h3{
+    color: @gray-darker;
+  }
+
+}
+
+.summary-node-group {
+  cursor : pointer;
+}
+
+.text-labels {
+  cursor: pointer;
+  .lh-transition(font-size, .5s)
 }

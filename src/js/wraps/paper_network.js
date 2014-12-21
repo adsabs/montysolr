@@ -1,155 +1,481 @@
 define([
-   'underscore',
-  'js/widgets/network_vis/network_widget',
-  'js/components/api_query_updater',
-  'bootstrap'
-],
-  function(
-   _,
-  NetworkWidget,
-  ApiQueryUpdater
-  ) {
+    'marionette',
+    'js/widgets/network_vis/network_widget',
+    'js/components/api_query_updater',
+    'hbs!./templates/paper-network-data',
+    'bootstrap'
+  ],
+  function (
+    Marionette,
+    NetworkWidget,
+    ApiQueryUpdater,
+    DataTemplate,
+    bs
+    ) {
 
-  var options = {};
+    var options = {};
 
-  options.endpoint = "services/vis/paper-network";
+    options.endpoint = "services/vis/paper-network";
 
-  options.networkType = "paper";
+    options.networkType = "paper";
 
-  options.helpText = "<p>The paper network groups papers from your search results based on how many" +
-    " references they have in common. Papers with many references in common are more likely to discuss" +
-    " similar topics.</p><p>If your search results returned a large enough set of papers, you will see two views:" +
-    " a summary view, which shows groups of tightly linked papers, and a detail view " +
-    " which shows you the individual papers from a group and how they are connected. </p><p>The size of the circles in the summary node graph" +
-    " are based on the cumulative number of citations shared by the group, and the titles of the summary nodes are small" +
-    " word clouds based on the words from the titles of the papers in the group.</p>";
+    options.helpText = "<p>Papers are grouped by shared references, because " +
+      " they are more likely to discuss similar topics.</p>" +
+      " <p>If your search returned a large enough set of papers, you will see two views:" +
+      " a <b>summary view</b>  with groups of tightly linked papers, and a <b>detail view</b> " +
+      " with individual papers and their connections. </p><p>The size of the nodes corresponds " +
+      " to cumulative number of shared citations.</p>";
 
-  //these defaults won't typically change
-  options.summaryMixin = {};
+    //these defaults won't typically change
+    options.graphMixin = {};
 
-  options.summaryMixin.labelSpaceMultiplier = 1.5;
+    options.graphMixin.labelSpaceMultiplier = 1.5;
 
-  options.summaryMixin.addLabels = function(options){
+    options.graphMixin.drawSummaryGraph = function () {
 
-    var nodes = options.nodes;
-    var ticks = options.ticks;
+      var d3Svg = d3.select(this.$("svg.summary-chart")[0]);
 
-    // get sizes of each group for the outer radius scale
-    var sizes = [];
-    _.each(nodes, function (n) {
-      if (n.size) {
-        sizes.push(n.size)
+      var graphData = this.model.get("summaryGraph");
+
+      var nodes = graphData.nodes;
+
+      // get a  range for link weights
+      var weights = [];
+
+      for (var i = 0; i < graphData.links.length; i++) {
+        weights.push(graphData.links[i].value);
       }
-    });
 
-    sizes = _.sortBy(sizes, function (s) {
-      return s
-    })
+      weights.sort(function sortNumber(a, b) {
+        return a - b;
+      });
 
-    var fontScale = d3.scale.linear()
-      .domain([sizes[0], sizes[sizes.length - 1]])
-      .range([20, 40]);
+      var self = this;
 
-    //append labels
-    var text = ticks.append("g")
-      .attr("x", 0)
-      .attr("dy", ".35em")
-      .attr("transform", function (d, i) {
-        return "rotate(" + -(d.angle * 180 / Math.PI - 90) + ")"
+      //show detail panel
+
+      this.$(".detail-panel").removeClass("hidden");
+
+      var paperNums = _.pluck(graphData.nodes, "paperCount");
+
+      var pie = d3.layout.pie();
+
+      // get sizes of each group for the outer radius scale
+      var sizes = [];
+      _.each(graphData.nodes, function (n) {
+        if (n.size) {
+          sizes.push(n.size / n.paperCount)
+        }
+      });
+
+      sizes = _.sortBy(sizes, function (s) {
+        return s
+      });
+
+      var width = 1000,
+        height = 1000,
+        radiusScale = d3.scale.linear().domain([sizes[0], sizes[sizes.length - 1]]).range([1.3, 2.5]);
+
+        var innerRadius = Math.min(width, height) * .13;
+
+      this.innerRadius = innerRadius;
+
+      var calculateOuterRadius = function (d, i, j) {
+
+        var size = graphData.nodes[i].size /graphData.nodes[i].paperCount;
+        return innerRadius * radiusScale(size)
+      };
+
+      //give the labels a little inner padding
+      var calculateLabelPosition = function (d, i, j) {
+
+        var size = graphData.nodes[d.index].size;
+        return innerRadius * 2;
+      };
+
+
+      var arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(calculateOuterRadius);
+      //ads colors
+      var fill = d3.scale.ordinal().range(this.adsColors);
+
+      var svg = d3Svg
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+      var data = pie(paperNums);
+
+      _.each(data, function (d, i) {
+
+        var totalPadding = (2 * Math.PI / 22) / data.length;
+
+        data[i].startAngle = data[i].startAngle + totalPadding / 2;
+
+        data[i].endAngle = data[i].endAngle - totalPadding / 2;
+
+
+      });
+
+      var groups = svg.selectAll("path")
+        .data(data)
+        .enter()
+        .append("path")
+        .attr("fill", function (d, i) {
+
+          return fill(i)
+        })
+        .attr("d", arc)
+        .classed("summary-node-group", true)
+        //for testing purposes, add the id
+        .attr("id", function(d,i ){return "vis-group-" + graphData.nodes[i].id})
+        .on("mouseover", fade("mouseenter"))
+        .on("mouseout", fade("mouseleave"))
+        //trigger group select events
+        .on("click", function (d, i) {
+
+          var groupId = graphData.nodes[i].id;
+          self.trigger("group:selected", groupId);
+
+        });
+
+      // Returns an array of tick angles and labels, given a group.
+      function groupTicks(d, i, j) {
+
+        var name = graphData.nodes[i].nodeName;
+        var k = (d.endAngle - d.startAngle) / d.value;
+        return [
+          {
+            angle: d.value / 2 * k + d.startAngle,
+            label: name
+          }
+        ];
+      }
+
+      var ticks = svg.append("g").selectAll("g")
+        .data(data)
+        .enter().append("g").selectAll("g")
+        .data(groupTicks)
+        .enter().append("g")
+        .classed("groupLabel", true)
+        .attr("transform", function (d, i, j) {
+          return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")" + "translate(" + calculateLabelPosition(_.extend(d, {
+            index: j
+          })) + ",0)";
+        });
+
+      // get sizes of each group for the outer radius scale
+      var sizes = [];
+      _.each(nodes, function (n) {
+        if (n.size) {
+          sizes.push(n.size)
+        }
+      });
+
+      sizes = _.sortBy(sizes, function (s) {
+        return s
       })
-      .classed("summary-label-container", true)
-      .selectAll("text")
-      .data(function (d, i) {
-        return _.pairs(d.label);
-      })
-      .enter()
-      .append("text")
-      .attr("x", 0)
-      .attr("text-anchor", "middle")
-      .attr("y", function (d, i, j) {
-        var size = nodes[j].size;
-        return i * fontScale(size);
-      })
-      .attr("font-size", function (d, i, j) {
-        var size = nodes[j].size;
-        return fontScale(size) + "px";
-      })
-      .text(function (d, i) {
-        if (i<=4){
-          return d[0];
+
+      var fontScale = d3.scale.linear()
+        .domain([sizes[0], sizes[sizes.length - 1]])
+        .range([20, 40]);
+
+      //append labels
+      var text = ticks.append("g")
+        .attr("x", 0)
+        .attr("dy", ".35em")
+        .attr("transform", function (d, i) {
+          return "rotate(" + -(d.angle * 180 / Math.PI - 90) + ")"
+        })
+        .classed("summary-label-container", true)
+        .selectAll("text")
+        .data(function (d, i) {
+          return _.pairs(d.label);
+        })
+        .enter()
+        .append("text")
+        .attr("x", 0)
+        .classed("text-labels", true)
+        .attr("text-anchor", "middle")
+        .attr("y", function (d, i, j) {
+          var size = nodes[j].size;
+          return i * fontScale(size);
+        })
+        .attr("font-size", function (d, i, j) {
+          var size = nodes[j].size;
+          return fontScale(size) + "px";
+        })
+        .text(function (d, i) {
+          if (i <= 4) {
+            return d[0];
+
+          }
+        });
+
+      //show and fade labels
+      text.on("mouseover", fadeText("mouseenter"))
+        .on("mouseout", fadeText("mouseleave"));
+
+      //trigger group select events
+      text.on("click", function () {
+
+        var groupIndex = graphData.nodes[this.parentNode.__data__.index].id;
+
+        self.trigger("group:selected", groupIndex);
+
+      });
+
+      // Returns an event handler for fading a given chord group.
+      function fade(event) {
+        return function (g, i, j) {
+
+          var textOpacity = event == "mouseenter" ? 1 : .25;
+
+          //fade the text
+          d3.selectAll(self.$(".summary-label-container"))
+            .filter(function (d, i2) {
+              return i2  == i
+            })
+            .selectAll("text")
+            .transition()
+            .style("opacity", textOpacity);
+
+        };
+      }
+
+      //have to add this to the text or else it interferes with mouseover
+      function fadeText(event) {
+        return function (g, j, i) {
+
+          var textOpacity = event == "mouseenter" ? 1 : .25;
+
+          //fade the text
+          d3.select(this.parentNode)
+            .selectAll("text")
+            .transition()
+            .style("opacity", textOpacity);
+
+        };
+      }
+    };
+
+    options.graphMixin.events = {
+
+      "change input[name=height-setting]" : "toggleHeightSetting"
+    };
+
+    options.graphMixin.toggleHeightSetting = function(e){
+
+      var self = this;
+
+      //val is either read_count vs "size" which is citations
+
+      var val = $(e.target).val();
+
+      var graphData  =this.model.get("summaryGraph");
+
+      // get sizes of each group for the outer radius scale
+      var sizes = [];
+      _.each(graphData.nodes, function (n) {
+
+        var  individualSize = n[val] || 0 ;
+
+          sizes.push(individualSize / n.paperCount);
+
+      });
+
+      sizes = _.sortBy(sizes, function (s) {
+        return s
+      });
+
+      radiusScale = d3.scale.linear().domain([sizes[0], sizes[sizes.length - 1]]).range([1.3, 2.5]);
+
+      var calculateOuterRadius = function (d, i, j) {
+
+        var size = graphData.nodes[i][val] /graphData.nodes[i].paperCount;
+        return self.innerRadius * radiusScale(size);
+      };
+
+      var arc = d3.svg.arc().innerRadius(this.innerRadius).outerRadius(calculateOuterRadius);
+
+      d3.selectAll(".summary-node-group")
+        .transition()
+        .attr("d", arc);
+
+      var fontScale = d3.scale.linear()
+        .domain([sizes[0], sizes[sizes.length - 1]])
+        .range([20, 40]);
+
+      d3.selectAll(".summary-label-container")
+        .attr("y", function (d, i) {
+          var size = graphData.nodes[i][val]/graphData.nodes[i].paperCount;;
+          return i * fontScale(size);
+        })
+        .selectAll("text")
+        .attr("font-size", function (d, i, j) {
+          var size = graphData.nodes[j][val]/graphData.nodes[j].paperCount;
+          return fontScale(size) + "px";
+        })
+
+
+    };
+
+
+    options.showDetailGraphView = function () {
+
+      var groupId = this.model.get("currentGroup");
+
+      var groupIndex;
+
+      _.each(this.model.get("data").summaryGraph.nodes, function (n, i) {
+
+        if (n.id == groupId) {
+
+          groupIndex = i;
 
         }
-      })
 
-    return text;
-  };
+      });
 
-  options.detailMixin = {};
+      //get data
+      var summaryData = _.filter(this.model.get("data").summaryGraph.nodes, function (n, i) {
 
-  options.detailMixin.renderNodes = function(options){
+        return ( n.id == groupId)
 
-   var g2 = options.g2;
+      })[0];
 
-   var scalesDict = options.scalesDict;
+      //make a copy
+      summaryData = $.extend({}, summaryData);
 
-   var authorRegex =/.+,\s*./;
+      summaryData.processedTopCommonReferences = []
 
-   var node = g2.selectAll(".detail-node")
-     .data(this.model.get("nodes"))
-     .enter()
-     .append("text")
-     .text(function (d) {
-       var normalizedName = d.first_author.match(authorRegex);
-       return d.nodeName.slice(0,4) + "; " + normalizedName;
-     })
-     //adding popovers
-     .attr("data-toggle", "popover")
-     .attr("title", function(d){return "<b>"+d.nodeName +"</b>"})
-     .attr("data-content", function(d){
-       return "<b>Title: </b>"+ d.title+"<br/><b>First Author: </b>" + d.first_author+"<br/><b>Citation Count: </b>"+ d.citation_count
-     })
-     .attr("font-size", function (d) {
-       return scalesDict.fontScale(d.nodeWeight) + "px"
-     })
-     .classed({"detail-node": true, "selected-node": function (d) {
-       return d.currentlySelected ? true : false
-     }});
+      _.each(summaryData.topCommonReferences, function (v, k) {
 
-   return node
+        summaryData.processedTopCommonReferences.push([k, (v * 100).toFixed(0)]);
 
- };
+      });
 
-  options.detailMixin.addExtraListeners = function(){
+      summaryData.processedTopCommonReferences = _.sortBy(summaryData.processedTopCommonReferences,
+        function(n){return n[1]}).reverse();
 
-    //initialize popovers
-    this.$('[data-toggle="popover"]').popover(
-      {
-        trigger: "hover",
-        container: $("body"),
-        html : true,
-        placement : "left"
+      var detailGraph = this.extractGraphData(groupId);
+
+      var topNodes = _.sortBy(detailGraph.nodes, function (o) {
+
+        return o.citation_count;
+
+      }).reverse().slice(0, 5);
+
+      var detailModel = new Backbone.Model();
+
+      detailModel.set("summaryData", summaryData);
+
+      if (this.model.get("currentlySelectedGroupIds").indexOf(groupId)!== -1){
+
+        detailModel.set("currentlySelected", true);
+
       }
-    )
+      else {
 
-  };
+        detailModel.set("currentlySelected", false);
 
-  options.broadcastFilteredQuery = function(bibcodes){
+      }
 
-    if (!bibcodes.length) {
-      return;
-    }
+      detailModel.set("topNodes", topNodes);
 
-    var updater = new ApiQueryUpdater("fq");
-    bibcodes = "bibcode:(" + bibcodes.join(" OR ") +")";
-    var newQuery = this.getCurrentQuery().clone();
-    updater.updateQuery(newQuery, "fq", "limit", bibcodes);
+      detailModel.set("fullGraph", this.model.get("data").fullGraph);
 
-    this.resetWidget();
-    this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
-  };
+      detailModel.set("groupId", groupId);
 
-  return function(){
-    return new NetworkWidget(options);
-  };
+      detailModel.set("backgroundColor", this.adsColors[groupIndex]);
 
-});
+      //render view
+
+      var detailView = new DetailView({model: detailModel});
+
+      this.listenTo(detailView, "name:toggle", this.updateSingleName);
+      this.listenTo(detailView, "names:toggle", this.updateGroupOfNames);
+
+      this.listenTo(detailView, "close", function () {
+        this.stopListening(detailView);
+      });
+
+      this.$(".info-region").empty().append(detailView.render().el);
+
+      this.$(".info-region").fadeIn();
+
+    };
+
+    var DetailView = Marionette.ItemView.extend({
+
+      template: DataTemplate,
+
+      className : "paper-network-detail-view",
+
+      events: {
+        "click .update-all": "toggleAllNames"
+      },
+
+      toggleAllNames: function () {
+
+        var names = [];
+
+        _.each(this.model.get("fullGraph").nodes, function (n) {
+
+          if (n.group ===this.model.get("groupId")) {
+
+            names.push(n.nodeName);
+          }
+
+        }, this);
+
+        var action = this.$(".update-all").hasClass("add-all") ? "add" : "remove";
+
+        this.trigger("names:toggle", names, action);
+
+        this.toggleUpdateButton();
+
+      },
+
+      toggleUpdateButton: function () {
+
+        this.$(".update-all").toggleClass("add-all");
+
+        if (this.$(".update-all").hasClass("add-all")) {
+
+          this.$(".update-all").text("Add entire group to filter list.");
+
+        }
+
+        else {
+
+          this.$(".update-all").text("Remove entire group from filter list.");
+
+        }
+
+      }
+
+
+    });
+
+    options.broadcastFilteredQuery = function (bibcodes) {
+
+      if (!bibcodes.length) {
+        return;
+      }
+
+      var updater = new ApiQueryUpdater("fq");
+      bibcodes = "bibcode:(" + bibcodes.join(" OR ") + ")";
+      var newQuery = this.getCurrentQuery().clone();
+        newQuery.unlock();
+      updater.updateQuery(newQuery, "fq", "limit", bibcodes);
+
+      this.resetWidget();
+      this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+    };
+
+    return function () {
+      return new NetworkWidget(options);
+    };
+
+  });

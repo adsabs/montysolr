@@ -157,6 +157,15 @@ svg {
 }
 
 
+/*
+
+this interferes with other visualizations, i dont know how to override it
+
+*/
+
+/*svg text {*/
+    /*font: normal 12px Arial;*/
+/*}*/
 
 svg .title {
     font: bold 14px Arial;

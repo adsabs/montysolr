@@ -6,7 +6,7 @@ define([
   JsonResponse
   ){
 
-  describe("Paper Network Widget (UI Widget)", function(){
+  describe("Paper Network UI Widget (paper_network_widget.spec.js)", function(){
 
     var testDataBig = {
       "fullGraph": {
@@ -8277,6 +8277,7 @@ define([
             "id": 0,
             "nodeName": "2014arXiv1406.4542H",
             "nodeWeight": 0,
+            "read_count": 20.0,
             "title": "Computing and Using Metrics in the ADS"
           },
           {
@@ -8286,6 +8287,7 @@ define([
             "id": 1,
             "nodeName": "2009arad.workE..32A",
             "nodeWeight": 1,
+            "read_count": 9.0,
             "title": "Towards a Resource-Centric Data Network for Astronomy"
           },
           {
@@ -8295,6 +8297,7 @@ define([
             "id": 2,
             "nodeName": "1998ASPC..153..277E",
             "nodeWeight": 1,
+            "read_count": 2.0,
             "title": "The Astrophysics Data System"
           },
           {
@@ -8304,6 +8307,7 @@ define([
             "id": 3,
             "nodeName": "2006JEPub...9....2H",
             "nodeWeight": 8,
+            "read_count": 18.0,
             "title": "Effect of E-printing on Citation Rates in Astronomy and Physics"
           },
           {
@@ -8313,6 +8317,7 @@ define([
             "id": 4,
             "nodeName": "2003ASPC..295...51M",
             "nodeWeight": 1,
+            "read_count": 16.0,
             "title": "Federating Catalogs and Interfacing Them with Archives: A VO Prototype"
           },
           {
@@ -8322,6 +8327,7 @@ define([
             "id": 5,
             "nodeName": "2005ApJ...635L.125G",
             "nodeWeight": 36,
+            "read_count": 119.0,
             "title": "SHELS: The Hectospec Lensing Survey"
           },
           {
@@ -8331,6 +8337,7 @@ define([
             "id": 6,
             "nodeName": "2007ASPC..377...69A",
             "nodeWeight": 2,
+            "read_count": 33.0,
             "title": "Creation and Use of Citations in the ADS"
           },
           {
@@ -8340,6 +8347,7 @@ define([
             "id": 7,
             "nodeName": "1998ASPC..153..293K",
             "nodeWeight": 4,
+            "read_count": 4.0,
             "title": "The Historical Literature of Astronomy, via ADS"
           },
           {
@@ -8349,6 +8357,7 @@ define([
             "id": 8,
             "nodeName": "2014ApJ...786...93U",
             "nodeWeight": 2,
+            "read_count": 131.0,
             "title": "Reducing Systematic Error in Weak Lensing Cluster Surveys"
           },
           {
@@ -8358,6 +8367,7 @@ define([
             "id": 10,
             "nodeName": "2007ApJ...671.1708B",
             "nodeWeight": 62,
+            "read_count": 118.0,
             "title": "Hypervelocity Stars. III. The Space Density and Ejection History of Main-Sequence Stars from the Galactic Center"
           },
           {
@@ -8367,6 +8377,7 @@ define([
             "id": 11,
             "nodeName": "1997AJ....113..624K",
             "nodeWeight": 12,
+            "read_count": 17.0,
             "title": "An Adaptive Kernel Approach to Finding dSph Galaxies Around the Milky Way"
           },
           {
@@ -8376,6 +8387,7 @@ define([
             "id": 12,
             "nodeName": "2012opsa.book..253H",
             "nodeWeight": 3,
+            "read_count": 22.0,
             "title": "The ADS in the Information Age - Impact on Discovery"
           },
           {
@@ -8385,6 +8397,7 @@ define([
             "id": 14,
             "nodeName": "1998ASPC..145..378E",
             "nodeWeight": 5,
+            "read_count": 4.0,
             "title": "New Capabilities of the ADS Abstract and Article Service"
           },
           {
@@ -8394,6 +8407,7 @@ define([
             "id": 15,
             "nodeName": "2011ApSSP...1..125H",
             "nodeWeight": 4,
+            "read_count": 16.0,
             "title": "Finding Your Literature Match - A Recommender System"
           },
           {
@@ -8403,6 +8417,7 @@ define([
             "id": 16,
             "nodeName": "2010ASPC..434..155K",
             "nodeWeight": 3,
+            "read_count": 17.0,
             "title": "Using Multipartite Graphs for Recommendation and Discovery"
           },
           {
@@ -8412,6 +8427,7 @@ define([
             "id": 17,
             "nodeName": "2006AAS...20917302H",
             "nodeWeight": 0,
+            "read_count": 4.0,
             "title": "Finding Astronomical Communities Through Co-readership Analysis"
           },
           {
@@ -8421,6 +8437,7 @@ define([
             "id": 18,
             "nodeName": "2006ApJ...640L..35B",
             "nodeWeight": 68,
+            "read_count": 102.0,
             "title": "A Successful Targeted Search for Hypervelocity Stars"
           },
           {
@@ -8430,6 +8447,7 @@ define([
             "id": 19,
             "nodeName": "1998ASPC..145...93M",
             "nodeWeight": 2,
+            "read_count": 9.0,
             "title": "RVSAO 2.0 - A Radial Velocity Package for IRAF"
           },
           {
@@ -8439,6 +8457,7 @@ define([
             "id": 21,
             "nodeName": "2007ASPC..377...36E",
             "nodeWeight": 1,
+            "read_count": 6.0,
             "title": "Connectivity in the Astronomy Digital Library"
           },
           {
@@ -8448,6 +8467,7 @@ define([
             "id": 22,
             "nodeName": "1993AJ....105..788F",
             "nodeWeight": 34,
+            "read_count": 26.0,
             "title": "A Study of the Rich Cluster of Galaxies A119"
           },
           {
@@ -8457,6 +8477,7 @@ define([
             "id": 23,
             "nodeName": "2009JInfo...3....1H",
             "nodeWeight": 5,
+            "read_count": 29.0,
             "title": "Use of astronomical literature - A report on usage patterns"
           },
           {
@@ -8466,6 +8487,7 @@ define([
             "id": 24,
             "nodeName": "2012LPI....43.1022H",
             "nodeWeight": 0,
+            "read_count": 9.0,
             "title": "Online Discovery: Search Paradigms and the Art of Literature Exploration"
           },
           {
@@ -8475,6 +8497,7 @@ define([
             "id": 25,
             "nodeName": "2006ApJ...647..303B",
             "nodeWeight": 76,
+            "read_count": 95.0,
             "title": "Hypervelocity Stars. I. The Spectroscopic Survey"
           },
           {
@@ -8484,6 +8507,7 @@ define([
             "id": 26,
             "nodeName": "1986NYASA.470..123G",
             "nodeWeight": 0,
+            "read_count": 10.0,
             "title": "The galaxy distribution and the large-scale structure of the Universe."
           },
           {
@@ -8493,6 +8517,7 @@ define([
             "id": 27,
             "nodeName": "2007ASPC..377...93E",
             "nodeWeight": 0,
+            "read_count": 7.0,
             "title": "Full Text Searching in the Astrophysics Data System"
           },
           {
@@ -8502,7 +8527,8 @@ define([
             "id": 28,
             "nodeName": "2005AJ....130.1482R",
             "nodeWeight": 59,
-            "title": "CAIRNS: The Cluster and Infall Region Nearby Survey. III. Environmental Dependence of Hα Properties of Galaxies"
+            "read_count": 130.0,
+            "title": "CAIRNS: The Cluster and Infall Region Nearby Survey. III. Environmental Dependence of H\u03b1 Properties of Galaxies"
           },
           {
             "citation_count": 0,
@@ -8511,6 +8537,7 @@ define([
             "id": 29,
             "nodeName": "2009LPI....40.1873H",
             "nodeWeight": 0,
+            "read_count": 6.0,
             "title": "The SAO/NASA Astrophysics Data System: A Gateway to the Planetary Sciences Literature"
           },
           {
@@ -8520,6 +8547,7 @@ define([
             "id": 30,
             "nodeName": "1992ApJ...395..347B",
             "nodeWeight": 23,
+            "read_count": 35.0,
             "title": "The Velocity-Distance Relation for Galaxies on a Bubble"
           },
           {
@@ -8529,6 +8557,7 @@ define([
             "id": 31,
             "nodeName": "2011ApSSP...1...23K",
             "nodeWeight": 1,
+            "read_count": 7.0,
             "title": "The Emerging Scholarly Brain"
           },
           {
@@ -8538,6 +8567,7 @@ define([
             "id": 32,
             "nodeName": "1994ApJ...437..560W",
             "nodeWeight": 25,
+            "read_count": 3.0,
             "title": "A Medium-deep Redshift Survey of a Minislice at the North Galactic Pole"
           },
           {
@@ -8547,6 +8577,7 @@ define([
             "id": 33,
             "nodeName": "2003AJ....126.1362B",
             "nodeWeight": 21,
+            "read_count": 27.0,
             "title": "The Century Survey Galactic Halo Project. I. Stellar Spectral Analysis"
           },
           {
@@ -8556,6 +8587,7 @@ define([
             "id": 34,
             "nodeName": "1993AJ....106..676A",
             "nodeWeight": 20,
+            "read_count": 7.0,
             "title": "CCD Calibration of the Magnitude Scale for the Southern Sky Redshift Survey Extension Galaxy Sample"
           },
           {
@@ -8565,6 +8597,7 @@ define([
             "id": 35,
             "nodeName": "2003ASPC..295..309A",
             "nodeWeight": 0,
+            "read_count": 3.0,
             "title": "ADS Web Services for the Discovery and Linking of Bibliographic Records"
           },
           {
@@ -8574,6 +8607,7 @@ define([
             "id": 36,
             "nodeName": "2005ASPC..347..228M",
             "nodeWeight": 4,
+            "read_count": 20.0,
             "title": "Creating Data that Never Die: Building a Spectrograph Data Pipeline in the Virtual Observatory Era"
           },
           {
@@ -8583,6 +8617,7 @@ define([
             "id": 37,
             "nodeName": "2010AJ....139.1857F",
             "nodeWeight": 20,
+            "read_count": 109.0,
             "title": "Triggered Star Formation in Galaxy Pairs at z = 0.08-0.38"
           },
           {
@@ -8592,6 +8627,7 @@ define([
             "id": 38,
             "nodeName": "2005AJ....130.1097B",
             "nodeWeight": 17,
+            "read_count": 30.0,
             "title": "The Century Survey Galactic Halo Project. II. Global Properties and the Luminosity Function of Field Blue Horizontal Branch Stars"
           },
           {
@@ -8601,6 +8637,7 @@ define([
             "id": 39,
             "nodeName": "2001ApJ...559..606C",
             "nodeWeight": 67,
+            "read_count": 68.0,
             "title": "Star Formation in a Complete Spectroscopic Survey of Galaxies"
           },
           {
@@ -8610,6 +8647,7 @@ define([
             "id": 40,
             "nodeName": "1995PASP..107..776K",
             "nodeWeight": 0,
+            "read_count": 7.0,
             "title": "Giant Shoulders: Data and Discovery in Astronomy"
           },
           {
@@ -8619,6 +8657,7 @@ define([
             "id": 41,
             "nodeName": "2007ASPC..377..106H",
             "nodeWeight": 6,
+            "read_count": 14.0,
             "title": "myADS-arXiv -- a Tailor-made, Open Access, Virtual Journal"
           },
           {
@@ -8628,6 +8667,7 @@ define([
             "id": 42,
             "nodeName": "2001ASPC..238..491M",
             "nodeWeight": 2,
+            "read_count": 21.0,
             "title": "SVDFIT: An IRAF Task for Eigenvector Sky Subtraction"
           },
           {
@@ -8637,6 +8677,7 @@ define([
             "id": 43,
             "nodeName": "2000A&AS..143...61E",
             "nodeWeight": 17,
+            "read_count": 13.0,
             "title": "The NASA Astrophysics Data System: The search engine and its user interface"
           },
           {
@@ -8646,6 +8687,7 @@ define([
             "id": 44,
             "nodeName": "2006ApJ...653.1194B",
             "nodeWeight": 54,
+            "read_count": 97.0,
             "title": "Hypervelocity Stars: Predicting the Spectrum of Ejection Velocities"
           },
           {
@@ -8655,6 +8697,7 @@ define([
             "id": 45,
             "nodeName": "2014ApJ...786..125S",
             "nodeWeight": 1,
+            "read_count": 63.0,
             "title": "Comparison of Galaxy Clusters Selected by Weak-lensing, Optical Spectroscopy, and X-Rays in the Deep Lens Survey F2 Field"
           },
           {
@@ -8664,6 +8707,7 @@ define([
             "id": 46,
             "nodeName": "2000A&AS..143..111G",
             "nodeWeight": 20,
+            "read_count": 18.0,
             "title": "The NASA Astrophysics Data System: Data holdings"
           },
           {
@@ -8673,6 +8717,7 @@ define([
             "id": 47,
             "nodeName": "2007AJ....133..882K",
             "nodeWeight": 55,
+            "read_count": 84.0,
             "title": "SDSS 0809+1729: Connections Between Extremely Metal-Poor Galaxies and Gamma-Ray Burst Hosts"
           },
           {
@@ -8682,6 +8727,7 @@ define([
             "id": 48,
             "nodeName": "1996ASPC..101..558A",
             "nodeWeight": 4,
+            "read_count": 5.0,
             "title": "The ADS Article Service Data Holdings and Access Methods"
           },
           {
@@ -8691,7 +8737,8 @@ define([
             "id": 49,
             "nodeName": "2007AJ....134.1360K",
             "nodeWeight": 13,
-            "title": "μ-PhotoZ: Photometric Redshifts by Inverting the Tolman Surface Brightness Test"
+            "read_count": 22.0,
+            "title": "\u03bc-PhotoZ: Photometric Redshifts by Inverting the Tolman Surface Brightness Test"
           },
           {
             "citation_count": 78,
@@ -8700,6 +8747,7 @@ define([
             "id": 50,
             "nodeName": "1989ApJ...336...77F",
             "nodeWeight": 78,
+            "read_count": 22.0,
             "title": "A Combined Optical/X-Ray Study of the Galaxy Cluster Abell 2256"
           },
           {
@@ -8709,6 +8757,7 @@ define([
             "id": 51,
             "nodeName": "2010ARIST..44....3K",
             "nodeWeight": 8,
+            "read_count": 97.0,
             "title": "Usage Bibliometrics"
           },
           {
@@ -8718,6 +8767,7 @@ define([
             "id": 52,
             "nodeName": "1997AJ....114.2205G",
             "nodeWeight": 79,
+            "read_count": 47.0,
             "title": "The Century Survey: A Deeper Slice of the Universe"
           },
           {
@@ -8727,6 +8777,7 @@ define([
             "id": 53,
             "nodeName": "1999PASP..111..438F",
             "nodeWeight": 294,
+            "read_count": 326.0,
             "title": "The Updated Zwicky Catalog (UZC)"
           },
           {
@@ -8736,6 +8787,7 @@ define([
             "id": 54,
             "nodeName": "2007LePub..20...16H",
             "nodeWeight": 4,
+            "read_count": 24.0,
             "title": "E-prints and journal articles in astronomy: a productive co-existence"
           },
           {
@@ -8745,6 +8797,7 @@ define([
             "id": 55,
             "nodeName": "1997PASP..109.1278S",
             "nodeWeight": 6,
+            "read_count": 17.0,
             "title": "Trends in Astronomical Publication Between 1975 and 1996"
           },
           {
@@ -8754,6 +8807,7 @@ define([
             "id": 56,
             "nodeName": "2010ApJ...709..832G",
             "nodeWeight": 24,
+            "read_count": 104.0,
             "title": "SHELS: Testing Weak-Lensing Maps with Redshift Surveys"
           },
           {
@@ -8763,6 +8817,7 @@ define([
             "id": 57,
             "nodeName": "2003LPI....34.1949E",
             "nodeWeight": 0,
+            "read_count": 4.0,
             "title": "Expanded Citations Database in the NASA ADS Abstract Service"
           },
           {
@@ -8772,6 +8827,7 @@ define([
             "id": 58,
             "nodeName": "1984ApJ...287L..55G",
             "nodeWeight": 67,
+            "read_count": 16.0,
             "title": "The Shane-Wirtanen counts"
           },
           {
@@ -8781,6 +8837,7 @@ define([
             "id": 60,
             "nodeName": "2001AJ....122.2893W",
             "nodeWeight": 17,
+            "read_count": 25.0,
             "title": "Redshifts for 2410 Galaxies in the Century Survey Region"
           },
           {
@@ -8790,6 +8847,7 @@ define([
             "id": 61,
             "nodeName": "1996AJ....111...64M",
             "nodeWeight": 12,
+            "read_count": 30.0,
             "title": "The Lumpy Cluster Abell 1185"
           },
           {
@@ -8799,6 +8857,7 @@ define([
             "id": 62,
             "nodeName": "1998AJ....115.2359K",
             "nodeWeight": 49,
+            "read_count": 46.0,
             "title": "A V and I CCD Mosaic Survey of the Ursa Minor Dwarf Spheroidal Galaxy"
           },
           {
@@ -8808,6 +8867,7 @@ define([
             "id": 63,
             "nodeName": "2005ApJ...622L..33B",
             "nodeWeight": 158,
+            "read_count": 262.0,
             "title": "Discovery of an Unbound Hypervelocity Star in the Milky Way Halo"
           },
           {
@@ -8817,6 +8877,7 @@ define([
             "id": 64,
             "nodeName": "1998ASPC..145..395A",
             "nodeWeight": 0,
+            "read_count": 2.0,
             "title": "Mirroring the ADS Bibliographic Databases"
           },
           {
@@ -8826,6 +8887,7 @@ define([
             "id": 65,
             "nodeName": "2008AJ....135..564B",
             "nodeWeight": 26,
+            "read_count": 69.0,
             "title": "The Century Survey Galactic Halo Project III: A Complete 4300 DEG<SUP>2</SUP> Survey of Blue Horizontal Branch Stars in the Metal-Weak Thick Disk and Inner Halo"
           },
           {
@@ -8835,6 +8897,7 @@ define([
             "id": 66,
             "nodeName": "2001ApJ...561L..41R",
             "nodeWeight": 46,
+            "read_count": 45.0,
             "title": "Infrared Mass-to-Light Profile throughout the Infall Region of the Coma Cluster"
           },
           {
@@ -8844,6 +8907,7 @@ define([
             "id": 67,
             "nodeName": "2012AJ....143..102G",
             "nodeWeight": 13,
+            "read_count": 139.0,
             "title": "The Faint End of the Luminosity Function and Low Surface Brightness Galaxies"
           },
           {
@@ -8853,6 +8917,7 @@ define([
             "id": 68,
             "nodeName": "1995VA.....39..217E",
             "nodeWeight": 6,
+            "read_count": 8.0,
             "title": "Access to the Astrophysics Science Information and Abstract System"
           },
           {
@@ -8862,6 +8927,7 @@ define([
             "id": 69,
             "nodeName": "2007BASI...35..717E",
             "nodeWeight": 0,
+            "read_count": 17.0,
             "title": "Access to the literature and connection to on-line data"
           },
           {
@@ -8871,6 +8937,7 @@ define([
             "id": 71,
             "nodeName": "2004tivo.conf..267E",
             "nodeWeight": 0,
+            "read_count": 2.0,
             "title": "The Astronomy Digital Library and the VO"
           },
           {
@@ -8880,6 +8947,7 @@ define([
             "id": 73,
             "nodeName": "2007ApJ...660..311B",
             "nodeWeight": 52,
+            "read_count": 60.0,
             "title": "Hypervelocity Stars. II. The Bound Population"
           },
           {
@@ -8889,6 +8957,7 @@ define([
             "id": 74,
             "nodeName": "1989AJ.....98.1143T",
             "nodeWeight": 23,
+            "read_count": 5.0,
             "title": "Redshifts for a Sample of Fainter Galaxies in the First CfA Survey Slice"
           },
           {
@@ -8898,7 +8967,8 @@ define([
             "id": 75,
             "nodeName": "2010ApJ...708..534W",
             "nodeWeight": 19,
-            "title": "Evolution of the Hα Luminosity Function"
+            "read_count": 81.0,
+            "title": "Evolution of the H\u03b1 Luminosity Function"
           },
           {
             "citation_count": 1,
@@ -8907,6 +8977,7 @@ define([
             "id": 76,
             "nodeName": "1997ASPC..125..361S",
             "nodeWeight": 1,
+            "read_count": 2.0,
             "title": "The Sociology of Astronomical Publication Using ADS and ADAMS"
           },
           {
@@ -8916,6 +8987,7 @@ define([
             "id": 77,
             "nodeName": "2009ASPC..411..384H",
             "nodeWeight": 1,
+            "read_count": 13.0,
             "title": "Exploring the Astronomy Literature Landscape"
           },
           {
@@ -8925,6 +8997,7 @@ define([
             "id": 78,
             "nodeName": "2008PASP..120.1222F",
             "nodeWeight": 16,
+            "read_count": 65.0,
             "title": "Spectrophotometry with Hectospec, the MMT's Fiber-Fed Spectrograph"
           },
           {
@@ -8934,6 +9007,7 @@ define([
             "id": 79,
             "nodeName": "1990AJ....100.1405W",
             "nodeWeight": 12,
+            "read_count": 6.0,
             "title": "Redshifts for Fainter Galaxies in the First CfA Survey Slice. II."
           },
           {
@@ -8943,6 +9017,7 @@ define([
             "id": 80,
             "nodeName": "2001AJ....122..714B",
             "nodeWeight": 37,
+            "read_count": 26.0,
             "title": "V- and R-band Galaxy Luminosity Functions and Low Surface Brightness Galaxies in the Century Survey"
           },
           {
@@ -8952,6 +9027,7 @@ define([
             "id": 81,
             "nodeName": "2009astro2010P..28K",
             "nodeWeight": 1,
+            "read_count": 22.0,
             "title": "The Smithsonian/NASA Astrophysics Data System (ADS) Decennial Report"
           },
           {
@@ -8961,6 +9037,7 @@ define([
             "id": 82,
             "nodeName": "1995AJ....109.2368T",
             "nodeWeight": 17,
+            "read_count": 8.0,
             "title": "Redshifts for Fainter Galaxies in the First CFA Slice. III. To the Zwicky Catalog Limit"
           },
           {
@@ -8970,6 +9047,7 @@ define([
             "id": 83,
             "nodeName": "1999AJ....117.1275K",
             "nodeWeight": 14,
+            "read_count": 20.0,
             "title": "Measuring the Dark Matter Scale of Local Group Dwarf Spheroidals"
           },
           {
@@ -8979,6 +9057,7 @@ define([
             "id": 84,
             "nodeName": "1992ASPC...25..432K",
             "nodeWeight": 109,
+            "read_count": 61.0,
             "title": "XCSAO: A Radial Velocity Package for the IRAF Environment"
           },
           {
@@ -8988,6 +9067,7 @@ define([
             "id": 86,
             "nodeName": "2000A&AS..143...41K",
             "nodeWeight": 60,
+            "read_count": 63.0,
             "title": "The NASA Astrophysics Data System: Overview"
           },
           {
@@ -8997,6 +9077,7 @@ define([
             "id": 87,
             "nodeName": "2007ApJ...666..231B",
             "nodeWeight": 15,
+            "read_count": 62.0,
             "title": "Stellar Velocity Dispersion of the Leo A Dwarf Galaxy"
           },
           {
@@ -9006,6 +9087,7 @@ define([
             "id": 88,
             "nodeName": "2006ASPC..351..653K",
             "nodeWeight": 1,
+            "read_count": 15.0,
             "title": "Intelligent Information Retrieval"
           },
           {
@@ -9015,6 +9097,7 @@ define([
             "id": 89,
             "nodeName": "2005IPM....41.1395K",
             "nodeWeight": 14,
+            "read_count": 120.0,
             "title": "The Effect of Use and Access on Citations"
           },
           {
@@ -9024,6 +9107,7 @@ define([
             "id": 90,
             "nodeName": "1997ASPC..125..357A",
             "nodeWeight": 3,
+            "read_count": 1.0,
             "title": "Astronomical Information Discovery and Access: Design and Implementation of the ADS Bibliographic Services"
           },
           {
@@ -9033,6 +9117,7 @@ define([
             "id": 91,
             "nodeName": "2013PASP..125.1362F",
             "nodeWeight": 2,
+            "read_count": 87.0,
             "title": "Measuring Galaxy Velocity Dispersions with Hectospec"
           },
           {
@@ -9042,6 +9127,7 @@ define([
             "id": 92,
             "nodeName": "2000A&AS..143...85A",
             "nodeWeight": 20,
+            "read_count": 36.0,
             "title": "The NASA Astrophysics Data System: Architecture"
           },
           {
@@ -9051,6 +9137,7 @@ define([
             "id": 93,
             "nodeName": "2000PASP..112..367B",
             "nodeWeight": 9,
+            "read_count": 23.0,
             "title": "Rotation Curve Measurement using Cross-Correlation"
           },
           {
@@ -9060,6 +9147,7 @@ define([
             "id": 94,
             "nodeName": "1995ASPC...77...28E",
             "nodeWeight": 11,
+            "read_count": 9.0,
             "title": "The New Astrophysics Data System"
           },
           {
@@ -9069,6 +9157,7 @@ define([
             "id": 96,
             "nodeName": "1996ASPC..101..569E",
             "nodeWeight": 8,
+            "read_count": 9.0,
             "title": "Various Access Methods to the Abstracts in the Astrophysics Data System"
           },
           {
@@ -9078,6 +9167,7 @@ define([
             "id": 97,
             "nodeName": "1998PASP..110..934K",
             "nodeWeight": 285,
+            "read_count": 207.0,
             "title": "RVSAO 2.0: Digital Redshifts and Radial Velocities"
           },
           {
@@ -9087,6 +9177,7 @@ define([
             "id": 98,
             "nodeName": "1998AJ....116....1D",
             "nodeWeight": 138,
+            "read_count": 102.0,
             "title": "The Southern Sky Redshift Survey"
           },
           {
@@ -9096,6 +9187,7 @@ define([
             "id": 99,
             "nodeName": "2006ASPC..351..715A",
             "nodeWeight": 0,
+            "read_count": 6.0,
             "title": "Bibliographic Classification using the ADS Databases"
           },
           {
@@ -9105,6 +9197,7 @@ define([
             "id": 100,
             "nodeName": "2003AJ....126.2152R",
             "nodeWeight": 137,
+            "read_count": 245.0,
             "title": "CAIRNS: The Cluster and Infall Region Nearby Survey. I. Redshifts and Mass Profiles"
           }
         ]
@@ -9187,7 +9280,15 @@ define([
               "use": 7.917171988845775
             },
             "paperCount": 26,
-            "size": 156
+            "size": 156,
+            "topCommonReferences": {
+              "2000A&AS..143...41K": 0.69,
+              "2000A&AS..143...61E": 0.31,
+              "2000A&AS..143...85A": 0.31,
+              "2000A&AS..143..111G": 0.35,
+              "2002SPIE.4847..238K": 0.27
+            },
+            "total_reads": 617.0
           },
           {
             "id": 1,
@@ -9200,7 +9301,15 @@ define([
               "system": 7.516577810972208
             },
             "paperCount": 13,
-            "size": 59
+            "size": 59,
+            "topCommonReferences": {
+              "1993ASPC...52..132K": 0.46,
+              "1993ASSL..182...21K": 0.15,
+              "1993adass...2..132K": 0.23,
+              "1996ASPC..101..569E": 0.23,
+              "1997Ap&SS.247..189E": 0.23
+            },
+            "total_reads": 106.0
           },
           {
             "id": 2,
@@ -9213,7 +9322,15 @@ define([
               "survey": 21.405011639608446
             },
             "paperCount": 27,
-            "size": 999
+            "size": 999,
+            "topCommonReferences": {
+              "1998PASP..110..934K": 0.59,
+              "1998SPIE.3355..285F": 0.3,
+              "2005ApJ...635L.125G": 0.3,
+              "2005PASP..117.1411F": 0.33,
+              "2006ApJ...643..128W": 0.33
+            },
+            "total_reads": 2403.0
           },
           {
             "id": 4,
@@ -9226,7 +9343,15 @@ define([
               "survey": 19.45910149055313
             },
             "paperCount": 25,
-            "size": 1423
+            "size": 1423,
+            "topCommonReferences": {
+              "1979AJ.....84.1511T": 0.36,
+              "1986ApJ...302L...1D": 0.28,
+              "1988ApJ...327..544D": 0.24,
+              "1989Sci...246..897G": 0.36,
+              "1994ApJ...424L...1D": 0.28
+            },
+            "total_reads": 1152.0
           },
           {
             "id": 11,
@@ -9239,12 +9364,15 @@ define([
               "services": 1.9459101490553132
             },
             "paperCount": 2,
-            "size": 14
+            "size": 14,
+            "topCommonReferences": {
+              "1995ASPC...77...36A": 1.0
+            },
+            "total_reads": 10.0
           }
         ]
       }
     };
-
 
     var testDataSmall = {
       "fullGraph": {
@@ -9312,53 +9440,69 @@ define([
     $("#test").empty();
     });
 
-    it("should have a help popover", function(){
 
-      var paperNetwork = new PaperNetwork();
-
-      paperNetwork.processResponse(new JsonResponse(testDataBig));
-
-      $("#test").append(paperNetwork.view.el);
-      $("#test").find("i.icon-help").mouseover();
-
-      expect($(".popover").text()).to.eql("About This Network VisualizationThe paper network groups papers from your search results based on how many references they have in common. Papers with many references in common are more likely to discuss similar topics.If your search results returned a large enough set of papers, you will see two views: a summary view, which shows groups of tightly linked papers, and a detail view  which shows you the individual papers from a group and how they are connected. The size of the circles in the summary node graph are based on the cumulative number of citations shared by the group, and the titles of the summary nodes are small word clouds based on the words from the titles of the papers in the group.");
-      expect($(".popover").css("display")).to.eql("block");
-
-      $("#test").find("i.icon-help").mouseout();
-    });
-
-
-    it("should add mouseover interactions for the detail graph", function(){
+    it("should show angle of summary graph based on # of papers", function(){
 
       var paperNetwork = new PaperNetwork();
       paperNetwork.processResponse(new JsonResponse(testDataBig));
 
       $("#test").append(paperNetwork.view.el);
-      paperNetwork.view.graphView.model.set("currentGroup", $(".summary-node-group:first-of-type").get(0));
+      d3.selectAll(".summary-node-group").select("#vis-group-0");
 
-      expect( $(".detail-node:first-of-type").data("content")).to.eql("<b>Title: </b>Computing and Using Metrics in the ADS<br/><b>First Author: </b>Henneken, Edwin A.<br/><b>Citation Count: </b>0");
-      expect( $(".detail-node:last-of-type").data("content")).to.eql("<b>Title: </b>Bibliographic Classification using the ADS Databases<br/><b>First Author: </b>Accomazzi, A.<br/><b>Citation Count: </b>0");
+      var largeAdsGroupData = d3.selectAll("#vis-group-0").data()[0];
+      var largeAstroGroupData = d3.selectAll("#vis-group-4").data()[0];
+
+      //data contains number of papers
+      expect(largeAdsGroupData.value).to.eql(26);
+      expect(largeAstroGroupData.value).to.eql(25);
+
+      //angle should be slightly larger for ads group because it is a bit larger
+      expect(largeAdsGroupData.endAngle - largeAdsGroupData.startAngle).to.be.gt(largeAstroGroupData.endAngle - largeAstroGroupData.startAngle);
     });
 
-    if (!(window.PHANTOMJS || window.mochaPhantomJS)) {
-      it("should add mouseover interactions for the detail graph (Non-PhantomJS)", function () {
 
-        var paperNetwork = new PaperNetwork();
-        paperNetwork.processResponse(new JsonResponse(testDataBig));
+    it.skip("should allow the user to toggle between citations and reads view", function(){
 
-        $("#test").append(paperNetwork.view.el);
+      var paperNetwork = new PaperNetwork();
+      paperNetwork.processResponse(new JsonResponse(testDataBig));
 
-        //trigger detail view sadly can't trigger mouse events on svg in phantomjs
-        $(".summary-node-group:first-of-type").click();
-        $(".detail-node:first-of-type").mouseover();
+      $("#test").append(paperNetwork.view.el);
+      $("input[value=total_reads]").click();
 
-        expect($(".popover").length).to.eql(1);
-        expect($(".popover").text()).to.eql("2014arXiv1406.4542HTitle: Computing and Using Metrics in the ADSFirst Author: Henneken, Edwin A.Citation Count: 0");
-        expect($(".popover").css("display")).to.eql("block");
-        $(".detail-node:first-of-type").mouseout();
+    });
 
-      })
-    }
+
+
+    it("should display a view with several details about the group", function(){
+
+      var paperNetwork = new PaperNetwork();
+      paperNetwork.processResponse(new JsonResponse(testDataBig));
+
+      $("#test").append(paperNetwork.view.el);
+
+      //to change the detail view, set the current group in the container view model to the group id
+      paperNetwork.view.model.set("currentGroup", 0);
+
+      expect($(".paper-network-detail-view p:first").text()).to.eql('This group consists of 26 papers, which have been cited, in total, 156\n    times.');
+      expect($(".paper-network-detail-view ul").eq(1).find("li:first").html().trim()).to.eql('<a href="#abs/2000A&amp;AS..143...41K" data-bypass="" target="_blank">2000A&amp;AS..143...41K</a> (cited by 69% of papers in this group)');
+    });
+
+    it("listens to the graph view for node selection events (adding and removing) and updates the selected nodes list collection", function(){
+
+      var paperNetwork = new PaperNetwork();
+      paperNetwork.processResponse(new JsonResponse(testDataBig));
+
+      $("#test").append(paperNetwork.view.el);
+
+      //to change the detail view, set the current group in the container view model to the group id
+      paperNetwork.view.model.set("currentGroup", 0);
+      paperNetwork.view.$("button.update-all").click();
+      expect(paperNetwork.view.$("ul.dropdown-menu").find("li").length).to.eql(26);
+
+      paperNetwork.view.$("button.update-all").click();
+      expect(paperNetwork.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
+      expect(paperNetwork.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql('Click on a node in the detail view to add it to this list. You can then filter your current search to include only the selected items.');
+    })
 
   });
 
