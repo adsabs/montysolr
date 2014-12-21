@@ -3,14 +3,16 @@ define([
   'js/widgets/network_vis/network_widget',
   'js/bugutils/minimal_pubsub',
   'js/components/api_query',
-  'js/components/json_response'
+  'js/components/json_response',
+  'underscore'
 
 ], function (
   Marionette,
   NetworkWidget,
   MinimalPubsub,
   ApiQuery,
-  JsonResponse
+  JsonResponse,
+  _
   ) {
 
 
@@ -6905,11 +6907,8 @@ define([
 
 
     afterEach(function(){
-
       $("#test").empty();
-
-
-    })
+    });
 
 
     it("renders different views with different types of graphs based on the data it is given", function(){
@@ -6922,26 +6921,20 @@ define([
 
       expect($("#test").find("svg").length).to.eql(1);
 
-      expect($("#test").find("text.detail-node").length).to.eql(19)
-      expect($("#test").find("line.detail-link").length).to.eql(68)
+      expect($("#test").find("text.detail-node").length).to.eql(19);
+      expect($("#test").find("line.detail-link").length).to.eql(68);
 
       //this should show two graphs, a summary and a detail graph
       networkWidget.processResponse(new JsonResponse(testDataLarge));
-
       expect($("#test").find(".summary-node-group").length).to.eql(9);
 
       networkWidget.view.model.set("currentGroup", 2);
-
       expect($("#test").find("svg").length).to.eql(2);
 
       //this should show just a message;
-
       networkWidget.processResponse(new JsonResponse(testDataEmpty));
-
       expect($("#test").find(".author-graph").text()).to.eql("There wasn't enough data returned by your search to form a visualization.")
-
-
-    })
+    });
 
     it("listens to the graph view for node selection events (adding and removing) and updates the selected nodes list collection", function(){
 
@@ -6951,35 +6944,23 @@ define([
       networkWidget.processResponse(new JsonResponse(testDataSmall));
 
       //testing view method instead of click
-
       networkWidget.view.updateSingleName("Bohlen, Ex");
-
       expect(networkWidget.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
-
-
 
       //the x is from the close button
       expect(networkWidget.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql("Bohlen, Exx");
 
       networkWidget.view.updateSingleName("Bohlen, Ex");
-
       expect(networkWidget.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
-
       expect(networkWidget.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql('Click on a node in the detail view to add it to this list. You can then filter your current search to include only the selected items.');
 
       networkWidget.view.$("button.update-all").click();
-
       expect(networkWidget.view.$("ul.dropdown-menu").find("li").length).to.eql(19);
 
       networkWidget.view.$("button.update-all").click();
-
       expect(networkWidget.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
-
       expect(networkWidget.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql('Click on a node in the detail view to add it to this list. You can then filter your current search to include only the selected items.');
-
-
-
-    })
+    });
 
 
 
@@ -6989,25 +6970,18 @@ define([
       $("#test").append(networkWidget.view.el);
 
       var minsub = new MinimalPubsub({verbose: false});
-
       var q =  new ApiQuery({q: 'star'});
 
       networkWidget.activate(minsub.beehive.getHardenedInstance());
-
       minsub.publish(minsub.START_SEARCH, q);
 
       expect(networkWidget.getCurrentQuery().get("q")).to.eql(q.get("q"));
-
-      networkWidget.pubsub.publish = sinon.stub()
+      networkWidget.pubsub.publish = sinon.stub();
 
       networkWidget.onShow();
-
       expect (networkWidget.pubsub.publish.calledOnce).to.be.true;
-
       expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql("author-network?q=star");
-
-
-    })
+    });
 
     it("communicates a filtered request to pubsub", function(){
 
@@ -7015,22 +6989,15 @@ define([
       $("#test").append(networkWidget.view.el);
 
       var minsub = new MinimalPubsub({verbose: false});
-
-      networkWidget.setCurrentQuery(new ApiQuery({q : "original search"}))
-
+      networkWidget.setCurrentQuery(new ApiQuery({q : "original search"}));
       networkWidget.activate(minsub.beehive.getHardenedInstance());
-
       networkWidget.pubsub.publish = sinon.stub();
 
       networkWidget.view.trigger("filterSearch", ["testName1", "testName2"]);
-
       expect(networkWidget.pubsub.publish.called).to.be.true;
-
       expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
-
       expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql( "__fq_fq=AND&__fq_fq=author%3A(%22testName1%22+OR+%22testName2%22)&fq=(author%3A(%22testName1%22+OR+%22testName2%22))&q=original+search");
-
-    })
+    });
 
     it("should show a loading view while it waits for data from pubsub", function(){
 
@@ -7038,22 +7005,14 @@ define([
       $("#test").append(networkWidget.view.el);
 
       var minsub = new MinimalPubsub({verbose: false});
-
       networkWidget.activate(minsub.beehive.getHardenedInstance());
-
       networkWidget.pubsub.publish = sinon.stub();
 
       networkWidget.startWidgetLoad();
-
       expect(networkWidget.view.$(".s-loading").length).to.eql(1);
-
-      networkWidget.processResponse(new JsonResponse(testDataEmpty))
-
+      networkWidget.processResponse(new JsonResponse(testDataEmpty));
       expect(networkWidget.view.$(".s-loading").length).to.eql(0);
-
-
-
-    })
+    });
 
 
     it("has a method to completely remove the graphView", function(){
@@ -7062,39 +7021,33 @@ define([
       $("#test").append(networkWidget.view.el);
 
       var minsub = new MinimalPubsub({verbose: false});
-
-
       networkWidget.processResponse(new JsonResponse(testDataLarge));
-
       expect(networkWidget.resetWidget).to.be.instanceof(Function);
 
+      expect(networkWidget.view.graphView.$el.children().length).not.be.eql(0);
+      expect(_.keys(networkWidget.view.graphView._listeners).length).not.be.eql(0);
       networkWidget.resetWidget();
 
-
-    })
+      expect(networkWidget.view.graphView.$el.children().length).to.be.eql(0);
+      expect(networkWidget.model.get('data')).to.be.undefined;
+      expect(_.keys(networkWidget.view.graphView._listeners).length).to.be.eql(0);
+    });
 
     it("has a help popover that is accessible by hovering over the question mark icon", function(){
 
       var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-
       $("#test").append(networkWidget.view.el);
 
       var minsub = new MinimalPubsub({verbose: false});
-
-
       networkWidget.processResponse(new JsonResponse(testDataLarge));
 
       //it uses the standard bootstrap popover, you just need to make sure the data-content attribute is correct
-
       expect(networkWidget.view.$(".icon-help").attr("data-content")).to.eql("test");
-
       expect($("div.popover").length).to.eql(0);
 
       networkWidget.view.$(".icon-help").mouseover();
-
       expect($("div.popover").length).to.eql(1);
-
-    })
+    });
 
 
     it("should show a detail network for the summary graph node that was clicked", function(){
@@ -7103,50 +7056,35 @@ define([
       $("#test").append(networkWidget.view.el);
 
       networkWidget.processResponse(new JsonResponse(testDataLarge));
+      $(".summary-node-group:first").click();
 
-      $(".summary-node-group:first").click()
-
-
-      var names = $(".detail-graph-container .detail-node").map(function(){return d3.select(this).text()})
-
-
+      var names = $(".detail-graph-container .detail-node").map(function(){return d3.select(this).text()});
       names = names.sort();
 
-
       // now get names from testDataLarge
-
       var testNames=[];
-
       _.each(testDataLarge.fullGraph.nodes, function(n){
-
         if (n.group == 0){
           testNames.push(n.nodeName)
         }
-
       });
 
       testNames = testNames.sort();
-
       _.each(names, function(n, i){
         expect(n).to.eql(testNames[i])
       });
-
-
-    })
+    });
 
     it("should have an extractGraphData method that extracts the apprpriate sub network, with optional limiting of nodes", function(){
 
       var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-
       $("#test").append(networkWidget.view.el);
 
       //this should show two graphs, a summary and a detail graph
       networkWidget.processResponse(new JsonResponse(testDataLarge));
 
       // using group 2, the ads group, as an example
-
       var detailGraph = networkWidget.view.extractGraphData(2, 5);
-
 
       expect(detailGraph.nodes).to.eql([
         {
@@ -7238,13 +7176,6 @@ define([
           "weight": 39.72448979591838
         }
       ]);
-
-
-
     })
-
-
   })
-
-
-})
+});

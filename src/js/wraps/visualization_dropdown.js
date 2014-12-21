@@ -18,7 +18,7 @@ define([
 
   var btnType = "btn-primary-faded";
 
-  var dropdownTitle = "Visualize";
+  var dropdownTitle = "Explore";
 
   var iconClass = "icon-visualize";
 

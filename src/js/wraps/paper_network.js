@@ -5,7 +5,13 @@ define([
     'hbs!./templates/paper-network-data',
     'bootstrap'
   ],
-  function (Marionette, NetworkWidget, ApiQueryUpdater, DataTemplate) {
+  function (
+    Marionette,
+    NetworkWidget,
+    ApiQueryUpdater,
+    DataTemplate,
+    bs
+    ) {
 
     var options = {};
 
@@ -13,13 +19,12 @@ define([
 
     options.networkType = "paper";
 
-    options.helpText = "<p>The paper network groups papers from your search results based on how many" +
-      " references they have in common. Papers with many references in common are more likely to discuss" +
-      " similar topics.</p><p>If your search results returned a large enough set of papers, you will see two views:" +
-      " a summary view, which shows groups of tightly linked papers, and a detail view " +
-      " which shows you the individual papers from a group and how they are connected. </p><p>The size of the circles in the summary node graph" +
-      " are based on the cumulative number of citations shared by the group, and the titles of the summary nodes are small" +
-      " word clouds based on the words from the titles of the papers in the group.</p>";
+    options.helpText = "<p>Papers are grouped by shared references, because " +
+      " they are more likely to discuss similar topics.</p>" +
+      " <p>If your search returned a large enough set of papers, you will see two views:" +
+      " a <b>summary view</b>  with groups of tightly linked papers, and a <b>detail view</b> " +
+      " with individual papers and their connections. </p><p>The size of the nodes corresponds " +
+      " to cumulative number of shared citations.</p>";
 
     //these defaults won't typically change
     options.graphMixin = {};

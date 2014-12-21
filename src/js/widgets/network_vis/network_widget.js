@@ -1076,30 +1076,20 @@ define([
 
         //close graphView
         if (this.view && this.view.graphView) {
-
           this.view.graphView.$el.empty();
           this.view.graphView.stopListening();
-
         }
-
-          this.view.chosenNamesCollection.reset(null);
-
+        this.view.chosenNamesCollection.reset(null);
         //reset model
         this.model.set(_.result(this.model, "defaults"), {silent: true});
-
       },
 
       destroyWidget : function(){
-
         //close graphView
         if (this.view.graphView) {
-
           this.view.graphView.close();
-
         }
-
         this.view.chosenNamesView.close();
-
       },
 
       //fetch data

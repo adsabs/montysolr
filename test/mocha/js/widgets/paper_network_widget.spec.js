@@ -6,7 +6,7 @@ define([
   JsonResponse
   ){
 
-  describe("Paper Network Widget (UI Widget)", function(){
+  describe("Paper Network UI Widget (paper_network_widget.spec.js)", function(){
 
     var testDataBig = {
       "fullGraph": {
@@ -9443,31 +9443,22 @@ define([
 
     it("should show angle of summary graph based on # of papers", function(){
 
-
       var paperNetwork = new PaperNetwork();
       paperNetwork.processResponse(new JsonResponse(testDataBig));
 
       $("#test").append(paperNetwork.view.el);
-
       d3.selectAll(".summary-node-group").select("#vis-group-0");
 
       var largeAdsGroupData = d3.selectAll("#vis-group-0").data()[0];
-
       var largeAstroGroupData = d3.selectAll("#vis-group-4").data()[0];
 
       //data contains number of papers
-
       expect(largeAdsGroupData.value).to.eql(26);
-
       expect(largeAstroGroupData.value).to.eql(25);
 
-
       //angle should be slightly larger for ads group because it is a bit larger
-
       expect(largeAdsGroupData.endAngle - largeAdsGroupData.startAngle).to.be.gt(largeAstroGroupData.endAngle - largeAstroGroupData.startAngle);
-
-
-    })
+    });
 
 
     it.skip("should allow the user to toggle between citations and reads view", function(){
@@ -9476,11 +9467,9 @@ define([
       paperNetwork.processResponse(new JsonResponse(testDataBig));
 
       $("#test").append(paperNetwork.view.el);
-
       $("input[value=total_reads]").click();
 
-
-    })
+    });
 
 
 
@@ -9492,18 +9481,13 @@ define([
       $("#test").append(paperNetwork.view.el);
 
       //to change the detail view, set the current group in the container view model to the group id
-
       paperNetwork.view.model.set("currentGroup", 0);
 
       expect($(".paper-network-detail-view p:first").text()).to.eql('This group consists of 26 papers, which have been cited, in total, 156\n    times.');
-
       expect($(".paper-network-detail-view ul").eq(1).find("li:first").html().trim()).to.eql('<a href="#abs/2000A&amp;AS..143...41K" data-bypass="" target="_blank">2000A&amp;AS..143...41K</a> (cited by 69% of papers in this group)');
-
-
-    })
+    });
 
     it("listens to the graph view for node selection events (adding and removing) and updates the selected nodes list collection", function(){
-
 
       var paperNetwork = new PaperNetwork();
       paperNetwork.processResponse(new JsonResponse(testDataBig));
@@ -9511,24 +9495,14 @@ define([
       $("#test").append(paperNetwork.view.el);
 
       //to change the detail view, set the current group in the container view model to the group id
-
       paperNetwork.view.model.set("currentGroup", 0);
-
       paperNetwork.view.$("button.update-all").click();
-
       expect(paperNetwork.view.$("ul.dropdown-menu").find("li").length).to.eql(26);
 
       paperNetwork.view.$("button.update-all").click();
-
       expect(paperNetwork.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
-
       expect(paperNetwork.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql('Click on a node in the detail view to add it to this list. You can then filter your current search to include only the selected items.');
-
-
-
     })
-
-
 
   });
 
