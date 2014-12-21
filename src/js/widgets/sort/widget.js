@@ -6,12 +6,15 @@ define(['marionette',
   'jquery',
   'js/widgets/base/base_widget',
   'hbs!./templates/sort_template',
-  'bootstrap'
+  'bootstrap',
+  'js/components/api_feedback'
 ], function (Marionette,
   Backbone,
   $,
   BaseWidget,
-  SortTemplate
+  SortTemplate,
+  bootstrap,
+  ApiFeedback
   ) {
 
     var SortModel = Backbone.Model.extend({
@@ -146,6 +149,14 @@ define(['marionette',
         BaseWidget.prototype.initialize.apply(this, arguments)
       },
 
+      activate: function (beehive) {
+        _.bindAll(this, "handleFeedback");
+        this.pubsub = beehive.Services.get('PubSub');
+
+        // widget doesn't need to execute queries (but it needs to listen to them)
+        this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
+      },
+
       onAll: function (ev, data) {
         if (ev == "sortChange") {
           //    find current sort values
@@ -159,31 +170,31 @@ define(['marionette',
         this.pubsub.publish(this.pubsub.START_SEARCH, apiQuery);
       },
 
-      processResponse: function (apiResponse) {
+      handleFeedback: function(feedback) {
+        switch (feedback.code) {
+          case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
+            this.setCurrentQuery(feedback.query);
+            this.extractSort(feedback.query);
+            break;
+        }
+      },
 
-        var q, params, sortVals;
+      extractSort: function (q) {
 
-        q = apiResponse.getApiQuery();
-        this.setCurrentQuery(q);
+        var params, sortVals;
 
-        params =  apiResponse.get("responseHeader.params");
-        if (params.sort) {
-
-          sortVals = params.sort.split(/\s+/);
+        if (q.has('sort')) {
+          sortVals = q.get('sort')[0].split(/\s+/);
           this.model.removeDefaults();
           this.model.addDefault("sortOptions", sortVals[0]);
           this.model.addDefault("orderOptions", sortVals[1]);
-
         }
-//       if there is no sort indicated, it is the default, "relevant"
-        else {
+        else { // if there is no sort indicated, it is the default, "relevant"
           this.view.model.set(_.result(this.model, "defaults"))
         }
-
         //need to explicitly tell the view that the model changed
         this.model.trigger("change:formData")
       }
-
 
     });
 
