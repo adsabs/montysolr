@@ -152,7 +152,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
       if (_.isUndefined(name)) {
         throw new Error("You tried to subscribe to undefined event. Error between chair and keyboard?");
       }
-      //this.once(name, callback, key); // the key becomes context
+      this.once(name, callback, key); // the key becomes context
       this.once(name+key.getId(), callback, key); // this is for individual responses
     },
 

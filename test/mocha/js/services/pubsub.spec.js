@@ -2,7 +2,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
   'js/components/facade', 'backbone'],
   function(GenericModule, PubSub, PubSubKey, PubSubEvents, Facade, Backbone) {
 
-  describe("PubSub - default implementation (Service)", function () {
+  describe("PubSub - default implementation of Service (pubsub.spec.js)", function () {
       
     it("should return PubSub object (generic module)", function() {
       expect(new PubSub()).to.be.an.instanceof(GenericModule);
@@ -305,16 +305,30 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
     it("has subscribeOnce", function() {
       var pubsub = new PubSub();
       var hardened = pubsub.getHardenedInstance();
+      var hardened2 = pubsub.getHardenedInstance();
 
       var spy = sinon.spy();
+      var spy2 = sinon.spy();
 
-      expect(hardened.subscribeOnce).to.be.undefined;
+      expect(hardened.subscribeOnce).to.be.defined;
+      hardened2.subscribe('event', spy2);
       pubsub.subscribeOnce(pubsub.getPubSubKey(), 'event', spy);
+
+      // there should be no generic signal present
+      expect(pubsub._events['event'].length).to.be.eql(2);
+      expect(pubsub._events['event' + pubsub.getPubSubKey().getId()]).to.be.defined;
+
       hardened.publish('event', 'one');
 
       expect(spy.callCount).to.be.eql(1);
       hardened.publish('event', 'one');
       expect(spy.callCount).to.be.eql(1);
+      expect(spy2.callCount).to.be.eql(2);
+
+      // there should be no generic signal present
+      expect(pubsub._events['event'].length).to.be.eql(1);
+      expect(pubsub._events['event' + pubsub.getPubSubKey().getId()]).to.be.undefined;
+
     });
 
   });

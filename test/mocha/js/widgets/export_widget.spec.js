@@ -59,7 +59,7 @@ define([
     it("displays exported documents in pre-formatted area", function(done) {
       var widget = _getWidget();
       var $w = widget.render().$el;
-      $('#scratch').append($w);
+      $('#test').append($w);
 
       widget.model.set('numFound', 5000);
       widget.view.buildSlider(0, 300);
