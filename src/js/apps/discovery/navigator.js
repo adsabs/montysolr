@@ -58,8 +58,12 @@ define([
         });
         this.set('results-page', function() {
           app.getObject('MasterPageManager').show('SearchPage',
-          searchPageAlwaysVisible);
+            searchPageAlwaysVisible);
           this.route = '#search/' + app.getWidget('SearchWidget').getCurrentQuery().url();
+        });
+        this.set('export-page', function() {
+          app.getObject('MasterPageManager').show('SearchPage',
+            ['Export'].concat(searchPageAlwaysVisible.slice(1)));
         });
 
         this.set('show-author-network', function() {
