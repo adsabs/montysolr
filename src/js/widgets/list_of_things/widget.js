@@ -134,7 +134,10 @@ define([
 
         // XXX:rca - hack, to be solved later
         this.trigger('page-manager-event', 'widget-ready',
-          {numFound: apiResponse.get("response.numFound"), widget: this});
+          {numFound: apiResponse.has("response.numFound")
+            ? apiResponse.get("response.numFound")
+            : this.hiddenCollection.length,
+            widget: this});
       },
 
       extractDocs: function(apiResponse) {
