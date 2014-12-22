@@ -6,6 +6,7 @@ define([
     'backbone',
     'js/components/generic_module',
     'js/mixins/dependon',
+    'js/mixins/string_utils',
     'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events',
     'js/mixins/link_generator_mixin',
@@ -19,6 +20,7 @@ define([
             Backbone,
             GenericModule,
             Mixins,
+            StringUtils,
             OrcidApiConstants,
 			      PubSubEvents,
             LinkGeneratorMixin,
@@ -34,19 +36,19 @@ define([
       return messageCopy;
     }
 
-    // TODO: move this to some commonUtils.js
-    String.prototype.format = function () {
-      var args = arguments;
-      return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
-        if (m == "{{") {
-          return "{";
-        }
-        if (m == "}}") {
-          return "}";
-        }
-        return args[n];
-      });
-    };
+//    // TODO: move this to some commonUtils.js
+//    String.prototype.format = function () {
+//      var args = arguments;
+//      return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
+//        if (m == "{{") {
+//          return "{";
+//        }
+//        if (m == "}}") {
+//          return "}";
+//        }
+//        return args[n];
+//      });
+//    };
 
     function getParameterByName(name) {
       name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -114,7 +116,7 @@ define([
         }
       },
       redirectToLogin: function() {
-        var url = ORCID_OAUTH_LOGIN_URL.format(window.location.origin);
+        var url = StringUtils.format(ORCID_OAUTH_LOGIN_URL, window.location.origin);
 
         window.location.replace(url);
       },
@@ -409,9 +411,9 @@ define([
 
         return this.sendData({
           type: "GET",
-          url: ORCID_PROFILE_URL.format(userSession.authData.orcid),
+          url: StringUtils.format(ORCID_PROFILE_URL, userSession.authData.orcid),
           headers: {
-            Authorization: "Bearer {0}".format(userSession.authData.access_token)
+            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token)
           }
         })
       },
@@ -419,7 +421,7 @@ define([
       showLoginDialog: function () {
         var ORCID_REDIRECT_URI = 'http://localhost:3000/oauthRedirect.html';
 
-        var url = ORCID_OAUTH_LOGIN_URL.format(ORCID_REDIRECT_URI);
+        var url = StringUtils.format(ORCID_OAUTH_LOGIN_URL, ORCID_REDIRECT_URI);
 
         var WIDTH = 600;
         var HEIGHT = 650;
@@ -450,10 +452,10 @@ define([
 
         return this.sendData({
           type: "POST",
-          url: ORCID_WORKS_URL.format(userSession.authData.orcid),
+          url: StringUtils.format(ORCID_WORKS_URL, userSession.authData.orcid),
           data: Json2Xml.xml(orcidWorks, { attributes_key: '$', header: true }),
           headers: {
-            Authorization: "Bearer {0}".format(userSession.authData.access_token),
+            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token),
             "Content-Type": "application/orcid+xml"
           }})
           .done(function() {
@@ -554,10 +556,10 @@ define([
 
         return this.sendData({
           type: "PUT",
-          url: ORCID_WORKS_URL.format(userSession.authData.orcid),
+          url: StringUtils.format(ORCID_WORKS_URL, userSession.authData.orcid),
           data: Json2Xml.xml(orcidWorks, { attributes_key: '$', header: true }),
           headers: {
-            Authorization: "Bearer {0}".format(userSession.authData.access_token),
+            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token),
             "Content-Type": "application/orcid+xml"
           }})
           .done(function() {
