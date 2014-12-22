@@ -5,7 +5,7 @@ define([
     'backbone',
     'marionette',
     'js/widgets/base/base_widget',
-    'js/services/orcid_api_constants',
+    'js/modules/orcid/orcid_api_constants',
     'hbs!./templates/orcid_login_template',
     './model'
 

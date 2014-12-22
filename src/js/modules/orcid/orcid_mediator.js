@@ -3,7 +3,7 @@ define([
     'jquery',
     'js/components/generic_module',
     'js/mixins/dependon',
-    'js/components/orcid_api_constants',
+    'js/modules/orcid/orcid_api_constants',
     'js/components/api_query_updater',
     'js/components/api_query'
   ],

@@ -29,9 +29,9 @@ require.config({
           'Api': 'js/services/api',
           'PubSub': 'js/services/pubsub',
           'Navigator': 'js/apps/discovery/navigator',
-          OrcidApi: 'js/services/orcid_api',
+          OrcidApi: 'js/modules/orcid/orcid_api',
           LocalStorage: 'js/services/localStorage',
-          Json2Xml: 'js/services/json2xml'
+          Json2Xml: 'js/modules/orcid/json2xml'
         },
         objects: {
           User: 'js/components/user',
@@ -61,9 +61,9 @@ require.config({
         MetricsDropdown : 'js/wraps/metrics_dropdown',
         Metrics :  'js/widgets/metrics/widget',
 
-        OrcidLogin: 'js/widgets/orcid_login/widget',
-        OrcidWorks: 'js/widgets/orcid_works/widget',
-        OrcidModelNotifier: 'js/widgets/orcid_model_notifier/widget',
+        OrcidLogin: 'js/modules/orcid/orcid_login/widget',
+        OrcidWorks: 'js/modules/orcid/orcid_works/widget',
+        OrcidModelNotifier: 'js/modules/orcid/orcid_model_notifier/widget',
 
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',

@@ -2,11 +2,11 @@ define([
     'js/components/generic_module',
     'js/mixins/dependon',
     'jquery',
-    'js/services/orcid_api',
+    'js/modules/orcid/orcid_api',
     'underscore',
     'xml2json',
     'js/components/application',
-    'js/services/orcid_api_constants',
+    'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events'
   ],
 
@@ -19,8 +19,8 @@ define([
           PubSub: 'js/services/pubsub',
           Api: 'js/services/api',
           LocalStorage: 'js/services/localStorage',
-          OrcidApi: 'js/services/orcid_api',
-          Json2Xml: 'js/services/json2xml'
+          OrcidApi: 'js/modules/orcid/orcid_api',
+          Json2Xml: 'js/modules/orcid/json2xml'
         },
         objects: {
           QueryMediator: 'js/components/query_mediator'

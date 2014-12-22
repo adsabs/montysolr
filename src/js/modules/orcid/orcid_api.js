@@ -6,10 +6,10 @@ define([
     'backbone',
     'js/components/generic_module',
     'js/mixins/dependon',
-    'js/services/orcid_api_constants',
+    'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events',
     'js/mixins/link_generator_mixin',
-    'js/widgets/orcid_model_notifier/orcid_model'
+    'js/modules/orcid/orcid_model_notifier/orcid_model'
 
   ],
   function (_,

@@ -3,7 +3,7 @@ define([
     'marionette',
     'backbone',
     'js/widgets/base/base_widget',
-    'js/services/orcid_api_constants',
+    'js/modules/orcid/orcid_api_constants',
     './orcid_model'
   ],
 

@@ -1,7 +1,7 @@
 define([], function(){
     var tests = [
-      '/services/json2xml.spec.js',
-      '/services/orcid_api.spec.js'
+      '/modules/orcid/json2xml.spec.js',
+      '/modules/orcid/orcid_api.spec.js'
     ];
 
     return tests;

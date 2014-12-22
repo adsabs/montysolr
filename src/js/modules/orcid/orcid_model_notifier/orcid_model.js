@@ -1,7 +1,7 @@
 define([
     'backbone',
     'underscore',
-    'js/mixins/array_extensions',
+    'js/modules/orcid/array_extensions',
   ],
   function(
     Backbone,

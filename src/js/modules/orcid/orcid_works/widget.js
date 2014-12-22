@@ -4,10 +4,10 @@ define([
     'backbone',
     'marionette',
     'js/widgets/base/base_widget',
-    'js/services/orcid_api_constants',
+    'js/modules/orcid/orcid_api_constants',
     'hbs!./templates/orcid_work_template',
     'hbs!./templates/orcid_works_template',
-    'js/widgets/orcid_model_notifier/orcid_model'
+    'js/modules/orcid_model_notifier/orcid_model'
 
   ],
   function (_, $, Backbone, Marionette, BaseWidget, OrcidApiConstants, OrcidWorkTemplate, OrcidWorksTemplate, OrcidModel) {
@@ -226,7 +226,7 @@ define([
       itemView: OrcidWorkView,
 
       onAllInternalEvents: function(ev, arg1, arg2) {
-        if (ev == 'orchidWorksWidget:stateChanged'){
+        if (ev == 'orcidWorksWidget:stateChanged'){
           this.stateChanged(arg1);
         }
       },
@@ -320,10 +320,10 @@ define([
       },
 
       showLoading: function () {
-        this.view.trigger('orchidWorksWidget:stateChanged', 'loading');
+        this.view.trigger('orcidWorksWidget:stateChanged', 'loading');
       },
       hideWorks: function () {
-        this.view.trigger('orchidWorksWidget:stateChanged', 'unloaded');
+        this.view.trigger('orcidWorksWidget:stateChanged', 'unloaded');
       },
 
       showWorks: function (personalProfile) {
@@ -395,7 +395,7 @@ define([
 
         this.view.collection = new OrcidWorksCollection(works);
 
-        this.view.trigger('orchidWorksWidget:stateChanged', 'loaded');
+        this.view.trigger('orcidWorksWidget:stateChanged', 'loaded');
 
         this.view.model.set('items', works);
 

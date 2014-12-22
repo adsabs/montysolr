@@ -5,7 +5,7 @@ define([
     'js/components/api_query',
     'js/widgets/base/base_widget',
     'hbs!./templates/item-template',
-    'js/widgets/orcid_model_notifier/orcid_model'
+    'js/modules/orcid/orcid_model_notifier/orcid_model'
   ],
 
   function (Marionette,

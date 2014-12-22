@@ -6,6 +6,8 @@ define([
   ],
   function(_, Bootstrap, GenericModule, Mixins) {
 
+    // BC:rca - I don't want global exports (unless it is required by json2xml - and i'd be very suspicious of
+    // that library, if it was); please move to a standalone function
     // TODO: move this to some commonUtils.js
     String.prototype.format = function () {
       var args = arguments;

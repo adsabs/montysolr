@@ -2,7 +2,7 @@ define([
     'js/components/generic_module',
     'js/mixins/dependon',
     'jquery',
-    'js/services/orcid_api',
+    'js/modules/orcid/orcid_api',
     'underscore',
     'xml2json',
     'js/components/application'
@@ -37,7 +37,7 @@ define([
     var config = {
       core: {
         services: {
-          Json2Xml: 'js/services/json2xml'
+          Json2Xml: 'js/modules/orcid/json2xml'
         },
         objects: {
           QueryMediator: 'js/components/query_mediator'

@@ -19,7 +19,7 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
-    'js/services/orcid_api_constants',
+    'js/modules/orcid/orcid_api_constants',
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
     'hbs!./templates/pagination-template',
