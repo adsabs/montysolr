@@ -26,7 +26,7 @@ define([
                   //work-external-identifier-id: "ads:1234"
                   //work-external-identifier-type: "other-id"
 
-                  return e['work-external-identifier-type'] == 'other-id' && e['work-external-identifier-id'].startsWith('ads:');
+                  return e['work-external-identifier-type'] == 'other-id' && e['work-external-identifier-id'].indexOf('ads:') == 0;
                 };
 
                 var identifiers = e["work-external-identifiers"]["work-external-identifier"]
