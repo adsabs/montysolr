@@ -7,7 +7,7 @@ define([
     'js/modules/orcid/orcid_api_constants',
     'hbs!./templates/orcid_work_template',
     'hbs!./templates/orcid_works_template',
-    'js/modules/orcid_model_notifier/orcid_model'
+    'js/modules/orcid/orcid_model_notifier/orcid_model'
 
   ],
   function (_, $, Backbone, Marionette, BaseWidget, OrcidApiConstants, OrcidWorkTemplate, OrcidWorksTemplate, OrcidModel) {
