@@ -180,7 +180,7 @@ define([
         var extIdentifiersObj = orcidWork["work-external-identifiers"];
 
         if (!extIdentifiersObj) {
-          return undefined;
+          return [];
         }
 
         var extIdentifiers = extIdentifiersObj["work-external-identifier"] || [];
