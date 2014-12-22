@@ -1,13 +1,10 @@
 define([
     'backbone',
-    'underscore',
-    'js/modules/orcid/array_extensions',
+    'underscore'
   ],
   function(
     Backbone,
-    _,
-    ArrayExtensions
-  ) {
+    _) {
     var OrcidModel = Backbone.Model.extend({
       initialize: function(){
         this.on("change:orcidProfile", function(model){
@@ -117,8 +114,6 @@ define([
           }).length > 0;
       }
     });
-
-    _.extend(Array.prototype, ArrayExtensions);
 
     return new OrcidModel();
 
